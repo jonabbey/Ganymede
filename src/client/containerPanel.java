@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.14 $ %D%
+    Version: $Revision: 1.15 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -671,7 +671,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 	System.out.println("Adding StringSelector, its a vector of strings!");
       }
 
-    stringSelector ss = new stringSelector(gclient.parseDump(field.choices()),
+    stringSelector ss = new stringSelector(field.choices().getLabels(),
 					   field.getValues(), 
 					   this,
 					   editable);
@@ -690,45 +690,45 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 
   private void addInvidVector(invid_field field) throws RemoteException
   {
+    QueryResult
+      valueResults = null,
+      choiceResults = null;
+
     Vector
-      valueResults,
-      valueHandles,
-      choiceResults = null, 
+      valueHandles = null,
       choiceHandles = null;
 
-    Result 
-      result;
-
     /* -- */
+
     if (debug)
       {
 	System.out.println("Adding StringSelector, its a vector of invids!");
       }
 
-    valueResults = gclient.parseDump(field.encodedValues());
+    valueResults = field.encodedValues();
+    valueHandles = new Vector();
 
     if (editable)
       {
-	choiceResults = gclient.parseDump(field.choices());
+	choiceResults = field.choices();
 	choiceHandles = new Vector();
       }
 
-    valueHandles = new Vector();
-
     for (int i = 0; i < valueResults.size(); i++)
       {
-	result = (Result) valueResults.elementAt(i);
-
-	valueHandles.addElement(new listHandle(result.toString(), result.getInvid()));
+	valueHandles.addElement(new listHandle(valueResults.getLabel(i), 
+					       valueResults.getInvid(i)));
       }
 
     if (editable)
       {
-	for (int i = 0; i < choiceResults.size(); i++)
+	if (choiceResults != null)
 	  {
-	    result = (Result) choiceResults.elementAt(i);
-	    
-	    choiceHandles.addElement(new listHandle(result.toString(), result.getInvid()));
+	    for (int i = 0; i < choiceResults.size(); i++)
+	      {
+		choiceHandles.addElement(new listHandle(choiceResults.getLabel(i),
+							choiceResults.getInvid(i)));
+	      }
 	  }
       }
 
@@ -807,7 +807,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 				// Add a choice
 				  
 		JComboBox choice = new JComboBox();
-		Vector choices = gclient.parseDump(field.choices());
+		Vector choices = field.choices().getLabels();
 				  
 		for (int j = 0; j < choices.size(); j++)
 		  {
@@ -844,7 +844,7 @@ public class containerPanel extends JBufferedPane implements ActionListener, Jse
 				  
 		JComboBox combo = new JComboBox();
 
-		Vector choices = gclient.parseDump(field.choices());
+		Vector choices = field.choices().getLabels();
 		String currentChoice = (String) field.getValue();
 		boolean found = false;
 

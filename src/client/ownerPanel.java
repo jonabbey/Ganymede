@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -80,43 +80,37 @@ public class ownerPanel extends JBufferedPane implements JsetValueCallback {
 
   private stringSelector createInvidSelector(invid_field field) throws RemoteException
   {
-    Vector
-      valueResults,
-      valueHandles,
-      choiceResults = null, 
-      choiceHandles = null;
+    QueryResult
+      results,
+      choiceResults = null;
 
-    Result 
-      result;
+    Vector
+      valueHandles = null,
+      choiceHandles = null;
 
     /* -- */
 
     System.out.println("Adding StringSelector, its a vector of invids!");
     
-    valueResults = gclient.parseDump(field.encodedValues());
+    results = field.encodedValues();
+    valueHandles = new Vector();
 
     if (editable)
       {
-	choiceResults = gclient.parseDump(field.choices());
+	choiceResults = field.choices();
 	choiceHandles = new Vector();
       }
 
-    valueHandles = new Vector();
-
-    for (int i = 0; i < valueResults.size(); i++)
+    for (int i = 0; i < results.size(); i++)
       {
-	result = (Result) valueResults.elementAt(i);
-
-	valueHandles.addElement(new listHandle(result.toString(), result.getInvid()));
+	valueHandles.addElement(new listHandle(results.getLabel(i), results.getInvid(i)));
       }
 
     if (editable)
       {
 	for (int i = 0; i < choiceResults.size(); i++)
 	  {
-	    result = (Result) choiceResults.elementAt(i);
-	    
-	    choiceHandles.addElement(new listHandle(result.toString(), result.getInvid()));
+	    choiceHandles.addElement(new listHandle(choiceResults.getLabel(i), choiceResults.getInvid(i)));
 	  }
       }
 

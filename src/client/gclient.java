@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.32 $ %D%
+   Version: $Revision: 1.33 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -166,113 +166,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     windowBar;
 
   /* -- */
-
-  /**
-   *
-   * This static method parses a result or string dump
-   * into a vector of component Result or String
-   * objects.  Queries will always return a
-   * Result object dump, choice list methods on
-   * fields will often simply return a String
-   * object dump.
-   *
-   */
-
-  static public Vector parseDump(StringBuffer buffer)
-  {
-    if (buffer == null)
-      {
-	return new Vector();	// empty vector
-      }
-
-    StringBuffer tempString = new StringBuffer();
-    char[] chars = buffer.toString().toCharArray();
-    int index = 0;
-    Vector results = new Vector();
-    Invid invid = null;
-    boolean includeInvid;
-
-    /* -- */
-
-    tempString.setLength(0);
-
-    while (index < chars.length && chars[index] != '\n')
-      {
-	tempString.append(chars[index++]);
-      }
-
-    if (tempString.toString().equals("inv"))
-      {
-	includeInvid = true;
-      }
-    else
-      {
-	includeInvid = false;
-      }
-
-    index++;			// skip over newline
-
-    while (index < chars.length)
-      {
-	if (includeInvid)
-	  {
-	    // first read in the Invid
-
-	    tempString.setLength(0); // truncate the buffer
-
-	    // System.err.println("Parsing row " + rows++);
-
-	    while (chars[index] != '|')
-	      {
-		// if we have a backslashed character, take the backslashed char
-		// as a literal
-	    
-		if (chars[index] == '\n')
-		  {
-		    throw new RuntimeException("parse error in row");
-		  }
-	    
-		tempString.append(chars[index++]);
-	      }
-
-	    //	System.err.println("Invid string: " + tempString.toString());
-	    
-	    invid = new Invid(tempString.toString());
-	    
-	    index++;		// skip over |
-	  }
-
-	// now read in the label
-
-	tempString.setLength(0); // truncate the buffer
-
-	while (chars[index] != '\n')
-	  {
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
-
-	    if (chars[index] == '\\')
-	      {
-		index++;
-	      }
-
-	    tempString.append(chars[index++]);
-	  }
-
-	if (includeInvid)
-	  {
-	    results.addElement(new Result(invid, tempString.toString()));
-	  }
-	else
-	  {
-	    results.addElement(tempString.toString());
-	  }
-
-	index++;		// skip newline
-      }
-
-    return results;
-  }
 
   /**
    *
@@ -930,9 +823,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     Vector vect;
     BaseNode parentNode;
     InvidNode oldNode, newNode, fNode;
-    int i;
-    Result sorted_results[] = null;
     Query _query = null;
+    Vector unsorted_objects = new Vector();
 
     /* -- */
 
@@ -957,60 +849,47 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  }
 	else
 	  {
-	    StringBuffer resultDump =  session.query(_query);
-	    Vector unsorted_objects = gclient.parseDump(resultDump);
+	    QueryResult resultDump =  session.query(_query);
+
+	    for (int i = 0; i < resultDump.size(); i++)
+	      {
+		unsorted_objects.addElement(new Result(resultDump.getInvid(i), resultDump.getLabel(i)));
+	      }
 
 	    //System.out.println("There are " + unsorted_objects.size() + " objects in the query");
 
-	    if (unsorted_objects.size() > 0)
-	      {
-		sorted_results = new Result[unsorted_objects.size()];
-	      }
-	    else
-	      {
-		sorted_results = null;
-	      }
-
-	    if ((unsorted_objects == null) || (sorted_results == null))
+	    if (unsorted_objects.size()  == 0)
 	      {
 		System.out.println("unsorted_objects or sorted_results == null");
 	      }
 	    else
 	      {
-		for (int j = 0; j < unsorted_objects.size() ; j++)
-		  {
-		    //System.out.println("Adding " + (Result)unsorted_objects.elementAt(j));
-		    sorted_results[j] = (Result)unsorted_objects.elementAt(j);
-		  }
-
-		System.out.println("sorted_results.length == " + sorted_results.length);
-		
-		(new QuickSort(sorted_results, 
-			       new arlut.csd.Util.Compare() 
-			       {
-				 public int compare(Object a, Object b) 
-				   {
-				     Result aF, bF;
+		(new VecQuickSort(unsorted_objects, 
+				  new arlut.csd.Util.Compare() 
+				  {
+				    public int compare(Object a, Object b) 
+				      {
+					Result aF, bF;
 				     
-				     aF = (Result) a;
-				     bF = (Result) b;
-				     int comp = 0;
+					aF = (Result) a;
+					bF = (Result) b;
+					int comp = 0;
 				     
-				     comp =  aF.toString().compareTo(bF.toString());
+					comp =  aF.toString().compareTo(bF.toString());
 				     
-				     if (comp < 0)
-				       {
-					 return -1;
-				       }
-				     else if (comp > 0)
-				       { 
-					 return 1;
-				       } 
-				     else
-				       { 
-					 return 0;
-				       }
-				   }
+					if (comp < 0)
+					  {
+					    return -1;
+					  }
+					else if (comp > 0)
+					  { 
+					    return 1;
+					  } 
+					else
+					  { 
+					    return 0;
+					  }
+				      }
 			       }
 			       )).sort();
 	      }
@@ -1024,17 +903,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     parentNode = node;
     oldNode = null;
     fNode = (InvidNode) node.getChild();
-    i = 0;
+    int i = 0;
 	
-    while ((sorted_results != null) && ((i < sorted_results.length) || (fNode != null)))
+    while ((i < unsorted_objects.size()) || (fNode != null))
       {
 	//System.out.println("Looking at the next node");
-	//System.out.println("i = " + i + " length = " + sorted_results.length);
+	//System.out.println("i = " + i + " length = " + unsorted_objects.length);
 	
-	if (i < sorted_results.length)
+	if (i < unsorted_objects.size())
 	  {
-	    invid = sorted_results[i].getInvid();
-	    label = sorted_results[i].toString();
+	    invid = ((Result) unsorted_objects.elementAt(i)).getInvid();
+	    label = unsorted_objects.elementAt(i).toString();
 	    //System.out.println("Dealing with " + object.getLabel());
 	  }
 	else
