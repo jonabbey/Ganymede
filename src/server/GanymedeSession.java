@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.86 $ %D%
+   Version: $Revision: 1.87 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -18,7 +18,11 @@ package arlut.csd.ganymede;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.*;
+import java.net.*;
+import java.io.*;
 
+import Qsmtp;
+import arlut.csd.Util.*;
 import arlut.csd.JDialog.*;
 
 /*------------------------------------------------------------------------------
@@ -1446,6 +1450,93 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     setLastEvent("abortTransaction");
 
     return session.abortTransaction(); // *sync* DBSession 
+  }
+
+  /**
+   *
+   * This method allows clients to cause mail to be sent from the
+   * Ganymede server when they can't do it themselves.  The mail
+   * will have a From: header indicating the identity of the
+   * sender.
+   *
+   */
+
+  public void sendMail(String address, String subject, StringBuffer body)
+  {
+    Qsmtp mailer;
+    String returnAddr;
+    String mailsuffix;
+    StringBuffer signature = new StringBuffer();
+    Vector addresses = new Vector();
+    StringTokenizer tokens = new StringTokenizer(address, ", ", false);
+
+    /* -- */
+
+    mailer = new Qsmtp(Ganymede.mailHostProperty);
+
+    while (tokens.hasMoreElements())
+      {
+	addresses.addElement(tokens.nextToken());
+      }
+
+    // do we have a real user name, or a persona name?
+
+    if (username.equals(Ganymede.rootname))
+      {
+	// supergash.. use the default return address
+
+	returnAddr = Ganymede.returnaddrProperty;
+      }
+    else
+      {
+	if (username.indexOf(':') == -1)
+	  {
+	    // real username, save it as is
+
+	    returnAddr = username;
+	  }
+	else
+	  {
+	    // persona, extract the user's name out of it
+	    returnAddr = username.substring(0, username.indexOf(':'));
+	  }
+    
+	mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
+
+	if (mailsuffix != null)
+	  {
+	    returnAddr += mailsuffix;
+	  }
+      }
+
+    // create the signature
+
+    signature.append("This message was sent by ");
+    signature.append(username);
+    signature.append(", running the Ganymede client on ");
+    signature.append(clienthost);
+    signature.append(".");
+
+    body.append("\n------------------------------------------------------------\n");
+    body.append(WordWrap.wrap(signature.toString(), 78, null));
+    body.append("\n------------------------------------------------------------\n");
+
+    try
+      {
+	mailer.sendmsg(returnAddr,
+		       addresses,
+		       "Ganymede: " + subject,
+		       body.toString());
+      }
+    catch (ProtocolException ex)
+      {
+	throw new RuntimeException("Couldn't figure address " + ex);
+      }
+    catch (IOException ex)
+      {
+	throw new RuntimeException("IO problem " + ex);
+      }
+
   }
 
   /**
