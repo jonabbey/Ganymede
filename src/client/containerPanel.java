@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.29 $ %D%
+    Version: $Revision: 1.30 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,8 +42,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   gclient
     gc;			// our interface to the server
 
-  JPanel
-    panel; //This is the panel that holds everything
+  //  JPanel
+  //  panel; //This is the panel that holds everything
 
   db_object
     object;			// the object we're editing
@@ -182,12 +182,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     //panel = new JPanel();
     //layout = new TableLayout(false);
     //layout.rowSpacing(5);
-    setLayout(new BorderLayout());
+    //setLayout(new BorderLayout());
     
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
-    panel = new JPanel(gbl, false);
-    add("North", panel);
+    setLayout(gbl);
+    //panel = new JPanel(gbl, false);
+    //add("North", panel);
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.insets = new Insets(4,4,4,4);
     
@@ -195,7 +196,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     if (progressBar != null)
       {
 	progressBar.setMinimum(0);
-	progressBar.setMaximum(20);
+	progressBar.setMaximum(15);
 	progressBar.setValue(0);
       }
       
@@ -251,7 +252,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (progressBar != null)
       {
-	progressBar.setMaximum(templates.size());
 	progressBar.setValue(2);
       }
 
@@ -266,6 +266,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (progressBar != null)
       {
+	progressBar.setMaximum(infoVector.size());
 	progressBar.setValue(3);
       }
 
@@ -780,7 +781,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     gbc.weightx = 1.0;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(comp, gbc);
-    panel.add(comp);
+    add(comp);
 
     row++;
 
@@ -805,12 +806,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     gbc.gridx = 0;
     gbc.gridy = row;
     gbl.setConstraints(l, gbc);
-    panel.add(l);
+    add(l);
     
     gbc.gridx = 1;
     gbc.weightx = 1.0;
     gbl.setConstraints(comp, gbc);
-    panel.add(comp);
+    add(comp);
 
     row++;
 
@@ -1130,7 +1131,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     addRow( ss, fieldTemplate.getName(), fieldInfo.isVisible()); 
   }
 
-
+  /*
   public void validate()
   {
     System.out.println("--Validate: containerPanel: " + this);
@@ -1148,6 +1149,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       super.doLayout();
       System.out.println("<< cp doLayout done");
   }
+  */
 
   private final void setStatus(String s)
   {
