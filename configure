@@ -27,16 +27,11 @@ x)      echo="echo"      nnl="\c" ;;   # Sys V
 esac
 
 # Find the source files, if location was not specified.
-
-# Try the directory containing this script, then its parent.
-
-prog=$0
-
-GROOTDIR=`echo $prog|sed 's%/[^/][^/]*$%%'`
+GROOTDIR=`pwd $0`
 # if the program name is the same as the srcdir name, we have no path
 # set.. must be .
 test "x$GROOTDIR" = "x$prog" && GROOTDIR=.
-if test ! -d $GROOTDIR/src/classes; then
+if test ! -d $GROOTDIR/src/build/classes; then
   echo "configure: error: can not find sources in $rootdir" 1>&2; exit 1;
 fi
 export GROOTDIR
