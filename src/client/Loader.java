@@ -6,7 +6,7 @@
    the client.
    
    Created: 1 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -195,7 +195,7 @@ public class Loader extends Thread {
 
     /* -- */
 
-    baseMap = new Hashtable();
+    baseMap = new Hashtable(baseHash.size());
 
     enum = baseHash.keys();
 
