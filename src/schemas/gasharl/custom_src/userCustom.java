@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.114 $
-   Last Mod Date: $Date: 2003/08/02 00:10:54 $
+   Version: $Revision: 1.115 $
+   Last Mod Date: $Date: 2004/02/05 20:51:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -861,7 +861,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     
     if (categoryObj.isSet(userCategorySchema.EXPIRE))
       {
-	if (object.getFieldValueLocal(SchemaConstants.ExpirationField) == null)
+	if ((object.getFieldValueLocal(SchemaConstants.ExpirationField) == null) &&
+	    (object.getFieldValueLocal(SchemaConstants.RemovalField) == null))
 	  {
 	    return Ganymede.createErrorDialog("Missing Expiration Field",
 					      "User objects belonging to the " + categoryName +
