@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,7 +14,6 @@
 
 package arlut.csd.ganymede;
 
-import java.lang.reflect.*;
 import java.io.*;
 import java.util.*;
 import java.rmi.*;
@@ -182,6 +181,17 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   public short getID()
   {
     return definition.getID();
+  }
+
+  /**
+   *
+   * Returns the object this field is part of.
+   * 
+   */
+
+  public DBObject getOwner()
+  {
+    return owner;
   }
 
   /**
@@ -381,12 +391,40 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	throw new IllegalArgumentException("scalar accessor called on vector");
       }
 
-    if (owner.objectBase.objectHook != null)
+    if (owner.objectBase.objectHook.virtualizeField(getID()))
       {
-	if (owner.objectBase.objectHook.virtualizeField(getID()))
-	  {
-	    return owner.objectBase.objectHook.getVirtualValue(this);
-	  }
+	return owner.objectBase.objectHook.getVirtualValue(this);
+      }
+
+    return value;
+  }
+
+  /**
+   *
+   * Returns the value of this field, if a scalar.  This method
+   * is intended to be used by the virtualizing hook to use to
+   * return the default value if the virtualizer wants to pass
+   * through.
+   *
+   * @see arlut.csd.ganymede.db_field
+   *
+   */
+
+  public Object getValue(boolean virtualize)
+  {
+    if (!verifyReadPermission())
+      {
+	throw new IllegalArgumentException("permission denied to read this field");
+      }
+
+    if (isVector())
+      {
+	throw new IllegalArgumentException("scalar accessor called on vector");
+      }
+
+    if (virtualize && owner.objectBase.objectHook.virtualizeField(getID()))
+      {
+	return owner.objectBase.objectHook.getVirtualValue(this);
       }
 
     return value;
