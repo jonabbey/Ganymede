@@ -9,8 +9,6 @@ package arlut.csd.JDialog;
 
 import arlut.csd.JDataComponent.*;
 
-import tablelayout.*;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -67,7 +65,14 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
   JMultiLineLabel
     textLabel;
 
-  TableLayout table;
+  GridBagLayout
+    gbl,
+    compgbl;
+
+  GridBagConstraints
+    gbc,
+    compgbc;
+  
   Image image;
 
   Vector objects;
@@ -145,30 +150,45 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
     objects = Resource.getObjects();
     components = new Vector(objects.size());
 
+    gbl = new GridBagLayout();
+    gbc = new GridBagConstraints();
+
+    gbc.insets = new Insets(4,4,4,4);
+
     mainPanel = new JPanel();
-    mainPanel.setLayout(new BorderLayout());
+    mainPanel.setLayout(gbl);
+    setContentPane(mainPanel);
 
-    dataPanel = new JPanel(new BorderLayout());
-    dataPanel.setBorder(BorderFactory.createEmptyBorder(0,5,0,5));
-    mainPanel.add("Center", dataPanel);
-
-    // Set up the text box at the top
+    //
+    // Title at top of dialog
+    //
 
     JLabel titleLabel = new JLabel(Resource.title, SwingConstants.CENTER);
-    EmptyBorder eb5 = (EmptyBorder)BorderFactory.createEmptyBorder(5,5,5,5);
-    titleLabel.setBorder(eb5);
     titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
-    titleLabel.setOpaque(true);
-    JPanel tPanel = new JPanel();
-    tPanel.add(titleLabel);
-    mainPanel.add("North", tPanel);
+
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 2;
+    gbc.gridheight = 1;
+    gbl.setConstraints(titleLabel, gbc);
+    mainPanel.add(titleLabel);
+
+    //
+    // Text message under title
+    //
 
     textLabel = new JMultiLineLabel(Resource.getText());
-    //textLabel = new JLabel(Resource.getText());
-    textLabel.setBorder(eb5);
-    dataPanel.add("North", textLabel);
+    
+    gbc.gridy = 1;
+    gbc.gridx = 1;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(textLabel, gbc);
+    mainPanel.add(textLabel);
 
-    image = Resource.getImage();
+    //
+    // ButtonPanel takes up the bottom of the dialog
+    //
 
     buttonPanel = new JPanel();
 
@@ -184,27 +204,56 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	CancelButton.addActionListener(this);
 	buttonPanel.add(CancelButton);
       }
-    JPanel southPanel = new JPanel(new BorderLayout());
-    southPanel.setBorder(BorderFactory.createEmptyBorder(5,3,0,3));
-    southPanel.add("Center", buttonPanel);
-    southPanel.add("North", new arlut.csd.JDataComponent.JSeparator());
 
-    mainPanel.add("South", southPanel);
+    //
+    // Separator goes all the way accross
+    // 
+
+    arlut.csd.JDataComponent.JSeparator sep = new     arlut.csd.JDataComponent.JSeparator();
+
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+    gbc.gridwidth = 2;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(sep, gbc);
+    mainPanel.add(sep);
+
+    //
+    // buttonPanel goes underneath
+    //
+
+    gbc.gridx = 0;
+    gbc.gridy = 4;
+    gbc.gridwidth = 2;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(buttonPanel, gbc);
+    mainPanel.add(buttonPanel);
+
+    //
+    // Image on left hand side
+    //
+
+    image = Resource.getImage();
+
 
     if (image != null)
       {
-	//	System.out.println("add image");
 	imageCanvas = new JLabel(new ImageIcon(image));
 	JPanel imagePanel = new JPanel();
 	imagePanel.add(imageCanvas);
-	mainPanel.add("West", imagePanel);
+      
+
+	gbc.gridx = 0;
+	gbc.gridy = 1;
+	gbc.gridwidth = 1;
+	gbc.gridheight = 2;
+	gbl.setConstraints(imagePanel, gbc);
+	mainPanel.add(imagePanel);
       }
 
-    this.setSize(600, 600);
-
     mainPanel.setBorder(new EtchedBorder());
-
-    getContentPane().add(mainPanel);
 
     if (debug)
       {
@@ -213,12 +262,22 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 
     // We have to make the panel, even if it is empty.  This is
     // because we have to add space to to it for the stupid activator.
-    panel = new JInsetPanel();
-    table = new TableLayout(false);
-    panel.setLayout(table);
-    table.rowSpacing(10);
+    panel = new JPanel();
+
+    gbc.gridx = 1;
+    gbc.gridy = 2;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(panel, gbc);
+    mainPanel.add(panel);
+
+    // The panel uses its own grid bag stuff
+    compgbc = new GridBagConstraints();
+    compgbl = new GridBagLayout();
+
+    panel.setLayout(compgbl);
     
-    dataPanel.add("Center", panel); 
+
 
 
     // add stuff to panel here
@@ -517,7 +576,7 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	System.out.println("null objects vector");
       }
     
-    //Having problems with setting the prefered size of the 
+    // Having problems with setting the prefered size of the 
     // table layout
 
     if (Resource.frame != null)
@@ -529,11 +588,13 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 	    System.out.println("Bounds: " + r);
 	  }
 	
+	// Sometimes a new JFrame() is passed in, and it won't have
+	// anything interesting for bounds I don't think they are
+	// null, but they are all 0 or something.  Might as well make
+	// sure they are not null anyway.
+
 	if ((r != null) && ((r.width != 0) && (r.height != 0)))
 	  {
-	    // Sometimes a new JFrame() is passed in, and it won't have anything interesting for bounds
-	    // I don't think they are null, but they are all 0 or something.  Might as well make sure they are not
-	    // null anyway.
 	    int width = getPreferredSize().width;
 	    int height = getPreferredSize().height;
 	    
@@ -556,8 +617,9 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
       }
 
     // Add some blank space so the yellow box can eat it up.
-    addSpace(panel, 10, (components == null) ? 1 : components.size() + 1);
+    //addSpace(panel, 10, (components == null) ? 1 : components.size() + 1);
 
+    pack(); // pack again?
   }
 
 
@@ -573,23 +635,9 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
 
   public Hashtable DialogShow()
   {
-    /*
-    SwingUtilities.invokeLater(new Runnable() 
-			       {
-				 public void run()
-				   {
-				     firstComp.requestFocus();
-				   }
-			       });
-    */
 
     pack();
-
-    repaint();
-    //    show();
-
-    setVisible(true);		// thread will halt here
-    //show();
+    show();
 
     if (debug)
       {
@@ -725,10 +773,29 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
   {
     components.addElement(comp);
 
-    JLabel l = new JLabel(label);
+    compgbc.gridwidth = 1;
+    compgbc.fill = GridBagConstraints.NONE;
+    compgbc.anchor = GridBagConstraints.NORTHWEST;
     
-    parent.add("0 " + row + " rhwHW", l);
-    parent.add("1 " + row + " lhH", comp);
+    compgbc.gridy = row;
+    compgbc.gridx = 0;
+    compgbc.weightx = 0.0;
+
+    JLabel l = new JLabel(label, SwingConstants.LEFT);
+
+    compgbl.setConstraints(l, compgbc);
+    compgbc.gridwidth = GridBagConstraints.REMAINDER;
+    parent.add(l);
+
+    compgbc.gridx = 1;
+    compgbc.weightx = 1.0;
+
+    compgbl.setConstraints(comp, compgbc);
+    parent.add(comp);
+
+    //parent.add("0 " + row + " rhwHW", l);
+    //parent.add("1 " + row + " lhH", comp);
+
     parent.invalidate();
   }
 
@@ -737,11 +804,17 @@ public class StringDialog extends JDialog implements ActionListener, JsetValueCa
    */
   private final void addSpace(JPanel parent, int space, int row)
   {
-    parent.add("0 " + row + " rhH", Box.createVerticalStrut(space));
+    // Do nothing.  See nothing.  Hear nothing.
+    //parent.add("0 " + row + " rhH", Box.createVerticalStrut(space));
   }
 
   private final void addSeparator(JPanel parent, Component comp, int row)
   {
+    compgbc.gridy = row;
+    compgbc.gridx = 1;
+    compgbc.gridwidth = GridBagConstraints.REMAINDER;
+    compgbc.fill = GridBagConstraints.HORIZONTAL;
+
     parent.add("0 " + row + " 2 1 hH", comp);
   }
   
