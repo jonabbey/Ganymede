@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.22 $ %D%
+  Version: $Revision: 1.23 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -275,7 +275,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 							   parent.parent,
 							   parent, container.frame,
 							   null, false);
-		    cp.setBorder(new LineBorder(Color.black));
+		    cp.setBorder(parent.lineEmptyBorder);
+		    //cp.setBorder(parent.blackLineB);
 		    
 		    //		    addElement(object.getLabel(), cp);
 		    addElement((i+1) + ". " + object.getLabel(), cp);
@@ -368,7 +369,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						       parent.parent,
 						       parent, container.frame);
 
-		cp.setBorder(new LineBorder(Color.black));
+		cp.setBorder(parent.lineEmptyBorder);
+		//cp.setBorder(parent.blackLineB);
 
 		addElement("New Element", cp, true);
 	      }
