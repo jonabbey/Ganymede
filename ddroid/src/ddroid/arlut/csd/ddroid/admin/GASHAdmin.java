@@ -144,7 +144,6 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
   protected boolean connected = false;
 
   static Server server = null;	// remote reference
-  private static Container appletContentPane = null;
   static Image admin_logo = null;
 
   JTextField username = null;
@@ -195,21 +194,17 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 	GASHAdminFrame.debugFilename = argv[1];
       }
 
-    new GASHAdmin();		// this constructor sets static admin ref
+    applet = new GASHAdmin();
 
     JFrame loginFrame = new GASHAdminLoginFrame("Admin console login", applet);
 
-    appletContentPane = loginFrame.getContentPane();
+    loginFrame.getContentPane().setLayout(new BorderLayout());
+    loginFrame.getContentPane().add("Center", applet);
 
-    appletContentPane.setLayout(new BorderLayout());
-    appletContentPane.add(applet, "Center");
+    applet.init();		// init before visible for smoothness
 
-    loginFrame.pack();
-    loginFrame.setSize(265,380);
     loginFrame.setVisible(true);
-
-    applet.init();
-    applet.getContentPane().getLayout().layoutContainer(applet);
+    loginFrame.pack();		// pack after visible so we size everything properly
   }
   
   public void init()
@@ -265,7 +260,6 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
       }
   }
 
-
   public JPanel createLoginPanel()
   {
     JPanel panel = new JPanel();
@@ -284,7 +278,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
       {
 	JLabel image = new JLabel(new ImageIcon(admin_logo));
 	image.setOpaque(true);
-	image.setBackground(new Color(111,207,247));
+	image.setBackground(Color.black);
 
 	gbc.fill = GridBagConstraints.BOTH;
 	gbc.gridx = 0;
@@ -309,8 +303,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener {
 
     labelPanel.add("South", hostLabel);
 
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weighty = 0.0;
+    gbc.weightx = 1.0;
     gbc.gridy = 1;
     gbl.setConstraints(labelPanel, gbc);
     panel.add(labelPanel);
