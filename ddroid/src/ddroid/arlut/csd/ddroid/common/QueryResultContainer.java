@@ -26,14 +26,68 @@ import java.util.Map;
 public class QueryResultContainer implements List, Serializable {
   static final long serialVersionUID = -8277390343373928867L;
 
+  /**
+   * An ordered list of headers that correspond to each column in this result
+   * set.
+   */
   List headers = null;
+  
+  /**
+   * An ordered list of Shorts that correspond to the DBField ID's of each
+   * column in this result set.
+   */
   List types = null;
+  
+  /**
+   * A list of Object[]. This represents the actual result set. The list of
+   * rows is sorted in the order each row was added to the result set via
+   * addRow(). The length of each row is equal to the number of column headers
+   * for this result set. The types of the objects contained in each cell of
+   * each row depends on the type of the DBField that represents that cell's
+   * value. A StringDBField column, for example, will yield String objects while
+   * a NumericDBField will yield an Integer.
+   */
   List rows = null;
+  
+  /**
+   * An ordered list of ObjectHandles that correspond to the DBObject
+   * represented in each row of the result set. There is one handle per
+   * row.
+   */
   Vector handles = null;
   
+  /**
+   * Optimization structure that speeds up obtaining a list of labels for each
+   * object referenced in the result set. This list has the same order of the
+   * rows of the result set.
+   */
   transient Vector labelList = null;
+   
+   /**
+   * Optimization structure that speeds up obtaining a list of invids for each
+   * object referenced in the result set. This list has the same order of the
+   * rows of the result set.
+   */ 
   transient Vector invidList = null;
+  
+  /**
+   * Optimization structure that speeds up obtaining an Invid given a DBObject's
+   * label. This is not a general-purpose lookup method, as it only applies to
+   * DBObjects referenced by this result set.
+   * 
+   * FIXME: There is an outstanding bug here. Using a Hash for this purpose
+   * assumes that there is a 1-to-1 mapping between labels and the DBObjects
+   * they represent. However, it's possible to have multiple DBObjects with the
+   * same Invids. In other words, the size of the keyset (or value set) of the
+   * hash may be smaller than the number of rows.
+   */
   transient Map labelHash = null;
+  
+  /**
+   * Optimization structure that speeds up obtaining an object's label given that
+   * DBObject's invid. This is not a general-purpose lookup method, as it only
+   * applies to DBObjects referenced by this result set.
+   */
   transient Map invidHash = null;
 
   public QueryResultContainer()
