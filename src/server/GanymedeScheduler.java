@@ -6,7 +6,7 @@
    to register tasks to be run on a periodic basis.
    
    Created: 26 January 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -23,25 +23,15 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is intended to serve as a process running concurrently
- * with the RMI-dispatched GanymedeServer object.  Its primary duty is
- * to take care of any objects that have passed their inactivation or
- * expiration times.  Periodically (once per day?  per half-day?),
- * this thread will wake up, obtain a lock on all bases in the database,
- * sweep through them looking for objects that need to be inactivated or
- * removed, and perform the appropriate actions.
  *
- * This class is in the very earliest design stages, and it is unclear
- * whether the proper design course at this point is to have a single,
- * continously running thread to wake up at the appropriate times, or
- * whether the server should have a method defined that could be
- * synchronously executed whenever there are no users logged in to the
- * server and the time for the next cleaning has passed.
+ * This class is designed to act as a background task scheduler for the
+ * Ganymede server.  It is similar in function and behavior to the UNIX
+ * cron facility, except that it is not currently as fancy as cron is
+ * in terms of specifying periodicity of task scheduling, and in that
+ * it provides some operations for run-time management of scheduled
+ * and running tasks.
  *
- * Most generically, we could have a simple timer thread that kept track
- * of a number of possible runnable actions that could be woken up and run
- * by an asynchronous thread that could sleep until the next action time 
- * has been met.
+ * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  */
 
@@ -49,12 +39,6 @@ public class GanymedeScheduler extends Thread {
 
   static final int minsPerDay = 1440;
   static final boolean debug = false;
-  
-  Date nextAction = null;
-  private Vector currentlyScheduled = new Vector();
-  private Vector currentlyRunning = new Vector();
-
-  /* -- */
 
   /**
    *
@@ -64,7 +48,7 @@ public class GanymedeScheduler extends Thread {
 
   public static void main(String[] argv)
   {
-    GanymedeScheduler scheduler = new GanymedeScheduler();
+    GanymedeScheduler scheduler = new GanymedeScheduler(false);
     new Thread(scheduler).start();
 
     Date time, currentTime;
@@ -97,8 +81,26 @@ public class GanymedeScheduler extends Thread {
 				new sampleTask("sample task 4"), "sample task 4");
   }
 
-  public GanymedeScheduler()
+  // --- end statics
+
+  Date nextAction = null;
+  private Hashtable currentlyScheduled = new Hashtable();
+  private Hashtable currentlyRunning = new Hashtable();
+  private boolean reportTasks;
+
+  /**
+   *
+   * Constructor
+   *
+   * @param reportTasks if true, the scheduler will attempt to notify
+   *                    the GanymedeAdmin class when tasks are scheduled
+   *                    and/or completed.
+   *
+   */
+
+  public GanymedeScheduler(boolean reportTasks)
   {
+    this.reportTasks = reportTasks;
   }
 
   /**
@@ -115,12 +117,17 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
-    if (time == null || task == null)
+    if (time == null || task == null || name == null)
       {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
       }
 
-    handle = new scheduleHandle(this, time, 0, task, name == null ? "" : name);
+    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name))
+      {
+	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
+      }
+
+    handle = new scheduleHandle(this, time, 0, task, name);
     scheduleTask(handle);
     
     System.err.println("Ganymede Scheduler: Scheduled task " + name + " for execution at " + time);
@@ -142,9 +149,14 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
-    if (task == null)
+    if (task == null || name == null)
       {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
+      }
+
+    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name))
+      {
+	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
       }
 
     currentTime = new Date();
@@ -163,7 +175,7 @@ public class GanymedeScheduler extends Thread {
 
     time = cal.getTime();
 
-    handle = new scheduleHandle(this, time, minsPerDay, task, name == null ? "" : name);
+    handle = new scheduleHandle(this, time, minsPerDay, task, name);
     scheduleTask(handle);
 
     System.err.println("Ganymede Scheduler: Scheduled task " + name + " for daily execution at " + time);
@@ -189,9 +201,14 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
-    if (task == null)
+    if (task == null || name == null)
       {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addAction()");
+      }
+
+    if (currentlyRunning.containsKey(name) || currentlyScheduled.containsKey(name))
+      {
+	throw new IllegalArgumentException("error, task " + name + " already registered with scheduler");
       }
 
     currentTime = new Date();
@@ -210,14 +227,217 @@ public class GanymedeScheduler extends Thread {
 
     time = cal.getTime();
 
-    handle = new scheduleHandle(this, time, intervalMinutes, task, name == null ? "" : name);
+    handle = new scheduleHandle(this, time, intervalMinutes, task, name);
 
     scheduleTask(handle);
 
     System.err.println("Ganymede Scheduler: Scheduled task " + name + " for periodic execution at " + time);
     System.err.println("                    Task will repeat every " + intervalMinutes + " minutes");
   }
+
+  /**
+   *
+   * This method is provided to allow an admin console to cause a registered
+   * task to be immediately spawned.
+   *
+   * @return true if the task is either currently running or was started, 
+   *         or false if the task could not be found in the list of currently
+   *         registered tasks.
+   *
+   */
+
+  public synchronized boolean runTaskNow(String name)
+  {
+    if (currentlyRunning.containsKey(name))
+      {
+	return true;		// it's already running
+      }
+    else
+      {
+	scheduleHandle handle = (scheduleHandle) currentlyScheduled.get(name);
+
+	if (handle == null)
+	  {
+	    return false;	// couldn't find task
+	  }
+
+	runTask(handle);
+
+	return true;
+      }
+  }
   
+  /**
+   *
+   * This method is provided to allow an admin console to put an
+   * immediate halt to a running background task.
+   *
+   * @return true if the task was either not running, or was
+   *         running and was told to stop.
+   *
+   */
+
+  public synchronized boolean stopTask(String name)
+  {
+    if (!currentlyRunning.containsKey(name))
+      {
+	return true;		// it's not running
+      }
+    else
+      {
+	scheduleHandle handle = (scheduleHandle) currentlyRunning.get(name);
+
+	if (handle == null)
+	  {
+	    return false;	// couldn't find task
+	  }
+
+	handle.stop();
+
+	return true;
+      }
+  }
+
+  /**
+   *
+   * This method is provided to allow an admin console to specify
+   * that a task be suspended.  Suspended tasks will not be
+   * run until later enabled.  If the task is currently running,
+   * it will not be interfered with, but the task will not be
+   * issued for execution in future until re-enabled.
+   *
+   * @return true if the task was found and disabled
+   *
+   */
+
+  public synchronized boolean disableTask(String name)
+  {
+    scheduleHandle handle = null;
+
+    /* -- */
+
+    handle = (scheduleHandle) currentlyRunning.get(name);
+
+    if (handle == null)
+      {
+	handle = (scheduleHandle) currentlyScheduled.get(name);
+      }
+
+    if (handle == null)
+      {
+	return false;		// couldn't find it
+      }
+    else
+      {
+	handle.disable();
+	return true;
+      }
+  }
+
+  /**
+   *
+   * This method is provided to allow an admin console to specify
+   * that a task be re-enabled after a suspension.
+   *
+   * A re-enabled task will be scheduled for execution according
+   * to its original scheduled, with any runtimes that would have
+   * been issued during the time the task was suspended simply
+   * skipped.
+   *
+   * @return true if the task was found and enabled
+   *
+   */
+
+  public synchronized boolean enableTask(String name)
+  {
+    scheduleHandle handle = null;
+
+    /* -- */
+
+    handle = (scheduleHandle) currentlyRunning.get(name);
+
+    if (handle == null)
+      {
+	handle = (scheduleHandle) currentlyScheduled.get(name);
+      }
+
+    if (handle == null)
+      {
+	return false;		// couldn't find it
+      }
+    else
+      {
+	handle.enable();
+	return true;
+      }
+  }
+
+  /**
+   *
+   * This method is provided to allow an admin console to reschedule
+   * the next invocation time of a named task, and to change the
+   * interval in minutes between invocations of this task.
+   *
+   * @param name The name of the task to be rescheduled
+   * @param time The desired time of the next invocation.  If the task
+   * is currently running, this time will be overridden by the task's
+   * prescribed runtime interval.
+   * @param interval The time, in minutes, between invocations of this
+   * task.  If interval is less than 1, the interval for this task
+   * will not be changed.
+   *
+   *
+   * @return true if the task was found and rescheduled
+   *
+   */
+
+  public synchronized boolean rescheduleTask(String name, Date time, int interval)
+  {
+    scheduleHandle handle = null;
+    boolean changed = false;
+
+    /* -- */
+
+    handle = (scheduleHandle) currentlyRunning.get(name);
+
+    if (handle == null)
+      {
+	handle = (scheduleHandle) currentlyScheduled.get(name);
+      }
+
+    if (handle == null)
+      {
+	return false;		// couldn't find it
+      }
+    else
+      {
+	if (time != null)
+	  {
+	    handle.startTime = time;
+	    
+	    if (time.getTime() < nextAction.getTime())
+	      {
+		changed = true;
+		nextAction.setTime(time.getTime());
+		notify();	// let the scheduler know about our newly scheduled event
+	      }
+	  }
+
+	if (interval > 0)
+	  {
+	    changed = true;
+	    handle.interval = interval;
+	  }
+
+	if (changed)
+	  {
+	    updateTaskInfo();
+	  }
+
+	return changed;
+      }
+  }
+
   /**
    *
    * This method is responsible for carrying out the scheduling
@@ -316,10 +536,13 @@ public class GanymedeScheduler extends Thread {
 		  {
 		    Vector toRun = new Vector();
 		    Date nextRun = null;
+		    Enumeration enum;
+		    
+		    enum = currentlyScheduled.elements();
 
-		    for (int i = 0; i < currentlyScheduled.size(); i++)
+		    while (enum.hasMoreElements())
 		      {
-			handle = (scheduleHandle) currentlyScheduled.elementAt(i);
+			handle = (scheduleHandle) enum.nextElement();
 			
 			if (handle.startTime.getTime() <= currentTime)
 			  {
@@ -358,29 +581,57 @@ public class GanymedeScheduler extends Thread {
       }
   }
 
-  synchronized void runTask(scheduleHandle handle)
+  /**
+   *
+   * This private method is used by the GanymedeScheduler thread's main
+   * loop to put a task in the scheduled hash onto the run hash
+   *
+   */
+
+  private synchronized void runTask(scheduleHandle handle)
   {
-    if (currentlyScheduled.removeElement(handle))
+    if (currentlyScheduled.remove(handle.name) != null)
       {
 	System.err.println("Ganymede Scheduler: running " + handle.name);
 
-	currentlyRunning.addElement(handle);
+	currentlyRunning.put(handle.name, handle);
+	updateTaskInfo();	// update first, so the console sees it before the task completes
 	handle.runTask();
       }
   }
 
+  /**
+   *
+   * This method is used by instances of scheduleHandle to let the
+   * GanymedeScheduler thread know when their tasks have run to
+   * completion.  This method is responsible for rescheduling
+   * the task if it is a periodic task.
+   *
+   */
+
   synchronized void notifyCompletion(scheduleHandle handle)
   {
-    if (currentlyRunning.removeElement(handle))
+    if (currentlyRunning.remove(handle.name) != null)
       {
 	System.err.println("Ganymede Scheduler: " + handle.name + " completed");
 
-	if (handle.reschedule())
-	  {
-	    System.err.println("Ganymede Scheduler: rescheduling task " + handle.name + " for " + handle.startTime);
+	// we need to check to see if the task was ordinarily scheduled to
+	// start at some time in the future to handle the case where a
+	// console forced us to run a task early.. if the task wasn't
+	// yet due to run, we don't want to make it skip its normally
+	// scheduled next run
 
-	    scheduleTask(handle);
+	if (handle.startTime.after(new Date()))
+	  {
+	    if (handle.reschedule())
+	      {
+		System.err.println("Ganymede Scheduler: rescheduling task " + handle.name + " for " + handle.startTime);
+		
+		scheduleTask(handle);
+	      }
 	  }
+
+	updateTaskInfo();
       }
     else
       {
@@ -390,14 +641,14 @@ public class GanymedeScheduler extends Thread {
 
   /**
    *
-   * This method takes a task that needs to be scheduled and
+   * This private method takes a task that needs to be scheduled and
    * adds it to the scheduler.
    *
    */
 
   private synchronized void scheduleTask(scheduleHandle handle)
   {
-    currentlyScheduled.addElement(handle);
+    currentlyScheduled.put(handle.name, handle);
 
     if (debug)
       {
@@ -419,138 +670,65 @@ public class GanymedeScheduler extends Thread {
       }
   }
 
+  /**
+   *
+   * This method is run when the GanymedeScheduler thread is
+   * terminated.  It kills off any background processes currently
+   * running.  Those threads should have a finally clause that can
+   * handle abrupt termination.
+   * 
+   */
+
   private synchronized void cleanUp()
   {
     scheduleHandle handle;
+    Enumeration enum;
 
     /* -- */
 
-    for (int i = 0; i < currentlyRunning.size(); i++)
+    enum = currentlyRunning.elements();
+
+    while (enum.hasMoreElements())
       {
-	handle = (scheduleHandle) currentlyRunning.elementAt(i);
+	handle = (scheduleHandle) enum.nextElement();
 
 	handle.stop();
       }
   }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                  scheduleHandle
-
-------------------------------------------------------------------------------*/
-
-class scheduleHandle {
-
-  static final boolean debug = false;
-
-  Date startTime;
-  int interval;			// 0 if this is a one-shot, otherwise, the count in minutes
-  Runnable task;
-  Thread thread, monitor;
-  String name;
-  GanymedeScheduler scheduler;
-
-  /* -- */
-
-  public scheduleHandle(GanymedeScheduler scheduler,
-			Date time, int interval, 
-			Runnable task, String name)
-  {
-    if (time == null)
-      {
-	throw new IllegalArgumentException("can't schedule a task without a start time");
-      }
-
-    this.scheduler = scheduler;
-    this.startTime = time;
-    this.interval = interval;
-    this.task = task;
-    this.name = name;
-  }
-
-  synchronized void runTask()
-  {
-    // start our task
-
-    if (debug)
-      {
-	System.err.println("Ganymede Scheduler: Starting task " + name + " at " + new Date());
-      }
-
-    thread = new Thread(task, name);
-    thread.start();
-
-    // and have our monitor watch for it
-    
-    monitor = new Thread(new taskMonitor(thread, this), name);
-    monitor.start();
-  }
 
   /**
    *
-   * This method is called by our task monitor when our task
-   * completes
+   * This method is used to report to the Ganymede server (and thence
+   * the admin console(s) the status of background tasks scheduled
+   * and/or running.
    *
    */
 
-  synchronized void notifyCompletion()
+  private synchronized void updateTaskInfo()
   {
-    monitor = null;
-    scheduler.notifyCompletion(this);
-  }
-
-  synchronized boolean reschedule()
-  {
-    if (interval == 0)
+    if (reportTasks)
       {
-	return false;
+	Enumeration enum;
+	Vector handles = new Vector();
+
+	/* -- */
+
+	enum = currentlyScheduled.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    handles.addElement(enum.nextElement());
+	  }
+    
+	enum = currentlyRunning.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    handles.addElement(enum.nextElement());
+	  }
+
+	GanymedeAdmin.refreshTasks(handles);
       }
-    else
-      {
-	startTime.setTime(startTime.getTime() + (long) (60000 * interval));
-	return true;
-      }
-  }
-
-  synchronized void stop()
-  {
-    monitor.stop();
-    thread.stop();
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                     taskMonitor
-
-------------------------------------------------------------------------------*/
-
-class taskMonitor implements Runnable {
-
-  Thread task;
-  scheduleHandle handle;
-
-  /* -- */
-
-  public taskMonitor(Thread task, scheduleHandle handle)
-  {
-    this.task = task;
-    this.handle = handle;
-  }
-
-  public void run()
-  {
-    try
-      {
-	task.join();		// wait for our task to finish
-      }
-    catch (InterruptedException ex)
-      {
-	return;			// if interrupted, assume the scheduler is going down
-      }
-
-    handle.notifyCompletion(); // tell the scheduler it has completed
   }
 }
 
