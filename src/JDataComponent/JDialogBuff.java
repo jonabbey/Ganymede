@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -37,7 +37,7 @@ import java.awt.Frame;
 
 public class JDialogBuff implements java.io.Serializable {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // ---
   
@@ -163,7 +163,7 @@ public class JDialogBuff implements java.io.Serializable {
 
 	    if (debug)
 	      {
-		System.err.println("JDialogBuff: choice label = " + choiceLabel);
+		System.err.println("JDialogBuff: choice label = " + choiceLabel + " value = " + chunk.value + " init = " + chunk.initialValue);
 	      }
 
 	    retVal.addChoice(choiceLabel, (Vector) chunk.value, (String)chunk.initialValue);
