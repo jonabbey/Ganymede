@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ public class DBJournal implements ObjectStatus {
   }
 
   static final String id_string = "GJournal";
-  static final byte major_version = 1;
+  static final byte major_version = 2;
   static final byte minor_version = 0;
 
   static final String OPENTRANS = "open";
