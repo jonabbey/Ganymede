@@ -6,7 +6,7 @@
    information defining a field.
    
    Created: 5 November 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -113,30 +113,69 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
       }
   }
 
+  /**
+   *
+   * Returns a type identifier for this field.
+   *
+   * @see arlut.csd.ganymede.FieldType
+   *
+   */
+
   public short getType()
   {
     return type;
   }
+
+  /**
+   *
+   * Returns the field number for this field.
+   *
+   */
 
   public short getID()
   {
     return fieldID;
   }
 
+  /**
+   *
+   * Returns the object type number for the object containing this
+   * field.
+   * 
+   */
+
   public short getBaseID()
   {
     return baseID;
   }
+
+  /**
+   *
+   * Returns the name of this field.
+   * 
+   */
 
   public String getName()
   {
     return name;
   }
 
+  /**
+   *
+   * Returns a description of this field suitable for a tooltip.
+   *  
+   */
+
   public String getComment()
   {
     return comment;
   }
+
+  /**
+   *
+   * Returns true if this field is a vector.
+   *
+   */
 
   public boolean isArray()
   {
@@ -241,50 +280,128 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
     return (type == IP);
   }
 
+  /**
+   *
+   * Returns true if this field is one of the standard
+   * fields that are part of all objects held in
+   * the Ganymede server.
+   *
+   */
+
   public boolean isBuiltIn()
   {
     return builtIn;
   }
+
+  /**
+   *
+   * If this field is a BOOLEAN, returns true
+   * if this field should be presented as a
+   * pair of radio boxes labeled by getTrueLabel() and
+   * getFalseLabel().
+   *
+   */
 
   public boolean isLabeled()
   {
     return labeled;
   }
 
+  /**
+   *
+   * If this field is a BOOLEAN and isLabeled() is true,
+   * returns the text to be associated with the true
+   * choice.
+   *
+   */
+
   public String getTrueLabel()
   {
     return trueLabel;
   }
 
+  /**
+   *
+   * If this field is a BOOLEAN and isLabeled() is true,
+   * returns the text to be associated with the false
+   * choice.
+   *
+   */
+
   public String getFalseLabel()
   {
     return falseLabel;
   }
+
+  /**
+   *
+   * If this field is a STRING, returns the minimum acceptable length
+   * for this field.
+   * 
+   */
   
   public short getMinLength()
   {
     return minLength;
   }
 
+  /**
+   *
+   * If this field is a STRING, returns the maximum acceptable length
+   * for this field.
+   * 
+   */
+
   public short getMaxLength()
   {
     return maxLength;
   }
+
+  /**
+   *
+   * If this field is a STRING and a limited set of characters are
+   * acceptable in this field, returns those characters.
+   * 
+   */
 
   public String getOKChars()
   {
     return okChars;
   }
 
+  /**
+   *
+   * If this field is a STRING and a limited set of characters are
+   * not acceptable in this field, returns those characters.
+   * 
+   */
+
   public String getBadChars()
   {
     return badChars;
   }
 
+  /**
+   *
+   * If this field is an INVID, returns true if this field refers
+   * to an 'embedded' object.
+   *
+   */
+
   public boolean isEditInPlace()
   {
     return editInPlace;
   }
+
+  /**
+   *
+   * If this field is an INVID and is configured to point to an object
+   * of a certain type, returns the object type this field points to.<br><br>
+   * 
+   * This method will return a negative value if this field can point
+   * to objects of differing types.
+   *
+   */
 
   public short getTargetBase()
   {
@@ -295,6 +412,13 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
 
     return allowedTarget;
   }
+
+  /**
+   *
+   * If this field is a PASSWORD, returns true if passwords are stored in
+   * this field in UNIX Crypt() form.
+   *
+   */
 
   public boolean isCrypted()
   {
