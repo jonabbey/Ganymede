@@ -142,7 +142,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     for (int i = 0; i < bases.size(); i++)
       {
 	thisBase = (Base)bases.elementAt(i);
-	String name = (String)baseNames.get(thisBase);
+	String name = (String) baseNames.get(thisBase);
 	
 	if (name.startsWith("Embedded:"))
 	  {
@@ -153,7 +153,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 	  }
 	else
 	  {
-	    listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
+	    listHandle lh = new listHandle(name, (Short) baseToShort.get(thisBase));
 	    listHandles.addElement(lh);
 	  }
       }
@@ -380,8 +380,8 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		System.out.println("edit object type = null");
 	      }
 	    
-	    listHandle lh = (listHandle)type.getSelectedItem();
-	    Short baseID = (Short)lh.getObject();
+	    listHandle lh = (listHandle) type.getSelectedItem();
+	    Short baseID = (Short) lh.getObject();
 	    
 	    if (debug)
 	      {
@@ -402,7 +402,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		  }
 
 		edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
-		
+
 		if (edit_query != null)
 		  {
 		    edit_invids = edit_query.getListHandles();
