@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2231,7 +2231,7 @@ public class directLoader {
 
 	userInvid = (Invid) userInvids.get(m.userName);
 
-	// need to edit this user, create an imbedded object
+	// need to edit this user, create an embedded object
 
 	user_obj = my_client.session.edit_db_object(userInvid);
 
