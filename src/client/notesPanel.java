@@ -5,7 +5,7 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,8 +22,6 @@ import com.sun.java.swing.*;
 import com.sun.java.swing.border.*;
 //import com.sun.java.swing.event.*;
 
-import tablelayout.*;
-
 import jdj.PackageResources;
 
 import arlut.csd.ganymede.*;
@@ -33,7 +31,7 @@ import arlut.csd.JDataComponent.*;
 
 public class notesPanel extends JPanel{
 
-  final static boolean debug = true;
+  final static boolean debug = false;
 
   int 
     row = 0;
@@ -72,13 +70,15 @@ public class notesPanel extends JPanel{
       JPanel topPane = new JPanel(false);
       //topPane.setLayout(new BoxLayout(topPane, BoxLayout.Y_AXIS));
       topPane.setLayout(new GridLayout(2,1));
+
       JPanel createdPane = new JPanel(false);
       //createdPane.setLayout(new BoxLayout(createdPane, BoxLayout.Y_AXIS));
-      createdPane.setLayout(new TableLayout());
+      createdPane.setLayout(new GridLayout(2,2));
       createdPane.setBorder(new TitledBorder("Creation Information"));
+
       JPanel modPane = new JPanel(false);
       //modPane.setLayout(new BoxLayout(modPane, BoxLayout.Y_AXIS));
-      modPane.setLayout(new TableLayout());
+      modPane.setLayout(new GridLayout(2,2));
       modPane.setBorder(new TitledBorder("Modification Information"));
 
       topPane.add(createdPane);
@@ -124,9 +124,11 @@ public class notesPanel extends JPanel{
 	  createdOn.setText(dateformat.format(creation_date));
 	}
 
-      addRow(createdPane, "Created on:", createdBy, 0);
+      createdPane.add(new JLabel("Created on:"));
+      createdPane.add(createdOn);
       
-      addRow(createdPane, "Created by:", createdOn, 1);
+      createdPane.add(new JLabel("Created by:"));
+      createdPane.add(createdBy);
 
       modifiedBy = new JTextField(20);
       if (modifier == null)
@@ -148,9 +150,11 @@ public class notesPanel extends JPanel{
 	  modifiedOn.setText(dateformat.format(mod_date));
 	}
 
-      addRow(modPane, "Modified by:", modifiedBy, 0);
+      modPane.add(new JLabel("Modified by:"));
+      modPane.add(modifiedBy);
 
-      addRow(modPane, "Modified on:", modifiedOn, 1);
+      modPane.add(new JLabel("Modified on:"));
+      modPane.add(modifiedOn);
 
       //add("North", topPane);
       add(topPane);
