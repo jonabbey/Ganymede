@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 1999/08/18 23:48:11 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/03/16 06:33:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -911,7 +911,21 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       {
 	Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
 
-	// if we have more than 2 interfaces, we don't care
+	// if the interface that we are deleting is holding a network
+	// allocation, we need to free that
+	
+	interfaceCustom delInterface = (interfaceCustom) 
+	  getSession().editDBObject((Invid) interfaces.elementAt(index));
+
+	Invid oldNet = (Invid) delInterface.getFieldValueLocal(interfaceSchema.IPNET);
+
+	if (oldNet != null)
+	  {
+	    freeNet(oldNet);
+	  }
+
+	// if we currently have more or less than 2 interfaces, we
+	// don't care
 
 	if (interfaces.size() != 2)
 	  {
