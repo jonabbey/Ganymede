@@ -985,6 +985,20 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
     </p>
 
     <p>
+      One word of caution.. it is possible to dead-lock the Ganymede server from within the
+    <a
+      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>,
+    <a
+      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase2()">commitPhase2()</a>,
+    and <a
+      href="../javadoc/arlut/csd/ganymede/DBEditObject.html#release(boolean)">release()</a> methods,
+    as portions of the database are locked during the time that these methods are executing.
+    Under no circumstances should you use any methods that involve locks in GanymedeSession
+    from within these methods.  In particular, it is forbidden to use any GanymedeSession
+    methods that involve the GanymedeSession query system, including the otherwise tempting
+    findLabeledObject() method.</p>
+
+    <p>
       Of course, if you are not doing something special, you shouldn't have to
       override any of these methods.  The default <a
       href="../javadoc/arlut/csd/ganymede/DBEditObject.html#commitPhase1()">commitPhase1()</a>
@@ -1503,7 +1517,10 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	  in the two-phase commit protocol.  If a particular
 	  subclass of DBEditObject does not need to involve outside
 	  processes in the full two-phase commit protocol, this
-	  method should not be overridden.
+	  method should not be overridden.<br><br>
+
+          Beware.. it can cause a server dead-lock to call GanymedeSession
+          Query methods from within this method.
 	</td>
       </tr>
       <tr>
@@ -1519,7 +1536,10 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/DBEditObj
 	  process being initiated whose success or failure would not
 	  affect the successful commit of this DBEditObject in the
 	  Ganymede server, the process invokation should be placed here,
-	  rather than in commitPhase1().
+	  rather than in commitPhase1().<br><br>
+
+          Beware.. it can cause a server dead-lock to call GanymedeSession
+          Query methods from within this method.
 	</td>
       </tr>
       <tr>
