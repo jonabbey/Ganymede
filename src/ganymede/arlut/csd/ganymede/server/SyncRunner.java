@@ -212,63 +212,51 @@ public class SyncRunner implements Runnable {
       {
 	DBEditObject syncObject = objectList[i];
 
-	if (syncObject.isEmbedded())
-	  {
-	    // If our container is also in this transaction, we'll
-	    // skip writing out the embedded object as its own entry
-	    // and let the emitXMLDelta() in the DBEditObject take
-	    // care of writing out the changes to the embedded object.
-	    //
-	    // The Ganymede GUI client will never edit an embedded
-	    // object without also checking the containing objects out
-	    // for editing, but it's possible to force that kind of
-	    // behavior with the xmlclient if the user just tries to
-	    // directly edit the embedded object on its own
-
-	    InvidDBField containerField = (InvidDBField) syncObject.getField(SchemaConstants.ContainerField);
-	    Invid invid = containerField.value();
-	    DBEditObject myParentObject = transaction.findObject(invid);
-
-	    while (myParentObject != null && myParentObject.isEmbedded())
-	      {
-		containerField = (InvidDBField) myParentObject.getField(SchemaConstants.ContainerField);
-		invid = containerField.value();
-		myParentObject = transaction.findObject(invid);
-	      }
-
-	    // if the top-level parent object is in this transaction,
-	    // skip ahead and let the parent object handle writing
-	    // itself out
-
-	    if (myParentObject != null)
-	      {
-		continue;
-	      }
-	  }
-
-	if (shouldInclude(syncObject, transaction))
+	if (shouldInclude(syncObject))
 	  {
 	    if (xmlOut == null)
 	      {
 		xmlOut = createXMLSync(transRecord);
+		xmlOut.setDeltaSyncing(true);
 	      }
 
 	    switch (syncObject.getStatus())
 	      {
 	      case ObjectStatus.CREATING:
-		xmlOut.startElementIndent("addobject");
+		xmlOut.startElementIndent("object_delta");
+
+		xmlOut.indentOut();
+
+		xmlOut.startElementIndent("before");
+		xmlOut.endElement("before");
+
+		xmlOut.startElementIndent("after");
 		xmlOut.indentOut();
 		syncObject.emitXML(xmlOut);
 		xmlOut.indentIn();
-		xmlOut.endElementIndent("addobject");
+		xmlOut.endElementIndent("after");
+		
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("object_delta");
+
 		break;
 
 	      case ObjectStatus.DELETING:
-		xmlOut.startElementIndent("deleteobject");
+		xmlOut.startElementIndent("object_delta");
+
+		xmlOut.indentOut();
+
+		xmlOut.startElementIndent("before");
 		xmlOut.indentOut();
 		syncObject.getOriginal().emitXML(xmlOut);
 		xmlOut.indentIn();
-		xmlOut.endElementIndent("deleteobject");
+		xmlOut.endElementIndent("before");
+
+		xmlOut.startElementIndent("after");
+		xmlOut.endElement("after");
+		
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("object_delta");
 		break;
 
 	      case ObjectStatus.EDITING:
@@ -375,7 +363,7 @@ public class SyncRunner implements Runnable {
    * to this channel.</p>
    */
 
-  public boolean shouldInclude(DBEditObject object, DBEditSet transaction)
+  public boolean shouldInclude(DBEditObject object)
   {
     if (!mayInclude(object))
       {
@@ -431,7 +419,7 @@ public class SyncRunner implements Runnable {
 
 	// changed
 
-	if (memberField.isDefined() && origField != null && shouldInclude(memberField, origField, transaction))
+	if (memberField.isDefined() && origField != null && shouldInclude(memberField, origField))
 	  {
 	    return true;
 	  }
@@ -444,14 +432,9 @@ public class SyncRunner implements Runnable {
    * <p>Returns true if the given field needs to be sent to this sync
    * channel.  This method is responsible for doing the determination
    * only if both field and origField are not null and isDefined().</p>
-   *
-   * <p>The transaction DBEditSet is used to determine whether an
-   * edit-in-place InvidDBField contains embedded objects that were
-   * changed enough to need to be sent to this sync channel, by doing lookups for
-   * the target of the invid in the transactional context.</p>
    */
 
-  public boolean shouldInclude(DBField newField, DBField origField, DBEditSet transaction)
+  public boolean shouldInclude(DBField newField, DBField origField)
   {
     String fieldOption;
 
@@ -476,36 +459,6 @@ public class SyncRunner implements Runnable {
       case SchemaConstants.ModificationDateField:
       case SchemaConstants.ModifierField:
 	return false;
-      }
-
-    if (newField.getOwner().isEmbedded() && newField.getID() == SchemaConstants.ContainerField)
-      {
-	return false;
-      }
-
-    if (transaction != null)
-      {
-	if (newField.isEditInPlace())
-	  {
-	    InvidDBField embeddedElements = (InvidDBField) newField;
-		
-	    for (int j = 0; j < embeddedElements.size(); j++)
-	      {
-		Invid embeddedObjInvid = (Invid) embeddedElements.getElementLocal(j);
-
-		// if we're not editing an embedded object invid, then
-		// we don't care about the embedded object.. if the
-		// transaction doesn't include it, we will just move
-		// on to the fieldOption checks below, and the
-		// hasChanged() method on the list of invids in this
-		// edit-in-place field
-		
-		if (transaction.isEditingObject(embeddedObjInvid) && shouldInclude(transaction.findObject(embeddedObjInvid), transaction))
-		  {
-		    return true;
-		  }
-	      }
-	  }
       }
 
     fieldOption = getOption(newField);

@@ -150,7 +150,7 @@ import arlut.csd.ganymede.rmi.db_field;
  * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} customization methods.  Most
  * DBField methods at some point call methods on the DBObject/DBEditObject
  * that contains it.  All methods that cause changes to fields call out to
- * finalizeXXX() and/or wizardHook() methods in DBEditObject.  Consult the
+ * finalizeXYZ() and/or wizardHook() methods in DBEditObject.  Consult the
  * DBEditObject customization guide for details on the field/object interactions.</P>
  *
  * <P>An important note about synchronization: it is possible to encounter a
@@ -334,26 +334,6 @@ public abstract class DBField implements Remote, db_field {
    */
 
   abstract void emitXML(XMLDumpContext dump) throws IOException;
-
-  /**
-   * <p>This method is used when this field has changed, and its
-   * changes need to be written to a Sync Channel.</p>
-   *
-   * <p>The assumptions of this method are that both this field and
-   * the orig field are defined (i.e., non-null, non-empty), and that
-   * orig is of the same class as this field.  It is an error to call
-   * this method with null dump or orig parameters.</p>
-   *
-   * <p>It is also an error to call this method when this field is not
-   * currently being edited in a DBEditObject, as emitXMLDelta() may
-   * depend on context from the editing object.</p>
-   *
-   * <p>It is the responsibility of the code that calls this method to
-   * determine that this field differs from orig.  If this field and
-   * orig have no changes between them, the output is undefined.</p>
-   */
-
-  abstract void emitXMLDelta(XMLDumpContext dump, DBField orig) throws IOException;
 
   /**
    * <P>Returns true if obj is a field with the same value(s) as

@@ -1309,9 +1309,22 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
 	DBField field = (DBField) fieldVec.elementAt(i);
 	    
-	if (field.isDefined() && xmlOut.mayInclude(field))
+	if (field.isDefined())
 	  {
-	    field.emitXML(xmlOut);
+	    // if we are writing an embedded object out during delta
+	    // syncing, we want to be sure and include the container
+	    // field, even though the Ganymede GUI doesn't provide
+	    // that as an option in the Field Options editing dialog.
+	    // This is because the ContainerField is an intrinsic part
+	    // of an embedded object if we are not writing the
+	    // embedded object out directly embedded in a container
+	    // object as we would do in a non-delta syncing case.
+
+	    if ((this.isEmbedded() && field.getID() == SchemaConstants.ContainerField && xmlOut.isDeltaSyncing()) ||
+		xmlOut.mayInclude(field))
+	      {
+		field.emitXML(xmlOut);
+	      }
 	  }
       }
 

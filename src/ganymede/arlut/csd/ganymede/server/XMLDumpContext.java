@@ -97,6 +97,15 @@ public class XMLDumpContext {
   private SyncRunner syncConstraints;
 
   /**
+   * <p>If true, this XMLDumpContext is being used to transmit a
+   * transaction delta, in which case we'll want to let callers know
+   * so that they can decide to handle certain things (such as
+   * embedded objects) differently.</p>
+   */
+
+  private boolean deltaSyncing = false;
+
+  /**
    * <p>The actual writer, from James Clark's XML package.</p>
    */
 
@@ -152,6 +161,27 @@ public class XMLDumpContext {
   }
 
   /**
+   * <p>Sets whether or not this XMLDumpContext was created to write to a
+   * delta sync channel.</p>
+   */
+
+  public void setDeltaSyncing(boolean param)
+  {
+    this.deltaSyncing = param;
+  }
+
+  /**
+   * <p>Returns true if this XMLDumpContext was created to write to a
+   * delta sync channel.</p>
+   */
+
+  public boolean isDeltaSyncing()
+  {
+    return this.deltaSyncing;
+  }
+
+
+  /**
    * <p>Returns the name of the Sync Channel we're writing to, if we
    * are writing to one.</p>
    */
@@ -196,9 +226,9 @@ public class XMLDumpContext {
    * returns true.</p>
    */
 
-  public boolean shouldInclude(DBEditObject object, DBEditSet transaction)
+  public boolean shouldInclude(DBEditObject object)
   {
-    return syncConstraints == null || syncConstraints.shouldInclude(object, transaction);
+    return syncConstraints == null || syncConstraints.shouldInclude(object);
   }
 
   /**
@@ -206,17 +236,21 @@ public class XMLDumpContext {
    * channel.  This method is responsible for doing the determination
    * only if both field and origField are not null and isDefined().</p>
    *
-   * <p>The transaction DBEditObject is used to determine whether an
-   * edit-in-place InvidDBField contains embedded objects that were
-   * changed enough to need to be sent to this sync channel.</p>
-   *
    * <p>If we're not writing to a sync channel, this method always
    * returns true.</p>
    */
 
-  public boolean shouldInclude(DBField newField, DBField oldField, DBEditSet transaction)
+  public boolean shouldInclude(DBField newField, DBField oldField)
   {
-    return syncConstraints == null || syncConstraints.shouldInclude(newField, oldField, transaction);
+    // if we are doing anything other than a delta sync, we won't want
+    // to include the container field in embedded objects
+
+    if (!isDeltaSyncing() && newField.getOwner().isEmbedded() && newField.getID() == SchemaConstants.ContainerField)
+      {
+	return false;
+      }
+
+    return syncConstraints == null || syncConstraints.shouldInclude(newField, oldField);
   }
 
   /**

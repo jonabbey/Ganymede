@@ -3626,9 +3626,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	throw new IllegalArgumentException(ts.l("emitXMLDelta.bad_state"));
       }
 
+    xmlOut.startElementIndent("object_delta");
+    xmlOut.indentOut();
+
+    xmlOut.startElementIndent("before");
+    xmlOut.indentOut();
+
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
     xmlOut.attribute("id", getXMLLabel());
+    xmlOut.attribute("oid", getInvid().toString());
     xmlOut.indentOut();
 
     // by using getFieldAry(), we get the fields in display order.  We
@@ -3643,55 +3650,69 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	DBField myField = (DBField) this.getField(fieldDef.getID());
 	DBField origField = (DBField) original.getField(fieldDef.getID());
 
-	if (!myField.isDefined() && origField == null)
+	if (origField == null)
 	  {
-	    // not present in either old or new
+	    // not present in the before state, don't write anything for it
+
 	    continue;
 	  }
-
-	if (myField.isDefined() && origField == null)
+	else
 	  {
-	    // newly created
+	    // we had this field in the before state, let's see if we
+	    // need to write it out, either because this field was
+	    // deleted from the after state and our sync constraints
+	    // require us to write it out, or because the field is
+	    // present both before and after, but it has changed and
+	    // our sync constraints require us to write it out in that
+	    // circumstance.
 
-	    if (xmlOut.mayInclude(myField, true))
+	    if ((!myField.isDefined() && xmlOut.mayInclude(origField))|| (myField.isDefined() && xmlOut.shouldInclude(myField, origField)))
 	      {
-		xmlOut.startElementIndent("delta");
-		xmlOut.attribute("state", "field created");
-		xmlOut.indentOut();
-		myField.emitXML(xmlOut);
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("delta");
-	      }
-	  }
-	else if (!myField.isDefined() && origField != null)
-	  {
-	    // deleted
-
-	    if (xmlOut.mayInclude(origField, true))
-	      {
-		xmlOut.startElementIndent("delta");
-		xmlOut.attribute("state", "field deleted");
-		xmlOut.indentOut();
 		origField.emitXML(xmlOut);
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("delta");
 	      }
 	  }
-	else if (myField.isDefined() && xmlOut.shouldInclude(myField, origField, getEditSet()))
-	  {
-	    if (myField.isEditInPlace() || myField.hasChanged(origField))
-	      {
-		// changed, or is an edit-in-place vector of embedded
-		// objects, in which case we use the emitXMLDelta()
-		// method in case one of the embedded objects changed,
-		// which xmlOut.shouldInclude() will detect, but
-		// myField.hasChanged() will not.
+      }
 
-		myField.emitXMLDelta(xmlOut, origField);
-	      }
-	    else
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("object");
+
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("before");
+
+    xmlOut.startElementIndent("after");
+    xmlOut.indentOut();
+
+    xmlOut.startElementIndent("object");
+    xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
+    xmlOut.attribute("id", getXMLLabel());
+    xmlOut.attribute("oid", getInvid().toString());
+    xmlOut.indentOut();
+
+    for (int i = 0; i < fieldDefs.length; i++)
+      {
+	fieldDef = fieldDefs[i];
+
+	DBField myField = (DBField) this.getField(fieldDef.getID());
+	DBField origField = (DBField) original.getField(fieldDef.getID());
+
+	if (!myField.isDefined())
+	  {
+	    // not present in the after state, don't write anything for it
+
+	    continue;
+	  }
+	else
+	  {
+	    // we had this field in the before state, let's see if we
+	    // need to write it out, either because this field was
+	    // newly created in the after state and our sync
+	    // constraints require us to write it out, or because the
+	    // field is present both before and after, but it has
+	    // changed and our sync constraints require us to write it
+	    // out in that circumstance.
+
+	    if ((origField == null && xmlOut.mayInclude(myField))|| (origField != null && xmlOut.shouldInclude(myField, origField)))
 	      {
-		// not changed, but we're supposed to include it anyway
 		myField.emitXML(xmlOut);
 	      }
 	  }
@@ -3699,6 +3720,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     xmlOut.indentIn();
     xmlOut.endElementIndent("object");
+
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("after");
+
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("object_delta");
   }
 
   /**

@@ -189,52 +189,6 @@ public class NumericDBField extends DBField implements num_field {
     xmlOut.endElement(this.getXMLName());
   }
 
-  /**
-   * <p>This method is used when this field has changed, and its
-   * changes need to be written to a Sync Channel.</p>
-   *
-   * <p>The assumptions of this method are that both this field and
-   * the orig field are defined (i.e., non-null, non-empty), and that
-   * orig is of the same class as this field.  It is an error to call
-   * this method with null dump or orig parameters.</p>
-   *
-   * <p>It is also an error to call this method when this field is not
-   * currently being edited in a DBEditObject, as emitXMLDelta() may
-   * depend on context from the editing object.</p>
-   *
-   * <p>It is the responsibility of the code that calls this method to
-   * determine that this field differs from orig.  If this field and
-   * orig have no changes between them, the output is undefined.</p>
-   */
-
-  synchronized void emitXMLDelta(XMLDumpContext xmlOut, DBField orig) throws IOException
-  {
-    if (!(this.getOwner() instanceof DBEditObject))
-      {
-	throw new IllegalStateException();
-      }
-
-    xmlOut.startElementIndent(this.getXMLName());
-
-    xmlOut.indentOut();
-
-    xmlOut.indent();
-    xmlOut.startElement("delta");
-    xmlOut.attribute("state", "before");
-    emitIntXML(xmlOut, ((NumericDBField) orig).value());
-    xmlOut.endElement("delta");
-    
-    xmlOut.indent();
-    xmlOut.startElement("delta");
-    xmlOut.attribute("state", "after");
-    emitIntXML(xmlOut, this.value());
-    xmlOut.endElement("delta");
-
-    xmlOut.indentIn();
-
-    xmlOut.endElementIndent(this.getXMLName());
-  }
-
   public void emitIntXML(XMLDumpContext xmlOut, int value) throws IOException
   {
     xmlOut.write(java.lang.Integer.toString(value));

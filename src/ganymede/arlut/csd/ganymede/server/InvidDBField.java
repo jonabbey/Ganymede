@@ -377,7 +377,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // ownership will be implicitly recorded in the structure of the
     // XML file
 
-    if (getOwner().isEmbedded() && getID() == 0)
+    if (getOwner().isEmbedded() && getID() == 0 && !xmlOut.isDeltaSyncing())
       {
 	return;
       }
@@ -386,7 +386,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // reference for our target, but instead we will actually write
     // out the object in-place.
 
-    boolean asEmbedded = isEditInPlace();
+    boolean asEmbedded = isEditInPlace() && !xmlOut.isDeltaSyncing();
 
     xmlOut.startElementIndent(this.getXMLName());
 
@@ -414,183 +414,6 @@ public final class InvidDBField extends DBField implements invid_field {
       }
 
     xmlOut.endElement(this.getXMLName());
-  }
-
-  /**
-   * <p>This method is used when this field has changed, and its
-   * changes need to be written to a Sync Channel.</p>
-   *
-   * <p>The assumptions of this method are that both this field and
-   * the orig field are defined (i.e., non-null, non-empty), and that
-   * orig is of the same class as this field.  It is an error to call
-   * this method with null dump or orig parameters.</p>
-   *
-   * <p>It is also an error to call this method when this field is not
-   * currently being edited in a DBEditObject, as emitXMLDelta() may
-   * depend on context from the editing object.</p>
-   *
-   * <p>It is the responsibility of the code that calls this method to
-   * determine that this field differs from orig.  If this field and
-   * orig have no changes between them, the output is undefined.</p>
-   */
-
-  synchronized void emitXMLDelta(XMLDumpContext xmlOut, DBField orig) throws IOException
-  {
-    if (!(this.getOwner() instanceof DBEditObject))
-      {
-	throw new IllegalStateException();
-      }
-
-    xmlOut.startElementIndent(this.getXMLName());
-
-    if (!isVector())
-      {
-	// we know that scalar invid fields can never be
-	// edit-in-place/embedded
-
-	xmlOut.indentOut();
-
-	xmlOut.indent();
-	xmlOut.startElement("delta");
-	xmlOut.attribute("state", "before");
-	emitInvidXML(xmlOut, ((InvidDBField) orig).value(), false);
-	xmlOut.endElement("delta");
-
-	xmlOut.indent();
-	xmlOut.startElement("delta");
-	xmlOut.attribute("state", "after");
-	emitInvidXML(xmlOut, this.value(), false);
-	xmlOut.endElement("delta");
-
-	xmlOut.indentIn();
-      }
-    else if (!isEditInPlace())
-      {
-	fieldDeltaRec vectorDelta = this.getVectorDiff(orig);
-	Vector unchangedValues = VectorUtils.difference(this.getVectVal(), VectorUtils.union(vectorDelta.addValues, vectorDelta.delValues));
-
-	xmlOut.indentOut();
-
-	for (int i = 0; i < unchangedValues.size(); i++)
-	  {
-	    xmlOut.indent();
-	    emitInvidXML(xmlOut, (Invid) unchangedValues.elementAt(i), false);
-	  }
-
-	if (vectorDelta.addValues != null && vectorDelta.addValues.size() > 0)
-	  {
-	    xmlOut.startElementIndent("delta");
-	    xmlOut.attribute("state", "add");
-	    xmlOut.indentOut();
-
-	    for (int i = 0; i < vectorDelta.addValues.size(); i++)
-	      {
-		xmlOut.indent();
-		emitInvidXML(xmlOut, (Invid) vectorDelta.addValues.elementAt(i), false);
-	      }
-
-	    xmlOut.indentIn();
-
-	    xmlOut.endElementIndent("delta");
-	  }
-
-	if (vectorDelta.delValues != null && vectorDelta.delValues.size() > 0)
-	  {
-	    xmlOut.startElementIndent("delta");
-	    xmlOut.attribute("state", "remove");
-	    xmlOut.indentOut();
-
-	    for (int i = 0; i < vectorDelta.delValues.size(); i++)
-	      {
-		xmlOut.indent();
-		emitInvidXML(xmlOut, (Invid) vectorDelta.delValues.elementAt(i), false);
-	      }
-
-	    xmlOut.indentIn();
-
-	    xmlOut.endElementIndent("delta");
-	  }
-	
-	xmlOut.indentIn();
-      }
-    else			// edit-in-place
-      {
-	fieldDeltaRec vectorDelta = this.getVectorDiff(orig);
-	Vector unchangedValues = VectorUtils.difference(this.getVectVal(), VectorUtils.union(vectorDelta.addValues, vectorDelta.delValues));
-
-	DBEditSet transaction = ((DBEditObject) getOwner()).getEditSet();
-
-	xmlOut.indentOut();
-
-	for (int i = 0; i < unchangedValues.size(); i++)
-	  {
-	    Invid embeddedInvid = (Invid) unchangedValues.elementAt(i);
-	    DBEditObject embeddedObj = transaction.findObject(embeddedInvid);
-
-	    if (embeddedObj != null)
-	      {
-		embeddedObj.emitXMLDelta(xmlOut);
-	      }
-	    else
-	      {
-		// the Ganymede GUI client won't allow us to get an
-		// embedded object contained within another object
-		// that was edited without editing the embedded object
-		// as well, so transaction.findObject() should have
-		// given it to us.
-		//
-		// it's possible, however, that the xmlclient might
-		// allow the user to directly edit some embedded
-		// objects in a containing object without editing all
-		// of them, so in that case we'll go ahead and pull the
-		// persistent version of the object and emit it sans delta
-
-		DBObject embeddedObj2 = Ganymede.db.getObject(embeddedInvid);
-		
-		if (embeddedObj2 == null)
-		  {
-		    // "InvidDBField.emitXMLDelta(): {0} has an invalid invid: {1}, not writing it to XML delta stream"
-		    throw new IllegalStateException(ts.l("emitXMLDelta.bad_invid", this.toString(), embeddedInvid));
-		  }
-	      }
-	  }
-
-	if (vectorDelta.addValues != null && vectorDelta.addValues.size() > 0)
-	  {
-	    xmlOut.startElementIndent("delta");
-	    xmlOut.attribute("state", "add");
-	    xmlOut.indentOut();
-
-	    for (int i = 0; i < vectorDelta.addValues.size(); i++)
-	      {
-		DBEditObject embeddedObj = transaction.findObject((Invid) vectorDelta.addValues.elementAt(i));
-		embeddedObj.emitXML(xmlOut);
-	      }
-
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("delta");
-	  }
-
-	if (vectorDelta.delValues != null && vectorDelta.delValues.size() > 0)
-	  {
-	    xmlOut.startElementIndent("delta");
-	    xmlOut.attribute("state", "remove");
-	    xmlOut.indentOut();
-
-	    for (int i = 0; i < vectorDelta.delValues.size(); i++)
-	      {
-		DBEditObject embeddedObj = transaction.findObject((Invid) vectorDelta.addValues.elementAt(i));
-		embeddedObj.emitXML(xmlOut);
-	      }
-
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("delta");
-	  }
-
-	xmlOut.indentIn();
-      }
-
-    xmlOut.endElementIndent(this.getXMLName());
   }
 
   /**

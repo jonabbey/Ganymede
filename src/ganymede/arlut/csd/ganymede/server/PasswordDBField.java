@@ -786,43 +786,6 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * <p>This method is used when this field has changed, and its
-   * changes need to be written to a Sync Channel.</p>
-   *
-   * <p>The assumptions of this method are that both this field and
-   * the orig field are defined (i.e., non-null, non-empty), and that
-   * orig is of the same class as this field.  It is an error to call
-   * this method with null dump or orig parameters.</p>
-   *
-   * <p>It is the responsibility of the code that calls this method to
-   * determine that this field differs from orig.  If this field and
-   * orig have no changes between them, the output is undefined.</p>
-   */
-
-  synchronized void emitXMLDelta(XMLDumpContext xmlOut, DBField orig) throws IOException
-  {
-    xmlOut.startElementIndent(this.getXMLName());
-
-    xmlOut.indentOut();
-    xmlOut.indent();
-    xmlOut.startElement("delta");
-    xmlOut.attribute("state", "before");
-    ((PasswordDBField) orig).emitXML(xmlOut, false);
-    xmlOut.endElement("delta");
-    
-    xmlOut.indent();
-    xmlOut.startElement("delta");
-    xmlOut.attribute("state", "after");
-    emitXML(xmlOut, false);
-    xmlOut.endElement("delta");
-
-    xmlOut.indentIn();
-    xmlOut.indent();
-
-    xmlOut.endElement(this.getXMLName());
-  }
-
-  /**
    * <p>Standard {@link arlut.csd.ganymede.rmi.db_field db_field} method
    * to retrieve the value of this field.  Because we are holding sensitive
    * password information, this method always returns null.. we don't want
