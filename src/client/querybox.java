@@ -14,8 +14,8 @@
    
    Created: 23 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.71 $
-   Last Mod Date: $Date: 2001/07/13 21:51:33 $
+   Version: $Revision: 1.72 $
+   Last Mod Date: $Date: 2001/10/24 21:35:54 $
    Module By: Erik Grostic
               Jonathan Abbey
 
@@ -104,9 +104,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   OptionsPanel optionsPanel = null;	// to hold the frame that we popup to get a list of
 				// desired fields in the query's results
   gclient gc = null;
-
-  Hashtable 
-    shortHash;			// Key: Base ID    *--*  Value: Corresponding Base
 
   // the following hashes are accessed through a set of private accessor
   // methods to avoid confusion
@@ -211,8 +208,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     this.gc = gc;
     this.selectedBase = defaultBase;
 
-    this.shortHash = gc.getBaseMap();
-
     // - Define the main window
     
     contentPane.setLayout(new BorderLayout());
@@ -254,7 +249,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     Vector baseNames = new Vector();
 
-    Enumeration enum = shortHash.elements();
+    Enumeration enum = gc.getBaseMap().elements();
       
     while (enum.hasMoreElements())
       {
@@ -1118,12 +1113,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
   BaseDump getBaseFromShort(Short id)
   {
-    return (BaseDump) shortHash.get(id);
+    return (BaseDump) gc.getBaseMap().get(id);
   }
 
   BaseDump getBaseFromShort(short id)
   {
-    return (BaseDump) shortHash.get(new Short(id));
+    return (BaseDump) gc.getBaseMap().get(new Short(id));
   }
 }
 
