@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <title>Ganymede UNIX Installation Guide Release 1.0 pre-release 1, beta 5 - 13 December 2000</title>
+    <title>Ganymede UNIX Installation Guide Release 1.0 pre-release 1 - 17 January 2001</title>
   </head>
 
   <body BGCOLOR="#FFFFFF">
 
-<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede UNIX Installation Guide Release 1.0 pre-release 1, beta 5 - 13 December 2000</FONT></h1>
+<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560>
+<h1><FONT FACE="Arial, Helvetica">Ganymede UNIX Installation Guide Release 1.0 pre-release 1 - 17 January 2001</FONT></h1>
 <hr>
 
 <p>Note: If you are reading this as the <code>INSTALL</code> text file
@@ -663,53 +663,58 @@ Ganymede server, see the <a href="xml.html">xml.html</a> file in the
 <dl>
 <dt><b>What is the name of the system that the server will run on?</b></dt>
 <dd>
-	<p>This question is used to configure the html files that your users
-will access to launch the Ganymede client applets in their web browsers.  This should be
-the name of the system on which you are going to run the Ganymede server.</p>
+	<p>This question is used to configure the applet launch page
+	that your users will access to run the Ganymede applets.  This
+	should be the name of the system on which you are going to run
+	the Ganymede server.</p>
 </dd>
 <dt><b>What port is the RMI registry supporting Ganymede running on?</b></dt>
 <dd>
-	<p>As with installClient and installServer, this is asking you for
-the port number on which the RMI registry for the Ganymede server is running at,
-on the machine that is running the Ganymede server.  This number must match
-the one used when you installed the server.</p>
+	<p>As with installClient and installServer, this is asking you
+	for the port number for the Ganymede server's rmiregistry.
+	This number must match the one used when you installed the
+	server.</p>
 </dd>
 <dt><b>Where should the web access files be installed?</b></dt>
 <dd>
-	<p>This is asking for the directory on your filesystem to install
-all of the web access files.  This directory will need to be mappable to a url by
-a web server running on the same machine that will be running your Ganymede
-server.</p>
+	<p>This is asking for the name of a directory in which to
+	install the web access files.  If this directory does not
+	exist, it will be created in the directory containing it.
+	This directory will need to be mappable to a url by a web
+	server running on the same machine that will be running your
+	Ganymede server.</p>
 </dd>
 <dt><b>Where will the ganymede client binaries be installed?</b></dt>
 <dd>
-	<p>This is asking for the directory that contains (or will contain) the
-Ganymede text mode clients, in particular <a href="glossary.html#xmlclient">xmlclient</a>.
-This directory must be accessible by your web server process, which will need
-to be able to access xmlclient in this directory in order for the password
-changing CGI to work.</p>
+	<p>This is asking for the directory that contains (or will
+	contain) the Ganymede text mode clients, in particular <a
+	href="glossary.html#xmlclient">xmlclient</a>.  The directory
+	containing <a href="glossary.html#xmlclient">xmlclient</a>
+	must be accessible by the user account that your web server
+	runs under, so that the <a
+	href="glossary.html#ganypass">ganypass.pl</a> CGI script can
+	properly communicate with the Ganymede server.</p>
 </dd>
 </dl>
 
-    <p>installWeb will configure and install a bunch of files into a
-    designated directory, including an index.html file, a couple of
-    jar files containing the classes for the Ganymede gui client and
-    admin console, a CGI script that will allow your users to change
-    their passwords through their web browser using an HTML file, and
+    <p><a href="glossary.html#installWeb">installWeb</a> will
+    configure and install a bunch of files into a designated
+    directory, including an index.html file, a couple of jar files
+    containing the classes for the Ganymede gui client and admin
+    console, a CGI script that will allow your users to change their
+    passwords through their web browser using an HTML file, and
     various support files.  These files are customized during
     installation to point to the proper location for your Ganymede
     server.</p>
 
-    <p>Once you have installed the web client files into a directory,
-    you will need to install a web server on the same machine that
-    will be running your Ganymede server, if you haven't already.  The
-    reason for this is that your users will need to be able to run the
-    Ganymede client in their web browser, and Java applets are run in a
-    security "sandbox", which keeps downloaded code from being able to
-    cause mischief on your machine.  One of the restrictions of the
-    Java sandbox is that unsigned downloaded applets are only allowed
-    to open networking connections to the same machine that the applet
-    was downloaded from.</p>
+    <p>In order for your users to run the Ganymede client applets in
+    their web browsers, you will have to install and configure a web
+    server on the same machine that you will be running the Ganymede
+    server.  The reason for this requirement is that Java applets are
+    run in a security "sandbox", which puts security restrictions on
+    downloaded code.  One of these restrictions is that unsigned
+    applets are only allowed to open networking connections to the
+    same machine that the applet was downloaded from.</p>
 
     <p>Because of this, you will have to install a web server on the
     same machine as your Ganymede server, and you will have to
@@ -725,9 +730,10 @@ changing CGI to work.</p>
     installed, your users will be able to access your web client
     directory to run the Ganymede applet launcher (through the
     index.html file), or to run the Ganymede password change CGI
-    script, ganypass.pl.  The ganypass.pl CGI script is useful because
-    it allows any web browser that supports HTML forms to be used to
-    change a user's password, whereas the full Ganymede client
+    script, <a href="glossary.html#ganypass">ganypass.pl</a>.  The <a
+    href="glossary.html#ganypass">ganypass.pl</a> script is useful
+    because it allows any web browser that supports HTML forms to be
+    used to change a user's password, whereas the full Ganymede client
     launcher requires both JavaScript and Java support.</p>
 
     <p>If you do want your users to be able to run the full Ganymede
@@ -782,7 +788,7 @@ changing CGI to work.</p>
     <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
     <!-- Created: Thu May 27 16:58:48 CDT 1999 -->
     <!-- hhmts start -->
-Last modified: Fri Jan 12 03:12:45 CST 2001
+Last modified: Fri Jan 12 16:32:55 CST 2001
 <!-- hhmts end -->
   </body>
 </html>

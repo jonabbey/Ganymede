@@ -1109,6 +1109,21 @@ both of which will have some impact on reducing memory usage.
 Schema edit commits will be faster, but otherwise the overall speed
 of the server will probably not be much changed.
 
+77. [SERVER, CLIENT] More Memory Optimizations, History Panel revisions
+
+I reduced the size of the creator info and modifier info strings so
+that they will only include the name of the user/admin and the name of
+the client used to create/modify the object.  This will save about 100
+bytes from each object created right off.  In addition, since the time
+is no longer included in these fields, the automatic interning that
+the server does to eliminate redundant strings will reduce the
+overhead for these data elements by a very, very large percentage.
+
+To compensate for the creation and modification time no longer being
+included in the history string fields, I have modified the client
+to display the history date fields with hour, minute, and second
+as well as date.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

@@ -1,8 +1,7 @@
 
-   Ganymede
+   [INLINE]
    
-    Ganymede UNIX Installation Guide Release 1.0 pre-release 1, beta 5 - 13
-                                 December 2000
+ Ganymede UNIX Installation Guide Release 1.0 pre-release 1 - 17 January 2001
                                        
      _________________________________________________________________
                                       
@@ -521,36 +520,81 @@ _8. Prepare web access clients_
 
    The installWeb script is used to install, on your UNIX system, the
    html, cgi, and java files needed to support client access to Ganymede
-   from a web browser. installWeb installs a bunch of files into a
-   designated directory, including an index.html file, the ganymede.jar
-   and ganymedeAdmin.jar, and a bunch of individual html files linked to
-   the index.html file, all customized for your Ganymede server's
-   location.
+   from a web browser. When you run installWeb, it will ask you a small
+   number of questions, including the following:
    
-   Java applets run in a security "sandbox", which keeps downloaded code
-   from being able to cause mischief on your machine. One of the
-   restrictions of the Java sandbox is that unsigned downloaded applets
-   are only allowed to open networking connections to the same machine
-   that the applet was downloaded from. Because of this, you will have to
-   install a web server on the same machine as your Ganymede server, and
-   your users will have to point their browser at a URL on that system
-   which will resolve to the directory that contains the files installed
-   by the installWeb script.
+   _What is the name of the system that the server will run on?_
+          This question is used to configure the applet launch page that
+          your users will access to run the Ganymede applets. This should
+          be the name of the system on which you are going to run the
+          Ganymede server.
+          
+   _What port is the RMI registry supporting Ganymede running on?_
+          As with installClient and installServer, this is asking you for
+          the port number for the Ganymede server's rmiregistry. This
+          number must match the one used when you installed the server.
+          
+   _Where should the web access files be installed?_
+          This is asking for the name of a directory in which to install
+          the web access files. If this directory does not exist, it will
+          be created in the directory containing it. This directory will
+          need to be mappable to a url by a web server running on the
+          same machine that will be running your Ganymede server.
+          
+   _Where will the ganymede client binaries be installed?_
+          This is asking for the directory that contains (or will
+          contain) the Ganymede text mode clients, in particular
+          xmlclient. The directory containing xmlclient must be
+          accessible by the user account that your web server runs under,
+          so that the ganypass.pl CGI script can properly communicate
+          with the Ganymede server.
+          
+   installWeb will configure and install a bunch of files into a
+   designated directory, including an index.html file, a couple of jar
+   files containing the classes for the Ganymede gui client and admin
+   console, a CGI script that will allow your users to change their
+   passwords through their web browser using an HTML file, and various
+   support files. These files are customized during installation to point
+   to the proper location for your Ganymede server.
    
-   Once you have a web server running on the same machine as your
-   Ganymede server and you have used installWeb to generate the web
-   directory for your clients, you will need to be sure that the machines
-   that will run the client over the web are configured properly. The
-   installed web files include versions of the Ganymede client pages
-   designed for use with the Java plug-in on Windows (version 1.3.0 or
-   better is really best.. see java.sun.com/j2se to download the Java
-   plug-in), as well as a version of the client pages designed for use
-   with a browser with built-in RMI and Swing support. The 'native'
-   option is intended for users of web browsers that have built-in
-   support for Sun's latest JVM plug-ins. This includes the Netscape
-   browser under OS/2, the Internet Explorer browser on Macintosh, and
-   the Mozilla/Netscape 6 browser on Macintosh, Windows, Linux, and
-   Solaris.
+   In order for your users to run the Ganymede client applets in their
+   web browsers, you will have to install and configure a web server on
+   the same machine that you will be running the Ganymede server. The
+   reason for this requirement is that Java applets are run in a security
+   "sandbox", which puts security restrictions on downloaded code. One of
+   these restrictions is that unsigned applets are only allowed to open
+   networking connections to the same machine that the applet was
+   downloaded from.
+   
+   Because of this, you will have to install a web server on the same
+   machine as your Ganymede server, and you will have to configure your
+   web server so that your users can access the web client directory
+   through the web server. You should set up an alias in your httpd.conf
+   file that maps a URL path like "/ganymede" to your web client
+   directory. This directory should be configured to allow running CGI
+   scripts with the extension '.pl', to support the password change CGI
+   script that is installed in that directory.
+   
+   Once the web server has been configured and the web clients installed,
+   your users will be able to access your web client directory to run the
+   Ganymede applet launcher (through the index.html file), or to run the
+   Ganymede password change CGI script, ganypass.pl. The ganypass.pl
+   script is useful because it allows any web browser that supports HTML
+   forms to be used to change a user's password, whereas the full
+   Ganymede client launcher requires both JavaScript and Java support.
+   
+   If you do want your users to be able to run the full Ganymede client,
+   you will need to be sure that their web browsers are configured
+   properly. The installed web files include versions of the Ganymede
+   client pages designed for use with the Java plug-in on Windows
+   (version 1.3.0 or better is really best.. see java.sun.com/j2se to
+   download the Java plug-in), as well as a version of the client pages
+   designed for use with a browser with built-in RMI and Swing support.
+   The 'native' option is intended for users of web browsers that have
+   built-in support for Sun's latest JVM plug-ins. This includes the
+   Netscape browser under OS/2, the Internet Explorer browser on
+   Macintosh, and the Mozilla/Netscape 6 browser on Macintosh, Windows,
+   Linux, and Solaris.
    
    On the Macintosh with Internet Explorer, you need to install the very
    latest version of Apple's Macintosh Runtime for Java. Current version
@@ -588,4 +632,4 @@ _8. Prepare web access clients_
    
     Jonathan Abbey
     
-   Last modified: Mon Dec 18 01:33:54 CST 2000
+   Last modified: Fri Jan 12 16:32:55 CST 2001
