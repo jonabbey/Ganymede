@@ -5,7 +5,7 @@
    This file is a management class for automounter map objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -68,6 +68,25 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
   public mapCustom(DBObject original, DBEditSet editset) throws RemoteException
   {
     super(original, editset);
+  }
+
+  /**
+   *
+   * Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public boolean fieldRequired(DBObject object, short fieldid)
+  {
+    if (fieldid == mapSchema.MAPNAME)
+      {
+	return true;
+      }
+
+    return false;
   }
 
   /**
