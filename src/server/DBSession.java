@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 2002/03/13 20:44:48 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 2002/03/15 03:14:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -93,7 +93,7 @@ import arlut.csd.Util.booleanSemaphore;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.106 $ %D%
+ * @version $Revision: 1.107 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1886,23 +1886,8 @@ final public class DBSession {
   }
 
   /**
-   * <P>internal method for setting error messages resulting from session activities.</P>
-   *
-   * <P>this method may eventually be hooked up to a more general logging
-   * mechanism.</P>
-   *
-   * @deprecated This method is obsoleted by the use of ReturnVal
+   * <p>Gets our lock key</p>
    */
-
-  public void setLastError(String error)
-  {
-    this.lastError = error;
-
-    if (debug)
-      {
-	Ganymede.debug(key + ": DBSession.setLastError(): " + error);
-      }
-  }
 
   public Object getKey()
   {

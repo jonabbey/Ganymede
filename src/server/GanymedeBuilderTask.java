@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2001/07/23 21:51:01 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2002/03/15 03:14:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -186,6 +186,15 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     /* -- */
 
+    String shutdownState = GanymedeServer.shutdownSemaphore.checkEnabled();
+
+    if (shutdownState != null)
+      {
+	Ganymede.debug("Aborting builder task " + this.getClass().getName() + 
+		       " for shutdown condition: " + shutdownState);
+	return;
+      }
+
     if (options == null)
       {
 	this.forceAllBases = false;
@@ -243,7 +252,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	      }
 	    catch (InterruptedException ex)
 	      {
-		Ganymede.debug("Could not run task " + this.getClass().toString() + ", couldn't get dump lock");
+		Ganymede.debug("Could not run task " + this.getClass().getName() + ", couldn't get dump lock");
 		return;
 	      }
 
@@ -299,7 +308,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	
 	if (currentThread.isInterrupted())
 	  {
-	    Ganymede.debug("Builder task interrupted, not doing network build.");
+	    Ganymede.debug("Builder task " + this.getClass().getName() + 
+			   " interrupted, not doing network build.");
 	    Ganymede.updateBuildStatus();
 	    return;
 	  }
@@ -314,9 +324,12 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		
 		try
 		  {
-		    if (GanymedeServer.shutdownSemaphore.increment(0) != null)
+		    shutdownState = GanymedeServer.shutdownSemaphore.increment(0);
+
+		    if (shutdownState != null)
 		      {
-			Ganymede.debug("Aborting builder task build");
+			Ganymede.debug("Aborting builder task " + this.getClass().getName() + 
+				       " build for shutdown condition: " + shutdownState);
 			return;
 		      }
 		  }

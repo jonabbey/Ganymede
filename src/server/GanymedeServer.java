@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.92 $
-   Last Mod Date: $Date: 2002/03/15 02:25:43 $
+   Version: $Revision: 1.93 $
+   Last Mod Date: $Date: 2002/03/15 03:14:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1149,7 +1149,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
       }
     
-    // wait for any phase 2 builder tasks to complete
+    // wait for any phase 2 builder tasks to complete, block any new builder tasks
+    // from executing
 
     Ganymede.debug("Server going down.. waiting for any builder tasks to finish phase 2");
 
@@ -1169,9 +1170,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	// from this point on, we will go down, no matter what
 	// exceptions might percolate up to this point
 
-	// dump, then shut down.  Our second dump parameter is false, so
-	// that we are guaranteed that no internal client can get a
-	// writelock and maybe get a transaction off that would cause us
+	// dump, then shut down.  This dump call will cause us to
+	// block until all write locks queued up are processed and
+	// released.  Our second dump parameter is false, so that we
+	// are guaranteed that no internal client can get a writelock
+	// and maybe get a transaction off that would cause us
 	// confusion.
 
 	try
