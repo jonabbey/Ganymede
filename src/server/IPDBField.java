@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -282,6 +282,7 @@ public class IPDBField extends DBField implements ip_field {
     DBEditObject eObj;
     Byte[] bytes;
     ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
 
     /* -- */
 
@@ -384,7 +385,9 @@ public class IPDBField extends DBField implements ip_field {
 
     this.newValue = bytes;
 
-    if (eObj.finalizeSetValue(this, bytes))
+    newRetVal = eObj.finalizeSetValue(this, bytes);
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	if (bytes != null)
 	  {
@@ -399,7 +402,19 @@ public class IPDBField extends DBField implements ip_field {
 
 	this.newValue = null;
 
-	return retVal;
+	// if the return value from the wizard was not null,
+	// it might have included rescan information, which
+	// we'll want to combine with that from our 
+	// finalizeSetValue() call.
+
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;		// success
+	  }
       }
     else
       {
@@ -415,16 +430,7 @@ public class IPDBField extends DBField implements ip_field {
 	    mark(this.value);
 	  }
 
-	if (bytes.length > 4)
-	  {
-	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-					      "Could not finalize IP address : " + genIPV6string(bytes));
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-					      "Could not finalize IP address : " + genIPV4string(bytes));
-	  }
+	return newRetVal;
       }
   }
 
@@ -444,6 +450,7 @@ public class IPDBField extends DBField implements ip_field {
     DBEditObject eObj;
     Byte[] bytes;
     ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
 
     /* -- */
 
@@ -539,13 +546,27 @@ public class IPDBField extends DBField implements ip_field {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    if (eObj.finalizeSetElement(this, index, bytes))
+    newRetVal = eObj.finalizeSetElement(this, index, bytes)
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.setElementAt(bytes, index);
 
 	defined = true;
-	
-	return retVal;
+
+	// if the return value from the wizard was not null,
+	// it might have included rescan information, which
+	// we'll want to combine with that from our 
+	// finalizeSetElement() call.
+
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;		// success
+	  }
       }
     else
       {
@@ -559,16 +580,7 @@ public class IPDBField extends DBField implements ip_field {
 	    mark(values.elementAt(index));
 	  }
 
-	if (bytes.length > 4)
-	  {
-	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-					      "Could not finalize IP address : " + genIPV6string(bytes));
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("Server: Error in IPDBField.setValue()",
-					      "Could not finalize IP address : " + genIPV4string(bytes));
-	  }
+	return newRetVal;
       }
   }
 
@@ -588,6 +600,7 @@ public class IPDBField extends DBField implements ip_field {
     DBEditObject eObj;
     Byte[] bytes;
     ReturnVal retVal = null;
+    ReturnVal newRetVal = null;
 
     /* -- */
 
@@ -668,11 +681,26 @@ public class IPDBField extends DBField implements ip_field {
 	  }
       }
 
-    if (eObj.finalizeAddElement(this, bytes)) 
+    newRetVal = eObj.finalizeAddElement(this, bytes);
+
+    if (newRetVal == null || newRetVal.didSucceed())
       {
 	values.addElement(bytes);
 	defined = true;
-	return retVal;
+
+	// if the return value from the wizard was not null,
+	// it might have included rescan information, which
+	// we'll want to combine with that from our 
+	// finalizeAddElement() call.
+
+	if (retVal != null)
+	  {
+	    return retVal.unionRescan(newRetVal);
+	  }
+	else
+	  {
+	    return newRetVal;		// success
+	  }
       } 
     else
       {
@@ -681,8 +709,7 @@ public class IPDBField extends DBField implements ip_field {
 	    unmark(bytes);
 	  }
 
-	return Ganymede.createErrorDialog("Server: Error in IPDBField.addElement()",
-					  "Could not finalize IP address\n" + getLastError());
+	return newRetVal;
       }
   }
 

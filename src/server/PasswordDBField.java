@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 21 July 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -529,6 +529,7 @@ public class PasswordDBField extends DBField implements pass_field {
   public ReturnVal setPlainTextPass(String text)
   {
     String cryptedText = null;
+    ReturnVal retVal;
 
     /* -- */
 
@@ -538,7 +539,9 @@ public class PasswordDBField extends DBField implements pass_field {
 					 "Invalid password value\n" + getLastError());
       }
 
-    if (((DBEditObject)owner).finalizeSetValue(this, text))
+    retVal = ((DBEditObject) owner).finalizeSetValue(this, text);
+
+    if (retVal == null || retVal.didSucceed())
       {
 	if (definition.isCrypted())
 	  {
@@ -567,14 +570,9 @@ public class PasswordDBField extends DBField implements pass_field {
 	    this.value = (cryptedText == null) ? text : cryptedText;
 	    defined = true;
 	  }
+      }
 
-	return null;
-      }
-    else
-      {
-	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setPlainTextPass()",
-					  "Could not finalize password value\n" + getLastError());
-      }
+    return retVal;
   }
 
   /**
@@ -590,6 +588,8 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setCryptPass(String text)
   {
+    ReturnVal retVal;
+
     if (!definition.isCrypted())
       {
 	owner.editset.session.setLastError("can't set a pre-crypted value into a plaintext password field");
@@ -604,7 +604,9 @@ public class PasswordDBField extends DBField implements pass_field {
 					  "Invalid crypted password value\n" + getLastError());
       }
 
-    if (((DBEditObject)owner).finalizeSetValue(this, text))
+    retVal = ((DBEditObject)owner).finalizeSetValue(this, text);
+
+    if (retVal == null || retVal.didSucceed())
       {
 	if ((text == null) || (text.equals("")))
 	  {
@@ -616,14 +618,9 @@ public class PasswordDBField extends DBField implements pass_field {
 	    this.value = text;
 	    defined = true;
 	  }
+      }
 
-	return null;
-      }
-    else
-      {
-	return Ganymede.createErrorDialog("Server: Error in PasswordDBField.setCryptTextPass()",
-					  "Could not finalize crypted password value\n" + getLastError());
-      }
+    return retVal;
   }
 
   // ****
