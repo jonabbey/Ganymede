@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -409,7 +409,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     // The right panel which will contain the windowPanel
 
-    JBufferedPane rightP = new JBufferedPane(false);
+    JBufferedPane rightP = new JBufferedPane(true);
 
     rightP.setLayout(new BorderLayout());
 
