@@ -6,15 +6,16 @@
 
    Created: 28 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/10/10 02:29:07 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2003/03/14 01:17:44 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -42,7 +43,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -62,8 +64,6 @@ import arlut.csd.Util.WordWrap;
 
 public class JMultiLineLabel extends JTextArea {
 
-  final static boolean debug = false;
-
   // ---
 
   /**
@@ -81,9 +81,6 @@ public class JMultiLineLabel extends JTextArea {
     line_ascent,
     line_height,
     max_width;
-
-  String[]
-    lines;
 
   boolean
     haveMeasured = false;
@@ -105,43 +102,23 @@ public class JMultiLineLabel extends JTextArea {
 
   public JMultiLineLabel(String label, int alignment)
   {
-    if (debug)
-      {
-	System.out.println("Starting new JMLL");
-      }
-
     metric = getFontMetrics(getFont());
 
     setEditable(false);
     setOpaque(false);
-    
-    // The JTextArea has an etched border around it, so get rid of it.
-    //setBorder(BorderFactory.createEmptyBorder(0,0,0,0); 
-
     setBorder(null); 
+    setLineWrap(true);
+    setWrapStyleWord(true);
 
-    // Find out the length of the string.  If the length is less than
-    // the default number of columns, make the number of columns the
-    // same as the string.
-
-    if (label != null)
-      {
-	int length = label.length();
-
-	if (length < columns)
-	  {
-	    columns = length;
-	  }
-      }
-
-    setText(wrap(label));
+    setText(label);
   }
 
   // Public functions
 
-  public void setText(String s)
+  public void setWrapLength(int val)
   {
-    super.setText(wrap(s));
+    columns = val;
+    revalidate();
   }
 
   public int getAlignment()
@@ -161,12 +138,12 @@ public class JMultiLineLabel extends JTextArea {
       width,
       height;
 
-    String text = wrap(getText());
-
     /* -- */
 
-    // First, find out how wide this puppy is
-    width = getLongestLineWidth(text);
+    // First, find out how wide this puppy should be, based on our
+    // preferred wrap
+
+    width = getLongestLineWidth(wrap(getText()));
     
     // Now, the height
     height = super.getPreferredSize().height;
@@ -184,16 +161,15 @@ public class JMultiLineLabel extends JTextArea {
   {
     if (text == null)
       {
-	if (debug)
-	  {
-	    System.out.println("Whoa, text is null");
-	  }
-
-	return text; 
+	return null;
       }
     
     return (WordWrap.wrap(text, columns, null));
   }
+
+  /**
+   * <p>We're pretending to be a label, so please don't give us focus.</p>
+   */
 
   public boolean isFocusTraversable()
   {

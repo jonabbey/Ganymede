@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 2003/03/13 00:51:07 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 2003/03/14 01:17:44 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import javax.swing.border.*;
  * individual data fields with the value entered into that field.</p>
  *
  * @see DialogRsrc 
- * @version $Revision: 1.59 $ $Date: 2003/03/13 00:51:07 $ $Name:  $
+ * @version $Revision: 1.60 $ $Date: 2003/03/14 01:17:44 $ $Name:  $
  * @author Mike Mulvaney 
  */
 
@@ -256,60 +256,50 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     //
 
     textLabel = new JMultiLineLabel(resource.getText());
-    JScrollPane pane = new JScrollPane(textLabel);
-    pane.setBorder(null);
+
+    JScrollPane pane = new JScrollPane(textLabel,
+				       JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+    if (resource.getText() != null && !resource.getText().equals(""))
+      {
+	pane.setBorder(new EmptyBorder(10,10,10,10));
+      }
+    else
+      {
+	pane.setBorder(null);
+      }
 
     mainPanel.add(pane, "Center");
 
     // now we need to create our south panel
 
     JPanel southPanel = new JPanel();
+    southPanel.setLayout(new BorderLayout());
     mainPanel.add(southPanel, "South");
 
-    gbl = new GridBagLayout();
-    southPanel.setLayout(gbl);
-
-    gbc = new GridBagConstraints();
-    //    gbc.insets = new Insets(4,4,4,4);
+    //
+    // Now to build the south panel
 
     //
-    // Separator goes all the way accross
-    // 
-
-    JSeparator sep = new JSeparator();
-
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbl.setConstraints(sep, gbc);
-    southPanel.add(sep);
-
-    //
-    // Now for our data object panel
+    // Our data object panel
     //
 
     panel = createElementPanel();
-
-    gbc.gridx = 0;
-    gbc.gridy = 1;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weighty = 1.0;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbl.setConstraints(panel, gbc);
-    southPanel.add(panel);
+    southPanel.add(panel, "Center");
 
     //
     // ButtonPanel takes up the bottom of the dialog
     //
 
     buttonPanel = new JPanel();
+    buttonPanel.setLayout(new BorderLayout());
+    
+    JPanel flowPanel = new JPanel();
 
     OKButton = new JButton(resource.OKText);
     OKButton.addActionListener(this);
-    buttonPanel.add(OKButton);
+    flowPanel.add(OKButton);
 
     // if cancel is null, don't put it on there
 
@@ -317,21 +307,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
       {
 	CancelButton = new JButton(resource.CancelText);
 	CancelButton.addActionListener(this);
-	buttonPanel.add(CancelButton);
+	flowPanel.add(CancelButton);
       }
 
-    //
-    // buttonPanel goes underneath
-    //
+    buttonPanel.add(new JSeparator(), "North");
+    buttonPanel.add(flowPanel, "South");
 
-    gbc.gridx = 0;
-    gbc.gridy = 2;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weighty = 0.0;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbl.setConstraints(buttonPanel, gbc);
-    southPanel.add(buttonPanel);
+    southPanel.add(buttonPanel, "South");
 
     registerCallbacks();
     pack();
