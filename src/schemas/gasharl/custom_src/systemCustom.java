@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2001/04/04 22:39:24 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2001/04/06 01:26:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -767,99 +767,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    */
 
   private Byte[] getIPAddress(Invid netInvid, int start, int stop)
-  {
-    // the namespace being used to manage the IP address space
-
-    DBNameSpace namespace = Ganymede.db.getNameSpace("IPspace");
-
-    /* -- */
-
-    if (namespace == null)
-      {
-	System.err.println("systemCustom.getIPAddress(): couldn't get IP namespace");
-	return null;
-      }
-
-    DBObject netObj = getSession().viewDBObject(netInvid);
-    Byte[] netNum = (Byte[]) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
-    
-    if (netNum.length != 4)
-      {
-	Ganymede.debug("Error, " + netObj.getLabel() + 
-		       " has an improper network number for the GASH schema.");
-	return null;
-      }
-
-    Byte[] address = new Byte[4];
-
-    for (int i = 0; i < netNum.length; i++)
-      {
-	address[i] = netNum[i];
-      }
-
-    // ok, we've got our net prefix.. try to find an open slot..
-
-    int i = start;
-    address[3] = new Byte(u2s(i));
-
-    // find an unused ip address on this net
-
-    if (start > stop)
-      {
-	while (i > stop && !namespace.reserve(editset, address, true))
-	  {
-	    address[3] = new Byte(u2s(--i));
-	  }
-      }
-    else
-      {
-	while (i < stop && !namespace.reserve(editset, address, true))
-	  {
-	    address[3] = new Byte(u2s(++i));
-	  }
-      }
-
-    // see if we really did wind up with an acceptable address
-
-    if (!namespace.reserve(editset, address, true))
-      {
-	return null;
-      }
-    else
-      {
-	if (debug)
-	  {
-	    System.err.print("systemCustom.getIPAddress(): returning ");
-	    
-	    for (int j = 0; j < address.length; j++)
-	      {
-		if (j > 0)
-		  {
-		    System.err.print(".");
-		  }
-		
-		System.err.print(s2u(address[j].byteValue()));
-	      }
-	    
-	    System.err.println();
-	  }
-
-	return address;
-      }
-  }
-
-  /**
-   * <p>Allocates a free I.P. address for the given network object.  This
-   * is done using the {@link arlut.csd.ganymede.DBNameSpace DBNameSpace}
-   * attached to the interface address value field.  getIPAddress() will
-   * seek through the Class-C host range looking for an IP address that
-   * is not yet taken.  The direction of host id scanning depends on the
-   * system category attached to this object.</p>
-   *
-   * @return An IP address if one could be allocated, null otherwise
-   */
-
-  public String findIPAddress(String newFormRange)
   {
     // the namespace being used to manage the IP address space
 
