@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
@@ -75,9 +75,9 @@ import javax.swing.border.EmptyBorder;
 import arlut.csd.JCalendar.JpanelCalendar;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.date_field;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.date_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -86,13 +86,13 @@ import arlut.csd.ddroid.rmi.date_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>GUI date panel used in the Directory Droid client to allow the display
+ * <p>GUI date panel used in the Ganymede client to allow the display
  * and/or editing of the standard expiration and removal time fields
- * that are defined on all object types in the Directory Droid server.</p>
+ * that are defined on all object types in the Ganymede server.</p>
  *
  * <p>The datePanel is contained within a {@link
- * arlut.csd.ddroid.client.framePanel framePanel} in the Ganymede
- * client.  See the {@link arlut.csd.ddroid.client.gclient gclient}
+ * arlut.csd.ganymede.client.framePanel framePanel} in the Ganymede
+ * client.  See the {@link arlut.csd.ganymede.client.gclient gclient}
  * class for more information on the structure of the Ganymede
  * client.</p>
  */

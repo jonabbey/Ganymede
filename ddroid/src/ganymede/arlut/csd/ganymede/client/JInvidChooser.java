@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -72,7 +72,7 @@ import javax.swing.JTextField;
 
 import arlut.csd.JDataComponent.JPanelCombo;
 import arlut.csd.JDataComponent.listHandle;
-import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ganymede.common.Invid;
 
 
 /*------------------------------------------------------------------------------
@@ -370,7 +370,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
 /**
  * <p>A combobox editor class to provide intelligent keyboard handling for
- * the {@link arlut.csd.ddroid.client.JInvidChooser JInvidChooser} scalar
+ * the {@link arlut.csd.ganymede.client.JInvidChooser JInvidChooser} scalar
  * invid field gui component.</p>
  */
 

@@ -1,7 +1,7 @@
 /*
    xmlclient.java
 
-   This is a text client for the Directory Droid server.  This client is
+   This is a text client for the Ganymede server.  This client is
    designed to take the filename for an XML file on the command line,
    load the file, parse it, then connect to the server and transfer
    the file to the server for server-side integration into the Ganymede
@@ -20,7 +20,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -57,7 +57,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -74,11 +74,11 @@ import arlut.csd.Util.XMLError;
 import arlut.csd.Util.XMLItem;
 import arlut.csd.Util.XMLStartDocument;
 import arlut.csd.Util.XMLWarning;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.FileReceiver;
-import arlut.csd.ddroid.rmi.Server;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.XMLSession;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.FileReceiver;
+import arlut.csd.ganymede.rmi.Server;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.XMLSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -87,10 +87,10 @@ import arlut.csd.ddroid.rmi.XMLSession;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a text client for the Directory Droid server.  This client is
+ * <p>This is a text client for the Ganymede server.  This client is
  * designed to take the filename for an XML file on the command line,
  * load the file, parse it, then connect to the server and transfer
- * the file to the server for server-side integration into the Directory Droid
+ * the file to the server for server-side integration into the Ganymede
  * database.</p>
  *
  * @version $Id$
@@ -103,8 +103,8 @@ public final class xmlclient implements ClientListener {
 
   /**
    * <p>This major version number is compared with the "major"
-   * attribute in the Directory Droid XML document element.  xmlclient won't
-   * try to read Directory Droid XML files whose major number is too high</p>
+   * attribute in the Ganymede XML document element.  xmlclient won't
+   * try to read Ganymede XML files whose major number is too high</p>
    */
 
   public static final int majorVersion = 1;
@@ -132,13 +132,13 @@ public final class xmlclient implements ClientListener {
   private boolean schemaOnly = false;
 
   /**
-   * RMI reference to a Directory Droid server
+   * RMI reference to a Ganymede server
    */
 
   private Server server = null;
 
   /**
-   * <p>Remote session interface to the Directory Droid server, used while
+   * <p>Remote session interface to the Ganymede server, used while
    * loading data objects into the server.</p>
    */
 
@@ -235,7 +235,7 @@ public final class xmlclient implements ClientListener {
 
     if (propFilename == null)
       {
-	System.err.println("Directory Droid xmlclient: Error, must specify properties on Java invocation line");
+	System.err.println("Ganymede xmlclient: Error, must specify properties on Java invocation line");
 	System.exit(1);
       }
     else
@@ -299,7 +299,7 @@ public final class xmlclient implements ClientListener {
 
     if (!xmlFile.exists())
       {
-	System.err.println("Directory Droid xmlclient: Error, file " + xmlFilename + " does not exist");
+	System.err.println("Ganymede xmlclient: Error, file " + xmlFilename + " does not exist");
 	ok = false;
       }
 
@@ -431,7 +431,7 @@ public final class xmlclient implements ClientListener {
 
 	if (!docElement.matches("ganymede"))
 	  {
-	    System.err.println("Error, " + xmlFilename + " does not contain a Directory Droid XML file.");
+	    System.err.println("Error, " + xmlFilename + " does not contain a Ganymede XML file.");
 	    System.err.println("Unrecognized XML element: " + docElement);
 	    return;
 	  }
@@ -480,7 +480,7 @@ public final class xmlclient implements ClientListener {
 	// for the user's password, but since it is off, we can't
 	// really prompt for a missing user name here.
 
-	System.err.println("Directory Droid xmlclient: Error, must specify Directory Droid account name in <ganymede> element, or on");
+	System.err.println("Ganymede xmlclient: Error, must specify Ganymede account name in <ganymede> element, or on");
 	System.err.println("command line.");
 	printUsage();
 	return false;
@@ -687,7 +687,7 @@ public final class xmlclient implements ClientListener {
 	  }
 	else if (!docElement.matches("ganymede"))
 	  {
-	    System.err.println("Error, " + xmlFilename + " does not contain a Directory Droid XML file.");
+	    System.err.println("Error, " + xmlFilename + " does not contain a Ganymede XML file.");
 	    System.err.println("Unrecognized XML element: " + docElement);
 	    return false;
 	  }
@@ -741,7 +741,7 @@ public final class xmlclient implements ClientListener {
    * file.</p>
    *
    * <p>This method is public so that loader code linked with the
-   * Directory Droid server code can initialize the properties without
+   * Ganymede server code can initialize the properties without
    * going through Ganymede.main().</p>
    */
 
@@ -852,7 +852,7 @@ public final class xmlclient implements ClientListener {
   // These are for the ClientListener
 
   /**
-   * Handle a message from the {@link arlut.csd.ddroid.client.ClientBase ClientBase}
+   * Handle a message from the {@link arlut.csd.ganymede.client.ClientBase ClientBase}
    * RMI object.
    */
 
@@ -866,7 +866,7 @@ public final class xmlclient implements ClientListener {
 
   /**
    * Handle a forced disconnect message from the
-   * {@link arlut.csd.ddroid.client.ClientBase ClientBase} RMI object.
+   * {@link arlut.csd.ganymede.client.ClientBase ClientBase} RMI object.
    */
 
   public void disconnected(ClientEvent e)

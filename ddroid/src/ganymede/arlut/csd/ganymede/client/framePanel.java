@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -89,14 +89,14 @@ import javax.swing.event.InternalFrameListener;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.booleanSemaphore;
-import arlut.csd.ddroid.common.BaseDump;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.date_field;
-import arlut.csd.ddroid.rmi.db_object;
-import arlut.csd.ddroid.rmi.invid_field;
-import arlut.csd.ddroid.rmi.string_field;
+import arlut.csd.ganymede.common.BaseDump;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.date_field;
+import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.rmi.invid_field;
+import arlut.csd.ganymede.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -106,13 +106,13 @@ import arlut.csd.ddroid.rmi.string_field;
 
 /**
  * <p>An internal client window displaying and/or editing a particular database
- * object from the Directory Droid server. A framePanel is a JInternalFrame which contains a
+ * object from the Ganymede server. A framePanel is a JInternalFrame which contains a
  * tabbed pane which incorporates a
- * {@link arlut.csd.ddroid.client.containerPanel containerPanel} for
+ * {@link arlut.csd.ganymede.client.containerPanel containerPanel} for
  * viewing/editing a server-side database object, as well as several
  * auxiliary panes such as an
- * {@link arlut.csd.ddroid.client.ownerPanel ownerPanel},
- * {@link arlut.csd.ddroid.client.historyPanel historyPanel}, and other
+ * {@link arlut.csd.ganymede.client.ownerPanel ownerPanel},
+ * {@link arlut.csd.ganymede.client.historyPanel historyPanel}, and other
  * panels as appropriate for specific object types.</p>
  *
  * @version $Id$
@@ -255,7 +255,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     history_panel;
 
   /** 
-   * <p>A vector of {@link arlut.csd.ddroid.client.containerPanel}s,
+   * <p>A vector of {@link arlut.csd.ganymede.client.containerPanel}s,
    * used to allow the gclient to refresh containerPanels on demand,
    * and to allow the gclient to order any containerPanels contained
    * in this framePanel to stop loading on a transaction cancel.</p>
@@ -269,7 +269,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   private Vector containerPanels = new Vector();
 
   /**
-   * Vector of {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}s used
+   * Vector of {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}s used
    * by the save() and sendMail() methods to enumerate this object's fields.
    */
 
@@ -415,7 +415,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * needed to present the database object associated with this window
    * to the user.  Some of this data (types of fields defined in objects
    * of this type, for instance) will have been already loaded into
-   * {@link arlut.csd.ddroid.client.gclient gclient}, but this method
+   * {@link arlut.csd.ganymede.client.gclient gclient}, but this method
    * is reponsible for loading all data specific to the object being
    * viewed and/or edited.</p>
    *
@@ -743,7 +743,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * Uses the Directory Droid server to e-mail a summary of this object to one
+   * Uses the Ganymede server to e-mail a summary of this object to one
    * or more email addresses.
    */
 
@@ -807,7 +807,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * Saves a summary of this object to disk.  Only available if the Directory Droid client
+   * Saves a summary of this object to disk.  Only available if the Ganymede client
    * was run as an application.
    */
 
@@ -1880,7 +1880,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		okToKill = new StringDialog(gclient.client, 
 					    "Ok to hide " + getTitle() + "?",
 					    "Closing this window will not undo changes made to it, nor will it make " +
-					    "this object available to other Directory Droid users to edit. If you want to " +
+					    "this object available to other Ganymede users to edit. If you want to " +
 					    "undo changes to this object, you will have to either manually undo them " +
 					    "or cancel the transaction.\n\n" +
 					    "If this window is closed, you will be able to re-open it from the tree " +

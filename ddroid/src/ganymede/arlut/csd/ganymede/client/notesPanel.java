@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.event.KeyEvent;
@@ -65,7 +65,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
-import arlut.csd.ddroid.rmi.string_field;
+import arlut.csd.ganymede.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,13 +74,13 @@ import arlut.csd.ddroid.rmi.string_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * Notes panel for use in {@link arlut.csd.ddroid.client.framePanel framePanel}'s
+ * Notes panel for use in {@link arlut.csd.ganymede.client.framePanel framePanel}'s
  * in the client's display.  This panel is only created when a user clicks on
  * a Notes tab in a viewed or edited object window in the client.  Unlike most
  * GUI components in the client that are connected to database fields on the server,
  * the notesPanel doesn't automatically update the server on focus loss.  Instead,
  * notesPanel currently depends on gclient's 
- * {@link arlut.csd.ddroid.client.gclient#commitTransaction() commitTransaction()}
+ * {@link arlut.csd.ganymede.client.gclient#commitTransaction() commitTransaction()}
  * method to poll all notesPanels open and active for their contents.  This really
  * should be changed, as it means that currently an edit object window which is
  * manually closed will not have its notes field updated on transaction commit.

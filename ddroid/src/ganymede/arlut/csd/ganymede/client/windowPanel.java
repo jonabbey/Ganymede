@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -81,15 +81,15 @@ import javax.swing.event.InternalFrameListener;
 
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.PackageResources;
-import arlut.csd.ddroid.common.DumpResult;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.db_field;
-import arlut.csd.ddroid.rmi.db_object;
-import arlut.csd.ddroid.rmi.invid_field;
+import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.db_field;
+import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.rmi.invid_field;
 
 import foxtrot.Task;
 import foxtrot.Worker;
@@ -102,8 +102,8 @@ import foxtrot.Worker;
 
 /**
  * <p>windowPanel is the top level panel containing and controlling the
- * internal {@link arlut.csd.ddroid.client.framePanel} and
- * {@link arlut.csd.ddroid.client.gResultTable gResultTable} windows
+ * internal {@link arlut.csd.ganymede.client.framePanel} and
+ * {@link arlut.csd.ganymede.client.gResultTable gResultTable} windows
  * that are displayed in reaction to actions taken by the user.
  * windowPanel is responsible for adding these windows, and maintaining
  * the window list in the menubar.</p>
@@ -630,7 +630,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   /**
    * <p>Convenience method, calls
-   * {@link arlut.csd.ddroid.client.gclient#setStatus(java.lang.String) gclient.setStatus}
+   * {@link arlut.csd.ganymede.client.gclient#setStatus(java.lang.String) gclient.setStatus}
    * to set some text in the client's status bar, with a time-to-live of the
    * default 5 seconds.</p>
    */

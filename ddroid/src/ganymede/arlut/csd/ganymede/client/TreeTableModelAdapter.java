@@ -23,7 +23,7 @@
  * http://java.sun.com/products/jfc/tsc/tech_topics/tech_topics.html
  */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;

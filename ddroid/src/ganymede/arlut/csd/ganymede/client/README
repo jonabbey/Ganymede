@@ -7,14 +7,14 @@ SVN URL: $HeadURL$
 
 --------------------------------------------------------------------------------
 
-This directory contains the code for the Directory Droid GUI and XML
-clients.  The glogin class is the entry point for the Directory Droid
-GUI client.  It is dual-mode, which means that it can be launched as a
-Java application (using the main() entry point) or as an applet, since
-it is subclassed from javax.swing.JApplet.
+This directory contains the code for the Ganymede GUI and XML clients.
+The glogin class is the entry point for the Ganymede GUI client.  It
+is dual-mode, which means that it can be launched as a Java
+application (using the main() entry point) or as an applet, since it
+is subclassed from javax.swing.JApplet.
 
 This directory also contains the ClientBase class, which is designed
-to serve as the nucleus of any Directory Droid client written in Java,
+to serve as the nucleus of any Ganymede client written in Java,
 and which handles the necessary client/server communications.
 
 Jonathan Abbey

@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -62,9 +62,9 @@ import java.util.Vector;
 import arlut.csd.Util.Compare;
 import arlut.csd.Util.VecQuickSort;
 import arlut.csd.Util.VecSortInsert;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ObjectHandle;
-import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ObjectHandle;
+import arlut.csd.ganymede.common.QueryResult;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,7 +74,7 @@ import arlut.csd.ddroid.common.QueryResult;
 
 /**
  * <p>This class is used to keep track of a list of 
- * {@link arlut.csd.ddroid.common.ObjectHandle ObjectHandle} objects from
+ * {@link arlut.csd.ganymede.common.ObjectHandle ObjectHandle} objects from
  * the server, storing various pieces of information about the
  * objects, including their expiration/removal/inactive status,
  * their current label, and more.</p>

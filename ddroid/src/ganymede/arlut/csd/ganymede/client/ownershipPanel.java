@@ -2,8 +2,8 @@
 
    ownerPanel.java
 
-   The ownershipPanel is used in the Directory Droid client to display
-   objects owned when the user opens a Directory Droid Owner Group window.
+   The ownershipPanel is used in the Ganymede client to display
+   objects owned when the user opens a Ganymede Owner Group window.
    
    Created: 9 September 1997
    Last Mod Date: $Date$
@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -52,7 +52,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -77,14 +77,14 @@ import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.invid_field;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.invid_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -93,8 +93,8 @@ import arlut.csd.ddroid.rmi.invid_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>The ownershipPanel is used in the Directory Droid client to display objects owned
- * when the user opens a Directory Droid Owner Group window.</P>
+ * <P>The ownershipPanel is used in the Ganymede client to display objects owned
+ * when the user opens a Ganymede Owner Group window.</P>
  */
 
 public class ownershipPanel extends JPanel implements ItemListener {
@@ -280,8 +280,8 @@ public class ownershipPanel extends JPanel implements ItemListener {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>The objectPane class is a JPanel subclass used in the Directory Droid client
- * to display a list of objects of a given type contained in a Directory Droid Owner
+ * <P>The objectPane class is a JPanel subclass used in the Ganymede client
+ * to display a list of objects of a given type contained in a Ganymede Owner
  * Group.</P>
  */
 

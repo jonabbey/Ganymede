@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -176,7 +176,7 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
 
 	JPanel topPersonaPanel = new JPanel(new BorderLayout());
 
-	JMultiLineLabel explanation = new JMultiLineLabel("\nThe Directory Droid server timed you out due to inactivity.\n\n" +
+	JMultiLineLabel explanation = new JMultiLineLabel("\nThe Ganymede server timed you out due to inactivity.\n\n" +
 							  "You will have to re-authenticate with your password in " +
 							  "order to continue using Ganymede.");
 

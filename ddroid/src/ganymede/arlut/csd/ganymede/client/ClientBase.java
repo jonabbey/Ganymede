@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -62,12 +62,12 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.clientAsyncMessage;
-import arlut.csd.ddroid.rmi.ClientAsyncResponder;
-import arlut.csd.ddroid.rmi.Server;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.XMLSession;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.clientAsyncMessage;
+import arlut.csd.ganymede.rmi.ClientAsyncResponder;
+import arlut.csd.ganymede.rmi.Server;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.XMLSession;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -92,13 +92,13 @@ public class ClientBase implements Runnable {
   // ---
 
   /**
-   * RMI reference to a Directory Droid server
+   * RMI reference to a Ganymede server
    */
 
   private Server server = null;
 
   /**
-   * RMI reference to a client session on a Directory Droid server
+   * RMI reference to a client session on a Ganymede server
    */
 
   private Session session = null;
@@ -112,13 +112,13 @@ public class ClientBase implements Runnable {
 
   /**
    * Thread that we'll create to continuously do a blocking poll on
-   * the Directory Droid server for asynchronous messages.
+   * the Ganymede server for asynchronous messages.
    */
 
   private Thread asyncThread = null;
 
   /**
-   * RMI reference to a client XMLSession on a Directory Droid server
+   * RMI reference to a client XMLSession on a Ganymede server
    */
 
   private XMLSession xSession = null;
@@ -129,12 +129,12 @@ public class ClientBase implements Runnable {
   /* -- */
 
   /**
-   * <p>This constructor takes a URL for the Directory Droid server to connect to, a
+   * <p>This constructor takes a URL for the Ganymede server to connect to, a
    * reference to an object implementing the ClientListener interface to
    * report problems.  The constructor will establish an initial connection
    * to the server and prepare itself for subsequent login before returning.</p>
    *
-   * @param serverURL An rmi:// URL for a Directory Droid server.
+   * @param serverURL An rmi:// URL for a Ganymede server.
    * @param listener A ClientListener to report problems and disconnection to.
    */
 
@@ -201,14 +201,14 @@ public class ClientBase implements Runnable {
 
   /**
    * <p>This method is used by a client to actually get logged into the
-   * server.  The {@link arlut.csd.ddroid.rmi.Session Session} handle
+   * server.  The {@link arlut.csd.ganymede.rmi.Session Session} handle
    * returned is then used to do all server operations appropriate 
    * for a normal client.  Calling the Session logout() method will
    * end the client's connection to the server.</p>
    *
    * @return null if login failed, else a valid server Session reference
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public Session login(String username, String password) throws RemoteException
@@ -256,7 +256,7 @@ public class ClientBase implements Runnable {
 
 	if (asyncPort != null)
 	  {
-	    asyncThread = new Thread(this, "Directory Droid Async Reader");
+	    asyncThread = new Thread(this, "Ganymede Async Reader");
 	    asyncThread.start();
 	  }
       }
@@ -288,7 +288,7 @@ public class ClientBase implements Runnable {
 
   /**
    * <p>This method is used by a client to actually get logged into
-   * the server.  The {@link arlut.csd.ddroid.rmi.XMLSession
+   * the server.  The {@link arlut.csd.ganymede.rmi.XMLSession
    * XMLSession} handle returned is then used to do all server
    * operations appropriate for the xml client.  Calling the XMLSession
    * xmlEnd() method will end the client's connection to the
@@ -296,7 +296,7 @@ public class ClientBase implements Runnable {
    *
    * @return null if login failed, else a valid server Session reference
    *
-   * @see arlut.csd.ddroid.rmi.Session
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public XMLSession xmlLogin(String username, String password) throws RemoteException
@@ -345,7 +345,7 @@ public class ClientBase implements Runnable {
 
 	if (asyncPort != null)
 	  {
-	    asyncThread = new Thread(this, "Directory Droid Async Reader");
+	    asyncThread = new Thread(this, "Ganymede Async Reader");
 	    asyncThread.start();
 	  }
 	
@@ -438,7 +438,7 @@ public class ClientBase implements Runnable {
   /**
    * <p>Register a client listener.  A client listener is an object
    * that is to be notified if we get an asynchronous callback from
-   * the Directory Droid server, such as a forced log-off, or if we need
+   * the Ganymede server, such as a forced log-off, or if we need
    * to report an error during login.</p>
    */
 

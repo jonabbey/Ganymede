@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client.password;
+package arlut.csd.ganymede.client.password;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -59,17 +59,17 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Properties;
 
-import arlut.csd.ddroid.client.ClientBase;
-import arlut.csd.ddroid.client.ClientEvent;
-import arlut.csd.ddroid.client.ClientListener;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.db_object;
-import arlut.csd.ddroid.rmi.pass_field;
+import arlut.csd.ganymede.client.ClientBase;
+import arlut.csd.ganymede.client.ClientEvent;
+import arlut.csd.ganymede.client.ClientListener;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.rmi.pass_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -117,7 +117,7 @@ public class PasswordClient implements ClientListener {
 
   public boolean changePassword(String username, String oldPassword, String newPassword)
   {
-    arlut.csd.ddroid.rmi.Session session;
+    arlut.csd.ganymede.rmi.Session session;
 
     /* -- */
 
@@ -314,8 +314,8 @@ public class PasswordClient implements ClientListener {
    * Call getMessage() on the ClientEvent to get the
    * reason for the disconnect.
    *
-   * @see arlut.csd.ddroid.client.ClientListener
-   * @see arlut.csd.ddroid.client.ClientEvent
+   * @see arlut.csd.ganymede.client.ClientListener
+   * @see arlut.csd.ganymede.client.ClientEvent
    *
    */
 
@@ -333,8 +333,8 @@ public class PasswordClient implements ClientListener {
    * Call getMessage() on the ClientEvent to get the
    * message.
    *
-   * @see arlut.csd.ddroid.client.ClientListener
-   * @see arlut.csd.ddroid.client.ClientEvent
+   * @see arlut.csd.ganymede.client.ClientListener
+   * @see arlut.csd.ganymede.client.ClientEvent
    *
    */
 

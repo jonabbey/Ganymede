@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -83,10 +83,10 @@ import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JTable.rowSelectCallback;
 import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.PackageResources;
-import arlut.csd.ddroid.common.DumpResult;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -96,23 +96,23 @@ import arlut.csd.ddroid.rmi.Session;
 
 /**
  * <p>Client internal window for displaying the results of a 
- * query {@link arlut.csd.ddroid.rmi.Session#dump(arlut.csd.ddroid.common.Query) dump}
+ * query {@link arlut.csd.ganymede.rmi.Session#dump(arlut.csd.ganymede.common.Query) dump}
  * in a table form.</p>
  *
- * <p>This window is created when {@link arlut.csd.ddroid.client.windowPanel windowPanel}'s
- * {@link arlut.csd.ddroid.client.windowPanel#addTableWindow(arlut.csd.ddroid.rmi.Session,
- * arlut.csd.ddroid.common.Query, arlut.csd.ddroid.common.DumpResult, java.lang.String) addTableWindow}
+ * <p>This window is created when {@link arlut.csd.ganymede.client.windowPanel windowPanel}'s
+ * {@link arlut.csd.ganymede.client.windowPanel#addTableWindow(arlut.csd.ganymede.rmi.Session,
+ * arlut.csd.ganymede.common.Query, arlut.csd.ganymede.common.DumpResult, java.lang.String) addTableWindow}
  * method is called.</p>
  * 
  * <p>Note that windowPanel's addTableWindow method is called from 
- * {@link arlut.csd.ddroid.client.gclient gclient}'s actionPerformed method,
+ * {@link arlut.csd.ganymede.client.gclient gclient}'s actionPerformed method,
  * which spawns a separate thread in which the query is performed and
  * the gResultTable window is created.</p>
  *
- * <p>Constructors for this class take a {@link arlut.csd.ddroid.common.Query Query} object
+ * <p>Constructors for this class take a {@link arlut.csd.ganymede.common.Query Query} object
  * describing the query that this table was generated from, and a
- * {@link arlut.csd.ddroid.common.DumpResult DumpResult} object actually containing the dump
- * results from the Directory Droid server.  gResultTable can resubmit the dump query to the
+ * {@link arlut.csd.ganymede.common.DumpResult DumpResult} object actually containing the dump
+ * results from the Ganymede server.  gResultTable can resubmit the dump query to the
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
@@ -589,12 +589,12 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     result.append("<HTML>\n");
     result.append("<HEAD>\n");
-    result.append("<TITLE>Directory Droid Table Dump - ");
+    result.append("<TITLE>Ganymede Table Dump - ");
     result.append(date);
     result.append("</TITLE>\n");
     result.append("</HEAD>\n");
     result.append("<BODY BGCOLOR=\"#FFFFFF\">\n");
-    result.append("<H1>Directory Droid Table Dump - ");
+    result.append("<H1>Ganymede Table Dump - ");
     result.append(date);
     result.append("</H1>\n");
     result.append("<HR>\n");

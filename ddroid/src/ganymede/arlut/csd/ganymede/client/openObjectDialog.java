@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -81,11 +81,11 @@ import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.Util.VecQuickSort;
-import arlut.csd.ddroid.common.BaseDump;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ganymede.common.BaseDump;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryResult;
 
 /*------------------------------------------------------------------------------
                                                                            class

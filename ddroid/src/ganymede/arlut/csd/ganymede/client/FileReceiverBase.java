@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,14 +54,14 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
 
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.FileReceiver;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.FileReceiver;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -71,8 +71,8 @@ import arlut.csd.ddroid.rmi.FileReceiver;
 
 /**
  * <p>Standard remotely accessible {@link
- * arlut.csd.ddroid.rmi.FileReceiver FileReceiver} object for use in
- * Directory Droid clients.  By using a single class that implements the
+ * arlut.csd.ganymede.rmi.FileReceiver FileReceiver} object for use in
+ * Ganymede clients.  By using a single class that implements the
  * FileReceiver interface, we only need to have a single stub in the
  * server's jar file.</p> 
  */

@@ -4,7 +4,7 @@
 
    An interface to complement the ClientBase class.  This interface
    must be implemented by any code that creates uses ClientBase to
-   talk to the Directory Droid server.
+   talk to the Ganymede server.
    
    Created: 31 March 1998
    Last Mod Date: $Date$
@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
    02111-1307, USA
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 
 /*------------------------------------------------------------------------------
@@ -62,11 +62,11 @@ package arlut.csd.ddroid.client;
 
 /** 
  * <P>An interface to complement the {@link
- * arlut.csd.ddroid.client.ClientBase ClientBase} class.  This
+ * arlut.csd.ganymede.client.ClientBase ClientBase} class.  This
  * interface must be implemented by any code that creates uses
- * ClientBase to talk to the Directory Droid server.</P>
+ * ClientBase to talk to the Ganymede server.</P>
  *
- * @see arlut.csd.ddroid.client.ClientEvent
+ * @see arlut.csd.ganymede.client.ClientEvent
  */
 
 public interface ClientListener {
@@ -75,7 +75,7 @@ public interface ClientListener {
    * <p>Called when the server forces a disconnect.</p>
    *
    * <p>Call getMessage() on the
-   * {@link arlut.csd.ddroid.client.ClientEvent ClientEvent} 
+   * {@link arlut.csd.ganymede.client.ClientEvent ClientEvent} 
    * to get the reason for the disconnect.</p>
    */
 
@@ -87,7 +87,7 @@ public interface ClientListener {
    * up a dialog or do whatever else is appropriate.</p>
    *
    * <p>Call getMessage() on the
-   * {@link arlut.csd.ddroid.client.ClientEvent ClientEvent} 
+   * {@link arlut.csd.ganymede.client.ClientEvent ClientEvent} 
    * to get the reason for the disconnect.</p>
    */
 

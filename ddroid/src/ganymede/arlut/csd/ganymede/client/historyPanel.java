@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -82,9 +82,9 @@ import javax.swing.border.TitledBorder;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDataComponent.JsetValueCallback;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.rmi.date_field;
-import arlut.csd.ddroid.rmi.string_field;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.rmi.date_field;
+import arlut.csd.ganymede.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -317,9 +317,9 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Component panel used in the Directory Droid client to hold modification and creation
+ * <p>Component panel used in the Ganymede client to hold modification and creation
  * date information in the client's
- * {@link arlut.csd.ddroid.client.historyPanel historyPanel} tab component.</p>
+ * {@link arlut.csd.ganymede.client.historyPanel historyPanel} tab component.</p>
  *
  */
 

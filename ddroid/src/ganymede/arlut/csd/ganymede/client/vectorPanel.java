@@ -18,7 +18,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -81,14 +81,14 @@ import arlut.csd.JDataComponent.JIPField;
 import arlut.csd.JDataComponent.JErrorValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
-import arlut.csd.ddroid.common.FieldInfo;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.db_field;
-import arlut.csd.ddroid.rmi.db_object;
-import arlut.csd.ddroid.rmi.invid_field;
-import arlut.csd.ddroid.rmi.ip_field;
+import arlut.csd.ganymede.common.FieldInfo;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.db_field;
+import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.rmi.invid_field;
+import arlut.csd.ganymede.rmi.ip_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -98,16 +98,16 @@ import arlut.csd.ddroid.rmi.ip_field;
 
 /**
  * <p>A GUI vector panel that is designed to be placed inside a
- * {@link arlut.csd.ddroid.client.containerPanel containerPanel} within the client.
+ * {@link arlut.csd.ganymede.client.containerPanel containerPanel} within the client.
  * This vector panel is intended to support vectors of discrete GUI components that
- * are mapped to elements in a server-side vector {@link arlut.csd.ddroid.rmi.db_field db_field},
+ * are mapped to elements in a server-side vector {@link arlut.csd.ganymede.rmi.db_field db_field},
  * but right now it only supports IP Address fields and edit-in-place
  * containerPanels.  Most of the code in this class is dedicated to handling
  * vectors of embedded containerPanels.</p>
  *
  * <p>Whatever sort of GUI components/database elements this vectorPanel is managing,
  * all GUI components will be wrapped by
- * {@link arlut.csd.ddroid.client.elementWrapper elementWrapper}'s, which are responsible
+ * {@link arlut.csd.ganymede.client.elementWrapper elementWrapper}'s, which are responsible
  * for hiding and revealing the GUI component on the user's command.</p>
  *
  * <p>vectorPanel handles communications with the server to manage the server-side
@@ -115,8 +115,8 @@ import arlut.csd.ddroid.rmi.ip_field;
  *
  * @see elementWrapper
  * @see containerPanel
- * @see arlut.csd.ddroid.rmi.invid_field
- * @see arlut.csd.ddroid.rmi.ip_field
+ * @see arlut.csd.ganymede.rmi.invid_field
+ * @see arlut.csd.ganymede.rmi.ip_field
  * 
  * @version $Id$
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
@@ -179,9 +179,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     centerPanelAdded = false;
 
   /**
-   * Reference to server-side vector {@link arlut.csd.ddroid.rmi.invid_field invid_field} or
-   * {@link arlut.csd.ddroid.rmi.ip_field ip_field}.  This vectorPanel will communicate
-   * with the Directory Droid server using this reference to make changes to the vector field.
+   * Reference to server-side vector {@link arlut.csd.ganymede.rmi.invid_field invid_field} or
+   * {@link arlut.csd.ganymede.rmi.ip_field ip_field}.  This vectorPanel will communicate
+   * with the Ganymede server using this reference to make changes to the vector field.
    */
 
   private db_field my_field;
@@ -475,7 +475,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   } 
 
   /**
-   * <p>Creates a new element in the vector {@link arlut.csd.ddroid.rmi.db_field db_field}
+   * <p>Creates a new element in the vector {@link arlut.csd.ganymede.rmi.db_field db_field}
    * this vectorPanel is connected to.  Creates and adds the GUI component for the new
    * element to the vectorPanel.</p>
    *

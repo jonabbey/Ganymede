@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
@@ -68,11 +68,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import arlut.csd.JDialog.StringDialog;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.db_object;
-import arlut.csd.ddroid.rmi.invid_field;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.rmi.invid_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -82,7 +82,7 @@ import arlut.csd.ddroid.rmi.invid_field;
 
 /**
  * <p>This Panel is used to present a user's personae when viewing or editing
- * a user object in the Directory Droid client.</p>
+ * a user object in the Ganymede client.</p>
  *
  * @author Mike Mulvaney
  */

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -71,7 +71,7 @@ import arlut.csd.JDataComponent.JDeleteVectorValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
-import arlut.csd.ddroid.common.ReturnVal;
+import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
                                                                            class

@@ -3,7 +3,7 @@
    querybox
 
    This class implements a modal dialog that is popped up to generate
-   a Query object that will be used by the rest of the ddroid.client
+   a Query object that will be used by the rest of the ganymede.client
    package to submit the query to the server for handling.
 
    Once an instance of querybox is constructed, the client code will
@@ -23,7 +23,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -60,7 +60,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -110,17 +110,17 @@ import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.Util.FixedListCompare;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.StringUtils;
-import arlut.csd.ddroid.common.BaseDump;
-import arlut.csd.ddroid.common.DumpResult;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryAndNode;
-import arlut.csd.ddroid.common.QueryDataNode;
-import arlut.csd.ddroid.common.QueryDeRefNode;
-import arlut.csd.ddroid.common.QueryNode;
-import arlut.csd.ddroid.common.QueryNotNode;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ganymede.common.BaseDump;
+import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryAndNode;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryDeRefNode;
+import arlut.csd.ganymede.common.QueryNode;
+import arlut.csd.ganymede.common.QueryNotNode;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.Base;
 
 /*------------------------------------------------------------------------------
                                                                            class 
@@ -130,8 +130,8 @@ import arlut.csd.ddroid.rmi.Base;
 
 /**
  * <P>This class implements a modal dialog that is popped up to
- * generate a {@link arlut.csd.ddroid.common.Query Query} object that will
- * be used by the rest of the ddroid.client package to submit the
+ * generate a {@link arlut.csd.ganymede.common.Query Query} object that will
+ * be used by the rest of the ganymede.client package to submit the
  * query to the server for handling.</P>
  *
  * <P>Once an instance of querybox is constructed, the client code will

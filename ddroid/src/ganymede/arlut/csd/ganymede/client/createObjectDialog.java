@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -71,7 +71,7 @@ import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDialog.JCenterDialog;
-import arlut.csd.ddroid.rmi.Base;
+import arlut.csd.ganymede.rmi.Base;
 
 /*------------------------------------------------------------------------------
                                                                            class

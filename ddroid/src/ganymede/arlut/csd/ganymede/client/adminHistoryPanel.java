@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -78,7 +78,7 @@ import javax.swing.border.TitledBorder;
 import arlut.csd.JCalendar.JpopUpCalendar;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
-import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -87,7 +87,7 @@ import arlut.csd.ddroid.common.Invid;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>The adminHistoryPanel is used in the Directory Droid client when the user is
+ * <P>The adminHistoryPanel is used in the Ganymede client when the user is
  * editing or viewing an admin persona object.  The adminHistoryPanel provides
  * the user with the ability to get a report of all actions taken by the admin
  * in question from the server's logs.</P>

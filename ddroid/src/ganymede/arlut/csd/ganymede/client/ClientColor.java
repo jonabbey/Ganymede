@@ -4,7 +4,7 @@
  *
  */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.Color;
 import java.awt.SystemColor;

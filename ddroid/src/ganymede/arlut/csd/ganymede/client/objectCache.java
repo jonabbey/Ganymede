@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -52,14 +52,14 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.util.Hashtable;
 import java.util.Vector;
 
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ObjectHandle;
-import arlut.csd.ddroid.common.QueryResult;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ObjectHandle;
+import arlut.csd.ganymede.common.QueryResult;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,7 +74,7 @@ import arlut.csd.ddroid.common.QueryResult;
  *
  * <p>objectCache maintains a mapping between hash keys (typically
  * Short values corresponding to object type ids on the server) and
- * {@link arlut.csd.ddroid.client.objectList objectList} objects
+ * {@link arlut.csd.ganymede.client.objectList objectList} objects
  * which track status of objects for that hash key.</p>
  */
 

@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,18 +51,18 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.rmi.RemoteException;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.VecQuickSort;
-import arlut.csd.ddroid.common.BaseDump;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ganymede.common.BaseDump;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -105,20 +105,20 @@ public class Loader extends Thread {
 
   /**
    * <p>Hash mapping Short object type id's to Vectors of
-   * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}'s,
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s,
    * used by the client to quickly look up information about fields 
    * in order to populate 
-   * {@link arlut.csd.ddroid.client.containerPanel containerPanel}'s.</p>
+   * {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s.</p>
    *
    * <p>This hash is used by
-   * {@link arlut.csd.ddroid.client.gclient#getTemplateVector(java.lang.Short) getTemplateVector}.</p>
+   * {@link arlut.csd.ganymede.client.gclient#getTemplateVector(java.lang.Short) getTemplateVector}.</p>
    */
 
   private Hashtable templateHash;
 
   /**
    * <p>Hash mapping Short object type id's to a Hash that
-   * maps field name to {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}
+   * maps field name to {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
    * object</p>
    */
 
@@ -342,8 +342,8 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a Vector of {@link arlut.csd.ddroid.common.BaseDump BaseDump} objects,
-   * providing a local cache of {@link arlut.csd.ddroid.rmi.Base Base}
+   * <p>Returns a Vector of {@link arlut.csd.ganymede.common.BaseDump BaseDump} objects,
+   * providing a local cache of {@link arlut.csd.ganymede.rmi.Base Base}
    * references that the client consults during operations.</p>
    *
    * <p>If this thread hasn't yet downloaded that information, this method will
@@ -394,7 +394,7 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a hash mapping {@link arlut.csd.ddroid.common.BaseDump BaseDump}
+   * <p>Returns a hash mapping {@link arlut.csd.ganymede.common.BaseDump BaseDump}
    * references to their title.</p>
    *
    * <p>If this thread hasn't yet downloaded that information, this method will
@@ -445,8 +445,8 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a hash mapping Short {@link arlut.csd.ddroid.rmi.Base Base} id's to
-   * {@link arlut.csd.ddroid.common.BaseDump BaseDump} objects.</p>
+   * <p>Returns a hash mapping Short {@link arlut.csd.ganymede.rmi.Base Base} id's to
+   * {@link arlut.csd.ganymede.common.BaseDump BaseDump} objects.</p>
    *
    * <p>If this thread hasn't yet downloaded that information, this method will
    * block until the information is available.</p>
@@ -493,7 +493,7 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a hashtable mapping {@link arlut.csd.ddroid.common.BaseDump BaseDump}
+   * <p>Returns a hashtable mapping {@link arlut.csd.ganymede.common.BaseDump BaseDump}
    * references to their object type id in Short form.  This is
    * a holdover from a time when the client didn't create local copies
    * of the server's Base references.</p>
@@ -604,7 +604,7 @@ public class Loader extends Thread {
   }
 
   /**
-   * <P>Returns a {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}
+   * <P>Returns a {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
    * for a field specified by object type id and field name.</P>
    */
 
@@ -614,7 +614,7 @@ public class Loader extends Thread {
   }
 
   /**
-   * <P>Returns a {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}
+   * <P>Returns a {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
    * for a field specified by object type id and field name.</P>
    */
 
@@ -644,7 +644,7 @@ public class Loader extends Thread {
 
   /**
    * <p>Returns a vector of 
-   * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}'s.</p>
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s.</p>
    *
    * @param id Object type id to retrieve field information for.
    */
@@ -656,7 +656,7 @@ public class Loader extends Thread {
 
   /**
    * <p>Returns a vector of 
-   * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}'s
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s
    * listing fields and field informaton for the object type identified by 
    * id.</p>
    *

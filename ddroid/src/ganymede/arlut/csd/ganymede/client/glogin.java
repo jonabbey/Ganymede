@@ -1,7 +1,7 @@
 /*
    glogin.java
 
-   Directory Droid client login module
+   Ganymede client login module
 
    This client has been developed so that it can run as both an applet,
    as well as an application.
@@ -19,7 +19,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -56,7 +56,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -90,8 +90,8 @@ import javax.swing.SwingUtilities;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.ParseArgs;
-import arlut.csd.ddroid.rmi.Server;
-import arlut.csd.ddroid.rmi.Session;
+import arlut.csd.ganymede.rmi.Server;
+import arlut.csd.ganymede.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -100,14 +100,14 @@ import arlut.csd.ddroid.rmi.Session;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Directory Droid client start class.  This class can be run from the command
+ * <p>Ganymede client start class.  This class can be run from the command
  * line via its static main() method, or as an applet loaded into a
  * web browser, generally with Sun's Java plug-in.</p>
  *
  * <p>This class has a run() method for attempting to connect to
  * the server in the background once the applet is initialized.</p>
  *
- * <p>Once glogin handles the user's login, a {@link arlut.csd.ddroid.client.gclient gclient}
+ * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
  * object is constructed, which handles all of the user's interactions with the server.</p>
  *
  * @version $Id$
@@ -199,7 +199,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   /**
    * Background thread used to attempt to get the initial RMI connection to the
-   * Directory Droid server.
+   * Ganymede server.
    */
 
   protected Thread my_thread = new Thread(this);
@@ -249,7 +249,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     my_glogin = new glogin();
 
-    my_frame = new gloginFrame("Directory Droid Client", my_glogin);
+    my_frame = new gloginFrame("Ganymede Client", my_glogin);
 
     my_frame.getContentPane().setLayout(new BorderLayout());
     my_frame.getContentPane().add("Center", my_glogin);
@@ -261,7 +261,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * This method returns true if the Directory Droid client is running
+   * This method returns true if the Ganymede client is running
    * as an applet.
    */
 
@@ -333,7 +333,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     JPanel labelPanel = new JPanel();
     labelPanel.setLayout(new BorderLayout());
 
-    JLabel label = new JLabel("Directory Droid Server on: ");
+    JLabel label = new JLabel("Ganymede Server on: ");
     labelPanel.add("North", label);
 
     JLabel hostLabel = new JLabel(serverhost + ", port " + registryPortProperty);
@@ -426,9 +426,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * <P>Private method to load the Directory Droid client's parameters
+   * <P>Private method to load the Ganymede client's parameters
    * from a file.  Used when glogin is run from the command line..
-   * {@link arlut.csd.ddroid.client.glogin#loadParameters() loadParameters()}
+   * {@link arlut.csd.ganymede.client.glogin#loadParameters() loadParameters()}
    * is for use in an applet context.</P>
    */ 
 
@@ -483,9 +483,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * <P>Private method to load the Directory Droid client's parameters
+   * <P>Private method to load the Ganymede client's parameters
    * from an applet's HTML parameters.  Used when glogin is run as an applet..
-   * {@link arlut.csd.ddroid.client.glogin#loadProperties(java.lang.String) loadProperties()}
+   * {@link arlut.csd.ganymede.client.glogin#loadProperties(java.lang.String) loadProperties()}
    * is for use in an application context.</P>
    */ 
 
@@ -508,7 +508,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    System.err.println("Couldn't get a valid registry port number from Directory Droid applet parameters: " + 
+	    System.err.println("Couldn't get a valid registry port number from Ganymede applet parameters: " + 
 			       registryPort);
 	  }
       }
@@ -822,7 +822,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Starts the main Directory Droid client.
+   * Starts the main Ganymede client.
    */
 
   private void startSession(Session session)
@@ -861,7 +861,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   // These are for the ClientListener
 
   /**
-   * Handle a message from the {@link arlut.csd.ddroid.client.ClientBase ClientBase}
+   * Handle a message from the {@link arlut.csd.ganymede.client.ClientBase ClientBase}
    * RMI object.
    */
 
@@ -896,7 +896,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   /**
    * Handle a forced disconnect message from the
-   * {@link arlut.csd.ddroid.client.ClientBase ClientBase} RMI object.
+   * {@link arlut.csd.ganymede.client.ClientBase ClientBase} RMI object.
    */
 
   public void disconnected(ClientEvent e)
@@ -944,7 +944,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
  * about being disconnected, etc.</p>
  *
  * <p>When run, this thread waits for die() to be called, whereupon it
- * creates an {@link arlut.csd.ddroid.client.ExitThread ExitThread} to
+ * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
  * actually shut down the client.</p>
  *
  * @version $Id$
@@ -1033,9 +1033,9 @@ class DeathWatcherThread extends Thread {
 /**
  * <p>Client-side self-destruction thread.  This thread will be created and run
  * when the server sends the client's
- * {@link arlut.csd.ddroid.client.ClientBase ClientBase} a forced disconnect 
+ * {@link arlut.csd.ganymede.client.ClientBase ClientBase} a forced disconnect 
  * RMI call.  When run, this thread starts a 30 second timer, while the 
- * {@link arlut.csd.ddroid.client.DeathWatcherThread DeathWatcherThread} shows
+ * {@link arlut.csd.ganymede.client.DeathWatcherThread DeathWatcherThread} shows
  * a dialog to the user, explaining the disconnect.  The user can click ok on
  * that dialog, causing this thread's dieNow() method to terminate the timer.  In
  * any case, when the timer counts down to zero, the glogin's logout() method 
@@ -1085,7 +1085,7 @@ class ExitThread extends Thread {
 	System.out.println("glogin: Interupted trying to sleep and quit: " + ie);
       }
     
-    System.out.println("\nDirectory Droid disconnected: " + message);
+    System.out.println("\nGanymede disconnected: " + message);
 
     glogin.my_glogin.logout();
   }
@@ -1104,7 +1104,7 @@ class ExitThread extends Thread {
 
 /**
  * <p>JFrame subclass which is used to hold the {@link
- * arlut.csd.ddroid.client.glogin glogin} applet when the Ganymede
+ * arlut.csd.ganymede.client.glogin glogin} applet when the Ganymede
  * client is run as an application rather than an applet.</p>
  */
 

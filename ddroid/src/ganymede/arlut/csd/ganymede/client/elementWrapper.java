@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -72,7 +72,7 @@ import javax.swing.JPanel;
 import arlut.csd.JDataComponent.JIPField;
 import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
-import arlut.csd.ddroid.common.Invid;
+import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -81,12 +81,12 @@ import arlut.csd.ddroid.common.Invid;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This GUI class is used in the Directory Droid client to wrap embedded objects
- * in an expandable panel for inclusion in a presentation in a {@link arlut.csd.ddroid.client.vectorPanel vectorPanel}.
+ * <p>This GUI class is used in the Ganymede client to wrap embedded objects
+ * in an expandable panel for inclusion in a presentation in a {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}.
  * </p>
  *
  * <p>Typically, elementWrapper objects contain
- * {@link arlut.csd.ddroid.client.containerPanel containerPanels}, which
+ * {@link arlut.csd.ganymede.client.containerPanel containerPanels}, which
  * themselves contain GUI elements from embedded objects.</p>
  */
 

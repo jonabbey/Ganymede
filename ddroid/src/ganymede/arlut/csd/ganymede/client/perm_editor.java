@@ -2,7 +2,7 @@
 
    perm_editor.java
 
-   perm_editor is a JTable-based permissions editor for Directory Droid.
+   perm_editor is a JTable-based permissions editor for Ganymede.
    
    Created: 18 November 1998
 
@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -93,13 +93,13 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import arlut.csd.Util.PackageResources;
-import arlut.csd.ddroid.common.BaseDump;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.PermEntry;
-import arlut.csd.ddroid.common.PermMatrix;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.perm_field;
+import arlut.csd.ganymede.common.BaseDump;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.PermEntry;
+import arlut.csd.ganymede.common.PermMatrix;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.perm_field;
 
 /*------------------------------------------------------------------------------
                                                                            class 
@@ -108,7 +108,7 @@ import arlut.csd.ddroid.rmi.perm_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Permissions editor dialog in the Directory Droid client.</P>
+ * <P>Permissions editor dialog in the Ganymede client.</P>
  */
 
 class perm_editor extends JDialog implements ActionListener, Runnable {
@@ -852,7 +852,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
 /**
  * <P>BoolRenderer is a custom TableCellRenderer class used in conjunction with the
- * Directory Droid client's {@link arlut.csd.ddroid.client.perm_editor perm_editor},
+ * Ganymede client's {@link arlut.csd.ganymede.client.perm_editor perm_editor},
  * to provide a checkbox that can be graphically disabled if a permissions
  * item may not be edited for some reason .</P>
  */
@@ -966,7 +966,7 @@ class BoolRenderer extends JCheckBox implements TableCellRenderer {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Data-carrying class for the Directory Droid client's {@link arlut.csd.ddroid.client.perm_editor perm_editor}
+ * <P>Data-carrying class for the Ganymede client's {@link arlut.csd.ganymede.client.perm_editor perm_editor}
  * permissions editor dialog.</P>
  */
 
@@ -1161,8 +1161,8 @@ class PermRow {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Custom TreeTableModel model for use with the Directory Droid client's
- * {@link arlut.csd.ddroid.client.perm_editor perm_editor} permissions
+ * <P>Custom TreeTableModel model for use with the Ganymede client's
+ * {@link arlut.csd.ganymede.client.perm_editor perm_editor} permissions
  * editor dialog.</P>
  */
 
@@ -1489,7 +1489,7 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
 }
 
 /**
- * <p>Custom tree renderer for the Directory Droid client's permissions
+ * <p>Custom tree renderer for the Ganymede client's permissions
  * editor treeTable.</p>
  */
 

@@ -16,7 +16,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -53,7 +53,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 
 /*------------------------------------------------------------------------------
@@ -64,13 +64,13 @@ package arlut.csd.ddroid.client;
 
 /**
  * <P>An event object to pass information from the {@link
- * arlut.csd.ddroid.client.ClientBase ClientBase} class to users
+ * arlut.csd.ganymede.client.ClientBase ClientBase} class to users
  * thereof. Currently, this only has support for a message String and
  * integer message type, but it is here in case we need some other
  * types in there.</P>
  */
 
-public class ClientEvent implements arlut.csd.ddroid.common.ClientMessage {
+public class ClientEvent implements arlut.csd.ganymede.common.ClientMessage {
 
   int type;
   private String message;

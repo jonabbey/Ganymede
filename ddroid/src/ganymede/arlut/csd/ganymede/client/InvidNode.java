@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,12 +50,12 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import arlut.csd.JTree.treeMenu;
 import arlut.csd.JTree.treeNode;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ObjectHandle;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ObjectHandle;
 
 /*---------------------------------------------------------------------
                                                                   class 
@@ -65,7 +65,7 @@ import arlut.csd.ddroid.common.ObjectHandle;
 
 /**
  * <p>Class used in the client to represent an individual
- * {@link arlut.csd.ddroid.rmi.db_object db_object} in the client's tree
+ * {@link arlut.csd.ganymede.rmi.db_object db_object} in the client's tree
  * display.</p>
  */
 

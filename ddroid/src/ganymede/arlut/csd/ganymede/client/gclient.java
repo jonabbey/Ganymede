@@ -1,7 +1,7 @@
 /*
    gclient.java
 
-   Directory Droid client main module
+   Ganymede client main module
 
    Created: 24 Feb 1997
 
@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
@@ -113,22 +113,22 @@ import arlut.csd.JTree.treeMenu;
 import arlut.csd.JTree.treeNode;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.VecQuickSort;
-import arlut.csd.ddroid.common.BaseDump;
-import arlut.csd.ddroid.common.CatTreeNode;
-import arlut.csd.ddroid.common.CategoryDump;
-import arlut.csd.ddroid.common.CategoryTransport;
-import arlut.csd.ddroid.common.DumpResult;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.ObjectHandle;
-import arlut.csd.ddroid.common.Query;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.Base;
-import arlut.csd.ddroid.rmi.Category;
-import arlut.csd.ddroid.rmi.CategoryNode;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.db_object;
+import arlut.csd.ganymede.common.BaseDump;
+import arlut.csd.ganymede.common.CatTreeNode;
+import arlut.csd.ganymede.common.CategoryDump;
+import arlut.csd.ganymede.common.CategoryTransport;
+import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ObjectHandle;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.Base;
+import arlut.csd.ganymede.rmi.Category;
+import arlut.csd.ganymede.rmi.CategoryNode;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -138,16 +138,16 @@ import arlut.csd.ddroid.rmi.db_object;
 
 /**
  * <p>Main ganymede client class.  When {@link
- * arlut.csd.ddroid.client.glogin glogin} is run and a user logs in
+ * arlut.csd.ganymede.client.glogin glogin} is run and a user logs in
  * to the server, the client obtains a {@link
- * arlut.csd.ddroid.rmi.Session Session} reference that allows it to
+ * arlut.csd.ganymede.rmi.Session Session} reference that allows it to
  * talk to the server on behalf of a user, and a single instance of
  * this class is created to handle all client GUI and networking
  * operations for that user.</p>
  *
- * <p>gclient creates a {@link arlut.csd.ddroid.client.windowPanel
+ * <p>gclient creates a {@link arlut.csd.ganymede.client.windowPanel
  * windowPanel} object to contain internal object ({@link
- * arlut.csd.ddroid.client.framePanel framePanel}) and query windows
+ * arlut.csd.ganymede.client.framePanel framePanel}) and query windows
  * on the right side of a Swing JSplitPane.  The left side contains a
  * custom {@link arlut.csd.JTree.treeControl treeControl} GUI
  * component displaying object categories, types, and instances for
@@ -228,7 +228,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /**
    * Local copy of the category/object tree downloaded from
-   * the server by the {@link arlut.csd.ddroid.client.gclient#buildTree() buildTree()}
+   * the server by the {@link arlut.csd.ganymede.client.gclient#buildTree() buildTree()}
    * method.
    */
 
@@ -263,7 +263,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   //
 
   /** 
-   * Cache of {@link arlut.csd.ddroid.common.Invid invid}'s for objects
+   * Cache of {@link arlut.csd.ganymede.common.Invid invid}'s for objects
    * that might have been changed by the client.  The keys and the
    * values in this hash are the same.  The collection of tree nodes
    * corresponding to invid's listed in changedHash will be refreshed
@@ -273,7 +273,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   private Hashtable changedHash = new Hashtable();
 
   /** 
-   * Mapping of {@link arlut.csd.ddroid.common.Invid invid}'s for objects
+   * Mapping of {@link arlut.csd.ganymede.common.Invid invid}'s for objects
    * that the client has requested be deleted by the server to
    * {@link arlut.csd.ganymede.client.CacheInfo CacheInfo} objects
    * which hold information about the object used to make decisions
@@ -283,7 +283,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   private Hashtable deleteHash = new Hashtable();
 
   /**  
-   * Mapping of {@link arlut.csd.ddroid.common.Invid invid}'s for objects
+   * Mapping of {@link arlut.csd.ganymede.common.Invid invid}'s for objects
    * that the client has requested be created by the server to
    * {@link arlut.csd.ganymede.client.CacheInfo CacheInfo} objects
    * which hold information about the object used to make decisions
@@ -293,7 +293,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   private Hashtable createHash = new Hashtable();
 
   /**
-   * Hash of {@link arlut.csd.ddroid.common.Invid invid}'s corresponding
+   * Hash of {@link arlut.csd.ganymede.common.Invid invid}'s corresponding
    * to objects that have been created by the client but which have not
    * had nodes created in the client's tree display.  Once nodes are
    * created for these objects, the invid will be taken out of this
@@ -303,17 +303,17 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   private Hashtable createdObjectsWithoutNodes = new Hashtable();
 
   /**
-   * <p>Hash mapping Short {@link arlut.csd.ddroid.rmi.Base Base} id's to
-   * the corresponding {@link arlut.csd.ddroid.client.BaseNode BaseNode}
+   * <p>Hash mapping Short {@link arlut.csd.ganymede.rmi.Base Base} id's to
+   * the corresponding {@link arlut.csd.ganymede.client.BaseNode BaseNode}
    * displayed in the client's tree display.</p>
    */
 
   protected Hashtable shortToBaseNodeHash = new Hashtable();
 
   /**
-   * <p>Hash mapping {@link arlut.csd.ddroid.common.Invid Invid}'s for objects
+   * <p>Hash mapping {@link arlut.csd.ganymede.common.Invid Invid}'s for objects
    * referenced by the client to the corresponding
-   * {@link arlut.csd.ddroid.client.InvidNode InvidNode} displayed in the
+   * {@link arlut.csd.ganymede.client.InvidNode InvidNode} displayed in the
    * client's tree display.</p>
    */
 
@@ -321,14 +321,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /**
    * <p>Our main cache, keeps information about all objects we've learned
-   * about via {@link arlut.csd.ddroid.common.QueryResult QueryResult}'s returned
+   * about via {@link arlut.csd.ganymede.common.QueryResult QueryResult}'s returned
    * to us by the server.</p>
    *
    * <p>We can get QueryResults from the server by doing direct
-   * {@link arlut.csd.ddroid.rmi.Session#query(arlut.csd.ddroid.common.Query) query}
+   * {@link arlut.csd.ganymede.rmi.Session#query(arlut.csd.ganymede.common.Query) query}
    * calls on the server, or by calling choices() on an 
-   * {@link arlut.csd.ddroid.rmi.invid_field invid_field} or on a
-   * {@link arlut.csd.ddroid.rmi.string_field string_field}.  Information from
+   * {@link arlut.csd.ganymede.rmi.invid_field invid_field} or on a
+   * {@link arlut.csd.ganymede.rmi.string_field string_field}.  Information from
    * both sources may be integrated into this cache.</p>
    */
 
@@ -539,7 +539,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * it is set.</p>
    *
    * <p>Whenever the gclient's
-   * {@link arlut.csd.ddroid.client.gclient#setStatus(java.lang.String,int) setStatus}
+   * {@link arlut.csd.ganymede.client.gclient#setStatus(java.lang.String,int) setStatus}
    * method is called, this thread has a countdown timer started, which will
    * clear the status label if it is not reset by another call to setStatus.</p>
    */
@@ -588,7 +588,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     try
       {
-	setTitle("Directory Droid Client: " + s.getMyUserName() + " logged in");
+	setTitle("Ganymede Client: " + s.getMyUserName() + " logged in");
       }
     catch (RemoteException rx)
       {
@@ -611,7 +611,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if (s == null)
       {
-	throw new IllegalArgumentException("Directory Droid Error: Parameter for Session s is null");
+	throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");
       }
 
     session = s;
@@ -772,7 +772,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     // This uses action commands, so you don't need to globally declare these
 
-    JMenuItem showAboutMI = new JMenuItem("About Directory Droid");
+    JMenuItem showAboutMI = new JMenuItem("About Ganymede");
     showAboutMI.setMnemonic('a');
     showAboutMI.addActionListener(this);
     helpMenu.add(showAboutMI);
@@ -1101,7 +1101,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     try
       {
-	ReturnVal rv = session.openTransaction("Directory Droid GUI Client");
+	ReturnVal rv = session.openTransaction("Ganymede GUI Client");
 	rv = handleReturnVal(rv);
 
 	if ((rv != null) && (!rv.didSucceed()))
@@ -1182,7 +1182,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   
   /**
    * <p>Returns a vector of 
-   * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}'s.</p>
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s.</p>
    *
    * @param id Object type id to retrieve field information for.
    */
@@ -1193,7 +1193,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns a {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}
+   * <p>Returns a {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
    * based on the short type id for the containing object and the
    * short field id for the field.</p>
    */
@@ -1217,7 +1217,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /**
    * <p>Returns a vector of 
-   * {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}'s
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s
    * listing fields and field informaton for the object type identified by 
    * id.</p>
    *
@@ -1231,9 +1231,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /**
    * <p>Clears out the client's 
-   * {@link arlut.csd.ddroid.client.objectCache objectCache},
+   * {@link arlut.csd.ganymede.client.objectCache objectCache},
    * which holds object labels, and activation status for invid's returned 
-   * by various query and {@link arlut.csd.ddroid.rmi.db_field db_field} 
+   * by various query and {@link arlut.csd.ganymede.rmi.db_field db_field} 
    * choices() operations.</p>
    */
 
@@ -1256,7 +1256,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * has already been retrieved, the cached list will be returned.  If
    * it hasn't, getObjectList() will get the list from the server and
    * save a local copy in an 
-   * {@link arlut.csd.ddroid.client.objectCache objectCache}
+   * {@link arlut.csd.ganymede.client.objectCache objectCache}
    * for future requests.</p>
    */
 
@@ -1409,7 +1409,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns a hash mapping {@link arlut.csd.ddroid.common.BaseDump BaseDump}
+   * <p>Returns a hash mapping {@link arlut.csd.ganymede.common.BaseDump BaseDump}
    * references to their title.</p>
    *
    * <p>Checks to see if the baseNames was loaded, and if not, it loads it.
@@ -1422,8 +1422,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns a Vector of {@link arlut.csd.ddroid.common.BaseDump BaseDump} objects,
-   * providing a local cache of {@link arlut.csd.ddroid.rmi.Base Base}
+   * <p>Returns a Vector of {@link arlut.csd.ganymede.common.BaseDump BaseDump} objects,
+   * providing a local cache of {@link arlut.csd.ganymede.rmi.Base Base}
    * references that the client consults during operations.</p>
    *
    * <p>Checks to see if the baseList was loaded, and if not, it loads it.
@@ -1437,8 +1437,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns a hash mapping Short {@link arlut.csd.ddroid.rmi.Base Base} id's to
-   * {@link arlut.csd.ddroid.common.BaseDump BaseDump} objects.</p>
+   * <p>Returns a hash mapping Short {@link arlut.csd.ganymede.rmi.Base Base} id's to
+   * {@link arlut.csd.ganymede.common.BaseDump BaseDump} objects.</p>
    *
    * <p>Checks to see if the baseMap was loaded, and if not, it loads it.
    * Always use this instead of trying to access the baseMap
@@ -1451,7 +1451,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Returns a hashtable mapping {@link arlut.csd.ddroid.common.BaseDump BaseDump}
+   * <p>Returns a hashtable mapping {@link arlut.csd.ganymede.common.BaseDump BaseDump}
    * references to their object type id in Short form.  This is
    * a holdover from a time when the client didn't create local copies
    * of the server's Base references.</p>
@@ -1605,7 +1605,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>This method is triggered by the Directory Droid server if the client
+   * <p>This method is triggered by the Ganymede server if the client
    * is idle long enough.  This method will downgrade the user's
    * login to a minimum privilege level if possible, requiring
    * the user to enter their admin password again to regain
@@ -1730,23 +1730,23 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    buffer.append("<head></head>");
 	    buffer.append("<body>");
-	    buffer.append("<h1>Directory Droid Directory Management System</h1><p>");
+	    buffer.append("<h1>Ganymede Directory Management System</h1><p>");
 	    buffer.append("<p>Release number: ");
 	    buffer.append(arlut.csd.Util.SVNVersion.getReleaseString());
 	    buffer.append("<br>Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004<br>The University of Texas at Austin</p>");
-	    buffer.append("<p>Directory Droid is licensed and distributed under the GNU General Public License ");
+	    buffer.append("<p>Ganymede is licensed and distributed under the GNU General Public License ");
 	    buffer.append("and comes with ABSOLUTELY NO WARRANTY.</p>");
 	    buffer.append("<p>This is free software, and you are welcome to redistribute it ");
 	    buffer.append("under the conditions of the GNU General Public License.</p>");
 	    buffer.append("<p>Written by Jonathan Abbey, Michael Mulvaney, Navin Manohar, ");
 	    buffer.append("Brian O'Mara, and Erik Grostic.</p>");
-	    buffer.append("<br><p>Visit the Directory Droid web site at http://www.arlut.utexas.edu/gash2/</p>");
+	    buffer.append("<br><p>Visit the Ganymede web site at http://www.arlut.utexas.edu/gash2/</p>");
 	    buffer.append("</body>");
 
 	    aboutMessage = buffer.toString();
 	  }
 
-	about = new messageDialog(this, "About Directory Droid",  null);
+	about = new messageDialog(this, "About Ganymede",  null);
 	about.setHtmlText(aboutMessage);
       }
 
@@ -1763,19 +1763,19 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	if (creditsMessage == null)
 	  {
-	    creditsMessage = ("<head></head><h1>Directory Droid credits</h1>" +
-			      "<p>Directory Droid was developed by the Computer Science Division of the Applied " +
+	    creditsMessage = ("<head></head><h1>Ganymede credits</h1>" +
+			      "<p>Ganymede was developed by the Computer Science Division of the Applied " +
 			      "Research Laboratories at The University of Texas at Austin</p>" +
-			      "<p>The primary designer and author of Directory Droid was Jonathan Abbey, " +
+			      "<p>The primary designer and author of Ganymede was Jonathan Abbey, " +
 			      "jonabbey@arlut.utexas.edu.</p>  <p>Michael Mulvaney, mikem@mail.utexas.edu, "+
 			      "developed large portions of the client.</p> <p>Significant portions of the client " +
 			      "were initially developed by Navin Manohar.  Erik Grostic and Brian O'Mara " +
-			      "contributed code to the client.</p><p>Navin, Erik, and Brian worked on Directory Droid " +
+			      "contributed code to the client.</p><p>Navin, Erik, and Brian worked on Ganymede " +
 			      "while working as student employees at ARL.</p>" +
 			      "<p>Dan Scott, dscott@arlut.utexas.edu, oversaw the development " +
-			      "of Directory Droid and its predecessor, GASH, and provided high-level " +
+			      "of Ganymede and its predecessor, GASH, and provided high-level " +
 			      "direction and support.</p><br>" +
-			      "<p>The Directory Droid web page is currently at " +
+			      "<p>The Ganymede web page is currently at " +
 			      "<a href=\"http://www.arlut.utexas.edu/gash2\">" +
 			      "http://www.arlut.utexas.edu/gash2</a>.</p>");
 	  }
@@ -2340,7 +2340,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   /**
    * <p>This method builds the initial data structures for the object
    * selection tree, using the base information in the baseHash
-   * hashtable gained from the {@link arlut.csd.ddroid.client.Loader Loader}
+   * hashtable gained from the {@link arlut.csd.ganymede.client.Loader Loader}
    * thread.</p>
    */
 
@@ -2673,7 +2673,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * method directly.</p>
    *
    * <p>This method is precisely analagous in function to
-   * {@link arlut.csd.ddroid.client.gclient#cleanUpAfterCancel() cleanUpAfterCancel()},
+   * {@link arlut.csd.ganymede.client.gclient#cleanUpAfterCancel() cleanUpAfterCancel()},
    * except for use after a commit.</p> 
    */
 
@@ -2760,7 +2760,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /**
    * <p>Queries the server for status information on a vector of 
-   * {@link arlut.csd.ddroid.common.Invid invid}'s that were touched
+   * {@link arlut.csd.ganymede.common.Invid invid}'s that were touched
    * in some way by the client during the recent transaction.
    * The results from the queries are used to update the icons
    * in the tree.</p>
@@ -2768,7 +2768,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Called by refreshTreeAfterCommit().</p>
    *
    * <p>This method is called from
-   * {@link arlut.csd.ddroid.client.gclient#refreshTreeAfterCommit() refreshTreeAfterCommit()}.</p>
+   * {@link arlut.csd.ganymede.client.gclient#refreshTreeAfterCommit() refreshTreeAfterCommit()}.</p>
    *
    * @param paramVect Vector of invid's to refresh.  
    * @param afterCommit If true, this method will update the client's status
@@ -3031,7 +3031,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    ********************************************************************************/
 
   /** 
-   * <p>Opens a new {@link arlut.csd.ddroid.client.framePanel framePanel} 
+   * <p>Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel} 
    * window to allow the user to edit an object.</p>
    *
    * <p>Use this to edit objects, so gclient can keep track of the
@@ -3047,7 +3047,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Opens a new {@link arlut.csd.ddroid.client.framePanel framePanel}
+   * <p>Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel}
    * window to allow the user to edit an object.</p>
    *
    * <p>Use this to edit objects, so gclient can keep track of the
@@ -3142,7 +3142,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /** 
    * <p>Creates a new object on the server and opens a new
-   * client {@link arlut.csd.ddroid.client.framePanel framePanel}
+   * client {@link arlut.csd.ganymede.client.framePanel framePanel}
    * window to allow the user to edit the new object.</p>
    *
    * @param type Type of object to be created
@@ -3262,7 +3262,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /** 
    * <p>Creates a new object on the server and opens a new
-   * client {@link arlut.csd.ddroid.client.framePanel framePanel}
+   * client {@link arlut.csd.ganymede.client.framePanel framePanel}
    * window to allow the user to edit the new object.</p>
    *
    * @param type Type of object to be created
@@ -3374,7 +3374,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Opens a new {@link arlut.csd.ddroid.client.framePanel framePanel} 
+   * <p>Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel} 
    * window to view the object corresponding to the given invid.</p>
    */
 
@@ -3384,7 +3384,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * <p>Opens a new {@link arlut.csd.ddroid.client.framePanel framePanel}
+   * <p>Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel}
    * window to view the object corresponding to the given invid.</p>
    *
    * @param objectType Type of the object to be viewed.. if this is
@@ -4028,7 +4028,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   /**
    * <p>This method is called by the {@link
-   * arlut.csd.ddroid.client.JFilterDialog JFilterDialog} class when
+   * arlut.csd.ganymede.client.JFilterDialog JFilterDialog} class when
    * the owner list filter is changed, to refresh the tree's display
    * of all object lists loaded into the client so that only those
    * objects matching the owner list filter are visible.</p>
@@ -4291,7 +4291,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   /** 
    * <p>Commits the currently open transaction on the server.  All
    * changes made by the user since the last openNewTransaction() call
-   * will be integrated into the database on the Directory Droid server.</p>
+   * will be integrated into the database on the Ganymede server.</p>
    *
    * <p>For various reasons, the server may reject the transaction as
    * incomplete.  Usually this will be a non-fatal error.. the user
@@ -4473,7 +4473,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * <p>Cleans up the tree and gclient's caches.</p>
    *
    * <p>This method is precisely analagous in function to
-   * {@link arlut.csd.ddroid.client.gclient#refreshTreeAfterCommit() refreshTreeAfterCommit()},
+   * {@link arlut.csd.ganymede.client.gclient#refreshTreeAfterCommit() refreshTreeAfterCommit()},
    * except for use after a cancel, when nodes marked as deleted are not removed from the tree,
    * and nodes marked as created are not kept.</p>
    */
@@ -4601,7 +4601,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     try
       {
-	ReturnVal rv = session.openTransaction("Directory Droid GUI Client");
+	ReturnVal rv = session.openTransaction("Ganymede GUI Client");
 	
 	handleReturnVal(rv);
 	if ((rv != null) && (!rv.didSucceed()))
@@ -4756,7 +4756,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	showHelpWindow();
       }
-    else if (command.equals("About Directory Droid"))
+    else if (command.equals("About Ganymede"))
       {
 	Thread thread = new Thread(new Runnable() {
 	  public void run() {
@@ -5849,7 +5849,7 @@ class PersonaListener implements ActionListener {
 	    // List of creatable object types might have changed.
 		
 	    gc.createDialog = null;
-	    gc.setTitle("Directory Droid Client: " + newPersona + " logged in.");
+	    gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
 		
 	    gc.ownerGroups = null;
 	    gc.clearCaches();
@@ -5895,7 +5895,7 @@ class PersonaListener implements ActionListener {
 
 /**
  * Client-side cache object, used by the
- * {@link arlut.csd.ddroid.client.gclient gclient} class to track object status for
+ * {@link arlut.csd.ganymede.client.gclient gclient} class to track object status for
  * nodes in the client tree display.
  */
 
@@ -6011,7 +6011,7 @@ class CacheInfo {
 
 /**
  * Background thread designed to clear the status label in 
- * {@link arlut.csd.ddroid.client.gclient gclient}
+ * {@link arlut.csd.ganymede.client.gclient gclient}
  * some seconds after the setClock() method is called.
  */
 
@@ -6143,7 +6143,7 @@ class StatusClearThread extends Thread {
  * from the server on a non-RMI thread.  We do this so that RMI calls
  * from the server are granted permission to put events on the GUI
  * thread for apropriately synchronized icon setitng.  Set up and torn
- * down by the {@link arlut.csd.ddroid.client.gclient gclient}
+ * down by the {@link arlut.csd.ganymede.client.gclient gclient}
  * class.
  */
 
@@ -6234,7 +6234,7 @@ class SecurityLaunderThread extends Thread {
 
   /**
    * <p>This method is called to trigger a build status icon update.</p>
-   * Called by {@link arlut.csd.ddroid.client.gclient#setBuildStatus(java.lang.String) gclient.setBuildStatus()}.
+   * Called by {@link arlut.csd.ganymede.client.gclient#setBuildStatus(java.lang.String) gclient.setBuildStatus()}.
    */
 
   public synchronized void setBuildStatus(int phase)

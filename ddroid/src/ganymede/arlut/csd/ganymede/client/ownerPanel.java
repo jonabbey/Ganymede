@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -50,7 +50,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -77,10 +77,10 @@ import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDataComponent.listHandle;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.invid_field;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.invid_field;
 
 /**
  * <p>GUI panel for displaying the list of owners for a given object in
@@ -297,7 +297,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
   }
 
   /**
-   * <p>Updates the contents of a vector {@link arlut.csd.ddroid.rmi.invid_field invid_field}
+   * <p>Updates the contents of a vector {@link arlut.csd.ganymede.rmi.invid_field invid_field}
    * value selector against the current contents of the field on the server.</p>
    *
    * @param ss The StringSelector GUI component being updated

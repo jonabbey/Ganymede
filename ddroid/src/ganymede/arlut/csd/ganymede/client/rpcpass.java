@@ -17,7 +17,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -54,7 +54,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -65,11 +65,11 @@ import java.rmi.RemoteException;
 import java.util.Properties;
 
 import arlut.csd.Util.ParseArgs;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.rmi.Session;
-import arlut.csd.ddroid.rmi.db_object;
-import arlut.csd.ddroid.rmi.pass_field;
-import arlut.csd.ddroid.rmi.string_field;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.rmi.pass_field;
+import arlut.csd.ganymede.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -82,11 +82,11 @@ import arlut.csd.ddroid.rmi.string_field;
  * gecos information based on interaction with the rpc.yppasswdd daemon
  * from the Linux NIS kit, versions 1.3.6.92 and above, using the -x option.</p>
  *
- * <p>This client uses the {@link arlut.csd.ddroid.client.ClientBase ClientBase}
+ * <p>This client uses the {@link arlut.csd.ganymede.client.ClientBase ClientBase}
  * client stub for communications with the server.</p>
  *
  * <p>This code should be considered quasi-deprecatd, because the NIS
- * passwd daemon can't pass plaintext to Directory Droid, making it useless
+ * passwd daemon can't pass plaintext to Ganymede, making it useless
  * for updating Samba, md5 or NT password hashes.</p> 
  */
 
@@ -125,7 +125,7 @@ public class rpcpass implements ClientListener {
 
     if (propFilename == null)
       {
-	System.out.println("Directory Droid rpcpass: Error, invalid command line parameters");
+	System.out.println("Ganymede rpcpass: Error, invalid command line parameters");
  	System.out.println("Usage: java rpcpass properties=<property file>");
 	System.exit(1);
       }
@@ -138,7 +138,7 @@ public class rpcpass implements ClientListener {
       }
     catch (IOException ex)
       {
-	System.out.println("Directory Droid rcpass: Could not read input from rpc.yppasswdd: " + ex.getMessage());
+	System.out.println("Ganymede rcpass: Could not read input from rpc.yppasswdd: " + ex.getMessage());
       }
 
     input = input.trim();
@@ -223,13 +223,13 @@ public class rpcpass implements ClientListener {
     if (username == null || oldpass == null || 
 	(cryptedpass == null && shell == null && gecos == null))
       {
-	System.out.println("Directory Droid rpcpass: Error, information missing.");
+	System.out.println("Ganymede rpcpass: Error, information missing.");
 	System.exit(1);
       }
 
     if (!loadProperties(propFilename))
       {
-	System.out.println("Directory Droid rpcpass: Error, couldn't successfully load properties from file " + 
+	System.out.println("Ganymede rpcpass: Error, couldn't successfully load properties from file " + 
 			   propFilename + ".");
 	System.exit(1);
       }
@@ -256,7 +256,7 @@ public class rpcpass implements ClientListener {
       }
     catch (RemoteException ex)
       {
-	System.out.println("Directory Droid rpcpass: couldn't log in for username " + username);
+	System.out.println("Ganymede rpcpass: couldn't log in for username " + username);
 	System.exit(1);
       }
 
@@ -270,12 +270,12 @@ public class rpcpass implements ClientListener {
 	      {
 		if (attempt.getDialog() != null)
 		  {
-		    System.out.println("Directory Droid rpcpass: couldn't open transaction " + username +
+		    System.out.println("Ganymede rpcpass: couldn't open transaction " + username +
 				       ": " + attempt.getDialog().getText());
 		  }
 		else
 		  {
-		    System.out.println("Directory Droid rpcpass: couldn't open transaction " + username);
+		    System.out.println("Ganymede rpcpass: couldn't open transaction " + username);
 		  }
 
 		return;
@@ -283,7 +283,7 @@ public class rpcpass implements ClientListener {
 	  }
 	catch (RemoteException ex)
 	  {
-	    System.out.println("Directory Droid rpcpass: couldn't open transaction " + 
+	    System.out.println("Ganymede rpcpass: couldn't open transaction " + 
 			       username + ": " + ex.getMessage());
 	    return;
 	  }
@@ -300,13 +300,13 @@ public class rpcpass implements ClientListener {
 	      {
 		if (attempt.getDialog() != null)
 		  {
-		    System.out.println("Directory Droid rpcpass: couldn't edit user " + username +
+		    System.out.println("Ganymede rpcpass: couldn't edit user " + username +
 				       ": " + attempt.getDialog().getText());
 		    return;
 		  }
 		else
 		  {
-		    System.out.println("Directory Droid rpcpass: couldn't edit user " + username);
+		    System.out.println("Ganymede rpcpass: couldn't edit user " + username);
 		    return;
 		  }
 	      }
@@ -321,13 +321,13 @@ public class rpcpass implements ClientListener {
 		  {
 		    if (attempt.getDialog() != null)
 		      {
-			System.out.println("Directory Droid rpcpass: couldn't set password for user " + username +
+			System.out.println("Ganymede rpcpass: couldn't set password for user " + username +
 					   ": " + attempt.getDialog().getText());
 			return;
 		      }
 		    else
 		      {
-			System.out.println("Directory Droid rpcpass: couldn't set password for user " + username);
+			System.out.println("Ganymede rpcpass: couldn't set password for user " + username);
 			return;
 		      }
 		  }
@@ -343,13 +343,13 @@ public class rpcpass implements ClientListener {
 		  {
 		    if (attempt.getDialog() != null)
 		      {
-			System.out.println("Directory Droid rpcpass: couldn't set shell for user " + username +
+			System.out.println("Ganymede rpcpass: couldn't set shell for user " + username +
 					   ": " + attempt.getDialog().getText());
 			return;
 		      }
 		    else
 		      {
-			System.out.println("Directory Droid rpcpass: couldn't set shell for user " + username);
+			System.out.println("Ganymede rpcpass: couldn't set shell for user " + username);
 			return;
 		      }
 		  }
@@ -361,13 +361,13 @@ public class rpcpass implements ClientListener {
 	      {
 		if (attempt.getDialog() != null)
 		  {
-		    System.out.println("Directory Droid rpcpass: couldn't commit transaction " + username +
+		    System.out.println("Ganymede rpcpass: couldn't commit transaction " + username +
 				       ": " + attempt.getDialog().getText());
 		    return;
 		  }
 		else
 		  {
-		    System.out.println("Directory Droid rpcpass: couldn't commit transaction " + username);
+		    System.out.println("Ganymede rpcpass: couldn't commit transaction " + username);
 		    return;
 		  }
 	      }
@@ -401,7 +401,7 @@ public class rpcpass implements ClientListener {
    * file.</p>
    *
    * <p>This method is public so that loader code linked with the
-   * Directory Droid server code can initialize the properties without
+   * Ganymede server code can initialize the properties without
    * going through Ganymede.main().</p>
    */
 
@@ -465,7 +465,7 @@ public class rpcpass implements ClientListener {
    * <p>Called when the server forces a disconnect.</p>
    *
    * <p>Call getMessage() on the
-   * {@link arlut.csd.ddroid.client.ClientEvent ClientEvent} 
+   * {@link arlut.csd.ganymede.client.ClientEvent ClientEvent} 
    * to get the reason for the disconnect.</p>
    */
 
@@ -479,7 +479,7 @@ public class rpcpass implements ClientListener {
    * up a dialog or do whatever else is appropriate.</p>
    *
    * <p>Call getMessage() on the
-   * {@link arlut.csd.ddroid.client.ClientEvent ClientEvent} 
+   * {@link arlut.csd.ganymede.client.ClientEvent ClientEvent} 
    * to get the reason for the disconnect.</p>
    */
 

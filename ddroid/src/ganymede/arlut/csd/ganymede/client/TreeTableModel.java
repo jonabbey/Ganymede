@@ -24,7 +24,7 @@
  */
 
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import javax.swing.tree.TreeModel;
 

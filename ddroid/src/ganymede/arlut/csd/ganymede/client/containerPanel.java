@@ -14,7 +14,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -51,7 +51,7 @@
 
 */
 
-package arlut.csd.ddroid.client;
+package arlut.csd.ganymede.client;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -100,20 +100,20 @@ import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.Util.VecSortInsert;
-import arlut.csd.ddroid.common.FieldInfo;
-import arlut.csd.ddroid.common.FieldTemplate;
-import arlut.csd.ddroid.common.FieldType;
-import arlut.csd.ddroid.common.Invid;
-import arlut.csd.ddroid.common.QueryResult;
-import arlut.csd.ddroid.common.ReturnVal;
-import arlut.csd.ddroid.common.SchemaConstants;
-import arlut.csd.ddroid.rmi.db_field;
-import arlut.csd.ddroid.rmi.db_object;
-import arlut.csd.ddroid.rmi.invid_field;
-import arlut.csd.ddroid.rmi.ip_field;
-import arlut.csd.ddroid.rmi.pass_field;
-import arlut.csd.ddroid.rmi.perm_field;
-import arlut.csd.ddroid.rmi.string_field;
+import arlut.csd.ganymede.common.FieldInfo;
+import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.FieldType;
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_field;
+import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.rmi.invid_field;
+import arlut.csd.ganymede.rmi.ip_field;
+import arlut.csd.ganymede.rmi.pass_field;
+import arlut.csd.ganymede.rmi.perm_field;
+import arlut.csd.ganymede.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -124,11 +124,11 @@ import arlut.csd.ddroid.rmi.string_field;
 /**
  * <p>One of the basic building blocks of the ganymede client, a containerPanel is
  * a GUI panel which allows the user to view and/or edit all the custom fields
- * for an object in the Directory Droid database.</p>
+ * for an object in the Ganymede database.</p>
  *
  * <p>Each containerPanel displays a single
- * {@link arlut.csd.ddroid.rmi.db_object db_object}, and allows the
- * user to edit or view each {@link arlut.csd.ddroid.rmi.db_field db_field} in the
+ * {@link arlut.csd.ganymede.rmi.db_object db_object}, and allows the
+ * user to edit or view each {@link arlut.csd.ganymede.rmi.db_field db_field} in the
  * object.  On loading, containerPanel loops through the fields of the object, adding the
  * appropriate type of input for each field.  This includes text fields,
  * number fields, boolean fields, and string selector fields(fields that can have
@@ -138,14 +138,14 @@ import arlut.csd.ddroid.rmi.string_field;
  * fields, translating GUI activity to attempted changes to server fields.  Any
  * attempted change that the server refuses will cause a dialog to be popped up via
  * gclient's
- * {@link arlut.csd.ddroid.client.gclient#handleReturnVal(arlut.csd.ddroid.common.ReturnVal) handleReturnVal()}
+ * {@link arlut.csd.ganymede.client.gclient#handleReturnVal(arlut.csd.ganymede.common.ReturnVal) handleReturnVal()}
  * method, and the GUI component that caused the change will be reverted to its pre-change
  * status.</p>
  *
  * <p>The gclient's handleReturnVal() method also supports extracting a list of objects
  * and fields that need to be refreshed when one change on the server is reflected
  * across more than one object.  This is handled by containerPanel's
- * {@link arlut.csd.ddroid.client.containerPanel#update(java.util.Vector) update()}
+ * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
  * @version $Id$
@@ -187,7 +187,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   /**
    * The window we are contained in, may be null if we are embedded in a 
-   * {@link arlut.csd.ddroid.client.vectorPanel vectorPanel}.
+   * {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}.
    */
 
   protected framePanel frame;
@@ -204,7 +204,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   /**
    * <p>Vector used to list vectorPanels embedded in this object window.  This
    * variable is used by
-   * {@link arlut.csd.ddroid.client.vectorPanel#expandAllLevels() vectorPanel.expandAllLevels()}
+   * {@link arlut.csd.ganymede.client.vectorPanel#expandAllLevels() vectorPanel.expandAllLevels()}
    * to do recursive expansion of embedded objects.</p>
    */
 
@@ -235,16 +235,16 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   /**
    * <p>Hashtable mapping GUI components to their associated
-   * {@link arlut.csd.ddroid.rmi.db_field db_field}'s.
+   * {@link arlut.csd.ganymede.rmi.db_field db_field}'s.
    */
 
   Hashtable objectHash = new Hashtable();
 
   /**
    * <p>Hashtable mapping the combo boxes contained within
-   * {@link arlut.csd.ddroid.client.JInvidChooser JInvidChooser}
+   * {@link arlut.csd.ganymede.client.JInvidChooser JInvidChooser}
    * GUI components to their associated
-   * {@link arlut.csd.ddroid.rmi.db_field db_field}'s.</p>
+   * {@link arlut.csd.ganymede.rmi.db_field db_field}'s.</p>
    *
    * <p>This is required because while we want to hide or reveal the JInvidChooser
    * as a whole, we'll get itemStateChanged() calls from the combo
@@ -254,7 +254,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   Hashtable invidChooserHash = new Hashtable();
 
   /**
-   * <p>Vector of {@link arlut.csd.ddroid.common.FieldInfo FieldInfo} objects
+   * <p>Vector of {@link arlut.csd.ganymede.common.FieldInfo FieldInfo} objects
    * holding the values for fields in this object.  Used during loading
    * and update.</p>
    */
@@ -262,7 +262,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   Vector infoVector = null;
 
   /**
-   * <p>Vector of {@link arlut.csd.ddroid.common.FieldTemplate FieldTemplate}
+   * <p>Vector of {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
    * objects holding the constant field type information for fields in
    * this object.</p>
    */
@@ -301,7 +301,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * when we embedded a persona panel in a framePanel showing a user object.</p>
    *
    * <p>This is a dirty hack to make the client a little extra smart about one
-   * particular kind of mandatory Directory Droid server object.</p>
+   * particular kind of mandatory Ganymede server object.</p>
    */
 
   boolean isPersonaPanel = false;
@@ -1444,7 +1444,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * <p>Updates the contents of a vector {@link arlut.csd.ddroid.rmi.string_field string_field}
+   * <p>Updates the contents of a vector {@link arlut.csd.ganymede.rmi.string_field string_field}
    * value selector against the current contents of the field on the server.</p>
    *
    * @param ss The StringSelector GUI component being updated
@@ -1520,7 +1520,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * <p>Updates the contents of a vector {@link arlut.csd.ddroid.rmi.invid_field invid_field}
+   * <p>Updates the contents of a vector {@link arlut.csd.ganymede.rmi.invid_field invid_field}
    * value selector against the current contents of the field on the server.</p>
    *
    * @param ss The StringSelector GUI component being updated
@@ -1636,7 +1636,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	// ok, now we have to connect the field change report coming
 	// from the JDataComponent to the appropriate field object
-	// on the Directory Droid server.  First we'll try the simplest,
+	// on the Ganymede server.  First we'll try the simplest,
 	// generic case.
 
 	if ((v.getSource() instanceof JstringField) ||
@@ -2718,7 +2718,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * <p>If we contain any {@link arlut.csd.ddroid.client.vectorPanel vectorPanel}s,
+   * <p>If we contain any {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}s,
    * they will call this method during loading to let us update our progress bar if
    * we have it still up.  This is used to let us include the time it will take
    * to get vector panels loaded in the progress bar time estimate.</p>
