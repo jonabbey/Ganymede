@@ -132,14 +132,6 @@ public class GanymedeRMIManager {
    */
   public void startRMIRegistry(int port) throws RemoteException
   {
-    /* TODO: When you pass in the client and server socket factories,
-     * you get a bizarre error:
-     * 
-     * "non-JRMP server at remote endpoint"
-     * 
-     * I don't know what this means, but we'll need to sort that out
-     * if we want to SSL-encrypt rmiregistry traffic.
-     */
     LocateRegistry.createRegistry(port);
   }
 
