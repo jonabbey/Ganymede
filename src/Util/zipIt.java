@@ -8,8 +8,8 @@
    
    Created: 3 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/02/03 23:11:30 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/02/04 22:00:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -121,7 +121,7 @@ public class zipIt {
 	  {
 	    File inFile = (File) files.elementAt(i);
 
-	    if (inFile.isDirectory())
+	    if (!inFile.exists() || inFile.isDirectory())
 	      {
 		continue;
 	      }
