@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 2001/04/16 04:54:28 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 2001/04/23 05:21:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -368,44 +368,74 @@ public class PasswordDBField extends DBField implements pass_field {
     // plaintext if we are told to, or if we don't have any
     // hashed form of it to use
 
-    if (!getFieldDef().isCrypted() || (cryptedPass == null || cryptedPass.equals("")))
+    if (getFieldDef().isCrypted())
       {
-	out.writeUTF("");
+	cryptedPass = getUNIXCryptText();
+
+	if (cryptedPass == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(cryptedPass);
+	    wrote_hash = true;
+	  }
       }
     else
       {
-	out.writeUTF(cryptedPass);
-	wrote_hash = true;
+	out.writeUTF("");
       }
 
-    if (!getFieldDef().isMD5Crypted() || (md5CryptPass == null || md5CryptPass.equals("")))
+    if (getFieldDef().isMD5Crypted())
       {
-	out.writeUTF("");
+	md5CryptPass = getMD5CryptText();
+
+	if (md5CryptPass == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(md5CryptPass);
+	    wrote_hash = true;
+	  }
       }
     else
       {
-	out.writeUTF(md5CryptPass);
-	wrote_hash = true;
+	out.writeUTF("");
       }
 
-    if (!getFieldDef().isWinHashed() || (lanHash == null || lanHash.equals("")))
+    if (getFieldDef().isWinHashed())
       {
-	out.writeUTF("");
-      }
-    else
-      {
-	out.writeUTF(lanHash);
-	wrote_hash = true;
-      }
+	lanHash = getLANMANCryptText();
 
-    if (!getFieldDef().isWinHashed() || (ntHash == null || ntHash.equals("")))
-      {
-	out.writeUTF("");
-      }
+	if (lanHash == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(lanHash);
+	    wrote_hash = true;
+	  }
+
+	ntHash = getNTUNICODECryptText();
+
+	if (ntHash == null)
+	  {
+	    out.writeUTF("");
+	  }
+	else
+	  {
+	    out.writeUTF(ntHash);
+	    wrote_hash = true;
+	  }
+      } 
     else
       {
-	out.writeUTF(ntHash);
-	wrote_hash = true;
+	out.writeUTF("");
+	out.writeUTF("");
       }
 
     // at file version 2.1, we write out plaintext if the field
