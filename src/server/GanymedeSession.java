@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.156 $
-   Last Mod Date: $Date: 1999/10/29 16:14:09 $
+   Version: $Revision: 1.157 $
+   Last Mod Date: $Date: 1999/10/29 17:58:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.156 $ %D%
+ * @version $Revision: 1.157 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3836,6 +3836,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     /* -- */
 
     checklogin();
+
+    if (invid == null)
+      {
+	return Ganymede.createErrorDialog("Client error",
+					  "Error, the client attempted to clone a null invid.");
+      }
 
     retVal = view_db_object(invid); // get a copy customized for per-field visibility
 

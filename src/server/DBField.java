@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.75 $
-   Last Mod Date: $Date: 1999/10/29 16:14:05 $
+   Version: $Revision: 1.76 $
+   Last Mod Date: $Date: 1999/10/29 17:58:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1063,10 +1063,10 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 		    mark(this.value); // we aren't clearing the old value after all
 		  }
 		
-		setLastError("value " + newValue + " already taken in namespace");
+		setLastError("value " + submittedValue + " already taken in namespace");
 
 		return Ganymede.createErrorDialog("Server: Error in DBField.setValue()",
-						  "value " + newValue +
+						  "value " + submittedValue +
 						  " already taken in namespace");
 	      }
 	  }
@@ -1081,13 +1081,13 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    newRetVal = eObj.finalizeSetValue(this, newValue);
+    newRetVal = eObj.finalizeSetValue(this, submittedValue);
 
     if (newRetVal == null || newRetVal.didSucceed())
       {
-	if (value != null)
+	if (submittedValue != null)
 	  {
-	    this.value = newValue;
+	    this.value = submittedValue;
 	  }
 	else
 	  {
