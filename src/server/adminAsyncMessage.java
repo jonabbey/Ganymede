@@ -4,8 +4,8 @@
 
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2003/09/08 18:28:18 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/09/08 21:29:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -67,25 +67,25 @@ import java.rmi.server.Unreferenced;
  * calls {@link arlut.csd.ganymede.serverClientAsyncResponder#getNextMsgs()} to
  * receive asynchonous notifications from the server.</p>
  *
- * @version $Revision: 1.5 $ $Date: 2003/09/08 18:28:18 $
+ * @version $Revision: 1.6 $ $Date: 2003/09/08 21:29:25 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public class adminAsyncMessage {
 
   static final int FIRST = 0;
-  static final int SETSERVERSTART = 0;
-  static final int SETLASTDUMPTIME = 1;
-  static final int SETTRANSACTIONS = 2;
-  static final int SETOBJSCHECKOUT = 3;
-  static final int SETLOCKSHELD = 4;
-  static final int CHANGESTATE = 5;
-  static final int CHANGESTATUS = 6;
-  static final int CHANGEADMINS = 7;
-  static final int CHANGEUSERS = 8;
-  static final int CHANGETASKS = 9;
-  static final int SETMEMORYSTATE = 10;
-  static final int FORCEDISCONNECT = 11;
+  static public final int SETSERVERSTART = 0;
+  static public final int SETLASTDUMPTIME = 1;
+  static public final int SETTRANSACTIONS = 2;
+  static public final int SETOBJSCHECKOUT = 3;
+  static public final int SETLOCKSHELD = 4;
+  static public final int CHANGESTATE = 5;
+  static public final int CHANGESTATUS = 6;
+  static public final int CHANGEADMINS = 7;
+  static public final int CHANGEUSERS = 8;
+  static public final int CHANGETASKS = 9;
+  static public final int SETMEMORYSTATE = 10;
+  static public final int FORCEDISCONNECT = 11;
   static final int LAST = 11;
 
   /* --- */
