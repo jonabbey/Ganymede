@@ -5,7 +5,7 @@
    The frame containing the notes panel
    
    Created: 4 September 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,7 +19,10 @@ import java.util.*;
 import java.text.SimpleDateFormat;
 
 import com.sun.java.swing.*;
-import com.sun.java.swing.event.*;
+import com.sun.java.swing.border.*;
+//import com.sun.java.swing.event.*;
+
+import tablelayout.*;
 
 import jdj.PackageResources;
 
@@ -28,9 +31,12 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 
 
-public class notesPanel extends JBufferedPane implements DocumentListener{
+public class notesPanel extends JPanel{
 
   final static boolean debug = true;
+
+  int 
+    row = 0;
 
   JTextArea
     notesArea;
@@ -40,6 +46,12 @@ public class notesPanel extends JBufferedPane implements DocumentListener{
 
   string_field
     notes_field;
+
+  JTextField
+    createdBy,
+    modifiedBy,
+    createdOn,
+    modifiedOn;
 
   public notesPanel(string_field notes_field, string_field creator_field, 
 		    date_field creation_date_field, string_field modifier_field,
@@ -54,30 +66,24 @@ public class notesPanel extends JBufferedPane implements DocumentListener{
       this.notes_field = notes_field;
 
       //setLayout(new BorderLayout(5,5));
-      setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-      setInsets(new Insets(5,5,5,5));
+      //setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+      setLayout(new GridLayout(2,1));
 
-      JBufferedPane topPane = new JBufferedPane(false);
-      topPane.setLayout(new BoxLayout(topPane, BoxLayout.Y_AXIS));
-      JBufferedPane leftPane = new JBufferedPane(false);
-      leftPane.setLayout(new BoxLayout(leftPane, BoxLayout.Y_AXIS));
-      JBufferedPane rightPane = new JBufferedPane(false);
-      rightPane.setLayout(new BoxLayout(rightPane, BoxLayout.Y_AXIS));
+      JPanel topPane = new JPanel(false);
+      //topPane.setLayout(new BoxLayout(topPane, BoxLayout.Y_AXIS));
+      topPane.setLayout(new GridLayout(2,1));
+      JPanel createdPane = new JPanel(false);
+      //createdPane.setLayout(new BoxLayout(createdPane, BoxLayout.Y_AXIS));
+      createdPane.setLayout(new TableLayout());
+      createdPane.setBorder(new TitledBorder("Creation Information"));
+      JPanel modPane = new JPanel(false);
+      //modPane.setLayout(new BoxLayout(modPane, BoxLayout.Y_AXIS));
+      modPane.setLayout(new TableLayout());
+      modPane.setBorder(new TitledBorder("Modification Information"));
 
-      JBorderedPane creationPane = new JBorderedPane();
-      creationPane.setBorder(BorderFactory.createTitledBorder(creationPane, "Creation Information"));
-      creationPane.setLayout(new BorderLayout());
-      creationPane.add("Center", leftPane);
-
-      JBorderedPane modificationPane = new JBorderedPane();
-      modificationPane.setBorder(BorderFactory.createTitledBorder(modificationPane, "Last Modification"));
-      modificationPane.setLayout(new BorderLayout());
-      modificationPane.add("Center", rightPane);
-
-      topPane.add(creationPane);
-      topPane.add(Box.createVerticalStrut(3));
-      topPane.add(modificationPane);
-      topPane.add(Box.createVerticalStrut(3));
+      topPane.add(createdPane);
+      //topPane.add(Box.createVerticalStrut(3));
+      topPane.add(modPane);
 
       String creator = null;
       Date creation_date = null;
@@ -85,7 +91,6 @@ public class notesPanel extends JBufferedPane implements DocumentListener{
       Date mod_date = null;
 
       SimpleDateFormat dateformat = new SimpleDateFormat("MMM dd, yyyy",Locale.getDefault());
-
 
       try
 	{
@@ -99,63 +104,61 @@ public class notesPanel extends JBufferedPane implements DocumentListener{
 	  throw new RuntimeException("Could not get creation info: " + rx);
 	}
 
-      JLabel createdBy = new JLabel();
+      createdBy = new JTextField(20);
       if (creator == null)
 	{
 	  createdBy.setText("No creator set for this object.");
 	}
       else
 	{
-	  createdBy.setText("Created by " + creator);
+	  createdBy.setText(creator);
 	}
 
-      JLabel createdOn = new JLabel();
+      createdOn = new JTextField(20);
       if (creation_date == null)
 	{
 	  createdOn.setText("No creation date has been set for this object.");
 	}
       else
 	{
-	  createdOn.setText("Created on " + dateformat.format(creation_date));
+	  createdOn.setText(dateformat.format(creation_date));
 	}
 
-      leftPane.add(createdBy);
-      leftPane.add(Box.createVerticalStrut(3));
-      leftPane.add(createdOn);
-      leftPane.add(Box.createVerticalStrut(3));
+      addRow(createdPane, "Created on:", createdBy, 0);
+      
+      addRow(createdPane, "Created by:", createdOn, 1);
 
-      JLabel modifiedBy = new JLabel();
+      modifiedBy = new JTextField(20);
       if (modifier == null)
 	{
 	  modifiedBy.setText("No information about the last modifier.");
 	}
       else
 	{
-	  modifiedBy.setText("Modified by " + modifier);
+	  modifiedBy.setText(modifier);
 	}
-      JLabel modifiedOn = new JLabel();
+
+      modifiedOn = new JTextField(20);
       if (mod_date == null)
 	{
 	  modifiedOn.setText("No last modification date");
 	}
       else
 	{
-	  modifiedOn.setText("Modified on " + dateformat.format(mod_date));
+	  modifiedOn.setText(dateformat.format(mod_date));
 	}
 
-      rightPane.add(modifiedBy);
-      rightPane.add(Box.createVerticalStrut(3));
-      rightPane.add(modifiedOn);
-      rightPane.add(Box.createVerticalStrut(3));
+      addRow(modPane, "Modified by:", modifiedBy, 0);
+
+      addRow(modPane, "Modified on:", modifiedOn, 1);
 
       //add("North", topPane);
       add(topPane);
       
-      JBorderedPane bottomPane = new JBorderedPane();
-      bottomPane.setBorder(BorderFactory.createTitledBorder(bottomPane, "Notes"));
-      bottomPane.setLayout(new BorderLayout());
-
-      notesArea = new JTextArea(null, 30,15, JTextArea.SCROLLBARS_NONE);
+      //notesArea = new JTextArea(null, 30,15, JTextArea.SCROLLBARS_NONE);
+      //notesArea = new JTextArea(30,15);
+      notesArea = new JTextArea();
+      notesArea.setBorder(new TitledBorder("Notes"));
 
       if (debug)
 	{
@@ -163,24 +166,25 @@ public class notesPanel extends JBufferedPane implements DocumentListener{
 	  System.out.println("Rows =   " + notesArea.getRows());
 	}
 
-      bottomPane.add("Center", notesArea);
-      add(bottomPane);
+      add(notesArea);
       //add("Center", bottomPane);
-      try
-	{
-	  String s = (String)notes_field.getValue();
-	  if (s != null)
-	    {
 
-	      notesArea.append(s);
+      if (notes_field != null)
+	{
+	  try
+	    {
+	      String s = (String)notes_field.getValue();
+	      if (s != null)
+		{
+		  
+		  notesArea.append(s);
+		}
+	    }
+	  catch (RemoteException rx)
+	    {
+	      throw new RuntimeException("Could not get note text: " + rx);
 	    }
 	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get note text: " + rx);
-	}
-      
-      //notesArea.getDocument().addDocumentListener(this);
 
     }
 
@@ -196,20 +200,15 @@ public class notesPanel extends JBufferedPane implements DocumentListener{
 	}
     }
 
-  // DocumentListener methods
-  // Get rid of this soon, don't think we need the listeners
-  public void insertUpdate(DocumentEvent e)
-    {
-      System.out.println("insert update");
-    }
-  public void changedUpdate(DocumentEvent e)
-    {
-      System.out.println("changed update");
-    }
+  void addRow(Container cont, String label, JComponent comp, int row)
+  {
+    JLabel l = new JLabel(label);
+    l.setOpaque(true);
+    l.setBackground(ClientColor.ComponentBG);
+    comp.setBackground(ClientColor.ComponentBG);
+    cont.add("0 " + row + " lthwHW", l);
+    cont.add("1 " + row + " lthwHW", comp);
+  }
 
-  public void removeUpdate(DocumentEvent e)
-    {
-      System.out.println("remove update");
-    }
 
 }
