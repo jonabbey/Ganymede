@@ -31,4 +31,6 @@ trap "echo Aborted" 2
 
 export CLASSPATH
 
+stty -echo
 $JAVA -ms32m -mx128m arlut.csd.ganymede.stopServer properties=$PROPERTIES $&
+stty echo
