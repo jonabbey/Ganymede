@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.107 $ %D%
+   Version: $Revision: 1.108 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.107 $ %D%
+ * @version $Revision: 1.108 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -2997,6 +2997,25 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    result = new ReturnVal(true); // success
 	    result.setObject(objref);
 
+	    if (Ganymede.remotelyAccessible)
+	      {
+		// the exportObject call will fail if the object has
+		// already been exported.  Unfortunately, there doesn't
+		// seem to be much way to tell this beforehand, so
+		// we won't bother to try.
+
+		try
+		  {
+		    UnicastRemoteObject.exportObject(objref);
+		  }
+		catch (RemoteException ex)
+		  {
+		    //		    ex.printStackTrace();
+		  }
+
+		((DBObject) objref).exportFields();
+	      }
+
 	    return result;
 	  }
 	catch (RemoteException ex)
@@ -3062,6 +3081,25 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    result = new ReturnVal(true);
 	    result.setObject(objref);
+
+	    if (Ganymede.remotelyAccessible)
+	      {
+		// the exportObject call will fail if the object has
+		// already been exported.  Unfortunately, there doesn't
+		// seem to be much way to tell this beforehand, so
+		// we won't bother to try.
+
+		try
+		  {
+		    UnicastRemoteObject.exportObject(objref);
+		  }
+		catch (RemoteException ex)
+		  {
+		    // ex.printStackTrace();
+		  }
+
+		((DBObject) objref).exportFields();
+	      }
 
 	    return result;
 	  }
@@ -3200,6 +3238,25 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     ReturnVal result = new ReturnVal(true);
 
     result.setObject(newObj);
+
+    if (Ganymede.remotelyAccessible)
+      {
+	// the exportObject call will fail if the object has
+	// already been exported.  Unfortunately, there doesn't
+	// seem to be much way to tell this beforehand, so
+	// we won't bother to try.
+
+	try
+	  {
+	    UnicastRemoteObject.exportObject(newObj);
+	  }
+	catch (RemoteException ex)
+	  {
+	    // ex.printStackTrace();
+	  }
+
+	((DBObject) newObj).exportFields();
+      }
 
     return result;
   }
