@@ -11,7 +11,7 @@
    StringBuffer.
    
    Created: 31 October 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -886,6 +886,8 @@ public class DBLog {
 	System.err.println("updateSysEventCodeHash(): updating..");
       }
 
+    sysEventCodes.clear();
+
     eventCodeVector = session.internalQuery(new Query(SchemaConstants.EventBase));
 
     if (eventCodeVector == null)
@@ -893,8 +895,6 @@ public class DBLog {
 	Ganymede.debug("DBLog.updateSysEventCodeHash(): no event records found in database");
 	return;
       }
-
-    sysEventCodes.clear();
       
     for (int i = 0; i < eventCodeVector.size(); i++)
       {
@@ -969,6 +969,8 @@ public class DBLog {
 	System.err.println("updateObjEventCodeHash(): updating..");
       }
 
+    objEventCodes.clear();
+
     eventCodeVector = session.internalQuery(new Query(SchemaConstants.ObjectEventBase));
 
     if (eventCodeVector == null)
@@ -976,8 +978,6 @@ public class DBLog {
 	Ganymede.debug("DBLog.updateObjEventCodeHash(): no event records found in database");
 	return;
       }
-
-    objEventCodes.clear();
       
     for (int i = 0; i < eventCodeVector.size(); i++)
       {
