@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.72 $ %D%
+    Version: $Revision: 1.73 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -776,7 +776,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    // here because JnumberField only sends callbacks on
 	    // focus loss
 
-	    ((JnumberField)comp).setText((value == null) ? "" : value.toString());
+	    ((JnumberField)comp).setValue(value);
 	  }
 	else if (comp instanceof JCheckBox)
 	  {
@@ -1212,9 +1212,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     // now find the chosen vector
     chosen = field.getValues();
 
-
     ss.update(available, chosen);
-
   }
 
   public void updateInvidStringSelector(StringSelector ss, invid_field field) throws RemoteException
