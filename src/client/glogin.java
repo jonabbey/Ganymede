@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -141,6 +141,8 @@ public class glogin extends JApplet implements Runnable {
     appletContentPane.setLayout(gbl);
 
     JLabel image = new JLabel(new ImageIcon(ganymede_logo));
+    image.setOpaque(true);
+    image.setBackground(Color.black);
 
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.gridx = 0;
@@ -158,7 +160,6 @@ public class glogin extends JApplet implements Runnable {
     // callback set with addTextListener().. instead, we'll
     // trap the login/quit buttons, and query these
     // fields when we process the buttons.
-    
 
     JLabel userL = new JLabel("Username:");
     gbc.fill = GridBagConstraints.NONE;
