@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2001/11/15 02:01:03 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2001/12/04 05:15:32 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.16 $ $Date: 2001/11/15 02:01:03 $ $Name:  $
+ * @version $Revision: 1.17 $ $Date: 2001/12/04 05:15:32 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -87,6 +87,30 @@ public class xmlfield implements FieldType {
    */
 
   static DateFormat[] formatters = null;
+
+  /**
+   * <p>constant string for the addIfNotPresent mode</p>
+   */
+
+  static final String ADDIFNOTPRESENT = "addIfNotPresent";
+
+  /**
+   * <p>constant string for the add mode</p>
+   */
+
+  static final String ADD = "add";
+
+  /**
+   * <p>constant string for the set mode</p>
+   */
+
+  static final String SET = "set";
+
+  /**
+   * <p>constant string for the delete mode</p>
+   */
+
+  static final String DELETE = "delete";
 
   /**
    * <p>Definition record for this field type</p>
@@ -426,21 +450,21 @@ public class xmlfield implements FieldType {
        "delete" -- Delete the listed elements
 
     */
-
+    
     Stack modeStack = new Stack();
 
     /* -- */
 
     // by default, we add
 
-    modeStack.push("addIfNotPresent");
+    modeStack.push(ADDIFNOTPRESENT);
 
     nextItem = owner.xSession.getNextItem();
 
     while (!nextItem.matchesClose(openElement.getName()) && !(nextItem instanceof XMLEndDocument))
       {
-	if (((nextItem.matches("addIfNotPresent") || nextItem.matches("add") || 
-	      nextItem.matches("delete")) && !nextItem.isEmpty()))
+	if (((nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(ADD) || 
+	      nextItem.matches(DELETE)) && !nextItem.isEmpty()))
 	  {
 	    if (setMode)
 	      {
@@ -456,7 +480,7 @@ public class xmlfield implements FieldType {
 
 	    nextItem = owner.xSession.getNextItem();
 	  }
-	else if (nextItem.matches("set"))
+	else if (nextItem.matches(SET))
 	  {
 	    if (canDoSetMode)
 	      {
@@ -465,7 +489,7 @@ public class xmlfield implements FieldType {
 
 		if (!nextItem.isEmpty())
 		  {
-		    modeStack.push("set");
+		    modeStack.push(SET);
 		  }
 	      }
 	    else
@@ -479,12 +503,12 @@ public class xmlfield implements FieldType {
 
 	    nextItem = owner.xSession.getNextItem();
 	  }
-	else if (nextItem.matchesClose("add") || nextItem.matchesClose("delete") || nextItem.matchesClose("addIfNotPresent"))
+	else if (nextItem.matchesClose(ADD) || nextItem.matchesClose(DELETE) || nextItem.matchesClose(ADDIFNOTPRESENT))
 	  {
 	    if (modeStack.size() > 1 && modeStack.peek().equals(nextItem.getName()))
 	      {
 		// we checked for modeStack.size() > 1 to cover the
-		// initial modeStack.push("addIfNotPresent")
+		// initial modeStack.push(ADDIFNOTPRESENT)
 
 		modeStack.pop();
 	      }
@@ -499,7 +523,7 @@ public class xmlfield implements FieldType {
 
 	    nextItem = owner.xSession.getNextItem();
 	  }
-	else if (nextItem.matchesClose("set"))
+	else if (nextItem.matchesClose(SET))
 	  {
 	    // okay.. we're actually not going to do anything
 	    // here, because set mode is really exclusive within
@@ -549,7 +573,7 @@ public class xmlfield implements FieldType {
 
 		    setValues.addElement(newValue);
 		  }
-		else if (modeStack.peek().equals("add"))
+		else if (modeStack.peek().equals(ADD))
 		  {
 		    if (addValues == null)
 		      {
@@ -560,7 +584,7 @@ public class xmlfield implements FieldType {
 
 		    addValues.addElement(newValue);
 		  }
-		else if (modeStack.peek().equals("addIfNotPresent"))
+		else if (modeStack.peek().equals(ADDIFNOTPRESENT))
 		  {
 		    if (addIfNotPresentValues == null)
 		      {
@@ -571,7 +595,7 @@ public class xmlfield implements FieldType {
 
 		    addIfNotPresentValues.addElement(newValue);
 		  }
-		else if (modeStack.peek().equals("delete"))
+		else if (modeStack.peek().equals(DELETE))
 		  {
 		    if (delValues == null)
 		      {
@@ -917,7 +941,7 @@ public class xmlfield implements FieldType {
 		// but which are not in our setValues vector, then add
 		// any that are missing
 
-		Vector currentValues = field.getValues();
+		Vector currentValues = field.getValuesLocal();
 		Vector removeValues = VectorUtils.minus(currentValues, setValues);
 		Vector newValues = VectorUtils.minus(setValues, currentValues);
 
@@ -1021,7 +1045,7 @@ public class xmlfield implements FieldType {
 	      }
 	    else if (!fieldDef.isEditInPlace())
 	      {
-		invid_field field = (invid_field) owner.objref.getField(fieldDef.getID());
+		InvidDBField field = (InvidDBField) owner.objref.getField(fieldDef.getID());
 
 		/* -- */
 
@@ -1031,7 +1055,7 @@ public class xmlfield implements FieldType {
 
 		if (setValues != null)
 		  {
-		    Vector currentValues = field.getValues();
+		    Vector currentValues = field.getValuesLocal();
 		    Vector invidValues = getExtantInvids(setValues);
 		    Vector removeValues = VectorUtils.difference(currentValues, invidValues);
 		    Vector newValues = VectorUtils.difference(invidValues, currentValues);
@@ -1060,6 +1084,22 @@ public class xmlfield implements FieldType {
 			return null;
 		      }
 		  }
+
+		if (addIfNotPresentValues != null)
+		  {
+		    Vector invidValues = getExtantInvids(addIfNotPresentValues);
+		    Vector newValues = VectorUtils.difference(invidValues, field.getValuesLocal());
+
+		    if (newValues.size() != 0)
+		      {
+			result = field.addElements(newValues);
+			
+			if (result != null && !result.didSucceed())
+			  {
+			    return result;
+			  }
+		      }
+		  }
 	    
 		if (addValues != null)
 		  {
@@ -1083,11 +1123,11 @@ public class xmlfield implements FieldType {
 	      }
 	    else		// *** edit in place / embedded object case ***
 	      {
-		invid_field field = (invid_field) owner.objref.getField(fieldDef.getID());
+		InvidDBField field = (InvidDBField) owner.objref.getField(fieldDef.getID());
 
 		/* -- */
 		
-		Vector currentValues = field.getValues();
+		Vector currentValues = field.getValuesLocal();
 		Vector needToBeEdited = null;
 		Vector needToBeCreated = null;
 		Vector needToBeRemoved = null;
@@ -1388,7 +1428,7 @@ public class xmlfield implements FieldType {
 	  {
 	    invids.addElement(invid);
 	  }
-	else if (debug)
+	else
 	  {
 	    owner.xSession.err.println("Couldn't find invid for " + x);
 	  }
