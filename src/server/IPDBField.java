@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -343,6 +343,8 @@ public class IPDBField extends DBField implements ip_field {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
+    this.newValue = bytes;
+
     if (eObj.finalizeSetValue(this, bytes))
       {
 	if (bytes != null)
@@ -356,6 +358,8 @@ public class IPDBField extends DBField implements ip_field {
 	    defined = false;	// the key
 	  }
 
+	this.newValue = null;
+
 	return null;
       }
     else
@@ -363,6 +367,8 @@ public class IPDBField extends DBField implements ip_field {
 	// our owner disapproved of the operation,
 	// undo the namespace manipulations, if any,
 	// and finish up.
+
+	this.newValue = null;
 
 	if (ns != null)
 	  {
