@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 2002/01/26 05:27:28 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 2002/01/26 05:31:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,11 +80,11 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.55 $ $Date: 2002/01/26 05:27:28 $
+ * @version $Revision: 1.56 $ $Date: 2002/01/26 05:31:22 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unreferenced {
+final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unreferenced {
 
   /**
    * Static vector of GanymedeAdmin instances, used to
