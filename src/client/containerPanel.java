@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.115 $
-   Last Mod Date: $Date: 2000/02/29 09:35:00 $
+   Version: $Revision: 1.116 $
+   Last Mod Date: $Date: 2000/07/13 21:33:10 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -99,7 +99,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.115 $ $Date: 2000/02/29 09:35:00 $ $Name:  $
+ * @version $Revision: 1.116 $ $Date: 2000/07/13 21:33:10 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -498,8 +498,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	templates = gc.getTemplateVector(type);
 
-	if (templates == null)
+	if (templates == null || templates.size() == 0)
 	  {
+	    System.err.println("No fields defined for this object type.. ??");
+
 	    setStatus("No fields defined for this object type.. error.");
 	    return;
 	  }
@@ -517,6 +519,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	catch (RemoteException rx)
 	  {
 	    throw new RuntimeException("Could not get FieldInfoVector: " + rx);
+	  }
+
+	if (infoVector.size() == 0)
+	  {
+	    System.err.println("No field info in getFieldInfoVector()");
 	  }
 
 	// keep a copy of the infoVector size so we don't have to

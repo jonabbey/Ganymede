@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.76 $
-   Last Mod Date: $Date: 2000/06/23 23:42:49 $
+   Version: $Revision: 1.77 $
+   Last Mod Date: $Date: 2000/07/13 21:33:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1036,9 +1036,12 @@ public class DBEditSet {
 		      }
 		    else
 		      {
+			// not sure why this test is here.. was I
+			// going to do something more with this?
+
 			InvidDBField invf = (InvidDBField) eObj.getField(SchemaConstants.ContainerField);
 			
-			if (invf == null || invf.getValueLocal() == null)
+			if (invf == null || !invf.isDefined())
 			  {
 			    Ganymede.debug("DBEditSet.commit(): WARNING, an embedded object's " +
 					   "container link is undefined or null-valued.(?!)");
@@ -1150,6 +1153,12 @@ public class DBEditSet {
 
 			invids = new Vector();
 			invids.addElement(eObj.getInvid());
+
+			// if we changed an embedded object, make a
+			// note that the containing object was
+			// involved so that we show changes to
+			// embedded objects in a log search for the
+			// containing object
 
 			if (eObj.isEmbedded())
 			  {

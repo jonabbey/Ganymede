@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.190 $
-   Last Mod Date: $Date: 2000/07/13 00:01:50 $
+   Version: $Revision: 1.191 $
+   Last Mod Date: $Date: 2000/07/13 21:33:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.190 $ $Date: 2000/07/13 00:01:50 $
+ * @version $Revision: 1.191 $ $Date: 2000/07/13 21:33:15 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2563,7 +2563,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (value.getType() != type)
       {
-	throw new RuntimeException("findLabeledObject(): Error in query processing," + 
+	throw new RuntimeException("findLabeledObject() ASSERTFAIL: Error in query processing," + 
 				   " didn't get back right kind of object");
       }
 

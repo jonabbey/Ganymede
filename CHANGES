@@ -759,6 +759,19 @@ rather than in byte array form.
 Now, the query logic will properly convert IP strings to byte array
 form for optimized namespace lookups.
 
+49. [SERVER] Fixed queries on embedded objects
+
+The GanymedeSession queryDispatch() method will now properly perform a
+search on an embedded object if a Query is submitted whose requested
+returnType is equal to the searched-for type.
+
+My initial decision to include embedded objects in the Ganymede design
+has made *so* many things painfully complex in the whole system.
+Sigh.
+
+This is another bug that showed up in development and testing of the
+XML client.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

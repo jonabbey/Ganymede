@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2000/06/14 04:53:23 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2000/07/13 21:33:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -927,6 +927,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     if (fieldid == systemSchema.PRIMARYUSER)
       {
+	if (getStatus() != CREATING)
+	  {
+	    return false;
+	  }
+
 	try
 	  {
 	    Invid systemType = (Invid) object.getFieldValueLocal(systemSchema.SYSTEMTYPE);
@@ -947,7 +952,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    // prompted to set a system type, and once they go back
 	    // and do that and try to re-commit, they'll hit us again
 	    // and we can make the proper determination at that point.
-
+	    
 	    return false;
 	  }
       }
