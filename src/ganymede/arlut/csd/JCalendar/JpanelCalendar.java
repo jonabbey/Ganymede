@@ -799,7 +799,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	    // we're going to count on our parent doing an error dialog display if
 	    // needed.
 
-	    if (!callback.setValuePerformed(new JValueObject(this, selectedDate_calendar.getTime())))
+	    if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
 	      {
 		if (debug)
 		  {
@@ -862,7 +862,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     try 
       {
-	if (!callback.setValuePerformed(new JValueObject(this, selectedDate_calendar.getTime())))
+	if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
 	  {
 	    // constructing a JErrorDialog causes it to be shown.
 	    

@@ -95,7 +95,7 @@ public class JpopUpCalendar extends JFrame implements JsetValueCallback {
 
     try 
       {
-	b = parent.setValuePerformed(new JValueObject(this,(Date)(vObj.getValue())));
+	b = parent.setValuePerformed(new JSetValueObject(this,(Date)(vObj.getValue())));
       }
     catch (java.rmi.RemoteException e) 
       {
