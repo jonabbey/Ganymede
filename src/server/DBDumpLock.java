@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -80,7 +80,7 @@ class DBDumpLock extends DBLock {
     locked = false;
   }
 
-  public void establish(Object key)
+  public void establish(Object key) throws InterruptedException
   {
     done = false;
 
@@ -173,6 +173,12 @@ class DBDumpLock extends DBLock {
 
 	lockManager.notify();
       }
+  }
+
+  // abort is currently a no-op.. need to implement it
+
+  public void abort()
+  {
   }
 
   boolean isLocked(DBObjectBase base)
