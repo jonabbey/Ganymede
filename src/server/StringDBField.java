@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/06/15 02:48:30 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 1999/06/24 00:56:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -249,11 +249,6 @@ public class StringDBField extends DBField implements string_field {
 
   public String value()
   {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
-
     if (isVector())
       {
 	throw new IllegalArgumentException("scalar accessor called on vector field");
@@ -264,11 +259,6 @@ public class StringDBField extends DBField implements string_field {
 
   public String value(int index)
   {
-    if (!verifyReadPermission())
-      {
-	throw new IllegalArgumentException("permission denied to read this field");
-      }
-
     if (!isVector())
       {
 	throw new IllegalArgumentException("vector accessor called on scalar");

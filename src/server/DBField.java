@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.72 $
-   Last Mod Date: $Date: 1999/06/18 22:43:18 $
+   Version: $Revision: 1.73 $
+   Last Mod Date: $Date: 1999/06/24 00:56:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -659,8 +659,8 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     eObj = (DBEditObject) owner;
 
-    // if our owner has already started the commit
-    // process, we can't allow any changes
+    // if our owner has already started the commit process, we can't
+    // allow any changes, local access or no
 
     if (eObj.isCommitting())
       {

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.82 $
-   Last Mod Date: $Date: 1999/06/18 22:43:22 $
+   Version: $Revision: 1.83 $
+   Last Mod Date: $Date: 1999/06/24 00:56:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,20 +78,21 @@ import arlut.csd.Util.zipIt;
  * including field definitions for all fields that may be stored in
  * objects of that type.</P>
  *
- * <p>In addition to holding schema information, each DBObjectBase contains
- * an {@link arlut.csd.ganymede.Invid Invid}-keyed hash of
- * {@link arlut.csd.ganymede.DBObject DBObject}'s of that type
- * in memory after the database loading is complete at start-up.  Changes made
- * to the DBStore are done in transactional contexts using DBSession, which is
- * responsible for initiating journal changes when individual transactions are
- * committed to the database.  Periodically, the Ganymede server's 
- * {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler} task engine
- * will schedule a full
- * {@link arlut.csd.ganymede.DBStore#dump(java.lang.String,boolean,boolean) dump} to
- * consolidate the journal and update the on-disk database file.  The server will
- * also do a dump when the server's admin console
- * {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin} interface initiates a
- * server shutdown.</p>
+ * <p>In addition to holding schema information, each DBObjectBase
+ * contains an {@link arlut.csd.ganymede.Invid Invid}-keyed hash of
+ * {@link arlut.csd.ganymede.DBObject DBObject}'s of that type in
+ * memory after the database loading is complete at start-up.  Changes
+ * made to the DBStore are done in {@link arlut.csd.ganymede.DBEditSet
+ * transactional contexts} using DBSession, which is responsible for
+ * initiating journal changes when individual transactions are
+ * committed to the database.  Periodically, the Ganymede server's
+ * {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler} task
+ * engine will schedule a full {@link
+ * arlut.csd.ganymede.DBStore#dump(java.lang.String,boolean,boolean)
+ * dump} to consolidate the journal and update the on-disk database
+ * file.  The server will also do a dump when the server's admin
+ * console {@link arlut.csd.ganymede.GanymedeAdmin GanymedeAdmin}
+ * interface initiates a server shutdown.</p>
  *
  * <p>DBStore was originally written with the intent of being able to serve as
  * a stand-alone in-process transactional object storage system, but in practice, DBStore
@@ -114,8 +115,9 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.82 $ %D%
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
+ * @version $Revision: 1.83 $ %D%
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
+ */
 
 public class DBStore {
 

@@ -6,8 +6,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/06/18 22:43:25 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/06/24 00:56:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -216,9 +216,14 @@ public class PermEntry implements java.io.Serializable {
 
   public final PermEntry union(PermEntry p)
   {
-    if (p == null)
+    if (p == null || (visible && editable && create && delete))
       {
 	return this;
+      }
+    else if ((p.visible || visible) && (p.editable || editable) && 
+	     (p.create || create) && (p.delete || delete))
+      {
+	return PermEntry.fullPerms;
       }
     else
       {
@@ -235,11 +240,18 @@ public class PermEntry implements java.io.Serializable {
       {
 	return PermEntry.noPerms;
       }
-
-    return new PermEntry(p.visible && visible,
-			 p.editable && editable,
-			 p.create && create,
-			 p.delete && delete);
+    else if (!((p.visible && visible) || (p.editable && editable) || 
+	       (p.create && create) || (p.delete && delete)))
+      {
+	return PermEntry.noPerms;
+      }
+    else
+      {
+	return new PermEntry(p.visible && visible,
+			     p.editable && editable,
+			     p.create && create,
+			     p.delete && delete);
+      }
   }
 
   /**

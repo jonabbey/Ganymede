@@ -7,8 +7,8 @@
    
    Created: 3 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 1999/06/18 22:43:26 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 1999/06/24 00:56:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -155,8 +155,6 @@ public class PermMatrix implements java.io.Serializable {
 	return new PermMatrix(this);
       }
 
-    // copy the original permissions
-
     result = new PermMatrix(orig);
 
     // now go through our matrix and for any entries in this.matrix,
@@ -178,7 +176,85 @@ public class PermMatrix implements java.io.Serializable {
 	  }
 	else
 	  {
-	    result.matrix.put(key, entry1);
+	    if (!isBasePerm((String)key))
+	      {
+		// We are union'ing a field entry.. since orig doesn't
+		// contain an explicit record for this field while our
+		// matrix does, see if we can find a record for the
+		// containing base in field and union that with this entry..
+		// this will serve to maintain the permission inheritance
+		// issues
+
+		entry3 = (PermEntry) result.matrix.get(baseEntry((String)key));
+
+		if (entry3 == null)
+		  {
+		    // there is no entry for this field's base.. put in
+		    // the original from our matrix
+
+		    result.matrix.put(key, entry1);
+		  }
+		else
+		  {
+		    // there is an entry for this field's base.. put it in
+		    // so that we properly handle permission inheritance
+
+		    result.matrix.put(key, entry1.union(entry3));
+		  }
+	      }
+	    else
+	      {
+		result.matrix.put(key, entry1);
+	      }
+	  }
+      }
+
+    // result now contains all of the records from orig, with all of
+    // the records from this.matrix union'ed in.  The only problem now
+    // is that it's possible that orig contained field records that
+    // this.matrix didn't have a match for, which means that we should
+    // have unioned in the corresponding base record from this.matrix
+    // at that point, but we didn't since we were looping over the
+    // entries in this.matrix rather than in orig.
+
+    enum = result.matrix.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = enum.nextElement();
+
+	entry1 = (PermEntry) result.matrix.get(key);
+	entry2 = (PermEntry) this.matrix.get(key);
+
+	if (entry2 != null)
+	  {
+	    continue; // we already took care of this above
+	  }
+	else
+	  {
+	    if (!isBasePerm((String)key))
+	      {
+		// This is the case we are concerned with.. the result
+		// matrix has a field entry that we don't have a match
+		// for in this.matrix.. we need to check to see
+		// if we have a base entry for the corresponding base
+		// that we need to union in to reflect the default base
+		// -> field inheritance
+
+		entry3 = (PermEntry) this.matrix.get(baseEntry((String)key));
+
+		if (entry3 == null)
+		  {
+		    continue;	// no inheritance to be had here
+		  }
+		else
+		  {
+		    // there is an entry for this field's base.. put it in
+		    // so that we properly handle permission inheritance
+
+		    result.matrix.put(key, entry1.union(entry3));
+		  }
+	      }
 	  }
       }
 
