@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -274,31 +274,11 @@ public class JstringField extends JentryField implements KeyListener{
   {
      if (s != null)
        {
- 	this.allowedChars = s;
+	 this.allowedChars = s;
        }
      else 
        {
- 	this.allowedChars = null;
-       }
-
-     if (s == null || s.equals(""))
-       {
- 	return;
-       }
-     else
-       {
-	 //	 Keymap map = getKeymap();
-	 //	
-	 //	 Action insert = new DefaultAction(JTextComponent.insertContentAction);
-	 //
-	 //	 KeyStroke[] strokes = map.getKeyStrokesForAction(insert);
-	 //
-	 //	 map.removeBindings();
-	 //	 
-	 //	 for (int i = 0; i < s.length(); i++)
-	 //	   {
-	 //	     map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i), 0), insert);
-	 //	   }
+	 this.allowedChars = null;
        }
   }
  
@@ -309,22 +289,6 @@ public class JstringField extends JentryField implements KeyListener{
    */
   public void setDisallowedChars(String s)
   {
-    //    Keymap map;
-
-    /* -- */
-
-    //    map = getKeymap();
-
-    if (s != null && !s.equals(""))
-      {
-	// 	for (int i = 0; i < s.length(); i++)
-	// 	  {
-	//	    //	    map.removeKeyStrokeBinding(KeyStroke.getKeyStroke(s.charAt(i), 0));
-	//	    map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i)),
-	//			      new DefaultAction("null action"));
-	// 	  }
-      }
-
     if (s!= null)
       {
  	this.disallowedChars = s;
@@ -362,7 +326,6 @@ public class JstringField extends JentryField implements KeyListener{
     return this.size;
   }
 
-
   /**
    *  determines whether a given character is valid or invalid for a JstringField
    *
@@ -380,7 +343,6 @@ public class JstringField extends JentryField implements KeyListener{
       }
     
     if (allowedChars != null)
-
       {
 	if (allowedChars.indexOf(ch) == -1)
 	  {
@@ -392,7 +354,7 @@ public class JstringField extends JentryField implements KeyListener{
   }
 
   /**
-   * When the JstringField looses focus, any changes made to 
+   * When the JstringField loses focus, any changes made to 
    * the value in the JstringField need to be propogated to the
    * server.  This method will handle that functionality.
    *
@@ -415,13 +377,53 @@ public class JstringField extends JentryField implements KeyListener{
       {
 	sendCallback();
       }
+  }
 
+  /**
+   *
+   * We only want certain keystrokes to be registered by the stringfield.
+   *
+   * This method overrides the processKeyEvent() method in JComponent and
+   * gives us a way of intercepting characters that we don't want in our
+   * string field.
+   *
+   */
+
+  protected void processKeyEvent(KeyEvent e)
+  {
+    // always pass through useful editing keystrokes.. this seems to be
+    // necessary because backspace and delete apparently have defined
+    // Unicode representations, so they don't match CHAR_UNDEFINED below
+
+    if ((e.getKeyCode() == KeyEvent.VK_BACK_SPACE) ||
+	(e.getKeyCode() == KeyEvent.VK_DELETE) ||
+	(e.getKeyCode() == KeyEvent.VK_END) ||
+	(e.getKeyCode() == KeyEvent.VK_HOME))
+      {
+	super.processKeyEvent(e);
+      }
+
+    // We check against KeyEvent.CHAR_UNDEFINED so that we pass
+    // through things like backspace, arrow keys, etc.
+
+    if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
+      {
+	super.processKeyEvent(e);
+      }
+    else if (isAllowed(e.getKeyChar()) && (getText().length() < size))
+      {
+	super.processKeyEvent(e);
+      }
+
+    // otherwise, we ignore it
   }
 
   public void sendCallback()
   {
-    
     String str;
+
+    /* -- */
+
     // if nothing in the JstringField has changed,
     // we don't need to worry about this event.
     
@@ -514,7 +516,6 @@ public class JstringField extends JentryField implements KeyListener{
       }
   }
   
-
   public void keyPressed(KeyEvent e) {}
   public void keyReleased(KeyEvent e) {}
   public void keyTyped(KeyEvent e)
@@ -530,8 +531,5 @@ public class JstringField extends JentryField implements KeyListener{
 	    
 	  }
       }
-    
   }
-
-
 }
