@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2000/06/14 04:51:20 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2000/06/14 05:03:52 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -72,13 +72,13 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.client.xmlclient xmlclient}.</p>
  *
- * @version $Revision: 1.10 $ $Date: 2000/06/14 04:51:20 $ $Name:  $
+ * @version $Revision: 1.11 $ $Date: 2000/06/14 05:03:52 $ $Name:  $
  * @author Jonathan Abbey
  */
 
 public class xmlobject {
 
-  final static boolean debug = true;
+  final static boolean debug = false;
 
   /**
    * <p>The local identifier string for this object</p>
