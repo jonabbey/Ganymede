@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.216 $
-   Last Mod Date: $Date: 2000/12/06 09:59:42 $
+   Version: $Revision: 1.217 $
+   Last Mod Date: $Date: 2000/12/07 23:03:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.216 $ $Date: 2000/12/06 09:59:42 $
+ * @version $Revision: 1.217 $ $Date: 2000/12/07 23:03:26 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2121,13 +2121,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// the client will perform an openTransaction as soon as it is
 	// ready to talk to the server.  By sending a building message to
 	// the client here, we allow it to set the initial state of the
-	// building/idle icon in the client's display.
+	// building/idle icon in the client's display
 
-	if (GanymedeServer.building == 1)
+	// note that since we don't sync on GanymedeBuilderTask in any
+	// way, we could maybe conceivably get out of sync a bit.
+
+	if (GanymedeBuilderTask.getPhase1Count() > 0)
 	  {
 	    sendMessage(ClientMessage.BUILDSTATUS, "building");
 	  }
-	else if (GanymedeServer.building == 2)
+	else if (GanymedeBuilderTask.getPhase2Count() > 0)
 	  {
 	    sendMessage(ClientMessage.BUILDSTATUS, "building2");
 	  }

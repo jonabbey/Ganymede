@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 2000/11/24 04:43:39 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 2000/12/07 23:03:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -968,29 +968,26 @@ public class Ganymede {
    * record that the server is processing a build.</P>
    */
 
-  static void buildOn(int phase)
+  static void updateBuildStatus()
   {
-    GanymedeServer.building = phase;
-    
-    if (phase == 1)
+    int p1 = GanymedeBuilderTask.getPhase1Count();
+    int p2 = GanymedeBuilderTask.getPhase2Count();
+
+    // phase 1 can have the database locked, so show that
+    // for preference
+
+    if (p1 > 0)
       {
 	GanymedeServer.sendMessageToRemoteSessions(1, "building");
       }
-    else if (phase == 2)
+    else if (p2 > 0)
       {
 	GanymedeServer.sendMessageToRemoteSessions(1, "building2");
       }
-  }
-
-  /**
-   * </P>This method is called by the GanymedeBuilderTask base class to
-   * record that the server is through processing a build.</P>
-   */
-
-  static void buildOff()
-  {
-    GanymedeServer.building = 0;
-    GanymedeServer.sendMessageToRemoteSessions(1, "idle");
+    else
+      {
+	GanymedeServer.sendMessageToRemoteSessions(1, "idle");
+      }
   }
 
   /**

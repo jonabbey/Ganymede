@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/12/07 20:44:00 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/12/07 23:03:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -116,6 +116,20 @@ public abstract class GanymedeBuilderTask implements Runnable {
   private static boolean firstRun = true;
   private static int id = 0;
 
+  /**
+   * <P>Count of the number of builder tasks currently
+   * running in phase 1.</P>
+   */
+
+  private static int phase1Count = 0;
+
+  /**
+   * <P>Count of the number of builder tasks currently
+   * running in phase 1.</P>
+   */
+
+  private static int phase2Count = 0;
+
   /* --- */
 
   protected Date lastRunTime;
@@ -146,6 +160,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
     boolean
       success1 = false,
       success2 = false;
+    boolean alreadyDecdCount = false;
 
     /* -- */
 
@@ -158,116 +173,140 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	optionsCache = null;
 
-	Ganymede.buildOn(1);
-
-	// we need a unique label for our session so that multiple
-	// builder tasks can have their own lock keys.. our label will
-	// start at builder:0 and work our way up as we go along
-	// during the server's lifetime
-
-	synchronized (GanymedeBuilderTask.class) 
-	  {
-	    label = "builder:" + id++;
-	  }
+	incPhase1(true);
 
 	try
 	  {
-	    session = new GanymedeSession(label);
-	  }
-	catch (java.rmi.RemoteException ex)
-	  {
-	    throw new RuntimeException("bizarro remote exception " + ex);
-	  }
+	    // we need a unique label for our session so that multiple
+	    // builder tasks can have their own lock keys.. our label will
+	    // start at builder:0 and work our way up as we go along
+	    // during the server's lifetime
 
-	try
-	  {
-	    lock = session.getSession().openDumpLock();
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug("Could not run task " + this.getClass().toString() + ", couldn't get dump lock");
-	    return;
-	  }
-
-	// update our time as soon as possible, so that any changes
-	// that are made in the database after we release the dump
-	// lock will have a time stamp after our 'last build' time
-	// stamp.
-
-	if (lastRunTime == null)
-	  {
-	    lastRunTime = new Date();
-	  }
-	else
-	  {
-	    if (oldLastRunTime == null)
+	    synchronized (GanymedeBuilderTask.class) 
 	      {
-		oldLastRunTime = new Date(lastRunTime.getTime());
+		label = "builder:" + id++;
 	      }
-	    else
-	      {
-		oldLastRunTime.setTime(lastRunTime.getTime());
-	      }
-
-	    lastRunTime.setTime(System.currentTimeMillis());
-	  }
-
-	success1 = this.builderPhase1();
-
-	// release the lock, and so on
-	
-	if (session != null)
-	  {
-	    session.logout();	// will clear the dump lock
-	    session = null;
-	    lock = null;
-	  }
-
-	if (currentThread.isInterrupted())
-	  {
-	    Ganymede.debug("Builder task interrupted, not doing network build.");
-	    return;
-	  }
-
-	Ganymede.buildOn(2);
-
-	if (success1)
-	  {
-	    boolean shutdownblock = false;
 
 	    try
 	      {
-		if (GanymedeServer.shutdownSemaphore.increment(0) != null)
-		  {
-		    Ganymede.debug("Aborting builder task build");
-		    return;
-		  }
+		session = new GanymedeSession(label);
+	      }
+	    catch (java.rmi.RemoteException ex)
+	      {
+		throw new RuntimeException("bizarro local remote exception " + ex);
+	      }
+
+	    try
+	      {
+		lock = session.getSession().openDumpLock();
 	      }
 	    catch (InterruptedException ex)
 	      {
-		// will never happen, since we are giving 0 to
-		// increment
+		Ganymede.debug("Could not run task " + this.getClass().toString() + ", couldn't get dump lock");
+		return;
 	      }
 
-	    // guess what?  we're going to capture the return value of
-	    // builderPhase2 and just not do anything with it!  that's
-	    // how wacky we're going to be!
+	    // update our time as soon as possible, so that any changes
+	    // that are made in the database after we release the dump
+	    // lock will have a time stamp after our 'last build' time
+	    // stamp.
 
-	    try
+	    if (lastRunTime == null)
 	      {
-		success2 = this.builderPhase2();
+		lastRunTime = new Date();
 	      }
-	    finally
+	    else
 	      {
-		GanymedeServer.shutdownSemaphore.decrement();
+		if (oldLastRunTime == null)
+		  {
+		    oldLastRunTime = new Date(lastRunTime.getTime());
+		  }
+		else
+		  {
+		    oldLastRunTime.setTime(lastRunTime.getTime());
+		  }
+
+		lastRunTime.setTime(System.currentTimeMillis());
 	      }
+
+	    success1 = this.builderPhase1();
+	  }
+	catch (Exception ex)
+	  {
+	    decPhase1(true);
+	    alreadyDecdCount = true;
+
+	    ex.printStackTrace();
+	    return;
+	  }
+	finally
+	  {
+	    if (!alreadyDecdCount)
+	      {
+		decPhase1(false); // false since we don't want to force stat update yet
+	      }
+
+	    // release the lock, and so on
+
+	    if (session != null)
+	      {
+		session.logout();	// will clear the dump lock
+		session = null;
+		lock = null;
+	      }
+	  }
+	
+	if (currentThread.isInterrupted())
+	  {
+	    Ganymede.debug("Builder task interrupted, not doing network build.");
+	    Ganymede.updateBuildStatus();
+	    return;
+	  }
+
+	try
+	  {
+	    incPhase2(true);
+
+	    if (success1)
+	      {
+		boolean shutdownblock = false;
+		
+		try
+		  {
+		    if (GanymedeServer.shutdownSemaphore.increment(0) != null)
+		      {
+			Ganymede.debug("Aborting builder task build");
+			return;
+		      }
+		  }
+		catch (InterruptedException ex)
+		  {
+		    // will never happen, since we are giving 0 to
+		    // increment
+		  }
+		
+		// guess what?  we're going to capture the return value of
+		// builderPhase2 and just not do anything with it!  that's
+		// how wacky we're going to be!
+		
+		try
+		  {
+		    success2 = this.builderPhase2();
+		  }
+		finally
+		  {
+		    GanymedeServer.shutdownSemaphore.decrement();
+		  }
+	      }
+	  }
+	finally
+	  {
+	    decPhase2(true);
 	  }
       }
     finally
       {
 	// we need the finally in case our thread is stopped
-	
-	Ganymede.buildOff();
 
 	if (session != null)
 	  {
@@ -611,7 +650,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	      {
 		Date oldTime = new Date(file.lastModified());
 		
-		DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH:mm:ss", 
+		DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd-HH:mm:ss", 
 							    java.util.Locale.US);
 
 		String label = formatter.format(oldTime);
@@ -959,6 +998,92 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	  {
 	    continue;
 	  }
+      }
+  }
+
+  /**
+   * <P>This is public for GanymedeSession.openTransaction(), as a
+   * hack to support proper updating of the client's status icon on
+   * client connect.</P>
+   */
+  
+  public static int getPhase1Count()
+  {
+    return phase1Count;
+  }
+
+  /**
+   * <P>This is public for GanymedeSession.openTransaction(), as a
+   * hack to support proper updating of the client's status icon on
+   * client connect.</P>
+   */
+
+  public static int getPhase2Count()
+  {
+    return phase2Count;
+  }
+
+  static synchronized void incPhase1(boolean update)
+  {
+    phase1Count++;
+
+    if (update)
+      {
+	updateBuildStatus();
+      }
+  }
+
+  static synchronized void decPhase1(boolean update)
+  {
+    phase1Count--;
+
+    if (update)
+      {
+	updateBuildStatus();
+      }
+  }
+
+  static synchronized void incPhase2(boolean update)
+  {
+    phase2Count++;
+
+    if (update)
+      {
+	updateBuildStatus();
+      }
+  }
+
+  static synchronized void decPhase2(boolean update)
+  {
+    phase2Count--;
+
+    if (update)
+      {
+	updateBuildStatus();
+      }
+  }
+
+  /**
+   * </P>This method is called by the GanymedeBuilderTask base class to
+   * record that the server is processing a build.</P>
+   */
+
+  static synchronized void updateBuildStatus()
+  {
+    // phase 1 can have the database locked, so show that
+    // for preference
+
+    if (phase1Count > 0)
+      {
+	GanymedeServer.sendMessageToRemoteSessions(1, "building");
+      }
+    else if (phase2Count > 0)
+      {
+	GanymedeServer.sendMessageToRemoteSessions(1, "building2");
+      }
+    else
+      {
+	GanymedeServer.sendMessageToRemoteSessions(1, "idle");
       }
   }
 }
