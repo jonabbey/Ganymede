@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/03/10 02:02:03 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/03/10 03:15:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,6 +80,6 @@ public class XMLCloseElement extends XMLItem {
 
   public String toString()
   {
-    return "XML Close Element [" + name + "]";
+    return "XML Close Element </" + name + ">";
   }
 }

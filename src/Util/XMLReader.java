@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/03/10 02:02:06 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2000/03/10 03:15:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -116,43 +116,145 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
    *
    * <P>getNextItem() returns null when there are no more XML elements or character
    * data to be read from the XMLReader stream.</P>
+   *
+   * @param skipWhiteSpaceChars if true, getNextItem() will silently eat any
+   * all-whitespace character data.
    */
 
-  public XMLItem getNextItem()
+  public XMLItem getNextItem(boolean skipWhiteSpaceChars)
   {
-    XMLItem value;
+    XMLItem value = null;
+    boolean finished = false;
 
     /* -- */
 
     synchronized (buffer)
       {
-	while (!done && pushback == null && buffer.size() == 0)
+	while (!finished)
 	  {
-	    try
+	    finished = true;	// assume we won't be seeing whitespace chars
+
+	    while (!done && pushback == null && buffer.size() == 0)
 	      {
-		buffer.wait();
+		try
+		  {
+		    buffer.wait();
+		  }
+		catch (InterruptedException ex)
+		  {
+		    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
+		  }
 	      }
-	    catch (InterruptedException ex)
+
+	    if (done && pushback == null && buffer.size() == 0)
 	      {
-		throw new RuntimeException("interrupted, can't wait for buffer to fill.");
+		return null;
+	      }
+
+	    if (pushback != null)
+	      {
+		value = pushback;
+		pushback = null;
+	      }
+	    else
+	      {
+		value = (XMLItem) buffer.elementAt(0);
+		buffer.removeElementAt(0);
+		buffer.notifyAll();
+	      }
+
+	    if (skipWhiteSpaceChars)
+	      {
+		if (value instanceof XMLCharData)
+		  {
+		    finished = ((XMLCharData) value).containsNonWhitespace();
+		  }
 	      }
 	  }
 
-	if (done && pushback == null && buffer.size() == 0)
-	  {
-	    return null;
-	  }
+	return value;
+      }    
+  }
 
-	if (pushback != null)
+  /**
+   * <P>getNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
+   * from the XMLReader's buffer.  If the background thread's parsing has fallen
+   * behind, getNextItem() will block until either data is made available from
+   * the parse thread, or the XMLReader is closed.</P>
+   *
+   * <P>getNextItem() returns null when there are no more XML elements or character
+   * data to be read from the XMLReader stream.</P>
+   */
+
+  public XMLItem getNextItem()
+  {
+    return getNextItem(false);
+  }
+
+  /**
+   * <P>peekNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
+   * from the XMLReader's buffer.  If the background thread's parsing has fallen
+   * behind, peekNextItem() will block until either data is made available from
+   * the parse thread, or the XMLReader is closed.</P>
+   *
+   * <P>peekNextItem() returns null when there are no more XML elements or character
+   * data to be read from the XMLReader stream.</P>
+   *
+   * @param skipWhiteSpaceChars if true, peekNextItem() will silently eat any
+   * all-whitespace character data.  Any all-whitespace character data eaten
+   * in this way will be taken out of the XMLReader buffer, and no subsequent
+   * peekNextItem() or getNextItem(), with skipWhiteSpaceChars true or false,
+   * will return that item.
+   */
+
+  public XMLItem peekNextItem(boolean skipWhiteSpaceChars)
+  {
+    XMLItem value = null;
+    boolean finished = false;
+
+    /* -- */
+
+    synchronized (buffer)
+      {
+	while (!finished)
 	  {
-	    value = pushback;
-	    pushback = null;
-	  }
-	else
-	  {
-	    value = (XMLItem) buffer.elementAt(0);
-	    buffer.removeElementAt(0);
-	    buffer.notifyAll();
+	    finished = true;
+
+	    while (!done && pushback == null && buffer.size() == 0)
+	      {
+		try
+		  {
+		    buffer.wait();
+		  }
+		catch (InterruptedException ex)
+		  {
+		    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
+		  }
+	      }
+
+	    if (done && pushback == null && buffer.size() == 0)
+	      {
+		return null;
+	      }
+
+	    if (pushback != null)
+	      {
+		value = pushback;
+	      }
+	    else
+	      {
+		value = (XMLItem) buffer.elementAt(0);
+	      }
+
+	    if (skipWhiteSpaceChars)
+	      {
+		if ((value instanceof XMLCharData) && 
+		    ((XMLCharData) value).containsNonWhitespace())
+		  {
+		    getNextItem();	// skip the whitespace
+		    finished = false;
+		  }
+	      }
 	  }
 
 	return value;
@@ -171,40 +273,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public XMLItem peekNextItem()
   {
-    XMLItem value;
-
-    /* -- */
-
-    synchronized (buffer)
-      {
-	while (!done && pushback == null && buffer.size() == 0)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		throw new RuntimeException("interrupted, can't wait for buffer to fill.");
-	      }
-	  }
-
-	if (done && pushback == null && buffer.size() == 0)
-	  {
-	    return null;
-	  }
-
-	if (pushback != null)
-	  {
-	    value = pushback;
-	  }
-	else
-	  {
-	    value = (XMLItem) buffer.elementAt(0);
-	  }
-
-	return value;
-      }
+    return peekNextItem(false);
   }
 
   /**

@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/03/10 02:02:03 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/03/10 03:15:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,6 +65,7 @@ package arlut.csd.Util;
 public class XMLCharData extends XMLItem {
 
   String data;
+  Boolean nonEmpty = null;
 
   /* -- */
 
@@ -86,6 +87,28 @@ public class XMLCharData extends XMLItem {
   public String getCleanString()
   {
     return data.trim();
+  }
+
+  /**
+   * <P>This method returns true if this char data contains any non-whitespace
+   * data.</P>
+   */
+
+  public boolean containsNonWhitespace()
+  {
+    if (nonEmpty == null)
+      {
+	if (data.trim().length() != 0)
+	  {
+	    nonEmpty = new Boolean(true);
+	  }
+	else
+	  {
+	    nonEmpty = new Boolean(false);
+	  }
+      }
+
+    return nonEmpty.booleanValue();
   }
 
   public String toString()

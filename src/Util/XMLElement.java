@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2000/03/10 02:02:04 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/03/10 03:15:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -51,6 +51,8 @@
 
 package arlut.csd.Util;
 
+import java.util.*;
+
 import org.xml.sax.*;
 import com.jclark.xml.sax.*;
 
@@ -68,50 +70,119 @@ import com.jclark.xml.sax.*;
 public class XMLElement extends XMLItem {
 
   String name;
-  AttributeList atts;
+  Hashtable attributes;
 
   /* -- */
 
   XMLElement(String name, AttributeList atts)
   {
+    int length;
+    String label;
+    String value;
+
+    /* -- */
+
     this.name = name;
-    this.atts = atts;
+
+    if (atts != null)
+      {
+	length = atts.getLength();
+
+	attributes = new Hashtable(length + 1, (float) 1.0);
+
+	for (int i = 0; i < atts.getLength(); i++)
+	  {
+	    label = atts.getName(i);
+	    value = atts.getValue(i);
+
+	    attributes.put(label, value);
+	  }
+      }
   }
+
+  /**
+   * <P>This method returns the name of this element.</P>
+   */
 
   public String getName()
   {
     return name;
   }
 
-  public AttributeList getAttributeList()
+  /**
+   * <P>This method returns true if this element is named
+   * &lt;name&gt;</P>
+   */
+
+  public boolean matches(String name)
   {
-    return atts;
+    return name != null && name.equals(this.name);
+  }
+
+  /**
+   * <P>This method returns the number of attributes that this
+   * element has.</P>
+   */
+
+  public int getAttributeCount()
+  {
+    if (attributes == null)
+      {
+	return 0;
+      }
+    else
+      {
+	return attributes.size();
+      }
+  }
+
+  /**
+   * <P>This method returns the attribute value for attribute
+   * &lt;name&gt;, if any.  If this element does not contain
+   * an attribute of the given name, null is returned.</P>
+   */
+
+  public String getAttribute(String name)
+  {
+    if (attributes == null)
+      {
+	return null;
+      }
+
+    return (String) attributes.get(name);
   }
 
   public String toString()
   {
+    Object key, value;
+    int i = 0;
     StringBuffer buffer = new StringBuffer();
 
-    buffer.append("XML Open Element [");
+    /* -- */
+
+    buffer.append("XML Open Element <");
     buffer.append(name);
-    buffer.append("]");
     
-    if (atts != null && atts.getLength() > 0)
+    if (attributes != null)
       {
-	buffer.append("<");
+	Enumeration keys = attributes.keys();
 
-	for (int i = 0; i < atts.getLength(); i++)
+	while (keys.hasMoreElements())
 	  {
-	    if (i != 0)
-	      {
-		buffer.append(", ");
-	      }
+	    buffer.append(" ");
 
-	    buffer.append(atts.getName(i));
+	    key = keys.nextElement();
+	    value = attributes.get(key);
+
+	    buffer.append(key);
 	    buffer.append("= \"");
-	    buffer.append(atts.getValue(i));
+	    buffer.append(value);
 	    buffer.append("\"");
+
+	    i++;
 	  }
+
+	buffer.append(">");
       }
 
     return buffer.toString();
