@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.51 $
-   Last Mod Date: $Date: 1999/07/21 05:40:39 $
+   Version: $Revision: 1.52 $
+   Last Mod Date: $Date: 1999/07/21 05:47:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2141,7 +2141,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		oldVolMap.put(volumeId, mapEntryInvid);
 
-		System.err.println("Old entry.. " + mapName + ", " + volumeId);
+		if (debug)
+		  {
+		    System.err.println("Old entry.. " + mapName + ", " + volumeId);
+		  }
 	      }
 	  }
       }
@@ -2172,7 +2175,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		newVolMap.put(volumeId, mapEntryInvid);
 
-		System.err.println("New entry.. " + mapName + ", " + volumeId);
+		if (debug)
+		  {
+		    System.err.println("New entry.. " + mapName + ", " + volumeId);
+		  }
 	      }
 	  }
       }
@@ -2186,7 +2192,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	mapName = (String) keptMapNames.elementAt(i);
 
-	System.err.println("Checking map " + mapName + " for a volume change");
+	if (debug)
+	  {
+	    System.err.println("Checking map " + mapName + " for a volume change");
+	  }
 	
 	Invid oldMapEntryInvid = (Invid) oldEntryMap.get(mapName);
 	Invid newMapEntryInvid = (Invid) newEntryMap.get(mapName);
@@ -2203,8 +2212,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (!oldVolInvid.equals(newVolInvid))
 	      {
-		System.err.println("In map " + mapName + ", old vol was " + oldVolInvid +
-				   ", is now " + newVolInvid);
+		if (debug)
+		  {
+		    System.err.println("In map " + mapName + ", old vol was " + oldVolInvid +
+				       ", is now " + newVolInvid);
+		  }
 
 		// we have moved the user's home directory on this map.. we won't
 		// try to create the new home directory ourselves
@@ -2225,7 +2237,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	volumeId = (Invid) addedVolumes.elementAt(i);
 
-	System.err.println("Gained volume " + volumeId);
+	if (debug)
+	  {
+	    System.err.println("Gained volume " + volumeId);
+	  }
 
 	// the user might have the same volume registered on multiple
 	// maps, but we don't care enough to send mail out for it
@@ -2237,7 +2252,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	volumeId = (Invid) deletedVolumes.elementAt(i);
 
-	System.err.println("Lost volume " + volumeId);
+	if (debug)
+	  {
+	    System.err.println("Lost volume " + volumeId);
+	  }
 
 	// the user might have had the same volume registered on
 	// multiple maps, but we don't care enough to send mail out
