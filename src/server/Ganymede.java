@@ -5,7 +5,7 @@
    Server main module
 
    Created: 17 January 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,12 +28,14 @@ public class Ganymede {
   public static final boolean debug = true;
   public static Date startTime = new Date();
   public static String debugFilename = null;
-
+  public static String logFilename = "db/log";
+  public static DBLog log = null;
+  
   /* -- */
 
   public static void main(String argv[]) 
   {
-    File dataFile;
+    File dataFile, logFile;
 
     /* -- */
 
@@ -79,7 +81,6 @@ public class Ganymede {
     if (stop)
       {
 	System.err.println("Warning: Ganymede server already bound by other process / Naming failure.");
-	//	System.exit(0);
       }
 
     debug("Creating DBStore structures");
@@ -160,11 +161,48 @@ public class Ganymede {
 	throw new RuntimeException("Couldn't establish internal session: " + ex);
       }
 
+    // set up the log
+
+    try
+      {
+	log = new DBLog(logFilename, internalSession);
+      }
+    catch (IOException ex)
+      {
+	throw new RuntimeException("Couldn't initialize log file");
+      }
+
+    String startMesg;
+
+    if (debugFilename != null)
+      {
+	startMesg = "Server startup - Debug mode";
+      }
+    else
+      {
+	startMesg = "Server startup - Not in Debug mode";
+      }
+
+    log.logSystemEvent(new DBLogEvent("restart",
+				      startMesg,
+				      null,
+				      null,
+				      null,
+				      null));
+
     if (debug)
       {
 	debug("Setup and bound server object OK");
       }
   }
+
+  /**
+   *
+   * This method is used to initialize the Ganymede system when it is
+   * being driven by a direct-linked loader main() entry point, as a
+   * single process.
+   * 
+   */
 
   public static GanymedeServer directInit(String dbFilename) 
   {
@@ -240,6 +278,12 @@ public class Ganymede {
 
     if (debug)
       {
+	debug("Sweeping invid links");
+	server.sweepInvids();
+      }
+
+    if (debug)
+      {
 	debug("Setup and bound server object OK");
       }
 
@@ -256,5 +300,4 @@ public class Ganymede {
       }
     GanymedeAdmin.setStatus(string);
   }
-
 }
