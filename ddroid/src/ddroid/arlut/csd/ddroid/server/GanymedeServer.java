@@ -143,8 +143,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   static loginSemaphore shutdownSemaphore = new loginSemaphore();
 
   /**
-   * <p>TranslationService object for handling string localization in the Ganymede
-   * server.</p>
+   * <p>TranslationService object for handling string localization in
+   * the Directory Droid server.</p>
    */
 
   static TranslationService ts = null;

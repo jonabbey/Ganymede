@@ -56,6 +56,8 @@ package arlut.csd.ddroid.server;
 import arlut.csd.ddroid.common.*;
 import arlut.csd.ddroid.rmi.*;
 
+import arlut.csd.Util.TranslationService;
+
 import java.io.*;
 import java.util.*;
 
@@ -110,6 +112,15 @@ final public class DBSession {
   {
     debug = val;
   }
+
+  /**
+   * <p>TranslationService object for handling string localization in the Directory Droid
+   * server.</p>
+   */
+
+  static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.DBSession");
+
+  // ---
 
   /**
    * <P>User-level session reference.  As mentioned above, 
@@ -260,7 +271,7 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException("createDBObject called outside of a transaction");
+	throw new RuntimeException(ts.l("global.notransaction", "createDBObject"));
       }
 
     base = store.getObjectBase(object_type);
@@ -276,8 +287,8 @@ final public class DBSession {
 	// failure?  Report it, but we don't have to do any clean up at this
 	// point.
 
-	return Ganymede.createErrorDialog("Object Creation Failure",
-					  "Couldn't create the new object in the database.");
+	return Ganymede.createErrorDialog(ts.l("createDBObject.failure"),
+					  ts.l("createDBObject.failure_text"));
       }
 
     // Checkpoint the transaction at this point so that we can
@@ -306,7 +317,7 @@ final public class DBSession {
 
 		if (tmpInvid.getType() != SchemaConstants.OwnerBase)
 		  {
-		    throw new RuntimeException("bad ownership invid");
+		    throw new RuntimeException(ts.l("createDBObject.badowner"));
 		  }
 
 		// we don't want to explicitly record supergash ownership
@@ -327,8 +338,7 @@ final public class DBSession {
 
 			String checkedOutBy = owner.shadowObject.editset.description;
 
-			retVal.getDialog().appendText("\nOwner group " + name + 
-						      " is currently checked out by:\n" + checkedOutBy);
+			retVal.getDialog().appendText("\n" + ts.l("createDBObject.checkedout", name, checkedOutBy));
 		      }
 		    catch (NullPointerException ex)
 		      {
@@ -351,10 +361,8 @@ final public class DBSession {
 
 	if (!editSet.addObject(e_object))
 	  {
-	    return Ganymede.createErrorDialog("Object creation failure",
-					      "Couldn't create the object, because it came pre-linked " +
-					      "to a deleted object.\nDon't worry, this wasn't your fault.\n" +
-					      "Talk to whoever customized Directory Droid for you, or try again later.");
+	    return Ganymede.createErrorDialog(ts.l("createDBObject.failure"),
+					      ts.l("createDBObject.addObject_failed"));
 	  }
 
 	// update admin consoles
@@ -416,12 +424,12 @@ final public class DBSession {
       {
 	try
 	  {
-	    Ganymede.debug("Created new object : " + e_object.getLabel() + ", invid = " + e_object.getInvid());
+	    Ganymede.debug(ts.l("createDBObject.created", e_object.getLabel(), e_object.getInvid().toString());
 	    db_field[] fields = e_object.listFields();
 	    
 	    for (int i = 0; i < fields.length; i++)
 	      {
-		Ganymede.debug("field: " + i + " is " + fields[i].getID() + ":" + fields[i].getName());
+		Ganymede.debug(ts.l("createDBObject.field_report", i, fields[i].getID(), fields[i].getName());
 	      }
 	  }
 	catch (java.rmi.RemoteException ex)
@@ -578,14 +586,14 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException("editDBObject called outside of a transaction");
+	throw new RuntimeException(ts.l("global.notransaction", "editDBObject"));
       }
 
     obj = viewDBObject(baseID, objectID);
 
     if (obj == null)
       {
-	System.err.println("*** couldn't find object, base = " + baseID + ", obj = " + objectID);
+	System.err.println(ts.l("editDBObject.noobject", baseID, objectID));
 	return null;
       }
 
@@ -829,10 +837,13 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException("deleteDBObject called outside of a transaction");
+	throw new RuntimeException(ts.l("global.notransaction", "deleteDBObject"));
       }
 
     obj = viewDBObject(baseID, objectID);
+
+    // we have to have an editable object in order to delete it.. see
+    // if we can do that
 
     if (obj instanceof DBEditObject)
       {
@@ -845,9 +856,8 @@ final public class DBSession {
 
     if (eObj == null)
       {
-	return Ganymede.createErrorDialog("Can't delete " + obj.getLabel(),
-					  "Couldn't delete " + obj.getLabel() + 
-					  ", someone else is working with the object.");
+	return Ganymede.createErrorDialog(ts.l("deleteDBObject.cant_delete", obj.getLabel()),
+					  ts.l("deleteDBObject.cant_delete_text", obj.getLabel()));
       }
 
     return deleteDBObject(eObj);
@@ -885,7 +895,7 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException("deleteDBObject called outside of a transaction");
+	throw new RuntimeException(ts.l("global.notransaction", "deleteDBObject"));
       }
 
     key = "del" + eObj.getLabel();
@@ -916,9 +926,8 @@ final public class DBSession {
 
 	    popCheckpoint(key);
 
-	    return Ganymede.createErrorDialog("Can't delete " + eObj.toString(),
-					      eObj.toString() + " can't be deleted because an object which points " +
-					      "to it is currently checked out for editing by someone else.");
+	    return Ganymede.createErrorDialog(ts.l("deleteDBObject.cant_delete", eObj.toString()),
+					      ts.l("deleteDBObject.cant_delete_text2", eObj.toString()));
 	  }
 
 	break;
@@ -941,9 +950,8 @@ final public class DBSession {
 
 	rollback(key);
 
-	return Ganymede.createErrorDialog("Server: Error in DBSession.deleteDBObject()",
-					  "Error.. exception thrown while deleting " + 
-					  eObj + ": " + ex.getMessage());
+	return Ganymede.createErrorDialog(ts.l("deleteDBObject.error"),
+					  ts.l("deleteDBObject.error_text", eObj.toString(), ex.getMessage()));
       }
 
     // the remove logic can entirely bypass our normal finalize logic
@@ -1008,7 +1016,7 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException("inactivateDBObject called outside of a transaction");
+	throw new RuntimeException(ts.l("global.notransaction", "inactivateDBObject"));
       }
 
     key = "inactivate" + eObj.getLabel();
@@ -1020,9 +1028,8 @@ final public class DBSession {
 	break;
 
       default:
-	return Ganymede.createErrorDialog("Server: Error in DBSession.inactivateDBObject()",
-					  "Error.. can't inactivate an object that has " +
-					  "already been inactivated or deleted");
+	return Ganymede.createErrorDialog(ts.l("inactivateDBObject.error"),
+					  ts.l("inactivateDBObject.error_text"));
       }
 
     checkpoint(key);
@@ -1044,9 +1051,8 @@ final public class DBSession {
 
 	eObj.finalizeInactivate(false);
 
-	return Ganymede.createErrorDialog("Server: Error in DBSession.inactivateDBObject()",
-					  "Error.. exception thrown while inactivating " + 
-					  eObj + ": " + ex.getMessage());
+	return Ganymede.createErrorDialog(ts.l("inactivateDBObject.error"),
+					  ts.l("inactivateDBObject.error_text2", eObj.toString(), ex.getMessage()));
       }
 
     if (debug)
@@ -1105,7 +1111,7 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException("reactivateDBObject called outside of a transaction");
+	throw new RuntimeException(ts.l("global.notransaction", "reactivateDBObject"));
       }
 
     key = "reactivate" + eObj.getLabel();
@@ -1114,20 +1120,19 @@ final public class DBSession {
       {
       case DBEditObject.DELETING:
       case DBEditObject.DROPPING:
-	return Ganymede.createErrorDialog("Server: Error in DBSession.reactivateDBObject()",
-					  "Error.. can't reactivate an object that is being deleted\n" +
-					  "If you need to undo an object deletion, cancel your transaction.");
+	return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
+					  ts.l("reactivateDBObject.error_text"));
       }
 
     if (!eObj.isInactivated())
       {
-	return Ganymede.createErrorDialog("Server: Error in DBSession.reactivateDBObject()",
-					  "Error.. can't reactivate an object that is not inactive.");
+	return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
+					  ts.l("reactivateDBObject.error_text2"));
       }
 
     checkpoint(key);
 
-    System.err.println("DBSession.reactivateDBObject(): Calling eObj.reactivate()");
+    System.err.println(ts.l("reactivateDBObject.debug1"));
 
     try
       {
@@ -1141,12 +1146,11 @@ final public class DBSession {
 
 	rollback(key);
 
-	return Ganymede.createErrorDialog("Server: Error in DBSession.reactivateDBObject()",
-					  "Error.. exception thrown while reactivating " + 
-					  eObj + ": " + ex.getMessage());
+	return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error")
+					  ts.l("reactivateDBObject.error_text3", eObj.toString(), ex.getMessage()));
       }
 
-    System.err.println("DBSession.reactivateDBObject(): Got back from eObj.reactivate()");
+    System.err.println(ts.l("reactivateDBObject.debug2"));
 
     if (retVal != null && !retVal.didSucceed())
       {
@@ -1154,7 +1158,7 @@ final public class DBSession {
 	  {
 	    // oops, irredeemable failure.  rollback.
 
-	    System.err.println("DBSession.reactivateDBObject(): object refused reactivation, rolling back");
+	    System.err.println(ts.l("reactivateDBObject.debug3"));
 
 	    rollback(key);
 	  }
@@ -1303,8 +1307,7 @@ final public class DBSession {
 
     if (localObj == null)
       {
-	throw new IntegrityConstraintException("getContainingObj() couldn't find owner of embedded object " + 
-					       object.getLabel());
+	throw new IntegrityConstraintException(ts.l("getContainingObj.integrity", object.getLabel()));
       }
 
     return localObj;
@@ -1501,7 +1504,7 @@ final public class DBSession {
   {
     if (editSet != null)
       {
-	throw new IllegalArgumentException("transaction already open.");
+	throw new IllegalArgumentException(ts.l("openTransaction.transaction"));
       }
 
     editSet = new DBEditSet(store, this, describe, interactive);
@@ -1541,12 +1544,12 @@ final public class DBSession {
 
     if (debug)
       {
-	System.err.println(key + ": entering commitTransaction");
+	System.err.println(ts.l("commitTransaction.debug1", String.valueOf(key)));
       }
 
     if (editSet == null)
       {
-	throw new RuntimeException(key + ": commitTransaction called outside of a transaction");
+	throw new RuntimeException(ts.l("commitTransaction.notransaction", String.valueOf(key)));
       }
 
     // we can't commit a transaction with locks held, because that
@@ -1558,7 +1561,7 @@ final public class DBSession {
     
     if (debug)
       {
-	System.err.println(key + ": commiting editset");
+	System.err.println(ts.l("commitTransaction.debug2", String.valueOf(key)));
       }
 
     String description = editSet.description; // get before commit() clears it
@@ -1569,11 +1572,11 @@ final public class DBSession {
       {
 	if (description != null)
 	  {
-	    Ganymede.debug(key + ": committed transaction " + description);
+	    Ganymede.debug(ts.l("commitTransaction.debug3", String.valueOf(key), description));
 	  }
 	else
 	  {
-	    Ganymede.debug(key + ": committed transaction");
+	    Ganymede.debug(ts.l("commitTransaction.debug4", String.valueOf(key)));
 	  }
 
 	editSet = null;
@@ -1624,15 +1627,15 @@ final public class DBSession {
   {
     if (editSet == null)
       {
-	throw new RuntimeException("abortTransaction called outside of a transaction");
+	throw new RuntimeException(ts.l("global.notransaction", "abortTransaction"));
       }
 
     if (!editSet.abort())
       {
-	Ganymede.debug("abortTransaction() for " + key + ", can't safely dump writeLock.. can't kill it off");
+	Ganymede.debug(ts.l("abortTransaction.cant_abort", String.valueOf(key)));
 	
-	return Ganymede.createErrorDialog("Server: Error in DBSession.abortTransaction()",
-					  "Error.. transaction could not abort: can't safely dump writeLock");
+	return Ganymede.createErrorDialog(ts.l("abortTransaction.error"),
+					  ts.l("abortTransaction.error_text"));
       }
     else
       {
