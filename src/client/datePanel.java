@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2001/10/11 23:26:36 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2002/01/29 05:39:20 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -161,7 +161,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     top_pane.setMaximumSize(top_pane.getPreferredSize());
 
     dateformat = new SimpleDateFormat("MMM dd, yyyy",Locale.getDefault());
-    timeformat = new SimpleDateFormat("MMM dd, yyyy, at HH:mm a", Locale.getDefault());
+    timeformat = new SimpleDateFormat("MMM dd, yyyy, 'at' HH:mm a", Locale.getDefault());
 
     if (editable)
       {
