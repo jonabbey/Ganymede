@@ -7,15 +7,16 @@
    
    Created: 6 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2002/03/08 06:39:54 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2002/03/08 06:40:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   The University of Texas at Austin.
 
    Contact information
 
@@ -43,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -64,7 +66,7 @@ import java.util.*;
  * {@link arlut.csd.Util.Compare Compare} interface for ordering
  * comparisons.</P>
  *
- * @version $Revision: 1.7 $ $Date: 2002/03/08 06:39:54 $ $Name:  $
+ * @version $Revision: 1.8 $ $Date: 2002/03/08 06:40:51 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
