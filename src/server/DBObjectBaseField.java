@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,11 +39,13 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   String field_name;		// name of this field
   short field_code;		// id of this field in the current object
   short field_type;		// data type contained herein
+  short field_order;		// display order for this field
   byte visibility;		// visibility code
   String classname;		// name of class to manage user interactions with this field
   String comment;
   Class classdef;		// class object containing the code managing dbfields of this type
   boolean array;		// true if this field is an array type
+  boolean loading = false;	// true if we're in the middle of loading
 
   // array attributes
 
@@ -66,9 +68,9 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   // invid attributes
 
+  boolean editInPlace = false;
   short allowedTarget = -1;
-  boolean symmetry;
-  short targetField;
+  short targetField = -1;
 
   // schema editing
 
@@ -96,6 +98,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     
     field_code = 0;
     field_type = 0;
+    field_order = 0;
     editor = null;
     changed = false;
   }
@@ -138,6 +141,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     field_name = original.field_name; // name of this field
     field_code = original.field_code; // id of this field in the current object
     field_type = original.field_type; // data type contained herein
+    field_order = original.field_order;	// display order
     visibility = original.visibility; // visibility code
     classname = original.classname; // name of class to manage user interactions with this field
     comment = original.comment;
@@ -156,7 +160,6 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     caseInsensitive = original.caseInsensitive;
 
     allowedTarget = original.allowedTarget;
-    symmetry = original.symmetry;
     targetField = original.targetField;
 
     this.editor = editor;
@@ -171,7 +174,14 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     out.writeUTF(classname);
     out.writeUTF(comment);
     out.writeByte(visibility);
+
+    if ((base.store.major_version >= 1) && (base.store.minor_version >= 1))
+      {
+	out.writeShort(field_order); // added at file version 1.1
+      }
+
     out.writeBoolean(array);
+
     if (array)
       {
 	out.writeShort(limit);
@@ -204,13 +214,15 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     else if (isInvid())
       {
 	out.writeShort(allowedTarget);
-	out.writeBoolean(symmetry);
+	out.writeBoolean(editInPlace);
 	out.writeShort(targetField);
       }
   }
 
   synchronized void receive(DataInput in) throws IOException
   {
+    loading = true;
+
     field_name = in.readUTF();
     field_code = in.readShort();
     field_type = in.readShort();
@@ -232,7 +244,20 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     comment = in.readUTF();
 
     visibility = in.readByte();
+
+    // at file version 1.1, we introduced field_order
+
+    if ((base.store.file_major >= 1) && (base.store.file_minor >= 1))
+      {
+	field_order = in.readShort();
+      }
+    else
+      {
+	field_order = 0;
+      }
+
     array = in.readBoolean();
+
     if (array)
       {
 	limit = in.readShort();
@@ -271,9 +296,11 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     else if (isInvid())
       {
 	allowedTarget = in.readShort();
-	symmetry = in.readBoolean();
+	editInPlace = in.readBoolean();
 	targetField = in.readShort();
       }
+
+    loading = false;
   }
 
   // ----------------------------------------------------------------------
@@ -584,6 +611,20 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   /**
    *
+   * Returns the order of this field within the containing
+   * base.  Used to determine the layout order of object
+   * viewing panels.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public short getDisplayOrder()
+  {
+    return field_order;
+  }
+
+  /**
+   *
    * Returns the type id for this field definition as
    * a Short, suitable for use in a hash.
    *
@@ -616,6 +657,30 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
       }
 
     field_code = id;
+  }
+
+  /**
+   *
+   * Set the display order of this field in the SchemaEditor's
+   * tree, and in the object display panels in the client.
+   *
+   * Note that this method does not check to make sure that fields
+   * don't have duplicated order values.. the schema editor needs
+   * to do the proper logic to make sure that all fields have a
+   * reasonable order after any field creation, deletion, or 
+   * re-ordering.
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
+  public synchronized void setDisplayOrder(short order)
+  {
+    if (editor == null)
+      {
+	throw new IllegalArgumentException("not editing");
+      }
+
+    field_order = order;
   }
 
   /**
@@ -1011,7 +1076,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 
   public synchronized void setNameSpace(String nameSpaceId)
   {
-    if (editor == null)
+    if (editor == null && !loading)
       {
 	throw new IllegalArgumentException("not editing");
       }
@@ -1073,6 +1138,32 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   // **
   // invid attribute methods
   // **
+
+  /**
+   *
+   * Returns true if this field is intended as an editInPlace
+   * reference for the client's rendering.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public boolean isEditInPlace()
+  {
+    return editInPlace;
+  }
+
+  /**
+   *
+   * Sets whether or not this field is intended as an editInPlace
+   * reference for the client's rendering.
+   *
+   * @see arlut.csd.ganymede.BaseField
+   */
+
+  public void setEditInPlace(boolean b)
+  {
+    editInPlace = b;
+  }
 
   /**
    *
@@ -1182,7 +1273,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	return;
       }
 
-    b = base.editor.getBase(baseName);
+    b = editor.getBase(baseName);
 
     try
       {
@@ -1216,32 +1307,7 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
 	throw new IllegalArgumentException("not an invid field");
       }
 
-    return symmetry;
-  }
-
-  /**
-   *
-   * Turns symmetry maintenance on/off for this invid field.  If b is
-   * true, changes to this invid field will result in symmetric changes
-   * being made to an invid that is set/cleared/added/deleted on this
-   * field.
-   *
-   * @see arlut.csd.ganymede.BaseField
-   */
-
-  public synchronized void setSymmetry(boolean b)
-  {
-    if (editor == null)
-      {
-	throw new IllegalArgumentException("not editing");
-      }
-
-    if (!isInvid())
-      {
-	throw new IllegalArgumentException("not an invid field");
-      }
-
-    symmetry = b;
+    return ((allowedTarget != -1) && (targetField != -1));
   }
 
   /**
