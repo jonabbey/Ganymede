@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,15 +43,22 @@ public class DBObjectBase {
   /* - */
 
   DBStore store;
+
+  // schema info from the DBStore file
+
   String object_name;
   String classname;
+  Class classdef;
   short type_code;
+
+  // runtime data
+
   Hashtable fieldHash;		// field dictionary
   Hashtable objectHash;		// objects in our objectBase
   int object_count;
   int maxid;			// highest invid to date
 
-  // Used by the DBLock Classes
+  // used by the DBLock Classes to synchronize client access
 
   DBLock currentLock;
   Vector writerList, readerList, dumperList;
@@ -68,6 +75,7 @@ public class DBObjectBase {
     this.store = store;
     object_name = null;
     classname = null;
+    classdef = null;
     type_code = 0;
     fieldHash = null;
     objectHash = null;
@@ -144,7 +152,20 @@ public class DBObjectBase {
 	System.err.println("DBObjectBase.receive(): class name: " + classname);
       }
 
-    type_code = in.readShort();
+    if (classname != null && !classname.equals(""))
+      {
+	try
+	  {
+	    classdef = Class.forName(classname);
+	  }
+	catch (ClassNotFoundException ex)
+	  {
+	    System.err.println("DBObjectBase.receive(): class definition could not be found: " + ex);
+	    classdef = null;
+	  }
+      }
+
+    type_code = in.readShort();	// read our index for the DBStore's objectbase hash
 
     size = in.readShort();
 
@@ -283,6 +304,17 @@ public class DBObjectBase {
   public String getClassName()
   {
     return classname;
+  }
+
+  /**
+   *
+   * Returns the class definition for this object type
+   *
+   */
+
+  public Class getClassDef()
+  {
+    return classdef;
   }
 
   /**
