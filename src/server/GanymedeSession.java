@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.153 $
-   Last Mod Date: $Date: 1999/10/08 00:12:14 $
+   Version: $Revision: 1.154 $
+   Last Mod Date: $Date: 1999/10/13 20:02:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.153 $ %D%
+ * @version $Revision: 1.154 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -846,10 +846,28 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	  }
 
-	// Update the server's records, refresh the admin consoles.
+	try
+	  {
+	    // Update the server's records, refresh the admin consoles.
+	    
+	    GanymedeServer.sessions.removeElement(this);
+	    
+	    // update the admin consoles
+	    
+	    GanymedeAdmin.refreshUsers();
+	  }
+	finally
+	  {
+	    // if we are the last user logged in and the server is in
+	    // deferred shutdown mode, clearActiveUser() will shut the
+	    // server down, so the rest of of the stuff below may not
+	    // happen
 
-	GanymedeServer.sessions.removeElement(this);
-	GanymedeServer.clearActiveUser(username);
+	    GanymedeServer.clearActiveUser(username);
+	  }
+
+	// guess we're still running.  Remember the last time this
+	// user logged out for the motd-display check
 
 	if (userInvid != null)
 	  {
@@ -859,8 +877,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    GanymedeServer.userLogOuts.put(personaInvid, new Date());
 	  }
-
-	GanymedeAdmin.refreshUsers();
 
 	// help the garbage collector
 
@@ -877,7 +893,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	Ganymede.debug("User " + username + " logged off");
 
-	this.username = null;
 	this.lastError = null;
       }
   }

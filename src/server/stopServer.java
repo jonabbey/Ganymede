@@ -8,8 +8,8 @@
 
    Created: 28 April 1999
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/05/07 05:21:38 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 1999/10/13 20:02:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -81,8 +81,13 @@ public class stopServer {
     String server_url;
     Server server = null;
     stopServerAdmin admin = null;
+    boolean waitForUsers = false;
 
     /* -- */
+
+    // if the user invokes us with -delay, we'll do a deferred shutdown.
+
+    waitForUsers = ParseArgs.switchExists("delay", argv);
 
     propFilename = ParseArgs.getArg("properties", argv);
 
@@ -147,14 +152,22 @@ public class stopServer {
 
     try
       {
-	admin.shutdown();
+	admin.shutdown(waitForUsers);
       }
     catch (RemoteException rx)
       {
 	// just have to hope we did shut it down
       }
 
-    System.out.println("Ganymede stopServer: Ganymede server shutdown");
+    if (!waitForUsers)
+      {
+	System.out.println("Ganymede stopServer: Ganymede server shutdown");
+      }
+    else
+      {
+	System.out.println("Ganymede stopServer: Ganymede server shutdown initiated\nServer will "
+			   + "shut down when all users are logged out.");
+      }
 
     System.exit(0);
   }
@@ -271,9 +284,9 @@ class stopServerAdmin extends UnicastRemoteObject implements Admin {
       }
   }
 
-  void shutdown() throws RemoteException
+  void shutdown(boolean waitForUsers) throws RemoteException
   {
-    aSession.shutdown();
+    aSession.shutdown(waitForUsers);
   }
 
   public void disconnect() throws RemoteException

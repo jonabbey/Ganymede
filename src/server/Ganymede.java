@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 1999/10/12 18:56:10 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 1999/10/13 20:02:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -829,6 +829,22 @@ public class Ganymede {
     writer.close();
 
     return stringTarget.toString();
+  }
+
+  /**
+   * This is a convenience method used by the server to return a
+   * standard informative dialog.
+   */
+
+  static public ReturnVal createInfoDialog(String title, String body)
+  {
+    ReturnVal retVal = new ReturnVal(true);
+    retVal.setDialog(new JDialogBuff(title,
+				     body,
+				     "OK",
+				     null,
+				     "ok.gif"));
+    return retVal;
   }
 
   /**

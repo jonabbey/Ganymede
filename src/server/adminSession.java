@@ -9,8 +9,8 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/07/08 04:27:45 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/10/13 20:02:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import java.util.Date;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Revision: 1.13 $ %D%
+ * @version $Revision: 1.14 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -104,7 +104,7 @@ public interface adminSession extends Remote {
    * <p>shutdown the server cleanly, on behalf of this admin console.</p>
    */
 
-  ReturnVal     shutdown() throws RemoteException;
+  ReturnVal     shutdown(boolean waitForUsers) throws RemoteException;
 
   /**
    * <P>dump the current state of the db to disk</P>

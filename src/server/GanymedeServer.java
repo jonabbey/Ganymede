@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.44 $
-   Last Mod Date: $Date: 1999/10/08 01:41:30 $
+   Version: $Revision: 1.45 $
+   Last Mod Date: $Date: 1999/10/13 20:02:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,6 +76,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   static Vector sessions = new Vector();
   static Hashtable activeUsers = new Hashtable();
   static Hashtable userLogOuts = new Hashtable();
+  static boolean shutdown = false;
 
   /* -- */
 
@@ -151,6 +152,12 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    if (Ganymede.db.sweepInProgress)
 	      {
 		client.forceDisconnect("Invid Sweep In Progress");
+		return null;
+	      }
+
+	    if (GanymedeServer.shutdown)
+	      {
+		client.forceDisconnect("Login not allowed, the Ganymede server is being shut down.");
 		return null;
 	      }
 	  }
@@ -416,6 +423,30 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     synchronized (activeUsers)
       {
 	activeUsers.remove(username);
+
+	// if we are in deferred shutdown mode and this was the last
+	// user logged in, spin off a thread to shut the server down
+
+	if (shutdown && activeUsers.size() == 0)
+	  {
+	    Thread deathThread = new Thread(new Runnable() {
+	      public void run() {
+		// sleep for 5 seconds to let our last client disconnect
+		
+		try
+		  {
+		    java.lang.Thread.currentThread().sleep(5000);
+		  }
+		catch (InterruptedException ex)
+		  {
+		  }
+
+		GanymedeServer.shutdown();
+	      }
+	    });
+
+	    deathThread.start();
+	  }
       }
   }
 
@@ -664,6 +695,111 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       }
 
     return aSession;
+  }
+
+  /**
+   * <p>This method is used by the
+   * {@link arlut.csd.ganymede.GanymedeAdmin#shutdown(boolean, java.lang.String) shutdown()}
+   * method to put the server into 'shutdown soon' mode.</p>
+   */
+
+  public static synchronized void setShutdown()
+  {
+    GanymedeServer.shutdown = true;
+    GanymedeAdmin.setStatus("Server going down.. waiting for users to log out");
+  }
+
+  /**
+   * <p>This method actually does the shutdown.</p>
+   */
+
+  public static synchronized ReturnVal shutdown()
+  {
+    Vector tempList;
+    GanymedeSession temp;
+    GanymedeAdmin atmp;
+
+    /* -- */
+
+    GanymedeAdmin.setStatus("Server going down.. performing final dump");
+
+    // dump, then shut down.  Our second dump parameter is false,
+    // so that we are guaranteed that no client can get a writelock
+    // and maybe get a transaction off that would cause us confusion.
+
+    try
+      {
+	Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive last
+      }
+    catch (IOException ex)
+      {
+	return Ganymede.createErrorDialog("Shutdown Error",
+					  "shutdown error: couldn't successfully dump db:" + ex);
+      }
+
+    // ok, we now are left holding a dump lock.  it should be safe to kick
+    // everybody off and shut down the server
+
+    // forceOff modifies GanymedeServer.sessions, so we need to copy our list
+    // before we iterate over it.
+
+    tempList = new Vector();
+
+    for (int i = 0; i < sessions.size(); i++)
+      {
+	tempList.addElement(sessions.elementAt(i));
+      }
+
+    for (int i = 0; i < tempList.size(); i++)
+      {
+	temp = (GanymedeSession) tempList.elementAt(i);
+
+	temp.forceOff("Server going down");
+      }
+
+    // stop any background tasks running
+
+    Ganymede.scheduler.stop();
+
+    // disconnect the admin consoles
+
+    for (int i = 0; i < GanymedeAdmin.consoles.size(); i++)
+      {
+	atmp = (GanymedeAdmin) GanymedeAdmin.consoles.elementAt(i);
+
+	try
+	  {
+	    atmp.admin.forceDisconnect("Server going down now.");
+	  }
+	catch (RemoteException ex)
+	  {
+	    // don't worry about it
+	  }
+      }
+
+    Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
+					       "Server shutdown",
+					       null,
+					       null,
+					       null,
+					       null));
+
+    System.err.println("\nServer completing shutdown.. waiting for log thread to complete.");
+
+    try
+      {
+	Ganymede.log.close();
+      }
+    catch (IOException ex)
+      {
+	System.err.println("IO Exception closing log file:" + ex);
+      }
+
+    System.err.println("\nServer shutdown complete.");
+
+    System.exit(0);
+
+    return null;
   }
 
   /**

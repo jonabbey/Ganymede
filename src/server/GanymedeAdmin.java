@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 1999/07/30 16:15:48 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 1999/10/13 20:02:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.33 $ %D%
+ * @version $Revision: 1.34 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -89,7 +89,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * keep track of the attached admin consoles.
    */
 
-  private static Vector consoles = new Vector();
+  static Vector consoles = new Vector();
 
   /**
    * Static vector of GanymedeAdmin instances for which
@@ -710,9 +710,12 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 
   /**
    * <p>shutdown the server cleanly, on behalf of this admin console.</p>
+   *
+   * @param waitForUsers if true, shutdown will be deferred until all users are logged
+   * out.  No new users will be allowed to login.
    */
 
-  public ReturnVal shutdown()
+  public ReturnVal shutdown(boolean waitForUsers)
   {
     GanymedeSession temp;
     GanymedeAdmin atmp;
@@ -726,85 +729,18 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
 					  "You do not have permissions to shut down the server");
       }
 
-    setStatus("Server going down.. performing final dump");
-
-    // dump, then shut down.  Our second dump parameter is false,
-    // so that we are guaranteed that no client can get a writelock
-    // and maybe get a transaction off that would cause us confusion.
-
-    try
+    if (waitForUsers)
       {
-	Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive last
+	GanymedeServer.setShutdown();
+	return Ganymede.createInfoDialog("Server Set For Shutdown",
+					 "The server is prepared for shut down.  Shutdown will commence as soon " +
+					 "as all current users log out.");
       }
-    catch (IOException ex)
+    else
       {
-	return Ganymede.createErrorDialog("Shutdown Error",
-					  "shutdown error: couldn't successfully dump db:" + ex);
+	GanymedeServer.shutdown();
+	return null;		// we'll never get here
       }
-
-    // ok, we now are left holding a dump lock.  it should be safe to kick
-    // everybody off and shut down the server
-
-    // forceOff modifies GanymedeServer.sessions, so we need to copy our list
-    // before we iterate over it.
-
-    tempList = new Vector();
-
-    for (int i = 0; i < GanymedeServer.sessions.size(); i++)
-      {
-	tempList.addElement(GanymedeServer.sessions.elementAt(i));
-      }
-
-    for (int i = 0; i < tempList.size(); i++)
-      {
-	temp = (GanymedeSession) tempList.elementAt(i);
-
-	temp.forceOff("Server going down");
-      }
-
-    // stop any background tasks running
-
-    Ganymede.scheduler.stop();
-
-    // disconnect the admin consoles
-
-    for (int i = 0; i < consoles.size(); i++)
-      {
-	atmp = (GanymedeAdmin) consoles.elementAt(i);
-
-	try
-	  {
-	    atmp.admin.forceDisconnect("Server going down now.");
-	  }
-	catch (RemoteException ex)
-	  {
-	    // don't worry about it
-	  }
-      }
-
-    Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
-					       "Server shutdown",
-					       null,
-					       null,
-					       null,
-					       null));
-
-    System.err.println("\nServer completing shutdown.. waiting for log thread to complete.");
-
-    try
-      {
-	Ganymede.log.close();
-      }
-    catch (IOException ex)
-      {
-	System.err.println("IO Exception closing log file:" + ex);
-      }
-
-    System.err.println("\nServer shutdown complete.");
-
-    System.exit(0);
-
-    return null;		// we'll never get here
   }
 
   /**

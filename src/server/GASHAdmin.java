@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.58 $
-   Last Mod Date: $Date: 1999/07/30 16:15:47 $
+   Version: $Revision: 1.59 $
+   Last Mod Date: $Date: 1999/10/13 20:02:13 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -1215,6 +1215,8 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
       }
     else if (event.getSource() == shutdownMI)
       {
+	boolean waitForUsers=false;
+
 	if (shutdownDialog == null)
 	  {
 	    shutdownDialog = new StringDialog(this,
@@ -1225,6 +1227,16 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	if (shutdownDialog.DialogShow() != null)
 	  {
+	    shutdownDialog = new StringDialog(this,
+					      "Wait for users to log out?",
+					      "Do you want to suspend shutdown until all users are logged off?",
+					      "Yes, wait", "No, shutdown now", question);
+
+	    if (shutdownDialog.DialogShow() != null)
+	      {
+		waitForUsers = true;
+	      }
+
 	    if (debug)
 	      {
 		System.err.println("Affirmative shutdown request");
@@ -1234,7 +1246,7 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
 
 	    try
 	      {
-		success = admin.shutdown();
+		success = admin.shutdown(waitForUsers);
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -1799,13 +1811,13 @@ class iAdmin extends UnicastRemoteObject implements Admin {
     handleReturnVal(aSession.killAll());
   }
 
-  boolean shutdown() throws RemoteException
+  boolean shutdown(boolean waitForUsers) throws RemoteException
   {
     if (debug)
       {
       }
 
-    ReturnVal retVal = handleReturnVal(aSession.shutdown());
+    ReturnVal retVal = handleReturnVal(aSession.shutdown(waitForUsers));
 
     return (retVal == null || retVal.didSucceed());
   }
