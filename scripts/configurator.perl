@@ -4,8 +4,9 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.36 $
-# $Date: 1999/02/23 23:20:01 $
+# $Revision: 1.37 $
+# $Date: 1999/04/06 20:53:57 $
+# $Name:  $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -120,23 +121,23 @@ sub write_makefile {
 classfiles:
 	\@echo "Building Ganymede sources"
 	\@cd $rootdir/src/Util; \\
-	build
+	./build
 	\@cd $rootdir/src/Qsmtp; \\
-	build		
+	./build		
 	\@cd $rootdir/src/jcrypt; \\
-	build		
+	./build		
 	\@cd $rootdir/src/JDataComponent; \\
-	build
+	./build
 	\@cd $rootdir/src/JTree; \\
-	build
+	./build
 	\@cd $rootdir/src/JTable; \\
-	build
+	./build
 	\@cd $rootdir/src/server; \\
-	build
+	./build
 	\@cd $rootdir/src/client; \\
-	build
+	./build
 	\@cd $rootdir/src/password; \\
-	build
+	./build
 	\@cd $rootdir/src
 	\@echo "Built Ganymede classes"
 
@@ -144,19 +145,19 @@ kits:
 	\@echo "Building schemas"
 	\@echo "Compiling BSD schema kit"
 	\@cd $rootdir/src/schemas/bsd; \\
-	build;
+	./build;
 	\@echo "Compiling GASH schema kit"
 	\@cd $rootdir/src/schemas/gash; \\
-	build;
+	./build;
 	\@echo "Compiling GASHARL schema kit"
 	\@cd $rootdir/src/schemas/gasharl; \\
-	build;
+	./build;
 	\@echo "Compiling LINUX schema kit"
 	\@cd $rootdir/src/schemas/linux; \\
-	build;
+	./build;
 	\@echo "Compiling Solaris NIS schema kit"
 	\@cd $rootdir/src/schemas/nisonly; \\
-	build;
+	./build;
 
 clean:
 	\@echo "Removing class files (except gnu-regexp files)"
@@ -171,9 +172,9 @@ cleanconfig:
 jars:
 	\@echo "Building server, client, and admin jar files"
 	\@cd $classdir; \\
-	buildJar; \\
-	buildAdminJar; \\
-	buildServerJar; \\
+	./buildJar; \\
+	./buildAdminJar; \\
+	./buildServerJar; \\
 	cp *.jar $rootdir/jars;
 	\@echo "Finished generating jars in $rootdir/jars"
 
@@ -303,7 +304,7 @@ JAVADIR=$javadir
 # will look here to find pre-compiled classes needed to compile
 # code in this directory
 
-CLASSDIR=$classdir
+CLASSDIR=$classdir:$ENV{"GSWING"}/swingall.jar
 
 # Target location for classes built from sources in this directory.
 # This is just the root of the tree.. the javac compiler will
@@ -316,7 +317,6 @@ ENDCONFIG
 
     close(CONFIGFILE);
 }
-
 
 ######################################################################### 
 #
@@ -377,8 +377,6 @@ sub copydir{
   }
 }
 
-
-
 ###
 ### Let's do it, then.
 ###
@@ -416,8 +414,6 @@ removelastslash($javadir);
 	  "$classdir", "Ganymede Jars", "$classdir",
 	  "$rootdir/src/password", "Ganymede Sample Password Client", "$rootdir/src/password/classes",
 	  "$rootdir/doc", "Javadoc", "$classdir");
-
-
 
 print "\nGenerating config.sh files in source directories.\n";
 
@@ -477,7 +473,6 @@ while ($#rebuilds > 0) {
        "$classdir/server_classes/sync_tree",
        "sync_tree.gnu.server.in",
        "$classdir/server_classes/sync_tree.gnu");
-
 
 print "Generating jar generation scripts.\n\n";
 
