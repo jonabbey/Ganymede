@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# Ganymede Loader Run Script 
+# Created: 18 March 1998
+# Ver: %I% %D%
+#
+# Jonathan Abbey
+#
+###################################################
+
+# Where are we running the JVM from?
+
+JAVA=/opt/bin/java
+
+# Where are the Ganymede jars installed?
+
+JARPATH=/home/broccol/gash2/classes
+
+# Where is the loader tree?
+
+LOADERDIR=/home/broccol/gash2/code/arlut/csd/ganymede/schemas/gasharl/loader
+
+# Where are the classes for the loader?
+
+LOADERCLASSPATH=$LOADERDIR/classes
+
+# Set the CLASSPATH for the JVM to use
+
+CLASSPATH=$JARPATH/ganymedeServer.jar:$LOADERCLASSPATH:$LOADERDIR/../custom.jar
+
+export CLASSPATH
+
+# Where is the schema file we're going to start things off
+# with?
+
+SCHEMAFILE=$LOADERDIR/ganymede.schema 
+
+# Where is the database directory?
+
+DB=$LOADERDIR/db
+
+# The properties file tells the loader where to look for
+# the database, where to write a summary of the schema,
+# and so on.
+#
+# NOTE: The GASH loader automatically looks for its input
+# files in $LOADERDIR/input.. this is hard-coded, rather
+# than being set in ganymede.properties.
+#
+# NOTE: The properties file used for the loader probably
+# should not be the same one used to run the server.. it's
+# better to keep the files the loader uses separate.
+
+PROPERTIES=$LOADERDIR/ganymede.properties
+
+##################################################
+
+echo "Cleaning old journal files"
+
+rm -f $DB/journal*
+
+cd $LOADERDIR
+
+echo "Copying schema definition file to loader directory"
+
+cp $SCHEMAFILE $DB/loader.db
+
+echo "Running loader"
+
+$JAVA -noasyncgc -ms32m -mx256m arlut.csd.ganymede.loader.directLoader $PROPERTIES
