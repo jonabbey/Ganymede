@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.177 $
-   Last Mod Date: $Date: 2000/10/09 06:21:33 $
+   Version: $Revision: 1.178 $
+   Last Mod Date: $Date: 2000/12/03 12:15:06 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -89,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.177 $ $Date: 2000/10/09 06:21:33 $ $Name:  $
+ * @version $Revision: 1.178 $ $Date: 2000/12/03 12:15:06 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/10/09 06:21:33 $";
+  static String release_date = "$Date: 2000/12/03 12:15:06 $";
   static String release_number = null;
 
   // ---
@@ -738,27 +738,27 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     // Create menus for the tree
 
-    pMenuAll.add(new MenuItem("Hide Non-Editables"));
-    pMenuAll.add(new MenuItem("Query"));
-    pMenuAll.add(new MenuItem("Report editable"));
-    pMenuAll.add(new MenuItem("Report all"));
+    pMenuAll.add(new JMenuItem("Hide Non-Editables"));
+    pMenuAll.add(new JMenuItem("Query"));
+    pMenuAll.add(new JMenuItem("Report editable"));
+    pMenuAll.add(new JMenuItem("Report all"));
 
-    pMenuEditable.add(new MenuItem("Show Non-Editables"));
-    pMenuEditable.add(new MenuItem("Query"));
-    pMenuEditable.add(new MenuItem("Report editable"));
-    pMenuEditable.add(new MenuItem("Report all"));
+    pMenuEditable.add(new JMenuItem("Show Non-Editables"));
+    pMenuEditable.add(new JMenuItem("Query"));
+    pMenuEditable.add(new JMenuItem("Report editable"));
+    pMenuEditable.add(new JMenuItem("Report all"));
 
-    pMenuAllCreatable.add(new MenuItem("Hide Non-Editables"));
-    pMenuAllCreatable.add(new MenuItem("Query"));
-    pMenuAllCreatable.add(new MenuItem("Report editable"));
-    pMenuAllCreatable.add(new MenuItem("Report all"));
-    pMenuAllCreatable.add(new MenuItem("Create"));
+    pMenuAllCreatable.add(new JMenuItem("Hide Non-Editables"));
+    pMenuAllCreatable.add(new JMenuItem("Query"));
+    pMenuAllCreatable.add(new JMenuItem("Report editable"));
+    pMenuAllCreatable.add(new JMenuItem("Report all"));
+    pMenuAllCreatable.add(new JMenuItem("Create"));
 
-    pMenuEditableCreatable.add(new MenuItem("Show Non-Editables"));
-    pMenuEditableCreatable.add(new MenuItem("Query"));
-    pMenuEditableCreatable.add(new MenuItem("Report editable"));
-    pMenuEditableCreatable.add(new MenuItem("Report all"));
-    pMenuEditableCreatable.add(new MenuItem("Create"));
+    pMenuEditableCreatable.add(new JMenuItem("Show Non-Editables"));
+    pMenuEditableCreatable.add(new JMenuItem("Query"));
+    pMenuEditableCreatable.add(new JMenuItem("Report editable"));
+    pMenuEditableCreatable.add(new JMenuItem("Report all"));
+    pMenuEditableCreatable.add(new JMenuItem("Create"));
 
     if (debug)
       {
@@ -853,27 +853,27 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     objectViewPM = new treeMenu();
-    objectViewPM.add(new MenuItem("View Object"));
+    objectViewPM.add(new JMenuItem("View Object"));
 
     objectRemovePM = new treeMenu();
-    objectRemovePM.add(new MenuItem("View Object"));
-    objectRemovePM.add(new MenuItem("Edit Object"));
-    objectRemovePM.add(new MenuItem("Clone Object"));
-    objectRemovePM.add(new MenuItem("Delete Object"));
+    objectRemovePM.add(new JMenuItem("View Object"));
+    objectRemovePM.add(new JMenuItem("Edit Object"));
+    objectRemovePM.add(new JMenuItem("Clone Object"));
+    objectRemovePM.add(new JMenuItem("Delete Object"));
 
     objectInactivatePM = new treeMenu();
-    objectInactivatePM.add(new MenuItem("View Object"));
-    objectInactivatePM.add(new MenuItem("Edit Object"));
-    objectInactivatePM.add(new MenuItem("Clone Object"));
-    objectInactivatePM.add(new MenuItem("Delete Object"));
-    objectInactivatePM.add(new MenuItem("Inactivate Object"));
+    objectInactivatePM.add(new JMenuItem("View Object"));
+    objectInactivatePM.add(new JMenuItem("Edit Object"));
+    objectInactivatePM.add(new JMenuItem("Clone Object"));
+    objectInactivatePM.add(new JMenuItem("Delete Object"));
+    objectInactivatePM.add(new JMenuItem("Inactivate Object"));
 
     objectReactivatePM = new treeMenu();
-    objectReactivatePM.add(new MenuItem("View Object"));
-    objectReactivatePM.add(new MenuItem("Edit Object"));
-    objectReactivatePM.add(new MenuItem("Clone Object"));
-    objectReactivatePM.add(new MenuItem("Delete Object"));
-    objectReactivatePM.add(new MenuItem("Reactivate Object"));
+    objectReactivatePM.add(new JMenuItem("View Object"));
+    objectReactivatePM.add(new JMenuItem("Edit Object"));
+    objectReactivatePM.add(new JMenuItem("Clone Object"));
+    objectReactivatePM.add(new JMenuItem("Delete Object"));
+    objectReactivatePM.add(new JMenuItem("Reactivate Object"));
 
     try
       {
