@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.33 $
-# $Date: 1999/01/23 01:06:35 $
+# $Revision: 1.34 $
+# $Date: 1999/01/26 19:13:21 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -159,7 +159,7 @@ kits:
 
 clean:
 	\@echo "Removing class files (except gnu-regexp files)"
-	\@find $rootdir/src/classes/arlut -name \*.class -exec rm {} \\; -print
+	\@find $classdir/arlut -name \*.class -exec rm {} \\; -print
 
 cleanconfig:
 	\@echo "Removing config.sh files"
@@ -169,7 +169,7 @@ cleanconfig:
 
 jars:
 	\@echo "Building server, client, and admin jar files"
-	\@cd $rootdir/src/classes; \\
+	\@cd $classdir; \\
 	buildJar; \\
 	buildAdminJar; \\
 	buildServerJar; \\
@@ -225,7 +225,7 @@ sub write_syncjars {
 
     while (<SYNCIN>){
 	s/\/opt\/bin\/perl5/$perlname/;
-	s/\<\#CLASSDIR\#\>/$rootdir\/src\/classes/;
+	s/\<\#CLASSDIR\#\>/$classdir/;
 	print SYNCOUT $_;
     }
 
@@ -302,7 +302,7 @@ JAVADIR=$javadir
 # will look here to find pre-compiled classes needed to compile
 # code in this directory
 
-CLASSDIR=$rootdir/src/classes
+CLASSDIR=$classdir
 
 # Target location for classes built from sources in this directory.
 # This is just the root of the tree.. the javac compiler will
@@ -324,23 +324,30 @@ $perlname = $ENV{GPERL};
 $rootdir = &resolve(cwd(), $ENV{GROOTDIR});
 $javadir = $ENV{GJAVA};
 
+# See if there's a user-defined target location
+# for the classes. Otherwise, use default.
+$classdir = $ENV{GCLASSDIR};
+if ($classdir eq "") {
+  $classdir = "$rootdir/src/classes";
+}
+
 removelastslash($javadir);
 
 # First we need to put out all the config.sh files that the build and
 # rebuild scripts depend on.  See the header for write_config() to
 # identify the three pieces.
 
-@configs=("$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$rootdir/src/classes",
-	  "$rootdir/src/jcrypt", "jcrypt Class", "$rootdir/src/classes",
-	  "$rootdir/src/Util", "Ganymede Utility Classes", "$rootdir/src/classes",
-	  "$rootdir/src/JTable", "Ganymede Table Classes", "$rootdir/src/classes",
-	  "$rootdir/src/JTree", "Ganymede Tree Classes", "$rootdir/src/classes",
-	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes", "$rootdir/src/classes",
-	  "$rootdir/src/server", "Ganymede Server Classes", "$rootdir/src/classes",
-	  "$rootdir/src/client", "Ganymede Client Classes", "$rootdir/src/classes",
-	  "$rootdir/src/classes", "Ganymede Jars", "$rootdir/src/classes",
+@configs=("$rootdir/src/Qsmtp", "Qsmtp Mail Class", "$classdir",
+	  "$rootdir/src/jcrypt", "jcrypt Class", "$classdir",
+	  "$rootdir/src/Util", "Ganymede Utility Classes", "$classdir",
+	  "$rootdir/src/JTable", "Ganymede Table Classes", "$classdir",
+	  "$rootdir/src/JTree", "Ganymede Tree Classes", "$classdir",
+	  "$rootdir/src/JDataComponent", "Ganymede GUI Component Classes", "$classdir",
+	  "$rootdir/src/server", "Ganymede Server Classes", "$classdir",
+	  "$rootdir/src/client", "Ganymede Client Classes", "$classdir",
+	  "$rootdir/src/classes", "Ganymede Jars", "$classdir",
 	  "$rootdir/src/password", "Ganymede Sample Password Client", "$rootdir/src/password/classes",
-	  "$rootdir/doc", "Javadoc", "$rootdir/src/classes");
+	  "$rootdir/doc", "Javadoc", "$classdir");
 
 print "\nGenerating config.sh files in source directories.\n";
 
@@ -393,13 +400,14 @@ while ($#rebuilds > 0) {
 }
 
 @sync=("sync_tree.admin.in",
-       "$rootdir/src/classes/admin_classes/sync_tree",
+       "$classdir/admin_classes/sync_tree",
        "sync_tree.client.in",
-       "$rootdir/src/classes/client_classes/sync_tree",
+       "$classdir/client_classes/sync_tree",
        "sync_tree.server.in",
-       "$rootdir/src/classes/server_classes/sync_tree",
+       "$classdir/server_classes/sync_tree",
        "sync_tree.gnu.server.in",
-       "$rootdir/src/classes/server_classes/sync_tree.gnu");
+       "$classdir/server_classes/sync_tree.gnu");
+
 
 print "Generating jar generation scripts.\n\n";
 
