@@ -173,6 +173,8 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
 		System.err.println("Read " + count + " bytes from " + keysResource);
 	      }
 	  }
+
+	x.close();
       
 	ks.load(PackageResources.getPackageResourceAsStream(keysResource, this.getClass()), pass);
 	kmf.init(ks, pass);

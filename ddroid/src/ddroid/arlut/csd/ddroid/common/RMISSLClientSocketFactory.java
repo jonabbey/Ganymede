@@ -167,6 +167,8 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 	      }
 	  }
 
+	x.close();
+
 	ks.load(PackageResources.getPackageResourceAsStream(certsResource, this.getClass()), null);
 	tmf.init(ks);
 	ctx.init(null, tmf.getTrustManagers(), null);
