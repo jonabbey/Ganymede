@@ -2,13 +2,21 @@
    Resource class for use with StringDialog.java
 */
 
-package arlut.csd.Dialog;
+package arlut.csd.JDialog;
 
 import java.lang.String;
 import java.util.*;
 import java.awt.*;
 
+import com.sun.java.swing.*;
+
 import gjt.*;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                      DialogRsrc
+
+------------------------------------------------------------------------------*/
 
 public class DialogRsrc {
   
@@ -16,11 +24,17 @@ public class DialogRsrc {
   
   Vector objects;
 
-  String title;
-  String text;
-  public String OKText;
-  public String CancelText;
   Image image;
+
+  String 
+    title,
+    text;
+
+  public String
+    OKText,
+    CancelText;
+
+  /* -- */
 
   /**
    * Constructor for DialogRsrc
@@ -31,9 +45,9 @@ public class DialogRsrc {
    *
    */
   public DialogRsrc(Frame frame, String Title, String Text)
-    {
-      this(frame, Title, Text, "Ok", "Cancel", null);
-    }
+  {
+    this(frame, Title, Text, "Ok", "Cancel", null);
+  }
 
   /** 
    * Constructor with special "Ok" and "Cancel" strings
@@ -45,9 +59,9 @@ public class DialogRsrc {
    * @param Cancel String for Cancel button
    */
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel)
-    {
-      this(frame, Title, Text, OK, Cancel, null);
-    }
+  {
+    this(frame, Title, Text, OK, Cancel, null);
+  }
 
   /** 
    * Constructor with special "Ok" and "Cancel" strings
@@ -60,19 +74,17 @@ public class DialogRsrc {
    * @param image Image to display next to text
    */
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, Image image)
-    {
+  {
+    this.frame = frame;
+    
+    this.title = Title;
+    this.text = Text;
+    this.OKText = OK;
+    this.CancelText = Cancel;
+    this.image = image;
       
-      this.frame = frame;
-      
-      this.title = Title;
-      this.text = Text;
-      this.OKText = OK;
-      this.CancelText = Cancel;
-      this.image = image;
-      
-      objects = new Vector();
-      
-    }
+    objects = new Vector();
+  }
   
 
   /**
@@ -82,9 +94,9 @@ public class DialogRsrc {
    * @param string String to use as the label
    */
   public void addString(String string)
-    {
-      objects.addElement(new stringThing(string));
-    }
+  {
+    objects.addElement(new stringThing(string));
+  }
 
   /**
    * 
@@ -94,9 +106,9 @@ public class DialogRsrc {
    */
   
   public void addBoolean(String string)
-    {
-      objects.addElement(new booleanThing(string));
-    }
+  {
+    objects.addElement(new booleanThing(string));
+  }
 
   /**
    *
@@ -107,10 +119,10 @@ public class DialogRsrc {
    */
   
   public void addChoice(String label, Vector choices)
-    {
-      System.out.println("adding choice, but not really");
-      objects.addElement(new choiceThing(label, choices));
-    }
+  {
+    System.out.println("adding choice, but not really");
+    objects.addElement(new choiceThing(label, choices));
+  }
 
   /**
    *
@@ -118,10 +130,10 @@ public class DialogRsrc {
    *
    */
   public void addSeparator()
-    {
-      System.out.println("Adding separator");
-      objects.addElement(new Separator());
-    }
+  {
+    System.out.println("Adding separator");
+    objects.addElement(new Separator());
+  }
 
   /**
    *
@@ -130,25 +142,25 @@ public class DialogRsrc {
    * @param label String to use as label
    */
   public void addPassword(String label)
-    {
-      System.out.println("Adding password field");
-      objects.addElement(new passwordThing(label));
-    }
+  {
+    System.out.println("Adding password field");
+    objects.addElement(new passwordThing(label));
+  }
 
   public Vector getObjects()
-    {
-      return objects;
-    }
+  {
+    return objects;
+  }
 
   public String getText()
-    {
-      return text;
-    }
+  {
+    return text;
+  }
   
   public Image getImage()
-    {
-      return image;
-    }
+  {
+    return image;
+  }
 
   /**
    *
@@ -157,9 +169,9 @@ public class DialogRsrc {
    * @param newImage Image to display
    */
   public void setImage(Image newImage)
-    {
-      image = newImage;
-    }
+  {
+    image = newImage;
+  }
 
 }//DialogRsrc
 

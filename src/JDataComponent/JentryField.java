@@ -2,7 +2,7 @@
    JentryField.java
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -36,8 +36,8 @@ abstract public class JentryField extends JTextField {
   // Constructors //
   //////////////////
 
-  public JentryField(int columns) {
-    
+  public JentryField(int columns) 
+  {
     super(columns);
     enableEvents(AWTEvent.FOCUS_EVENT_MASK);
     enableEvents(AWTEvent.KEY_EVENT_MASK);
@@ -53,6 +53,7 @@ abstract public class JentryField extends JTextField {
    *  returns true if the value in the JentryField has 
    *  been modified.
    */
+
   public boolean getChanged()
   {
     return changed;
@@ -62,6 +63,7 @@ abstract public class JentryField extends JTextField {
   /**
    *  returns a JcomponentAttr object for the JentryField
    */
+
   public JcomponentAttr getValueAttr()
   {
     return this.valueAttr;
@@ -71,10 +73,13 @@ abstract public class JentryField extends JTextField {
    *  sets the parent of this component for callback purposes
    *
    */
+
   public void setCallback(JsetValueCallback parent)
   {
     if (parent == null)
-      throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
+      {
+	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
+      }
     
     my_parent = parent;
 
@@ -85,6 +90,7 @@ abstract public class JentryField extends JTextField {
    *  Stub function that is overriden is subclasses of JentryField
    *
    */
+
   private boolean isAllowed(char ch)
   {
     return true;
@@ -96,6 +102,7 @@ abstract public class JentryField extends JTextField {
    *
    * @param color the color which will be used
    */
+
   public void setBackground(Color color)
   {
     setValueBackColor(color,true);
@@ -108,10 +115,13 @@ abstract public class JentryField extends JTextField {
    * @param color the color which will be used
    * @param repaint true if the value component needs to be repainted
    */
+
   public void setValueBackColor(Color color,boolean repaint)
   {
     if (valueAttr == null)
-      return;
+      {
+	return;
+      }
     
     valueAttr.setBackground(color);
     
@@ -125,6 +135,7 @@ abstract public class JentryField extends JTextField {
    * @param attrib the attributes which will be used
    * @param repaint true if the label component needs to be repainted
    */
+
   public void setValueAttr(JcomponentAttr attributes,boolean repaint)
   {
     this.valueAttr = attributes;
@@ -134,57 +145,67 @@ abstract public class JentryField extends JTextField {
     super.setBackground(attributes.bg);
 
     if (repaint)
-      this.repaint();
+      {
+	this.repaint();
+      }
   }
 
- /**
+  /**
    *  sets the font for the JentryField and
    *  forces a repaint
    *
    * @param f the font which will be used
    */
+
   public void setFont(Font f)
   {
     setValueFont(f,true);
   }
   
- /**
+  /**
    *  sets the font for the JentryField
    *
    * @param f the font which will be used
    * @param repaint true if the value component needs to be repainted
    */
+
   public void setValueFont(Font f,boolean repaint)
   {
     if (valueAttr == null)
-      return;
+      {
+	return;
+      }
     
     valueAttr.setFont(f);
 
     setValueAttr(valueAttr,repaint);
   }
 
- /**
+  /**
    * sets the foreground color for the JentryField
    * and forces a repaint.
    *
    * @param color the color which will be used
    */
+
   public void setForeground(Color color)
   {
     setValueForeColor(color,true);    
   }
 
- /**
+  /**
    * sets the foreground color for the JentryField
    *
    * @param color the color which will be used
    * @param repaint true if the value component needs to be repainted
    */
+
   public void setValueForeColor(Color color,boolean repaint)
   {
-  if (valueAttr == null)
-      return;
+    if (valueAttr == null)
+      {
+	return;
+      }
     
     valueAttr.setForeground(color);
 
@@ -196,11 +217,11 @@ abstract public class JentryField extends JTextField {
    *
    * @param e the FocusEvent that needs to be processed
    */
-  public void processFocusEvent(FocusEvent e)
-    {
-      super.processFocusEvent(e);
 
-    }
+  public void processFocusEvent(FocusEvent e)
+  {
+    super.processFocusEvent(e);
+  }
 }
 
 
