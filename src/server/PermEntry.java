@@ -5,7 +5,7 @@
    This class holds the basic per-object / per-field access control bits.
    
    Created: 27 June 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,13 @@ public class PermEntry implements java.io.Serializable {
   public PermEntry(DataInput in) throws IOException
   {
     receive(in);
+  }
+
+  public PermEntry(PermEntry orig)
+  {
+    this.visible = orig.visible;
+    this.editable = orig.editable;
+    this.create = orig.create;
   }
 
   public boolean equals(Object obj)
@@ -111,5 +118,22 @@ public class PermEntry implements java.io.Serializable {
   public boolean isCreatable()
   {
     return create;
+  }
+
+  /**
+   *
+   * Diagnostic aid.
+   *
+   */
+
+  public String toString()
+  {
+    String result;
+
+    result = "visible : " + (visible ? "true" : "false");
+    result += " editable : " + (editable ? "true" : "false");
+    result += " create : " + (create ? "true" : "false");
+
+    return result;
   }
 }
