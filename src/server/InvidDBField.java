@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.116 $
-   Last Mod Date: $Date: 1999/11/23 04:04:37 $
+   Version: $Revision: 1.117 $
+   Last Mod Date: $Date: 2000/01/08 03:29:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -85,7 +86,7 @@ import arlut.csd.Util.VectorUtils;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.116 $ %D%
+ * @version $Revision: 1.117 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -119,7 +120,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     super();			// may throw RemoteException
 
-    value = values = null;
+    value = null;
     this.owner = owner;
     this.definition = definition;
     receive(in);
@@ -142,15 +143,13 @@ public final class InvidDBField extends DBField implements invid_field {
     this.owner = owner;
     this.definition = definition;
     
-    value = null;
-
     if (isVector())
       {
-	values = new Vector();
+	value = new Vector();
       }
     else
       {
-	values = null;
+	value = null;
       }
   }
 
@@ -167,13 +166,11 @@ public final class InvidDBField extends DBField implements invid_field {
     
     if (isVector())
       {
-	values = (Vector) field.values.clone();
-	value = null;
+	value = (Vector) field.getVectVal().clone();
       }
     else
       {
 	value = field.value;
-	values = null;
       }
   }
 
@@ -194,8 +191,6 @@ public final class InvidDBField extends DBField implements invid_field {
     this.owner = owner;
     this.definition = null;
     this.value = value;
-
-    values = null;
   }
 
   /**
@@ -217,14 +212,12 @@ public final class InvidDBField extends DBField implements invid_field {
     
     if (values == null)
       {
-	this.values = new Vector();
+	value = new Vector();
       }
     else
       {
-	this.values = (Vector) values.clone();
+	value = values.clone();
       }
-
-    value = null;
   }
   
   public Object clone()
@@ -249,6 +242,8 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// this is a hack.. this is for creating a db file with all the supergash
 	// ownership links scoured.
+
+	Vector values = getVectVal();
 
 	if (fixup)
 	  {
@@ -380,17 +375,21 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (count > 0)
 	  {
-	    values = new Vector(count);
+	    value = new Vector(count);
+
+	    // a cast of convenience..
+
+	    Vector v = (Vector) value;
 
 	    for (int i = 0; i < count; i++)
 	      {
 		temp = new Invid(in.readShort(), in.readInt());
-		values.addElement(temp);
+		v.addElement(temp);
 	      }
 	  }
 	else
 	  {
-	    values = new Vector();
+	    value = new Vector();
 	  }
       }
     else
@@ -424,7 +423,7 @@ public final class InvidDBField extends DBField implements invid_field {
 					   " in object " + owner.getLabel());
       }
 
-    return (Invid) values.elementAt(index);
+    return (Invid) getVectVal().elementAt(index);
   }
 
   /**
@@ -645,6 +644,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	boolean found = false;
 
+	Vector values = getVectVal();
+	Vector origValues = origI.getVectVal();
+
 	/* -- */
 
 	if (debug)
@@ -668,7 +670,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    currentElements.put(element, element);
 	  }
 
-	enum = origI.values.elements();
+	enum = origValues.elements();
 
 	while (enum.hasMoreElements())
 	  {
@@ -694,14 +696,14 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	Hashtable origElements = new Hashtable();
 
-	for (int i = 0; !found && i < origI.values.size(); i++)
+	for (int i = 0; !found && i < origValues.size(); i++)
 	  {
 	    if (debug)
 	      {
 		System.err.print(",");
 	      }
 
-	    element = origI.values.elementAt(i);
+	    element = origValues.elementAt(i);
 	    
 	    origElements.put(element, element);
 	  }
@@ -1747,6 +1749,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
+	Vector values = getVectVal();
+
 	for (int i = 0; i < values.size(); i++)
 	  {
 	    tmp = (Invid) values.elementAt(i);
@@ -1891,7 +1895,8 @@ public final class InvidDBField extends DBField implements invid_field {
 					      "because the vector field is already at maximum capacity");
 	  }
 
-	
+	Vector values = getVectVal();
+
 	// only the backlinks field should ever be redundantly
 	// linked.. since the backlinks field unbind logic will
 	// automatically look for all links, we'll just go ahead and
@@ -2054,6 +2059,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
+	Vector values = getVectVal();
+
 	// test for all values in our vector
 
 	for (int i = 0; i < values.size(); i++)
@@ -2147,7 +2154,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (backField.isVector())
 		  {
-		    if (backField.values == null)
+		    if (backField.getVectVal() == null)
 		      {
 			Ganymede.debug("*** InvidDBField.test(): Null back-link invid found for invid " + 
 				       temp + " in object " + objectName + " in field " + getName());
@@ -2159,12 +2166,13 @@ public final class InvidDBField extends DBField implements invid_field {
 		      {
 			boolean found = false;
 			Invid testInv;
+			Vector backValues = backField.getVectVal();
 
 			/* -- */
 
-			for (int j = 0; !found && (j < backField.values.size()); j++)
+			for (int j = 0; !found && (j < backValues.size()); j++)
 			  {
-			    testInv = (Invid) backField.values.elementAt(j);
+			    testInv = (Invid) backValues.elementAt(j);
 
 			    if (myInvid.equals(testInv))
 			      {
@@ -2259,7 +2267,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	
 		if (backField.isVector())
 		  {
-		    if (backField.values == null)
+		    Vector backValues = backField.getVectVal();
+
+		    if (backValues == null)
 		      {
 			Ganymede.debug("*** InvidDBField.test(): Null back-link invid found for invid " + 
 				       temp + " in object " + objectName + " in field " + getName());
@@ -2271,9 +2281,9 @@ public final class InvidDBField extends DBField implements invid_field {
 			boolean found = false;
 			Invid testInv;
 
-			for (int j = 0; !found && (j < backField.values.size()); j++)
+			for (int j = 0; !found && (j < backValues.size()); j++)
 			  {
-			    testInv = (Invid) backField.values.elementAt(j);
+			    testInv = (Invid) backValues.elementAt(j);
 
 			    if (myInvid.equals(testInv))
 			      {
@@ -2465,15 +2475,11 @@ public final class InvidDBField extends DBField implements invid_field {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    this.newValue = value;
-
     newRetVal = eObj.finalizeSetValue(this, value);
 
     if (newRetVal == null || newRetVal.didSucceed())
       {
 	this.value = value;
-
-	this.newValue = null;
 
 	if (checkpoint)
 	  {
@@ -2491,8 +2497,6 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	this.newValue = null;
-
 	if (checkpoint)
 	  {
 	    eObj.getSession().rollback(checkkey);
@@ -2542,6 +2546,11 @@ public final class InvidDBField extends DBField implements invid_field {
     // DBField.setElement(), DBField.setElementLocal() check the index and value
     // params for us.
 
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+      }
+
     if (isEditInPlace())
       {
 	throw new IllegalArgumentException("can't manually set element in edit-in-place vector: " +
@@ -2554,6 +2563,8 @@ public final class InvidDBField extends DBField implements invid_field {
 					  "don't have permission to change field /  non-editable object: " +
 					  getName() + " in object " + owner.getLabel());
       }
+
+    Vector values = getVectVal();
 
     if (this.value.equals(values.elementAt(index)))
       {
@@ -2713,7 +2724,9 @@ public final class InvidDBField extends DBField implements invid_field {
 					   getName() + " in object " + owner.getLabel());
       }
 
-    if (this.values.contains(value))
+    Vector values = getVectVal();
+
+    if (values.contains(value))
       {
 	return Ganymede.createErrorDialog("InvidDBField.addElement() - redundant value submitted",
 					  "Field " + getName() + " already contains value " + value);
@@ -2863,6 +2876,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("vector method called on a scalar field " +
 					   getName() + " in object " + owner.getLabel());
       }
+
+    Vector values = getVectVal();
 
     if (!isEditInPlace())
       {
@@ -3111,6 +3126,8 @@ public final class InvidDBField extends DBField implements invid_field {
 					   getName() + " in object " + owner.getLabel());
       }
 
+    Vector values = getVectVal();
+
     if ((index < 0) || (index >= values.size()))
       {
 	throw new IllegalArgumentException("invalid index " + index + 
@@ -3318,6 +3335,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("can't call encodedValues on scalar field: " +
 					   getName() + " in object " + owner.getLabel());
       }
+
+    Vector values = getVectVal();
 
     gsession = owner.getGSession();
 

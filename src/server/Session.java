@@ -11,15 +11,16 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2000/01/04 05:57:31 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2000/01/08 03:29:02 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -79,7 +80,7 @@ import java.util.*;
  * return value, and the {@link arlut.csd.ganymede.db_field db_field}
  * references that are obtained from the db_object references.</P>
  *
- * @version $Revision: 1.41 $ %D%
+ * @version $Revision: 1.42 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -630,9 +631,6 @@ public interface Session extends Remote {
    * <p>Typically, only certain values will be cloned.  What values are
    * retained is up to the specific code module provided for the
    * invid type of object.</p>
-   *
-   * <p>Note that at the present time, clone_db_object doesn't do anything..
-   * it's a feature that is yet to be developed.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    *    

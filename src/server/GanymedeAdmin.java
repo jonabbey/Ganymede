@@ -9,15 +9,16 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 1999/10/13 20:02:14 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2000/01/08 03:28:58 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -78,7 +79,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.34 $ %D%
+ * @version $Revision: 1.35 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -147,32 +148,35 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * the consoles.
    */
 
-  public static synchronized void setStatus(String status)
+  public static void setStatus(String status)
   {
     GanymedeAdmin temp;
 
     /* -- */
 
-    for (int i = 0; i < consoles.size(); i++)
+    synchronized (GanymedeAdmin.consoles)
       {
-	temp = (GanymedeAdmin) consoles.elementAt(i);
+	for (int i = 0; i < consoles.size(); i++)
+	  {
+	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	if (temp == null)
-	  {
-	    continue;
-	  }
+	    if (temp == null)
+	      {
+		continue;
+	      }
 
-	try
-	  {
-	    temp.admin.changeStatus(status);
-	    temp.admin.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
-	  }
-	catch (RemoteException ex)
-	  {
-	    // don't call Ganymede.debug() here or we'll get into an infinite
-	    // loop if we have any problems.
-	    System.err.println("Couldn't update Status on an admin console" + ex);
-	    badConsoles.addElement(temp);
+	    try
+	      {
+		temp.admin.changeStatus(status);
+		temp.admin.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
+	      }
+	    catch (RemoteException ex)
+	      {
+		// don't call Ganymede.debug() here or we'll get into an infinite
+		// loop if we have any problems.
+		System.err.println("Couldn't update Status on an admin console" + ex);
+		badConsoles.addElement(temp);
+	      }
 	  }
       }
 
@@ -184,22 +188,25 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * to the consoles.
    */
 
-  public static synchronized void updateTransCount()
+  public static void updateTransCount()
   {
     GanymedeAdmin temp;
 
     /* -- */
 
-    for (int i = 0; i < consoles.size(); i++)
+    synchronized (GanymedeAdmin.consoles)
       {
-	temp = (GanymedeAdmin) consoles.elementAt(i);
-
-	if (temp == null)
+	for (int i = 0; i < consoles.size(); i++)
 	  {
-	    continue;
+	    temp = (GanymedeAdmin) consoles.elementAt(i);
+	    
+	    if (temp == null)
+	      {
+		continue;
+	      }
+	    
+	    updateTransCount(temp);
 	  }
-
-	updateTransCount(temp);
       }
   }
 
@@ -247,22 +254,25 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * consoles.
    */
 
-  public static synchronized void updateLastDump()
+  public static void updateLastDump()
   {
     GanymedeAdmin temp;
 
     /* -- */
 
-    for (int i = 0; i < consoles.size(); i++)
+    synchronized (GanymedeAdmin.consoles)
       {
-	temp = (GanymedeAdmin) consoles.elementAt(i);
-
-	if (temp == null)
+	for (int i = 0; i < consoles.size(); i++)
 	  {
-	    continue;
-	  }
+	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	updateLastDump(temp);
+	    if (temp == null)
+	      {
+		continue;
+	      }
+
+	    updateLastDump(temp);
+	  }
       }
   }
 
@@ -297,22 +307,25 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * This method updates the objects checked out count on all consoles.
    */
 
-  public static synchronized void updateCheckedOut()
+  public static void updateCheckedOut()
   {
     GanymedeAdmin temp;
 
     /* -- */
 
-    for (int i = 0; i < consoles.size(); i++)
+    synchronized (GanymedeAdmin.consoles)
       {
-	temp = (GanymedeAdmin) consoles.elementAt(i);
-
-	if (temp == null)
+	for (int i = 0; i < consoles.size(); i++)
 	  {
-	    continue;
-	  }
+	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	updateCheckedOut(temp);
+	    if (temp == null)
+	      {
+		continue;
+	      }
+
+	    updateCheckedOut(temp);
+	  }
       }
   }
 
@@ -343,22 +356,25 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
     detachBadConsoles();
   }
 
-  public static synchronized void updateLocksHeld()
+  public static void updateLocksHeld()
   {
     GanymedeAdmin temp;
 
     /* -- */
 
-    for (int i = 0; i < consoles.size(); i++)
+    synchronized (GanymedeAdmin.consoles)
       {
-	temp = (GanymedeAdmin) consoles.elementAt(i);
-
-	if (temp.admin == null)
+	for (int i = 0; i < consoles.size(); i++)
 	  {
-	    continue;
-	  }
+	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	updateLocksHeld(temp);
+	    if (temp.admin == null)
+	      {
+		continue;
+	      }
+
+	    updateLocksHeld(temp);
+	  }
       }
   }
 
@@ -405,17 +421,20 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    * attached consoles
    */
 
-  public static synchronized void setState()
+  public static void setState()
   {
     GanymedeAdmin temp;
 
     /* -- */
 
-    for (int i = 0; i < consoles.size(); i++)
+    synchronized (GanymedeAdmin.consoles)
       {
-	temp = (GanymedeAdmin) consoles.elementAt(i);
+	for (int i = 0; i < consoles.size(); i++)
+	  {
+	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	setState(temp);
+	    setState(temp);
+	  }
       }
   }
 
@@ -516,18 +535,21 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
     
     scheduleHandles = Ganymede.scheduler.reportTaskInfo();
 
-    for (int i = 0; i < consoles.size(); i++)
+    synchronized (GanymedeAdmin.consoles)
       {
-	temp = (GanymedeAdmin) consoles.elementAt(i);
+	for (int i = 0; i < consoles.size(); i++)
+	  {
+	    temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	try
-	  {
-	    temp.admin.changeTasks(scheduleHandles);
-	  }
-	catch (RemoteException ex)
-	  {
-	    Ganymede.debug("Couldn't update task list on an admin console" + ex);
-	    badConsoles.addElement(temp);
+	    try
+	      {
+		temp.admin.changeTasks(scheduleHandles);
+	      }
+	    catch (RemoteException ex)
+	      {
+		Ganymede.debug("Couldn't update task list on an admin console" + ex);
+		badConsoles.addElement(temp);
+	      }
 	  }
       }
 
@@ -586,7 +608,7 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unrefer
    *
    */
 
-  public synchronized void logout(String reason)
+  public void logout(String reason)
   {
     if (this.admin != null)
       {

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 1999/11/19 20:37:00 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 2000/01/08 03:28:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.83 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.84 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -856,7 +856,7 @@ public class DBObject implements db_object, FieldType, Remote {
 			    temp.addElement(monitor);
 			  }
 
-			invF.values = temp;
+			invF.value = temp;
 
 			invF.emit(out);
 		      }
@@ -1868,7 +1868,8 @@ public class DBObject implements db_object, FieldType, Remote {
   /**
    * <p>Get a sorted list of DBFields contained in this object.</p>
    *
-   * <p>This is a server-side only operation.</p>
+   * <p>This is a server-side only operation.. permissions are not
+   * checked.</p>
    */
 
   synchronized public Vector getFieldVector(boolean customOnly)

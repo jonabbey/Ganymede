@@ -6,15 +6,16 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 1999/11/19 01:01:56 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2000/01/08 03:28:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -149,23 +150,12 @@ import arlut.csd.JDialog.*;
 public abstract class DBField implements Remote, db_field, Cloneable {
 
   /**
-   * the object's current value, for scalars
+   * the object's current value.  May be a Vector for vector fields, in
+   * which case getVectVal() may be used to perform the cast.
    */
 
   Object value = null;
   
-  /**
-   * the object's new value, for use by custom verification classes
-   */
-
-  Object newValue = null;
-
-  /**
-   * the object's current value, for vectors
-   */
-
-  Vector values;
-
   /**
    * The object this field is contained within
    */
@@ -174,11 +164,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   /**
    * <P>Link to the field definition for this field</P>
-   *
-   * <P>For a very minor memory optimization, we could ditch
-   * this field and have the {@link arlut.csd.ganymede.DBField#getFieldDef() getFieldDef()}
-   * method do a dynamic look-up based on {@link arlut.csd.ganymede.DBField#owner owner}
-   * and {@link arlut.csd.ganymede.DBField#fieldID fieldID}, maybe.</P>
    */
 
   DBObjectBaseField definition;
@@ -188,12 +173,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    */
 
   DBField next = null;
-
-  /**
-   * <P>Field number for this field in the containing {@link arlut.csd.ganymede.DBObject DBObject}.</P>
-   */
-
-  short fieldID = -1;
 
   /**
    * <P>Permissions record for this field in the current
@@ -206,8 +185,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
    * operation, after all.</P>
    */
 
-  PermEntry
-    permCache = null;
+  PermEntry permCache = null;
 
   /* -- */
 
@@ -215,7 +193,19 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   {
     permCache = null;
   }
+
+  /**
+   * This method is designed to handle casting this field's value into
+   * a vector as needed.  We don't bother to check whether value is a Vector
+   * here, as the code which would have used the old values field should
+   * do that for us themselves.
+   */
   
+  public final Vector getVectVal()
+  {
+    return (Vector) value;
+  }
+
   /**
    *
    * Object value of DBField.  Used to represent value in value hashes.
@@ -247,7 +237,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
       }
 
-    return values.elementAt(index);
+    return getVectVal().elementAt(index);
   }
 
   /**
@@ -263,7 +253,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       }
     else
       {
-	return values.size();
+	return getVectVal().size();
       }
   }
 
@@ -412,6 +402,23 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	  {
 	    retVal = target.addElement(valuesToCopy.elementAt(i), local, true); // inhibit wizards
 
+	    // the above operation could fail if we don't have write
+	    // privileges fo the target field, so we'll return an
+	    // error code back to the cloneFromObject() method.
+
+	    // this isn't exactly the right thing to do if the failure
+	    // pertains to a single value that we attempted to add,
+	    // but if a value was legal in the source object, it
+	    // should generally be legal in the target object, so
+	    // aborting the copy here isn't too horribly
+	    // inappropriate.  We will leave the target field with a
+	    // partial field copy in that case, however.
+
+	    // if this turns out to be unacceptable, i'll have to add
+	    // code here to build up a dialog describing the values
+	    // that could not be copied, which would be a bit of a
+	    // pain.
+
 	    if (retVal != null && !retVal.didSucceed())
 	      {
 		return retVal;
@@ -475,12 +482,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public final short getID()
   {
-    if (fieldID == -1)
-      {
-	fieldID = getFieldDef().getID();
-      }
-
-    return fieldID;
+    return getFieldDef().getID();
   }
 
   /**
@@ -592,6 +594,8 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   {
     if (isVector())
       {
+	Vector values = getVectVal();
+
 	if (values != null && values.size() > 0)
 	  {
 	    return true;
@@ -645,7 +649,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	session.checkpoint(key);
 
 	while ((tempResult == null || tempResult.didSucceed()) && 
-	       values.size() > 0)
+	       getVectVal().size() > 0)
 	  {
 	    tempResult = deleteElement(0, local, false);
 	  }
@@ -846,63 +850,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
   /**
-   * <P>This method is used to allow server-side custom code to get access to
-   * a proposed new value before it is finalized, used when making a change
-   * to this field causes other fields to be changed which need to insure
-   * that this field has an appropriate value first.</P>
-   *
-   * <P><B>This method is not intended to be accessible to the client.</B></P>
-   *
-   * <P>This method does not support virtualized fields.</P>
-   *
-   * <P>This method will only have a useful value during the
-   * course of the containing objects' finalizeSetValue() call.  It
-   * is intended that this field will set the new value in setValue(),
-   * call owner.finalizeSetValue(), then clear the newValue.</P>
-   *
-   * <P>What, this code a hack?</P>
-   */
-
-  public Object getNewValue()
-  {
-    if (isVector())
-      {
-	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
-      }
-
-    return newValue;
-  }
-
-  /**
-   *
-   * <P>This method is used to allow server-side custom code to get access to
-   * a proposed new value before it is finalized, used when making a change
-   * to this field causes other fields to be changed which need to insure
-   * that this field has an appropriate value first.</P>
-   *
-   * <P><B>This method is not intended to be accessible to the client.</B></P>
-   *
-   * <P>This method does not support virtualized fields.</P>
-   *
-   * <P>This method will only have a useful value during the
-   * course of the containing objects' finalizeSetValue() call.  It
-   * is intended that this field will set the new value in setValue(),
-   * call owner.finalizeSetValue(), then clear the newValue.</P>
-   *
-   * <P>What, this code a hack?</P>
-   */
-
-  public Object getOldValue()
-  {
-    if (isVector())
-      {
-	throw new IllegalArgumentException("scalar accessor called on vector " + getName());
-      }
-
-    return value;
-  }
-
-  /**
    *
    * Returns the value of this field, if a scalar.  This method
    * is intended to be used by the virtualizing hook to use to
@@ -1088,11 +1035,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	  }
       }
 
-    // record the new value we are proposing so the logging code
-    // can compare before/after
-
-    this.newValue = submittedValue;
-
     // check our owner, do it.  Checking our owner should
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
@@ -1110,8 +1052,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	    this.value = null;
 	  }
 
-	this.newValue = null;
-
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
 	// we'll want to combine with that from our 
@@ -1128,8 +1068,6 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       }
     else
       {
-	this.newValue = null;
-
 	// our owner disapproved of the operation,
 	// undo the namespace manipulations, if any,
 	// and finish up.
@@ -1170,8 +1108,8 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					   getName());
       }
 
-    return values; // this is ok, since this is being serialized. the client's not
-                   // gaining the ability to add or remove items from this field
+    return getVectVal();	// this is ok, since this is being serialized. the client's not
+				// gaining the ability to add or remove items from this field
   }
 
   /**
@@ -1200,7 +1138,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	throw new IllegalArgumentException("invalid index " + index + " on field " + getName());
       }
 
-    return values.elementAt(index);
+    return getVectVal().elementAt(index);
   }
 
   /**
@@ -1230,7 +1168,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					  getName() + ".setElement()");
       }
 
-    if ((index < 0) || (index > values.size()))
+    if ((index < 0) || (index > getVectVal().size()))
       {
 	throw new IllegalArgumentException("invalid index " + index);
       }
@@ -1266,7 +1204,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					  getName() + ".setElement()");
       }
 
-    if ((index < 0) || (index > values.size()))
+    if ((index < 0) || (index > getVectVal().size()))
       {
 	throw new IllegalArgumentException("invalid index " + index);
       }
@@ -1310,6 +1248,11 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     /* -- */
 
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+      }
+
     if (!isEditable(local))	// *sync* on GanymedeSession possible.
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object, field " +
@@ -1338,6 +1281,10 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	    return retVal;
 	  }
       }
+
+    // okay, we're going to proceed.  Get our vector.
+
+    Vector values = getVectVal();
 
     // check to see if we can do the namespace manipulations implied by this
     // operation
@@ -1533,7 +1480,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
     if (newRetVal == null || newRetVal.didSucceed()) 
       {
-	values.addElement(submittedValue);
+	getVectVal().addElement(submittedValue);
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
@@ -1635,6 +1582,8 @@ public abstract class DBField implements Remote, db_field, Cloneable {
       {
 	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
       }
+
+    Vector values = getVectVal();
 
     if ((index < 0) || (index >= values.size()))
       {
@@ -1873,8 +1822,8 @@ public abstract class DBField implements Remote, db_field, Cloneable {
     /* - */
 
     fieldDeltaRec deltaRec = new fieldDeltaRec(getID());
-    Vector oldValues = oldField.values;
-    Vector newValues = values;
+    Vector oldValues = oldField.getVectVal();
+    Vector newValues = getVectVal();
     Object compareValue;
 
     // make hashes of our before and after state so that we
@@ -2234,7 +2183,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 
   public int indexOfValue(Object value)
   {
-    return values.indexOf(value);
+    return getVectVal().indexOf(value);
   }
 
   /**
@@ -2309,7 +2258,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 					   getName());
       }
 
-    return values;
+    return getVectVal();
   }
 
   /** 
@@ -2359,7 +2308,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   {
     if (isVector())
       {
-	return values.clone();
+	return getVectVal().clone();
       }
     else
       {
@@ -2406,7 +2355,7 @@ public abstract class DBField implements Remote, db_field, Cloneable {
 	  }
 	else
 	  {
-	    this.values = (Vector) oldval;
+	    this.value = oldval;
 	  }
       }
     else
@@ -2483,4 +2432,3 @@ public abstract class DBField implements Remote, db_field, Cloneable {
   }
 
 }
-

@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.123 $
-   Last Mod Date: $Date: 1999/11/23 04:04:36 $
+   Version: $Revision: 1.124 $
+   Last Mod Date: $Date: 2000/01/08 03:28:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -111,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.123 $ $Date: 1999/11/23 04:04:36 $ $Name:  $
+ * @version $Revision: 1.124 $ $Date: 2000/01/08 03:28:55 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1561,9 +1562,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * <p>The default (DBEditObject) implementation of this method will only clone
    * fields for which
-   * {@link arlut.csd.ganymede.DBEditObject#canCloneField(arlut.csd.ganymede.DBSession, arlut.csd.ganymede.DBObject, arlut.csd.ganymede.DBField) canCloneField()}
+   * {@link arlut.csd.ganymede.DBEditObject#canCloneField(arlut.csd.ganymede.DBSession,
+   * arlut.csd.ganymede.DBObject, arlut.csd.ganymede.DBField) canCloneField()}
    * returns true, and which are not connected to a namespace (and thus could not
    * possibly be cloned).</p>
+   *
+   * <p>If one or more fields in the original object are unreadable by the cloning
+   * session, we will provide a list of fields that could not be cloned due to
+   * a lack of read permissions in a dialog in the ReturnVal.  Such a problem will
+   * not result in a failure code being returned, however.. the clone will succeed,
+   * but an informative dialog will be provided to the user.</p>
    */
 
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
@@ -1596,6 +1604,13 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    if (!newField.isDefined() && !newField.isEditInPlace() && 
 		(newField.getNameSpace() == null))
 	      {
+		// copyFieldTo() checks read permissions on the
+		// original object's field, and will return an error
+		// dialog if the user doesn't have permission to read
+		// the field.  If we have a problem, we'll return a
+		// dialog describing the fields that could not be
+		// cloned, but we won't fail the operation.
+		
 		retVal = origField.copyFieldTo(newField, local);
 
 		if (retVal != null && retVal.getDialog() != null)
@@ -1608,6 +1623,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	      }
 	  }
       }
+
+    // we're returning a successful result if we've gotten here, but
+    // 'normal operations' might be false if some fields could not be
+    // cloned due to read permissions.
 
     retVal = new ReturnVal(true, !problem);
 

@@ -9,15 +9,16 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 2000/01/04 07:00:10 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 2000/01/08 03:28:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -928,13 +929,13 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		if (iField.isVector())
 		  {
-		    tempVector = iField.values;
+		    tempVector = iField.getVectVal();
 		    vectorEmpty = true;
 
 		    // clear out the invid's held in this field pending
 		    // successful lookup
 
-		    iField.values = new Vector(); 
+		    iField.value = new Vector(); 
 
 		    // iterate over the invid's held in this vector
 		    
@@ -946,7 +947,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 			if (session.viewDBObject(invid) != null)
 			  {
-			    iField.values.addElement(invid); // keep this invid
+			    iField.getVectVal().addElement(invid); // keep this invid
 			    vectorEmpty = false;
 			  }
 			else

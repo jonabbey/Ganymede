@@ -7,15 +7,16 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 1999/11/16 08:01:03 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2000/01/08 03:29:00 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -95,7 +96,7 @@ public class IPDBField extends DBField implements ip_field {
 
   IPDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = values = null;
+    value = null;
     this.owner = owner;
     this.definition = definition;
     receive(in);
@@ -118,15 +119,13 @@ public class IPDBField extends DBField implements ip_field {
     this.owner = owner;
     this.definition = definition;
     
-    value = null;
-
     if (isVector())
       {
-	values = new Vector();
+	value = new Vector();
       }
     else
       {
-	values = null;
+	value = null;
       }
   }
 
@@ -143,13 +142,11 @@ public class IPDBField extends DBField implements ip_field {
     
     if (isVector())
       {
-	values = (Vector) field.values.clone();
-	value = null;
+	value = field.getVectVal().clone();
       }
     else
       {
 	value = field.value;
-	values = null;
       }
   }
 
@@ -169,8 +166,6 @@ public class IPDBField extends DBField implements ip_field {
     this.owner = owner;
     this.definition = definition;
     this.value = value;
-
-    values = null;
   }
 
   /**
@@ -191,14 +186,12 @@ public class IPDBField extends DBField implements ip_field {
 
     if (values == null)
       {
-	this.values = new Vector();
+	value = new Vector();
       }
     else
       {
-	this.values = (Vector) values.clone();
+	value = values.clone();
       }
-
-    value = null;
   }
 
   public Object clone()
@@ -210,6 +203,8 @@ public class IPDBField extends DBField implements ip_field {
   {
     if (isVector())
       {
+	Vector values = getVectVal();
+
 	out.writeShort(values.size());
 
 	for (int i = 0; i < values.size(); i++)
@@ -246,7 +241,10 @@ public class IPDBField extends DBField implements ip_field {
     if (isVector())
       {
 	count = in.readShort();
-	values = new Vector(count);
+	value = new Vector(count);
+
+	Vector values = (Vector) value;
+
 	for (int i = 0; i < count; i++)
 	  {
 	    byte length = in.readByte();
@@ -295,6 +293,8 @@ public class IPDBField extends DBField implements ip_field {
       }
 
     Byte[] foreignBytes = (Byte[]) value;
+
+    Vector values = getVectVal();
 
     for (int i = 0; i < values.size(); i++)
       {
@@ -479,8 +479,6 @@ public class IPDBField extends DBField implements ip_field {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    this.newValue = bytes;
-
     newRetVal = eObj.finalizeSetValue(this, bytes);
 
     if (newRetVal == null || newRetVal.didSucceed())
@@ -493,8 +491,6 @@ public class IPDBField extends DBField implements ip_field {
 	  {
 	    this.value = null;
 	  }
-
-	this.newValue = null;
 
 	// if the return value from the wizard was not null,
 	// it might have included rescan information, which
@@ -515,8 +511,6 @@ public class IPDBField extends DBField implements ip_field {
 	// our owner disapproved of the operation,
 	// undo the namespace manipulations, if any,
 	// and finish up.
-
-	this.newValue = null;
 
 	if (ns != null)
 	  {
@@ -562,6 +556,8 @@ public class IPDBField extends DBField implements ip_field {
       {
 	throw new IllegalArgumentException("vector accessor called on scalar field");
       }
+
+    Vector values = getVectVal();
 
     if ((index < 0) || (index > values.size()))
       {
@@ -716,6 +712,8 @@ public class IPDBField extends DBField implements ip_field {
 	throw new IllegalArgumentException("vector accessor called on scalar field");
       }
 
+    Vector values = getVectVal();
+
     if (value instanceof String)
       {
 	String input = (String) value;
@@ -828,7 +826,7 @@ public class IPDBField extends DBField implements ip_field {
 	throw new IllegalArgumentException("vector accessor called on scalar");
       }
 
-    return (Byte[]) values.elementAt(index);
+    return (Byte[]) getVectVal().elementAt(index);
   }
 
   public String getValueString()
@@ -867,6 +865,8 @@ public class IPDBField extends DBField implements ip_field {
 	    return genIPV4string(element);
 	  }
       }
+
+    Vector values = getVectVal();
 
     int size = size();
 
@@ -933,6 +933,9 @@ public class IPDBField extends DBField implements ip_field {
 	  added = new Vector(),
 	  deleted = new Vector();
 
+	Vector values = getVectVal();
+	Vector origValues = origI.getVectVal();
+
 	Enumeration enum;
 
 	Byte[] elementA, elementB;
@@ -943,7 +946,7 @@ public class IPDBField extends DBField implements ip_field {
 
 	// find elements in the orig field that aren't in our present field
 
-	enum = origI.values.elements();
+	enum = origValues.elements();
 
 	while (enum.hasMoreElements())
 	  {
@@ -985,9 +988,9 @@ public class IPDBField extends DBField implements ip_field {
 
 	    found = false;
 
-	    for (int i = 0; !found && i < origI.values.size(); i++)
+	    for (int i = 0; !found && i < origValues.size(); i++)
 	      {
-		elementB = (Byte[]) origI.values.elementAt(i);
+		elementB = (Byte[]) origValues.elementAt(i);
 
 		if (elementA.length == elementB.length)
 		  {
@@ -1192,7 +1195,7 @@ public class IPDBField extends DBField implements ip_field {
 	throw new IllegalArgumentException("vector accessor called on scalar field");
       }
 
-    Byte[] element = (Byte[]) values.elementAt(index);
+    Byte[] element = (Byte[]) getVectVal().elementAt(index);
 
     if (element == null)
       {
@@ -1251,7 +1254,7 @@ public class IPDBField extends DBField implements ip_field {
 	throw new IllegalArgumentException("vector accessor called on scalar field");
       }
 
-    Byte[] element = (Byte[]) values.elementAt(index);
+    Byte[] element = (Byte[]) getVectVal().elementAt(index);
 
     if (element == null)
       {

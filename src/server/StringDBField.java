@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 1999/09/22 23:15:22 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2000/01/08 03:29:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -79,7 +80,7 @@ public class StringDBField extends DBField implements string_field {
 
   StringDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = values = null;
+    value = null;
     this.owner = owner;
     this.definition = definition;
     receive(in);
@@ -102,15 +103,13 @@ public class StringDBField extends DBField implements string_field {
     this.owner = owner;
     this.definition = definition;
     
-    value = null;
-    
     if (isVector())
       {
-	values = new Vector();
+	value = new Vector();
       }
     else
       {
-	values = null;
+	value = null;
       }
   }
 
@@ -127,13 +126,11 @@ public class StringDBField extends DBField implements string_field {
     
     if (isVector())
       {
-	values = (Vector) field.values.clone();
-	value = null;
+	value = field.getVectVal().clone();
       }
     else
       {
 	value = field.value;
-	values = null;
       }
   }
 
@@ -153,8 +150,6 @@ public class StringDBField extends DBField implements string_field {
     this.owner = owner;
     this.definition = definition;
     this.value = value;
-
-    values = null;
   }
 
   /**
@@ -175,14 +170,12 @@ public class StringDBField extends DBField implements string_field {
 
     if (values == null)
       {
-	this.values = new Vector();
+	value = new Vector();
       }
     else
       {
-	this.values = (Vector) values.clone();
+	value = values.clone();
       }
-    
-    value = null;
   }
 
   public Object clone()
@@ -194,6 +187,8 @@ public class StringDBField extends DBField implements string_field {
   {
     if (isVector())
       {
+	Vector values = getVectVal();
+
 	int count = 0;
 
 	for (int i = 0; i < values.size(); i++)
@@ -229,7 +224,9 @@ public class StringDBField extends DBField implements string_field {
     if (isVector())
       {
 	count = in.readShort();
-	values = new Vector(count);
+	value = new Vector(count);
+
+	Vector values = (Vector) value;
 
 	for (int i = 0; i < count; i++)
 	  {
@@ -265,7 +262,7 @@ public class StringDBField extends DBField implements string_field {
 	throw new IllegalArgumentException("vector accessor called on scalar");
       }
 
-    return (String) values.elementAt(index);
+    return (String) getVectVal().elementAt(index);
   }
 
   /**
@@ -383,6 +380,9 @@ public class StringDBField extends DBField implements string_field {
 	  added = new Vector(),
 	  deleted = new Vector();
 
+	Vector values = getVectVal();
+	Vector origValues = origS.getVectVal();
+
 	Enumeration enum;
 
 	String elementA, elementB;
@@ -393,7 +393,7 @@ public class StringDBField extends DBField implements string_field {
 
 	// find elements in the orig field that aren't in our present field
 
-	enum = origS.values.elements();
+	enum = origValues.elements();
 
 	while (enum.hasMoreElements())
 	  {
@@ -427,9 +427,9 @@ public class StringDBField extends DBField implements string_field {
 
 	    found = false;
 
-	    for (int i = 0; !found && i < origS.values.size(); i++)
+	    for (int i = 0; !found && i < origValues.size(); i++)
 	      {
-		elementB = (String) origS.values.elementAt(i);
+		elementB = (String) origValues.elementAt(i);
 
 		if (elementA.equals(elementB))
 		  {
@@ -518,7 +518,7 @@ public class StringDBField extends DBField implements string_field {
   {
     if (isVector())
       {
-	if (values != null && values.size() > 0)
+	if (value != null && getVectVal().size() > 0)
 	  {
 	    return true;
 	  }

@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/06/15 02:48:22 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/01/08 03:28:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -83,7 +84,7 @@ public class DateDBField extends DBField implements date_field {
 
   DateDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = values = null;
+    value = null;
     this.owner = owner;
     this.definition = definition;
     receive(in);
@@ -107,7 +108,6 @@ public class DateDBField extends DBField implements date_field {
     this.definition = definition;
     
     value = null;
-    values = null;
   }
 
   /**
@@ -122,7 +122,6 @@ public class DateDBField extends DBField implements date_field {
     definition = field.definition;
     
     value = field.value;
-    values = null;
   }
 
   /**
@@ -136,8 +135,6 @@ public class DateDBField extends DBField implements date_field {
     this.owner = owner;
     this.definition = definition;
     this.value = value;
-
-    values = null;
   }
 
   /**

@@ -7,15 +7,16 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 1999/11/05 00:31:37 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2000/01/08 03:29:01 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -140,7 +141,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   PasswordDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = values = null;
+    value = null;
     this.owner = owner;
     this.definition = definition;
     receive(in);
@@ -164,7 +165,6 @@ public class PasswordDBField extends DBField implements pass_field {
     this.definition = definition;
     
     value = null;
-    values = null;
   }
 
   /**

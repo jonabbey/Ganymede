@@ -7,15 +7,16 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 1999/12/14 23:44:17 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2000/01/08 03:29:02 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -555,7 +556,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     super();			// initialize UnicastRemoteObject
 
-    value = values = null;
+    value = null;
     this.owner = owner;
     this.definition = definition;
     receive(in);
@@ -581,7 +582,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     matrix = new Hashtable();
     defined = false;
     value = null;
-    values = null;
   }
 
   /**
@@ -597,7 +597,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     /* -- */
 
-    value = values = null;
+    value = null;
 
     if (debug)
       {

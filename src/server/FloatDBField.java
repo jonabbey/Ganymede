@@ -7,15 +7,16 @@
 
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 1999/10/29 16:14:08 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2000/01/08 03:28:57 $
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -79,7 +80,7 @@ public class FloatDBField extends DBField implements float_field {
 
   FloatDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = values = null;
+    value = null;
     this.owner = owner;
     this.definition = definition;
     receive(in);
@@ -103,7 +104,6 @@ public class FloatDBField extends DBField implements float_field {
     this.definition = definition;
     
     value = null;
-    values = null;		// float fields cannot be arrays
   }
 
   /**
@@ -118,7 +118,6 @@ public class FloatDBField extends DBField implements float_field {
     definition = field.definition;
     
     value = field.value;
-    values = null;
   }
 
   /**
@@ -132,8 +131,6 @@ public class FloatDBField extends DBField implements float_field {
     this.owner = owner;
     this.definition = definition;
     this.value = new Double(value);
-
-    values = null;
   }
 
   /**

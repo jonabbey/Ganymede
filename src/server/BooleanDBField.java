@@ -7,15 +7,16 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/06/15 02:48:16 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 2000/01/08 03:28:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
@@ -80,7 +81,6 @@ public class BooleanDBField extends DBField implements boolean_field {
   BooleanDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = null;
-    values = null;
     this.owner = owner;
     this.definition = definition;
     receive(in);
@@ -104,7 +104,6 @@ public class BooleanDBField extends DBField implements boolean_field {
     this.definition = definition;
     
     value = null;
-    values = null;
   }
 
   /**
@@ -119,7 +118,6 @@ public class BooleanDBField extends DBField implements boolean_field {
     definition = field.definition;
     
     value = field.value;
-    values = null;
   }
 
   /**
@@ -133,8 +131,6 @@ public class BooleanDBField extends DBField implements boolean_field {
     this.owner = owner;
     this.definition = definition;
     this.value = new Boolean(value);
-
-    values = null;
   }
 
   /**

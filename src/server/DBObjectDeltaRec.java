@@ -10,8 +10,8 @@
    
    Created: 11 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/10/29 16:14:07 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2000/01/08 03:28:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -792,7 +792,7 @@ public class DBObjectDeltaRec implements FieldType {
 		value = ((IPwrap) value).address;
 	      }
 
-	    field.values.addElement(value);
+	    field.getVectVal().addElement(value);
 	  }
 
 	for (int j = 0; j < fieldRec.delValues.size(); j++)
@@ -804,7 +804,7 @@ public class DBObjectDeltaRec implements FieldType {
 		value = ((IPwrap) value).address;
 	      }
 
-	    field.values.removeElement(value);
+	    field.getVectVal().removeElement(value);
 	  }
       }
 
