@@ -1,6 +1,6 @@
 /*
 
-   Parser.java
+   PackageResources.java
 
    This is a resource used for loading resources.
 
@@ -8,8 +8,8 @@
    Heavily modified by Jon Abbey and Mike Mulvaney
    
    Created: 9 July 1997
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/03/30 20:13:44 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/07/29 19:41:56 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -67,7 +67,7 @@ import java.applet.*;
  * can load images and other resources from either CLASSPATH or a jar file,
  * depending on how the program using this class is run.</p>
  *
- * @version $Revision: 1.3 $ $Date: 1999/03/30 20:13:44 $ $Name:  $
+ * @version $Revision: 1.4 $ $Date: 1999/07/29 19:41:56 $ $Name:  $
  * @author Jonathan Abbey
  */
 
