@@ -6,8 +6,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 1999/01/22 18:03:58 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 1999/08/19 02:12:44 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -61,11 +61,20 @@ import javax.swing.text.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *  JentryField serves as an abstract base class for all Fields that use textfields.
- *  The subclasses of this class should be used.
+ * <p>JentryField serves as an abstract base class for all GUI fields in the
+ * client that use textfields.  All text entry fields in the Ganymede client
+ * are done using JentryField.  Among other responsibilities, JentryField is
+ * responsible for dispatching a callback event when the user tabs out of
+ * a field he has been entering text into.</p>
+ *
+ * <p>In combination with the {@link arlut.csd.JDataComponent.JentryDocument JentryDocument}
+ * class, JentryField makes sure that the user can't type invalid characters,
+ * nor too many characters, providing immediate feedback if he tries.</p>
+ *
+ * <p>See this subclasses of this class for actual usable classes.</p>
  */
 
-abstract public class JentryField extends JTextField implements FocusListener{
+abstract public class JentryField extends JTextField implements FocusListener {
 
   static final boolean debug = false;
 
@@ -158,6 +167,15 @@ abstract public class JentryField extends JTextField implements FocusListener{
     return -1;
   }
 
+  /**
+   * returns the current size of the contents of this gui field
+   */
+
+  public int getLength()
+  {
+    return 0;
+  }
+
   public void focusLost(FocusEvent e)
   {
     if (debug)
@@ -183,9 +201,22 @@ abstract public class JentryField extends JTextField implements FocusListener{
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>Helper class for {@link arlut.csd.JDataComponent.JentryField JentryField}
+ * and its subclasses.  JentryDocument is responsible for guaranteeing that
+ * the user cannot enter invalid characters into a string field in the client,
+ * nor type too many characters.</p>
+ */
+
 class JentryDocument extends PlainDocument {
 
+  final static boolean debug = false;
+
+  // ---
+
   private JentryField field;
+
+  /* - */
 
   public JentryDocument(JentryField field)
   {
@@ -198,14 +229,24 @@ class JentryDocument extends PlainDocument {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("JentryDocument.insertString(" + str +")");
+      }
+
     for (int i = 0; i < str.length(); i++)
       {
 	char c = str.charAt(i);
 
 	if (!field.isAllowed(c) ||
 	     (field.getMaxStringSize() != -1 && 
-	      field.getMaxStringSize() - buffer.length() <= 0))
+	      field.getMaxStringSize() - field.getLength() <= 0))
 	  {
+	    if (debug)
+	      {
+		System.err.println("Trying to reject character " + c);
+	      }
+
 	    Toolkit.getDefaultToolkit().beep();
 	  }
 	else
@@ -216,6 +257,11 @@ class JentryDocument extends PlainDocument {
 
     if (buffer.length() != 0)
       {
+	if (debug)
+	  {
+	    System.err.println("Inserting string " + buffer.toString());
+	  }
+
 	super.insertString(offset, buffer.toString(), a);
       }
   }

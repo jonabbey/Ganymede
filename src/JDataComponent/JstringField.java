@@ -10,8 +10,8 @@
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 1999/02/25 01:26:09 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 1999/08/19 02:12:44 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -373,6 +373,24 @@ public class JstringField extends JentryField implements KeyListener {
   public int getMaxStringSize()
   {
     return this.size;
+  }
+
+  /**
+   * returns the current size of the contents of this gui field
+   */
+
+  public int getLength()
+  {
+    String text = super.getText();
+
+    if (text == null)
+      {
+	return 0;
+      }
+    else
+      {
+	return text.length();
+      }
   }
 
   /**
