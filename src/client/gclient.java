@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.63 $ %D%
+   Version: $Revision: 1.64 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1288,6 +1288,200 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   /**
    *
+   * This method is used to update the list of object nodes under a given
+   * base node in our object selection tree.
+   *
+   */
+  
+  void refreshObjects(BaseNode node, boolean doRefresh) throws RemoteException
+  {
+    Base base;
+    Invid invid = null;
+    String label = null;
+    Vector vect;
+    BaseNode parentNode;
+    InvidNode oldNode, newNode, fNode;
+    Query _query = null;
+
+    ObjectHandle handle = null;
+    Vector objectHandles;
+    objectList objectlist = null;
+
+    short id;
+
+    /* -- */
+
+    base = node.getBase();    
+
+    try
+      {
+	id = base.getTypeID();
+	//Now get all the children
+	_query = new Query(id, null, false);// include all, even non-editables
+	node.setQuery(_query);
+      }
+    catch (RemoteException rx)
+      {
+	throw new IllegalArgumentException("It's the Query! " + rx);
+      }
+
+    Short Id = new Short(id);
+
+    if (cachedLists.containsList(Id))
+      {
+	objectlist = cachedLists.getList(Id);
+      }
+    else
+      {
+	try
+	  {
+	    QueryResult qr = session.query(_query);
+
+	    if (qr != null)
+	      {
+		System.out.println("Caching copy");
+		objectlist = new objectList(qr);
+		cachedLists.putList(Id, objectlist);
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get dump: " + rx);
+	  }
+      }
+    
+    objectHandles = objectlist.getObjectHandles(true); // include inactives, non-editables
+
+    // **
+    //
+    // The loop below goes over the sorted list of objectHandles and
+    // the sorted list of nodes in the tree under this particular baseNode,
+    // comparing as the loop progresses, adding or removing nodes from the
+    // tree to match the current contents of the objectHandles list
+    //
+    // The important variables in the loop are fNode, which points to the
+    // current node in the subtree that we're examining, and i, which
+    // is counting our way through the objectHandles Vector.
+    // 
+    // **
+
+    parentNode = node;
+    oldNode = null;
+    fNode = (InvidNode) node.getChild();
+    int i = 0;
+	
+    while ((i < objectHandles.size()) || (fNode != null))
+      {
+	//System.out.println("Looking at the next node");
+	//System.out.println("i = " + i + " length = " + unsorted_objects.length);
+	
+	if (i < objectHandles.size())
+	  {
+	    handle = (ObjectHandle) objectHandles.elementAt(i);
+
+	    if (!node.isShowAll() && !handle.isEditable())
+	      {
+		i++;		// skip this one
+		System.out.println("Skipping this one");
+		continue;
+	      }
+
+	    invid = handle.getInvid();
+	    label = handle.getLabel();
+	  }
+	else
+	  {
+	    // We've gone past the end of the list of objects in this
+	    // object list.. from here on out, we're going to wind up
+	    // removing anything we find in this subtree
+
+	    //System.out.println("Object is null");
+
+	    handle = null;
+	    label = null;
+	    invid = null;
+	  }
+
+	// insert a new node in the tree, change the label, or remove
+	// a node
+
+	if ((fNode == null) ||
+	    ((invid != null) && 
+	     ((label.compareTo(fNode.getText())) < 0)))
+	  {
+	    // If we have an invid/label in the object list that's not
+	    // in the tree, we need to insert it
+
+	    InvidNode objNode = new InvidNode(node, 
+					      handle.isInactive() ? (label + " (inactive)") :label,
+					      invid,
+					      oldNode, false,
+					      handle.isEditable() ? OPEN_FIELD : OBJECTNOWRITE,
+					      handle.isEditable() ? CLOSED_FIELD : OBJECTNOWRITE,
+					      handle.isEditable() ? (node.canInactivate()
+								     ? objectInactivatePM : objectRemovePM) : objectViewPM,
+					       
+					      handle);
+	    
+	    invidNodeHash.put(invid, objNode);
+	    setIconForNode(invid);
+	   
+	    tree.insertNode(objNode, false);
+
+	    oldNode = objNode;
+	    fNode = (InvidNode) oldNode.getNextSibling();
+	    
+	    i++;
+	  }
+	else if ((invid == null) ||
+		 ((label.compareTo(fNode.getText())) > 0))
+	  {
+	    // We've found a node in the tree without a matching
+	    // node in the object list.  Delete it!
+
+	    // System.out.println("Removing this node");
+	    // System.err.println("Deleting: " + fNode.getText());
+
+	    newNode = (InvidNode) fNode.getNextSibling();
+	    tree.deleteNode(fNode, false);
+
+	    fNode = newNode;
+	  }
+	else if (fNode.getInvid().equals(invid))
+	  {
+	    // we've got a node in the tree that matches the
+	    // invid of the current object in the object list,
+	    // but the label may possibly have changed, so we'll
+	    // go ahead and re-set the label, just to be sure
+
+	    // System.err.println("Setting: " + object.getName());
+
+	    if (handle.isInactive())
+	      {
+		fNode.setText(label + " (inactive)");
+	      }
+	    else
+	      {
+		fNode.setText(label);
+	      }
+
+	    oldNode = fNode;
+	    fNode = (InvidNode) oldNode.getNextSibling();
+
+	    setIconForNode(invid);
+
+	    i++;
+	  }
+      }
+
+    if (doRefresh)
+      {
+	tree.refresh();
+      }
+  }
+
+  /**
+   *
    * This method updates the tree for the nodes that might have changed.
    *
    * This method fixes all the icons, and cleans out the various hashes.  Only call this 
@@ -1418,199 +1612,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
 
     tree.refresh();
-  }
-
-  /**
-   *
-   * This method is used to update the list of object nodes under a given
-   * base node in our object selection tree.
-   *
-   */
-  
-  void refreshObjects(BaseNode node, boolean doRefresh) throws RemoteException
-  {
-    Base base;
-    Invid invid = null;
-    String label = null;
-    Vector vect;
-    BaseNode parentNode;
-    InvidNode oldNode, newNode, fNode;
-    Query _query = null;
-
-    ObjectHandle handle = null;
-    Vector objectHandles;
-    objectList objectlist = null;
-
-    short id;
-
-    /* -- */
-
-    base = node.getBase();    
-
-    try
-      {
-	id = base.getTypeID();
-	//Now get all the children
-	_query = new Query(id, null, false);// include all, even non-editables
-	node.setQuery(_query);
-      }
-    catch (RemoteException rx)
-      {
-	throw new IllegalArgumentException("It's the Query! " + rx);
-      }
-
-    Short Id = new Short(id);
-
-    if (cachedLists.containsList(Id))
-      {
-	objectlist = cachedLists.getList(Id);
-      }
-    else
-      {
-	try
-	  {
-	    QueryResult qr = session.query(_query);
-
-	    if (qr != null)
-	      {
-		System.out.println("Caching copy");
-		objectlist = new objectList(qr);
-		cachedLists.putList(Id, objectlist);
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not get dump: " + rx);
-	  }
-      }
-    
-    objectHandles = objectlist.getObjectHandles(true); // include inactives, non-editables
-
-    // **
-    //
-    // The loop below goes over the sorted list of objectHandles and
-    // the sorted list of nodes in the tree under this particular baseNode,
-    // comparing as the loop progresses, adding or removing nodes from the
-    // tree to match the current contents of the objectHandles list
-    //
-    // The important variables in the loop are fNode, which points to the
-    // current node in the subtree that we're examining, and i, which
-    // is counting our way through the objectHandles Vector.
-    // 
-    // **
-
-    parentNode = node;
-    oldNode = null;
-    fNode = (InvidNode) node.getChild();
-    int i = 0;
-	
-    while ((i < objectHandles.size()) || (fNode != null))
-      {
-	//System.out.println("Looking at the next node");
-	//System.out.println("i = " + i + " length = " + unsorted_objects.length);
-	
-	if (i < objectHandles.size())
-	  {
-	    handle = (ObjectHandle) objectHandles.elementAt(i);
-
-	    if (!node.isShowAll() && !handle.isEditable())
-	      {
-		i++;		// skip this one
-		continue;
-	      }
-
-	    invid = handle.getInvid();
-	    label = handle.getLabel();
-	  }
-	else
-	  {
-	    // We've gone past the end of the list of objects in this
-	    // object list.. from here on out, we're going to wind up
-	    // removing anything we find in this subtree
-
-	    //System.out.println("Object is null");
-
-	    handle = null;
-	    label = null;
-	    invid = null;
-	  }
-
-	// insert a new node in the tree, change the label, or remove
-	// a node
-
-	if ((fNode == null) ||
-	    ((invid != null) && 
-	     ((label.compareTo(fNode.getText())) < 0)))
-	  {
-	    // If we have an invid/label in the object list that's not
-	    // in the tree, we need to insert it
-
-	    InvidNode objNode = new InvidNode(node, 
-					      handle.isInactive() ? (label + " (inactive)") :label,
-					      invid,
-					      oldNode, false,
-					      handle.isEditable() ? OPEN_FIELD : OBJECTNOWRITE,
-					      handle.isEditable() ? CLOSED_FIELD : OBJECTNOWRITE,
-					      handle.isEditable() ? (node.canInactivate()
-								     ? objectInactivatePM : objectRemovePM) : objectViewPM,
-					       
-					      handle);
-	    
-	    invidNodeHash.put(invid, objNode);
-	    setIconForNode(invid);
-	   
-	    tree.insertNode(objNode, false);
-
-	    oldNode = objNode;
-	    fNode = (InvidNode) oldNode.getNextSibling();
-	    
-	    i++;
-	  }
-	else if ((invid == null) ||
-		 ((label.compareTo(fNode.getText())) > 0))
-	  {
-	    // We've found a node in the tree without a matching
-	    // node in the object list.  Delete it!
-
-	    // System.out.println("Removing this node");
-	    // System.err.println("Deleting: " + fNode.getText());
-
-	    newNode = (InvidNode) fNode.getNextSibling();
-	    tree.deleteNode(fNode, false);
-
-	    fNode = newNode;
-	  }
-	else if (fNode.getInvid().equals(invid))
-	  {
-	    // we've got a node in the tree that matches the
-	    // invid of the current object in the object list,
-	    // but the label may possibly have changed, so we'll
-	    // go ahead and re-set the label, just to be sure
-
-	    // System.err.println("Setting: " + object.getName());
-
-	    if (handle.isInactive())
-	      {
-		fNode.setText(label + " (inactive)");
-	      }
-	    else
-	      {
-		fNode.setText(label);
-	      }
-
-	    oldNode = fNode;
-	    fNode = (InvidNode) oldNode.getNextSibling();
-
-	    setIconForNode(invid);
-
-	    i++;
-	  }
-      }
-
-    if (doRefresh)
-      {
-	tree.refresh();
-      }
   }
 
   /**
@@ -3260,6 +3261,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	
 	if (node instanceof BaseNode)
 	  {
+	    setWaitCursor();
+	    
 	    BaseNode baseN = (BaseNode)node;
 	    
 	    try
@@ -3288,6 +3291,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      {
 		throw new RuntimeException("Could not get query: " + rx);
 	      }
+	    setNormalCursor();
 	  }
 	else
 	  {
@@ -3300,10 +3304,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
 	if (node instanceof BaseNode)
 	  {
+	    setWaitCursor();
 	    Base base = ((BaseNode) node).getBase();
 
 	    querybox box = new querybox(base, getBaseHash(), getBaseMap(),  this, "Query Panel");
 
+	    setNormalCursor();
 	    Query q = box.myshow();
 
 	    if (q != null)
@@ -3343,6 +3349,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	Short id;
 
 	/* -- */
+	setWaitCursor();
 
 	try
 	  {
@@ -3367,6 +3374,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 		throw new RuntimeException("oops, couldn't refresh base" + ex);
 	      }
 	  }
+	setNormalCursor();
       }
     else if (event.getActionCommand().equals("Hide Non-Editables"))
       {
