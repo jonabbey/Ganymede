@@ -6,8 +6,8 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 2001/04/25 19:23:58 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 2001/04/27 21:21:59 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -495,9 +495,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    return Ganymede.createErrorDialog("Unacceptable IP address",
 					      "IP address " + IPDBField.genIPString(address) +
-					      " does not match any network available to you." +
-					      "  You may have misentered the address, or this may " +
-					      "be a permissions issue.");
+					      " does not match any network available to you.");
 	  }
 
 	// we need to fix up the IP Network link to point to the
