@@ -9,7 +9,11 @@
 # 
 ############################
 
-## This section is customized by the server install script
+########################################
+#
+# This section is customized by the server install script
+#
+########################################
 
 # These lines should be in the form X=Y, with nothing else on
 # the line.. they are customized by the installServer.perl
@@ -20,9 +24,11 @@ PROPERTIES=ganymede.properties
 CLASSPATH=jars/ganymedeServer.jar:jars/gnu-regexp-1.1.4.jar:jars/custom.jar:jython/jython.jar:jython/jython-lib.jar
 INSTALLDIR=/var/ganymede
 
+# ------------------------------------------------------------------ #
+
 ########################################
 #
-# Control variables
+# Control variables for manual editing
 #
 ########################################
 
@@ -79,21 +85,7 @@ MAXPERMSPACE=128m
 
 RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000'
 
-############################################### 
-
-trap "echo Aborted" 2
-
-echo "Running Ganymede Server"
-
-export CLASSPATH
-
-# Set a higher upper limit on the number of descriptors so that
-# Ganymede doesn't run out while doing big builds
-#
-# This may be Solaris-specific, so use with caution if you're on
-# another operating system.
-
-#ulimit -n 128
+# ------------------------------------------------------------------ #
 
 # Below this point we have a few choices of invocation lines that
 # actually run your JVM on the Ganymede server..
@@ -168,20 +160,29 @@ export CLASSPATH
 # The -resetadmin, -forcelocalhost, -suppressEmail, telnet, and
 # -logrmi or logrmi=XXX parameters should be placed on the invocation
 # line after arlut.csd.ganymede.server.Ganymede.
-
+#
 # Other options included below include the -Xms32m and -Xmx256m jvm
 # options, which force a minimum heap size of 32 megabytes and a
 # maximum heap size of 256 megabytes.  If you are running an unusally
 # large Ganymede installation, you may want to increase the
 # maximum heap size to something greater than 256 megabytes.
 
-#			     ----====----
+# ------------------------------------------------------------------ #
 
-# The following line runs with HotSpot JITTING on.  Any exceptions
-# thrown by the server will not include line numbers, but the
-# '-logrmi' option does cause RMI calls to the
-# server to be logged to $INSTALLDIR/debug.log.
+trap "echo Aborted" 2
+
+echo "Running Ganymede Server"
+
+export CLASSPATH
+
+# Set a higher upper limit on the number of descriptors so that
+# Ganymede doesn't run out while doing big builds
 #
+# This may be Solaris-specific, so use with caution if you're on
+# another operating system.
+
+# ulimit -n 128
+
 # The directive '-XX:MaxPermSize=$MAXPERMSPACE' is used to increase
 # the portion of the server's heap that is dedicated to class and
 # method memory, and most especially to interned string storage.  The
