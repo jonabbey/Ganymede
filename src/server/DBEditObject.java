@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.84 $ %D%
+   Version: $Revision: 1.85 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1882,7 +1882,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * If remove() returns a ReturnVal that has its success flag set to false
    * and does not include a JDialogBuff for further interaction with the
-   * user, the DBSEssion.deleteDBObject() method will rollback any changes
+   * user, the DBSession.deleteDBObject() method will roll back any changes
    * made by this method.<br><br>
    *
    * remove() is intended for subclassing, whereas finalizeRemove() is
@@ -2219,9 +2219,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * For normal usage this method would not be overridden.  For
    * cases in which change to an object would result in an external
-   * process being initiated whose success or failure would not
+   * process being initiated whose <b>success or failure would not
    * affect the successful commit of this DBEditObject in the
-   * Ganymede server, the process invokation should be placed here,
+   * Ganymede server</b>, the process invokation should be placed here,
    * rather than in commitPhase1().<br><br>
    *
    * Subclasses that override this method may wish to make this method 
