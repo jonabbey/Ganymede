@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.66 $
-   Last Mod Date: $Date: 2000/07/05 22:02:06 $
+   Version: $Revision: 1.67 $
+   Last Mod Date: $Date: 2000/08/09 02:22:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -199,8 +199,52 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   public Session login(Client client) throws RemoteException
   {
     String clientName = null;
-    String clienthost = null;
     String clientPass;
+
+    /* -- */
+
+    clientName = client.getName();
+    clientPass = client.getPassword();
+
+    return processLogin(clientName, clientPass, client, Ganymede.remotelyAccessible);
+  }
+
+  /** 
+   * <p>XML Client login method.  Establishes a {@link
+   * arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession} object
+   * in the server for the client, and returns a {@link
+   * arlut.csd.ganymede.XMLSession XMLSession} remote reference to the
+   * XML client.  The GanymedeXMLSession object in turn contains a
+   * GanymedeSession object, which contains all of the server's
+   * knowledge about a given client's status., and is tracked by the
+   * GanymedeServer object for statistics and for the admin console's
+   * monitoring support.</P>
+   * 
+   * @see arlut.csd.ganymede.Server 
+   */
+
+  public XMLSession xmlLogin(String clientName, String clientPass) throws RemoteException
+  {
+    return new GanymedeXMLSession(processLogin(clientName, clientPass, null, false));
+  }
+
+  /**
+   * <p>This internal method handles the client login logic for both the normal
+   * interactive client and the xml batch client.</p>
+   *
+   * @param clientName The user/persona name to be logged in
+   * @param clientPass The password (in plaintext) to authenticate with
+   * @param client If we're using the interactive client, the processLogin() method
+   * will use the client reference to send a disconnect message explaining the
+   * login refusal
+   * @param directSession If true, the GanymedeSession returned will export objects
+   * created or referenced by the GanymedeSession for direct RMI access
+   */
+
+  private GanymedeSession processLogin(String clientName, String clientPass, 
+				       Client client, boolean directSession) throws RemoteException
+  {
+    String clienthost = null;
     boolean found = false;
     boolean success = false;
     Query userQuery;
@@ -218,13 +262,20 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  {
 	    if (error.equals("shutdown"))
 	      {
-		client.forceDisconnect("The server is currently waiting to shutdown.  No logins will be " +
-				       "accepted until the server has restarted.");
+		if (client != null)
+		  {
+		    client.forceDisconnect("The server is currently waiting to shutdown.  No logins will be " +
+					   "accepted until the server has restarted.");
+		  }
 	      }
 	    else
 	      {
-		client.forceDisconnect("Can't login to Ganymede server.. semaphore disabled: " + error);
+		if (client != null)
+		  {
+		    client.forceDisconnect("Can't login to Ganymede server.. semaphore disabled: " + error);
+		  }
 	      }
+
 	    return null;
 	  }
       }
@@ -246,8 +297,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	    // against user/persona name later on, but we want to have
 	    // a canonical name to track multiple logins with.
     
-	    clientName = client.getName().toLowerCase();
-	    clientPass = client.getPassword();
+	    clientName = clientName.toLowerCase();
 
 	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.NOCASEEQ, clientName);
 	    userQuery = new Query(SchemaConstants.UserBase, root, false);
@@ -374,7 +424,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 		// registerActiveUser() on us, as well as directly
 		// adding itself to our sessions Vector.
 
-		GanymedeSession session = new GanymedeSession(client, clientName, user, persona);
+		GanymedeSession session = new GanymedeSession(client, clientName, user, persona,
+							      directSession);
 
 		Ganymede.debug(session.username + " logged in from " + session.clienthost);
 
@@ -404,7 +455,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 		success = true;
 
-		return (Session) session;
+		return session;
 	      }
 	    else
 	      {

@@ -7,8 +7,8 @@
    
    Created: 11 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/03/08 22:44:00 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/08/09 02:22:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,70 +66,56 @@ import java.rmi.RemoteException;
  * client to get information about and/or make changes to a object held
  * in the Ganymede server.</p>
  *
- * @version $Revision: 1.23 $ $Date: 2000/03/08 22:44:00 $
+ * @version $Revision: 1.24 $ $Date: 2000/08/09 02:22:20 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public interface db_object extends java.rmi.Remote {
 
   /**
-   *
-   * Returns the numeric id of the object in the objectBase
-   *
+   * <p>Returns the numeric id of the object in the objectBase</p>
    */
 
   public int getID() throws RemoteException;
 
   /**
-   *
-   * Returns the base id of the object's type
-   *
+   * <p>Returns the base id of the object's type</p>
    */
 
   public short getTypeID() throws RemoteException;
 
   /**
-   *
-   * Returns the name of the object's type
-   *
+   * <p>Returns the name of the object's type</p>
    */
 
   public String getTypeName() throws RemoteException;
 
   /**
-   *
-   * Returns the unique object id (invid) of this object
-   *
+   * <p>Returns the unique object id (invid) of this object</p>
    */
 
   public Invid getInvid() throws RemoteException;
 
   /**
-   *
-   * Returns a vector of custom field information records, in display order.
+   * <p>Returns a vector of custom field information records, in display order.</p>
    *
    * @see arlut.csd.ganymede.FieldInfo
-   *
    */
 
   public Vector getFieldInfoVector() throws RemoteException;
 
   /**
-   *
    * <p>Get access to a field from this object.</p>
    *
    * @param id The field code for the desired field of this object.
-   *
    */
 
   public db_field getField(short id) throws RemoteException;
 
   /**
-   *
    * <p>Get access to a field from this object, by name.</p>
    *
    * @param fieldname The fieldname for the desired field of this object
-   *
    */
 
   public db_field getField(String fieldname) throws RemoteException;
@@ -143,47 +129,54 @@ public interface db_object extends java.rmi.Remote {
   public String getFieldName(short id) throws RemoteException;
 
   /**
-   *
+   * <p>This method returns the short field id code for the named
+   * field, if the field is present in this object, or -1 if the
+   * field could not be found.</p>
+   */
+
+  public short getFieldId(String fieldname) throws RemoteException;
+
+  /**
    * <p>Get access to the field that serves as this object's label</p>
    *
    * <p>Not all objects use simple field values as their labels.  If an
    * object has a calculated label, this method will return null.</p>
-   *
    */
 
   public db_field getLabelField() throws RemoteException;
 
   /**
+   * <p>Get access to the field id for the field that serves as this
+   * object's label, if any.</p>
    *
+   * <p>Not all objects use simple field values as their labels.  If an
+   * object has a calculated label, this method will return -1.</p> 
+   */
+
+  public short getLabelFieldID() throws RemoteException;
+
+  /**
    * <p>Get list of all db_fields contained in this object,
    * in unsorted order.</p>
-   *
    */
 
   public db_field[] listFields() throws RemoteException;
 
   /**
-   *
-   * Returns the primary label of this object.
-   *
+   * <p>Returns the primary label of this object.</p>
    */
 
   public String getLabel() throws RemoteException;
 
   /**
-   *
-   * Returns true if this object is an embedded type
-   *
+   * <p>Returns true if this object is an embedded type</p>
    */
 
   public boolean isEmbedded() throws RemoteException;
 
-
   /**
-   *
    * <p>Returns true if inactivate() is a valid operation on
    * checked-out objects of this type.</p>
-   *
    */
 
   public boolean canInactivate() throws RemoteException;
@@ -209,46 +202,36 @@ public interface db_object extends java.rmi.Remote {
   public Date getRemovalDate() throws RemoteException;
 
   /**
-   *
    * <p>Returns true if this object has an expiration date set.</p>
-   *
    */
 
   public boolean willExpire() throws RemoteException;
 
   /**
-   *
    * <p>Returns the date that this object is to be automatically
    * inactivated if it has an expiration date set.</p>
-   *
    */
 
   public Date getExpirationDate() throws RemoteException;
 
   /**
-   *
-   * Shortcut method to set a field's value.  Using this
+   * <p>Shortcut method to set a field's value.  Using this
    * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.
-   *
+   * particularly useful in database loading.</p>
    */
 
   public ReturnVal setFieldValue(short fieldID, Object value) throws RemoteException;
 
   /**
-   *
-   * Shortcut method to get a scalar field's value.  Using this
-   * method saves a roundtrip to the server.
-   *
+   * <p>Shortcut method to get a scalar field's value.  Using this
+   * method saves a roundtrip to the server.</p>
    */
 
   public Object getFieldValue(short fieldID) throws RemoteException;
 
   /**
-   *
-   * Shortcut method to get a vector field's values.  Using this
-   * method saves a roundtrip to the server.
-   *
+   * <p>Shortcut method to get a vector field's values.  Using this
+   * method saves a roundtrip to the server.</p>
    */
 
   public Vector getFieldValues(short fieldID) throws RemoteException;

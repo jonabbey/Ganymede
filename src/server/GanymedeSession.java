@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.192 $
-   Last Mod Date: $Date: 2000/07/26 00:42:12 $
+   Version: $Revision: 1.193 $
+   Last Mod Date: $Date: 2000/08/09 02:22:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -62,6 +62,7 @@ package arlut.csd.ganymede;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.*;
+import java.lang.reflect.*;
 import java.net.*;
 import java.io.*;
 
@@ -126,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.192 $ $Date: 2000/07/26 00:42:12 $
+ * @version $Revision: 1.193 $ $Date: 2000/08/09 02:22:17 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -484,6 +485,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   AdminEntry userInfo = null;
 
+  /**
+   * <p>If true, this GanymedeSession will export its objects and fields for
+   * direct access via RMI.</p>
+   */
+
+  boolean remotelyAccessible;
+
   /* -- */
 
   /**
@@ -592,7 +600,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    */
   
   public GanymedeSession(Client client, String loginName, 
-			 DBObject userObject, DBObject personaObject) throws RemoteException
+			 DBObject userObject, DBObject personaObject,
+			 boolean exportObjects) throws RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -602,6 +611,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // its login() method
 
     semaphoreLocked = true;
+
+    // record whether we should export our objects
+
+    this.remotelyAccessible = exportObjects;
 
     // record information about the client that we'll need
     // to have while the client is connected to us.
@@ -3872,7 +3885,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     // let a NullPointerException be thrown if we were given a null
     // Invid.
-
+    
     obj = session.viewDBObject(invid);
 
     if (obj == null)
@@ -3902,8 +3915,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	result = new ReturnVal(true); // success
 	result.setObject(objref);
+	result.setInvid(((DBObject) objref).getInvid());
 
-	if (Ganymede.remotelyAccessible)
+	if (this.remotelyAccessible)
 	  {
 	    // the exportObject call will fail if the object has
 	    // already been exported.  Unfortunately, there doesn't
@@ -3996,7 +4010,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	    result = new ReturnVal(true);
 	    result.setObject(objref);
 
-	    if (Ganymede.remotelyAccessible)
+	    if (this.remotelyAccessible)
 	      {
 		// the exportObject call will fail if the object has
 		// already been exported.  Unfortunately, there doesn't
@@ -4134,7 +4148,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    result.setObject(newObj);
 
-	    if (Ganymede.remotelyAccessible)
+	    if (this.remotelyAccessible)
 	      {
 		// the exportObject call will fail if the object has
 		// already been exported.  Unfortunately, there doesn't
@@ -4261,7 +4275,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     result.setObject(newObj);
 
-    if (Ganymede.remotelyAccessible)
+    if (this.remotelyAccessible)
       {
 	// the exportObject call will fail if the object has
 	// already been exported.  Unfortunately, there doesn't
@@ -4604,6 +4618,28 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     // the transaction commits
     
     return session.deleteDBObject(invid);
+  }
+
+  /**
+   * <p>This method is used by the db_objectRemote proxy class to transmit method
+   * calls from the client to the server without maintaining a separate RMI
+   * remote reference per object.</p>
+   */
+
+  public Object doObjectCall(Invid objId, String methodName, Object[] params)
+  {
+    throw new IllegalArgumentException("Not implemented");
+  }
+
+  /**
+   * <p>This method is used by the db_field Remote proxy classes to
+   * transmit method calls from the client to the server without
+   * maintaining a separate RMI remote reference per field.</p>
+   */
+
+  public Object doFieldCall(Invid objId, short fieldID, String methodName, Object[] params)
+  {
+    throw new IllegalArgumentException("Not implemented");
   }
 
   /****************************************************************************

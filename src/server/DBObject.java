@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2000/07/12 04:53:35 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2000/08/09 02:22:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.99 $ $Date: 2000/07/12 04:53:35 $
+ * @version $Revision: 1.100 $ $Date: 2000/08/09 02:22:16 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -683,6 +683,33 @@ public class DBObject implements db_object, FieldType, Remote {
       }
 
     return null;
+  }
+
+  /**
+   * <p>Get access to the field id for the field that serves as this
+   * object's label, if any.</p>
+   *
+   * <p>Not all objects use simple field values as their labels.  If an
+   * object has a calculated label, this method will return -1.</p> 
+   */
+
+  public short getLabelFieldID()
+  {
+    // check to see if getLabelHook() is used to generate a string
+    // label..  if so, there is no label field per se, and we'll
+    // return null.
+
+    String result = objectBase.objectHook.getLabelHook(this);
+
+    if (result != null)
+      {
+	return -1;
+      }
+
+    // no calculated label for this object.. just go ahead and use the
+    // default label obtaining bit
+    
+    return objectBase.getLabelField();
   }
 
   /**
@@ -1434,7 +1461,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * @param id The field code for the desired field of this object.
    */
 
-  public String getFieldName(short id)
+  public final String getFieldName(short id)
   {
     DBField field = fields.get(id);
 
@@ -1444,6 +1471,34 @@ public class DBObject implements db_object, FieldType, Remote {
       }
     
     return null;
+  }
+
+  /**
+   * <p>This method returns the short field id code for the named
+   * field, if the field is present in this object, or -1 if the
+   * field could not be found.</p>
+   */
+
+  synchronized public final short getFieldId(String fieldname)
+  {
+    Enumeration enum;
+    DBField field;
+
+    /* -- */
+
+    enum = fields.elements();
+
+    while (enum.hasMoreElements())
+      {
+	field = (DBField) enum.nextElement();
+
+	if (field.getName().equalsIgnoreCase(fieldname))
+	  {
+	    return field.getID();
+	  }
+      }
+
+    return -1;
   }
 
   /**

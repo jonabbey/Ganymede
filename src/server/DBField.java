@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 2000/06/14 04:52:33 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 2000/08/09 02:22:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -200,10 +200,14 @@ public abstract class DBField implements Remote, db_field {
   }
 
   /**
-   * This method is designed to handle casting this field's value into
+   * <p>This method is designed to handle casting this field's value into
    * a vector as needed.  We don't bother to check whether value is a Vector
    * here, as the code which would have used the old values field should
-   * do that for us themselves.
+   * do that for us themselves.</p>
+   *
+   * <p>This method does no permissions checking at all, and should only
+   * be used from within DBField and subclass code.  For other purposes,
+   * use getValuesLocal().</p>
    */
   
   public final Vector getVectVal()
