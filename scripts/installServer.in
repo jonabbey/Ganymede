@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.40 $
-# $Date: 2001/07/30 07:02:05 $
+# $Revision: 1.41 $
+# $Date: 2002/12/16 22:07:41 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -303,7 +303,7 @@ while (<INPUT>) {
   } elsif (defined $runconvert{$1}) {
     print OUTPUT "$1=$runconvert{$1}\n";
   } else {
-    print "Error.. unrecognized template entry $1 - copying template value\n";
+    print "Unrecognized template entry $1 - copying template value\n";
     print OUTPUT $_;
   }
 }
@@ -325,7 +325,7 @@ while (<INPUT>) {
   } elsif (defined $runconvert{$1}) {
     print OUTPUT "$1=$runconvert{$1}\n";
   } else {
-    print "Error.. unrecognized template entry $1 - copying template value\n";
+    print "Unrecognized template entry $1 - copying template value\n";
     print OUTPUT $_;
   }
 }
@@ -370,7 +370,7 @@ while (<INPUT>) {
     } elsif (defined $runconvert{$1}) {
 	print OUTPUT "$1=$runconvert{$1}\n";
     } else {
-	print "Error.. unrecognized template entry $1 - copying template value\n";
+	print "Unrecognized template entry $1 - copying template value\n";
 	print OUTPUT $_;
     }
 }
