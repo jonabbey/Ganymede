@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.52 $
-   Last Mod Date: $Date: 1999/01/27 21:45:13 $
+   Version: $Revision: 1.53 $
+   Last Mod Date: $Date: 1999/03/17 20:13:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -545,6 +545,8 @@ public class DBEditSet {
 	      case DBEditObject.CREATING:
 	      case DBEditObject.DROPPING:
 		obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
+
+		session.GSession.checkIn();
 		obj.getBase().store.checkIn(); // update checked out count
 		break;
 		
@@ -1174,6 +1176,7 @@ public class DBEditSet {
 	    // reset to checked-in status, put it into our object hash
 	    
 	    base.objectTable.put(new DBObject(eObj)); // have to sync, since we don't prevent viewDBObject()
+	    session.GSession.checkIn();
 	    base.store.checkIn(); // update checkout count
 
 	    break;
@@ -1191,6 +1194,7 @@ public class DBEditSet {
 	    // enough that we don't worry about it here.
 
 	    base.objectTable.remove(eObj.id);  // have to sync, since we don't prevent viewDBObject()
+	    session.GSession.checkIn();
 	    base.store.checkIn(); // count it as checked in once it's deleted
 	    break;
 
@@ -1200,6 +1204,7 @@ public class DBEditSet {
 	    // we ever got to this point.. 
 
 	    base.releaseId(eObj.getID()); // relinquish the unused invid
+	    session.GSession.checkIn();
 	    base.store.checkIn(); // count it as checked in once it's deleted
 	    break;
 	  }
@@ -1291,6 +1296,7 @@ public class DBEditSet {
 	  case DBEditObject.CREATING:
 	  case DBEditObject.DROPPING:
 	    eObj.getBase().releaseId(eObj.getID()); // relinquish the unused invid
+	    session.GSession.checkIn();
 	    eObj.getBase().store.checkIn(); // update checked out count
 	    break;
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.65 $
-   Last Mod Date: $Date: 1999/02/10 05:33:39 $
+   Version: $Revision: 1.66 $
+   Last Mod Date: $Date: 1999/03/17 20:13:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,7 +88,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.65 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.66 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1082,6 +1082,15 @@ public class DBObject implements db_object, FieldType, Remote {
 
     editset.addObject(shadowObject);
 
+    // update the session's checkout count first, then
+    // update the database's overall checkout, which
+    // will trigger a console update
+
+    if (editset.session.GSession != null)
+      {
+	editset.session.GSession.checkOut();
+      }
+
     objectBase.store.checkOut(); // update checked out count
 
     return shadowObject;
@@ -1110,6 +1119,11 @@ public class DBObject implements db_object, FieldType, Remote {
       }
 
     shadowObject = null;
+
+    if (editset.session.GSession != null)
+      {
+	editset.session.GSession.checkIn();
+      }
 
     objectBase.store.checkIn(); // update checked out count
 

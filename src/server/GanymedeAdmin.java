@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 1999/02/10 05:33:40 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 1999/03/17 20:13:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -423,7 +423,8 @@ class GanymedeAdmin extends UnicastRemoteObject implements adminSession {
 					      session.clienthost,
 					      (session.status == null) ? "" : session.status,
 					      session.connecttime.toString(),
-					      (session.lastEvent == null) ? "" : session.lastEvent));
+					      (session.lastEvent == null) ? "" : session.lastEvent,
+					      session.objectsCheckedOut));
 	  }
       }
 

@@ -7,8 +7,8 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/02/10 05:33:42 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/03/17 20:13:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -87,6 +87,12 @@ public class scheduleHandle implements java.io.Serializable {
   boolean rerun;
 
   /**
+   * When was this task last issued?
+   */
+
+  Date lastTime;
+
+  /**
    * When will this task next be issued?
    */
 
@@ -148,6 +154,7 @@ public class scheduleHandle implements java.io.Serializable {
       }
 
     this.scheduler = scheduler;
+    this.lastTime = null;
     this.startTime = time;
     this.task = task;
     this.name = name;
@@ -221,6 +228,7 @@ public class scheduleHandle implements java.io.Serializable {
 
     monitor = null;
     isRunning = false;
+    lastTime = new Date();
     scheduler.notifyCompletion(this);
   }
 

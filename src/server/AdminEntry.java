@@ -7,8 +7,8 @@
    
    Created: 3 February 1997
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:05:25 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/03/17 20:13:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -61,14 +61,19 @@ public class AdminEntry implements java.io.Serializable {
     status,
     connecttime,
     event;
+  
+  int
+    objectsCheckedOut;
 
   public AdminEntry(String username, String hostname, String status,
-		    String connecttime, String event)
+		    String connecttime, String event,
+		    int objectsCheckedOut)
   {
     this.username = username;
     this.hostname = hostname;
     this.status = status;
     this.connecttime = connecttime;
     this.event = event;
+    this.objectsCheckedOut = objectsCheckedOut;
   }
 }

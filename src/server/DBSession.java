@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 1999/01/27 21:45:14 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 1999/03/17 20:13:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -262,6 +262,12 @@ final public class DBSession {
       }
 
     // update admin consoles
+
+    // update the session's checkout count first, then
+    // update the database's overall checkout, which
+    // will trigger a console update
+
+    GSession.checkOut();
 
     store.checkOut();
 

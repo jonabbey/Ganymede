@@ -5,8 +5,8 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 1999/01/27 22:22:04 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 1999/03/17 20:13:50 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -266,6 +266,7 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	frame.table.setCellText(e.username, 2, e.status, false);
 	frame.table.setCellText(e.username, 3, e.connecttime, false);
 	frame.table.setCellText(e.username, 4, e.event, false);
+	frame.table.setCellText(e.username, 5, Integer.toString(e.objectsCheckedOut), false);
       }
 
     // And refresh our table
@@ -354,16 +355,21 @@ class iAdmin extends UnicastRemoteObject implements Admin {
 	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
 
+	if (handle.lastTime != null)
+	  {
+	    frame.taskTable.setCellText(handle.name, 2, handle.lastTime.toString(), false);
+	  }
+
 	if (handle.startTime != null)
 	  {
-	    frame.taskTable.setCellText(handle.name, 2, handle.startTime.toString(), false);
+	    frame.taskTable.setCellText(handle.name, 3, handle.startTime.toString(), false);
 	  }
 	else
 	  {
-	    frame.taskTable.setCellText(handle.name, 2, "On Demand", false);
+	    frame.taskTable.setCellText(handle.name, 3, "On Demand", false);
 	  }
 
-	frame.taskTable.setCellText(handle.name, 3, handle.intervalString, false);
+	frame.taskTable.setCellText(handle.name, 4, handle.intervalString, false);
       }
 
     // And refresh our table
@@ -633,15 +639,15 @@ class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback
   
   rowTable table = null;
 
-  String headers[] = {"User", "System", "Status", "Connect Time", "Last Event"};
-  int colWidths[] = {100,100,100,100,100};
+  String headers[] = {"User", "System", "Status", "Connect Time", "Last Event", "Objects Checked Out"};
+  int colWidths[] = {100,100,100,100,100,100};
 
   // resources for the task monitor table
 
   rowTable taskTable = null;
 
-  String taskHeaders[] = {"Task", "Status", "Next Run", "Interval"};
-  int taskColWidths[] = {120,120,120,120};
+  String taskHeaders[] = {"Task", "Status", "Last Run", "Next Run", "Interval"};
+  int taskColWidths[] = {100,100,100,100,100};
 
   JPopupMenu taskPopMenu = null;
   JMenuItem runNowMI = null;

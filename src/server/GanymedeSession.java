@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.126 $
-   Last Mod Date: $Date: 1999/03/17 03:17:16 $
+   Version: $Revision: 1.127 $
+   Last Mod Date: $Date: 1999/03/17 20:13:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -85,7 +85,7 @@ import arlut.csd.JDialog.*;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Revision: 1.126 $ %D%
+ * @version $Revision: 1.127 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *   
  */
@@ -110,6 +110,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   boolean forced_off = false;
   boolean supergashMode = false;
   boolean beforeversupergash = false; // Be Forever Yamamoto
+  int objectsCheckedOut = 0;
 
   /**
    *
@@ -539,6 +540,34 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public boolean isSuperGash()
   {
     return supergashMode;
+  }
+
+  /**
+   *
+   * This method is used by the server to increment the admin
+   * console's display of the number of objects this user session has
+   * checked out and/or created.
+   *
+   */
+
+  public synchronized void checkOut()
+  {
+    objectsCheckedOut++;
+    GanymedeAdmin.refreshUsers();
+  }
+
+  /**
+   *
+   * This method is used by the server to decrement the admin
+   * console's display of the number of objects this user session has
+   * checked out and/or created.
+   *
+   */
+
+  public synchronized void checkIn()
+  {
+    objectsCheckedOut--;
+    GanymedeAdmin.refreshUsers();
   }
 
   /**
