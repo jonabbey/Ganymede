@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2000/09/12 05:08:53 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2000/09/14 23:17:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -532,10 +532,16 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
     catch (IOException ex)
       {
-	close();
-	ex.printStackTrace();
-	err.println("XMLReader io error: " + ex.getMessage());
-	throw new RuntimeException("XMLReader io error: " + ex.getMessage());
+	// if we're done and we've been reading data through a pipe,
+	// we want to ignore the pipe broken error that the parser
+	// seems to insist on running up against.
+
+	if (!done)
+	  {
+	    close();
+	    ex.printStackTrace();
+	    err.println("XMLReader io error: " + ex.getMessage());
+	  }
       }
   }
 
