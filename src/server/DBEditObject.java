@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.132 $
-   Last Mod Date: $Date: 2000/06/30 04:35:20 $
+   Version: $Revision: 1.133 $
+   Last Mod Date: $Date: 2000/07/26 00:30:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -112,7 +112,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.132 $ $Date: 2000/06/30 04:35:20 $ $Name:  $
+ * @version $Revision: 1.133 $ $Date: 2000/07/26 00:30:20 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3051,6 +3051,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * arlut.csd.ganymede.GanymedeSession#findLabeledObject(java.lang.String,
    * short) findLabeledObject()}), or else you will lock the server.</p>
    *
+   * <p>This method should NEVER try to edit or change any DBEditObject
+   * in the server.. at this point in the game, the server has fixed the
+   * transaction working set and is depending on commitPhase1() not trying
+   * to make changes.</p>
+   *
    * @see arlut.csd.ganymede.DBEditSet 
    */
 
@@ -3098,6 +3103,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * calls, including {@link
    * arlut.csd.ganymede.GanymedeSession#findLabeledObject(java.lang.String,
    * short) findLabeledObject()}), or else you will lock the server.</p>
+   *
+   * <p>This method should NEVER try to edit or change any DBEditObject
+   * in the server.. at this point in the game, the server has fixed the
+   * transaction working set and is depending on commitPhase2() not trying
+   * to make changes internal to the server.</p>
    */
 
   public void commitPhase2()

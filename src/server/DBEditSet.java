@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.77 $
-   Last Mod Date: $Date: 2000/07/13 21:33:13 $
+   Version: $Revision: 1.78 $
+   Last Mod Date: $Date: 2000/07/26 00:30:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -777,7 +777,6 @@ public class DBEditSet {
     Vector committedObjects = new Vector();
     Enumeration enum;
     DBObjectBase base;
-    Object key;
     DBEditObject eObj, eObj2;
     ReturnVal retVal = null;
 
@@ -946,46 +945,9 @@ public class DBEditSet {
 
 	try
 	  {
-	    DateDBField df;
-	    StringDBField sf;
-	    String result;
-
-	    // we're going to checkpoint the transaction here so that we
-	    // can abort cleanly if something rejects go-ahead in
-	    // commitPhase1().  commitPhase1() may not make any changes
-	    // that we need to worry about, but once we call
-	    // commitPhase1() on an object, we can't make _any_ changes to
-	    // it.  So, we need to set the modification times and what-not
-	    // before we call commitPhase1() and find out whether the object
-	    // considers itself good to go.  In theory, we could avoid the
-	    // checkpointing altogether and just assume that our timestamp
-	    // changes to the object won't ever have any bearing on the
-	    // object's commitPhase1() go/no go, but that would require
-	    // special-case coding, whereas we can just use the checkpoint
-	    // system to achieve the same ends generically.
-	
-	    String checkpointLabel = "commit" + (new Date()).toString();
-
-	    if (debug)
-	      {
-		System.err.println("DBEditSet.commit(): checkpoint(" + checkpointLabel +
-				   "), objects.size=" + objects.size());
-	      }
-
-	    checkpoint(checkpointLabel);
-
 	    // Ok, we now need to go through the objects that are being
-	    // changed by this transaction and update their informational
-	    // fields, then try to commit the objects.
-    
-	    // Note that we are assuming here that none of the changes we
-	    // make at this point (setting creation dates, modification
-	    // dates, etc.) will alter the working set of this transaction
-	    // (i.e., no new objects will be brought into the transaction
-	    // by anything we do here.)
-
-	    // write the creation and / or modification info into the objects,
-	    // run the objects' commit routines.
+	    // changed by this transaction and check to see if we
+	    // have an ok to commit them.
 	    
 	    enum = objects.elements();
 
@@ -993,75 +955,10 @@ public class DBEditSet {
 	      {
 		eObj = (DBEditObject) enum.nextElement();
 
-		switch (eObj.getStatus())
-		  {
-		  case DBEditObject.CREATING:
-		    
-		    if (!eObj.isEmbedded())
-		      {
-			df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
-			df.setValueLocal(modDate);
-			
-			sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
-			
-			result = session.getID();
-			
-			if (description != null)
-			  {
-			    result += ": " + description;
-			  }
+		// signal that this object is finalized, and no further
+		// changes will be made to it
 
-			sf.setValueLocal(result);
-		      }
-
-		    // * fall-through *
-
-		  case DBEditObject.EDITING:
-		    
-		    if (!eObj.isEmbedded())
-		      {
-			df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
-			df.setValueLocal(modDate);
-
-			sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
-
-			result = session.getID();
-
-			if (description != null)
-			  {
-			    result += ": " + description;
-			  }
-
-			sf.setValueLocal(result);
-		      }
-		    else
-		      {
-			// not sure why this test is here.. was I
-			// going to do something more with this?
-
-			InvidDBField invf = (InvidDBField) eObj.getField(SchemaConstants.ContainerField);
-			
-			if (invf == null || !invf.isDefined())
-			  {
-			    Ganymede.debug("DBEditSet.commit(): WARNING, an embedded object's " +
-					   "container link is undefined or null-valued.(?!)");
-			  }
-		      }
-
-		    eObj.finalized = true;
-		    break;
-
-		  case DBEditObject.DELETING:
-		  case DBEditObject.DROPPING:
-
-		    // Deletion activities for this object were done
-		    // at the time of the client's request.. the
-		    // commitPhase1() logic may have something to do,
-		    // however.
-
-		    eObj.finalized = true;
-		    break;
-		  }
+		eObj.finalized = true;
 
 		// and try to commit this object
 
@@ -1079,7 +976,7 @@ public class DBEditSet {
 		    // chance to fix things up here.. if the end-user
 		    // requested a transaction commit without the
 		    // possibility of retry, that is handled in
-		    // GanymedeSession.  
+		    // GanymedeSession.commitTransaction().
 
 		    // We must allow retry here.
 
@@ -1090,10 +987,6 @@ public class DBEditSet {
 		      }
 
 		    releaseWriteLock("transaction commit rejected in phase 1");
-
-		    // undo the time stamp changes and what-not.
-
-		    rollback(checkpointLabel);
 
 		    // let DBSession/the client know they can retry things.
 
@@ -1106,25 +999,96 @@ public class DBEditSet {
 		  }
 	      }
 
-	    // we've gotten this far, phase one must have completed ok.
+	    // phase one complete, go ahead and have all our objects
+	    // do their 2nd level (external) commit processes
 
-	    popCheckpoint(checkpointLabel);
-
-	    // phase one complete, go ahead and have all our
-	    // objects do their 2nd level (external) commit processes
-
-	    // the whole point of 2 phase commit is that nothing can
-	    // go wrong here...
+	    // before we call commitPhase2() on the objects in our
+	    // working set, we'll set the historical fields, which
+	    // specify the time of creation/last modification and the
+	    // identity of the user who created/modified the object
+	    
+	    DateDBField df;
+	    StringDBField sf;
+	    String result = session.getID() + ": " + description;
 
 	    for (int i = 0; i < committedObjects.size(); i++)
 	      {
 		eObj = (DBEditObject) committedObjects.elementAt(i);
 
-		eObj.commitPhase2();
+		// force a change of date and modifier information
+		// into the object without using the normal field
+		// modification methods.. this lets us set field
+		// values at a time when the object would reject
+		// changes from the user because the finalized bit is
+		// set.
+
+		switch (eObj.getStatus())
+		  {
+		  case DBEditObject.CREATING:
+		    
+		    if (!eObj.isEmbedded())
+		      {
+			df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+			df.value = modDate;
+			
+			sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+			sf.value = result;
+		      }
+
+		    // * fall-through *
+
+		  case DBEditObject.EDITING:
+		    
+		    if (!eObj.isEmbedded())
+		      {
+			df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+			df.value = modDate;
+
+			sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+			sf.value = result;
+		      }
+		    else
+		      {
+			// not sure why this test is here.. was I
+			// going to do something more with this?
+
+			InvidDBField invf = (InvidDBField) eObj.getField(SchemaConstants.ContainerField);
+
+			if (invf == null || !invf.isDefined())
+			  {
+			    Ganymede.debug("DBEditSet.commit(): WARNING, an embedded object's " +
+					   "container link is undefined or null-valued.(?!)");
+			  }
+		      }
+		  }
+
+		// tell the object to go ahead and do any external
+		// commit actions.
+
+		try
+		  {
+		    eObj.commitPhase2();
+		  }
+		catch (RuntimeException ex)
+		  {
+		    // if we get a runtime exception here, we want to
+		    // go ahead and commit the rest of the objects,
+		    // since we may already have done external actions
+		    // through other objects that have already had
+		    // their commitPhase2() methods called
+
+		    // just show the trace, don't throw it up
+
+		    ex.printStackTrace();
+		  }
 	      }
 
-	    // need to clear out any transients before
-	    // we write the transaction out to disk
+	    // need to clear out any transients before we write the
+	    // transaction out to disk and do logging and such.. we do
+	    // this in a separate loop from the above so that we won't
+	    // chance throwing an exception that would prevent all
+	    // objects in the transaction from having commitPhase2()
+	    // called
 
 	    GanymedeSession gSession = session.getGSession();
 	    Vector invids;
@@ -1256,7 +1220,8 @@ public class DBEditSet {
 		  }
 	      }
 
-	    // write this transaction out to the Journal
+	    // the logging was successful, now write this transaction
+	    // out to the Journal
 
 	    try
 	      {
