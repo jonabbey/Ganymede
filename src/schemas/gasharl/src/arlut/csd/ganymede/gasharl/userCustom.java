@@ -535,11 +535,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (retVal != null && retVal.getDialog() != null)
 	  {
-	    if (resultBuf.length() != 0)
-	      {
-		resultBuf.append("\n\n");
-	      }
-
 	    resultBuf.append(retVal.getDialog().getText());
 	
 	    problem = true;
