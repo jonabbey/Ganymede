@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.26 $ %D%
+   Version: $Revision: 1.27 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -309,6 +309,14 @@ final public class DBSession {
    * the checked out shadow of invid, if it has been checked out by this
    * transaction.
    *
+   * Note that unless the object has been checked out by the current session,
+   * this method will return access to the object as it is stored directly
+   * in the main datastore hashes.  This means that the object will be
+   * read-only and will grant all accesses, as it will have no notion of
+   * what session or transaction owns it.  If you need to have access to the
+   * object's fields be protected, use GanymedeSession.view_db_object to
+   * get the object.
+   *
    * @param invid The invariant id of the object to be viewed.
    *
    * @see arlut.csd.ganymede.DBObjectBase
@@ -328,11 +336,20 @@ final public class DBSession {
    * the checked out shadow of invid, if it has been checked out by this
    * transaction.
    *
+   * Note that unless the object has been checked out by the current session,
+   * this method will return access to the object as it is stored directly
+   * in the main datastore hashes.  This means that the object will be
+   * read-only and will grant all accesses, as it will have no notion of
+   * what session or transaction owns it.  If you need to have access to the
+   * object's fields be protected, use GanymedeSession.view_db_object to
+   * get the object.
+   *
    * @param baseID The short id number of the DBObjectBase containing the object to
    *               be viewed.
    *
    * @param objectID The int id number of the object to be viewed within the specified
    *                 object base.
+   *
    *
    * @see arlut.csd.ganymede.DBObjectBase
    *
