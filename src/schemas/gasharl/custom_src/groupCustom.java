@@ -5,7 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -262,7 +262,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		// Stupid client won't let us show wizards.  We'll teach them!
 		// First, find out what is going on.  How many groups is this user in?
 		
-		db_object user = gSession.edit_db_object(userInvid);
+		db_object user = gSession.edit_db_object(userInvid).getObject();
 		int size = 0;
 
 		try

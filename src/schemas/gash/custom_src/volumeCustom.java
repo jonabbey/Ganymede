@@ -5,7 +5,7 @@
    This file is a management class for NFS volume objects in Ganymede.
    
    Created: 6 December 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -297,9 +297,9 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 	    Invid user = (Invid) vObj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
 
 	    // and we need to edit the user.. we'll want to check permissions
-	    // for this.
+	    // for this, so we'll use edit_db_object()
 
-	    DBEditObject eObj = (DBEditObject) getGSession().edit_db_object(user);
+	    DBEditObject eObj = (DBEditObject) (getGSession().edit_db_object(user).getObject());
 
 	    if (eObj == null)
 	      {

@@ -5,7 +5,7 @@
   A wizard to allow deletion of a user's home group from the group edit window.
 
   Created: 8 April 1998
-  Version: $Revision: 1.1 $ %D%
+  Version: $Revision: 1.2 $ %D%
   Module by: Mike Mulvaney
   Applied Research Laboratories, The University of Texas at Austin
   
@@ -223,7 +223,7 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
     JDialogBuff dialog;
     ReturnVal retVal = null;
     
-    user = (userCustom)session.edit_db_object(userInvid);
+    user = (userCustom) (session.edit_db_object(userInvid).getObject());
 
     if (user == null)
       {
