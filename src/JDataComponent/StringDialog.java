@@ -5,7 +5,7 @@
    A configurable Dialog box.
    
    Created: 16 June 1997
-   Version: $Revision: 1.40 $ %D%
+   Version: $Revision: 1.41 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,7 @@ import javax.swing.border.*;
 
 public class StringDialog extends JCenterDialog implements ActionListener, JsetValueCallback, ItemListener {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // --
 
@@ -389,22 +389,40 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 		    dateThing dt = (dateThing) element;
 
 		    JdateField dateField;
+		    Date currentDate;
+		    Date minDate = new Date();
 
-		    if (dt.getMaxDate() != null)
+		    if (dt.getDate() != null)
 		      {
-			dateField = new JdateField(dt.getDate(), true, true,
-						   dt.getDate(), dt.getMaxDate(), this);
+			currentDate = dt.getDate();
 		      }
 		    else
 		      {
-			dateField = new JdateField(dt.getDate(), true, false,
+			if (dt.getMaxDate() != null)
+			  {
+			    currentDate = dt.getMaxDate();
+			  }
+			else
+			  {
+			    currentDate = null;
+			  }
+		      }
+
+		    if (dt.getMaxDate() != null)
+		      {
+			dateField = new JdateField(currentDate, true, true,
+						   minDate, dt.getMaxDate(), this);
+		      }
+		    else
+		      {
+			dateField = new JdateField(currentDate, true, false,
 						   null, null, this);
 		      }
 
 		    addRow(panel, dateField, dt.getLabel(), i);
 
 		    componentHash.put(dateField, dt.getLabel());
-		    valueHash.put(dt.getLabel(), "");
+		    valueHash.put(dt.getLabel(), currentDate);
 		  }
 		else if (element instanceof passwordThing)
 		  {
@@ -758,14 +776,21 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 	String label = (String) componentHash.get(comp);
 	JdateField dateField = (JdateField) comp;
 
-	if (valueHash != null)
-	  {
-	    valueHash.put(label, dateField.getDate());
-	  }
-
 	if (debug)
 	  {
 	    System.out.println("Setting " + label + " to " + dateField.getDate());
+	  }
+
+	if (valueHash != null)
+	  {
+	    if (dateField.getDate() == null)
+	      {
+		valueHash.remove(label);
+	      }
+	    else
+	      {
+		valueHash.put(label, dateField.getDate());
+	      }
 	  }
       }
     else if (comp instanceof JpasswordField)
@@ -808,6 +833,26 @@ public class StringDialog extends JCenterDialog implements ActionListener, JsetV
 	    System.out.println("Setting " + label + " to " + (String)v.getValue());
 	  }
       }
+    else if (comp instanceof JstringArea)
+      {
+	String label = (String) componentHash.get(comp);
+
+	if (debug)
+	  {
+	    System.out.println("label is " + label);
+	  }
+	
+	if (valueHash != null)
+	  {
+	    valueHash.put(label, (String) v.getValue());
+	  }
+
+	if (debug)
+	  {
+	    System.out.println("Setting " + label + " to " + (String) v.getValue());
+	  }
+      }
+
     return true;
   }
 
