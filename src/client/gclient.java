@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.134 $
-   Last Mod Date: $Date: 1999/03/04 19:08:40 $
+   Version: $Revision: 1.135 $
+   Last Mod Date: $Date: 1999/03/04 19:17:59 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -753,44 +753,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	getContentPane().add("North", toolBar);
       }
-
-//     /////////////////////////
-//    boolean sameSize = true;
-
-//    if (sameSize) { // Not sure about status of this so use
-//      // toggle to save having to comment out and in.
-
-//      int width=0;
-//      int height=0;
-    
-//      for (int i = 0; i<toolBar.getComponentCount(); i++) {
-
-//        JButton b = (JButton)toolBar.getComponent(i);
-
-//        int temp = b.getWidth();
-//        System.out.println(b.getActionCommand() + "  Width: " + temp);
-//        if (temp > width) {
-// 	 width = temp;
-//        }
-
-//        int temp2 = b.getHeight();
-//        System.out.println(b.getActionCommand() + " Height: " + temp2);
-//        if (temp2 > height) {
-// 	 height = temp2;
-//        }
-//      }
-
-//      Dimension buttonSize = new Dimension(width,height);    
-
-//      for (int j = 0; j<toolBar.getComponentCount(); j++) {
-//        JButton b = (JButton)toolBar.getComponent(j);
-//        b.setMaximumSize(buttonSize);
-//        b.setMinimumSize(buttonSize);
-//        b.setPreferredSize(buttonSize);
-//      }
-//    }
-
-
     
     commit = new JButton("Commit");
     commit.setEnabled(false);
@@ -870,14 +832,23 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     setSize(800, 600);
     show();
 
+
+    //
     // Adjust size of toolbar buttons to that of largest button
+    // Must be done after components are displayed. Otherwise, 
+    // getWidth & getHeight return 0's.
+    //
+
+    // Not sure about status of "uniform buttons" so
+    // using toggle to save having to comment out and in.
     boolean sameSize = true;
 
-    if (sameSize) { // Not sure about status of this so use
-      // toggle to save having to comment out and in.
+    if (sameSize) { 
 
       int width=0;
       int height=0;
+
+      // Get width/height for biggest button
       
       for (int i = 0; i<toolBar.getComponentCount(); i++) {
 	
@@ -895,7 +866,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
       
       Dimension buttonSize = new Dimension(width,height);    
-      
+
+      // Set width/height of all buttons to that of biggest
+        
       for (int j = 0; j<toolBar.getComponentCount(); j++) {
 	JButton b = (JButton)toolBar.getComponent(j);
        	b.setMaximumSize(buttonSize);
