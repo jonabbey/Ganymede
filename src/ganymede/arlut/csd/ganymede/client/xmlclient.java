@@ -197,7 +197,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	    xc.terminate(0);
 	  }
 
-	if (xc.doEverything(true))
+	if (xc.doSendChanges(true))
 	  {
 	    xc.terminate(0);
 	  }
@@ -491,7 +491,7 @@ public final class xmlclient implements ClientListener, Runnable {
    * the Ganymede server.</p>
    */
 
-  public boolean doEverything(boolean commandLine) throws RemoteException, IOException
+  public boolean doSendChanges(boolean commandLine) throws RemoteException, IOException
   {
     // first, check the basic integrity of the xml file and attempt to
     // find the username and password out of it
@@ -933,6 +933,7 @@ public final class xmlclient implements ClientListener, Runnable {
   public synchronized void run()
   {
     String result;
+    int count = 0;
 
     /* -- */
 
@@ -956,6 +957,15 @@ public final class xmlclient implements ClientListener, Runnable {
 	catch (RemoteException ex)
 	  {
 	    ex.printStackTrace();
+
+	    // we won't exit our err stream thread on one or two
+	    // errors, but if we get a bunch, assume we've lost the
+	    // connection and end the thread.
+
+	    if (count++ > 3)
+	      {
+		return;
+	      }
 	  }
       }
   }

@@ -525,44 +525,19 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * to finalize the XML transaction and return an overall success or
    * failure message in the ReturnVal.</p>
    *
-   * <p>Because the GanymedeXMLSession will still be chewing on the
-   * XML transmitted by the client, the client will need to loop on
-   * this call in order to get more output while the chewing occurs.
-   * If the ReturnVal returned has doNormalProcessing set to true,
-   * this means that the server has not transmitted its final
-   * ReturnVal, and the client should sleep for a bit and call
-   * xmlEnd() again to get more output.</p>
-   *
    * @see arlut.csd.ganymede.rmi.XMLSession
    */
 
   public ReturnVal xmlEnd()
   {
-    synchronized (parsing)
+    if (debug)
       {
-	if (parsing.isSet())
-	  {
-	    // we're not done yet, get a message report
-
-	    ReturnVal retVal = getReturnVal(null, true);
-
-	    if (retVal == null)
-	      {
-		// no message for this call, but we still need a carrier for the
-		// doNormalProcessing message
-		
-		retVal = new ReturnVal(true);
-	      }
-	    
-	    retVal.doNormalProcessing = true; // tell the client to loop back to check us
-	    
-	    return retVal;
-	  }
-	else
-	  {
-	    return getReturnVal(null, success);
-	  }
+	System.err.println("xmlEnd() called");
       }
+
+    parsing.waitForCleared();
+
+    return getReturnVal(null, success);
   }
 
   /**
@@ -608,6 +583,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    catch (InterruptedException ex2)
 	      {
 		// ?
+	      }
+
+	    // Now that we've waited, collect any additional
+	    // accumulation and we'll return
+
+	    synchronized (errBuffer)
+	      {
+		progress = progress + errBuffer.toString();
+		errBuffer.setLength(0);
 	      }
 	  }
 	else
@@ -664,6 +648,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    System.err.println("GanymedeXMLSession closing reader");
 	  }
+
+	System.err.println("Abort called, closing reader.");
 
 	reader.close();		// this will cause the XML Reader to halt
       }
@@ -761,6 +747,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void cleanup()
   {
+    if (debug)
+      {
+	System.err.println("Entering cleanup");
+      }
+
     if (cleanedup.set(true))
       {
 	return;
@@ -898,27 +889,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (nextElement.matches("ganydata"))
 	  {
-	    boolean dataOk = false;
-
-	    try
+	    if (!processData())
 	      {
-		dataOk = processData();
-	      }
-	    finally
-	      {
-		if (debug)
-		  {
-		    System.err.println("run exited processData(), cleanup(), dataOk = " + String.valueOf(dataOk));
-		  }
-		cleanup();
-	      }
+		// don't both processing rest of XML doc.. just jump
+		// down to finally clause
 
-	    if (!dataOk)
-	      {
-		// don't both processing rest of XML
-		// doc.. just jump down to finally clause
-
-		return; 
+		return;
 	      }
 
 	    nextElement = getNextItem();
@@ -949,11 +925,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
 
 	parsing.set(false);
-
-	if (reader != null)
-	  {
-	    reader.close();
-	  }
 
 	cleanupSchemaEdit();
 	cleanup();
@@ -2106,7 +2077,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public boolean storeObject(xmlobject object)
   {
-    if (debug)
+    if (false)
       {
 	System.err.println("GanymedeXMLSession: storeObject(" + object + ")");
       }
@@ -2186,14 +2157,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// store a reference to a pre-existing object when the xml
 	// file meant to reference an object defined in it
 
-	if (debug)
+	if (false)
 	  {
 	    err.println("Calling findLabeledObject() on " + typeId + ":" + objId);
 	  }
 	
 	invid = session.findLabeledObject(objId, typeId);
 	
-	if (debug)
+	if (false)
 	  {
 	    err.println("Returned from findLabeledObject() on " + typeId + ":" + objId);
 	    err.println("findLabeledObject() returned " + invid);
