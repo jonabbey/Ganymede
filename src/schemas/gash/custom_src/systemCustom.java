@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -86,6 +86,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     DBEditObject newObject;
     DBObjectBase targetBase;
     DBObjectBaseField fieldDef;
+    InvidDBField container;
 
     /* -- */
 
@@ -97,6 +98,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    targetBase = Ganymede.db.getObjectBase(fieldDef.getTargetBase());
 	    newObject = targetBase.createNewObject(editset);
+
+	    // link it in
+
+	    container = (InvidDBField) newObject.getField(SchemaConstants.ContainerField);
+	    container.setValue(getInvid());
 	    
 	    return newObject.getInvid();
 	  }
