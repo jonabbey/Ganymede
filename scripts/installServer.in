@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.2 $
-# $Date: 1999/01/21 16:56:12 $
+# $Revision: 1.3 $
+# $Date: 1999/01/29 05:07:58 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -33,6 +33,9 @@ use English;
 	  "RETURNADDR", "SUPERNAME", "SUPERPASS",
 	  "MONITORNAME", "MONITORPASS", "SCHEMA");
 
+# Notice that we are leaving HELPWEB out of @steps, since we
+# really don't have that set up yet.
+
 @gashsteps = ("DNSDOMAIN", "MAILSUFFIX", "HOMEDIRPREFIX");
 @nisonlysteps = ("HOMEDIRPREFIX");
 
@@ -49,7 +52,7 @@ use English;
          "MONITORPASS" => "monitor",
 	 "SCHEMA" => "",
 	 "DNSDOMAIN" => "",
-         "HELPWEB" => "http://www.arlut.utexas.edu/~mulvaney/ganymede/");
+         "HELPWEB" => "http://www.arlut.utexas.edu/gash2/help/");
 
 %descrip = ("JVM" => "Where are the JDK 1.1 binaries installed?",
             "SERVERINSTALL" => "Where should the server tree be installed?",
