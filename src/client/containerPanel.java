@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.16 $ %D%
+    Version: $Revision: 1.17 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ import arlut.csd.JDataComponent.*;
 
 public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // -- 
   
@@ -75,6 +75,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   boolean
     editable;
+
+  JProgressBar
+    progressBar;
   
   /* -- */
 
@@ -88,8 +91,24 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * @param window   windowPanel containing this containerPanel
    *
    */
-
   public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame)
+
+  {
+    this(object, editable, parent, window, frame, null);
+  }
+  /**
+   *
+   * Main constructor for containerPanel
+   *
+   * @param object   The object to be displayed
+   * @param editable If true, the fields presented will be enabled for editing
+   * @param parent   Parent gclient of this container
+   * @param window   windowPanel containing this containerPanel
+   * @param progressBar JProgressBar to be updated, can be null
+   *
+   */
+
+  public containerPanel(db_object object, boolean editable, gclient parent, windowPanel window, framePanel frame, JProgressBar progressBar)
   {
 
     /* -- */
@@ -106,6 +125,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     this.object = object;
     this.editable = editable;
     this.frame = frame;
+    this.progressBar = progressBar;
 
     objectHash = new Hashtable();
     rowHash = new Hashtable();
@@ -127,7 +147,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	throw new RuntimeException("Could not get the fields: " + rx);
       }
-      
+
+    if (progressBar != null)
+      {
+	progressBar.setMinimum(0);
+	progressBar.setMaximum(fields.length);
+      }
+
     if (debug)
       {
 	System.out.println("Entering big loop");
@@ -137,6 +163,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	for (int i = 0; i < fields.length ; i++)
 	  {
+	    if (progressBar != null)
+	      {
+		progressBar.setValue(i);
+	      }
+
 	    try
 	      {
 		short ID = fields[i].getID();
@@ -162,7 +193,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
       }
-      
+    
+    if (progressBar != null)
+      {
+	progressBar.setValue(0);
+      }
+
     if (debug)
       {
 	System.out.println("Done with loop");
