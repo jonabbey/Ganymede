@@ -7,8 +7,8 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/11/09 03:47:20 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/05/10 22:30:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -334,8 +334,6 @@ public class XMLElement extends XMLItem {
 	    buffer.append("=\"");
 	    buffer.append(attrVals[i]);
 	    buffer.append("\"");
-
-	    i++;
 	  }
 
 	if (empty)
