@@ -678,14 +678,14 @@ public final class xmlclient implements ClientListener {
 	  {
 	    String message = retVal.getDialogText();
 
-	    if (message != null)
+	    if (message != null && message.length()>0)
 	      {
-		System.err.println(message);
+		System.err.print(message);
 	      }
 
 	    try
 	      {
-		Thread.sleep(2500);	// sleep for 2.5 seconds before calling back
+		Thread.sleep(1500);	// sleep for 2.5 seconds before calling back
 	      }
 	    catch (InterruptedException ex)
 	      {

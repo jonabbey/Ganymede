@@ -504,15 +504,30 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public ReturnVal xmlEnd()
   {
-    if (!parsing.isSet())
+    synchronized (parsing)
       {
-	ReturnVal retVal = getReturnVal(null, success);
-	retVal.doNormalProcessing = true; // tell the client to loop back to check us
-	return retVal;
-      }
-    else
-      {
-	return getReturnVal(null, success);
+	if (parsing.isSet())
+	  {
+	    // we're not done yet, get a message report
+
+	    ReturnVal retVal = getReturnVal(null, true);
+
+	    if (retVal == null)
+	      {
+		// no message for this call, but we still need a carrier for the
+		// doNormalProcessing message
+		
+		retVal = new ReturnVal(true);
+	      }
+	    
+	    retVal.doNormalProcessing = true; // tell the client to loop back to check us
+	    
+	    return retVal;
+	  }
+	else
+	  {
+	    return getReturnVal(null, success);
+	  }
       }
   }
 
@@ -1885,7 +1900,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	System.err.println("\n\n");
 
 	err.println("\nDone scanning XML for <ganydata>, integrating transaction for " + totalCount + " <object> elements.\n");
-	err.flush();
 
 	committedTransaction = integrateXMLTransaction();
 
