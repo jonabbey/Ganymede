@@ -54,11 +54,24 @@ text field was enabled all the time, confusing users manipulating
 the component.  Now the 'Add' button will only be enabled when the
 user has entered something into the text button.
 
-5. [SCHEMA] Lots of refinements to gasharl schema
+5. [SERVER/CLIENT] Modified default removal logic
 
-The server no longer allows users to be deleted by non-supergash
-admins.  The gasharl schema is designed so that users are inactivated
-instead, with removal done automatically at a later point.
+The server now by default refuses to allow objects to be removed
+that have an inactivation protocol defined.  supergash can go ahead
+and remove objects directly, and custom DBEditObject subclasses can
+still redefine this behavior by overriding canRemove().
+
+In conjunction with this change, the client has been modified so
+that it will always show 'delete' as an option when right-clicking
+on an object, even though the object may have an inactivation
+protocol defined.  This makes things simpler, since it would be
+difficult to handle the delete toolbar icon properly if I just
+wanted the client to prevent the user from ever trying to delete
+an object that can be inactivated.  And besides, the user might
+be operating with supergash privileges.
+
+6. [SCHEMA] Lots of refinements to gasharl schema
+
 
 -------------------- Changes from 0.96 to 0.97 -------------------
 
