@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 1999/10/09 01:01:31 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 1999/10/26 15:26:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ import arlut.csd.Util.zipIt;
  * thread-lock, but it is still important to do a notifyAll() to avoid
  * unnecessary delays.</P>
  *
- * @version $Revision: 1.93 $ %D%
+ * @version $Revision: 1.94 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -441,6 +441,7 @@ public class DBStore {
       {
 	System.err.println("DBStore initialization error: couldn't properly process " + filename);
 	System.err.println("IOException: " + ex);
+	System.err.println("Stack Trace: " + Ganymede.stackTrace(ex));
 	throw new RuntimeException("DBStore initialization error (" + filename + ")");
       }
     finally

@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 1999/07/23 04:54:00 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 1999/10/26 15:26:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -374,17 +374,19 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 	  {
 	    System.err.print(filenames[i]);
 	    System.err.print(" ");
-	    
-	    filenameVect.addElement(basePath + filenames[i]);
+
+	    File testFile = new File(basePath + filenames[i]);
+
+	    if (!testFile.isDirectory())
+	      {
+		filenameVect.addElement(basePath + filenames[i]);
+	      }
 	  }
 	
-	// System.err.println();
-
-	// it's okay that filenameVect includes the old directory as a
-	// file, because zipIt.createZipFile knows enough not to zip up
-	// directories.
-	
-	zipIt.createZipFile(zipFileName, filenameVect);
+	if (filenameVect.size() > 0)
+	  {
+	    zipIt.createZipFile(zipFileName, filenameVect);
+	  }
       }
   }
 
