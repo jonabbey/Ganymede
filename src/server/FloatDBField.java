@@ -7,8 +7,8 @@
 
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/03/24 21:27:24 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/03/25 05:36:44 $
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -168,18 +168,16 @@ public class FloatDBField extends DBField implements float_field {
    * out this field to disk.  It is mated with receiveXML().</p>
    */
 
-  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    /* -- */
-
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.indent();
 
     xmlOut.startElement(this.getXMLName());
     emitDoubleXML(xmlOut, value());
     xmlOut.endElement(this.getXMLName());
   }
 
-  public void emitDoubleXML(XMLWriter xmlOut, double value) throws IOException
+  public void emitDoubleXML(XMLDumpContext xmlOut, double value) throws IOException
   {
     xmlOut.startElement("float");
     xmlOut.attribute("val", java.lang.Double.toString(value));

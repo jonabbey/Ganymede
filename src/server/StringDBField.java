@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2000/03/24 21:27:28 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2000/03/25 05:36:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -248,9 +248,9 @@ public class StringDBField extends DBField implements string_field {
    * out this field to disk.  It is mated with receiveXML().</p>
    */
 
-  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.indent();
 
     xmlOut.startElement(this.getXMLName());
 
@@ -264,17 +264,19 @@ public class StringDBField extends DBField implements string_field {
 
 	for (int i = 0; i < values.size(); i++)
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel+1);
+	    xmlOut.bumpIndentLevel();
+	    xmlOut.indent();
+	    xmlOut.dumpIndentLevel();
 	    emitStringXML(xmlOut, (String) values.elementAt(i));
 	  }
 
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
       }
 
     xmlOut.endElement(this.getXMLName());
   }
 
-  public void emitStringXML(XMLWriter xmlOut, String value) throws IOException
+  public void emitStringXML(XMLDumpContext xmlOut, String value) throws IOException
   {
     xmlOut.startElement("string");
     xmlOut.attribute("val", value);

@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.68 $
-   Last Mod Date: $Date: 2000/03/22 06:24:09 $
+   Version: $Revision: 1.69 $
+   Last Mod Date: $Date: 2000/03/25 05:36:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -511,24 +511,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   {
     loading = true;
 
-    field_name = in.readUTF();
+    // we use setName to filter out any fieldname chars that wouldn't
+    // be acceptable as an XML entity name character.
+
+    setName(in.readUTF());	
     field_code = in.readShort();
     field_type = in.readShort();
-    classname = in.readUTF();
-
-    if (classname != null && !classname.equals(""))
-      {
-	try 
-	  {
-	    classdef = Class.forName(classname);
-	  }
-	catch (ClassNotFoundException ex)
-	  {	    
-	    System.err.println("DBObjectBaseField.receive(): class definition could not be found: " + ex);
-	    classdef = null;
-	  }
-      }
-
+    setClassName(in.readUTF());
     comment = in.readUTF();
 
     // we stopped keeping the editable and removable flags in the
@@ -749,22 +738,22 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
    * out this field definition to disk.  It is mated with receive().</p>
    */
 
-  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     boolean nonEmpty = false;
 
     /* -- */
 
-    XMLUtils.indent(xmlOut, indentLevel);
-    indentLevel++;
+    xmlOut.indent();
+    xmlOut.bumpIndentLevel();
 
     xmlOut.startElement("fielddef");
-    xmlOut.attribute("name", field_name);
+    xmlOut.attribute("name", XMLUtils.XMLEncode(field_name));
     xmlOut.attribute("id", java.lang.Short.toString(field_code));
 
     if (classname != null && !classname.equals(""))
       {
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("classname");
 	xmlOut.attribute("name", classname);
 	xmlOut.endElement("classname");
@@ -772,7 +761,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     if (comment != null && !comment.equals(""))
       {
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("comment");
 	xmlOut.write(comment);
 	xmlOut.endElement("comment");
@@ -780,12 +769,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
     if (!visibility)
       {
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("invisible");
 	xmlOut.endElement("invisible");
       }
 
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.indent();
     xmlOut.startElement("typedef");
     
     switch (field_type)
@@ -821,12 +810,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	throw new RuntimeException("emitXML: unrecognized field type:" + field_type);
       }
 
-    indentLevel++;
+    xmlOut.bumpIndentLevel();
 
     if (array)
       {
 	nonEmpty = true;
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("vector");
 	xmlOut.attribute("maxSize", java.lang.Short.toString(limit));
 	xmlOut.endElement("vector");
@@ -837,7 +826,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	if (labeled)
 	  {
 	    nonEmpty = true;
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("labeled");
 	    xmlOut.attribute("true", trueLabel);
 	    xmlOut.attribute("false", falseLabel);
@@ -848,19 +837,19 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	nonEmpty = true;
 
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("minlength");
 	xmlOut.attribute("val", java.lang.Short.toString(minLength));
 	xmlOut.endElement("minlength");
 
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("maxlength");
 	xmlOut.attribute("val", java.lang.Short.toString(maxLength));
 	xmlOut.endElement("maxlength");
 
 	if (okChars != null && !okChars.equals(""))
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("okchars");
 	    xmlOut.attribute("val", okChars);
 	    xmlOut.endElement("okchars");
@@ -868,7 +857,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (badChars != null && !badChars.equals(""))
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("badchars");
 	    xmlOut.attribute("val", badChars);
 	    xmlOut.endElement("badchars");
@@ -876,7 +865,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	
 	if (namespace != null)
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("namespace");
 	    xmlOut.attribute("val", namespace.getName());
 	    xmlOut.endElement("namespace");
@@ -884,7 +873,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (regexpPat != null && !regexpPat.equals(""))
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("regexp");
 	    xmlOut.attribute("val", regexpPat);
 	    xmlOut.endElement("regexp");
@@ -892,7 +881,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (multiLine)
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("multiline");
 	    xmlOut.endElement("multiline");
 	  }
@@ -903,7 +892,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    nonEmpty = true;
 
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("namespace");
 	    xmlOut.attribute("val", namespace.getName());
 	    xmlOut.endElement("namespace");
@@ -915,7 +904,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	  {
 	    nonEmpty = true;
 
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("namespace");
 	    xmlOut.attribute("val", namespace.getName());
 	    xmlOut.endElement("namespace");
@@ -928,7 +917,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    DBObjectBase targetObjectBase = null;
 	    nonEmpty = true;
 
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("targetobject");
 
 	    if (allowedTarget == -2)
@@ -947,7 +936,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 		if (targetObjectName != null)
 		  {
-		    xmlOut.attribute("name", targetObjectName);
+		    xmlOut.attribute("name", XMLUtils.XMLEncode(targetObjectName));
 		  }
 		else
 		  {
@@ -961,7 +950,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	      {
 		boolean wroteLabel = false;
 
-		XMLUtils.indent(xmlOut, indentLevel);
+		xmlOut.indent();
 
 		xmlOut.startElement("targetfield");
 
@@ -971,7 +960,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 		    if (targetFieldDef != null)
 		      {
-			xmlOut.attribute("name", targetFieldDef.getName());
+			xmlOut.attribute("name", XMLUtils.XMLEncode(targetFieldDef.getName()));
 			wroteLabel = true;
 		      }
 		  }
@@ -986,7 +975,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	    if (editInPlace)
 	      {
-		XMLUtils.indent(xmlOut, indentLevel);
+		xmlOut.indent();
 		xmlOut.startElement("embedded");
 		xmlOut.endElement("embedded");
 	      }
@@ -996,19 +985,19 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       {
 	nonEmpty = true;
 
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("minlength");
 	xmlOut.attribute("val", java.lang.Short.toString(minLength));
 	xmlOut.endElement("minlength");
 
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("maxlength");
 	xmlOut.attribute("val", java.lang.Short.toString(maxLength));
 	xmlOut.endElement("maxlength");
 
 	if (okChars != null && !okChars.equals(""))
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("okchars");
 	    xmlOut.attribute("val", okChars);
 	    xmlOut.endElement("okchars");
@@ -1016,7 +1005,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (badChars != null && !badChars.equals(""))
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("badchars");
 	    xmlOut.attribute("val", badChars);
 	    xmlOut.endElement("badchars");
@@ -1024,37 +1013,37 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
 	if (crypted)
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("crypted");
 	    xmlOut.endElement("crypted");
 	  }
 
 	if (md5crypted)
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("md5crypted");
 	    xmlOut.endElement("md5crypted");
 	  }
 
 	if (storePlaintext)
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.indent();
 	    xmlOut.startElement("plaintext");
 	    xmlOut.endElement("plaintext");
 	  }
       }
-
-    indentLevel--;
+    
+    xmlOut.dumpIndentLevel();
 
     if (nonEmpty)
       {
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
       }
 
     xmlOut.endElement("typedef");
 
-    indentLevel--;
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.dumpIndentLevel();
+    xmlOut.indent();
     xmlOut.endElement("fielddef");
   }
 
@@ -1462,15 +1451,23 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   public synchronized ReturnVal setName(String name)
   {
-    if (editor == null)
+    if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalArgumentException("not in an schema editing context");
       }
     
     if (name == null || name.equals(""))
       {
 	throw new IllegalArgumentException("can't have a null or empty name");
       }
+
+    // make sure we strip any chars that would cause this object name
+    // to not be a valid XML entity name character.  We make an
+    // exception for spaces, which we will replace with underscores as
+    // an XML char.
+
+    name = StringUtils.strip(name,
+			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-").trim();
 
     if (name.equals(field_name))
       {
@@ -1516,9 +1513,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   {
     Class newclassdef;
 
-    if (editor == null)
+    /* -- */
+
+    if (!base.store.loading && editor == null)
       {
-	throw new IllegalArgumentException("not editing");
+	throw new IllegalArgumentException("not in an schema editing context");
       }
 
     if (!name.equals(classname))

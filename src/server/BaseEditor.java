@@ -5,8 +5,8 @@
    Base Editor component for GASHSchema.
    
    Created: 14 August 1997
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/02/29 09:35:04 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/03/25 05:36:37 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -136,7 +136,14 @@ class BaseEditor extends JPanel implements JsetValueCallback, ItemListener {
     typeN.setCallback(this);
     addRow(editPanel, typeN, "ObjectType ID:", 0);
 
-    nameS = new JstringField(40, 100, true, false, null, null);
+    // only allow characters that can be used as an XML entity name.
+    // We allow the space char (which is not allowed as an XML entity
+    // name), but disallow the underscore char, which we use in place
+    // of the space when we write out the field name as an XML entity.
+
+    nameS = new JstringField(40, 100, true, false,
+			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-", 
+			     null);
     nameS.setCallback(this);
     addRow(editPanel, nameS, "Object Type:", 1);
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 2000/03/24 21:27:26 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 2000/03/25 05:36:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -168,18 +168,18 @@ public class NumericDBField extends DBField implements num_field {
    * out this field to disk.  It is mated with receiveXML().</p>
    */
 
-  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     /* -- */
 
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.indent();
 
     xmlOut.startElement(this.getXMLName());
     emitIntXML(xmlOut, value());
     xmlOut.endElement(this.getXMLName());
   }
 
-  public void emitIntXML(XMLWriter xmlOut, int value) throws IOException
+  public void emitIntXML(XMLDumpContext xmlOut, int value) throws IOException
   {
     xmlOut.startElement("int");
     xmlOut.attribute("val", java.lang.Integer.toString(value));

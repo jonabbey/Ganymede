@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.85 $
-   Last Mod Date: $Date: 2000/03/24 21:27:22 $
+   Version: $Revision: 1.86 $
+   Last Mod Date: $Date: 2000/03/25 05:36:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -312,7 +312,7 @@ public abstract class DBField implements Remote, db_field {
    * out this field to disk.  It is mated with receiveXML().</p>
    */
 
-  abstract void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException;
+  abstract void emitXML(XMLDumpContext dump) throws IOException;
 
   /**
    * <P>Returns true if obj is a field with the same value(s) as

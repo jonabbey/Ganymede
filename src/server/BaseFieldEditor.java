@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2000/02/29 09:35:05 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2000/03/25 05:36:38 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -184,7 +184,14 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
     idN = new JnumberField(20,  false, false, 0, 0);
     addRow(editPanel, idN, "Field ID:", rowcount++);
     
-    nameS = new JstringField(20, 100,  true, false, null, null);
+    // only allow characters that can be used as an XML entity name.
+    // We allow the space char (which is not allowed as an XML entity
+    // name), but disallow the underscore char, which we use in place
+    // of the space when we write out the base name as an XML entity.
+
+    nameS = new JstringField(20, 100,  true, false,
+			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-", 
+			     null);
     nameS.setCallback(this);
     addRow(editPanel, nameS, "Field Name:", rowcount++);
 

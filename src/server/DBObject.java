@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.92 $
-   Last Mod Date: $Date: 2000/03/24 21:27:22 $
+   Version: $Revision: 1.93 $
+   Last Mod Date: $Date: 2000/03/25 05:36:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.92 $ $Date: 2000/03/24 21:27:22 $
+ * @version $Revision: 1.93 $ $Date: 2000/03/25 05:36:41 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1111,17 +1111,17 @@ public class DBObject implements db_object, FieldType, Remote {
    * mated with receiveXML().</p> 
    */
 
-  synchronized public void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  synchronized public void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     boolean useObjLabel = false;
     String label;
 
     /* -- */
 
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.indent();
     
     xmlOut.startElement("object");
-    xmlOut.attribute("type", getTypeName());
+    xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
 
     DBField labelField = (DBField) getLabelField();
 
@@ -1134,9 +1134,10 @@ public class DBObject implements db_object, FieldType, Remote {
 	label = java.lang.Integer.toString(getID());
       }
 
-    xmlOut.attribute("localid", label);
+    xmlOut.attribute("local", label);
+    xmlOut.attribute("num", java.lang.Integer.toString(getID()));
 
-    indentLevel++;
+    xmlOut.bumpIndentLevel();
 
     Vector fieldVec = getFieldVector(false);
 
@@ -1144,11 +1145,22 @@ public class DBObject implements db_object, FieldType, Remote {
       {
 	DBField field = (DBField) fieldVec.elementAt(i);
 
-	field.emitXML(xmlOut, indentLevel);
+	if (!xmlOut.doDumpHistoryInfo() &&
+	    field.getID() == SchemaConstants.CreationDateField ||
+	    field.getID() == SchemaConstants.CreatorField ||
+	    field.getID() == SchemaConstants.ModificationDateField ||
+	    field.getID() == SchemaConstants.ModifierField)
+	  {
+	    // skip these
+
+	    continue;
+	  }
+
+	field.emitXML(xmlOut);
       }
 
-    indentLevel--;
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.dumpIndentLevel();
+    xmlOut.indent();
     xmlOut.endElement("object");
   }
 

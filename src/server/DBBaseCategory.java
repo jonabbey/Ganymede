@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/03/15 03:32:23 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/03/25 05:36:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -597,40 +597,38 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
    * XML form.</p>
    */
 
-  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     boolean lastCategory = false;
 
     /* -- */
 
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.indent();
 
     xmlOut.startElement("category");
     xmlOut.attribute("name", getName());
-    XMLUtils.indent(xmlOut, 0);	// skip line after category start
+    xmlOut.skipLine();		// skip line after category start
 
-    indentLevel++;
+    xmlOut.bumpIndentLevel();
 
     for (int i = 0; i < contents.size(); i++)
       {
 	if (contents.elementAt(i) instanceof DBBaseCategory)
 	  {
-	    ((DBBaseCategory) contents.elementAt(i)).emitXML(xmlOut, indentLevel);
+	    ((DBBaseCategory) contents.elementAt(i)).emitXML(xmlOut);
 
-	    XMLUtils.indent(xmlOut, 0);	// skip line
+	    xmlOut.skipLine();
 	    lastCategory = true;
 	  }
 	else if (contents.elementAt(i) instanceof DBObjectBase)
 	  {
-	    ((DBObjectBase) contents.elementAt(i)).emitXML(xmlOut, indentLevel);
+	    ((DBObjectBase) contents.elementAt(i)).emitXML(xmlOut);
 	    lastCategory = false;
 	  }
       }
 
-    indentLevel--;
-
-    XMLUtils.indent(xmlOut, indentLevel);
-
+    xmlOut.dumpIndentLevel();
+    xmlOut.indent();
     xmlOut.endElement("category");
   }
 

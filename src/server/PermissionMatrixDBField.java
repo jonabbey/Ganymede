@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.39 $
-   Last Mod Date: $Date: 2000/03/24 21:27:27 $
+   Version: $Revision: 1.40 $
+   Last Mod Date: $Date: 2000/03/25 05:36:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -779,7 +779,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * out this field to disk.  It is mated with receiveXML().</p>
    */
 
-  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     Enumeration enum, enum2;
     String key;
@@ -816,16 +816,16 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	innerTable.put(decodeFieldName(key), entry);
       }
 
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.indent();
 
     xmlOut.startElement(this.getXMLName());
 
-    indentLevel++;
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.bumpIndentLevel();
+    xmlOut.indent();
 
     xmlOut.startElement("permissions");
 
-    indentLevel++;
+    xmlOut.bumpIndentLevel();
 
     enum = baseHash.keys();
 
@@ -836,9 +836,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	innerTable = (Hashtable) baseHash.get(key);
 	entry = (PermEntry) innerTable.get("[base]");
 
-	XMLUtils.indent(xmlOut, indentLevel);
-	xmlOut.startElement(key);
-	indentLevel++;
+	xmlOut.indent();
+	xmlOut.bumpIndentLevel();
+	xmlOut.startElement(arlut.csd.Util.XMLUtils.XMLEncode(key));
 
 	if (entry != null)
 	  {
@@ -858,23 +858,23 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 	    PermEntry fieldEntry = (PermEntry) innerTable.get(fieldKey);
 
-	    XMLUtils.indent(xmlOut, indentLevel);
-	    xmlOut.startElement(fieldKey);
+	    xmlOut.indent();
+	    xmlOut.startElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
 	    xmlOut.attribute("perm", fieldEntry.getXMLCode());
-	    xmlOut.endElement(fieldKey);
+	    xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
 	  }
 
-	indentLevel--;
-	XMLUtils.indent(xmlOut, indentLevel);
-	xmlOut.endElement(key);
+	xmlOut.dumpIndentLevel();
+	xmlOut.indent();
+	xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(key));
       }
 
-    indentLevel--;
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.dumpIndentLevel();
+    xmlOut.indent();
     xmlOut.endElement("permissions");
 
-    indentLevel--;
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.dumpIndentLevel();
+    xmlOut.indent();
     xmlOut.endElement(this.getXMLName());
   }
 

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.113 $
-   Last Mod Date: $Date: 2000/03/24 21:27:23 $
+   Version: $Revision: 1.114 $
+   Last Mod Date: $Date: 2000/03/25 05:36:43 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.113 $ %D%
+ * @version $Revision: 1.114 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -916,7 +916,7 @@ public class DBStore {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
     DataOutputStream out = null;
-    UTF8XMLWriter xmlOut = null;
+    XMLDumpContext xmlOut = null;
     
     Enumeration basesEnum;
     DBDumpLock lock = null;
@@ -947,8 +947,10 @@ public class DBStore {
 	outStream = new FileOutputStream(filename);
 	bufStream = new BufferedOutputStream(outStream);
 
-	xmlOut = new UTF8XMLWriter(bufStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS);
-
+	xmlOut = new XMLDumpContext(new UTF8XMLWriter(bufStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+				   false, // don't dump plaintext passwords needlessly
+				   false, // don't include creator/modifier data
+				   true);
 	// start writing
 
 	xmlOut.startElement("ganymede");
@@ -956,36 +958,53 @@ public class DBStore {
 	xmlOut.attribute("major", Byte.toString(major_xml_version));
 	xmlOut.attribute("minor", Byte.toString(minor_xml_version));
 
-	XMLUtils.indent(xmlOut, 1);
+	xmlOut.bumpIndentLevel();
+	xmlOut.indent();
+
 	xmlOut.startElement("ganyschema");
 
-	XMLUtils.indent(xmlOut, 2);
+	xmlOut.bumpIndentLevel();
+	xmlOut.indent();
+
 	xmlOut.startElement("namespaces");
 
 	for (int i = 0; i < nameSpaces.size(); i++)
 	  {
 	    ns = (DBNameSpace) nameSpaces.elementAt(i);
-	    ns.emitXML(xmlOut, 3);
+	    ns.emitXML(xmlOut);
 	  }
 
-	XMLUtils.indent(xmlOut, 2);
+	xmlOut.indent();
+
 	xmlOut.endElement("namespaces");
 
 	// write out our category tree
 
-	XMLUtils.indent(xmlOut, 0); // newline
-	XMLUtils.indent(xmlOut, 2);
+	xmlOut.skipLine();
+
+	xmlOut.bumpIndentLevel();
+	xmlOut.indent();
 	xmlOut.startElement("object_type_definitions");
-	rootCategory.emitXML(xmlOut, 3);
-	XMLUtils.indent(xmlOut, 2);
+
+	xmlOut.bumpIndentLevel();
+	rootCategory.emitXML(xmlOut);
+
+	xmlOut.dumpIndentLevel();
+	xmlOut.indent();
+
 	xmlOut.endElement("object_type_definitions");
-	XMLUtils.indent(xmlOut, 1);
+
+	xmlOut.dumpIndentLevel();
+	xmlOut.indent();
+
 	xmlOut.endElement("ganyschema");
 
 	if (dumpDataObjects)
 	  {
-	    XMLUtils.indent(xmlOut, 1);
+	    xmlOut.indent();
 	    xmlOut.startElement("ganydata");
+	    
+	    xmlOut.bumpIndentLevel();
 
 	    Vector bases = getBases();
 	    
@@ -1004,15 +1023,17 @@ public class DBStore {
 		  {
 		    DBObject x = (DBObject) enum.nextElement();
 
-		    x.emitXML(xmlOut, 2);
+		    x.emitXML(xmlOut);
 		  }
 	      }
 
-	    XMLUtils.indent(xmlOut, 1);
+	    xmlOut.dumpIndentLevel();
+	    xmlOut.indent();
 	    xmlOut.endElement("ganydata");
 	  }
-
-	XMLUtils.indent(xmlOut, 0);
+	
+	xmlOut.dumpIndentLevel();
+	xmlOut.indent();
 	xmlOut.endElement("ganymede");
 	xmlOut.write("\n");
 	xmlOut.close();

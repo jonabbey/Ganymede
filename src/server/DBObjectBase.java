@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 2000/03/15 03:32:24 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 2000/03/25 05:36:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -743,7 +743,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	System.err.println("DBObjectBase.receive(): enter");
       }
 
-    object_name = in.readUTF();
+    setName(in.readUTF());	// we use setName to filter out any bad chars in transition to 1.0
 
     if (debug)
       {
@@ -994,18 +994,18 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * <P>This method dumps schema information to an XML stream.</P>
    */
 
-  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    XMLUtils.indent(xmlOut, indentLevel);
-    indentLevel++;
+    xmlOut.indent();
+    xmlOut.bumpIndentLevel();
 
     xmlOut.startElement("objectdef");
-    xmlOut.attribute("name", object_name);
+    xmlOut.attribute("name", XMLUtils.XMLEncode(object_name));
     xmlOut.attribute("id", java.lang.Short.toString(type_code));
 
     if (classname != null && !classname.equals(""))
       {
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("classdef");
 	xmlOut.attribute("name", classname);
 	xmlOut.endElement("classdef");
@@ -1013,9 +1013,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (embedded)
       {
-	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.indent();
 	xmlOut.startElement("embedded");
 	xmlOut.endElement("embedded");
+      }
+
+    if (label_id != -1)
+      {
+	xmlOut.indent();
+	xmlOut.startElement("label");
+	xmlOut.attribute("fieldid", java.lang.Integer.toString(label_id));
+	xmlOut.endElement("label");
       }
 
     synchronized (customFields)
@@ -1024,12 +1032,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  {
 	    DBObjectBaseField fieldDef = (DBObjectBaseField) customFields.elementAt(i);
 
-	    fieldDef.emitXML(xmlOut, indentLevel);
+	    fieldDef.emitXML(xmlOut);
 	  }
       }
 
-    indentLevel--;
-    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.dumpIndentLevel();
+    xmlOut.indent();
     xmlOut.endElement("objectdef");
   }
 
@@ -1542,9 +1550,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	throw new IllegalArgumentException("not in an schema editing context");
       }
 
-    if (isEmbedded() && !newName.startsWith("Embedded: "))
+    // make sure we strip any chars that would cause this object name
+    // to not be a valid XML entity name character.  We make an
+    // exception for spaces, which we will replace with underscores as
+    // an XML char.
+
+    newName = StringUtils.strip(newName,
+				"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-").trim();
+
+    if (isEmbedded() && !newName.startsWith("Embedded "))
       {
-	myNewName = "Embedded: " + newName;
+	myNewName = "Embedded " + newName;
       }
     else
       {

@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2000/03/24 21:27:27 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2000/03/25 05:36:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -425,34 +425,31 @@ public class PasswordDBField extends DBField implements pass_field {
    * out this field to disk.  It is mated with receiveXML().</p>
    */
 
-  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  synchronized void emitXML(XMLDumpContext dump) throws IOException
   {
-    /* -- */
+    dump.indent();
 
-    XMLUtils.indent(xmlOut, indentLevel);
-
-    xmlOut.startElement(this.getXMLName());
-    xmlOut.startElement("password");
+    dump.startElement(this.getXMLName());
+    dump.startElement("password");
     
-    if (uncryptedPass != null && md5CryptPass == null && cryptedPass == null)
+    if (uncryptedPass != null && 
+	(dump.doDumpPlaintext() || (md5CryptPass == null && cryptedPass == null)))
       {
-	xmlOut.attribute("plaintext", uncryptedPass);
-      }
-    else
-      {
-	if (cryptedPass != null)
-	  {
-	    xmlOut.attribute("crypt", cryptedPass);
-	  }
-	
-	if (md5CryptPass != null)
-	  {
-	    xmlOut.attribute("md5crypt", cryptedPass);
-	  }
+	dump.attribute("plaintext", uncryptedPass);
       }
 
-    xmlOut.endElement("password");
-    xmlOut.endElement(this.getXMLName());
+    if (cryptedPass != null)
+      {
+	dump.attribute("crypt", cryptedPass);
+      }
+	
+    if (md5CryptPass != null)
+      {
+	dump.attribute("md5crypt", cryptedPass);
+      }
+
+    dump.endElement("password");
+    dump.endElement(this.getXMLName());
   }
 
   /**
