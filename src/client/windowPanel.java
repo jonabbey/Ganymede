@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.57 $
-   Last Mod Date: $Date: 1999/01/29 05:08:53 $
+   Version: $Revision: 1.58 $
+   Last Mod Date: $Date: 1999/02/12 20:41:10 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -128,7 +128,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     lineEmptyBorder = new CompoundBorder(blackLineB, emptyBorder15);
 
   JMenuItem
-    removeAllMI;
+    removeAllMI,
+    toggleToolBarMI;
 
   /* -- */
 
@@ -143,6 +144,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     this.gc = gc;
     debug = gc.debug;
     this.windowMenu = windowMenu;
+
+    // toggleToolBarMI was added to windowMenu in client
+    // but we need to name it here so we can reference 
+    // it in updateMenu. Note assumption that it is first item
+    // in original windowMenu.
+    this.toggleToolBarMI = windowMenu.getItem(0);
 
     if (debug)
       {
@@ -758,7 +765,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	// System.err.println(e + " - windowMenu.removeAll() found nothing to remove.");
       }
-  
+
+    windowMenu.add(toggleToolBarMI);  
     windowMenu.add(removeAllMI);
     windowMenu.addSeparator();
 
