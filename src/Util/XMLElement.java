@@ -7,15 +7,15 @@
 
    Created: 9 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2001/05/10 22:30:10 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2001/05/10 22:31:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -45,7 +45,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
