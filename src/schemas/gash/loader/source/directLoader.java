@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1257,6 +1257,8 @@ public class directLoader {
 
 	    // the setValue logic for the user object will have created
 	    // a default email target for us.. we don't want it.
+
+	    ReturnVal retVal;
 
 	    while (sf.size() != 0)
 	      {
