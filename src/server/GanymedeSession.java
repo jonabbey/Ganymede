@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.197 $
-   Last Mod Date: $Date: 2000/09/08 02:02:25 $
+   Version: $Revision: 1.198 $
+   Last Mod Date: $Date: 2000/09/12 22:10:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -127,7 +127,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.197 $ $Date: 2000/09/08 02:02:25 $
+ * @version $Revision: 1.198 $ $Date: 2000/09/12 22:10:40 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1156,8 +1156,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      }
 	    else
 	      {
-		// if we are forced off, and we're running under a GanymedeXMLSession,
-		// tell the GanymedeXMLSession to kick off
+		// if we are forced off, and we're running under a
+		// GanymedeXMLSession, tell the GanymedeXMLSession to
+		// kick off
+
+		// if we're not forced off, then presumably the
+		// GanymedeXMLSession triggered the logout.
 
 		if (xSession != null)
 		  {
