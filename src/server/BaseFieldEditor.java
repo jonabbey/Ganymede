@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.48 $
-   Last Mod Date: $Date: 2001/12/19 23:46:09 $
+   Version: $Revision: 1.49 $
+   Last Mod Date: $Date: 2001/12/19 23:51:49 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -1841,7 +1841,10 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	      }
 	    else
 	      {
-		System.out.println("not the label, ok to change");
+		if (debug)
+		  {
+		    System.out.println("not the label, ok to change");
+		  }
 	      }
 	  }
 
