@@ -5,7 +5,7 @@
    A wizard to manage user rename interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,26 +29,68 @@ import arlut.csd.JDialog.JDialogBuff;
 
 /**
  *
- * A wizard to manage user rename interactions for the userCustom object.
+ * A wizard to handle the wizard interactions required when a user is
+ * renamed.  All that this wizard actually does is pop up a couple of
+ * dialog boxes advising the user as to the implications of renaming
+ * a user account.
  *
  * @see arlut.csd.ganymede.ReturnVal
- * @see arlut.csd.ganymede.Ganymediator
+ * @see arlut.csd.ganymede.Ganymediator 
  */
 
 public class userRenameWizard extends GanymediatorWizard {
 
+  // static field constants.. these should cohere with the field
+  // definitions for the user object type in the Ganymede schema
+
+  /**
+   * The user-level session context that this wizard is acting in.  This
+   * object is used to handle necessary checkpoint/rollback activity by
+   * this wizard, as well as to handle any necessary label lookups.
+   */
+
   GanymedeSession session;
+
+  /**
+   * Keeps track of the state of the wizard.  Each time respond() is called,
+   * state is checked to see what results from the user are expected and
+   * what the appropriate dialogs or actions to perform in turn are.<br>
+   * 
+   * state is also used by the userCustom object to make sure that
+   * we have finished our interactions with the user when we tell the
+   * user object to go ahead and remove the group.  <br>
+   * 
+   * <pre>
+   * Values:
+   *         1 - Wizard has been initialized, initial explanatory dialog
+   *             has been generated.
+   * DONE (99) - Wizard has approved the proposed action, and is signalling
+   *             the user object code that it is okay to proceed with the
+   *             action without further consulting this wizard.
+   * </pre>
+   */
+
   int state;
-  DBEditObject object;
+
+  /**
+   * The actual user object that this wizard is acting on
+   */
+
+  userCustom userObject;
+
+  /**
+   * The username field in the user object that we may change
+   */
+
   DBField field;
-  Object param;
-  ReturnVal retVal;
 
-  // reactivation params
+  /**
+   * The proposed new name for the user
+   */
 
-  String password;
-  String shell;
-  String forward;
+  String newname;
+
+  /* -- */
 
   /**
    *
@@ -56,17 +98,29 @@ public class userRenameWizard extends GanymediatorWizard {
    *
    */
 
+  /**
+   *
+   * This constructor registers the wizard as an active wizard
+   * on the provided session.
+   *
+   * @param session The GanymedeSession object that this wizard will
+   * use to interact with the Ganymede data store.
+   * @param userObject The user object that this wizard will work with.
+   * @param newname The proposed new name for the user.
+   *
+   */
+
   public userRenameWizard(GanymedeSession session, 
-         		  DBEditObject object, 
+         		  userCustom userObject, 
 		          DBField field,
-		          Object param) throws RemoteException
+		          String newname) throws RemoteException
   {
     super(session);		// register ourselves
 
     this.session = session;
-    this.object = object;
+    this.userObject = userObject;
     this.field = field;
-    this.param = param;
+    this.newname = newname;
   }
 
   /**
@@ -87,6 +141,7 @@ public class userRenameWizard extends GanymediatorWizard {
   public ReturnVal respond(Hashtable returnHash)
   {
     JDialogBuff dialog;
+    ReturnVal retVal = null;
 
     /* -- */
 
@@ -98,7 +153,17 @@ public class userRenameWizard extends GanymediatorWizard {
 
 	if (returnHash == null)
 	  {
-	    aborted = true;
+	    retVal = new ReturnVal(false);
+	    dialog = new JDialogBuff("User Rename Cancelled",
+				     "OK, good decision.",
+				     "Yeah, I guess",
+				     null,
+				     "ok.gif");
+	    retVal.setDialog(dialog);
+
+	    this.unregister(); // we're stopping here, so we'll unregister ourselves
+
+	    return retVal;
 	  }
 	else
 	  {
@@ -118,47 +183,42 @@ public class userRenameWizard extends GanymediatorWizard {
 	    aborted = (answer == null) || !answer.booleanValue();
 	  }
 
-	if (aborted)
+	System.err.println("userRenameWizard: Calling field.setValue()");
+
+	state = DONE;		// let the userCustom wizardHook know to go 
+				// ahead and pass this operation through now
+
+	// note that this setValue() operation will pass
+	// through userObject.wizardHook().  wizardHook will see that we are
+	// an active userRenameWizard, and are at state DONE, so it
+	// will go ahead and unregister us and let the name change
+	// go through to completion.
+
+	retVal = field.setValue(newname);
+	System.err.println("userRenameWizard: Returned from field.setValue()");
+
+	if (retVal == null)
 	  {
-	    retVal = new ReturnVal(false);
-	    dialog = new JDialogBuff("User Rename Canceled",
-				     "OK, good decision.",
-				     "Yeah, I guess",
+	    retVal = new ReturnVal(true); // should cause DBField.setValue() to proceed
+	    dialog = new JDialogBuff("User Rename Performed",
+				     "OK, buddy, your funeral.",
+				     "Thanks a lot",
 				     null,
 				     "ok.gif");
+	    
 	    retVal.setDialog(dialog);
-
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
 	  }
-	else
-	  {
-	    System.err.println("userRenameWizard: Calling field.setValue()");
+	
+	// just in case the setValue didn't go through
 
-	    state = DONE;	// let the wizardHook know to go ahead and pass
-				// this operation through now
+	this.unregister(); // we're stopping here, so we'll unregister ourselves
 
-	    retVal = field.setValue(param);
-	    System.err.println("userRenameWizard: Returned from field.setValue()");
-
-	    if (retVal == null)
-	      {
-		retVal = new ReturnVal(true); // should cause DBField.setValue() to proceed
-		dialog = new JDialogBuff("User Rename Performed",
-					 "OK, buddy, your funeral.",
-					 "Thanks a lot",
-					 null,
-					 "ok.gif");
-		    
-		retVal.setDialog(dialog);
-	      }
-
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
-	  }
-
-	System.err.println("Returning second userRenameWizard dialog");
-
+	System.err.println("Returning confirmation dialog");
+	
 	return retVal;
       }
+
+    // are we in an unexpected state?
 
     return Ganymede.createErrorDialog("userRenameWizard: Error",
 				      "No idea what you're talking about");	
@@ -174,6 +234,7 @@ public class userRenameWizard extends GanymediatorWizard {
   {
     JDialogBuff dialog;
     StringBuffer buffer = new StringBuffer();
+    ReturnVal retVal = null;
 
     /* -- */
 

@@ -2,10 +2,11 @@
 
    userHomeGroupDelWizard.java
 
-   A wizard to manage step-by-step interactions for the userCustom object.
+   A wizard to handle the wizard interactions required when a user attempts
+   to delete the group that they have selected for their default group.
    
    Created: 29 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -29,42 +30,108 @@ import arlut.csd.JDialog.JDialogBuff;
 
 /**
  *
+ * A wizard to handle the wizard interactions required when a user attempts
+ * to delete the group that they have selected for their default group.
+ *
+ * <br>When a user deletes a group from their list of groups (264)
+ * that they are a member of, the userCustom object will check to see
+ * if that group is the one they have selected as their default (home)
+ * group in field 265.  If so, this wizard gets invoked to make sure
+ * that the user understands the consequences of this act, and to solicit
+ * from the user their choice of other group to set as their default (home)
+ * group.<br>
+ *
  * @see arlut.csd.ganymede.ReturnVal
- * @see arlut.csd.ganymede.Ganymediator
+ * @see arlut.csd.ganymede.Ganymediator 
  */
 
 public class userHomeGroupDelWizard extends GanymediatorWizard {
+  
+  // static field constants.. these should cohere with the field
+  // definitions for the user object type in the Ganymede schema
+
+  static short GROUPLIST=264;
+  static short HOMEGROUP=265;
+  
+  // ---
+
+  /**
+   * The user-level session context that this wizard is acting in.  This
+   * object is used to handle necessary checkpoint/rollback activity by
+   * this wizard, as well as to handle any necessary label lookups.
+   */
 
   GanymedeSession session;
+
+  /**
+   * Keeps track of the state of the wizard.  Each time respond() is called,
+   * state is checked to see what results from the user are expected and
+   * what the appropriate dialogs or actions to perform in turn are.<br>
+   * 
+   * state is also used by the userCustom object to make sure that
+   * we have finished our interactions with the user when we tell the
+   * user object to go ahead and remove the group.  <br>
+   * 
+   * <pre>
+   * Values:
+   *         1 - Wizard has been initialized, initial explanatory dialog
+   *             has been generated.
+   *         2 - Wizard has generated the second dialog and is waiting
+   *             for the user to either choose a new home group, or
+   *             cancel out.
+   * DONE (99) - Wizard has approved the proposed action, and is signalling
+   *             the user object code that it is okay to proceed with the
+   *             action without further consulting this wizard.
+   * </pre>
+   */
+
   int state;
-  DBEditObject object;
-  DBField field;
-  Object param;
-  ReturnVal retVal;
 
-  // reactivation params
+  /**
+   * The actual user object that this wizard is acting on.
+   */
 
-  String password;
-  String shell;
-  String forward;
+  userCustom userObject;
+
+  /**
+   * The Integer index of the group entry that we are being asked to
+   * help delete.  We keep track of this so that when the user finishes
+   * the interaction sequence we know which element to go ahead and
+   * remove.
+   */
+
+  int index;
+
+  /* -- */
 
   /**
    *
-   * Constructor
+   * This constructor registers the wizard as an active wizard
+   * on the provided session.
+   *
+   * @param session The GanymedeSession object that this wizard will
+   * use to interact with the Ganymede data store.
+   * @param userObject The user object that this wizard will work with.
+   * @param param An Integer object specifying the index of the GROUPLIST
+   * field that the user wishes to delete.
    *
    */
 
   public userHomeGroupDelWizard(GanymedeSession session, 
-				DBEditObject object, 
-				DBField field,
+				userCustom userObject, 
 				Object param) throws RemoteException
   {
     super(session);		// register ourselves
 
     this.session = session;
-    this.object = object;
-    this.field = field;
-    this.param = param;
+    this.userObject = userObject;
+
+    if (!(param instanceof Integer))
+      {
+	throw new IllegalArgumentException("Error, expecting an Integer array index");
+      }
+
+    this.index = ((Integer) param).intValue();
   }
 
   /**
@@ -85,33 +152,33 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
   public ReturnVal respond(Hashtable returnHash)
   {
     JDialogBuff dialog;
+    ReturnVal retVal = null;
 
     /* -- */
+
+
+    if (returnHash == null)
+      {
+	retVal = new ReturnVal(false);
+	dialog = new JDialogBuff("Home Group Removal Canceled",
+				 "Home Group Removal Canceled",
+				 "OK",
+				 null,
+				 "ok.gif");
+	retVal.setDialog(dialog);
+	
+	this.unregister(); // we're stopping here, so we'll unregister ourselves
+	
+	return retVal;
+      }
 
     if (state == 1)
       {
 	System.err.println("userHomeGroupDelWizard.respond(): state == 1");
 
-	if (returnHash == null)
-	  {
-	    retVal = new ReturnVal(false);
-	    dialog = new JDialogBuff("Home Group Removal Canceled",
-				     "Home Group Removal Canceled",
-				     "OK",
-				     null,
-				     "ok.gif");
-	    retVal.setDialog(dialog);
-
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
-
-	    return retVal;
-	  }
-
-	System.err.println("userHomeGroupDelWizard.respond(): state == 1, creating dialog");
-
 	retVal = new ReturnVal(false);
 	dialog = new JDialogBuff("Home Group Change",
-				 "What group do you want to make the new default for this user?",
+				 "What group do you want to set as the new default for this user?",
 				 "OK",
 				 "Cancel",
 				 "question.gif");
@@ -119,13 +186,13 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
 	// get the list of choices, synthesize a list that contains every choice but
 	// the one being deleted
 
-	((userCustom) object).updateGroupChoiceList();
+	userObject.updateGroupChoiceList();
 
-	QueryResult groupChoice = ((userCustom) object).groupChoices;
+	QueryResult groupChoice = userObject.groupChoices;
 
 	// Which group is being deleted?
 
-	Invid val = (Invid) object.getFieldValuesLocal((short) 264).elementAt(((Integer) param).intValue());
+	Invid val = (Invid) userObject.getFieldValuesLocal(GROUPLIST).elementAt(index);
 
 	// Make a list of all choices except the one being deleted
 
@@ -156,40 +223,25 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
       {
 	System.err.println("userHomeGroupDelWizard.respond(): state == 2");
 
-	if (returnHash == null)
-	  {
-	    retVal = new ReturnVal(false);
-	    dialog = new JDialogBuff("Home Group Removal Canceled",
-				     "Home Group Removal Canceled",
-				     "OK",
-				     null,
-				     "ok.gif");
-	    retVal.setDialog(dialog);
-
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
-
-	    return retVal;
-	  }
-
 	String group = (String) returnHash.get("New Home Group");
 
 	// get the list of groups
 
-	((userCustom) object).updateGroupChoiceList();
+	userObject.updateGroupChoiceList();
 
-	QueryResult groupChoice = ((userCustom) object).groupChoices;
+	QueryResult groupChoice = userObject.groupChoices;
 
 	// find the group we're changing to, find the id, change it
 
 	boolean found = false;
-	((userCustom) object).getGSession().checkpoint("homegroupdel" + object.getLabel());
+	session.checkpoint("homegroupdel" + userObject.getLabel());
 
 	for (int i = 0; i < groupChoice.size(); i++)
 	  {
 	    if (groupChoice.getLabel(i).equals(group))
 	      {
 		found = true;
-		retVal = object.setFieldValue((short) 265, groupChoice.getInvid(i));
+		retVal = userObject.setFieldValue(HOMEGROUP, groupChoice.getInvid(i));
 		break;
 	      }
 	  }
@@ -217,8 +269,15 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
 	    state = DONE;	// let the wizardHook know to go ahead and pass
 				// this operation through now
 
-	    InvidDBField invF = (InvidDBField) object.getField((short) 264);
-	    retVal = invF.deleteElement(((Integer) param).intValue());
+	    InvidDBField invF = (InvidDBField) userObject.getField(GROUPLIST);
+
+	    // note that this deleteElement() operation will pass
+	    // through userObject.wizardHook().  wizardHook will see that we are
+	    // an active userHomeGroupDelWizard, and are at state DONE, so it
+	    // will go ahead and unregister us and let the GROUPLIST modification
+	    // go through to completion.
+
+	    retVal = invF.deleteElement(index);
 
 	    if (retVal == null || retVal.didSucceed())
 	      {
@@ -233,10 +292,11 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
 	      }
 	    else
 	      {
-		if (!((userCustom) object).getGSession().rollback("homegroupdel" + object.getLabel()))
+		if (!session.rollback("homegroupdel" + userObject.getLabel()))
 		  {
 		    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 							"Ran into a problem during home group deletion, and rollback failed");
+		    this.unregister(); // we're stopping here, so we'll unregister ourselves
 		  }
 	      }
 	  }
@@ -244,17 +304,19 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
 	  {
 	    // argh, failure..
 
-	    if (!object.getEditSet().rollback("homegroupdel" + object.getLabel()))
+	    if (!session.rollback("homegroupdel" + userObject.getLabel()))
 	      {
 		retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 						    "Ran into a problem during home group change, and rollback failed");
 	      }
-	  }
 
-	this.unregister(); // we're stopping here, so we'll unregister ourselves
+	    this.unregister(); // we're stopping here, so we'll unregister ourselves
+	  }
 
 	return retVal;
       }
+
+    // are we in an unexpected state?
 	
     return Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 				      "No idea what you're talking about");
@@ -270,17 +332,18 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
   {
     JDialogBuff dialog;
     StringBuffer buffer = new StringBuffer();
+    ReturnVal retVal;
 
     /* -- */
 
     System.err.println("userHomeGroupDelWizard: creating home group deletion wizard");
     
-    ((userCustom) object).updateGroupChoiceList();
+    userObject.updateGroupChoiceList();
     
-    if (((userCustom) object).groupChoices.size() == 1)
+    if (userObject.groupChoices.size() == 1)
       {
 	buffer.append("Can't delete lone group for user ");
-	buffer.append(object.getLabel());
+	buffer.append(userObject.getLabel());
 	buffer.append("\n\nYou may not delete the last group from a user's account.  All active users in UNIX need ");
 	buffer.append("to be a member of at least a single account group.");
 
@@ -295,7 +358,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard {
       }
 
     buffer.append("Changing home group for user ");
-    buffer.append(object.getLabel());
+    buffer.append(userObject.getLabel());
     buffer.append("\n\nThe group you are attempting to remove this user from is the user's default group. ");
     buffer.append("In order to remove the user from this group, you are going to need to select another group ");
     buffer.append("to be the default group for this user at login time.");
