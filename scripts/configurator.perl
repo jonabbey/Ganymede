@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.49 $
-# $Date: 2000/08/10 20:30:33 $
+# $Revision: 1.50 $
+# $Date: 2000/09/15 06:52:22 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -135,8 +135,6 @@ classfiles:
 	\@cd $rootdir/src/JTree; \\
 	./build
 	\@cd $rootdir/src/JTable; \\
-	./build
-	\@cd $rootdir/src/tools; \\
 	./build
 	\@cd $rootdir/src/server; \\
 	./build
