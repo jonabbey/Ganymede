@@ -2,8 +2,8 @@
 #
 # Ganymede Server build script
 #
-# Version: $Revision: 1.1 $
-# Date: $Date: 1999/01/15 00:16:40 $
+# Version: $Revision: 1.2 $
+# Date: $Date: 1999/01/15 21:45:55 $
 #
 ############################################################
 
@@ -15,7 +15,7 @@ currentdir=`pwd`
 
 prog=$0
 builddir=`echo $prog|sed 's%/[^/][^/]*$%%'`
-test "x$builddir" = "x$builddir" && GROOTDIR=.
+test "x$builddir" = "x$builddir" && builddir=.
 cd $builddir
 
 # Load configuration information
