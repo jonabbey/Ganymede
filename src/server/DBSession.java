@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.57 $ %D%
+   Version: $Revision: 1.58 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -148,6 +148,7 @@ final public class DBSession {
     StringDBField sf;
     Date modDate = new Date();
     String result;
+    Invid tmpInvid;
 
     /* -- */
 
@@ -173,6 +174,20 @@ final public class DBSession {
 	
 	for (int i = 0; i < owners.size(); i++)
 	  {
+	    tmpInvid = (Invid) owners.elementAt(i);
+
+	    if (tmpInvid.getType() != SchemaConstants.OwnerBase)
+	      {
+		throw new RuntimeException("bad ownership invid");
+	      }
+
+	    // we don't want to explicitly record supergash ownership
+	    
+	    if (tmpInvid.getNum() == SchemaConstants.OwnerSupergash)
+	      {
+		continue;
+	      }
+
 	    inf.addElementLocal(owners.elementAt(i));
 	  }
       }
