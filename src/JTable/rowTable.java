@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.28 $ %D%
+  Version: $Revision: 1.29 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,7 +48,7 @@ import javax.swing.*;
  *
  * @see arlut.csd.JTable.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.28 $ %D% 
+ * @version $Revision: 1.29 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -960,6 +960,43 @@ class rowSorter {
 		return -1;
 	      }
 	    else if (ib > ia)
+	      {
+		return 1;
+	      }
+	    else
+	      {
+		return 0;
+	      }
+	  }
+      }
+
+    if (Adata instanceof Double)
+      {
+	double da = ((Double) Adata).doubleValue();
+	double db = ((Double) Bdata).doubleValue();
+
+	if (forward)
+	  {
+	    if (da < db)
+	      {
+		return -1;
+	      }
+	    else if (da > db)
+	      {
+		return 1;
+	      }
+	    else
+	      {
+		return 0;
+	      }
+	  }
+	else
+	  {
+	    if (db < da)
+	      {
+		return -1;
+	      }
+	    else if (db > da)
 	      {
 		return 1;
 	      }
