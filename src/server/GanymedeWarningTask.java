@@ -7,7 +7,7 @@
    a whole number of weeks in the future.
    
    Created: 4 February 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -55,6 +55,12 @@ public class GanymedeWarningTask implements Runnable {
     /* -- */
 
     Ganymede.debug("Warning Task: Starting");
+
+    if (Ganymede.db.schemaEditInProgress)
+      {
+	Ganymede.debug("Deferring warning task - schema being edited");
+	return;
+      }
 
     try
       {
