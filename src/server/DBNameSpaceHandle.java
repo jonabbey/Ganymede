@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/07/09 06:35:00 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2001/08/13 20:07:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -155,9 +155,21 @@ class DBNameSpaceHandle implements Cloneable {
 	return null;
       }
 
-    DBObject _obj = session.session.viewDBObject(fieldInvid);
-   
-    return (DBField) _obj.getField(fieldId);
+    if (session != null)
+      {
+	DBObject _obj = session.session.viewDBObject(fieldInvid);
+	
+	return (DBField) _obj.getField(fieldId);
+      }
+    else
+      {
+	// during start-up, before we have a session available
+
+	DBObjectBase _base = Ganymede.db.getObjectBase(fieldInvid.getType());
+	DBObject _obj = _base.objectTable.get(fieldInvid.getNum());
+
+	return (DBField) _obj.getField(fieldId);
+      }
   }
 
   public void setField(DBField field)
