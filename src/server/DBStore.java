@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ public class DBStore {
 
   static final String id_string = "Gstore";
   static final byte major_version = 1;
-  static final byte minor_version = 1;
+  static final byte minor_version = 2;
 
   static final boolean debug = true;
 
@@ -621,6 +621,8 @@ public class DBStore {
 	bf.comment = "Permissions for this admin entity";
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
+	b.setLabelField(SchemaConstants.AdminNameField);
+
 	setBase(b);
 
 	b = new DBObjectBase(this);
@@ -667,6 +669,8 @@ public class DBStore {
 	bf.editable = false;
 	bf.comment = "If this user can act as an administrator, this field points to the admin object for this user";
 	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	b.setLabelField(SchemaConstants.UserUserName);
     
 	setBase(b);
       }
@@ -690,7 +694,7 @@ public class DBStore {
     s.setValue("supergash");
     
     PasswordDBField p = (PasswordDBField) eO.getField("Password");
-    p.setValue(GanymedeConfig.newSGpass); // default supergash password
+    p.setPlainTextPass(GanymedeConfig.newSGpass); // default supergash password
     
     session.commitTransaction();
   }
