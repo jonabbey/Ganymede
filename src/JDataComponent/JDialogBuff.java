@@ -5,7 +5,7 @@
    Serializable resource class for use with StringDialog.java
    
    Created: 27 January 1998
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -147,10 +147,10 @@ public class JDialogBuff implements java.io.Serializable {
 	  {
 	    if (debug)
 	      {
-		System.err.println("JDialogBuff: retrieving password chunk");
+		System.err.println("JDialogBuff: retrieving password chunk:  " + chunk.value + " new: " + chunk.initialValue);
 	      }
 
-	    retVal.addPassword((String) chunk.value, new Boolean(chunk.initialValue).booleanValue()); // initialValue in this case is a boolean
+	    retVal.addPassword((String) chunk.value, new Boolean((String)chunk.initialValue).booleanValue()); // initialValue in this case is a boolean
 	  }
 	else if (chunk.label.startsWith("@choice>"))
 	  {
@@ -229,6 +229,7 @@ public class JDialogBuff implements java.io.Serializable {
 
   public JDialogBuff(String Title, String Text, String OK, String Cancel, String image)
   {
+
     buffer = new StringBuffer();
 
     addChunk("@1", Title, null);
@@ -347,6 +348,7 @@ public class JDialogBuff implements java.io.Serializable {
 
   public void addPassword(String label, boolean isNew)
   {
+    System.out.println("*******Adding passowrd: " + isNew);
     addChunk("@pass", label, new Boolean(isNew).toString());
   }
 
