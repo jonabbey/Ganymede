@@ -5,7 +5,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.43 $ %D%
+   Version: $Revision: 1.44 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -353,7 +353,15 @@ final public class DBSession {
       }
     else
       {
-	return obj.createShadow(editSet);
+	DBEditObject eObj = obj.createShadow(editSet); // *sync* DBObject
+
+	if (eObj == null)
+	  {
+	    setLastError("Couldn't edit " + obj.getLabel() + 
+			 ", someone else is working with the object.");
+	  }
+
+	return eObj;
       }
   }
 
@@ -411,18 +419,25 @@ final public class DBSession {
    *
    */
 
-  public synchronized DBObject viewDBObject(short baseID, int objectID)
+  public DBObject viewDBObject(short baseID, int objectID)
   {
     DBObjectBase base;
-    DBObject     obj;
+    DBObject     obj = null;
     Short      baseKey;
     Integer      objKey;
 
     /* -- */
-
+    
     if (isTransactionOpen())
       {
-	obj = editSet.findObject(new Invid(baseID, objectID));
+	try
+	  {
+	    obj = editSet.findObject(new Invid(baseID, objectID)); // *sync* DBEditSet
+	  }
+	catch (NullPointerException ex)
+	  {
+	    // maybe the transaction got closed?  We're not synchronized here, after all
+	  }
 
 	if (obj != null)
 	  {
@@ -463,9 +478,9 @@ final public class DBSession {
    * 
    */
 
-  public synchronized ReturnVal deleteDBObject(Invid invid)
+  public ReturnVal deleteDBObject(Invid invid)
   {
-    return deleteDBObject(invid.getType(), invid.getNum());
+    return deleteDBObject(invid.getType(), invid.getNum()); // *sync*
   }
 
   /**
@@ -485,7 +500,7 @@ final public class DBSession {
    *  
    */
 
-  public synchronized ReturnVal deleteDBObject(short baseID, int objectID)
+  public ReturnVal deleteDBObject(short baseID, int objectID)
   {
     DBObject obj;
     DBEditObject eObj;
@@ -506,6 +521,13 @@ final public class DBSession {
     else
       {
 	eObj = obj.createShadow(editSet);
+      }
+
+    if (eObj == null)
+      {
+	return Ganymede.createErrorDialog("Can't delete " + obj.getLabel(),
+					  "Couldn't delete " + obj.getLabel() + 
+					  ", someone else is working with the object.");
       }
 
     return deleteDBObject(eObj);
@@ -872,7 +894,9 @@ final public class DBSession {
 
   /**
    *
-   * releaseLock releases a particular lock held by this session.
+   * releaseLock releases a particular lock held by this session.<br><br>
+   *
+   * This method must be synchronized.
    *
    */
 
@@ -886,11 +910,15 @@ final public class DBSession {
   /**
    *
    * releaseAllLocks() releases all locks held by this
-   * session.
+   * session.<br><br>
+   *
+   * This method is *not* synchronized.  This method must
+   * only be called by code synchronized on this DBSession
+   * instance.
    *
    */
 
-  public synchronized void releaseAllLocks()
+  public void releaseAllLocks()
   {
     DBLock lock;
     Enumeration enum = lockVect.elements();
@@ -925,6 +953,11 @@ final public class DBSession {
 
   public synchronized void openTransaction(String describe)
   {
+    if (editSet != null)
+      {
+	throw new IllegalArgumentException("transaction already open.");
+      }
+
     editSet = new DBEditSet(store, this, describe);
   }
 
