@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.95 $
-   Last Mod Date: $Date: 2001/11/17 01:00:09 $
+   Version: $Revision: 1.96 $
+   Last Mod Date: $Date: 2001/11/17 01:21:27 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -1415,12 +1415,15 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   protected void processWindowEvent(WindowEvent e) 
   {
-    if (e.getID() == WindowEvent.WINDOW_CLOSED)
+    if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
+	super.processWindowEvent(e); // go ahead and close it, please
 	cleanup();
       }
-
-    super.processWindowEvent(e);
+    else
+      {
+	super.processWindowEvent(e);
+      }
   }
 
   /**
