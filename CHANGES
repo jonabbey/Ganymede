@@ -485,6 +485,19 @@ file.
 Thanks to Alex Robinson (Alex_robinson@bigfoot.com) for reporting
 this.
 
+32. [SERVER] Improved object cloning with partial failure on vector copy
+
+I happened to notice that when I attempted to clone a user who
+belonged to one or more groups that I did not have permission to put
+into a new user, Ganymede did not react well.  That is, I got a dialog
+saying that certain items could not be cloned, and when I looked at my
+newly cloned object, several of the fields were just totally blank.
+
+I've now modified DBField.addElements() and InvidDBField.addElements()
+so that they are able to handle partial copies, and so that the
+DBField.copyFieldTo() method takes advantage of this to make object
+cloning more robust.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000
