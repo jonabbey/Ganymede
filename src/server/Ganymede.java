@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.139 $
-   Last Mod Date: $Date: 2003/01/13 17:31:20 $
+   Version: $Revision: 1.140 $
+   Last Mod Date: $Date: 2003/01/13 18:36:08 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -775,7 +775,7 @@ public class Ganymede {
 
   static public ReturnVal createInfoDialog(String title, String body)
   {
-    ReturnVal retVal = new ReturnVal(true);
+    ReturnVal retVal = new ReturnVal(true,true); // success ok, doNormalProcessing ok
     retVal.setDialog(new JDialogBuff(title,
 				     body,
 				     "OK",
