@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -267,9 +267,14 @@ public class DBEditSet {
 	    break;
 
 	  case DBEditObject.DELETING:
-	    break;
-
 	  case DBEditObject.DROPPING:
+
+	    if (!eObj.remove())
+	      {
+		release();
+		Ganymede.debug("Transaction commit rejected by object " + eObj.getLabel() + "'s removal logic");
+		return false;
+	      }
 	    break;
 	  }
 
