@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -62,6 +62,7 @@ public class DBEditSet {
    *
    * @param dbStore The owning DBStore object.
    * @param session The DBStore session owning this transaction.
+   * @param description An optional string to identify this transaction
    *
    */
 
@@ -203,12 +204,16 @@ public class DBEditSet {
    * @param addressList Vector of Strings, the address list
    * @param subject The subject line of the message
    * @param message The body of the message
+   * @param admin The invid of the admin whose action resulted in the mail
+   * @param adminName The name of the admin whose actin resulted in the mail
+   * @param objects A vector of invids of objects involved in the mail
    *
    */
 
-  public void logMail(Vector addresses, String subject, String message)
+  public void logMail(Vector addresses, String subject, String message, 
+		      Invid admin, String adminName, Vector objects)
   {
-    logEvents.addElement(new DBMailEvent(addresses, subject, message));
+    logEvents.addElement(new DBLogEvent(addresses, subject, message, admin, adminName, objects));
   }
 
   /**
@@ -219,14 +224,12 @@ public class DBEditSet {
    * @param addressList Vector of Strings, the address list
    * @param subject The subject line of the message
    * @param message The body of the message
-   * @param html if true, the message will be sent as an html mime attachement
    *
    */
 
-  public void logMail(Vector addresses, String subject, String message,
-		      boolean html)
+  public void logMail(Vector addresses, String subject, String message)
   {
-    logEvents.addElement(new DBMailEvent(addresses, subject, message, html));
+    logEvents.addElement(new DBLogEvent(addresses, subject, message, null, null, null));
   }
 
   /**
