@@ -173,6 +173,33 @@ method.
 This has the advantage that newly created objects which contain
 embedded objects will include full information on the embedded objects.
 
+13. [SERVER] Reworked ownership inheritance
+
+The support in GanymedeSession's recursePersonaMatch() method for
+recursing up the ownership tree to find matching personas was broken
+in the case when an owner group contained no members.  In such cases,
+the upwards recursion stopped inappropriately.
+
+This was a pretty major logical error, and one which has left support
+for the Ganymede owner group hierarchy broken for quite a long time.
+
+Upon looking at the code, I found a lot of gross stuff in the whole
+owner group permission handling logic.  I went in and committed major
+surgery on the owner group code.  The code is now simpler and less
+prone to security problems due to inappropriate caching.  In addition,
+there may be a noticeable decrease in the time taken when a new object
+is created, as the owner group list calculation code is far more
+efficient now.
+
+14. [SERVER] Tweaked object creation ownership behavior 
+
+Previously, the Ganymede server would complain any time someone tried
+to create an object with more than one default owner selected.
+Ganymede will now allow this, but will complain if no owner list has
+been manually selected in the interactive case.  Ganymede will now
+provide a warning if it had to pick an owner group at random to put a
+newly created object in when run with a non-interactive client.
+
 -------------------- Changes from 1.0.9 to 1.0.10 -------------------
 
 RELEASE DATE: April 2, 2002
