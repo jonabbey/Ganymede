@@ -1139,13 +1139,12 @@ need to move to an incremental model for synchronization.</p>
       file.</li>
 
       <li><b>When Changed</b> -- This field will be written to the Sync
-      Channel whenever it changes, and if it changes, the object that
-      contains it will be included in the synchronization file.</li>
+      Channel whenever it changes.</li>
 
-      <li><b>Always</b> -- This field will always be written to the Sync
-      Channel, so long as the object it is contained in was changed
-      during the transaction and a at least one field marked "Always"
-      or "When Changed" was changed in the transaction.</li>
+      <li><b>Always</b> -- This field will always be written to the
+      Sync Channel, so long as at least one field in the containing
+      object that is marked "Always" or "When Changed" was changed in
+      the transaction.</li>
     </ul>
 
     <p>The <b>Always</b> option is intended to allow you to mark
