@@ -22,7 +22,7 @@ import java.awt.event.*;
 public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
 
   Hashtable buttons;
-  JBufferedPane panel;
+  JPanel panel;
   
   PopupMenu
     popup;
@@ -31,7 +31,7 @@ public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
     {
 
       buttons = new Hashtable();
-      panel = new JBufferedPane();
+      panel = new JPanel();
       popup = new PopupMenu();
       add(popup);
       add(panel);
@@ -52,7 +52,7 @@ public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
       panel.add(button);
       buttons.put(label, button);
       panel.doLayout();
-      button.setPad(new Insets(5,2,5,2));
+      button.setMargin(new Insets(5,2,5,2));
       this.validate();
       return button;
     }
@@ -107,7 +107,7 @@ public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
       Enumeration enum = buttons.keys();
       while (enum.hasMoreElements())
 	{
-	  ((JButton)enum.nextElement()).setPad(pad);
+	  ((JButton)enum.nextElement()).setMargin(pad);
 	}
 
     }

@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -236,18 +236,18 @@ public class JstringField extends JentryField {
        }
      else
        {
-	 Keymap map = getKeymap();
-	
-	 Action insert = new DefaultAction(JTextComponent.insertContentAction);
-
-	 KeyStroke[] strokes = map.getKeyStrokesForAction(insert);
-
-	 map.removeBindings();
-	 
-	 for (int i = 0; i < s.length(); i++)
-	   {
-	     map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i), 0), insert);
-	   }
+	 //	 Keymap map = getKeymap();
+	 //	
+	 //	 Action insert = new DefaultAction(JTextComponent.insertContentAction);
+	 //
+	 //	 KeyStroke[] strokes = map.getKeyStrokesForAction(insert);
+	 //
+	 //	 map.removeBindings();
+	 //	 
+	 //	 for (int i = 0; i < s.length(); i++)
+	 //	   {
+	 //	     map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i), 0), insert);
+	 //	   }
        }
   }
  
@@ -258,20 +258,20 @@ public class JstringField extends JentryField {
    */
   public void setDisallowedChars(String s)
   {
-    Keymap map;
+    //    Keymap map;
 
     /* -- */
 
-    map = getKeymap();
+    //    map = getKeymap();
 
     if (s != null && !s.equals(""))
       {
- 	for (int i = 0; i < s.length(); i++)
- 	  {
-	    //	    map.removeKeyStrokeBinding(KeyStroke.getKeyStroke(s.charAt(i), 0));
-	    map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i)),
-				      new DefaultAction("null action"));
- 	  }
+	// 	for (int i = 0; i < s.length(); i++)
+	// 	  {
+	//	    //	    map.removeKeyStrokeBinding(KeyStroke.getKeyStroke(s.charAt(i), 0));
+	//	    map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i)),
+	//			      new DefaultAction("null action"));
+	// 	  }
       }
 
     if (s!= null)

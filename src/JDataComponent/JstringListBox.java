@@ -5,7 +5,7 @@
  An implementation of JListBox used to display strings.
 
  Created: 21 Aug 1997
- Version: $Revision: 1.7 $ %D%
+ Version: $Revision: 1.8 $ %D%
  Module By: Mike Mulvaney
  Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,7 +19,7 @@ import java.awt.*;
 import java.util.Vector;
 import arlut.csd.Util.VecQuickSort;
 
-public class JstringListBox extends JListBox implements ListCellRenderer, ListSelectionListener{ 
+public class JstringListBox extends JList implements ListCellRenderer, ListSelectionListener{ 
 
   static final boolean debug = false;
 
@@ -113,6 +113,7 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 				  }
 				  )	      
 		  ).sort();
+
 		  if (debug)
 		    {
 		      System.out.println("Done sorting strings");
@@ -120,16 +121,13 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 	      }   
 	    for (int i=0 ; i<items.size() ; i++)
 	      {
-		
 		if (debug)
 		  {
 		    System.err.println("JstringListBox: adding string " + (String) items.elementAt(i));
 		  }
 		
 		insertHandleAt(new listHandle((String)items.elementAt(i)), i);
-		
 	      }
-	    
 	  }
 	else if (items.elementAt(0) instanceof listHandle)
 	  {
@@ -191,7 +189,6 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
 	    System.out.println("Unsupported item type passed to JstringListBox in a vector(needs to be String or ListHandle)");
 	  }
       
-
       }
     setModel(model);
     
@@ -303,7 +300,6 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
       }
   }
 
-
   public int getSizeOfList()
   {
     return model.getSize();
@@ -371,8 +367,13 @@ public class JstringListBox extends JListBox implements ListCellRenderer, ListSe
     label.setText(((listHandle)model.elementAt(index)).getLabel());
   }
 
-  public Component getListCellRendererComponent()
+  public Component getListCellRendererComponent(JList list,
+						Object value,
+						int index,
+						boolean isSelected,
+						boolean cellHasFocus)
   {
+    configureListCellRenderer(value, index);
     return label;
   }
 

@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -162,7 +162,7 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
 
     add(_date,"Center");
 
-    JBufferedPane buttonPanel = new JBufferedPane();
+    JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
 
     Image img = PackageResources.getImageResource(this, "i043.gif", getClass());

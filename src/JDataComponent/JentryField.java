@@ -47,9 +47,9 @@ abstract public class JentryField extends JTextField {
 
     // disable tab insertion
 
-    Keymap binding = getKeymap();
-    binding.addActionForKeyStroke(KeyStroke.getKeyStroke('\t'),
-				  new DefaultAction("null action"));
+    //    Keymap binding = getKeymap();
+    //    binding.addActionForKeyStroke(KeyStroke.getKeyStroke('\t'),
+    //				  new ("null action"));
   }
 
   ///////////////////
