@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.8 $
-   Last Mod Date: $Date: 1999/07/21 23:19:20 $
+   Version: $Revision: 1.9 $
+   Last Mod Date: $Date: 1999/11/16 07:57:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -259,6 +259,51 @@ public class VectorUtils {
 	if (!workSetB.containsKey(item))
 	  {
 	    result.addElement(item);
+	  }
+      }
+
+    return result;
+  }
+
+  /**
+   * <P>This method returns a Vector containing the elements of vectA minus
+   * the elements of vectB.  If vectA has an element in the Vector 5 times
+   * and vectB has it 3 times, the result will have it two times.</P>
+   *
+   * <P>This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.</P>
+   */
+
+  public static Vector minus(Vector vectA, Vector vectB)
+  {
+    Hashtable 
+      workSetB = new Hashtable();
+
+    Vector result = new Vector();
+    Enumeration enum;
+    Object item;
+
+    /* -- */
+
+    if (vectA == null)
+      {
+	return result;
+      }
+
+    result = (Vector) vectA.clone();
+
+    if (vectB != null)
+      {
+	enum = vectB.elements();
+
+	while (enum.hasMoreElements())
+	  {
+	    item = enum.nextElement();
+
+	    if (result.contains(item))
+	      {
+		result.removeElement(item);
+	      }
 	  }
       }
 
