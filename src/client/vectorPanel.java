@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.15 $ %D%
+  Version: $Revision: 1.16 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -195,6 +195,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     CompoundBorder cb = BorderFactory.createCompoundBorder(tb,eb);
     setBorder(cb);
 
+    //setBackground(container.frame.getVectorBG());
+
     //add("South", addB);
     
     compVector = new Vector();
@@ -246,7 +248,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						   datefield.maxDate(),
 						   ca,
 						   this);
-		    addElement(df);
+		    addElement(datefield.getName(), df);
 		  }
 		else
 		  {
@@ -256,7 +258,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						   null,
 						   null,
 						   ca);
-		    addElement(df);
+		    addElement(datefield.getName(),df);
 		  }
 	      }
 	  }
@@ -300,7 +302,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						   this);
 		    
 		sf.setText(((Integer)numfield.getElement(i)).toString());
-		addElement(sf);
+		addElement(numfield.getName(), sf);
 	      }
 	  }
 	catch (RemoteException rx)
@@ -334,7 +336,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		ipf.setValue((Byte[]) ipfield.getElement(i));
 		ipf.setCallback(this);
 		
-		addElement(ipf);
+		addElement(ipfield.getName(), ipf);
 	      }
 	  }
 	catch (RemoteException rx)
@@ -377,8 +379,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 							   parent.parent,
 							   parent, container.frame);
 		    cp.setBorder(new LineBorder(Color.black));
-
-		    addElement(cp);
+		    
+		    //		    addElement(object.getLabel(), cp);
+		    addElement(object.getLabel(), cp);
 		  }
 	      }
 	    else
@@ -457,7 +460,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						       parent.parent,
 						       parent, container.frame);
 		cp.setBorder(new LineBorder(Color.black));
-		addElement(cp);
+		addElement("New Element", cp);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -484,7 +487,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 					       ca,
 					       this);
 			
-		addElement(df);
+		addElement("New date", df);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -508,7 +511,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 					    true,
 					    ipfield.v6Allowed());
 		ipf.setCallback(this);
-		addElement(ipf);
+		addElement("New IP address", ipf);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -554,7 +557,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 						     
 		  
-		addElement(sf);
+		addElement("New number", sf);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -567,6 +570,30 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
       }
     }
+
+
+  /** 
+   * Paint method draws a little plus box on the bottom right.
+   *
+   */
+  public void paint(Graphics g)
+  {
+    super.paint(g);
+
+    Color color = g.getColor();
+    g.setColor(Color.black);
+    
+    Rectangle bounds = getBounds();
+
+    g.drawRect(bounds.height - 10, bounds.y, bounds.height, bounds.y+10);
+    g.drawLine(bounds.x + 5, bounds.height - 10, bounds.x + 5, bounds.height); 
+
+    g.drawLine(bounds.x, bounds.height - 5, bounds.x + 10, bounds.height - 5); 
+   
+
+    g.setColor(color);
+  }
+
 
   public void addElement(Component c)
   {

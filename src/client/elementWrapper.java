@@ -13,6 +13,7 @@ package arlut.csd.ganymede.client;
 import java.awt.*;
 import java.awt.event.*;
 import com.sun.java.swing.*;
+import com.sun.java.swing.border.*;
 
 import arlut.csd.JDataComponent.*;
 
@@ -57,7 +58,7 @@ class elementWrapper extends JPanel implements ActionListener {
     this.parent = parent;
     
     setLayout(new BorderLayout());
-    setBorder(parent.lineBorder);
+    setBorder(parent.parent.lineEmptyBorder);
       
     buttonPanel = new JPanel();
     buttonPanel.setOpaque(true);
@@ -84,6 +85,7 @@ class elementWrapper extends JPanel implements ActionListener {
     buttonPanel.add("East",remove);
       
     my_component = comp;
+    my_component.setBackground(parent.container.frame.getVectorBG());
       
     //add("Center",my_component);
     add("North",buttonPanel);
@@ -113,6 +115,7 @@ class elementWrapper extends JPanel implements ActionListener {
     invalidate();
     invalidateRight();
   }
+
 
   /**
    *
