@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -221,7 +221,7 @@ public class directLoader {
 
 	    perm_field pf = (perm_field) current_obj.getField(SchemaConstants.PermMatrix);
 
-	    PermEntry defPerm = new PermEntry(true, true, true);
+	    PermEntry defPerm = new PermEntry(true, true, true, true);
 	
 	    pf.setPerm(SchemaConstants.UserBase, defPerm);
 	    pf.setPerm((short) 279, defPerm); // person privs
@@ -274,51 +274,50 @@ public class directLoader {
 	    current_obj.setFieldValue(SchemaConstants.OwnerNameField, ogRec.prefix);
 	  }
 
-	my_client.session.commitTransaction(); // lock in perm object
-	my_client.session.openTransaction("GASH directLoader");
+	commitTransaction();	// lock in perm object
 
 	System.out.println("\nRegistering users\n");
-
+	my_client.session.openTransaction("GASH directLoader");
 	registerUsers();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	my_client.session.openTransaction("GASH directLoader");
 	registerPersons();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	my_client.session.openTransaction("GASH directLoader");
 	registerEmail();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering groups\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerGroups();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering user netgroups\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerUserNetgroups();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering System Types\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystemTypes();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering systems\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystems();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering system netgroups\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerSystemNetgroups();
-	my_client.session.commitTransaction();
+	commitTransaction();
 
 	System.out.println("\nRegistering automounter configuration\n");
 	my_client.session.openTransaction("GASH directLoader");
 	registerAutomounter();
-	my_client.session.commitTransaction();
+	commitTransaction();
       }
     catch (RemoteException ex)
       {
@@ -343,6 +342,16 @@ public class directLoader {
     my_server.dump();
       
     System.exit(0);
+  }
+
+  private static void commitTransaction() throws RemoteException
+  {
+    ReturnVal retVal = my_client.session.commitTransaction(true);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	throw new RuntimeException("Could not commit transaction, aborting loader");
+      }
   }
 
   /*----------------------------------------------------------------------------*/
