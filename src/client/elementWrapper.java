@@ -168,15 +168,21 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   public void expand()
   {
     vp.wp.getgclient().setWaitCursor();;
-    System.out.println("expand().");
+    if (debug)
+      {
+	System.out.println("expand().");
+      }
+
     if (expanded)
       {
-	System.out.println("remove");
+	if (debug)
+	  {
+	    System.out.println("remove");
+	  }
+
 	//remove(my_component);
-	my_component.setVisible(false);
-	System.out.println("setIcon");
+	my_component.setVisible(false);	
 	expand.setIcon(vp.wp.closeIcon);
-	System.out.println("setToolTipText");
 	expand.setToolTipText("Collapse this element");
 	expanded = false;
       }
@@ -199,36 +205,13 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	expanded = true;
       }
 
+    if(debug)
+      {
+	System.out.println("Done with expand().");
+      }
 
-    System.out.println("Done with expand().");
     vp.wp.getgclient().setNormalCursor();;    
   }
-
-  /*
-   *
-   * This method does causes the hierarchy of containers above
-   * us to be recalculated from the bottom (us) on up.  Normally
-   * the validate process works from the top-most container down,
-   * which isn't what we want at all in this context.
-   *
-   *
-
-  public void invalidateRight()
-  {
-    Component c;
-
-    //c = my_component;
-    c = this;
-
-    while ((c!= null) && !(c instanceof JViewport))
-      {
-	System.out.println("doLayout on: " + c);
-	c.doLayout();
-	c = c.getParent();
-
-      }
-  }
-  */
 
   public void actionPerformed(ActionEvent evt) 
   {

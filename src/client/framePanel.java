@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -158,7 +158,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       progressPanel.add(new JLabel("Loading..."));
       progressPanel.add(progressBar);
 
-      getContentPane().add("Center", progressPanel);
+      //getContentPane().add("Center", progressPanel);
+      setContentPane(progressPanel);
 
       try
 	{
@@ -182,7 +183,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	}
 
 
-      contentPane = getContentPane();
+      //contentPane = new JPanel();
 
       // windowPanel wants to know if framePanel is changed
 
@@ -286,10 +287,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 
       createPanel(general_index);
       showTab(general_index);
-      contentPane.remove(progressPanel);
-      contentPane.add("Center", pane);
+      //contentPane.remove(progressPanel);
+      //contentPane.add("Center", pane);
 
-      contentPane.invalidate();
+      setContentPane(pane);
+      //contentPane.invalidate();
+      pane.invalidate();
       validate();
     }
 

@@ -6,7 +6,7 @@
    by the client.
    
    Created: 3 March 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -121,8 +121,18 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
       {
 	try
 	  {
-	    gc.getSession().filterQueries(filter);
-	    this.setVisible(false);
+	    ReturnVal retVal = gc.getSession().filterQueries(filter);
+	    gc.handleReturnVal(retVal);
+
+	    if ((retVal == null) || (retVal.didSucceed()))
+	      {
+		this.setVisible(false);
+	      }
+	    else
+	      {
+		this.setVisible(false);
+		gc.showErrorMessage("Could not set filter query.");
+	      }
 	  }
 	catch (RemoteException rx)
 	  {

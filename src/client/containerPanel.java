@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.52 $ %D%
+    Version: $Revision: 1.53 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -446,7 +446,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  db_field field = (db_field)objectHash.get(comp);
 	  if (field == null)
 	    {
-	      System.out.println("Fiel dis null, skipping.");
+	      System.out.println("-----Field is null, skipping.");
 	      return;
 	    }
 
@@ -658,6 +658,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  else if (comp instanceof StringSelector)
 	    {
 	      System.out.println("Skipping over StringSelector.");
+	    }
+	  else if (comp instanceof vectorPanel)
+	    {
+	      System.out.println("VectorPanel: anything to do?");
 	    }
 	  else 
 	    {
@@ -1241,7 +1245,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 		if (returnValue == null)
 		  {
-		    gc.somethingChanged();;
+		    gc.somethingChanged();
 		    if (debug)
 		      {
 			System.out.println("field setValue returned true");
@@ -1398,7 +1402,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Name: " + fieldTemplate.getName() + " Field type desc: " + fieldType);
+	System.out.println(" Name: " + fieldTemplate.getName() + " Field type desc: " + fieldType);
       }
     
     if (isVector)
@@ -1794,6 +1798,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     vectorPanel vp = new vectorPanel(field, winP, editable && fieldInfo.isEditable(), isEditInPlace, this);
     vectorPanelList.addElement(vp);
+    objectHash.put(vp, field);
+    shortToComponentHash.put(new Short(fieldInfo.getID()), vp);
 
     addVectorRow( vp, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
     
@@ -2321,8 +2327,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 
 	objectHash.put(combo.getCombo(), field); // We do the itemStateChanged straight from the JComboBox in the JInvidChooser,
+	objectHash.put(combo, field); // The update method still need to be able to find this JInvidChooser.
 	
 	shortToComponentHash.put(new Short(fieldInfo.getID()), combo);
+
 
 	if (debug)
 	  {
@@ -2338,9 +2346,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  {
 	    final Invid thisInvid = (Invid)fieldInfo.getValue();
 
-	    String label = (String)gc.getSession().view_db_object(thisInvid).getLabel();
+	    String label = (String)gc.getSession().viewObjectLabel(thisInvid);
 	    //JstringField sf = new JstringField(20, false);
 	    //sf.setText(label);
+	    if (label == null)
+	      {
+		System.out.println("-you don't have permission to view this object.");
+		label = "Permission denied!";
+	      }
 
 	    //JPanel p = new JPanel(new BorderLayout());
 	    JButton b = new JButton(label);

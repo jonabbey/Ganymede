@@ -9,7 +9,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.36 $ %D%
+   Version: $Revision: 1.37 $ %D%
    Module By: Navin Manohar and Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -345,6 +345,17 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     invalidate();
     validate();
+  }
+
+  /**
+   * Logout fromt the server. 
+   *
+   * This is called from the gclient.
+   */
+  public void logout() throws RemoteException
+  {
+    my_client.disconnect();
+    enableButtons(true);
   }
 
   public void stop() 

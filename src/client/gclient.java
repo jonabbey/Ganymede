@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.69 $ %D%
+   Version: $Revision: 1.70 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -689,7 +689,12 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     try
       {
-	session.openTransaction("gclient");
+	ReturnVal rv = session.openTransaction("gclient");
+	handleReturnVal(rv);
+	if ((rv != null) && (!rv.didSucceed()))
+	  {
+	    throw new RuntimeException("Could not open transaction.");
+	  }
       }
     catch (RemoteException rx)
       {
@@ -1017,9 +1022,29 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 			       {
 				 public void run()
 				   {
+				     
 				     JErrorDialog d = new JErrorDialog(gc, Title, Message);
+				     /*
+				     final JDialog d = new JDialog(gc, Title, true);
+				     JPanel p = new JPanel();
+				     p.add(new JLabel(Message));
+				     JButton b = new JButton("ok");
+				     b.addActionListener(new ActionListener() {
+				       public void actionPerformed(ActionEvent e)
+					 {
+					   d.setVisible(false);
+					 }});
+				     p.add(b);
+				     d.setContentPane(p);
+				     d.setVisible(true);
+				     */
 				   }
 			       });
+ 
+
+
+    setStatus(title + ": " + message);
+
   }
 
   /**
@@ -1052,7 +1077,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   {
     commit.setEnabled(true);
     cancel.setEnabled(true);
-    somethingChanged = true;
+    setSomethingChanged(true);
+  }
+
+  private void setSomethingChanged(boolean state)
+  {
+    System.out.println("Setting somethingChanged to " + state);
+    somethingChanged = state;
   }
 
   /**
@@ -1128,11 +1159,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    break;		// we're done
 	  }
       }
-
+    /*
+     * This just isn't a good idea.  Just because a return val came back, doesn't
+     * mean that anything changed.  You need to keep track of things changing where
+     * they might actually change.
     if ((retVal == null) || retVal.didSucceed()) 
       {
 	somethingChanged(); 
       }
+    */
 
     if (debug)
       {
@@ -2389,6 +2424,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		    setIconForNode(invid);
 		    tree.refresh();
 		    setStatus("Object inactivated.");
+		    somethingChanged();
+
 		  }
 		else
 		  {
@@ -2449,6 +2486,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     if (ok)
       {
 
+	somethingChanged();
 	setStatus("Object reactivated.");
 
 	// We need to fix the handle.
@@ -2732,9 +2770,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     try
       {
 	timer.stop();
-	session.logout();
+	_myglogin.logout();
 	this.dispose();
-	_myglogin.enableButtons(true);
       }
     catch (RemoteException rx)
       {
@@ -2771,6 +2808,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    */
   public void chooseDefaultOwner(boolean forcePopup)
   {
+    ReturnVal retVal = null;
+    
     if (ownerGroups == null)
       {
 	try
@@ -2805,7 +2844,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	      }
 	    try
 	      {
-		session.setDefaultOwner(owners);
+		retVal = session.setDefaultOwner(owners);
 	      }
 	    catch (RemoteException rx)
 	      {
@@ -2814,17 +2853,24 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    return;
 	  }
       }
-  	
+    
     if (defaultOwnerDialog == null)
       {
 	defaultOwnerDialog = new JDefaultOwnerDialog(this, ownerGroups);
       }
+
+    retVal = defaultOwnerDialog.chooseOwner();
+
+    handleReturnVal(retVal);
+
+    if ((retVal == null) || (retVal.didSucceed()))
+      {
+	defaultOwnerChosen =  true;
+      }
     else
       {
-	defaultOwnerDialog.setVisible(true);
+	defaultOwnerChosen = false;
       }
-
-    defaultOwnerChosen =  true;
 
   }
 
@@ -2870,7 +2916,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
   boolean OKToProceed()
   {
-    if (somethingChanged)
+    if (getSomethingChanged())
       {
 	StringDialog dialog = new StringDialog(this, 
 					       "Warning: changes have been made",
@@ -2952,45 +2998,18 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
 	if (succeeded)
 	  {
-	    somethingChanged = false;
+	    setSomethingChanged(false);
 	    cancel.setEnabled(false);
 	    commit.setEnabled(false);
 	
-	    // Might need to fix the tree nodes
-	    // Now go through changed list and revert any names that may be needed
-
-	    /*	    
-	    Enumeration changed = changedHash.keys();
-	    
-	    while (changed.hasMoreElements())
-	      {
-		Invid invid = (Invid)changed.nextElement();
-		CacheInfo info = (CacheInfo)changedHash.get(invid);
-		String label = null;
-		
-		try
-		  {
-		    label = session.viewObjectLabel(invid);
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not get label: " + rx);
-		  }
-	        
-		InvidNode node = (InvidNode)invidNodeHash.get(invid);
-		
-		if (node != null)
-		  {
-		    node.setText(label);
-		  }
-		
-		changedHash.remove(invid);
-		setIconForNode(invid);
-	      }	    
-	    */
-	      
 	    wp.refreshTableWindows();
-	    session.openTransaction("gclient");
+	    ReturnVal rv = session.openTransaction("gclient");
+	    handleReturnVal(rv);
+
+	    if ((rv != null) && (!rv.didSucceed()))
+	      {
+		showErrorMessage("Could not open transaction.");
+	      }
 
 	    if (debug)
 	      {
@@ -3345,10 +3364,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    System.out.println("Woo-woo the hashes are all empty");
 	  }
 
-	somethingChanged = false;
+	setSomethingChanged(false);
 	cancel.setEnabled(false);
 	commit.setEnabled(false);
-	session.openTransaction("glient");
+	ReturnVal rv = session.openTransaction("glient");
+
+	handleReturnVal(rv);
+	if ((rv != null) && (!rv.didSucceed()))
+	  {
+	    showErrorMessage("Could not open new transaction.");
+	  }
+
 	tree.refresh();
       }
     catch (RemoteException rx)
@@ -4295,11 +4321,8 @@ class PersonaListener implements ActionListener{
 
       boolean personaChangeSuccessful = false;
 
-      if (resource == null)
-	{
-	  resource = new DialogRsrc(gc, "Change Persona", "Enter the persona password:");
-	  resource.addPassword("Password:");
-	}
+      resource = new DialogRsrc(gc, "Change Persona", "Enter the password for " + newPersona + ":");
+      resource.addPassword("Password:");
 
       if (gc.debug)
 	{
