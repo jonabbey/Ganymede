@@ -6,8 +6,8 @@
 
    Created: 29 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.14 $
-   Last Mod Date: $Date: 2001/11/15 01:28:42 $
+   Version: $Revision: 1.15 $
+   Last Mod Date: $Date: 2003/05/19 21:08:46 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -222,7 +222,7 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
    * <pre>
    * Keys:
    *
-   * "Forwarding Address"
+   * "Email Target"
    * "Shell"
    * "New Password"
    * </pre>
@@ -251,7 +251,7 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 	  }
       } 
 
-    forward = (String) getParam("Forwarding Address");
+    forward = (String) getParam("Email Target");
     shell = (String) getParam("Shell");
     password = (String) getParam("New Password");
 
@@ -307,11 +307,11 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
     if (addrField != null && addrField.size() > 0)
       {
-	retVal.getDialog().addString("Forwarding Address", addrField.getValueString());
+	retVal.getDialog().addString("Email Target", addrField.getValueString());
       }
     else
       {
-	retVal.getDialog().addString("Forwarding Address");
+	retVal.getDialog().addString("Email Target");
       }
     
     System.err.println("userReactivateWizard.respond(): state == 1, returning dialog");
