@@ -6,7 +6,7 @@
    GASH netgroup_ file
    
    Created: 17 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -89,7 +89,7 @@ public class SystemNetgroup {
 	netgroup_name = getNextBit(tokens);
       }
 
-    // okay, we're in a line that has a user netgroup. figure
+    // okay, we're in a line that has a system netgroup. figure
     // out what it contains
 
     while ((tokens.ttype != StreamTokenizer.TT_EOL) &&
@@ -97,7 +97,7 @@ public class SystemNetgroup {
       {
 	if (tokens.ttype != StreamTokenizer.TT_WORD)
 	  {
-	    System.err.println("parse error in user list");
+	    System.err.println("parse error in system list");
 	  }
 	else
 	  {
@@ -113,7 +113,7 @@ public class SystemNetgroup {
 	      }
 	    else
 	      {
-		// we've got a user entry
+		// we've got a system entry
 
 		String tmp2 = tmp.substring(tmp.indexOf(',') + 1, tmp.lastIndexOf(','));
 		systems.addElement(tmp2);
