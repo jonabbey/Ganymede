@@ -7,8 +7,8 @@
 
    Created: 9 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2002/01/28 22:07:33 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2002/01/28 22:15:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -289,15 +289,16 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method returns a Vector of DBReadLock objects
-   * associated with key, if any.</P>
+   * <P>This method returns a Vector of DBReadLock objects associated
+   * with key, if any.  If there is no DBReadLock vector associated
+   * with the key, an IllegalStateException will be thrown.</P>
    *
    * <P>The Vector returned is part of DBLockSync's internal
    * data structures, and should only be browsed in a
    * block synchronized on this DBLockSync object.</P>
    *
    * <P>The Vector returned should not be modified by external
-   * code.</P> 
+   * code.</P>
    */
 
   public synchronized Vector getReadLockVector(Object key)
@@ -335,7 +336,7 @@ public class DBLockSync {
 	return (DBLock) obj;
       }
 
-    throw new IllegalStateException("Can't return a single lock, this key has a readlock vector.");
+    return null; // Can't return a single lock, this key has a readlock vector.
   }
 
   /**
