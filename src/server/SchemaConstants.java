@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,7 +46,7 @@ public interface SchemaConstants {
 
   final static short ContainerField = 0; // Invid pointer to object 'containing' us.
 
-  /* owner base */
+  /* ownerGroup base */
 
   final static short OwnerBase = 0; // all objects are owned by objects of type OwnerBase
 
@@ -54,6 +54,8 @@ public interface SchemaConstants {
   final static short OwnerMembersField = 101; // what admin:role entities have privileges in this OwnerBase?
   final static short OwnerObjectsOwned = 102; // what objects does this owner set own?
   final static short OwnerMailList = 103; // what email addresses should be notified if objects owned change?
+  final static short OwnerCcAdmins = 104; // If true, all mail sent in care of this owner group will be
+                                          // distributed to all admins on the list automatically
 
   // the following is a fixed object id's
 
@@ -75,18 +77,18 @@ public interface SchemaConstants {
 
   final static short PersonaSupergashObj = 1;
 
-  /* permission */
+  /* Role */
 
-  final static short PermBase = 2; // this base contains a set of permission bits constraining the admin personae's power
+  final static short RoleBase = 2; // this base contains a set of permission bits constraining the admin personae's power
 
-  final static short PermName = 100;
-  final static short PermMatrix = 101; // permissions applying to objects owned by admin personae
-  final static short PermPersonae = 102; // what admin personae are using this priv matrix?
-  final static short PermDefaultMatrix = 103; // permissions applying to all objects not owned by the relevant personae
+  final static short RoleName = 100;
+  final static short RoleMatrix = 101; // permissions applying to objects owned by admin personae
+  final static short RolePersonae = 102; // what admin personae are using this role?
+  final static short RoleDefaultMatrix = 103; // permissions applying to all objects not owned by the relevant personae
 
   // the following are fixed object id's
 
-  final static short PermDefaultObj = 1;
+  final static short RoleDefaultObj = 1;
 
   /* users have a defined set of fields */
 
