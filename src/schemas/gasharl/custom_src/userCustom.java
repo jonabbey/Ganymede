@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.99 $
-   Last Mod Date: $Date: 2001/10/11 21:30:41 $
+   Version: $Revision: 1.100 $
+   Last Mod Date: $Date: 2001/10/26 21:41:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2592,6 +2592,21 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Integer id = (Integer) getFieldValueLocal(userSchema.UID);
     Invid homegroupInvid = (Invid) getFieldValueLocal(userSchema.HOMEGROUP);
 
+    Vector ownerInvids = (Vector) entryObj.getFieldValuesLocal(SchemaConstants.OwnerListField);
+    String ownerName;
+
+    if (ownerInvids != null && ownerInvids.size() > 0)
+      {
+	Invid ownerOne = (Invid) ownerInvids.elementAt(0);
+
+	DBObject ownerObj = getSession().viewDBObject(ownerOne);
+	ownerName = ownerObj.getLabel();
+      }
+    else
+      {
+	ownerName = "";
+      }
+
     if (homegroupInvid == null)
       {
 	// the user didn't completely fill out this user
@@ -2644,10 +2659,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		// we'll call our external script with the following
 		//
-		// parameters: <volumename/volume_directory> <username> <user id> <group id> <mapname>
+		// parameters: <volumename/volume_directory> <username> <user id> <group id> <mapname> <owner>
 		
 		String execLine = createFilename + " " + volName + " " + 
-		  getLabel() + " " + id + " " + gid + " " + mapName;
+		  getLabel() + " " + id + " " + gid + " " + mapName + " " + ownerName;
 
 		if (debug)
 		  {
