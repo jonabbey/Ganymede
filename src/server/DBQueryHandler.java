@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -526,6 +526,13 @@ public class DBQueryHandler {
 	return false;
       }
   }
+
+  /**
+   *
+   * string1 is the query value provided by the client, string2 is the 
+   * value we are testing.
+   *
+   */
 
   private static boolean compareString(int comparator, String string1, String string2)
   {
