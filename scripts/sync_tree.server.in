@@ -10,8 +10,8 @@
 #
 #------------------------------------------------------------
 
-$sourcedir = "<#TARGETDIR#>/arlut/csd/ganymede";
-$targetdir = "<#TARGETDIR#>/server_classes/arlut/csd/ganymede";
+$sourcedir = "<#CLASSDIR#>/arlut/csd/ganymede";
+$targetdir = "<#CLASSDIR#>/server_classes/arlut/csd/ganymede";
 
 print "\nLinking server classes\n\n";
 

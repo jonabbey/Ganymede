@@ -2,8 +2,8 @@
 #
 # sync_tree.client
 #
-# $Revision: 1.5 $
-# $Date: 2000/02/19 02:22:59 $
+# $Revision: 1.6 $
+# $Date: 2000/02/19 02:56:26 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -50,7 +50,7 @@
 
 # What directory are we handling?
 
-chdir("<#TARGETDIR#>/client_classes/arlut/csd/ganymede") || die "Couldn't cd to directory to clean";
+chdir("<#CLASSDIR#>/client_classes/arlut/csd/ganymede") || die "Couldn't cd to directory to clean";
 
 # Clean it out
 
@@ -64,7 +64,7 @@ foreach $family (@ganymede_classes) {
 
 #    print "Linking family $family\n";
 
-    opendir SOURCEDIR, "<#TARGETDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
+    opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for families";
     @classes = grep /^$family[\$\.].*\.?class$/, readdir SOURCEDIR;
     closedir SOURCEDIR;
   
@@ -80,7 +80,7 @@ foreach $family (@ganymede_classes) {
 	
 	print "Linking " . $file . "\n";
 	
-	$result = link ("<#TARGETDIR#>/arlut/csd/ganymede/".$file, $file);
+	$result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
 	
 	if (!$result){
 	    print "$! -- $file\n";
@@ -92,13 +92,13 @@ foreach $family (@ganymede_classes) {
 
 print "\nAttempting to link stubs\n\n";
 
-opendir SOURCEDIR, "<#TARGETDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
+opendir SOURCEDIR, "<#CLASSDIR#>/arlut/csd/ganymede" or die "couldn't open dir for stubs";
 @stubs = grep /_Stub/, readdir SOURCEDIR;
 closedir SOURCEDIR;
 
 foreach $file (@stubs) {
   print "Linking " . $file . "\n";
-  $result = link ("<#TARGETDIR#>/arlut/csd/ganymede/".$file, $file);
+  $result = link ("<#CLASSDIR#>/arlut/csd/ganymede/".$file, $file);
 
   if (!$result){
     print "$! -- $file\n";
@@ -107,8 +107,8 @@ foreach $file (@stubs) {
 
 print "\nAttaching client dir\n\n";
 
-$clientdir="<#TARGETDIR#>/client_classes/arlut/csd/ganymede/client";
-$sourcedir="<#TARGETDIR#>/arlut/csd/ganymede/client";
+$clientdir="<#CLASSDIR#>/client_classes/arlut/csd/ganymede/client";
+$sourcedir="<#CLASSDIR#>/arlut/csd/ganymede/client";
 
 if (! -e $clientdir) {
    mkdir($clientdir, 0770) or die "Couldn't build new client directory";
