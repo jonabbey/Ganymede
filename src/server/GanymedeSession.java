@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -473,7 +473,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     // do a breadth-first search of the owner groups
 
-    groups = inf.getValues();
+    groups = inf.getValuesLocal();
 
     while (groups != null && (groups.size() > 0))
       {
@@ -505,7 +505,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	    inf = (InvidDBField) owner.getField(SchemaConstants.OwnerObjectsOwned);
 
-	    temp = inf.getValues();
+	    temp = inf.getValuesLocal();
 
 	    for (int j = 0; j < temp.size(); j++)
 	      {
@@ -916,6 +916,11 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	key = (Integer) enum.nextElement();
 	obj = (DBObject) base.objectHash.get(key);
 
+	// since we're accessing obj from the objectBase hash directly,
+	// permission checking won't be done here.. this means that
+	// the query handler could match on a field that we wouldn't
+	// actually have access to.. this will need to be dealt with.
+
 	if (DBQueryHandler.matches(query, obj))
 	  {
 	    if (embedded)
@@ -955,20 +960,20 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 			if (x == null)
 			  {
-			    result.addRow(obj);
+			    result.addRow(obj, this);
 			  }
 			else
 			  {
 			    if (x.getStatus() != ObjectStatus.DELETING &&
 				x.getStatus() != ObjectStatus.DROPPING)
 			      {
-				result.addRow(x);
+				result.addRow(x, this);
 			      }
 			  }
 		      }
 		    else
 		      {
-			result.addRow(obj);
+			result.addRow(obj, this);
 		      }
 		  }
 	      } 
@@ -993,20 +998,20 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 			    if (x == null)
 			      {
-				result.addRow(obj);
+				result.addRow(obj, this);
 			      }
 			    else
 			      {
 				if (x.getStatus() != ObjectStatus.DELETING &&
 				    x.getStatus() != ObjectStatus.DROPPING)
 				  {
-				    result.addRow(x);
+				    result.addRow(x, this);
 				  }
 			      }
 			  }
 			else
 			  {
-			    result.addRow(obj);
+			    result.addRow(obj, this);
 			  }
 		      }
 		  }
@@ -1032,7 +1037,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	    if (x.getStatus() == ObjectStatus.CREATING)
 	      {
-		result.addRow(x);
+		result.addRow(x, this);
 	      }
 	  }
       }
@@ -1715,6 +1720,69 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   /**
    *
    * This method takes the administrator's current
+   * persona, considers the owner groups the administrator
+   * is a member of, checks to see if the object is owned
+   * by that group, and determines the appropriate permission
+   * bits for the field in the object.
+   *
+   */
+
+  final PermEntry getPerm(DBObject object, short fieldId)
+  {
+    PermEntry objPerm;
+    PermEntry result;
+
+    /* -- */
+
+    if (object == null)
+      {
+	return null;
+      }
+
+    if (supergashMode)
+      {
+	return PermEntry.fullPerms;
+      }
+
+    objPerm = getPerm(object);
+
+    // is our current persona an owner of this object in some
+    // fashion?
+
+    if (!personaMatch(object))
+      {
+	// Ganymede.debug("getPerm for object " + object.getLabel() + " failed.. no persona match");
+
+	result = defaultPerms.getPerm(object.getTypeID(), fieldId);
+
+	if (result == null)
+	  {
+	    return PermEntry.noPerms;
+	  }
+	else
+	  {
+	    return result.intersection(objPerm);
+	  }
+      }
+
+    // ok, we know our persona has ownership.. return the
+    // permission entry for this object
+
+    result = personaPerms.getPerm(object.getTypeID(), fieldId);
+
+    if (result == null)
+      {
+	return PermEntry.noPerms;
+      }
+    else
+      {
+	return result.intersection(objPerm);
+      }
+  }
+
+  /**
+   *
+   * This method takes the administrator's current
    * persona's set of appropriate permission matrices,
    * does a binary OR'ing of the permission bits for
    * the given base, and returns the effective
@@ -1852,7 +1920,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 		
 		if (idbf != null)
 		  {
-		    Vector vals = idbf.getValues();
+		    Vector vals = idbf.getValuesLocal();
 
 		    // loop over the owner groups this persona is a member of, see if it includes
 		    // the supergash owner group
@@ -1883,7 +1951,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 		    if (idbf != null)
 		      {
-			Vector vals = idbf.getValues();
+			Vector vals = idbf.getValuesLocal();
 
 			// calculate the union of all permission matrices in effect for this persona
 
@@ -1961,7 +2029,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	return false;
       }
     
-    return recursePersonaMatch(inf.getValues());
+    return recursePersonaMatch(inf.getValuesLocal());
   }
 
   /**
@@ -2007,7 +2075,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	    continue;
 	  }
 
-	members = inf.getValues();
+	members = inf.getValuesLocal();
 
 	for (int j = 0; j < members.size(); j++)
 	  {
@@ -2025,7 +2093,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	  {
 	    if (inf.isVector())
 	      {
-		if (recursePersonaMatch(inf.getValues()))
+		if (recursePersonaMatch(inf.getValuesLocal()))
 		  {
 		    return true;
 		  }
@@ -2092,7 +2160,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	// see if we are a member of this particular owner group
 
-	members = inf.getValues();
+	members = inf.getValuesLocal();
 
 	for (int j = 0; j < members.size(); j++)
 	  {
@@ -2110,7 +2178,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	  {
 	    if (inf.isVector())
 	      {
-		if (recursePersonaMatch(inf.getValues()))
+		if (recursePersonaMatch(inf.getValuesLocal()))
 		  {
 		    found = true;
 		  }
@@ -2164,7 +2232,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	return false;   // we have a restriction, but the object is only owned by supergash.. nope.
       }
     
-    owners = inf.getValues();
+    owners = inf.getValuesLocal();
 
     if (owners == null)
       {
