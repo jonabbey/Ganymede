@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.94 $ %D%
+   Version: $Revision: 1.95 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -3830,12 +3830,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		    System.out.println("This one is hashed, sticking it back in.");
 		  }
 		
-		
 		handle = info.getOriginalObjectHandle();
+
 		if (handle != null)
 		  {
 		    list.addObjectHandle(handle);
 		    node = (InvidNode)invidNodeHash.get(invid);
+
 		    if (node != null)
 		      {
 			node.setHandle(handle);
@@ -3843,6 +3844,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		  }
 	      }
 	  }
+
 	deleteHash.remove(invid);
 	setIconForNode(invid);
       }
@@ -3861,6 +3863,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	info = (CacheInfo)createHash.get(invid);
 	
 	list = cachedLists.getList(info.getBaseID());
+
 	if (list != null)
 	  {
 	    if (debug)
@@ -3870,9 +3873,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    
 	    list.removeInvid(invid);
 	  }
+
 	createHash.remove(invid);
 	
 	node = (InvidNode)invidNodeHash.get(invid);
+
 	if (node != null)
 	  {
 	    tree.deleteNode(node, false);
@@ -3894,6 +3899,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	info = (CacheInfo)changedHash.get(invid);
 	    
 	list = cachedLists.getList(info.getBaseID());
+
 	if (list != null)
 	  {
 	    if (debug)
@@ -3930,6 +3936,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     info = null;
     
     changed = reactivatedHash.keys();
+
     while (changed.hasMoreElements())
       {
 	invid = (Invid)changed.nextElement();
@@ -3937,15 +3944,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	info = (CacheInfo)reactivatedHash.get(invid); 
 
 	list = cachedLists.getList(info.getBaseID());
+
 	if (list != null)
 	  {
-
 	    ObjectHandle original = info.getOriginalObjectHandle();
+
 	    if (original != null)
 	      {
 		if (debug)
 		  {
-		    System.out.println("Reverting to original ObjectHandle.  isInactive: " + original.isInactive() + " isRemovaldate: " + original.isRemovalSet() + " isExpire: " + original.isExpirationSet());
+		    System.out.println("Reverting to original ObjectHandle.  isInactive: " + 
+				       original.isInactive() + " isRemovaldate: " + 
+				       original.isRemovalSet() + " isExpire: " + 
+				       original.isExpirationSet());
 		  }
 		    
 		list.removeInvid(invid);
@@ -3979,7 +3990,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
 
 	node.setMenu(objectReactivatePM);  // set it back to the reactivate method
+
 	int index = node.getText().indexOf("(inactive)");
+
 	if (index < 0)
 	  {
 	    node.setText(node.getText() + " (inactive)");
@@ -3994,12 +4007,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     list = null;
     
     changed = inactivateHash.keys();
+
     while (changed.hasMoreElements())
       {
 	invid = (Invid)changed.nextElement();
 	info = (CacheInfo)inactivateHash.get(invid);
 	    
 	node = (InvidNode)invidNodeHash.get(invid);
+
 	if (node.getText().indexOf("(inactive)") > 0)
 	  {
 	    if (debug)
@@ -4011,12 +4026,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	  }
 
 	list = cachedLists.getList(info.getBaseID());
+
 	if (list != null)
 	  {
 	    list.removeInvid(invid);
 	    handle = info.getOriginalObjectHandle();
 	    list.addObjectHandle(handle);
 	    node = (InvidNode)invidNodeHash.get(invid);
+
 	    if (node != null)
 	      {
 		node.setHandle(handle);
@@ -4028,7 +4045,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	setIconForNode(invid);
       }
 
-    if (debug && createHash.isEmpty() && deleteHash.isEmpty() && changedHash.isEmpty() && inactivateHash.isEmpty() && reactivatedHash.isEmpty())
+    if (debug && createHash.isEmpty() && deleteHash.isEmpty() && 
+	changedHash.isEmpty() && inactivateHash.isEmpty() && 
+	reactivatedHash.isEmpty())
       {
 	System.out.println("Woo-woo the hashes are all empty");
       }
@@ -4380,88 +4399,75 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    System.err.println("not a base node, can't create");
 	  }
       }
-    else if (event.getActionCommand().equals("List editable"))
+    else if ((event.getActionCommand().equals("List editable")) ||
+	     (event.getActionCommand().equals("List all")))
       {
 	if (debug)
 	  {
-	    System.out.println("viewMI");
+	    System.out.println("viewMI/viewAllMI");
 	  }
 
 	if (node instanceof BaseNode)
 	  {
 	    BaseNode baseN = (BaseNode)node;
 
-	    try
+	    Query listQuery = null;
+
+	    if (event.getActionCommand().equals("List editable"))
 	      {
-		//Query _query = new Query(baseN.getBase().getTypeID(), null, true);
+		listQuery = baseN.getEditableQuery();
+	      }
+	    else
+	      {
+		listQuery = baseN.getAllQuery();
+	      }
 
+	    // inner classes can only refer to final method variables,
+	    // so we'll make some final references to keep our inner
+	    // class happy.
 
-		setStatus("Sending query for base " + node.getText() + " to server");
+	    final Query q = listQuery;
+	    final gclient thisGclient = this;
+	    final String tempText = node.getText();
 
-		DumpResult buffer = session.dump(baseN.getEditableQuery());
-
+	    Thread t = new Thread(new Runnable() {
+	      public void run() {
+		
+		thisGclient.wp.addWaitWindow(this);
+		DumpResult buffer = null;
+		
+		try
+		  {
+		    buffer = thisGclient.getSession().dump(q);
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException("caught remote: " + ex);
+		  }
+		    
 		if (buffer == null)
 		  {
-		    setStatus("results == null");
+		    setStatus("No results from list operation on base " + tempText);
 		  }
 		else
 		  {
-		    setStatus("Server returned results for query on base " + node.getText() + " - building table");
-
-		    wp.addTableWindow(session, baseN.getEditableQuery(), buffer, "Query Results");
+		    setStatus("List returned from server on base " + tempText +
+			      " - building table");
+		    
+		    thisGclient.wp.addTableWindow(thisGclient.getSession(), q,
+						  buffer, "Query Results");
 		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get query: " + rx);
-	      }
+
+		thisGclient.wp.removeWaitWindow(this);
+	      }});
+
+	    t.start();
+	    
+	    setStatus("Sending query for base " + node.getText() + " to server");
 	  }
 	else
 	  {
 	    System.out.println("viewMI from a node other than a BaseNode");
-	  }
-      }
-    else if (event.getActionCommand().equals("List all"))
-      {
-	if (debug)
-	  {
-	    System.out.println("viewAllMI");
-	  }
-	
-	if (node instanceof BaseNode)
-	  {
-	    setWaitCursor();
-	    
-	    BaseNode baseN = (BaseNode)node;
-	    
-	    try
-	      {
-		//Query _query = new Query(baseN.getBase().getTypeID(), null, false);
-
-		setStatus("Sending query for base " + node.getText() + " to server");
-
-		DumpResult buffer = session.dump(baseN.getAllQuery());
-		
-		if (buffer == null)
-		  {
-		    setStatus("results == null");
-		  }
-		else
-		  {
-		    setStatus("Server returned results for query on base " + node.getText() + " - building table");
-
-		    wp.addTableWindow(session, baseN.getAllQuery(), buffer, "Query Results");
-		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get query: " + rx);
-	      }
-	    setNormalCursor();
-	  }
-	else
-	  {
-	    System.out.println("viewAllMI from a node other than a BaseNode");
 	  }
       }
     else if (event.getActionCommand().equals("Query"))
@@ -4479,6 +4485,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    querybox box = new querybox(base, this,  this, "Query Panel");
 
 	    setNormalCursor();
+
+	    // inner classes can only refer to final method variables,
+	    // so we'll make some final references to keep our inner
+	    // class happy.
+
 	    final Query q = box.myshow();
 	    final gclient thisGclient = this;
 	    final String text = node.getText();
