@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.57 $
-# $Date: 2001/06/02 01:30:16 $
+# $Revision: 1.58 $
+# $Date: 2001/06/27 19:33:10 $
 # $Name:  $
 #
 # Jonathan Abbey
@@ -434,7 +434,7 @@ removelastslash($swingdir);
 
 print "\nGenerating config.sh files in source directories.\n";
 
-while ($#configs > 0) {
+while ($#configs >= 0) {
     write_config(shift @configs, shift @configs, shift @configs);
 }
 
@@ -462,7 +462,7 @@ while ($#configs > 0) {
 
 print "Generating rebuild files in source directories.\n";
 
-while ($#rebuilds > 0) {
+while ($#rebuilds >= 0) {
     write_rebuild(shift @rebuilds);
 }
 
@@ -477,7 +477,7 @@ while ($#rebuilds > 0) {
 
 print "Generating jar generation scripts.\n\n";
 
-while ($#sync > 0) {
+while ($#sync >= 0) {
     write_syncjars(shift @sync, shift @sync);
 }
 
