@@ -8,8 +8,8 @@
    
    Created: 2 October 2000
    Release: $Name:  $
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2000/10/03 01:48:18 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2001/05/21 02:51:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -121,6 +121,23 @@ final public class NamedStack {
       }
 
     return ((NamedStackHandle) stack.pop()).getData();
+  }
+
+  /**
+   * <p>This is just plain old pop, it will return the top element
+   * without regard to its name.</p>
+   */
+
+  public synchronized Object pop()
+  {
+    NamedStackHandle handle = (NamedStackHandle) stack.pop();
+
+    if (handle == null)
+      {
+	return null;
+      }
+    
+    return handle.getData();
   }
 
   public Object elementAt(int index)
