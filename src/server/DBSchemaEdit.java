@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.21 $ %D%
+   Version: $Revision: 1.22 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -35,7 +35,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   private final static boolean debug = true;
 
-  //
+  // ---
 
   private boolean developMode = false; // CAUTION!! Should be false unless the schema elements
              			       // that the Ganymede server's
@@ -101,15 +101,16 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	maxId = store.maxBaseId;
 	newBases = new Hashtable();
 
-	// this DBBaseCategory constructor recursively copies the bases referenced
-	// from store.rootCategory into newBases
+	// this DBBaseCategory constructor recursively copies the
+	// bases referenced from store.rootCategory into newBases
 
 	rootCategory = new DBBaseCategory(store, store.rootCategory, newBases, this);
 
 	// make a shallow copy of our namespaces vector.. note that we
 	// since DBNameSpace's are immutable once created, we don't
 	// need to worry about creating new ones, or about correcting
-	// the DBNameSpace references in the duplicated DBObjectBaseFields.
+	// the DBNameSpace references in the duplicated
+	// DBObjectBaseFields.
 
 	// we use oldNameSpaces to undo any namespace additions or deletions
 	// we do in store.nameSpaces during our editing.
@@ -165,9 +166,9 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	throw new IllegalArgumentException("can't create new built-ins when developMode is false");
       }
 
-    // We use the userbase as our model for the built-ins.. when we commit,
-    // we'll make all non-embedded bases have the same built-in fields
-    // as userbase
+    // We use the userbase as our model for the built-ins.. when we
+    // commit, we'll make all non-embedded bases have the same
+    // built-in fields as userbase
 
     synchronized(store)
       {
@@ -263,8 +264,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	// The path is going to include the name of the root node
 	// itself (unlike in the UNIX filesystem, where the root node
-	// has no 'name' of its own), so we need to skip into the
-	// root node.
+	// has no 'name' of its own), so we need to skip into the root
+	// node.
 
 	if (tok == '/')
 	  {
@@ -278,8 +279,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	while (tok != StreamTokenizer.TT_EOF && bc != null)
 	  {
-	    // note that slashes are the only non-word token we
-	    // should ever get, so they are implicitly separators.
+	    // note that slashes are the only non-word token we should
+	    // ever get, so they are implicitly separators.
 	    
 	    if (tok == StreamTokenizer.TT_WORD)
 	      {
@@ -828,15 +829,20 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	// ** need to unlink old objectBases / rootCategory for GC here? **
 
 	store.maxBaseId = maxId;
-	store.objectBases = newBases; // all the bases already have containingHash pointing to newBases
+
+	// all the bases already have containingHash pointing to
+	// newBases
+
+	store.objectBases = newBases; 
 	store.rootCategory = rootCategory;
 
 	// and unlock the server
 
 	store.schemaEditInProgress = false;
 
-	// and update the serialized representation of the category/base structure.. note that
-	// we want it to be created with supergash privs.
+	// and update the serialized representation of the
+	// category/base structure.. note that we want it to be
+	// created with supergash privs.
 
 	Ganymede.catTransport = new CategoryTransport(store.rootCategory, Ganymede.internalSession);
 	Ganymede.baseTransport = new BaseListTransport(Ganymede.internalSession);
@@ -853,7 +859,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
    *
    * The schema editor edits built-in fields by editing the
    * set of built-in fields associated with base SchemaConstants.UserBase
-   * (which is chosen randomly as a representative non-embedded object).
+   * (which is chosen randomly as a representative non-embedded object).<br><br>
    *
    * IMPORTANT NOTE: This is only to be used when the Schema Editing rig
    * is being used to alter the basic built-in fields that the Ganymede
@@ -909,9 +915,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    continue;
 	  }
 
-	// now we need to make sure that base
-	// has just those built-in field definitions that
-	// were in userBase
+	// now we need to make sure that base has just those built-in
+	// field definitions that were in userBase
 
 	fields = base.getFields();
 
@@ -966,9 +971,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    continue;
 	  }
 
-	// now we need to make sure that base
-	// has just those built-in field definitions that
-	// were in userBase
+	// now we need to make sure that base has just those built-in
+	// field definitions that were in userBase
 
 	fields = base.getFields();
 
@@ -1017,6 +1021,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    base.fieldHash.put(new Short(newFieldDef.getID()), newFieldDef);
 	  }
       }
+
     return true;
   }
 
