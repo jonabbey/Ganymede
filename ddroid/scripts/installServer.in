@@ -1,0 +1,608 @@
+#!/opt/bin/perl5
+#
+# Install script for Directory Droid Server
+#
+# Last Mod Date: $Date$
+# Last Revision Changed: $Rev$
+# Last Changed By: $Author$
+#
+# Jonathan Abbey - jonabbey@arlut.utexas.edu
+#
+############################################################
+
+use File::Copy;
+use Cwd;
+use English;
+
+$perlname = "<#PERLEXE#>";
+$homedir = $ENV{HOME};
+&removelastslash($homedir);
+
+# Make sure our current working directory is in the same directory as
+# the script
+
+$rootdir = &dirname($0);
+chdir($rootdir);
+
+# This script needs to get a several pieces of information from
+# the user, including:
+#
+# Where is the jvm (java command)?
+# Where should the server tree be placed?
+# What system is the server to run on?
+# What return address should the server put on outgoing mail?
+# What superuser name is desired?
+# What password is desired?
+# What monitor account name is desired?
+# What monitor account password is desired?
+# Where is the root of the help web?
+#
+# Everything else can be reasonably derived from the above.
+
+@steps = ("JVM","SERVERINSTALL","SYSTEMNAME","REGISTRYPORT","MAILHOST",
+	  "RETURNADDR", "SUPERNAME", "SUPERPASS",
+	  "MONITORNAME", "MONITORPASS");
+
+# Notice that we are leaving HELPWEB out of @steps, since we
+# really don't have that set up yet.
+
+%vars = ("JVM" => "<#JAVADIR#>",
+         "SERVERINSTALL" => "",
+         "SYSTEMNAME" => "",
+         "REGISTRYPORT" => "1099",
+	 "MAILHOST" => "",
+         "RETURNADDR" => "",
+         "SUPERNAME" => "supergash",
+         "SUPERPASS" => "",
+         "MONITORNAME" => "monitor",
+         "MONITORPASS" => "monitor",
+         "HELPWEB" => "http://www.arlut.utexas.edu/gash2/help/");
+
+%descrip = ("JVM" => "Where are the JDK binaries installed?",
+            "SERVERINSTALL" => "Where should the server tree be installed?",
+	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
+	    "REGISTRYPORT" => "What port should the RMI registry supporting Directory Droid run on?",
+	    "MAILHOST" => "What mailhost should Directory Droid use to send out diagnostic mail?",
+	    "RETURNADDR" => "What email address should Directory Droid sign on email that it sends out?",
+	    "SUPERNAME" => "What name do you want the Directory Droid superuser account to have?",
+	    "SUPERPASS" => "What password do you want the superuser account to have?",
+	    "MONITORNAME" => "What name do you want the Directory Droid monitor account to have?",
+	    "MONITORPASS" => "What password do you want the monitor account to have?",
+	    "HELPWEB" => "What URL is the Directory Droid help web at (leave default for now)?",
+	   );
+
+$template = "scripts/server.properties.template";
+
+####################
+
+# We don't want to hold back stdout
+
+$| = 1;
+
+print <<ENDINTRO;
+
+Directory Droid Server Install Script
+-------------------------------------
+
+ENDINTRO
+
+# Make sure we're running from the right directory
+
+open TEST, $template or $failure = 1;
+
+if (!$failure) {
+  close TEST;
+} else {
+  print "*error* couldn't find server properties template.  not run from install directory?\n";
+  exit;
+}
+
+if (!-f "jars/ddroidServer.jar") {
+  print "Error couldn't find ddroidServer.jar file.\n";
+  print "Be sure and do an 'ant jars' after building the Directory Droid server.\n";
+  exit;
+}
+
+# Read the information from the user
+
+$vars{"SYSTEMNAME"} = `hostname`; # default hostname
+chop $vars{"SYSTEMNAME"}; # take off trailing newline
+$vars{"MAILHOST"} = $vars{"SYSTEMNAME"};
+
+foreach $step (@steps) {
+
+  $success = 0;
+
+  while (!$success) {
+    print $descrip{$step};
+    print " [$vars{$step}] ";
+
+    $inp = <>;
+
+    chop $inp; # cut off newline
+
+    if ($inp ne "") {
+      $vars{$step} = $inp;
+    }
+
+    if ($vars{$step}eq "") {
+      $success = 0;
+      print "*You must provide a value for this field*\n";
+    } else {
+      $success = 1;
+    }
+
+    if (($step eq "SERVERINSTALL") ||
+	($step eq "JVM")) {
+
+      $vars{$step} = &canonify($vars{$step});
+
+      if ($vars{$step} !~ /^\//) {
+	print "*Pathname could not be resolved, please enter a full path.\n";
+	$success = 0;
+      }
+    }
+  }
+}
+
+# Ok, we've got everything
+
+print <<ENDCONFIG;
+
+Testing configuration information
+
+ENDCONFIG
+
+$success = 1; # Assume success until we find out otherwise
+
+# java command found ok?
+
+if (!-e $vars{"JVM"}."/java") {
+  die "*Can't find the java command*\n\nAborting..";
+  $success = 0;
+} else {
+  print "Found the java command ok\n";
+}
+
+# can we make the server install directory?
+
+if (!-d $vars{"SERVERINSTALL"}) {
+  mkdir($vars{"SERVERINSTALL"}, 0700) or die "*Couldn't make the server install directory*\n";
+  print "Made the server install directory ok\n";
+} else {
+  print "Found the server install directory ok\n";
+}
+
+# assume we've got the system name ok
+
+# Make sure the return address is fully qualified
+
+if ($vars{"RETURNADDR"} !~ /@/) {
+  $vars{"RETURNADDR"}.="@".$vars{"MAILHOST"};
+
+  print "** No machine/domain name specified in return address..\n";
+  print "** Set return address to " . $vars{"RETURNADDR"} . "\n";
+}
+
+print "\nConfiguration seems to check out.\n\n";
+print "Installing";
+
+$installdir = $vars{"SERVERINSTALL"};
+
+&makedir("$installdir/bin", 0750); print ".";
+&makedir("$installdir/db", 0700); print ".";
+&makedir("$installdir/db/text", 0700); print ".";
+&makedir("$installdir/backups", 0700); print ".";
+&makedir("$installdir/jars", 0750); print ".";
+&makedir("$installdir/html", 0750); print ".";
+&copydir("doc", "$installdir/doc"); print ".";
+copy("README", "$installdir/README"); print ".";
+copy("INSTALL", "$installdir/INSTALL"); print ".";
+copy("UPGRADE", "$installdir/UPGRADE"); print ".";
+copy("CHANGES", "$installdir/CHANGES"); print ".";
+copy("FAQ", "$installdir/FAQ"); print ".";
+copy("CREDITS", "$installdir/CREDITS"); print ".";
+copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
+copy("KNOWNBUGS", "$installdir/KNOWNBUGS"); print ".";
+
+copy("jars/ddroidServer.jar", "$installdir/jars/ddroidServer.jar"); print ".";
+copy("jars/gnu-regexp-1.1.4.jar", "$installdir/jars/gnu-regexp-1.1.4.jar"); print ".";
+
+# for the xmlclient, go ahead and install the client jar file
+
+copy("jars/ddroid.jar", "$installdir/jars/ddroid.jar"); print ".";
+
+copy("scripts/motd.html", "$installdir/db/text/motd.html"); print ".";
+copy("scripts/motd.txt", "$installdir/db/text/motd.txt"); print ".";
+
+# Copy the signature file
+
+copy("scripts/signature", "$installdir/db/signature"); print ".";
+
+# Copy and process the properties file into place
+
+%propconvert = ("ganymede.database" => "$installdir/db/ganymede.db",
+		"ganymede.schemadir" => "$installdir/schema",
+		"ganymede.log" => "$installdir/db/log",
+		"ganymede.loghelper" => "$installdir/bin/logscan.pl",
+		"ganymede.journal" => "$installdir/db/journal",
+		"ganymede.htmldump" => "$installdir/html/schemadump.html",
+		"ganymede.signaturefile" => "$installdir/db/signature",
+		"ganymede.messageDirectory" => "$installdir/db/text",
+		"ganymede.mailhost" => $vars{"MAILHOST"},
+		"ganymede.returnaddr" => $vars{"RETURNADDR"},
+		"ganymede.serverhost" => $vars{"SYSTEMNAME"},
+		"ganymede.registryPort" => $vars{"REGISTRYPORT"},
+		"ganymede.rootname" => $vars{"SUPERNAME"},
+		"ganymede.defaultrootpass" => $vars{"SUPERPASS"},
+		"ganymede.monitorname" => $vars{"MONITORNAME"},
+		"ganymede.defaultmonitorpass" => $vars{"MONITORPASS"},
+		"ganymede.helpbase" => $vars{"HELPWEB"},
+		"ganymede.softtimeout" => "false",
+		"ganymede.timeoutIdleNoObjs" => "15",
+		"ganymede.timeoutIdleWithObjs" => "20",
+		"ganymede.builder.backups" => "$installdir/backups",
+	       );
+
+open INPUT, $template or die "Couldn't open properties template!";
+open OUTPUT, ">$installdir/ganymede.properties" or die "Couldn't write ganymede.properties";
+
+print "\nCustomizing ganymede.properties\n";
+
+while (<INPUT>) {
+
+  if (!/^([^\#=]*)=/) {
+    print OUTPUT $_;
+  } elsif (defined $propconvert{$1}) {
+    print OUTPUT "$1=$propconvert{$1}\n";
+  } else {
+    print "No customized value for template entry $1 - copying value from template\n";
+    print OUTPUT $_;
+  }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0640, "$installdir/ganymede.properties";
+
+# Copy and process the runServer script into place
+
+print "\nCustomizing Directory Droid runServer script\n";
+
+# first we need to determine if we are running java 1.1 or java 1.2 or greater
+
+$version = &identifyjvm($vars{"JVM"}."/java");
+
+if ($version == 2) {
+  $template = "scripts/runServer.template2";
+} elsif ($version == 1) {
+  $template = "scripts/runServer.template";
+} else {
+  print "\nWarning, couldn't locate/verify " . $vars{"JVM"} . "/java.  Installing a Java 1.2+ configured runServer script.\n";
+  $template = "scripts/runServer.template2";
+}
+
+# now we need to configure and install the runServer script
+
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
+               "PROPERTIES" => "$installdir/ganymede.properties",
+               "CLASSPATH" => "$installdir/jars/ddroidServer.jar:$installdir/jars/gnu-regexp-1.1.4.jar:$installdir/schema/custom.jar",
+	       "RMIPORT" => $vars{"REGISTRYPORT"},
+	       "INSTALLDIR" => $installdir);
+
+open INPUT, "$template" or die "Couldn't open $template!";
+open OUTPUT, ">$installdir/bin/runServer" or die "Couldn't write runServer";
+
+while (<INPUT>) {
+
+  if (!/^([A-Z]*)=/) {
+    print OUTPUT $_;
+  } elsif (defined $runconvert{$1}) {
+    print OUTPUT "$1=$runconvert{$1}\n";
+  } else {
+    print "Unrecognized template entry $1 - copying template value\n";
+    print OUTPUT $_;
+  }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/runServer";
+
+# Copy and process the stopServer script into place
+
+open INPUT, "scripts/stopServer.template" or die "Couldn't open stopServer template!";
+open OUTPUT, ">$installdir/bin/stopServer" or die "Couldn't write stopServer";
+
+while (<INPUT>) {
+
+  if (!/^([A-Z]*)=/) {
+    print OUTPUT $_;
+  } elsif (defined $runconvert{$1}) {
+    print OUTPUT "$1=$runconvert{$1}\n";
+  } else {
+    print "Unrecognized template entry $1 - copying template value\n";
+    print OUTPUT $_;
+  }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/stopServer";
+
+# Copy and process the logscan.pl script into place
+
+open INPUT, "scripts/logscan.pl.template" or die "Couldn't open logscan template!";
+open OUTPUT, ">$installdir/bin/logscan.pl" or die "Couldn't write logscan";
+
+# logscan.pl is a perl script.. write out the name of our interpreter
+
+while (<INPUT>) {
+  s/\/opt\/bin\/perl5/$perlname/g;
+  s/<<LOGFILE>>/$installdir\/db\/log/g;
+
+  print OUTPUT $_;
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/logscan.pl";
+
+# Copy and process the xmlclient script into place
+
+%runconvert = ("JAVA" => $vars{"JVM"}."/java",
+	       "PROPERTIES" => "$installdir/ganymede.properties",
+	       "CLASSPATH" => "$installdir/jars/ddroid.jar");
+
+open INPUT, "scripts/xmlclient.template" or die "Couldn't open xmlclient template!";
+open OUTPUT, ">$installdir/bin/xmlclient" or die "Couldn't write xmlclient";
+
+while (<INPUT>) {
+
+    if (!/^([A-Z]*)=/) {
+	print OUTPUT $_;
+    } elsif (defined $runconvert{$1}) {
+	print OUTPUT "$1=$runconvert{$1}\n";
+    } else {
+	print "Unrecognized template entry $1 - copying template value\n";
+	print OUTPUT $_;
+    }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/xmlclient";
+
+######################################################################
+#
+#  Done!
+#
+######################################################################
+
+print <<ENDFINAL;
+
+------------------------------
+
+The Directory Droid server was successfully installed in $installdir.
+
+Done
+
+ENDFINAL
+
+#########################################################################
+#
+#                                                                 makedir
+#
+# input: 1) a directory to make
+#        2) octal chmod bits
+#
+#########################################################################
+sub makedir{
+  my ($dirpath, $chmod) = @_;
+
+  if (!-e $dirpath) {
+    mkdir ($dirpath, $chmod) or die("*Couldn't make $dirpath*");
+  }
+}
+
+#########################################################################
+#
+#                                                                 copydir
+#
+# input: 1) a directory to copy from
+#        2) directory target
+#
+#########################################################################
+sub copydir{
+  my ($source, $target) = @_;
+  my (@dirs, $file);
+
+  &removelastslash($source);
+  &removelastslash($target);
+
+  if (!-e $target) {
+    &makedir($target, 0750);
+  }
+
+  opendir SOURCE, $source || die "Failure in copydir";
+  @dirs = readdir SOURCE;
+  closedir SOURCE;
+
+  foreach $file (@dirs) {
+    if (($file eq ".") || ($file eq "..")) {
+      next;
+    }
+
+    if (-d "$source/$file") {
+      &copydir("$source/$file", "$target/$file"); #recurse
+    } else {
+      copy("$source/$file", "$target/$file");
+    }
+  }
+}
+
+#########################################################################
+#
+#                                                         removelastslash
+#
+# input: a pathname to test
+#
+# this function will remove a trailing slash from the directory name
+# input
+#
+#########################################################################
+sub removelastslash{
+  if ($_[0] =~ /\/$/) {
+    chop $_[0];
+  }
+
+  return $_[0];
+}
+
+#########################################################################
+#
+#                                                             identifyjvm
+# input: filename of the jvm executable
+#
+# returns: 0 if the jvm couldn't be tested, 1 if it was JDK 1.1 based,
+# 2 if it was 1.2 or 1.3 based
+#
+#
+#########################################################################
+sub identifyjvm {
+  my ($jvm) = @_;
+  my $versionString;
+
+  if (!-f $jvm) {
+    return 0;
+  }
+
+  $versionString = `$jvm -version 2>&1`;
+
+  if (($versionString =~ /1\.2/) ||
+      ($versionString =~ /1\.3/) ||
+      ($versionString =~ /1\.4/))
+    {
+      return 2;
+    }
+  else
+    {
+      return 1;
+    }
+}
+
+#########################################################################
+#
+#                                                                 resolve
+#
+# input: $dir - absolute pathname of current directory
+#        $link - string containing the readlink() results for a
+#                symbolic link in $dir to be processed
+#
+# returns: absolute pathname of the target of the symbolic link
+#
+#########################################################################
+sub resolve{
+    my($dir, $link) = @_;
+    my(@alinkp, $d, $alinkp);
+
+    # make array representations of
+    # the current directory and symbolic link
+
+    # if we have a leading / in our $dir or $link,
+    # we'll need to shift to get rid of the leading
+    # empty array element
+
+    @dirp=split(/\//, $dir);
+    shift(@dirp) if (!($dirp[0]));
+    @linkp=split(/\//, $link);
+    shift(@linkp) if (!($linkp[0]));
+
+    # @alinkp is an array that we will build to contain the absolute link
+    # target pathname.  If the link does not begin with a /, it is a relative link,
+    # and we need to place our current directory into the @alinkp array.
+
+    if ($link !~ /^\//) {
+	@alinkp=@dirp;
+    }
+
+    # modify the @alinkp array according
+    # to each path component of the @linkp array
+    # (an array representation of the symbolic link
+    # given to us), to arrive at the ultimate absolute
+    # pathname of the symbolic link
+
+    $d = shift(@linkp);
+
+    while ($d) {
+	if ($d eq "..") {
+	    pop(@alinkp);
+	}
+	elsif ($d ne "."){
+	    push(@alinkp, $d);
+	}
+	$d=shift(@linkp);
+    }
+
+    $"='/';
+
+    # perl functions return the value of the last expression
+    # in the subroutine
+
+    $alinkp="/@alinkp";
+}
+
+#########################################################################
+#
+#                                                                canonify
+#
+# input: $pathname - a directory or filename path, may be relative
+# or use ~ to represent the current user's home directory
+#
+# returns: absolute location of the givevn pathname
+#
+#########################################################################
+sub canonify {
+  my ($pathname) = @_;
+  my ($homedir);
+
+  $pathname = &removelastslash($pathname);
+
+  if (!(($pathname =~ /^\//) || ($pathname =~ /^~\//))) {
+    $pathname = &resolve(cwd(), $pathname);
+  }
+
+  if ($pathname =~ /^~\//) {
+    $homedir = $ENV{'HOME'};
+    &removelastslash($homedir);
+    $pathname =~ s/\~\//$homedir\//g;
+  }
+
+  return $pathname;
+}
+
+#########################################################################
+#
+#                                                                 dirname
+#
+# input: 1) a filename path
+#
+# return: the directory containing the filename given
+#
+#########################################################################
+sub dirname{
+  my ($dirpath) = @_;
+  my (@comps);
+
+  $dirpath = &canonify($dirpath);
+
+  @comps = split(/\//, $dirpath);
+  pop @comps;
+  return join('/', @comps);
+}

@@ -1,0 +1,7 @@
+#!/bin/csh
+cd /var/yp/gash/files
+grep -v '^>' hosts_info | sort > temp1
+grep '^>' hosts_info | sort > temp2
+cat temp1 temp2 > new_hosts_info
+# mv hosts_info hosts_info.presort
+mv new_hosts_info hosts_info

@@ -1,0 +1,223 @@
+Directory Droid Release 1.0.13
+?? ?, 2004
+CREDITS
+
+Last Revision Changed: $Rev$
+Last Changed By: $Author$
+Last Mod Date: $Date$
+SVN URL: $HeadURL$
+
+---------------------------------------------
+
+Directory Droid has been under development for over 6 years now, in both
+planning and execution.  The work has primarily been performed in the
+Computer Science Division of The Applied Research Laboratories, The
+University of Texas at Austin, with support from CSD and ARL
+management.
+
+The development of Directory Droid has benefited from the direct development
+contributions of the following individuals:
+
+--
+
+ Jonathan Abbey, jonabbey@arlut.utexas.edu
+
+Primary architect and coder on the project.  Developed the Directory
+Droid server and admin console, the table and tree GUI components used
+in both the admin console and the primary client, the great bulk of
+the project documentation (or lack thereof) as well as all of the CVS
+and build script work.  Answers e-mail.
+
+--
+
+ Mike Mulvaney, mike@mulvaney.com
+
+Mike worked on Directory Droid during his year and a half at the lab,
+from February of 1997 through September of 1998, before moving to the
+Washington D.C. area.  The client as it currently stands is primarily
+Mike's work.  In addition to the large bulk of client-side coding,
+Mike contributed significantly to the design of the system
+architecture as a whole.  Directory Droid would be a far, far poorer
+thing were it not for Mike.
+
+--
+
+ Brian O'Mara, bom@alumni.utexas.net
+
+Brian worked on Directory Droid during his tenure as a student
+employee at ARL from February 1998 through August of 2000.  Brian
+created custom icons for the Directory Droid client and rewrote the
+permissions editor to use more Swing classes, as well as creating the
+persona selection dialog introduced in Directory Droid 0.98.  Brian
+also reworked the Query dialog to be more user-friendly.  During his
+last year at ARL, Brian did an enormous amount of work in preparing
+for the ultimate replacement of the old-style hosts_info DNS support
+with new code to convert BIND files into an XML representation and
+back again, which will be incorporated into a Directory Droid schema
+kit sometime during 2001.
+
+--
+
+ Navin Manohar, navin.manohar@ac.com
+
+Navin worked on Directory Droid from its inception in late 1995
+through his departure from the lab in April of 1997.  Navin
+contributed to initial architecture design decisions during this time,
+as well as the initial development of the client, including the basic
+framework within which the client was developed.  He developed the
+excellent calendar GUI component that is used in the client, as well
+as the more unobtrusive but vital GUI components that the client uses
+for data entry, back in the Java 1.0 days.
+
+--
+
+ Erik Grostic, butcher@auschron.com
+
+Erik worked on Directory Droid from mid 1997 through his departure
+from the lab in December of 1997.  Erik developed the GUI code for the
+permissions editor and the query submission dialog, helping bring the
+client into fruition.
+
+--
+
+ Deepak Giridharagopal, deepak@arlut.utexas.edu
+
+Deepak is contributing Java coding and development to the Directory
+Droid system.  Deepak just started at ARL, but he has already made
+noticeable improvements to the Directory Droid client's GUI.
+
+--
+
+ Dan Scott, dscott@arlut.utexas.edu
+
+Dan originated the GASH project, providing strategic vision and
+architectural design to solve the essential problem of shared group
+control over the lab's master NIS and DNS databases.  Dan has
+contributed greatly to the higher level design issues in Directory
+Droid, as well as providing invaluable user interface design feedback
+and bug reporting.  Neither Directory Droid nor GASH could have been
+developed at all without his support.
+
+------
+
+Within ARL, Gil Kloepfer provided design assistance on the networking
+issues that Directory Droid is going to need to address as the lab moves into
+the 21st century.  Jay Scott contributed work on a new version of the
+GASH schema's build kit (which is not yet included with the Directory Droid
+distribution).  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
+Gramann, Andrew Helyer, Richard Mach, and others made helpful reports
+on gaps and problems with Directory Droid.
+
+John Knutson has provided bug reports and code contributions in the
+course of evaluating the Directory Droid code for use on an SGL
+project.  Directory Droid's support of floating point data fields came
+from John.
+
+A lot of Directory Droid is based on the experience and design work
+that went into GASH.  In addition to the aforementioned names, Dean
+Kennedy and Pug Bainter should be credited for their design work on
+GASH.  Pug Bainter authored the original GASH makefiles that the
+Directory Droid GASH schema uses to propagate information from
+Directory Droid into NIS and DNS.
+
+Outside ARL, we have gotten very helpful bug reports and feedback
+from:
+
+Pug Bainter, pug@pug.net - lots of really good bug reports
+Martin Schneider, martin@ira.uka.de - server customization bug reports
+Michael McEniry, mmceniry@itsc.uah.edu - linux localhost patch
+Christoph Litauer, litauer@uni-koblenz.de - xmlclient testing
+Curtis King, curtis.king@cul.ca - detailed bug reports
+Doug Floyd, dfloyd@io.com - bug reports and AIX testing
+Matt Knopp, mhat@vorlon.com - FreeBSD testing, Sesame Chicken
+Mike Clay, mclay@weareb.org - FreeBSD testing
+Stephen L. Johnson, sjohnson@godzilla.monsters.org - bug reports
+Matt Bush, xomox@netlag.com - beta testing, bug reports
+Jher, jher@fnord.com - beta testing
+Sheilagh O'Hare, martini@fc.net - design brilliance
+Frederick Dickey, frederick.j.dickey@boeing.com - packaging bug report
+Lewis Muhlenkamp, lewism@tt.comm.mot.com - packaging, client bug reports
+Nikola Nedeljkovic, nikola@carbonix.iam.tu-clausthal.de - packaging reports
+Andy Johnson, andyjohnson@engineer.com - build script bug reports
+Charles Adams, charles.adams@central.sun.com - bug reports, debugging
+Darrell Tippe, Darrell.Tippe@atcoitek.com - bug reports
+Glen Joseph, gjoseph@us.ibm.com - installServer bug report
+Chris McCraw, fool@dfw.net - bugzilla testing
+Ido Dubrawsky, ido@globeset.com - testing
+Michael Houle, michael.houle@atcoitek.com - many bug reports
+Miklos Muller, mmuller@lbcons.net - many wonderful bug reports for Directory Droid 1.0
+Gaurav Bhargava, gaurav.bhargava@villanova.edu - Bug reports, schema development
+Martin Vogt <vogt@itwm.uni-kl.de> - bug reports
+Steve Lemons, steve.lemons@arrisi.com - bug reports
+
+--
+
+The regular expression class library used in the server to provide
+regexp search support is from the Free Software Foundation, and was
+written by Wes Biggs <wes@cacas.org>.  The gnu-regexp-1.1.4.jar
+archive included in the src/lib directory contains the binary
+distribution of this software.  The GNU Regexp for Java page is at
+http://www.cacas.org/java/gnu/regexp/.
+
+The Java implementation of the standard UNIX crypt() function was
+converted from C by John Dumas, jdumas@zgs.com, whose code can be
+found at http://208.223.9.21/jfd/crypt.html.  jcrypt is included in
+Directory Droid by permission of the author.
+
+The Qsmtp class was originally written by James Driscoll
+(maus@io.com), and placed into the public domain.  See
+http://www.io.com/~maus/JavaPage.html for details and additional free
+Java code. Note that the version of Qstmp packaged with Directory Droid has
+been significantly modified, to provide more convenient use in a
+threaded context, and to provide rudimentary MIME file attachment
+support.
+
+Some of the MD5 classes used in the server were written by Santeri
+Paavolainen, and are included in Directory Droid under the terms of
+the GNU General Public License.  See
+http://www.cs.hut.fi/~santtu/java/ for more information.  The MD5Crypt
+class used to support FreeBSD-style md5 passwords was originally
+written by Poul-Henning Kamp (phk@login.dknet.dk) in C, and was
+translated into Java by Jonathan Abbey.. the following license
+information was placed on this code:
+
+   ----------------------------------------------------------------------------
+   "THE BEER-WARE LICENSE" (Revision 42):
+   <phk@login.dknet.dk> wrote this file.  As long as you retain this notice you
+   can do whatever you want with this stuff. If we meet some day, and you think
+   this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
+   ----------------------------------------------------------------------------
+
+The MD4 classes used to support Windows NT-compatible cryptographic
+hashes were written by Harry Mantakos, harry@meretrix.com.  The MD4
+classes came from Harry's JOTP project, which you can link to at
+http://www.cs.umd.edu/users/harry/jotp/. The actual "LANMAN" and "NT
+MD4 Unicode" hash support code was written by Andrew Tridgell and
+released under the GPL as part of the Samba source code, and was
+ported to Java by Jonathan Abbey, using Harry's MD4 code to perform
+the fundamental cryptographic hash function.
+
+The XML SAX reference classes and interfaces used by the Directory Droid
+server's XML parsing routines were written and released into the
+public domain by David Meggison <david@megginson.com>.  More
+information on the SAX standard for XML parsing can be found at the
+SAX home page at http://www.megginson.com/SAX/.
+
+The Directory Droid server uses James Clark's excellent XMLWriter and XP
+parser class libraries for XML generation and parsing.  Both are
+copyright 1997, 1998 by James Clark, and are included in Directory Droid in
+accordance with his stated licensing terms.  See
+http://www.jclark.com/xml/xp/index.html for information on the XP
+parser.
+
+The Base64 encoder used by ARL custom code to generate binary LDIF for
+LDAP synchronization was written by Robert Harder, rharder@usa.net, as
+part of his 'xmlizable' package, and placed by him into the Public
+Domain.  More information on this class may be found at
+http://iharder.net/xmlizable.
+
+The Java UUID Generator code used by ARL custom code to generate RFC
+and DCE-compliant globally unique identifiers for our Macintosh LDAP
+synchronization was written by Tatu Saloranta, tatu.saloranta@iki.fi,
+and is included in Directory Droid under the Lesser General Public License.
+See http://www.doomdark.org/doomdark/proj/jug/ for more information.

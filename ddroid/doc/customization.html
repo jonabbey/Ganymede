@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede Customization Guide</title>
+  </head>
+
+  <body BGCOLOR="#FFFFFF">
+<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
+<h1><FONT FACE="Arial, Helvetica">Customization Guide<br>Ganymede Release 1.0.12 - 1 March 2004</FONT></h1>
+    <hr>
+
+    <p>The Ganymede server has many advantages over the GASH project, including a graphical
+    user interface, support for automated clients, and support for concurrent users.  The
+    biggest advantage, however, is that the Ganymede server is totally customizable through
+    the authoring of custom classes and the visual editing of the Ganymede server's database
+    schema.</p>
+
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Schema Editing</b></h2></td>
+ </tr>
+</table>
+
+    <p>The Ganymede Admin console has as one of its primary functions the ability to edit
+    the Ganymede Database Schema.  You can access the schema editor when running the admin
+    console as supergash.  You will then see a window pop up that will look something like
+    the following:</p>
+
+    <p><img src="gifs/schema2.gif"></p>
+
+    <p>By clicking the right mouse button in the tree on the left of the schema editor window,
+    you can create new object types, add, change or remove field definitions, and specify
+    general parameters for field definitions.  You can also associate custom code modules
+    with particular object types in the database.  The tree also allows you to drag fields up
+    and down with the left mouse button to change the order in which fields are displayed in
+    the client.</p>
+
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Custom plug-ins for object management</b></h2></td>
+ </tr>
+</table>
+
+    <p>You can look at the schema source code included in release 0.96 to see examples
+    of custom plug-in objects to manage objects in the server.</p>
+
+    <p>In order to have the server recognize plug-ins, you need to:
+
+    <ul>
+     <li>Modify the schema for the object type you wish to manage, giving a fully qualified
+	 class name for the class.  i.e., <b>arlut.csd.ganymede.custom.ldapEntryCustom</b></li>
+     <li>Compile your custom class and bind it into a jar file for the server.  The build and
+         buildCustomJar scripts in the schema directory will do this work for you.</li>
+     <li>Shut down the server from the Admin console so that the server gets a chance to
+         do a full dump of the database file.  The journal file does not maintain information
+	 about schema changes.</li>
+     <li>Restart the server with your updated custom.jar file in place</li>
+    </ul>
+
+    <p>You may wish to consult the following javadoc's for details on the DBEditObject base
+    class that is subclassed to provide object intelligence on the server.</p>
+
+    <UL>
+    <LI><A HREF="javadoc/arlut/csd/ganymede/DBEditObject.html">The DBEditObject base class</A></LI>
+    <LI><A HREF="javadoc/arlut/csd/ganymede/GanymediatorWizard.html">The GanymediatorWizard class</A></LI>
+    </UL>
+
+    <p>We are also developing a guide to DBEditObject subclass construction <a href="customization/index.html">here</a>.</p>
+
+<table border="1" cellpadding="3" cellspacing="0" width="100%">
+ <tr BGCOLOR="#CCFFCC">
+  <td colspan="1"><h2><b>Custom plug-ins for scheduled and on-demand tasks</b></h2></td>
+ </tr>
+</table>
+
+    <p>Finally, the server supports the authoring of custom tasks that can be run at regular
+    intervals or on demand when a user commits a transaction in the database.</p>
+
+    <p><img src="gifs/adminTasks.gif"></p>
+
+    <p>Again, you may wish to consult the javadoc's for documentation
+    on the recommended base class for builder tasks.  You can read
+    about the server task registration and scheduling mechanism 
+    <a href="server.html#servertasks">here</a>.</p>
+
+    <UL>
+    <LI><A HREF="javadoc/arlut/csd/ganymede/GanymedeBuilderTask.html">The GanymedeBuilderTask class</A></LI>
+    </UL>
+
+    <hr>
+    <address><a href="mailto:ganymede@arlut.utexas.edu">Ganymede mailing list</a></address>
+  </body>
+</html>

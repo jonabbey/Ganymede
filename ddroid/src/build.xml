@@ -1,0 +1,241 @@
+<!--
+    Directory Droid Ant build file
+
+    Last Revision Changed: $Rev$
+    Last Changed By: $Author$
+    Last Mod Date: $Date$
+    SVN URL: $HeadURL$
+
+    Deepak Giridharagopal, deepak@arlut.utexas.edu
+-->
+
+<project name="ddroid" default="all" basedir=".">
+
+  <!-- 
+    Project-wide settings. All directories are relative to the project
+    directories.
+  -->
+
+  <property name="src.dir" value="ddroid"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="graphics.dir" value="graphics"/>
+
+  <!-- Build directories -->
+  <property name="build.dir" value="build"/>
+  <property name="build.classes" value="${build.dir}/classes"/>
+  <property name="build.doc" value="${build.dir}/doc"/>
+  <property name="build.lib" value="${build.dir}/lib"/>
+
+  <!-- Dist directories -->
+  <property name="dist.jars" value="../jars"/>
+  <property name="dist.doc" value="../doc/javadoc"/>
+
+  <!-- Global settings -->
+  <property name="debug.flag" value="on"/>
+  <property name="java.lib" value="${java.home}/jre/lib/rt.jar"/>
+
+  <!-- Global properties for javac -->
+  <property name="build.compiler" value="modern"/>
+
+  <path id="classpath">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+
+  <target name="help">
+    <echo>ant rules
+---------
+
+all           - Prepares build tree and compiles everything
+jars          - Produces the jar files for the server, client, and admin console
+javadoc       - Builds the java doc tree
+
+clean         - Cleans the build class tree
+javadoc_clean - Cleans the java doc tree
+distclean     - Cleans the directories at the top distribution level
+veryclean     - Does all of distclean, javadoc_clean, clean
+
+total         - Complete strip and rebuild
+</echo>
+  </target>
+
+  <target name="prepare">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${build.lib}"/>
+    <mkdir dir="${build.doc}"/>
+    <tstamp/>
+    <echo message="${TSTAMP}"/>
+  </target>
+
+  <target name="all" depends="main"/>
+
+  <target name="main" depends="prepare">
+    <mkdir dir="${build.classes}"/>
+    
+    <javac destdir="${build.classes}"
+           debug="${debug.flags}"
+           deprecation="on">
+           <src path="${src.dir}"/>
+           <classpath refid="classpath"/>
+    </javac>
+
+    <!-- Compile all of our Stub/Skel classes -->
+    <rmic base="${build.classes}">
+      <include name="arlut/csd/ddroid/server/GanymedeServer.class"/>
+      <include name="arlut/csd/ddroid/server/GanymedeSession.class"/>
+      <include name="arlut/csd/ddroid/server/GanymedeXMLSession.class"/>
+      <include name="arlut/csd/ddroid/server/GanymedeAdmin.class"/>
+      <include name="arlut/csd/ddroid/server/DBSchemaEdit.class"/>
+      <include name="arlut/csd/ddroid/server/DBBaseCategory.class"/>
+      <include name="arlut/csd/ddroid/server/DBObjectBase.class"/>
+      <include name="arlut/csd/ddroid/server/DBObjectBaseField.class"/>
+      <include name="arlut/csd/ddroid/server/DBNameSpace.class"/>
+      <include name="arlut/csd/ddroid/server/DBObject.class"/>
+      <include name="arlut/csd/ddroid/server/DBField.class"/>
+
+      <include name="arlut/csd/ddroid/server/PermissionMatrixDBField.class"/>
+      <include name="arlut/csd/ddroid/server/InvidDBField.class"/>
+      <include name="arlut/csd/ddroid/server/StringDBField.class"/>
+      <include name="arlut/csd/ddroid/server/BooleanDBField.class"/>
+      <include name="arlut/csd/ddroid/server/DateDBField.class"/>
+      <include name="arlut/csd/ddroid/server/NumericDBField.class"/>
+      <include name="arlut/csd/ddroid/server/PasswordDBField.class"/>
+      <include name="arlut/csd/ddroid/server/IPDBField.class"/>
+      <include name="arlut/csd/ddroid/server/FloatDBField.class"/>
+
+      <include name="arlut/csd/ddroid/server/GanymediatorWizard.class"/>
+
+      <include name="arlut/csd/ddroid/server/serverAdminAsyncResponder.class"/>
+      <include name="arlut/csd/ddroid/server/serverClientAsyncResponder.class"/>
+      
+      <include name="arlut/csd/ddroid/client/FileReceiverBase.class"/>
+    </rmic>
+
+    <echo>
+Class files rebuilt.  Don't forget to run 'ant jars' if you want to
+refresh the jar files.
+</echo>
+  </target>
+
+  <target name="jars" depends="main">
+    <!-- Copy over any jars used in the build -->
+    <copy todir="${build.lib}">
+      <fileset dir="${lib.dir}"/>
+    </copy>
+
+    <!-- Build the client jar file -->
+    <jar jarfile="${build.lib}/ddroid.jar">
+      <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JCalendar/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTable/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTree/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/client/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/common/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/rmi/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/server/*_Stub.class"/>
+      <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
+      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
+
+      <fileset dir="${graphics.dir}" includes="arlut/csd/JCalendar/*"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/JDataComponent/*"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/JCalendar/*"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/ddroid/client/*"/>
+    </jar>
+
+    <!-- Build the server jar file -->
+    <jar jarfile="${build.lib}/ddroidServer.jar">
+      <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/crypto/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/listHandle.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
+      <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
+      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
+      <fileset dir="${build.classes}" includes="Qsmtp/**/*.class"/>
+      <fileset dir="${build.classes}" includes="jcrypt/**/*.class"/>
+      <fileset dir="${build.classes}" includes="md5/**/*.class"/>
+
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/server/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/common/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/rmi/*.class"/>
+      
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/client/FileReceiverBase*_Stub.class"/>
+    </jar>
+
+    <!-- Build the admin jar file -->
+    <jar jarfile="${build.lib}/ddroidAdmin.jar">
+      <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTable/**/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/JTree/**/*.class"/>
+
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/admin/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/common/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/rmi/*.class"/>
+
+      <fileset dir="${build.classes}" includes="arlut/csd/ddroid/server/*_Stub.class"/>
+      
+      <fileset dir="${graphics.dir}" includes="arlut/csd/ddroid/admin.jpg"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/JDataComponent/*.gif"/>
+      <fileset dir="${graphics.dir}" includes="arlut/csd/ddroid/*.gif"/>
+    </jar>
+    
+    <!-- Copy over the newly created jars -->
+    <copy todir="${dist.jars}">
+      <fileset dir="${build.lib}"/>
+    </copy>
+  </target>
+
+
+  <target name="javadoc" depends="prepare,javadoc_clean">
+    <mkdir dir="${build.doc}"/>
+    <javadoc sourcepath="${src.dir}"
+             packagenames="*"
+             destdir="${build.doc}"
+             author="true"
+             version="true"
+             use="true">
+             <classpath refid="classpath"/>
+    </javadoc>
+
+    <!-- Copy over the newly created docs -->
+    <copy todir="${dist.doc}">
+      <fileset dir="${build.doc}"/>
+    </copy>
+  </target>
+  
+
+  
+  <target name="clean">
+    <delete includeemptydirs="true" failonerror="false">
+      <fileset dir="${build.classes}" includes="**/*"/>
+      <fileset dir="${build.lib}" includes="*.jar"/>
+    </delete>
+  </target>
+
+
+  
+  <target name="javadoc_clean">
+    <delete includeemptydirs="true" failonerror="false">
+      <fileset dir="${build.doc}" includes="**/*"/>
+    </delete>
+  </target>
+
+
+  <target name="dist_clean">
+    <delete includeemptydirs="true" failonerror="false">
+      <fileset dir="${dist.jars}" includes="**/*"/>
+      <fileset dir="${dist.doc}" includes="**/*"/>
+    </delete>
+  </target>
+
+  
+  <target name="veryclean" depends="javadoc_clean,clean,dist_clean"/>
+  
+  <target name="total" depends="veryclean,main,jars,javadoc"/>
+  
+</project>

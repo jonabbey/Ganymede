@@ -1,0 +1,40 @@
+Directory Droid Release 1.0.13
+?? ?, 2004
+README.source
+
+Last Revision Changed: $Rev$
+Last Changed By: $Author$
+Last Mod Date: $Date$
+SVN URL: $HeadURL$
+
+---------------------------------------------
+
+This release of Directory Droid includes full sources for everything.
+By default, the compiled classes for the Directory Droid server,
+client, and admin console are held in the top-level jars directory.
+If you want to rebuild the jars from scratch, here's what you do.
+
+1. cd src
+
+3. Run 'ant'.  This will compile the classes for all of the
+   source code in the source tree.  Once this completes, you
+   can set your CLASSPATH to <install>/src/build/classes and run
+   the Directory Droid tools.
+
+   You shouldn't see any errors or warnings during the make, with
+   the exception of some deprecation warnings having to do with
+   the org.xml.sax classes Sun decided to bundle into the 1.4
+   JDK, if you compile under 1.4.
+
+4. Run 'ant jars'.  This will recreate the 4 jar files used by
+   the installation scripts.
+
+5. Finally, if you haven't already, run 'configure' from the Directory
+   Droid distribution directory to create the install scripts that you will
+   use to install the software.
+
+Because Ant is smart about rebuilds, you can easily bring the whole
+system up to date by repeating steps 3 and 4 after modifying any
+Directory Droid code.
+
+Obviously, you can see the src/build.xml file for more details.

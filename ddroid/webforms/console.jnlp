@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- JNLP File for Directory Droid Admin Console
+
+     This file defines the launch characteristics for the
+     Directory Droid admin console, allowing the Java Web Start program
+     to properly launch the Directory Droid admin console.  This file
+     format is documented at 
+
+     http://java.sun.com/products/javawebstart/developers.html
+
+-->
+
+<jnlp spec="1.0+" codebase="#WEBROOT" href="console.jnlp">
+  <information>
+    <title>Directory Droid Admin Console</title>
+    <vendor>Applied Research Laboratories</vendor>
+    <homepage href="http://www.arlut.utexas.edu/gash2"/>
+    <description>Directory Droid Admin Console</description>
+  </information>
+  <resources>
+    <j2se version="1.5.0"/>
+    <j2se version="1.5.0-beta" href="http://java.sun.com/products/autodl/j2se"/>
+    <j2se version="1.5"/>
+    <j2se version="1.4.2"/>
+    <j2se version="1.4.1"/>
+    <j2se version="1.4.1-beta" href="http://java.sun.com/products/autodl/j2se"/>
+    <j2se version="1.4"/>
+    <j2se version="1.3.1"/>
+    <j2se version="1.3"/>
+    <j2se version="1.2"/>
+    <jar href="ddroidAdmin.jar"/>
+  </resources>
+  <applet-desc 
+    documentBase="#WEBROOT"
+    name="Directory Droid Admin Console"
+    main-class="arlut.csd.ddroid.admin.GASHAdmin"
+    width="320"
+    height="350">
+    <param name="ganymede.serverhost" value="#SERVERHOST"/>
+    <param name="ganymede.registryPort" value="#REGISTRYPORT"/>
+  </applet-desc>
+</jnlp>

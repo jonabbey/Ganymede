@@ -1,0 +1,161 @@
+#!/usr/bin/perl
+
+#***********************************************************************
+#
+#             ARL:UT Group Administration Shell Package
+#                         September 13, 1994
+#
+#  Copyright 1994. The University of Texas at Austin (UTA).  All rights
+#  reserved.  By using this software the USER indicates that he or she
+#  has read, understood, and will comply with the following:
+#
+#  -UTA hereby grants USER nonexclusive permission to use, copy, and/or
+#  modify this software for internal purposes only.  Any non-internal 
+#  distribution, including commercial sale or license, of this software,
+#  copies of the software, its associated documentation, and/or
+#  modifications of either is strictly prohibited without the prior
+#  consent of UTA.  Title to copyright to this software and its 
+#  associated documentation shall at all times remain with UTA. 
+#  Appropriate copyright notice shall be placed on all software copies,
+#  and a complete copy of this notice shall be included in all copies
+#  of the associated documentation.  No right is granted to use in 
+#  advertising, publicity, or otherwise any trademark, service mark,
+#  or the name of UTA.
+#
+#  -This software and any associated documentation is provided "as is",
+#  and UTA MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED,
+#  INCLUDING THOSE OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR
+#  PURPOSE, OR THAT USE OF THE SOFTWARE, MODIFICATIONS, OR ASSOCIATED
+#  DOCUMENTATION WILL NOT INFRINGE ANY PATENTS, COPYRIGHTS, TRADEMARKS 
+#  OR OTHER INTELLECTUAL PROPERTY RIGHTS OF A THIRD PARTY.  UTA, the
+#  University of Texas System, its Regents, officers, and employees 
+#  shall not be liable under any circumstances for any direct, indirect,
+#  special, incidental, or consequential damages with respect to any
+#  claim by USER or any third party on account of or arising from the
+#  use, or inability to use, this software or its associated 
+#  documentation, even if UTA has been advised of the possibility of
+#  those damages.
+#
+#***********************************************************************
+
+#
+# Last modified by Pug on 9/14/94.
+#
+# This program is going to be used to convert a gash aliases_info file into
+# the correctly formated aliases and userdb file.
+#
+# An aliases file is one that allows users to have mail for account names
+# directed to a desitination/delivery account on specified machines.
+#
+# A userdb file is one that will rewrite outgoing mail to make the user
+# appear to have only one account even if they have more than one with
+# different names. (ie. I have accounts pug and bainter on different machines,
+# but all of my outgoing mail via the Mailserver will be appear to be from
+# pug even if the account bainter originated the message.) NOTE: This is
+# only appropriate on machines with Sendmail 8.6.x and have the USERDB
+# code activated.
+#
+# The only paramater this program takes is the name of the aliases_info file.
+# Anything else will result in a message being displayed on the usage of 
+# this script.
+
+# The format of the gash aliases_info file is the following:
+#
+# <mask>ExternalUser : OutgoingAddress, OtherAddress, ... : < DeliveryAddress
+# InternalUser : OutgoingAddress, OtherAddress, ... : < DeliveryAddress
+#
+# : mask : Group : DeliveryAddress, ...
+#
+# Where mask is a GASH alias 3 letter identifier associated with the user
+# who created the alias, ExternalUser is a user not in the GASH user_info
+# database, and InternalUser is a user in the GASH user_info database. An
+# OutgoingAddress is the name they want to appear on all outgoing mail, 
+# OtherAddress is any other account names they may have or wish to be
+# identified by, Group is any group mailer identifier, and DeliveryAddress
+# is the username and machine name they want to mail delivered onto. Please
+# note that any mail being sent to the NFS mail partition need an address of
+# the NFS server machine to be written to the filesystem correctly and safely.
+#
+
+if ($#ARGV != 0) {
+    print "gash2aliases converts a gash aliases info file to the correct format for\n the sendmail aliases and userdb files. These files in turn work as forwarding\n and rewrite rules for sendmail.\n\nUsage:\n\tgash2alias [gash_aliases_info_file]\n";
+    exit;
+}
+
+#
+# Open input file.
+#
+
+open(INFOFILE, @ARGV[0]) || die "Can't open alias info file @ARGV[0]: $!\n"; 
+
+#
+# Open the output files.
+#
+
+open(ALIASES, "> aliases") || die "Can't open alias output file: $!\n";
+open(USERDB, "> userdb") || die "Can't open userdb output file: $!\n";
+
+#
+# Open the error file.
+#
+
+open(ERRORS, "> aliases.errors") || die "Can't open alias error file: $!\n";
+
+#
+# Parse the info file.
+#
+
+while (<INFOFILE>) {
+    chop;
+    # Find the Group aliases.
+    if (/^:\s*.+:\s*(.+):\s*(.+)/) {
+	@addresses = split(/,/,$1);
+	@destination = split(/,/,$2);
+	print ALIASES join(',',@addresses), ": ", join(',', @destination), "\n";
+    }
+    # Find the User aliases.
+    elsif (/^(.+)\s*:(.+):\s*(.+)/) {
+	$user = $1;
+	@addresses = split(/,/,$2);
+	@destination = split(/,/,$3);
+	$prefered = shift(@addresses);
+	# Find the InternalUser Aliases.
+	if ($user !~ /^</) {
+	  print ALIASES "$prefered:	", join(',', @destination), "\n";
+	  print USERDB "$prefered:mailname	$prefered\n";
+	  foreach $name (@addresses) {
+	    $name =~ s/ //g;
+	    # This is to stop internal looping.
+	    if ($user ne $name) {
+	      print ALIASES "$name:	$prefered\n";
+	    }
+	    else {
+	      print ALIASES "$name:	", join(',', @destination), "\n";
+	    }
+	    print USERDB "$name:mailname	$prefered\n";
+	  }
+	  print USERDB "$prefered:maildrop	$user\n";
+	}
+	# Find the ExternalUser Aliases.
+	# Note that the ExternalUsers do not have USERDB entries.
+	else {
+	  print ALIASES "$prefered:	", join(',', @destination), "\n";
+	  foreach $name (@addresses) {
+	    $name =~ s/ //g;
+	    print ALIASES "$name:	$prefered\n";
+	  }
+	}
+    }
+    else {
+	print ERRORS "Bad line: ", $_, "\n";
+    }
+}
+
+#
+# Close open files.
+#
+
+close(INFOFILE);
+close(ALIASES);
+close(USERDB);
+close(ERRORS);

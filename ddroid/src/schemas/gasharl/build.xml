@@ -1,0 +1,98 @@
+<project name="ddroid" default="all" basedir=".">
+
+  <!-- 
+    Project-wide settings. All directories are relative to the project
+    directories.
+  -->
+
+  <property name="src.dir" value="src"/>
+  <property name="lib.dir" value="lib"/>
+
+  <!-- Build directories -->
+  <property name="build.dir" value="build"/>
+  <property name="build.doc" value="doc"/>
+  <property name="build.classes" value="${build.dir}/classes"/>
+  <property name="build.lib" value="${build.dir}/lib"/>
+
+  <!-- Global settings -->
+  <property name="debug.flag" value="on"/>
+  <property name="java.lib" value="${java.home}/jre/lib/rt.jar"/>
+
+  <!-- Global properties for javac -->
+  <property name="build.compiler" value="modern"/>
+
+  <path id="classpath">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar"/>
+    </fileset>
+    <fileset dir="../../lib">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="prepare">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${build.lib}"/>
+    <mkdir dir="${build.doc}"/>
+    <tstamp/>
+    <echo message="${TSTAMP}"/>
+  </target>
+
+  <target name="all" depends="main"/>
+
+  <target name="main" depends="prepare">
+    <mkdir dir="${build.classes}"/>
+    
+    <javac destdir="${build.classes}"
+           debug="${debug.flags}"
+           nowarn="true"
+           deprecation="on">
+           <src path="${src.dir}"/>
+           <classpath refid="classpath"/>
+           <classpath path="../../build/classes"/>
+    </javac>
+  </target>
+  
+  <target name="jars" depends="main">
+    <!-- Copy over any jars used in the build -->
+    <copy todir="${build.lib}">
+      <fileset dir="${lib.dir}"/>
+    </copy>
+
+    <jar jarfile="${build.lib}/custom.jar"
+      basedir="${build.classes}">
+      <include name="**/*"/>
+    </jar>
+  </target>
+
+  <target name="javadoc" depends="prepare,javadoc_clean">
+    <mkdir dir="${build.doc}"/>
+    <javadoc sourcepath="${src.dir}"
+             packagenames="*"
+             destdir="${build.doc}"
+             author="true"
+             version="true"
+             use="true">
+             <classpath refid="classpath"/>
+             <classpath path="../../build/ganymede"/>
+    </javadoc>
+  </target>
+  
+  <target name="clean">
+    <delete>
+      <fileset dir="${build.classes}" includes="**/*.class"/>
+      <fileset dir="${build.lib}" includes="*.jar"/>
+    </delete>
+  </target>
+  
+  <target name="javadoc_clean">
+    <delete>
+      <fileset dir="${build.doc}" includes="**/*"/>
+    </delete>
+  </target>
+
+  <target name="veryclean" depends="javadoc_clean,clean"/>
+  
+  <target name="total" depends="veryclean,main,jars,javadoc"/>
+  
+</project>

@@ -1,0 +1,66 @@
+#!/bin/sh
+#
+# Directory Droid distribution cleaner
+#
+# Last Revision Changed: $Rev$
+# Last Changed By: $Author$
+# Last Mod Date: $Date$
+# SVN URL: $HeadURL$
+#
+# This script is intended to be used to clean out files
+# used during the build process, in preparation of tar'ing
+# up a Directory Droid release.
+#
+# I.e., to build Directory Droid, export Directory Droid from the SVN
+# archive to get a clean distrib copy, then do
+#
+# ./configure
+# cd src
+# ant total
+# cd ..
+# ./distribclean
+#
+# this will leave you with a copy of the Directory Droid tree with
+# the class and jar files necessary to allow someone to install
+# and run Directory Droid directly from a download without having
+# to build the source themselves.
+#
+############################################################
+
+echo "Directory Droid distribution cleaner"
+echo
+
+prog=$0
+
+GROOTDIR=`echo $prog|sed 's%/[^/][^/]*$%%'`
+# if the program name is the same as the srcdir name, we have no path
+# set.. must be .
+test "x$GROOTDIR" = "x$prog" && GROOTDIR=.
+if test ! -f $GROOTDIR/src/build.xml; then
+  echo "configure: error: can not find Ant file in $GROOTDIR/src/build.xml" 1>&2; exit 1;
+fi
+export GROOTDIR
+
+# Okay, GROOTDIR is where we're at.
+
+cd $GROOTDIR
+
+# Remove the configured install scripts
+
+echo "Removing custom install scripts"
+
+rm -f installClient*
+rm -f installServer
+rm -f installWeb
+
+# Clean up the src tree.. remove the configured makefile,
+# config.sh and rebuild files
+
+echo "Cleaning source tree"
+
+cd src
+
+ant clean
+
+echo "Redundant classes removed."
+echo "Distribution is ready for packaging."

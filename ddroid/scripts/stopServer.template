@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# Directory Droid stopServer Script
+#
+# Arguments: 
+#
+# stopServer [-delay]
+#
+# if -delay is provided on the command line, the stopServer script
+# will do a deferred shutdown on the server.  This means that the
+# server will not allow new users to log on, and will shut down
+# as soon as all active users have logged out.
+# 
+############################
+
+## This section is customized by the server install script
+
+# These lines should be in the form X=Y, with nothing else on
+# the line.. they are customized by the installServer.perl
+# script
+
+JAVA=/usr/bin/java
+RMIREGISTRY=/usr/bin/rmiregistry
+PROPERTIES=ganymede.properties
+CLASSPATH=jars/ddroidServer.jar:jars/custom.jar
+
+
+############################################### 
+
+trap "echo Aborted" 2
+
+export CLASSPATH
+
+stty -echo
+$JAVA -ms32m -mx128m arlut.csd.ddroid.server.stopServer properties=$PROPERTIES $&
+stty echo

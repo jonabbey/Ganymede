@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Permission model example</title>
+  </head>
+
+  <body>
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Permissions Model Example</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>This example will show how the different permissions objects
+    operate together.  It doesn't have very an in-depth discussion of
+    the implications of the different permission bits yet.<p>
+      
+    <p>Let's say you want to set up a small group of users, and give
+    them control over their own resources.  Usually this would require
+    the creation of an administrator, who would then create his own
+    objects.</p>
+
+    <p>The user we have chosen to be in charge of this group is <font
+    color=#FF0000>Ahab</font>.  Ahab will be given control of a new
+    Owner Group, called <font color=#FF0000>Pequod</font>.  We will
+    also make a new Role for Ahab, called <font
+    color=#FF0000>Captain</font>.</p>
+
+<p>The names here are meant to show how ownership of instances and
+types can be shared.  Ahab may be given another ship to control, which
+could be another owner group called the Santa Maria.  He would own
+everything on the Santa Maria, and would have the permissions of a
+Captain on both ships.  Also, each ship could be controlled by another
+admin, say the Queen of France operating with the Monarch role.  There
+could be other Captains of other ships, like Captain Picard of the
+Owner Group Enterprise.  Picard would have the same control over the
+objects in the Enterprise as Ahab has over the objects on the
+Pequod.</p>
+
+<p>First we will make the new Owner Group.  This is created just like
+any object.  In this case, I use the tree to create a new Owner Group.
+I call it <font color=#FF0000>Pequod</font>.  Don't worry about the
+other fields in the Owner Group for now; we have to create the other
+objects before we can link them.  Next comes the Role.  I create the
+Role in the same way: by right clicking on the Role node in the tree.
+I call the Role <font color=#FF0000>Captain</font>, because I might
+use this same role for other users who have their own ships.
+
+<p>When creating the Role, we have to set up permissions.  There are
+two permission fields: Owned Objects Bits and Default Bits.  Remember
+that Ahab is going to be in the <font color=#FF0000>Pequod</font> 
+owner group, so the Owned Objects Bits permissions will
+apply to the objects on the <font color=#FF0000>Pequod</font>.
+The Default Bits are used for all other objects.  I set up the
+permissions as shown, because I only want Ahab to be able to do a
+little bit of administrating(he's not all that trustworthy).
+
+<p>As far as the default bits go, I want him to be able to edit the
+member list of groups which he doesn't own.  This will allow him to
+add his own users to groups, but he won't be able to take users he
+doesn't own out of groups, because he doesn't have premission to edit
+the groups field of the users he doesn't own.  Yikes.
+
+<p>Note that I cannot create a Role with more permissions than my own.
+For example, if my Admin Persona can't create Users, then Ahab can't
+either.
+
+<p>Now that I have created a Role and an Owner Grouf for Ahab, it's
+time to create Ahab's admin persona.  This is wher everything will be
+linked together.  In order to create an Admin Persona, I edit Ahab's
+user object, and click on the Admin Personae tab.  To create a new
+persona, I just click on the "Create" button at the bottom of the
+window.  
+
+<p>The name of an Admin Persona must start with the user's name,
+followed by a colon.  In this case, I will call the new persona <font
+color=#FF0000>Ahab:Captain</font>.  After setting the password, I add the
+<font color=#FF0000>Pequod</font> Owner Group to the "Owner
+Sets" field.  Then I add <font color=#FF0000>Captain</font> to the
+"Roles" field.
+
+<p>Ok, Ahab is ready to go.  Now when Ahab logs in, he can change to his
+admin persona with the persona menu, and start to create his new group
+of friends.
+
+    <hr>
+    <address><a href="mailto:mulvaney@csdsun1.arlut.utexas.edu">Mike Mulvaney</a></address>
+<!-- Created: Mon Aug 17 14:49:13 CDT 1998 -->
+<!-- hhmts start -->
+Last modified: Tue Aug 25 16:54:22 CDT 1998
+<!-- hhmts end -->
+  </body>
+</html>

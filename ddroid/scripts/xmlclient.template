@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# Directory Droid XML client script
+#
+# Usage: xmlclient username=<username> [password=<password>] <xmlfilename>
+#
+# Last Revision Changed: $Rev$
+# Last Changed By: $Author$
+# Last Mod Date: $Date$
+#
+# Module by: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
+#
+##############################################################
+
+## This section is customized by the client install script
+
+# These lines should be in the form X=Y, with nothing else on
+# the line.. they are customized by the installClient.perl
+# script
+
+JAVA=/opt/bin/java
+CLASSPATH=/v/site/packages/ganymede/etc/ddroid.jar:/v/site/packages/swing-1.0/swingall.jar
+PROPERTIES=/opt/depot/ganymede/etc/ganymede.properties
+
+############################################### 
+
+trap "echo Aborted" 2
+
+export CLASSPATH
+
+stty -echo
+$JAVA arlut.csd.ddroid.client.xmlclient properties=$PROPERTIES $*;SAVE=$?
+stty echo
+
+exit $SAVE
+
