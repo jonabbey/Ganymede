@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 2002/03/13 06:39:53 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 2002/03/13 18:04:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -937,58 +937,19 @@ public class DBEditSet {
 	    commit_checkObjectsMissingFields();
 	  }
 
-	// are all the objects ready to commit?
-
 	committedObjects = commit_handlePhase1();
-
-	// yay, tell them to do the external commit actions
-
 	commit_handlePhase2(committedObjects);
-
-	// make a note of what we need to mail out and record in the log record
-
 	commit_createLogEvents(committedObjects);
-
-	// persist the transaction in the on-disk database journal
-	
-	commit_writeTransaction();
-	
-	// do our logging and email for this transaction
-
+	commit_persistTransaction();
 	commit_logTransaction();
-
-	// integrate the changed objects into our database hashes
-
 	commit_replaceObjects(committedObjects);
-
-	// update the namespace indices to match
-
 	commit_updateNamespaces();
-
-	// very last thing before we release our write lock.. touch
-	// all the bases' time stamps.. we do this as late as possible
-	// to minimize the chance that a builder task run in response
-	// to a previous commit records its lastRunTime after we, the
-	// next transaction committed, gets our timestamps updated.
-
-	commit_updateBases(baseSet);
-
-	// And now it's just clean up time.  First we remove any
-	// delete locks that we had asserted during this
-	// transaction.. this will allow other sessions/threads to try
-	// to delete objects that we had pointed to asymmetrically
-
 	DBDeletionManager.releaseSession(session);
-
+	commit_updateBases(baseSet);
 	releaseWriteLock();
-
-	// null stuff out to speed GC
-
 	this.deconstruct();
 
-	// wake up any threads sleeping on the checkpoint op
-
-	this.notifyAll();
+	this.notifyAll();	// wake up any late checkpointers
 
 	// we're going to return a ReturnVal with doNormalProcessing set to
 	// false to let everyone above us know that we've totally cleared
@@ -1392,6 +1353,11 @@ public class DBEditSet {
   /**
    * <p>Private helper method for commit() which causes all bases that were
    * touched by this transaction to be updated.</p>
+   *
+   * <p>This should be run as late as possible in the commit() sequence
+   * to minimize the chance that a previously scheduled builder task
+   * completes and updates its lastRunTime field after we have touched
+   * the timestamps on the changed bases.</p>
    */
 
   private final void commit_updateBases(Vector baseSet)
@@ -1761,7 +1727,7 @@ public class DBEditSet {
    * <p>Will throw a CommitException if a failure was detected.</p>
    */
 
-  private final void commit_writeTransaction() throws CommitException
+  private final void commit_persistTransaction() throws CommitException
   {
     try
       {
@@ -1966,7 +1932,12 @@ public class DBEditSet {
 	  case DBEditObject.CREATING:
 	  case DBEditObject.DROPPING:
 	    eObj.getBase().releaseId(eObj.getID()); // relinquish the unused invid
-	    session.GSession.checkIn();
+
+	    if (getGSession() != null)
+	      {
+		getGSession().checkIn();
+	      }
+
 	    eObj.getBase().store.checkIn(); // update checked out count
 	    break;
 
@@ -2000,34 +1971,26 @@ public class DBEditSet {
 
     // and help out garbage collection some
 
-    objects.clear();
-    objects = null;
-
-    logEvents.removeAllElements();
-    logEvents = null;
-
-    basesModified.clear();
-    basesModified = null;
-
-    dbStore = null;
-    session = null;
-
-    description = null;
-
-    checkpoints.removeAllElements();
-    checkpoints = null;
-
-    currentCheckpointThread = null;
+    this.deconstruct();
 
     // wake up any sleepy heads
 
     this.notifyAll();
   }
 
+  /**
+   * <p>Private helper method for commit() and release(), which breaks apart
+   * and nulls references to data structures maintained for this transaction
+   * to aid GC.</p>
+   */
+
   private void deconstruct()
   {
-    objects.clear();
-    objects = null;
+    if (objects != null)
+      {
+	objects.clear();
+	objects = null;
+      }
 
     if (logEvents != null)
       {
@@ -2035,16 +1998,22 @@ public class DBEditSet {
 	logEvents = null;
       }
 
-    basesModified.clear();
-    basesModified = null;
+    if (basesModified != null)
+      {
+	basesModified.clear();
+	basesModified = null;
+      }
 
     dbStore = null;
     session = null;
 
     description = null;
 
-    checkpoints.removeAllElements();
-    checkpoints = null;
+    if (checkpoints != null)
+      {
+	checkpoints.removeAllElements();
+	checkpoints = null;
+      }
 
     currentCheckpointThread = null;
   }
@@ -2065,7 +2034,7 @@ public class DBEditSet {
 	
 	if (debug)
 	  {
-	    System.err.println(session.key + ": DBEditSet.commit(): released write lock:");
+	    System.err.println(session.key + ": DBEditSet.commit(): released write lock");
 	  }
       }
   }
