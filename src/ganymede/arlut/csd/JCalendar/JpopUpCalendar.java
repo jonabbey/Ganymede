@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -60,12 +60,21 @@ import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 
+import arlut.csd.Util.TranslationService;
+
 /**************************************************************/      
 
 
 public class JpopUpCalendar extends JFrame implements JsetValueCallback {
 
   static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede system.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JCalendar.JpopUpCalendar");
 
   // ---
 
@@ -76,7 +85,9 @@ public class JpopUpCalendar extends JFrame implements JsetValueCallback {
 
   public JpopUpCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback, boolean editable) 
   {
-    super(editable? "Please Choose a Date & Time": "Selected Date");
+    // "Please Choose A Date And Time"
+    // "Selected Date"
+    super(editable ? ts.l("init.chooseTitle") : ts.l("init.displayTitle"));
 
     if (callback == null)
       {
