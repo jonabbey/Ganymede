@@ -4,13 +4,211 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/ganymede.css"/>
     <title>Ganymede Synchronization Guide</title>
   </head>
+
   <body>
     <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo"/>
     <h1>Ganymede Synchronization Guide<br/>Release 2.0 dev - ? ? 2005<br/>$Rev$</h1>
     <hr/>
-    <h2>-1. Quick Install Cheat Sheet</h2>
+
+    <h2>1. Ganymede, Synchronization, and You</h2>
+
+    <p>Ganymede is a synchronization engine.  Leaving aside the
+    graphical interface, the programmable business rules, the
+    transactional database, and all of that, Ganymede is basically
+    about copying data around.  Users and automated processes feed
+    changes into Ganymede, and Ganymede makes sure that the updated
+    data gets properly fed into whatever directory services or
+    databases the adopter might wish to support.</p>
+
+    <p>This document is intended to be a comprehensive guide to
+    implementing data synchronization from Ganymede to your target
+    directory services.  If you're interested in reading about how to
+    format data for importing into Ganymede, you should consult the <a
+    href="xml/index.html">Ganymede XML Guide</a>, which covers that
+    topic.</p>
+
+    <p>Whether you are importing data into or exporting data out of
+    Ganymede, you will need to be sure that your Ganymede server is
+    configured with a schema (and programmable object plug-ins)
+    appropriate to the sort of data you want to manage.  See the <a
+    href="xml/schema.html">Ganymede XML Schema</a> document for some
+    details on how a Ganymede schema is specified.  (I need to add
+    more discussion of this somewhere in the docs, though).</p>
+
+    <p>Now, assuming that you have gotten your Ganymede server's
+    schema and plug-in logic set up appropriately and that you have
+    got data successfully imported, we need to talk about getting that
+    data back out again, and transferred to the services you are
+    trying to administer.</p>
+
+    <h2>2. Approaches to Synchronization</h2>
+
+    <p>Ganymede is designed around a transactional model, in which a
+    set of changes that transitions the Ganymede server from one
+    consistent state to another consistent state are processed as a
+    single unit of work.  When a user commits a transaction into the
+    Ganymede server, the server knows that things have changed, and
+    that it needs to try and push its data out to target services.</p>
+
+    <p>There are, in priniciple, two ways that Ganymede could do that.
+    It could dump out everything it knows and arrange for that 'full
+    state' information to completely replace the previous state of the
+    external managed services, or it could just send out information
+    about the transactions that were made since the last
+    synchronization.  Directory services like NIS and DNS have
+    traditionally required a 'full state' build system, as those
+    services originally provided no mechanism for applying incremental
+    changes to their configuration.  Modern directory services like
+    LDAP, on the other hand, have always explicitly supported change
+    commands.  These kinds of directories work most efficiently when a
+    small list of recent changes (or "deltas") can be provided.  Other
+    possible synchronization targets, such as relational databases,
+    may be handled in either manner.</p>
+
+    <p>These two synchronization styles each have their own strengths
+    and weaknesses.  With a full state synchronization, it really
+    doesn't matter whether any previous synchronizations were
+    successful or not, because each synchronization will contain a
+    complete description of the desired configuration for the target
+    service.  This means that missing a synchronization because the
+    target directory service is temporarily unavailable is no problem.
+    The target directory will just catch up the next time a
+    synchronization occurs.  The inherent redundancy of this approach
+    can make the synchronization process very robust, but the downside
+    is that a full state synchronization can be very time consuming.
+    The synchronization process must involve writing out all known
+    data each time any changes are made.  In addition, if it isn't
+    possible to efficiently wipe and reload the target directory
+    service, a process of comparison must be undertaken to calculate
+    what has changed between the data written out for the
+    synchronization requires and the pre-existing configuration of the
+    target directory service.  In some cases, including that of
+    passwords in Active Directory, it may not even be possible to
+    completely read the pre-existing data from the target directory
+    service in order to be able to detect what has changed.  This may
+    mean that more data will need to be sent to the target service
+    than is strictly necessary, even if that same data is already
+    securely (but unretrievably) held in the target service.</p>
+
+    <p>Synchronizing only the recently applied transactions can be far
+    more efficient, assuming the target directory service can accept
+    and apply a set of changes.  Only a very small amount of data
+    needs to be synchronized at each synchronization, and the target
+    directory service doesn't need to erase or reload anything other
+    than what actually changed.  This kind of "delta" synchronization,
+    however, has some severe shortcomings.  The first problem is that
+    if we are only sending the most recent transactions, we have to
+    absolutely rely on the fact that the target directory service
+    remembers all previous changes.  If a synchronization were to get
+    lost somehow, the target directory service would become out of
+    sync with the master data held in Ganymede, and later
+    synchronizations might never detect or fix the problem.  Another
+    problem is that if we limit the amount of data we send to the
+    synchronization channel to only that which recently changed, we
+    might fail to provide enough surrounding context to allow the
+    synchronization system to translate the synchronziation data into
+    a form suitable to the target directory service.  It wouldn't do,
+    for example, to try and write to a synchronization channel the
+    fact that a user's password changed without also including enough
+    surrounding context for the user to allow the synchronization
+    system to locate the user record to change.</p>
+
+    <p>As it happens, Ganymede 2.0 provides three distinct systems for
+    data synchronization.  Two are based on the full state
+    synchronization model and one on the transactional delta model.
+    The two full state models differ mostly in where the logic for the
+    synchronization process is placed, and in when and how the
+    synchronizations are triggered.  We'll start first by talking
+    about the original Ganymede 1.0 full state synchronization model,
+    before considering the two new models that Ganymede 2.0
+    introduces.</p>
+
+    <h2>3. The GanymedeBuilderTask Synchronization Model</h2>
+
+    <h3>The GanymedeBuilderTask Model Explained</h3>
+
+    <p>The original Ganymede synchronization model is based around
+    full state synchronization, and was designed in conjunction with
+    the Ganymede transactional model to support NIS and DNS.  Both of
+    those directory services require all related changes to be made
+    all at once before rebuilding their state ("pushing the maps" in
+    NIS terminology, "rebuilding the BIND zone files" in DNS terms).</p>
+
+    <p>Ganymede's approach to supporting these services was to
+    implement a two phase building approach, using the <a
+    href="javadocs/arlut/csd/ganymede/server/GanymedeBuilderTask.html">arlut.csd.ganymede.server.GanymedeBuilderTask</a>
+    class.  When a transaction is committed in Ganymede, the <a
+    href="javadocs/arlut/csd/ganymede/server/GanymedeScheduler.html">
+    arlut.csd.ganymede.server.GanymedeScheduler</a> class schedules a
+    set of builder tasks for execution as soon as possible.  When a
+    builder task runs, it locks the Ganymede database to prevent any
+    new transactions from committing and it executes <a
+    href="javadocs/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1</a>.
+    The builderPhase1 method scans the Ganymede database for whatever
+    objects are relevant to the builder task's synchronization duties
+    and writes that data out to disk, using whatever data format is
+    convenient for the purposes of that synchronization channel.  When
+    the builder task completes its scan of the Ganymede database and
+    writes out all its data, the builderPhase1() method returns, and
+    the Ganymede database is unlocked so that future transactions can
+    commit.</p>
+
+    <p>The builder tasks then runs <a
+    href="javadocs/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2</a>.
+    builderPhase2 is designed to execute an external program or script
+    which reads the data written out by builderPhase1 and does
+    whatever is necessary to integrate that data into the target
+    directory services.  During the time that builderPhase2 is
+    running, users are free to commit changes into the Ganymede
+    database, but the GanymedeScheduler is blocked from re-running the
+    same builder task again.  This prevents any possibility of the
+    builder task synchronization overlapping itself and overwriting
+    data that a previous external build process may still be working
+    with.</p>
+
+    <p>This per-task blocking of the GanymedeScheduler means that a
+    lot of transactions may be committed to the Ganymede data store
+    before the builder task can be run again.  If it takes 5 minutes
+    for the external script run by builderPhase2() to complete,
+    potentially hundreds or thousands of changes can 'saved up' for
+    the builder task to handle when it finishes with the first
+    synchronization.  In this way, the Ganymede server can allow users
+    to commit changes at the fastest rate possible, while
+    simultaneously synchronizing data to the target services at the
+    fastest rate the synchronization process will allow.</p>
+
+    <p>There are two difficulties with this synchronization model.
+    The first is that by the time a builder task is executed by the
+    GanymedeScheduler, several minutes might have passed, during which
+    time the Ganymede server will have completely forgotten about what
+    the Ganymede server's data looked like before the transactions
+    were committed.  Because of this, the GanymedeBuilderTask model is
+    completely incapable of doing delta-style builds.  The best that
+    it can do is to write out everything it knows to be true at the
+    time the builderPhase1() method is run, and to depend on the
+    external build process run by builderPhase2() to do a
+    before-and-after comparison between the previous synchronization
+    and the current one.  This is completely dependent on the external
+    build process having enough logic to save away the earlier
+    synchronization's data and carry out the comparison.</p>
+
+    <p>The second difficulty with the GanymedeBuilderTask model is
+    that it depends on a lot of custom code being written in Java and
+    compiled into the Ganymede server.  In order to create a custom
+    GanymedeBuilderTask, the adopter must create his own subclass of
+    GanymedeBuilderTask and write all the logic for builderPhase1 and
+    builderPhase2.  Further, if the code in either of these methods
+    need to change, either to fix a bug or to respond to a change made
+    in the Ganymede server's schema, the server would have to be
+    stopped and restarted after compiling and loading the new version
+    of the builder task's code.</p>
+
+    <h3>How to Configure and Install a GanymedeBuilderTask Subclass</h3>
+
+
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
     <p class="address">$Date$, $Rev$, $Author$</p>
   </body>
+
 </html>
