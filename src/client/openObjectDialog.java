@@ -19,7 +19,7 @@ import arlut.csd.ganymede.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.Util.VecQuickSort;
 
-public class openObjectDialog extends JDialog implements ActionListener, MouseListener{
+public class openObjectDialog extends JDialog implements ActionListener, MouseListener, JsetValueCallback{
 
   private final static boolean debug = true;
 
@@ -50,11 +50,15 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   JComboBox
     type;
 
-  JTextField 
+  JstringField 
     text;
 
   listHandle
+    lastObject = null,
     currentObject = null;
+
+  JLabel
+    titleL;
 
   /* -- */
 
@@ -72,7 +76,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     getContentPane().add(middle, BorderLayout.CENTER);
     gbc.insets = new Insets(4,4,4,4);
     
-    JLabel titleL = new JLabel("Enter the object name", SwingConstants.CENTER);
+    titleL = new JLabel("Choose invid:", SwingConstants.CENTER);
     titleL.setFont(new Font("Helvetica", Font.BOLD, 14));
     titleL.setOpaque(true);
     titleL.setBorder(client.emptyBorder5);
@@ -118,22 +122,32 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     
     gbc.gridx = 0;
     gbc.gridy = 1;
+
+    gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 2;
     JLabel oType = new JLabel("Object Type:"); 
     gbl.setConstraints(oType, gbc);
     middle.add(oType);
+
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 2;
     gbl.setConstraints(type, gbc);
     middle.add(type);
 	
-    text = new JTextField(20);
+    text = new JstringField(20, true);
+    text.setCallback(this);
     JLabel editTextL = new JLabel("Object Name:");
     
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 2;
     gbc.gridx = 0;
     gbc.gridy = 2;
     gbl.setConstraints(editTextL, gbc);
     middle.add(editTextL);
-    
+
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;    
     gbc.gridx = 2;
     gbl.setConstraints(text, gbc);
     middle.add(text);
@@ -159,9 +173,16 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   public Invid chooseInvid()
   {
     pack();
+    text.requestFocus();
+		    
     setVisible(true);
 
     return invid;
+  }
+
+  public void setText(String text)
+  {
+    titleL.setText(text);
   }
 
   public void close(boolean foundOne)
@@ -179,12 +200,25 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
     if (list != null)
       {
+	if (debug)
+	  {
+	    System.out.println("Removing the list");
+	  }
 	pane.remove(list);
       }
 
     if (pane != null)
       {
+	if (debug)
+	  {
+	    System.out.println("Removing pane");
+	  }
 	middle.remove(pane);
+      }
+
+    if (debug)
+      {
+	System.out.println("Nulling the pane and list");
       }
 
     pane = null;
@@ -193,6 +227,11 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
   public void actionPerformed(ActionEvent e)
   {
+    if (debug)
+      {
+	System.out.println("Action performed: " + e.getActionCommand());
+      }
+
     if (e.getActionCommand().equals("Find Object with this name"))
       {
 	String string = text.getText();
@@ -211,6 +250,24 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 	  }
 	else
 	  {
+	    if (list == null)
+	      {
+		list = new JList();
+		list.setBorder(client.lineBorder);
+		list.setModel(new DefaultListModel());
+		list.addMouseListener(this);
+	      }
+	    else
+	      {
+		((DefaultListModel)list.getModel()).clear();
+	      }
+
+	    if (pane == null)
+	      {
+		pane = new JScrollPane(list);
+		pane.setBorder(new TitledBorder("Matching objects"));
+	      }
+
 	    client.setStatus("Searching for objects begining with " + string);
 	    
 	    if (type == null)
@@ -248,12 +305,12 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 		else if (edit_invids.size() == 0)
 		  {
 		    JErrorDialog d = new JErrorDialog(client, "Error finding object", "No object starts with that string.");
+		    return;
 		  }
 		else
 		  {
 		    (new VecQuickSort(edit_invids, 
-				      new arlut.csd.Util.Compare() 
-				      {
+				      new arlut.csd.Util.Compare() {
 					public int compare(Object a, Object b) 
 					  {
 					    listHandle aF, bF;
@@ -277,34 +334,24 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 						return 0;
 					      }
 					  }
-				      }
-				      )).sort();
+		    })).sort();
 
-				      if (list == null)
-					{	      
-					  list = new JList(edit_invids);
-					}
-				      else
-					{
-					  list.setListData(edit_invids);
-					}
-
-				      pane = new JScrollPane(list);
-		    
-				      list.setBorder(client.lineBorder);
-				      pane.setBorder(new TitledBorder("Matching objects"));
-		    
-				      list.addMouseListener(this);
+		       
+		    DefaultListModel model = (DefaultListModel)list.getModel();
+		    for (int i = 0; i < edit_invids.size(); i++)
+		      {
+			model.addElement(edit_invids.elementAt(i));
+		      }
 		    
 		    
-				      gbc.gridx = 0;
-				      gbc.gridy = 3;
-				      gbc.gridwidth = GridBagConstraints.REMAINDER;
-				      gbc.fill = GridBagConstraints.HORIZONTAL;
-				      gbl.setConstraints(pane, gbc);
+		    gbc.gridx = 0;
+		    gbc.gridy = 3;
+		    gbc.gridwidth = GridBagConstraints.REMAINDER;
+		    gbc.fill = GridBagConstraints.HORIZONTAL;
+		    gbl.setConstraints(pane, gbc);
 		    
-				      middle.add(pane);
-				      pack();
+		    middle.add(pane);
+		    pack();
 		  }
 	      }
 	    catch (java.rmi.RemoteException rx)
@@ -322,9 +369,10 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
   public void mouseClicked(MouseEvent e)
   {
+    
     currentObject = (listHandle)list.getSelectedValue();
     
-    if (e.getWhen() - lastClick < 500)
+    if ((e.getWhen() - lastClick < 500)  && (currentObject == lastObject))
       {
 	//client.wp.addWindow(client.session.edit_db_object( (Invid)((listHandle)currentObject).getObject()) , true);
 	invid = (Invid)((listHandle)currentObject).getObject();
@@ -337,7 +385,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
       }
 
     lastClick = e.getWhen();
-
+    lastObject = currentObject;
 
   }
 
@@ -346,5 +394,15 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   public void mouseEntered(MouseEvent e) {}
   public void mouseExited(MouseEvent e) {}
 
+  public boolean setValuePerformed(JValueObject e)
+  {
+    if (debug)
+      {
+	System.out.println("setValuePerformed ");
+      }
+    ActionEvent ae = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "Find Object with this name");
+    actionPerformed(ae);
 
+    return true;
+  }
 }
