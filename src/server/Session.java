@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -33,7 +33,7 @@ import java.util.*;
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
  *
- * @version $Revision: 1.13 $ %D%
+ * @version $Revision: 1.14 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -62,6 +62,51 @@ public interface Session extends Remote {
    */
 
   boolean     selectPersona(String persona, String password) throws RemoteException;
+
+  /**
+   *
+   * This method returns a QueryResult of owner groups that the current
+   * persona has access to.  This list is the transitive closure of
+   * the list of owner groups in the current persona.  That is, the
+   * list includes all the owner groups in the current persona along
+   * with all of the owner groups those owner groups own, and so on.
+   *
+   */
+
+  QueryResult      getOwnerGroups() throws RemoteException;
+
+  /**
+   *
+   * This method may be used to set the owner groups of any objects
+   * created hereafter.
+   *
+   * @param ownerInvids a Vector of Invid objects pointing to
+   * ownergroup objects.
+   *
+   */
+
+  void        setDefaultOwner(Vector ownerInvids) throws RemoteException;
+
+  /**
+   *
+   * This method may be used to cause the server to pre-filter any object
+   * listing to only show those objects directly owned by owner groups
+   * referenced in the ownerInvids list.  This filtering will not restrict
+   * the ability of the client to directly view any object that the client's
+   * persona would normally have access to, but will reduce clutter and allow
+   * the client to present the world as would be seen by administrator personas
+   * with just the listed ownerGroups accessible.
+   *
+   * This method cannot be used to grant access to objects that are accessible
+   * by the client's adminPersona.
+   *
+   * Calling this method with ownerInvids set to null will turn off the filtering.
+   *
+   * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
+   *
+   */
+
+  void        filterQueries(Vector ownerInvids) throws RemoteException;
 
   //  Database operations
 

@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.23 $ %D%
+   Version: $Revision: 1.24 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -59,8 +59,16 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   boolean supergashMode = false;
   boolean beforeversupergash = false; // Be Forever Yamamoto
 
-  PermMatrix personaPerms;
-  PermMatrix defaultPerms;
+  PermMatrix personaPerms;	// what permission bits are applicable to objects accessible by the current persona?
+
+  PermMatrix defaultPerms;	// what permission bits are applicable to any generic objects not 
+				// specifically accessible by ownership relations by this persona?
+
+  Vector newObjectOwnerInvids = null;	// vector of Invids pointing to owner groups that the admin wants
+				        // newly created objects to be placed in
+
+  Vector visibilityFilterInvids = null; // vector of Invids pointing to owner groups that the admin wants
+				        // his set of objects displayed to be limited to.
 
   /* -- */
 
@@ -75,7 +83,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
    * Note that all internal session activities (queries, etc.) are
    * currently using a single, synchronized DBSession object.. this
    * mean that only one user at a time can currently be processed for
-   * login.
+   * login. 8-(
    * 
    */
 
@@ -112,8 +120,12 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   {
     super();			// UnicastRemoteObject initialization
 
+    // --
+
     String temp;
     int i=2;
+
+    /* -- */
     
     this.client = client;
 
@@ -212,6 +224,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	  }
 	catch (RemoteException e)
 	  {
+	    // ok, they're already gone.. (?)
 	  }
       }
 
@@ -272,7 +285,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     // logout the client, abort any DBSession transaction going
 
-    session.releaseAllReadLocks();
+    session.releaseAllReadLocks(); // given that we're synchronized, will we ever have locks here?
     session.logout();
  
     GanymedeServer.sessions.removeElement(this);
@@ -325,10 +338,12 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   /**
    *
-   * This method provides may be used to select an admin persona.
+   * This method is used to select an admin persona, changing the
+   * permissions that the user has and the objects that are
+   * accessible in the database.
    *
    * @see arlut.csd.ganymede.Session
-   *
+   * 
    */
 
   public synchronized boolean selectPersona(String persona, String password)
@@ -398,6 +413,166 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
     return false;
   }
 
+  /**
+   *
+   * This method returns a QueryResult of owner groups that the current
+   * persona has access to.  This list is the transitive closure of
+   * the list of owner groups in the current persona.  That is, the
+   * list includes all the owner groups in the current persona along
+   * with all of the owner groups those owner groups own, and so on.
+   *
+   */
+
+  public synchronized QueryResult getOwnerGroups()
+  {
+    QueryResult result = new QueryResult();
+    InvidDBField inf;
+    Vector groups, children, temp;
+    Hashtable seen = new Hashtable();
+    Invid inv;
+    DBObject owner;
+
+    /* -- */
+
+    if (personaInvid == null)
+      {
+	return result;		// empty list
+      }
+
+    // if we're in supergash mode, return all the owner groups
+    // defined
+
+    if (supergashMode)
+      {
+	return query(new Query(SchemaConstants.OwnerBase));
+      }
+
+    inf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
+
+    if (inf == null)
+      {
+	return result;		// empty list
+      }
+
+    // do a breadth-first search of the owner groups
+
+    groups = inf.getValues();
+
+    while (groups != null && (groups.size() > 0))
+      {
+	children = new Vector();
+
+	for (int i = 0; i < groups.size(); i++)
+	  {
+	    inv = (Invid) groups.elementAt(i);
+
+	    if (seen.contains(inv))
+	      {
+		continue;
+	      }
+
+	    owner = session.viewDBObject(inv);
+
+	    if (owner == null)
+	      {
+		continue;
+	      }
+	    else
+	      {
+		seen.put(inv, inv);
+	      }
+
+	    result.addRow(inv, owner.getLabel());
+
+	    // got the parent.. now add any children
+
+	    inf = (InvidDBField) owner.getField(SchemaConstants.OwnerObjectsOwned);
+
+	    temp = inf.getValues();
+
+	    for (int j = 0; j < temp.size(); j++)
+	      {
+		inv = (Invid) temp.elementAt(j);
+		
+		if (inv.getType() == SchemaConstants.OwnerBase)
+		  {
+		    children.addElement(inv);
+		  }
+	      }
+	  }
+
+	groups = children;
+      }
+    
+    return result;
+  }
+
+  /**
+   *
+   * This method may be used to set the owner groups of any objects
+   * created hereafter.
+   *
+   * @param ownerInvids a Vector of Invid objects pointing to
+   * ownergroup objects.
+   *
+   */
+
+  public void setDefaultOwner(Vector ownerInvids)
+  {
+    if (ownerInvids == null)
+      {
+	newObjectOwnerInvids = ownerInvids;
+	return;
+      }
+
+    if (!supergashMode && !isMemberAll(ownerInvids))
+      {
+	throw new IllegalArgumentException("Error.. ownerInvids contains invid that the persona is not a member of.");
+      }
+    else
+      {
+	newObjectOwnerInvids = ownerInvids;
+      }
+  }
+
+  /**
+   *
+   * This method may be used to cause the server to pre-filter any object
+   * listing to only show those objects directly owned by owner groups
+   * referenced in the ownerInvids list.  This filtering will not restrict
+   * the ability of the client to directly view any object that the client's
+   * persona would normally have access to, but will reduce clutter and allow
+   * the client to present the world as would be seen by administrator personas
+   * with just the listed ownerGroups accessible.
+   *
+   * This method cannot be used to grant access to objects that are accessible
+   * by the client's adminPersona.
+   *
+   * Calling this method with ownerInvids set to null will turn off the filtering.
+   *
+   * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
+   *
+   */
+
+  public void filterQueries(Vector ownerInvids)
+  {
+    if (ownerInvids == null)
+      {
+	visibilityFilterInvids = ownerInvids;
+	return;
+      }
+
+    if (!supergashMode && !isMemberAll(ownerInvids))
+      {
+	throw new IllegalArgumentException("Error.. ownerInvids contains invid that the persona is not a member of.");
+      }
+    else
+      {
+	visibilityFilterInvids = ownerInvids;
+      }
+  }
+
+
   //  Database operations
 
   /**
@@ -429,11 +604,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	  {
 	    DBObjectBase base = (DBObjectBase) enum.nextElement();
 
-	    PermEntry perm;
-
-	    perm = getPerm(base.getTypeID());
-
-	    if (perm != null && perm.isVisible())
+	    if (getPerm(base.getTypeID()).isVisible())
 	      {
 		result.addElement(base);
 	      }
@@ -637,7 +808,6 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     Vector fieldDefs = new Vector();
     DBObjectBaseField field;
-    PermEntry perm;
 
     for (int i = 0; i < containingBase.sortedFields.size(); i++)
       {
@@ -653,9 +823,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 		  }
 		else
 		  {
-		    perm = getPerm(base.getTypeID(), field.getID());
-
-		    if (perm != null && perm.isVisible())
+		    if (getPerm(base.getTypeID(), field.getID()).isVisible())
 		      {
 			fieldDefs.addElement(field);
 		      }
@@ -671,9 +839,7 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	      }
 	    else
 	      {
-		perm = getPerm(base.getTypeID(), field.getID());
-
-		if (perm != null && perm.isVisible())
+		if (getPerm(base.getTypeID(), field.getID()).isVisible())
 		  {
 		    fieldDefs.addElement(field);
 		  }
@@ -724,16 +890,23 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	    if (supergashMode)
 	      {
-		result.addRow(obj);
+		if (filterMatch(obj))
+		  {
+		    result.addRow(obj);
+		  }
 	      } 
 	    else
 	      {
+		PermEntry perm;
+
+		/* -- */
+
 		perm = getPerm(obj);
 
-		if (perm != null)
+		if ((!query.editableOnly && perm.isVisible()) ||
+		    (query.editableOnly && perm.isEditable()))
 		  {
-		    if ((!query.editableOnly && perm.isVisible()) ||
-			(query.editableOnly && perm.isEditable()))
+		    if (filterMatch(obj))
 		      {
 			result.addRow(obj);
 		      }
@@ -829,6 +1002,15 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
     embedded = base.isEmbedded();
 
+    if (embedded)
+      {
+	Ganymede.debug("Query on embedded type");
+      }
+    else
+      {
+	Ganymede.debug("Query on non-embedded type");
+      }
+
     baseLock.addElement(base);
 
     Ganymede.debug("Query: " + username + " : opening read lock on " + base.getName());
@@ -873,23 +1055,31 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 		  }
 	      }
 
-	    if (debug)
-	      {
-	        Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel());
-	      }
-
 	    if (supergashMode)
 	      {
-		result.addRow(obj);
+		if (debug)
+		  {
+		    Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel() + ", invid: " + obj.getInvid());
+		  }
+
+		if (filterMatch(obj))
+		  {
+		    result.addRow(obj);
+		  }
 	      } 
 	    else
 	      {
 		perm = getPerm(obj);
 
-		if (perm != null)
+		if ((!query.editableOnly && perm.isVisible()) ||
+		    (query.editableOnly && perm.isEditable()))
 		  {
-		    if ((!query.editableOnly && perm.isVisible()) ||
-			(query.editableOnly && perm.isEditable()))
+		    if (debug)
+		      {
+			Ganymede.debug("Query: " + username + " : adding element " + obj.getLabel() + ", invid: " + obj.getInvid());
+		      }
+			
+		    if (filterMatch(obj))
 		      {
 			result.addRow(obj);
 		      }
@@ -914,8 +1104,8 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   /**
    *
    * This method provides the hook for doing all
-   * manner of object listing for the Ganymede
-   * database.
+   * manner of internal object listing for the Ganymede
+   * database.  Unfiltered.
    *
    * @see arlut.csd.ganymede.Query
    * @see arlut.csd.ganymede.Result
@@ -1104,15 +1294,29 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
   public synchronized db_object create_db_object(short type) 
   {
+    DBObject newObj;
+    
     if (getPerm(type).isCreatable())
       {
-	return session.createDBObject(type);
+	newObj = session.createDBObject(type);
+	
+	if (newObjectOwnerInvids != null)
+	  {
+	    InvidDBField inf = (InvidDBField) newObj.getField(SchemaConstants.OwnerListField);
+
+	    for (int i = 0; i < newObjectOwnerInvids.size(); i++)
+	      {
+		inf.addElement(newObjectOwnerInvids.elementAt(i));
+	      }
+	  }
       }
     else
       {
 	setLastError("Permission to create object of type " + type + " denied.");
 	return null;
       }
+
+    return (db_object) newObj;
   }
 
   /**
@@ -1519,16 +1723,14 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
   /**
    *
    * This method returns true if the active persona has some sort of
-   * owner relationship with the object in question.
+   * owner/access relationship with the object in question through
+   * its list of owner groups.
    * 
    */
 
   private final boolean personaMatch(DBObject obj)
   {
     InvidDBField inf;
-    boolean found = false;
-    Vector owners, members;
-    DBObject personaObj, ownerObj;
 
     /* -- */
 
@@ -1546,21 +1748,44 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 	return false;
       }
     
-    owners = inf.getValues();
-    
-    // we've got the owners for this object.. now, is our persona a member of any
-    // of the owner groups that own this object?
+    return recursePersonaMatch(inf.getValues());
+  }
+
+  /**
+   *
+   * Recursive helper method for personaMatch.. this method
+   * does a depth first search up the owner tree for each
+   * Invid contained in the invids Vector to see if personaInvid
+   * is a member of any of the containing owner groups.
+   *
+   * @param owners A vector of invids pointing to OwnerBase objects
+   *
+   */
+
+  private final boolean recursePersonaMatch(Vector owners)
+  {
+    Invid owner;
+    DBObject ownerObj;
+    InvidDBField inf;
+    Vector members;
+
+    /* -- */
+
+    if (owners == null)
+      {
+	return false;
+      }
 
     for (int i = 0; i < owners.size(); i++)
       {
-	ownerObj = session.viewDBObject((Invid) owners.elementAt(i));
-	
+	owner = (Invid) owners.elementAt(i);
+
+	ownerObj = session.viewDBObject(owner);
+
 	if (ownerObj == null)
 	  {
 	    continue;
 	  }
-
-	//	System.err.println("\t" + obj.getLabel() + "is owned by " + ownerObj.getLabel());
 
 	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
 
@@ -1571,20 +1796,184 @@ final class GanymedeSession extends UnicastRemoteObject implements Session {
 
 	members = inf.getValues();
 
-	//	System.err.println("\tSeeking invid " + personaInvid);
+	for (int j = 0; j < members.size(); j++)
+	  {
+	    if (personaInvid.equals((Invid) members.elementAt(j)))
+	      {
+		return true;
+	      }
+	  }
+
+	// didn't find, recurse up
+
+	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
+
+	if (inf != null)
+	  {
+	    if (inf.isVector())
+	      {
+		if (recursePersonaMatch(inf.getValues()))
+		  {
+		    return true;
+		  }
+	      }
+	    else
+	      {
+		throw new RuntimeException("Owner field not a vector!!");
+	      }
+	  }
+      }
+
+    return false;
+  }
+
+  /**
+   *
+   * This private helper method iterates through the owners
+   * vector and checks to see if the current personaInvid is a
+   * member of all of the groups through either direct membership
+   * or through membership of an owning group.  This method is
+   * depends on recursePersonaMatch().
+   *
+   */
+
+  private final boolean isMemberAll(Vector owners)
+  {
+    Invid owner;
+    DBObject ownerObj;
+    InvidDBField inf;
+    Vector members;
+    boolean found;
+
+    /* -- */
+
+    if (owners == null)
+      {
+	return false;		// shouldn't happen in context
+      }
+
+    // loop over all the owner groups in the vector, make sure
+    // that we are a valid member of each of these groups, either
+    // directly or through being a member of a group that owns
+    // one of these groups.
+
+    for (int i = 0; i < owners.size(); i++)
+      {
+	found = false;	// yes, but what have you done for me _lately_?
+
+	owner = (Invid) owners.elementAt(i);
+
+	ownerObj = session.viewDBObject(owner);
+
+	if (ownerObj == null)
+	  {
+	    return false;	// we expect to find it
+	  }
+
+	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
+
+	if (inf == null)
+	  {
+	    return false;	// we expect to find it
+	  }
+
+	// see if we are a member of this particular owner group
+
+	members = inf.getValues();
 
 	for (int j = 0; j < members.size(); j++)
 	  {
-	    //	    System.err.println("\t\tFound invid " + members.elementAt(j));
+	    if (personaInvid.equals((Invid) members.elementAt(j)))
+	      {
+		found = true;
+	      }
+	  }
 
-	    if (personaInvid.equals((Invid)members.elementAt(j)))
+	// didn't find, recurse up
+
+	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
+
+	if (inf != null)
+	  {
+	    if (inf.isVector())
+	      {
+		if (recursePersonaMatch(inf.getValues()))
+		  {
+		    found = true;
+		  }
+	      }
+	    else
+	      {
+		throw new RuntimeException("Owner field not a vector!!");
+	      }
+	  }
+
+	if (!found)
+	  {
+	    return false;
+	  }
+      }
+
+    return true;
+  }
+
+  /**
+   *
+   * This method returns true if the visibility filter vector allows
+   * visibility of the object in question.  The visibility vector
+   * works by direct ownership identity (i.e., no recursing up), so
+   * it's a simple loop-di-loop.
+   *  
+   */
+
+  private final boolean filterMatch(DBObject obj)
+  {
+    Vector owners;
+    InvidDBField inf;
+    Invid tmpInvid;
+
+    /* -- */
+
+    if (obj == null)
+      {
+	return false;
+      }
+
+    if (visibilityFilterInvids == null)
+      {
+	return true;		// no visibility restriction, go for it
+      }
+
+    inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField);
+
+    if (inf == null)
+      {
+	return false;   // we have a restriction, but the object is only owned by supergash.. nope.
+      }
+    
+    owners = inf.getValues();
+
+    if (owners == null)
+      {
+	return false;   // we shouldn't get here, but we don't really care either
+      }
+    
+    // we've got the owners for this object.. now, is there any match between our
+    // visibilityFilterInvids and the owners of this object?
+
+    for (int i = 0; i < visibilityFilterInvids.size(); i++)
+      {
+	tmpInvid = (Invid) visibilityFilterInvids.elementAt(i);
+
+	for (int j = 0; j < owners.size(); j++)
+	  {
+	    if (tmpInvid.equals((Invid)owners.elementAt(j)))
 	      {
 		return true;
 	      }
 	  }
       }
 
-    //    Ganymede.debug("No match");
     return false;
   }
 }
