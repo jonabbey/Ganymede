@@ -17,7 +17,7 @@
    call back this GanymediatorWizard to continue along the process.
    
    Created: 29 January 1998
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -64,7 +64,7 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
   // ---
 
   protected boolean active = false;
-  protected int state = 0;
+  public int state = 0;
   protected GanymedeSession session = null;
 
   /* -- */
