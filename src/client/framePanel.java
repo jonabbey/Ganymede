@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.34 $ %D%
+   Version: $Revision: 1.35 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -326,9 +326,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       pane.setBackground(Color.lightGray);
       setContentPane(pane);
 
-
       // Need to add the menubar at the end, so the user doesn't get
       // into the menu items before the tabbed pane is all set up
+
       JMenuBar mb = createMenuBar(editable);
       try
 	{
@@ -808,237 +808,233 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     return menuBar;
   }
 
-
-
   //This need to be changed to show the progress bar
-  void create_general_panel()
-    {
-      if (debug)
-	{
-	  println("Creating general panel");
-	}
-      
-      containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar, false, isCreating);
-      containerPanels.addElement(cp);
-      cp.load();
-      cp.setBorder(wp.emptyBorder10);
 
-      general.getVerticalScrollBar().setUnitIncrement(15);
-      general.setViewportView(cp);
-      //general.setViewportView(progressBar);
-      createdList.addElement(new Integer(general_index));
-      setStatus("Done");
-      
-    }
+  void create_general_panel()
+  {
+    if (debug)
+      {
+	println("Creating general panel");
+      }
+    
+    containerPanel cp = new containerPanel(object, editable, wp.gc, wp, this, progressBar, false, isCreating, null);
+    containerPanels.addElement(cp);
+    cp.load();
+    cp.setBorder(wp.emptyBorder10);
+    
+    general.getVerticalScrollBar().setUnitIncrement(15);
+    general.setViewportView(cp);
+    //general.setViewportView(progressBar);
+    createdList.addElement(new Integer(general_index));
+    setStatus("Done");
+  }
 
   void create_expiration_date_panel()
-    {
-      if (debug)
-	{
-	  println("Creating date panel");
-	}
+  {
+    if (debug)
+      {
+	println("Creating date panel");
+      }
+    
+    if (exp_field == null)
+      {
+	try
+	  {
+	    exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get removal field: " + rx);
+	  }
+      }
 
-      if (exp_field == null)
-	{
-	  try
-	    {
-	      exp_field = (date_field)object.getField(SchemaConstants.ExpirationField);
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new RuntimeException("Could not get removal field: " + rx);
-	    }
-	}
-
-      expiration_date.getVerticalScrollBar().setUnitIncrement(15);
-      expiration_date.setViewportView(new datePanel(exp_field, "Expiration date", editable, this));
-	  
-      createdList.addElement(new Integer(expiration_date_index));
-
-      setStatus("Done");
-      
-    }
+    expiration_date.getVerticalScrollBar().setUnitIncrement(15);
+    expiration_date.setViewportView(new datePanel(exp_field, "Expiration date", editable, this));
+    
+    createdList.addElement(new Integer(expiration_date_index));
+    
+    setStatus("Done");
+  }
 
   void create_removal_date_panel()
-    {
-      if (debug)
-	{
-	  println("Creating removal date panel");
-	}
+  {
+    if (debug)
+      {
+	println("Creating removal date panel");
+      }
+    
+    if (rem_field == null)
+      {
+	try
+	  {
+	    rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new RuntimeException("Could not get removal field: " + rx);
+	  }
+      }
 
-      if (rem_field == null)
-	{
-	  try
-	    {
-	      rem_field = (date_field)object.getField(SchemaConstants.RemovalField);
-	    }
-	  catch (RemoteException rx)
-	    {
-	      throw new RuntimeException("Could not get removal field: " + rx);
-	    }
-	}
-
-      removal_date.getVerticalScrollBar().setUnitIncrement(15);
-      removal_date.setViewportView(new datePanel(rem_field, "Removal Date", editable, this));
+    removal_date.getVerticalScrollBar().setUnitIncrement(15);
+    removal_date.setViewportView(new datePanel(rem_field, "Removal Date", editable, this));
 	  
-      createdList.addElement(new Integer(removal_date_index));
+    createdList.addElement(new Integer(removal_date_index));
 
-      setStatus("Done");
+    setStatus("Done");
 
-      removal_date.invalidate();
-      validate();
-      
-    }
+    removal_date.invalidate();
+    validate();
+  }
 
   void create_owner_panel()
-    {
-      if (debug)
-	{
-	  println("Creating owner panel");
-	}
+  {
+    if (debug)
+      {
+	println("Creating owner panel");
+      }
 
-      try
-	{
-	  owner.getVerticalScrollBar().setUnitIncrement(15);
-	  owner.setViewportView(new ownerPanel((invid_field)object.getField(SchemaConstants.OwnerListField), editable, this));
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not generate Owner field: " + rx);
-	}
-	
-      createdList.addElement(new Integer(owner_index));
+    try
+      {
+	owner.getVerticalScrollBar().setUnitIncrement(15);
+	owner.setViewportView(new ownerPanel((invid_field)object.getField(SchemaConstants.OwnerListField), editable, this));
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not generate Owner field: " + rx);
+      }
+    
+    createdList.addElement(new Integer(owner_index));
 
-      setStatus("Done");
+    setStatus("Done");
       
-      owner.invalidate();
-      validate();
-    }
+    owner.invalidate();
+    validate();
+  }
 
   void create_history_panel()
-    {
-      setStatus("Creating history panel");
+  {
+    setStatus("Creating history panel");
 
-      try
-	{
-	  creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
-	  creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
-	  modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
-	  modifier_field = (string_field)object.getField(SchemaConstants.ModifierField);
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get field information: " + rx);
-	}
+    try
+      {
+	creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
+	creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
+	modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
+	modifier_field = (string_field)object.getField(SchemaConstants.ModifierField);
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get field information: " + rx);
+      }
 
-      //history.getVerticalScrollBar().setUnitIncrement(15);
-      //history.setViewportView(new historyPanel(getObjectInvid(), 
-      history.add("Center", new historyPanel(getObjectInvid(), 
-					       getgclient(), 
-					       creator_field, 
-					       creation_date_field, 
-					       modifier_field,
-					       modification_date_field));
+    //history.getVerticalScrollBar().setUnitIncrement(15);
+    //history.setViewportView(new historyPanel(getObjectInvid(), 
+
+    history.add("Center", new historyPanel(getObjectInvid(), 
+					   getgclient(), 
+					   creator_field, 
+					   creation_date_field, 
+					   modifier_field,
+					   modification_date_field));
 	
-      createdList.addElement(new Integer(history_index));
+    createdList.addElement(new Integer(history_index));
       
-      history.invalidate();
-      validate();
-
-      setStatus("Done");
-    }
-
+    history.invalidate();
+    validate();
+    
+    setStatus("Done");
+  }
 
   void create_admin_history_panel()
-    {
-      setStatus("Creating admin history panel");
-      admin_history.getVerticalScrollBar().setUnitIncrement(15);
-      admin_history.setViewportView(new adminHistoryPanel(getObjectInvid(), getgclient()));
-	
-      createdList.addElement(new Integer(admin_history_index));
-      
-      admin_history.invalidate();
-      validate();
-
-      setStatus("Done");
-    }
+  {
+    setStatus("Creating admin history panel");
+    admin_history.getVerticalScrollBar().setUnitIncrement(15);
+    admin_history.setViewportView(new adminHistoryPanel(getObjectInvid(), getgclient()));
+    
+    createdList.addElement(new Integer(admin_history_index));
+    
+    admin_history.invalidate();
+    validate();
+    
+    setStatus("Done");
+  }
 
   void create_notes_panel()
-    {
-      if (debug)
-	{
-	  println("Creating notes panel");
-	}
+  {
+    if (debug)
+      {
+	println("Creating notes panel");
+      }
 
-      my_notesPanel = new notesPanel(notes_field, 
-				     editable, this);
+    my_notesPanel = new notesPanel(notes_field, 
+				   editable, this);
 
-      notes.getVerticalScrollBar().setUnitIncrement(15);
-      notes.setViewportView(my_notesPanel);
+    notes.getVerticalScrollBar().setUnitIncrement(15);
+    notes.setViewportView(my_notesPanel);
 
-      createdList.addElement(new Integer(notes_index));
-      setStatus("Done");
-
-      notes.invalidate();
-      validate();
-    }
-
+    createdList.addElement(new Integer(notes_index));
+    setStatus("Done");
+    
+    notes.invalidate();
+    validate();
+  }
+  
   void create_objects_owned_panel()
-    {
-      if (debug)
-	{
-	  println("Creating ownership panel");
-	}
+  {
+    if (debug)
+      {
+	println("Creating ownership panel");
+      }
 
-      invid_field oo = null;
-      try
-	{
-	  oo = (invid_field)object.getField(SchemaConstants.OwnerObjectsOwned);
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get owner objects owned: " + rx);
-	}
+    invid_field oo = null;
 
-      if (oo == null)
-	{
-	  JPanel null_oo = new JPanel();
-	  null_oo.add(new JLabel("There are no objects owned here."));
-	  objects_owned.getVerticalScrollBar().setUnitIncrement(15);
-	  objects_owned.setViewportView(null_oo);
-	}
-      else
-	{
-	  objects_owned.getVerticalScrollBar().setUnitIncrement(15);
-	  objects_owned.setViewportView(new ownershipPanel(oo, editable, this));
-	  createdList.addElement(new Integer(objects_owned_index));
-	}
+    try
+      {
+	oo = (invid_field)object.getField(SchemaConstants.OwnerObjectsOwned);
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get owner objects owned: " + rx);
+      }
 
-      objects_owned.invalidate();
-      validate();
+    if (oo == null)
+      {
+	JPanel null_oo = new JPanel();
+	null_oo.add(new JLabel("There are no objects owned here."));
+	objects_owned.getVerticalScrollBar().setUnitIncrement(15);
+	objects_owned.setViewportView(null_oo);
+      }
+    else
+      {
+	objects_owned.getVerticalScrollBar().setUnitIncrement(15);
+	objects_owned.setViewportView(new ownershipPanel(oo, editable, this));
+	createdList.addElement(new Integer(objects_owned_index));
+      }
 
-      setStatus("Done");
-    }
+    objects_owned.invalidate();
+    validate();
+
+    setStatus("Done");
+  }
 
   void create_personae_panel()
-    {
-      if (debug)
-	{
-	  println("Creating personae panel()");
-	}
-
-      invid_field p = null;
-
+  {
+    if (debug)
+      {
+	println("Creating personae panel()");
+      }
+    
+    invid_field p = null;
       
-      personae.setLayout(new BorderLayout());
-      personae.add("Center", new personaPanel(persona_field, editable, this));
-      createdList.addElement(new Integer(personae_index));
-      
-      personae.invalidate();
-      validate();
-
-      setStatus("Done");
-    }
+    personae.setLayout(new BorderLayout());
+    personae.add("Center", new personaPanel(persona_field, editable, this));
+    createdList.addElement(new Integer(personae_index));
+    
+    personae.invalidate();
+    validate();
+    
+    setStatus("Done");
+  }
 
   /**
    * These add the tabs to the framePanel, but they don't create the content
@@ -1046,74 +1042,79 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
    * The create_ methods create the actual panes, after the pane is selected.
    * If you want to create a panel, call addWhateverPanel, then showWhateverPanel.
    */
+
   public void addExpirationDatePanel()
-    {
-      if (expiration_date_index == -1)
-	{
-	  if (debug)
-	    {
-	      println("Adding date tabs");
-	    }
-	  expiration_date = new JScrollPane();
-	  pane.addTab("Expiration", null, expiration_date);
-	  expiration_date_index = current++;
-	}
-    }
+  {
+    if (expiration_date_index == -1)
+      {
+	if (debug)
+	  {
+	    println("Adding date tabs");
+	  }
+	expiration_date = new JScrollPane();
+	pane.addTab("Expiration", null, expiration_date);
+	expiration_date_index = current++;
+      }
+  }
+
   public void addRemovalDatePanel()
-    {
-      if (removal_date_index == -1)
-	{
-	  if (debug)
-	    {
-	      println("Adding removal date tabs");
-	    }
+  {
+    if (removal_date_index == -1)
+      {
+	if (debug)
+	  {
+	    println("Adding removal date tabs");
+	  }
 	  
-	  removal_date = new JScrollPane();
-	  pane.addTab("Removal", null, removal_date);
-	  removal_date_index = current++;
-	}
-    }
+	removal_date = new JScrollPane();
+	pane.addTab("Removal", null, removal_date);
+	removal_date_index = current++;
+      }
+  }
 
   public void addNotesPanel()
-    {
-      if (debug)
-	{
-	  println("Adding notes tab");
-	}
-      pane.addTab("Notes", null, notes);
-      notes_index = current++;
-      
-      try
-	{
-	  if (notes_field != null)
-	    {
-	      String notesText = (String)notes_field.getValue();
-	      if ((notesText != null) && (! notesText.trim().equals("")))
-		{
-		  if (debug)
-		    {
-		      println("Setting notes test to *" + notesText + "*.");
-		    }
+  {
+    if (debug)
+      {
+	println("Adding notes tab");
+      }
 
-		  ImageIcon noteIcon = new ImageIcon((Image)PackageResources.getImageResource(this, "note02.gif", getClass()));
-		  
-		  pane.setIconAt(notes_index, noteIcon);
-		}
-	      else if (debug)
-		{
-		  println("Empty notes");
-		}
-	    }
-	  else if (debug)
-	    {
-	      System.err.println("notes_field is null in framePanel");
-	    }
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get notes Text: " + rx);
-	}
-    }
+    pane.addTab("Notes", null, notes);
+    notes_index = current++;
+      
+    try
+      {
+	if (notes_field != null)
+	  {
+	    String notesText = (String)notes_field.getValue();
+
+	    if ((notesText != null) && (!notesText.trim().equals("")))
+	      {
+		if (debug)
+		  {
+		    println("Setting notes test to *" + notesText + "*.");
+		  }
+
+		ImageIcon noteIcon = new ImageIcon((Image) PackageResources.getImageResource(this, 
+											     "note02.gif", 
+											     getClass()));
+		pane.setIconAt(notes_index, noteIcon);
+	      }
+	    else if (debug)
+	      {
+		println("Empty notes");
+	      }
+	  }
+	else if (debug)
+	  {
+	    System.err.println("notes_field is null in framePanel");
+	  }
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get notes Text: " + rx);
+      }
+  }
 
   //
   // showPanel(int) will generate the actual panel.  I don't know if we need

@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.41 $ %D%
+  Version: $Revision: 1.42 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -328,7 +328,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 						       editable,
 						       wp.gc,
 						       wp, container.frame,
-						       null, false);
+						       null, false, null);
 		container.frame.containerPanels.addElement(cp);
 		cp.setBorder(wp.lineEmptyBorder);
 		    
@@ -414,7 +414,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		containerPanel cp = new containerPanel(object,
 						       isFieldEditable() && editable,
 						       wp.gc,
-						       wp, container.frame);
+						       wp, container.frame, null);
 		
 		// register this containerPanel with the framePanel, so it
 		// can be told to stop.  The containerPanel will also
@@ -681,13 +681,17 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 			System.out.println("VectorPanel.refresh(): need to add new element.");
 		      }
 
-		    ReturnVal rv = editable ? wp.gc.getSession().edit_db_object((Invid)o) : wp.gc.getSession().view_db_object((Invid)o);
+		    ReturnVal rv = editable ? wp.gc.getSession().edit_db_object((Invid)o) :
+		      wp.gc.getSession().view_db_object((Invid)o);
+
 		    rv = wp.gc.handleReturnVal(rv);
+
 		    containerPanel newcp = new containerPanel(rv.getObject(),
 				 			      editable,
 					 		      wp.gc,
 						 	      wp, container.frame,
-							      null, false);	  
+							      null, false, null);
+
 		    container.frame.containerPanels.addElement(newcp);
 		    newcp.setBorder(wp.lineEmptyBorder);
 		    

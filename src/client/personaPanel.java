@@ -476,7 +476,8 @@ class personaContainer extends JScrollPane implements Runnable{
 					       pp.fp.getgclient(), 
 					       pp.fp.getWindowPanel(), 
 					       pp.fp,
-					       progressBar);
+					       progressBar,
+					       this);
 	cp.setBorder(pp.empty);
 	setViewportView(cp);
       }
