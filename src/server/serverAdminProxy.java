@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2002/08/03 01:29:57 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2002/08/07 00:56:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import arlut.csd.Util.booleanSemaphore;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.25 $ $Date: 2002/08/03 01:29:57 $
+ * @version $Revision: 1.26 $ $Date: 2002/08/07 00:56:17 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -102,8 +102,6 @@ public class serverAdminProxy implements Admin, Runnable {
   /**
    * <p>Our queue of {@link arlut.csd.ganymede.adminEvent adminEvent} objects.</p>
    */
-
-  //  private Vector eventBuffer;
 
   private final adminEvent[] eventBuffer;
   private int enqueuePtr = 0;
