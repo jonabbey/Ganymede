@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -102,42 +102,50 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
       {
 	System.out.println("Adding StringSelector, its a vector of invids!");
       }
-
-    Object key = field.choicesKey();
-    
-    if ((key != null) && (parent.parent.parent.cachedLists.containsKey(key)))
+    if (editable)
       {
-	if (debug)
-	  {
-	    System.out.println("Using cached copy...");
-	  }
+	Object key = field.choicesKey();
 	
-	availableOwners = (Vector)parent.parent.parent.cachedLists.get(key);
-      }
-    else
-      {
-	if (debug)
-	  {
-	    System.out.println("Downloading copy");
-	  }
-	availableOwners = field.choices().getListHandles();
-	
-	if (key != null)
+	if ((key != null) && (parent.parent.parent.cachedLists.containsKey(key)))
 	  {
 	    if (debug)
 	      {
-		System.out.println("Saving this under key: " + key);
+		System.out.println("Using cached copy...");
 	      }
 	    
-	    parent.parent.parent.cachedLists.put(key, availableOwners);
+	    availableOwners = (Vector)parent.parent.parent.cachedLists.get(key);
+	  }
+	else
+	  {
+	    if (debug)
+	      {
+		System.out.println("Downloading copy");
+	      }
+	    availableOwners = field.choices().getListHandles();
+	    
+	    if (key != null)
+	      {
+		if (debug)
+		  {
+		    System.out.println("Saving this under key: " + key);
+		  }
+		
+		parent.parent.parent.cachedLists.put(key, availableOwners);
+	      }
 	  }
 	
       }
 
     currentOwners = field.encodedValues().getListHandles();
 
+    // availableOwners might be null
+    // if editable is false, availableOwners will be null
     tStringSelector ss = new tStringSelector(availableOwners, currentOwners, this, editable, 100, "Owners", "Owner Groups");
-    ss.setCallback(this);
+    if (editable)
+      {
+	ss.setCallback(this);
+      }
+
     return ss;
   }
 
