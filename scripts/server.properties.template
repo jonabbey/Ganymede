@@ -34,17 +34,6 @@ ganymede.log=/home/broccol/gash2/code/arlut/csd/ganymede/db/log
 
 ganymede.journal=/home/broccol/gash2/code/arlut/csd/ganymede/db/journal
 
-
-# ganymede.schemadump
-#
-# The filename to dump the portion of the database to when the admin
-# console requests a schema dump.
-#
-# Used by the server
-
-ganymede.schemadump=/home/broccol/gash2/code/arlut/csd/ganymede/db/ganymede.schema
-
-
 # ganymede.htmldump
 #
 # The filename to dump an html representation of the database schema to when
@@ -242,73 +231,3 @@ ganymede.helpbase=http://www.arlut.utexas.edu/~mulvaney/ganymede/
 
 ganymede.loghelper=/var/ganymede/bin/logscan.pl
 
-
-# ------------------------------------------------------------
-#
-# NIS/GASH Builder Properties
-#
-# ------------------------------------------------------------
-
-# ganymede.builder.output
-#
-# The directory that the NIS builder task or GASH builder task 
-# will emit its map source files to.
-#
-# Used by the server
-
-ganymede.builder.output=/home/broccol/gash2/code/arlut/csd/ganymede/db/out
-
-
-# ganymede.builder.scriptlocation
-#
-# The directory that Ganymede's build tasks will look to in order to run
-# the appropriate build script(s).
-#
-# Used by the server
-
-ganymede.builder.scriptlocation=/home/broccol/gash2/code/arlut/csd/ganymede/db/
-
-
-# ------------------------------------------------------------
-#
-# GASH Builder Properties
-#
-# ------------------------------------------------------------
-
-# ganymede.gash.dnsdomain
-#
-# The single dns domain that the GASH schema logic will manage
-#
-# Used by the server
-
-ganymede.gash.dnsdomain=arlut.utexas.edu
-
-
-# ganymede.defaultmailsuffix
-#
-# What is the default email suffix for newly created users?
-#
-# Used by the server
-
-ganymede.defaultmailsuffix=@arlut.utexas.edu
-
-
-# ganymede.homedirprefix
-#
-# Where are user's home directories placed?
-#
-# If this is not defined, the user may place his home
-# directory anywhere.
-#
-# Used by the server
-
-ganymede.homedirprefix=/home/
-
-# ganymede.md5
-#
-# If 'yes', the Linux and BSD schema kits will write out MD5-compatible
-# passwords when doing a build.
-#
-# Used by the server
-
-ganymede.md5=no

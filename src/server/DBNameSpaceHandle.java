@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 2000/11/10 05:04:54 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2000/11/14 05:30:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -94,13 +94,24 @@ class DBNameSpaceHandle {
   boolean inuse;
 
   /**
-   * so the namespace hash can be used as an index
-   * field always points to the field that contained
-   * this value at the time this field was last
-   * committed in a transaction
+   * <P>so the namespace hash can be used as an index fieldInvid always
+   * points to the object that contained the field that contained this
+   * value at the time this field was last committed in a transaction.</P>
+   *
+   * <P>fieldInvid will be null if the value pointing to this handle
+   * has not been committed into the database outside of an active
+   * transaction.</P>
    */
 
-  private Invid fieldObj;
+  private Invid fieldInvid;
+
+  /**
+   * <P>If this handle is associated with a value that has been
+   * checked into the database, fieldId will be the field number for
+   * the field that holds that value in the database, within the
+   * object referenced by fieldInvid.</P>
+   */
+
   private short fieldId;
 
   /**
@@ -137,12 +148,12 @@ class DBNameSpaceHandle {
 
   public DBField getField(GanymedeSession session)
   {
-    if (fieldObj == null)
+    if (fieldInvid == null)
       {
 	return null;
       }
 
-    DBObject _obj = session.session.viewDBObject(fieldObj);
+    DBObject _obj = session.session.viewDBObject(fieldInvid);
    
     return (DBField) _obj.getField(fieldId);
   }
@@ -151,12 +162,12 @@ class DBNameSpaceHandle {
   {
     if (field != null)
       {
-	fieldObj = field.getOwner().getInvid();
+	fieldInvid = field.getOwner().getInvid();
 	fieldId = field.getID();
       }
     else
       {
-	fieldObj = null;
+	fieldInvid = null;
 	fieldId = -1;
       }
   }
