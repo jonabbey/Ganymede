@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -303,6 +303,19 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     return ns;
   }
+
+  /**
+   *
+   * This method deletes a DBNameSpace object, returning true if
+   * the deletion could be carried out, false otherwise.
+   *
+   * Currently, this method doesn't do any checking to see if the
+   * namespace has any fields created on it.. this will need to
+   * be elaborated as time goes by.
+   *
+   * @see arlut.csd.ganymede.SchemaEdit
+   */
+
 
   public synchronized boolean deleteNameSpace(String name)
   {
