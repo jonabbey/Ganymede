@@ -80,6 +80,10 @@ $Author$
         margin-top: 3em;
         font-variant: small-caps;
         font-size: x-large;
+        border-left: 2em solid #cfc;
+        border-top: 2px solid #cfc;
+        padding-left: .5em;
+        padding-top: .25em;
     }
 
     h3 {
@@ -87,6 +91,8 @@ $Author$
         font-variant: small-caps;
         font-size: large;
         color: #900;
+        border-left: 2em solid #ccf;
+        padding-left: 1em;
     }
 
     h4 {
