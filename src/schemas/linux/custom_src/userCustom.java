@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -332,7 +332,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public boolean canRemove(DBSession session, DBObject object)
   {
-    String name = object.getFieldValuesLocal(userSchema.USERNAME);
+    String name = (String) object.getFieldValueLocal(userSchema.USERNAME);
 
     if (name != null && name.equals("root"))
       {
