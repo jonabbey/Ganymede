@@ -16,8 +16,8 @@
    
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.1 $
-   Last Mod Date: $Date: 2003/09/05 00:06:25 $
+   Version: $Revision: 1.2 $
+   Last Mod Date: $Date: 2003/09/05 00:15:37 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -88,7 +88,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientMessage
  *
- * @version $Revision: 1.1 $ $Date: 2003/09/05 00:06:25 $
+ * @version $Revision: 1.2 $ $Date: 2003/09/05 00:15:37 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT */
  */
 
@@ -211,6 +211,8 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
   }
 
   /**
+   * <p>Blocks waiting for the next asynchronous message from the
+   * server.  Returns null if isAlive() is false.</p>
    */
 
   public clientMessage getNextMsg()
@@ -240,8 +242,8 @@ public class serverClientAsyncResponder implements ClientAsyncResponder, Remote 
 	event = dequeue();
 
 	// clear the direct pointer to this event so that
-	// changeStatus() and replaceEvent() will know that we
-	// don't have an event of this kind in our buffer anymore.
+	// replaceEvent() will know that we don't have an event of
+	// this kind in our buffer anymore.
 	
 	lookUp[event.method] = null;
       }
