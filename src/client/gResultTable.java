@@ -6,7 +6,7 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,24 +31,28 @@ import com.sun.java.swing.*;
 
 ------------------------------------------------------------------------------*/
 
-public class gResultTable extends JInternalFrame implements rowSelectCallback {
+public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
 
   windowPanel parent;
   PopupMenu popMenu;
   MenuItem viewMI;
   MenuItem editMI;
   Session session;
+  Query query;
+  rowTable table = null;
+  JButton refreshButton;
 
   /* -- */
 
-  public gResultTable(windowPanel parent, Session session, Vector results) throws RemoteException
+  public gResultTable(windowPanel parent, Session session, Query query, Vector results) throws RemoteException
   {
     super();			// JInternalFrame init
 
+    this.setTitle("Query Results");
+
     this.parent = parent;
     this.session = session;
-
-    // --
+    this.query = query;
 
     popMenu = new PopupMenu();
     viewMI = new MenuItem("View Entry");
@@ -57,35 +61,82 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback {
     popMenu.add(viewMI);
     popMenu.add(editMI);
 
-    Result result;
-    Enumeration enum;
-    db_field[] fields;
-    db_object obj;
-    int i, j;
-
-    /* -- */
-
     setLayout(new BorderLayout());
 
-    Hashtable fieldsPresent = new Hashtable();
+    JPanel buttonPanel = new JPanel();
+    refreshButton = new JButton("Refresh Query");
+    refreshButton.addActionListener(this);
+    buttonPanel.add(refreshButton);
+    
+    add("South", buttonPanel);
 
-    // get all fields present in our results
+    loadResults(results);
+  }
+
+  public void actionPerformed(ActionEvent event)
+  {
+    if (event.getSource() == refreshButton)
+      {
+	refreshQuery();
+      }
+  }
+
+  public void refreshQuery()
+  {
+    Vector results = null;
+
+    if (query != null)
+      {
+	try
+	  {
+	    results = session.query(query);
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote exception in refreshQuery " + ex);
+	  }
+
+	if (results != null)
+	  {
+	    loadResults(results);
+	  }
+      }
+  }
+
+  public void loadResults(Vector results)
+  {
+    int i, j;
+    db_field[] fields;
+    db_object obj;
+    Hashtable fieldsPresent = new Hashtable();
+    Result result;
+    Enumeration enum;
+    boolean firstTime = true;
+
+    /* -- */
 
     System.err.println("result size = " + results.size());
     
     for (i = 0; i < results.size(); i++)
       {
-	fields = ((Result) results.elementAt(i)).getObject().listFields();
-
-	System.err.println("result " + i + ", fields length = " + fields.length);
-
-	for (j = 0; j < fields.length; j++)
+	try
 	  {
-	    System.err.println("field: " + fields[j].getName());
-	    if (!fieldsPresent.containsKey(fields[j].getName()))
+	    fields = ((Result) results.elementAt(i)).getObject().listFields();
+
+	    System.err.println("result " + i + ", fields length = " + fields.length);
+
+	    for (j = 0; j < fields.length; j++)
 	      {
-		fieldsPresent.put(fields[j].getName(), fields[j]);
+		System.err.println("field: " + fields[j].getName());
+		if (!fieldsPresent.containsKey(fields[j].getName()))
+		  {
+		    fieldsPresent.put(fields[j].getName(), fields[j]);
+		  }
 	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote " + ex);
 	  }
       }
 
@@ -152,14 +203,28 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback {
 
     for (i = 0; i < fields.length; i++)
       {
-	colMap.put(new Short(fields[i].getDisplayOrder()), new Short((short) i));
-	headers[i] = fields[i].getName();
-	colWidths[i] = 50;
+	try
+	  {
+	    colMap.put(new Short(fields[i].getDisplayOrder()), new Short((short) i));
+	    headers[i] = fields[i].getName();
+	    colWidths[i] = 50;
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote " + ex);
+	  }
       }
     
-    rowTable table = new rowTable(colWidths, headers, this, popMenu);
-
-    add("Center", table);
+    if (table == null)
+      {
+	table = new rowTable(colWidths, headers, this, popMenu);
+	add("Center", table);
+      }
+    else
+      {
+	table.reinitialize(colWidths, headers);
+	firstTime = false;
+      }
 
     enum = results.elements();
 
@@ -171,17 +236,27 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback {
 
 	table.newRow(obj);
 
-	fields = obj.listFields();
-
-	for (i = 0; i < fields.length; i++)
+	try
 	  {
-	    table.setCellText(obj, 
-			      ((Short) colMap.get(new Short(fields[i].getDisplayOrder()))).shortValue(), 
-			      fields[i].getValueString(), false);
+	    fields = obj.listFields();
+
+	    for (i = 0; i < fields.length; i++)
+	      {
+		table.setCellText(obj, 
+				  ((Short) colMap.get(new Short(fields[i].getDisplayOrder()))).shortValue(), 
+				  fields[i].getValueString(), false);
+	      }
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote " + ex);
 	  }
       }
 
-    this.setTitle("Query Results");
+    if (!firstTime)
+      {
+	table.refreshTable();
+      }
   }
 
   public void rowSelected(Object key)
