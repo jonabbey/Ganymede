@@ -14,8 +14,6 @@ import java.awt.event.*;
 import java.util.*;
 import java.rmi.RemoteException;
 
-import gjt.ColumnLayout;
-
 import com.sun.java.swing.*;
 import arlut.csd.JDialog.*;
 
@@ -111,19 +109,36 @@ public class JpassField extends JPanel implements ActionListener, JsetValueCallb
     if (showChangeFields)
       {
 	field1 = new JpasswordField(columns, maxstrlen, 
-				  is_editable, true, allowed, disallowed);
+				    is_editable, true, allowed, disallowed);
 
 	field1.setCallback(this);
 	field1.setEditable(is_editable);
 
 	field2 = new JpasswordField(columns, maxstrlen,
-				  is_editable, true, allowed, disallowed);
+				    is_editable, true, allowed, disallowed);
 
 	field2.setCallback(this);
 	field2.setEditable(is_editable);
 
-	setLayout(new ColumnLayout());
+	GridBagLayout gbl;
+	GridBagConstraints gbc;
+
+	gbl = new GridBagLayout();
+	gbc = new GridBagConstraints();
+	gbc.anchor = GridBagConstraints.WEST;
+	gbc.gridheight = 1;
+	gbc.fill = GridBagConstraints.HORIZONTAL;
+
+	setLayout(gbl);
+
+	gbc.gridx = 0;
+	gbc.gridy = 0;
+	gbc.gridwidth = GridBagConstraints.REMAINDER;
+	gbl.setConstraints(field1, gbc);
 	add(field1);
+
+	gbc.gridy = 1;
+	gbl.setConstraints(field1, gbc);
 	add(field2);
       }
     else
