@@ -93,15 +93,19 @@ RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3
 #
 # You will generally always want this to be true, even though the use
 # of a SecureRandom generator when Ganymede exports its RMI objects
-# may impose some computational overhead on the server.  Given that
-# you'll want to be using SSL anyway, this overhead is not likely to
-# be enough to worry about.
+# will impose some computational overhead on the server (up to several
+# seconds of delay when the first object id is generated while the
+# secure random number generator determines its seed, according to the
+# JDK 1.2 release notes).
 #
 # If you don't set this parameter to true and use SSL, however, the
 # integrity of Ganymede's security model will be at considerable risk,
 # and you should not allow access to a Ganymede server configured in
 # such a fashion outside of a well-protected and trusted network
 # environment.
+#
+# See the following URL for more details about RMI security and randomIDs:
+# http://www.essi.fr/~fron/SAR11/security/Building%20Secure%20Java%20RMI%20Servers.html
 
 RMISECURITY='-Djava.rmi.server.randomIDs=true'
 
