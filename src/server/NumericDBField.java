@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -32,7 +33,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  NumericDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
+  NumericDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
   {
     value = values = null;
     this.owner = owner;
@@ -52,7 +53,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  NumericDBField(DBObject owner, DBObjectBaseField definition)
+  NumericDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
   {
     this.owner = owner;
     this.definition = definition;
@@ -67,7 +68,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  public NumericDBField(DBObject owner, NumericDBField field)
+  public NumericDBField(DBObject owner, NumericDBField field) throws RemoteException
   {
     this.owner = owner;
     definition = field.definition;
@@ -92,7 +93,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  public NumericDBField(DBObject owner, int value, DBObjectBaseField definition)
+  public NumericDBField(DBObject owner, int value, DBObjectBaseField definition) throws RemoteException
   {
     if (definition.isArray())
       {
@@ -113,7 +114,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  public NumericDBField(DBObject owner, Vector values, DBObjectBaseField definition)
+  public NumericDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
   {
     if (!definition.isArray())
       {
@@ -137,9 +138,16 @@ public class NumericDBField extends DBField implements num_field {
     value = null;
   }
 
-  protected Object clone()
+  public Object clone()
   {
-    return new DateDBField(owner, this);
+    try
+      {
+	return new NumericDBField(owner, this);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't clone NumericDBField: " + ex);
+      }
   }
 
   void emit(DataOutput out) throws IOException
@@ -302,7 +310,7 @@ public class NumericDBField extends DBField implements num_field {
   public boolean verifyNewValue(Object o)
   {
     DBEditObject eObj;
-    Integer i;
+    Integer I;
 
     /* -- */
 
@@ -319,17 +327,17 @@ public class NumericDBField extends DBField implements num_field {
 	return false;
       }
 
-    i = (Integer) o;
+    I = (Integer) o;
 
     if (limited())
       {
-	if (getMinValue().intValue() > i.intValue())
+	if (getMinValue() > I.intValue())
 	  {
 	    setLastError("value out of range (underflow)");
 	    return false;
 	  }
 
-	if (getMaxValue().intValue() < i.intValue())
+	if (getMaxValue() < I.intValue())
 	  {
 	    setLastError("value out of range (overflow)");
 	    return false;

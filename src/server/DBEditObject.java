@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,8 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
+import java.rmi.server.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -43,7 +45,7 @@ import java.util.*;
  * 
  */
 
-public class DBEditObject extends DBObject {
+public class DBEditObject extends DBObject implements storable_object, ObjectStatus, FieldType {
 
   static boolean debug = true;
 
@@ -109,6 +111,20 @@ public class DBEditObject extends DBObject {
 
   /**
    *
+   * Static method to verify whether this object type has an inactivation
+   * mechanism.
+   *
+   * To be overridden in DBEditObject subclasses.
+   *
+   */
+
+  public static boolean canBeInactivated()
+  {
+    return false;
+  }
+
+  /**
+   *
    * Static method to verify whether the user has permission
    * to inactivate a given object.  The client's DBSession object
    * will call this per-class method to do an object type-
@@ -157,28 +173,6 @@ public class DBEditObject extends DBObject {
     return true;
   }
 
-  // valid status types
-
-  /**
-   * Status code for an object in the DBStore that has been checked out for editing.
-   */
-  static final byte EDITING = 1;
-
-  /**
-   * Status code for a newly created object.
-   */
-  static final byte CREATING = 2;
-
-  /**
-   * Status code for a previously existing object that is to be deleted
-   */
-  static final byte DELETING = 3;
-
-  /**
-   * Status code for a newly created object that is to be dropped
-   */
-  static final byte DROPPING = 4;
-
   /* --------------------- Instance fields and methods --------------------- */
 
   DBObject original;
@@ -202,16 +196,21 @@ public class DBEditObject extends DBObject {
    * @see arlut.csd.ganymede.DBField
    */
 
-  DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset)
+  DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
   {
-    Enumeration enum;
-    Object key;
-    DBObjectBaseField fieldDef;
-    DBField field, tmp;
-
-    /* -- */
-
     super(objectBase, invid.getNum());
+
+    Enumeration 
+      enum;
+
+    Object 
+      key;
+
+    DBObjectBaseField 
+      fieldDef;
+
+    DBField 
+      tmp = null;
 
     original = null;
     this.editset = editset;
@@ -233,28 +232,31 @@ public class DBEditObject extends DBObject {
 		
 	    switch (fieldDef.getType())
 	      {
-	      case DBStore.BOOLEAN:
+	      case BOOLEAN:
 		tmp = new BooleanDBField(this, fieldDef);
 		break;
 		    
-	      case DBStore.NUMERIC:
+	      case NUMERIC:
 		tmp = new NumericDBField(this, fieldDef);
 		break;
 		
-	      case DBStore.DATE:
+	      case DATE:
 		tmp = new DateDBField(this, fieldDef);
 		break;
 
-	      case DBStore.STRING:
+	      case STRING:
 		tmp = new StringDBField(this, fieldDef);
 		break;
 		    
-	      case DBStore.INVID:
+	      case INVID:
 		tmp = new InvidDBField(this, fieldDef);
 		break;
 	      }
 
-	    fields.put(key, tmp);
+	    if (tmp != null)
+	      {
+		fields.put(key, tmp);
+	      }
 	  }
       }    
   }
@@ -266,71 +268,79 @@ public class DBEditObject extends DBObject {
    *
    */
 
-  DBEditObject(DBObject original, DBEditSet editset)
+  DBEditObject(DBObject original, DBEditSet editset) throws RemoteException
   {
-    Enumeration enum;
-    Object key;
-    DBObjectBaseField fieldDef;
-    DBField field, tmp;
+    super(original.objectBase);
 
-    /* -- */
+    Enumeration 
+      enum;
 
-    // do we also want to synchronize on the object base
-    // below?
+    Object 
+      key;
 
-    this.editset = editset;
+    DBObjectBaseField 
+      fieldDef;
+
+    DBField 
+      field, 
+      tmp = null;
+
+    synchronized (original)
+      {
+	this.original = original;
+	this.id = original.id;
+	this.objectBase = original.objectBase;
+	removalDate = original.removalDate;
+	expirationDate = original.expirationDate;
+      }
+
     shadowObject = null;
+    this.editset = editset;
     committing = false;
     stored = true;
     status = EDITING;
 
-    synchronized (original)
+    fields = new Hashtable();
+
+    // clone the fields from the original object
+    // since we own these, the field-modifying
+    // methods on the copied fields will allow editing
+    // to go forward
+
+    if (original.fields != null)
       {
-	super(original.objectBase);
+	enum = original.fields.elements();
 
-	this.original = original;
-	this.id = original.id;
-	this.objectBase = original.objectBase;
-
-	fields = new Hashtable();
-
-	// clone the fields from the original object
-	// since we own these, the field-modifying
-	// methods on the copied fields will allow editing
-	// to go forward
-
-	if (original.fields != null)
+	while (enum.hasMoreElements())
 	  {
-	    enum = original.fields.elements();
+	    field = (DBField) enum.nextElement();
+	    key = new Short(field.getID());
 
-	    while (enum.hasMoreElements())
+	    switch (field.getType())
 	      {
-		field = (DBField) enum.nextElement();
-		key = new Short(field.getID());
-
-		switch (field.getType())
-		  {
-		  case DBStore.BOOLEAN:
-		    tmp = new BooleanDBField(this, field);
-		    break;
+	      case BOOLEAN:
+		tmp = new BooleanDBField(this, (BooleanDBField) field);
+		break;
 		    
-		  case DBStore.NUMERIC:
-		    tmp = new NumericDBField(this, field);
-		    break;
+	      case NUMERIC:
+		tmp = new NumericDBField(this, (NumericDBField) field);
+		break;
 
-		  case DBStore.DATE:
-		    tmp = new DateDBField(this, field);
-		    break;
+	      case DATE:
+		tmp = new DateDBField(this, (DateDBField) field);
+		break;
 
-		  case DBStore.STRING:
-		    tmp = new StringDBField(this, field);
-		    break;
+	      case STRING:
+		tmp = new StringDBField(this, (StringDBField) field);
+		break;
 		    
-		  case DBStore.INVID:
-		    tmp = new InvidDBField(this, field);
-		    break;
-		  }
+	      case INVID:
+		tmp = new InvidDBField(this, (InvidDBField) field);
+		break;
+	      }
 
+	    if (tmp != null)
+	      {
 		fields.put(key, tmp);
 	      }
 	  }
@@ -353,23 +363,23 @@ public class DBEditObject extends DBObject {
 		
 		switch (fieldDef.getType())
 		  {
-		  case DBStore.BOOLEAN:
+		  case BOOLEAN:
 		    tmp = new BooleanDBField(this, fieldDef);
 		    break;
 		    
-		  case DBStore.NUMERIC:
+		  case NUMERIC:
 		    tmp = new NumericDBField(this, fieldDef);
 		    break;
 		
-		  case DBStore.DATE:
+		  case DATE:
 		    tmp = new DateDBField(this, fieldDef);
 		    break;
 
-		  case DBStore.STRING:
+		  case STRING:
 		    tmp = new StringDBField(this, fieldDef);
 		    break;
 		    
-		  case DBStore.INVID:
+		  case INVID:
 		    tmp = new InvidDBField(this, fieldDef);
 		    break;
 		  }
@@ -382,12 +392,14 @@ public class DBEditObject extends DBObject {
 
   /**
    *
+   * Returns the DBSession that this object is checked out in
+   * care of.
    *
-   *
+   * @see arlut.csd.ganymede.DBSession
    *
    */
 
-  DBEditSet getSession()
+  DBSession getSession()
   {
     return editset.getSession();
   }
@@ -579,7 +591,7 @@ public class DBEditObject extends DBObject {
    * 
    */
 
-  boolean finalizeSetElement(DBField field, int index, Object value)
+  public boolean finalizeSetElement(DBField field, int index, Object value)
   {
     return true;
   }
@@ -604,7 +616,7 @@ public class DBEditObject extends DBObject {
    *  
    */
 
-  boolean finalizeSetValue(DBField field, Object value)
+  public boolean finalizeSetValue(DBField field, Object value)
   {
     return true;
   }
@@ -732,7 +744,7 @@ public class DBEditObject extends DBObject {
    * @see #commitPhase2()
    */
 
-  boolean inactivate()
+  public boolean inactivate()
   {
     return true;
   }
@@ -755,7 +767,7 @@ public class DBEditObject extends DBObject {
    * @see #commitPhase2()
    */
 
-  boolean remove()
+  public boolean remove()
   {
     return true;
   }
@@ -785,7 +797,7 @@ public class DBEditObject extends DBObject {
    * @see arlut.csd.ganymede.DBEditSet
    */
 
-  synchronized boolean commitPhase1()
+  public synchronized boolean commitPhase1()
   {
     committing = true;
     return consistencyCheck(this);
@@ -799,7 +811,7 @@ public class DBEditObject extends DBObject {
    *
    */
 
-  synchronized boolean isCommitting()
+  public synchronized boolean isCommitting()
   {
     return committing;
   }
@@ -820,7 +832,7 @@ public class DBEditObject extends DBObject {
    * @see arlut.csd.ganymede.DBEditSet
    */
 
-  synchronized void commitPhase2()
+  public synchronized void commitPhase2()
   {
     return;
   }
@@ -836,9 +848,41 @@ public class DBEditObject extends DBObject {
    * 
    */
 
-  void release()
+  public void release()
   {
     return;
   }
-  
+
+  /**
+   *
+   * A client that has checked this object out can call this method
+   * to trigger object storage and transaction commit.. this is
+   * sort of a hack to give the client an object-centered view
+   * of the world, rather than explicit awareness of transactions.
+   *
+   * @see storable_object
+   *
+   */
+
+  public boolean store()
+  {
+    return false;
+  }
+
+  /**
+   *
+   * A client that has checked this object out can call this method
+   * to abort the transaction.. this is
+   * sort of a hack to give the client an object-centered view
+   * of the world, rather than explicit awareness of transactions.
+   *
+   * @see storable_object
+   *
+   */
+
+  public boolean dispose()
+  {
+    return false;
+  }
+
 }

@@ -8,7 +8,7 @@
    Result is serializable.
    
    Created: 21 October 1996 
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,49 +16,75 @@
 
 package arlut.csd.ganymede;
 
-import arlut.csd.ganymede.Invid;
+import java.rmi.RemoteException;
 
 public class Result implements java.io.Serializable {
   
-  Invid  invid;
-  String label;
+  db_object object;	// remote reference to an object on the server
 
   /* -- */
 
-  public Result(Invid invid, String label)
+  public Result(db_object object)
   {
-    this.invid = invid;
-    this.label = label;
+    this.object = object;
   }
+
+  // toString() can't throw RemoteException because it is
+  // defined in class Object without so doing
 
   public String toString()
   {
-    return label;
+    try 
+      {
+	return object.getLabel();
+      } 
+    catch (RemoteException ex)
+      {
+	return "";
+      }
   }
+
+  // ditto equals
 
   public boolean equals(Object object)
   {
-    if (object instanceof Result)
+    try
       {
-	return ((Result) object).invid.equals(invid);
+	if (object instanceof Result)
+	  {
+	    return ((Result) object).object.equals(object);
+	  }
+	else if (object instanceof db_object)
+	  {
+	    return ((db_object) object).equals(object);
+	  }
+	else
+	  {
+	    return false;
+	  }
       }
-    else if (object instanceof Invid)
-      {
-	return ((Invid) object).equals(invid);
-      }
-    else
+    catch (Exception ex)
       {
 	return false;
       }
   }
 
+  // and hashCode
+
   public int hashCode()
   {
-    return invid.hashCode();
+    try
+      {
+	return object.getInvid().hashCode();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught a remote exception: " + ex);
+      }
   }
 
-  public Invid Invid()
+  public Invid getInvid() throws RemoteException
   {
-    return invid;
+    return object.getInvid();
   }
 }

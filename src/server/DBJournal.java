@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,7 +43,7 @@ import java.util.*;
  *
  */
 
-public class DBJournal {
+public class DBJournal implements ObjectStatus {
 
   static boolean debug = true;
 
@@ -432,7 +432,7 @@ public class DBJournal {
 	    System.err.println("Objects in Transaction: " + editset.objects.size());
 	  }
 
-	jFile.writeInt(editset.object.size());
+	jFile.writeInt(editset.objects.size());
 
 	enum = editset.objects.elements();
 
@@ -442,18 +442,18 @@ public class DBJournal {
 
 	    switch (eObj.getStatus())
 	      {
-	      case DBEditObject.CREATING:
+	      case CREATING:
 		jFile.writeByte(CREATE);
 		jFile.writeShort(eObj.objectBase.type_code);
 		eObj.emit(jFile);
 
 		if (debug)
 		  {
-		    obj.print(System.err);
+		    eObj.print(System.err);
 		  }
 		break;
 
-	      case DBEditObject.EDITING:
+	      case EDITING:
 		jFile.writeByte(EDIT);
 		jFile.writeShort(eObj.objectBase.type_code);
 		eObj.emit(jFile);
@@ -465,18 +465,18 @@ public class DBJournal {
 
 		break;
 
-	      case DBEditObject.DELETING:
+	      case DELETING:
 		jFile.writeByte(DELETE);
 		jFile.writeShort(eObj.objectBase.type_code);
 		jFile.writeShort(eObj.id);
 
 		if (debug)
 		  {
-		    System.err.println(obj.objectBase.object_name + " : " + obj.id);
+		    System.err.println(eObj.objectBase.object_name + " : " + eObj.id);
 		  }
 		break;
 
-	      case DBEditObject.DROPPING:
+	      case DROPPING:
 		break;
 	      }
 	  }

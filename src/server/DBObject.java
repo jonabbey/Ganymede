@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,8 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
+import java.rmi.server.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -44,12 +46,15 @@ import java.util.*;
  *
  * <p>This is kind of like modern dating.</p>
  *
- * @version $Revision: 1.12 $ %D% (Created 2 July 1996)
+ * <p>The constructors of this object can throw RemoteException because of the
+ * UnicastRemoteObject superclass' constructor.</p>
+ *
+ * @version $Revision: 1.13 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
 
-public class DBObject implements db_object {
+public class DBObject extends UnicastRemoteObject implements db_object, FieldType {
 
   static boolean debug = true;
 
@@ -85,7 +90,7 @@ public class DBObject implements db_object {
    *
    */
 
-  DBObject(DBObjectBase objectBase)
+  DBObject(DBObjectBase objectBase) throws RemoteException
   {
     this.objectBase = objectBase;
     id = 0;
@@ -104,7 +109,7 @@ public class DBObject implements db_object {
    *
    */
 
-  DBObject(DBObjectBase objectBase, int id)
+  DBObject(DBObjectBase objectBase, int id) throws RemoteException
   {
     this(objectBase);
     this.id = id;
@@ -117,7 +122,7 @@ public class DBObject implements db_object {
    *
    */
 
-  DBObject(DBObjectBase objectBase, DataInput in) throws IOException
+  DBObject(DBObjectBase objectBase, DataInput in) throws IOException, RemoteException
   {
     this.objectBase = objectBase;
     shadowObject = null;
@@ -140,7 +145,7 @@ public class DBObject implements db_object {
    * 
    */
   
-  DBObject(DBEditObject eObj)
+  DBObject(DBEditObject eObj) throws RemoteException
   {
     Enumeration enum;
     DBField field;
@@ -208,7 +213,7 @@ public class DBObject implements db_object {
 
   public short getTypeID()
   {
-    return objectBase.type_count;
+    return objectBase.type_code;
   }
 
   /**
@@ -272,13 +277,13 @@ public class DBObject implements db_object {
     out.writeInt(id);
     out.writeShort(fields.size());
 
-    out.writeBoolean(new Boolean(willExpire()));
+    out.writeBoolean(willExpire());
     if (willExpire())
       {
 	out.writeLong(expirationDate.getTime());
       }
 
-    out.writeBoolean(new Boolean(isInactivated()));
+    out.writeBoolean(isInactivated());
     if (isInactivated())
       {
 	out.writeLong(removalDate.getTime());
@@ -304,12 +309,21 @@ public class DBObject implements db_object {
 
   synchronized void receive(DataInput in) throws IOException
   {
-    DBField tmp;
-    DBObjectBaseField definition;
-    short fieldcode;
-    short type;
-    Short key;
-    int tmp_count;
+    DBField 
+      tmp = null;
+
+    DBObjectBaseField 
+      definition;
+
+    short 
+      fieldcode,
+      type;
+
+    Short
+      key;
+
+    int 
+      tmp_count;
 
     /* -- */
 
@@ -326,7 +340,7 @@ public class DBObject implements db_object {
 	System.err.println("DBObject.receive(): tmp_count = 0");
       }
 
-    if (in.readBoolean().booleanValue())
+    if (in.readBoolean())
       {
 	expirationDate = new Date(in.readLong());
       }
@@ -335,7 +349,7 @@ public class DBObject implements db_object {
 	expirationDate = null;
       }
 
-    if (in.readBoolean().booleanValue())
+    if (in.readBoolean())
       {
 	removalDate = new Date(in.readLong());
       }
@@ -360,23 +374,23 @@ public class DBObject implements db_object {
 
 	switch (type)
 	  {
-	  case DBStore.BOOLEAN:
+	  case BOOLEAN:
 	    tmp = new BooleanDBField(this, in, definition);
 	    break;
 
-	  case DBStore.NUMERIC:
+	  case NUMERIC:
 	    tmp = new NumericDBField(this, in, definition);
 	    break;
 
-	  case DBStore.DATE:
+	  case DATE:
 	    tmp = new DateDBField(this, in, definition);
 	    break;
 
-	  case DBStore.STRING:
+	  case STRING:
 	    tmp = new StringDBField(this, in, definition);
 	    break;
 
-	  case DBStore.INVID:
+	  case INVID:
 	    tmp = new InvidDBField(this, in, definition);
 	    break;
 	  }
@@ -454,7 +468,16 @@ public class DBObject implements db_object {
 	return null;
       }
 
-    shadowObject = new DBEditObject(this, editset);
+    try
+      {
+	shadowObject = new DBEditObject(this, editset);
+      }
+    catch (RemoteException ex)
+      {
+	editset.getSession().setLastError("remote exception creating shadow for " + 
+					  getBase().getName() + ": " + getID());
+	return null;
+      }
 
     editset.addObject(shadowObject);
     this.editset = editset;
@@ -510,7 +533,7 @@ public class DBObject implements db_object {
    * @see arlut.csd.ganymede.db_object
    */
 
-  public DBField getField(short id)
+  public db_field getField(short id)
   {
     return (DBField) fields.get(new Short(id));
   }
@@ -524,7 +547,7 @@ public class DBObject implements db_object {
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public DBField getField(String fieldname)
+  synchronized public db_field getField(String fieldname)
   {
     Enumeration enum;
     DBField field;
@@ -552,7 +575,7 @@ public class DBObject implements db_object {
    * @see arlut.csd.ganymede.db_object
    */
 
-  synchronized public DBField[] listFields()
+  synchronized public db_field[] listFields()
   {
     DBField[] results;
     DBField temp;
@@ -695,7 +718,6 @@ public class DBObject implements db_object {
     Enumeration enum;
     Object key;
     DBField field;
-    DBArrayField afield;
 
     /* -- */
 
@@ -711,15 +733,13 @@ public class DBObject implements db_object {
 
 	field = (DBField) fields.get(key);
 
-	if (field instanceof DBArrayField)
+	if (field.isVector())
 	  {
-	    afield = (DBArrayField) field;
-
-	    for (int i = 0; i < afield.size(); i++)
+	    for (int i = 0; i < field.size(); i++)
 	      {
-		out.print("\t" + afield.key(i));
+		out.print("\t" + field.key(i));
 
-		if (i + 1 < afield.size())
+		if (i + 1 < field.size())
 		  {
 		    out.println(",");
 		  }

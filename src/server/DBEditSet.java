@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -109,7 +110,7 @@ public class DBEditSet {
 
     /* -- */
 
-    enum = object.elements();
+    enum = objects.elements();
 
     while (enum.hasMoreElements())
       {
@@ -269,7 +270,14 @@ public class DBEditSet {
 	  {
 	  case DBEditObject.CREATING:
 	  case DBEditObject.EDITING:
-	    base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
+	    try
+	      {
+		base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
+	      }
+	    catch (RemoteException ex)
+	      {
+		throw new Error("couldn't save edited object " + eObj + ", we're down in flames.");
+	      }
 	    break;
 
 	  case DBEditObject.DELETING:

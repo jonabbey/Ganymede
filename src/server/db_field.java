@@ -6,7 +6,7 @@
    or a scalar.  
 
    Created: 10 April 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,13 +16,14 @@ package arlut.csd.ganymede;
 
 import java.rmi.RemoteException;
 
-public interface db_field extends java.rmi.Remote {
+interface db_field extends java.rmi.Remote {
 
   String getName() throws RemoteException;
-  short getId() throws RemoteException;
+  short getID() throws RemoteException;
   String getComment() throws RemoteException;
   String getTypeDesc() throws RemoteException;
   short getType() throws RemoteException;
+  boolean isDefined() throws RemoteException;
   boolean isVector() throws RemoteException;
   boolean isEditable() throws RemoteException;
   boolean isVisible() throws RemoteException;
@@ -34,7 +35,7 @@ public interface db_field extends java.rmi.Remote {
 
   // for vectors
 
-  int length() throws RemoteException;
+  int size() throws RemoteException;
 
   Object getElement(int index) throws RemoteException;
   boolean setElement(int index, Object value) throws RemoteException;

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,7 +16,7 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
-
+import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -33,7 +33,7 @@ public class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  InvidDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
+  InvidDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
   {
     value = values = null;
     this.owner = owner;
@@ -53,7 +53,7 @@ public class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  InvidDBField(DBObject owner, DBObjectBaseField definition)
+  InvidDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
   {
     this.owner = owner;
     this.definition = definition;
@@ -69,7 +69,7 @@ public class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public InvidDBField(DBObject owner, InvidDBField field)
+  public InvidDBField(DBObject owner, InvidDBField field) throws RemoteException
   {
     this.owner = owner;
     definition = field.definition;
@@ -94,7 +94,7 @@ public class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public InvidDBField(DBObject owner, Invid value, DBObjectBaseField definition)
+  public InvidDBField(DBObject owner, Invid value, DBObjectBaseField definition) throws RemoteException
   {
     if (definition.isArray())
       {
@@ -119,7 +119,7 @@ public class InvidDBField extends DBField implements invid_field {
    *
    */
 
-  public InvidDBField(DBObject owner, Vector values, DBObjectBaseField definition)
+  public InvidDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
   {
     if (!definition.isArray())
       {
@@ -143,9 +143,16 @@ public class InvidDBField extends DBField implements invid_field {
     value = null;
   }
   
-  protected Object clone()
+  public Object clone()
   {
-    return new InvidDBField(owner, this);
+    try
+      {
+	return new InvidDBField(owner, this);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("Couldn't create InvidDBField: " + ex);
+      }
   }
 
   void emit(DataOutput out) throws IOException
@@ -166,8 +173,9 @@ public class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	out.writeShort(value.getType());
-	out.writeInt(value.getNum());
+	temp = (Invid) value;
+	out.writeShort(temp.getType());
+	out.writeInt(temp.getNum());
       }
   }
 
@@ -209,7 +217,7 @@ public class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException("scalar accessor called on vector");
       }
 
-    return value;
+    return (Invid) value;
   }
 
   public Invid value(int index)
@@ -255,7 +263,6 @@ public class InvidDBField extends DBField implements invid_field {
 
   private boolean bind(Invid oldRemote, Invid newRemote)
   {
-    byte symmetry;
     short targetField;
 
     DBEditObject 
@@ -287,9 +294,7 @@ public class InvidDBField extends DBField implements invid_field {
 
     // find out whether we need to do anything to maintain symmetry
 
-    symmetry = getFieldDef().getSymmetry();
-
-    if (symmetry == 0)
+    if (!getFieldDef().isSymmetric())
       {
 	return true;
       }
@@ -381,6 +386,8 @@ public class InvidDBField extends DBField implements invid_field {
 	setLastError("couldn't establish field symmetry with " + newRef);
 	return false;
       }
+
+    return true;
   }
 
   /**
@@ -394,7 +401,6 @@ public class InvidDBField extends DBField implements invid_field {
 
   private boolean unbind(Invid remote)
   {
-    byte symmetry;
     short targetField;
 
     DBEditObject 
@@ -424,9 +430,7 @@ public class InvidDBField extends DBField implements invid_field {
 
     // find out whether we need to do anything to maintain symmetry
 
-    symmetry = getFieldDef().getSymmetry();
-
-    if (symmetry == 0)
+    if (!getFieldDef().isSymmetric())
       {
 	return true;
       }
@@ -575,7 +579,8 @@ public class InvidDBField extends DBField implements invid_field {
     int 
       index = -1;
 
-    Invid tmp;
+    Invid 
+      tmp = null;
 
     DBEditObject eObj;
 
@@ -916,7 +921,7 @@ public class InvidDBField extends DBField implements invid_field {
 
   public boolean limited()
   {
-    return definition.isTargetLimited();
+    return definition.isTargetRestricted();
   }
 
   /**

@@ -7,13 +7,13 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package gash;
+package arlut.csd.ganymede;
 
 import java.util.*;
 import java.rmi.*;
@@ -37,11 +37,16 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   GanymedeServer server;
   Client client;
+
   boolean logged_in;
+
+  Date connecttime;
+
   String username;
   String clienthost;
-  Date connecttime;
   String lastError;
+
+  DBSession session;
 
   /* -- */
 
@@ -83,7 +88,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
       }
     catch (RemoteException ex)
       {
-	Ganymede.debug("iSession: couldn't verify username on client" + ex);
+	Ganymede.debug("GanymedeSession: couldn't verify username on client" + ex);
 	logged_in = false;
       }
 
@@ -166,7 +171,7 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     Ganymede.debug("User " + username + " logging off");
     logged_in = false;
     this.client = null;
-
+ 
     GanymedeServer.sessions.removeElement(this);
     GanymedeServer.activeUsers.remove(username);
     GanymedeAdmin.refreshUsers();
@@ -179,9 +184,25 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
 
   //  Database operations
 
-  public Type[] types()
+  /**
+   *
+   * This method returns a list of remote references to the Ganymede
+   * object type definitions.
+   * 
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public Enumeration getTypes()
   {
-    return Ganymede.schema.types;
+    // how do we manage this so that we don't have to
+    // worry about concurrency issues?  We basically
+    // just want to make sure that the client can't
+    // retain access to this enumeration after
+    // the system goes into schema editing mode..
+    // Is the schema edit establish code sufficiently
+    // rigorous to permit this?
+
+    return Ganymede.db.objectBases.elements();
   }
 
   public Result[] query(Query query)
@@ -189,19 +210,19 @@ class GanymedeSession extends UnicastRemoteObject implements Session {
     return null;
   }
 
-  public data_object view_db_object(Invid invid)
+  public db_object view_db_object(Invid invid)
   {
-    return null;
+    return session.viewDBObject(invid);
   }
 
   public storable_object edit_db_object(Invid invid)
   {
-    return null;
+    return session.editDBObject(invid);
   }
 
-  public storable_object create_db_object(int type) 
+  public storable_object create_db_object(short type) 
   {
-    return null;
+    return session.createDBObject(type);
   }
   
   public boolean inactivate_db_object(Invid invid) 

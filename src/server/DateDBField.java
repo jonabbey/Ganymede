@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -32,7 +33,7 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  DateDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
+  DateDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
   {
     value = values = null;
     this.owner = owner;
@@ -52,7 +53,7 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  DateDBField(DBObject owner, DBObjectBaseField definition)
+  DateDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
   {
     this.owner = owner;
     this.definition = definition;
@@ -68,7 +69,7 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  public DateDBField(DBObject owner, DateDBField field)
+  public DateDBField(DBObject owner, DateDBField field) throws RemoteException
   {
     this.owner = owner;
     definition = field.definition;
@@ -93,7 +94,7 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  public DateDBField(DBObject owner, Date value, DBObjectBaseField definition)
+  public DateDBField(DBObject owner, Date value, DBObjectBaseField definition) throws RemoteException
   {
     if (definition.isArray())
       {
@@ -122,7 +123,7 @@ public class DateDBField extends DBField implements date_field {
    *
    */
 
-  public DateDBField(DBObject owner, Vector values, DBObjectBaseField definition)
+  public DateDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
   {
     if (!definition.isArray())
       {
@@ -139,7 +140,7 @@ public class DateDBField extends DBField implements date_field {
       }
     else
       {
-	this.values = (Vector) value.clone();
+	this.values = (Vector) values.clone();
 	defined = true;
       }
 
@@ -147,9 +148,16 @@ public class DateDBField extends DBField implements date_field {
     value = null;
   }
 
-  protected Object clone()
+  public Object clone()
   {
-    return new DateDBField(owner, this);
+    try
+      {
+	return new DateDBField(owner, this);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't clone date field: " + ex);
+      }
   }
 
   void emit(DataOutput out) throws IOException

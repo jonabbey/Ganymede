@@ -10,7 +10,7 @@
    primary interface for accessing ganymede db objects.
 
    Created: 1 April 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -19,6 +19,7 @@
 package arlut.csd.ganymede;
 
 import java.rmi.*;
+import java.util.*;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -31,7 +32,8 @@ import java.rmi.*;
  *   Ganymede Session object holds the state for a .Ganymede client's session
  *   with the Ganymede server.  The Ganymede session will also provide the
  *   primary interface for accessing ganymede db objects.
-
+ *
+ * @see arlut.csd.ganymede.DBSession
  */
 
 public interface Session extends Remote {
@@ -46,11 +48,13 @@ public interface Session extends Remote {
 
   /**
    *
-   * List types of objects stored and manipulated through the Ganymede server
+   * List types of objects stored and manipulated through the Ganymede server.
+   *
+   * This method returns an enumeration of Base remote references.
    *
    */
 
-  Type[] types() throws RemoteException;
+  Enumeration getTypes() throws RemoteException;
 
   /**
    *
@@ -87,7 +91,7 @@ public interface Session extends Remote {
    * @return the newly created object for editing
    *
    */
-  storable_object   create_db_object(int type) throws RemoteException;
+  storable_object   create_db_object(short type) throws RemoteException;
 
   /**
    *

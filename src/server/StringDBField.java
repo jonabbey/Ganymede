@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -32,7 +33,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  StringDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
+  StringDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
   {
     defined = true;
     value = values = null;
@@ -53,7 +54,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  StringDBField(DBObject owner, DBObjectBaseField definition)
+  StringDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
   {
     this.owner = owner;
     this.definition = definition;
@@ -69,7 +70,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  public StringDBField(DBObject owner, StringDBField field)
+  public StringDBField(DBObject owner, StringDBField field) throws RemoteException
   {
     this.owner = owner;
     definition = field.definition;
@@ -94,7 +95,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  public StringDBField(DBObject owner, String value, DBObjectBaseField definition)
+  public StringDBField(DBObject owner, String value, DBObjectBaseField definition) throws RemoteException
   {
     if (definition.isArray())
       {
@@ -123,7 +124,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  public StringDBField(DBObject owner, Vector values, DBObjectBaseField definition)
+  public StringDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
   {
     if (!definition.isArray())
       {
@@ -147,9 +148,16 @@ public class StringDBField extends DBField implements string_field {
     value = null;
   }
 
-  protected Object clone()
+  public Object clone()
   {
-    return new StringDBField(owner, this);
+    try
+      {
+	return new StringDBField(owner, this);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't clone StringDBField: " + ex);
+      }
   }
 
   void emit(DataOutput out) throws IOException
@@ -164,7 +172,7 @@ public class StringDBField extends DBField implements string_field {
       }
     else
       {
-	out.writeUTF(value);
+	out.writeUTF((String)value);
       }
   }
 
@@ -492,7 +500,7 @@ public class StringDBField extends DBField implements string_field {
 	ok = false;
 	v = choices();
 
-	for (int i = 0; i < v.length() && !ok; i++)
+	for (int i = 0; i < v.size() && !ok; i++)
 	  {
 	    s2 = (String) v.elementAt(i);
 

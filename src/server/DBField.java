@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,13 +16,15 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
+import java.rmi.server.*;
 
 /*------------------------------------------------------------------------------
                                                                   abstract class
                                                                          DBField
 
 ------------------------------------------------------------------------------*/
-public abstract class DBField implements Cloneable, db_field {
+public abstract class DBField extends UnicastRemoteObject implements db_field, Cloneable {
 
   Object value;
   Vector values;  
@@ -32,6 +34,11 @@ public abstract class DBField implements Cloneable, db_field {
 
   /* -- */
 
+  public DBField() throws RemoteException
+  {
+    super();
+  }
+  
   /**
    *
    * Object value of DBField.  Used to represent value in value hashes.
@@ -173,7 +180,7 @@ public abstract class DBField implements Cloneable, db_field {
 
   public short getID()
   {
-    return definition.id();
+    return definition.getID();
   }
 
   /**
@@ -271,11 +278,6 @@ public abstract class DBField implements Cloneable, db_field {
       }
 
     eObj = (DBEditObject) owner;
-
-    if (!eObj.canWrite())
-      {
-	return false;
-      }
 
     // if our owner has already started the commit
     // process, we can't allow any changes
@@ -854,7 +856,7 @@ public abstract class DBField implements Cloneable, db_field {
 	return false;		// should we throw an exception?
       }
 
-    return namespace.mark(editset, value);
+    return namespace.mark(editset, value, this);
   }
 
   // ****

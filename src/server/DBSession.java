@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -186,7 +186,17 @@ public class DBSession {
 
     obj = viewDBObject(baseID, objectID);
 
-    return obj.createShadow(editSet);
+    if (obj instanceof DBEditObject)
+      {
+	// we already have a copy checked out.. go ahead and
+	// return a reference to our copy
+
+	return (DBEditObject) obj;
+      }
+    else
+      {
+	return obj.createShadow(editSet);
+      }
   }
 
   /**
@@ -270,7 +280,7 @@ public class DBSession {
 
     // we couldn't be so trusting on an enum establish request, though.
 
-    if ((lock == null) || lock.isLocked(base))
+    if ((lock == null) || !lock.isLocked(base))
       {
 	throw new RuntimeException("viewDBObject: viewDBObject called without lock");
       }
@@ -376,11 +386,9 @@ public class DBSession {
 
       case DBEditObject.DELETING:
 	return;
-	break;
 
       case DBEditObject.DROPPING:
 	return;
-	break;
       }
   }
 
@@ -474,17 +482,14 @@ public class DBSession {
 
   /**
    *
-   * openReadLock establishes a read lock for the entire DBStore.<br><br>
+   * openWriteLock establishes a write lock for the entire DBStore.<br><br>
    *
-   * The thread calling this method will block until the read lock 
-   * can be established.  If transactions on the database are
-   * currently committing, the establishment of the read lock will be suspended
-   * until all such transactions are committed.<br><br>
+   * The thread calling this method will block until the write lock 
+   * can be established.  The write lock cannot be established until
+   * all read locks on the DBStore have completed.  All write lock
+   * requests get queued in order of submission, only one session
+   * can have a write lock at a time.
    *
-   * All viewDBObject calls done within the context of an open read lock
-   * will be transaction consistent.  Other sessions may pull objects out for
-   * editing during the course of the session's read lock, but no visible changes
-   * will be made to those ObjectBases until the read lock is released.
    */
 
   public synchronized void openWriteLock()

@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -16,6 +16,7 @@ package arlut.csd.ganymede;
 
 import java.io.*;
 import java.util.*;
+import java.rmi.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -54,7 +55,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    */
 
-  BooleanDBField(DBObject owner, DBObjectBaseField definition)
+  BooleanDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
   {
     this.owner = owner;
     this.definition = definition;
@@ -70,7 +71,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    */
 
-  public BooleanDBField(DBObject owner, BooleanDBField field)
+  public BooleanDBField(DBObject owner, BooleanDBField field) throws RemoteException
   {
     this.owner = owner;
     definition = field.definition;
@@ -96,7 +97,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    */
 
-  public BooleanDBField(DBObject owner, boolean value, DBObjectBaseField definition)
+  public BooleanDBField(DBObject owner, boolean value, DBObjectBaseField definition) throws RemoteException
   {
     if (definition.isArray())
       {
@@ -117,7 +118,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    */
 
-  public BooleanDBField(DBObject owner, Vector values, DBObjectBaseField definition)
+  public BooleanDBField(DBObject owner, Vector values, DBObjectBaseField definition) throws RemoteException
   {
     if (!definition.isArray())
       {
@@ -138,13 +139,20 @@ public class BooleanDBField extends DBField implements boolean_field {
 	defined = true;
       }
 
-    value = false;
+    value = null;
     defined = true;
   }
 
-  protected Object clone()
+  public Object clone()
   {
-    return new BooleanDBField(owner, this);
+    try
+      {
+	return new BooleanDBField(owner, this);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("couldn't clone boolean field: " + ex);
+      }
   }
 
   void emit(DataOutput out) throws IOException
