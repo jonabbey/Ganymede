@@ -6,8 +6,8 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.61 $
-   Last Mod Date: $Date: 1999/10/29 18:43:35 $
+   Version: $Revision: 1.62 $
+   Last Mod Date: $Date: 1999/10/29 19:11:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -336,10 +336,20 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
   {
+    if (debug)
+      {
+	System.err.println("Attempting to clone User " + origObj.getLabel());
+      }
+
     boolean problem = false;
     ReturnVal tmpVal;
     StringBuffer resultBuf = new StringBuffer();
     ReturnVal retVal = super.cloneFromObject(session, origObj, local);
+
+    if (debug)
+      {
+	System.err.println("User " + origObj.getLabel() + " cloned, working on embeddeds");
+      }
 
     if (retVal != null && retVal.getDialog() != null)
       {
@@ -374,8 +384,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     for (i = 0; i < newOnes.size(); i++)
       {
+	if (debug)
+	  {
+	    System.err.println("User clone sub " + i);
+	  }
+
 	workingVolume = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
 	origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
+
+	if (debug)
+	  {
+	    System.err.println("Attempting to clone user volume " + origVolume.getLabel());
+	  }
+
 	tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
 
 	if (tmpVal != null && tmpVal.getDialog() != null)
@@ -393,10 +414,20 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	for (; i < oldOnes.size(); i++)
 	  {
+	    if (debug)
+	      {
+		System.err.println("User clone sub sub " + i);
+	      }
+
 	    tmpVal = newVolumes.createNewEmbedded(local);
 
 	    if (!tmpVal.didSucceed())
 	      {
+		if (debug)
+		  {
+		    System.err.println("User clone couldn't allocate new embedded");
+		  }
+
 		if (tmpVal != null && tmpVal.getDialog() != null)
 		  {
 		    resultBuf.append("\n\n");
@@ -411,6 +442,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    workingVolume = (DBEditObject) session.editDBObject(newInvid);
 	    origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
+
+	    if (debug)
+	      {
+		System.err.println("Attempting to clone user volume " + origVolume.getLabel());
+	      }
+
 	    tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
 
 	    if (tmpVal != null && tmpVal.getDialog() != null)
