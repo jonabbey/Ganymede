@@ -8,7 +8,7 @@
    server.
    
    Created: 6 February 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,7 @@ import arlut.csd.JDataComponent.listHandle;
 
 ------------------------------------------------------------------------------*/
 
-public class ObjectHandle {
+public class ObjectHandle implements Cloneable {
 
   String label;
   Invid invid;
@@ -44,7 +44,6 @@ public class ObjectHandle {
     this.inactive = inactive;
     this.expirationSet = expirationSet;
     this.removalSet = removalSet;
-
   }
 
   public final String getLabel()
