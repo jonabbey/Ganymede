@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.28 $
-   Last Mod Date: $Date: 2000/12/03 23:09:32 $
+   Version: $Revision: 1.29 $
+   Last Mod Date: $Date: 2000/12/04 03:07:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -99,7 +99,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   /**
    * Set the highWaterMark to something high if on a single processor
-   * system, to something high (equal to 0) on a multi-processor
+   * system, to something low (equal to 0) on a multi-processor
    * native threads system.  
    */
 
@@ -155,7 +155,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
     this.bufferSize = bufferSize;
 
-    if (false) // optimize for single processor
+    if (true) // optimize for single processor
       {
 	this.highWaterMark = bufferSize - 5;
 	this.lowWaterMark = 5;
@@ -731,15 +731,15 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 	  {
 	    close();
 	    ex.printStackTrace();
-	    err.println("XMLReader parse error: " + ex.getMessage());
+	    System.err.println("XMLReader parse error: " + ex.getMessage());
 
 	    synchronized (buffer)
 	      {
-		err.println("Last " + buffer.size() + " items successfully parsed:");
+		System.err.println("Last " + buffer.size() + " items successfully parsed:");
 
 		for (int i = 0; i < buffer.size(); i++)
 		  {
-		    err.println(buffer.elementAt(i));
+		    System.err.println(buffer.elementAt(i));
 		  }
 	      }
 	    throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
