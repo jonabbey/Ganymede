@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.18 $ %D%
+   Version: $Revision: 1.19 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -42,7 +42,8 @@ public class QueryResult implements java.io.Serializable {
   // for use pre-serialized
 
   transient Hashtable invidHash = null;
-  transient private boolean forTransport = true;
+  transient Hashtable labelHash = null;
+  private boolean forTransport = true;
 
   // for transport
 
@@ -61,6 +62,8 @@ public class QueryResult implements java.io.Serializable {
   {
     buffer = new StringBuffer();
     invidHash = new Hashtable();
+    labelHash = new Hashtable();
+    handles = new Vector();
   }
 
   /**
@@ -130,6 +133,21 @@ public class QueryResult implements java.io.Serializable {
 	throw new NullPointerException("QueryResult.addRow(): null label passed in");
       }
 
+    // don't add an object we've already got here
+
+    if (invid != null && containsInvid(invid))
+      {
+	return;
+      }
+    else if (invid == null && containsLabel(label))
+      {
+	return;
+      }
+
+    handles.addElement(new ObjectHandle(label, invid, 
+					inactive, expirationSet, 
+					removalSet, editable));
+
     if (forTransport)
       {
 	// encode any true bits
@@ -193,6 +211,13 @@ public class QueryResult implements java.io.Serializable {
 
 	invidHash.put(invid, label);
       }
+
+    if (label != null)
+      {
+	labelHash.put(label, label);
+      }
+
+    unpacked = false;
   }
 
   // ***
@@ -217,7 +242,7 @@ public class QueryResult implements java.io.Serializable {
 
   public Vector getHandles()
   {
-    if (!unpacked)
+    if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
@@ -227,7 +252,7 @@ public class QueryResult implements java.io.Serializable {
 
   public Invid getInvid(int row)
   {
-    if (!unpacked)
+    if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
@@ -237,7 +262,7 @@ public class QueryResult implements java.io.Serializable {
 
   public Vector getLabels()
   {
-    if (!unpacked)
+    if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
@@ -257,7 +282,7 @@ public class QueryResult implements java.io.Serializable {
   
   public String getLabel(int row)
   {
-    if (!unpacked)
+    if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
@@ -267,7 +292,7 @@ public class QueryResult implements java.io.Serializable {
 
   public int size()
   {
-    if (!unpacked)
+    if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
@@ -288,7 +313,7 @@ public class QueryResult implements java.io.Serializable {
 
     /* -- */
 
-    if (!unpacked)
+    if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
@@ -312,7 +337,7 @@ public class QueryResult implements java.io.Serializable {
 
     /* -- */
 
-    if (!unpacked)
+    if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
@@ -332,7 +357,7 @@ public class QueryResult implements java.io.Serializable {
 
     /* -- */
 
-    if (!unpacked)
+    if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
@@ -363,6 +388,19 @@ public class QueryResult implements java.io.Serializable {
 
   /**
    *
+   * This method is provided for the server to optimize
+   * it's QueryResult loading operations, and is not
+   * intended for use post-serialization.
+   *
+   */
+
+  public synchronized boolean containsLabel(String label)
+  {
+    return labelHash.containsKey(label);
+  }
+
+  /**
+   *
    * This is a pre-serialization method for concatenating
    * another (for transport) QueryResult to ourself.
    *
@@ -371,6 +409,49 @@ public class QueryResult implements java.io.Serializable {
   public void append(QueryResult result)
   {
     buffer.append(result.buffer.toString());
+  }
+
+  /**
+   *
+   * This method returns a QueryResult which holds the intersection
+   * of the contents of this QueryResult and the contents of
+   * operand.
+   *
+   */
+
+  public synchronized QueryResult intersection(QueryResult operand)
+  {
+    QueryResult result = new QueryResult(forTransport);
+    ObjectHandle handle;
+
+    /* -- */
+
+    if (operand == null || operand.size() == 0)
+      {
+	return result;
+      }
+
+    for (int i = 0; i < handles.size(); i++)
+      {
+	handle = (ObjectHandle) handles.elementAt(i);
+
+	if (handle.getInvid() != null)
+	  {
+	    if (operand.containsInvid(handle.getInvid()))
+	      {
+		result.addRow(handle);
+	      }
+	  }
+	else
+	  {
+	    if (operand.containsLabel(handle.getLabel()))
+	      {
+		result.addRow(handle);
+	      }
+	  }
+      }
+
+    return result;
   }
 
   // ***
@@ -399,6 +480,11 @@ public class QueryResult implements java.io.Serializable {
     boolean inactive, expirationSet, removalSet, editable;
 
     /* -- */
+
+    if (debug)
+      {
+	System.err.println("QueryResult.unpackBuffer()");
+      }
 
     // prepare our handle vector
 
