@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -105,8 +105,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    while (enum.hasMoreElements())
 	      {
 		base = (DBObjectBase) enum.nextElement();
-		store.objectBases.put(base.getKey(),
-				      new DBObjectBase(base, this));
+		store.setBase(new DBObjectBase(base, this));
 	      }
 	  }
 
@@ -200,11 +199,51 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
 	Ganymede.debug("created base: " + base.getKey());
 
-	store.objectBases.put(base.getKey(), base);
+	store.setBase(base);
       }
 
     return base;
   }
+
+  /**
+   *
+   * This method deletes a DBObjectBase, removing it from the
+   * Schema Editor's working set of bases.  The removal won't
+   * take place for real unless the SchemaEdit is committed.
+   *
+   * @see arlut.csd.ganymede.SchemaEdit
+   */
+
+  public void deleteBase(Base b)
+  {
+    DBObjectBase base;
+    short id;
+
+    /* -- */
+
+    try
+      {
+	id = b.getTypeID();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("remote " + ex);
+      }
+
+    System.err.println("deleteBase");
+
+    if (!locked)
+      {
+	Ganymede.debug("deleteBase failure: already released/committed");
+	throw new RuntimeException("already released/committed");
+      }
+
+    synchronized (store)
+      {
+	store.objectBases.remove(new Short(id));
+      }
+  }
+
 
   public synchronized NameSpace[] getNameSpaces()
   {
@@ -410,6 +449,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public void unreferenced()
   {
+    Ganymede.debug("DBSchemaEdit unreferenced");
+
     if (locked)
       {
 	release();
