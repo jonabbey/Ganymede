@@ -5,7 +5,7 @@
   A wizard to allow deletion of a user's home group from the group edit window.
 
   Created: 8 April 1998
-  Version: $Revision: 1.4 $ %D%
+  Version: $Revision: 1.5 $ %D%
   Module by: Mike Mulvaney
   Applied Research Laboratories, The University of Texas at Austin
   
@@ -200,10 +200,7 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 		print("Before union: success: " + ret.dumpRescanInfo());
 	      }
 
-
 	    ReturnVal rv = ret.unionRescan(retVal);
-
-
 
 	    if (debug)
 	      {
