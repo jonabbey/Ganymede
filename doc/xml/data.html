@@ -254,7 +254,9 @@ to do this:</p>
 force the xmlclient to set the <b>Groups</b> field to contain only
 the two items listed, adding or removing items as necessary.</p>
 
-<p>You can also manually add or remove individual items:</p>
+<p>You can also manually add or remove individual items, using
+<b>&lt;add&gt;</b>, <b>&lt;addIfNotPresent&gt;</b>, and
+<b>&lt;delete&gt;</b>:</p>
 
 <pre>
   &lt;object type="User" id="broccol" action="edit"&gt;
@@ -271,16 +273,19 @@ the two items listed, adding or removing items as necessary.</p>
 </pre>
 
 <p>This will cause the omsovr group to be added and the omsnet group
-to be removed.  You can have as many <b>&lt;add&gt;</b> and
-<b>&lt;delete&gt;</b> containers as you want within a vector field,
-but <b>&lt;add&gt;</b> and <b>&lt;delete&gt;</b> are not compatible
-with <b>&lt;set&gt;</b>.  If you use <b>&lt;set&gt;</b>, you may
-not use <b>&lt;add&gt;</b> or <b>&lt;delete&gt;</b> as well.</p>
+to be removed.  You can have as many <b>&lt;add&gt;</b>,
+<b>&lt;addIfNotPresent&gt;</b> and <b>&lt;delete&gt;</b> containers as
+you want within a vector field, but <b>&lt;add&gt;</b>,
+<b>&lt;addIfNotPresent&gt;</b> and <b>&lt;delete&gt;</b> are not
+compatible with <b>&lt;set&gt;</b>.  If you use <b>&lt;set&gt;</b>,
+you may not use <b>&lt;add&gt;</b>, <b>&lt;addIfNotPresent&gt;</b> or
+<b>&lt;delete&gt;</b> as well.</p>
 
-<p>If you don't specify <b>&lt;add&gt;</b>, <b>&lt;delete&gt;</b>,
-or <b>&lt;set&gt;</b>, the xmlclient will treat the items as belonging
-to an <b>&lt;add&gt;</b> container.  For this reason, the following
-is not allowed:</p>
+<p>If you don't specify <b>&lt;add&gt;</b>,
+<b>&lt;addIfNotPresent&gt;</b>, <b>&lt;delete&gt;</b>, or
+<b>&lt;set&gt;</b>, the xmlclient will treat the items as belonging to
+an <b>&lt;addIfNotPresent&gt;</b> container.  For this reason, the
+following is not allowed:</p>
 
 <pre>
   &lt;object type="User" id="broccol" action="edit"&gt;
@@ -296,8 +301,8 @@ is not allowed:</p>
 </pre>
 
 <p>because the omsovr element is considered to be in an
-<b>&lt;add&gt;</b>, which may not co-exist with a <b>&lt;set&gt;</b>
-in a single field element.</p>
+<b>&lt;addIfNotPresent&gt&gt;</b>, which may not co-exist with a
+<b>&lt;set&gt;</b> in a single field element.</p>
 
 <p>There are presently nine different types of data fields supported
 by the Ganymede server, and each of these types has its own rules as
@@ -897,7 +902,7 @@ object on the server, regardless of whatever other activity the
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
 <!-- Created: Tue Jul 25 21:18:12 CDT 2000 -->
 <!-- hhmts start -->
-Last modified: Tue Oct 30 21:59:35 CST 2001
+Last modified: Tue Nov 13 18:39:49 CST 2001
 <!-- hhmts end -->
   </body>
 </html>
