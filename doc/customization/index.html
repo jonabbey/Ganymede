@@ -198,9 +198,11 @@
 	<td colspan="1" align="right"><h3><b><a href="userCustom.java">userCustom.java</a></b></h3></td></tr></table> 
     
     <pre>
-package arlut.csd.ganymede.custom;
+package arlut.csd.ganymede.mySchemaPackage;
 
-import arlut.csd.ganymede.*;
+import arlut.csd.ganymede.server.*;
+import arlut.csd.ganymede.common.*;
+import arlut.csd.ganymede.rmi.*;
 
 public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html">DBEditObject</a> {
     </pre>
@@ -231,7 +233,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
     <pre>
   /**
    *
-   * Customization Constructor
+   * Customization/objectHook PSEUDOSTATIC Constructor 
    *
    */
 
@@ -715,14 +717,14 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
       or failure of the operation attempted.  This information can
       include a list of objects and fields for the client to refresh,
       and it can include a <a
-      href="../javadoc/arlut.csd.JDialog.JDialogBuff.html">JDialogBuff</a>
+      href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
       object, and a <a
       href="../javadoc/arlut/csd/ganymede/server/GanymediatorWizard.html">wizard
       callback</a>.
     </p>
 
     <p>
-      <a href="../javadoc/arlut.csd.JDialog.JDialogBuff.html">JDialogBuff</a>
+      <a href="../javadoc/arlut/csd/JDialog/JDialogBuff.html">JDialogBuff</a>
       is a dialog definition object. It defines a dialog for the
       client to display, including a title, text message, an icon, an
       optional set of fields for the user to fill in, and text for the
