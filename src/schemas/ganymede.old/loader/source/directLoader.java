@@ -3,14 +3,14 @@
 
    Ganymede directLoader module
 
-   This module is intended to be able to login to the Ganymede
+   This module is intended to be bound to the bulk of the Ganymede
    server and automatically create a whole bunch of objects
    to initialize the database from GASH data.
 
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -270,7 +270,7 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("admin_info");
+	inStream = new FileInputStream("input/admin_info");
       }
     catch (FileNotFoundException ex)
       {
@@ -370,7 +370,7 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("user_info");
+	inStream = new FileInputStream("input/user_info");
 	done = false;
       }
     catch (FileNotFoundException ex)
@@ -434,7 +434,7 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("group_info");
+	inStream = new FileInputStream("input/group_info");
       }
     catch (FileNotFoundException ex)
       {
@@ -498,7 +498,7 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("netgroup");
+	inStream = new FileInputStream("input/netgroup");
       }
     catch (FileNotFoundException ex)
       {
@@ -563,7 +563,7 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("internet_assignment");
+	inStream = new FileInputStream("input/internet_assignment");
       }
     catch (FileNotFoundException ex)
       {
@@ -623,7 +623,7 @@ public class directLoader {
 
     try
       {
-	sysLoader = new SystemLoader("hosts_info");
+	sysLoader = new SystemLoader("input/hosts_info");
       }
     catch (IOException ex)
       {
@@ -642,7 +642,7 @@ public class directLoader {
 
     try
       {
-	inStream = new FileInputStream("netgroup");
+	inStream = new FileInputStream("input/netgroup");
       }
     catch (FileNotFoundException ex)
       {
