@@ -9,15 +9,15 @@
 
    Created: 28 May 1996
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2001/03/28 05:16:32 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2002/01/26 20:05:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -68,7 +68,7 @@ import java.util.Date;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Revision: 1.19 $ %D%
+ * @version $Revision: 1.20 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -115,6 +115,9 @@ public interface adminSession extends Remote {
 
   /**
    * <p>shutdown the server cleanly, on behalf of this admin console.</p>
+   *
+   * @param waitForUsers if true, shutdown will be deferred until all users are logged
+   * out.  No new users will be allowed to login.
    */
 
   ReturnVal     shutdown(boolean waitForUsers) throws RemoteException;
@@ -126,17 +129,19 @@ public interface adminSession extends Remote {
   ReturnVal     dumpDB() throws RemoteException;
 
   /**
-   *
-   * run a (possibly long-running) verification suite on the invid links
-   *
+   * <p>run a long-running verification suite on the Ganymede server
+   * database's invid links</p>
    */
 
   ReturnVal        runInvidTest() throws RemoteException;
 
   /**
-   * <P>Removes any invid pointers in the Ganymede database whose
-   * targets are not properly defined.  This should not happen
-   * unless there is a bug some place in the server.</P>
+   * <p>run a long-running verification and repair operation on the Ganymede
+   * server's invid database links</p>
+   *
+   * <p>Removes any invid pointers in the Ganymede database whose
+   * targets are not properly defined.  This should not ever happen
+   * unless there is a bug some place in the server.</p>
    */
 
   ReturnVal     runInvidSweep() throws RemoteException;
@@ -160,14 +165,20 @@ public interface adminSession extends Remote {
    * <P>Causes a pre-registered task in the Ganymede server
    * to be executed as soon as possible.  This method call
    * will have no effect if the task is currently running.</P>
+   *
+   * @param name The name of the task to run
    */
 
   ReturnVal     runTaskNow(String name) throws RemoteException;
 
   /**
-   * <P>Causes a running task to be stopped as soon as possible.
-   * This is not always a safe operation, as the task is stopped
-   * abruptly, with possible consequences.  Use with caution.</P>
+   * <p>Causes a running task to be interrupted as soon as possible.
+   * Ganymede tasks need to be specifically written to be able
+   * to respond to interruption, so it is not guaranteed that the
+   * task named will always be able to safely or immediately respond
+   * to a stopTask() command.</p>
+   *
+   * @param name The name of the task to interrupt
    */
 
   ReturnVal     stopTask(String name) throws RemoteException;
@@ -177,6 +188,8 @@ public interface adminSession extends Remote {
    * until {@link arlut.csd.ganymede.adminSession#enableTask(java.lang.String) enableTask()}
    * is called.  This method will not stop a task that is currently
    * running.</P>
+   *
+   * @param name The name of the task to disable
    */
 
   ReturnVal     disableTask(String name) throws RemoteException;
@@ -185,14 +198,23 @@ public interface adminSession extends Remote {
    * <P>Causes a task that was temporarily disabled by
    * {@link arlut.csd.ganymede.adminSession#disableTask(java.lang.String) disableTask()}
    * to be available for execution again.</P>
+   *
+   * @param name The name of the task to enable
    */
 
   ReturnVal     enableTask(String name) throws RemoteException;
 
   /**
-   *
-   * lock the server and edit the schema
-   *
+   * <p>Lock the server to prevent client logins and edit the server
+   * schema.  This method will return a {@link
+   * arlut.csd.ganymede.SchemaEdit SchemaEdit} remote reference to the
+   * admin console, which will present a graphical schema editor using
+   * this remote reference.  The server will remain locked until the
+   * admin console commits or cancels the schema editing session,
+   * either through affirmative action or through the death of the
+   * admin console or the network connection.  The {@link
+   * arlut.csd.ganymede.DBSchemaEdit DBSchemaEdit} class on the server
+   * coordinates everything.</p>
    */
 
   SchemaEdit  editSchema() throws RemoteException;

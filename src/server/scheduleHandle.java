@@ -7,15 +7,15 @@
    
    Created: 3 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2001/10/29 20:03:14 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2002/01/26 20:05:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -413,7 +413,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Server-side method to bring this task to an abrupt halt.</P>
+   * <P>Server-side method to interrupt this task.  Tasks must be specifically
+   * written to properly respond to an interruption.</P>
    */
 
   synchronized void stop()

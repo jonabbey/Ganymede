@@ -7,15 +7,15 @@
    
    Created: 26 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2001/10/29 20:03:14 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2002/01/26 20:05:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
    The University of Texas at Austin.
 
    Contact information
@@ -673,7 +673,9 @@ public class GanymedeScheduler extends Thread {
   
   /**
    * <P>This method is provided to allow an admin console to put an
-   * immediate halt to a running background task.</P>
+   * immediate halt to a running background task.  Calling this
+   * method will result in an interrupt being sent to the running
+   * background task.</P>
    *
    * @return true if the task was either not running, or was
    *         running and was told to stop.
