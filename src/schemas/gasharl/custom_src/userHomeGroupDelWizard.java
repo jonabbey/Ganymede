@@ -6,7 +6,7 @@
    to delete the group that they have selected for their default group.
    
    Created: 29 January 1998
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -210,6 +210,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
   public ReturnVal processDialog2()
   {
     ReturnVal retVal = null;
+    String checkPointKey = "homegroupdel" + userObject.getLabel();
 
     /* -- */
 
@@ -226,7 +227,14 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     // find the group we're changing to, find the id, change it
     
     boolean found = false;
-    session.checkpoint("homegroupdel" + userObject.getLabel());
+
+    // we're going to check point here, so that we can undo things if
+    // we can't complete all parts of this operation.  This is needed
+    // because we are doing two separate operations together.. the
+    // InvidDBField logic does its own checkpointing, but we need
+    // one that includes the two operations <<ensemble>>.
+
+    session.checkpoint(checkPointKey);
     
     for (int i = 0; i < groupChoice.size(); i++)
       {
@@ -234,11 +242,12 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 	  {
 	    found = true;
 
-	    // right now, this might fail if the user is in a group that the
-	    // current admin doesn't have permission to edit.  Unlinking for
-	    // groups is free (see groupCustom), but adding, even adding to
-	    // the home users field for users that are already in the superset
-	    // users list is not automatically permitted.  This may change.
+	    // right now, this might fail if the user is in a group
+	    // that the current admin doesn't have permission to edit.
+	    // Unlinking for groups is free (see groupCustom), but
+	    // adding, even adding to the home users field for users
+	    // that are already in the superset users list is not
+	    // automatically permitted.  This may change.
 
 	    retVal = userObject.setFieldValue(HOMEGROUP, groupChoice.getInvid(i));
 	    break;
@@ -281,28 +290,43 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 			     "ok.gif");
 
 	    retVal.addRescanField(HOMEGROUP);
+
+	    // we succeeded, so pop off our checkpoint
+
+	    session.getSession().popCheckpoint(checkPointKey);
+	    
+	    return retVal;
 	  }
 	else
 	  {
-	    if (!session.rollback("homegroupdel" + userObject.getLabel()))
+	    // try to undo everything.. if we can, we'll go ahead
+	    // and return the failure report from invF.deleteElement()
+
+	    if (!session.rollback(checkPointKey))
 	      {
 		retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 						    "Ran into a problem during home group deletion, and rollback failed");
 	      }
+
+	    return retVal;
 	  }
       }
     else if (retVal.getDialog() == null)
       {
-	// argh, failure..
+	// argh, failure with no explanation..
 
-	if (!session.rollback("homegroupdel" + userObject.getLabel()))
+	if (!session.rollback(checkPointKey))
 	  {
 	    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 						"Ran into a problem during home group change, and rollback failed");
 	  }
-      }
 
-    return retVal;
+	return retVal;
+      }
+    else
+      {
+	return retVal;
+      }
   }
 
   /**
