@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.33 $ %D%
+    Version: $Revision: 1.34 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -326,6 +326,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * Goes through all the components and checks to see if they should be visible,
    * and updates their contents.
    *
+   * !!! This will not currently work, because some of the components (JComboBox)
+   * !!! generate events when setItem is used.  So it will send a bunch of extra
+   * !!! calls.  No good!
    */
 
   public void update()
@@ -375,10 +378,67 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		Object o = field.getValue();
 		if (o instanceof String)
 		  {
-		    ((JComboBox)comp).setSelectedItem((String)o);
+		    Vector choiceHandles = null;
+		    Vector choices = null;
+		    string_field s_field = (string_field)field;
+
+		    Object key = s_field.choicesKey();
+		    if (key == null)
+		      {
+			if (debug)
+			  {
+			    System.out.println("key is null, getting new copy.");
+			  }
+			choices = s_field.choices().getLabels();
+		      }
+		    else
+		      {
+			if (debug)
+			  {
+			    System.out.println("key = " + key);
+			  }
+		
+			if (gc.cachedLists.containsKey(key))
+			  {
+			    if (debug)
+			      {
+				System.out.println("key in there, using cached list");
+			      }
+			    choiceHandles = (Vector)gc.cachedLists.get(key);
+
+			  }
+			else
+			  {
+			    if (debug)
+			      {
+				System.out.println("It's not in there, downloading a new one.");
+			      }
+			    choiceHandles = s_field.choices().getListHandles();
+			    gc.cachedLists.put(key, choiceHandles);
+
+			  }
+	    
+			for (int j = 0; j < choiceHandles.size() ; j++)
+			  {
+			    choices.addElement(((listHandle)choiceHandles.elementAt(j)).getLabel());
+			  }		
+		      }    
+
+		    JComboBox cb = (JComboBox)comp;
+		    cb.removeAllItems();
+		    for (int i = 0; i < choices.size(); i++)
+		      {
+			cb.addItem((String)choices.elementAt(i));
+		      }
+		    
+		    cb.addItem("<none>");
+
+		    // Do I need to check to make sure that this one is possible?
+		    cb.setSelectedItem((String)o);
 		  }
 		else if (o instanceof Invid)
 		  {
+		    // Still need to rebuild list here.
 		    listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid)o), o);
 		    ((JComboBox)comp).setSelectedItem(lh);
 		  }
@@ -386,7 +446,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  {
 		    // This might be null.  Which means we should choose <none>.  But do
 		    // we choose (string)<none> or (listHandle)<none>?
-		    System.out.println("I am not expecting this type in JComboBox: " + o);
+		    if (field instanceof string_field)
+		      {
+			((JComboBox)comp).setSelectedItem("<none>");
+		      }
+		    else if (field instanceof invid_field)
+		      {
+			((JComboBox)comp).setSelectedItem(new listHandle("<none>", null));
+		      }
+		    else
+		      {
+			System.out.println("I am not expecting this type in JComboBox: " + field);
+		      }
 		  }
 	      }
 	    else if (comp instanceof JLabel)
@@ -914,7 +985,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Name: " + fieldTemplate.getName() + "Field type desc: " + fieldType);
+	System.out.println("Name: " + fieldTemplate.getName() + " Field type desc: " + fieldType);
       }
     
     if (isVector)
@@ -1177,15 +1248,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     // ss is canChoose, mustChoose
-    PopupMenu invidTablePopup = new PopupMenu();
-    MenuItem editO = new MenuItem("Edit object");
-    MenuItem viewO = new MenuItem("View object");
+    JPopupMenu invidTablePopup = new JPopupMenu();
+    JMenuItem editO = new JMenuItem("Edit object");
+    JMenuItem viewO = new JMenuItem("View object");
     invidTablePopup.add(editO);
     invidTablePopup.add(viewO);
     
-    PopupMenu invidTablePopup2 = new PopupMenu();
-    MenuItem editO2 = new MenuItem("Edit object");
-    MenuItem viewO2 = new MenuItem("View object");
+    JPopupMenu invidTablePopup2 = new JPopupMenu();
+    JMenuItem editO2 = new JMenuItem("Edit object");
+    JMenuItem viewO2 = new JMenuItem("View object");
     invidTablePopup2.add(editO2);
     invidTablePopup2.add(viewO2);
 
