@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.84 $ %D%
+   Version: $Revision: 1.85 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2058,7 +2058,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       {
 	obj = (DBObject) enum.nextElement();
 
-	if (DBQueryHandler.matches(query, obj))
+	if (DBQueryHandler.matches(this, query, obj))
 	  {
 	    // if we are processing an embedded type, we want to add
 	    // the ultimate container of the embedded object to the
@@ -2118,7 +2118,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		if (x.getStatus() == ObjectStatus.CREATING ||
 		    x.getStatus() == ObjectStatus.EDITING)
 		  {
-		    if (DBQueryHandler.matches(query, x))
+		    if (DBQueryHandler.matches(this, query, x))
 		      {
 			obj = getContainingObj(x);
 
@@ -2246,7 +2246,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		    // ok, we're editing it or creating it.. now, does it still meet
 		    // the search criteria?
 		    
-		    if (DBQueryHandler.matches(query, x))
+		    if (DBQueryHandler.matches(this, query, x))
 		      {
 			if (perspectiveObject == null)
 			  {
