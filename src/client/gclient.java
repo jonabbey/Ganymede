@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.112 $ %D%
+   Version: $Revision: 1.113 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -369,11 +369,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     logoutMI.addActionListener(this);
 
     clearTreeMI = new JMenuItem("Clear Tree");
+    clearTreeMI.setMnemonic('c');
     clearTreeMI.addActionListener(this);
 
     filterQueryMI = new JMenuItem("Filter Query");
+    filterQueryMI.setMnemonic('q');
     filterQueryMI.addActionListener(this);
     defaultOwnerMI = new JMenuItem("Set Default Owner");
+    defaultOwnerMI.setMnemonic('d');
     defaultOwnerMI.addActionListener(this);
 
     fileMenu.add(clearTreeMI);
@@ -495,7 +498,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     helpMenu = new JMenu("Help");
     helpMenu.setMnemonic('h');
     showHelpMI = new JMenuItem("Help");
-    showHelpMI.setMnemonic('h');
+    //    showHelpMI.setMnemonic('h');  // swing can't handle menu and menuitem with same mnemonic
     showHelpMI.addActionListener(this);
     helpMenu.add(showHelpMI);
 
