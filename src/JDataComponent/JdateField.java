@@ -5,7 +5,7 @@
 
    
    Created: 31 Jul 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -384,9 +384,12 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
    */
   public void setValueBackColor(Color color,boolean repaint)
   {
-    valueAttr.setBackground(color);
-    
-    setValueAttr(valueAttr,repaint);
+    if (valueAttr != null)
+      {
+	valueAttr.setBackground(color);
+	
+	setValueAttr(valueAttr,repaint);
+      }
   }
   
   
@@ -430,9 +433,12 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
    */
   public void setValueFont(Font f,boolean repaint)
   {
-    valueAttr.setFont(f);
-
-    setValueAttr(valueAttr,repaint);
+    if (valueAttr != null)
+      {
+	valueAttr.setFont(f);
+	
+	setValueAttr(valueAttr,repaint);
+      }
   }
 
  /**
@@ -454,10 +460,13 @@ public class JdateField extends JPanel implements JsetValueCallback,ActionListen
    */
   public void setValueForeColor(Color color,boolean repaint)
   {
-    valueAttr.setForeground(color);
-
-    setValueAttr(valueAttr,repaint);
-  } 
+    if (valueAttr != null)
+      {
+	valueAttr.setForeground(color);
+	
+	setValueAttr(valueAttr,repaint);
+      } 
+  }
 
   /**
    *  sets the parent of this component for callback purposes
