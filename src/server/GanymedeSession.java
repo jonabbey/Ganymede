@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.47 $ %D%
+   Version: $Revision: 1.48 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,6 +45,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   boolean logged_in;
   boolean forced_off = false;
+  
+  public boolean enableWizards = true;
 
   Date connecttime;
 
@@ -410,6 +412,27 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   /**
    *
+   * This method is used to allow a client to request that wizards
+   * not be provided in response to actions by the client.  This
+   * is intended to allow non-interactive or non-gui clients to
+   * do work without having to go through a wizard interaction
+   * sequence.<br><br>
+   *
+   * Wizards are enabled by default.
+   *
+   * @param val If true, wizards will be enabled.
+   *
+   * @see arlut.csd.ganymede.Session
+   *
+   */
+
+  public void enableWizards(boolean val)
+  {
+    this.enableWizards = val;
+  }
+
+  /**
+   *
    * This method returns a list of personae names available
    * to the user logged in.
    *
@@ -732,21 +755,28 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     synchronized (Ganymede.db)
       {
-	if (Ganymede.db.schemaEditInProgress)
+	try
 	  {
-	    throw new RuntimeException("schemaEditInProgress");
-	  }
-
-	enum = Ganymede.db.objectBases.elements();
-
-	while (enum.hasMoreElements())
-	  {
-	    DBObjectBase base = (DBObjectBase) enum.nextElement();
-
-	    if (getPerm(base.getTypeID()).isVisible())
+	    if (Ganymede.db.schemaEditInProgress)
 	      {
-		result.addElement(base);
+		throw new RuntimeException("schemaEditInProgress");
 	      }
+	    
+	    enum = Ganymede.db.objectBases.elements();
+
+	    while (enum.hasMoreElements())
+	      {
+		DBObjectBase base = (DBObjectBase) enum.nextElement();
+		
+		if (getPerm(base.getTypeID()).isVisible())
+		  {
+		    result.addElement(base);
+		  }
+	      }
+	  }
+	finally
+	  {
+	    Ganymede.db.notifyAll(); // for lock code
 	  }
       }
 
@@ -764,6 +794,29 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   public Category getRootCategory()
   {
     return Ganymede.db.rootCategory;
+  }
+
+  /**
+   *
+   * Returns a serialized representation of the basic category
+   * and base structure on the server.
+   *
+   * @see arlut.csd.ganymede.Category
+   *
+   */
+
+  public CategoryTransport getCategoryTree()
+  {
+    if (Ganymede.catTransport == null)
+      {
+	synchronized (Ganymede.db)
+	  {
+	    Ganymede.catTransport = new CategoryTransport(Ganymede.db.rootCategory);
+	    Ganymede.db.notifyAll(); // in case of locks
+	  }
+      }
+
+    return Ganymede.catTransport;
   }
 
   /**
@@ -2031,19 +2084,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public ReturnVal inactivate_db_object(Invid invid)
-  {
-    return inactivate_db_object(invid, true);
-  }
-
-  /**
-   *
-   * As above, with an interactive parameter to allow expiration logic to
-   * tell the custom code to dispense with interactive wizards.
-   *
-   */
-  
-  public synchronized ReturnVal inactivate_db_object(Invid invid, boolean interactive) 
+  public synchronized ReturnVal inactivate_db_object(Invid invid) 
   {
     DBEditObject eObj;
     DBLogEvent event;
@@ -2067,7 +2108,50 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     setLastEvent("inactivate_db_object: " + eObj.getLabel());
 
-    return session.inactivateDBObject(eObj, interactive);
+    return session.inactivateDBObject(eObj);
+  }
+
+  /**
+   *
+   * Reactivates an inactivated object in the database
+   *
+   * This method is only applicable to inactivated objects.  For such,
+   * the object will be reactivated if possible, and the removal date
+   * will be cleared.  The object may retain an expiration date,
+   * however.
+   *
+   * The client should check the returned ReturnVal's
+   * getObjectStatus() method to see whether the re-activated object
+   * has an expiration date set.
+   *
+   * @see arlut.csd.ganymede.Session
+   */
+
+  public synchronized ReturnVal reactivate_db_object(Invid invid)
+  {
+    DBEditObject eObj;
+    DBLogEvent event;
+
+    /* -- */
+
+    eObj = (DBEditObject) edit_db_object(invid);
+
+    if (eObj == null)
+      {
+	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
+					  "Couldn't check out this object for reactivation");
+      }
+
+    if (!eObj.isInactivated())
+      {
+	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
+					  "Object " + eObj.getLabel() +
+					  " is not inactivated");
+      }
+
+    setLastEvent("reactivate_db_object: " + eObj.getLabel());
+
+    return session.reactivateDBObject(eObj);
   }
 
   /**
@@ -2085,19 +2169,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public ReturnVal remove_db_object(Invid invid)
-  {
-    return remove_db_object(invid, true);
-  }
-
-  /**
-   *
-   * As above, with an interactive parameter to allow expiration logic to
-   * tell the custom code to dispense with interactive wizards.
-   *
-   */
-  
-  public synchronized ReturnVal remove_db_object(Invid invid, boolean interactive) 
+  public synchronized ReturnVal remove_db_object(Invid invid) 
   {
     if (debug)
       {
@@ -2151,7 +2223,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     setLastEvent("remove_db_object: " + vObj.getLabel());
     
-    return session.deleteDBObject(invid, interactive);
+    return session.deleteDBObject(invid);
   }
 
   /**
