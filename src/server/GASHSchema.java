@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.77 $ %D%
+   Version: $Revision: 1.78 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -142,13 +142,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   public CompoundBorder
     statusBorder = BorderFactory.createCompoundBorder(loweredBorder, emptyBorder5),
     statusBorderRaised = BorderFactory.createCompoundBorder(raisedBorder, emptyBorder5);
-
-  GridBagLayout
-    nameGBL = new GridBagLayout(),
-    catGBL = new GridBagLayout();
-  
-  GridBagConstraints
-    gbc = new GridBagConstraints();
 
   /* -- */
 
@@ -2492,6 +2485,12 @@ class NameSpaceEditor extends JPanel implements ActionListener {
   JPanel nameJPanel;
   GASHSchema owner;
   String currentNameSpaceLabel = null;
+
+  GridBagLayout
+    gbl = new GridBagLayout();
+
+  GridBagConstraints
+    gbc = new GridBagConstraints();
   
   /* -- */
 
@@ -2510,18 +2509,18 @@ class NameSpaceEditor extends JPanel implements ActionListener {
     this.owner = owner;
 
     nameJPanel = new JInsetPanel(10,10,10,10);
-    nameJPanel.setLayout(nameGBL);
+    nameJPanel.setLayout(gbl);
 
     nameS = new JstringField(20, 100, false, false, null, null);
-    addRow(nameJPanel, nameS, "Namespace:", 0, nameGBL);
+    addRow(nameJPanel, nameS, "Namespace:", 0);
       
     caseCB = new JCheckBox();
     caseCB.setEnabled(false);
-    addRow(nameJPanel, caseCB, "Case insensitive:", 1, nameGBL);
+    addRow(nameJPanel, caseCB, "Case insensitive:", 1);
     
     spaceL = new JList();
     //spaceL.setEnabled(false);
-    addRow(nameJPanel, spaceL, "Fields in this space:", 2, nameGBL);
+    addRow(nameJPanel, spaceL, "Fields in this space:", 2);
 
     setLayout(new java.awt.BorderLayout());
     add("Center", nameJPanel);
@@ -2635,18 +2634,30 @@ class NameSpaceEditor extends JPanel implements ActionListener {
 		      }
 		    
 		  }
+
 		spaceL.setListData(spaceV);
 	      }
 	  }
       }
   }
 
-  void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
+  synchronized void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
   {
     JLabel l = new JLabel(label);
 
-    parent.add("0 " + row + " lhwHW", l);
-    parent.add("1 " + row + " lhwHW", comp);
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+
+    gbc.weightx = 0.0;
+    gbc.gridx = 0;
+    gbc.gridy = row;
+    gbl.setConstraints(l, gbc);
+    parent.add(l);
+
+    gbc.gridx = 1;
+    gbc.weightx = 1.0;
+    gbl.setConstraints(comp, gbc);
+    parent.add(comp);
   }
 }
 
@@ -2668,6 +2679,12 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
   CatTreeNode catNode;
   Category category;
 
+  GridBagLayout
+    gbl = new GridBagLayout();
+  
+  GridBagConstraints
+    gbc = new GridBagConstraints();
+
   /* -- */
 
   CategoryEditor(GASHSchema owner)
@@ -2685,10 +2702,10 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     this.owner = owner;
     
     catJPanel = new JInsetPanel(10,10,10,10);
-    catJPanel.setLayout(catGBL);
+    catJPanel.setLayout(gbl);
     
     catNameS = new JstringField(20, 100, true, false, null, "/", this);
-    addRow(catJPanel, catNameS, "Category Label:", 0, catGBL);
+    addRow(catJPanel, catNameS, "Category Label:", 0);
     
     setLayout(new java.awt.BorderLayout());
     add("Center", catJPanel);
@@ -2767,8 +2784,7 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     return true;		// what the?
   }
 
-  synchronized void addRow(JPanel parent, java.awt.Component comp,  String label, int row, 
-			   GridBagLayout gbl)
+  synchronized void addRow(JPanel parent, java.awt.Component comp,  String label, int row)
   {
     JLabel l = new JLabel(label);
 
