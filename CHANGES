@@ -23,6 +23,19 @@ convert < and > to the XML entity escapes &lt; and &gt;, which could
 cause the server's XML parser to reject password changes that involved
 those characters.
 
+3. [SERVER] Fixed object deletion journal processing on server start-up
+
+The server had a bug that prevented successful startup if the server
+was killed without getting a chance to consolidate the database into a
+new ganymede.db file, and if one of the transactions in the journal
+file involved an deleted object that had one or more
+namespace-constrained database fields.
+
+This was due to an attempt to use Ganymede.internalSession before that
+variable was defined.  This has been fixed by making the
+DBNameSpaceHandle.getField() method look up objects directly out of
+the DBStore tables without using a GanymedeSession, if needed.
+
 -------------------- Changes from 1.04 to 1.0.5 -------------------
 
 RELEASE DATE: July 27, 2001
