@@ -5,7 +5,7 @@
    A GUI component
 
    Created: 17 June 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,7 +14,6 @@ package csd.Table;
 
 import java.awt.*;
 import java.util.*;
-import csd.Table.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -29,10 +28,14 @@ import csd.Table.*;
  *
  * @see csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.1 $ %D% 
+ * @version $Revision: 1.2 $ %D% 
  */
 
 public class gridTable extends baseTable {
+
+  static final boolean debug = false;
+
+  /* - */
 
   /**
    * This is the base constructor for gridTable, which allows
@@ -67,13 +70,16 @@ public class gridTable extends baseTable {
 		   Color hRowLineColor,
 		   String[] headers,
 		   boolean horizLines, boolean vertLines,
-		   boolean vertFill, boolean hVertFill,
-		   boolean allow_select)
+		   boolean vertFill, boolean hVertFill)
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
 	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
-	  headers, horizLines, vertLines, vertFill, hVertFill,
-	  allow_select);
+	  headers, horizLines, vertLines, vertFill, hVertFill);
+
+    if (debug)
+      {
+	System.err.println(">> gridTable primary constructor exiting");
+      }
   }
 
 
@@ -98,7 +104,12 @@ public class gridTable extends baseTable {
 	 Color.black,
 	 Color.black,
 	 headers,
-	 true, true, true, true, true);
+	 true, true, true, true);
+
+    if (debug)
+      {
+	System.err.println(">>> processing gridTable default constructor");
+      }
 
     // we couldn't pass this to the baseTableConstructors
     // above, so we set it directly here, then force metrics
@@ -109,8 +120,24 @@ public class gridTable extends baseTable {
     tableAttrib.c = this;
     tableAttrib.calculateMetrics();
 
+    if (debug)
+      {
+	System.err.println(">>> calling calcFonts");
+      }
+
     calcFonts();
+
+    if (debug)
+      {
+	System.err.println(">>> calling calcCols");
+      }
+
     calcCols();
+
+    if (debug)
+      {
+	System.err.println(">>> exiting gridTable default constructor");
+      }
   }
 
   /**
