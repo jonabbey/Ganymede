@@ -81,6 +81,7 @@ import arlut.csd.Util.XMLStartDocument;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.Util.XMLWarning;
 import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -2200,6 +2201,27 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
+   * <p>This method is used to look up an xmlobject that we have seen,
+   * in order to get a partial resolution of an invid target that we
+   * have found in our XML processing.  It is called by {@link
+   * arlut.csd.ganymede.server.xInvid#getInvid()} in the event that an
+   * &gt;invid&lt; element is found which does not resolve to a
+   * pre-existing object in the server.</p>
+   */
+
+  public xmlobject getXMLObjectTarget(short typeId, String objectId)
+  {
+    Hashtable objectHash = (Hashtable) objectStore.get(new Short(typeId));
+
+    if (objectHash == null)
+      {
+	return null;
+      }
+
+    return (xmlobject) objectHash.get(objectId);
+  }
+
+  /**
    * <p>This method resolves an Invid from a type/id pair, talking
    * to the server if the type/id pair has not previously been seen.</p>
    *
@@ -2533,21 +2555,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     
     session.enableWizards(false); // we're not interactive, don't give us no wizards
 
-    // go through all of our 'possibly created' objects and do the
-    // Invid lookups on them before we do any edits, so that we can
-    // resolve the labels with the pre-edit names in place
+    // we first need to try to resolve all objects in our various
+    // queues to find their invids.  if we find ones that don't match
+    // with objects pre-existing on the server, but do match other
+    // <object> elements in the file, we'll provisionally link them to
+    // the xmlobject representing the object in question.
 
-    for (int i = 0; i < createdObjects.size(); i++)
-      {
-	xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
-
-	newObject.getInvid();
-      }
-
-    // now that we've made sure to resolve all Invids for the
-    // possibly-newly-created objects, we can go ahead and create
-    // those that we really couldn't find for editing.
-
+    knitInvidReferences();
+    
     for (int i = 0; success && i < createdObjects.size(); i++)
       {
 	boolean newlyCreated = false;
@@ -2559,37 +2574,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// already exists and go ahead and pull it for editing rather
 	// than creating it, unless the forceCreate flag is on.
 
-	if (!newObject.forceCreate && newObject.getInvid() != null)
-	  {
-	    incCount(editCount, newObject.typeString);
-
-	    if (debug)
-	      {
-		System.err.println("Editing pre-existing " + newObject);
-	      }
-
-	    attempt = newObject.editOnServer(session);
-
-	    if (attempt != null && !attempt.didSucceed())
-	      {
-		String msg = attempt.getDialogText();
-
-		if (msg != null)
-		  {
-		    // "GanymedeXMLSession Error editing object {0}:\n{1}"
-		    err.println(ts.l("integrateXMLTransaction.editing_error_msg", newObject, msg));
-		  }
-		else
-		  {
-		    // "GanymedeXMLSession Error detected editing object {0}, but no specific error message was generated."
-		    err.println(ts.l("integrateXMLTransaction.editing_error_no_msg", newObject));
-		  }
-
-		success = false;
-		continue;
-	      }
-	  }
-	else
+	if (newObject.forceCreate || newObject.getInvid() == null)
 	  {
 	    incCount(createCount, newObject.typeString);
 
@@ -2615,6 +2600,36 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		  {
 		    // "GanymedeXMLSession Error detected creating object {0}, but no specific error message was generated."
 		    err.println(ts.l("integrateXMLTransaction.creating_error_no_msg", newObject));
+		  }
+
+		success = false;
+		continue;
+	      }
+	  }
+	else
+	  {
+	    incCount(editCount, newObject.typeString);
+
+	    if (debug)
+	      {
+		System.err.println("Editing pre-existing " + newObject);
+	      }
+
+	    attempt = newObject.editOnServer(session);
+
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    // "GanymedeXMLSession Error editing object {0}:\n{1}"
+		    err.println(ts.l("integrateXMLTransaction.editing_error_msg", newObject, msg));
+		  }
+		else
+		  {
+		    // "GanymedeXMLSession Error detected editing object {0}, but no specific error message was generated."
+		    err.println(ts.l("integrateXMLTransaction.editing_error_no_msg", newObject));
 		  }
 
 		success = false;
@@ -2664,41 +2679,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
       }
 
-    // at this point, all objects we need to create are created,
-    // and any non-invid fields in those new objects have been
-    // registered.  We now need to register any invid fields in
-    // the newly created objects, which should be able to resolve
-    // now.
-    
-    for (int i = 0; success && i < createdObjects.size(); i++)
-      {
-	xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
-
-	//	err.println("Resolving pointers for " + newObject);
-	
-	attempt = newObject.registerFields(1); // just invids
-
-	if (attempt != null && !attempt.didSucceed())
-	  {
-	    String msg = attempt.getDialogText();
-
-	    if (msg != null)
-	      {
-		// "[{0,number,#}] Error registering fields for {1}:\n{2}"
-		err.println(ts.l("integrateXMLTransaction.error_registering", new Integer(2), newObject, msg));
-	      }
-	    else
-	      {
-		// "[{0,number,#}] Error detected registering fields for {1}."
-		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(2), newObject));
-	      }
-
-	    success = false;
-	    continue;
-	  }
-      }
-
-    // now we need to register fields in the edited objects
+    // the created (or possibly) created objects are created and/or
+    // edited, and their non-invid fields are fixed up.  we need to do
+    // the same for definitely edited objects
 
     for (int i = 0; success && i < editedObjects.size(); i++)
       {
@@ -2726,8 +2709,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    success = false;
 	    continue;
 	  }
-	
-	attempt = object.registerFields(2); // invids and others
+
+	attempt = object.registerFields(0); // everything but non-embedded invid fields
 
 	if (attempt != null && !attempt.didSucceed())
 	  {
@@ -2736,12 +2719,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (msg != null)
 	      {
 		// "[{0,number,#}] Error registering fields for {1}:\n{2}"
-		err.println(ts.l("integrateXMLTransaction.error_registering", new Integer(3), object, msg));
+		err.println(ts.l("integrateXMLTransaction.error_registering", new Integer(2), object, msg));
 	      }
 	    else
 	      {
 		// "[{0,number,#}] Error detected registering fields for {1}."
-		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(3), object));
+		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(2), object));
 	      }
 
 	    success = false;
@@ -2749,17 +2732,47 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
       }
 
-    // XXX hm.. what happens here if we created an object in the
-    // createdObjects vector (or edited it in the editedObjects
-    // vector) which is meant to link to an embedded object?  since
-    // we're not registering the embedded objects until we get to this
-    // point, it seems that we'd have a problem, there.. ?? XXX
-
-    for (int i = 0; success && i < embeddedObjects.size(); i++)
+    // at this point, all objects we need to create are created,
+    // and any non-invid fields in those new objects have been
+    // registered.  We now need to register any invid fields in
+    // the newly created objects, which should be able to resolve
+    // now.
+    
+    for (int i = 0; success && i < createdObjects.size(); i++)
       {
-	xmlobject object = (xmlobject) embeddedObjects.elementAt(i);
+	xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
+
+	//	err.println("Resolving pointers for " + newObject);
 	
-	attempt = object.registerFields(1); // only non-embedded invids
+	attempt = newObject.registerFields(1); // just invids
+
+	if (attempt != null && !attempt.didSucceed())
+	  {
+	    String msg = attempt.getDialogText();
+
+	    if (msg != null)
+	      {
+		// "[{0,number,#}] Error registering fields for {1}:\n{2}"
+		err.println(ts.l("integrateXMLTransaction.error_registering", new Integer(3), newObject, msg));
+	      }
+	    else
+	      {
+		// "[{0,number,#}] Error detected registering fields for {1}."
+		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(3), newObject));
+	      }
+
+	    success = false;
+	    continue;
+	  }
+      }
+
+    // now we need to register fields in the edited objects
+
+    for (int i = 0; success && i < editedObjects.size(); i++)
+      {
+	xmlobject object = (xmlobject) editedObjects.elementAt(i);
+
+	attempt = object.registerFields(1); // just invids, everything else we already did
 
 	if (attempt != null && !attempt.didSucceed())
 	  {
@@ -2774,6 +2787,35 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		// "[{0,number,#}] Error detected registering fields for {1}."
 		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(4), object));
+	      }
+
+	    success = false;
+	    continue;
+	  }
+      }
+
+    // finally we need to do the same for the objects we checked out
+    // or created when handling embedded objects
+
+    for (int i = 0; success && i < embeddedObjects.size(); i++)
+      {
+	xmlobject object = (xmlobject) embeddedObjects.elementAt(i);
+	
+	attempt = object.registerFields(1); // only non-embedded invids
+
+	if (attempt != null && !attempt.didSucceed())
+	  {
+	    String msg = attempt.getDialogText();
+
+	    if (msg != null)
+	      {
+		// "[{0,number,#}] Error registering fields for {1}:\n{2}"
+		err.println(ts.l("integrateXMLTransaction.error_registering", new Integer(5), object, msg));
+	      }
+	    else
+	      {
+		// "[{0,number,#}] Error detected registering fields for {1}."
+		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(5), object));
 	      }
 
 	    success = false;
@@ -2976,6 +3018,101 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     err.println(ts.l("integrateXMLTransaction.agony_of_defeat"));
 
     return success;
+  }
+
+  /**
+   * <p>This private helper method is responsible for working through
+   * the objectStore hash and dereferencing any xInvids contained
+   * therein to objects in the XML file and/or server, before any
+   * actual edits are performed.</p>
+   *
+   * <p>This is necessary so that we can deal with the possibility of
+   * objects being renamed before we have all of our invid field
+   * updates made.  By looking up all Invids that we can before we
+   * start editing anything (but after we've done a storeObject() on
+   * all objects that we are editing or creating), we can be sure that
+   * we will resolve Invid references in xInvid objects to the proper,
+   * pre-rename object labels.</p>
+   */
+
+  private void knitInvidReferences() throws NotLoggedInException
+  {
+    Enumeration typeEnum = objectStore.keys();
+
+    while (typeEnum.hasMoreElements())
+      {
+	Short type = (Short) typeEnum.nextElement();
+	Hashtable objectHash = (Hashtable) objectStore.get(type);
+	Enumeration objEnum = objectHash.keys();
+
+	while (objEnum.hasMoreElements())
+	  {
+	    Object key = objEnum.nextElement();
+
+	    xmlobject storedObject = (xmlobject) objectHash.get(key);
+		
+	    // let's try to get the invid for this storedObject.  If
+	    // it is identified by the "num" attribute, this will
+	    // always succeed.  If it is identified by the "id"
+	    // attribute, we'll be looking it up by its label.
+
+	    Invid invid = storedObject.getInvid();
+
+	    if (invid == null)
+	      {
+		if (storedObject.getMode() == null || storedObject.getMode().equals("create"))
+		  {
+		    // we may need to create this object, so we'll
+		    // clear the knownNonExistent flag.
+			
+		    storedObject.knownNonExistent = false;
+		  }
+		else
+		  {
+		    // "Error, could not look up {0} object with label {1}."
+		    throw new RuntimeException(ts.l("knitInvidReferences.no_such_object",
+						    getTypeName(type.shortValue()), key));
+		  }
+	      }
+	  }
+      }
+
+    // now that we have forced the lookup of all labeled objects, we
+    // need to go through all objects that we've seen reference to and
+    // try to look up all <invid> elements contained therein.  <invid>
+    // elements that point to objects we have just looked up above
+    // will be able to dereference those Invids by looking in this
+    // very objectStore hashing structure, even for objects that we
+    // have labeled but not yet created on the server.
+
+    typeEnum = objectStore.keys();
+
+    while (typeEnum.hasMoreElements())
+      {
+	Short type = (Short) typeEnum.nextElement();
+	Hashtable objectHash = (Hashtable) objectStore.get(type);
+	Enumeration objEnum = objectHash.elements();
+
+	while (objEnum.hasMoreElements())
+	  {
+	    xmlobject storedObject = (xmlobject) objEnum.nextElement();
+
+	    // now go through the stored object and do lookups for
+	    // any invid fields contained thereunder.
+
+	    Enumeration fieldEnum = storedObject.fields.elements();
+
+	    while (fieldEnum.hasMoreElements())
+	      {
+		xmlfield field = (xmlfield) fieldEnum.nextElement();
+
+		if (field.getType() == FieldType.INVID)
+		  {
+		    field.dereferenceInvids();
+		  }
+	      }
+	  }
+      }
   }
 
   /**

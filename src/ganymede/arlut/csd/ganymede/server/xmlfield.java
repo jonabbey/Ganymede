@@ -70,6 +70,7 @@ import java.util.Vector;
 
 import org.xml.sax.SAXException;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLCharData;
 import arlut.csd.Util.XMLElement;
@@ -105,7 +106,14 @@ import arlut.csd.ganymede.rmi.field_option_field;
 
 public class xmlfield implements FieldType {
 
-  final static boolean debug = true;
+  final static boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.xmlfield");
 
   /**
    * <p>Formatter that we use for generating and parsing date fields</p>
@@ -1533,6 +1541,63 @@ public class xmlfield implements FieldType {
   }
 
   /**
+   * <p>This method is used by the {@link
+   * arlut.csd.ganymede.server.GanymedeXMLSession} to cause this field
+   * to attempt to do lookups on all labeled xInvids in this field, in
+   * an attempt to get the Invids for them.  If a lookup cannot be
+   * resolved when this method is called, it will be left unresolved
+   * for a later round, after we have created the objects we need to
+   * create.</p>
+   */
+
+  public void dereferenceInvids() throws NotLoggedInException
+  {
+    if (getType() != FieldType.INVID)
+      {
+	// "dereferenceInvids() called on a non-Invid field."
+	throw new RuntimeException(ts.l("dereferenceInvids.bad_type"));
+      }
+
+    if (!isArray())
+      {
+	if (value != null)
+	  {
+	    ((xInvid) value).getInvid(false); // try to resolve
+	  }
+      }
+    else
+      {
+	if (setValues != null)
+	  {
+	    for (int i = 0; i < setValues.size(); i++)
+	      {
+		xInvid xi = (xInvid) setValues.elementAt(i);
+		xi.getInvid(false);	// try to resolve
+	      }
+
+	    for (int i = 0; i < delValues.size(); i++)
+	      {
+		xInvid xi = (xInvid) delValues.elementAt(i);
+		xi.getInvid(false);	// try to resolve
+	      }
+
+	    for (int i = 0; i < addValues.size(); i++)
+	      {
+		xInvid xi = (xInvid) addValues.elementAt(i);
+		xi.getInvid(false);	// try to resolve
+	      }
+
+	    for (int i = 0; i < addIfNotPresentValues.size(); i++)
+	      {
+		xInvid xi = (xInvid) addIfNotPresentValues.elementAt(i);
+		xi.getInvid(false);	// try to resolve
+	      }
+	  }
+      }
+
+  }
+
+  /**
    * <P>This private helper method takes a Vector of xInvid and
    * xmlobject objects (in the embedded object case) and returns
    * a Vector of Invid objects.  If any xmlobjects in the input
@@ -1703,6 +1768,25 @@ public class xmlfield implements FieldType {
   }
 
   /**
+   * <p>Returns the {@link arlut.csd.ganymede.common.FieldType} short for
+   * the type of field represented by this xmlfield.</p>
+   */
+
+  public short getType()
+  {
+    return fieldDef.getType();
+  }
+
+  /**
+   * <p>Returns true if this field is a vector field.</p>
+   */
+
+  public boolean isArray()
+  {
+    return fieldDef.isArray();
+  }
+
+  /**
    * <p>Debug diagnostics</p>
    */
 
@@ -1756,6 +1840,13 @@ public class xmlfield implements FieldType {
 class xInvid {
 
   /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede system.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.xInvid");
+
+  /**
    * <p>The numeric type id for the object type this xInvid is
    * meant to point to.</p>
    *
@@ -1774,6 +1865,16 @@ class xInvid {
    */
 
   String objectId;
+
+  /**
+   * <p>This attribute will point either to an Invid, if a
+   * dereferencing could be accomplished successfully against a
+   * pre-existing object on the server, or to an xmlobject if we
+   * couldn't find a pre-existing (or registered) object on the server
+   * but we were able to find a match in our xml file.</p>
+   */
+
+  private Object invidPtr;
 
   /**
    * <p>The numeric object id, if specified in the XML file for this
@@ -1863,18 +1964,87 @@ class xInvid {
 
   public Invid getInvid() throws NotLoggedInException
   {
+    return getInvid(true);
+  }
+
+  /**
+   * <p>This method resolves and returns the Invid for
+   * this xInvid place holder, talking to the server
+   * if necessary to resolve an id string.</p>
+   *
+   * @param noReally If false, we're being called by the xmlfield
+   * dereferenceInvids method, and we don't need to consider it a
+   * failure if we can't get either an Invid or xmlobject reference.
+   * If true, we're being called at a time when we really do need to
+   * have some kind of proper lookup, so we'll throw an exception
+   * if we can't find something to match this xInvid.
+   */
+
+  public Invid getInvid(boolean noReally) throws NotLoggedInException
+  {
+    if (invidPtr != null)
+      {
+	if (invidPtr instanceof Invid)
+	  {
+	    return (Invid) invidPtr;
+	  }
+	else if (invidPtr instanceof xmlobject)
+	  {
+	    Invid deref = ((xmlobject) invidPtr).getInvid();
+
+	    if (deref != null)
+	      {
+		invidPtr = deref;
+		return (Invid) invidPtr;
+	      }
+	    else
+	      {
+		return null;
+	      }
+	  }
+      }
+
     if (objectId != null)
       {
-	return getXSession().getInvid(typeId, objectId);
+	invidPtr = getXSession().getInvid(typeId, objectId);
+
+	if (invidPtr == null)
+	  {
+	    // we couldn't get a direct Invid reference, so set this
+	    // invid reference to point to the xmlobject that matches
+	    // it
+
+	    invidPtr = getXSession().getXMLObjectTarget(typeId, objectId);
+
+	    // if noReally is true, we aren't merely doing a
+	    // speculative dereference.. complain and shout.
+
+	    if (invidPtr == null && noReally)
+	      {
+		// "xInvid.getInvid(): Couldn''t find any {0} objects labeled {1}."
+		throw new RuntimeException(ts.l("getInvid.bad_label",
+						getXSession().getTypeName(typeId),
+						objectId));
+	      }
+
+	    // even if we found an xmlobject, we still don't know the
+	    // Invid, so we'll return null for now
+
+	    return null;
+	  }
+	else
+	  {
+	    return (Invid) invidPtr;
+	  }
       }
     else if (num != -1)
       {
-	return Invid.createInvid(typeId, num);
+	invidPtr = Invid.createInvid(typeId, num);
+	
+	return (Invid) invidPtr;
       }
-    else
-      {
-	return null;
-      }
+
+    return null;
   }
 
   public String toString()

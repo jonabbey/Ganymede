@@ -91,7 +91,7 @@ import arlut.csd.ganymede.rmi.db_object;
 
 public class xmlobject {
 
-  final static boolean debug = true;
+  final static boolean debug = false;
 
   /**
    * <p>The local identifier string for this object</p>
@@ -475,8 +475,9 @@ public class xmlobject {
 	    continue;
 	  }
 
-	// on mode 0, we register everything but invid's.  on mode 1,
-	// we only register invid's.  on mode 2, we register
+	// on mode 0, we register everything but invid's (embedded
+	// objects do not count as invids for this purpose).  on mode
+	// 1, we only register invid's.  on mode 2, we register
 	// everything.
 
 	if (field.fieldDef.isInvid() && !field.fieldDef.isEditInPlace() && mode == 0)
