@@ -32,6 +32,19 @@ to have members that are users, external email listings, or other
 email groups.  Previously, the email list members field couldn't really
 be edited after the bulk loading process was complete.
 
+3. [CLIENT] Made windows for newly created objects non-closeable
+
+The client allows the user to close object windows manually as a
+convenience, to avoid cluttering up the client when editing lots of
+objects.
+
+Unfortunately, if we allow the user to close a newly created object,
+there isn't necessarily a good way of getting that window back if it
+turns out that the user left some mandatory field unfilled when they
+go to click on 'commit'.  Now object creation windows will not be
+closeable, so that it's not possible to 'lose' object windows that you
+need to do further editing on.
+
 -------------------- Changes from 0.96 to 0.97 -------------------
 
 RELEASE DATE: February 11, 1999
