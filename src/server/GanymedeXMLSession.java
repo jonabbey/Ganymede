@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2000/12/04 22:47:33 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2000/12/05 05:06:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -331,6 +331,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    */
 
   private XMLItem categoryTree = null;
+
+  /**
+   * <p>We're using this Vector as a super-simple sempahore thingy,
+   * to gate the cleanup() method.</p>
+   */
+
+  private Vector cleanedup = new Vector();
   
   /* -- */
 
@@ -394,9 +401,17 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    // but, because we're not nuts, we'll not wait more than
 	    // 10 seconds
 
+	    // note also that we don't assume that reader is not null here.. if
+	    // the parser throws an exception, it's possible that that won't
+	    // directly cause our run() method to terminate with an exception,
+	    // so we'll have to try and do cleanup ourselves.. if the run()
+	    // method does do an exception, we may have already cleaned up
+	    // before we get called, so we check to make sure that reader is
+	    // not null
+
 	    int waitCount = 0;
 
-	    while (!reader.isDone() && waitCount < 10)
+	    while (reader != null && !reader.isDone() && waitCount < 10)
 	      {
 		System.err.println("Waiting for reader to close down:" + waitCount);
 
@@ -412,7 +427,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		waitCount++;
 	      }
 
-	    return getReturnVal("pipe writing: " + ex.getMessage(), false);
+	    cleanup();
+
+	    return getReturnVal(null, false);
 	  }
       }
     else
@@ -511,6 +528,21 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void cleanup()
   {
+    // our ad-hoc semaphore
+
+    synchronized (cleanedup)
+      {
+	if (cleanedup.size() != 0)
+	  {
+	    return;
+	  }
+
+	cleanedup.addElement("cleaning");
+      }
+
+    // note, we must not clear errBuf here, as we may cleanup before
+    // calling getReturnVal() to report to the client.
+
     reader = null;
 
     objectTypes.clear();
@@ -768,6 +800,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// process.  The finally clause for this try block will use
 	// the success variable to decide whether to commit or abort
 	// the schema edit.
+
+	// the getNextTree() method will have either succeeded or
+	// failed in its entirety.. if it found an error along the
+	// way, it will have just returned that information, so check
+	// that before we get crazy and start messing with the schema
 
 	if ((_schemaTree instanceof XMLError) ||
 	    (_schemaTree instanceof XMLEndDocument))
@@ -1166,8 +1203,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	else
 	  {
 	    err.println("Releasing schema edit");
-	    editor.release();
-	    this.editor = null;
+
+	    if (editor != null)
+	      {
+		editor.release();
+		this.editor = null;
+	      }
+
 	    return false;
 	  }
       }
@@ -1687,6 +1729,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		  }
 		catch (NullPointerException ex)
 		  {
+		    // if we have already cleaned up as a result of the parser
+		    // throwing a pipe write exception, don't report this
+		    // exception, as it ultimately came from another thread
+
+		    if (cleanedup.size() > 0)
+		      {
+			return false;
+		      }
+
+		    // otherwise, it was probably due to something in the xmlobject
+		    // constructor, and we should report it..
+
 		    // bad field or object error.. return out of this
 		    // method without committing the transaction
 		    // our finally clause will log us out
@@ -2136,6 +2190,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     Hashtable inactivateCount = new Hashtable();
 
     /* -- */
+
+    if (cleanedup.size() > 0)
+      {
+	return false;
+      }
 
     // first, set this.success to false, to reset our success indicator after
     // doing any schema editing
