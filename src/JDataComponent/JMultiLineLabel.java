@@ -5,7 +5,7 @@
    A simple label supporting multiple lines.
 
    Created: 28 January 1998
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -91,7 +91,6 @@ public class JMultiLineLabel extends JTextArea {
     if (label != null)
       {
 	int length = label.length();
-	System.out.println("String is " + length + " chars long.");
 	if (length < columns)
 	  {
 	    columns = length;
@@ -149,8 +148,13 @@ public class JMultiLineLabel extends JTextArea {
   {
     if (text == null)
       {
-	System.out.println("Whoa, text is null");
+	if (debug)
+	  {
+	    System.out.println("Whoa, text is null");
+	  }
+	return text; 
       }
+
     
     return (WordWrap.wrap(text, columns, null));
 
