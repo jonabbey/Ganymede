@@ -8,7 +8,7 @@
    server.
    
    Created: 6 February 1998
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -44,6 +44,19 @@ public class ObjectHandle implements Cloneable {
     this.inactive = inactive;
     this.expirationSet = expirationSet;
     this.removalSet = removalSet;
+  }
+
+  public Object clone()
+  {
+    try
+      {
+	return super.clone();
+      }
+    catch (CloneNotSupportedException ex)
+      {
+      }
+
+    return null;		// if it didn't work.. not a prob.
   }
 
   public final String getLabel()
