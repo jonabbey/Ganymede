@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.42 $ %D%
+   Version: $Revision: 1.43 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1673,6 +1673,22 @@ public final class InvidDBField extends DBField implements invid_field {
 	embeddedObj.setFieldValue((short) 0, null);
 	return null;
       }
+  }
+
+  /**
+   *
+   * <p>Return the object type that this invid field is constrained to point to, if set</p>
+   *
+   * <p>-1 means there is no restriction on target type.</p>
+   *
+   * <p>-2 means there is no restriction on target type, but there is a specified symmetric field.</p>
+   *
+   * @see arlut.csd.ganymede.invid_field
+   */
+
+  public short getTargetBase()
+  {
+    return definition.getTargetBase();
   }
 
   /**
