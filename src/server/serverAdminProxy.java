@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/02/01 04:10:32 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/02/01 04:11:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,7 +62,7 @@ import java.rmi.server.Unreferenced;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                   GanymedeAdmin
+                                                                serverAdminProxy
 
 ------------------------------------------------------------------------------*/
 
@@ -76,11 +76,11 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.2 $ $Date: 2000/02/01 04:10:32 $
+ * @version $Revision: 1.3 $ $Date: 2000/02/01 04:11:48 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-class serverAdminProxy implements Admin, Runnable {
+public class serverAdminProxy implements Admin, Runnable {
 
   /**
    * <p>Our background communications thread, which is responsible for
