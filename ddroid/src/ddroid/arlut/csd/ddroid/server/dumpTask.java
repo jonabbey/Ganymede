@@ -113,7 +113,7 @@ class dumpTask implements Runnable {
 	  }
 
 	started = true;
-	Ganymede.debug(ts.l("running", Ganymede.db.journal.transactionsInJournal));
+	Ganymede.debug(ts.l("running", new Integer(Ganymede.db.journal.transactionsInJournal)));
 
 	try
 	  {
