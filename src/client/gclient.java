@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.101 $ %D%
+   Version: $Revision: 1.102 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2253,7 +2253,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     // Update any other nodes we touched
     //
 
-    refreshChangedObjectHandles();
+    refreshChangedObjectHandles(null, true);
 
     if (!changedHash.isEmpty())
       {
@@ -2274,163 +2274,74 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
    * the client after transaction commit.  The results from the
    * queries are used to update the icons in the tree.
    *
-   * This method is destructive to the changedHash, and will remove
-   * any entries that it was properly able to refresh.  Any entries
-   * that it was not able to refresh indicate either a network problem,
-   * or that the objects were removed from the server without our knowing,
-   * which shouldn't happen generally.  It _can_ happen, if another transaction
-   * gets the object checked out, deleted, and committed before we can fire
+   * If paramVect is null, this method will be destructive to the
+   * changedHash, and will remove any entries that it was properly
+   * able to refresh.  Any entries that it was not able to refresh
+   * indicate either a network problem, or that the objects were
+   * removed from the server without our knowing, which shouldn't
+   * happen generally.  It _can_ happen, if another transaction gets
+   * the object checked out, deleted, and committed before we can fire
    * off our queries after commit.  Which really shouldn't happen.
+   *
+   * @param paramVect Vector of invid's to refresh.  If null, the invid's
+   * keyed in this.changedHash will be used instead.
+   * @param afterCommit If true, this method will update the client's
+   * status bar as it progresses.
+   * 
    */
 
-  public void refreshChangedObjectHandles()
+  public void refreshChangedObjectHandles(Vector paramVect, boolean afterCommit)
   {
-    Hashtable typeHash = new Hashtable();
-    Enumeration enum, enum2;
-    QueryNode root = null;
+    Vector invidVect = new Vector();
+    Enumeration enum;
     Invid invid;
-    Short objectTypeKey;
-    Vector x;
+    Short objectTypeKey = null;
 
     /* -- */
 
-    setStatus("refreshing object handles after commit");
-
-    enum = changedHash.keys();
-
-    while (enum.hasMoreElements())
+    if (afterCommit)
       {
-	invid = (Invid) enum.nextElement();
-
-	objectTypeKey = new Short(invid.getType());
-
-	if (typeHash.containsKey(objectTypeKey))
-	  {
-	    x = (Vector) typeHash.get(objectTypeKey);
-	  }
-	else
-	  {
-	    x = new Vector();
-	    typeHash.put(objectTypeKey, x);
-	  }
-
-	x.addElement(invid);
+	setStatus("refreshing object handles after commit");
       }
 
-    // now loop over each type, issuing one query for each..
-
-    enum = typeHash.keys();
-
-    while (enum.hasMoreElements())
+    if (paramVect == null)
       {
-	objectTypeKey = (Short) enum.nextElement();
+	enum = changedHash.keys();
 
-	setStatus("refreshing object handles for type " + objectTypeKey);
-
-	x = (Vector) typeHash.get(objectTypeKey);
-
-	root = null;
-	enum2 = x.elements();
-
-	while (enum2.hasMoreElements())
+	while (enum.hasMoreElements())
 	  {
-	    invid = (Invid) enum2.nextElement();
-
-	    if (root == null)
-	      {
-		root = new QueryDataNode((short) -2, QueryDataNode.EQUALS, invid);
-	      }
-	    else
-	      {
-		root = new QueryOrNode(root, new QueryDataNode((short) -2, QueryDataNode.EQUALS, invid));
-	      }
-	  }
-
-	// ok, got our query tree.. send in the query
-
-	setStatus("querying for object handles for type " + objectTypeKey);
-
-	try
-	  {
-	    QueryResult result = session.query(new Query(objectTypeKey.shortValue(), root, false));
-
-	    // now get the results
-	    
-	    Vector handleList = result.getHandles();
-	    
-	    // and update anything we've got in the tree
-	    
-	    setStatus("Updating tree for object handles for type " + objectTypeKey);
-	    
-	    for (int i = 0; i < handleList.size(); i++)
-	      {
-		ObjectHandle newHandle = (ObjectHandle) handleList.elementAt(i);
-		
-		InvidNode nodeToUpdate = (InvidNode) invidNodeHash.get(newHandle.getInvid());
-		
-		if (nodeToUpdate != null)
-		  {
-		    if (debug)
-		      {
-			System.err.println("got object handle refresh for " + newHandle.debugDump());
-		      }
-
-		    nodeToUpdate.setHandle(newHandle);
-		    
-		    changedHash.remove(newHandle.getInvid());
-		    setIconForNode(newHandle.getInvid());
-		  }
-
-		// and update our tree cache for this item
-
-		objectList list = cachedLists.getList(objectTypeKey);
-
-		list.removeInvid(newHandle.getInvid());
-		list.addObjectHandle(newHandle);
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    setStatus("Couldn't get object handle refresh for " + objectTypeKey);
+	    invid = (Invid) enum.nextElement();
+	    invidVect.addElement(invid);
 	  }
       }
-
-    setStatus("Completed refresh of changed objects in the tree.");
-  }
-
-  /**
-   * This method does the same thing as refreshChangedObjectHandles(), but
-   * for a single object only.
-   */
-
-  public void refreshChangedObject(Invid invid)
-  {
-    QueryNode root = null;
-    Short objectTypeKey;
-
-    /* -- */
-
-    objectTypeKey = new Short(invid.getType());
-
-    root = new QueryDataNode((short) -2, QueryDataNode.EQUALS, invid);
+    else
+      {
+	invidVect = paramVect;
+      }
 
     try
       {
-	QueryResult result = session.query(new Query(objectTypeKey.shortValue(), root, false));
-	
+	QueryResult result = session.queryInvids(invidVect);
+
 	// now get the results
 	    
 	Vector handleList = result.getHandles();
 	    
 	// and update anything we've got in the tree
-	    
-	setStatus("Updating tree for object handles for type " + objectTypeKey);
+	
+	if (afterCommit)
+	  {
+	    setStatus("Updating object handles in tree");
+	  }
 	    
 	for (int i = 0; i < handleList.size(); i++)
 	  {
 	    ObjectHandle newHandle = (ObjectHandle) handleList.elementAt(i);
-		
-	    InvidNode nodeToUpdate = (InvidNode) invidNodeHash.get(newHandle.getInvid());
+	    invid = newHandle.getInvid();
+
+	    objectTypeKey = new Short(invid.getType());
+
+	    InvidNode nodeToUpdate = (InvidNode) invidNodeHash.get(invid);
 		
 	    if (nodeToUpdate != null)
 	      {
@@ -2440,24 +2351,46 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 		  }
 		
 		nodeToUpdate.setHandle(newHandle);
+		    
+		if (paramVect == null)
+		  {
+		    changedHash.remove(newHandle.getInvid());
+		  }
 
 		setIconForNode(newHandle.getInvid());
 	      }
 	    
 	    // and update our tree cache for this item
-	    
+
 	    objectList list = cachedLists.getList(objectTypeKey);
-	    
+
 	    list.removeInvid(newHandle.getInvid());
 	    list.addObjectHandle(newHandle);
 	  }
       }
     catch (RemoteException ex)
       {
-	setStatus("Couldn't get object handle refresh for " + objectTypeKey);
+	setStatus("Couldn't get object handle vector refresh");
       }
 
-    setStatus("Completed singleton refresh.");
+    if (afterCommit)
+      {
+	setStatus("Completed refresh of changed objects in the tree.");
+      }
+  }
+
+  /**
+   * This method does the same thing as refreshChangedObjectHandles(), but
+   * for a single object only.
+   */
+
+  public void refreshChangedObject(Invid invid)
+  {
+    Vector paramVec = new Vector();
+
+    paramVec.addElement(invid);
+
+    refreshChangedObjectHandles(paramVec, false);
   }
 
   /**
@@ -3853,7 +3786,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     
     // Now go through changed list and revert any names that may be needed
 
-    refreshChangedObjectHandles();
+    refreshChangedObjectHandles(null, true);
 
     if (debug && createHash.isEmpty() && deleteHash.isEmpty() && 
 	changedHash.isEmpty())
