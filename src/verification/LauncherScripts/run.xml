@@ -1,0 +1,104 @@
+<project name="ganymede" default="build" basedir=".">
+
+  <!-- Constructs the base classpath -->
+  
+  <path id="gany.classpath">
+    <!-- First we'll include all of ganymede's requisite jars -->
+    <fileset dir="${BASE_DIRECTORY}/lib">
+      <include name="**/*.jar"/>
+    </fileset>
+    <fileset dir="${BASE_DIRECTORY}/jython">
+      <include name="**/*.jar"/>
+    </fileset>
+    
+    <!-- Now add the directory to ant's build directory, which contains
+    the class files we need. -->
+    <pathelement path="${BASE_DIRECTORY}/build/classes"/>
+    <pathelement path="${BASE_DIRECTORY}/build/crypto"/>
+    <pathelement path="${BASE_DIRECTORY}/resources"/>
+
+    <!-- And lastly, include the JDK tools archive so we can do remote
+    debugging. -->
+    <pathelement path="${java.home}/../lib/tools.jar"/>
+  </path>
+
+  <!-- This is the string of JVM arguments that enables remote debugging -->
+  <property name="jvm.debug.args" 
+            value="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=n"/>
+
+
+
+  <!-- Targets ahoy! -->
+          
+  
+  <!-- This is the target that launches the server -->
+  <target name="runServer">
+
+    <!-- If there's a custom schema.jar file, then include it -->
+    <available file="${SERVER_DIRECTORY}/schema/custom.jar"
+      property="custom.jar.classpath"
+      value="${SERVER_DIRECTORY}/schema/custom.jar"/>
+   
+    <path id="classpath">
+      <path refid="gany.classpath"/>
+      <pathelement location="${custom.jar.classpath}"/>
+    </path>
+
+    <echo>Launching Ganymede server. The output is contained in the file:
+      server_output.log.${TIMESTAMP}
+and you can attach a remote debugger on port
+      8000
+    </echo>
+
+    <java classname="arlut.csd.ganymede.server.Ganymede" 
+          output="${CWD_DIR}/server_output.log.${TIMESTAMP}"
+          fork="true">
+      <classpath refid="classpath"/>
+      <jvmarg line="${jvm.debug.args},address=8000 -Xms32m -Xmx128m -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000"/>
+      <arg line="-resetadmin usedirectory=${SERVER_DIRECTORY} -suppressEmail telnet=4444 logrmi=/tmp/serverrmi.log"/>
+    </java>
+  
+  </target>
+
+
+
+  <!-- This is the target that launches the client -->
+  <target name="runClient">
+    <echo>Launching Ganymede client. The output is contained in the file:
+      client_output.log.${TIMESTAMP}
+and you can attach a remote debugger on port
+      8001
+    </echo>
+
+    <java classname="arlut.csd.ganymede.client.glogin"
+          output="${CWD_DIR}/client_output.log.${TIMESTAMP}"
+          fork="true">
+      <classpath refid="gany.classpath"/>
+      <jvmarg line="${jvm.debug.args},address=8001 -Xmx48m"/>
+      <arg line="properties=${CLIENT_PROPERTIES}"/>
+    </java>
+  
+  </target>
+ 
+
+
+  <!-- This target launches the admin console -->
+  <target name="runAdmin">
+    <echo>Launching Ganymede admin console. The output is contained in the file:
+      admin_output.log.${TIMESTAMP}
+and you can attach a remote debugger on port
+      8002
+    </echo>
+
+
+    <java classname="arlut.csd.ganymede.admin.GASHAdmin"
+          output="${CWD_DIR}/admin_output.log.${TIMESTAMP}"
+          fork="true">
+      <classpath refid="gany.classpath"/>
+      <jvmarg line="${jvm.debug.args},address=8002 -Xmx48m"/>
+      <arg line="${CLIENT_PROPERTIES}"/>
+    </java>
+  
+  </target>
+   
+</project>

@@ -1,0 +1,12 @@
+#!/bin/sh
+base_directory=`dirname $0`
+src_directory="../../`dirname $base_directory`"
+timestamp=`date +"%Y%m%d-%H%M%S"`
+if [ -z $1 ]
+then
+  echo "You need to give the path of your Ganymede client properties file."
+  exit 1
+fi
+rm -f admin_output.log
+ln -s admin_output.log.$timestamp admin_output.log
+ant -f "$base_directory/run.xml" -DBASE_DIRECTORY="$src_directory" -DCLIENT_PROPERTIES="$1" -DCWD_DIR="`pwd`" -DTIMESTAMP="$timestamp" runAdmin
