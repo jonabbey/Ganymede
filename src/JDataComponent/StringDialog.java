@@ -39,12 +39,41 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
   EtchedBorder mainBorder;
   ButtonPanel buttonPanel;
   Panel mainPanel;
+  TableLayout table;
   //ActionListener listener;
 
   Vector objects;
 
   /**
-   * Constructor for StringDialog.
+   * Simple constructor for a small dialog box
+   *
+   * @param frame Parent frame of the Dialog Box
+   * @param Title Title of the Dialog Box
+   * @param Text Text shown in the Dialog Box
+   *
+   */
+  public StringDialog(Frame frame, String Title, String Text)
+    {
+      this(frame, Title, Text, "Ok", "Cancel");
+    }
+
+ /**
+   * Simple constructor for a small dialog box
+   *
+   * @param frame Parent frame of the Dialog Box
+   * @param Title Title of the Dialog Box
+   * @param Text Text shown in the Dialog Box
+   * @param OK String for "OK" button
+   * @param Cancel String for "Cancel" button
+   *
+   */
+  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel)
+    {
+      this(new DialogRsrc(frame, Title, Text, OK, Cancel));
+    }
+
+  /**
+   * Constructor for more complicated StringDialog.
    *
    *@param Resource Sets resource for Dialog box.
    */
@@ -60,90 +89,7 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
 
       MultiLineLabel textLabel = new MultiLineLabel(Resource.getText());
       textBorder = new EtchedBorder(textLabel, 2, 5);
-
-      panel = new InsetPanel();
-      TableLayout table = new TableLayout(false);
-      panel.setLayout(table);
-      table.rowSpacing(10);
-     
       
-      //add stuff to panel here
-      int numberOfObjects = objects.size();
-      if (numberOfObjects > 0) 
-	{
-	  for(int i = 0; i < numberOfObjects; ++i) 
-	    {
-	      Object element = objects.elementAt(i);
-	      if (element instanceof stringThing)
-		{
-		  stringThing st = (stringThing)element;
-		  stringField sf = new stringField();
-		  sf.setEditable(true);
-		  sf.setCallback(this); 
-		  addRow(panel, sf, st.getLabel(), i);
-
-		  componentHash.put(sf, st.getLabel());
-		  valueHash.put(st.getLabel(), "");
-
-		}
-	      else if (element instanceof booleanThing)
-		{
-		  booleanThing bt = (booleanThing)element;
-		  checkboxField cb = new checkboxField();
-		  cb.setCallback(this);
-		  cb.setState(bt.getDefault().booleanValue());
-		  addRow(panel, cb, bt.getLabel(), i);
-
-		  componentHash.put(cb, bt.getLabel());
-		  valueHash.put(bt.getLabel(), bt.getDefault());
-
-		}
-	      else if (element instanceof choiceThing)
-		{
-		  choiceThing ct = (choiceThing)element;
-		  Choice ch = new Choice();
-		  Vector items = ct.getItems();
-		  if (items == null)
-		    {
-		      System.out.println("Nothing to add to Choice, empty vector");
-		    }
-		  else
-		    {
-		      int total = items.size();
-		      for (int j = 0; j < total ; ++j)
-			{
-			  String str = (String)items.elementAt(j);
-			  ch.add(str);
-			  
-			}
-		      ch.addItemListener(this);
-		      addRow(panel, ch, ct.getLabel(), i);
-		      
-		      componentHash.put(ch, ct.getLabel());
-		      valueHash.put(ct.getLabel(), (String)items.elementAt(0));
-		    }
-		}
-	      else if (element instanceof Separator)
-		{
-		  Separator sep = (Separator)element;
-		  addSeparator(panel, sep, i);
-		}
-	      else
-		{
-		  System.out.println("Item " + i + " is of unknown type");
-		}
-	      
-	    }
-
-	}
-      else 
-	{
-	  System.out.println("No objects to add to StringDialog");
-	}
-
-
-
-
       buttonPanel = new ButtonPanel();
       OKButton = buttonPanel.add(Resource.OKText);
       CancelButton = buttonPanel.add(Resource.CancelText);
@@ -158,13 +104,107 @@ public class StringDialog extends Dialog implements ActionListener, setValueCall
       
       mainPanel.setLayout(new BorderLayout());
       mainPanel.add("North", textBorder);
-      mainPanel.add("Center", panel); 
+      
       mainPanel.add("South", buttonPanel);
       this.setSize(600, 600);
 
       mainBorder = new EtchedBorder(mainPanel, 3, 10);
       
       add(mainBorder);
+
+
+      //add stuff to panel here
+      if (objects != null)
+	{
+	  System.out.println("objects != null");
+	  
+	  int numberOfObjects = objects.size();
+	  if (numberOfObjects > 0) 
+	    {
+	      System.out.println("objects.size() > 0"); 
+	      panel = new InsetPanel();
+	      table = new TableLayout(false);
+	      panel.setLayout(table);
+	      table.rowSpacing(10);
+	      
+	      mainPanel.add("Center", panel); 
+	      
+	      for(int i = 0; i < numberOfObjects; ++i) 
+		{
+		  Object element = objects.elementAt(i);
+		  if (element instanceof stringThing)
+		    {
+		      stringThing st = (stringThing)element;
+		      stringField sf = new stringField();
+		      sf.setEditable(true);
+		      sf.setCallback(this); 
+		      addRow(panel, sf, st.getLabel(), i);
+		      
+		      componentHash.put(sf, st.getLabel());
+		      valueHash.put(st.getLabel(), "");
+		      
+		    }
+		  else if (element instanceof booleanThing)
+		    {
+		      booleanThing bt = (booleanThing)element;
+		      checkboxField cb = new checkboxField();
+		      cb.setCallback(this);
+		      cb.setState(bt.getDefault().booleanValue());
+		      addRow(panel, cb, bt.getLabel(), i);
+		      
+		      componentHash.put(cb, bt.getLabel());
+		      valueHash.put(bt.getLabel(), bt.getDefault());
+		      
+		    }
+		  else if (element instanceof choiceThing)
+		    {
+		      choiceThing ct = (choiceThing)element;
+		      Choice ch = new Choice();
+		      Vector items = ct.getItems();
+		      if (items == null)
+			{
+			  System.out.println("Nothing to add to Choice, empty vector");
+			}
+		      else
+			{
+			  int total = items.size();
+			  for (int j = 0; j < total ; ++j)
+			    {
+			      String str = (String)items.elementAt(j);
+			      ch.add(str);
+			      
+			    }
+			  ch.addItemListener(this);
+			  addRow(panel, ch, ct.getLabel(), i);
+			  
+			  componentHash.put(ch, ct.getLabel());
+			  valueHash.put(ct.getLabel(), (String)items.elementAt(0));
+			}
+		    }
+		  else if (element instanceof Separator)
+		    {
+		      Separator sep = (Separator)element;
+		      addSeparator(panel, sep, i);
+		    }
+		  else
+		    {
+		      System.out.println("Item " + i + " is of unknown type");
+		    }
+		  
+		}
+	      
+	    }
+	  else 
+	    {
+	      System.out.println("No objects to add to StringDialog");
+	    }
+	}
+      else
+	{
+	  System.out.println("null objects vector");
+	}
+
+    
 
       //Having problems with setting the prefered size of the 
       // table layout
