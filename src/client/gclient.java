@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.169 $
-   Last Mod Date: $Date: 2000/02/16 11:31:12 $
+   Version: $Revision: 1.170 $
+   Last Mod Date: $Date: 2000/03/01 22:01:07 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -89,7 +89,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.169 $ $Date: 2000/02/16 11:31:12 $ $Name:  $
+ * @version $Revision: 1.170 $ $Date: 2000/03/01 22:01:07 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -129,7 +129,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   static final int OBJECTNOWRITE = 16;
 
   static String release_name = "$Name:  $";
-  static String release_date = "$Date: 2000/02/16 11:31:12 $";
+  static String release_date = "$Date: 2000/03/01 22:01:07 $";
   static String release_number = null;
 
   // ---
@@ -336,7 +336,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   //
 
   private boolean
-    building = false,
+    buildingPhase1 = false,
+    buildingPhase2 = false,
     toolToggle = true,
     showToolbar = true,       // Show the toolbar
     somethingChanged = false;  // This will be set to true if the user changes anything
@@ -431,7 +432,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     createDialogImage;
 
   ImageIcon
-    buildIcon, idleIcon;
+    idleIcon, buildIcon, buildIcon2;
 
   /**
    * JDesktopPane on the right side of the client's display, contains
@@ -844,8 +845,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     search = PackageResources.getImageResource(this, "srchfol2.gif", getClass());
     queryIcon = PackageResources.getImageResource(this, "query.gif", getClass());
     cloneIcon = PackageResources.getImageResource(this, "clone.gif", getClass());
-    buildIcon = new ImageIcon(PackageResources.getImageResource(this, "build.gif", getClass()));
-    idleIcon = new ImageIcon(PackageResources.getImageResource(this, "idle.gif", getClass()));
+    idleIcon = new ImageIcon(PackageResources.getImageResource(this, "nobuild.gif", getClass()));
+    buildIcon = new ImageIcon(PackageResources.getImageResource(this, "build1.gif", getClass()));
+    buildIcon2 = new ImageIcon(PackageResources.getImageResource(this, "build2.gif", getClass()));
     trash = PackageResources.getImageResource(this, "trash.gif", getClass());
     creation = PackageResources.getImageResource(this, "creation.gif", getClass());
     newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
@@ -1012,9 +1014,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     statusThread = new StatusClearThread(statusLabel);
     statusThread.start();
 
-    if (building)
+    if (buildingPhase1)
       {
 	buildLabel.setIcon(buildIcon);
+      }
+    else if (buildingPhase2)
+      {
+	buildLabel.setIcon(buildIcon2);
       }
     else
       {
@@ -1577,13 +1583,18 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	System.out.println("Setting build status: " + status);
       }
 
-    building = (status != null) && status.equals("building");
+    buildingPhase1 = (status != null) && status.equals("building");
+    buildingPhase2 = (status != null) && status.equals("building2");
     
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	if (building)
+	if (buildingPhase1)
 	  {
 	    buildLabel.setIcon(buildIcon);
+	  }
+	else if (buildingPhase2)
+	  {
+	    buildLabel.setIcon(buildIcon2);
 	  }
 	else
 	  {

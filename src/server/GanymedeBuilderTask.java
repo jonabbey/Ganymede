@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 2000/02/21 19:50:22 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 2000/03/01 22:01:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -120,7 +120,7 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 
     try
       {
-	Ganymede.buildOn();
+	Ganymede.buildOn(1);
 
 	try
 	  {
@@ -180,6 +180,8 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
 	    Ganymede.debug("Builder task interrupted, not doing network build.");
 	    return;
 	  }
+
+	Ganymede.buildOn(2);
 
 	if (success1)
 	  {

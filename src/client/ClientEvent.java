@@ -8,8 +8,8 @@
    
    Created: 31 March 1998
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/02/16 11:31:11 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/03/01 22:01:07 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -66,11 +66,7 @@ package arlut.csd.ganymede.client;
  * types in there.</P>
  */
 
-public class ClientEvent {
-
-  final public static int ERROR = 0;
-  final public static int BUILDSTATUS = 1;
-
+public class ClientEvent implements arlut.csd.ganymede.ClientMessage {
 
   int type;
   private String message;

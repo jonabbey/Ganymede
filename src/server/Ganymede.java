@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 2000/02/29 09:35:17 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 2000/03/01 22:01:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1117,10 +1117,18 @@ public class Ganymede {
    * record that the server is processing a build.</P>
    */
 
-  static void buildOn()
+  static void buildOn(int phase)
   {
-    GanymedeServer.building = true;
-    GanymedeServer.sendMessageToRemoteSessions(1, "building");
+    GanymedeServer.building = phase;
+    
+    if (phase == 1)
+      {
+	GanymedeServer.sendMessageToRemoteSessions(1, "building");
+      }
+    else if (phase == 2)
+      {
+	GanymedeServer.sendMessageToRemoteSessions(1, "building2");
+      }
   }
 
   /**
@@ -1130,7 +1138,7 @@ public class Ganymede {
 
   static void buildOff()
   {
-    GanymedeServer.building = false;
+    GanymedeServer.building = 0;
     GanymedeServer.sendMessageToRemoteSessions(1, "idle");
   }
 

@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.59 $
-   Last Mod Date: $Date: 2000/02/21 19:50:24 $
+   Version: $Revision: 1.60 $
+   Last Mod Date: $Date: 2000/03/01 22:01:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -122,10 +122,17 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
   static boolean shutdown = false;
 
   /**
-   * <p>If true, the server is currently executing a builder task.</P>
+   * <P>If 1, the server is currently executing phase one of
+   * a builder task.</P>
+   *
+   * <P>If 2, the server is currently executing phase two of
+   * a builder task.</P>
+   *
+   * <P>If 0, the server is not currently executing a 
+   * builder task.</P>
    */
 
-  public static boolean building = false;
+  public static int building = 0;
 
   /**
    * <p>Our handy, all purpose login semaphore</p>
