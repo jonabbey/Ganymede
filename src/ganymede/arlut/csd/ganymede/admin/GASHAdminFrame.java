@@ -102,6 +102,7 @@ import arlut.csd.JDialog.messageDialog;
 import arlut.csd.JTable.rowSelectCallback;
 import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -118,6 +119,13 @@ import arlut.csd.Util.PackageResources;
  */
 
 public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede admin console.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdminFrame");
 
   static GASHAdminDispatch adminDispatch = null;
   static GASHSchema schemaEditor = null;
@@ -195,14 +203,24 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   
   rowTable table = null;
 
-  String headers[] = {"User", "System", "Status", "Connect Time", "Last Event", "Objects Checked Out"};
+  String headers[] = {ts.l("global.user_col_0"), // "User"
+		      ts.l("global.user_col_1"), // "System"
+		      ts.l("global.user_col_2"), // "Status"
+		      ts.l("global.user_col_3"), // "Connect Time"
+		      ts.l("global.user_col_4"), // "Last Event"
+		      ts.l("global.user_col_5")}; // "Objects Checked Out"
+
   int colWidths[] = {100,100,100,100,100,100};
 
   // resources for the task monitor table
 
   rowTable taskTable = null;
 
-  String taskHeaders[] = {"Task", "Status", "Last Run", "Next Run", "Interval"};
+  String taskHeaders[] = {ts.l("global.task_col_0"), // "Task"
+			  ts.l("global.task_col_1"), // "Status"
+			  ts.l("global.task_col_2"), // "Last Run"
+			  ts.l("global.task_col_3"), // "Next Run"
+			  ts.l("global.task_col_4")}; // "Interval"
   int taskColWidths[] = {100,100,100,100,100};
 
   JPopupMenu taskPopMenu = null;
@@ -234,35 +252,84 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     this.adminPanel = adminPanel;
 
     mbar = new JMenuBar();
-    controlMenu = new JMenu("Control", false); // no tear-off
-    controlMenu.setMnemonic('c');
 
-    clearLogMI = new JMenuItem("Clear Log Panel");
-    clearLogMI.setMnemonic('l');
+    // "Control"
+    controlMenu = new JMenu(ts.l("init.control_menu"), false); // no tear-off
+
+    if (ts.hasPattern("init.control_menu_key_optional"))
+      {
+	controlMenu.setMnemonic((int) ts.l("init.control_menu_key_optional").charAt(0));
+      }
+
+    // "Clear Log Panel"
+    clearLogMI = new JMenuItem(ts.l("init.control_menu_0"));
+
+    if (ts.hasPattern("init.control_menu_0_key_optional"))
+      {
+	clearLogMI.setMnemonic((int) ts.l("init.control_menu_0_key_optional").charAt(0));
+      }
+
     clearLogMI.addActionListener(this);
 
-    forceBuildMI = new JMenuItem("Force Build");
+    // "Force Build"
+    forceBuildMI = new JMenuItem(ts.l("init.control_menu_1"));
+
+    if (ts.hasPattern("init.control_menu_1_key_optional"))
+      {
+	forceBuildMI.setMnemonic((int) ts.l("init.control_menu_1_key_optional").charAt(0));
+      }
+
     forceBuildMI.setMnemonic('f');
     forceBuildMI.addActionListener(this);
 
-    killAllMI = new JMenuItem("Kill Off All Users");
-    killAllMI.setMnemonic('k');
+    // "Kill Off All Users"
+    killAllMI = new JMenuItem(ts.l("init.control_menu_2"));
+
+    if (ts.hasPattern("init.control_menu_2_key_optional"))
+      {
+	killAllMI.setMnemonic((int) ts.l("init.control_menu_2_key_optional").charAt(0));
+      }
+
     killAllMI.addActionListener(this);
 
-    schemaMI = new JMenuItem("Edit Schema");
-    schemaMI.setMnemonic('e');
+    // "Edit Schema"
+    schemaMI = new JMenuItem(ts.l("init.control_menu_3"));
+
+    if (ts.hasPattern("init.control_menu_3_key_optional"))
+      {
+	schemaMI.setMnemonic((int) ts.l("init.control_menu_3_key_optional").charAt(0));
+      }
+
     schemaMI.addActionListener(this);
 
-    shutdownMI = new JMenuItem("Shutdown Ganymede");
-    shutdownMI.setMnemonic('s');
+    // "Shutdown Ganymede"
+    shutdownMI = new JMenuItem(ts.l("init.control_menu_4"));
+
+    if (ts.hasPattern("init.control_menu_4_key_optional"))
+      {
+	shutdownMI.setMnemonic((int) ts.l("init.control_menu_4_key_optional").charAt(0));
+      }
+
     shutdownMI.addActionListener(this);
 
-    dumpMI = new JMenuItem("Dump Database");
-    dumpMI.setMnemonic('d');
+    // "Dump Database"
+    dumpMI = new JMenuItem(ts.l("init.control_menu_5"));
+
+    if (ts.hasPattern("init.control_menu_5_key_optional"))
+      {
+	dumpMI.setMnemonic((int) ts.l("init.control_menu_5_key_optional").charAt(0));
+      }
+
     dumpMI.addActionListener(this);
 
-    quitMI = new JMenuItem("Quit Console");
-    quitMI.setMnemonic('q');
+    // "Quit Console"
+    quitMI = new JMenuItem(ts.l("init.control_menu_6"));
+
+    if (ts.hasPattern("init.control_menu_6_key_optional"))
+      {
+	quitMI.setMnemonic((int) ts.l("init.control_menu_6_key_optional").charAt(0));
+      }
+
     quitMI.addActionListener(this);
 
     controlMenu.add(clearLogMI);
@@ -276,19 +343,52 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     controlMenu.add(new arlut.csd.JDataComponent.LAFMenu(this)); // ??
     controlMenu.add(quitMI);
 
-    debugMenu = new JMenu("Debug", false); // no tear-off
-    debugMenu.setMnemonic('d');
+    // "Debug"
+    debugMenu = new JMenu(ts.l("init.debug_menu"), false); // no tear-off
 
-    runInvidTestMI = new JMenuItem("Test Invid Integrity");
+    if (ts.hasPattern("init.debug_menu_key_optional"))
+      {
+	debugMenu.setMnemonic((int) ts.l("init.debug_menu_key_optional").charAt(0));
+      }
+
+    // "Test Invid Integrity"
+    runInvidTestMI = new JMenuItem(ts.l("init.debug_menu_0"));
+
+    if (ts.hasPattern("init.debug_menu_0_key_optional"))
+      {
+	runInvidTestMI.setMnemonic((int) ts.l("init.debug_menu_0_key_optional").charAt(0));
+      }
+
     runInvidTestMI.addActionListener(this);
 
-    runInvidSweepMI = new JMenuItem("Repair Invid Integrity");
+    // "Repair Invid Integrity"
+    runInvidSweepMI = new JMenuItem(ts.l("init.debug_menu_1"));
+
+    if (ts.hasPattern("init.debug_menu_1_key_optional"))
+      {
+	runInvidSweepMI.setMnemonic((int) ts.l("init.debug_menu_1_key_optional").charAt(0));
+      }
+
     runInvidSweepMI.addActionListener(this);
 
-    runEmbeddedTestMI = new JMenuItem("Test Embedded Integrity");
+    // "Test Embedded Integrity"
+    runEmbeddedTestMI = new JMenuItem(ts.l("init.debug_menu_2"));
+
+    if (ts.hasPattern("init.debug_menu_2_key_optional"))
+      {
+	runEmbeddedTestMI.setMnemonic((int) ts.l("init.debug_menu_2_key_optional").charAt(0));
+      }
+
     runEmbeddedTestMI.addActionListener(this);
 
-    runEmbeddedSweepMI = new JMenuItem("Repair Embedded Integrity");
+    // "Repair Embedded Integrity"
+    runEmbeddedSweepMI = new JMenuItem(ts.l("init.debug_menu_3"));
+
+    if (ts.hasPattern("init.debug_menu_3_key_optional"))
+      {
+	runEmbeddedSweepMI.setMnemonic((int) ts.l("init.debug_menu_3_key_optional").charAt(0));
+      }
+
     runEmbeddedSweepMI.addActionListener(this);
 
     debugMenu.add(runInvidTestMI);
@@ -296,11 +396,22 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     debugMenu.add(runEmbeddedTestMI);
     debugMenu.add(runEmbeddedSweepMI);
 
-    helpMenu = new JMenu("Help");
-    helpMenu.setMnemonic('h');
-    
-    showAboutMI = new JMenuItem("About Ganymede");
-    showAboutMI.setMnemonic('a');
+    // "Help"
+    helpMenu = new JMenu(ts.l("init.help_menu"));
+
+    if (ts.hasPattern("init.help_menu_key_optional"))
+      {
+	helpMenu.setMnemonic((int) ts.l("init.help_menu_key_optional").charAt(0));
+      }
+
+    // "About Ganymede"
+    showAboutMI = new JMenuItem(ts.l("init.help_menu_0"));
+
+    if (ts.hasPattern("init.help_menu_0_key_optional"))
+      {
+	showAboutMI.setMnemonic((int) ts.l("init.help_menu_0_key_optional").charAt(0));
+      }
+
     showAboutMI.addActionListener(this);
     helpMenu.add(showAboutMI);
 
@@ -324,15 +435,19 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Ganymede Server Host */
 
-    hostLabel = new JLabel("Ganymede Server Host:");
+    // "Ganymede Server Host:"
+
+    hostLabel = new JLabel(ts.l("init.hostlabel"));
 
     if (adminPanel.isSSL())
       {
-	hostField = new JTextField(GASHAdmin.url + "  [SSL]", 40);
+	// "{0}  [SSL]"
+	hostField = new JTextField(ts.l("init.urlssl", GASHAdmin.url), 60);
       }
     else
       {
-	hostField = new JTextField(GASHAdmin.url + "  [NO SSL]", 40);
+	// "{0}  [NO SSL]"
+	hostField = new JTextField(ts.l("init.urlnossl", GASHAdmin.url), 60);
       }
 
     hostField.setEditable(false);
@@ -365,7 +480,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Admin consoles connected to server */
 
-    adminLabel = new JLabel("Admin consoles connected to server:");
+    // "Admin consoles connected to server:"
+    adminLabel = new JLabel(ts.l("init.console_count"));
 
     adminField = new JTextField("", 40);
     adminField.setEditable(false);
@@ -389,7 +505,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Server State */
 
-    stateLabel = new JLabel("Server State:");
+    // "Server State:"
+    stateLabel = new JLabel(ts.l("init.server_state"));
 
     stateField = new JTextField("", 40);
     stateField.setEditable(false);
@@ -413,7 +530,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Server Start Time */
 
-    startLabel = new JLabel("Server Start Time:");
+    // "Server Start Time:"
+    startLabel = new JLabel(ts.l("init.start_time"));
 
     startField = new JTextField("", 40);
     startField.setEditable(false);
@@ -437,7 +555,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Last Dump Time */
 
-    dumpLabel = new JLabel("Last Dump Time:");
+    // "Last Dump Time:"
+    dumpLabel = new JLabel(ts.l("init.lastdump"));
 
     dumpField = new JTextField("", 40);
     dumpField.setEditable(false);
@@ -461,7 +580,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* In-use / Free / Total Memory */
 
-    memLabel = new JLabel("In-use / Free / Total Memory:");
+    // "In-use / Free / Total Memory:"
+    memLabel = new JLabel(ts.l("init.memory"));
 
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
@@ -485,7 +605,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Transactions in Journal */
 
-    journalLabel = new JLabel("Transactions in Journal:");
+    // "Transactions in Journal:"
+    journalLabel = new JLabel(ts.l("init.trans_count"));
 
     journalField = new JTextField("", 40);
     journalField.setEditable(false);
@@ -509,7 +630,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Objects Checked Out */
 
-    checkedOutLabel = new JLabel("Objects Checked Out:");
+    // "Objects Checked Out:"
+    checkedOutLabel = new JLabel(ts.l("init.objects_out"));
 
     checkedOutField = new JTextField("", 40);
     checkedOutField.setEditable(false);
@@ -533,7 +655,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Locks held */
 
-    locksLabel = new JLabel("Locks held:");
+    // "Locks Held:"
+    locksLabel = new JLabel(ts.l("init.locks"));
 
     locksField = new JTextField("", 40);
     locksField.setEditable(false);
@@ -563,7 +686,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     
     JPanel topBox = new JPanel(new BorderLayout());
     topBox.add("Center",topPanel);
-    topBox.setBorder(new TitledBorder("Ganymede Server"));
+    // "Ganymede Server"
+    topBox.setBorder(new TitledBorder(ts.l("init.title")));
     topGBL.setConstraints(topBox, topGBC);
     getContentPane().add(topBox);
 
@@ -572,13 +696,16 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     topGBC.fill = GridBagConstraints.BOTH;
     topGBC.weighty = 1.0;
 
-    statusArea = new JTextArea("Ganymede Admin Console\n", 6, 50);
+    // "Ganymede Admin Console\n"
+    statusArea = new JTextArea(ts.l("init.start_log_msg"), 6, 50);
     statusArea.setEditable(false);
     JScrollPane statusAreaPane = new JScrollPane(statusArea);
 
     JPanel statusBox = new JPanel(new java.awt.BorderLayout());
     statusBox.add("Center", statusAreaPane);
-    statusBox.setBorder(new TitledBorder("Server Log"));
+
+    // "Server Log"
+    statusBox.setBorder(new TitledBorder(ts.l("init.server_log_title")));
 
     //    topGBL.setConstraints(statusBox, topGBC);
     //    getContentPane().add(statusBox);
@@ -589,22 +716,32 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     popMenu = new JPopupMenu();
 
-    killUserMI = new JMenuItem("Kill User");
+    // "Kill User"
+    killUserMI = new JMenuItem(ts.l("init.killUserPopup"));
     popMenu.add(killUserMI);
 
     table = new rowTable(colWidths, headers, this, false, popMenu, false);
     JPanel tableBox = new JPanel(new BorderLayout());
     tableBox.add("Center", table);
-    tableBox.setBorder(new TitledBorder("Users Connected"));
+
+    // "Users Connected"
+    tableBox.setBorder(new TitledBorder(ts.l("init.users_title")));
 
     // create background task monitor
 
     taskPopMenu = new JPopupMenu();
 
-    runNowMI = new JMenuItem("Run Task Now");
-    stopTaskMI = new JMenuItem("Stop Running Task");
-    disableTaskMI = new JMenuItem("Disable Task");
-    enableTaskMI = new JMenuItem("Enable Task");
+    // "Run Task Now"
+    runNowMI = new JMenuItem(ts.l("init.runNowPopup"));
+
+    // "Stop Running Task"
+    stopTaskMI = new JMenuItem(ts.l("init.stopTaskPopup"));
+
+    // "Disable Task"
+    disableTaskMI = new JMenuItem(ts.l("init.disableTaskPopup"));
+
+    // "Enable Task"
+    enableTaskMI = new JMenuItem(ts.l("init.enableTaskPopup"));
 
     taskPopMenu.add(runNowMI);
     taskPopMenu.add(stopTaskMI);
@@ -616,13 +753,18 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     JPanel taskBox = new JPanel(new java.awt.BorderLayout());
     taskBox.add("Center", taskTable);
-    taskBox.setBorder(new TitledBorder("Task Monitor"));
+
+    // "Task Monitor"
+    taskBox.setBorder(new TitledBorder(ts.l("init.task_title")));
 
     // and put them into our tab pane
 
     tabPane = new JTabbedPane();
-    tabPane.addTab("Users Connected", tableBox);
-    tabPane.addTab("Task Monitor", taskBox);
+
+    // "Users Connected"
+    tabPane.addTab(ts.l("init.users_title"), tableBox);
+    // "Task Monitor"
+    tabPane.addTab(ts.l("init.task_title"), taskBox);
 
     // and put the tab pane into our frame with the
     // same constraints that the text area had
