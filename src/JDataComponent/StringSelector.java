@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 2000/12/05 23:10:16 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 2001/05/11 00:56:41 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -93,7 +93,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.30 $ $Date: 2000/12/05 23:10:16 $ $Name:  $
+ * @version $Revision: 1.31 $ $Date: 2001/05/11 00:56:41 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -176,7 +176,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   public StringSelector(Vector available, Vector chosen, Container parent, 
 			boolean editable, boolean canChoose, boolean mustChoose, int rowWidth)
   {
-    this(available, chosen, parent, editable, canChoose, mustChoose, rowWidth, "Selected", "Available", null, null);
+    this(available, chosen, parent, editable, canChoose, mustChoose, rowWidth, "Members", "Available", null, null);
   }
 
   /**
@@ -193,7 +193,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   public StringSelector(Vector available, Vector chosen, Container parent, 
 			boolean editable, boolean canChoose, boolean mustChoose)
   {
-    this(available, chosen, parent, editable, canChoose, mustChoose, 0, "Selected", "Available", null, null);
+    this(available, chosen, parent, editable, canChoose, mustChoose, 0, "Members", "Available", null, null);
   }
 
   /**

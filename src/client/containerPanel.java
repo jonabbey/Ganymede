@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.120 $
-   Last Mod Date: $Date: 2001/05/11 00:14:32 $
+   Version: $Revision: 1.121 $
+   Last Mod Date: $Date: 2001/05/11 00:56:08 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -100,7 +100,7 @@ import arlut.csd.Util.VecSortInsert;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.120 $ $Date: 2001/05/11 00:14:32 $ $Name:  $
+ * @version $Revision: 1.121 $ $Date: 2001/05/11 00:56:08 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -108,6 +108,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   boolean debug = false;
   static final boolean debug_persona = false;
+  static final int FIELDWIDTH = 25;
 
   // ---
 
@@ -2614,7 +2615,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 					   true, true, 
 					   ((choiceHandles != null) && 
 					    (editable && fieldInfo.isEditable())) ? 150 : 300,
-					   "Selected", "Available",
+					   "Members", "Available",
 					   invidTablePopup, invidTablePopup2);
     if (choiceHandles == null)
       {
@@ -2893,7 +2894,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
 	int maxLength = fieldTemplate.getMaxLength();
 
-	sf = new JstringField(30 > maxLength ? maxLength + 1 : 30,
+	sf = new JstringField(FIELDWIDTH > maxLength ? maxLength + 1 : FIELDWIDTH,
 			      maxLength,
 			      editable && fieldInfo.isEditable(),
 			      false,
@@ -2964,7 +2965,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     else
       {
 	int maxLength = fieldTemplate.getMaxLength();
-	sf = new JstringField(30 > maxLength ? maxLength + 1 : 30,
+	sf = new JstringField(FIELDWIDTH > maxLength ? maxLength + 1 : FIELDWIDTH,
 			      maxLength,
 			      true,
 			      false,
@@ -3027,7 +3028,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     nf.setEditable(editable && fieldInfo.isEditable());
-    nf.setColumns(40);
+    nf.setColumns(FIELDWIDTH);
 
     String comment = fieldTemplate.getComment();
 
@@ -3454,7 +3455,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
 
     combo.setMaximumRowCount(12);
-    combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
+    combo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
     combo.setVisible(true);
     
     if (currentChoice != null)
