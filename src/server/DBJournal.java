@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -59,11 +59,13 @@ public class DBJournal {
   static final String OPENTRANS = "open";
   static final String CLOSETRANS = "close";
 
+  // instance variables
+
   String filename;
-
   RandomAccessFile jFile = null;
-
   DBStore store = null;
+  boolean dirty = false;	// dirty is true if the journal has any
+				// transactions written out
 
   /* -- */
 
@@ -123,6 +125,8 @@ public class DBJournal {
 	    System.err.println("Writing DBStore Journal header");
 	  }
 	initialize(jFile);
+
+	dirty = false;
       }
     else
       {
@@ -135,6 +139,33 @@ public class DBJournal {
 	  }
 
 	jFile = new RandomAccessFile(filename, "rw");
+
+	// look to see if there are any transactions in the journal
+
+	readHeaders();
+
+	try
+	  {
+	    if (jFile.readUTF().compareTo(OPENTRANS) != 0)
+	      {
+		if (debug)
+		  {
+		    System.err.println("DBJournal constructor: open string mismatch");
+		  }
+		throw new IOException();
+	      }
+	    else
+	      {
+		dirty = true;	// we have some transactions in the existing journal
+	      }
+	  }
+	catch (EOFException ex)
+	  {
+	    dirty = false;	// we have no transactions in the existing journal
+	  }
+
+	// from now on, write to append to the end of the file
+
 	jFile.seek(jFile.length());
       }
   }
@@ -181,6 +212,8 @@ public class DBJournal {
 
     jFile = new RandomAccessFile(filename, "rw");
     initialize(jFile);
+
+    dirty = false;
   }
 
   /**
@@ -203,37 +236,11 @@ public class DBJournal {
 
     /* - */
 
-    if (debug)
-      {
-	System.err.println("DBJournal: Loading transactions from " + filename);
-      }
-
     entries = new Vector();
 
-    jFile.seek(0);
-  
-    if (DBJournal.id_string.compareTo(jFile.readUTF()) != 0)
-      {
-	throw new RuntimeException("Error, id_string mismatch.. wrong file type?");
-      }
+    // skip past the journal header block
 
-    if (jFile.readShort() != DBJournal.major_version)
-      {
-	throw new RuntimeException("Error, major_version mismatch.. wrong file type?");
-      }
-
-    // skip past the next two bits
-
-    jFile.readShort();		// minor version doesn't matter so much
-
-    if (debug)
-      {
-	System.err.println("DBJournal file created " + new Date(jFile.readLong()));
-      }
-    else
-      {
-	jFile.readLong();		// date is there for others to look at
-      }
+    readHeaders();
 
     // start reading and applying the changes
 
@@ -273,6 +280,11 @@ public class DBJournal {
 	    System.err.println("Objects Created: " + object_count);
 	  }
 
+	if (object_count > 0)
+	  {
+	    dirty = true;
+	  }
+
 	for (int i = 0; i < object_count; i++)
 	  {
 	    obj_type = jFile.readShort();
@@ -295,6 +307,11 @@ public class DBJournal {
 	if (debug)
 	  {
 	    System.err.println("Objects Modified: " + object_count);
+	  }
+
+	if (object_count > 0)
+	  {
+	    dirty = true;
 	  }
 
 	for (int i = 0; i < object_count; i++)
@@ -324,6 +341,11 @@ public class DBJournal {
 	if (debug)
 	  {
 	    System.err.println("Objects Deleted: " + object_count);
+	  }
+
+	if (object_count > 0)
+	  {
+	    dirty = true;
 	  }
 
 	for (int i = 0; i < object_count; i++)
@@ -440,6 +462,8 @@ public class DBJournal {
 		obj.print(System.err);
 	      }
 	  }
+
+	dirty = true;
       }
     else
       {
@@ -475,6 +499,8 @@ public class DBJournal {
 		obj.print(System.err);
 	      }
 	  }
+
+	dirty = true;
       }
     else
       {
@@ -502,6 +528,8 @@ public class DBJournal {
 		System.err.println(obj.objectBase.object_name + " : " + obj.id);
 	      }
 	  }
+
+	dirty = true;
       }
     else
       {
@@ -520,6 +548,55 @@ public class DBJournal {
       }
 
     return true;
+  }
+
+
+  /**
+   *  returns true if the journal does not contain any transactions
+   *
+   */
+
+  public boolean clean()
+  {
+    return !dirty;
+  }
+
+  /**
+   *
+   *
+   */
+
+  void readHeaders() throws IOException
+  {
+    if (debug)
+      {
+	System.err.println("DBJournal: Loading transactions from " + filename);
+      }
+
+    jFile.seek(0);
+  
+    if (DBJournal.id_string.compareTo(jFile.readUTF()) != 0)
+      {
+	throw new RuntimeException("Error, id_string mismatch.. wrong file type?");
+      }
+
+    if (jFile.readShort() != DBJournal.major_version)
+      {
+	throw new RuntimeException("Error, major_version mismatch.. wrong file type?");
+      }
+
+    // skip past the next two bits
+
+    jFile.readShort();		// minor version doesn't matter so much
+
+    if (debug)
+      {
+	System.err.println("DBJournal file created " + new Date(jFile.readLong()));
+      }
+    else
+      {
+	jFile.readLong();		// date is there for others to look at
+      }
   }
 }
 

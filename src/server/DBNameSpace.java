@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -193,14 +193,14 @@ class DBNameSpace {
 
     if (debug)
       {
-	System.err.println("DBNameSpace.mark(): enter");
+	System.err.println(editSet.session.key + ": DBNameSpace.mark(): enter");
       }
 
     if (uniqueHash.containsKey(value))
       {
 	if (debug)
 	  {
-	    System.err.println("DBNameSpace.mark(): uniqueHash contains key " + value);
+	    System.err.println(editSet.session.key + ": DBNameSpace.mark(): uniqueHash contains key " + value);
 	  }
 	
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
@@ -215,7 +215,7 @@ class DBNameSpace {
 
 	    if (debug)
 	      {
-		System.err.println("DBNameSpace.mark(): we don't own handle");
+		System.err.println(editSet.session.key + ": DBNameSpace.mark(): we don't own handle");
 	      }
 
 	    return false;	// somebody else owns it
@@ -245,7 +245,7 @@ class DBNameSpace {
       {
 	if (debug)
 	  {
-	    System.err.println("DBNameSpace.mark(): value not in uniqueHash");
+	    System.err.println(editSet.session.key + ": DBNameSpace.mark(): value not in uniqueHash");
 	  }
 
 	// we're creating a new value.. previous value
@@ -261,7 +261,7 @@ class DBNameSpace {
 
     if (debug)
       {
-	System.err.println("DBNameSpace.mark(): mark obtained succesfully");
+	System.err.println(editSet.session.key + ": DBNameSpace.mark(): mark obtained succesfully");
       }
 
     return true;
