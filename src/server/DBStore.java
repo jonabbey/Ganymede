@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.35 $ %D%
+   Version: $Revision: 1.36 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,6 +52,7 @@ public class DBStore {
    */
   
   boolean schemaEditInProgress;	// lock for schema revision
+  boolean sweepInProgress;	// lock for invid sweep
   short maxBaseId = 256;	// to keep track of what ID to assign to new bases
   Hashtable objectBases;	// hash mapping object type to DBObjectBase's
   Hashtable lockHash;		// identifier keys for current locks
@@ -620,6 +621,11 @@ public class DBStore {
 	throw new RuntimeException("can't login, the server's in schema edit mode");
       }
 
+    if (sweepInProgress)
+      {
+	throw new RuntimeException("can't login, the server is performing an invid sweep");
+      }
+
     return new DBSession(this, null, key);
   }
 
@@ -881,6 +887,9 @@ public class DBStore {
 	ns = new DBNameSpace("persona", true);
 	nameSpaces.addElement(ns);
 
+	ns = new DBNameSpace("eventtoken", true);
+	nameSpaces.addElement(ns);
+
 	// create owner base
 
 	b = new DBObjectBase(this, false);
@@ -1125,6 +1134,87 @@ public class DBStore {
 	b.fieldHash.put(new Short(bf.field_code), bf);
 
 	b.setLabelField(SchemaConstants.UserUserName);
+    
+	setBase(b);
+
+	// create event base
+
+	b = new DBObjectBase(this, false);
+	b.object_name = "Event";
+	b.type_code = (short) SchemaConstants.EventBase;  
+	b.displayOrder = b.type_code;
+
+	adminCategory.addNode(b, false, false); // add it to the end is ok
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.EventToken;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Event Token";
+	bf.badChars = " :";
+	bf.field_order = 1;
+	bf.loading = true;
+	bf.setNameSpace("eventtoken");
+	bf.loading = false;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Single-word token to identify this event type in Ganymede source code";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.EventName;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Event Name";
+	bf.badChars = ":";
+	bf.field_order = 2;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Short name for this event class, suitable for an email message title";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.EventDescription;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Event Description";
+	bf.badChars = ":";
+	bf.field_order = 3;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Fuller description for this event class, suitable for an email message body";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.EventMailBoolean;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Send Mail?";
+	bf.field_order = 4;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, occurrences of this event will be emailed";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.EventMailList;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Fixed Mail List";
+	bf.badChars = ":";
+	bf.field_order = 5;
+	bf.array = true;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "List of email addresses to always send events of this type to";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_order = bf.field_code = SchemaConstants.EventMailToSelf;
+	bf.field_type = FieldType.BOOLEAN;
+	bf.field_name = "Cc: Admin?";
+	bf.field_order = 6;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	b.setLabelField(SchemaConstants.EventToken);
     
 	setBase(b);
       }
