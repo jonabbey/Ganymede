@@ -7,7 +7,7 @@
    and base structures on the server to the client.
    
    Created: 12 February 1998
-   Version: $Revision: 1.9 $ %D%
+   Version: $Revision: 1.10 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -174,7 +174,7 @@ public class CategoryTransport implements java.io.Serializable {
 	      }
 	    else if (node instanceof DBBaseCategory)
 	      {
-		result = containsVisibleBase((DBBaseCategory) node);
+		result = containsEditableBase((DBBaseCategory) node);
 	      }
 	  }
       }
