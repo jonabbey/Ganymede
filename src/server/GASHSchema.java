@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,6 +36,8 @@ import gjt.RowLayout;
 import gjt.ColumnLayout;
 
 import arlut.csd.Tree.*;
+
+import com.sun.java.swing.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,7 +76,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     createFieldMI = null,
     deleteFieldMI = null;
   
-  PopupMenu
+  treeMenu
     categoryMenu = null,
     baseMenu = null,
     fieldMenu = null,
@@ -85,7 +87,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     card;
 
   Panel 
-    displayPane,
     buttonPane,
     attribPane,
     attribCardPane,
@@ -135,8 +136,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     
     setLayout(new BorderLayout());
 
-    displayPane = new Panel();
-    displayPane.setLayout(new BorderLayout());
 
     attribPane = new Panel();
     attribPane.setBackground(bgColor);
@@ -205,8 +204,6 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     rightPanel.setLayout(new BorderLayout());
     rightPanel.add("Center", rightBox);
 
-    displayPane.add("Center", rightPanel);
-
     // Set up button pane
 
     buttonPane = new Panel();
@@ -254,9 +251,13 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
     leftPanel.setLayout(new BorderLayout());
     leftPanel.add("Center", leftBox);
 
-    displayPane.add("West", leftPanel);
+    //    displayPane.add("West", leftPanel);
 
-    add("Center", displayPane);
+    //    add("Center", displayPane);
+
+    JSplitPane sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
+
+    add("Center", sPane);
 
     //
     //
@@ -266,7 +267,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     // category menu
 
-    categoryMenu = new PopupMenu();
+    categoryMenu = new treeMenu();
 
     createCategoryMI = new MenuItem("Create Category");
     deleteCategoryMI = new MenuItem("Delete Category");
@@ -278,19 +279,19 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     // namespace menu
 
-    nameSpaceMenu = new PopupMenu("Namespace Menu");
+    nameSpaceMenu = new treeMenu("Namespace Menu");
     createNameMI = new MenuItem("Create Namespace");
     nameSpaceMenu.add(createNameMI);
 
     // namespace object menu
 
-    nameSpaceObjectMenu = new PopupMenu();
+    nameSpaceObjectMenu = new treeMenu();
     deleteNameMI = new MenuItem("Delete Namespace");
     nameSpaceObjectMenu.add(deleteNameMI);
 
     // base menu
 
-    baseMenu = new PopupMenu("Base Menu");
+    baseMenu = new treeMenu("Base Menu");
     deleteObjectMI = new MenuItem("Delete Object Type");
     createFieldMI = new MenuItem("Create Field");
     baseMenu.add(createFieldMI);
@@ -298,7 +299,7 @@ public class GASHSchema extends Frame implements treeCallback, treeDragDropCallb
 
     // field menu
 
-    fieldMenu = new PopupMenu("Field Menu");
+    fieldMenu = new treeMenu("Field Menu");
     deleteFieldMI = new MenuItem("Delete Field");
     fieldMenu.add(deleteFieldMI);
 
