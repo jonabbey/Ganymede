@@ -4,8 +4,8 @@
 # and make all the build scripts.  It is run by the configure
 # script in the root of the ganymede distribution.
 #
-# $Revision: 1.23 $
-# $Date: 1999/01/20 18:07:43 $
+# $Revision: 1.24 $
+# $Date: 1999/01/20 18:47:27 $
 #
 # Jonathan Abbey
 # jonabbey@arlut.utexas.edu
@@ -118,7 +118,7 @@ classfiles:
 	\@cd $rootdir/src
 	\@echo "Built Ganymede classes"
 
-schemakits:
+kits:
 	\@echo "Building schemas"
 	\@echo "Compiling BSD schema kit"
 	\@cd $rootdir/src/schemas/bsd/custom_src; \\
