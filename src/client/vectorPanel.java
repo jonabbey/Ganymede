@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.32 $ %D%
+  Version: $Revision: 1.33 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -600,10 +600,17 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 		if ((cp != null) && cp.getObjectInvid().equals((Invid)o))
 		  {
+		    System.out.println("Calling cp.updateAll()");
 		    cp.updateAll();
+		    ((elementWrapper)ewHash.get(cp)).checkValidation();
+		    ((elementWrapper)ewHash.get(cp)).refreshTitle();
 		  }
 		else
 		  {
+		    /*
+		     * I don't need to add a new element. When this ew
+		     * is opened, the containerPanel will be loaded
+		     * then, we will be right.  
 		    if (debug)
 		      {
 			System.out.println("VectorPanel.refresh(): need to add new element.");
@@ -621,6 +628,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    
 		    compVector.insertElementAt(newcp, i);
 		    addElement(newcp);
+		    */
+		    System.out.println("Skipping non loaded cp");
 		  }
 	      
 
@@ -636,6 +645,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  }
 		else
 		  {
+		    /*
+		     * See above.
 		    JIPField ipf = new JIPField(new JcomponentAttr(null,
 								   new Font("Helvetica",Font.PLAIN,12),
 								   Color.black,Color.white),
@@ -647,6 +658,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    
 		    compVector.insertElementAt(ipf, i);
 		    addElement(ipf, false);
+		    */
+		    System.out.println("Skpping non-loaded IPField.");
 
 		  }
 	      }
