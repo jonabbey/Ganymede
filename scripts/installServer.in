@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.6 $
-# $Date: 1999/04/16 23:18:06 $
+# $Revision: 1.7 $
+# $Date: 1999/04/28 06:52:50 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -395,6 +395,28 @@ close INPUT;
 close OUTPUT;
 
 chmod 0750, "$installdir/bin/decodeDB";
+
+# Copy and process the stopServer script into place
+
+open INPUT, "scripts/stopServer.template" or die "Couldn't open stopServer template!";
+open OUTPUT, ">$installdir/bin/stopServer" or die "Couldn't write stopServer";
+
+while (<INPUT>) {
+
+  if (!/^([A-Z]*)=/) {
+    print OUTPUT $_;
+  } elsif (defined $runconvert{$1}) {
+    print OUTPUT "$1=$runconvert{$1}\n";
+  } else {
+    print "Error.. unrecognized template entry $1 - copying template value\n";
+    print OUTPUT $_;
+  }
+}
+
+close INPUT;
+close OUTPUT;
+
+chmod 0750, "$installdir/bin/stopServer";
 
 # Configure the schema build scripts
 
