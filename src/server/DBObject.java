@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.111 $
-   Last Mod Date: $Date: 2001/01/11 23:35:56 $
+   Version: $Revision: 1.112 $
+   Last Mod Date: $Date: 2001/01/12 01:47:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.111 $ $Date: 2001/01/11 23:35:56 $
+ * @version $Revision: 1.112 $ $Date: 2001/01/12 01:47:40 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1662,7 +1662,33 @@ public class DBObject implements db_object, FieldType, Remote {
 
   public synchronized db_field[] listFields()
   {
-    return fieldAry;
+    db_field result[];
+    short count = 0;
+
+    synchronized (fieldAry)
+      {
+	for (int i = 0; i < fieldAry.length; i++)
+	  {
+	    if (fieldAry[i] != null)
+	      {
+		count++;
+	      }
+	  }
+
+	result = new db_field[count];
+
+	count = 0;
+
+	for (int i = 0; i < fieldAry.length; i++)
+	  {
+	    if (fieldAry[i] != null)
+	      {
+		result[count++] = fieldAry[i];
+	      }
+	  }
+      }
+
+    return result;
   }
 
   /**

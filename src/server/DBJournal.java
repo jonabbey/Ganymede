@@ -6,8 +6,8 @@
    
    Created: 3 December 1996
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2001/01/12 01:31:37 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2001/01/12 01:47:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -749,7 +749,8 @@ class JournalEntry {
 	    for (int i = 0; i < tempFields.length; i++)
 	      {
 		DBField _field = (DBField) tempFields[i];
-		definition = _field.getFieldDef(base);
+
+		definition = _field.getFieldDef();
 
 		if (definition.namespace != null)
 		  {
@@ -812,7 +813,7 @@ class JournalEntry {
 	for (int i = 0; i < tempFields.length; i++)
 	  {
 	    DBField _field = (DBField) tempFields[i];
-	    definition = _field.getFieldDef(base);
+	    definition = _field.getFieldDef();
 
 	    if (definition.namespace != null)
 	      {
