@@ -64,7 +64,6 @@
 package arlut.csd.ddroid.server;
 
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 
 import arlut.csd.ddroid.common.clientAsyncMessage;
 import arlut.csd.ddroid.rmi.ClientAsyncResponder;
@@ -94,7 +93,7 @@ import arlut.csd.ddroid.rmi.ClientAsyncResponder;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class serverClientAsyncResponder extends UnicastRemoteObject implements ClientAsyncResponder {
+public class serverClientAsyncResponder implements ClientAsyncResponder {
 
   /**
    * <p>Our queue of {@link arlut.csd.ddroid.common.clientAsyncMessage clientAsyncMessage} objects.</p>
@@ -153,12 +152,10 @@ public class serverClientAsyncResponder extends UnicastRemoteObject implements C
 
   public serverClientAsyncResponder() throws RemoteException
   {
-    super();			// UnicastRemoteObject may throw RemoteException
-
-    /* -- */
-
     eventBuffer = new clientAsyncMessage[maxBufferSize];
     lookUp = new clientAsyncMessage[clientAsyncMessage.LAST - clientAsyncMessage.FIRST + 1];
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**

@@ -59,7 +59,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Enumeration;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -103,7 +102,7 @@ import arlut.csd.ddroid.rmi.BaseField;
  * DBObjectBaseField's type information in an efficiently retrieved summary.</P>
  */
 
-public final class DBObjectBaseField extends UnicastRemoteObject implements BaseField, FieldType {
+public final class DBObjectBaseField implements BaseField, FieldType {
 
   static final ReturnVal warning1 = genWarning1();
   static final ReturnVal warning2 = genWarning2();
@@ -311,6 +310,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     field_code = -1;
     field_type = -1;
     editor = null;
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**

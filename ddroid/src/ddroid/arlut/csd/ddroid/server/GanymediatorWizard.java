@@ -69,7 +69,6 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -167,7 +166,7 @@ import arlut.csd.ddroid.rmi.Ganymediator;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
-public abstract class GanymediatorWizard extends UnicastRemoteObject implements Ganymediator {
+public abstract class GanymediatorWizard implements Ganymediator {
 
   public final static int STARTUP = 0;
   public final static int DONE = 99;	// we'll never have a wizard with > 99 steps, right?
@@ -192,8 +191,6 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
 
   public GanymediatorWizard(GanymedeSession session) throws RemoteException
   {
-    super();			// UnicastRemoteObject initialization
-
     if (session == null)
       {
 	throw new IllegalArgumentException("can't construct: null session");
@@ -209,6 +206,8 @@ public abstract class GanymediatorWizard extends UnicastRemoteObject implements 
       }
 
     state = 0;
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**

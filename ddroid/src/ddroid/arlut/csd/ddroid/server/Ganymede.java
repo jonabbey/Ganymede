@@ -193,6 +193,15 @@ public class Ganymede {
   public static boolean remotelyAccessible = true;
 
   /**
+   * <p>This object is responsible for handling all of the RMI
+   * exportation of objects in the server.  According to how it is
+   * initialized, objects may or may not be exported over SSL, and may
+   * or may not be exported on a fixed port.</p>
+   */
+
+  public static GanymedeRMIManager rmi = null;
+
+  /**
    * <p>Once the server is started and able to accept RMI clients,
    * this field will hold the GanymedeServer object which clients
    * talk to in order to login to the server.</p>
@@ -527,6 +536,10 @@ public class Ganymede {
 
 	System.getProperties().setProperty("sun.rmi.server.exceptionTrace", "true");
       }
+
+    // Create our GanymedeRMIManager to handle RMI exports
+
+    Ganymede.rmi = new GanymedeRMIManager(0, false);
 
     // Create a GanymedeServer object to support the logging
     // code... the GanymedeServer's main purpose (to allow logins)

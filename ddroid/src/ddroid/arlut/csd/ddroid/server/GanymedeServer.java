@@ -98,7 +98,7 @@ import arlut.csd.ddroid.rmi.adminSession;
  * will directly interact with.</p>
  */
 
-public class GanymedeServer extends UnicastRemoteObject implements Server {
+public class GanymedeServer implements Server {
 
   /**
    * <P>Singleton server object.  A running Directory Droid Server will have one
@@ -195,8 +195,6 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   public GanymedeServer() throws RemoteException
   {
-    super();			// UnicastRemoteObject initialization
-
     ts = TranslationService.getTranslationService("arlut.csd.ddroid.server.GanymedeServer");
  
     if (server == null)
@@ -212,6 +210,8 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
     loginSession = new GanymedeSession(); // supergash
     loginSession.enableWizards(false);
     loginSession.enableOversight(false);
+
+    Ganymede.rmi.publishObject(this);
   } 
 
   /**
@@ -296,7 +296,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     try
       {
-	UnicastRemoteObject.exportObject(xSession);
+	Ganymede.rmi.publishObject(xSession);
       }
     catch (RemoteException ex)
       {
@@ -535,7 +535,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	      {
 		try
 		  {
-		    String ipAddress = getClientHost();
+		    String ipAddress = UnicastRemoteObject.getClientHost();
 
 		    try
 		      {
@@ -973,7 +973,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     try
       {
-	String ipAddress = getClientHost();
+	String ipAddress = UnicastRemoteObject.getClientHost();
 	
 	try
 	  {

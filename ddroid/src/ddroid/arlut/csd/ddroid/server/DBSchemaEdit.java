@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -117,7 +116,7 @@ import arlut.csd.ddroid.rmi.SchemaEdit;
  * ganymede.db file before going in and editing your database schema.</P> 
  */
 
-public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, SchemaEdit {
+public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   final static boolean debug = false;
 
@@ -225,6 +224,8 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	    oldNameSpaces.addElement(ns);
 	  }
       } // end synchronized (store)
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**

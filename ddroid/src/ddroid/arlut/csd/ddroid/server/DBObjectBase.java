@@ -62,7 +62,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -140,7 +139,7 @@ import arlut.csd.ddroid.rmi.Session;
  * of this type, as well as by the schema editor when the schema is being edited.</p>
  */
 
-public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryNode, JythonMap {
+public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   static boolean debug = true;
 
@@ -481,8 +480,6 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public DBObjectBase(DBStore store, boolean embedded, boolean createFields) throws RemoteException
   {
-    super();			// initialize UnicastRemoteObject
-
     debug = Ganymede.debug;
 
     this.store = store;
@@ -515,6 +512,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       }
 
     objectHook = this.createHook();
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**
@@ -1264,7 +1263,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 		catch (RemoteException ex)
 		  {
 		    ex.printStackTrace();
-		    throw new RuntimeException("UnicastRemoteObject initialization error " + ex.getMessage());
+		    throw new RuntimeException("Publishing error " + ex.getMessage());
 		  }
 
 		if (xmldebug)

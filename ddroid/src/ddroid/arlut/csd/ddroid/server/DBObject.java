@@ -62,7 +62,6 @@ import java.io.PrintWriter;
 import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -541,7 +540,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	
 	    try
 	      {
-		UnicastRemoteObject.exportObject(field);
+		Ganymede.rmi.publishObject(field);
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -583,7 +582,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	
 	    try
 	      {
-		UnicastRemoteObject.unexportObject(field, true);
+		Ganymede.rmi.unpublishObject(field, true);
 	      }
 	    catch (NoSuchObjectException ex)
 	      {

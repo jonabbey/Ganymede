@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.46 $
+   Version: $Revision$
    Last Mod Date: $Date$
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -55,7 +55,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -106,7 +105,7 @@ import arlut.csd.ddroid.rmi.NameSpace;
  * for things like IP address representation.</p>
  */
 
-public final class DBNameSpace extends UnicastRemoteObject implements NameSpace {
+public final class DBNameSpace implements NameSpace {
 
   static final boolean debug = false;
 
@@ -174,6 +173,8 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     receive(in);
     uniqueHash = new GHashtable(caseInsensitive); // size?
     transactions = new Hashtable(TRANSCOUNT);
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**
@@ -190,6 +191,8 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     this.caseInsensitive = caseInsensitive;
     uniqueHash = new GHashtable(caseInsensitive); // size?
     transactions = new Hashtable(TRANSCOUNT);
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**

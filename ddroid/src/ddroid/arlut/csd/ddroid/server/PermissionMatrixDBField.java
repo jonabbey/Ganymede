@@ -464,8 +464,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 			  DataInput in,
 			  DBObjectBaseField definition) throws IOException
   {
-    super();			// initialize UnicastRemoteObject
-
     value = null;
     this.owner = owner;
     this.fieldcode = definition.getID();

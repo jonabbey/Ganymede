@@ -59,7 +59,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -88,7 +87,7 @@ import arlut.csd.ddroid.rmi.CategoryNode;
  * category tree.</P>
  */
 
-public class DBBaseCategory extends UnicastRemoteObject implements Category, CategoryNode {
+public class DBBaseCategory implements Category, CategoryNode {
 
   private final static boolean debug = false;
 
@@ -187,8 +186,6 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
   public DBBaseCategory(DBStore store, String name, DBBaseCategory parent) throws RemoteException
   {
-    super();			// UnicastRemoteObject initialization
-
     this.setName(name);
     this.store = store;
     this.parent = parent;
@@ -204,6 +201,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       }
 
     contents = new Vector();
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**
@@ -229,11 +228,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
   public DBBaseCategory(DBStore store, DataInput in) throws RemoteException, IOException
   {
-    super();			// UnicastRemoteObject initialization
-
     this.store = store;
     contents = new Vector();
     receive(in, null);
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**
@@ -246,11 +245,11 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
 
   public DBBaseCategory(DBStore store, DataInput in, DBBaseCategory parent) throws RemoteException, IOException
   {
-    super();			// UnicastRemoteObject initialization
-
     this.store = store;
     contents = new Vector();
     receive(in, parent);
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**
@@ -271,6 +270,8 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
     setName(rootCategory.getName());
     
     recurseDown(rootCategory, baseHash, editor);
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**

@@ -70,7 +70,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.server.ServerNotActiveException;
-import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
 import java.util.ArrayList;
 import java.util.Date;
@@ -674,7 +673,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	asyncPort = new serverClientAsyncResponder();
 
-	UnicastRemoteObject.exportObject(this);	// may throw RemoteException
+	Ganymede.rmi.publishObject(this); // may throw RemoteException
       }
 
     if (userObject != null)
@@ -1157,7 +1156,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		    // must force, since we ourselves are probably in
 		    // the middle of an RMI call
 
-		    UnicastRemoteObject.unexportObject(this, true);
+		    Ganymede.rmi.unpublishObject(this, true);
 		  }
 		catch (NoSuchObjectException ex)
 		  {
@@ -6463,7 +6462,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	try
 	  {
-	    UnicastRemoteObject.exportObject(object);
+	    Ganymede.rmi.publishObject(object);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -6512,7 +6511,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 		try
 		  {
-		    UnicastRemoteObject.unexportObject((Remote) x, true); // go ahead and force
+		    Ganymede.rmi.unpublishObject((Remote) x, true); // go ahead and force
 		  }
 		catch (NoSuchObjectException ex)
 		  {

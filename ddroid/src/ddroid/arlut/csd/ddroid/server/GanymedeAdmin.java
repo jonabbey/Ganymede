@@ -58,7 +58,6 @@ package arlut.csd.ddroid.server;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
 import java.util.Date;
 import java.util.Enumeration;
@@ -94,7 +93,7 @@ import arlut.csd.ddroid.rmi.adminSession;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, Unreferenced {
+final class GanymedeAdmin implements adminSession, Unreferenced {
 
   private static final boolean debug = false;
 
@@ -659,7 +658,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   public GanymedeAdmin(boolean fullprivs, String adminName, String clientHost) throws RemoteException
   {
-    super();			// UnicastRemoteObject initialization
+    Ganymede.rmi.publishObject(this);
 
     // if the memoryStatusTask hasn't previously recorded the free and
     // total memory, get those statistics so we can provide them to
