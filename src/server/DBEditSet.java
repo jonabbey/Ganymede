@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,32 +36,25 @@ import java.util.*;
 class DBEditSet {
 
   Vector 
-    objectsChanged, 
-    objectsCreated, 
-    objectsDeleted;
+    objectsChanged = null, 
+    objectsCreated = null, 
+    objectsDeleted = null;
 
   Hashtable basesModified;
 
   DBStore dbStore;
-
-  Object key;
+  DBSession session;
 
   /* -- */
 
   /*
    * Constructor for DBEditSet
    *
-   * key is a unique Object used to identify the thread / client that
-   * posesses this editSet.  Each thread/client should possess one editSet
-   * at most.  The csd.DBStore module does not actually look at the contents
-   * of key;  key is intended to be referenced by the code that uses csd.DBStore,
-   * not by csd.DBStore itself.  csd.DBStore just keeps the key for the user.
-   *
    */
 
-  DBEditSet(DBStore dbStore, Object key)
+  DBEditSet(DBStore dbStore, DBSession session)
   {
-    this.key = key;
+    this.session = session;
     this.dbStore = dbStore;
     objectsChanged = new Vector();
     objectsCreated = new Vector();
@@ -156,6 +149,10 @@ class DBEditSet {
     DBWriteLock wLock;
     Vector baseSet;
     Enumeration enum;
+    DBObjectBase base;
+    Object key;
+    DBEditObject eObj;
+    DBObject obj;
 
     /* -- */
 
@@ -168,11 +165,56 @@ class DBEditSet {
       }
 
     wLock = new DBWriteLock(dbStore, baseSet);
-    wLock.establish(key);	// wait for write lock
+    wLock.establish(session);	// wait for write lock
 
-    // need to iterate through vectors, call consistency
-    // check routines, emit dumplings
-    // and clear DBEditObject's from DBObjectBases
+    // write this transaction out to the Journal
+
+    try
+      {
+	if (!dbStore.journal.writeTransaction(this))
+	  {
+	    release();
+	    return false;
+	  }
+      }
+    catch (IOException ex)
+      {
+	// we probably want to be more extreme here.. if we couldn't write out
+	// the transaction, we are probably out of space on the filesystem
+	// with the journal/dbstore file.
+
+	release();
+	return false;
+      }
+
+    // and make the changes in our in-memory hashes.
+
+    for (int i = 0; i < objectsCreated.size(); i++)
+      {
+	eObj = (DBEditObject) objectsCreated.elementAt(i);
+
+	base = eObj.objectBase;
+
+	base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
+      }
+
+    for (int i = 0; i < objectsChanged.size(); i++)
+      {
+	eObj = (DBEditObject) objectsChanged.elementAt(i);
+
+	base = eObj.objectBase;
+
+	base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
+      }
+
+    for (int i = 0; i < objectsDeleted.size(); i++)
+      {
+	obj = (DBObject) objectsDeleted.elementAt(i);
+
+	base = obj.objectBase;
+
+	base.objectHash.remove(new Integer(obj.id));
+      }
 
     // confirm all namespace modifications associated with this editset
     // and release namespace values that correspond with old
@@ -184,6 +226,10 @@ class DBEditSet {
       }
 
     wLock.release();
+
+    objectsCreated = null;
+    objectsChanged = null;
+    objectsDeleted = null;
 
     return true;
   }
