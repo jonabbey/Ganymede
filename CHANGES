@@ -12,8 +12,16 @@ RELEASE DATE: August ??, 2001
 The Ganymede server wasn't properly clearing references to a bunch of
 temporary data structures when a schema edit was cancelled by the
 admin console.  This had the effect of increasing our server's memory
-footprint by a couple hundred thousand kilobytes or so until such time
-as the admin console was stopped and restarted.
+footprint by a couple hundred kilobytes or so until such time as the
+admin console was stopped and restarted.
+
+2. [WEBACCESS] Fixed ganypass.pl to allow < and > chars in passwords
+
+The ganypass.pl script, which provides a CGI interface to the
+xmlclient for changing users' passwords, was improperly failing to
+convert < and > to the XML entity escapes &lt; and &gt;, which could
+cause the server's XML parser to reject password changes that involved
+those characters.
 
 -------------------- Changes from 1.04 to 1.0.5 -------------------
 
