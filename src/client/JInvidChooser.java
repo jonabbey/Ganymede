@@ -7,7 +7,7 @@
    buttons on the sides.
    
    Created: Before May 7, 1998
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Mike Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -231,14 +231,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	return;
       }
 
-    if (e.getItem() == null || e.getItem() == noneHandle)
-      {
-	view.setEnabled(false);
-      }
-    else
-      {
-	view.setEnabled(true);
-      }
+    view.setEnabled(getSelectedInvid() != null);
   }
 
   /**
