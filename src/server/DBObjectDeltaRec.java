@@ -9,7 +9,7 @@
    changes made to objects in the Ganymede journal file.
    
    Created: 11 June 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -110,15 +110,15 @@ public class DBObjectDeltaRec implements FieldType {
 	origField = (DBField) oldObj.getField(fieldDef.getID());
 	currentField = (DBField) newObj.getField(fieldDef.getID());
 
-	if ((origField == null || !origField.defined) && 
-	    (currentField == null || !currentField.defined))
+	if ((origField == null || !origField.isDefined()) && 
+	    (currentField == null || !currentField.isDefined()))
 	  {
 	    // no change.. was null/undefined, still is.
 
 	    continue;
 	  }
 
-	if (currentField == null || !currentField.defined)
+	if (currentField == null || !currentField.isDefined())
 	  {
 	    // lost this field
 
@@ -127,7 +127,7 @@ public class DBObjectDeltaRec implements FieldType {
 	    continue;
 	  }
 
-	if (origField == null || !origField.defined)
+	if (origField == null || !origField.isDefined())
 	  {
 	    // we gained this field
 
