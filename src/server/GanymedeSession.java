@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.83 $ %D%
+   Version: $Revision: 1.84 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -724,9 +724,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
 
-    for (int i = 0; i < inv.size(); i++)
+    if (inv != null)
       {
-	results.addElement(viewObjectLabel((Invid)inv.getElement(i)));
+	for (int i = 0; i < inv.size(); i++)
+	  {
+	    results.addElement(viewObjectLabel((Invid)inv.getElement(i)));
+	  }
       }
 
     results.addElement(user.getLabel()); // add their 'end-user' persona
