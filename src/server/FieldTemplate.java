@@ -7,8 +7,8 @@
    
    Created: 5 November 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/06/15 02:48:23 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/08/19 02:13:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ package arlut.csd.ganymede;
  * <p>The {@link arlut.csd.ganymede.FieldInfo FieldInfo} object is used to return
  * the value information associated with an actual instance of a field.</p>
  *
- * @version $Revision: 1.10 $ $Date: 1999/06/15 02:48:23 $ $Name:  $
+ * @version $Revision: 1.11 $ $Date: 1999/08/19 02:13:05 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -490,5 +490,66 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   public boolean isCrypted()
   {
     return crypted;
+  }
+
+  /**
+   * debug instrumentation
+   */
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    /* -- */
+
+    result.append("Field template: ");
+    result.append(getName());
+    result.append("<");
+    result.append(getID());
+    result.append(">");
+
+    if (isBoolean())
+      {
+	result.append(" boolean");
+      }
+    else if (isNumeric())
+      {
+	result.append(" numeric");
+      }
+    else if (isDate())
+      {
+	result.append(" date");
+      }
+    else if (isString())
+      {
+	result.append(" string, ");
+
+	result.append("minlength = ");
+	result.append(getMinLength());
+	result.append(", maxlength = ");
+	result.append(getMaxLength());
+	result.append(", okChars = ");
+	result.append(getOKChars());
+	result.append(", badChars = ");
+	result.append(getBadChars());
+      }
+    else if (isInvid())
+      {
+	result.append(" invid");
+      }
+    else if (isPermMatrix())
+      {
+	result.append(" permmatrix");
+      }
+    else if (isPassword())
+      {
+	result.append(" password");
+      }
+    else if (isIP())
+      {
+	result.append(" ip");
+      }
+
+    return result.toString();
   }
 }
