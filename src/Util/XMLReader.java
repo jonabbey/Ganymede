@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/09/17 07:25:07 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/10/25 09:15:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -472,6 +472,119 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
 
     return result;
+  }
+
+  /**
+   * <P>This method takes an optional XMLItem and, if it is an
+   * non-empty XMLElement, will return that element as the root node
+   * of a tree of all elements contained under it.  All XMLItems in
+   * the tree will be linked using the getParent() and getChildren()
+   * methods supported by every XMLItem class.</P>
+   *
+   * <P>This method is recursive, and so may cause a
+   * StackOverflowError to be thrown if the XML under the startingItem
+   * is extremely deeply nested.</P> 
+   *
+   * <P>Note that the startingItem is optional, and if it is present,
+   * it must be the last XMLItem read from this XMLReader.. getNextTree()
+   * assumes that the XMLReader is primed to read the first XMLItem following
+   * the startingItem if startingItem is provided.  If startingItem is not
+   * provided, getNextTree() will read the next item from the XMLReader,
+   * and make that the root of the tree returned.  If the next item is not
+   * a non-empty XML element start tag, the next item will be returned by
+   * itself.</P>
+   *
+   * <P>This variant of getNextItem() uses the default skipWhiteSpace setting for
+   * this XMLReader.</P>
+   */
+
+  public XMLItem getNextTree(XMLItem startingItem)
+  {
+    return getNextTree(startingItem, this.skipWhiteSpace);
+  }
+
+  /**
+   * <P>This method takes an optional XMLItem and, if it is an
+   * non-empty XMLElement, will return that element as the root node
+   * of a tree of all elements contained under it.  All XMLItems in
+   * the tree will be linked using the getParent() and getChildren()
+   * methods supported by every XMLItem class.</P>
+   *
+   * <P>This method is recursive, and so may cause a
+   * StackOverflowError to be thrown if the XML under the startingItem
+   * is extremely deeply nested.</P> 
+   *
+   * <P>Note that the startingItem is optional, and if it is present,
+   * it must be the last XMLItem read from this XMLReader.. getNextTree()
+   * assumes that the XMLReader is primed to read the first XMLItem following
+   * the startingItem if startingItem is provided.  If startingItem is not
+   * provided, getNextTree() will read the next item from the XMLReader,
+   * and make that the root of the tree returned.  If the next item is not
+   * a non-empty XML element start tag, the next item will be returned by
+   * itself.</P>
+   */
+
+  public XMLItem getNextTree(XMLItem startingItem, boolean skipWhiteSpace)
+  {
+    XMLItem nextItem;
+
+    /* -- */
+
+    if (startingItem == null)
+      {
+	startingItem = getNextItem(skipWhiteSpace);
+      }
+
+    if (!(startingItem instanceof XMLElement) || startingItem.isEmpty())
+      {
+	return startingItem;
+      }
+    
+    Vector children = new Vector();
+
+    while (true)
+      {
+	nextItem = getNextTree(null, skipWhiteSpace);
+
+	// if we get an error or a warning, we just pass that up
+
+	if (nextItem instanceof XMLError || nextItem instanceof XMLWarning)
+	  {
+	    children = null;
+	    return nextItem;
+	  }
+
+	// ditto a pre-mature EOF
+
+	if (nextItem instanceof XMLEndDocument)
+	  {
+	    children = null;
+	    return nextItem;
+	  }
+
+	// if we find the matching close, bundle up the children and
+	// pass them up
+
+	if (nextItem.matchesClose(startingItem.getName()))
+	  {
+	    if (children.size() > 0)
+	      {
+		XMLItem[] childrenAry = new XMLItem[children.size()];
+		
+		for (int i = 0; i < children.size(); i++)
+		  {
+		    childrenAry[i] = (XMLItem) children.elementAt(i);
+		  }
+		
+		startingItem.setChildren(childrenAry);
+	      }
+
+	    return startingItem;
+	  }
+
+	nextItem.setParent(startingItem);
+	children.addElement(nextItem);
+      }
   }
 
   /**
