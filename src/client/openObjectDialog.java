@@ -6,8 +6,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/02/11 00:58:36 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/02/11 03:07:59 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -175,17 +175,6 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     middle = new JPanel(gbl);
     getContentPane().add(middle, BorderLayout.CENTER);
     gbc.insets = new Insets(4,4,4,4);
-    
-    titleL = new JLabel("Choose invid:", SwingConstants.CENTER);
-    titleL.setFont(new Font("Helvetica", Font.BOLD, 14));
-    titleL.setOpaque(true);
-    titleL.setBorder(client.emptyBorder5);
-    
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbc.gridwidth = 4;
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbl.setConstraints(titleL, gbc);
 
     // Set up the dialog's icon (by default, no icon).
     // gclient actually specifies the image 
@@ -195,10 +184,28 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     iconL = new JLabel(icon);
     iconL.setBorder(new EmptyBorder(10,15,10,15));
 
-    middle.add(iconL, SwingConstants.CENTER);
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 1;
+    gbl.setConstraints(iconL, gbc);
+
+    middle.add(iconL);
+    
+    titleL = new JLabel("Choose invid:", SwingConstants.CENTER);
+    titleL.setFont(new Font("Helvetica", Font.BOLD, 14));
+    titleL.setOpaque(true);
+    titleL.setBorder(client.emptyBorder5);
+    
+    gbc.gridx = 1;
+    gbc.gridy = 0;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;    
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbl.setConstraints(titleL, gbc);
+
     middle.add(titleL);
     
     gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;    
     
     type = new JComboBox();
 
@@ -286,7 +293,6 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
     gbc.gridx = 0;
     gbc.gridy = 1;
-
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 2;
 
@@ -357,9 +363,9 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
   }
 
   public void setIcon(ImageIcon icon) 
-    {
-      iconL.setIcon(icon);
-    }
+  {
+    iconL.setIcon(icon);
+  }
 
   public void setReturnEditableOnly(boolean editableOnly)
   {

@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.127 $
-   Last Mod Date: $Date: 1999/02/11 00:56:44 $
+   Version: $Revision: 1.128 $
+   Last Mod Date: $Date: 1999/02/11 03:07:58 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -534,9 +534,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	personasExist = true;
       }
     else if (showToolbar && personae != null)
-    {
-    currentPersonaString = my_username;
-    }
+      {
+	currentPersonaString = my_username;
+      }
 
     // Help menu
 
@@ -1871,11 +1871,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     b.addActionListener(this);
     toolBar.add(b);
 
-
     // if we just have a single persona, don't hassle with
     // a personaCombo
     
-     if ((personae != null)  && personae.size() > 1)
+    if ((personae != null)  && personae.size() > 1)
       {
 	if (debug)
 	  {
@@ -1884,7 +1883,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	
 	personaCombo = new JComboBox();
 
-	for(int i =0; i< personae.size(); i++)
+	for (int i =0; i< personae.size(); i++)
 	  {
 	    personaCombo.addItem((String)personae.elementAt(i));
 	  }
@@ -1894,12 +1893,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	JPanel pStuff = new JPanel(new FlowLayout());
 
-
 	pStuff.add(new JLabel("Persona:"));
 	pStuff.add(personaCombo);
 	personaPanel.add("South", pStuff);
-
-
       }
     else if (debug)
       {
