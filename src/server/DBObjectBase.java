@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.117 $
-   Last Mod Date: $Date: 2000/10/29 20:36:40 $
+   Version: $Revision: 1.118 $
+   Last Mod Date: $Date: 2000/10/30 23:06:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -205,8 +205,10 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   // runtime data
 
   /**
-   * Custom field dictionary sorted in display order.
-   * This Vector does *not* include any built-in fields.
+   * Custom field dictionary sorted in display order.  This Vector
+   * does *not* include any built-in fields.  Elements of this Vector
+   * are {@link arlut.csd.ganymede.DBObjectBaseField
+   * DBObjectBaseFields}.
    */
 
   Vector customFields;
@@ -1040,7 +1042,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * DBObjectBase from an XMLItem &lt;objectdef&gt; tree.</P>
    */
 
-  synchronized ReturnVal setXML(XMLItem root)
+  synchronized ReturnVal setXML(XMLItem root, boolean resolveInvidLinks)
   {
     XMLItem item;
     String _objectName = null;
@@ -1053,14 +1055,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     boolean _embedded = false;
     boolean classSet = false;
     boolean labelSet = false;
-    Vector fieldsInXML = new Vector(); // vector of Integer id's
-    Vector fieldsInBase = new Vector(); // vector of Integer id's
+    Vector fieldsInXML = new Vector(); // order vector of Integer field id's
+    Vector fieldsInBase = new Vector(); // vector of Integer field id's previously in schema
+    Vector _fieldsToDelete; // vector of Integer field id's to be deleted from schema
     ReturnVal retVal;
+
     /* -- */
 
     if (root == null || !root.matches("objectdef"))
       {
-	throw new IllegalArgumentException("DBObjectBase.setXML(): root element != open objectdef: " + root);
+	throw new IllegalArgumentException("DBObjectBase.setXML(): root element != open objectdef: " + 
+					   root);
       }
 
     // GanymedeXMLSession.processSchema does a handleBaseRenaming up
@@ -1072,7 +1077,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (_objectName == null || _objectName.equals(""))
       {
 	return Ganymede.createErrorDialog("xml",
-					  "DBObjectBase.setXML(): objectdef missing name attribute:\n " + root.getTreeString());
+					  "DBObjectBase.setXML(): objectdef missing name attribute:\n " + 
+					  root.getTreeString());
       }
 
     // we call setName() at the bottom, after we know for sure what our
@@ -1083,7 +1089,8 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (_idInt == null)
       {
 	return Ganymede.createErrorDialog("xml",
-					  "DBObjectBase.setXML(): objectdef missing id attribute:\n " + root.getTreeString());
+					  "DBObjectBase.setXML(): objectdef missing id attribute:\n " + 
+					  root.getTreeString());
       }
 
     retVal = setTypeID(_idInt.shortValue());
@@ -1093,7 +1100,9 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	return retVal;
       }
 
-    // first scan the children nodes, make sure all fields have unique names and id's
+    // first scan the children nodes, make sure all fields have unique
+    // names and id's, build up a list of Integer field id's for us to
+    // compare against the list of field id's currently defined
 
     XMLItem children[] = root.getChildren();
 
@@ -1109,13 +1118,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	    if (_fieldNameStr == null || _fieldIDInt == null)
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "Field definition missing name and/or id: " + item.getTreeString());
+						  "Field definition missing name and/or id: " + 
+						  item.getTreeString());
 	      }
 
 	    if (nameTable.containsKey(_fieldNameStr))
 	      {
 		return Ganymede.createErrorDialog("xml",
-						  "More than one field in objectdef: " + root.getTreeString() + 
+						  "More than one field in objectdef: " + 
+						  root.getTreeString() + 
 						  "\ncontains field name " + _fieldNameStr);
 	      }
 
@@ -1131,6 +1142,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	    nameTable.put(_fieldNameStr, item);
 
+	    if (_fieldIDInt.shortValue() < 100)
+	      {
+		return Ganymede.createErrorDialog("xml",
+						  "Can't modify or set a field:\n " + item.getTreeString() + 
+						  "\nwith a field id in the global field range:\n" +
+						  root.getTreeString());
+	      }
+
 	    if (idTable.containsKey(_fieldIDInt))
 	      {
 		return Ganymede.createErrorDialog("xml",
@@ -1144,8 +1163,36 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	  }
       }
 
-    // okay, we know all field names and fields are unique.. go ahead
-    // and load the data in
+    // we've got a vector of Integers for the field id's we are going to be
+    // setting.. we now need to find out field id's that are missing
+    // in the xml, as we'll need to delete these
+
+    for (int i = 0; i < customFields.size(); i++)
+      {
+	DBObjectBaseField _field = (DBObjectBaseField) customFields.elementAt(i);
+
+	fieldsInBase.addElement(new Integer(_field.getID()));
+      }
+
+    _fieldsToDelete = VectorUtils.difference(fieldsInBase, fieldsInXML);
+
+    for (int i = 0; i < _fieldsToDelete.size(); i++)
+      {
+	Integer _fieldID = (Integer) _fieldsToDelete.elementAt(i);
+
+	DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldID.shortValue());
+
+	retVal = deleteField(_field.getName());
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+      }
+
+    // we've done our first data integrity test and we've figured out
+    // what fields we're going to need to delete.. go ahead and scan
+    // ahead and actually create and/or edit fields as needed
 
     for (int i = 0; i < children.length; i++)
       {
@@ -1249,6 +1296,42 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	return retVal;
       }
+
+    // and we need to order the fields in customFields in the same
+    // order they appeared in the XML
+
+    Vector _newCustom = new Vector();
+
+    for (int i = 0; i < fieldsInXML.size(); i++)
+      {
+	Integer _fieldID = (Integer) fieldsInXML.elementAt(i);
+
+	DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldID.shortValue());
+
+	if (_field == null)
+	  {
+	    return Ganymede.createErrorDialog("xml",
+					      "Couldn't find field " + _fieldID +
+					      "while resorting customFields.");
+	  }
+
+	_newCustom.addElement(_field);
+      }
+
+    // make sure we are consistent like we think we should be
+
+    Vector _intersection = VectorUtils.intersection(customFields, _newCustom);
+
+    if ((_intersection.size() != customFields.size()) ||
+	(_intersection.size() != _newCustom.size()))
+      {
+	return Ganymede.createErrorDialog("xml",
+					  "Consistency error while resorting customFields.");
+      }
+    
+    customFields = _newCustom;
+
+    // and we're done
 
     return null;
   }
@@ -2366,6 +2449,13 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	throw new IllegalArgumentException("can't call in a non-edit context");
       }
 
+    if (fieldInUse(fieldName))
+      {
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "deleteField() called on object type " + getName() + 
+					  " with a field name ( " + fieldName + "). that is in use in the database");
+      }
+
     field = (DBObjectBaseField) getField(fieldName);
 
     if (field == null)
@@ -2373,6 +2463,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	return Ganymede.createErrorDialog("Schema Editing Error",
 					  "deleteField() called on object type " + getName() + 
 					  " with an unrecognized field name ( " + fieldName + ").");
+      }
+
+    if (!field.isRemovable())
+      {
+	return Ganymede.createErrorDialog("Schema Editing Error",
+					  "deleteField() called on object type " + getName() + 
+					  " with a system field name ( " + fieldName + 
+					  "). that may not be deleted");
       }
 
     removeField(field);
@@ -2929,9 +3027,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   /**
    * <p>This method is used to remove a field from this base's
    * field database.</p>
+   *
+   * <p>This method is not intended for access from outside this
+   * class.. use deleteField() for that.</p>
    */
 
-  synchronized void removeField(DBObjectBaseField field)
+  private synchronized void removeField(DBObjectBaseField field)
   {
     fieldTable.remove(field.getID());
 

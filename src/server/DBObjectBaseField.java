@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.79 $
-   Last Mod Date: $Date: 2000/10/29 20:36:41 $
+   Version: $Revision: 1.80 $
+   Last Mod Date: $Date: 2000/10/30 23:06:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2154,7 +2154,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   public boolean isRemovable()
   {
-    return this.getID() >= 256;	// fields with id's below 256 are server-essential
+    return !isSystemField();
   }
 
   /**

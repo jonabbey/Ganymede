@@ -7,8 +7,8 @@
    
    Created: 24 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2000/02/29 09:35:16 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2000/10/30 23:06:29 $
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -1308,74 +1308,39 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	String label = fNode.getText();
 	String parentLabel = fNode.getParent().getText();
 
-	boolean isRemovable = false;
+	DialogRsrc dialogResource = new DialogRsrc(this,
+						   "Confirm Field Deletion",
+						   "Ok to delete field " + label + 
+						   "from object type " + parentLabel + "?",
+						   "Delete", "Cancel",
+						   questionImage);
 
-	try
-	  {
-	    isRemovable = field.isRemovable();
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Can't get isRemoveable, assuming false: " +rx);
-	  }
+	Hashtable results = new StringDialog(dialogResource).DialogShow();
 
-	if (isRemovable)
+	if (results != null)
 	  {
-	    if (debug)
+	    BaseNode bNode = (BaseNode) node.getParent();
+		
+	    try
 	      {
-		System.err.println("deleting field node");
-	      }
-
-	    DialogRsrc dialogResource = new DialogRsrc(this,
-						       "Confirm Field Deletion",
-						       "Ok to delete field " + label + 
-						       "from object type " + parentLabel + "?",
-						       "Delete", "Cancel",
-						       questionImage);
-
-	    Hashtable results = new StringDialog(dialogResource).DialogShow();
-
-	    if (results != null)
-	      {
-		if (node.getParent() instanceof BaseNode)
+		ReturnVal retVal = bNode.getBase().deleteField(fNode.getText());
+		
+		if (retVal != null && !retVal.didSucceed())
 		  {
-		    BaseNode bNode = (BaseNode) node.getParent();
-
-		    try
-		      {
-			if (!bNode.getBase().fieldInUse(fNode.getText()))
-			  {
-			    bNode.getBase().deleteField(fNode.getText());
-			    refreshFields(bNode, true);
-			    ne.refreshSpaceList();
-			    be.refreshLabelChoice();
-			  }
-			else
-			  {
-				// field in use
-				
-			    new JErrorDialog(this,
-					     "Couldn't delete field " + label,
-					     "Couldn't delete field.. field " + label + " is in use");
-			  }
-		      }
-		    catch (RemoteException ex)
-		      {
-			new JErrorDialog(this,
-					 "Couldn't delete field",
-					 "Caught an exception from the server trying to delete field.. " + ex);
-		      }
+		    handleReturnVal(retVal);
+		    return;
 		  }
+		
+		refreshFields(bNode, true);
+		ne.refreshSpaceList();
+		be.refreshLabelChoice();
 	      }
-	  }
-	else
-	  {
-	    new StringDialog(this,
-			     "Error: field not removable",
-			     "Field " + label + " in object type " + parentLabel +
-			     " is not removable.",
-			     "Ok",
-			     null).DialogShow();
+	    catch (RemoteException ex)
+	      {
+		new JErrorDialog(this,
+				 "Couldn't delete field",
+				 "Caught an exception from the server trying to delete field.. " + ex);
+	      }
 	  }
       }
   }
