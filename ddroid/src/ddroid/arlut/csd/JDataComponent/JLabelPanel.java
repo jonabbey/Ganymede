@@ -57,6 +57,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import java.util.HashMap;
 
 /*------------------------------------------------------------------------------
