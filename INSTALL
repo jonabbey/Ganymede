@@ -1,7 +1,7 @@
 
    Ganymede
    
-         Ganymede UNIX Installation Guide Release 0.99.4 - 8 July 1999
+        Ganymede UNIX Installation Guide Release 0.99.5 - 28 July 1999
                                        
      _________________________________________________________________
                                       
@@ -187,14 +187,15 @@ _3. Installing client files_
    Java jar files.
    
    We have provided two install scripts for installing the Ganymede
-   clients on a UNIX system. installClient is for Java 1.1 and
-   installClient2 is for Java 1.2. Either script which will prompt you
-   for the name of the machine that will be running your Ganymede server,
-   and the directory which will contain the bin, html, and jars
-   directories. The install script will then customize and install
-   scripts for you so that the end-user client and admin console can
-   easily be run. Of course, that the server has to be up and running to
-   run either the main client or the console.
+   clients on a UNIX system. installClient is for Java 1.1 and Swing 1.1
+   or greater (Swing 1.1.1 heavily recommended), and installClient2 is
+   for Java 1.2. Either script which will prompt you for the name of the
+   machine that will be running your Ganymede server, and the directory
+   which will contain the bin, html, and jars directories. The install
+   script will then customize and install scripts for you so that the
+   end-user client and admin console can easily be run. Of course, that
+   the server has to be up and running to run either the main client or
+   the console.
    
    Don't try to install the client and server into the same directory..
    the two are meant to be installed separately, in separate directories.
@@ -224,7 +225,7 @@ _3. Installing client files_
    restart the browser. The Ganymede Plug-In clients should work properly
    now.
    
-   _IMPORTANT NOTE: whenever you run applets using the Java Plug-In, the
+   _IMPORTANT NOTE_: whenever you run applets using the Java Plug-In, the
    applets can only run as long as the log-in applet is still displayed
    in the web browser. If you close the main browser window or click to a
    different page (either by following a link or by clicking back on the
@@ -238,7 +239,7 @@ _3. Installing client files_
    hasn't been maintained in a while, and may not be working properly
    currently.
    
-4. Configuring the server
+_4. Configuring the server_
 
    The server may be configured in two ways. The first is by using the
    admin console to edit the server's schema and the second is by
@@ -352,32 +353,33 @@ _3. Installing client files_
    is bundled as part of the schema's custom.jar file, and you can view
    and alter the source code in schema/custom_src.
    
-5. Loading the server
+_5. Loading the server_
 
    When you run the installServer script, you are prompted for which
    sample schema you want to use. Whichever you choose is copied to your
-   server install directory under 'schema', and a file providing
+   server install directory under '_schema_', and a file providing
    customized and detailed instructions is placed in the README.custom
    file in the server install directory.
    
-   The schema directory contains the sample schema file as discussed
-   above, a custom_src directory with the source code for the custom
+   The _schema_ directory contains the sample schema file as discussed
+   above, a _custom_src_ directory with the source code for the custom
    plug-ins to go with the object definitions in the ganymede.schema
-   file, and a loader directory.
+   file, and a _loader_ directory.
    
-   The loader directory contains the following:
+   The _loader_ directory contains the following:
    
      * a ganymede.properties file that you will want to customize
-     * an input directory
-     * a db directory
+     * an _input_ directory
+     * a _db_ directory
      * a runDirectLoader script
        
    In order to load the Ganymede server, copy your input files to the
-   input directory, and run the runDirectLoader script. This will produce
-   a loader.db file in the schema/loader/db directory. You can then copy
-   this file to db/ganymede.db, remove any journal file in db, and start
-   the server. The server will load the new database, and you will then
-   be able to log in as supergash and take a look at your database.
+   _input_ directory, and run the runDirectLoader script. This will
+   produce a _loader.db_ file in the _schema/loader/db_ directory. You
+   can then copy this file to db/ganymede.db, remove any journal file in
+   _db_, and start the server. The server will load the new database, and
+   you will then be able to log in as supergash and take a look at your
+   database.
    
    Take a look at the README file in the schema directory for details on
    how the schema you installed works.
@@ -387,4 +389,4 @@ _3. Installing client files_
    
     Jonathan Abbey
     
-   Last modified: Thu Jul 8 21:49:34 CDT 1999 _
+   Last modified: Wed Jul 28 18:03:58 CDT 1999

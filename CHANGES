@@ -1,11 +1,11 @@
 Ganymede Release 0.99.5
-July ??, 1999
+July 28, 1999
 CHANGES
 ---------------------------------------------
 
 -------------------- Changes from 0.99.4 to 0.99.5 -------------------
 
-RELEASE DATE: July ??, 1999
+RELEASE DATE: July 28, 1999
 
 1. [SCHEMA] Several gasharl schema mods
 
@@ -55,7 +55,8 @@ to fix this later.
 I don't expect many (any?) folks outside of ARL have written wizards
 for use with custom schemas yet.  For those who are interested, the
 GanymediatorWizard javadoc header now has some hopefully usable
-documentation on how to do this.
+documentation on how to do this.  (I've also written a guide on
+the whole subject.. see change #18.)
 
 Modified all wizard code in all of the included schema kits (not
 counting the not-maintained ganymede.only schema) to use the modern
@@ -257,6 +258,11 @@ the Ganymede clients.  The new primary web page uses JavaScript to
 launch the clients in their own frames, making it possible to run a
 client and console simultaneously, and to be able to close the
 original launch frame without killing the clients.
+
+18. [DOCUMENTATION] Added a detailed guide to Wizard authoring
+
+Added another long document on customizing the server with plug-in code,
+this time on the topic of wizard authoring.
 
 -------------------- Changes from 0.99.3 to 0.99.4 -------------------
 

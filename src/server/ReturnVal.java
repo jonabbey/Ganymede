@@ -8,8 +8,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 1999/05/07 05:21:36 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 1999/07/28 23:11:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,16 +77,21 @@ import arlut.csd.JDialog.*;
  * or action on the part of the client will simply return null.</p>
  *
  * <p>If a non-null ReturnVal object is passed back, one of two things
- * may be true.  didSucceed() may return true, in which case the
+ * may be true.  {@link arlut.csd.ganymede.ReturnVal#didSucceed() didSucceed()}
+ * may return true, in which case the
  * operation was successful, but there may be an informational dialog
  * returned and/or a list of objects and fields that need to be
  * updated in response to the successful update.</p>
  *
- * <p>Alternatively, didSucceed() may return false, in which case the
+ * <p>Alternatively, {@link arlut.csd.ganymede.ReturnVal#didSucceed() didSucceed()}
+ *  may return false, in which case the
  * operation either could not succeed or is incomplete.  In this case,
- * doRescan() will return false, and getDialog() should return a valid
- * JDialogBuff().  If the operation is simply incomplete pending more
- * data from the user, getCallback() will return a non-null value.  In
+ * {@link arlut.csd.ganymede.ReturnVal#doRescan() doRescan()} will return false, and
+ * {@link arlut.csd.ganymede.ReturnVal#getDialog() getDialog()} should return a valid
+ * {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}.  If the operation is
+ * simply incomplete pending more
+ * data from the user, {@link arlut.csd.ganymede.ReturnVal#getCallback() getCallback()}
+ * will return a non-null value.  In
  * this case, the user should be presented the dialog box, and the
  * results of that dialog should be passed to the callback.  The
  * callback will in return pass back another ReturnVal object.  The

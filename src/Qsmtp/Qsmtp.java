@@ -92,6 +92,7 @@ import java.text.*;
 
 public class Qsmtp implements Runnable {
 
+  static final boolean debug = false;
   static final int DEFAULT_PORT = 25;
   static final String EOL = "\r\n"; // network end of line
 
@@ -179,6 +180,11 @@ public class Qsmtp implements Runnable {
 
   public synchronized void stopThreaded()
   {
+    if (debug)
+      {
+	System.err.println("Qstmp.stopThreaded()");
+      }
+
     if (!this.threaded)
       {
 	return;
@@ -187,13 +193,32 @@ public class Qsmtp implements Runnable {
     if (backgroundThread != null)
       {
 	this.threaded = false;
-	queuedMessages.notifyAll();
+
+	if (debug)
+	  {
+	    System.err.println("Qstmp.stopThreaded() - waking background thread");
+	  }
+	
+	synchronized (queuedMessages)
+	  {
+	    queuedMessages.notifyAll();
+	  }
 
 	// the background thread will kill itself off cleanly
 
 	try
 	  {
+	    if (debug)
+	      {
+		System.err.println("Qstmp.stopThreaded() - waiting for background thread to die");
+	      }
+
 	    backgroundThread.join(); // wait for our email sending thread to drain
+
+	    if (debug)
+	      {
+		System.err.println("Qstmp.stopThreaded() - background thread completed");
+	      }
 	  }
 	catch (InterruptedException ex)
 	  {
@@ -335,6 +360,11 @@ public class Qsmtp implements Runnable {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("Qsmtp: background thread starting");
+      }
+
     try
       {
 	while (threaded)
@@ -343,39 +373,44 @@ public class Qsmtp implements Runnable {
 
 	    synchronized (queuedMessages)
 	      {
-		while (message == null)
+		if (queuedMessages.size() > 0)
 		  {
-		    if (queuedMessages.size() > 0)
-		      {
-			message = (messageObject) queuedMessages.firstElement();
-			queuedMessages.removeElementAt(0);
-		      }
-		    else
-		      {
-			message = null;
+		    message = (messageObject) queuedMessages.firstElement();
+		    queuedMessages.removeElementAt(0);
+		  }
+		else
+		  {
+		    message = null;
 
-			try
-			  {
-			    queuedMessages.wait(); // wait until something is queued
-			  }
-			catch (InterruptedException ex)
-			  {
-			    // ??
-			  }
+		    try
+		      {
+			queuedMessages.wait(); // wait until something is queued
+		      }
+		    catch (InterruptedException ex)
+		      {
+			// ??
+		      }
+
+		    if (debug)
+		      {
+			System.err.println("Qsmtp: background thread woke up");
 		      }
 		  }
 	      }
 
-	    try
+	    if (message != null)
 	      {
-		dispatchMessage(message);
-	      }
-	    catch (IOException ex)
-	      {
-		System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
-		System.err.println(message.toString());
-		ex.printStackTrace();
-		System.err.println();
+		try
+		  {
+		    dispatchMessage(message);
+		  }
+		catch (IOException ex)
+		  {
+		    System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
+		    System.err.println(message.toString());
+		    ex.printStackTrace();
+		    System.err.println();
+		  }
 	      }
 	  }
       }
@@ -387,6 +422,11 @@ public class Qsmtp implements Runnable {
 
 	    if (!threaded)
 	      {
+		if (debug)
+		  {
+		    System.err.println("Qsmtp: background thread stopping.. clearing mail queue");
+		  }
+
 		synchronized (queuedMessages)
 		  {
 		    while (queuedMessages.size() > 0)
@@ -396,6 +436,11 @@ public class Qsmtp implements Runnable {
 
 			try
 			  {
+			    if (debug)
+			      {
+				System.err.println("Qsmtp: background thread sending mail");
+			      }
+
 			    dispatchMessage(message);
 			  }
 			catch (IOException ex)
@@ -412,8 +457,12 @@ public class Qsmtp implements Runnable {
 	finally
 	  {
 	    this.backgroundThread = null;
-	    this.notifyAll();
 	  }
+      }
+
+    if (debug)
+      {
+	System.err.println("Qsmtp: background thread finishing");
       }
   }
 

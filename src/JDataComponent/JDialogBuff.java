@@ -6,8 +6,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 1999/06/15 02:46:47 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 1999/07/28 23:11:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,13 +62,17 @@ import java.awt.Frame;
  * is asking a client to present.</P>
  *
  * <P>If you don't need to send a dialog definition object across an RMI
- * link, just construct a DialogRsrc directly.  (Note.. this is
+ * link, you can just construct a {@link arlut.csd.JDialog.DialogRsrc DialogRsrc}
+ * directly.</p>
+ */
+
+/*  (Note.. this is
  * semi-vestigal code, now, since we just use normal serialization to
  * have JDialogBuff transport its parameters, which could be done
  * directly with DialogRsrc just as well.  There are some things in
  * the DialogRsrc class, like the image cache, that we may not want
  * to mess with.  In any case, all of the Ganymede code expects JDialogBuff,
- * so it's going to stay for now.)</P>
+ * so it's going to stay for now.)
  */
 
 public class JDialogBuff implements java.io.Serializable {
