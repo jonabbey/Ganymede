@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.17 $ %D%
+  Version: $Revision: 1.18 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,7 +48,6 @@ import javax.swing.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * <p>This component allows the display of a tree structured
  * graph of nodes, each node being a small image and a line of text.
  * Nodes with children can be opened or closed, allowing the child
@@ -57,11 +56,10 @@ import javax.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.17 $ %D%
+ * @version $Revision: 1.18 $ %D%
  *
  * @see arlut.csd.JTree.treeCallback
  * @see arlut.csd.JTree.treeNode
- *
  */
 
 public class treeControl extends JPanel implements AdjustmentListener, ActionListener {
@@ -1464,6 +1462,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>This class is the actual rendering surface used by the JTree {@link
+ * arlut.csd.JTree.treeControl treeControl} class.</p>
+ */
 
 class treeCanvas extends JComponent implements MouseListener, MouseMotionListener {
 
@@ -2634,6 +2636,12 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
 
 }
+
+/**
+ * <p>This class is used as a simple struct to hold scratch information
+ * for the {@link arlut.csd.JTree.treeControl treeControl} rendering
+ * logic.</p>
+ */
 
 class Range {
   
