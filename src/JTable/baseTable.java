@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.35 $ %D%
+  Version: $Revision: 1.36 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.35 $ %D%
+ * @version $Revision: 1.36 $ %D%
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -1389,6 +1389,11 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("baseTable.optimizeCols(): entering");
+      }
+
     /*
       This method uses the following variables to do its calculations.
 
@@ -1443,10 +1448,14 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
 	if (nominalWidth[i] < scaledWidth)
 	  {
-	    if ((scaledWidth - (nominalWidth[i] * scalefact)) > 0)
+	    spareSpace += scaledWidth - nominalWidth[i];
+
+	    /*
+	      if ((scaledWidth - (nominalWidth[i] * scalefact)) > 0)
 	      {
-		spareSpace += scaledWidth - (nominalWidth[i] * scalefact);
+	      spareSpace += scaledWidth - (nominalWidth[i] * scalefact);
 	      }
+	    */
 	  }
 	else
 	  {
@@ -2359,6 +2368,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
   long
     lastClick = 0;
+
+  boolean dragCursor = false;
 
   /* -- */
 
@@ -3281,6 +3292,11 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	    lastClick = e.getWhen();
 	  }
       }
+    else
+      {
+	setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.E_RESIZE_CURSOR));
+	dragCursor = true;
+      }
 
     if (e.isPopupTrigger())
       {
@@ -3323,6 +3339,12 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     if (colDrag != 0)
       {
+	if (dragCursor)
+	  {
+	    setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
+	    dragCursor = false;
+	  }
+
 	if (debug)
 	  {
 	    System.err.println("placing column " + colDrag);
@@ -3482,6 +3504,12 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     /* -- */
 
+    if (dragCursor)
+      {
+	setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
+	dragCursor = false;
+      }
+
     x = e.getX();
     y = e.getY();
 
@@ -3625,7 +3653,59 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
   public void mouseMoved(MouseEvent e)
   {
+    int
+      x,vx,
+      column;
+
     // set the cursor?
+
+    x = e.getX();
+
+    if (rt.hbar_visible)
+      {
+	vx = x + h_offset;	// adjust for horizontal scrolling
+      }
+    else
+      {
+	vx = x;
+      }
+
+    column = -1;
+
+    // mouse down near column line?
+
+    for (int col = 1; column == -1 && col < rt.cols.size(); col++)
+      {
+	int colLoc = ((Integer) rt.colPos.elementAt(col)).intValue();
+
+	// nice wide grab range
+	
+	if ((vx > colLoc - colgrab) &&
+	    (vx < colLoc + colgrab))
+	  {
+	    column = col;
+	  }
+      }
+
+    if (column == -1)
+      {	
+	// we'll only reset the cursor if we're not dragging and the
+	// cursor is not already reset.
+
+	if (colDrag == 0 && dragCursor)
+	  {
+	    setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
+	    dragCursor = false;
+	  }
+      }
+    else
+      {
+	if (!dragCursor)
+	  {
+	    setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.E_RESIZE_CURSOR));
+	    dragCursor = true;
+	  }
+      }
   }
 
   // perform column dragging
