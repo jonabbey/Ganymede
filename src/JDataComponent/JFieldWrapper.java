@@ -4,7 +4,7 @@
 
    
    Created: 1 Oct 1996
-   Version: $Revision: 1.1 $ %D%
+   Version: 1.1 97/07/16
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -30,7 +30,7 @@ import com.sun.java.swing.*;
 import java.awt.*;
 import gjt.Box;
 
-public class JFieldWrapper extends JPanel {
+public class JFieldWrapper extends JBufferedPane {
 
   Component my_field = null;
 

@@ -2,7 +2,7 @@
    JentryField.java
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: 1.2 97/07/22
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */

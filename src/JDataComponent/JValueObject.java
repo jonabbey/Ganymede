@@ -10,7 +10,7 @@
 
    
    Created: 28 Feb 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: 1.2 97/08/26
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 

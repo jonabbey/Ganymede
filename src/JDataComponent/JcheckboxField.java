@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: 1.3 97/07/18
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,7 @@ import java.awt.*;
  This class defines a JcheckboxField.
 
 *******************************************************************/
-public class JcheckboxField extends JCheckbox implements ItemListener {
+public class JcheckboxField extends JCheckBox implements ItemListener {
 
   private boolean allowCallback = false;
   private boolean changed = false; 

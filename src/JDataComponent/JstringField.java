@@ -4,7 +4,7 @@
 
    
    Created: 12 Jul 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: 1.2 97/08/27
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */

@@ -19,10 +19,10 @@ import java.util.Enumeration;
 import java.lang.String;
 import java.awt.event.*;
 
-public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
+public class Jtaskbar extends JBufferedPane implements ActionListener, MouseListener {
 
   Hashtable buttons;
-  JPanel panel;
+  JBufferedPane panel;
   
   PopupMenu
     popup;
@@ -31,7 +31,7 @@ public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
     {
 
       buttons = new Hashtable();
-      panel = new JPanel();
+      panel = new JBufferedPane();
       popup = new PopupMenu();
       add(popup);
       add(panel);
