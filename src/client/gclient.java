@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.61 $ %D%
+   Version: $Revision: 1.62 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -48,7 +48,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   // ---
   
   // Image numbers
-  final int NUM_IMAGE = 16;
+  final int NUM_IMAGE = 17;
   
   final int OPEN_BASE = 0;
   final int CLOSED_BASE = 1;
@@ -66,9 +66,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   final int CLOSED_FIELD_REMOVESET = 12;
   final int CLOSED_FIELD_EXPIRESET = 13;
 
-
   final int OPEN_CAT = 14;
   final int CLOSED_CAT = 15;
+
+  final int OBJECTNOWRITE = 16;
 
   final boolean debug = true;
 
@@ -93,7 +94,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   public CompoundBorder
     statusBorder = new CompoundBorder(loweredBorder, emptyBorder5),
     statusBorderRaised = new CompoundBorder(raisedBorder, emptyBorder5);
-
 
   //
   // Yum, caches
@@ -231,13 +231,16 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     objReactivateMI;
 
   treeMenu 
-    pMenu = new treeMenu();
+    pMenuAll = new treeMenu(),
+    pMenuEditable= new treeMenu();
   
   MenuItem 
     createMI = null,
     viewMI = null,
     viewAllMI = null,
-    queryMI = null;
+    queryMI = null,
+    showAllMI = null,
+    hideNonEditMI = null;
 
   JMenuBar 
     menubar;
@@ -465,11 +468,20 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     viewMI = new MenuItem("List editable");
     viewAllMI = new MenuItem("List all");
     queryMI = new MenuItem("Query");
+    showAllMI = new MenuItem("Show All Objects");
+    hideNonEditMI = new MenuItem("Hide Non-Editables");
 
-    pMenu.add(viewMI);
-    pMenu.add(viewAllMI);
-    pMenu.add(createMI);
-    pMenu.add(queryMI);
+    pMenuAll.add(viewMI);
+    pMenuAll.add(viewAllMI);
+    pMenuAll.add(createMI);
+    pMenuAll.add(queryMI);
+    pMenuAll.add(hideNonEditMI);
+
+    pMenuEditable.add(viewMI);
+    pMenuEditable.add(viewAllMI);
+    pMenuEditable.add(createMI);
+    pMenuEditable.add(queryMI);
+    pMenuEditable.add(showAllMI);
 
     if (debug)
       {
@@ -479,6 +491,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     Image openFolder = PackageResources.getImageResource(this, "openfolder.gif", getClass());
     Image closedFolder = PackageResources.getImageResource(this, "folder.gif", getClass());
     Image list = PackageResources.getImageResource(this, "list.gif", getClass());
+    Image listnowrite = PackageResources.getImageResource(this, "listnowrite.gif", getClass());
     Image redOpenFolder = PackageResources.getImageResource(this, "openfolder-red.gif", getClass());
     Image redClosedFolder = PackageResources.getImageResource(this, "folder-red.gif", getClass());
     
@@ -509,6 +522,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     
     images[OPEN_CAT] = redOpenFolder;
     images[CLOSED_CAT] = redClosedFolder;
+
+    images[OBJECTNOWRITE] = listnowrite;
 
     tree = new treeControl(new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, Color.white, this, images,
@@ -1270,7 +1285,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 			       true, 
 			       OPEN_BASE, 
 			       CLOSED_BASE,
-			       pMenu);
+			       pMenuEditable);
 	shortToBaseNodeHash.put(new Short(base.getTypeID()), newNode);
       }
     else if (node instanceof Category)
@@ -1462,7 +1477,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	id = base.getTypeID();
 	//Now get all the children
-	_query = new Query(id);
+	_query = new Query(id, null, !node.isShowAll());
 	node.setQuery(_query);
       }
     catch (RemoteException rx)
@@ -1480,8 +1495,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       {
 	try
 	  {
-	    Query q = new Query(id);
-	    QueryResult qr = session.query(q);
+	    QueryResult qr = session.query(_query);
 
 	    if (qr != null)
 	      {
@@ -1555,8 +1569,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 					      handle.isInactive() ? (label + " (inactive)") :label,
 					      invid,
 					      oldNode, false,
-					      OPEN_FIELD,
-					      CLOSED_FIELD,
+					      handle.isEditable() ? OPEN_FIELD : OBJECTNOWRITE,
+					      handle.isEditable() ? CLOSED_FIELD : OBJECTNOWRITE,
 					      node.canInactivate() ? objectInactivatePM : objectRemovePM,
 					      handle);
 	    
@@ -1628,6 +1642,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
   public void setIconForNode(Invid invid)
   {
     InvidNode node = (InvidNode)invidNodeHash.get(invid);
+
     if (node == null)
       {
 	return;
@@ -1641,6 +1656,15 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
       }
     else
       {
+	// if we can't edit it, assume it'll never be anything other
+	// than inaccessible
+
+	if (!handle.isEditable())
+	  {
+	    node.setImages(OBJECTNOWRITE, OBJECTNOWRITE);
+	    return;
+	  }
+
 	if (deleteHash.containsKey(invid))
 	  {
 	    if (true)
@@ -1901,9 +1925,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
   public void showNewlyCreatedObject(db_object obj, Invid invid, Short type)
   {
-
-    ObjectHandle handle = new ObjectHandle("New Object", invid, false, false, false);
-
+    ObjectHandle handle = new ObjectHandle("New Object", invid, false, false, false, true);
        
     wp.addWindow(obj, true);
     
@@ -1932,9 +1954,9 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     if (shortToBaseNodeHash.containsKey(type))
       {
 	baseN = (BaseNode)shortToBaseNodeHash.get(type);
+
 	if (baseN.isLoaded())
 	  {
-
 	    InvidNode objNode = new InvidNode(baseN, 
 					      "New Object", 
 					      invid,
@@ -1943,7 +1965,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 					      CLOSED_FIELD_CREATE,
 					      baseN.canInactivate() ? objectInactivatePM : objectRemovePM,
 					      handle);
-
 	    
 	    createHash.put(invid, new CacheInfo(type, "New Object", null, handle));
 	    
@@ -3334,6 +3355,72 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	      }
 	  }
       }
+    else if (event.getSource() == showAllMI)
+      {
+	BaseNode bn = (BaseNode) node;
+	Base base = bn.getBase();
+	Short id;
+
+	/* -- */
+
+	try
+	  {
+	    id = new Short(base.getTypeID());
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("couldn't get the base id" + ex);
+	  }
+
+	// we want to force a full refresh of this id
+
+	cachedLists.removeList(id);
+
+	bn.showAll(true);
+	node.setMenu(pMenuAll);
+
+	try
+	  {
+	    refreshObjects(bn, true);
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("oops, couldn't refresh base" + ex);
+	  }
+      }
+    else if (event.getSource() == hideNonEditMI)
+      {
+	BaseNode bn = (BaseNode) node;
+	Base base = bn.getBase();
+	Short id;
+
+	/* -- */
+
+	try
+	  {
+	    id = new Short(base.getTypeID());
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("couldn't get the base id" + ex);
+	  }
+
+	// we want to force a full refresh of this id
+
+	cachedLists.removeList(id);
+
+	bn.showAll(false);
+	bn.setMenu(pMenuEditable);
+
+	try
+	  {
+	    refreshObjects(bn, true);
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("oops, couldn't refresh base" + ex);
+	  }
+      }
     else if (event.getActionCommand().equals("View Object"))
       {
 	if (node instanceof InvidNode)
@@ -3584,6 +3671,7 @@ class BaseNode extends arlut.csd.JTree.treeNode {
   private Query query;
   private boolean loaded = false;
   private boolean canBeInactivated = false;
+  private boolean showAll = false;
 
   /* -- */
 
@@ -3611,6 +3699,16 @@ class BaseNode extends arlut.csd.JTree.treeNode {
   public boolean canInactivate()
   {
     return canBeInactivated;
+  }
+
+  public boolean isShowAll()
+  {
+    return showAll;
+  }
+
+  public void showAll(boolean showAll)
+  {
+    this.showAll = showAll;
   }
 
   public void setBase(Base base)
