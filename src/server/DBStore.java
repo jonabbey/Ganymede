@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -60,6 +60,8 @@ public class DBStore {
   Hashtable lockHash;		// identifier keys for current locks
   Vector nameSpaces;		// unique valued hashes
 
+  DBJournal journal = null;
+
   /* -- */
 
   /**
@@ -89,6 +91,7 @@ public class DBStore {
    * definition and database contents from a single disk file.
    *
    * @param filename Name of the database file
+   * @see csd.DBStore.DBJournal
    *
    */
 
@@ -169,6 +172,35 @@ public class DBStore {
       }
 
     lockHash = new Hashtable(baseCount);
+
+    try 
+      {
+	journal = new DBJournal(this, "journal");
+      }
+    catch (IOException ex)
+      {
+	// what do we really want to do here?
+
+	throw new RuntimeException("couldn't initialize journal");
+      }
+
+    try
+      {
+	if (!journal.load())
+	  {
+	    throw new RuntimeException("problem loading journal");
+	  }
+	else
+	  {
+	    journal.reset();
+	  }
+      }
+    catch (IOException ex)
+      {
+	// what do we really want to do here?
+
+	throw new RuntimeException("couldn't load journal");
+      }
   }
 
   /**
@@ -185,6 +217,7 @@ public class DBStore {
    * @param filename Name of the database file to emit
    *
    * @see csd.DBStore.DBEditSet
+   * @see csd.DBStore.DBJournal
    *
    */
 
@@ -243,6 +276,8 @@ public class DBStore {
 	    outStream.close();
 	  }	      
       }
+
+    journal.reset();
   }
 
   /**

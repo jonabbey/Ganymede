@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -86,6 +86,24 @@ public class DBObject {
     editset = null;
     markedAsDeleted = false;
     receive(in);
+  }
+
+  /**
+   *
+   * This constructor is used to create a non-editable from a DBEditObject
+   * that we have finished editing.
+   *
+   */
+  
+  DBObject(DBEditObject eObj)
+  {
+    objectBase = eObj.objectBase;
+    id = eObj.id;
+    fieldcount = eObj.fieldcount;
+    fields = eObj.fields;
+    shadowObject = null;
+    markedAsDeleted = false;
+    editset = null;
   }
   
   /**
