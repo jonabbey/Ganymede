@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.67 $ %D%
+   Version: $Revision: 1.68 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -22,6 +22,7 @@ import arlut.csd.JTree.*;
 
 import com.sun.java.swing.*;
 import com.sun.java.swing.border.*;
+import java.awt.*;
 
 import tablelayout.*;
 
@@ -128,6 +129,21 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   java.awt.Color
     bgColor = java.awt.SystemColor.control;
 
+  public EmptyBorder
+    emptyBorder5 = (EmptyBorder)BorderFactory.createEmptyBorder(5,5,5,5),
+    emptyBorder10 = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10);
+
+  public BevelBorder
+    raisedBorder = (BevelBorder)BorderFactory.createBevelBorder(BevelBorder.RAISED),
+    loweredBorder = (BevelBorder)BorderFactory.createBevelBorder(BevelBorder.LOWERED);
+      
+  public LineBorder
+    lineBorder = (LineBorder)BorderFactory.createLineBorder(Color.black);
+
+  public CompoundBorder
+    statusBorder = BorderFactory.createCompoundBorder(loweredBorder, emptyBorder5),
+    statusBorderRaised = BorderFactory.createCompoundBorder(raisedBorder, emptyBorder5);
+
   /* -- */
 
   public GASHSchema(String title, SchemaEdit editor)
@@ -212,13 +228,18 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     attribCardPane.add("category", categoryEditPane);
 
     attribPane.add("Center", attribCardPane);
-    JPanel attribPaneBorder = new JPanel(new java.awt.BorderLayout());
-    attribPaneBorder.add("Center", attribPane);
-    attribPaneBorder.setBorder(new TitledBorder("Attributes"));
 
-    JInsetPanel rightJPanel = new JInsetPanel(5, 5, 5, 10);
+    JPanel rightJPanel = new JPanel();
+
+    JPanel rightTop = new JPanel(false);
+    rightTop.setBorder(statusBorderRaised);
+    JLabel rightL = new JLabel("Attributes");
+    rightTop.setLayout(new BorderLayout());
+    rightTop.add("Center", rightL);
+    
     rightJPanel.setLayout(new java.awt.BorderLayout());
-    rightJPanel.add("Center", attribPaneBorder);
+    rightJPanel.add("Center", attribPane);
+    rightJPanel.add("North", rightTop);
 
     // Set up button pane
 
@@ -261,14 +282,18 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     //
     //
 
-    
-    JPanel leftBox = new JPanel(new java.awt.BorderLayout());
-    leftBox.add("Center", tree);
-    leftBox.setBorder(new TitledBorder("Schema Objects"));
-
-    JInsetPanel leftJPanel = new JInsetPanel(5, 10, 5, 5);
+    JPanel leftJPanel = new JPanel();
     leftJPanel.setLayout(new java.awt.BorderLayout());
-    leftJPanel.add("Center", leftBox);
+
+    JPanel leftTop = new JPanel(false);
+    leftTop.setBorder(statusBorderRaised);
+    JLabel leftL = new JLabel("Schema Objects");
+    leftTop.setLayout(new BorderLayout());
+
+    leftTop.add("Center", leftL);
+
+    leftJPanel.add("North", leftTop);
+    leftJPanel.add("Center", tree);
 
     //    displayPane.add("West", leftJPanel);
 
