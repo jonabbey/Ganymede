@@ -7,8 +7,8 @@
    
    Created: 21 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/26 05:08:20 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/06/15 02:47:07 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,24 +58,20 @@ import java.util.*;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * Convenience methods for working with Vectors.. provides efficient Union,
- * Intersection, and Difference methods.
- *
+ * <P>Convenience methods for working with Vectors.. provides efficient Union,
+ * Intersection, and Difference methods.</P>
  */
 
 public class VectorUtils {
 
   /**
-   *
-   * This method returns a Vector containing the union of the objects
+   * <P>This method returns a Vector containing the union of the objects
    * contained in vectA and vectB.  The resulting Vector will not
    * contain any duplicates, even if vectA or vectB themselves contain
-   * repeated items.<br><br>
+   * repeated items.</P>
    *
-   * This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.
-   *  
+   * <P>This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.</P>
    */
 
   public static Vector union(Vector vectA, Vector vectB)
@@ -120,10 +116,8 @@ public class VectorUtils {
   }
 
   /**
-   *
-   * This method adds obj to vect if and only if vect does not
-   * already contain obj.
-   *  
+   * <P>This method adds obj to vect if and only if vect does not
+   * already contain obj.</P>
    */
 
   public static void unionAdd(Vector vect, Object obj)
@@ -140,13 +134,11 @@ public class VectorUtils {
   }
 
   /**
+   * <P>This method returns a Vector containing the intersection of the
+   * objects contained in vectA and vectB.</P>
    *
-   * This method returns a Vector containing the intersection of the
-   * objects contained in vectA and vectB.<br><br>
-   *
-   * This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.
-   *  
+   * <P>This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.</P>
    */
 
   public static Vector intersection(Vector vectA, Vector vectB)
@@ -219,13 +211,11 @@ public class VectorUtils {
   }
 
   /**
+   * <P>This method returns a Vector containing the set of objects
+   * contained in vectA that are not contained in vectB.</P>
    *
-   * This method returns a Vector containing the set of objects
-   * contained in vectA that are not contained in vectB.<br><br>
-   *
-   * This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.
-   *  
+   * <P>This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.</P>
    */
 
   public static Vector difference(Vector vectA, Vector vectB)
@@ -271,10 +261,8 @@ public class VectorUtils {
   }
 
   /**
-   *
-   * This method returns a string containing all the elements in vec
-   * concatenated together, comma separated.
-   *
+   * <P>This method returns a string containing all the elements in vec
+   * concatenated together, comma separated.</P>
    */
 
   public static String vectorString(Vector vec)
@@ -295,25 +283,23 @@ public class VectorUtils {
   }
 
   /**
-   *
-   * This method takes a sepChars-separated string and converts it to
+   * <P>This method takes a sepChars-separated string and converts it to
    * a vector of fields.  i.e., "gomod,jonabbey" -> a vector whose
-   * elements are "gomod" and "jonabbey".<br><br>
+   * elements are "gomod" and "jonabbey".</P>
    *
-   * NOTE: this method will omit 'degenerate' fields from the output
+   * <P>NOTE: this method will omit 'degenerate' fields from the output
    * vector.  That is, if input is "gomod,,,  jonabbey" and sepChars
    * is ", ", then the result vector will still only have "gomod"
    * and "jonabbey" as elements, even though one might wish to
    * explicitly know about the blanks between commas.  This method
    * is intended mostly for creating email list vectors, rather than
-   * general file-parsing vectors.
+   * general file-parsing vectors.</P>
    *
    * @param input the sepChars-separated string to test.
    *
    * @param sepChars a string containing a list of characters which
    * may occur as field separators.  Any two fields in the input may
    * be separated by one or many of the characters present in sepChars.
-   *
    */
 
   public static Vector stringVector(String input, String sepChars)
@@ -369,14 +355,12 @@ public class VectorUtils {
   }
 
   /**
-   *
-   * findNextSep() takes a string, a starting position, and a string of
+   * <P>findNextSep() takes a string, a starting position, and a string of
    * characters to be considered field separators, and returns the
-   * first index after startDex whose char is in sepChars.
+   * first index after startDex whose char is in sepChars.</P>
    *
-   * If there are no chars in sepChars past startdex in input, findNextSep()
-   * returns -1.
-   *
+   * <P>If there are no chars in sepChars past startdex in input, findNextSep()
+   * returns -1.</P>
    */
 
   private static int findNextSep(String input, int startDex, String sepChars)

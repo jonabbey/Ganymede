@@ -6,8 +6,8 @@
    
    Created: 27 January 1998
    Release: $Name:  $
-   Version: $Revision: 1.20 $
-   Last Mod Date: $Date: 1999/05/07 05:18:12 $
+   Version: $Revision: 1.21 $
+   Last Mod Date: $Date: 1999/06/15 02:46:47 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,19 +58,17 @@ import java.awt.Frame;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <P>This class is a serializable description of a dialog object that a server
+ * is asking a client to present.</P>
  *
- * This class is a serializable description of a dialog object that a server
- * is asking a client to present.  
- *
- * If you don't need to send a dialog definition object across an RMI
+ * <P>If you don't need to send a dialog definition object across an RMI
  * link, just construct a DialogRsrc directly.  (Note.. this is
  * semi-vestigal code, now, since we just use normal serialization to
  * have JDialogBuff transport its parameters, which could be done
  * directly with DialogRsrc just as well.  There are some things in
  * the DialogRsrc class, like the image cache, that we may not want
  * to mess with.  In any case, all of the Ganymede code expects JDialogBuff,
- * so it's going to stay for now.)
- *
+ * so it's going to stay for now.)</P>
  */
 
 public class JDialogBuff implements java.io.Serializable {

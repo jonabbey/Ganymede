@@ -6,8 +6,8 @@
    
    Created: 16 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/01/22 18:04:02 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/06/15 02:46:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -56,6 +56,11 @@ import java.util.Vector;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <P>Serializable object to describe a string chooser field for passing to the
+ * client as part of a {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}
+ * or {@link arlut.csd.JDialog.StringDialog StringDialog}.</P> 
+ */
 
 public class choiceThing implements java.io.Serializable {
   

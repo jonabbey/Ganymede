@@ -5,8 +5,8 @@
    Non-serializable Resource class for use with StringDialog.java
    
    Created: 16 June 1997
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 1999/01/22 18:03:54 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 1999/06/15 02:46:47 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -60,14 +60,15 @@ import javax.swing.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is used to create a customized StringDialog.  
+ * <P>This class is used to create a customized
+ * {@link arlut.csd.JDialog.StringDialog StringDialog}.</P>
  *
  * <p>Use the various addXXX methods on this class to insert
  * the desired type of inputs, and then pass it to a StringDialog
  * constructor.  The order in which the addXXX methods are called
  * determines the layout order in the StringDialog.</p>
  *
- * Example:
+ * <P>Example:</P>
  *
  * <code><blockquote><pre>
  * DialogRsrc r = new DialogRsrc(frame, "Simple dialog", "Give us some information:");
@@ -82,7 +83,6 @@ import javax.swing.*;
  *     //process hashtable...
  * }
  * </pre></blockquote></code>
- *  @see StringDialog
  */
 
 public class DialogRsrc {

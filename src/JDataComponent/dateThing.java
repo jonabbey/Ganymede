@@ -6,8 +6,8 @@
    
    Created: 13 October 1998
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:04:02 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/06/15 02:46:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,6 +55,12 @@ import java.util.Date;
                                                                        dateThing
 
 ------------------------------------------------------------------------------*/
+
+/**
+ * <P>Serializable object to describe a date field for passing to the
+ * client as part of a {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}
+ * or {@link arlut.csd.JDialog.StringDialog StringDialog}.</P> 
+ */
 
 public class dateThing implements java.io.Serializable {
 
