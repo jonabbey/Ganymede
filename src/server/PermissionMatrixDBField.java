@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.16 $ %D%
+   Version: $Revision: 1.17 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -41,7 +41,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * 
    */
 
-  PermissionMatrixDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
+  PermissionMatrixDBField(DBObject owner, 
+			  DataInput in,
+			  DBObjectBaseField definition) throws IOException, RemoteException
   {
     super();			// initialize UnicastRemoteObject
 
@@ -56,14 +58,15 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the DBObjectBase
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the DBStore.
+   * but for which no value has been stored in the DBStore.<br><br>
    *
    * Used to provide the client a template for 'creating' this
    * field if so desired.
    *
    */
 
-  PermissionMatrixDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
+  PermissionMatrixDBField(DBObject owner, 
+			  DBObjectBaseField definition) throws RemoteException
   {
     super();			// initialize UnicastRemoteObject
 
@@ -82,7 +85,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    *
    */
 
-  public PermissionMatrixDBField(DBObject owner, PermissionMatrixDBField field) throws RemoteException
+  public PermissionMatrixDBField(DBObject owner, 
+				 PermissionMatrixDBField field) throws RemoteException
   {
     super();			// initialize UnicastRemoteObject
 
@@ -155,7 +159,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     return false;
   }
 
-  // fancy equals method really does check for value equality
+  /**
+   *
+   * fancy equals method really does check for value equality
+   *
+   */
 
   public synchronized boolean equals(Object obj)
   {
@@ -199,18 +207,26 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     return true;
   }
 
-  // we don't really want to hash according to our permission
-  // contents, so just hash according to our containing object's
-  // i.d.
+  /**
+   *
+   * we don't really want to hash according to our permission
+   * contents, so just hash according to our containing object's
+   * i.d.
+   *
+   */
 
   public Object key()
   {
     return new Integer(owner.getID());
   }
 
-  // we don't allow setValue.. PermissionMatrixDBField doesn't allow
-  // direct setting of the entire matrix.. just use the get() and set()
-  // methods below.
+  /**
+   *
+   * we don't allow setValue.. PermissionMatrixDBField doesn't allow
+   * direct setting of the entire matrix.. just use the get() and set()
+   * methods below.
+   *
+   */
 
   public ReturnVal setValue(Object value, boolean local)
   {
@@ -303,7 +319,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.<br><br>
    *
    * If there is no change in the field, null will be returned.
    * 
@@ -349,7 +365,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /**
    *
    * Returns a PermEntry object representing this PermMatrix's 
-   * permissions on the field <fieldID> in base <baseID>
+   * permissions on the field &lt;fieldID&gt; in base &lt;baseID&gt;
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
@@ -363,7 +379,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /**
    *
    * Returns a PermEntry object representing this PermMatrix's 
-   * permissions on the base <baseID>
+   * permissions on the base &lt;baseID&gt;
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
@@ -377,7 +393,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /**
    *
    * Returns a PermEntry object representing this PermMatrix's 
-   * permissions on the field <field> in base <base>
+   * permissions on the field &lt;field&gt; in base &lt;base&gt;
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
@@ -398,7 +414,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   /**
    *
    * Returns a PermEntry object representing this PermMatrix's 
-   * permissions on the base <base>
+   * permissions on the base &lt;base&gt;
    *
    * @see arlut.csd.ganymede.perm_field
    * @see arlut.csd.ganymede.PermMatrix
@@ -418,8 +434,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    *
-   * Sets the permission entry for this matrix for base <baseID>,
-   * field <fieldID> to PermEntry <entry>.
+   * Sets the permission entry for this matrix for base &lt;baseID&gt;,
+   * field &lt;fieldID&gt; to PermEntry &lt;entry&gt;.<br><br>
    *
    * This operation will fail if this permission matrix is not
    * associated with a currently checked-out-for-editing
@@ -442,7 +458,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (debug)
       {
-	System.err.println("PermissionMatrixDBField: base " + baseID + ", field " + fieldID + " set to " + entry);
+	System.err.println("PermissionMatrixDBField: base " + 
+			   baseID + ", field " + fieldID + " set to " + entry);
       }
 
     defined = true;
@@ -450,8 +467,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    *
-   * Sets the permission entry for this matrix for base <baseID>
-   * to PermEntry <entry>
+   * Sets the permission entry for this matrix for base &lt;baseID&gt;
+   * to PermEntry &lt;entry&gt;<br><br>
    *
    * This operation will fail if this permission matrix is not
    * associated with a currently checked-out-for-editing
@@ -482,8 +499,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    *
-   * Sets the permission entry for this matrix for base <base>,
-   * field <field> to PermEntry <entry>
+   * Sets the permission entry for this matrix for base &lt;base&gt;,
+   * field &lt;field&gt; to PermEntry &lt;entry&gt;<br><br>
    *
    * This operation will fail if this permission matrix is not
    * associated with a currently checked-out-for-editing
@@ -521,8 +538,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    *
-   * Sets the permission entry for this matrix for base <baseID>
-   * to PermEntry <entry>.
+   * Sets the permission entry for this matrix for base &lt;baseID&gt;
+   * to PermEntry &lt;entry&gt;.<br><br>
    *
    * This operation will fail if this permission matrix is not
    * associated with a currently checked-out-for-editing
@@ -542,7 +559,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 	    if (debug)
 	      {
-		System.err.println("PermissionMatrixDBField: base " + base.getName() + 
+		System.err.println("PermissionMatrixDBField: base " + 
+				   base.getName() + 
 				   " set to " + entry);
 	      }
 	  }
@@ -590,7 +608,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    *
-   * This method is used to basically force state into this field.
+   * This method is used to basically force state into this field.<br><br>
    *
    * It is used to place a value or set of values that were known to
    * be good during the current transaction back into this field,
@@ -602,12 +620,14 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (!(owner instanceof DBEditObject))
       {
-	throw new RuntimeException("Invalid rollback on field " + getName() + ", not in an editable context");
+	throw new RuntimeException("Invalid rollback on field " + 
+				   getName() + ", not in an editable context");
       }
 
     if (!(oldval instanceof PermMatrixCkPoint))
       {
-	throw new RuntimeException("Invalid rollback on field " + getName() + ", not a PermMatrixCkPoint");
+	throw new RuntimeException("Invalid rollback on field " + 
+				   getName() + ", not a PermMatrixCkPoint");
       }
 
     if (oldval == null)
