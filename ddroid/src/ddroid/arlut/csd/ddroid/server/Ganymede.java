@@ -519,6 +519,14 @@ public class Ganymede {
 	    System.err.println(ts.l("main.error_fail_debug") + ex);
 	  }
       }
+    else
+      {
+	// Make RMI log any exceptions thrown in response to client calls
+	// to stderr.. XXX not sure this should always be done if the debug
+	// file is not specified on the command line XXX
+
+	System.getProperties().setProperty("sun.rmi.server.exceptionTrace", "true");
+      }
 
     // Create a GanymedeServer object to support the logging
     // code... the GanymedeServer's main purpose (to allow logins)
