@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1205,6 +1205,10 @@ public class directLoader {
 	  {
 	    current_obj.setFieldValue(userSchema.UNIXENABLED, new Boolean(true));
 	  }
+
+	// assume privileged for now
+
+	current_obj.setFieldValue(userSchema.PRIVILEGED, new Boolean(true));
 
 	// set the UID
 
