@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.68 $ %D%
+   Version: $Revision: 1.69 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2674,7 +2674,7 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
     catJPanel = new JInsetPanel(10,10,10,10);
     catJPanel.setLayout(new TableLayout(false));
     
-    catNameS = new JstringField(20, 100, true, false, null, null, this);
+    catNameS = new JstringField(20, 100, true, false, null, "/", this);
     addRow(catJPanel, catNameS, "Category Label:", 0);
     
     setLayout(new java.awt.BorderLayout());
@@ -2702,14 +2702,34 @@ class CategoryEditor extends JPanel implements JsetValueCallback {
       {
 	try
 	  {
-	    if (category.setName((String) v.getValue()))
+	    String newValue = (String) v.getValue();
+
+	    if (debug)
 	      {
-		catNode.setText((String) v.getValue());
+		System.err.println("Trying to set category name to " + newValue);
+	      }
+
+	    if (category.setName(newValue))
+	      {
+		// update the node in the tree
+
+		catNode.setText(newValue);
 		owner.tree.refresh();
+
+		if (debug)
+		  {
+		    System.err.println("Was able to set category name to " + newValue);
+		  }
+
 		return true;
 	      }
 	    else
 	      {
+		if (debug)
+		  {
+		    System.err.println("Was not able to set category name to " + newValue);
+		  }
+
 		return false;
 	      }
 	  }
