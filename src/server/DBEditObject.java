@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.81 $ %D%
+   Version: $Revision: 1.82 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -367,7 +367,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  protected DBSession getSession()
+  protected final DBSession getSession()
   {
     return editset.getSession();
   }
@@ -380,7 +380,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * 
    */
 
-  protected GanymedeSession getGSession()
+  protected final GanymedeSession getGSession()
   {
     return getSession().getGSession();
   }
@@ -397,9 +397,31 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  public byte getStatus()
+  public final byte getStatus()
   {
     return status;
+  }
+
+  /**
+   * This method is used to make sure that the built-in fields that
+   * the server assumes will always be present in any editable object
+   * will be in place.<br><br>
+   * 
+   * This method checks with instantiateNewField() if the field id is
+   * not one of those that is needfull.  If instantiateNewField() approves
+   * the creation of a new field, checkNewField() will check to see if
+   * the GanymedeSession's permissions permit the field creation.
+   *
+   */
+
+  public final boolean checkNewField(short fieldID)
+  {
+    if (fieldID <= 8)
+      {
+	return true;		// we always allow the built in fields
+      }
+
+    return instantiateNewField(fieldID);
   }
 
   /**
@@ -413,7 +435,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  void setStatus(byte new_status)
+  final void setStatus(byte new_status)
   {
     switch (new_status)
       {
@@ -431,12 +453,66 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /**
    *
+   * Shortcut method to set a field's value.  Using this
+   * method can save the client a roundtrip to the server.<br><br>
+   *
+   * This method cannot be used on permission fields or password
+   * fields.
+   *
+   * @see arlut.csd.ganymede.db_object 
+   */
+
+  public final ReturnVal setFieldValue(short fieldID, Object value)
+  {
+    // note! this *must* be setValue(), not setValueLocal(), as this
+    // is a method that the client calls directly.
+
+    try
+      {
+	return getField(fieldID).setValue(value);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote on a local op: " + ex);
+      }
+  }
+
+  /**
+   *
+   * Shortcut method to set a field's value.  This version bypasses
+   * permission checking and is only intended for server-side
+   * use.<br><br>
+   *
+   * This method cannot be used on permission fields or password
+   * fields.
+   *
+   */
+
+  public final ReturnVal setFieldValueLocal(short fieldID, Object value)
+  {
+    ReturnVal retval;
+    DBField field = (DBField) getField(fieldID);
+
+    /* -- */
+
+    if (field != null)
+      {
+	return field.setValueLocal(value);
+      }
+
+    return Ganymede.createErrorDialog("DBEditObject.setFieldValueLocal() error",
+				      "DBEditObject.setFieldValueLocal() couldn't find field " + fieldID + 
+				      " in object " + getLabel());
+  }
+
+  /**
+   *
    * Returns true if the object has ever been stored in the DBStore under the
    * current invid.
    *
    */
 
-  public boolean isStored()
+  public final boolean isStored()
   {
     return stored;
   }
@@ -490,128 +566,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	field = (DBField) enum.nextElement();
 	fields.remove(field.getID());
       }
-  }
-
-  /**
-   * This method is the hook that DBEditObject subclasses use to interpose
-   * wizards when a field's value is being changed.<br><br>
-   *
-   * Whenever a field is changed in this object, this method will be
-   * called with details about the change. This method can refuse to
-   * perform the operation, it can make changes to other objects in
-   * the database in response to the requested operation, or it can
-   * choose to allow the operation to continue as requested.<br><br>
-   *
-   * In the latter two cases, the wizardHook code may specify a list
-   * of fields and/or objects that the client may need to update in
-   * order to maintain a consistent view of the database.<br><br>
-   *
-   * If server-local code has called
-   * GanymedeSession.enableOversight(false), this method will never be
-   * called.  This mode of operation is intended only for initial
-   * bulk-loading of the database.<br><br>
-   *
-   * This method may also be bypassed when server-side code uses
-   * setValueLocal() and the like to make changes in the database.<br><br>
-   *
-   * This method is called before the finalize*() methods.. the finalize*()
-   * methods is where last minute cascading changes should be performed..
-   * the finalize*() methods have no power to set object/field rescan
-   * or return dialogs to the client, however.. in cases where such
-   * is necessary, a custom plug-in class must have wizardHook() and
-   * finalize*() configured to work together to both provide proper field
-   * rescan notification and to check the operation being performed and
-   * make any changes necessary to other fields and/or objects.<br><br>
-   *
-   * Note as well that wizardHook() is called before the namespace checking
-   * for the proposed value is performed, while the finalize*() methods are
-   * called after the namespace checking.
-   *
-   * @return a ReturnVal object indicated success or failure, objects and
-   * fields to be rescanned by the client, and a doNormalProcessing flag
-   * that will indicate to the field code whether or not the operation
-   * should continue to completion using the field's standard logic.
-   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
-   * if the wizardHook wishes to simply specify rescan information while
-   * having the field perform its standard operation.</b>  wizardHook() may
-   * return new ReturnVal(true, false) if the wizardHook performs the operation
-   * (or a logically related operation) itself.  The same holds true for the
-   * respond() method in GanymediatorWizard subclasses.
-   *
-   */
-
-  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
-  {
-    return null;		// by default, we just ok whatever
-  }
-
-  /**
-   *
-   * Shortcut method to set a field's value.  Using this
-   * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.<br><br>
-   *
-   * This method cannot be used on permission fields or password
-   * fields.
-   *
-   * @see arlut.csd.ganymede.db_object 
-   */
-
-  public ReturnVal setFieldValue(short fieldID, Object value)
-  {
-    // note! this *must* be setValue(), not setValueLocal(), as this
-    // is a method that the client calls directly.
-
-    try
-      {
-	return getField(fieldID).setValue(value);
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote on a local op: " + ex);
-      }
-  }
-
-  /**
-   *
-   * Shortcut method to set a field's value.  This version bypasses
-   * permission checking and is only intended for server-side
-   * use.<br><br>
-   *
-   * This method cannot be used on permission fields or password
-   * fields.
-   *
-   */
-
-  public ReturnVal setFieldValueLocal(short fieldID, Object value)
-  {
-    ReturnVal retval;
-    DBField field = (DBField) getField(fieldID);
-
-    /* -- */
-
-    if (field != null)
-      {
-	return field.setValueLocal(value);
-      }
-
-    return Ganymede.createErrorDialog("DBEditObject.setFieldValueLocal() error",
-				      "DBEditObject.setFieldValueLocal() couldn't find field " + fieldID + 
-				      " in object " + getLabel());
-  }
-
-  /**
-   *
-   * Hook to have this object create a new embedded object
-   * in the given field.  
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
-   */
-
-  public Invid createNewEmbeddedObject(InvidDBField field)
-  {
-    throw new IllegalArgumentException("Error: createNewEmbeddedObject called on base DBEditObject");
   }
 
   /**
@@ -690,6 +644,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 				      errorBuf.toString());
   }
 
+
+
   /* -------------------- pseudo-static Customization hooks -------------------- 
 
 
@@ -700,14 +656,16 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
      to perform actions on designated external DBObjects rather than on the
      per-DBObjectBase instance.
 
-     */
+  */
 
   /**
    *
    * This method is used to control whether or not it is acceptable to
    * make a link to the given field in this DBObject type when the
    * user only has editing access for the source InvidDBField and not
-   * the target.
+   * the target.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    * @param object The object that the link is to be created in
    * @param fieldID The field that the link is to be created in
@@ -725,7 +683,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method is used to control whether or not it is acceptable to
    * rescind a link to the given field in this DBObject type when the
    * user only has editing access for the source InvidDBField and not
-   * the target.
+   * the target.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    * @param object The object that the link is to be removed from
    * @param fieldID The field that the linkk is to be removed from
@@ -743,7 +703,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method is used to control whether or not it is acceptable to
    * make a link to the given field in this DBObject type when the
    * user only has editing access for the source InvidDBField and not
-   * the target.
+   * the target.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    * @param object The object that the link is to be created in
    * @param fieldID The field that the link is to be created in
@@ -760,7 +722,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method is used to control whether or not it is acceptable to
    * rescind a link to the given field in this DBObject type when the
    * user only has editing access for the source InvidDBField and not
-   * the target.
+   * the target.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    * @param object The object that the link is to be removed from
    * @param fieldID The field that the linkk is to be removed from
@@ -787,7 +751,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * This method should be used very sparingly.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -812,7 +778,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * method for an answer, but will grant additional permissions as
    * appropriate.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -836,7 +804,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * This method should be used very sparingly.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -861,7 +831,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * method for an answer, but will grant additional permissions as
    * appropriate.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -880,7 +852,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * the use of DBEditSet.findObject() to get a transaction
    * consistent view of related objects.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -898,7 +872,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Customization method to control whether a specified field
    * is required to be defined at commit time for a given object.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -915,7 +891,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * sensitive check to see if this object feels like being
    * available for viewing to the client.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -938,7 +916,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * If field is not from an object of the same base as this DBEditObject,
    * an exception will be thrown.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    * 
    */
 
@@ -962,7 +942,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * sensitive check to see if this object feels like being
    * available for editing by the client.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -976,7 +958,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Customization method to verify whether this object type has an inactivation
    * mechanism.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -1001,7 +985,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * calling us.  This serves to force the session classes
    * to check for write permission before attempting inactivation.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -1018,7 +1004,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * sensitive check to see if this object feels like being
    * available for removal by the client.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -1035,7 +1023,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * sensitive check to see if this object feels like being
    * available for cloning by the client.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -1050,7 +1040,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Hook to allow the cloning of an object.  If this object type
    * supports cloning (which should be very much customized for this
    * object type.. creation of the ancillary objects, which fields to
-   * clone, etc.), this customization method will actually do the work.
+   * clone, etc.), this customization method will actually do the work.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -1066,7 +1058,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * will call the canCreate method in the DBObjectBase for this object type
    * to determine whether creation is allowed to the user.<br><br>
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden in DBEditObject subclasses.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -1096,7 +1090,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Hook to allow intelligent generation of labels for DBObjects
    * of this type.  Subclasses of DBEditObject should override
    * this method to provide for custom generation of the
-   * object's label type
+   * object's label type<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -1111,7 +1107,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * object.  If this method returns true on a given object, the Ganymede
    * Permissions system will provide access to the object as owned with
    * whatever permissions apply to objects owned by the persona active
-   * in gSession.
+   * in gSession.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
@@ -1120,26 +1118,81 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     return false;
   }
 
+
   /**
-   * This method is used to make sure that the built-in fields that
-   * the server assumes will always be present in any editable object
-   * will be in place.<br><br>
-   * 
-   * This method checks with instantiateNewField() if the field id is
-   * not one of those that is needfull.  If instantiateNewField() approves
-   * the creation of a new field, checkNewField() will check to see if
-   * the GanymedeSession's permissions permit the field creation.
+   *
+   * This method provides a hook that can be used to indicate that a
+   * particular field's value should be filtered by a particular
+   * subclass of DBEditObject.  This is intended to allow, for instance,
+   * that the Admin object's name field, if null, can have the owning
+   * user's name interposed.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
    *
    */
 
-  public final boolean checkNewField(short fieldID)
+  public boolean virtualizeField(short fieldID)
   {
-    if (fieldID <= 8)
-      {
-	return true;		// we always allow the built in fields
-      }
+    return false;
+  }
 
-    return instantiateNewField(fieldID);
+  /**
+   *
+   * This method provides a hook to return interposed values for
+   * fields that have their data massaged by a DBEditObject
+   * subclass.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   */
+
+  public Object getVirtualValue(DBField field)
+  {
+    return null;
+  }
+
+  /* -------------------- editing/creating Customization hooks -------------------- 
+
+
+     The following block of methods are intended to be subclassed to
+     provide intelligence for the object creation/editing process.
+
+  */
+
+  /**
+   *
+   * Initialize a newly created DBEditObject.
+   *
+   * When this method is called, the DBEditObject has been created,
+   * its ownership set, and all fields defined in the controlling
+   * DBObjectBase have been instantiated without defined
+   * values.<br><br>
+   *
+   * This method is responsible for filling in any default
+   * values that can be calculated from the DBSession
+   * associated with the editset defined in this DBEditObject.<br><br>
+   *
+   * If initialization fails for some reason, initializeNewObject()
+   * will return false.  If the owning GanymedeSession is not in
+   * bulk-loading mode (i.e., enableOversight is true),
+   * DBSession.createDBObject() will checkpoint the transaction before
+   * calling this method.  If this method returns false, the calling
+   * method will rollback the transaction.  This method has no
+   * responsibility for undoing partial initialization, the
+   * checkpoint/rollback logic will take care of that.<br><br>
+   *
+   * If enableOversight is false, DBSession.createDBObject() will not
+   * checkpoint the transaction status prior to calling initializeNewObject(),
+   * so it is the responsibility of this method to handle any checkpointing
+   * needed.<br><br>
+   *
+   * This method should be overridden in subclasses.
+   *   
+   */
+
+  public boolean initializeNewObject()
+  {
+    return true;
   }
 
   /**
@@ -1180,67 +1233,70 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
+   * This method is the hook that DBEditObject subclasses use to interpose
+   * wizards when a field's value is being changed.<br><br>
    *
-   * This method provides a hook that can be used to indicate that a
-   * particular field's value should be filtered by a particular
-   * subclass of DBEditObject.  This is intended to allow, for instance,
-   * that the Admin object's name field, if null, can have the owning
-   * user's name interposed.
+   * Whenever a field is changed in this object, this method will be
+   * called with details about the change. This method can refuse to
+   * perform the operation, it can make changes to other objects in
+   * the database in response to the requested operation, or it can
+   * choose to allow the operation to continue as requested.<br><br>
+   *
+   * In the latter two cases, the wizardHook code may specify a list
+   * of fields and/or objects that the client may need to update in
+   * order to maintain a consistent view of the database.<br><br>
+   *
+   * If server-local code has called
+   * GanymedeSession.enableOversight(false), this method will never be
+   * called.  This mode of operation is intended only for initial
+   * bulk-loading of the database.<br><br>
+   *
+   * This method may also be bypassed when server-side code uses
+   * setValueLocal() and the like to make changes in the database.<br><br>
+   *
+   * This method is called before the finalize*() methods.. the finalize*()
+   * methods is where last minute cascading changes should be performed..
+   * the finalize*() methods have no power to set object/field rescan
+   * or return dialogs to the client, however.. in cases where such
+   * is necessary, a custom plug-in class must have wizardHook() and
+   * finalize*() configured to work together to both provide proper field
+   * rescan notification and to check the operation being performed and
+   * make any changes necessary to other fields and/or objects.<br><br>
+   *
+   * Note as well that wizardHook() is called before the namespace checking
+   * for the proposed value is performed, while the finalize*() methods are
+   * called after the namespace checking.
+   *
+   * @return a ReturnVal object indicated success or failure, objects and
+   * fields to be rescanned by the client, and a doNormalProcessing flag
+   * that will indicate to the field code whether or not the operation
+   * should continue to completion using the field's standard logic.
+   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
+   * if the wizardHook wishes to simply specify rescan information while
+   * having the field perform its standard operation.</b>  wizardHook() may
+   * return new ReturnVal(true, false) if the wizardHook performs the operation
+   * (or a logically related operation) itself.  The same holds true for the
+   * respond() method in GanymediatorWizard subclasses.
    *
    */
 
-  public boolean virtualizeField(short fieldID)
+  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    return false;
+    return null;		// by default, we just ok whatever
   }
 
   /**
    *
-   * This method provides a hook to return interposed values for
-   * fields that have their data massaged by a DBEditObject
-   * subclass.
+   * Hook to have this object create a new embedded object
+   * in the given field.  
+   *
+   * To be overridden in DBEditObject subclasses.
    *
    */
 
-  public Object getVirtualValue(DBField field)
+  public Invid createNewEmbeddedObject(InvidDBField field)
   {
-    return null;
-  }
-
-  /**
-   *
-   * Initialize a newly created DBEditObject.
-   *
-   * When this method is called, the DBEditObject has been created,
-   * its ownership set, and all fields defined in the controlling
-   * DBObjectBase have been instantiated without defined
-   * values.<br><br>
-   *
-   * This method is responsible for filling in any default
-   * values that can be calculated from the DBSession
-   * associated with the editset defined in this DBEditObject.<br><br>
-   *
-   * If initialization fails for some reason, initializeNewObject()
-   * will return false.  If the owning GanymedeSession is not in
-   * bulk-loading mode (i.e., enableOversight is true),
-   * DBSession.createDBObject() will checkpoint the transaction before
-   * calling this method.  If this method returns false, the calling
-   * method will rollback the transaction.  This method has no
-   * responsibility for undoing partial initialization, the
-   * checkpoint/rollback logic will take care of that.<br><br>
-   *
-   * If enableOversight is false, DBSession.createDBObject() will not
-   * checkpoint the transaction status prior to calling initializeNewObject(),
-   * so it is the responsibility of this method to handle any checkpointing
-   * needed.<br><br>
-   *
-   * This method should be overridden in subclasses.
-   *   
-   */
-
-  public boolean initializeNewObject()
-  {
-    return true;
+    throw new IllegalArgumentException("Error: createNewEmbeddedObject called on base DBEditObject");
   }
 
   /**
@@ -2141,7 +2197,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    */
 
-  public boolean isCommitting()
+  public final boolean isCommitting()
   {
     return committing;
   }
@@ -2199,7 +2255,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   //
   // ***
 
-  synchronized Hashtable checkpoint()
+  synchronized final Hashtable checkpoint()
   {
     Enumeration enum;
     Object key, value;
@@ -2232,7 +2288,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     return result;
   }
 
-  synchronized void rollback(Hashtable ckpoint)
+  synchronized final void rollback(Hashtable ckpoint)
   {
     Enumeration enum;
     Short key;
@@ -2447,7 +2503,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   ----------------------------------------------------------*/
 
-  protected GanymedeSession internalSession()
+  protected final GanymedeSession internalSession()
   {
     return Ganymede.internalSession;
   }
