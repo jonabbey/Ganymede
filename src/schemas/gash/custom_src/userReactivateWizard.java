@@ -5,7 +5,7 @@
    A wizard to manage user reactivation interactions for the userCustom object.
 
    Created: 29 January 1998
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,25 +26,74 @@ import arlut.csd.JDialog.JDialogBuff;
                                                             userReactivateWizard
 
 ------------------------------------------------------------------------------*/
-
 /**
  *
- * A wizard to manage user reactivation interactions for the userCustom object.
+ * A wizard to handle the wizard interactions required when a user reactivates
+ * a user account.
+ *
+ * <br>This wizard, unlike the userHomeGroupDelWizard and userRenameWizard, does
+ * not directly manipulate fields in the user object.  Instead, it works with
+ * methods written for its benefit in userCustom.<br>
+ *
+ * <br>Object Reactivation basically consists of rendering an object fit for use
+ * once again, by clearing the removal date, and fixing up any fields that need
+ * fixing.<br>
  *
  * @see arlut.csd.ganymede.ReturnVal
- * @see arlut.csd.ganymede.Ganymediator
+ * @see arlut.csd.ganymede.Ganymediator 
+ * @see arlut.csd.ganymede.custom.userCustom
+ * @see arlut.csd.ganymede.custom.userSchema
  */
 
-public class userReactivateWizard extends GanymediatorWizard {
+public class userReactivateWizard extends GanymediatorWizard implements userSchema {
+
+  static final boolean debug = false;
+
+  // ---
+
+  /**
+   * The user-level session context that this wizard is acting in.  This
+   * object is used to handle necessary checkpoint/rollback activity by
+   * this wizard, as well as to handle any necessary label lookups.
+   */
 
   GanymedeSession session;
+
+  /**
+   * Keeps track of the state of the wizard.  Each time respond() is called,
+   * state is checked to see what results from the user are expected and
+   * what the appropriate dialogs or actions to perform in turn are.<br>
+   * 
+   * state is also used by the userCustom object to make sure that
+   * we have finished our interactions with the user when we tell the
+   * user object to go ahead and remove the group.  <br>
+   * 
+   * <pre>
+   * Values:
+   *         1 - Wizard has been initialized, initial explanatory dialog
+   *             has been generated.
+   *         2 - Wizard has generated the second dialog and is waiting
+   *             for the user to provide the password, shell, and forwarding
+   *             addresses needed to reactivate this account.
+   * DONE (99) - Wizard has approved the proposed action, and is signalling
+   *             the user object code that it is okay to proceed with the
+   *             action without further consulting this wizard.
+   * </pre>
+   */
+
   int state;
-  DBEditObject object;
-  DBField field;
-  Object param;
-  ReturnVal retVal;
+
+  /**
+   * The actual user object that this wizard is acting on.
+   */
+
+  userCustom userObject;
 
   // reactivation params
+
+  // These variables are directly accessed by userCustom when this
+  // wizard calls back to the userObject to perform the reactivation
+  // logic.
 
   String password;
   String shell;
@@ -57,16 +106,12 @@ public class userReactivateWizard extends GanymediatorWizard {
    */
 
   public userReactivateWizard(GanymedeSession session, 
-			      DBEditObject object, 
-			      DBField field,
-			      Object param) throws RemoteException
+			      userCustom userObject) throws RemoteException
   {
     super(session);		// register ourselves
 
     this.session = session;
-    this.object = object;
-    this.field = field;
-    this.param = param;
+    this.userObject = userObject;
   }
 
   /**
@@ -87,29 +132,31 @@ public class userReactivateWizard extends GanymediatorWizard {
   public ReturnVal respond(Hashtable returnHash)
   {
     JDialogBuff dialog;
+    ReturnVal retVal = null;
 
     /* -- */
+
+    if (returnHash == null)
+      {
+	retVal = new ReturnVal(false);
+	dialog = new JDialogBuff("User Reactivation Canceled",
+				 "User Reactivation Canceled",
+				 "OK",
+				 null,
+				 "ok.gif");
+	retVal.setDialog(dialog);
+
+	// note that we don't set the callback on the ReturnVal.. this
+	// terminates the wizard process
+	
+	this.unregister(); // we're stopping here, so we'll unregister ourselves
+	
+	return retVal;
+      }
 
     if (state == 1)
       {
 	System.err.println("userReactivateWizard.respond(): state == 1");
-
-	if (returnHash == null)
-	  {
-	    retVal = new ReturnVal(false);
-	    dialog = new JDialogBuff("User Reactivation Canceled",
-				     "User Reactivation Canceled",
-				     "OK",
-				     null,
-				     "ok.gif");
-	    retVal.setDialog(dialog);
-
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
-
-	    return retVal;
-	  }
-
-	System.err.println("userReactivateWizard.respond(): state == 1, creating dialog");
 
 	retVal = new ReturnVal(false);
 	dialog = new JDialogBuff("Reactivate User",
@@ -120,17 +167,17 @@ public class userReactivateWizard extends GanymediatorWizard {
 
 	dialog.addPassword("New Password");
 
-	StringDBField stringfield = (StringDBField) object.getField((short) 263);
+	StringDBField stringfield = (StringDBField) userObject.getField(LOGINSHELL);
 
-	((userCustom) object).updateShellChoiceList();
+	userObject.updateShellChoiceList();
 	dialog.addChoice("Shell", 
-			 userCustom.shellChoices.getLabels(),
+			 userObject.shellChoices.getLabels(),
 			 (String) stringfield.getValueLocal());
 
 	dialog.addString("Forwarding Address");
 	    
 	retVal.setDialog(dialog);
-	retVal.setCallback(this);
+	retVal.setCallback(this); // have the client get back to us
 	
 	state = 2;
 
@@ -140,41 +187,29 @@ public class userReactivateWizard extends GanymediatorWizard {
       }
     else if (state == 2)
       {
-	System.err.println("userReactivateWizard.respond(): state == 2");
-
-	if (returnHash == null)
+	if (debug)
 	  {
-	    retVal = new ReturnVal(false);
-	    dialog = new JDialogBuff("User Reactivation Canceled",
-				     "User Reactivation Canceled",
-				     "OK",
-				     null,
-				     "ok.gif");
-	    retVal.setDialog(dialog);
+	    System.err.println("userReactivateWizard.respond(): state == 2");
 
-	    this.unregister(); // we're stopping here, so we'll unregister ourselves
+	    Enumeration enum = returnHash.keys();
+	    int i = 0;
 
-	    return retVal;
-	  }
-
-	Enumeration enum = returnHash.keys();
-	int i = 0;
-
-	while (enum.hasMoreElements())
-	  {
-	    Object key = enum.nextElement();
-	    Object value = returnHash.get(key);
+	    while (enum.hasMoreElements())
+	      {
+		Object key = enum.nextElement();
+		Object value = returnHash.get(key);
 		
-	    System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
-	  }
-	    
+		System.err.println("Item: (" + i++ + ") = " + key + ":" + value);
+	      }
+	  } 
+
 	forward = (String) returnHash.get("Forwarding Address");
 	shell = (String) returnHash.get("Shell");
 	password = (String) returnHash.get("New Password");
 
 	// and do the inactivation
 	    
-	retVal = ((userCustom) object).reactivate(this);
+	retVal = userObject.reactivate(this);
 
 	if (retVal == null || retVal.didSucceed())
 	  {
@@ -192,7 +227,7 @@ public class userReactivateWizard extends GanymediatorWizard {
 	    // failure.. need to do the rollback that would have originally
 	    // been done for us if we hadn't gone through the wizard process
 
-	    if (!object.getEditSet().rollback("reactivate" + object.getLabel()))
+	    if (!session.rollback("reactivate" + userObject.getLabel()))
 	      {
 		retVal = Ganymede.createErrorDialog("userReactivateWizard: Error",
 						    "Ran into a problem during user reactivation, and rollback failed");
@@ -222,13 +257,14 @@ public class userReactivateWizard extends GanymediatorWizard {
   {
     JDialogBuff dialog;
     StringBuffer buffer = new StringBuffer();
+    ReturnVal retVal = null;
 
     /* -- */
 
     System.err.println("userReactivateWizard: creating reactivation wizard");
 
     buffer.append("Reactivating ");
-    buffer.append(object.getLabel());
+    buffer.append(userObject.getLabel());
     buffer.append("\n\nIn order to reactivate this account, you need to provide a password, ");
     buffer.append("a login shell, and a new address to send email for this account to.");
 	
