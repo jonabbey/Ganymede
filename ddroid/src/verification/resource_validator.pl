@@ -338,8 +338,10 @@ sub examine_java {
 
   my ($properties, $classname, $mode, $package, $propname, $proppath, $working, $key);
   my ($value, $prop_param_count, $rest, $arg_count);
+  my (%seen, $hashref, $prop);
 
   my $result = 0;
+  my $prop_loaded = 0;
 
   $jfile =~ /\/([^\/]*)\.java$/;
 
@@ -372,10 +374,11 @@ sub examine_java {
       $proppath =~ s/\./\//g;
 
       if (!open(PROPS, "< $properties_root/$proppath.properties")) {
-	print "***  Error, couldn't load properties file $properties_root/$proppath.properties ***\n";
+	print "*** Error, couldn't load properties file $properties_root/$proppath.properties ***\n";
 	return;
       }
 
+      $prop_loaded = 1;
       $properties = new Config::Properties();
       $properties->load(*PROPS);
       close(PROPS);
@@ -389,23 +392,12 @@ sub examine_java {
       $working = $_;
       $key = $1;
 
+      $seen{$key} = 1;
+
       $value = $properties->getProperty($key);
       $prop_param_count = countparams($value);
 
-      # okay, now we need to count the parameters provided.. this will
-      # be more than a bit tricky.  we'll need to find the end of the
-      # key string, look for a comma, then keep reading characters
-      # until we get to the closing parenthesis, taking into account
-      # backslash escapes, comment sections, quotation marks of both
-      # kinds, and other mode-changing thingies.  this will be
-      # especially tricky because we might have to jump across one or
-      # more newlines before we find the closing paren.  We might make
-      # the simplifying assumption that the additional lines we slurp
-      # in won't have a ts.l() call on them, if we've already
-      # determined that we have to cross the newline boundary, or we
-      # could use the perl redo function to jump back to the interior
-      # of our while body and continue regexp processing anew after
-      # we've found the end of one call.
+      # okay, now we need to count the parameters provided.
 
       # first, get the remnants of the line after the ts.l method
       # call and the key parameter..
@@ -415,14 +407,14 @@ sub examine_java {
       $rest = $1;
 
       # now we need to do a mode-sensitive scan loop looking for
-      # commas at the top level.. things that will make us jump into
-      # another mode includes open parens, // comment introducers,
-      # single quotes, and double quotes.. when we hit one of them,
-      # we'll push that mode char onto a stack and keep reading char
-      # by char until we find the matching exit from that mode
+      # commas at the top level.. the inchoverjavaargs() subroutine
+      # takes care of that for us.. if it has to slurp in successive lines
+      # to make it to the end of the ts.l() call, we'll take the last string
+      # that it processed and redo our loop looking at that as our next line
+      # to search for another ts.l() call.
 
       if ($value eq "") {
-	print "***  Error, couldn't find property for key $key!!! ***\n";
+	print "*** Error, couldn't find property for key $key!!! ***\n";
       } else {
 
 	($arg_count, $new_string) = inchoverjavaargs($rest, *IN);
@@ -444,6 +436,21 @@ sub examine_java {
     }
   }
   close(IN);
+
+  # we've finished scanning this java file.. now, did we get any
+  # properties in the property file that weren't used in the source
+  # code?
+
+  if ($prop_loaded) {
+    $hashref = $properties->getProperties();
+
+    foreach $prop (keys %$hashref) {
+      if (!defined $seen{$prop}) {
+	print "  Warning, property $prop not used\n";
+      }
+    }
+  }
+
   return $result;
 }
 
