@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/02/02 01:03:01 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/02/02 01:06:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -76,7 +76,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.6 $ $Date: 2000/02/02 01:03:01 $
+ * @version $Revision: 1.7 $ $Date: 2000/02/02 01:06:21 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -453,7 +453,7 @@ public class serverAdminProxy implements Admin, Runnable {
    * admin console, in chronological order.</p>
    */
 
-  public void addEvent(adminEvent newEvent) throws RemoteException
+  private void addEvent(adminEvent newEvent) throws RemoteException
   {
     synchronized (eventBuffer)
       {
@@ -481,7 +481,7 @@ public class serverAdminProxy implements Admin, Runnable {
    * event's contents.</p>
    */
 
-  public void replaceEvent(adminEvent newEvent) throws RemoteException
+  private void replaceEvent(adminEvent newEvent) throws RemoteException
   {
     adminEvent oldEvent;
 
@@ -514,6 +514,16 @@ public class serverAdminProxy implements Admin, Runnable {
 	eventBuffer.notify();
       }
   }
+
+  /**
+   * <p>This method throws a remoteException which describes the state
+   * of the event buffer.  This is called from addEvent and
+   * replaceEvent.  The {@link arlut.csd.ganymede.GanymedeAdmin
+   * GanymedeAdmin} code that calls the {@link
+   * arlut.csd.ganymede.Admin Admin} proxy methods in serverAdminProxy
+   * take repeated remote exceptions as an indication that they need
+   * to detach the admin console, which is why we use RemoteException.</p>
+   */
 
   private void throwOverflow() throws RemoteException
   {
