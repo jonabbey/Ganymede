@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.29 $ %D%
+   Version: $Revision: 1.30 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -274,14 +274,26 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public boolean fieldRequired(DBObject object, short fieldid)
   {
-    switch (fieldid)
+    if (isInactivated())
       {
-      case userSchema.USERNAME:
-      case userSchema.PERSON:
-      case userSchema.PASSWORD:
-      case userSchema.SIGNATURE:
-      case userSchema.EMAILTARGET:
-	return true;
+	switch (fieldid)
+	  {
+	  case userSchema.USERNAME:
+	  case userSchema.PERSON:
+	    return true;
+	  }
+      }
+    else
+      {
+	switch (fieldid)
+	  {
+	  case userSchema.USERNAME:
+	  case userSchema.PERSON:
+	  case userSchema.PASSWORD:
+	  case userSchema.SIGNATURE:
+	  case userSchema.EMAILTARGET:
+	    return true;
+	  }
       }
 
     Boolean bool = (Boolean) object.getFieldValueLocal(userSchema.UNIX);
