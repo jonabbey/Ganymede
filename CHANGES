@@ -32,7 +32,12 @@ The journal loading code in the Ganymede server now simply complains
 politely to stderr if the journal is truncated inappropriately, rather
 than throwing an IOException.
 
-4. [SERVER] Modified all the schema kits to handle backups differently
+The Ganymede server no longer keeps the old journal files around, but
+rather just keeps a single back-up.  While it was entertaining doing a
+hexdump on old journal files to see what had been done, it cluttered
+the db directory more than anything really being useful.
+
+4. [SERVER] Changed how file backups are handled
 
 Previously, all of the schema kits' builder tasks copied individual
 files to file.<date> when the builder task was re-run.  Now any time
