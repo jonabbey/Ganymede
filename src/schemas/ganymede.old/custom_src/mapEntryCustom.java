@@ -5,7 +5,7 @@
    This file is a management class for Automounter map entry objects in Ganymede.
    
    Created: 9 December 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -34,6 +34,8 @@ import java.rmi.*;
 public class mapEntryCustom extends DBEditObject implements SchemaConstants, mapEntrySchema {
 
   static PermEntry noEditPerm = new PermEntry(true, false, false, false);
+
+  static final boolean debug = false;
 
   // ---
 
@@ -203,8 +205,12 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     
     // ok, mapsToSkip has a list of invid's to skip in our choice list.
 
-    QueryResult result = new QueryResult();
     QueryResult baseList = super.obtainChoiceList(field);
+    QueryResult result = new QueryResult();
+
+    // go through baseList, anything that we don't skip because
+    // other map entries in this user object have taken that
+    // map gets added to result.
 
     for (int i = 0; i < baseList.size(); i++)
       {
@@ -214,6 +220,12 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 	  {
 	    result.addRow(baseList.getObjectHandle(i));
 	  }
+      }
+
+    if (debug)
+      {
+	System.err.println("mapEntryCustom: map choice for invid " + getInvid() + ":\n" +
+			   result.getBuffer());
       }
     
     return result;
@@ -264,6 +276,11 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
     for (int i = 0; i < entries.size(); i++)
       {
+	if (debug)
+	  {
+	    System.err.println("mapEntryCustom.wizardHook(): adding object " + 
+			       entries.elementAt(i) + " for rescan");
+	  }
 	result.addRescanObject((Invid) entries.elementAt(i), rescanPlease);
       }
 
@@ -320,11 +337,17 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     Invid userInvid = (Invid) getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
     DBObject user = getSession().viewDBObject(userInvid);
 
-    result = user.getFieldValuesLocal(userSchema.VOLUMES);
+    result = (Vector) user.getFieldValuesLocal(userSchema.VOLUMES).clone();
     
     // we are not our own sibling.
 
     result.removeElement(getInvid());
+
+    if (debug)
+      {
+	System.err.println("mapEntryCustom.getSiblingInvids(): " + getInvid() +
+			   " has return value: " + result);
+      }
 
     return result;
   }
