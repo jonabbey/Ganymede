@@ -2141,7 +2141,7 @@ public final class DBStore implements JythonMap {
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.SyncChannelServicer;
-	bf.field_type = FieldType.String;
+	bf.field_type = FieldType.STRING;
 	bf.field_name = "Service Program";
 	bf.comment = "The location of the program to service this sync channel";
 	b.addFieldToEnd(bf);
