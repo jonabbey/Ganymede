@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.54 $ %D%
+   Version: $Revision: 1.55 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1287,7 +1287,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     InvidNode oldNode, newNode, fNode;
     Query _query = null;
 
-    ObjectHandle handle;
+    ObjectHandle handle = null;
     Vector objectHandles;
     objectList objectlist = null;
 
@@ -1343,6 +1343,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     // the sorted list of nodes in the tree under this particular baseNode,
     // comparing as the loop progresses, adding or removing nodes from the
     // tree to match the current contents of the objectHandles list
+    //
+    // The important variables in the loop are fNode, which points to the
+    // current node in the subtree that we're examining, and i, which
+    // is counting our way through the objectHandles Vector.
     // 
     // **
 
@@ -1367,7 +1371,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    // We've gone past the end of the list of objects in this
 	    // object list.. from here on out, we're going to wind up
-	    // anything left in this subtree
+	    // removing anything we find in this subtree
 
 	    //System.out.println("Object is null");
 
@@ -1405,10 +1409,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	else if ((invid == null) ||
 		 ((label.compareTo(fNode.getText())) > 0))
 	  {
-	    // delete a node in the tree without a matching
-	    // node in the object list
+	    // We've found a node in the tree without a matching
+	    // node in the object list.  Delete it!
 
-	    //System.out.println("Removing this node");
+	    // System.out.println("Removing this node");
 	    // System.err.println("Deleting: " + fNode.getText());
 
 	    newNode = (InvidNode) fNode.getNextSibling();
@@ -1420,11 +1424,19 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	  {
 	    // we've got a node in the tree that matches the
 	    // invid of the current object in the object list,
-	    // but the label may possibly have changed
-
-	    fNode.setText(label);
+	    // but the label may possibly have changed, so we'll
+	    // go ahead and re-set the label, just to be sure
 
 	    // System.err.println("Setting: " + object.getName());
+
+	    if (handle.isInactive())
+	      {
+		fNode.setText(label + " (inactive)");
+	      }
+	    else
+	      {
+		fNode.setText(label);
+	      }
 
 	    oldNode = fNode;
 	    fNode = (InvidNode) oldNode.getNextSibling();
