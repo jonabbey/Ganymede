@@ -6,7 +6,7 @@
    reports from the system log based on specific criteria.
    
    Created: 31 October 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -81,7 +81,7 @@ public class DBLog {
 
 	    entry = (Result) eventCodeVector.elementAt(i);
 	    
-	    eventCodes.put(entry.toString(), new eventType((DBObject)session.view_db_object(entry.getInvid())));
+	    eventCodes.put(entry.toString(), new eventType(session.session.viewDBObject(entry.getInvid())));
 	  }
       }
 

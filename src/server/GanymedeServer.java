@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -129,7 +129,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     for (int i = 0; !found && (i < results.size()); i++)
       {
-	user = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
+	user = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
 	
 	pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 	
@@ -148,7 +148,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
 	for (int i = 0; !found && (i < results.size()); i++)
 	  {
-	    persona = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
+	    persona = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
 	    
 	    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
 	    
@@ -316,7 +316,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 
     for (int i = 0; !found && (i < results.size()); i++)
       {
-	obj = (DBObject) Ganymede.internalSession.view_db_object(((Result) results.elementAt(i)).getInvid());
+	obj = Ganymede.internalSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
 	    
 	pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
 	    

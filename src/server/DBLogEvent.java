@@ -7,7 +7,7 @@
    email..
    
    Created: 31 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -430,7 +430,7 @@ public class DBLogEvent {
     while (enum.hasMoreElements())
       {
 	invid = (Invid) enum.nextElement();
-	object = (DBObject) Ganymede.internalSession.view_db_object(invid);
+	object = Ganymede.internalSession.session.viewDBObject(invid);
 
 	if (object == null)
 	  {
@@ -487,7 +487,7 @@ public class DBLogEvent {
 		continue;	// don't want supergash
 	      }
 
-	    object2 = (DBObject) Ganymede.internalSession.view_db_object(invid2);
+	    object2 = Ganymede.internalSession.session.viewDBObject(invid2);
 
 	    if (object2 == null)
 	      {
