@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -123,9 +123,24 @@ public class DBWriteLock extends DBLock {
 
     synchronized (lockManager)
       {
-	if (lockManager.lockHash.containsKey(key))
+	while (lockManager.lockHash.containsKey(key))
 	  {
-	    throw new RuntimeException("Error: lock sought by owner of existing lockset.");
+	    if (abort)
+	      {
+		for (int i = 0; i < baseSet.size(); i++)
+		  {
+		    base = (DBObjectBase) baseSet.elementAt(i);
+		    base.removeWriter(this);
+		  }
+
+		inEstablish = false;
+		lockManager.notifyAll();
+		throw new InterruptedException();
+	      }
+	    else
+	      {
+		lockManager.wait();	// we might have to wait for multiple readers on our key to release
+	      }
 	  }
 
 	lockManager.lockHash.put(key, this);
