@@ -697,7 +697,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * build has completely finished, and it will feel free to
    * immediately schedule this builder task again, which may mean that
    * the builderPhase1() method will overwrite files the backgrounded
-   * external builder process is still using.</p>
+   * external builder process is still using.</P>
+   *
+   * <P>Note as well that the Ganymede server makes no guarantee as to
+   * what the environment variables or current working directory will
+   * be set to when any external builder scripts are executed.  If
+   * your external scripts depend on these things, you should make
+   * sure that your external builder script sets them itself.</P>
    *
    * <P>By releasing the dumpLock before we get to that point, we
    * minimize contention for users of the system.</P>
