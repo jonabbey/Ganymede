@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.56 $
-   Last Mod Date: $Date: 2002/01/26 05:31:22 $
+   Version: $Revision: 1.57 $
+   Last Mod Date: $Date: 2002/01/26 05:36:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -80,7 +80,7 @@ import java.rmi.server.Unreferenced;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.</p>
  *
- * @version $Revision: 1.56 $ $Date: 2002/01/26 05:31:22 $
+ * @version $Revision: 1.57 $ $Date: 2002/01/26 05:36:41 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -833,12 +833,12 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
   public void refreshMe() throws RemoteException
   {
     proxy.setServerStart(Ganymede.startTime);
+    proxy.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
     doUpdateTransCount();
     doUpdateLastDump();
     doUpdateCheckedOut();
     doUpdateLocksHeld();
     doUpdateMemState();
-    proxy.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
     doSetState();
 
     doRefreshUsers(GanymedeServer.getUserTable());
@@ -898,7 +898,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
     if (!fullprivs)
       {
 	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to kill of user " + user);
+					  "You do not have permissions to kill off user " + user);
       }
 
     if (GanymedeServer.server.killUser(user, "Admin console disconnecting you"))
@@ -1182,7 +1182,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
     if (!fullprivs)
       {
-	Ganymede.debug("Attempt made to edit schema by a non-privileged console");
+	Ganymede.debug("Attempt made to edit schema by a non-privileged console:" + this.toString());
 	return null;
       }
 
@@ -1197,7 +1197,8 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
 	if (semaphoreCondition != null)
 	  {
-	    Ganymede.debug("Can't edit schema, semaphore error: " + semaphoreCondition);
+	    Ganymede.debug(this.toString() + ", can't edit schema, semaphore error: " +
+			   semaphoreCondition);
 	    return null;
 	  }
       }
@@ -1237,7 +1238,8 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
 		if (base.isLocked())
 		  {
-		    Ganymede.debug("Can't edit Schema, lock held on " + base.getName());
+		    Ganymede.debug(this.toString() + ", can't edit Schema, lock held on " + 
+				   base.getName());
 		    GanymedeServer.lSemaphore.enable("schema edit");
 		    return null;
 		  }
@@ -1246,7 +1248,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
 	 // should be okay
 
-	 Ganymede.debug("Ok to create DBSchemaEdit");
+	 Ganymede.debug("Ok to create DBSchemaEdit for " + this.toString());
 
 	 GanymedeAdmin.setState("Schema Edit In Progress");
 
