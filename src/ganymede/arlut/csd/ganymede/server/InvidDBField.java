@@ -1058,7 +1058,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // "Bind link error"
 	    // "Can't forge an asymmetric link between {0} and invid {1}, the target object is being deleted."
 	    return Ganymede.createErrorDialog(ts.l("bind.deletedremote_sub"),
-					      ts.l("bind.deletedremote_text", this.toString(), newRemote.toString()));
+					      ts.l("bind.deletedremote_text", this.getName(), newRemote.toString()));
 	  }
       }
 
@@ -1149,7 +1149,7 @@ public final class InvidDBField extends DBField implements invid_field {
 			// "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}"
 			return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
 							  ts.l("bind.busy_old",
-							       this.toString(), remobj.getLabel(), remobj.getTypeName(),
+							       this.getName(), remobj.getLabel(), remobj.getTypeName(),
 							       edit_username, edit_hostname));
 		      }
 		
@@ -1157,7 +1157,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by another user."
 		    return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
 						      ts.l("bind.busy_old2",
-							   this.toString(), remobj.getLabel(), remobj.getTypeName()));
+							   this.getName(), remobj.getLabel(), remobj.getTypeName()));
 		  }
 		else
 		  {
@@ -1166,7 +1166,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    // This is probably a temporary condition due to other user activity on the Ganymede server."
 		    return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
 						      ts.l("bind.busy_old_temp",
-							   this.toString(), remobj.getLabel(), remobj.getTypeName()));
+							   this.getName(), remobj.getLabel(), remobj.getTypeName()));
 		  }
 	      }
 	    catch (NullPointerException ex)
@@ -1176,7 +1176,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		// This is probably a temporary condition due to other user activity on the Ganymede server."
 		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
 						  ts.l("bind.busy_old_temp",
-						       this.toString(), remobj.getLabel(), remobj.getTypeName()));
+						       this.getName(), remobj.getLabel(), remobj.getTypeName()));
 	      }
 	  }
 
@@ -1201,7 +1201,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		// "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
 		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
 						  ts.l("bind.schema_error",
-						       Integer.toString(targetField), oldRef.getLabel()));
+						       Integer.getName(targetField), oldRef.getLabel()));
 	      }
 	  }
 	
@@ -1220,7 +1220,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		// "InvidDBField.bind(): Couldn''t unlink from old reference"
 		// "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
 		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						  ts.l("bind.inconsistency", Integer.toString(targetField), oldRef.getLabel()));
+						  ts.l("bind.inconsistency", Integer.getName(targetField), oldRef.getLabel()));
 	      }
 	    else
 	      {
@@ -1273,7 +1273,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // "InvidDBField.bind(): Couldn''t link to remote object"
 	    // "Field {0} cannot be linked to remote object {1}.\n\nThe remote object has been deleted."
 	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-					      ts.l("bind.deleted_new", this.toString(), newRemote.toString()));
+					      ts.l("bind.deleted_new", this.getName(), newRemote.toString()));
 	  }
       }
     else
@@ -1288,7 +1288,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // "Field {0} could not be linked to the {1} {2} object.  You do not have permission to edit the {1} {2} object."
 	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
 					      ts.l("bind.no_newref_perm",
-						   this.toString(), remobj.getLabel(), remobj.getTypeName()));
+						   this.getName(), remobj.getLabel(), remobj.getTypeName()));
 	  }
       }
     
@@ -1320,14 +1320,14 @@ public final class InvidDBField extends DBField implements invid_field {
 		    // "InvidDBField.bind(): Couldn''t link to new reference"
 		    // "Field {0} could not be linked to the {1} {2} object, which is busy being edited by {3} on system {4}."
 		    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-						      ts.l("bind.busy_new", this.toString(), remobj.getLabel(), remobj.getTypeName(),
+						      ts.l("bind.busy_new", this.getName(), remobj.getLabel(), remobj.getTypeName(),
 							   edit_username, edit_hostname));
 		  }
 		
 		// "InvidDBField.bind(): Couldn''t link to new reference"
 		// "Field {0} could not be linked to the {1} {2} object, which is busy being edited by another user."
 		return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-						  ts.l("bind.busy_new2", this.toString(), remobj.getLabel(), remobj.getTypeName()));
+						  ts.l("bind.busy_new2", this.getName(), remobj.getLabel(), remobj.getTypeName()));
 	      }
 	    else
 	      {
@@ -1335,7 +1335,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		// "Field {0} could not be linked to the {1} {2} object.  
 		// This is probably a temporary condition due to other user activity on the Ganymede server."
 		return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-						  ts.l("bind.busy_new_temp", this.toString(), remobj.getLabel(), remobj.getTypeName()));
+						  ts.l("bind.busy_new_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
 	      }
 	  }
 	catch (NullPointerException ex)
@@ -1344,7 +1344,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // "Field {0} could not be linked to the {1} {2} object.  
 	    // This is probably a temporary condition due to other user activity on the Ganymede server."
 	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-					      ts.l("bind.busy_new_temp", this.toString(), remobj.getLabel(), remobj.getTypeName()));
+					      ts.l("bind.busy_new_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
 	  }
       }
 
@@ -1596,7 +1596,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
 		    // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}."
 		    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-						      ts.l("bind.busy_old", this.toString(), remobj.getLabel(), remobj.getTypeName(), edit_username, edit_hostname));
+						      ts.l("bind.busy_old", this.getName(), remobj.getLabel(), remobj.getTypeName(), edit_username, edit_hostname));
 		  }
 		catch (NullPointerException ex)
 		  {
@@ -1604,7 +1604,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    // "Field {0} could not be unlinked from the {1} {2} object.  
 		    // This is probably a temporary condition due to other user activity on the Ganymede server."
 		    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-						      ts.l("bind.busy_old_temp", this.toString(), remobj.getLabel(), remobj.getTypeName()));
+						      ts.l("bind.busy_old_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
 		  }
 	      }
 	  }
@@ -1869,7 +1869,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	// "InvidDBField.establish(): can''t link to deleted object"
 	// "Couldn''t establish a new linkage in field {0} because object {1} has been deleted."
 	return Ganymede.createErrorDialog(ts.l("establish.deletion_sub"),
-					  ts.l("establish.deletion_text", this.toString(), getOwner().getLabel()));
+					  ts.l("establish.deletion_text", this.getName(), getOwner().getLabel()));
       }
 
     if (isVector())
