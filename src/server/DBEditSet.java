@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.120 $
-   Last Mod Date: $Date: 2002/04/03 02:32:29 $
+   Version: $Revision: 1.121 $
+   Last Mod Date: $Date: 2002/04/03 17:15:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1100,6 +1100,9 @@ public class DBEditSet {
 		retVal = ex.getReturnVal();
 	      }
 	  }
+
+	// retVal could be set by either commitPhase1() or
+	// commit_checkObjectMissingFields()
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
