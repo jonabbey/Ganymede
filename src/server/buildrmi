@@ -3,8 +3,8 @@
 # Ganymede Server RMI build script
 #
 # Release: $Name:  $
-# Version: $Revision: 1.8 $
-# Date: $Date: 2000/09/08 02:02:28 $
+# Version: $Revision: 1.9 $
+# Date: $Date: 2000/11/23 06:14:35 $
 #
 ############################################################
 
@@ -21,7 +21,7 @@ cd $builddir
 
 # Load configuration information
 
-. config.sh
+. ./config.sh
 
 CLASSPATH=$CLASSDIR:$CLASSPATH; export CLASSPATH
 RMICOMPILER=$JAVADIR/rmic; export RMICOMPILER
