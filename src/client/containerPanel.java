@@ -6,8 +6,8 @@
 
     Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.90 $
-   Last Mod Date: $Date: 1999/02/23 00:36:28 $
+   Version: $Revision: 1.91 $
+   Last Mod Date: $Date: 1999/03/12 20:47:16 $
     Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -3000,7 +3000,13 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     objectHash.put(df, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), df);
+
+    if (debug) {
+      println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
+    }
+
     df.setEditable(editable && fieldInfo.isEditable());
+    df.setEnabled(editable && fieldInfo.isEditable());
 
     Date date = ((Date)fieldInfo.getValue());
     

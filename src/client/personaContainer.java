@@ -5,8 +5,8 @@
    a panel for handling User's personae.
    
    Created: 15 January 1999
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:04:19 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/03/12 20:47:18 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
@@ -89,9 +89,6 @@ class personaContainer extends JScrollPane implements Runnable{
     createNew,
     editable;
 
-  int
-    index;
-
   JProgressBar
     progressBar;
 
@@ -102,7 +99,7 @@ class personaContainer extends JScrollPane implements Runnable{
 
   /* -- */
 
-  public personaContainer(Invid invid, int index, boolean editable, personaPanel pp, db_object object)
+  public personaContainer(Invid invid, boolean editable, personaPanel pp, db_object object)
   {
     if (object == null)
       {
@@ -111,7 +108,6 @@ class personaContainer extends JScrollPane implements Runnable{
 
     this.invid = invid;
     this.object = object;
-    this.index = index;
     this.pp = pp;
     gc = pp.gc;
     this.editable = editable;
@@ -143,7 +139,7 @@ class personaContainer extends JScrollPane implements Runnable{
 
 	if ((label != null) && (!label.equals("null")))
 	  {
-	    pp.middle.setTitleAt(index, label);
+	    pp.middle.setTitleAt(pp.panels.indexOf(this), label);
 	    pp.middle.repaint();
 	  }
 	

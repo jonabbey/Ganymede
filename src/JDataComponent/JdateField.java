@@ -5,8 +5,8 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.24 $
-   Last Mod Date: $Date: 1999/02/10 04:57:59 $
+   Version: $Revision: 1.25 $
+   Last Mod Date: $Date: 1999/03/12 20:45:41 $
    Release: $Name:  $
 
    Module By: Navin Manohar
@@ -86,7 +86,8 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
     allowCallback = false,
     changed = false, 
     limited,
-    unset;
+    unset,
+    iseditable;
 
   private JsetValueCallback callback = null;
 
@@ -183,6 +184,10 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	System.err.println("JdateField(): date = " + date);
       }
 
+    this.iseditable = iseditable;
+
+
+
     if (date == null)
       {
 	my_date = null; // new Date();
@@ -239,6 +244,8 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
     buttonPanel.add(_calendarButton,"West");
 
     // don't need the clear button if it is not editable
+
+
 
     if (iseditable)
       {
@@ -335,9 +342,11 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
   {
     try
       {
-	_calendarButton.setEnabled(enabled);
+	//	_calendarButton.setEnabled(enabled);
+	//_calendarButton.setVisible(enabled);
 	_clearButton.setEnabled(enabled);
-	_date.setEnabled(enabled);
+	_clearButton.setVisible(enabled);
+	//	_date.setEnabled(enabled);
       }
     catch (NullPointerException e) {}  // the buttons might still be null
   }
