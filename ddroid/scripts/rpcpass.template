@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Directory Droid rpcpass client script
+# Ganymede rpcpass client script
 #
-# This script is designed to run the Directory Droid rpcpass client,
+# This script is designed to run the Ganymede rpcpass client,
 # which is designed to work with the patched rpc.yppasswdd from the
 # Linux NIS kit.
 #
@@ -14,7 +14,7 @@
 # Where the p:, s:, and g: fields are each optional.
 #
 # After reading this line from stdin, rpcpass will connect to the
-# Directory Droid server and change the password and/or shell.  If
+# Ganymede server and change the password and/or shell.  If
 # this operation succeeds, rpcpass will emit a single line to stdout,
 #
 # OK\n
@@ -46,4 +46,4 @@ trap "echo Aborted" 2
 
 export CLASSPATH
 
-$JAVA -mx32m arlut.csd.ddroid.client.rpcpass properties=$PROPERTIES
+$JAVA -mx32m arlut.csd.ganymede.client.rpcpass properties=$PROPERTIES

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Directory Droid XML client script
+# Ganymede XML client script
 #
 # Usage: xmlclient username=<username> [password=<password>] <xmlfilename>
 #
@@ -19,7 +19,7 @@
 # script
 
 JAVA=/opt/bin/java
-CLASSPATH=/v/site/packages/ganymede/etc/ddroid.jar:/v/site/packages/swing-1.0/swingall.jar
+CLASSPATH=/v/site/packages/ganymede/etc/ganymede.jar:/v/site/packages/swing-1.0/swingall.jar
 PROPERTIES=/opt/depot/ganymede/etc/ganymede.properties
 
 ############################################### 
@@ -29,7 +29,7 @@ trap "echo Aborted" 2
 export CLASSPATH
 
 stty -echo
-$JAVA arlut.csd.ddroid.client.xmlclient properties=$PROPERTIES $*;SAVE=$?
+$JAVA arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES $*;SAVE=$?
 stty echo
 
 exit $SAVE

@@ -1,6 +1,6 @@
 #!/opt/bin/perl5
 #
-# Install script for Directory Droid Server
+# Install script for Ganymede Server
 #
 # Last Mod Date: $Date$
 # Last Revision Changed: $Rev$
@@ -61,14 +61,14 @@ chdir($rootdir);
 %descrip = ("JVM" => "Where are the JDK binaries installed?",
             "SERVERINSTALL" => "Where should the server tree be installed?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
-	    "REGISTRYPORT" => "What port should the RMI registry supporting Directory Droid run on?",
-	    "MAILHOST" => "What mailhost should Directory Droid use to send out diagnostic mail?\n\t(Leaving this blank will cause Directory Droid to not send any emails)",
-	    "RETURNADDR" => "What email address should Directory Droid sign on email that it sends out?",
-	    "SUPERNAME" => "What name do you want the Directory Droid superuser account to have?",
+	    "REGISTRYPORT" => "What port should the RMI registry supporting Ganymede run on?",
+	    "MAILHOST" => "What mailhost should Ganymede use to send out diagnostic mail?\n\t(Leaving this blank will cause Ganymede to not send any emails)",
+	    "RETURNADDR" => "What email address should Ganymede sign on email that it sends out?",
+	    "SUPERNAME" => "What name do you want the Ganymede superuser account to have?",
 	    "SUPERPASS" => "What password do you want the superuser account to have?",
-	    "MONITORNAME" => "What name do you want the Directory Droid monitor account to have?",
+	    "MONITORNAME" => "What name do you want the Ganymede monitor account to have?",
 	    "MONITORPASS" => "What password do you want the monitor account to have?",
-	    "HELPWEB" => "What URL is the Directory Droid help web at (leave default for now)?",
+	    "HELPWEB" => "What URL is the Ganymede help web at (leave default for now)?",
 	   );
 
 $template = "scripts/server.properties.template";
@@ -81,7 +81,7 @@ $| = 1;
 
 print <<ENDINTRO;
 
-Directory Droid Server Install Script
+Ganymede Server Install Script
 -------------------------------------
 
 ENDINTRO
@@ -97,9 +97,9 @@ if (!$failure) {
   exit;
 }
 
-if (!-f "jars/ddroidServer.jar") {
-  print "Error couldn't find ddroidServer.jar file.\n";
-  print "Be sure and do an 'ant jars' after building the Directory Droid server.\n";
+if (!-f "jars/ganymedeServer.jar") {
+  print "Error couldn't find ganymedeServer.jar file.\n";
+  print "Be sure and do an 'ant jars' after building the Ganymede server.\n";
   exit;
 }
 
@@ -209,13 +209,13 @@ copy("CREDITS", "$installdir/CREDITS"); print ".";
 copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
 copy("KNOWNBUGS", "$installdir/KNOWNBUGS"); print ".";
 
-copy("jars/ddroidServer.jar", "$installdir/jars/ddroidServer.jar"); print ".";
+copy("jars/ganymedeServer.jar", "$installdir/jars/ganymedeServer.jar"); print ".";
 copy("jars/gnu-regexp-1.1.4.jar", "$installdir/jars/gnu-regexp-1.1.4.jar"); print ".";
 &copydir("src/jython", "$installdir/jython"); print ".";
 
 # for the xmlclient, go ahead and install the client jar file
 
-copy("jars/ddroid.jar", "$installdir/jars/ddroid.jar"); print ".";
+copy("jars/ganymede.jar", "$installdir/jars/ganymede.jar"); print ".";
 
 copy("scripts/motd.html", "$installdir/db/text/motd.html"); print ".";
 copy("scripts/motd.txt", "$installdir/db/text/motd.txt"); print ".";
@@ -273,7 +273,7 @@ chmod 0640, "$installdir/ganymede.properties";
 
 # Copy and process the runServer script into place
 
-print "\nCustomizing Directory Droid runServer script\n";
+print "\nCustomizing Ganymede runServer script\n";
 
 $version = &identifyjvm($vars{"JVM"}."/java");
 
@@ -287,7 +287,7 @@ if ($version != 2) {
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "RMIREGISTRY" => $vars{"JVM"}."/rmiregistry",
                "PROPERTIES" => "$installdir/ganymede.properties",
-               "CLASSPATH" => "$installdir/jars/ddroidServer.jar:$installdir/jars/gnu-regexp-1.1.4.jar:$installdir/schema/custom.jar:$installdir/jars/antlr.jar:$installdir/jython/jython.jar:$installdir/jython/jython-lib.jar",
+               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/jars/gnu-regexp-1.1.4.jar:$installdir/schema/custom.jar:$installdir/jars/antlr.jar:$installdir/jython/jython.jar:$installdir/jython/jython-lib.jar",
 	       "RMIPORT" => $vars{"REGISTRYPORT"},
 	       "INSTALLDIR" => $installdir);
 
@@ -356,7 +356,7 @@ chmod 0750, "$installdir/bin/logscan.pl";
 
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "PROPERTIES" => "$installdir/ganymede.properties",
-	       "CLASSPATH" => "$installdir/jars/ddroid.jar");
+	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
 
 open INPUT, "scripts/xmlclient.template" or die "Couldn't open xmlclient template!";
 open OUTPUT, ">$installdir/bin/xmlclient" or die "Couldn't write xmlclient";
@@ -388,7 +388,7 @@ print <<ENDFINAL;
 
 ------------------------------
 
-The Directory Droid server was successfully installed in $installdir.
+The Ganymede server was successfully installed in $installdir.
 
 Done
 

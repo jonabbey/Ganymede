@@ -1,6 +1,6 @@
 #!/opt/bin/perl5
 #
-# Unix Install script for Directory Droid client stuff
+# Unix Install script for Ganymede client stuff
 #
 # Last Revision Changed: $Rev$
 # Last Changed By: $Author$
@@ -41,7 +41,7 @@ chdir($rootdir);
 
 %descrip = ("JVM" => "Where are the Java binaries installed?",
 	    "SYSTEMNAME" => "What is the name of the system that the server will run on?",
-	    "REGISTRYPORT" => "What port is the RMI registry supporting Directory Droid running on?",
+	    "REGISTRYPORT" => "What port is the RMI registry supporting Ganymede running on?",
             "CLIENTINSTALL" => "Where should the client binaries be installed?");
 
 $template = "scripts/client.properties.template";
@@ -54,7 +54,7 @@ $| = 1;
 
 print <<ENDINTRO;
 
-Directory Droid Client Install Script
+Ganymede Client Install Script
 -------------------------------------
 
 ENDINTRO
@@ -70,9 +70,9 @@ if (!$failure) {
   exit;
 }
 
-if (!-f "jars/ddroid.jar") {
-  print "Error couldn't find ddroid.jar file.\n";
-  print "Be sure and do an 'ant jars' after building the Directory Droid server.\n";
+if (!-f "jars/ganymede.jar") {
+  print "Error couldn't find ganymede.jar file.\n";
+  print "Be sure and do an 'ant jars' after building the Ganymede server.\n";
   exit;
 }
 
@@ -159,15 +159,15 @@ $installdir = $vars{"CLIENTINSTALL"};
 open OUTPUT, ">$installdir/README" or die "Couldn't open $installdir/README!";
 print OUTPUT <<ENDREADME;
 
-Directory Droid Clients
+Ganymede Clients
 -----------------------
 
-This directory contains the clients for the Directory Droid directory
+This directory contains the clients for the Ganymede directory
 management system.
 
 The bin directory contains the actual executable clients.  These
 clients are actually bourne shell scripts that invoke the Java VM on
-the Directory Droid client classes, held in the jars directory.
+the Ganymede client classes, held in the jars directory.
 
 The client scripts were customized at install time with their
 installation location.  If you move these client scripts to
@@ -176,9 +176,9 @@ their new location, or provide a symbolic link from the old
 client installation directory to the new location.
 
 The client.properties file in this directory is consulted by the
-Directory Droid clients to determine where the Directory Droid server
+Ganymede clients to determine where the Ganymede server
 is.  If you want to retarget the clients to another location for the
-Directory Droid server, you should be able to accomplish this by
+Ganymede server, you should be able to accomplish this by
 simply editing the client.properties file.
 
 ENDREADME
@@ -189,8 +189,8 @@ chmod 0644, "$installdir/README"; print ".";
 copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
 copy("README.xml", "$installdir/README.xml"); print ".";
 
-copy("jars/ddroid.jar", $installdir."/jars/ddroid.jar"); print ".";
-copy("jars/ddroidAdmin.jar", $installdir."/jars/ddroidAdmin.jar"); print ".";
+copy("jars/ganymede.jar", $installdir."/jars/ganymede.jar"); print ".";
+copy("jars/ganymedeAdmin.jar", $installdir."/jars/ganymedeAdmin.jar"); print ".";
 
 # Copy and process the properties file into place
 
@@ -219,16 +219,16 @@ close OUTPUT;
 
 # Copy and process the ganymede script into place
 
-print "\nCustomizing ddroid script\n";
+print "\nCustomizing Ganymede script\n";
 
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "PROPERTIES" => $installdir."/client.properties",
-	       "CLASSPATH" => $installdir."/jars/ddroid.jar");
+	       "CLASSPATH" => $installdir."/jars/ganymede.jar");
 
-$template = "scripts/ddroid.template";
+$template = "scripts/ganymede.template";
 
 open INPUT, "$template" or die "Couldn't open $template!";
-open OUTPUT, ">".$installdir."/bin/ddroid" or die "Couldn't write ddroid";
+open OUTPUT, ">".$installdir."/bin/ganymede" or die "Couldn't write ganymede";
 
 while (<INPUT>) {
 
@@ -245,7 +245,7 @@ while (<INPUT>) {
 close INPUT;
 close OUTPUT;
 
-chmod 0755, "$installdir/bin/ddroid";
+chmod 0755, "$installdir/bin/ganymede";
 
 # Copy and process the xmlclient script into place
 
@@ -253,7 +253,7 @@ print "\nCustomizing xmlclient script\n";
 
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "PROPERTIES" => "$installdir/client.properties",
-	       "CLASSPATH" => "$installdir/jars/ddroid.jar");
+	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
 
 open INPUT, "scripts/xmlclient.template" or die "Couldn't open xmlclient template!";
 open OUTPUT, ">$installdir/bin/xmlclient" or die "Couldn't write xmlclient";
@@ -275,18 +275,18 @@ close OUTPUT;
 
 chmod 0755, "$installdir/bin/xmlclient";
 
-# Copy and process the ddroidAdmin script into place
+# Copy and process the ganymedeAdmin script into place
 
-print "\nCustomizing ddroidAdmin script\n";
+print "\nCustomizing ganymedeAdmin script\n";
 
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "PROPERTIES" => "$installdir/client.properties",
-	       "CLASSPATH" => "$installdir/jars/ddroidAdmin.jar");
+	       "CLASSPATH" => "$installdir/jars/ganymedeAdmin.jar");
 
-$template = "scripts/ddroidAdmin.template";
+$template = "scripts/ganymedeAdmin.template";
 
 open INPUT, "$template" or die "Couldn't open $template!";
-open OUTPUT, ">$installdir/bin/ddroidAdmin" or die "Couldn't write ddroidAdmin";
+open OUTPUT, ">$installdir/bin/ganymedeAdmin" or die "Couldn't write ganymedeAdmin";
 
 while (<INPUT>) {
 
@@ -303,7 +303,7 @@ while (<INPUT>) {
 close INPUT;
 close OUTPUT;
 
-chmod 0755, "$installdir/bin/ddroidAdmin";
+chmod 0755, "$installdir/bin/ganymedeAdmin";
 
 # Copy and process the rpcpass script into place
 
@@ -311,7 +311,7 @@ print "\nCustomizing rpcpass script\n";
 
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
 	       "PROPERTIES" => "$installdir/client.properties",
-	       "CLASSPATH" => "$installdir/jars/ddroid.jar");
+	       "CLASSPATH" => "$installdir/jars/ganymede.jar");
 
 open INPUT, "scripts/rpcpass.template" or die "Couldn't open rpcpass template!";
 open OUTPUT, ">$installdir/bin/rpcpass" or die "Couldn't write rpcpass";

@@ -22,5 +22,5 @@ echo "Running Ganymede Admin Console"
 
 export CLASSPATH
 
-$JAVA -Xmx32m arlut.csd.ddroid.admin.GASHAdmin $PROPERTIES
+$JAVA -Xmx32m arlut.csd.ganymede.admin.GASHAdmin $PROPERTIES
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Directory Droid stopServer Script
+# Ganymede stopServer Script
 #
 # Arguments: 
 #
@@ -22,7 +22,7 @@
 JAVA=/usr/bin/java
 RMIREGISTRY=/usr/bin/rmiregistry
 PROPERTIES=ganymede.properties
-CLASSPATH=jars/ddroidServer.jar:jars/custom.jar
+CLASSPATH=jars/ganymedeServer.jar:jars/custom.jar
 
 
 ############################################### 
@@ -32,5 +32,5 @@ trap "echo Aborted" 2
 export CLASSPATH
 
 stty -echo
-$JAVA -ms32m -mx128m arlut.csd.ddroid.server.stopServer properties=$PROPERTIES $&
+$JAVA -ms32m -mx128m arlut.csd.ganymede.server.stopServer properties=$PROPERTIES $&
 stty echo

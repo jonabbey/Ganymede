@@ -1,8 +1,8 @@
 #!/opt/bin/perl5
 #
-# This script is designed to walk through the Directory Droid package
+# This script is designed to walk through the Ganymede package
 # and make all the build scripts.  It is run by the configure script
-# in the root of the Directory Droid distribution.
+# in the root of the Ganymede distribution.
 #
 # Last Revision Changed: $Rev$
 # Last Changed By: $Author$
@@ -13,7 +13,7 @@
 #
 ############################################################
 
-die "We require Perl 5.003 or greater to install Directory Droid." if $] < 5.003;
+die "We require Perl 5.003 or greater to install Ganymede." if $] < 5.003;
 
 use File::Copy;
 use Cwd;
@@ -215,22 +215,22 @@ write_install("installClient.in", "installClient");
 write_install("installWeb.in", "installWeb");
 write_install("installServer.in", "installServer");
 
-if (-f "$rootdir/jars/ddroidServer.jar") {
+if (-f "$rootdir/jars/ganymedeServer.jar") {
 print <<ENDCODA;
 Done.
 
-Directory Droid is now configured for installation.  You can now run
+Ganymede is now configured for installation.  You can now run
 the installServer, installClient, and installWeb scripts to install
-the Directory Droid software.
+the Ganymede software.
 
 ENDCODA
 } else {
 print <<ENDCODA2;
 Done.
 
-The Directory Droid distribution directory is now configured for compilation.
+The Ganymede distribution directory is now configured for compilation.
 You can now cd to the src directory and run 'ant' followed by 'ant
-jars' to compile Directory Droid.
+jars' to compile Ganymede.
 
 ENDCODA2
 }
