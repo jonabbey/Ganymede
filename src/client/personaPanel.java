@@ -24,7 +24,7 @@ public class personaPanel extends JPanel implements ActionListener{
   final static boolean debug = true;
 
   framePanel
-    parent;
+    fp;
 
   invid_field
     field;
@@ -52,29 +52,29 @@ public class personaPanel extends JPanel implements ActionListener{
   EmptyBorder
     empty = new EmptyBorder(new Insets(7,7,7,7));
 
-  public personaPanel(invid_field field, boolean editable, framePanel parent) 
+  public personaPanel(invid_field field, boolean editable, framePanel fp) 
   {
     this.field = field;
     this.editable = editable;
-    this.parent = parent;
+    this.fp = fp;
 
     setLayout(new BorderLayout());
 
     // Create the button panel for the bottom
     JPanel bottom = new JPanel(false);
-    bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
+    //bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
 
     add = new JButton("Create");
-    add.setMaximumSize(add.getPreferredSize());
+    //add.setMaximumSize(add.getPreferredSize());
     add.addActionListener(this);
     delete = new JButton("Delete");
-    delete.setMaximumSize(delete.getPreferredSize());
+    //delete.setMaximumSize(delete.getPreferredSize());
     delete.addActionListener(this);
 
-    bottom.add(Box.createHorizontalGlue());
+    //bottom.add(Box.createHorizontalGlue());
     bottom.add(add);
     bottom.add(delete);
-    bottom.add(Box.createHorizontalGlue());
+    //bottom.add(Box.createHorizontalGlue());
 
     add("South", bottom);
 
@@ -105,7 +105,7 @@ public class personaPanel extends JPanel implements ActionListener{
 	Thread t = new Thread(pc);
 	t.start();
 
-	middle.addTab("", pc);
+	middle.addTab("Persona " + i, pc);
       }
 
     // Show the first one(will just be a progress bar for now)
@@ -131,7 +131,7 @@ public class personaPanel extends JPanel implements ActionListener{
 	Thread t = new Thread(pc);
 	t.start();
 
-	middle.addTab("", pc);
+	middle.addTab("New Persona " + index, pc);
 
 	pc.waitForLoad();
 
@@ -150,13 +150,17 @@ public class personaPanel extends JPanel implements ActionListener{
 
 	personaContainer pc = (personaContainer)panels.get(new Integer(middle.getSelectedIndex()));
 	Invid invid = pc.getInvid();
-	
+
+	if (debug)
+	  {
+	    System.out.println("invid to delete: " + invid);
+	  }
 
 	try
 	  {
-	    Invid user = parent.object.getInvid();
+	    Invid user = fp.object.getInvid();
 
-	    removed = parent.object.getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
+	    removed = fp.object.getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
 
 	    if (removed)
 	      {
@@ -165,7 +169,7 @@ public class personaPanel extends JPanel implements ActionListener{
 		    System.out.println("removed the element from the field ok");
 		  }
 
-		deleted = parent.getgclient().getSession().remove_db_object(invid);
+		deleted = fp.getgclient().getSession().remove_db_object(invid);
 	      }
 	    else
 	      {
@@ -191,9 +195,11 @@ public class personaPanel extends JPanel implements ActionListener{
 
 	if (deleted && removed)
 	  {
+	    System.out.println("Selected number: " + middle.getSelectedIndex());
+	    System.out.println("Deleting number: " + pc.index);
 	    middle.removeTabAt(pc.index);
-	    middle.invalidate();
-	    validate();
+	    //middle.invalidate();
+	    //validate();
 	  }
 	else
 	  {
@@ -218,7 +224,7 @@ class personaContainer extends JScrollPane implements Runnable{
     invid;
 
   personaPanel
-    parent;
+    pp;
 
   boolean
     createNew,
@@ -233,16 +239,16 @@ class personaContainer extends JScrollPane implements Runnable{
   JPanel
     progressPane;
 
-  public personaContainer(Invid invid, int index, boolean editable,personaPanel parent)
+  public personaContainer(Invid invid, int index, boolean editable,personaPanel pp)
   {
-    this(invid, index, editable, parent, false);
+    this(invid, index, editable, pp, false);
   }
 
-  public personaContainer(Invid invid, int index, boolean editable, personaPanel parent, boolean createNew)
+  public personaContainer(Invid invid, int index, boolean editable, personaPanel pp, boolean createNew)
   {
     this.invid = invid;
     this.index = index;
-    this.parent = parent;
+    this.pp = pp;
     this.editable = editable;
     this.createNew = createNew;
 
@@ -266,43 +272,43 @@ class personaContainer extends JScrollPane implements Runnable{
 	if (createNew)
 	  {
 	    // First set up the back linking
-	    db_object newObject = parent.parent.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase);
-	    Invid user = parent.parent.object.getInvid();
+	    db_object newObject = pp.fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase);
+	    Invid user = pp.fp.object.getInvid();
 	    
-	    parent.parent.object.getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
+	    pp.fp.object.getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
 	    newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);
 	    
-	    parent.middle.setTitleAt(index, "New persona");
+	    pp.middle.setTitleAt(index, "New persona");
 	    // Then add that puppy
 	    containerPanel cp = new containerPanel(newObject,
 						   editable,
-						   parent.parent.getgclient(), parent.parent.getWindowPanel(), 
-						   parent.parent, progressBar);
-	    cp.setBorder(parent.empty);
+						   pp.fp.getgclient(), pp.fp.getWindowPanel(), 
+						   pp.fp, progressBar);
+	    cp.setBorder(pp.empty);
 	    setViewportView(cp);
 	  }
 	else if (editable)
 	  {
-	    db_object object = parent.parent.getgclient().getSession().edit_db_object(invid);
-	    parent.middle.setTitleAt(index, object.getLabel());
+	    db_object object = pp.fp.getgclient().getSession().edit_db_object(invid);
+	    pp.middle.setTitleAt(index, object.getLabel());
 	    containerPanel cp = new containerPanel(object,
 						   editable,
-						   parent.parent.getgclient(), parent.parent.getWindowPanel(), parent.parent,
+						   pp.fp.getgclient(), pp.fp.getWindowPanel(), pp.fp,
 						   progressBar);
-	    cp.setBorder(parent.empty);
+	    cp.setBorder(pp.empty);
 	    setViewportView(cp);
 	  }
 	else
 	  {
-	    db_object object = parent.parent.getgclient().getSession().view_db_object(invid);
-	    parent.middle.setTitleAt(index, object.getLabel());
+	    db_object object = pp.fp.getgclient().getSession().view_db_object(invid);
+	    pp.middle.setTitleAt(index, object.getLabel());
 	    containerPanel cp = new containerPanel(object,
 						   editable,
-						   parent.parent.getgclient(), 
-						   parent.parent.getWindowPanel(), 
-						   parent.parent,
+						   pp.fp.getgclient(), 
+						   pp.fp.getWindowPanel(), 
+						   pp.fp,
 						   progressBar);
-	    cp.setBorder(parent.empty);
+	    cp.setBorder(pp.empty);
 	    setViewportView(cp);
 	  }
       }
@@ -318,9 +324,8 @@ class personaContainer extends JScrollPane implements Runnable{
 	System.out.println("Done with thread in personaPanel");
       }
 
-    invalidate();
-    parent.invalidate();
-    parent.parent.validate();
+    //invalidate();
+    //validate();
 
     this.notifyAll();
   }
