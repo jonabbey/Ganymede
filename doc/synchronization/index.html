@@ -71,16 +71,16 @@
     doesn't matter whether any previous synchronizations were
     successful or not, because each synchronization will contain a
     complete description of the desired configuration for the target
-    service.  This means that missing a synchronization because the
-    target directory service is temporarily unavailable is no problem.
-    The target directory will just catch up the next time a
-    synchronization occurs.  The inherent redundancy of this approach
-    can make the synchronization process very robust, but the downside
-    is that a full state synchronization can be very time consuming.
-    In addition, if it isn't possible to efficiently wipe and reload
-    the target directory service, a process of comparison must be
-    undertaken to calculate what has changed between the data written
-    out for the synchronization requires and the pre-existing
+    service.  This means that missing a synchronization (perhaps
+    because the target directory service is temporarily unavailable)
+    is no problem.  The target directory will just catch up the next
+    time a synchronization occurs.  The inherent redundancy of this
+    approach can make the synchronization process very robust, but the
+    downside is that a full state synchronization can be very time
+    consuming.  In addition, if it isn't possible to efficiently wipe
+    and reload the target directory service, a process of comparison
+    must be undertaken to calculate what has changed between the data
+    written out for the synchronization requires and the pre-existing
     configuration of the target directory service.  In some cases,
     including that of passwords in Active Directory, it may not even
     be possible to completely read the pre-existing data from the
@@ -155,11 +155,11 @@
     transaction-by-transaction incremental synchronization, you'll
     need some other way to get your target services into initial
     synchronization with the contents of the Ganymede data store.  The
-    Sync Channel Full State model is designed to be that way.  This
-    model is also what you'll use if a service that you normally
-    maintain with the Sync Channel Incremental model gets corrupted or
-    out of sync with your Ganymede server and you need to force a full
-    re-sync.</p>
+    Sync Channel Full State model is probably the way that you will
+    want to use.  This model is also useful if a service that you
+    normally maintain with the Sync Channel Incremental model gets
+    corrupted or out of sync with your Ganymede server and you need to
+    force a full re-sync.</p>
 
     <div align="center">
     <table border="1">
@@ -209,7 +209,8 @@
     NIS terminology, "rebuilding the BIND zone files" in DNS terms).</p>
 
     <p>Ganymede's approach to supporting these services is to
-    implement a two phase building approach, using the <a
+    implement a two phase building approach, using custom-written
+    subclasses of the <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">arlut.csd.ganymede.server.GanymedeBuilderTask</a>
     class.  When a transaction is committed in Ganymede, the <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeScheduler.html">
@@ -218,14 +219,15 @@
     builder task runs, it locks the Ganymede database to prevent any
     new transactions from committing and it executes <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>.
-    The builderPhase1() method scans the Ganymede database for whatever
-    objects are relevant to the builder task's synchronization duties
-    and writes that data out to disk, using whatever data format is
-    convenient for the purposes of that synchronization channel.  When
-    the builder task completes its scan of the Ganymede database and
-    writes out all its data, the builderPhase1() method returns, and
-    the Ganymede database is unlocked so that any pending transactions
-    can commit.</p>
+    The builderPhase1() method scans the Ganymede database for
+    whatever objects are relevant to the builder task's
+    synchronization duties and writes that data out to disk, using
+    whatever data format is convenient for the purposes of that
+    synchronization channel.  When the builder task has completed its
+    scan of the Ganymede database and all of its data has been written
+    out, the builderPhase1() method returns, and the Ganymede database
+    is unlocked so that any pending transactions can proceed
+    to commit.</p>
 
     <p>The builder tasks then runs <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2()</a>.
@@ -253,29 +255,27 @@
 
     <p>There are two difficulties with this synchronization model.
     The first is that by the time a builder task is executed by the
-    Ganymede Scheduler, several minutes might have passed, during which
-    time the Ganymede server will have completely forgotten about what
-    the Ganymede server's data looked like before the transactions
-    were committed.  Because of this, the GanymedeBuilderTask model is
-    completely incapable of doing delta-style builds.  The best that
-    it can do is to write out everything it knows to be true at the
-    time the builderPhase1() method is run, and to depend on the
-    external build process run by builderPhase2() to do a
-    before-and-after comparison between the previous synchronization
-    and the current one.  This is completely dependent on the external
-    build process having enough logic to save away the earlier
-    synchronization's data and carry out the comparison.</p>
+    Ganymede Scheduler, several minutes might have passed, during
+    which time the Ganymede server will have completely forgotten
+    about what the Ganymede server's data looked like before the
+    transactions were committed.  Because of this, the
+    GanymedeBuilderTask model is completely incapable of doing
+    delta-style builds.  The best that it can do is to write out
+    everything it knows to be true at the time the builderPhase1()
+    method is run, and to depend on the external build process run by
+    builderPhase2() to do any necessary before-and-after comparisons
+    between the synchronization and the previous target state.</p>
 
     <p>The second difficulty with the GanymedeBuilderTask model is
     that it depends on a lot of custom code being written in Java and
     compiled into the Ganymede server.  In order to create a custom
     GanymedeBuilderTask, the adopter must create his own subclass of
-    GanymedeBuilderTask and write all the logic for builderPhase1() and
-    builderPhase2().  Further, if the code in either of these methods
-    need to change, either to fix a bug or to respond to a change made
-    in the Ganymede server's schema, the server would have to be
-    stopped and restarted after compiling and loading the new version
-    of the builder task's code.</p>
+    GanymedeBuilderTask and write all the logic for builderPhase1()
+    and builderPhase2().  Further, if the code in either of these
+    methods needs to be changed, either to fix a bug or to respond to
+    a change made in the Ganymede server's schema, the server would
+    have to be stopped and restarted after compiling and loading the
+    new version of the builder task's code.</p>
 
     <p>The advantage of using the GanymedeBuilderTask system is that
     it is the only full state synchronization model that is fully
@@ -316,42 +316,56 @@
     class="filename">schema/custom_src</code> directory.  You then
     compile your code with the <code class="filename">build</code>
     script.  After you are sure that your code compiles successfully,
-    you must shut down the server and rebuild the <code
-    class="filename">custom.jar</code> file with the <code
-    class="filename">buildCustomJar</code> script.  You can then start
-    up your server and your new <a
+    you must shut down the server, rebuild the <a
+    href="../glossary.html#custom.jar">custom.jar</a> file with the
+    <code class="filename">buildCustomJar</code> script, and install
+    the rebuilt <a href="../glossary.html#custom.jar">custom.jar</a>
+    into the appropriate location.  You can then start up your server
+    and your new <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
-    subclass should be accessible to the Ganymede server.  Accessible,
-    but not yet linked into the Ganymede database for actual use.</p>
+    subclass should be available for use by the Ganymede server.
+    Available, but not yet configured for actual use.</p>
 
     <h4 id="creating_buildertask">Registering Your Builder Task For Execution</h4>
 
-    <p>Once you have updated your server's <code
-    class="filename">custom.jar</code> file with your new builder
-    task, you have to register your new builder task with the server.
-    You do this by creating a new <code class="type">Task</code>
-    object in the Ganymede server.  The <code class="type">Task</code>
-    Object type is fully described in the <a
+    <p>Once you have updated your server's <a
+    href="../glossary.html#custom.jar">custom.jar</a> file with your
+    new builder task, you have to register your new builder task with
+    the server.  You do this by creating a new <code
+    class="type">Task</code> object in the Ganymede server.  The <code
+    class="type">Task</code> Object type is fully described in the <a
     href="../server.html#servertasks">Ganymede Server
     Overview</a>.</p>
 
     <p>For a builder task, there are four fields you need to worry
-    about: <code class="type">Task Name</code>, <code
-    class="type">Task Class</code>, <code class="type">Run On
-    Transaction Commit</code>, and <code class="type">Option
-    Strings</code>.  The <code class="type">Task Name</code> field
-    controls the name of the Task as seen in the admin console's task
-    monitor display, and must be unique in the Ganymede server.  The
-    <code class="type">Task Class</code> field should contain the
-    fully qualified class name for your custom <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
-    subclass.  The <code class="type">Run On Transaction Commit</code>
-    checkbox should be checked to indicate that this task is to be
-    scheduled for execution as soon as possible after each transaction
-    is committed, and the <code class="type">Option Strings</code>
-    field is used to provide optional run-time configuration
-    information to builder tasks that are programmed to look for
-    it.</p>
+    about:</p>
+
+    <ul>
+      <li><p><code class="type">Task Name</code> -- The name of the Task
+      as seen in the admin console, must be unique in the Ganymede
+      server.</p></li>
+
+      <li><p><code class="type">Task Class</code> -- The fully qualified
+      class name for your custom <a
+      href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
+      subclass, as defined in your <a
+      href="../glossary.html#custom.jar">custom.jar</a> file.</p></li>
+
+      <li><p><code class="type">Run On Transaction Commit</code> -- A
+      check-box, should be checked to indicate that this task is to be
+      scheduled for automatic execution.</p></li>
+
+      <li>
+	<p><code class="type">Option Strings</code> -- A Vector String
+	field, used to provide optional run-time configuration
+	information to builder tasks that are programmed to look for
+	it.</p>
+
+	<p>The strings in the <code class="type">Option Strings</code>
+	field should all be in the form: <code class="example">key =
+	value</code>.</p>
+      </li>
+    </ul>
 
     <p>Below is an example of a builder task that has been
     registered in the Ganymede server.  It is configured to be
@@ -574,10 +588,14 @@ writing, and the use of the <a
 href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#enumerateObjects(short)">enumerateObjects()</a>
 method for iterating over objects of a given type.  Each of these
 methods take advantage of logic built in to the GanymedeBuilderTask
-class, and will help your builder task code behave properly.</p>
+class, and will help your builder task behave properly in the Ganymede
+environment.</p>
 
-<p>As you may notice above, baseChanged() and enumerateObjects() both
-take a numeric parameter (a short) to describe what object type the method is to operate on.</p>
+<p class="note">As you may notice above, baseChanged() and
+enumerateObjects() both take a numeric parameter (a short) to describe
+what object type the method is to operate on.  This is a common idiom
+in the internal Ganymede <a
+href="../javadoc/arlut/csd/ganymede/server/DBStore.html">DBStore</a> API.</p>
 
 <p>The overall effect of builderPhase1() is to look to see whether any
 users or groups, as defined in the userKit schema, have changed since
@@ -674,9 +692,6 @@ return early, the Ganymede Scheduler would consider the builder task
 completely finished, and it would feel free to run the task all over
 again, which might cause your builderPhase1() method to overwrite
 files that your external builder script is still working with.</p>
-
-<p>What I say to you three times is true.  Never let your external
-builder script return until it is truly finished with its build.</p>
 
 <pre class="listing">
 
