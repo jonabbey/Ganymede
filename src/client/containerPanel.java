@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.25 $ %D%
+    Version: $Revision: 1.26 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -707,7 +707,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     gbc.gridy = row;
 
     gbc.weightx = 1.0;
-    gbc.fill = GridBagConstraints.NONE;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(comp, gbc);
     panel.add(comp);
 
@@ -727,11 +727,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     //add("0 " + row + " lthH", l);
     //add("1 " + row + " lthH", comp);
-
+    gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
 
     gbc.weightx = 0.0;
-    gbc.fill = GridBagConstraints.NONE;
     gbc.gridx = 0;
     gbc.gridy = row;
     gbl.setConstraints(l, gbc);
@@ -739,7 +738,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     
     gbc.gridx = 1;
     gbc.weightx = 1.0;
-    gbc.fill = GridBagConstraints.NONE;
     gbl.setConstraints(comp, gbc);
     panel.add(comp);
 
