@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.90 $ %D%
+   Version: $Revision: 1.91 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -46,6 +46,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   public static gclient client;
 
   // ---
+
+  String
+    creditsMessage = null,
+    aboutMessage = null;
   
   // Image numbers
   final int NUM_IMAGE = 17;
@@ -160,6 +164,11 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
   helpPanel
     help = null;
 
+  messageDialog
+    motd = null,
+    credits = null,
+    about = null;
+
   Vector
     personae,
     ownerGroups = null;  // Vector of owner groups
@@ -210,6 +219,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     trash,
     creation,
     newToolbarIcon,
+    ganymede_logo,
     createDialogImage;
 
   public JLabel
@@ -246,6 +256,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     pMenuEditable= new treeMenu(),
     pMenuEditableCreatable = new treeMenu(),
     pMenuAllCreatable = new treeMenu();
+
   
   JMenuBar 
     menubar;
@@ -498,6 +509,21 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     showHelpMI.addActionListener(this);
     helpMenu.add(showHelpMI);
 
+    helpMenu.addSeparator();
+
+    // This uses action commands, so you don't need to globally declare these
+    JMenuItem showAboutMI = new JMenuItem("About Ganymede");
+    showAboutMI.addActionListener(this);
+    helpMenu.add(showAboutMI);
+
+    JMenuItem showCreditsMI = new JMenuItem("Credits");
+    showCreditsMI.addActionListener(this);
+    helpMenu.add(showCreditsMI);
+
+    JMenuItem showMOTDMI = new JMenuItem("Message of the day");
+    showMOTDMI.addActionListener(this);
+    helpMenu.add(showMOTDMI);
+
     menubar.add(fileMenu);
     menubar.add(LandFMenu);
     menubar.add(actionMenu);
@@ -540,6 +566,8 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	System.out.println("Loading images for tree");
       }
+
+    ganymede_logo = _myglogin.ganymede_logo;
 
     Image openFolder = PackageResources.getImageResource(this, "openfolder.gif", getClass());
     Image closedFolder = PackageResources.getImageResource(this, "folder.gif", getClass());
@@ -752,6 +780,21 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     pack();
     setSize(800, 600);
     show();
+
+    // Check for MOTD
+    setStatus("Checking MOTD");
+    try
+      {
+	StringBuffer m = session.getMessageHTML("motd", true);
+	if (m != null)
+	  {
+	    showMOTD(m.toString());
+	  }
+      }
+    catch ( RemoteException rx)
+      {
+	throw new RuntimeException("Could not get motd: " + rx);
+      }
     
     setStatus("Ready.");
   }
@@ -1184,6 +1227,94 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	}
     }
 
+  /**
+   * Show the About... dialog.
+   */
+
+  public void showAboutMessage()
+  {
+    if (about == null)
+      {
+	if (aboutMessage == null)
+	  {
+	    aboutMessage = "<head></head><h1>About Ganymede</h1><p>Ganymede is a moon of Jupiter.</p>";
+	  }
+
+	about = new messageDialog(this, "About Ganymede",  ganymede_logo);
+	about.setHtmlText(aboutMessage);
+      }
+
+    about.setVisible(true);
+
+  }
+
+  public void showCredits()
+  {
+    if (credits == null)
+      {
+	if (creditsMessage == null)
+	  {
+	    creditsMessage = ("<head></head><h1>Ganymede credits</h1>" +
+	      "<p>Ganymede has been under development for nearly 3 years now, in both planning and execution.  " +
+			      "The work has primarily been performed in the Computer Science Division of The Applied " +
+			      "Research Laboratories, The University of Texas at Austin, with support from CSD and ARL " +
+			      "management.</p>" +
+			      "<p>The development of Ganymede has benefited from the direct development " +
+			      "contributions of the following individuals:</p> " +
+			      " <h3>Jonathan Abbey, jonabbey@arlut.utexas.edu</h3>" +
+			      "<p>Jon initiated the Ganymede project with support from CSD and lab " +
+			      "management after shortcomings in the GASH system became apparent.  Jon " +
+			      "has been the primary architect and coder on the project, developing " +
+			      "the Ganymede server and admin console, and well as contributing the " +
+			      "table and tree GUI components used in both the admin console and " +
+			      "the primary client.</p>" +
+			      "<h3> Mike Mulvaney, mulvaney@arlut.utexas.edu</h3>" +
+			      "<p> Mike has worked on Ganymede continuously since joining the lab in " +
+			      "February of 1997.  The client as it currently stands is primarily " +
+			      "Mike's work.  In addition to the large bulk of client-side coding," +
+			      "Mike has contributed significantly to the design of the system " +
+			      "architecture as a whole.  Ganymede would be a far, far poorer thing " +
+			      "were it not for Mike. </p>");
+
+
+
+
+
+	  }
+	
+	credits = new messageDialog(this, "Credits", null);
+	credits.setHtmlText(creditsMessage);
+      }
+
+    credits.setVisible(true);
+  }
+
+  public void showMOTD()
+  {
+    // This will always get the MOTD, even if we've seen it
+    try
+      {
+	showMOTD((session.getMessageHTML("motd", false)).toString());
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get motd: " + rx);
+      }
+  }
+
+  public void showMOTD(String message)
+  {
+    if (motd == null)
+      {
+	motd = new messageDialog(client, "MOTD", null);
+      }
+    
+    motd.setHtmlText(message);
+    
+    motd.setVisible(true);
+  }
+
+  
   /**
    * Popup a dialog with the default title.
    */
@@ -1780,11 +1911,17 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
       {
 	Base base = (Base)node;
 	boolean canCreate = base.canCreate(getSession());
+	if (base.getTypeID() == SchemaConstants.PersonaBase)
+	  {
+	    canCreate = false;
+	  }
+
 	newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
 			       true, 
 			       OPEN_BASE, 
 			       CLOSED_BASE,
 			       canCreate ? pMenuEditableCreatable : pMenuEditable,
+			       
 			       canCreate);
 	shortToBaseNodeHash.put(((BaseNode)newNode).getTypeID(), newNode);
       }
@@ -3958,6 +4095,31 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     else if (command.equals("Help"))
       {
 	showHelpWindow();
+      }
+    else if (command.equals("About Ganymede"))
+      {
+	Thread thread = new Thread(new Runnable() {
+	  public void run() {
+	    showAboutMessage();
+	  }});
+	thread.start();
+      }
+    else if (command.equals("Credits"))
+      {
+	Thread thread = new Thread(new Runnable() {
+	  public void run() {
+	    showCredits();
+	  }});
+	thread.start();
+      }
+    else if (command.equals("Message of the day"))
+      {
+
+	Thread thread = new Thread(new Runnable() {
+	  public void run() {
+	    showMOTD();
+	  }});
+	thread.start();
       }
     else
       {
