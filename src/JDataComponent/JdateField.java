@@ -5,7 +5,7 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 */
@@ -28,8 +28,6 @@ import arlut.csd.JCalendar.*;
 import arlut.csd.JDataComponent.*;
 import arlut.csd.JDialog.*;
 
-//import oreilly.Dialog.*;
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                                       JdateField
@@ -44,7 +42,7 @@ import arlut.csd.JDialog.*;
 
 public class JdateField extends JPanel implements JsetValueCallback, ActionListener {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // ---
 
@@ -97,8 +95,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
   
   public JdateField()
   {
-    this(null,true,
-	 false,null,null);
+    this(null,true,false,null,null);
   }
   
   /**
@@ -118,6 +115,11 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		    Date minDate,
 		    Date maxDate)
   { 
+    if (debug)
+      {
+	System.err.println("JdateField(): date = " + date);
+      }
+
     if (date == null)
       {
 	my_date = null; // new Date();
@@ -127,9 +129,6 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	my_date = new Date(date.getTime());
       }
 
-    //    _myTimeZone.setStartRule(Calendar.APRIL,1,Calendar.SUNDAY,2*60*60*1000);
-    //_myTimeZone.setEndRule(Calendar.OCTOBER,-1,Calendar.SUNDAY,2*60*60*1000);
-    
     _myCalendar = new GregorianCalendar(_myTimeZone,Locale.getDefault());
     
     if (islimited)
@@ -154,7 +153,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
     
     // max date size: 04/45/1998
 
-    _date = new JstringField(10,
+    _date = new JstringField(12, // make it a bit wider than needed
 			     10,
 			     iseditable,
 			     false,
@@ -240,8 +239,10 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	  {
 	    // throw up an information dialog here
 	    
-	    JErrorDialog _infoD = new JErrorDialog(new JFrame(),"Date Field Error","There was an error communicating with the server!\n"+re.getMessage());
-
+	    JErrorDialog _infoD = new JErrorDialog(new JFrame(),
+						   "Date Field Error",
+						   "There was an error communicating with the server!\n" +
+						   re.getMessage());
 	  }
 
 	if (retval == true)
@@ -452,15 +453,21 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 			return retval;
 		      }
 		  }
-		else
+
+		try
 		  {
 		    setDate(d);
-		    _myCalendar.setTime(d);
+		  }
+		catch (IllegalArgumentException ex)
+		  {
+		    return false; // out of range
+		  }
 
-		    if (pCal != null)
-		      {
-			pCal.update();
-		      }
+		_myCalendar.setTime(d);
+		
+		if (pCal != null)
+		  {
+		    pCal.update();
 		  }
 	      }
 	    else 
@@ -504,6 +511,15 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	    throw new RuntimeException("Error: Invalid value embedded in JValueObject");
 	  }
 	
+	try
+	  {
+	    setDate((Date) obj);
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	    return false;	// out of range
+	  }
+
 	// The user has triggered an update of the date value
 	// in the _date field by choosing a date from the 
 	// JpopUpCalendar
@@ -532,15 +548,14 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 						       re.getMessage());
 	      }
 
-	    if (retval == true)
+	    if (!retval)
 	      {
 		if (debug)
 		  {
-		    System.err.println("Setting date from calendar to " + 
-				       (Date) obj);
+		    System.err.println("Resetting date to " + old_date);
 		  }
 		
-		setDate((Date) obj);
+		setDate(old_date);
 	      }
 	  }
 	else
