@@ -5,7 +5,7 @@
    Remote interface definition.
 
    Created: 21 July 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -74,10 +74,30 @@ public interface pass_field extends db_field {
   /**
    *
    * Method to obtain the SALT for a stored crypted password.  If the
-   * client is going to submit a pre-crypted password, it must be
-   * salted by the salt returned by this method.
-   * 
+   * client is going to submit a pre-crypted password for comparison
+   * via matchCryptText(), it must be salted by the salt returned by
+   * this method.
+   *  
    */
 
   String getSalt() throws RemoteException;
+
+  /**
+   *
+   * This method is used to set the password for this field,
+   * crypting it if this password field is stored crypted.
+   *
+   */
+
+  boolean setPlainTextPass(String text) throws RemoteException;
+
+  /**
+   *
+   * This method is used to set a pre-crypted password for this field.
+   * This method will return false if this password field is not
+   * stored crypted.
+   *
+   */
+
+  boolean setCryptPass(String text) throws RemoteException;
 }
