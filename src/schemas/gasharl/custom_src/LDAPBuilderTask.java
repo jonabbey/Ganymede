@@ -7,8 +7,8 @@
    
    Created: 22 March 2004
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2004/03/24 03:54:11 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2004/03/24 04:15:12 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,6 +86,9 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
   private static String dnsdomain = null;
   private static String buildScript = null;
   private static Runtime runtime = null;
+
+  private static String AppleOptions = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><dict><key>simultaneous_login_enabled</key><true/></dict></plist>";
+
 
   // ---
 
@@ -304,6 +307,15 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	writeLDIF(out, "cn", fullName);
       }
 
+    String homeDirectory = (String) user.getFieldValueLocal(userSchema.HOMEDIR);
+
+    if (homeDirectory != null)
+      {
+	writeLDIF(out, "homeDirectory", homeDirectory);
+      }
+
+    writeLDIF(out, "apple-mcxflags", AppleOptions);
+
     out.println();
   }
 
@@ -445,4 +457,10 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
     return outBuf.toString();
   }
+
+  /*
+
+  <?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0"> <dict> <key>simultaneous_login_enabled</key><true/></dict></plist>
+
+  */
 }
