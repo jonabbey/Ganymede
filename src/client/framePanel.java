@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -80,11 +80,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
     removal_date, 
     owner,       // Holds an ownerPanel
     notes,       // holds a notePanel
-    history,      // holds an historyPanel
     admin_history, // holds an adminHistoryPanel (only for adminPersonae)
     objects_owned;  // Holds an ownershipPanel
 
   JPanel
+    history,      // holds an historyPanel
     personae;
 
   Vector
@@ -249,7 +249,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       addNotesPanel();
 
       // Add the history tab
-      history = new JScrollPane();
+      //history = new JScrollPane();
+      history = new JPanel(new BorderLayout());
       pane.addTab("History", null, history);
       history_index = current++;
 
@@ -874,8 +875,27 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   void create_history_panel()
     {
       setStatus("Creating history panel");
-      history.getVerticalScrollBar().setUnitIncrement(15);
-      history.setViewportView(new historyPanel(getObjectInvid(), getgclient()));
+
+      try
+	{
+	  creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
+	  creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
+	  modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
+	  modifier_field = (string_field)object.getField(SchemaConstants.ModifierField);
+	}
+      catch (RemoteException rx)
+	{
+	  throw new RuntimeException("Could not get field information: " + rx);
+	}
+
+      //history.getVerticalScrollBar().setUnitIncrement(15);
+      //history.setViewportView(new historyPanel(getObjectInvid(), 
+      history.add("Center", new historyPanel(getObjectInvid(), 
+					       getgclient(), 
+					       creator_field, 
+					       creation_date_field, 
+					       modifier_field,
+					       modification_date_field));
 	
       createdList.addElement(new Integer(history_index));
       
@@ -907,21 +927,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
 	  println("Creating notes panel");
 	}
 
-      try
-	{
-	  creation_date_field = (date_field)object.getField(SchemaConstants.CreationDateField);
-	  creator_field = (string_field)object.getField(SchemaConstants.CreatorField);
-	  modification_date_field = (date_field)object.getField(SchemaConstants.ModificationDateField);
-	  modifier_field = (string_field)object.getField(SchemaConstants.ModifierField);
-	}
-      catch (RemoteException rx)
-	{
-	  throw new RuntimeException("Could not get field information: " + rx);
-	}
-
-      my_notesPanel = new notesPanel(notes_field, creator_field, creation_date_field, 
-				     modifier_field,
-				     modification_date_field, editable, this);
+      my_notesPanel = new notesPanel(notes_field, 
+				     editable, this);
 
       notes.getVerticalScrollBar().setUnitIncrement(15);
       notes.setViewportView(my_notesPanel);
