@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.161 $
-   Last Mod Date: $Date: 2001/12/05 18:46:59 $
+   Version: $Revision: 1.162 $
+   Last Mod Date: $Date: 2001/12/05 19:44:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -113,7 +113,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.161 $ $Date: 2001/12/05 18:46:59 $ $Name:  $
+ * @version $Revision: 1.162 $ $Date: 2001/12/05 19:44:09 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -3175,9 +3175,39 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   {
     committing = true;
 
+    // if we have enableOversight turned on, let's check and see if
+    // this object is currently consistent.  If it is not, and it was
+    // before this transaction started, report the problem.
+
+    // If this object is an inconsistent state and was before the
+    // transaction started, don't block the commit
+
     if (getGSession().enableOversight)
       {
-	return consistencyCheck(this);
+	ReturnVal retVal = consistencyCheck(this);
+
+	if (retVal == null || retVal.didSucceed())
+	  {
+	    return retVal;	// no problem
+	  }
+
+	if (original != null)
+	  {
+	    ReturnVal retVal2 = original.objectBase.getObjectHook().consistencyCheck(original);
+
+	    if (retVal2 != null && !retVal2.didSucceed())
+	      {
+		return null;	// we were already inconsistent, so don't complain
+	      }
+	    else
+	      {
+		return retVal;	// we were consistent before, so complain
+	      }
+	  }
+	else
+	  {
+	    return retVal;	// newly created inconsistent object, complain
+	  }
       }
     else
       {
