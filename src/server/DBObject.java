@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.106 $
-   Last Mod Date: $Date: 2000/11/10 05:04:54 $
+   Version: $Revision: 1.107 $
+   Last Mod Date: $Date: 2000/11/29 02:56:19 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.106 $ $Date: 2000/11/10 05:04:54 $
+ * @version $Revision: 1.107 $ $Date: 2000/11/29 02:56:19 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -855,15 +855,28 @@ public class DBObject implements db_object, FieldType, Remote {
 
 	definition = objectBase.fieldTable.get(fieldcode);
 
-	if (definition == null)
+	if (definition == null && fieldcode != SchemaConstants.BackLinksField)
 	  {
 	    System.err.println("What the heck?  Null definition for " + 
 			       objectBase.getName() + ", fieldcode = " + fieldcode +
 			       ", " + i + "th field in object");
 	  }
-	else
+	else if (fieldcode == SchemaConstants.BackLinksField)
 	  {
-	    //  System.err.println("Reading " + definition.getName() + " " + definition.getTypeDesc());
+	    // the backlinks field was always a vector of invids, so
+	    // now that we are no longer explicitly recording asymmetric
+	    // relationships with the backlinks field, we can just skip forward
+	    // in the database file and skip the backlinks info
+
+	    int count = in.readShort();
+
+	    while (count-- > 0)
+	      {
+		in.readShort();
+		in.readInt();
+	      }
+
+	    continue;
 	  }
 
 	type = definition.getType();

@@ -8,8 +8,8 @@
    
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2000/11/23 02:35:53 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2000/11/29 02:56:20 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -216,9 +216,13 @@ public interface SchemaConstants {
   final static short ModifierField = 7;	
 
   /**
-   * any miscellaneous pointers pointing to us are kept track of in
-   * this field if we don't have an explicit back-link field 
+   * <p>any miscellaneous pointers pointing to us are kept track of in
+   * this field if we don't have an explicit back-link field.</p>
+   *
+   * <p>This field is DEPRECATED, and should only be encountered in
+   * ganymede.db files from old versions of the Ganymede server.</p>
    */
+
   final static short BackLinksField = 8; 
 
   /**
