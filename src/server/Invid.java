@@ -10,7 +10,7 @@
    Data type for invid objects;
    
    Created: 11 April 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -38,7 +38,10 @@ import java.io.*;
  * relationships between objects.  Invid's are also used by the client to identify
  * objects to be viewed, edited, deleted, etc.  Basically whenever any code
  * in Ganymede deals with a reference to an object, it is done through the use
- * of Inivid's.
+ * of Invid's.
+ *
+ * @see arlut.csd.ganymede.InvidDBField
+ * @see arlut.csd.ganymede.Session
  *  
  */
 
