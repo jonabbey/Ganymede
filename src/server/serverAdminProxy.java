@@ -11,8 +11,8 @@
    
    Created: 31 January 2000
    Release: $Name:  $
-   Version: $Revision: 1.18 $
-   Last Mod Date: $Date: 2002/01/26 04:49:27 $
+   Version: $Revision: 1.19 $
+   Last Mod Date: $Date: 2002/01/26 06:02:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.adminEvent
  *
- * @version $Revision: 1.18 $ $Date: 2002/01/26 04:49:27 $
+ * @version $Revision: 1.19 $ $Date: 2002/01/26 06:02:50 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -101,7 +101,7 @@ public class serverAdminProxy implements Admin, Runnable {
    * admin console isn't responding.</p>
    */
 
-  private int maxBufferSize = 15; // only 10 kinds of things, most of which we coalesce/replace
+  private int maxBufferSize = 15; // only 10 kinds of things, all of which we coalesce/replace
 
   /**
    * <p>Our remote reference to the admin console client</p>
@@ -210,7 +210,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setServerStart(Date date) throws RemoteException
   {
-    replaceEvent(new adminEvent(adminEvent.SETSERVERSTART, date));
+    replaceEvent(adminEvent.SETSERVERSTART, date);
   }
 
   /**
@@ -220,7 +220,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setLastDumpTime(Date date) throws RemoteException
   {
-    replaceEvent(new adminEvent(adminEvent.SETLASTDUMPTIME, date));
+    replaceEvent(adminEvent.SETLASTDUMPTIME, date);
   }
 
   /**
@@ -230,7 +230,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setTransactionsInJournal(int trans) throws RemoteException
   {
-    replaceEvent(new adminEvent(adminEvent.SETTRANSACTIONS, new Integer(trans)));
+    replaceEvent(adminEvent.SETTRANSACTIONS, new Integer(trans));
   }
 
   /**
@@ -240,7 +240,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setObjectsCheckedOut(int objs) throws RemoteException
   {
-    replaceEvent(new adminEvent(adminEvent.SETOBJSCHECKOUT, new Integer(objs)));
+    replaceEvent(adminEvent.SETOBJSCHECKOUT, new Integer(objs));
   }
 
   /**
@@ -250,7 +250,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void setLocksHeld(int locks) throws RemoteException
   {
-    replaceEvent(new adminEvent(adminEvent.SETLOCKSHELD, new Integer(locks)));
+    replaceEvent(adminEvent.SETLOCKSHELD, new Integer(locks));
   }
 
   /**
@@ -265,7 +265,7 @@ public class serverAdminProxy implements Admin, Runnable {
     parmAry[0] = freeMem;
     parmAry[1] = totalMem;
 
-    replaceEvent(new adminEvent(adminEvent.SETMEMORYSTATE, parmAry));
+    replaceEvent(adminEvent.SETMEMORYSTATE, parmAry);
   }
 
   /**
@@ -275,7 +275,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeState(String state) throws RemoteException
   {
-    replaceEvent(new adminEvent(adminEvent.CHANGESTATE, state));
+    replaceEvent(adminEvent.CHANGESTATE, state);
   }
 
   /**
@@ -285,17 +285,6 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeStatus(String status) throws RemoteException
   {
-    this.changeStatus(status, false);
-  }
-
-  /**
-   * <p>This method is called by the Ganymede server to add to the
-   * admin console's log display.</p>
-   */
-
-  public void changeStatus(String status, boolean timeLabelled) throws RemoteException
-  {
-    StringBuffer stampedLineBuffer;
     adminEvent newLogEvent;
 
     /* -- */
@@ -309,20 +298,6 @@ public class serverAdminProxy implements Admin, Runnable {
 	throw new RemoteException("serverAdminProxy: console disconnected");
       }
 
-    stampedLineBuffer = new StringBuffer();
-
-    if (!timeLabelled)
-      {
-	stampedLineBuffer.append((new Date()).toString());
-	stampedLineBuffer.append(" ");
-	stampedLineBuffer.append(status);
-	stampedLineBuffer.append("\n");
-      }
-    else
-      {
-	stampedLineBuffer.append(status);
-      }
-
     synchronized (eventBuffer)
       {
 	// if we have another changeStatus event in the eventBuffer,
@@ -334,14 +309,14 @@ public class serverAdminProxy implements Admin, Runnable {
 	    // coalesce this append to the log message
 
 	    StringBuffer buffer = (StringBuffer) lookUp[adminEvent.CHANGESTATUS].param;
-	    buffer.append(stampedLineBuffer.toString());
+	    buffer.append(status);
 	    return;
 	  }
 
 	// if we didn't find an event to append to, go ahead and add a
 	// new CHANGESTATUS log update event to the eventBuffer
 
-	newLogEvent = new adminEvent(adminEvent.CHANGESTATUS, stampedLineBuffer);
+	newLogEvent = new adminEvent(adminEvent.CHANGESTATUS, status);
 
 	// queue the log evennt
 
@@ -363,7 +338,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeAdmins(String adminStatus) throws RemoteException
   {
-    replaceEvent(new adminEvent(adminEvent.CHANGEADMINS, adminStatus));
+    replaceEvent(adminEvent.CHANGEADMINS, adminStatus);
   }
 
   /**
@@ -376,7 +351,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeUsers(Vector entries) throws RemoteException
   {
-    replaceEvent(new adminEvent(adminEvent.CHANGEUSERS, entries));
+    replaceEvent(adminEvent.CHANGEUSERS, entries);
   }
 
   /**
@@ -389,7 +364,7 @@ public class serverAdminProxy implements Admin, Runnable {
 
   public void changeTasks(Vector tasks) throws RemoteException
   {
-    replaceEvent(new adminEvent(adminEvent.CHANGETASKS, tasks));
+    replaceEvent(adminEvent.CHANGETASKS, tasks);
   }
 
   /**
@@ -501,6 +476,10 @@ public class serverAdminProxy implements Admin, Runnable {
       {
 	if (eventBuffer.size() >= maxBufferSize)
 	  {
+	    // we shouldn't overflow here because we are replacing or
+	    // coalescing all of our events.. we shouldn't be able to
+	    // have more events in our buffer than we have event types
+
 	    throwOverflow();
 	  }
 
@@ -513,13 +492,18 @@ public class serverAdminProxy implements Admin, Runnable {
   /**
    * <p>private helper method in serverAdminProxy, used to add an
    * event to the proxy's event buffer.  If the buffer already
-   * contains an event of the same type as newEvent, the old event's
-   * contents will be replaced with the new, and the admin console
+   * contains an event of the same type as method, the old event's
+   * contents will be replaced with param, and the admin console
    * will never be notified of the old event's contents.</p>
    */
 
-  private void replaceEvent(adminEvent newEvent) throws RemoteException
+  private void replaceEvent(byte method, Object param) throws RemoteException
   {
+    if (method < adminEvent.FIRST || method > adminEvent.LAST)
+      {
+	throw new IllegalArgumentException("bad method code: " + method);
+      }
+
     if (done)
       {
 	// we have to throw a remote exception, since that's what
@@ -534,9 +518,9 @@ public class serverAdminProxy implements Admin, Runnable {
 	// if we have an instance of this event on our eventBuffer,
 	// update its parameter with the new event's info.
 
-	if (lookUp[newEvent.method] != null)
+	if (lookUp[method] != null)
 	  {
-	    lookUp[newEvent.method].param = newEvent.param;
+	    lookUp[method].param = param;
 	    return;
 	  }
 
@@ -547,6 +531,8 @@ public class serverAdminProxy implements Admin, Runnable {
 	  {
 	    throwOverflow();
 	  }
+
+	adminEvent newEvent = new adminEvent(method, param);
 
 	eventBuffer.addElement(newEvent);
 
