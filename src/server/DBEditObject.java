@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.92 $ %D%
+   Version: $Revision: 1.93 $ %D%
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -50,7 +50,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *   
- * @version $Revision: 1.92 $ %D%
+ * @version $Revision: 1.93 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1575,8 +1575,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  }
 
 	boolean editOnly = !choiceListHasExceptions(field);
-
-	QueryResult result = editset.getSession().getGSession().query(new Query(baseId, root, editOnly), this);
 
 	// note that the query we are submitting here *will* be filtered by the
 	// current visibilityFilterInvid field in GanymedeSession.
