@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.75 $ %D%
+   Version: $Revision: 1.76 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,7 +70,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   /* --------------------- Instance fields and methods --------------------- */
 
-  DBObject original;
+  protected DBObject original;
   boolean committing;
 
   protected boolean deleting = false;	// true if the object is in the middle of carrying
