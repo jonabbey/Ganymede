@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2000/10/31 09:20:48 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/11/01 00:57:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -898,7 +898,19 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    return false;
 	  }
 
-	// 9. Woohoo, Martha, I is a-coming home!
+	// 9. Clear out any namespaces that need it
+
+	for (int i = 0; i < spacesToRemove.size(); i++)
+	  {
+	    String _name = (String) spacesToRemove.elementAt(i);
+
+	    if (!handleReturnVal(editor.deleteNameSpace(_name)))
+	      {
+		return false;
+	      }
+	  }
+
+	// 10. Woohoo, Martha, I is a-coming home!
 
 	success = true;
       }

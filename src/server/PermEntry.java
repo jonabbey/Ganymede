@@ -6,8 +6,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.21 $
-   Last Mod Date: $Date: 2000/03/22 06:24:14 $
+   Version: $Revision: 1.22 $
+   Last Mod Date: $Date: 2000/11/01 00:57:49 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -74,6 +74,7 @@ public class PermEntry implements java.io.Serializable {
 
   static public final PermEntry fullPerms = new PermEntry(true, true, true, true);
   static public final PermEntry noPerms = new PermEntry(false, false, false, false);
+  static public final PermEntry viewPerms = new PermEntry(true, false, false, false);
 
   // ---
 

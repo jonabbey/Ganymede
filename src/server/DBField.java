@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.93 $
-   Last Mod Date: $Date: 2000/08/25 21:54:09 $
+   Version: $Revision: 1.94 $
+   Last Mod Date: $Date: 2000/11/01 00:57:48 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2816,7 +2816,7 @@ public abstract class DBField implements Remote, db_field {
 
     // If we don't specifically have a permission record for this
     // field, inherit the permissions for our owner
-    
+
     if (permCache == null)
       {
 	permCache = gSession.getPerm(owner); // *sync* on gSession
