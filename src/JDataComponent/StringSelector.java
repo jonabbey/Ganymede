@@ -5,8 +5,8 @@
    A two list box for adding strings to lists.
 
    Created: 10 October 1997
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2001/07/05 22:24:49 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2003/01/31 00:27:24 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey
@@ -95,7 +95,7 @@ import javax.swing.border.*;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Revision: 1.47 $ $Date: 2001/07/05 22:24:49 $ $Name:  $
+ * @version $Revision: 1.48 $ $Date: 2003/01/31 00:27:24 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -472,6 +472,20 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <p>This method handles updating the item counts in the in and out displays.</p>
+   */
+
+  private void updateTitles()
+  {
+    inTitle.setText(org_in.concat(" : " + in.getSizeOfList()));
+
+    if (out != null)
+      {
+	outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
+      }
+  }
+
+  /**
    * <p>This method attaches popup menus to the in box and out
    * box.</p>
    */
@@ -717,7 +731,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    System.err.println("StringSelector: add Action");
 	  }
 
-	addItem();
+	addItems();
       }
     else if (e.getActionCommand().equals("Remove"))
       {
@@ -726,7 +740,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    System.err.println("StringSelector: remove Action");
 	  }
 
-	removeItem();
+	removeItems();
       }
     else if (e.getActionCommand().equals("AddNewString"))
       {
@@ -735,176 +749,15 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    System.err.println("StringSelector: addNewString Action");
 	  }
 
-	String item = custom.getText();
-
-	if (item.equals("") || in.containsLabel(item))
-	  {
-	    if (debug)
-	      {
-		System.out.println("That one's already in there.  No soup for you!");
-		return;
-	      }
-	  }
-
-	if (mustChoose) 
-	  {	    
-	    // Check to see if it is in there
-
-	    if (debug)
-	      {
-		System.out.println("Checking to see if this is a viable option");
-	      }
-	    
-	    if (out != null)
-	      {
-		if (out.containsLabel(item)) 
-		  {
-		    out.setSelectedLabel(item);
-		    listHandle handle = out.getSelectedHandle();
-			
-		    boolean ok = true;
-		    
-		    if (my_callback != null)
-		      {
-			ok = false;
-
-			try
-			  {
-			    ok = my_callback.setValuePerformed(new JValueObject(this, 
-									      0,  //in.getSelectedIndex(),
-									      JValueObject.ADD,
-									      handle.getObject()));
-			  }
-			catch (RemoteException rx)
-			  {
-			    throw new RuntimeException("Could not setValuePerformed: " + rx);
-			  }
-		      }
-		    
-		    if (ok)
-		      {
-			putItemIn(handle);
-			custom.setText("");
-			return;
-		      }
-		  }
-		else  //It's not in the outbox.
-		  {
-		    if (my_callback != null)
-		      {
-			try
-			  {
-			    if (out == null)
-			      {
-				my_callback.setValuePerformed(new JValueObject(this, 
-									       0,  
-									       JValueObject.ERROR,
-									       "You can't choose stuff for this vector.  Sorry."));
-			      }
-			    else
-			      {
-				my_callback.setValuePerformed(new JValueObject(this, 
-									       0,  
-									       JValueObject.ERROR,
-									       "That choice is not appropriate.  Please choose from the list."));
-			      }
-			  }
-			catch (RemoteException rx)
-			  {
-			    throw new RuntimeException("Could not tell parent what is wrong: " + rx);
-			  }
-		      }
-		  }
-	      }
-	  }
-	else
-	  {
-	    // not mustChoose, so you can stick it in there.  But see,
-	    // I need to see if it's in there first, because if it is,
-	    // IF IT IS, then you have to move the String over.  HA!
-
-	    if ((out != null) && out.containsLabel(item))
-	      {
-		out.setSelectedLabel(item);
-		listHandle handle = out.getSelectedHandle();
-		
-		boolean ok = true;
-		
-		if (my_callback != null)
-		  {
-		    ok = false;
-
-		    try
-		      {
-			ok = my_callback.setValuePerformed(new JValueObject(this, 
-									  0,  //in.getSelectedIndex(),
-									  JValueObject.ADD,
-									  handle.getObject()));
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Could not setValuePerformed: " + rx);
-		      }
-		    
-		    if (ok)
-		      {
-			putItemIn(handle);
-			custom.setText("");
-		      }	
-		  }
-		else //no callback to check
-		  {
-		    in.addItem(new listHandle(item, item));
-		    //		    in.setSelectedValue(item, true);
-		    custom.setText("");
-		  }	
-	      }
-	    else 
-	      {
-		//Not in the out box, send up the String
-		
-		boolean ok = false;
-
-		try
-		  {
-		    ok = my_callback.setValuePerformed(new JValueObject(this, 
-								      0,  //in.getSelectedIndex(),
-								      JValueObject.ADD,
-								      item));  //item is a String
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not setValuePerformed: " + rx);
-		  }
-		
-		if (ok)
-		  {
-		    in.addItem(new listHandle(item, item));
-		    
-		    //	in.setSelectedValue(item, true);
-		    custom.setText("");
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			System.err.println("setValuePerformed returned false.");
-		      }
-		  }
-	      }
-	    
-	    validate();
-	  }
+	addNewString();
       }
   }
 
   /**
-   *
-   * Internal method to move item from out to in  
-   *
+   * <p>This method moves one or more items from the out list to the in list.</p>
    */
 
-  void addItem()
+  void addItems()
   {
     boolean ok = false;
     Vector handles;
@@ -999,17 +852,16 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  }
       }
     
+    updateTitles();
     invalidate();
     parent.validate();
   }
 
   /**
-   *
-   * internal method to move item from in to out
-   *
+   * <p>This method moves one or more items from the in list to the out list.</p>
    */
-  
-  void removeItem()
+
+  void removeItems()
   {
     Vector handles;
     listHandle handle;
@@ -1098,15 +950,19 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      }
 	  }
       }
+
+    updateTitles();
   }
 
   /**
+   * <p>This method moves a single item from the outlist to the inlist.</p>
    *
-   * this actually does the inserting
+   * <p>This method is the opposite of
+   * {@link arlut.csd.JDataComponent.StringSelector#takeItemOut(arlut.csd.JDataComponent.listHandle) takeItemOut}.</p>
    *
    */
 
-  void putItemIn(listHandle item)
+  private void putItemIn(listHandle item)
   {
     if (debug)
       {
@@ -1123,8 +979,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	if (out != null)
 	  {
 	    out.removeItem(item);
-	    outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
-	    //outPanel.add("North", outTitle
 	  }
 
 	if (debug)
@@ -1140,17 +994,15 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	// returns true, and then the value is already in there.  So
 	// if we add it again, we get two of them.  Got it?
 
-	if (! in.containsItem(item))
+	if (!in.containsItem(item))
 	  {
 	    in.addItem(item);
-      	    inTitle.setText(org_in.concat(" : " + in.getSizeOfList()));
 	  }
 
 	if (debug)
 	  {
 	    System.out.println("Done Adding handle");
 	  }
-	//in.setSelectedValue(item, true);
       }
     else
       {
@@ -1159,12 +1011,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
+   * <p>This method moves a single item from the outlist to the inlist.</p>
    *
-   * this actually moves it from from in to out
-   *
+   * <p>This method is the opposite of
+   * {@link arlut.csd.JDataComponent.StringSelector#putItemIn(arlut.csd.JDataComponent.listHandle) putItemIn}.</p>
    */
   
-  void takeItemOut(listHandle item)
+  private void takeItemOut(listHandle item)
   {
     if (debug)
       {
@@ -1177,14 +1030,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     in.removeItem(item);
-    inTitle.setText(org_in.concat(" : " + in.getSizeOfList()));
 
     // If the item is already in there, don't add it.
 
     if ((out != null)  &&  (! out.containsItem(item)))
       {
 	out.addItem(item);
-        outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
       }
 
     remove.setEnabled(false);
@@ -1206,6 +1057,175 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	parent.validate();
       }
+  }
+
+  /**
+   * <p>This method handles the processing to add an item entered in
+   * the custom text entry box.</p>
+   */
+
+  private void addNewString()
+  {
+    String item = custom.getText();
+
+    if (item.equals("") || in.containsLabel(item))
+      {
+	if (debug)
+	  {
+	    System.out.println("That one's already in there.  No soup for you!");
+	  }
+
+	return;
+      }
+
+    if (out != null && mustChoose) 
+      {	    
+	// Check to see if it is in there
+
+	if (debug)
+	  {
+	    System.out.println("Checking to see if this is a viable option");
+	  }
+	    
+	if (out.containsLabel(item)) 
+	  {
+	    out.setSelectedLabel(item);
+	    listHandle handle = out.getSelectedHandle();
+	    
+	    boolean ok = true;
+	    
+	    if (my_callback != null)
+	      {
+		ok = false;
+		
+		try
+		  {
+		    ok = my_callback.setValuePerformed(new JValueObject(this, 
+									0,  //in.getSelectedIndex(),
+									JValueObject.ADD,
+									handle.getObject()));
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not setValuePerformed: " + rx);
+		  }
+	      }
+	    
+	    if (ok)
+	      {
+		putItemIn(handle);
+		custom.setText("");
+		return;
+	      }
+	  }
+	else  //It's not in the outbox.
+	  {
+	    if (my_callback != null)
+	      {
+		try
+		  {
+		    if (out == null)
+		      {
+			my_callback.setValuePerformed(new JValueObject(this, 
+								       0,  
+								       JValueObject.ERROR,
+								       "You can't choose stuff for this vector.  Sorry."));
+		      }
+		    else
+		      {
+			my_callback.setValuePerformed(new JValueObject(this, 
+								       0,  
+								       JValueObject.ERROR,
+								       "That choice is not appropriate.  Please choose from the list."));
+		      }
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not tell parent what is wrong: " + rx);
+		  }
+	      }
+	  }
+      }
+    else
+      {
+	// not mustChoose, so you can stick it in there.  But see,
+	// I need to see if it's in there first, because if it is,
+	// IF IT IS, then you have to move the String over.  HA!
+
+	if ((out != null) && out.containsLabel(item))
+	  {
+	    out.setSelectedLabel(item);
+	    listHandle handle = out.getSelectedHandle();
+		
+	    boolean ok = true;
+		
+	    if (my_callback != null)
+	      {
+		ok = false;
+
+		try
+		  {
+		    ok = my_callback.setValuePerformed(new JValueObject(this, 
+									0,  //in.getSelectedIndex(),
+									JValueObject.ADD,
+									handle.getObject()));
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not setValuePerformed: " + rx);
+		  }
+		    
+		if (ok)
+		  {
+		    putItemIn(handle);
+		    custom.setText("");
+		  }	
+	      }
+	    else //no callback to check
+	      {
+		in.addItem(new listHandle(item, item));
+		//		    in.setSelectedValue(item, true);
+		custom.setText("");
+	      }	
+	  }
+	else 
+	  {
+	    //Not in the out box, send up the String
+		
+	    boolean ok = false;
+
+	    try
+	      {
+		ok = my_callback.setValuePerformed(new JValueObject(this, 
+								    0,  //in.getSelectedIndex(),
+								    JValueObject.ADD,
+								    item));  //item is a String
+	      }
+	    catch (RemoteException rx)
+	      {
+		throw new RuntimeException("Could not setValuePerformed: " + rx);
+	      }
+		
+	    if (ok)
+	      {
+		in.addItem(new listHandle(item, item));
+		    
+		//	in.setSelectedValue(item, true);
+		custom.setText("");
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.err.println("setValuePerformed returned false.");
+		  }
+	      }
+	  }
+	    
+	validate();
+      }
+
+    updateTitles();
   }
 
   public boolean setValuePerformed(JValueObject o)
