@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.65 $ %D%
+   Version: $Revision: 1.66 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -523,6 +523,17 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * This method may also be bypassed when server-side code uses
    * setValueLocal() and the like to make changes in the database.
+   *
+   * @return a ReturnVal object indicated success or failure, objects and
+   * fields to be rescanned by the client, and a doNormalProcessing flag
+   * that will indicate to the field code whether or not the operation
+   * should continue to completion using the field's standard logic.
+   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
+   * if the wizardHook wishes to simply specify rescan information while
+   * having the field perform its standard operation.</b>  wizardHook() may
+   * return new ReturnVal(true, false) if the wizardHook performs the operation
+   * (or a logically related operation) itself.  The same holds true for the
+   * respond() method in GanymediatorWizard subclasses.
    *
    */
 
