@@ -5,7 +5,7 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.27 $ %D%
+   Version: $Revision: 1.28 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -15,6 +15,7 @@ package arlut.csd.ganymede.client;
 
 import tablelayout.*;
 import com.sun.java.swing.*;
+import com.sun.java.swing.border.*;
 import com.sun.java.swing.event.*;
 
 
@@ -64,10 +65,21 @@ public class windowPanel extends JDesktopPane implements PropertyChangeListener,
   // Load images for other packages
   ImageIcon
     // These are all for vectorPanel
-    openIcon = new ImageIcon(PackageResources.getImageResource(this, "scrollup.gif", getClass())),
-    closeIcon = new ImageIcon(PackageResources.getImageResource(this, "scrolldo.gif", getClass())),
-    removeImageIcon = new ImageIcon(PackageResources.getImageResource(this, "trash.gif", getClass()));
+    openIcon = new ImageIcon(PackageResources.getImageResource(this, "macdown.gif", getClass())),
+    closeIcon = new ImageIcon(PackageResources.getImageResource(this, "macright.gif", getClass())),
+    removeImageIcon = new ImageIcon(PackageResources.getImageResource(this, "x.gif", getClass()));
 
+  LineBorder
+    blackLineB = new LineBorder(Color.black);
+
+  EmptyBorder
+    emptyBorder3 = (EmptyBorder)BorderFactory.createEmptyBorder(3,3,3,3),
+    emptyBorder5 = (EmptyBorder)BorderFactory.createEmptyBorder(5,5,5,5),
+    emptyBorder10 = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10);
+  
+  CompoundBorder
+    eWrapperBorder = new CompoundBorder(emptyBorder3, new LineBorder(ClientColor.vectorTitles, 2)),
+    lineEmptyBorder = new CompoundBorder(blackLineB, emptyBorder5);
 
   /* -- */
 
