@@ -5,7 +5,7 @@
    An implementation of the QuickSort algorithm.
    
    Created: 24 April 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,7 +27,7 @@ public class QuickSort {
 
   /* -- */
 
-  QuickSort(Object[] objects, Compare comparator)
+  public QuickSort(Object[] objects, Compare comparator)
   {
     this.objects = objects;
     this.comparator = comparator;
@@ -51,12 +51,12 @@ public class QuickSort {
 	    do
 	      {
 		i++;
-	      } while (comparator.compare(objects[i], k) < 0);
+	      } while ((i <= last) && comparator.compare(objects[i], k) < 0);
 
 	    do
 	      {
 		j--;
-	      } while (comparator.compare(objects[j], k) > 0);
+	      } while ((j >= first) && comparator.compare(objects[j], k) > 0);
 
 	    if (i < j)
 	      {
@@ -74,7 +74,7 @@ public class QuickSort {
       }
   }
 
-  void sort()
+  public void sort()
   {
     if (objects.length < 2)
       {
