@@ -67,10 +67,11 @@ import arlut.csd.ganymede.common.SchemaConstants;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class is a DBEditObject subclass for handling fields in the Ganymede
- * server's sync channel object type.
- *
+ * <p>This class is a {@link arlut.csd.ganymede.server.DBEditObject}
+ * subclass for handling fields in the Ganymede server's sync channel
+ * object type.  It contains special logic for handling the set up and
+ * configuration of {@link arlut.csd.ganymede.server.SyncRunners} in
+ * the Ganymede server.</p>
  */
 
 public class syncChannelCustom extends DBEditObject implements SchemaConstants {

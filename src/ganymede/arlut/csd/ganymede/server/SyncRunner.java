@@ -83,14 +83,16 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * Channel-style incremental synchronization.  Unlike the full-state
  * {@link arlut.csd.ganymede.server.GanymedeBuilderTask} system,
  * SyncRunner is not designed to be customized through subclassing.
- * Each SyncRunner uses the same standard logic for writing out
- * synchronization data files in XML.  Each SyncRunner registered with
- * the Ganymede server is attached to a Sync Channel object in the
- * Ganymede data store.  This Sync Channel database object provides
- * all of the configuration controls which determine where the XML
- * files are written, what external program should be used to process
- * the XML files, and what objects and fields should be included in
- * the files.</p>
+ * All SyncRunner objects generate a standard format XML file for
+ * writing out synchronization data, instead.  SyncRunner objects are
+ * registered in the server for execution automatically when a Sync
+ * Channel object (using the {@link
+ * arlut.csd.ganymede.server.syncChannelCustom} DBEditObject subclass
+ * for management) is created in the Ganymede data store.  This Sync
+ * Channel object provides all of the configuration controls which
+ * determine where the XML synchronization files are written, what
+ * external program should be used to process the files, and what data
+ * needs to be written out for synchronization.</p>
  *
  * <p>Like {@link arlut.csd.ganymede.server.GanymedeBuilderTask},
  * SyncRunner synchronization is done in a split phase manner, in
@@ -117,16 +119,16 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * transaction commit.  What this means is that the transaction is not
  * counted as successfully committed until all Sync Channels that
  * match against the transaction successfully write and flush their
- * XML files to the proper output directory.  If there is any problem
- * that prevents all of the Sync Channels from being written to
- * successfully, the transaction will be aborted as if it never
- * happened.  All of this is done with proper ACID transactional
- * guarantees.  The Sync Channel implementation is designed so that
- * the Ganymede server can be killed at any time without leaving a
- * transaction partially committed between the sync channels and the
- * Ganymede journal file.  Either a transaction is completely recorded
- * to the sync channels and the journal, or it will not be recorded to
- * any sync channel or the journal.</p>
+ * XML files to the proper output directory.  If a problem prevents
+ * any of the Sync Channels from being successfully written, the
+ * transaction will be aborted as if it never happened.  All of this
+ * is done with proper ACID transactional guarantees.  The Sync
+ * Channel implementation is designed so that the Ganymede server can
+ * be killed at any time without leaving a transaction partially
+ * committed between the sync channels and the Ganymede journal file.
+ * Either a transaction is completely recorded to the sync channels
+ * and the journal, or it will not be recorded to any sync channel or
+ * the journal.</p>
  *
  * <p>All of this behavior corresponds to the logic that is
  * implemented in the {@link
