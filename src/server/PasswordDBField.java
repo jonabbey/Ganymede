@@ -7,8 +7,8 @@
 
    Created: 21 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.30 $
-   Last Mod Date: $Date: 1999/03/17 05:32:49 $
+   Version: $Revision: 1.31 $
+   Last Mod Date: $Date: 1999/05/26 23:17:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -62,21 +62,49 @@ import arlut.csd.JDialog.*;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>Ganymede database field used to store and manipulate password information.</p>
+ *
+ * <p>This class differs a bit from most subclasses of {@link
+ * arlut.csd.ganymede.DBField DBField} in that the normal setValue()/getValue()
+ * methods are non-functional.  Instead, there are special methods used to set or
+ * access password information in crypted and non-crypted forms.</p>
+ * 
+ * <p>Crypted passwords are stored in the UNIX crypt() format.  See the
+ * {@link jcrypt jcrypt} class for details on the crypt hashing.</p>
+ *
+ * <p>There are no methods provided to allow remote access to password information..
+ * server-side code must locally access the getUNIXCryptText() and getPlainText()
+ * methods to get access to the password information.  Generally, even in that
+ * case, only crypted password information will be available.  If this password
+ * field was configured to store encrypted passwords by way of its
+ * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}, this password
+ * field will never emit() the plaintext to disk.  Instead, the crypt()'ed
+ * password information will be retained for user authentication.  The plaintext of
+ * the password <b>may</b> be retained in memory for the purpose of replicating to
+ * systems that do not use the UNIX crypt() format for password hashing, but only
+ * on a temporary basis, for those passwords whose plaintext was provided to the
+ * server during its operation.</p>
+ *
+ * @see arlut.csd.ganymede.BaseField#setCrypted(boolean)
+ * @see arlut.csd.ganymede.BaseField#setPlainText(boolean)
+ */
+
 public class PasswordDBField extends DBField implements pass_field {
 
-  /* -- */
-  
   static final boolean debug = false;
 
-  String cryptedPass;
-  String uncryptedPass;
-  boolean defined = false;
+  // ---
+
+  private String cryptedPass;
+  private String uncryptedPass;
+  private boolean defined = false;
+
+  /* -- */
 
   /**
-   *
-   * Receive constructor.  Used to create a PasswordDBField from a DBStore/DBJournal
-   * DataInput stream.
-   *
+   * <p>Receive constructor.  Used to create a PasswordDBField from a DBStore/DBJournal
+   * DataInput stream.</p>
    */
 
   PasswordDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
@@ -88,16 +116,16 @@ public class PasswordDBField extends DBField implements pass_field {
     receive(in);
   }
 
-  /**
+  /** 
+   * <p>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the {@link
+   * arlut.csd.ganymede.DBObjectBase DBObjectBase} definition
+   * indicates that a given field may be present, but for which no
+   * value has been stored in the {@link arlut.csd.ganymede.DBStore
+   * DBStore}.</p>
    *
-   * No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the DBObjectBase
-   * definition indicates that a given field may be present,
-   * but for which no value has been stored in the DBStore.
-   *
-   * Used to provide the client a template for 'creating' this
-   * field if so desired.
-   *
+   * <p>Used to provide the client a template for 'creating' this
+   * field if so desired.</p> 
    */
 
   PasswordDBField(DBObject owner, DBObjectBaseField definition)
@@ -111,9 +139,7 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
    * Copy constructor.
-   *
    */
 
   public PasswordDBField(DBObject owner, PasswordDBField field)
@@ -135,12 +161,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Returns true if this field has a value associated
-   * with it, or false if it is an unfilled 'placeholder'.
+   * <p>Returns true if this field has a value associated
+   * with it, or false if it is an unfilled 'placeholder'.</p>
    *
    * @see arlut.csd.ganymede.db_field
-   *
    */
 
   public boolean isDefined()
@@ -149,13 +173,11 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * This method is used to mark a field as undefined when it is
+   * <p>This method is used to mark a field as undefined when it is
    * checked out for editing.  Different subclasses of DBField will
    * implement this in different ways.  Any namespace values claimed
    * by the field will be released, and when the transaction is
-   * committed, this field will be released.
-   * 
+   * committed, this field will be released.</p>
    */
 
   public synchronized ReturnVal setUndefined(boolean local)
@@ -172,13 +194,11 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
+   * <p>Returns true if obj is a field with the same value(s) as
+   * this one.</p>
    *
-   * Returns true if obj is a field with the same value(s) as
-   * this one.<br><br>
-   *
-   * This method is ok to be synchronized because it does not
-   * call synchronized methods on any other object.
-   *
+   * <p>This method is ok to be synchronized because it does not
+   * call synchronized methods on any other object.</p>
    */
 
   public synchronized boolean equals(Object obj)
@@ -194,10 +214,8 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Object value of DBField.  Used to represent value in value hashes.
-   * Subclasses need to override this method in subclass.
-   *
+   * <p>Object value of DBField.  Used to represent value in value hashes.
+   * Subclasses need to override this method in subclass.</p>
    */
 
   public Object key()
@@ -302,9 +320,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * We always return null here..
-   *
+   * <p>Standard {@link arlut.csd.ganymede.db_field db_field} method
+   * to retrieve the value of this field.  Because we are holding sensitive
+   * password information, this method always returns null.. we don't want
+   * to make password values available to the client under any circumstances.
    */
 
   public Object getValue()
@@ -313,12 +332,14 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
+   * <p>Returns an Object carrying the value held in this field.</p>
    *
-   * Returns an Object carrying the value held in this field.<br><br>
+   * <p>This is intended to be used within the Ganymede server, it bypasses
+   * the permissions checking that getValues() does.</p>
    *
-   * This is intended to be used within the Ganymede server, it bypasses
-   * the permissions checking that getValues() does.
-   *
+   * <p>Note that this method will always return null, as you need to use
+   * the special Password-specific value accessors to get access to the
+   * password information in crypted or non-crypted form.</p>
    */
 
   public Object getValueLocal()
@@ -350,9 +371,7 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
    * The default getValueString() encoding is acceptable.
-   *
    */
 
   public String getEncodingString()
@@ -361,15 +380,13 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Returns a String representing the change in value between this
+   * <p>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.</p>
    *
-   * If there is no change in the field, null will be returned.
-   * 
+   * <p>If there is no change in the field, null will be returned.</p>
    */
 
   public String getDiffString(DBField orig)
@@ -402,12 +419,10 @@ public class PasswordDBField extends DBField implements pass_field {
   // ****
 
   /**
-   *
-   * Returns the maximum acceptable string length
-   * for this field.
+   * <p>Returns the maximum acceptable string length
+   * for this field.</p>
    *
    * @see arlut.csd.ganymede.pass_field
-   *
    */
 
   public int maxSize()
@@ -416,12 +431,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Returns the minimum acceptable string length
-   * for this field.
+   * <p>Returns the minimum acceptable string length
+   * for this field.</p>
    *
    * @see arlut.csd.ganymede.pass_field
-   *
    */
 
   public int minSize()
@@ -430,14 +443,12 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Returns a string containing the list of acceptable characters.
+   * <p>Returns a string containing the list of acceptable characters.
    * If the string is null, it should be interpreted as meaning all
    * characters not listed in disallowedChars() are allowable by
-   * default.
+   * default.</p>
    *
    * @see arlut.csd.ganymede.pass_field
-   * 
    */
 
   public String allowedChars()
@@ -446,14 +457,12 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Returns a string containing the list of forbidden
+   * <p>Returns a string containing the list of forbidden
    * characters for this field.  If the string is null,
    * it should be interpreted as meaning that no characters
-   * are specifically disallowed.
+   * are specifically disallowed.</p>
    *
    * @see arlut.csd.ganymede.pass_field
-   *
    */
 
   public String disallowedChars()
@@ -462,12 +471,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Convenience method to identify if a particular
-   * character is acceptable in this field.
+   * <p>Convenience method to identify if a particular
+   * character is acceptable in this field.</p>
    *
    * @see arlut.csd.ganymede.pass_field
-   *
    */
 
   public boolean allowed(char c)
@@ -486,8 +493,7 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Returns true if the password stored in this field is hash-crypted.
+   * <p>Returns true if the password stored in this field is hash-crypted.</p>
    *
    * @see arlut.csd.ganymede.pass_field
    */
@@ -498,9 +504,8 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Verification method for comparing a plaintext entry with a crypted
-   * value.
+   * <p>Verification method for comparing a plaintext entry with a crypted
+   * value.</p>
    *
    * @see arlut.csd.ganymede.pass_field
    */
@@ -566,11 +571,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Verification method for comparing a crypt'ed entry with a crypted
+   * <p>Verification method for comparing a crypt'ed entry with a crypted
    * value.  The salts for the stored and submitted values must match
    * in order for a comparison to be made, else an illegal argument
-   * exception will be thrown
+   * exception will be thrown</p>
    *
    * @see arlut.csd.ganymede.pass_field
    */
@@ -591,9 +595,7 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * This method returns the UNIX-encrypted password text.
-   *
+   * <p>This server-side only method returns the UNIX-encrypted password text.</p>
    */
 
   public String getUNIXCryptText()
@@ -616,12 +618,21 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   *
-   * Method to obtain the SALT for a stored crypted password.  If the
+   * <p>This server-side only method returns the plaintext password text,
+   * if available.</p>
+   */
+
+  public String getPlainText()
+  {
+    return uncryptedPass;
+  }
+
+  /**
+   * <p>Method to obtain the SALT for a stored crypted password.  If the
    * client is going to submit a pre-crypted password for comparison
    * against a stored crypted password by use of the matchCryptText()
    * method, it must be salted by the salt returned by this method.
-   * If the password is stored in plaintext, null will be returned.
+   * If the password is stored in plaintext, null will be returned.</p>
    * 
    * @see arlut.csd.ganymede.pass_field 
    */
@@ -639,13 +650,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
+   * <p>Sets the value of this field, if a scalar.</p>
    *
-   * Sets the value of this field, if a scalar.
-   *
-   * The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.
-   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p> 
    */
 
   public ReturnVal setValue(Object value, boolean local)
@@ -654,12 +662,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
+   * <p>This method is used to set the password for this field,
+   * crypting it if this password field is stored crypted.</p>
    *
-   * This method is used to set the password for this field,
-   * crypting it if this password field is stored crypted.
-   *
-   * @see arlut.cds.ganymede.pass_field
-   *
+   * @see arlut.csd.ganymede.pass_field
    */
 
   public ReturnVal setPlainTextPass(String text)
@@ -736,14 +742,12 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
+   * <p>This method is used to set a pre-crypted password for this field.</p>
    *
-   * This method is used to set a pre-crypted password for this field.
-   *
-   * This method will return an error dialog if this field does not store
-   * passwords in UNIX crypted format.
+   * <p>This method will return an error dialog if this field does not store
+   * passwords in UNIX crypted format.</p>
    *
    * @see arlut.csd.ganymede.pass_field
-   *
    */
 
   public ReturnVal setCryptPass(String text)

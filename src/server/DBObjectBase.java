@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.86 $
-   Last Mod Date: $Date: 1999/04/20 18:21:51 $
+   Version: $Revision: 1.87 $
+   Last Mod Date: $Date: 1999/05/26 23:17:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1630,7 +1630,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * <p>Choose what field will serve as this objectBase's label.  A fieldName
    * parameter of null will cause the object's label field to be undefined,
    * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ganymede.DBEditObject.getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
+   * {@link arlut.csd.ganymede.DBEditObject#getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
    * method.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
@@ -1678,7 +1678,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * <p>Choose what field will serve as this objectBase's label.  A fieldID
    * parameter of -1 will cause the object's label field to be undefined,
    * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ganymede.DBEditObject.getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
+   * {@link arlut.csd.ganymede.DBEditObject#getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
    * method.</p>
    *
    * <p>This method is only valid when the Base reference is obtained

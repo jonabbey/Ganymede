@@ -7,8 +7,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 1999/01/22 18:05:26 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 1999/05/26 23:17:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,129 +58,607 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>Client side interface definition for the Ganymede
+ * {@link arlut.csd.ganymede.DBObjectBaseField DBObjectBaseField}
+ * class.  This interface allows the client to query and edit type information
+ * remotely.</p>
  *
- * Client side interface definition for the Ganymede DBObjectBaseField
- * class.  This interface allows the client to query type information
- * remotely.
- * 
+ * <p>All of the editing methods may be only be called when the server is
+ * in schema editing mode.</p>
  */
 
 public interface BaseField extends Remote {
 
+  /**
+   * <p>This method returns true if this field definition can be edited
+   * in the schema editor.</p>
+   *
+   * <p>This method will return always true if the DBSchemaEdit class is configured
+   * with developMode set to true.  Otherwise, this method will return false
+   * for the built-in field types that the server is dependent on for its
+   * own functioning.</p>
+   */
+
   public boolean isEditable() throws RemoteException;
+
+  /**
+   * <p>This method returns true if this field definition can be removed
+   * by the schema editor.</p>
+   */
+
   public boolean isRemovable() throws RemoteException;
+
+  /**
+   * <p>This method returns true if this field definition is designated
+   * as a built-in.  built-in fields are fields that are present in
+   * all object types held in the database.</p>
+   */
+
   public boolean isBuiltIn() throws RemoteException;
+
+  /**
+   * <p>This method returns true if this field
+   * is intended to be visible to the client normally,
+   * false otherwise.</p>
+   */
+
+  public boolean isVisible() throws RemoteException;
 
   // general
 
+  /**
+   * <p>Returns the Base we are a part of.</p>
+   */
+
   public Base getBase() throws RemoteException;
+
+  /**
+   * <p>Returns the name of this field</p>
+   */
+
   public String getName() throws RemoteException;
+
+  /**
+   * <p>Returns the name of the class managing instances of this field</p>
+   */
+
   public String getClassName() throws RemoteException;
+
+  /**
+   * <p>Returns the comment defined in the schema for this field</p>
+   */
+
   public String getComment() throws RemoteException;
+
+  /**
+   * <p>Returns id code for this field.  Each field in a
+   * {@link arlut.csd.ganymede.DBObject DBObject}
+   * has a unique code which identifies the field.  This code represents
+   * the field in the on-disk data store, and is used by 
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject}
+   * to choose what field to change in the setField method.</p>
+   */
+
   public short getID() throws RemoteException;
+
+  /**
+   * <p>Returns the order of this field within the containing
+   * base.  Used to determine the layout order of object
+   * viewing panels.</p>
+   */
+
   public short getDisplayOrder() throws RemoteException;
 
   // all of the setter methods below can only be called when a SchemaEdit
   // is in progress.
 
+  /**
+   * <p>Sets the name of this field</p>
+   */
+
   public void setName(String name) throws RemoteException;
+
+  /**
+   * <p>Sets the name of the class managing instances of this field</p>
+   */
+
   public void setClassName(String name) throws RemoteException;
+
+  /**
+   * <p>Sets the comment defined in the schema for this field</p>
+   */
+
   public void setComment(String s) throws RemoteException;
+
+  /**
+   * <p>Set the identifying code for this field.</p>
+   *
+   * <p>This is an incompatible change.  In fact, it
+   * is so incompatible that it only makes sense in
+   * the context of creating a new field in a particular
+   * DBObjectBase.. otherwise we would wind up indexed
+   * improperly if we don't somehow move ourselves to
+   * a different key slot in the DBObjectBase fieldHash.</p>
+   */
+
   public void setID(short id) throws RemoteException;
+
+  /**
+   * <p>Set the display order of this field in the SchemaEditor's
+   * tree, and in the object display panels in the client.</p>
+   *
+   * <p>Note that this method does not check to make sure that fields
+   * don't have duplicated order values.. the schema editor needs
+   * to do the proper logic to make sure that all fields have a
+   * reasonable order after any field creation, deletion, or 
+   * re-ordering.</p>
+   */
+
   public void setDisplayOrder(short order) throws RemoteException;
 
   // type info
 
+  /**
+   * <p>Returns the field type</p>
+   *
+   * <p>Where type is one of the following
+   * constants defined in the {@link arlut.csd.ganymede.FieldType FieldType}
+   * interface:</p>
+   *
+   * <pre>
+   *   static short BOOLEAN = 0;
+   *   static short NUMERIC = 1;
+   *   static short DATE = 2;
+   *   static short STRING = 3;
+   *   static short INVID = 4;
+   *   static short PERMISSIONMATRIX = 5;
+   *   static short PASSWORD = 6;
+   *   static short IP = 7;
+   * </pre>
+   */
+
   public short getType() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of boolean type</p>
+   */
+
   public boolean isBoolean() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of numeric type</p>
+   */
+
   public boolean isNumeric() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of date type</p>
+   */
+
   public boolean isDate() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of string type</p>
+   */
+
   public boolean isString() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of invid type</p>
+   */
+
   public boolean isInvid() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of permission matrix type</p>
+   */
+
   public boolean isPermMatrix() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of password type</p>
+   */
+
   public boolean isPassword() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is of IP address type</p>
+   */
+
   public boolean isIP() throws RemoteException;
+
+  /**
+   * <p>Sets the {@link arlut.csd.ganymede.FieldType field type}
+   * for this field.  Changing the field type
+   * is an incompatible change, and will result in the class managing
+   * this field type being reset to the default class for the field
+   * type.</p>
+   *
+   * <p>If the new field type is not string, invid, or IP, the field
+   * will be made a scalar field.</p>
+   */
 
   public void setType(short type) throws RemoteException;
 
   // vector info
 
+  /**
+   * <p>Returns true if this field is a vector field, false otherwise.</p>
+   */
+
   public boolean isArray() throws RemoteException;
+
+  /**
+   * <p>Returns the array size limitation for this field if it is an array field</p>
+   */
+
   public short getMaxArraySize() throws RemoteException;
 
+  /**
+   * <p>Set this field to be a vector or scalar.  If b is true, this field will
+   * be a vector, if false, scalar.</p>
+   *
+   * <p>Only strings, invid's, and ip fields may be vectors.  Attempting to 
+   * setArray(true) for other field types will cause an IllegalArgumentException
+   * to be thrown.</p>
+   *
+   * <p>It may be possible to compatibly handle the conversion from
+   * scalar to vector, but a vector to scalar change is an incompatible
+   * change.</p>
+   */
+
   public void setArray(boolean b) throws RemoteException;
+
+  /**
+   * <p>Set the maximum number of values allowed in this vector field.</p>
+   */
+
   public void setMaxArraySize(short limit) throws RemoteException;
 
   // boolean
 
+  /**
+   * <p>Returns true if this is a boolean field with labels</p>
+   */
+
   public boolean isLabeled() throws RemoteException;
+
+  /**
+   * <p>Returns the true Label if this is a labeled boolean field</p> 
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a labeled boolean type.</p>
+   */
+
   public String getTrueLabel() throws RemoteException;
+
+  /**
+   * <p>Returns the false Label if this is a labeled boolean field</p> 
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a labeled boolean type.</p>
+   */
+
   public String getFalseLabel() throws RemoteException;
 
+  /**
+   * <p>Turn labeled choices on/off for a boolean field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a boolean type.</p>
+   */
+
   public void setLabeled(boolean b) throws RemoteException;
+
+  /**
+   * <p>Sets the label associated with the true choice for this
+   * boolean field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a labeled boolean type.</p>
+   */
+
   public void setTrueLabel(String label) throws RemoteException;
+
+  /**
+   * <p>Sets the label associated with the false choice for this
+   * boolean field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a labeled boolean type.</p>
+   */
+
   public void setFalseLabel(String label) throws RemoteException;
 
   // string
 
+  /**
+   * <p>Returns the minimum acceptable string length if this is a string or
+   * password field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
+   */
+
   public short getMinLength() throws RemoteException;
+
+  /**
+   * <p>Returns the maximum acceptable string length if this is a string 
+   * or password field.</p>
+   * 
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
+   */
+
   public short getMaxLength() throws RemoteException;
+
+  /**
+   * <p>Returns the set of acceptable characters if this is a string field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
+   */
+
   public String getOKChars() throws RemoteException;
+
+  /**
+   * <p>Returns the set of unacceptable characters if this is a 
+   * string or password field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
+   */
+
   public String getBadChars() throws RemoteException;
+
+  /**
+   * <p>Returns true if this string field is intended to be a multi-line
+   * field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   */
+
   public boolean isMultiLine() throws RemoteException;
 
+  /**
+   * <p>Sets the minimum acceptable length for this string or password field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
+   */
+
   public void setMinLength(short val) throws RemoteException;
+
+  /** 
+   * <p>Sets the maximum acceptable length for this string or
+   * password field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
+   */
+
   public void setMaxLength(short val) throws RemoteException;
+
+  /**
+   * <p>Sets the set of characters that are allowed in this string or 
+   * password field.  If s is null, all characters by default 
+   * are acceptable.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
+   */
+
   public void setOKChars(String s) throws RemoteException;
+
+  /**
+   * <p>Sets the set of characters that are specifically disallowed in
+   * this string or password field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
+   *
+   * @see arlut.csd.ganymede.BaseField 
+   */
+
   public void setBadChars(String s) throws RemoteException;
+
+  /**
+   * <p>Sets whether or not this string field should be presented as a
+   * multiline field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
+   */
+
   public void setMultiLine(boolean b) throws RemoteException;
 
   // these two apply to strings, numbers, and IP addresses
 
+  /**
+   * <p>Returns the label of this string, numeric, or IP field's namespace.</p>
+   */
+
   public String getNameSpaceLabel() throws RemoteException;
 
   /**
-   * Note that this is intended to be called from the Schema Editor,
+   * <p>Set a namespace constraint for this string, numeric, or
+   * IP field.</p>
+   *
+   * <p>Note that this is intended to be called from the Schema Editor,
    * and won't take effect until the next time the system is stopped
-   * and reloaded.
+   * and reloaded.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string, numeric, or IP type.</p>
    */
 
   public void setNameSpace(String s) throws RemoteException;
   
   // invid
 
+  /**
+   * <p>Returns true if this is an invid field which is intended as an editInPlace
+   * reference for the client's rendering.</p>
+   */
+
   public boolean isEditInPlace() throws RemoteException;
+
+  /**
+   * <p>Sets whether or not this field is intended as an editInPlace
+   * reference for the client's rendering.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
+   */
+
   public void setEditInPlace(boolean b) throws RemoteException;
 
+  /**
+   * <p>Returns true if this is a target restricted invid field</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
+   */
+
   public boolean isTargetRestricted() throws RemoteException;
+
+  /**
+   * <p>If this field is a target restricted invid field, this method will return
+   * true if this field has a symmetry relationship to the target</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
+   */
+
   public boolean isSymmetric() throws RemoteException;
+
+  /**
+   * <p>Return the object type that this invid field is constrained to point to, if set</p>
+   *
+   * <p>-1 means there is no restriction on target type.</p>
+   *
+   * <p>-2 means there is no restriction on target type, but there is a specified symmetric field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
+   */
+
   public short getTargetBase() throws RemoteException;
+
+  /**
+   * <p>If this field is a target restricted invid field, this method will return
+   * a short indicating the field in the target object that the symmetry relation
+   * applies to.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
+   */
+
   public short getTargetField() throws RemoteException;
 
+  /**
+   * <p>Sets the allowed target object code of this invid field to &lt;val&gt;.
+   * If val is -1, this invid field can point to objects of any type.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
+   */
+
   public void setTargetBase(short val) throws RemoteException;
+
+  /**
+   * <p>Sets the allowed target object code of this invid field to &lt;baseName&gt;.
+   * If val is null, this invid field can point to objects of any type.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
+   */
+
   public void setTargetBase(String baseName) throws RemoteException;
+
+  /**
+   * <p>Sets the field of the target object of this invid field that should
+   * be managed in the symmetry relationship if isSymmetric().  If
+   * val == -1, the targetField will be set to a value representing
+   * no selection.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
+   */
+
   public void setTargetField(short val) throws RemoteException;
+
+  /**
+   * <p>Sets the field of the target object of this invid field that should
+   * be managed in the symmetry relationship if isSymmetric().  If &lt;fieldName&gt;
+   * is null, the targetField will be cleared.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
+   */
+
   public void setTargetField(String fieldName) throws RemoteException;
 
   // password
 
+  /**
+   * <p>This method returns true if this is a password field that
+   * stores passwords in UNIX crypt format, and can thus accept
+   * pre-crypted passwords.</p>
+   */
+
   public boolean isCrypted() throws RemoteException;
+
+  /**
+   * <p>This method is used to specify that this password field
+   * should store passwords in UNIX crypt format.  If passwords
+   * are stored in UNIX crypt format, they will not be kept in
+   * plaintext on disk.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   */
+
   public void setCrypted(boolean b) throws RemoteException;
+
+  /**
+   * <p>This method returns true if this is a password field that
+   * will keep a copy of the password in plaintext.</p>
+   */
+
   public boolean isPlainText() throws RemoteException;
+
+  /**
+   * <p>This method is used to specify that this password field
+   * should keep a copy of the password in plaintext, in
+   * addition to a UNIX crypted copy.  If crypted is
+   * false, plaintext will be treated as true, whether
+   * or not this is explicitly set by the schema editor.</p>
+   *
+   * <p>If crypted is true, fields of this type will never retain
+   * the plaintext password information on disk.  Plaintext 
+   * password information will only be retained in the on-disk
+   * ganymede.db file if crypted is false.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   */
+
   public void setPlainText(boolean b) throws RemoteException;
   
   // convenience methods
 
   /**
-   *
-   * This method is intended to produce a human readable
+   * <p>This method is intended to produce a human readable
    * representation of this field definition's type attributes.  This
    * method should not be used programatically to determine this
-   * field's type information.
+   * field's type information.</p>
    *
-   * This method is only for human elucidation, and the precise
-   * results returned are subject to change at any time.
+   * <p>This method is only for human information, and the precise
+   * results returned are subject to change at any time.</p>
    *
+   * @see arlut.csd.ganymede.BaseField 
    */
 
   public String getTypeDesc() throws RemoteException;

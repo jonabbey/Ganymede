@@ -4,8 +4,8 @@
    Tree node subclass used by gclient.java and openObjectDialog.java
 
    Created: 15 January 1999
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/01/22 18:04:09 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/05/26 23:17:12 $
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
 
    -----------------------------------------------------------------------
@@ -54,6 +54,12 @@ import arlut.csd.JTree.*;
                                                               InvidNode
 
 ---------------------------------------------------------------------*/
+
+/**
+ * <p>Class used in the client to represent an individual
+ * {@link arlut.csd.ganymede.db_object db_object} in the client's tree
+ * display.</p>
+ */
 
 class InvidNode extends arlut.csd.JTree.treeNode {
 

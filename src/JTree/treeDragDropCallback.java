@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
    
   Created: 22 June 1997
-  Version: $Revision: 1.1 $ %D%
+  Version: $Revision: 1.2 $ %D%
   Module By: Jonathan Abbey              jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,14 +36,13 @@ package arlut.csd.JTree;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * Callback interface to be implemented by objects that manage drag and drop
  * behavior within a treeControl.
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.1 $ %D%
+ * @version $Revision: 1.2 $ %D%
  *
- * @see arlut.csd.Tree.treeControl
+ * @see arlut.csd.JTree.treeControl
  */
 
 public interface treeDragDropCallback {

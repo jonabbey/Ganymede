@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.133 $
-   Last Mod Date: $Date: 1999/05/07 05:21:34 $
+   Version: $Revision: 1.134 $
+   Last Mod Date: $Date: 1999/05/26 23:17:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.JDialog.*;
  *
  * @see arlut.csd.ganymede.DBSession
  * 
- * @version $Revision: 1.133 $ %D%
+ * @version $Revision: 1.134 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -640,7 +640,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * default, the 1.1 RMI time-out is 10 minutes.</p>
    *
    * @see java.rmi.server.Unreferenced
-   *
    */
 
   public void unreferenced()
@@ -664,7 +663,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * <p>This method is now all-but-deprecated, as most code in the Ganymede
    * server now uses ReturnVal objects to return error information.</p>
    *
-   * @see setLastError
+   * @see arlut.csd.ganymede.GanymedeSession.setLastError()
    * @see arlut.csd.ganymede.Session 
    */
   
@@ -4742,12 +4741,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   //
 
   /**
+   * <p>Returns true if a wizard is currently interacting
+   * with the user.</p>
    *
-   * This method returns true if a wizard is currently interacting
-   * with the user.
-   *
-   * @see arlut.csd.GanymediatorWizard
-   *
+   * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
   public synchronized boolean isWizardActive()
@@ -4756,11 +4753,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   * This method returns true if a particular wizard is currently
-   * interacting with the user.
+   * <p>Returns true if a particular wizard is currently
+   * interacting with the user.</p>
    *
-   * @see arlut.csd.GanymediatorWizard
-   *
+   * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
   public synchronized boolean isWizardActive(GanymediatorWizard wizard)
@@ -4769,12 +4765,10 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>Returns the active wizard, if any, for
+   * this GanymedeSession.</p>
    *
-   * This method is used to return the active wizard, if any, for
-   * this GanymedeSession.
-   *
-   * @see arlut.csd.GanymediatorWizard
-   *
+   * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
   public synchronized GanymediatorWizard getWizard()
@@ -4783,14 +4777,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>This method is used to register a wizard for this GanymedeSession.</p>
    *
-   * This method is used to register a wizard for this GanymedeSession.
+   * <p>If an active wizard is already registered, this method will return
+   * false.</p>
    *
-   * If an active wizard is already registered, this method will return
-   * false.
-   *
-   * @see arlut.csd.GanymediatorWizard
-   *
+   * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
   public synchronized boolean registerWizard(GanymediatorWizard wizard)
@@ -4807,14 +4799,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
+   * <p>Unregisters a wizard from this GanymedeSession.</p>
    *
-   * This method is used to register a wizard for this GanymedeSession.
+   * <p>If there is no active wizard registered, or if the registered wizard
+   * is not equal to the wizard parameter, an IllegalArgumentException will
+   * be thrown.</p>
    *
-   * If an active wizard is already registered, this method will return
-   * false.
-   *
-   * @see arlut.csd.GanymediatorWizard
-   *
+   * @see arlut.csd.ganymede.GanymediatorWizard
    */
 
   public synchronized void unregisterWizard(GanymediatorWizard wizard)
@@ -4830,11 +4821,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   }
 
   /**
-   *
-   * This method returns true if the active persona has some sort of
+   * <p>Returns true if the active persona has some sort of
    * owner/access relationship with the object in question through
-   * its list of owner groups.
-   * 
+   * its list of owner groups.</p>
    */
 
   public final boolean personaMatch(DBObject obj)

@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 17 June 1996
-  Version: $Revision: 1.9 $ %D%
+  Version: $Revision: 1.10 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -43,10 +43,9 @@ import javax.swing.*;
  * <p>gridTable is a specialized baseTable, supporting an x,y 
  * access model
  *
- *
- * @see arlut.csd.Table.baseTable
+ * @see arlut.csd.JTable.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.9 $ %D% 
+ * @version $Revision: 1.10 $ %D% 
  */
 
 public class gridTable extends baseTable {

@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.64 $
-   Last Mod Date: $Date: 1999/04/07 01:14:25 $
+   Version: $Revision: 1.65 $
+   Last Mod Date: $Date: 1999/05/26 23:17:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -78,7 +78,7 @@ import arlut.csd.JDialog.*;
  * while DBSession is accessed only by (presumably trusted)
  * server-side code.</p>
  *
- * @version $Revision: 1.64 $ %D%
+ * @version $Revision: 1.65 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -723,7 +723,7 @@ final public class DBSession {
    *
    * <p>Note that this method does not check to see whether permission
    * has been obtained to inactivate the object.. that's done in
-   * {@link arlut.csd.GanymedeSession#inactivate_db_object(arlut.csd.ganymede.Invid) 
+   * {@link arlut.csd.ganymede.GanymedeSession#inactivate_db_object(arlut.csd.ganymede.Invid) 
    * GanymedeSession.inactivate_db_object()}.</p>
    *
    * @param eObj An object checked out in the current transaction to be inactivated
@@ -861,11 +861,9 @@ final public class DBSession {
   }
 
   /**
-   *
-   * Convenience pass-through method
+   * <p>Convenience pass-through method</p>
    * 
-   * @see arlut.csd.ganymede.DBEditSet#checkpoint()
-   *
+   * @see arlut.csd.ganymede.DBEditSet#checkpoint(java.lang.String)
    */
 
   public final void checkpoint(String name)
@@ -877,11 +875,9 @@ final public class DBSession {
   }
 
   /**
-   *
-   * Convenience pass-through method
+   * <p>Convenience pass-through method</p>
    * 
-   * @see arlut.csd.ganymede.DBEditSet#popCheckpoint()
-   *
+   * @see arlut.csd.ganymede.DBEditSet#popCheckpoint(java.lang.String)
    */
 
   public final boolean popCheckpoint(String name)
@@ -899,11 +895,9 @@ final public class DBSession {
   }
 
   /**
-   *
-   * Convenience pass-through method
+   * <p>Convenience pass-through method</p>
    * 
-   * @see arlut.csd.ganymede.DBEditSet#rollback()
-   *
+   * @see arlut.csd.ganymede.DBEditSet#rollback(java.lang.String)
    */
 
   public final boolean rollback(String name)
@@ -917,10 +911,8 @@ final public class DBSession {
   }
 
   /**
-   *
-   * Returns true if the session's lock is currently locked, false
-   * otherwise.
-   *
+   * <p>Returns true if the session's lock is currently locked, false
+   * otherwise.</p>
    */
 
   public boolean isLocked(DBLock lockParam)
@@ -941,18 +933,18 @@ final public class DBSession {
   }
 
   /**
+   * <p>Establishes a read lock for the DBObjectBase's in bases.</p>
    *
-   * openReadLock establishes a read lock for the DBObjectBase's in bases.<br><br>
-   *
-   * The thread calling this method will block until the read lock 
-   * can be established.  If any of the DBObjectBases in bases have transactions
+   * <p>The thread calling this method will block until the read lock 
+   * can be established.  If any of the {@link arlut.csd.ganymede.DBObjectBase DBObjectBases}
+   * in the bases vector have transactions
    * currently committing, the establishment of the read lock will be suspended
-   * until all such transactions are committed.<br><br>
+   * until all such transactions are committed.</p>
    *
-   * All viewDBObject calls done within the context of an open read lock
+   * <p>All viewDBObject calls done within the context of an open read lock
    * will be transaction consistent.  Other sessions may pull objects out for
    * editing during the course of the session's read lock, but no visible changes
-   * will be made to those ObjectBases until the read lock is released.
+   * will be made to those ObjectBases until the read lock is released.</p>
    */
 
   public synchronized DBReadLock openReadLock(Vector bases) throws InterruptedException

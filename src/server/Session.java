@@ -11,8 +11,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.37 $
-   Last Mod Date: $Date: 1999/05/07 05:21:36 $
+   Version: $Revision: 1.38 $
+   Last Mod Date: $Date: 1999/05/26 23:17:31 $
    Module By: Jonathan Abbey  jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -68,7 +68,7 @@ import java.util.*;
  * with the Ganymede server.  The Ganymede session will also provide the
  * primary interface for accessing ganymede db objects.</p>
  *
- * @version $Revision: 1.37 $ %D%
+ * @version $Revision: 1.38 $ %D%
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  *
  * @see arlut.csd.ganymede.DBSession
@@ -629,7 +629,7 @@ public interface Session extends Remote {
    * however.</p>
    *
    * <p>The client should check the returned ReturnVal's
-   * {@link arlut.csd.ganymede.ReturnVal.getObjectStatus() getObjectStatus()}
+   * {@link arlut.csd.ganymede.ReturnVal#getObjectStatus() getObjectStatus()}
    * method to see whether the re-activated object has an expiration date set.</p>
    *
    * <p>This method must be called within a transactional context.  The object's

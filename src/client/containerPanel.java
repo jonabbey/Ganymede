@@ -6,8 +6,8 @@
 
    Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.105 $
-   Last Mod Date: $Date: 1999/05/26 18:27:37 $
+   Version: $Revision: 1.106 $
+   Last Mod Date: $Date: 1999/05/26 23:17:13 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -97,7 +97,7 @@ import arlut.csd.Util.VecQuickSort;
  * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
  * method.</p>
  *
- * @version $Revision: 1.105 $ $Date: 1999/05/26 18:27:37 $ $Name:  $
+ * @version $Revision: 1.106 $ $Date: 1999/05/26 23:17:13 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -159,7 +159,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   /**
    * <p>Vector used to list vectorPanels embedded in this object window.  This
    * variable is used by
-   * {@link arlut.csd.ganymede.client.vectorPanel.expandAllLevels() vectorPanel.expandAllLevels()}
+   * {@link arlut.csd.ganymede.client.vectorPanel#expandAllLevels() vectorPanel.expandAllLevels()}
    * to do recursive expansion of embedded objects.</p>
    */
 

@@ -1,12 +1,10 @@
-
 /*
    JcheckboxField.java
-
    
    Created: 12 Jul 1996
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/01/22 18:03:57 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 1999/05/26 23:16:54 $
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
@@ -42,9 +40,7 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
-
 
 package arlut.csd.JDataComponent;
 
@@ -53,12 +49,21 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 
-/*******************************************************************
-                                                      JcheckboxField()
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                  JcheckboxField
 
- This class defines a JcheckboxField.
+------------------------------------------------------------------------------*/
 
-*******************************************************************/
+/**
+ * <p>Subclass of JCheckBox used to connect a checkbox to the standard
+ * {@link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}
+ * callback.</p>
+ *
+ * <p>Note that like all other uses of JsetValueCallback, this GUI component
+ * will revert its state if a call to JsetValueCallback is rejected.</p>
+ */
+
 public class JcheckboxField extends JCheckBox implements ItemListener {
 
   private boolean allowCallback = false;
@@ -75,9 +80,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
   private boolean notifyOnFocus = false;
 
-  ///////////////////
-  //  Constructors //
-  ///////////////////
+  /* -- */
 
   /**
    * Constructor that can create a JcheckboxField with a label, a particular state,
@@ -86,6 +89,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
    * @param label the label to use for this JcheckboxField
    * @param state the state to which this JcheckboxField is to be set
    */
+
   public JcheckboxField(String label,boolean state,boolean editable)
   {
     super(label);
@@ -103,9 +107,10 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
     addItemListener(this);
   }
 
-  /** Constructor that creates a basic checkbox with default foreground and background
-   *
+  /** 
+   * Constructor that creates a basic checkbox with default foreground and background
    */
+
   public JcheckboxField()
   {
     this(null, false, true);
@@ -131,22 +136,18 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
    * @param callback the component which can use the value of this JcheckboxField
    *
    */
+
   public JcheckboxField(String label,boolean state,boolean editable,JsetValueCallback callback)
-    {
-      this(label,state,editable);
-
-      setCallback(callback);
-      
-    }
-
-  ///////////////////
-  // Class Methods //
-  ///////////////////
+  {
+    this(label,state,editable);
+    
+    setCallback(callback);
+  }
 
   /**
    *  sets the parent of this component for callback purposes
-   *
    */
+
   public void setCallback(JsetValueCallback callback)
   {
     if (callback == null)
@@ -159,11 +160,11 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
     allowCallback = true;
   }
 
-
   /**
    * sets the value back to what it was before it was
    * changed 
    */
+
   public void resetValue()
   {
     setValue(oldvalue);
@@ -172,7 +173,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   /**
    * sets the value of this JcheckboxField to the boolean
    * value of state.
-   * 
    */
   
   public void setValue(boolean state)
@@ -183,6 +183,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   /**
    * returns the value represented by this JcheckboxField
    */
+
   public boolean getValue()
   {
     return isSelected();
@@ -200,7 +201,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
   /**
    * sets the label of this JcheckboxField
-   *
    */
 
   public void setText(String label)
@@ -210,6 +210,9 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
     super.setText(label);
   }
 
+  /**
+   * sets the state of this JcheckboxField
+   */
 
   public void setSelected(boolean state)
   {
@@ -219,6 +222,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   /**
    * sets the state of this JcheckboxField
    */
+
   public void setSelected(boolean state, boolean sendCallback)
   {
     if (value != state)
@@ -227,20 +231,16 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
       }
 
     this.value = state;
+
     if (sendCallback)
       {
 	super.setSelected(state);
       }
     else
       {
-	//removeItemListener(this);
 	super.setSelected(state);
-	//addItemListener(this);
       }
-
-
   }
-
 
   protected void processFocusEvent(FocusEvent e)
   {
@@ -272,10 +272,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
     super.processFocusEvent(e);
   }
-
-  /**
-   * @see java.awt.event.itemListener
-   */  
 
   public void itemStateChanged(ItemEvent e)
   {
@@ -312,10 +308,3 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
       }
   }
 }
-/************************************************************/ 
-
-
-
-
-
-

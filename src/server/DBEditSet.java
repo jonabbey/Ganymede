@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 1999/04/28 06:46:51 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 1999/05/26 23:17:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -176,7 +176,7 @@ public class DBEditSet {
   /**
    * The writelock acquired during the course of a commit attempt.  We keep
    * this around as a DBEditSet field so that we can use the handy
-   * {@link arlut.csd.ganymede.DBEditSet#releaseWriteLock() releaseWriteLock()}
+   * {@link arlut.csd.ganymede.DBEditSet#releaseWriteLock(java.lang.String) releaseWriteLock()}
    * method, but wLock should really never be non-null outside of the
    * context of the commit() call.
    */
@@ -1442,10 +1442,10 @@ public class DBEditSet {
   }
 
   /**
-   * This is a dinky little private helper method to keep things
+   * <p>This is a dinky little private helper method to keep things
    * clean.  It's essential that wLock be released if things go
    * wrong, else next time this session tries to commit a transaction,
-   * it'll wind up waiting forever for the old lock to be released.
+   * it'll wind up waiting forever for the old lock to be released.</p>
    */
 
   private void releaseWriteLock(String reason)

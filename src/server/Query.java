@@ -9,8 +9,8 @@
    
    Created: 21 October 1996
    Release: $Name:  $
-   Version: $Revision: 1.13 $
-   Last Mod Date: $Date: 1999/01/26 05:10:52 $
+   Version: $Revision: 1.14 $
+   Last Mod Date: $Date: 1999/05/26 23:17:30 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -280,16 +280,14 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method determines whether the query engine
+   * <p>This method determines whether the query engine
    * will filter the query according to the current
    * list of visible owner groups.  Queries by default
-   * are filtered.
+   * are filtered.</p>
    *
    * @param filtered If true, the query will be masked by ownership
    *
-   * @see arlut.csd.ganymede.Session#filterQueries()
-   * 
+   * @see arlut.csd.ganymede.Session#filterQueries(java.util.Vector)
    */
 
   public void setFiltered(boolean filtered)
@@ -298,10 +296,8 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method resets the permitList, allowing
-   * all fields to be returned by default.
-   * 
+   * <p>This method resets the permitList, allowing
+   * all fields to be returned by default.</p>
    */
 
   public void resetPermitList()
@@ -310,11 +306,9 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method sets the desired return type, for use
+   * <p>This method sets the desired return type, for use
    * in performing queries on embedded types when a
-   * parent type is what is desired.
-   *
+   * parent type is what is desired.</p>
    */
 
   public void setReturnType(short returnType)
@@ -323,15 +317,13 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method adds a field identifier to the list of
+   * <p>This method adds a field identifier to the list of
    * fields that may be returned.  Once this method
    * is called with a field identifier, the query will
-   * only return fields that have been explicitly added.
-   * <br><br>
+   * only return fields that have been explicitly added.</p>
    *
-   * resetPermitList() may be called to reset the
-   * list to the initial allow-all state.
+   * <p>resetPermitList() may be called to reset the
+   * list to the initial allow-all state.</p>
    */
 
   public void addField(short id)
@@ -345,17 +337,15 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method allows the client to add a list of subordinate queries
+   * <p>This method allows the client to add a list of subordinate queries
    * to this query.  The queries attached to this query *will not*
-   * have their subordinate queries processed.<br><br>
+   * have their subordinate queries processed.</p>
    * 
-   * Queries added with this method are used to allow queries to
-   * include checks on embedded objects.<br><br>
+   * <p>Queries added with this method are used to allow queries to
+   * include checks on embedded objects.</p>
    *
-   * It does no good to pass queries to addQuery that do not have
-   * the same return type as this query.
-   *   
+   * <p>It does no good to pass queries to addQuery that do not have
+   * the same return type as this query.</p>
    */
 
   public void addQuery(Query query)

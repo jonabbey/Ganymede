@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.149 $
-   Last Mod Date: $Date: 1999/04/06 04:17:01 $
+   Version: $Revision: 1.150 $
+   Last Mod Date: $Date: 1999/05/26 23:17:14 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -87,7 +87,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
  * treeControl} GUI component displaying object categories, types, and instances
  * for the user to browse and edit.</p>
  *
- * @version $Revision: 1.149 $ $Date: 1999/04/06 04:17:01 $ $Name:  $
+ * @version $Revision: 1.150 $ $Date: 1999/05/26 23:17:14 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
@@ -287,7 +287,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   /**
    * <p>Hash mapping {@link arlut.csd.ganymede.Invid Invid}'s for objects
    * referenced by the client to the corresponding
-   * {@link arlut.csd.ganymede.InvidNode InvidNode} displayed in the
+   * {@link arlut.csd.ganymede.client.InvidNode InvidNode} displayed in the
    * client's tree display.</p>
    */
 
@@ -495,7 +495,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * it is set.</p>
    *
    * <p>Whenever the gclient's
-   * {@link arlut.csd.ganymede.gclient#setStatus(java.lang.String,int) setStatus}
+   * {@link arlut.csd.ganymede.client.gclient#setStatus(java.lang.String,int) setStatus}
    * method is called, this thread has a countdown timer started, which will
    * clear the status label if it is not reset by another call to setStatus.</p>
    */

@@ -5,8 +5,8 @@
    The window that holds the frames in the client.
    
    Created: 11 July 1997
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 1999/04/12 21:36:39 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 1999/05/26 23:17:17 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -80,7 +80,7 @@ import arlut.csd.JDataComponent.*;
  * internal 'guy working' status window that lets the user know the client
  * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Revision: 1.67 $ $Date: 1999/04/12 21:36:39 $ $Name:  $
+ * @version $Revision: 1.68 $ $Date: 1999/05/26 23:17:17 $ $Name:  $
  * @author Mike Mulvaney
  */
 
@@ -520,7 +520,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   /**
    * <p>Convenience method, calls
-   * {@link arlut.csd.ganymede.gclient#setStatus(java.lang.String) gclient.setStatus}
+   * {@link arlut.csd.ganymede.client.gclient#setStatus(java.lang.String) gclient.setStatus}
    * to set some text in the client's status bar, with a time-to-live of the
    * default 5 seconds.</p>
    */

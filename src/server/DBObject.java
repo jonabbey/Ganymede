@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.70 $
-   Last Mod Date: $Date: 1999/04/20 18:21:51 $
+   Version: $Revision: 1.71 $
+   Last Mod Date: $Date: 1999/05/26 23:17:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -134,7 +134,7 @@ import arlut.csd.JDialog.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.70 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.71 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -808,7 +808,7 @@ public class DBObject implements db_object, FieldType, Remote {
    * to disk.  emit() dumps an object in its entirety to the
    * given out stream.</p>
    *
-   * @param out A {@link arlut.csd.ganymede.DBjournal DBjournal} or
+   * @param out A {@link arlut.csd.ganymede.DBJournal DBJournal} or
    * {@link arlut.csd.ganymede.DBStore DBStore} writing stream.
    */
 

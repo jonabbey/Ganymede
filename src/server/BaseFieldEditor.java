@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.32 $
-   Last Mod Date: $Date: 1999/01/22 18:05:26 $
+   Version: $Revision: 1.33 $
+   Last Mod Date: $Date: 1999/05/26 23:17:22 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -1258,9 +1258,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
   }
 
   /**
-   *
-   * Reinitialize the BaseFieldEditor with the current field.
-   *
+   * <p>Reinitialize the BaseFieldEditor with the current field.</p>
    */
 
   public void refreshFieldEdit(boolean updateTargetC)
@@ -1269,11 +1267,9 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
   }
 
   /**
-   * 
-   * For string, numeric, and checkbox fields
+   * <p>For string, numeric, and checkbox fields</p>
    *
-   * @see arlut.csd.DataComponent.setValueCallback
-   *
+   * @see arlut.csd.JDataComponent.JsetValueCallback
    */
 
   public boolean setValuePerformed(JValueObject v)

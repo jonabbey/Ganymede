@@ -51,7 +51,7 @@ html pages.
 
 Added the extraHeaders parameter to sendMsg() to support sendHTMLmsg().
 
-Moved the code to use the 1.1 io and text formatting classes.
+Modified the code to use the 1.1 io and text formatting classes.
 
 ***********************************************************************/
 
@@ -86,9 +86,8 @@ public class Qsmtp {
 
   /**
    *   Create a Qsmtp object pointing to the specified host
+   *
    *   @param hostid The host to connect to.
-   *   @exception UnknownHostException
-   *   @exception IOException
    */
 
   public Qsmtp(String hostid)
@@ -299,9 +298,10 @@ public class Qsmtp {
   }
 
   /**
+   * <p>In a perfect world, we'd do a generic MIME-capable mail system here.</p>
    *
-   * In a perfect world, we'd do a generic MIME-capable mail system here.
-   *
+   * @exception ProtocolException
+   * @exception IOException
    */
 
   public void sendHTMLmsg(String from_address, Vector to_addresses,
@@ -359,9 +359,7 @@ public class Qsmtp {
   }
 
   /**
-   *
-   * This method returns a properly mail-formatted date string.
-   *
+   * <p>This method returns a properly mail-formatted date string.</p>
    */
 
   public static String formatDate(Date date)

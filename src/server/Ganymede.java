@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.67 $
-   Last Mod Date: $Date: 1999/04/28 09:33:02 $
+   Version: $Revision: 1.68 $
+   Last Mod Date: $Date: 1999/05/26 23:17:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1087,7 +1087,7 @@ class dumpAndArchiveTask implements Runnable {
 
 /**
  * <p>Runnable class to do a synchronous garbage collection run.  Issued
- * by the {@link arlut.csd.GanymedeScheduler GanymedeScheduler}.</p>
+ * by the {@link arlut.csd.ganymede.GanymedeScheduler GanymedeScheduler}.</p>
  *
  * <p>I'm not sure that there is any point to having a synchronous garbage
  * collection task.. the idea was that we could schedule a full gc when

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 1999/04/07 01:14:26 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 1999/05/26 23:17:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -77,7 +77,7 @@ import arlut.csd.JDialog.*;
  * via the SchemaConstants.BackLinksField, which is guaranteed to be
  * defined in every object in the database.
  *
- * @version $Revision: 1.104 $ %D%
+ * @version $Revision: 1.105 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -831,28 +831,27 @@ public final class InvidDBField extends DBField implements invid_field {
   // ****
 
   /**
+   * <p>This method is used to link the remote invid to this checked-out invid
+   * in accordance with this field's defined symmetry constraints.</p>
    *
-   * This method is used to link the remote invid to this checked-out invid
-   * in accordance with this field's defined symmetry constraints.<br><br>
-   *
-   * This method will extract the objects referenced by the old and new
+   * <p>This method will extract the objects referenced by the old and new
    * remote parameters, and will cause the appropriate invid dbfields in
    * them to be updated to reflect the change in link status.  If either
    * operation can not be completed, bind will return the system to its
    * pre-bind status and return false.  One or both of the specified
    * remote objects may remain checked out in the current editset until
-   * the transaction is committed or released.<br><br>
+   * the transaction is committed or released.</p>
    *
-   * It is an error for newRemote to be null;  if you wish to undo an
+   * <p>It is an error for newRemote to be null;  if you wish to undo an
    * existing binding, use the unbind() method call.  oldRemote may
    * be null if this currently holds no value, or if this is a vector
-   * field and newRemote is being added.<br><br>
+   * field and newRemote is being added.</p>
    *
-   * This method should only be called from synchronized methods within
-   * InvidDBField.<br><br>
+   * <p>This method should only be called from synchronized methods within
+   * InvidDBField.</p>
    *
-   * <b>This method is private, and is not to be called by any code outside
-   * of this class.</b>
+   * <p><b>This method is private, and is not to be called by any code outside
+   * of this class.</b></p>
    *
    * @param oldRemote the old invid to be replaced
    * @param newRemote the new invid to be linked
@@ -861,8 +860,7 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    * @return null on success, or a ReturnVal with an error dialog encoded on failure
    *
-   * @see unbind
-   *
+   * @see arlut.csd.ganymede.InvidDBField#unbind(arlut.csd.ganymede.Invid, boolean)
    */
 
   private final ReturnVal bind(Invid oldRemote, Invid newRemote, boolean local)
@@ -1183,19 +1181,17 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
+   * <p>This method is used to unlink this field from the specified remote
+   * invid in accordance with this field's defined symmetry constraints.</p>
    *
-   * This method is used to unlink this field from the specified remote
-   * invid in accordance with this field's defined symmetry constraints.<br><br>
-   *
-   * <b>This method is private, and is not to be called by any code outside
-   * of this class.</b>
+   * <p><b>This method is private, and is not to be called by any code outside
+   * of this class.</b></p>
    *
    * @param remote An invid for an object to be checked out and unlinked
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
    *
    * @return null on success, or a ReturnVal with an error dialog encoded on failure
-   *
    */
 
   private final ReturnVal unbind(Invid remote, boolean local)

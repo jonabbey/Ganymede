@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.49 $
-   Last Mod Date: $Date: 1999/04/20 18:21:52 $
+   Version: $Revision: 1.50 $
+   Last Mod Date: $Date: 1999/05/26 23:17:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -61,38 +61,119 @@ import java.rmi.server.UnicastRemoteObject;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * An entry in the DBObjectBase dictionary.  This class defines the
- * type of an object field, along with any namespace information
- * pertaining to the field.
- *
+ * <p>An entry in the 
+ * {@link arlut.csd.ganymede.DBObjectBase DBObjectBase} field dictionary.  This class defines the
+ * type of an object field, along with constraints and any namespace information
+ * pertaining to the field.</p>
  */
 
 public final class DBObjectBaseField extends UnicastRemoteObject implements BaseField, FieldType {
 
-  DBObjectBase base;		// definition for the object type we are part of
+  /**
+   * Object type definition for the database object class we are member of
+   */
 
-  // schema fields
+  DBObjectBase base;
 
-  String field_name = null;	// name of this field
-  short field_code;		// id of this field in the current object
-  short field_type;		// data type contained herein
-  short field_order;		// display order for this field
+  /**
+   * name of this field
+   */
 
-  boolean editable = true;	// can this field be edited in the schema editor?
-  boolean removable = true;	// can this field be removed from the owning Base in the schema editor?
-  boolean visibility = true;	// should this field be displayed to the client?
-  boolean builtIn = false;	// is this field a built-in, applicable to all (nonembedded) object types?
+  String field_name = null;
 
-  String classname = null;	// name of class to manage user interactions with this field
+  /**
+   * id of this field in the current object type
+   */
+
+  short field_code;
+
+  /**
+   * {@link arlut.csd.ganymede.FieldType Field Type} for this field
+   */
+
+  short field_type;
+
+  /**
+   * display order for this field, used to display fields in order on the
+   * client.
+   */
+
+  short field_order;
+
+  /**
+   * Can this field be edited in the schema editor?  Will be false for
+   * fields that are required for the server's own functioning in the
+   * mandatory object types.
+   */
+
+  boolean editable = true;
+
+  /** 
+   * Can this field be removed from the owning Base in the schema
+   * editor?  Will be false for fields that are required for the
+   * server's own functioning in the mandatory object types.  
+   */
+
+  boolean removable = true;
+
+  /**
+   * Should this field be displayed to the client?  May be false for
+   * some fields intended for 'scratch-pad' use, as in serving as
+   * anchors for compound namespace use.  (i.e., the case where two
+   * fields in an object are considered together for namespace use..
+   * in this case, a hidden field might be defined with custom code
+   * updating the hidden field whenever either of the two visible
+   * fields are changed.  The hidden field will have a value of
+   * XY where X is the contents of field 1 and Y the contents of
+   * field 2.  Oh, never mind.)
+   */
+
+  boolean visibility = true;
+
+  /** 
+   * is this field a built-in universal field, applicable to all
+   * (nonembedded) object types?
+   */
+
+  boolean builtIn = false;
+
+  /**
+   * name of class to manage user interactions with this field
+   */
+
+  String classname = null;
+
+  /**
+   * string to be displayed in the client as a tooltip explaining this field
+   */
+
   String comment = null;
-  Class classdef;		// class object containing the code managing dbfields of this type
-  boolean array = false;	// true if this field is an array type
-  boolean loading = false;	// true if we're in the middle of loading
+
+  /**
+   * class object containing the code managing dbfields of this type
+   */
+
+  Class classdef;
+
+  /**
+   * true if this field is an array type
+   */
+
+  boolean array = false;
+
+  /**
+   * true if we're in the middle of loading
+   */
+
+  boolean loading = false;
 
   // array attributes
 
-  short limit = Short.MAX_VALUE; // max length of array
+  /**
+   * max length of array
+   */
+
+  short limit = Short.MAX_VALUE;
 
   // boolean attributes
 
@@ -122,10 +203,20 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 
   // schema editing
 
+  /**
+   * If we are being edited, this will point to an instance
+   * of a server-side schema editing class.
+   */
+
   DBSchemaEdit editor;
   boolean changed;
 
-  // downloadable FieldTemplate
+  /**
+   * Downloadable FieldTemplate representing the constant field type
+   * attributes represented by this DBObjectBaseField.  This template
+   * is regenerated whenever clearEditor() is called, upon schema
+   * editing completion.
+   */
 
   FieldTemplate template;
 
@@ -186,12 +277,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Copy constructor, used during schema editing.</p>
    *
-   * Copy constructor, used during schema editing.<br><br>
-   *
-   * <b>IMPORTANT: BE SURE TO ALWAYS EDIT THIS METHOD IF YOU ADD ANY FIELDS
-   * TO THIS CLASS!</b>
-   *
+   * <p><b>IMPORTANT: BE SURE TO ALWAYS EDIT THIS METHOD IF YOU ADD ANY FIELDS
+   * TO THIS CLASS!</b></p>
    */
 
   DBObjectBaseField(DBObjectBaseField original, DBSchemaEdit editor) throws RemoteException
@@ -243,10 +332,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method is used when the database is being dumped, to write
-   * out this field definition to disk.  It is mated with receive().
-   *
+   * <p>This method is used when the database is being dumped, to write
+   * out this field definition to disk.  It is mated with receive().</p>
    */
 
   synchronized void emit(DataOutput out) throws IOException
@@ -382,10 +469,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method is used when the database is being loaded, to read
-   * in this field definition from disk.  It is mated with emit().
-   *
+   * <p>This method is used when the database is being loaded, to read
+   * in this field definition from disk.  It is mated with emit().</p>
    */
 
   synchronized void receive(DataInput in) throws IOException
@@ -586,12 +671,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // ----------------------------------------------------------------------
 
   /**
+   * <p>This method returns true if this field definition can be edited
+   * in the schema editor.</p>
    *
-   * This method returns true if this field definition can be edited
-   * in the schema editor.<br><br>
-   *
-   * This method will return true if the DBSchemaEdit class is configured
-   * with developMode set to true.
+   * <p>This method will return always true if the DBSchemaEdit class is configured
+   * with developMode set to true.  Otherwise, this method will return false
+   * for the built-in field types that the server is dependent on for its
+   * own functioning.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -602,9 +688,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method returns true if this field definition can be removed
-   * by the schema editor.
+   * <p>This method returns true if this field definition can be removed
+   * by the schema editor.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -615,10 +700,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method returns true if this field definition is designated
+   * <p>This method returns true if this field definition is designated
    * as a built-in.  built-in fields are fields that are present in
-   * all object types held in the database.
+   * all object types held in the database.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -629,10 +713,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method returns true if this field
+   * <p>This method returns true if this field
    * is intended to be visible to the client normally,
-   * false otherwise.
+   * false otherwise.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -643,8 +726,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Returns the Base we are a part of.
+   * <p>Returns the Base we are a part of.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -655,8 +737,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Returns the name of this field
+   * <p>Returns the name of this field</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -667,8 +748,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Sets the name of this field
+   * <p>Sets the name of this field</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -684,8 +764,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Returns the name of the class managing instances of this field
+   * <p>Returns the name of the class managing instances of this field</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -696,8 +775,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Sets the name of the class managing instances of this field
+   * <p>Sets the name of the class managing instances of this field</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -732,9 +810,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Returns the Class object managing instances of this field
-   *
+   * <p>Returns the Class object managing instances of this field</p>
    */
 
   public Class getClassDef()
@@ -743,8 +819,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Returns the comment defined in the schema for this field
+   * <p>Returns the comment defined in the schema for this field</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -755,8 +830,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Sets the comment defined in the schema for this field
+   * <p>Sets the comment defined in the schema for this field</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -772,11 +846,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }      
 
   /**
-   *
    * <p>Returns the field type</p>
    *
    * <p>Where type is one of the following
-   * constants defined in the FieldType interface:</p>
+   * constants defined in the {@link arlut.csd.ganymede.FieldType FieldType}
+   * interface:</p>
    *
    * <pre>
    *   static short BOOLEAN = 0;
@@ -799,16 +873,19 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Sets the field type for this field.  Changing the field type
+   * <p>Sets the {@link arlut.csd.ganymede.FieldType field type}
+   * for this field.  Changing the field type
    * is an incompatible change, and will result in the class managing
    * this field type being reset to the default class for the field
-   * type.
+   * type.</p>
+   *
+   * <p>If the new field type is not string, invid, or IP, the field
+   * will be made a scalar field.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
 
-  public  synchronized void setType(short type)
+  public synchronized void setType(short type)
   {
     if (editor == null)
       {
@@ -833,8 +910,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // type identification convenience methods
 
   /**
-   * 
-   * Returns true if this field is of boolean type
+   * <p>Returns true if this field is of boolean type</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -845,8 +921,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * 
-   * Returns true if this field is of numeric type
+   * <p>Returns true if this field is of numeric type</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -857,8 +932,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * 
-   * Returns true if this field is of date type
+   * <p>Returns true if this field is of date type</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -869,8 +943,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * 
-   * Returns true if this field is of string type
+   * <p>Returns true if this field is of string type</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -881,8 +954,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * 
-   * Returns true if this field is of invid type
+   * <p>Returns true if this field is of invid type</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -893,8 +965,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * 
-   * Returns true if this field is of permission matrix type
+   * <p>Returns true if this field is of permission matrix type</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -905,8 +976,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * 
-   * Returns true if this field is of password type
+   * <p>Returns true if this field is of password type</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -917,8 +987,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * 
-   * Returns true if this field is of IP type 
+   * <p>Returns true if this field is of IP type</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -929,7 +998,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
   
   /**
-   *
    * <p>Returns true if this field is a vector field, false otherwise.</p>
    *
    * @see arlut.csd.ganymede.BaseField
@@ -941,13 +1009,16 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Set this field to be a vector or scalar.  If b is true, this field will
+   * be a vector, if false, scalar.</p>
    *
-   * Set this field to be a vector or scalar.  If b is true, this field will
-   * be a vector, if false, scalar.<br><br>
+   * <p>Only strings, invid's, and ip fields may be vectors.  Attempting to 
+   * setArray(true) for other field types will cause an IllegalArgumentException
+   * to be thrown.</p>
    *
-   * It may be possible to compatibly handle the conversion from
+   * <p>It may be possible to compatibly handle the conversion from
    * scalar to vector, but a vector to scalar change is an incompatible
-   * change.
+   * change.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -968,10 +1039,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * <p>Returns id code for this field.  Each field in a DBObject
+   * <p>Returns id code for this field.  Each field in a
+   * {@link arlut.csd.ganymede.DBObject DBObject}
    * has a unique code which identifies the field.  This code represents
-   * the field in the on-disk data store, and is used by DBEditObject
+   * the field in the on-disk data store, and is used by 
+   * {@link arlut.csd.ganymede.DBEditObject DBEditObject}
    * to choose what field to change in the setField method.</p>
    *
    * @see arlut.csd.ganymede.BaseField
@@ -983,10 +1055,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Returns the order of this field within the containing
+   * <p>Returns the order of this field within the containing
    * base.  Used to determine the layout order of object
-   * viewing panels.
+   * viewing panels.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -997,10 +1068,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Returns the type id for this field definition as
-   * a Short, suitable for use in a hash.
-   *
+   * <p>Returns the type id for this field definition as
+   * a Short, suitable for use in a hash.</p>
    */
 
   public Short getKey()
@@ -1009,15 +1078,14 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Set the identifying code for this field.</p>
    *
-   * Set the identifying code for this field.
-   *
-   * This is an incompatible change.  In fact, it
+   * <p>This is an incompatible change.  In fact, it
    * is so incompatible that it only makes sense in
    * the context of creating a new field in a particular
    * DBObjectBase.. otherwise we would wind up indexed
    * improperly if we don't somehow move ourselves to
-   * a different key slot in the DBObjectBase fieldHash.
+   * a different key slot in the DBObjectBase fieldHash.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -1033,15 +1101,14 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Set the display order of this field in the SchemaEditor's
+   * tree, and in the object display panels in the client.</p>
    *
-   * Set the display order of this field in the SchemaEditor's
-   * tree, and in the object display panels in the client.<br><br>
-   *
-   * Note that this method does not check to make sure that fields
+   * <p>Note that this method does not check to make sure that fields
    * don't have duplicated order values.. the schema editor needs
    * to do the proper logic to make sure that all fields have a
    * reasonable order after any field creation, deletion, or 
-   * re-ordering.
+   * re-ordering.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -1059,9 +1126,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
    * <p>Returns the object definition that this field is defined under.</p>
-   *
    */
 
   public DBObjectBase base()
@@ -1084,7 +1149,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // **
 
   /**
-   *
    * <p>Returns the array size limitation for this field if it is an array field</p>
    *
    * @see arlut.csd.ganymede.BaseField
@@ -1101,8 +1165,7 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * Set the maximum number of values allowed in this vector field.
+   * <p>Set the maximum number of values allowed in this vector field.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -1127,7 +1190,6 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // **
 
   /**
-   *
    * <p>Returns true if this is a boolean field with labels</p>
    *
    * @see arlut.csd.ganymede.BaseField
@@ -1144,8 +1206,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Turn labeled choices on/off for a boolean field.</p>
    *
-   * Turn labeled choices on/off for a boolean field.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a boolean type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1166,8 +1230,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
    * <p>Returns the true Label if this is a labeled boolean field</p> 
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a labeled boolean type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1183,9 +1249,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Sets the label associated with the true choice for this
+   * boolean field.</p>
    *
-   * Sets the label associated with the true choice for this
-   * boolean field.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a labeled boolean type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1206,8 +1274,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
    * <p>Returns the false Label if this is a labeled boolean field</p> 
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a labeled boolean type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1223,9 +1293,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Sets the label associated with the false choice for this
+   * boolean field.</p>
    *
-   * Sets the label associated with the false choice for this
-   * boolean field.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a labeled boolean type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1250,8 +1322,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // **
 
   /**
+   * <p>Returns the minimum acceptable string length if this is a string or
+   * password field.</p>
    *
-   * <p>Returns the minimum acceptable string length if this is a string field.</p>
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1267,8 +1342,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Sets the minimum acceptable length for this string or password field.</p>
    *
-   * Sets the minimum acceptable length for this string field.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1289,9 +1366,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * <p>Returns the maximum acceptable string length if this is a string field.</p>
+   * <p>Returns the maximum acceptable string length if this is a string 
+   * or password field.</p>
    * 
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
+   *
    * @see arlut.csd.ganymede.BaseField
    */
 
@@ -1305,11 +1385,14 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     return maxLength;
   }
 
-  /**
+  /** 
+   * <p>Sets the maximum acceptable length for this string or
+   * password field.</p>
    *
-   * Sets the maximum acceptable length for this string field.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ganymede.BaseField
+   * @see arlut.csd.ganymede.BaseField 
    */
 
   public synchronized void setMaxLength(short val)
@@ -1328,8 +1411,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
    * <p>Returns the set of acceptable characters if this is a string field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1345,9 +1430,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Sets the set of characters that are allowed in this string or 
+   * password field.  If s is null, all characters by default 
+   * are acceptable.</p>
    *
-   * Sets the set of characters that are allowed in this string field.  If
-   * s is null, all characters by default are acceptable.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1368,8 +1456,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Returns the set of unacceptable characters if this is a 
+   * string or password field.</p>
    *
-   * <p>Returns the set of unacceptable characters if this is a string field.</p>
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1385,9 +1476,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Sets the set of characters that are specifically disallowed in
+   * this string or password field.</p>
    *
-   * Sets the set of characters that are specifically disallowed in
-   * this string field.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string or password type.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -1408,9 +1501,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
    * <p>Returns true if this string field is intended to be a multi-line
    * field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1426,9 +1521,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Sets whether or not this string field should be presented as a
+   * multiline field.</p>
    *
-   * Sets whether or not this string field should be presented as a
-   * multiline field.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string type.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -1448,10 +1545,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
     multiLine = b;
   }
 
-  /**
-   *
-   * <p>Returns the DBNameSpace that this string field is associated with.</p>
-   *
+  /** 
+   * <p>Returns the DBNameSpace that this string, numeric, or IP
+   * field is associated with.</p> 
    */
 
   public DBNameSpace getNameSpace()
@@ -1464,10 +1560,9 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * <p>Returns the label of this string field's namespace.</p>
+   * <p>Returns the label of this string, numeric, or IP field's namespace.</p>
    *
    * @see arlut.csd.ganymede.BaseField
-   *
    */
 
   public String getNameSpaceLabel()
@@ -1487,12 +1582,15 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Set a namespace constraint for this string, numeric, or
+   * IP field.</p>
    *
-   * Set a namespace constraint for this string field.<br><br>
-   *
-   * Note that this is intended to be called from the Schema Editor,
+   * <p>Note that this is intended to be called from the Schema Editor,
    * and won't take effect until the next time the system is stopped
-   * and reloaded.
+   * and reloaded.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string, numeric, or IP type.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -1549,11 +1647,14 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>This method is used internally to set a namespace constraint.</p>
    *
-   * This method is used internally to set a namespace constraint.<br><br>
+   * <p>It does not appear that this method is currently used.. rather that
+   * {@link arlut.csd.ganymede.DBObjectBaseField#setNameSpace(java.lang.String)
+   * setNameSpace(string)} is.</p>
    *
-   * It does not appear that this method is currently used.
-   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a string, numeric, or IP type.</p>
    */
 
   void setNameSpace(DBNameSpace namespace)
@@ -1571,9 +1672,8 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // **
 
   /**
-   *
-   * Returns true if this field is intended as an editInPlace
-   * reference for the client's rendering.
+   * <p>Returns true if this is an invid field which is intended as an editInPlace
+   * reference for the client's rendering.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1584,9 +1684,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Sets whether or not this field is intended as an editInPlace
+   * reference for the client's rendering.</p>
    *
-   * Sets whether or not this field is intended as an editInPlace
-   * reference for the client's rendering.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1604,8 +1706,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
    * <p>Returns true if this is a target restricted invid field</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1621,12 +1725,14 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
    * <p>Return the object type that this invid field is constrained to point to, if set</p>
    *
    * <p>-1 means there is no restriction on target type.</p>
    *
    * <p>-2 means there is no restriction on target type, but there is a specified symmetric field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1642,9 +1748,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Sets the allowed target object code of this invid field to &lt;val&gt;.
+   * If val is -1, this invid field can point to objects of any type.</p>
    *
-   * Sets the allowed target object code of this invid field to &lt;val&gt;.
-   * If val is -1, this invid field can point to objects of any type.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -1684,9 +1792,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>Sets the allowed target object code of this invid field to &lt;baseName&gt;.
+   * If val is null, this invid field can point to objects of any type.</p>
    *
-   * Sets the allowed target object code of this invid field to &lt;baseName&gt;.
-   * If val is null, this invid field can point to objects of any type.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -1733,9 +1843,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
    * <p>If this field is a target restricted invid field, this method will return
    * true if this field has a symmetry relationship to the target</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1751,10 +1863,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
    * <p>If this field is a target restricted invid field, this method will return
    * a short indicating the field in the target object that the symmetry relation
    * applies to.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1770,11 +1884,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * 
-   * Sets the field of the target object of this invid field that should
+   * <p>Sets the field of the target object of this invid field that should
    * be managed in the symmetry relationship if isSymmetric().  If
    * val == -1, the targetField will be set to a value representing
-   * no selection.
+   * no selection.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1832,10 +1948,12 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   * 
-   * Sets the field of the target object of this invid field that should
+   * <p>Sets the field of the target object of this invid field that should
    * be managed in the symmetry relationship if isSymmetric().  If &lt;fieldName&gt;
-   * is null, the targetField will be cleared.
+   * is null, the targetField will be cleared.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not an invid type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1896,13 +2014,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method returns true if this is a password field that
+   * <p>This method returns true if this is a password field that
    * stores passwords in UNIX crypt format, and can thus accept
-   * pre-crypted passwords.
+   * pre-crypted passwords.</p>
    *
    * @see arlut.csd.ganymede.BaseField
-   *
    */
 
   public boolean isCrypted()
@@ -1911,12 +2027,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
+   * <p>This method is used to specify that this password field
+   * should store passwords in UNIX crypt format.  If passwords
+   * are stored in UNIX crypt format, they will not be kept in
+   * plaintext on disk.</p>
    *
-   * This method is used to specify that this password field
-   * should store passwords in UNIX crypt format.<br><br>
-   *
-   * This method will throw an IllegalArgumentException if
-   * this field definition is not a password type.
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1937,12 +2054,10 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method returns true if this is a password field that
-   * will keep a copy of the password in plaintext.
+   * <p>This method returns true if this is a password field that
+   * will keep a copy of the password in plaintext.</p>
    *
    * @see arlut.csd.ganymede.BaseField
-   *
    */
 
   public boolean isPlainText()
@@ -1951,15 +2066,19 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method is used to specify that this password field
+   * <p>This method is used to specify that this password field
    * should keep a copy of the password in plaintext, in
    * addition to a UNIX crypted copy.  If crypted is
    * false, plaintext will be treated as true, whether
-   * or not this is explicitly set by the schema editor.<br><br>
+   * or not this is explicitly set by the schema editor.</p>
    *
-   * This method will throw an IllegalArgumentException if
-   * this field definition is not a password type.
+   * <p>If crypted is true, fields of this type will never retain
+   * the plaintext password information on disk.  Plaintext 
+   * password information will only be retained in the on-disk
+   * ganymede.db file if crypted is false.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1982,14 +2101,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   // general convenience methods
 
   /**
-   *
-   * This method is intended to produce a human readable
+   * <p>This method is intended to produce a human readable
    * representation of this field definition's type attributes.  This
    * method should not be used programatically to determine this
-   * field's type information.<br><br>
+   * field's type information.</p>
    *
-   * This method is only for human elucidation, and the precise
-   * results returned are subject to change at any time.
+   * <p>This method is only for human information, and the precise
+   * results returned are subject to change at any time.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -2137,14 +2255,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method is intended to produce a human readable
+   * <p>This method is intended to produce a human readable
    * representation of this field definition's type attributes.  This
    * method should not be used programatically to determine this
-   * field's type information.<br><br>
+   * field's type information.</p>
    *
-   * This method is only for human elucidation, and the precise
-   * results returned are subject to change at any time.
+   * <p>This method is only for human elucidation, and the precise
+   * results returned are subject to change at any time.</p>
    *
    * @see arlut.csd.ganymede.BaseField 
    */
@@ -2315,15 +2432,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method is used when the Ganymede server dumps its schema.
+   * <p>This method is used when the Ganymede server dumps its schema.
    * It prints an HTML description of this field type to the PrintWriter
-   * specified.<br><br>
+   * specified.</p>
    *
-   * This method was written in concert with the other DBStore objects'
+   * <p>This method was written in concert with the other DBStore objects'
    * printHTML methods, and assumes that it will be run in the context
-   * of the full DBStore.printCategoryTreeHTML() method.
-   *
+   * of the full DBStore.printCategoryTreeHTML() method.</p>
    */
 
   public void printHTML(PrintWriter out)
@@ -2334,15 +2449,13 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
   }
 
   /**
-   *
-   * This method is used when the Ganymede server dumps its schema.
+   * <p>This method is used when the Ganymede server dumps its schema.
    * It prints an ASCII description of this field type to the PrintWriter
-   * specified.<br><br>
+   * specified.</p>
    *
-   * This method was written in concert with the other DBStore objects'
+   * <p>This method was written in concert with the other DBStore objects'
    * print methods, and assumes that it will be run in the context
-   * of the full DBStore.printBases() method.
-   *
+   * of the full DBStore.printBases() method.</p>
    */
 
   public void print(PrintWriter out, String indent)

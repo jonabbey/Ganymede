@@ -5,8 +5,8 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.55 $
-   Last Mod Date: $Date: 1999/04/06 04:17:01 $
+   Version: $Revision: 1.56 $
+   Last Mod Date: $Date: 1999/05/26 23:17:14 $
    Release: $Name:  $
 
    Module By: Michael Mulvaney
@@ -87,7 +87,7 @@ import arlut.csd.JDialog.*;
  * method communicates with the server in the background, downloading field information
  * needed to present the object to the user for viewing and/or editing.</p>
  *
- * @version $Revision: 1.55 $ $Date: 1999/04/06 04:17:01 $ $Name:  $
+ * @version $Revision: 1.56 $ $Date: 1999/05/26 23:17:14 $ $Name:  $
  * @author Michael Mulvaney 
  */
 
@@ -217,7 +217,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   Vector containerPanels = new Vector();
 
   /**
-   * Vector of {@link arlut.csd.ganymede.fieldTemplate fieldTemplate}s used
+   * Vector of {@link arlut.csd.ganymede.FieldTemplate FieldTemplate}s used
    * by the save() and sendMail() methods to enumerate this object's fields.
    */
 

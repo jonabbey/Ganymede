@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.107 $
-   Last Mod Date: $Date: 1999/04/28 06:46:50 $
+   Version: $Revision: 1.108 $
+   Last Mod Date: $Date: 1999/05/26 23:17:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -86,7 +86,7 @@ import arlut.csd.JDialog.*;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.107 $ $Date: 1999/04/28 06:46:50 $ $Name:  $
+ * @version $Revision: 1.108 $ $Date: 1999/05/26 23:17:23 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1848,7 +1848,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * a set of interactive dialogs to reactive the object.</p>
    *
    * <p>If reactivate() returns a ReturnVal that has its success flag set to false
-   * and does not include a {@link arlut.csd.JDataComponent.JDialogBuff JDialogBuff}
+   * and does not include a {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}
    * for further interaction with the
    * user, then 
    * {@link arlut.csd.ganymede.DBSession#inactivateDBObject(arlut.csd.ganymede.DBEditObject) inactivateDBObject()}

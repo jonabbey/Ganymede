@@ -6,8 +6,8 @@
    
    Created: 17 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 1999/03/24 03:29:48 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 1999/05/26 23:17:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -66,7 +66,7 @@ import java.util.*;
  * <p>The {@link arlut.csd.ganymede.Category Category} interface is also vital to
  * the client and schema editor's work with object types.</p>
  *
- * @version $Revision: 1.15 $ $Date: 1999/03/24 03:29:48 $ $Name:  $
+ * @version $Revision: 1.16 $ $Date: 1999/05/26 23:17:21 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -205,7 +205,7 @@ public interface Base extends CategoryNode, Remote {
    * <p>Choose what field will serve as this objectBase's label.  A fieldName
    * parameter of null will cause the object's label field to be undefined,
    * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ganymede.DBEditObject.getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
+   * {@link arlut.csd.ganymede.DBEditObject#getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
    * method.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
@@ -219,7 +219,7 @@ public interface Base extends CategoryNode, Remote {
    * <p>Choose what field will serve as this objectBase's label.  A fieldID
    * parameter of -1 will cause the object's label field to be undefined,
    * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ganymede.DBEditObject.getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
+   * {@link arlut.csd.ganymede.DBEditObject#getLabelHook(arlut.csd.ganymede.DBObject) getLabelHook()}
    * method.</p>
    *
    * <p>This method is only valid when the Base reference is obtained

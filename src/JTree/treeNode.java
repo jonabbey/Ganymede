@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.3 $ %D%
+  Version: $Revision: 1.4 $ %D%
   Module By: Jonathan Abbey              jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,9 +45,9 @@ import java.util.*;
  * by the treeCanvas.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.3 $ %D%
+ * @version $Revision: 1.4 $ %D%
  *
- * @see arlut.csd.Tree.treeCanvas
+ * @see arlut.csd.JTree.treeCanvas
  *
  */
 
@@ -146,7 +146,7 @@ public class treeNode implements Cloneable {
    * treeNode may want to call resetNode() on the result to prepare
    * the node for re-insertion into the tree.
    *
-   * @see arlut.csd.JTree.treeControl.moveNode
+   * @see arlut.csd.JTree.treeControl#moveNode(arlut.csd.JTree.treeNode, arlut.csd.JTree.treeNode,, arlut.csd.JTree.treeNode,, boolean)
    *
    */
 
@@ -167,7 +167,7 @@ public class treeNode implements Cloneable {
    * This clears this node's fields relating to the node's state and
    * position in the tree.
    *
-   * @see arlut.csd.JTree.treeControl.moveNode
+   * @see arlut.csd.JTree.treeControl#moveNode(arlut.csd.JTree.treeNode, arlut.csd.JTree.treeNode,, arlut.csd.JTree.treeNode,, boolean)
    *
    */
 

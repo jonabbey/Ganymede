@@ -28,7 +28,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
   
   Created: 3 March 1997
-  Version: $Revision: 1.15 $ %D%
+  Version: $Revision: 1.16 $ %D%
   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -57,10 +57,10 @@ import javax.swing.*;
  * both 'drag-tween' and 'drag on' drag supported.</p>
  *
  * @author Jonathan Abbey
- * @version $Revision: 1.15 $ %D%
+ * @version $Revision: 1.16 $ %D%
  *
- * @see arlut.csd.Tree.treeCallback
- * @see arlut.csd.Tree.treeNode
+ * @see arlut.csd.JTree.treeCallback
+ * @see arlut.csd.JTree.treeNode
  *
  */
 
@@ -207,7 +207,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    * @param mode A binary or'ing of of treeControl.DRAG_NONE, treeControl.DRAG_ICON,
    * and treeControl.DRAG_LINE.
    *
-   * @see arlut.csd.Tree.treeDragDropCallback
+   * @see arlut.csd.JTree.treeDragDropCallback
    *
    */
 

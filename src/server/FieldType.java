@@ -6,8 +6,8 @@
    
    Created: 15 April 1997
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/03/01 22:28:00 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 1999/05/26 23:17:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -49,12 +49,11 @@
 package arlut.csd.ganymede;
 
 /**
+ * <p>Hackified enumeration of defined types for database fields in
+ * the Ganymede {@link arlut.csd.ganymede.DBStore DBStore}.</p>
  *
- * Hackified enumeration of defined field types
- *
- * Ganymede classes can implement this interface to have access to
- * these constants. 
- *
+ * <p>Ganymede classes can implement this interface to have access to
+ * these constants.</p>
  */
 
 public interface FieldType {
