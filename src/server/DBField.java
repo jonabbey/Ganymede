@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.100 $
-   Last Mod Date: $Date: 2001/01/12 01:31:36 $
+   Version: $Revision: 1.101 $
+   Last Mod Date: $Date: 2001/03/03 07:19:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -423,6 +423,16 @@ public abstract class DBField implements Remote, db_field {
       }
 
     return null;
+  }
+
+  /**
+   * <p>This method is intended to be called when this field is being checked into
+   * the database.  Subclasses of DBField will override this method to clean up
+   * data that is cached for speed during editing.</p>
+   */
+
+  public void cleanup()
+  {
   }
 
   // ****

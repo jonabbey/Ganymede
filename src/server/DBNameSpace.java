@@ -6,15 +6,15 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2000/11/10 05:04:53 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2001/03/03 07:19:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
- 
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -44,7 +44,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -382,7 +383,6 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
 	if (handle.owner != editSet)
 	  {
-
 	    // either someone else is manipulating this value, or an object
 	    // stored in the database holds this value.  We would need to
 	    // pull that object out of the database and unmark the value on

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.117 $
-   Last Mod Date: $Date: 2001/02/14 22:40:31 $
+   Version: $Revision: 1.118 $
+   Last Mod Date: $Date: 2001/03/03 07:19:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.117 $ $Date: 2001/02/14 22:40:31 $
+ * @version $Revision: 1.118 $ $Date: 2001/03/03 07:19:36 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -328,6 +328,14 @@ public class DBObject implements db_object, FieldType, Remote {
 	    // DBEditObject
 
 	    field.owner = this;
+
+	    // clean up any cached data the field was holding during
+	    // editing
+
+	    field.cleanup();
+
+	    // and slot it into our packed hash
+
 	    saveField(field);
 	  }
       }
