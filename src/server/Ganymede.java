@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 2000/02/16 11:31:59 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 2000/02/22 07:21:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -456,6 +456,22 @@ public class Ganymede {
     else
       {
 	debug("Not Initializing RMI Security Manager.. not supporting classfile transfer");
+      }
+
+    if (true)
+      {
+	debug("Dumping schema to XML");
+
+	try
+	  {
+	    db.dumpXML(dbFilename + ".xml");
+	    debug("XML schema dumped.");
+	  }
+	catch (IOException ex)
+	  {
+	    ex.printStackTrace();
+	    debug("IOException dumping XML schema: " + ex.getMessage());
+	  }
       }
 
     // if debug=<filename> was specified on the command line, tell the

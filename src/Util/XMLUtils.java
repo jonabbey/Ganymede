@@ -7,8 +7,8 @@
 
    Created: 21 February 2000
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 2000/02/22 05:08:11 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 2000/02/22 07:21:18 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -73,7 +73,7 @@ public class XMLUtils {
 
     for (int i = 0; i < indentLevel; i++)
       {
-	xmlOut.write("\t");
+	xmlOut.write("  ");
       }
   }
 }

@@ -6,18 +6,20 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 1999/06/09 03:33:35 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 2000/02/22 07:21:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -53,6 +55,9 @@ import java.util.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
+
+import arlut.csd.Util.XMLUtils;
+import com.jclark.xml.output.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -203,6 +208,29 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
   {
     out.writeUTF(name);
     out.writeBoolean(caseInsensitive);
+  }
+
+  /**
+   * <P>Write out an XML entity for this namespace.</P>
+   */
+
+  public void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement("namespace");
+    xmlOut.attribute("name", getName());
+
+    if (caseInsensitive)
+      {
+	xmlOut.attribute("case-sensitive", "0");
+      }
+    else
+      {
+	xmlOut.attribute("case-sensitive", "1");
+      }
+
+    xmlOut.endElement("namespace");
   }
 
   /**

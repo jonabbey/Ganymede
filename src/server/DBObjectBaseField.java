@@ -7,8 +7,8 @@
 
    Created: 27 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.60 $
-   Last Mod Date: $Date: 2000/02/15 05:55:26 $
+   Version: $Revision: 1.61 $
+   Last Mod Date: $Date: 2000/02/22 07:21:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -55,7 +55,10 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
+
 import gnu.regexp.*;
+import com.jclark.xml.output.*;
+import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -752,6 +755,287 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
       }
 
     loading = false;
+  }
+
+  /**
+   * <p>This method is used when the database is being dumped, to write
+   * out this field definition to disk.  It is mated with receive().</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    boolean nonEmpty = false;
+
+    /* -- */
+
+    XMLUtils.indent(xmlOut, indentLevel);
+    indentLevel++;
+
+    xmlOut.startElement("fielddef");
+    xmlOut.attribute("name", field_name);
+    xmlOut.attribute("id", java.lang.Short.toString(field_code));
+
+    if (classname != null && !classname.equals(""))
+      {
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement("classname");
+	xmlOut.attribute("name", classname);
+	xmlOut.endElement("classname");
+      }
+
+    if (comment != null && !comment.equals(""))
+      {
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement("comment");
+	xmlOut.write(comment);
+	xmlOut.endElement("comment");
+      }
+
+    if (!editable || !removable || !visibility)
+      {
+	XMLUtils.indent(xmlOut, indentLevel);
+      }
+
+    if (!editable)
+      {
+	xmlOut.startElement("noneditable");
+	xmlOut.endElement("noneditable");
+      }
+
+    if (!removable)
+      {
+	xmlOut.startElement("nonremovable");
+	xmlOut.endElement("nonremovable");
+      }
+
+    if (!visibility)
+      {
+	xmlOut.startElement("invisible");
+	xmlOut.endElement("invisible");
+      }
+
+    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.startElement("typedef");
+    
+    switch (field_type)
+      {
+      case BOOLEAN:
+	xmlOut.attribute("type", "boolean");
+	break;
+      case NUMERIC:
+	xmlOut.attribute("type", "numeric");
+	break;
+      case FLOAT:
+	xmlOut.attribute("type", "float");
+	break;
+      case DATE:
+	xmlOut.attribute("type", "date");
+	break;
+      case STRING:
+	xmlOut.attribute("type", "string");
+	break;
+      case INVID:
+	xmlOut.attribute("type", "invid");
+	break;
+      case PERMISSIONMATRIX:
+	xmlOut.attribute("type", "permmatrix");
+	break;
+      case PASSWORD:
+	xmlOut.attribute("type", "password");
+	break;
+      }
+
+    indentLevel++;
+
+    if (array)
+      {
+	nonEmpty = true;
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement("vector");
+	xmlOut.attribute("maxSize", java.lang.Short.toString(limit));
+	xmlOut.endElement("vector");
+      }
+
+    if (isBoolean())
+      {
+	if (labeled)
+	  {
+	    nonEmpty = true;
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("labeled");
+	    xmlOut.attribute("true", trueLabel);
+	    xmlOut.attribute("false", falseLabel);
+	    xmlOut.endElement("labeled");
+	  }
+      }
+    else if (isString())
+      {
+	nonEmpty = true;
+
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement("minlength");
+	xmlOut.attribute("val", java.lang.Short.toString(minLength));
+	xmlOut.endElement("minlength");
+
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement("maxlength");
+	xmlOut.attribute("val", java.lang.Short.toString(maxLength));
+	xmlOut.endElement("maxlength");
+
+	if (okChars != null && !okChars.equals(""))
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("okchars");
+	    xmlOut.attribute("val", okChars);
+	    xmlOut.endElement("okchars");
+	  }
+
+	if (badChars != null && !badChars.equals(""))
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("badchars");
+	    xmlOut.attribute("val", badChars);
+	    xmlOut.endElement("badchars");
+	  }
+	
+	if (namespace != null)
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("namespace");
+	    xmlOut.attribute("val", namespace.getName());
+	    xmlOut.endElement("namespace");
+	  }
+
+	if (regexpPat != null && !regexpPat.equals(""))
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("regexp");
+	    xmlOut.attribute("val", regexpPat);
+	    xmlOut.endElement("regexp");
+	  }
+
+	if (multiLine)
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("multiline");
+	    xmlOut.endElement("multiline");
+	  }
+      }
+    else if (isNumeric())
+      {
+	if (namespace != null)
+	  {
+	    nonEmpty = true;
+
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("namespace");
+	    xmlOut.attribute("val", namespace.getName());
+	    xmlOut.endElement("namespace");
+	  }
+      }
+    else if (isIP())
+      {
+	if (namespace != null)
+	  {
+	    nonEmpty = true;
+
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("namespace");
+	    xmlOut.attribute("val", namespace.getName());
+	    xmlOut.endElement("namespace");
+	  }
+      }
+    else if (isInvid())
+      {
+	if (allowedTarget != -1)
+	  {
+	    nonEmpty = true;
+
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("targetobject");
+	    xmlOut.attribute("val", java.lang.Short.toString(allowedTarget));
+	    xmlOut.endElement("targetobject");
+
+	    if (targetField != -1 && targetField != SchemaConstants.BackLinksField)
+	      {
+		XMLUtils.indent(xmlOut, indentLevel);
+		xmlOut.startElement("targetfield");
+		xmlOut.attribute("val", java.lang.Short.toString(targetField));
+		xmlOut.endElement("targetfield");
+	      }
+
+	    if (editInPlace)
+	      {
+		XMLUtils.indent(xmlOut, indentLevel);
+		xmlOut.startElement("embedded");
+		xmlOut.endElement("embedded");
+	      }
+	  }
+      }
+    else if (isPassword())
+      {
+	nonEmpty = true;
+
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement("minlength");
+	xmlOut.attribute("val", java.lang.Short.toString(minLength));
+	xmlOut.endElement("minlength");
+
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement("maxlength");
+	xmlOut.attribute("val", java.lang.Short.toString(maxLength));
+	xmlOut.endElement("maxlength");
+
+	if (okChars != null && !okChars.equals(""))
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("okchars");
+	    xmlOut.attribute("val", okChars);
+	    xmlOut.endElement("okchars");
+	  }
+
+	if (badChars != null && !badChars.equals(""))
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("badchars");
+	    xmlOut.attribute("val", badChars);
+	    xmlOut.endElement("badchars");
+	  }
+
+	if (crypted)
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("crypted");
+	    xmlOut.endElement("crypted");
+	  }
+
+	if (md5crypted)
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("md5crypted");
+	    xmlOut.endElement("md5crypted");
+	  }
+
+	if (storePlaintext)
+	  {
+	    XMLUtils.indent(xmlOut, indentLevel);
+	    xmlOut.startElement("plaintext");
+	    xmlOut.endElement("plaintext");
+	  }
+      }
+
+    indentLevel--;
+
+    if (nonEmpty)
+      {
+	XMLUtils.indent(xmlOut, indentLevel);
+      }
+
+    xmlOut.endElement("typedef");
+
+    indentLevel--;
+    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.endElement("fielddef");
   }
 
   // ----------------------------------------------------------------------

@@ -7,18 +7,20 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/06/15 02:48:16 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2000/02/22 07:21:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -55,6 +57,7 @@ import java.io.*;
 import java.util.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
+import com.jclark.xml.output.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -448,6 +451,52 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
       }
     
     resort();
+  }
+
+  /**
+   * <p>Emits this category and its contents to &lt;out&gt;, in
+   * XML form.</p>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    boolean lastCategory = false;
+
+    /* -- */
+
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.startElement("category");
+    xmlOut.attribute("name", getName());
+
+    indentLevel++;
+
+    for (int i = 0; i < contents.size(); i++)
+      {
+	if (contents.elementAt(i) instanceof DBBaseCategory)
+	  {
+	    if (!lastCategory)
+	      {
+		XMLUtils.indent(xmlOut, 0); // skip line
+	      }
+
+	    ((DBBaseCategory) contents.elementAt(i)).emitXML(xmlOut, indentLevel);
+
+	    XMLUtils.indent(xmlOut, 0);	// skip line
+	    lastCategory = true;
+	  }
+	else if (contents.elementAt(i) instanceof DBObjectBase)
+	  {
+	    ((DBObjectBase) contents.elementAt(i)).emitXML(xmlOut, indentLevel);
+	    lastCategory = false;
+	  }
+      }
+
+    indentLevel--;
+
+    XMLUtils.indent(xmlOut, indentLevel);
+
+    xmlOut.endElement("category");
   }
 
   /**

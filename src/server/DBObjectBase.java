@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.102 $
-   Last Mod Date: $Date: 2000/02/19 02:23:04 $
+   Version: $Revision: 1.103 $
+   Last Mod Date: $Date: 2000/02/22 07:21:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -57,6 +57,7 @@ import java.util.*;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 
+import com.jclark.xml.output.*;
 import arlut.csd.Util.*;
 
 /*------------------------------------------------------------------------------
@@ -188,10 +189,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   Vector sortedFields;
 
   /**
-   * The hash listing us by object type
+   * <P>The hash listing us by object type
    * id.. we can iterate over the elements of
    * this hash to determine whether a proposed name
-   * is acceptable.
+   * is acceptable.  This is a hack used in schema
+   * editing.  I really need to clean this up.</P>
    */
 
   Hashtable containingHash;	
@@ -1158,6 +1160,86 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	System.err.println("DBObjectBase.receive(): maxid for " + object_name + " is " + maxid);
       }
+  }
+
+  /**
+   * <P>This method dumps schema information to an XML stream.</P>
+   */
+
+  synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    XMLUtils.indent(xmlOut, indentLevel);
+    indentLevel++;
+
+    xmlOut.startElement("objectdef");
+    xmlOut.attribute("name", object_name);
+    xmlOut.attribute("id", java.lang.Short.toString(type_code));
+
+    if (classname != null && !classname.equals(""))
+      {
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement("classdef");
+	xmlOut.attribute("name", classname);
+	xmlOut.endElement("classdef");
+      }
+
+    if (embedded)
+      {
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.startElement("embedded");
+	xmlOut.endElement("embedded");
+      }
+
+    // calculate what custom fields we want to emit.
+
+    synchronized (sortedFields)
+      {
+	for (int i = 0; i < sortedFields.size(); i++)
+	  {
+	    DBObjectBaseField fieldDef = (DBObjectBaseField) sortedFields.elementAt(i);
+
+	    if (fieldDef.isBuiltIn())
+	      {
+		continue;
+	      }
+
+	    fieldDef.emitXML(xmlOut, indentLevel);
+	  }
+      }
+
+    indentLevel--;
+    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.endElement("objectdef");
+  }
+
+  /**
+   * <P>This method writes out the built-in field definitions</P>
+   */
+
+  synchronized void emitXMLBuiltInFields(XMLWriter xmlOut, int indentLevel) throws IOException
+  {
+    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.startElement("builtin_fields");
+    indentLevel++;
+
+    synchronized (sortedFields)
+      {
+	for (int i = 0; i < sortedFields.size(); i++)
+	  {
+	    DBObjectBaseField fieldDef = (DBObjectBaseField) sortedFields.elementAt(i);
+
+	    if (!fieldDef.isBuiltIn())
+	      {
+		continue;
+	      }
+
+	    fieldDef.emitXML(xmlOut, indentLevel);
+	  }
+      }
+
+    indentLevel--;
+    XMLUtils.indent(xmlOut, indentLevel);
+    xmlOut.endElement("builtin_fields");
   }
 
   /**

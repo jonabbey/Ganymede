@@ -5,8 +5,8 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 1999/11/05 00:31:34 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2000/02/22 07:21:21 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey and Michael Mulvaney
@@ -15,10 +15,12 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   The University of Texas at Austin.
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -375,7 +377,7 @@ class BaseFieldEditor extends JPanel implements JsetValueCallback, ItemListener,
 	setRowVisible(vectorCF, false);
 	setRowVisible(maxArrayN, false);
       }
-    else
+    else			// strings, ip fields, invid fields
       {
 	setRowVisible(vectorCF, true);
 	setRowVisible(maxArrayN, vectorCF.isSelected());

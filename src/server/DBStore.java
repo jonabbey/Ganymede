@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.104 $
-   Last Mod Date: $Date: 2000/02/15 05:55:27 $
+   Version: $Revision: 1.105 $
+   Last Mod Date: $Date: 2000/02/22 07:21:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -56,6 +56,8 @@ import java.util.*;
 import java.text.*;
 import java.rmi.*;
 
+import com.jclark.xml.output.*;
+import arlut.csd.Util.XMLUtils;
 import arlut.csd.Util.zipIt;
 
 /*------------------------------------------------------------------------------
@@ -105,7 +107,7 @@ import arlut.csd.Util.zipIt;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.104 $ %D%
+ * @version $Revision: 1.105 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -132,6 +134,18 @@ public class DBStore {
    */
 
   static final byte minor_version = 17;
+
+  /**
+   * XML version major id
+   */
+
+  static final byte major_xml_version = 1;
+
+  /**
+   * XML version minor id
+   */
+
+  static final byte minor_xml_version = 1;
 
   /**
    * Enable/disable debug in the DBStore methods
@@ -914,6 +928,135 @@ public class DBStore {
 	if (textOutStream != null)
 	  {
 	    textOutStream.close();
+	  }
+      }
+  }
+
+  /**
+   * <p>Dumps the database to disk as an XML file</p>
+   *
+   * <p>This method dumps the entire database to disk.  The thread that calls the
+   * dump method will be suspended until there are no threads performing update
+   * writes to the in-memory database.  In practice this will likely never be
+   * a long interval.  Note that this method *will* dump the database, even
+   * if no changes have been made.  You should check the DBStore journal's 
+   * isClean() method to determine whether or not a dump is really needed,
+   * if you're not sure.</p>
+   *
+   * <p>The dump is guaranteed to be transaction consistent.</p>
+   *
+   * @param filename Name of the database file to emit
+
+   * @see arlut.csd.ganymede.DBEditSet
+   * @see arlut.csd.ganymede.DBJournal
+   */
+
+  public synchronized void dumpXML(String filename) throws IOException
+  {
+    FileOutputStream outStream = null;
+    BufferedOutputStream bufStream = null;
+    DataOutputStream out = null;
+    UTF8XMLWriter xmlOut = null;
+    
+    Enumeration basesEnum;
+    DBDumpLock lock = null;
+    DBNameSpace ns;
+    DBBaseCategory bc;
+    
+    /* -- */
+    
+    if (debug)
+      {
+	System.err.println("DBStore: Dumping XML");
+      }
+
+    lock = new DBDumpLock(this);
+
+    try
+      {
+	lock.establish("System");	// wait until we get our lock 
+      }
+    catch (InterruptedException ex)
+      {
+      }
+    
+    // Move the old version of the file to a backup
+    
+    try
+      {
+	outStream = new FileOutputStream(filename);
+	bufStream = new BufferedOutputStream(outStream);
+
+	xmlOut = new UTF8XMLWriter(bufStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS);
+
+	// start writing
+
+	xmlOut.startElement("ganymede");
+
+	xmlOut.attribute("major", Byte.toString(major_xml_version));
+	xmlOut.attribute("minor", Byte.toString(minor_xml_version));
+
+	XMLUtils.indent(xmlOut, 1);
+	xmlOut.startElement("ganyschema");
+
+	XMLUtils.indent(xmlOut, 2);
+	xmlOut.startElement("namespaces");
+
+	for (int i = 0; i < nameSpaces.size(); i++)
+	  {
+	    ns = (DBNameSpace) nameSpaces.elementAt(i);
+	    ns.emitXML(xmlOut, 3);
+	  }
+
+	XMLUtils.indent(xmlOut, 2);
+	xmlOut.endElement("namespaces");
+
+	// write out the built-in fields common to all object definitions
+
+	((DBObjectBase) objectBases.get(new Short(SchemaConstants.UserBase))).emitXMLBuiltInFields(xmlOut, 2);
+
+	// write out our category tree
+
+	XMLUtils.indent(xmlOut, 0); // newline
+	XMLUtils.indent(xmlOut, 2);
+	xmlOut.startElement("object_type_definitions");
+	rootCategory.emitXML(xmlOut, 3);
+	XMLUtils.indent(xmlOut, 2);
+	xmlOut.endElement("object_type_definitions");
+	XMLUtils.indent(xmlOut, 1);
+	xmlOut.endElement("ganyschema");
+	XMLUtils.indent(xmlOut, 0);
+	xmlOut.endElement("ganymede");
+	xmlOut.write("\n");
+	xmlOut.close();
+	xmlOut = null;
+      }
+    catch (IOException ex)
+      {
+	System.err.println("DBStore error dumping XML to " + filename);
+	
+	throw ex;
+      }
+    finally
+      {
+	if (lock != null)
+	  {
+	    lock.release();
+	  }
+
+	if (xmlOut != null)
+	  {
+	    xmlOut.close();
+	  }
+
+	if (bufStream != null)
+	  {
+	    bufStream.close();
+	  }
+	   
+	if (outStream != null)
+	  {
+	    outStream.close();
 	  }
       }
   }
