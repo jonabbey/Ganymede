@@ -5,7 +5,7 @@
    This file is a management class for ip objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -97,7 +97,14 @@ public class ipCustom extends DBEditObject implements SchemaConstants {
 
 	// get our I.P. network record
 
-	DBObject ipNet = editset.getSession().viewDBObject(invF.value());
+	Invid inv = invF.value();
+
+	if (inv == null)
+	  {
+	    return false;
+	  }
+
+	DBObject ipNet = editset.getSession().viewDBObject(inv);
 
 	if (ipNet == null)
 	  {
