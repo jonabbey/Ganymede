@@ -5,8 +5,8 @@
    Ganymede admin console and the server, bidirectionally.
 
    Created: 28 May 1996
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2003/09/08 18:28:18 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2003/09/09 03:01:42 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -241,7 +241,7 @@ class GASHAdminDispatch implements Runnable {
 		    break;
 
 		  case adminAsyncMessage.CHANGESTATUS:
-		    changeStatus(event.getString(0));
+		    changeStatus(((StringBuffer) event.getParam(0)).toString());
 		    break;
 
 		  case adminAsyncMessage.CHANGEADMINS:
