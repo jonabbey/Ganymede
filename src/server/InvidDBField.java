@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.133 $
-   Last Mod Date: $Date: 2000/06/02 21:12:09 $
+   Version: $Revision: 1.134 $
+   Last Mod Date: $Date: 2000/06/14 04:52:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.133 $ %D%
+ * @version $Revision: 1.134 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -3009,13 +3009,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
 
   /**
+   * <p>Creates and adds a new embedded object in this
+   * field, if it is an edit-in-place vector.</p>
    *
-   * This method is used to create a new embedded object in an
-   * invid field that contains a vector of edit-in-place/embedded
-   * objects.  The ReturnVal returned indicates success/failure,
-   * and on success will provide the Invid of the newly created
-   * embedded when ReturnVal.getInvid() is called on it.
-   *
+   * <p>Returns a {@link arlut.csd.ganymede.ReturnVal ReturnVal} which
+   * conveys a success or failure result.  If the createNewEmbedded()
+   * call was successful, the ReturnVal will contain
+   * {@link arlut.csd.ganymede.Invid Invid} and {@link
+   * arlut.csd.ganymede.db_object db_object}, which can be retrieved
+   * using the ReturnVal {@link arlut.csd.ganymede.ReturnVal#getInvid() getInvid()} 
+   * and {@link arlut.csd.ganymede.ReturnVal#getObject() getObject()}
+   * methods..</p>
    *
    * @see arlut.csd.ganymede.invid_field
    */
@@ -3026,16 +3030,20 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
+   * <p>Creates and adds a new embedded object in this
+   * field, if it is an edit-in-place vector.</p>
    *
-   * Creates and adds a new embedded object in this
-   * field, if it is an edit-in-place vector.<br><br>
-   *
-   * Returns an Invid pointing to the newly created and appended
-   * embedded object, or null if creation / addition was not possible.
+   * <p>Returns a {@link arlut.csd.ganymede.ReturnVal ReturnVal} which
+   * conveys a success or failure result.  If the createNewEmbedded()
+   * call was successful, the ReturnVal will contain
+   * {@link arlut.csd.ganymede.Invid Invid} and {@link
+   * arlut.csd.ganymede.db_object db_object}, which can be retrieved
+   * using the ReturnVal {@link arlut.csd.ganymede.ReturnVal#getInvid() getInvid()} 
+   * and {@link arlut.csd.ganymede.ReturnVal#getObject() getObject()}
+   * methods..</p>
    *
    * @param local If true, we don't check permission to edit this
-   * field before creating the new object.
-   * 
+   * field before creating the new object.  
    */
 
   public synchronized ReturnVal createNewEmbedded(boolean local)
@@ -3206,6 +3214,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		  }
 
 		retVal.setInvid(newObj);
+		retVal.setObject(embeddedObj);
 	    
 		return retVal.unionRescan(newRetVal);
 	      }

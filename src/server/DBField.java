@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.88 $
-   Last Mod Date: $Date: 2000/05/24 00:55:09 $
+   Version: $Revision: 1.89 $
+   Last Mod Date: $Date: 2000/06/14 04:52:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -2096,6 +2096,26 @@ public abstract class DBField implements Remote, db_field {
       }
 
     return deleteElement(index, local, noWizards);	// *sync* DBNameSpace possible
+  }
+
+  /**
+   * <p>Removes all elements from this field, if a
+   * vector.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.  If a success code is returned,
+   * all elements in values was removed from this field.  If a 
+   * failure code is returned, no elements in values were removed.</p>
+   *
+   * <p>The ReturnVal resulting from a successful deleteAllElements will
+   * encode an order to rescan this field.</p> 
+   *
+   * @see arlut.csd.ganymede.db_field
+   */
+
+  public ReturnVal deleteAllElements()
+  {
+    return this.deleteElement(this.getValues());
   }
 
   /**

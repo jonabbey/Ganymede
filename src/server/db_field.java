@@ -7,8 +7,8 @@
 
    Created: 10 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/05/19 04:42:54 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/06/14 04:52:36 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -64,7 +64,7 @@ import java.util.*;
  * db_field is used by the client to make changes to a field when editing the
  * {@link arlut.csd.ganymede.db_object db_object} the field is contained within.</p>
  *
- * @version $Revision: 1.22 $ $Date: 2000/05/19 04:42:54 $ $Name:  $
+ * @version $Revision: 1.23 $ $Date: 2000/06/14 04:52:36 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -88,6 +88,11 @@ public interface db_field extends java.rmi.Remote {
 
   String getName() throws RemoteException;
 
+  /**
+   * Returns true if this field is a mandatory server field,
+   * one that will be present in all objects and which may
+   * not be removed from the server's schema.
+   */
 
   public boolean isBuiltIn() throws RemoteException;
 
@@ -296,6 +301,21 @@ public interface db_field extends java.rmi.Remote {
    */
 
   ReturnVal deleteElements(Vector values) throws RemoteException;
+
+  /**
+   * <p>Removes all elements from this field, if a
+   * vector.</p>
+   *
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.  If a success code is returned,
+   * all elements in values was removed from this field.  If a 
+   * failure code is returned, no elements in values were removed.</p>
+   *
+   * <p>The ReturnVal resulting from a successful deleteAllElements will
+   * encode an order to rescan this field.</p> 
+   */
+
+  ReturnVal deleteAllElements() throws RemoteException;
 
   /**
    * <p>Returns true if this field is a vector field and value is contained

@@ -7,8 +7,8 @@
    
    Created: 11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2000/03/27 21:54:40 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2000/06/14 04:52:33 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -630,7 +630,12 @@ public class DBBaseCategory extends UnicastRemoteObject implements Category, Cat
   }
 
   /**
-   * <P>Resorts this category's contents based on the tmp_displayOrder field.</P>
+   * <p>Resorts this category's contents based on the tmp_displayOrder field.</p>
+   *
+   * <p>We only use this when loading DBBaseCategory's from old-style
+   * ganymede.db files.  The modern way of doing things depends on the
+   * order of categories within a contents Vector, and needs no
+   * explicit tmp_displayOrder or sorting to be done.</p> 
    */
 
   public void resort()

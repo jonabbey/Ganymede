@@ -7,8 +7,8 @@
 
    Created: 4 Sep 1997
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2000/04/04 08:29:32 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2000/06/14 04:52:35 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -485,7 +485,7 @@ public class IPDBField extends DBField implements ip_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, bytes, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	

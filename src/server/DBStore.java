@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.120 $
-   Last Mod Date: $Date: 2000/05/04 04:19:24 $
+   Version: $Revision: 1.121 $
+   Last Mod Date: $Date: 2000/06/14 04:52:34 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.120 $ %D%
+ * @version $Revision: 1.121 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -440,6 +440,11 @@ public class DBStore {
 		    maxBaseId = tempBase.getTypeID();
 		  }
 	      }
+
+	    // we're only using the resort() method because we're
+	    // handling an old file that might not have the categories
+	    // in display order.  This code is intended to fall out of
+	    // use.
 
 	    rootCategory.resort();
 	  }
