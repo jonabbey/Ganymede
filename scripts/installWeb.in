@@ -30,19 +30,23 @@ chdir($rootdir);
 #
 # Everything else can be reasonably derived from the above.
 
-@steps = ("SYSTEMNAME","REGISTRYPORT", "HTMLINSTALL", "WEBURL", "XMLPATH");
+@steps = ("SYSTEMNAME","REGISTRYPORT", "HTMLINSTALL", "DOCS", "ANT", "WEBURL", "XMLPATH");
 
 %vars = ("SYSTEMNAME" => "",
          "REGISTRYPORT" => "1099",
          "HTMLINSTALL" => "/sample/apache/html/ganymede",
          "WEBURL" => "/ganymede",
-	 "XMLPATH" => "/ganymede-client/bin");
+	 "XMLPATH" => "/ganymede-client/bin",
+	 "DOCS" => "yes",
+	 "ANT" => "/usr/bin/ant");
 
 %descrip = ("SYSTEMNAME" => "What is the name of the system that the server will run on?",
 	    "REGISTRYPORT" => "What port is the RMI registry supporting Ganymede running on?",
             "HTMLINSTALL" => "Where should the web access files be installed?",
             "WEBURL" => "What URL path will resolve to the Ganymede web access directory?",
-	    "XMLPATH" => "Where will the Ganymede client binaries be installed?");
+	    "XMLPATH" => "Where will the Ganymede client binaries be installed?",
+	    "DOCS" => "Do you want the Ganymede documentation installed in this directory as well?",
+	    "ANT" => "Where is Apache Ant installed?");
 
 &removelastslash($vars{"XMLPATH"});
 
@@ -76,6 +80,10 @@ $vars{"SYSTEMNAME"} = `hostname`; # default hostname
 chop $vars{"SYSTEMNAME"}; # take off trailing newline
 
 foreach $step (@steps) {
+
+  if ($step eq "ANT" && $vars{"DOCS"} !~ /^y/i) {
+    next;
+  }
 
   $success = 0;
 
@@ -175,7 +183,33 @@ ENDOK
 &install_file("webforms/console.jnlp", "$installdir/console.jnlp");
 chmod 0755, "$installdir/ganypass.pl";
 
-print "\nDone\n";
+print "\nDone installing web resources\n";
+
+if ($vars{"DOCS"} =~ /^y/i) {
+
+  if ($vars{'WEBURL'} =~ /\/$/) {
+    $doc_url = "$vars{'WEBURL'}doc/";
+  } else {
+    $doc_url = "$vars{'WEBURL'}/doc/";
+  }
+
+  print "\n\nInstalling documentation into $installdir/doc.\n";
+
+  if (!-e "$rootdir/doc/javadoc/index.html") {
+    chdir("$rootdir/src");
+    print "\n\nBuilding Ganymede javadocs.\n\n";
+    system($vars{'ANT'}, "javadoc");
+    chdir("$rootdir");
+  }
+
+  &copydir("doc", "$installdir/doc");
+
+  foreach $file ("README", "FAQ", "CHANGES", "CREDITS", "THINGSTODO", "KNOWNBUGS") {
+    &copy_file($file, "$installdir/$file");
+  }
+
+  print "\nDone installing documentation.\nDocumentation is accessible at $doc_url.\n";
+}
 
 #########################################################################
 #
@@ -209,6 +243,58 @@ sub copy_file{
   copy($source, $target);
   chmod 0644, $target;
   print ".";
+}
+
+#########################################################################
+#
+#                                                                 makedir
+#
+# input: 1) a directory to make
+#        2) octal chmod bits
+#
+#########################################################################
+sub makedir{
+  my ($dirpath, $chmod) = @_;
+
+  if (!-e $dirpath) {
+    mkdir ($dirpath, $chmod) or die("*Couldn't make $dirpath*");
+  }
+}
+
+#########################################################################
+#
+#                                                                 copydir
+#
+# input: 1) a directory to copy from
+#        2) directory target
+#
+#########################################################################
+sub copydir{
+  my ($source, $target) = @_;
+  my (@dirs, $file);
+
+  &removelastslash($source);
+  &removelastslash($target);
+
+  if (!-e $target) {
+    &makedir($target, 0755);
+  }
+
+  opendir SOURCE, $source || die "Failure in copydir";
+  @dirs = readdir SOURCE;
+  closedir SOURCE;
+
+  foreach $file (@dirs) {
+    if (($file eq ".") || ($file eq "..")) {
+      next;
+    }
+
+    if (-d "$source/$file") {
+      &copydir("$source/$file", "$target/$file"); #recurse
+    } else {
+      copy("$source/$file", "$target/$file");
+    }
+  }
 }
 
 #########################################################################

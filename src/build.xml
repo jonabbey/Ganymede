@@ -322,6 +322,8 @@ refresh the jar files.
              destdir="${build.doc}"
              author="true"
              version="true"
+	     verbose="false"
+	     additionalparam="-breakiterator"
              use="true">
              <classpath refid="classpath"/>
     </javadoc>
