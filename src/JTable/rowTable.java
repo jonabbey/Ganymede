@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.15 $ %D%
+  Version: $Revision: 1.16 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.15 $ %D% 
+ * @version $Revision: 1.16 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -560,7 +560,7 @@ public class rowTable extends baseTable implements ActionListener {
       {
 	if (e.getSource() == DeleteColMI)
 	  {
-	    this.deleteColumn(menuCol, false);
+	    this.deleteColumn(menuCol, true);
 	    refreshTable();
 	    return;
 	  }
@@ -600,7 +600,7 @@ public class rowTable extends baseTable implements ActionListener {
 
   public void resort(int column, boolean forward, boolean repaint)
   {
-    new rowSorter(rows, forward, this, column).sort();
+    new rowSorter(forward, this, column).sort();
 
     if (repaint)
       {
@@ -612,110 +612,227 @@ public class rowTable extends baseTable implements ActionListener {
 
 /* from Fundamentals of Data Structures in Pascal, 
         Ellis Horowitz and Sartaj Sahni,
-	Second Edition, p.339
+	Second Edition, p.347
 	Computer Science Press, Inc.
 	Rockville, Maryland
 	ISBN 0-88175-165-0 */
 
+class mergeRec {
+
+  
+  tableRow element;
+  rowHandle handle;
+  mergeRec link;
+
+  mergeRec(tableRow element, rowHandle handle)
+  {
+    this.element = element;
+    this.handle = handle;
+    link = null;
+  }
+
+  void setNext(mergeRec link)
+  {
+    this.link = link;
+  }
+
+  mergeRec next()
+  {
+    return link;
+  }
+
+}
+
 class rowSorter {
 
-  Vector objects;
+  Vector mergeRecs;
   boolean forward;
   rowTable parent;
   int column;
 
   /* -- */
 
-  public rowSorter(Vector objects, boolean forward, rowTable parent, int column)
+  public rowSorter(boolean forward, rowTable parent, int column)
   {
-    this.objects = objects;
     this.forward = forward;
     this.parent = parent;
     this.column = column;
   }
 
-  int compareRows(int i, int j)
+  int compare(mergeRec a, mergeRec b)
   {
     if (forward)
       {
-	return ((tableRow)parent.rows.elementAt(i)).elementAt(column).text.compareTo(((tableRow)parent.rows.elementAt(j)).elementAt(column).text);
+	return a.element.elementAt(column).text.compareTo(b.element.elementAt(column).text);
       }
     else
       {
-	return ((tableRow)parent.rows.elementAt(j)).elementAt(column).text.compareTo(((tableRow)parent.rows.elementAt(i)).elementAt(column).text);
+	return b.element.elementAt(column).text.compareTo(a.element.elementAt(column).text);
       }
   }
 
-  void quick(int first, int last)
+  mergeRec rmsort(int l, int u)
   {
-    int 
-      i,
-      j,
-      tmpInt;
+    int mid;
+    mergeRec q, r;
 
-    Object
-      k, 
-      tmp;
+    //    System.err.println("rmsort: low " + l + ", high " + u);
 
-    if (first<last)
+    if (l >= u)
       {
-	i = first; j = last+1; k = objects.elementAt(first);
-	do
-	  {
-	    do
-	      {
-		i++;
-	      } while ((i <= last) && compareRows(i,first) < 0);
-
-	    do
-	      {
-		j--;
-	      } while ((j >= first) && compareRows(j,first) > 0);
-
-	    if (i < j)
-	      {
-		tmp=objects.elementAt(j);
-		objects.setElementAt(objects.elementAt(i), j);
-		objects.setElementAt(tmp, i);
-
-		tmp=parent.crossref.elementAt(j);
-		parent.crossref.setElementAt(parent.crossref.elementAt(i), j);
-		parent.crossref.setElementAt(tmp, i);
-
-		tmpInt = ((rowHandle) parent.crossref.elementAt(j)).rownum;
-		((rowHandle) parent.crossref.elementAt(j)).rownum = ((rowHandle) parent.crossref.elementAt(i)).rownum;
-		((rowHandle) parent.crossref.elementAt(i)).rownum = tmpInt;
-
-		// don't need to change the hash.. the row to rowHandle mapping is
-		// still good.
-	      }
-	  } while (j > i);
-
-	tmp = objects.elementAt(first);
-	objects.setElementAt(objects.elementAt(j), first);
-	objects.setElementAt(tmp, j);
-
-	tmp=parent.crossref.elementAt(first);
-	parent.crossref.setElementAt(parent.crossref.elementAt(j), first);
-	parent.crossref.setElementAt(tmp, j);
-
-	tmpInt = ((rowHandle) parent.crossref.elementAt(first)).rownum;
-	((rowHandle) parent.crossref.elementAt(first)).rownum = ((rowHandle) parent.crossref.elementAt(j)).rownum;
-	((rowHandle) parent.crossref.elementAt(j)).rownum = tmpInt;
-
-	quick(first, j-1);
-	quick(j+1, last);
+	return (mergeRec) mergeRecs.elementAt(l);
       }
+    else
+      {
+	mid = (l + u) / 2;
+	q = rmsort(l, mid);
+	r = rmsort(mid+1, u);
+	return rmerge(q,r);
+      }
+  }
+
+  mergeRec rmerge(mergeRec u, mergeRec y)
+  {
+    mergeRec p1, p2, px, result, node;
+
+    /* -- */
+
+    p1 = u;
+    p2 = y;
+    result = null;
+
+    //    int count1, count2;
+    //
+    //    count1 = 1;
+    //    count2 = 1;
+    //
+    //    node = u;
+    //
+    //    while (node.next() != null)
+    //      {
+    //	node = node.next();
+    //	count1++;
+    //      }
+    //
+    //    node = y;
+    //
+    //    while (node.next() != null)
+    //      {
+    //	node = node.next();
+    //	count2++;
+    //      }
+
+    //    System.err.println("Merging chains: u [" + count1 + "], y [" + count2 + "]");
+
+    if (compare(p1, p2) <= 0)
+      {
+	//	System.err.println("Starting chain on p1 " + p1.element.elementAt(column).text);
+	result = p1;
+	p1 = p1.next();
+	result.setNext(null);
+      }
+    else
+      {
+	//	System.err.println("Starting chain on p2 " + p1.element.elementAt(column).text);
+	result = p2;
+	p2 = p2.next();
+	result.setNext(null);
+      }
+
+    node = result;
+    
+    while ((p1 != null) || (p2 != null))
+      {
+	//	if ((p1 != null) && (p2 != null))
+	//	  {
+	//	    System.err.println("Looping : " + p1.element.elementAt(column).text + " and " +
+	//			       p2.element.elementAt(column).text);
+	//	  }
+
+	if (p1 == null)
+	  {
+	    //	    System.err.println("Force Linking p2: " + p2.element.elementAt(column).text);
+	    px = p2.next();
+	    node.setNext(p2);
+	    p2.setNext(null);
+	    p2 = px;
+	  }
+	else if (p2 == null)
+	  {
+	    //	    System.err.println("Force Linking p1: " + p1.element.elementAt(column).text);
+	    px = p1.next();
+	    node.setNext(p1);
+	    p1.setNext(null);
+	    p1 = px;
+	  }
+	else if (compare(p1,p2) <= 0)
+	  {
+	    //	    System.err.println("Linking p1: " + p1.element.elementAt(column).text);
+	    px = p1.next();
+	    node.setNext(p1);
+	    p1.setNext(null);
+	    p1 = px;
+	  }
+	else
+	  {
+	    //	    System.err.println("Linking p2: " + p2.element.elementAt(column).text);
+	    px = p2.next();
+	    node.setNext(p2);
+	    p2.setNext(null);
+	    p2 = px;
+	  }
+
+	node = node.next();
+      }
+
+    //    System.err.println("Finished merge process");
+
+    //    count1 = 1;
+
+    //    node = result;
+
+    //    while (node.next() != null)
+    //      {
+    //	node = node.next();
+    //	count1++;
+    //      }
+
+    //    System.err.println("Chains merged: total length = [" + count1 + "]");
+
+    return result;
   }
 
   public void sort()
   {
-    if (objects.size() < 2)
+    if (parent.rows.size() < 2)
       {
 	return;
       }
+
+    mergeRecs = new Vector();
     
-    quick(0, objects.size()-1);
+    //    System.err.println("Creating mergeRecs");
+
+    for (int i = 0; i < parent.rows.size(); i++)
+      {
+	mergeRecs.addElement(new mergeRec((tableRow)parent.rows.elementAt(i),
+					  (rowHandle)parent.crossref.elementAt(i)));
+      }
+
+    //    System.err.println("Sorting from element " + 0 + " to " + (mergeRecs.size()-1));
+    
+    mergeRec result = rmsort(0, mergeRecs.size()-1);
+
+    //    System.err.println("Toplevel sorted, fixing crossrefs");
+
+    for (int i = 0; i < parent.rows.size(); i++)
+      {
+	parent.rows.setElementAt(result.element, i);
+	parent.crossref.setElementAt(result.handle, i);
+	result.handle.rownum = i;
+
+	result = result.next();
+      }
   }
 
 }
