@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.25 $ %D%
+   Version: $Revision: 1.26 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -52,7 +52,7 @@ public class DBStore {
    */
   
   boolean schemaEditInProgress;	// lock for schema revision
-  short maxBaseId;		// to keep track of what ID to assign to new bases
+  short maxBaseId = 256;	// to keep track of what ID to assign to new bases
   Hashtable objectBases;	// hash mapping object type to DBObjectBase's
   Hashtable lockHash;		// identifier keys for current locks
   Vector nameSpaces;		// unique valued hashes
@@ -220,9 +220,12 @@ public class DBStore {
 	      {
 		System.err.println("loaded base " + tempBase.getTypeID());
 	      }
-	  }
 
-	maxBaseId = baseCount;
+	    if (tempBase.getTypeID() > maxBaseId)
+	      {
+		maxBaseId = tempBase.getTypeID();
+	      }
+	  }
       }
     catch (IOException ex)
       {
@@ -859,10 +862,12 @@ public class DBStore {
 	ns = new DBNameSpace("access", true);
 	nameSpaces.addElement(ns);
 
+	// create admin base
+
 	b = new DBObjectBase(this, false);
 	b.object_name = "Admin";
-	b.type_code = getNextBaseID(); // 0
-	b.displayOrder = 0;
+	b.type_code = (short) SchemaConstants.AdminBase; // 0
+	b.displayOrder = b.type_code;
 
 	adminCategory.addNode(b, false, false);
 
@@ -961,8 +966,9 @@ public class DBStore {
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "Access Set";
-	b.type_code = getNextBaseID(); // 1 (SchemaConstants.PermBase)
-	b.displayOrder = 1;
+	b.type_code = (short) SchemaConstants.PermBase; // 1
+	b.displayOrder = b.type_code;
+
 	adminCategory.addNode(b, false, false); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
@@ -993,13 +999,16 @@ public class DBStore {
 
 	setBase(b);
 
+	// create user base
+
 	DBBaseCategory userCategory = new DBBaseCategory(this, "User-Level Objects", rootCategory);
 	rootCategory.addNode(userCategory, false, false);
 
 	b = new DBObjectBase(this, false);
 	b.object_name = "User";
-	b.type_code = getNextBaseID(); // 2
-	b.displayOrder = 2;
+	b.type_code = (short) SchemaConstants.UserBase; // 2
+	b.displayOrder = b.type_code;
+
 	userCategory.addNode(b, false, false); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
@@ -1045,6 +1054,52 @@ public class DBStore {
 
 	b.setLabelField(SchemaConstants.UserUserName);
     
+	setBase(b);
+
+	// Create history base
+
+	b = new DBObjectBase(this, false);
+	b.object_name = "History";
+	b.type_code = (short) SchemaConstants.HistoryBase; // 3
+	b.displayOrder = b.type_code;
+
+	adminCategory.addNode(b, false, false);	// add it to the end is ok
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.HistoryDescrip;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Event Description";
+	bf.field_order = 0;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Description of a historical event";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.HistoryObjects;
+	bf.field_type = FieldType.INVID;
+	bf.field_name = "Objects";
+	bf.allowedTarget = -2;	// any kind of object, but with a fixed target field
+	bf.targetField = SchemaConstants.HistoryField;
+	bf.editInPlace = false;
+	bf.field_order = 1;
+	bf.removable = false;
+	bf.editable = false;
+ 	bf.comment = "List of objects involved in this event";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.HistoryDate;
+	bf.field_type = FieldType.DATE;
+	bf.field_name = "Date";
+	bf.field_order = 2;
+	bf.removable = false;
+	bf.editable = false;
+	bf.comment = "Date this event occurred";
+	b.fieldHash.put(new Short(bf.field_code), bf);
+
+	b.setLabelField(SchemaConstants.UserUserName);
+
 	setBase(b);
       }
     catch (RemoteException ex)
