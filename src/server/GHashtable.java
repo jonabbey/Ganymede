@@ -6,7 +6,7 @@
    hashing/retrieval.
    
    Created: 10 April 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,10 @@ import java.util.*;
  * of the same string to identity.  It does this by basically mapping all
  * strings to the lowercase version internally.  The case sensitivity of
  * the hashtable is specified at hash creation time, and may not change
- * thereafter.
+ * thereafter.<br><br>
+ *
+ * This hashtable also has special support for handling arrays of Bytes as
+ * keys in the hash. 
  *
  */
 
@@ -103,6 +106,11 @@ public class GHashtable extends Hashtable {
 
   public synchronized boolean containsKey(Object key)
   {
+    if (key instanceof Byte[])
+      {
+	key = new IPwrap((Byte[]) key);
+      }
+
     if (caseInsensitive)
       {
 	return super.containsKey(new GKey(key));
@@ -115,6 +123,11 @@ public class GHashtable extends Hashtable {
 
   public synchronized Object get(Object key)
   {
+    if (key instanceof Byte[])
+      {
+	key = new IPwrap((Byte[]) key);
+      }
+
     if (caseInsensitive)
       {
 	return super.get(new GKey(key));
@@ -131,6 +144,11 @@ public class GHashtable extends Hashtable {
 
     /* -- */
 
+    if (key instanceof Byte[])
+      {
+	key = new IPwrap((Byte[]) key);
+      }
+
     if (caseInsensitive)
       {
 	result = super.put(new GKey(key), value);
@@ -145,6 +163,11 @@ public class GHashtable extends Hashtable {
 
   public synchronized Object remove(Object key)
   {
+    if (key instanceof Byte[])
+      {
+	key = new IPwrap((Byte[]) key);
+      }
+
     if (caseInsensitive)
       {
 	return super.remove(new GKey(key));
