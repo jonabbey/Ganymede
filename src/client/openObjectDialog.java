@@ -56,6 +56,8 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   listHandle
     currentObject = null;
 
+  /* -- */
+
   public openObjectDialog(gclient client)
   {
     super(client, "Open object", true);
@@ -90,10 +92,11 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     Base thisBase = null;
     try
       {
-	for(int i = 0; i < bases.size(); i++)
+	for (int i = 0; i < bases.size(); i++)
 	  {
 	    thisBase = (Base)bases.elementAt(i);
 	    String name = thisBase.getName();
+
 	    if (name.startsWith("Embedded:"))
 		  {
 		    if (debug)
@@ -149,16 +152,12 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
     buttonP.add(neverMind);
 	
     getContentPane().add(buttonP, BorderLayout.SOUTH);	
-    
-    
         
     setBounds(150,100, 200,100);
-
   }
 
   public Invid chooseInvid()
   {
-
     pack();
     setVisible(true);
 
@@ -168,6 +167,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   public void close(boolean foundOne)
   {
     // Make sure we return null if we didn't find one
+
     if (!foundOne)
       {
 	invid = null;
@@ -175,32 +175,20 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
     setVisible(false);
     
-    System.out.println("DDD-> Still going after setVisible(false)");
-
     text.setText("");
 
-    if(list != null)
+    if (list != null)
       {
-	System.out.println("DDD-> Getting rid of the list.");
 	pane.remove(list);
-	//list.dispose();
       }
 
     if (pane != null)
       {
-	System.out.println("DDD-> Getting rid of the pane.");
-	remove(pane);
-	//pane.dispose();
+	middle.remove(pane);
       }
-
-    
 
     pane = null;
     list = null;
-
-    invalidate();
-    
-    
   }
 
   public void actionPerformed(ActionEvent e)
