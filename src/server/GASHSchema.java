@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.5 $ %D%
+   Version: $Revision: 1.6 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -737,7 +737,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     editPanel = new Panel();
     //editPanel.setLayout(new ColumnLayout());
-    editPanel.setLayout(new TableLayout());
+    editPanel.setLayout(new TableLayout(false));
 
     ca = new componentAttr(this, new Font("SansSerif", Font.BOLD, 12),
 			   Color.black, Color.white);
@@ -793,7 +793,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     stringPanel = new Panel();
     //stringPanel.setLayout(new ColumnLayout());
-    stringPanel.setLayout(new TableLayout());
+    stringPanel.setLayout(new TableLayout(false));
 
     minLengthN = new numberField(20, ca, true, false, 0, Integer.MAX_VALUE);
     minLengthN.setCallback(this);
@@ -824,7 +824,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     booleanPanel = new Panel();
     //booleanPanel.setLayout(new ColumnLayout());
-    booleanPanel.setLayout(new TableLayout());
+    booleanPanel.setLayout(new TableLayout(false));
 
     labeledCF = new checkboxField(null, false, ca, true);
     labeledCF.setCallback(this);
@@ -845,7 +845,7 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     invidPanel = new Panel();
     //invidPanel.setLayout(new ColumnLayout());
-    invidPanel.setLayout(new TableLayout());
+    invidPanel.setLayout(new TableLayout(false));
 
     targetLimitCF = new checkboxField("Restricted Target:", false, ca, true);
     targetLimitCF.setCallback(this);
@@ -1031,9 +1031,9 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       {
 	setRowVisible(maxArrayN, vectorCF.getState());
 	System.out.println("vectorCF");
-	editPanel.invalidate();
+	editPanel.doLayout();
 	mainPanel.invalidate();
-	mainPanel.validate();
+	this.validate();
       }
     else if (comp == typeC)
       {
