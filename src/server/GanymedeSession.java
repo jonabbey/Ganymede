@@ -14,7 +14,7 @@
    operations.
 
    Created: 17 January 1997
-   Version: $Revision: 1.98 $ %D%
+   Version: $Revision: 1.99 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2479,6 +2479,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	      {
 		x = (DBEditObject) enum.nextElement();
 
+		// don't consider objects of the wrong type here.
+
+		if (x.getTypeID() != query.objectType)
+		  {
+		    continue;
+		  }
+
 		// don't consider objects we already have stored in the result
 
 		if (result.containsInvid(x.getInvid()))
@@ -3314,8 +3321,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if ((invid.getType() == SchemaConstants.RoleBase) &&
 	(invid.getNum() == SchemaConstants.RoleDefaultObj))
       {
-	setLastError("Can't delete default permissions definitions"); // for logging
-
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
 					  "Error.. can't delete default permissions definitions");
       }
@@ -3323,8 +3328,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
 	(invid.getNum() == 1))
       {
-	setLastError("Can't delete " + Ganymede.rootname + " persona");	// for logging
-
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
 					  "Error.. can't delete " + 
 					  Ganymede.rootname + " persona");
@@ -3335,16 +3338,12 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (vObj == null)
       {
-	setLastError("Can't delete non-existent object");
-
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
 					  "Error.. can't delete non-existent object");
       }
 
     if (!getPerm(vObj).isDeletable())
       {
-	setLastError("Don't have permission to delete object" + vObj.getLabel());
-
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
 					  "Don't have permission to delete object" +
 					  vObj.getLabel());
@@ -3352,8 +3351,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     if (!objBase.objectHook.canRemove(session, vObj))
       {
-	setLastError("object manager refused deletion" + vObj.getLabel());
-
 	return Ganymede.createErrorDialog("Server: Error in remove_db_object()",
 					  "Object Manager refused deletion for " + 
 					  vObj.getLabel());
@@ -3430,7 +3427,8 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     if (debug)
       {
 	System.err.println("Trying to find top-level object for " + 
-			   object.getTypeDesc() + ":" + object.getInvid().toString());
+			   object.getTypeDesc() + ":" + 
+			   object.getInvid().toString());
       }
 
     localObj = object;
@@ -3501,6 +3499,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
       }
 
     // find the top-level object if we were passed an embedded object
+
+    if (debug)
+      {
+	System.err.println("GanymedeSession.getPerm(): calling getContainingObj()");
+      }
     
     object = getContainingObj(object);
 
