@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede and XML Document Structure</title>
+  </head>
+
+  <body>
+    <h1>Ganymede and XML Document Structure</h1>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>On Ganymede and XML</b></h2></td>
+      </tr>
+    </table>
+
+    <p>Ganymede exports and imports object and schema data using a
+    simple XML format, in which the schema definition section and the
+    object data sections comprise two separate elements.  The basic
+    structure of an XML file for Ganymede looks like this:</p>
+
+    <pre>
+      &lt;ganymede major="1" minor="0"&gt;
+        &lt;ganyschema&gt;
+           -- Optional Ganymede Schema Definition Section Here --
+        &lt;/ganyschema&gt;
+        &lt;ganydata&gt;
+           -- Optional Ganymede Object Data Section Here --
+        &lt;/ganydata&gt;
+      &lt;/ganymede&gt;
+    </pre>
+
+    <p>The <b>ganymede</b> element is the XML file's <b>Document
+    Element</b>, and has two attributes, <b>major</b> and
+    <b>minor</b>, which specify the major and minor version numbers of
+    the Ganymede XML file format the file adheres to.</p>
+
+    <p>The <b>ganyschema</b> element contains the schema definition
+    for the Ganymede database.  This section contains definitions of
+    the types of objects that the Ganymede server knows about,
+    including the fields defined for those objects and the constraints
+    and relationships among those fields and objects.  The field
+    definitions in the Ganymede schema definition section control what
+    fields may legally appear in the object data section of a Ganymede
+    XML file, and what kind of data those fields are allowed to
+    contain.</p>
+
+    <p>The optional <b>ganydata</b> element contains actual data
+    records from the Ganymede database.  The <b>ganydata</b> element
+    contains a number of <b>object</b> elements, each of which contain
+    the data for a single object in the Ganymede database.</p>
+
+    <p>Each of these two sections are optional, but an XML file
+    without one of these two sections is pointless, as far as Ganymede
+    is concerned..</p>
+
+    <hr>
+    <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
+<!-- Created: Tue Jul 25 21:35:03 CDT 2000 -->
+<!-- hhmts start -->
+Last modified: Tue Jul 25 21:36:08 CDT 2000
+<!-- hhmts end -->
+  </body>
+</html>

@@ -1,0 +1,831 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>Ganymede Schema Representation in XML</title>
+  </head>
+
+  <body>
+    <h1>Ganymede Schema Representation in XML</h1>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>Ganymede Schema Definition in XML</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>The <b>&lt;ganyschema&gt;</b> element defines the structure of
+      the Ganymede database, what types of objects are defined, what
+      fields they have, what kind of data those fields can contained,
+      and what everything is called.</p>
+
+    <p>The <b>&lt;ganyschema&gt;</b> element contains in turn two
+      other elements, <b>&lt;namespaces&gt;</b> and
+      <b>&lt;object_type_definitions&gt;</b>.</p>
+
+    <pre>
+    &lt;ganyschema&gt;
+      &lt;namespaces&gt;
+         -- Optional Namespace Definitions --
+      &lt;/namespaces&gt;
+      &lt;object_type_definitions&gt;
+         -- Object And Field Definitions --
+      &lt;/object_type_definitions&gt;
+    &lt;/ganyschema&gt;
+    </pre>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><b>&lt;namespaces&gt;</b></h3></td></tr></table>
+
+    <p>The <b>&lt;namespaces&gt;</b> element contains definition
+      elements for all unique namespace structures in the server.  A
+      namespace is essentially a unique value index that the server
+      uses to assure that, across all fields in the database connected 
+      to the namespace, no value is repeated.  Namespaces are used to
+      keep user, group, and system names unique, among other
+      things.</p>
+
+    <p>Here is an example &lt;namespaces&gt; element that would be contained
+      at the start of a &lt;ganyschema&gt; element:</p>
+
+    <pre>
+    &lt;namespaces&gt;
+      &lt;namespace name="username"/&gt;
+      &lt;namespace name="groupname"/&gt;
+      &lt;namespace name="IPspace"/&gt;
+      &lt;namespace name="UserCategory" case-sensitive="true"/&gt;
+      &lt;namespace name="systemtype" case-sensitive="true"/&gt;
+    &lt;/namespaces&gt;
+    </pre>
+
+    <p>In this example, the username, groupname, and IPspace
+    namespaces consider two strings to be equivalent for namespace
+    conflict considerations even if two instances of the string have
+    different capitalization.  The UserCategory and systemtype name
+    spaces will not consider two strings to be in conflict if they
+    have different capitalizations.</p>
+
+    <p>Namespaces are only significant when they are attached to
+    fields in the &lt;object_type_definitions&gt; section, as we will
+    see shortly.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><b>&lt;object_type_definitions&gt;</b></h3></td></tr></table>
+
+    <p>In the Ganymede server, all data stored is stored in the form
+    of fields, which are aggregated in objects.  Each object stored in
+    the Ganymede server is of a certain type, such as a user, group,
+    system, network, or whatever else has been defined in the server's
+    schema.  The objects, in turn, may be grouped into categories.
+    Categories are a way of grouping similar kinds of objects together
+    so that they may be viewed or ignored in the client's tree view.</p>
+
+    <p>The <b>&lt;object_type_definitions&gt;</b> element under the
+    <b>&lt;ganyschema&gt;</b> element contains the actual schema
+    definition information in terms of categories, objects, and
+    fields.  The corresponding elements for these are the
+    <b>&lt;category&gt;</b>, <b>&lt;objectdef&gt;</b>, and
+    <b>&lt;fielddef&gt;</b> elements.</p>
+
+    <p>Here is an example:</p>
+
+    <pre>
+    &lt;object_type_definitions&gt;
+      &lt;category name="Categories"&gt;
+        &lt;category name="Admin-Level Objects"&gt;
+          &lt;category name="Events"&gt;
+            &lt;objectdef name="System_Events" id="4"&gt;
+              &lt;classdef name="arlut.csd.ganymede.eventCustom"/&gt;
+              &lt;label fieldid="100"/&gt;
+              &lt;fielddef name="Event_Token" id="100"&gt;
+                &lt;comment&gt;Single-word token for this event class&lt;/comment&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="32"/&gt;
+                  &lt;badchars val=" |"/&gt;
+                  &lt;namespace val="eventtoken"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Event_Mail" id="103"&gt;
+                &lt;comment&gt;If true, events of this type should be mailed&lt;/comment&gt;
+                &lt;typedef type="boolean"/&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Mail_List" id="107"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;vector/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+            &lt;/objectdef&gt;
+          &lt;/category&gt;
+        &lt;/category&gt;
+      &lt;/category&gt;
+    &lt;/object_type_definitions&gt;
+    </pre>
+
+    <p>This example is of a small portion of a Ganymede server's
+    schema definition.  This fragment shows an object type called
+    'System Events' which is contained in which has three fields
+    defined; a scalar string field called 'Event Token' which is
+    connected to the 'eventtoken' namespace, a boolean checkbox field
+    caleld 'Event Mail', and a vector string field called 'Mail
+    List'.</p>
+
+    <p>The 'System Events' object is contained within an 'Events'
+    category, which is contained in turn within a 'Admin-Level
+    Objects' category.  The 'Categories' category is itself simply a
+    container for the other categories.. it is the category root node.
+    All &lt;object_type_definitions&gt; elements in Ganymede XML
+    schema definition sections should contain a top-level 'Categories'
+    category, even if you don't want any categorical organization of
+    object types in the client.  Note that all &lt;category&gt; elements
+    that are opened are properly closed before the close of the
+    &lt;object_type_definitions&gt; element.</p>
+
+    <p><a name="underscore">Whenever the Ganymede server refers to object or field names,
+    any spaces in the object or field name is replaced by an
+    underscore in the XML file.  This is so that when actual instances
+    of objects are recorded in the &lt;ganydata&gt; element, encoded
+    field names can be used directly as element names.  Category names
+    are never referred to from elsewhere in the XML file, so the
+    category names do not have spaces converted to underscores.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><b>&lt;objectdef&gt;</b></h3></td></tr></table>
+
+    <p>The <b>objectdef</b> element is used to define object types in the
+    Ganymede server.  Each object type has a name and a numeric id,
+    which are defined in an open objectdef tag via the <b>'name'</b>
+    and <b>'id'</b> attributes.  Both of these values must be unique
+    within the &lt;ganyschema&gt; section.  The value of the
+    <b>'id'</b> attribute must be an integer number, and the value of
+    the <b>'name'</b> attribute must be a string which contains only
+    the letters a-z, in upper or lower case, numbers, a period, a
+    dash, or a space.</p>
+
+    <p>Example:</p>
+
+    <pre>
+       &lt;objectdef name="User" id="3"&gt;
+    </pre>
+
+    <p>Within the <b>objectdef</b> element, there are a couple of
+    optional elements that define optional characteristics of the
+    object, followed by a series of <b>fielddef</b> elements.</p>
+
+    <p>The optional elements are the <b>&lt;classdef&gt;</b>,
+    <b>&lt;embedded&gt;</b> and <b>&lt;label&gt;</b> elements.</p>
+
+    <p>The <b>classdef</b> element, if present, specifies the fully
+    qualified class name of a Java class to be loaded by the server to
+    manage server operations on objects of this type.  The
+    <b>classdef</b> element has a <b>name</b> attribute whose value is
+    the name of the Java class to be used. See <a
+    href="customization/index.html">the DBEditObject subclassing
+    guide</a> for details on the use of custom classes in the Ganymede
+    server. The <b>classdef</b> element must be empty.  That is, it
+    must not contain any other elements.</p>
+
+    <p>Example:</p>
+
+    <pre>
+       &lt;classdef name="arlut.csd.ganymede.custom.userCustom"/&gt;
+    </pre>
+
+    <p>or (equivalently)</p>
+
+    <pre>
+       &lt;classdef name="arlut.csd.ganymede.custom.userCustom"&gt;&lt;/classdef&gt;
+    </pre>
+
+    <p>The optional <b>embedded</b> element, if present, indicates
+    that the object is not a top-level object which will be shown in
+    the client's object tree and which will have its ownership and
+    permissions tracked independently, but rather is an embedded
+    object which will be encapsulated in another object of a defined
+    type.  The <b>embedded</b> element must be empty and it takes no
+    attributes.</p>
+
+    <p>Example:</p>
+
+    <pre>
+       &lt;embedded/&gt;
+    </pre>
+    
+    <p>The optional <b>label</b> element has a <b>fieldid</b>
+    attribute which gives the numeric field id of the field within the
+    object which is to serve as the label field.  Objects do not need
+    to have designated label fields, but if they do, they can have
+    only one, and it must refer to a String, IP, Numeric, or Floating
+    Point field defined within the &lt;objectdef&gt; element.
+    Password, Permission Matrix, Object Reference, and Boolean fields
+    may not be specified as label fields.  The <b>label</b> element
+    must be empty.</p>
+
+    <p>Example:</p>
+
+    <pre>
+       &lt;label fieldid="100"/&gt;
+    </pre>
+
+    <p>Once the optional elements are out of the way, we get down to
+    the meat of an object definition element.. the fields.  The
+    <b>objectdef</b> element will typically contain a series of
+    <b>fielddef</b> elements, one for each field defined in this
+    object type.  These <b>fielddef</b> elements are listed in
+    the order they should appear in the client.  The first <b>fielddef</b>
+    element in an <b>objectdef</b> element will appear at the
+    top of the object editing window in the Ganymede client, with
+    subsequent <b>fielddef</b>'s in order below the first.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><b>&lt;fielddef&gt;</b></h3></td></tr></table>
+
+    <p>The <b>&lt;fielddef&gt;</b> element is a complex one, with many
+    possible component elements.  There are currently 9 different
+    kinds of fields supported by the Ganymede server, and each of
+    these field types have different options available.  The open tag
+    for the <b>fielddef</b> element itself is fairly simple, however.
+    It has just two attributes, both mandatory.  These are the same as
+    the ones used in the <b>objectdef</b> tag.. <b>name</b> and
+    <b>id</b>.  The contents of the <b>name</b> attribute is limited
+    in precisely the same manner as the <b>name</b> attribute of the
+    <b>objectdef</b> tag's <b>name</b> attribute.  It must contain
+    only letters in the standard ASCII set, a-z, the numbers 0-9, a
+    period or dash, and an underscore in place of a space.  The
+    <b>id</b> attribute must be an integer number less than 32768.</p>
+
+    <p>Example of the <b>fielddef</b> element's open tag:</p>
+
+    <pre>
+      &lt;fielddef name="Username" id="100"&gt;
+    </pre>
+
+    <p>The <b>fielddef</b> element can contain a couple of optional
+    elements, <b>comment</b>, and <b>invisible</b>.</p>
+
+    <p>The <b>comment</b> element is a text containing element.  All
+    text between the opening <b>&lt;comment&gt;</b> tag and the
+    closing <b>&lt;/comment&gt;</b> tags is treated as a comment to
+    attach to the field.  The Ganymede GUI client will show this text
+    as a pop-up tooltip if the user lets the mouse linger on the GUI
+    component.  Aside from some text, however, the <b>comment</b>
+    element should not contain any subelements.</p>
+
+    <p>The <b>invisible</b> element is an optional empty element,
+    signifying that the field defined by the containing
+    <b>fielddef</b> element should not be visible in the Ganymede
+    client.  This is used to establish invisible scratch fields used
+    by custom code associated with the containing <b>objectdef</b>
+    element for various purposes.  This is a rather unusual element to
+    define in a <b>fielddef</b> element, and will only be present in
+    special cases.</p>
+
+    <p>Here's a (contrived) example of these two optional elements in use.</p>
+
+    <pre>
+      &lt;fielddef name="Hidden_Field" id="302"&gt;
+        &lt;comment&gt;This is a hidden field to be used for namespace manipulations.&lt;/comment&gt;
+        &lt;invisible/&gt;
+      &lt;/fielddef&gt;
+    </pre>
+
+    <p>Okay, with the two optional elements out of the way, it's time
+    for the meat of the <b>fielddef</b> element, the <b>typedef</b>
+    element.  The <b>typedef</b> element specifies what kind of data
+    field the containing <b>fielddef</b> field definition element
+    defines, and has a single attribute, <b>type</b>.  The <b>type</b>
+    attribute can have any of the values listed in the following
+    table:</p>
+
+    <table border=1>
+      <tr>
+	<th>Type</th><th>Explanation</th><th>Vector Allowed?</th>
+      </tr>
+      <tr>
+	<td>string</td><td>Unicode String</td><td>YES</td>
+      </tr>
+      <tr>
+	<td>ip</td><td>I.P. Address, IPv4 or IPv6</td><td>YES</td>
+      </tr>
+      <tr>
+	<td>invid</td><td>Object Reference</td><td>YES</td>
+      </tr>
+      <tr>
+	<td>boolean</td><td>Boolean</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>date</td><td>Date/Timestamp</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>numeric</td><td>Integer Number Field</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>float</td><td>Double precision float</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>password</td><td>Password Field</td><td>NO</td>
+      </tr>
+      <tr>
+	<td>permmatrix</td><td>Ganymede Permissions Matrix</td><td>NO</td>
+      </tr>
+    </table>
+
+    <p>For example:</p>
+
+    <pre>
+      &lt;typedef type="string"&gt;
+    </pre>
+
+    <p>After the <b>typedef</b> element open tag, there can be a
+    variety of elements, depending on the element's type.</p>
+
+    <p>First off, the <b>string</b>, <b>ip</b>, and <b>invid</b> field
+    types can be <b>vector</b> fields, in which a single data field
+    can contain more than one value.  In that case, the <b>typedef</b>
+      element will contain a <b>vector</b> element.</p>
+
+    <p>The <b>vector</b> element is an empty element with a single
+      attribute, <b>maxSize</b>, which has a numeric value specifying
+      the maximum number of values that can be held in this field
+      at a time.  For example, </p>
+
+    <pre>
+      &lt;typedef type="string"&gt;
+        &lt;vector maxSize="100"/&gt;
+      &lt;/typedef&gt;
+    </pre>
+
+    <p>would describe a vector string field that could contain up to
+    100 strings in the field.  Vector fields in Ganymede can not hold
+    more than 32767 elements, so if no <b>maxSize</b> attribute is
+    defined, an implicit value of 32767 is still in effect.</p>
+
+    <p>After the optional <b>vector</b> element (for the
+    <b>string</b>, <b>ip</b>, and <b>invid</b> types only), there are
+    a number of optional field constraint elements which differ by
+    type.  These are summarized in the table below.  The trickiest
+    options conceptually are those associated with the <b>invid</b>
+    field type.  I need to link this material to a general discussion
+    of invid fields.</p>
+
+    <p>
+    <table border=1>
+      <tr>
+	<th>field type</th>
+	<th>element name</th>
+	<th>element details</th>
+	<th>example</th>
+      </tr>
+      <tr>
+	<td>string</td>
+      </tr>
+      <tr>
+	<td></td><td>minlength</td>
+	<td><p>
+	    The <b>minlegth</b> element is an empty element with a single attribute, <b>val</b>,
+	    which contains a numeric value specifying a mandatory minimum number of characters
+	    present in this string field.</p></td>
+	<td>&lt;minlength val="2"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>maxlength</td>
+	<td>
+	  <p>
+	    The <b>maxlength</b> element is an empty element with a
+	    single attribute, <b>val</b>, which contains a numeric
+	    value specifying the maximum number of characters allowed
+	    in this string field.  The Ganymede server supports string
+	    values of up to 32767 characters in length, and this limit
+	    is present implicitly if the <b>maxlength</b> element is
+	    not present in a string field definition.
+	  </p>
+	</td>
+	<td>&lt;maxlength val="8"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>okchars</td>
+	<td><p>
+	    The <b>okchars</b> element is an empty element with a single attribute, <b>val</b>,
+	    which contains a string value enumerating the characters allowed
+	    in this string field.  If this optional element is defined in a string
+	    <b>typedef</b> element, no characters will be allowed in any field of
+	    this type unless that character is present in the <b>val</b> value.</p></td>
+	<td>&lt;okchars val="0123456789-"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>badchars</td>
+	<td><p>
+	    The <b>badchars</b> element is an empty element with a single attribute, <b>val</b>,
+	    which contains a string value enumerating the characters not allowed
+	    in this string field.  If this optional element is defined in a string
+	    <b>typedef</b> element, a character will not be allowed in any field of
+	    this type if that character is present in the <b>val</b> value.</p></td>
+	<td>&lt;badchars val=":"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>regexp</td>
+	<td><p>
+	    The <b>regexp</b> element is an empty element with a single attribute, <b>val</b>,
+	    which contains a string value which defines a Perl-style regular expression.
+	    If this optional element is defined in a string
+	    <b>typedef</b> element, fields of this type will only be allowed to
+	    contains strings which match this regular expression.</p></td>
+	<td>&lt;regexp val="^[a-z]+[a-z|\d]&$"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>multiline</td>
+	<td><p>
+	    The <b>multiline</b> element is an empty element with no attributes.
+	    This element signifies that this field should be presented in the Ganymede
+	    client as a multiline string area rather than a single line text field.
+	  </p></td>
+	<td>&lt;multiline/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>namespace</td>
+	<td><p>
+	    The <b>namespace</b> element is an empty element with a single attribute, <b>val</b>,
+	    which contains a string naming a namespace defined in the
+	    <b>namespaces</b> element contained in the top-level <b>ganyschema</b> element.
+	    If this optional element is defined in a string <b>typedef</b> element, 
+	    all fields associated with the specified namespace
+	    will be constrained to contain unique values across the specified namespace.</p></td>
+	<td>&lt;namespace val="username"/&gt;</td>
+      </tr>
+      <tr>
+	<td>ip</td>
+      </tr>
+      <tr>
+	<td></td><td>namespace</td>
+	<td><p>
+	    The <b>namespace</b> element is an empty element with a single attribute, <b>val</b>,
+	    which contains a string naming a namespace defined in the
+	    <b>namespaces</b> element contained in the top-level <b>ganyschema</b> element.
+	    If this optional element is defined in an ip <b>typedef</b> element, 
+	    all fields associated with the specified namespace
+	    will be constrained to contain unique values across the specified namespace.</p></td>
+	<td>&lt;namespace val="IPSpace"/&gt;</td>
+      </tr>
+      <tr>
+	<td>invid</td>
+      </tr>
+      <tr>
+	<td></td><td>targetobject</td>
+	<td>
+	  <p>The <b>targetobject</b> element is an empty element with
+	  a pair of attributes, <b>name</b> and <b>id</b>, which
+	  constrains the type of object this object reference field may
+	  point to in the server.</p>
+
+	  <p>The <b>name</b> attribute contains a string which has the
+	  encoded (underscores for spaces) name of the object type to
+	  point to, while the <b>id</b> attribute contains the integer
+	  numberic id of the object type pointed to.  Both may be
+	  specified, in which case the Ganymede server will verify
+	  that both the id number and the object name are consistent,
+	  or either one alone may be used.</p>
+	  
+	  <p>If this invid field is intended to be able to point to
+	  any kind of object, this is specified by using the
+	  <b>name</b> attribute alone, with a value of <b>"*any*"</b>.
+	  In this case, no <b>id</b> attribute should be
+	  specified.</p>
+	</td>
+	<td>&lt;targetobject name="User" id="3"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>targetfield</td>
+	<td>
+	  <p>The <b>targetfield</b> element is an optional empty
+	  element that specifies the field that this invid field is to
+	  be linked with.  If a <b>targetfield</b> is specified, the
+	  Ganymede server will maintain a symmetric link between this
+	  invid field and the target field in objects linked to
+	  this field.  The target field may be identified using either
+	  a <b>name</b> or an <b>id</b> attribute.</p>
+
+	  <p>The <b>name</b> attribute contains a string which has the
+	  encoded (underscores for spaces) name of the field to point
+	  to, while the <b>id</b> attribute contains the integer
+	  numberic id of the field pointed to.  Both may be specified,
+	  in which case the Ganymede server will verify that both the
+	  id number and the field name are consistent, or either one
+	  alone may be used.</p>
+	</td>
+	<td>&lt;targetfield name="Username" id="103"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>embedded</td>
+	<td>
+	  <p>The <b>embedded</b> element is an optional empty element
+	  that specifies that this invid field is to be used as an
+	  edit-in-place field.  That is, that objects linked by this
+	  field will be handled as if it is contained within the
+	  object which holds this field.</p>
+	</td>
+	<td>&lt;embedded/&gt;</td>
+      </tr>
+      <tr>
+	<td>boolean</td>
+      </tr>
+      <tr>
+	<td></td><td>labeled</td>
+	<td><p>
+	    The <b>labeled</b> element is an optional empty element with a pair of attributes, <b>true</b>
+	    and <b>false</b>.  If this element is present, the client will present this
+	    boolean field as a pair of radio buttons rather than a single check-box.  This
+	    can be useful when you've got a pair of choices that don't fit naturally
+	    into a yes/no dichotomy.</p>
+	  
+	  <p>In general, support for this option has not really been
+	  tested, and may not work well.</p>
+	</td>
+	<td>&lt;labeled true="Normal User" false="Custom Account"/&gt;</td>
+      </tr>
+      <tr>
+	<td>numeric</td>
+      </tr>
+      <tr>
+	<td></td><td>namespace</td> <td><p> The <b>namespace</b>
+	element is an optional, empty element with a single attribute,
+	<b>val</b>, which contains a string naming a namespace defined
+	in the <b>namespaces</b> element contained in the top-level
+	<b>ganyschema</b> element.  If this optional element is
+	defined in a numeric <b>typedef</b> element, all fields
+	associated with the specified namespace will be constrained to
+	contain unique values across the specified namespace.</p></td>
+	<td>&lt;namespace val="uid"/&gt;</td>
+      </tr>
+      <tr>
+	<td>password</td>
+      </tr>
+      <tr>
+	<td></td><td>minlength</td>
+	<td><p>
+	    The <b>minlegth</b> element is an empty element with a single attribute, <b>val</b>,
+	    which contains a numeric value specifying a mandatory minimum number of characters
+	    present in this password field.</p></td>
+	<td>&lt;minlength val="2"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>maxlength</td>
+	<td>
+	  <p>
+	    The <b>maxlength</b> element is an empty element with a
+	    single attribute, <b>val</b>, which contains a numeric
+	    value specifying the maximum number of characters allowed
+	    in this password field.  The Ganymede server supports string
+	    values of up to 32767 characters in length, and this limit
+	    is present implicitly if the <b>maxlength</b> element is
+	    not present in a password field definition.
+	  </p>
+	  <p>
+	    The <b>crypt</b> encryption hash method supported by Ganymede
+	    only considers the first 8 characters of the password in
+	    generating the authentication hash, so setting a maxlength
+	    larger than 8 characters will not guarantee that Ganymede
+	    will require the full password length for login authentication
+	    if the <b>crypt</b> method is used.
+	  </p>
+	</td>
+	<td>&lt;maxlength val="8"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>okchars</td>
+	<td><p>
+	    The <b>okchars</b> element is an empty element with a single attribute, <b>val</b>,
+	    which contains a string value enumerating the characters allowed
+	    in this password field.  If this optional element is defined in a password
+	    <b>typedef</b> element, no characters will be allowed in any field of
+	    this type unless that character is present in the <b>val</b> value.</p></td>
+	<td>&lt;okchars val="0123456789-"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>badchars</td>
+	<td><p>
+	    The <b>badchars</b> element is an empty element with a single attribute, <b>val</b>,
+	    which contains a string value enumerating the characters not allowed
+	    in this password field.  If this optional element is defined in a password
+	    <b>typedef</b> element, a character will not be allowed in any field of
+	    this type if that character is present in the <b>val</b> value.</p></td>
+	<td>&lt;badchars val=":"/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>crypted</td>
+	<td>
+	  <p>The <b>crypted</b> element is an optional, empty element.
+	  If this element is present, the Ganymede server will store
+	  the contents of this password in UNIX crypt() format.</p>
+
+	  <p>At least one of the <b>crypted</b>, <b>md5crypted</b>, or
+	  <b>plaintext</b> elements must be present or an error will
+	  result.</p>
+	</td>
+	<td>&lt;crypted/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>md5crypted</td>
+	<td>
+	  <p>The <b>md5crypted</b> element is an optional, empty
+	  element.  If this element is present, the Ganymede server
+	  will store the contents of this password in FreeBSD-style
+	  md5crypt() format.</p>
+
+	  <p>At least one of the <b>crypted</b>, <b>md5crypted</b>, or
+	  <b>plaintext</b> elements must be present or an error will
+	  result.</p>
+	</td>
+	<td>&lt;md5crypted/&gt;</td>
+      </tr>
+      <tr>
+	<td></td><td>plaintext</td> 
+	<td>
+	  <p>The <b>plaintext</b> element is an optional, empty
+	  element.  If this element is present, the Ganymede server
+	  will store the plaintext of passwords stored in this field
+	  to disk.  Normally, if the Ganymede server has either
+	  <b>crypted</b> or <b>md5crypted</b> set, the server will
+	  never dump the plaintext of passwords in this field to disk,
+	  as it is capable of authenticating logins against either the
+	  crypt() or md5crypt() hash.  If the <b>plaintext</b> element
+	  is present, the password will be preserved in plaintext form
+	  in the ganymede.db file, regardless of whether or not the
+	  password is also handled via one of the encryption
+	  hashes.</p>
+
+	  <p>At least one of the <b>crypted</b>, <b>md5crypted</b>, or
+	  <b>plaintext</b> elements must be present or an error will
+	  result.</p>
+	</td>
+	<td>&lt;plaintext/&gt;</td>
+      </tr>
+    </table>
+    </p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><b>Schema Example Fragment</b></h3></td></tr></table>
+
+    <p>The following is a transcript of the User object definition
+    from the GASHARL schema kit in use at ARL.  Notable features of
+    this fragment include the <b>Groups</b> invid field which is
+    bidirectionally linked with the Users field in the Groups object
+    type, and the edit-in-place <b>Directory Volume</b> field which
+    contains embedded <b>Embedded Automounter Map Entry</b>
+    objects.</p>
+
+    <p>Note also the newline in the middle of the <b>Groups</b> field
+    comment, which is actually preserved faithfully in the Ganymede
+    database.</p>
+
+    <pre>
+          &lt;objectdef name="User" id="3"&gt;
+            &lt;classdef name="arlut.csd.ganymede.custom.userCustom"/&gt;
+            &lt;label fieldid="100"/&gt;
+            &lt;fielddef name="Username" id="100"&gt;
+              &lt;comment&gt;User name for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;
+              &lt;typedef type="string"&gt;
+                &lt;maxlength val="8"/&gt;
+                &lt;badchars val=" :"/&gt;
+                &lt;namespace val="username"/&gt;
+                &lt;regexp val="^[a-z]+[a-z|\d]*$"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="UID" id="256"&gt;
+              &lt;typedef type="numeric"&gt;
+                &lt;namespace val="uid"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Password" id="101"&gt;
+              &lt;comment&gt;Password for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;
+              &lt;typedef type="password"&gt;
+                &lt;minlength val="3"/&gt;
+                &lt;maxlength val="32"/&gt;
+                &lt;crypted/&gt;
+                &lt;plaintext/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Account_Category" id="273"&gt;
+              &lt;typedef type="invid"&gt;
+                &lt;targetobject name="User_Category"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Full_Name" id="257"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;maxlength val="64"/&gt;
+                &lt;badchars val=":,"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Social_Security" id="274"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;okchars val="0123456789-"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Division" id="258"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;maxlength val="32"/&gt;
+                &lt;badchars val=":,"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Room" id="259"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;maxlength val="32"/&gt;
+                &lt;badchars val=": ,"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Office_Phone" id="260"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;maxlength val="16"/&gt;
+                &lt;badchars val=":"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Home_Phone" id="261"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;maxlength val="16"/&gt;
+                &lt;badchars val=":, "/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Groups" id="264"&gt;
+              &lt;comment&gt;List of non-primary groups the user is a member of.  
+Limited to 16 for NFS.&lt;/comment&gt;
+              &lt;typedef type="invid"&gt;
+                &lt;vector maxSize="16"/&gt;
+                &lt;targetobject name="Group"/&gt;
+                &lt;targetfield name="Users"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Home_Group" id="265"&gt;
+              &lt;typedef type="invid"&gt;
+                &lt;targetobject name="Group"/&gt;
+                &lt;targetfield name="Home_Users"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Login_Shell" id="263"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;maxlength val="128"/&gt;
+                &lt;badchars val=" :"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Home_Directory" id="262"&gt;
+              &lt;comment&gt;UNIX default directory, normally assigned by Ganymede&lt;/comment&gt;
+              &lt;typedef type="string"&gt;
+                &lt;maxlength val="128"/&gt;
+                &lt;badchars val=" :"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Admin_Personae" id="102"&gt;
+              &lt;comment&gt;A list of admin personae this user can assume&lt;/comment&gt;
+              &lt;typedef type="invid"&gt;
+                &lt;vector/&gt;
+                &lt;targetobject name="Admin_Persona"/&gt;
+                &lt;targetfield name="User"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Netgroups" id="266"&gt;
+              &lt;typedef type="invid"&gt;
+                &lt;vector/&gt;
+                &lt;targetobject name="User_Netgroup"/&gt;
+                &lt;targetfield name="Users"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Directory_Volume" id="271"&gt;
+              &lt;typedef type="invid"&gt;
+                &lt;vector/&gt;
+                &lt;targetobject name="Embedded_Automounter_Map_Entry"/&gt;
+                &lt;targetfield name="Containing_Object"/&gt;
+                &lt;embedded/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Email_Aliases" id="267"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;vector/&gt;
+                &lt;maxlength val="32"/&gt;
+                &lt;badchars val="@"/&gt;
+                &lt;namespace val="username"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Signature_Alias" id="268"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;maxlength val="32"/&gt;
+                &lt;badchars val="@"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+            &lt;fielddef name="Email_target" id="269"&gt;
+              &lt;typedef type="string"&gt;
+                &lt;vector/&gt;
+                &lt;badchars val=":"/&gt;
+              &lt;/typedef&gt;
+            &lt;/fielddef&gt;
+          &lt;/objectdef&gt;
+    </pre>
+
+    <hr>
+    <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
+<!-- Created: Tue Jul 25 21:17:30 CDT 2000 -->
+<!-- hhmts start -->
+Last modified: Tue Jul 25 21:17:38 CDT 2000
+<!-- hhmts end -->
+  </body>
+</html>

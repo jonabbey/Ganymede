@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>A Brief Introduction to XML</title>
+  </head>
+
+  <body>
+    <h1>A Brief Introduction to XML</h1>
+    
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCFFCC">
+	<td colspan="1"><h2><b>A Brief Introduction to XML</b></h2></td>
+      </tr>
+    </table> 
+
+    <p>
+      Like HTML, XML is a plain text data format with structural
+      tagging.  Unlike HTML, which has a predefined set of tags that
+      represent the structuring and rendering facilities of modern web
+      browsers, XML has no pre-defined document tags.  Instead, XML
+      allows applications to define their own sets of tags for use
+      according to the XML syntactical rules.  Using XML can be very
+      simple or very complex, depending on how many of the fancy features
+      you try to use.  Ganymede uses fairly simple XML, and this page
+      is intended to present the most basic facts about XML that you will
+      need to know to write syntactically valid XML files that Ganymede
+      can handle.
+    </p>
+
+    <p>
+      Facts about XML:
+    </p>
+
+    <ul>
+      <li><p>Tags are case-sensitive.  &lt;tag&gt;, &lt;Tag&gt; and &lt;TAG&gt;
+	  are all separate tags, and will not be treated as equivalent by an XML parser.</p></li>
+      <li><p>All tags must come in pairs.  HTML browsers can tolerate tags that stand alone,
+	  like &lt;br&gt; and &lt;p&gt;, but XML is more strict, and all elements must
+	  have an open tag (&lt;element&gt;) and a close tag (&lt;/element&gt;).</p></li>
+      
+      <li><p>The structure of
+	  XML files must be strictly tree-like.  That is, XML structural elements can contain
+	  other XML structural elements, but one XML structural element may not be partially
+	  contained by another.</p>
+	
+	<p>In other words,</p>
+
+	<pre>
+        &lt;element1&gt;
+          &lt;element2&gt;
+        &lt;/element1&gt;
+      &lt;/element2&gt;
+	</pre>
+	
+	<p>is an invalid XML sequence, as the element2 and element1 structural elements are intermingled.</p>
+	
+	<p>In contrast,</p>
+	
+	<pre>
+        &lt;element1&gt;
+          &lt;element2&gt;&lt;/element2&gt;
+        &lt;/element1&gt;
+	</pre>
+	
+	<p>is perfectly valid, because the entirety of element2 is contained
+	  within element1.</p>
+      </li>
+      
+      <li><p>In cases like the above, where the element2 element's open and close tag are 
+	  immediately adjacent, XML supports a special syntax for an empty element.  The
+	  same legal XML structure shown above could be written as:</p>
+	<pre>
+        &lt;element1&gt;
+          &lt;element2/&gt;
+        &lt;/element1&gt;
+	</pre>
+	
+	<p>where the trailing slash in the element2 element indicates that there will be no
+	  matching close tag to come along.  At any other time an element open tag (&lt;element&gt;) is seen,
+	  a compliant XML parser will expect and demand to see the matching close tag (&lt;/element&gt;)
+	  for that element before it sees the close tag for any elements higher up in the
+	  document structure.</p>
+      </li>
+      <li><p>In XML, all XML documents contain a single element (the <b>Document Element</b>, in
+	  XML lingo) which contains in turn any other
+	  elements and character data.  The start tag for the document element will generally
+	  be the first thing in an XML file's content proper, and the matching close tag
+	  for the document element will be the last thing in the XML file.  For this reason, the
+	  following XML fragment could not be an entire XML file:</p>
+	<pre>
+          &lt;element1&gt;
+            &lt;element2/&gt;
+          &lt;/element1&gt;
+          &lt;element3&gt;
+            &lt;element4&gt;
+              &lt;element5/&gt;
+            &lt;/element4&gt;
+          &lt;/element3&gt;
+        </pre>
+	<p>Because element1 does not contain elements 3, 4, and 5.</p>
+      </li>
+
+      <li><p>In XML, all attribute data must be quoted, as in</p>
+	<pre>
+          &lt;object label="labeldata"&gt;
+        </pre>
+	<p>The following is illegal:</p>
+	<pre>
+          &lt;object label=labeldata&gt;
+        </pre>
+      </li>
+
+      <li><p>
+	  All possible characters are legal within the double
+	  quotes surrounding an attribute's value except the
+	  <b>'&amp;'</b> character and the double quotation mark itself.
+	  If you need to include a double quotation mark in an attribute's
+	  data field, you have to use <b>&amp;quot;</b></p> <p>For
+	  example, if you wanted the string <b>'He said "hi" &amp; I waved back.'</b> in an XML
+	  tag attribute, you would have to do it this way:</p>
+	<pre>
+          &lt;sentence text="He said &amp;quot;hi&amp;quot; &amp;amp; I waved back."/&gt;
+        </pre>
+	
+	<p>
+	  Newlines and other whitespace are explicitly acceptable
+	  within the quoted value of an attribute.
+	</p>
+      </li>
+
+      <li><p>
+	  Likewise, if you want to include the <b>'&lt;'</b>,
+	  <b>'&gt;'</b>, or <b>'&amp;'</b> characters anywhere in the body of
+	  an XML document, for anything other than tag or special character
+	  definitions, you need to use <b>'&amp;lt;'</b>,
+	  <b>'&amp;gt;'</b>, and <b>'&amp;amp;'</b> instead, just as with HTML.</p>
+      </li>
+
+      <li><p>XML files use <a
+	    href="http://www.unicode.org/">Unicode</a>,
+	  with the <b>UTF-8</b> encoding, typically.  American 7-bit ASCII
+	  is a proper subset of Unicode and require no special
+	  handling in <b>UTF-8</b> encoding.  International characters 
+	  may be used in XML files, but you must do so in a manner
+	  compliant with <b>UTF-8</b>.  Ganymede will always emit XML files
+	  using the standard UNIX end-of-line character, but as with any
+	  XML parser, Ganymede can also handle DOS/Windows style line
+	  termination when reading XML files.</p>
+      </li>
+	  
+      <li><p>There are limitations on what characters you can
+	  use for tag and attribute names.  The rules on this are
+	  somewhat complex, but for the purpose of XML use with
+	  Ganymede at present, only the following characters will ever be
+	  used:</p>
+
+	<pre>
+           abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_
+	</pre>
+
+	<p>Eventually, Ganymede may be elaborated so that it knows all 
+	  of the rules for XML character limitations in the full
+	  Unicode character range, but for now, only the above
+	  characters will ever appear or be used in XML tag and
+	  attribute names for use with Ganymede.</p>
+      </li>
+      <li><p>Unlike in HTML, the XML standard does not specify that whitespace
+	  can be ignored or contracted.  For Ganymede's purposes, however,
+	  whitespace between tags is generally ignored, and newlines and
+	  indentation are nice for human readability but not necessary for
+	  Ganymede's input parsing.  More on this as we discuss what Ganymede
+	  does with XML, below.</p>
+      </li>
+    </ul>
+
+    <p>That's about all you should need to know about XML, at least as
+    far as we'll need to talk about in discussing Ganymede.  If you
+    want to read about things like external reference entities,
+    Document Type Definitions/DTD's, or the precise Backus-Naur style
+    specification for what characters are allowed to go where when,
+    you can probably find your way to the original XML standards
+    documents over at <a
+    href="http://www.xml.com/">www.XML.com</a>.</p>
+
+    <hr>
+    <address><a href="mailto:broccol@csdsun1.arlut.utexas.edu">Jonathan Abbey</a></address>
+<!-- Created: Tue Jul 25 21:21:56 CDT 2000 -->
+<!-- hhmts start -->
+Last modified: Tue Jul 25 21:24:37 CDT 2000
+<!-- hhmts end -->
+  </body>
+</html>
