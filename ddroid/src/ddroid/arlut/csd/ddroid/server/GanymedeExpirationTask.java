@@ -158,7 +158,7 @@ public class GanymedeExpirationTask implements Runnable {
 	Invid invid;
 	Date currentTime = new Date();
 	DBObjectBase base;
-	Enumeration baseEnum, enum;
+	Enumeration baseEnum, en;
 	QueryDataNode expireNode = new QueryDataNode(SchemaConstants.ExpirationField,
 						     QueryDataNode.LESSEQ,
 						     currentTime);
@@ -201,16 +201,16 @@ public class GanymedeExpirationTask implements Runnable {
 
 	    results = mySession.internalQuery(q);
 
-	    enum = results.elements();
+	    en = results.elements();
 
-	    while (enum.hasMoreElements())
+	    while (en.hasMoreElements())
 	      {
 		if (currentThread.isInterrupted())
 		  {
 		    throw new InterruptedException("scheduler ordering shutdown");
 		  }
 
-		result = (Result) enum.nextElement();
+		result = (Result) en.nextElement();
 
 		invid = result.getInvid();
 
@@ -266,16 +266,16 @@ public class GanymedeExpirationTask implements Runnable {
 
 	    results = mySession.internalQuery(q);
 
-	    enum = results.elements();
+	    en = results.elements();
 
-	    while (enum.hasMoreElements())
+	    while (en.hasMoreElements())
 	      {
 		if (currentThread.isInterrupted())
 		  {
 		    throw new InterruptedException("scheduler ordering shutdown");
 		  }
 
-		result = (Result) enum.nextElement();
+		result = (Result) en.nextElement();
 
 		invid = result.getInvid();
 

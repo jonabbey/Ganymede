@@ -245,12 +245,12 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
       {
 	System.err.println("userReactivateWizard.respond(): state == 2");
 
-	Enumeration enum = getKeys();
+	Enumeration en = getKeys();
 	int i = 0;
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    Object key = enum.nextElement();
+	    Object key = en.nextElement();
 	    Object value = getParam(key);
 		
 	    System.err.println("Item: (" + i++ + ") = " + key + ":" + value);

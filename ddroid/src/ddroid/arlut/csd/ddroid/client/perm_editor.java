@@ -260,9 +260,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 				   {
 				     public void actionPerformed(ActionEvent e)
 				       {
-					 for (Enumeration enum = (rowRootNode.children()); enum.hasMoreElements();) 
+					 for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
 					   {
-					     DefaultMutableTreeNode node = (DefaultMutableTreeNode)enum.nextElement();
+					     DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
 					     TreePath path = new TreePath(node.getPath());
 					     tree.expandPath(path);
 					   } 
@@ -273,9 +273,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 				     {
 				       public void actionPerformed(ActionEvent e)
 					 {
-					   for (Enumeration enum = (rowRootNode.children()); enum.hasMoreElements();) 
+					   for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
 					     {
-					       DefaultMutableTreeNode node = (DefaultMutableTreeNode)enum.nextElement();
+					       DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
 					       TreePath path = new TreePath(node.getPath());
 					       tree.collapsePath(path);
 					     } 
@@ -433,7 +433,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     boolean baseCreate, baseView, baseEdit, baseDelete;
     Vector fields;
     boolean visibleField;
-    Enumeration enum;
+    Enumeration en;
     short id;
     String name;
     DefaultMutableTreeNode rootNode, baseNode, fieldNode;
@@ -450,14 +450,14 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     // get a list of base types from the gclient.. we really just care
     // about their names and id's.
 
-    enum = gc.getBaseList().elements();
+    en = gc.getBaseList().elements();
 
     progressBar.setMaximum(gc.getBaseList().size() + 3);
     progressBar.setValue(3);
 
     int i = 3;
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
 	if (! keepLoading)
 	  {
@@ -468,7 +468,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
 	progressBar.setValue(i++);
 
-	base = (BaseDump) enum.nextElement();
+	base = (BaseDump) en.nextElement();
 
 	id = base.getTypeID();
 	name = base.getName();
@@ -701,11 +701,11 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	    System.out.println("Ok was pushed");
 	  }
 	
-	Enumeration enum = rowRootNode.preorderEnumeration();
+	Enumeration en = rowRootNode.preorderEnumeration();
 	
-	while (enum.hasMoreElements()) 
+	while (en.hasMoreElements()) 
 	  {
-	    DefaultMutableTreeNode node = (DefaultMutableTreeNode)enum.nextElement();
+	    DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
 	    ref = (PermRow)node.getUserObject();
 	  
 	    if (!ref.isChanged()) 

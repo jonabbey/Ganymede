@@ -326,11 +326,11 @@ public class DBEditSet {
 
 	DBEditObject[] results = new DBEditObject[size];
 	
-	Enumeration enum = objects.elements();
+	Enumeration en = objects.elements();
 	
 	for (int i = 0; i < size; i++)
 	  {
-	    results[i] = (DBEditObject) enum.nextElement();
+	    results[i] = (DBEditObject) en.nextElement();
 	  }
 
 	return results;
@@ -824,11 +824,11 @@ public class DBEditSet {
 
 	System.err.println("\nDBEditSet.rollback() Now:");
 
-	Enumeration enum = objects.elements();
+	Enumeration en = objects.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    System.err.println(enum.nextElement());
+	    System.err.println(en.nextElement());
 	  }
       }
 
@@ -852,11 +852,11 @@ public class DBEditSet {
 	oldvalues.put(chkinvid, chkinvid);
       }
 
-    Enumeration enum = objects.elements();
+    Enumeration en = objects.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	DBEditObject eobjRef = (DBEditObject) enum.nextElement();
+	DBEditObject eobjRef = (DBEditObject) en.nextElement();
 
 	Invid tmpvid = eobjRef.getInvid();
 	
@@ -1030,15 +1030,15 @@ public class DBEditSet {
   private final Vector commit_lockBases() throws CommitNonFatalException
   {
     Vector baseSet = new Vector();
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
-    enum = this.basesModified.keys();
+    en = this.basesModified.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	baseSet.addElement(enum.nextElement());
+	baseSet.addElement(en.nextElement());
       }
 
     // and try to lock the bases down.
@@ -1089,7 +1089,7 @@ public class DBEditSet {
   private final void commit_handlePhase1() throws CommitNonFatalException
   {
     Vector committedObjects;
-    Enumeration enum;
+    Enumeration en;
     DBEditObject eObj, eObj2;
     ReturnVal retVal;
 
@@ -1097,11 +1097,11 @@ public class DBEditSet {
 
     committedObjects = new Vector();
 
-    enum = this.objects.elements();
+    en = this.objects.elements();
     
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	eObj = (DBEditObject) enum.nextElement();
+	eObj = (DBEditObject) en.nextElement();
 
 	retVal = eObj.commitPhase1();
 
@@ -1216,11 +1216,11 @@ public class DBEditSet {
     
     result = result.intern();
 
-    Enumeration enum = objects.elements();
+    Enumeration en = objects.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	eObj = (DBEditObject) enum.nextElement();
+	eObj = (DBEditObject) en.nextElement();
 	
 	// force a change of date and modifier information
 	// into the object without using the normal field
@@ -1303,11 +1303,11 @@ public class DBEditSet {
 
   private final void commit_createLogEvents()
   {
-    Enumeration enum = objects.elements();
+    Enumeration en = objects.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	commit_createLogEvent((DBEditObject) enum.nextElement());
+	commit_createLogEvent((DBEditObject) en.nextElement());
       }
   }
 
@@ -1751,11 +1751,11 @@ public class DBEditSet {
 
     /* -- */
 
-    Enumeration enum = objects.elements();
+    Enumeration en = objects.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	eObj = (DBEditObject) enum.nextElement();
+	eObj = (DBEditObject) en.nextElement();
 
 	base = eObj.getBase();
 
@@ -1876,11 +1876,11 @@ public class DBEditSet {
 
   private final void commit_updateBases()
   {
-    Enumeration enum = this.basesModified.keys();
+    Enumeration en = this.basesModified.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	DBObjectBase base = (DBObjectBase) enum.nextElement();
+	DBObjectBase base = (DBObjectBase) en.nextElement();
 	
 	base.updateTimeStamp();
 	
@@ -2054,11 +2054,11 @@ public class DBEditSet {
 	throw new RuntimeException(ts.l("global.already"));
       }
 
-    Enumeration enum = objects.elements();
+    Enumeration en = objects.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	eObj = (DBEditObject) enum.nextElement();
+	eObj = (DBEditObject) en.nextElement();
 	eObj.release(true);
 	
 	switch (eObj.getStatus())

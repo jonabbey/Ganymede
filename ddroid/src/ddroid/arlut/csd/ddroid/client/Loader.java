@@ -854,7 +854,7 @@ public class Loader extends Thread {
   private synchronized void loadBaseMap() throws RemoteException
   {
     Base base;
-    Enumeration enum;
+    Enumeration en;
     int size;
     Vector myBaseList;
 

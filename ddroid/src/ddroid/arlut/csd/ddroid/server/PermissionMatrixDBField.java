@@ -389,7 +389,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   static public String debugdecode(Hashtable matrix)
   {
     StringBuffer result = new StringBuffer();
-    Enumeration enum;
+    Enumeration en;
     String key;
     PermEntry entry;
     String basename;
@@ -400,11 +400,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     result.append("PermMatrix DebugDump\n");
 
-    enum = matrix.keys();
+    en = matrix.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = (String) enum.nextElement();
+	key = (String) en.nextElement();
 
 	entry = (PermEntry) matrix.get(key);
 
@@ -423,11 +423,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	vec.addElement(decodeFieldName(key) + " -- " + entry.toString());
       }
 
-    enum = baseHash.keys();
+    en = baseHash.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = (String) enum.nextElement();
+	key = (String) en.nextElement();
 
 	//	result.append("\nBase - " + key + "\n");
 
@@ -514,11 +514,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     this.owner = owner;
     this.matrix = new Hashtable(field.matrix.size());
 
-    Enumeration enum = field.matrix.keys();
+    Enumeration en = field.matrix.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = enum.nextElement();
+	key = en.nextElement();
 
 	entry = (PermEntry) field.matrix.get(key);
 
@@ -786,7 +786,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
-    Enumeration enum, enum2;
+    Enumeration en, enum2;
     String key;
     PermEntry entry;
     String basename;
@@ -798,11 +798,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     // build up a hashtable structure so we get all the permission
     // entries grouped by base.
 
-    enum = matrix.keys();
+    en = matrix.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = (String) enum.nextElement();
+	key = (String) en.nextElement();
 
 	entry = (PermEntry) matrix.get(key);
 
@@ -827,11 +827,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     xmlOut.startElementIndent("permissions");
     xmlOut.indentOut();
 
-    enum = baseHash.keys();
+    en = baseHash.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = (String) enum.nextElement();
+	key = (String) en.nextElement();
 
 	innerTable = (Hashtable) baseHash.get(key);
 	entry = (PermEntry) innerTable.get("[base]");
@@ -883,11 +883,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     clean();
 
-    Enumeration enum = matrix.keys();
+    Enumeration en = matrix.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = (String) enum.nextElement();
+	key = (String) en.nextElement();
 	entry = (PermEntry) matrix.get(key);
 
 	if (isBasePerm(key))
@@ -958,18 +958,18 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     Vector myKeys = new Vector();
     Vector origKeys = new Vector();
 
-    Enumeration enum = matrix.keys();
+    Enumeration en = matrix.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	myKeys.addElement(enum.nextElement());
+	myKeys.addElement(en.nextElement());
       }
 
-    enum = origP.matrix.keys();
+    en = origP.matrix.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	origKeys.addElement(enum.nextElement());
+	origKeys.addElement(en.nextElement());
       }
 
     PermEntry entryA = null;

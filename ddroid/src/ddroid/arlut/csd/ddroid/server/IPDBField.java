@@ -1002,7 +1002,7 @@ public class IPDBField extends DBField implements ip_field {
 	Vector values = getVectVal();
 	Vector origValues = origI.getVectVal();
 
-	Enumeration enum;
+	Enumeration en;
 
 	Byte[] elementA, elementB;
 
@@ -1012,11 +1012,11 @@ public class IPDBField extends DBField implements ip_field {
 
 	// find elements in the orig field that aren't in our present field
 
-	enum = origValues.elements();
+	en = origValues.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    elementA = (Byte[]) enum.nextElement();
+	    elementA = (Byte[]) en.nextElement();
 
 	    found = false;
 
@@ -1046,11 +1046,11 @@ public class IPDBField extends DBField implements ip_field {
 
 	// find elements in present our field that aren't in the orig field
 
-	enum = values.elements();
+	en = values.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    elementA = (Byte[]) enum.nextElement();
+	    elementA = (Byte[]) en.nextElement();
 
 	    found = false;
 

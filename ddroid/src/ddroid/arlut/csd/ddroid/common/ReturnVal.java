@@ -347,7 +347,7 @@ public class ReturnVal implements java.io.Serializable {
   public Vector getRescanObjectsList()
   {
     Vector result = new Vector();
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
@@ -358,11 +358,11 @@ public class ReturnVal implements java.io.Serializable {
 
     breakOutRescanList();
 
-    enum = rescanHash.keys();
+    en = rescanHash.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	result.addElement(enum.nextElement());
+	result.addElement(en.nextElement());
       }
     
     return result;
@@ -628,7 +628,7 @@ public class ReturnVal implements java.io.Serializable {
 
   private void encodeRescanList(Hashtable rescanTable)
   {
-    Enumeration enum;
+    Enumeration en;
     Invid invid;
 
     /* -- */
@@ -642,11 +642,11 @@ public class ReturnVal implements java.io.Serializable {
 	rescanList.setLength(0);
       }
 
-    enum = rescanTable.keys();
+    en = rescanTable.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	invid = (Invid) enum.nextElement();
+	invid = (Invid) en.nextElement();
 
 	rescanList.append(invid.toString());
 	rescanList.append("|");

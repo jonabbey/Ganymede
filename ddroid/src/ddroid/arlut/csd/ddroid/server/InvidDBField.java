@@ -824,7 +824,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  added = new Vector(),
 	  deleted = new Vector();
 
-	Enumeration enum;
+	Enumeration en;
 
 	Object 
 	  element = null;
@@ -861,16 +861,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	    currentElements.put(element, element);
 	  }
 
-	enum = origValues.elements();
+	en = origValues.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
 	    if (debug)
 	      {
 		System.err.print("x");
 	      }
 
-	    element = enum.nextElement();
+	    element = en.nextElement();
 
 	    if (currentElements.get(element) == null)
 	      {
@@ -899,16 +899,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	    origElements.put(element, element);
 	  }
 
-	enum = values.elements();
+	en = values.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
 	    if (debug)
 	      {
 		System.err.print("x");
 	      }
 
-	    element = enum.nextElement();
+	    element = en.nextElement();
 
 	    if (origElements.get(element) == null)
 	      {

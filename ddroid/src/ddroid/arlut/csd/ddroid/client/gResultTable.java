@@ -558,7 +558,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     Vector headers = table.getTableHeaders();
     int colcount = headers.size();
     int size = table.getRowCount();
-    Enumeration enum = table.keys();
+    Enumeration en = table.keys();
     Object rowKey;
     String cellText;
     String date = (new Date()).toString();
@@ -599,7 +599,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       {
 	result.append("<TR>\n");
 
-	rowKey = enum.nextElement();
+	rowKey = en.nextElement();
 
 	for (int j = 0; j < colcount; j++)
 	  {

@@ -103,7 +103,7 @@ public class DBWriteLock extends DBLock {
 
   public DBWriteLock(DBStore store)
   {
-    Enumeration enum;
+    Enumeration en;
     DBObjectBase base;
 
     /* -- */

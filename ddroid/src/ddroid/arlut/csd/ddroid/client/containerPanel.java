@@ -790,7 +790,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	return;
       }
 
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
@@ -803,11 +803,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     try
       {
-	enum = objectHash.keys();
+	en = objectHash.keys();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    updateComponent((Component)enum.nextElement());
+	    updateComponent((Component)en.nextElement());
 	  }
 	
 	invalidate();
@@ -3577,7 +3577,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   public synchronized final void cleanUp()
   {
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
@@ -3591,11 +3591,11 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     if (rowHash != null)
       {
-	enum = rowHash.keys();
+	en = rowHash.keys();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    JComponent j = (JComponent) enum.nextElement();
+	    JComponent j = (JComponent) en.nextElement();
 	    
 	    if (j instanceof JCheckBox)
 	      {

@@ -1783,16 +1783,16 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     /* - */
 
-    Enumeration enum;
+    Enumeration en;
     Vector result = new Vector();
 
     /* -- */
 
-    enum = Ganymede.db.objectBases.elements();
+    en = Ganymede.db.objectBases.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	DBObjectBase base = (DBObjectBase) enum.nextElement();
+	DBObjectBase base = (DBObjectBase) en.nextElement();
 	
 	if (getPerm(base.getTypeID(), true).isVisible())
 	  {
@@ -2953,7 +2953,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     QueryResult result = new QueryResult(forTransport);
     DBObjectBase base = null;
     DBObjectBase containingBase = null;
-    Enumeration enum;
+    Enumeration en;
     DBObject obj;
     DBLock rLock = null;
     boolean returnContainingObject = false;
@@ -3362,7 +3362,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 		System.err.println("Query: " + username + " : got read lock");
 	      }
 
-	    enum = base.objectTable.elements();
+	    en = base.objectTable.elements();
 	  }
 	else
 	  {
@@ -3372,7 +3372,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 				   " : skipping read lock, iterating over iterationSet snapshot");
 	      }
 
-	    enum = base.getIterationSet().elements();
+	    en = base.getIterationSet().elements();
 	  }
 
 	// iterate over the objects in the base we're searching on,
@@ -3385,9 +3385,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// of a query, so we'll check that as well.
 
 	while (loggedInSemaphore.isSet() && 
-	       (rLock == null || session.isLocked(rLock)) && enum.hasMoreElements())
+	       (rLock == null || session.isLocked(rLock)) && en.hasMoreElements())
 	  {
-	    obj = (DBObject) enum.nextElement();
+	    obj = (DBObject) en.nextElement();
 
 	    if (DBQueryHandler.matches(this, query, obj))
 	      {
@@ -5136,11 +5136,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	// look to see if there are any objects that are newly created
 	// in our transaction's object list and add them as well.
 	    
-	Enumeration enum = objects.elements();
+	Enumeration en = objects.elements();
 	    
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    DBEditObject eObj = (DBEditObject) enum.nextElement();
+	    DBEditObject eObj = (DBEditObject) en.nextElement();
 	    
 	    if ((eObj.getStatus() == ObjectStatus.CREATING) && (eObj.getTypeID()==baseid))
 	      {

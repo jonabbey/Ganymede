@@ -159,7 +159,7 @@ public class PermMatrix implements java.io.Serializable {
   public synchronized PermMatrix union(PermMatrix orig)
   {
     PermMatrix result;
-    Enumeration enum;
+    Enumeration en;
     PermEntry entry1, entry2, entry3;
     Object key;
 
@@ -180,11 +180,11 @@ public class PermMatrix implements java.io.Serializable {
     // put the union of that and the matching entry already in result
     // into result.
 
-    enum = this.matrix.keys();
+    en = this.matrix.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = enum.nextElement();
+	key = en.nextElement();
 
 	entry1 = (PermEntry) this.matrix.get(key);
 	entry2 = (PermEntry) orig.matrix.get(key);
@@ -228,11 +228,11 @@ public class PermMatrix implements java.io.Serializable {
 
     // loop over the orig values for completeness
 
-    enum = orig.matrix.keys();
+    en = orig.matrix.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = enum.nextElement();
+	key = en.nextElement();
 
 	entry1 = (PermEntry) orig.matrix.get(key);
 	entry2 = (PermEntry) this.matrix.get(key);

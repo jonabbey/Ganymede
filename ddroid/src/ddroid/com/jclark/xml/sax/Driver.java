@@ -160,9 +160,9 @@ public class Driver extends ApplicationImpl
 
     DTD dtd = event.getDTD();
 
-    for (Enumeration enum = dtd.entityNames(DTD.NOTATION);
-	 enum.hasMoreElements(); ) {
-      String name = (String)enum.nextElement();
+    for (Enumeration en = dtd.entityNames(DTD.NOTATION);
+	 en.hasMoreElements(); ) {
+      String name = (String)en.nextElement();
       Entity entity = dtd.getEntity(DTD.NOTATION, name);
       String systemId = entity.getSystemId();
       if (systemId != null) {
@@ -173,9 +173,9 @@ public class Driver extends ApplicationImpl
       }
       dtdHandler.notationDecl(name, entity.getPublicId(), systemId);
     }
-    for (Enumeration enum = dtd.entityNames(DTD.GENERAL_ENTITY);
-	 enum.hasMoreElements();) {
-      String name = (String)enum.nextElement();
+    for (Enumeration en = dtd.entityNames(DTD.GENERAL_ENTITY);
+	 en.hasMoreElements();) {
+      String name = (String)en.nextElement();
       Entity entity = dtd.getEntity(DTD.GENERAL_ENTITY, name);
       String notationName = entity.getNotationName();
       if (notationName != null) {

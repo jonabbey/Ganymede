@@ -158,7 +158,7 @@ public class GanymedeWarningTask implements Runnable {
 	Calendar cal2;
 	Date loTime, hiTime;
 	DBObjectBase base;
-	Enumeration baseEnum, enum;
+	Enumeration baseEnum, en;
 	QueryNode expireNode, removeNode;
 	DBLogEvent event;
 	String title;
@@ -215,16 +215,16 @@ public class GanymedeWarningTask implements Runnable {
 
 		results = mySession.internalQuery(q);
 
-		enum = results.elements();
+		en = results.elements();
 
-		while (enum.hasMoreElements())
+		while (en.hasMoreElements())
 		  {
 		    if (currentThread.isInterrupted())
 		      {
 			throw new InterruptedException("scheduler ordering shutdown");
 		      }
 
-		    result = (Result) enum.nextElement();
+		    result = (Result) en.nextElement();
 
 		    invid = result.getInvid();
 
@@ -287,16 +287,16 @@ public class GanymedeWarningTask implements Runnable {
 
 		results = mySession.internalQuery(q);
 
-		enum = results.elements();
+		en = results.elements();
 
-		while (enum.hasMoreElements())
+		while (en.hasMoreElements())
 		  {
 		    if (currentThread.isInterrupted())
 		      {
 			throw new InterruptedException("scheduler ordering shutdown");
 		      }
 
-		    result = (Result) enum.nextElement();
+		    result = (Result) en.nextElement();
 
 		    invid = result.getInvid();
 
@@ -367,16 +367,16 @@ public class GanymedeWarningTask implements Runnable {
 	    
 	    results = mySession.internalQuery(q);
 
-	    enum = results.elements();
+	    en = results.elements();
 
-	    while (enum.hasMoreElements())
+	    while (en.hasMoreElements())
 	      {
 		if (currentThread.isInterrupted())
 		  {
 		    throw new InterruptedException("scheduler ordering shutdown");
 		  }
 		
-		result = (Result) enum.nextElement();
+		result = (Result) en.nextElement();
 		
 		invid = result.getInvid();
 		
@@ -431,16 +431,16 @@ public class GanymedeWarningTask implements Runnable {
 
 	    results = mySession.internalQuery(q);
 
-	    enum = results.elements();
+	    en = results.elements();
 
-	    while (enum.hasMoreElements())
+	    while (en.hasMoreElements())
 	      {
 		if (currentThread.isInterrupted())
 		  {
 		    throw new InterruptedException("scheduler ordering shutdown");
 		  }
 
-		result = (Result) enum.nextElement();
+		result = (Result) en.nextElement();
 
 		invid = result.getInvid();
 

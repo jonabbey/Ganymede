@@ -236,12 +236,12 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
       {
 	System.err.println("groupHomeGroupWizard.respond: state == 2");
 	
-	Enumeration enum = getKeys();
+	Enumeration en = getKeys();
 	int i = 0;
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    Object key = enum.nextElement();
+	    Object key = en.nextElement();
 	    Object value = getParam(key);
 	    System.err.println("Item: (" + i++ + ") " + key + ":" + value);
 	  } 

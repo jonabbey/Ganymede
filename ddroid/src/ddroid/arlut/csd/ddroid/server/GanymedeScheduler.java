@@ -913,16 +913,16 @@ public class GanymedeScheduler extends Thread {
 		      {
 			Vector toRun = new Vector();
 			Date nextRun = null;
-			Enumeration enum;
+			Enumeration en;
 			
-			enum = currentlyScheduled.elements();
+			en = currentlyScheduled.elements();
 			
 			// enum may be empty if the task that we woke ourselves
 			// up for was unregistered while we were sleeping
 			
-			while (enum.hasMoreElements())
+			while (en.hasMoreElements())
 			  {
-			    handle = (scheduleHandle) enum.nextElement();
+			    handle = (scheduleHandle) en.nextElement();
 			    
 			    if (handle.startTime.getTime() <= currentTime)
 			      {
@@ -1115,7 +1115,7 @@ public class GanymedeScheduler extends Thread {
   private synchronized void cleanUp()
   {
     scheduleHandle handle;
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
@@ -1125,11 +1125,11 @@ public class GanymedeScheduler extends Thread {
     // until we return before getting into
     // GanymedeScheduler.notifyCompletion()
 
-    enum = currentlyRunning.elements();
+    en = currentlyRunning.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	handle = (scheduleHandle) enum.nextElement();
+	handle = (scheduleHandle) en.nextElement();
 	
 	handle.stop();
       }
@@ -1143,7 +1143,7 @@ public class GanymedeScheduler extends Thread {
 
   private synchronized void updateTaskInfo(boolean updateConsoles)
   {
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
@@ -1151,23 +1151,23 @@ public class GanymedeScheduler extends Thread {
       {    
 	taskList.setSize(0);
 
-	enum = currentlyScheduled.elements();
+	en = currentlyScheduled.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    VectorUtils.unionAdd(taskList, enum.nextElement());
+	    VectorUtils.unionAdd(taskList, en.nextElement());
 	  }
     
-	enum = currentlyRunning.elements();
-	while (enum.hasMoreElements())
+	en = currentlyRunning.elements();
+	while (en.hasMoreElements())
 	  {
-	    VectorUtils.unionAdd(taskList, enum.nextElement());
+	    VectorUtils.unionAdd(taskList, en.nextElement());
 	  }
 
-	enum = onDemand.elements();
-	while (enum.hasMoreElements())
+	en = onDemand.elements();
+	while (en.hasMoreElements())
 	  {
-	    VectorUtils.unionAdd(taskList, enum.nextElement());
+	    VectorUtils.unionAdd(taskList, en.nextElement());
 	  }
 
 	taskListInitialized = true;

@@ -949,11 +949,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    // sure that we have the right (unordered) set, and that everything
 	    // is up-to-date.
 
-	    Enumeration enum = serverInvids.elements();
+	    Enumeration en = serverInvids.elements();
 
-	    while (enum.hasMoreElements())
+	    while (en.hasMoreElements())
 	      {
-		invid = (Invid) enum.nextElement();
+		invid = (Invid) en.nextElement();
 
 		localIndex = ((Integer) serverInvids.get(invid)).intValue();
 

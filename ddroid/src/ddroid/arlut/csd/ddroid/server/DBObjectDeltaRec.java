@@ -138,11 +138,11 @@ public final class DBObjectDeltaRec implements FieldType {
 			   oldObj.getLabel() + " and " + newObj.getLabel());
       }
 
-    Enumeration enum = objectBase.fieldTable.elements();
+    Enumeration en = objectBase.fieldTable.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	fieldDef = (DBObjectBaseField) enum.nextElement();
+	fieldDef = (DBObjectBaseField) en.nextElement();
 
 	if (debug)
 	  {

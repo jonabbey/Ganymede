@@ -3884,11 +3884,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 		// field
 		
 		boolean success = true;
-		Enumeration enum = base.objectTable.elements();
+		Enumeration en = base.objectTable.elements();
 		
-		while (success && enum.hasMoreElements())
+		while (success && en.hasMoreElements())
 		  {
-		    DBObject obj = (DBObject) enum.nextElement();
+		    DBObject obj = (DBObject) en.nextElement();
 		    
 		    DBField field = (DBField) obj.getField(getID());
 		    
@@ -3976,11 +3976,11 @@ public final class DBObjectBaseField extends UnicastRemoteObject implements Base
 	    // field
 	    
 	    boolean success = true;
-	    Enumeration enum = base.objectTable.elements();
+	    Enumeration en = base.objectTable.elements();
 	    
-	    while (success && enum.hasMoreElements())
+	    while (success && en.hasMoreElements())
 	      {
-		DBObject obj = (DBObject) enum.nextElement();
+		DBObject obj = (DBObject) en.nextElement();
 		
 		DBField field = (DBField) obj.getField(getID());
 		

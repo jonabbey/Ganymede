@@ -1339,7 +1339,7 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
 
   public SchemaEdit editSchema()
   {
-    Enumeration enum;
+    Enumeration en;
     DBObjectBase base;
 
     /* -- */
@@ -1392,13 +1392,13 @@ final class GanymedeAdmin extends UnicastRemoteObject implements adminSession, U
       {
 	Ganymede.debug("entering editSchema synchronization block");
 
-	enum = Ganymede.db.objectBases.elements();
+	en = Ganymede.db.objectBases.elements();
 
-	if (enum != null)
+	if (en != null)
 	  {
-	    while (enum.hasMoreElements())
+	    while (en.hasMoreElements())
 	      {
-		base = (DBObjectBase) enum.nextElement();
+		base = (DBObjectBase) en.nextElement();
 
 		if (base.isLocked())
 		  {

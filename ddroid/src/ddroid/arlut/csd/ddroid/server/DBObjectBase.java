@@ -521,14 +521,14 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 	// make copies of all the custom field definitions for this
 	// object type, and save them into our own field hash.
     
-	Enumeration enum;
+	Enumeration en;
 	DBObjectBaseField field;
     
-	enum = original.customFields.elements();
+	en = original.customFields.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    field = (DBObjectBaseField) enum.nextElement();
+	    field = (DBObjectBaseField) en.nextElement();
 	    bf = new DBObjectBaseField(field, editor); // copy this base field
 	    bf.base = this;
 
@@ -1665,7 +1665,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public synchronized void printHTML(PrintWriter out)
   {
-    Enumeration enum;
+    Enumeration en;
     DBObjectBaseField bf;
 
     /* -- */
@@ -1686,11 +1686,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     out.println("<th>Array?</th> <th>NameSpace</th> <th>Notes</th>");
     out.println("</tr>");
 
-    enum = customFields.elements();
+    en = customFields.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	bf = (DBObjectBaseField) enum.nextElement();
+	bf = (DBObjectBaseField) en.nextElement();
 
 	out.println("<tr>");
 	bf.printHTML(out);
@@ -1710,18 +1710,18 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public synchronized void print(PrintWriter out, String indent)
   {
-    Enumeration enum;
+    Enumeration en;
     DBObjectBaseField fieldDef;
 
     /* -- */
 
     out.println(indent + object_name + "(" + type_code + ")");
     
-    enum = customFields.elements();
+    en = customFields.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	fieldDef = (DBObjectBaseField) enum.nextElement();
+	fieldDef = (DBObjectBaseField) en.nextElement();
 
 	fieldDef.print(out, indent + "\t");
       }
@@ -2174,7 +2174,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   public synchronized Vector getFields(boolean includeBuiltIns)
   {
     Vector result;
-    Enumeration enum;
+    Enumeration en;
     DBObjectBaseField field;
 
     /* -- */
@@ -2183,11 +2183,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     // first we return the custom fields, in display order
 
-    enum = customFields.elements();
+    en = customFields.elements();
     
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	field = (DBObjectBaseField) enum.nextElement();
+	field = (DBObjectBaseField) en.nextElement();
 	
 	result.addElement(field);
       }
@@ -2197,11 +2197,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     if (includeBuiltIns)
       {
-	enum = fieldTable.elements();
+	en = fieldTable.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    field = (DBObjectBaseField) enum.nextElement();
+	    field = (DBObjectBaseField) en.nextElement();
 
 	    if (field.isBuiltIn())
 	      {	    
@@ -2237,15 +2237,15 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   public synchronized BaseField getField(String name)
   {
     BaseField bf;
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
-    enum = fieldTable.elements();
+    en = fieldTable.elements();
     
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	bf = (BaseField) enum.nextElement();
+	bf = (BaseField) en.nextElement();
 
 	try
 	  {
@@ -2518,17 +2518,17 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public boolean fieldInUse(DBObjectBaseField bF)
   {
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
     synchronized (objectTable)
       {
-	enum = objectTable.elements();
+	en = objectTable.elements();
 	    
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    DBObject obj = (DBObject) enum.nextElement();
+	    DBObject obj = (DBObject) en.nextElement();
 	    
 	    if (obj.getField(bF.getID()) != null)
 	      {
@@ -2549,7 +2549,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   public boolean fieldInUse(String fieldName)
   {
-    Enumeration enum;
+    Enumeration en;
     short id;
 
     DBObjectBaseField fieldDef = (DBObjectBaseField) getField(fieldName);
@@ -2563,11 +2563,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     synchronized (objectTable)
       {
-	enum = objectTable.elements();
+	en = objectTable.elements();
 	    
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    DBObject obj = (DBObject) enum.nextElement();
+	    DBObject obj = (DBObject) en.nextElement();
 	    
 	    if (obj.getField(id) != null)
 	      {
@@ -2608,16 +2608,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   synchronized short getNextFieldID()
   {
     short id = 256;		// below 256 reserved for future server-mandatory fields
-    Enumeration enum;
+    Enumeration en;
     DBObjectBaseField fieldDef;
 
     /* -- */
 
-    enum = fieldTable.elements();
+    en = fieldTable.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	fieldDef = (DBObjectBaseField) enum.nextElement();
+	fieldDef = (DBObjectBaseField) en.nextElement();
 
 	if (fieldDef.getID() >= id)
 	  {
@@ -2662,7 +2662,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
   
   synchronized void clearEditor()
   {
-    Enumeration enum;
+    Enumeration en;
     DBObjectBaseField fieldDef;
 
     /* -- */
@@ -2692,11 +2692,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
     synchronized (fieldTable)
       {
-	enum = fieldTable.elements();
+	en = fieldTable.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    fieldDef = (DBObjectBaseField) enum.nextElement();
+	    fieldDef = (DBObjectBaseField) en.nextElement();
 	    fieldDef.editor = null;
 	    fieldDef.template = new FieldTemplate(fieldDef);
 	  }
@@ -2730,7 +2730,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   void updateIterationSet()
   {
-    Enumeration enum;
+    Enumeration en;
     Vector newIterationSet;
 
     /* -- */
@@ -2739,11 +2739,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
       {
 	newIterationSet = new Vector(objectTable.size());
 
-	enum = objectTable.elements();
+	en = objectTable.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    newIterationSet.addElement(enum.nextElement());
+	    newIterationSet.addElement(en.nextElement());
 	  }
       }
 
@@ -2773,18 +2773,18 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
   private void updateBaseRefs()
   {
-    Enumeration enum;
+    Enumeration en;
     DBObject obj;
 
     /* -- */
 
     synchronized (objectTable)
       {
-	enum = objectTable.elements();
+	en = objectTable.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    obj = (DBObject) enum.nextElement();
+	    obj = (DBObject) en.nextElement();
 	   
 	    if (DBSchemaEdit.debug)
 	      {
@@ -3060,16 +3060,16 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     if (templateVector == null)
       {
 	templateVector = new Vector();
-	Enumeration enum;
+	Enumeration en;
 	DBObjectBaseField fieldDef;
 
 	// first load our system fields
 
-	enum = fieldTable.elements();
+	en = fieldTable.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    fieldDef = (DBObjectBaseField) enum.nextElement();
+	    fieldDef = (DBObjectBaseField) en.nextElement();
 
 	    if (!fieldDef.isBuiltIn())
 	      {
@@ -3081,11 +3081,11 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
 
 	// then load our custom fields
     
-	enum = customFields.elements();
+	en = customFields.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    fieldDef = (DBObjectBaseField) enum.nextElement();
+	    fieldDef = (DBObjectBaseField) en.nextElement();
 	
 	    templateVector.addElement(fieldDef.getTemplate());
 	  }

@@ -1071,11 +1071,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		System.out.println("Printing the hash:");
 	      }
 
-	    Enumeration enum = results.keys();
+	    Enumeration en = results.keys();
 
-	    while (enum.hasMoreElements()) 
+	    while (en.hasMoreElements()) 
 	      {
-		String label = (String) enum.nextElement();
+		String label = (String) en.nextElement();
 		Object ob = results.get(label);
 
 		if (ob instanceof String) 

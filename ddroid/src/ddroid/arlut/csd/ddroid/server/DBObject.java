@@ -2451,11 +2451,11 @@ public class DBObject implements db_object, FieldType, Remote {
 	if (table != null)
 	  {
 	    int size = table.size();
-	    Enumeration enum = table.elements();
+	    Enumeration en = table.elements();
 
 	    for (int i = 0; i < size; i++)
 	      {
-		results.addElement(enum.nextElement());
+		results.addElement(en.nextElement());
 	      }
 	  }
       }

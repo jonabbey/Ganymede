@@ -324,18 +324,18 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   public synchronized Base[] getBases(boolean embedded)
   {
     Base[] bases;
-    Enumeration enum;
+    Enumeration en;
     int i = 0;
     int size = 0;
     Base base;
 
     /* -- */
 
-    enum = newBases.elements();
+    en = newBases.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	base = (Base) enum.nextElement();
+	base = (Base) en.nextElement();
 
 	try
 	  {
@@ -361,11 +361,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       }
 
     bases = new Base[size];
-    enum = newBases.elements();
+    en = newBases.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	base = (Base) enum.nextElement();
+	base = (Base) en.nextElement();
 
 	try
 	  {
@@ -402,18 +402,18 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   public synchronized Base[] getBases()
   {
     Base[] bases;
-    Enumeration enum;
+    Enumeration en;
     int i = 0;
     Base base;
 
     /* -- */
 
     bases = new Base[newBases.size()];
-    enum = newBases.elements();
+    en = newBases.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	bases[i++] = (Base) enum.nextElement();
+	bases[i++] = (Base) en.nextElement();
       }
 
     return bases;
@@ -440,14 +440,14 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public synchronized Base getBase(String baseName)
   {
-    Enumeration enum = newBases.elements();
+    Enumeration en = newBases.elements();
     DBObjectBase base;
 
     /* -- */
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	base = (DBObjectBase) enum.nextElement();
+	base = (DBObjectBase) en.nextElement();
 
 	if (base.getName().equals(baseName))
 	  {
@@ -677,7 +677,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   public synchronized NameSpace[] getNameSpaces()
   {
     NameSpace[] spaces;
-    Enumeration enum;
+    Enumeration en;
     int i;
 
     /* -- */
@@ -687,11 +687,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	spaces = new NameSpace[store.nameSpaces.size()];
 	i = 0;
 	
-	enum = store.nameSpaces.elements();
+	en = store.nameSpaces.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    spaces[i++] = (NameSpace) enum.nextElement();
+	    spaces[i++] = (NameSpace) en.nextElement();
 	  }
       }
 
@@ -709,17 +709,17 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
   public synchronized NameSpace getNameSpace(String name)
   {
     NameSpace ns;
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
     synchronized (store)
       {
-	enum = store.nameSpaces.elements();
+	en = store.nameSpaces.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    ns = (NameSpace) enum.nextElement();
+	    ns = (NameSpace) en.nextElement();
 
 	    try
 	      {
@@ -817,11 +817,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
     // check to make sure this namespace isn't tied to a field still
 
-    Enumeration enum = newBases.elements();
+    Enumeration en = newBases.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	DBObjectBase base = (DBObjectBase) enum.nextElement();
+	DBObjectBase base = (DBObjectBase) en.nextElement();
 
 	Vector fieldDefs = base.getFields();
 
@@ -852,7 +852,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 
   public synchronized void commit()
   {
-    Enumeration enum;
+    Enumeration en;
     DBObjectBase base;
 
     /* -- */
@@ -870,11 +870,11 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
       {
 	// first the new object bases
 
-	enum = newBases.elements();
+	en = newBases.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    base = (DBObjectBase) enum.nextElement();
+	    base = (DBObjectBase) en.nextElement();
 
 	    if (debug)
 	      {

@@ -89,11 +89,11 @@ public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
   {
     panel.removeAll();
     
-    Enumeration enum = buttons.keys();
+    Enumeration en = buttons.keys();
     
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	panel.add((JButton)enum.nextElement());
+	panel.add((JButton)en.nextElement());
       }
     
     this.validate();
@@ -106,11 +106,11 @@ public class Jtaskbar extends JPanel implements ActionListener, MouseListener {
    */
   public void setButtonPad(Insets pad)
   {
-    Enumeration enum = buttons.keys();
+    Enumeration en = buttons.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	((JButton)enum.nextElement()).setMargin(pad);
+	((JButton)en.nextElement()).setMargin(pad);
       }
   }
 

@@ -194,7 +194,7 @@ public class objectList {
 
   public synchronized void augmentListWithNonEditables(QueryResult result)
   {
-    Enumeration enum;
+    Enumeration en;
     Vector localhandles;
     ObjectHandle handle;
 
@@ -207,11 +207,11 @@ public class objectList {
 
     localhandles = result.getHandles();
 
-    enum = localhandles.elements();
+    en = localhandles.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	handle = (ObjectHandle) enum.nextElement();
+	handle = (ObjectHandle) en.nextElement();
 
 	// we only want to add a handle if we don't have the
 	// invid in place already

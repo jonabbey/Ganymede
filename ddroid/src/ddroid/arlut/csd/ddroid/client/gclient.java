@@ -2730,7 +2730,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public void refreshChangedObjectHandles(Vector paramVect, boolean afterCommit)
   {
-    Enumeration enum;
+    Enumeration en;
     Invid invid;
     Short objectTypeKey = null;
 

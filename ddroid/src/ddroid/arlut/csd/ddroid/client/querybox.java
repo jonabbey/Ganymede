@@ -252,11 +252,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     Vector baseNames = new Vector();
 
-    Enumeration enum = gc.getBaseMap().elements();
+    Enumeration en = gc.getBaseMap().elements();
       
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	BaseDump key = (BaseDump) enum.nextElement();
+	BaseDump key = (BaseDump) en.nextElement();
 
 	// we want to ignore embedded objects -- for now
 	    
@@ -682,11 +682,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // ok, we now have a hash of base names that we're going
     // to need to issue queries on.. 
 
-    Enumeration enum = baseQueries.keys();
+    Enumeration en = baseQueries.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	myBaseName = (String) enum.nextElement();
+	myBaseName = (String) en.nextElement();
 	baseQVec = (Vector) baseQueries.get(myBaseName);
 
 	myNode = (QueryNode) baseQVec.elementAt(0);

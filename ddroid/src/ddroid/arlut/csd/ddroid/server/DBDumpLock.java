@@ -93,7 +93,7 @@ class DBDumpLock extends DBLock {
 
   public DBDumpLock(DBStore store)
   {
-    Enumeration enum;
+    Enumeration en;
     DBObjectBase base;
 
     /* -- */

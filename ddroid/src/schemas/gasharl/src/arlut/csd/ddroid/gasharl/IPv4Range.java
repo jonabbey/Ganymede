@@ -953,11 +953,11 @@ public class IPv4Range {
 
     IPv4Range range = new IPv4Range(x);
 
-    Enumeration enum = range.getSubRanges();
+    Enumeration en = range.getSubRanges();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	IPv4Range range2 = (IPv4Range) enum.nextElement();
+	IPv4Range range2 = (IPv4Range) en.nextElement();
 
 	System.out.println("Range:\n" + range2 + 
 			   "\nSize:\n" + range2.getSize() + "\n");

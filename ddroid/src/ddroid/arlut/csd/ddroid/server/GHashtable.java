@@ -296,9 +296,9 @@ class GEnum implements Enumeration {
 
   /* -- */
 
-  GEnum(Enumeration enum)
+  GEnum(Enumeration en)
   {
-    source = enum;
+    source = en;
   }
 
   public boolean hasMoreElements()

@@ -372,11 +372,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 					    int matching = 0;
 					    String matchingItem = null;
 
-					    Enumeration enum = out.model.elements();
+					    Enumeration en = out.model.elements();
 
-					    while (enum.hasMoreElements())
+					    while (en.hasMoreElements())
 					      {
-						item = (listHandle) enum.nextElement();
+						item = (listHandle) en.nextElement();
 
 						if (item.toString().equals(curVal))
 						  {

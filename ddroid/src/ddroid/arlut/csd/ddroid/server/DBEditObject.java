@@ -252,7 +252,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     /* -- */
 
     Enumeration 
-      enum = null;
+      en = null;
 
     DBObjectBaseField 
       fieldDef;
@@ -266,11 +266,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     synchronized (objectBase)
       {
-	enum = objectBase.fieldTable.elements();
+	en = objectBase.fieldTable.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    fieldDef = (DBObjectBaseField) enum.nextElement();
+	    fieldDef = (DBObjectBaseField) en.nextElement();
 
 	    // check for permission to create a particular field
 
@@ -337,7 +337,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     super(original.objectBase);
 
     Enumeration 
-      enum;
+      en;
 
     DBObjectBaseField 
       fieldDef;
@@ -424,11 +424,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     
     synchronized (objectBase)
       {
-	enum = objectBase.fieldTable.elements();
+	en = objectBase.fieldTable.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    fieldDef = (DBObjectBaseField) enum.nextElement();
+	    fieldDef = (DBObjectBaseField) en.nextElement();
 	    
 	    // if we don't have it in our fieldAry already,
 	    // we'll want to add it
@@ -2895,11 +2895,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	    System.err.println("Deleting " + toString() + ", chasing back pointers from global hash");
 	  }
 
-	Enumeration enum = backPointers.keys();
+	Enumeration en = backPointers.keys();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    remote = (Invid) enum.nextElement();
+	    remote = (Invid) en.nextElement();
 
 	    if (false)
 	      {
@@ -3458,7 +3458,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
   synchronized final void rollback(Hashtable ckpoint)
   {
-    Enumeration enum;
+    Enumeration en;
     Short key;
     Object value;
     Hashtable result = new Hashtable();
@@ -3466,11 +3466,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     /* -- */
 
-    enum = ckpoint.keys();
+    en = ckpoint.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = (Short) enum.nextElement();
+	key = (Short) en.nextElement();
 
 	field = retrieveField(key.shortValue());
 
@@ -3534,11 +3534,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	System.err.println("Entering diff for object " + getLabel());
       }
 
-    Enumeration enum = objectBase.fieldTable.elements();
+    Enumeration en = objectBase.fieldTable.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	fieldDef = (DBObjectBaseField) enum.nextElement();
+	fieldDef = (DBObjectBaseField) en.nextElement();
 
 	// we don't care if certain fields change
 

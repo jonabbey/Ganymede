@@ -668,7 +668,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     DBNameSpace namespace = Ganymede.db.getNameSpace("IPspace");
     Byte[] address = null;
-    Enumeration enum = null;
+    Enumeration en = null;
     IPv4Range range;
 
     /* -- */
@@ -723,13 +723,13 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
       }
 
-    enum = range.getElements(start, stop);
+    en = range.getElements(start, stop);
 
     boolean found = false;
 
-    while (!found && enum.hasMoreElements())
+    while (!found && en.hasMoreElements())
       {
-	address = (Byte[]) enum.nextElement();
+	address = (Byte[]) en.nextElement();
 
 	if (debug)
 	  {

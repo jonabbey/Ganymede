@@ -505,7 +505,7 @@ public class DBLog {
     String transdescrip = transaction.description;
     boolean found;
     DBLogEvent event;
-    Enumeration enum;
+    Enumeration en;
     Hashtable mailOuts = new Hashtable(); // maps address to MailOut objects
     Hashtable objectOuts = new Hashtable(); // objevent tag to hash mapping address to MailOut objects
     Object ref;
@@ -735,11 +735,11 @@ public class DBLog {
 
     if (mailer != null && transactionType.mail)
       {
-	enum = mailOuts.elements();
+	en = mailOuts.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    MailOut mailout = (MailOut) enum.nextElement();
+	    MailOut mailout = (MailOut) en.nextElement();
 	    String description = "Transaction summary: User " + adminName + ":" + 
 	      currentTime.toString() + "\n\n" + 
 	      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + signature;
@@ -1066,11 +1066,11 @@ public class DBLog {
 
   private void sendObjectMail(String returnAddr, String adminName, Hashtable objectOuts, Date currentTime)
   {
-    Enumeration enum = objectOuts.keys();
+    Enumeration en = objectOuts.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	String key = (String) enum.nextElement();
+	String key = (String) en.nextElement();
 	Hashtable addresses = (Hashtable) objectOuts.get(key);
 
 	Enumeration enum2 = addresses.keys();
@@ -1426,7 +1426,7 @@ public class DBLog {
   private Vector appendMailOut(DBLogEvent event, Hashtable map, 
 			       DBSession session, systemEventType transactionType)
   {
-    Enumeration enum;
+    Enumeration en;
     String str;
     MailOut mailout;
 
@@ -1442,11 +1442,11 @@ public class DBLog {
 			     transactionType.ccToOwners);
       }
     
-    enum = event.notifyVect.elements();
+    en = event.notifyVect.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	str = (String) enum.nextElement();
+	str = (String) en.nextElement();
 
 	if (debug)
 	  {
@@ -1809,7 +1809,7 @@ class systemEventType {
     StringBuffer result = new StringBuffer();
     InvidDBField invF;
     StringDBField strF;
-    Enumeration enum;
+    Enumeration en;
     Invid tmpI;
     String tmpS;
 
@@ -1936,7 +1936,7 @@ class objectEventType {
     StringBuffer result = new StringBuffer();
     InvidDBField invF;
     StringDBField strF;
-    Enumeration enum;
+    Enumeration en;
     Invid tmpI;
     String tmpS;
 

@@ -1006,11 +1006,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   public void refreshTableWindows()
   {
     Object obj;
-    Enumeration enum = windowList.keys();
+    Enumeration en = windowList.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	obj = windowList.get(enum.nextElement());
+	obj = windowList.get(en.nextElement());
 
 	if (obj instanceof gResultTable)
 	  {

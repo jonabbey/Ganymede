@@ -625,11 +625,11 @@ public final class DBStore {
 		// loading bypasses the transaction mechanism where this is
 		// normally done
 
-		Enumeration enum = objectBases.elements();
+		Enumeration en = objectBases.elements();
 
-		while (enum.hasMoreElements())
+		while (en.hasMoreElements())
 		  {
-		    DBObjectBase base = (DBObjectBase) enum.nextElement();
+		    DBObjectBase base = (DBObjectBase) en.nextElement();
 
 		    base.updateIterationSet();
 		  }
@@ -1099,11 +1099,11 @@ public final class DBStore {
 		    continue;
 		  }
 
-		Enumeration enum = base.objectTable.elements();
+		Enumeration en = base.objectTable.elements();
 
-		while (enum.hasMoreElements())
+		while (en.hasMoreElements())
 		  {
-		    DBObject x = (DBObject) enum.nextElement();
+		    DBObject x = (DBObject) en.nextElement();
 
 		    x.emitXML(xmlOut);
 		  }
@@ -1186,17 +1186,17 @@ public final class DBStore {
 
   public void printBases(PrintWriter out)
   {
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
     synchronized (objectBases)
       {
-	enum = objectBases.elements();
+	en = objectBases.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    ((DBObjectBase) enum.nextElement()).print(out, "");
+	    ((DBObjectBase) en.nextElement()).print(out, "");
 	  }
       }
   }
@@ -1209,17 +1209,17 @@ public final class DBStore {
   public Vector getBaseNameList()
   {
     Vector result = new Vector();
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
     synchronized (objectBases)
       {
-	enum = objectBases.elements();
+	en = objectBases.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    result.addElement(((DBObjectBase) enum.nextElement()).getName());
+	    result.addElement(((DBObjectBase) en.nextElement()).getName());
 	  }
       }
     
@@ -1234,17 +1234,17 @@ public final class DBStore {
   public Vector getBases()
   {
     Vector result = new Vector();
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
     synchronized (objectBases)
       {
-	enum = objectBases.elements();
+	en = objectBases.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    result.addElement(enum.nextElement());
+	    result.addElement(en.nextElement());
 	  }
       }
     
@@ -1282,17 +1282,17 @@ public final class DBStore {
   public DBObjectBase getObjectBase(String baseName)
   {
     DBObjectBase base;
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
     synchronized (objectBases)
       {
-	enum = objectBases.elements();
+	en = objectBases.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    base = (DBObjectBase) enum.nextElement();
+	    base = (DBObjectBase) en.nextElement();
 	    
 	    if (base.getName().equals(baseName))
 	      {
@@ -2476,11 +2476,11 @@ public final class DBStore {
   {
     synchronized (backPointers)
       {
-	Enumeration enum = backPointers.keys();
+	Enumeration en = backPointers.keys();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    Invid objInvid = (Invid) enum.nextElement();
+	    Invid objInvid = (Invid) en.nextElement();
 
 	    System.err.println("Object: " + describe(objInvid));
 

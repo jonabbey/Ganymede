@@ -134,38 +134,38 @@ public class VectorUtils {
 
 	Hashtable workSet = new Hashtable();
 	Vector result = new Vector(threshold);
-	Enumeration enum;
+	Enumeration en;
 	Object item;
 
 	/* -- */
 
 	if (vectA != null)
 	  {
-	    enum = vectA.elements();
+	    en = vectA.elements();
 
-	    while (enum.hasMoreElements())
+	    while (en.hasMoreElements())
 	      {
-		item = enum.nextElement();
+		item = en.nextElement();
 		workSet.put(item, item);
 	      }
 	  }
     
 	if (vectB != null)
 	  {
-	    enum = vectB.elements();
+	    en = vectB.elements();
 
-	    while (enum.hasMoreElements())
+	    while (en.hasMoreElements())
 	      {
-		item = enum.nextElement();
+		item = en.nextElement();
 		workSet.put(item, item);
 	      }
 	  }
 
-	enum = workSet.elements();
+	en = workSet.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    result.addElement(enum.nextElement());
+	    result.addElement(en.nextElement());
 	  }
 
 	// we're big enough to be over threshold, so lets go ahead and
@@ -269,38 +269,38 @@ public class VectorUtils {
       resultSet = new Hashtable();
 
     Vector result = new Vector();
-    Enumeration enum;
+    Enumeration en;
     Object item;
 
     /* -- */
 
     if (vectA != null)
       {
-	enum = vectA.elements();
+	en = vectA.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    item = enum.nextElement();
+	    item = en.nextElement();
 	    workSetA.put(item, item);
 	  }
       }
     
     if (vectB != null)
       {
-	enum = vectB.elements();
+	en = vectB.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    item = enum.nextElement();
+	    item = en.nextElement();
 	    workSetB.put(item, item);
 	  }
       }
 
-    enum = workSetA.elements();
+    en = workSetA.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	item = enum.nextElement();
+	item = en.nextElement();
 
 	if (workSetB.containsKey(item))
 	  {
@@ -308,11 +308,11 @@ public class VectorUtils {
 	  }
       }
 
-    enum = workSetB.elements();
+    en = workSetB.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	item = enum.nextElement();
+	item = en.nextElement();
 
 	if (workSetA.containsKey(item))
 	  {
@@ -320,11 +320,11 @@ public class VectorUtils {
 	  }
       }
 
-    enum = resultSet.elements();
+    en = resultSet.elements();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	result.addElement(enum.nextElement());
+	result.addElement(en.nextElement());
       }
 
     return result;
@@ -358,23 +358,23 @@ public class VectorUtils {
     if (vectA.size() + vectB.size() > 10) // ass
       {
 	Hashtable workSetB = new Hashtable();
-	Enumeration enum;
+	Enumeration en;
 
 	/* -- */
 
-	enum = vectB.elements();
+	en = vectB.elements();
     
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    item = enum.nextElement();
+	    item = en.nextElement();
 	    workSetB.put(item, item);
 	  }
 	
-	enum = vectA.elements();
+	en = vectA.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    item = enum.nextElement();
+	    item = en.nextElement();
 	    
 	    if (!workSetB.containsKey(item))
 	      {
@@ -451,7 +451,7 @@ public class VectorUtils {
       workSetB = new Hashtable();
 
     Vector result = new Vector();
-    Enumeration enum;
+    Enumeration en;
     Object item;
 
     /* -- */
@@ -465,11 +465,11 @@ public class VectorUtils {
 
     if (vectB != null)
       {
-	enum = vectB.elements();
+	en = vectB.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    item = enum.nextElement();
+	    item = en.nextElement();
 
 	    if (result.contains(item))
 	      {

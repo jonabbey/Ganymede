@@ -540,21 +540,21 @@ public class QueryResult implements java.io.Serializable {
     buffer.append(result.buffer.toString());
     unpacked = false;
 
-    Enumeration enum = result.invidHash.keys();
+    Enumeration en = result.invidHash.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	Object key = enum.nextElement();
+	Object key = en.nextElement();
 	Object val = result.invidHash.get(key);
 
 	this.invidHash.put(key, val);
       }
 
-    enum = result.labelHash.keys();
+    en = result.labelHash.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	Object key = enum.nextElement();
+	Object key = en.nextElement();
 	Object val = result.labelHash.get(key);
 
 	this.labelHash.put(key, val);

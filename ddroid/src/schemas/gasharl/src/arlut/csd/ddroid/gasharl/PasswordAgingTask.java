@@ -201,7 +201,7 @@ public class PasswordAgingTask implements Runnable {
     Date currentTime = new Date();
     Calendar lowerBound = new GregorianCalendar();
     Calendar upperBound = new GregorianCalendar();
-    Enumeration enum;
+    Enumeration en;
 
     QueryDataNode matchNode = new QueryDataNode(userSchema.PASSWORDCHANGETIME,
 						QueryDataNode.DEFINED,
@@ -212,16 +212,16 @@ public class PasswordAgingTask implements Runnable {
     
     results = mySession.internalQuery(q);
     
-    enum = results.elements();
+    en = results.elements();
     
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
 	if (currentThread.isInterrupted())
 	  {
 	    throw new InterruptedException("scheduler ordering shutdown");
 	  }
 	    
-	result = (Result) enum.nextElement();
+	result = (Result) en.nextElement();
 
 	invid = result.getInvid();
 

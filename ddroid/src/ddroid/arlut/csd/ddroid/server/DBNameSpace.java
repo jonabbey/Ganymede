@@ -961,7 +961,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     DBNameSpaceTransaction tRecord; 
     DBNameSpaceCkPoint point;
     DBNameSpaceHandle handle;
-    Enumeration enum;
+    Enumeration en;
 
     /* -- */
 
@@ -990,11 +990,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     // the transaction, and check them against the checkpoint we are
     // reverting to.
 
-    enum = tRecord.getReservedEnum();
+    en = tRecord.getReservedEnum();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	value = enum.nextElement();
+	value = en.nextElement();
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
 	// ok, we've got a value that is in our current reserved list.
@@ -1074,7 +1074,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
       }
 
     DBNameSpaceTransaction tRecord;
-    Enumeration enum;
+    Enumeration en;
     Object value;
     DBNameSpaceHandle handle;
 
@@ -1082,16 +1082,16 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
     tRecord = getTransactionRecord(editSet);
 
-    enum = tRecord.getReservedEnum();
+    en = tRecord.getReservedEnum();
 
     // loop over the values in the namespace that were changed or affected
     // by this editset, and revert them to their checked-in status, or
     // get rid of them entirely if they weren't allocated in this namespace
     // before this transaction allocated them
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	value = enum.nextElement();
+	value = en.nextElement();
 	handle = getHandle(value);
 
 	if (handle.original)
@@ -1139,7 +1139,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
       }
 
     DBNameSpaceTransaction tRecord;
-    Enumeration enum;
+    Enumeration en;
     Object value;
     DBNameSpaceHandle handle;
 
@@ -1147,7 +1147,7 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
     tRecord = getTransactionRecord(editSet);
 
-    enum = tRecord.getReservedEnum();
+    en = tRecord.getReservedEnum();
 
     // loop over the values in the namespace that were changed or
     // affected by this editset, and commit them into the database,
@@ -1155,9 +1155,9 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
     // field pointer, or getting rid of them entirely if they are not
     // in use anymore
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	value = enum.nextElement();
+	value = en.nextElement();
 	handle = getHandle(value);
 
 	if (handle.inuse)
@@ -1206,16 +1206,16 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
   private void dumpNameSpace()
   {
-    Enumeration enum;
+    Enumeration en;
     Object key;
     
     /* -- */
 
-    enum = uniqueHash.keys();
+    en = uniqueHash.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	key = enum.nextElement();
+	key = en.nextElement();
 	System.err.println("key: " + key + ", value: " + uniqueHash.get(key));
       }
   }
@@ -1244,11 +1244,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
     uniqueHash = new GHashtable(saveHash.size(), caseInsensitive);
 
-    Enumeration enum = saveHash.keys();
+    Enumeration en = saveHash.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	Object key = enum.nextElement();
+	Object key = en.nextElement();
 
 	DBNameSpaceHandle handle = (DBNameSpaceHandle) saveHash.get(key);
 
@@ -1385,11 +1385,11 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
       }
 
     Vector elementsToRemove = new Vector();
-    Enumeration enum = this.uniqueHash.keys();
+    Enumeration en = this.uniqueHash.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	Object value = enum.nextElement();
+	Object value = en.nextElement();
 	DBNameSpaceHandle handle = (DBNameSpaceHandle) this.uniqueHash.get(value);
 
 	if (handle.matches(objectType, fieldId))
@@ -1585,11 +1585,11 @@ class DBNameSpaceCkPoint {
 
 	// now copy our hash to preserve the namespace handles
 	
-	Enumeration enum = reserved.elements();
+	Enumeration en = reserved.elements();
 	
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    Object value = enum.nextElement();
+	    Object value = en.nextElement();
 		
 	    DBNameSpaceHandle handle = space.getHandle(value);
 		
@@ -1625,11 +1625,11 @@ class DBNameSpaceCkPoint {
 
     if (uniqueHash != null)
       {
-	Enumeration enum = uniqueHash.elements();
+	Enumeration en = uniqueHash.elements();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    DBNameSpaceHandle handle = (DBNameSpaceHandle) enum.nextElement();
+	    DBNameSpaceHandle handle = (DBNameSpaceHandle) en.nextElement();
 
 	    handle.cleanup();
 	  }

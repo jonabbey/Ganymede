@@ -2565,11 +2565,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		err.println("Objects created:");
 		
-		Enumeration enum = createCount.keys();
+		Enumeration en = createCount.keys();
 		
-		while (enum.hasMoreElements())
+		while (en.hasMoreElements())
 		  {
-		    String key = (String) enum.nextElement();
+		    String key = (String) en.nextElement();
 		    
 		    err.println("\t" + key + ": " + createCount.get(key));
 		  }
@@ -2579,11 +2579,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		err.println("Objects edited:");
 		
-		Enumeration enum = editCount.keys();
+		Enumeration en = editCount.keys();
 		
-		while (enum.hasMoreElements())
+		while (en.hasMoreElements())
 		  {
-		    String key = (String) enum.nextElement();
+		    String key = (String) en.nextElement();
 		    
 		    err.println("\t" + key + ": " + editCount.get(key));
 		  }
@@ -2593,11 +2593,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		err.println("Objects deleted:");
 		
-		Enumeration enum = deleteCount.keys();
+		Enumeration en = deleteCount.keys();
 		
-		while (enum.hasMoreElements())
+		while (en.hasMoreElements())
 		  {
-		    String key = (String) enum.nextElement();
+		    String key = (String) en.nextElement();
 		    
 		    err.println("\t" + key + ": " + deleteCount.get(key));
 		  }
@@ -2607,11 +2607,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		err.println("Objects inactivated:");
 		
-		Enumeration enum = inactivateCount.keys();
+		Enumeration en = inactivateCount.keys();
 		
-		while (enum.hasMoreElements())
+		while (en.hasMoreElements())
 		  {
-		    String key = (String) enum.nextElement();
+		    String key = (String) en.nextElement();
 		    
 		    err.println("\t" + key + ": " + inactivateCount.get(key));
 		  }
@@ -2719,7 +2719,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private DBSchemaEdit editSchema()
   {
-    Enumeration enum;
+    Enumeration en;
     DBObjectBase base;
 
     /* -- */
@@ -2781,13 +2781,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	Ganymede.debug("entering editSchema synchronization block");
 
-	enum = Ganymede.db.objectBases.elements();
+	en = Ganymede.db.objectBases.elements();
 
-	if (enum != null)
+	if (en != null)
 	  {
-	    while (enum.hasMoreElements())
+	    while (en.hasMoreElements())
 	      {
-		base = (DBObjectBase) enum.nextElement();
+		base = (DBObjectBase) en.nextElement();
 
 		if (base.isLocked())
 		  {

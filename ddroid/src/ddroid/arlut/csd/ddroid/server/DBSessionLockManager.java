@@ -133,11 +133,11 @@ public class DBSessionLockManager {
 
     if (lockHash.size() != 0)
       {
-	Enumeration enum = lockHash.keys();
+	Enumeration en = lockHash.keys();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    DBLock oldLock = (DBLock) enum.nextElement();
+	    DBLock oldLock = (DBLock) en.nextElement();
 
 	    if (oldLock instanceof DBWriteLock)
 	      {
@@ -186,11 +186,11 @@ public class DBSessionLockManager {
 
     if (lockHash.size() != 0)
       {
-	Enumeration enum = lockHash.keys();
+	Enumeration en = lockHash.keys();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    DBLock oldLock = (DBLock) enum.nextElement();
+	    DBLock oldLock = (DBLock) en.nextElement();
 
 	    if (oldLock instanceof DBWriteLock)
 	      {
@@ -240,11 +240,11 @@ public class DBSessionLockManager {
       {
 	StringBuffer resultBuffer = new StringBuffer();
 
-	Enumeration enum = lockHash.keys();
+	Enumeration en = lockHash.keys();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    resultBuffer.append(enum.nextElement().toString());
+	    resultBuffer.append(en.nextElement().toString());
 	    resultBuffer.append("\n");
 	  }
 
@@ -278,11 +278,11 @@ public class DBSessionLockManager {
 
     if (lockHash.size() != 0)
       {
-	Enumeration enum = lockHash.keys();
+	Enumeration en = lockHash.keys();
 
-	while (enum.hasMoreElements())
+	while (en.hasMoreElements())
 	  {
-	    DBLock oldLock = (DBLock) enum.nextElement();
+	    DBLock oldLock = (DBLock) en.nextElement();
 
 	    if (oldLock instanceof DBWriteLock)
 	      {
@@ -326,11 +326,11 @@ public class DBSessionLockManager {
 
   public synchronized void releaseAllLocks()
   {
-    Enumeration enum = lockHash.keys();
+    Enumeration en = lockHash.keys();
 
-    while (enum.hasMoreElements())
+    while (en.hasMoreElements())
       {
-	DBLock lock = (DBLock) enum.nextElement();
+	DBLock lock = (DBLock) en.nextElement();
 	lock.abort();		// blocks until the lock can be cleared
       }
 
