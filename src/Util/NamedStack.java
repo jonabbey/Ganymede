@@ -8,8 +8,8 @@
    
    Created: 2 October 2000
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/10/02 20:17:05 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/10/02 20:18:29 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -140,6 +140,11 @@ public class NamedStack {
       }
 
     return handle.getName();
+  }
+
+  public int size()
+  {
+    return stack.size();
   }
 
   /**
