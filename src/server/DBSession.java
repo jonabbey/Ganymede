@@ -1,12 +1,11 @@
 /*
-   GASH 2
 
    DBSession.java
 
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -280,10 +279,12 @@ public class DBSession {
 
     // we couldn't be so trusting on an enum establish request, though.
 
-    if ((lock == null) || !lock.isLocked(base))
-      {
-	throw new RuntimeException("viewDBObject: viewDBObject called without lock");
-      }
+    //**    if ((lock == null) || !lock.isLocked(base))
+    //**     {
+    //**	throw new RuntimeException("viewDBObject: viewDBObject called without lock");
+    //**      }
+
+    // depend on the objectHash's thread synchronization here
 
     obj = (DBObject) base.objectHash.get(objKey);
 
@@ -407,7 +408,7 @@ public class DBSession {
    * will be made to those ObjectBases until the read lock is released.
    */
 
-  public synchronized void openReadLock(Vector bases)
+  public void openReadLock(Vector bases) throws InterruptedException
   {
     lock = new DBReadLock(store, bases);
     lock.establish(this);
@@ -428,7 +429,7 @@ public class DBSession {
    * will be made to those ObjectBases until the read lock is released.
    */
 
-  public synchronized void openReadLock()
+  public synchronized void openReadLock() throws InterruptedException
   {
     lock = new DBReadLock(store);
     lock.establish(this);
@@ -467,7 +468,7 @@ public class DBSession {
    * ALL THIS NEEDS TO BE WORKED ON MORE ***** JON *****
    */
 
-  public synchronized void openWriteLock(Vector bases)
+  private synchronized void openWriteLock(Vector bases) throws InterruptedException
   {
     if (lock != null && lock instanceof DBWriteLock )
       {
@@ -492,7 +493,7 @@ public class DBSession {
    *
    */
 
-  public synchronized void openWriteLock()
+  private synchronized void openWriteLock() throws InterruptedException
   {
     if (lock != null && lock instanceof DBWriteLock )
       {
@@ -529,19 +530,21 @@ public class DBSession {
    * DBStore journal file.  Event logging / mail notification may
    * take place.<br><br>
    *
-   * Note that if the session holds a readlock when commitTransaction
-   * is called, the read lock will be released so that a write lock can be
-   * acquired.  There is no guarantee that changes won't happen in the
-   * database between the relinquishing of the read lock
-   * and the acquisition of the write lock, but any objects that were
-   * pulled for editing by this transaction may not be touched by
-   * any other concurrent sessions.
+   * The session must not hold any locks when commitTransaction is
+   * called.  The symmetrical invid references between related objects
+   * and the atomic namespace management code should guarantee that no
+   * incompatible change is made with respect to any checked out objects
+   * while the Bases are unlocked.
    *
    * @see arlut.csd.ganymede.DBEditObject
    */
 
-  public synchronized void commitTransaction()
+  public synchronized boolean commitTransaction()
   {
+    boolean result;
+
+    /* -- */
+
     // we need to release our readlock, if we have one,
     // so that the commit can establish a writelock..
 
@@ -560,60 +563,27 @@ public class DBSession {
 
     if (lock != null)
       {
-	if (debug)
-	  {
-	    System.err.println(key + ": commitTransaction(): holding a lock");
-	  }
-
-	if (lock instanceof DBReadLock)
-	  {
-	    if (debug)
-	      {
-		System.err.println(key + ": commitTransaction(): holding a read lock");
-	      }
-	    lock.release();
-
-	    if (debug)
-	      {
-		System.err.println(key + ": commitTransaction(): released read lock");
-	      }
-
-	    lock = null;
-
-// 	    if (debug)
-// 	      {
-// 		System.err.println("commitTransaction(): acquiring write lock");
-// 	      }
-
-// 	    lock = new DBWriteLock(store);
-
-// 	    if (debug)
-// 	      {
-// 		System.err.println("commitTransaction(): got write lock");
-// 	      }
-	  }
+	throw new IllegalArgumentException(key + ": commitTransaction(): holding a lock");
       }
 
-    if (debug)
-      {
-	System.err.println(key + ": commitTransaction(): committing editSet");
-      }
+    Ganymede.debug("commitTransaction(): acquiring write lock");
 
-    editSet.commit();
+    lock = new DBWriteLock(store);
 
-    if (debug)
-      {
-	System.err.println(key + ": commitTransaction(): editset committed");
-      }
+    Ganymede.debug("commitTransaction(): got write lock");
+    Ganymede.debug(key + ": commitTransaction(): committing editSet");
+
+    result = editSet.commit();
+
+    Ganymede.debug(key + ": commitTransaction(): editset committed");
 
     editSet = null;
 
-    //    lock.release();
-    //
-    //    if (debug)
-    //      {
-    //	System.err.println("commitTransaction(): writeLock released");
-    //      }
+    lock.release();
+
+    Ganymede.debug("commitTransaction(): writeLock released");
+
+    return result;
   }
 
   /**
@@ -624,7 +594,8 @@ public class DBSession {
    * or destroyed by this session during this transaction are abandoned / unaffected
    * by the actions during the transaction.<br><br>
    *
-   * Calling abortTransaction has no affect on any locks held by this session.
+   * Calling abortTransaction has no affect on any locks held by this session, but
+   * generally no locks should be held here.
    *
    * @see arlut.csd.ganymede.DBEditObject
    */
@@ -634,6 +605,11 @@ public class DBSession {
     if (editSet == null)
       {
 	throw new RuntimeException("abortTransaction called outside of a transaction");
+      }
+
+    if (lock != null)
+      {
+	Ganymede.debug("warning: DBSession.abortTransaction() called with lock held");
       }
 
     editSet.release();
@@ -668,5 +644,10 @@ public class DBSession {
       {
 	System.err.println(key + ": DBSession.setLastError(): " + error);
       }
+  }
+
+  public Object getKey()
+  {
+    return key;
   }
 }
