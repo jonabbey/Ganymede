@@ -234,11 +234,11 @@ ten times when expanded into linked objects in memory.
    If we take this as a minimum bound, and if we imagine a system that
 can dedicate 1 gigabyte of RAM and/or swap for the JVM, a database
 hundred times that of the size we use at ARL seems at least
-conceivable, or a database with nearly 80,000 users and 255,000
-systems.  Ganymede has not been tested to this level, and it would
-take an extremely well tuned VM to handle garbage collection for that
-size database, but Sun's HotSpot VM on a multi-processor machine might
-have a decent go at it.  Whether the JVM would handle i/o and
+conceivable, or an NIS/DNS-style database with nearly 80,000 users and
+255,000 systems.  Ganymede has not been tested to this level, and it
+would take an extremely well tuned VM to handle garbage collection for
+that size database, but Sun's HotSpot VM on a multi-processor machine
+might have a decent go at it.  Whether the JVM would handle i/o and
 threading for as many clients as is implied by such a scale, and
 whether Ganymede's hashing data structures would function efficiently
 at that scale are open questions.  The client would certainly have
@@ -437,6 +437,6 @@ http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.ht
 Ganymede FAQ
 Author: Jonathan Abbey
 Release: $name:  $
-Version: $Revision: 1.13 $
-Last Mod Date: $Date: 2001/01/31 00:51:31 $
+Version: $Revision: 1.14 $
+Last Mod Date: $Date: 2001/01/31 00:52:37 $
 -------------------------------------------------------------------------------
