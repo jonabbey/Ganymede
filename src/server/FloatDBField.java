@@ -7,8 +7,8 @@
 
    Created: 29 October 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2000/03/22 06:24:10 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/03/24 21:27:24 $
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -174,9 +174,9 @@ public class FloatDBField extends DBField implements float_field {
 
     XMLUtils.indent(xmlOut, indentLevel);
 
-    xmlOut.startElement(this.getName());
+    xmlOut.startElement(this.getXMLName());
     emitDoubleXML(xmlOut, value());
-    xmlOut.endElement(this.getName());
+    xmlOut.endElement(this.getXMLName());
   }
 
   public void emitDoubleXML(XMLWriter xmlOut, double value) throws IOException

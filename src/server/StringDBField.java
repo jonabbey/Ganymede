@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2000/03/22 06:24:15 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2000/03/24 21:27:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -252,11 +252,11 @@ public class StringDBField extends DBField implements string_field {
   {
     XMLUtils.indent(xmlOut, indentLevel);
 
-    xmlOut.startElement(this.getName());
+    xmlOut.startElement(this.getXMLName());
 
     if (!isVector())
       {
-	emitStringXML(xmlOut, value());
+	xmlOut.write(value());	// for scalar fields, just write the string in place
       }
     else
       {
@@ -271,7 +271,7 @@ public class StringDBField extends DBField implements string_field {
 	XMLUtils.indent(xmlOut, indentLevel);
       }
 
-    xmlOut.endElement(this.getName());
+    xmlOut.endElement(this.getXMLName());
   }
 
   public void emitStringXML(XMLWriter xmlOut, String value) throws IOException

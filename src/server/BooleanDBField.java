@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/03/22 06:24:06 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/03/24 21:27:21 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -172,11 +172,11 @@ public class BooleanDBField extends DBField implements boolean_field {
   {
     XMLUtils.indent(xmlOut, indentLevel);
 
-    xmlOut.startElement(this.getName());
+    xmlOut.startElement(this.getXMLName());
     xmlOut.startElement("boolean");
     xmlOut.attribute("val", value() ? "true" : "false");
     xmlOut.endElement("boolean");
-    xmlOut.endElement(this.getName());
+    xmlOut.endElement(this.getXMLName());
   }
 
   /**

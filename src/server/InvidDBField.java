@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.124 $
-   Last Mod Date: $Date: 2000/03/22 06:24:12 $
+   Version: $Revision: 1.125 $
+   Last Mod Date: $Date: 2000/03/24 21:27:25 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.124 $ %D%
+ * @version $Revision: 1.125 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -421,13 +421,29 @@ public final class InvidDBField extends DBField implements invid_field {
 
   synchronized void emitXML(XMLWriter xmlOut, int indentLevel) throws IOException
   {
+    // if we're the containing object field in an embedded object, we
+    // don't need to describe ourselves to the XML file.. our
+    // ownership will be implicitly recorded in the structure of the
+    // XML file
+
+    if (getOwner().isEmbedded() && getID() == 0)
+      {
+	return;
+      }
+
+    // if we are an edit-in-place field, we won't write out an invid
+    // reference for our target, but instead we will actually write
+    // out the object in-place.
+
+    boolean asEmbedded = isEditInPlace();
+
     XMLUtils.indent(xmlOut, indentLevel);
 
-    xmlOut.startElement(this.getName());
+    xmlOut.startElement(this.getXMLName());
 
     if (!isVector())
       {
-	emitInvidXML(xmlOut, value());
+	emitInvidXML(xmlOut, value(), asEmbedded, indentLevel + 1);
       }
     else
       {
@@ -435,14 +451,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	for (int i = 0; i < values.size(); i++)
 	  {
-	    XMLUtils.indent(xmlOut, indentLevel+1);
-	    emitInvidXML(xmlOut, (Invid) values.elementAt(i));
+	    if (!asEmbedded)
+	      {
+		XMLUtils.indent(xmlOut, indentLevel+1);
+	      }
+	    emitInvidXML(xmlOut, (Invid) values.elementAt(i), asEmbedded, indentLevel+1);
 	  }
 
 	XMLUtils.indent(xmlOut, indentLevel);
       }
 
-    xmlOut.endElement(this.getName());
+    xmlOut.endElement(this.getXMLName());
   }
 
   /**
@@ -457,34 +476,37 @@ public final class InvidDBField extends DBField implements invid_field {
    * <P>When it can, emitInvidXML() will use a human-readable label
    * for the id attribute.  This can only be done, however, in those
    * cases where the object in question has a designated label field
-   * and in which that label field is guaranteed to have a
-   * unique value through the use of a DBNameSpace.  If emitInvidXML()
-   * cannot guarantee that the label will be unique, it will write
-   * out a label based on the target object's type-specific object
-   * number, with a '#' prefix.</P>
+   * and in which that label field is guaranteed to have a unique
+   * value through the use of a DBNameSpace.  If emitInvidXML() cannot
+   * guarantee that the label will be unique, it will write out the
+   * target object's type-specific object number</P>
    *
    * <P>All id's attributes written out by emitInvidXML() will be
-   * written with a '#' prefix to indicate that the id reference
-   * is local to the file being written out.  That is, when emitInvidXML()
-   * writes an invid to an XMLWriter stream, it puts an # at the start
-   * of the id attribute to indicate that the reference is to another
-   * object defined in the XML stream.  If external code (such as a Perl
-   * script) wants to indicate a link to an object pre-existing in
-   * the server that will be reading the XML file, it will leave out
-   * the # prefix, and the server will attempt to find the id reference
-   * (either numeric or unique label) in its pre-existing database.</P>
+   * written with the target designated using the 'local' attribute to
+   * indicate that the id reference is local to the file being written
+   * out.  If external code (such as a Perl script) wants to indicate
+   * a link to an object pre-existing in the server that will be
+   * reading the XML file, it will use the 'global' attribute instead,
+   * and the server will attempt to find the id reference (either
+   * numeric or unique label) in its pre-existing database.</P>
    */
 
-  public void emitInvidXML(XMLWriter xmlOut, Invid invid) throws IOException
+  public void emitInvidXML(XMLWriter xmlOut, Invid invid, 
+			   boolean asEmbedded, int indentLevel) throws IOException
   {
     String type;
     String label;
-    DBObject target;
+    DBObject target = null;
     DBField targetField;
 
     /* -- */
 
-    target = Ganymede.internalSession.getSession().viewDBObject(invid);
+    DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+
+    if (base != null)
+      {
+	target = base.objectTable.get(invid.getNum()); // depend on objectTableSync here
+      }
 
     if (target == null)
       {
@@ -493,28 +515,35 @@ public final class InvidDBField extends DBField implements invid_field {
 	return;
       }
 
-    type = target.getTypeName();
-
-    // if the object that we are targetting has a label field which is
-    // handled by a namespace, we can use the object's name with a #
-    // as a temporary label.  Otherwise, we'll have to use the object
-    // number as a temporary label.
-
-    targetField = (DBField) target.getLabelField();
-
-    if (targetField != null && targetField.getNameSpace() != null)
+    if (asEmbedded)
       {
-	label = "#" + Ganymede.internalSession.viewObjectLabel(invid);
+	target.emitXML(xmlOut, indentLevel);
       }
     else
       {
-	label = "#" + invid.getNum();
-      }
+	type = target.getTypeName();
+
+	// if the object that we are targetting has a label field which is
+	// handled by a namespace, we can use the object's name with a #
+	// as a temporary label.  Otherwise, we'll have to use the object
+	// number as a temporary label.
+
+	targetField = (DBField) target.getLabelField();
+
+	if (targetField != null && targetField.getNameSpace() != null)
+	  {
+	    label = Ganymede.internalSession.viewObjectLabel(invid);
+	  }
+	else
+	  {
+	    label = java.lang.Integer.toString(invid.getNum());
+	  }
     
-    xmlOut.startElement("invid");
-    xmlOut.attribute("type", type);
-    xmlOut.attribute("id", label);
-    xmlOut.endElement("invid");
+	xmlOut.startElement("invid");
+	xmlOut.attribute("type", type);
+	xmlOut.attribute("local", label);
+	xmlOut.endElement("invid");
+      }
   }
 
   // ****
@@ -666,6 +695,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	    ((DBEditObject) objectRef).getStatus() == ObjectStatus.DELETING)
 	  {
 	    objectRef = ((DBEditObject) objectRef).original;
+	  }
+
+	if (objectRef == null)
+	  {
+	    return "***no target for invid " + invid.toString() + " ***";
 	  }
 
 	return objectRef.getLabel();

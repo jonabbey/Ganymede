@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.84 $
-   Last Mod Date: $Date: 2000/03/22 06:24:07 $
+   Version: $Revision: 1.85 $
+   Last Mod Date: $Date: 2000/03/24 21:27:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -477,6 +477,16 @@ public abstract class DBField implements Remote, db_field {
     return getFieldDef().getName();
   }
 
+  /**
+   * <P>Returns the name for this field, encoded
+   * in a form suitable for use as an XML element
+   * name.</P>
+   */
+
+  public final String getXMLName()
+  {
+    return arlut.csd.Util.XMLUtils.XMLEncode(getFieldDef().getName());
+  }
 
   /**
    *

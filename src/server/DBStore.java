@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.112 $
-   Last Mod Date: $Date: 2000/03/22 06:24:09 $
+   Version: $Revision: 1.113 $
+   Last Mod Date: $Date: 2000/03/24 21:27:23 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,7 +106,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.112 $ %D%
+ * @version $Revision: 1.113 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -911,7 +911,7 @@ public class DBStore {
    * @see arlut.csd.ganymede.DBJournal
    */
 
-  public synchronized void dumpXML(String filename) throws IOException
+  public synchronized void dumpXML(String filename, boolean dumpDataObjects) throws IOException
   {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
@@ -981,6 +981,37 @@ public class DBStore {
 	xmlOut.endElement("object_type_definitions");
 	XMLUtils.indent(xmlOut, 1);
 	xmlOut.endElement("ganyschema");
+
+	if (dumpDataObjects)
+	  {
+	    XMLUtils.indent(xmlOut, 1);
+	    xmlOut.startElement("ganydata");
+
+	    Vector bases = getBases();
+	    
+	    for (int i = 0; i < bases.size(); i++)
+	      {
+		DBObjectBase base = (DBObjectBase) bases.elementAt(i);
+
+		if (base.isEmbedded())
+		  {
+		    continue;
+		  }
+
+		Enumeration enum = base.objectTable.elements();
+
+		while (enum.hasMoreElements())
+		  {
+		    DBObject x = (DBObject) enum.nextElement();
+
+		    x.emitXML(xmlOut, 2);
+		  }
+	      }
+
+	    XMLUtils.indent(xmlOut, 1);
+	    xmlOut.endElement("ganydata");
+	  }
+
 	XMLUtils.indent(xmlOut, 0);
 	xmlOut.endElement("ganymede");
 	xmlOut.write("\n");

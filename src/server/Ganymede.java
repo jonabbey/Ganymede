@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.94 $
-   Last Mod Date: $Date: 2000/03/15 03:32:27 $
+   Version: $Revision: 1.95 $
+   Last Mod Date: $Date: 2000/03/24 21:27:24 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -123,7 +123,9 @@ import arlut.csd.Util.ParseArgs;
 
 public class Ganymede {
 
-  public static boolean debug = true;  
+  public static boolean debug = true;
+
+  public static boolean doXML = false;
 
   /**
    * <p>If true, Ganymede.createErrorDialog() will print the
@@ -297,6 +299,11 @@ public class Ganymede {
 	  }
       }
 
+    if (ParseArgs.switchExists("doXML", argv))
+      {
+	doXML = true;
+      }
+
     // second, if we see -permdecode on the command line, do a textual dump of
     // the permissions objects encoded in the ganymede.db file.
 
@@ -439,25 +446,6 @@ public class Ganymede {
 	debug("Not Initializing RMI Security Manager.. not supporting classfile transfer");
       }
 
-    if (true)
-      {
-	debug("Dumping schema to XML");
-
-	try
-	  {
-	    db.dumpXML(dbFilename + ".xml");
-	    debug("XML schema dumped.");
-	  }
-	catch (IOException ex)
-	  {
-	    ex.printStackTrace();
-	    debug("IOException dumping XML schema: " + ex.getMessage());
-	  }
-
-	
-	db.importXML(dbFilename + ".xml", false);
-      }
-
     // if debug=<filename> was specified on the command line, tell the
     // RMI system to log RMI calls and exceptions that occur in
     // response to RMI calls.
@@ -508,6 +496,25 @@ public class Ganymede {
       {
 	throw new RuntimeException("Couldn't establish internal session: " + ex);
       }
+
+    if (doXML)
+      {
+	debug("Dumping schema to XML");
+
+	try
+	  {
+	    db.dumpXML(dbFilename + ".xml", true);
+	    debug("XML schema dumped.");
+	  }
+	catch (IOException ex)
+	  {
+	    ex.printStackTrace();
+	    debug("IOException dumping XML schema: " + ex.getMessage());
+	  }
+	
+	//	db.importXML(dbFilename + ".xml", false);
+      }
+
 
     // set up the log
 

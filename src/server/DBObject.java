@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.91 $
-   Last Mod Date: $Date: 2000/03/22 06:24:08 $
+   Version: $Revision: 1.92 $
+   Last Mod Date: $Date: 2000/03/24 21:27:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -136,7 +136,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.91 $ $Date: 2000/03/22 06:24:08 $
+ * @version $Revision: 1.92 $ $Date: 2000/03/24 21:27:22 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1127,14 +1127,14 @@ public class DBObject implements db_object, FieldType, Remote {
 
     if (labelField != null && labelField.getNameSpace() != null)
       {
-	label = "#" + getLabel();
+	label = getLabel();
       }
     else
       {
-	label = "#" + getID();
+	label = java.lang.Integer.toString(getID());
       }
 
-    xmlOut.attribute("id", label);
+    xmlOut.attribute("localid", label);
 
     indentLevel++;
 
@@ -1845,13 +1845,30 @@ public class DBObject implements db_object, FieldType, Remote {
       }
     else			// all fields in this object
       {
+	for (int i = 0; i < objectBase.customFields.size(); i++)
+	  {
+	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
+	    
+	    field = fields.get(fieldDef.getID());
+	    
+	    if (field != null)
+	      {
+		results.addElement(field);
+	      }
+	  }
+
+	// then tack on the built-in fields
+
 	enum = fields.elements();
     
 	while (enum.hasMoreElements())
 	  {
 	    field = (DBField) enum.nextElement();
-	    
-	    results.addElement(field);
+
+	    if (field.isBuiltIn())
+	      {
+		results.addElement(field);
+	      }
 	  }
       }
 

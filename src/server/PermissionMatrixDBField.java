@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.38 $
-   Last Mod Date: $Date: 2000/03/22 06:24:15 $
+   Version: $Revision: 1.39 $
+   Last Mod Date: $Date: 2000/03/24 21:27:27 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -818,7 +818,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     XMLUtils.indent(xmlOut, indentLevel);
 
-    xmlOut.startElement(this.getName());
+    xmlOut.startElement(this.getXMLName());
 
     indentLevel++;
     XMLUtils.indent(xmlOut, indentLevel);
@@ -838,13 +838,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 	XMLUtils.indent(xmlOut, indentLevel);
 	xmlOut.startElement(key);
+	indentLevel++;
 
 	if (entry != null)
 	  {
 	    xmlOut.attribute("perm", entry.getXMLCode());
 	  }
-
-	indentLevel++;
 
 	enum2 = innerTable.keys();
 
@@ -865,8 +864,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	    xmlOut.endElement(fieldKey);
 	  }
 
-	xmlOut.endElement(key);
 	indentLevel--;
+	XMLUtils.indent(xmlOut, indentLevel);
+	xmlOut.endElement(key);
       }
 
     indentLevel--;
@@ -875,7 +875,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     indentLevel--;
     XMLUtils.indent(xmlOut, indentLevel);
-    xmlOut.endElement(this.getName());
+    xmlOut.endElement(this.getXMLName());
   }
 
   public synchronized String getValueString()
