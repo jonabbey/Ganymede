@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -28,7 +28,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   static final boolean debug = false;
 
-  private Hashtable matrix;
+  Hashtable matrix;
 
   /* -- */
 
