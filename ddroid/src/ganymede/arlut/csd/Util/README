@@ -8,9 +8,9 @@ SVN URL: $HeadURL$
 --------------------------------------------------------------------------------
 
 This directory contains various utility classes.  They are used by the
-Directory Droid server, client, and admin console, but everything in
+Ganymede server, client, and admin console, but everything in
 this package is designed to be useful even outside of the context of
-the Directory Droid codebase.
+the Ganymede codebase.
 
 Jonathan Abbey
 7 May 2004
