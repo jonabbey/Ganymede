@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.21 $ %D%
+  Version: $Revision: 1.22 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import com.sun.java.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.21 $ %D%
+ * @version $Revision: 1.22 $ %D%
  */
 
 public class baseTable extends JBufferedPane implements AdjustmentListener, ActionListener {
@@ -1258,7 +1258,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
     if (rows.size() == 0)
       {
-	newRow.setTopEdge(headerAttrib.height + (2 * hHeadLineThickness) + 1);
+	newRow.setTopEdge(displayRegionFirstLine());
       }
     else
       {
@@ -1399,6 +1399,18 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 
     calcCols();
     reCalcRowPos(0);
+  }
+
+  /**
+   *
+   * This method returns the first line of the display area,
+   * below the headers.
+   * 
+   */
+
+  final int displayRegionFirstLine()
+  {
+    return headerAttrib.height + (2 * hHeadLineThickness);
   }
 
   /**
@@ -1821,13 +1833,13 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
     if (vbar_visible && (canvas.getBounds().height != 0))
       {
 	vbar.setValues(vbar.getValue(),
-		       canvas.getBounds().height - headerAttrib.height - (2 * hHeadLineThickness),
+		       canvas.getBounds().height - displayRegionFirstLine(),
 		       0,
 		       calcVSize());
 
 	vbar.setUnitIncrement(row_height + hRowLineThickness);    // we want the up/down buttons to go a line at a time
 	    
-	vbar.setBlockIncrement((canvas.getBounds().height - headerAttrib.height - 2 * hHeadLineThickness)/2);
+	vbar.setBlockIncrement((canvas.getBounds().height - displayRegionFirstLine())/2);
       }
 
     // Adjust the Horizontal Scrollbar's Parameters
@@ -1862,7 +1874,7 @@ public class baseTable extends JBufferedPane implements AdjustmentListener, Acti
 	return 0;
       }
 
-    return ((tableRow) rows.lastElement()).getBottomEdge() - headerAttrib.height - 2 * hHeadLineThickness +
+    return ((tableRow) rows.lastElement()).getBottomEdge() - displayRegionFirstLine() +
       hRowLineThickness;
   }
 
@@ -2154,7 +2166,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
     vbar_old = 0,
     colDrag = 0,
     dragRowSave = 0,
-    dragRowSaveVY = 0,
+    dragRowSaveY = 0,
     colXOR = -1,
     v_offset = 0,		// y value of the topmost displayed pixel
     h_offset = 0,		// x value of the leftmost displayed pixel
@@ -2358,11 +2370,6 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	vbar_old = rt.vbar.getValue();
       }
 
-    if (debug)
-      {
-	System.err.println("\tFilling Rect");
-      }
-
     /* Calculate horizontal offset, rendering parameters */
 
     if (rt.hbar_visible)
@@ -2439,7 +2446,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 	last_row = first_row;
 
-	bottomedge = v_offset + getBounds().height - 1 - rt.headerAttrib.height - 2 * rt.hHeadLineThickness;
+	bottomedge = v_offset + getBounds().height - 1 - rt.displayRegionFirstLine();
 
 	while (last_row < rt.rows.size() && ((tableRow) rt.rows.elementAt(last_row)).getTopEdge() < bottomedge)
 	  {
@@ -2466,7 +2473,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	    // followed by a series of rows of single row_height 
 
 	    last_row = rt.rows.size() + 
-	      (getBounds().height - rt.headerAttrib.height - 2 * rt.hHeadLineThickness - rt.calcVSize()) /
+	      (getBounds().height - rt.displayRegionFirstLine() - rt.calcVSize()) /
 	      (rt.row_height + rt.hRowLineThickness);
 
 	    if (debug)
@@ -2483,9 +2490,9 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	System.err.println("Rendering cols: first_col = " + first_col + ", last_col = " + last_col);
       }
 
-    tableCol column;
-    tableRow row;
-    int topLine;
+    tableCol column = null;
+    tableRow row = null;
+    int topLine = rt.displayRegionFirstLine();
     int leftEdge;
 
     for (int j = first_col; j <= last_col; j++)
@@ -2506,19 +2513,71 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 	leftEdge = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset + rt.vLineThickness;
 
-	for (int i = first_row; i < last_row; i++)
+	int i;
+
+	for (i = first_row; i < rt.rows.size(); i++)
 	  {
 	    row = (tableRow) rt.rows.elementAt(i);
-
+	    
 	    topLine = row.getTopEdge() - v_offset;
-
+		
 	    cellRect.setBounds(leftEdge, topLine, column.width, row.getHeight() + 1);
 	    bg.setClip(cellRect);
-	    
+		
 	    renderBlitCell(cellRect, bg, j, i, column);
 	  }
 
-	// and now render the header
+	// we need to blank out the rest of this column.. this will
+	// only occur if we have fewer rows than we have room to
+	// display, and if we have vertical filling turned on.
+
+	if (i < last_row)
+	  {
+	    if (debug)
+	      {
+		System.err.println("Blanking bottom of column " + j);
+	      }
+
+	    int blankTop;
+
+	    if (row == null)
+	      {
+		blankTop = topLine;
+	      }
+	    else
+	      {
+		blankTop = topLine + row.getHeight() + 1;
+	      }
+
+	    if (debug)
+	      {
+		System.err.println("Blanking from " + blankTop + " to the bottom of the canvas");
+	      }
+
+	    if (column != null && column.attr != null && column.attr.bg != null)
+	      {
+		bg.setColor(column.attr.bg);
+	      }
+	    else
+	      {
+		bg.setColor(rt.tableAttrib.bg);
+	      }
+
+	    // open up the clip region enough for us to blank the rest of
+	    // this column
+
+	    bg.setClip(leftEdge, blankTop,
+			column.width, getBounds().height - blankTop);
+
+	    // and do it
+		       
+	    bg.fillRect(leftEdge, blankTop,
+			column.width, getBounds().height - blankTop);
+	  }
+
+	// and now render the header for this column.  We do this last so that
+	// we will overwrite whatever portion of the first row extends above
+	// the displayRegionFirstLine() demarc.
 
 	cellRect.setBounds(leftEdge, 0, column.width, rt.headerAttrib.height + 1);
 	bg.setClip(cellRect);
@@ -2582,7 +2641,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
     if (rt.horizLines)
       {
-	topLine = rt.headerAttrib.height + 2 * rt.hHeadLineThickness;
+	topLine = rt.displayRegionFirstLine();
 
 	int horizlinePos = topLine;
 
@@ -2623,9 +2682,9 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	    xpos = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset;
 	    
 	    bg.setColor(rt.vHeadLineColor);
-	    bg.drawLine(xpos, 0, xpos, rt.headerAttrib.height + 2 * rt.hHeadLineThickness - 1);
+	    bg.drawLine(xpos, 0, xpos, rt.displayRegionFirstLine() - 1);
 	    bg.setColor(rt.vRowLineColor);
-	    bg.drawLine(xpos, rt.headerAttrib.height + 2 * rt.hHeadLineThickness, xpos, ypos);
+	    bg.drawLine(xpos, rt.displayRegionFirstLine(), xpos, ypos);
 	  }
       }
 
@@ -2875,7 +2934,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
     /* -- */
     
-    base = rt.headerAttrib.height + 2 * rt.hHeadLineThickness;
+    base = rt.displayRegionFirstLine();
     
     row = 0;
 
@@ -2957,10 +3016,10 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
 		colDrag = col;
 		dragRowSave = mapClickToRow(vy);
-		dragRowSaveVY = ((tableRow) rt.rows.elementAt(dragRowSave)).getTopEdge() - v_offset;
+		dragRowSaveY = ((tableRow) rt.rows.elementAt(dragRowSave)).getTopEdge() - v_offset;
 
 		System.err.println("Remembering drag row.. row: " + dragRowSave +
-				   ", topEdge " + dragRowSaveVY);
+				   ", topEdge " + dragRowSaveY);
 	      }
 	    else if ((vx >= (colLoc + colgrab)) &&
 		     (vx <= (((Integer) rt.colPos.elementAt(col+1)).intValue() - colgrab)))
@@ -2987,7 +3046,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
       {
 	// not a column drag.. row chosen?
 
-	if ((y > rt.headerAttrib.height + 2 * rt.hHeadLineThickness))
+	if (y > rt.displayRegionFirstLine())
 	  {
 	    clickRow = mapClickToRow(vy);
 
@@ -3170,7 +3229,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 	// grabbed the bar in will have it's top edge
 	// positioned correctly.
 
-	rt.scrollRowTo(dragRowSave, dragRowSaveVY);
+	rt.scrollRowTo(dragRowSave, dragRowSaveY);
 
 	render();
 	repaint();
@@ -3261,7 +3320,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
 
     // What row were we triggered on?
 
-    if ((y > rt.headerAttrib.height + 2 * rt.hHeadLineThickness))
+    if (y > rt.displayRegionFirstLine())
       {
 	clickRow = mapClickToRow(vy);
 	
@@ -3413,13 +3472,13 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
     if (rt.rows.size() < 5)
       {
 	return new Dimension(rt.origTotalWidth + (rt.cols.size() + 1) * rt.vLineThickness,
-			     rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
+			     rt.displayRegionFirstLine() +
 			     5 * (rt.row_height + rt.hRowLineThickness));
       }
     else
       {
 	return new Dimension(rt.origTotalWidth + (rt.cols.size() + 1) * rt.vLineThickness,
-			     rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
+			     rt.displayRegionFirstLine() +
 			     rt.rows.size() * (rt.row_height + rt.hRowLineThickness));
       }
   }
@@ -3427,7 +3486,7 @@ class tableCanvas extends JBufferedPane implements MouseListener, MouseMotionLis
   public Dimension getMinimumSize()
   {
     return new Dimension(rt.origTotalWidth,
-			 rt.headerAttrib.height + 2 * rt.hHeadLineThickness +
+			 rt.displayRegionFirstLine() +
 			 2 * (rt.row_height + rt.hRowLineThickness));
   }
 
