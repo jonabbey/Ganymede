@@ -5,7 +5,7 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -14,6 +14,7 @@
 package csd.DBStore;
 
 import java.io.*;
+import java.util.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -44,6 +45,8 @@ import java.io.*;
 
 public class DBJournal {
 
+  static final boolean debug = true;
+
   static final String id_string = "GJournal";
   static final byte major_version = 0;
   static final byte minor_version = 0;
@@ -59,7 +62,7 @@ public class DBJournal {
 
   /* -- */
 
-  static void initialize(DataOutput out)
+  static void initialize(DataOutput out) throws IOException
   {
     out.writeUTF(DBJournal.id_string);
     out.writeShort(DBJournal.major_version);
@@ -82,7 +85,7 @@ public class DBJournal {
    *
    */
   
-  public DBJournal(DBStore store, String filename)
+  public DBJournal(DBStore store, String filename) throws IOException
   {
     this.store = store;
     this.filename = filename;
@@ -92,19 +95,39 @@ public class DBJournal {
 	throw new RuntimeException("bad parameter");
       }
 
+    if (debug)
+      {
+	System.err.println("Initializing DBStore Journal:" + filename);
+      }
+
     File file = new File(filename);
 
     if (!file.exists())
       {
 	// create an empty Journal file
 
+	if (debug)
+	  {
+	    System.err.println("Creating Journal File");
+	  }
+
 	jFile = new RandomAccessFile(filename, "rw");
+
+	if (debug)
+	  {
+	    System.err.println("Writing DBStore Journal header");
+	  }
 	initialize(jFile);
       }
     else
       {
 	// open an existing Journal file and prepare to
 	// write to the end of it
+
+	if (debug)
+	  {
+	    System.err.println("Opening Journal File for Append");
+	  }
 
 	jFile = new RandomAccessFile(filename, "rw");
 	jFile.seek(jFile.length());
@@ -119,8 +142,17 @@ public class DBJournal {
    *
    */
 
-  public synchronized boolean reset()
+  public synchronized void reset() throws IOException
   {
+    String newname;
+
+    /* - */
+
+    if (debug)
+      {
+	System.err.println("DBJournal: Resetting Journal File");
+      }
+
     if (jFile != null)
       {
 	jFile.close();
@@ -128,7 +160,19 @@ public class DBJournal {
 
     File file = new File(filename);
 
-    file.renameTo(new File(filename + new Date()));
+    newname = filename + new Date();
+
+    if (debug)
+      {
+	System.err.println("DBJournal: saving old Journal as " + newname);
+      }
+
+    file.renameTo(new File(newname));
+
+    if (debug)
+      {
+	System.err.println("DBJournal: creating fresh Journal " + filename);
+      }
 
     jFile = new RandomAccessFile(filename, "rw");
     initialize(jFile);
@@ -142,7 +186,7 @@ public class DBJournal {
    *
    */
 
-  public synchronized boolean load(DBStore store) throws IOException;
+  public synchronized boolean load(DBStore store) throws IOException
   {
     long transaction_time = 0;
     int object_count = 0;
@@ -154,11 +198,16 @@ public class DBJournal {
 
     /* - */
 
+    if (debug)
+      {
+	System.err.println("DBJournal: Loading transactions from " + filename);
+      }
+
     entries = new Vector();
 
     jFile.seek(0);
   
-    if (DBJournal.id_string.compareTo(jFile.readUTF()))
+    if (DBJournal.id_string.compareTo(jFile.readUTF()) != 0)
       {
 	throw new RuntimeException("Error, id_string mismatch.. wrong file type?");
       }
@@ -171,7 +220,15 @@ public class DBJournal {
     // skip past the next two bits
 
     jFile.readShort();		// minor version doesn't matter so much
-    jFile.readLong();		// date is there for others to look at
+
+    if (debug)
+      {
+	System.err.println("DBJournal file created " + new Date(jFile.readLong()));
+      }
+    else
+      {
+	jFile.readLong();		// date is there for others to look at
+      }
 
     // start reading and applying the changes
 
@@ -179,23 +236,38 @@ public class DBJournal {
       {
 	if (jFile.readUTF().compareTo(OPENTRANS) != 0)
 	  {
-	    throw IOEXCEPTION;
+	    throw new IOException();
 	  }
 
 	EOFok = false;
 
 	transaction_time = jFile.readLong();
 
+	if (debug)
+	  {
+	    System.err.println("Transaction: " + new Date(transaction_time));
+	  }
+
 	// read newly created objects
 
 	object_count = jFile.readInt();
 
+	if (debug)
+	  {
+	    System.err.println("Objects Created: " + object_count);
+	  }
+
 	for (int i = 0; i < object_count; i++)
 	  {
 	    obj_type = jFile.readShort();
-	    base = store.objectBases.get(new Integer(obj_type));
+	    base = (DBObjectBase) store.objectBases.get(new Integer(obj_type));
 
 	    obj = new DBObject(base, jFile);
+
+	    if (debug)
+	      {
+		obj.print(System.err);
+	      }
 
 	    entries.addElement(new JournalEntry(base, obj.id, obj));
 	  }
@@ -204,12 +276,22 @@ public class DBJournal {
 
 	object_count = jFile.readInt();
 
+	if (debug)
+	  {
+	    System.err.println("Objects Modified: " + object_count);
+	  }
+
 	for (int i = 0; i < object_count; i++)
 	  {
 	    obj_type = jFile.readShort();
-	    base = store.objectBases.get(new Integer(obj_type));
+	    base = (DBObjectBase) store.objectBases.get(new Integer(obj_type));
 
 	    obj = new DBObject(base, jFile);
+
+	    if (debug)
+	      {
+		obj.print(System.err);
+	      }
 
 	    entries.addElement(new JournalEntry(base, obj.id, obj));
 	  }
@@ -218,11 +300,21 @@ public class DBJournal {
 
 	object_count = jFile.readInt();
 
+	if (debug)
+	  {
+	    System.err.println("Objects Deleted: " + object_count);
+	  }
+
 	for (int i = 0; i < object_count; i++)
 	  {
 	    obj_type = jFile.readShort();
-	    base = store.objectBases.get(new Integer(obj_type));
+	    base = (DBObjectBase) store.objectBases.get(new Integer(obj_type));
 	    obj_id = jFile.readShort();
+
+	    if (debug)
+	      {
+		System.err.println(base.object_name + ":" + obj_id);
+	      }
 
 	    entries.addElement(new JournalEntry(base, obj_id, null));
 	  }
@@ -233,11 +325,17 @@ public class DBJournal {
 	    throw new IOException();
 	  }
 
+	if (debug)
+	  {
+	    System.err.println("Transaction " + transaction_time + " successfully read from Journal.");
+	    System.err.println("Integrating transaction into DBStore memory image.");
+	  }
+
 	// okay, process this transaction
 
 	for (int i = 0; i < entries.size(); i++)
 	  {
-	    ((JournalEntry) entries.elementAt(i)).process();
+	    ((JournalEntry) entries.elementAt(i)).process(store);
 	  }
 
 	EOFok = true;
@@ -246,13 +344,23 @@ public class DBJournal {
       {
 	if (EOFok)
 	  {
+	    if (debug)
+	      {
+		System.err.println("All transactions processed successfully");
+	      }
 	    return true;
 	  }
 	else
 	  {
+	    if (debug)
+	      {
+		System.err.println("DBJournal file unexpectedly ended.");
+	      }
 	    throw new IOException();
 	  }
       }
+
+    return true;
   }
 
   /**
@@ -269,21 +377,33 @@ public class DBJournal {
    *
    */
 
-  public synchronized boolean writeTransaction(DBEditSet editset) throws IOException;
+  public synchronized boolean writeTransaction(DBEditSet editset) throws IOException
   {
     Enumeration enum;
     DBObject obj;
     long transaction_time = 0;
+    Date now;
 
     /* - */
 
-    transaction_time = (new Date()).getTime();
+    now = new Date();
+    transaction_time = now.getTime();
+
+    if (debug)
+      {
+	System.err.println("Writing transaction to the Journal : " + now);
+      }
 
     jFile.writeUTF(OPENTRANS);
     jFile.writeLong(transaction_time);
 
     if (editset.objectsCreated != null)
       {
+	if (debug)
+	  {
+	    System.err.println("Objects Created : " + editset.objectsCreated.size());
+	  }
+
 	jFile.writeInt(editset.objectsCreated.size());
 
 	enum = editset.objectsCreated.elements();
@@ -292,7 +412,12 @@ public class DBJournal {
 	  {
 	    obj = (DBObject) enum.nextElement();
 	    jFile.writeShort(obj.objectBase.type_code);
-	    obj.emit();
+	    obj.emit(jFile);
+
+	    if (debug)
+	      {
+		obj.print(System.err);
+	      }
 	  }
       }
     else
@@ -309,6 +434,11 @@ public class DBJournal {
 
     if (editset.objectsChanged != null)
       {
+	if (debug)
+	  {
+	    System.err.println("Objects Changed : " + editset.objectsChanged.size());
+	  }
+
 	jFile.writeInt(editset.objectsChanged.size());
 
 	enum = editset.objectsChanged.elements();
@@ -317,7 +447,12 @@ public class DBJournal {
 	  {
 	    obj = ((DBObject) enum.nextElement());
 	    jFile.writeShort(obj.objectBase.type_code);
-	    obj.emit();
+	    obj.emit(jFile);
+
+	    if (debug)
+	      {
+		obj.print(System.err);
+	      }
 	  }
       }
     else
@@ -327,6 +462,11 @@ public class DBJournal {
 
     if (editset.objectsDeleted != null)
       {
+	if (debug)
+	  {
+	    System.err.println("Objects Deleted : " + editset.objectsDeleted.size());
+	  }
+
 	jFile.writeInt(editset.objectsDeleted.size());
 
 	enum = editset.objectsDeleted.elements();
@@ -336,6 +476,10 @@ public class DBJournal {
 	    obj = (DBObject) enum.nextElement();
 	    jFile.writeShort(obj.objectBase.type_code);
 	    jFile.writeShort(obj.id);
+	    if (debug)
+	      {
+		System.err.println(obj.objectBase.object_name + " : " + obj.id);
+	      }
 	  }
       }
     else
@@ -348,6 +492,11 @@ public class DBJournal {
 
     jFile.writeUTF(CLOSETRANS);
     jFile.writeLong(transaction_time);
+
+    if (debug)
+      {
+	System.err.println("Transaction " + now + " successfully written to Journal.");
+      }
 
     return true;
   }
@@ -362,12 +511,12 @@ public class DBJournal {
 class JournalEntry {
 
   DBObjectBase base;
-  short id;
+  int id;
   DBObject obj;			// if null, we'll delete
 
   /* -- */
   
-  public JournalEntry(DBObjectBase base, short id, DBObject obj)
+  public JournalEntry(DBObjectBase base, int id, DBObject obj)
   {
     this.base = base;
     this.id = id;
@@ -379,12 +528,12 @@ class JournalEntry {
     if (obj == null)
       {
 	// delete the object
-	base.remove(new Integer(id));
+	base.objectHash.remove(new Integer(id));
       }
     else
       {
 	// put the new object in place
-	base.put(new Integer(id), obj);
+	base.objectHash.put(new Integer(id), obj);
       }
   }
 }
