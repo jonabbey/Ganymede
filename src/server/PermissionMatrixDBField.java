@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.36 $
-   Last Mod Date: $Date: 2000/01/08 03:29:02 $
+   Version: $Revision: 1.37 $
+   Last Mod Date: $Date: 2000/03/16 06:29:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -719,7 +719,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @param local If true, permissions checking is skipped.
    */
 
-  public synchronized ReturnVal copyFieldTo(PermissionMatrixDBField target, boolean local)
+  public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
   {
     if (!local)
       {
@@ -736,11 +736,18 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 					  "Can't copy field " + getName() + ", no write privileges");
       }
 
+    if (!(target instanceof PermissionMatrixDBField))
+      {
+	return Ganymede.createErrorDialog("Copy field error",
+					  "Can't copy field " + getName() +
+					  ", target is not a PermissionMatrixDBField.");
+      }
+
     // doing a simple clone of the hashtable is okay, since both the
     // keys and values of the matrix are treated as immutable (they
     // are replaced, not changed in-place)
 
-    target.matrix = (Hashtable) this.matrix.clone();
+    ((PermissionMatrixDBField) target).matrix = (Hashtable) this.matrix.clone();
 
     return null;
   }

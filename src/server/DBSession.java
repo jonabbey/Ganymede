@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.80 $
-   Last Mod Date: $Date: 2000/02/29 09:35:13 $
+   Version: $Revision: 1.81 $
+   Last Mod Date: $Date: 2000/03/16 06:29:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.80 $ %D%
+ * @version $Revision: 1.81 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -920,7 +920,6 @@ final public class DBSession {
 
 	checkpoint(key);
 
-
 	break;
 
       case DBEditObject.EDITING:
@@ -937,6 +936,7 @@ final public class DBSession {
 						  "to it is currently checked out for editing by someone else.");
 	      }
 	  }
+
 	checkpoint(key);
 
 	break;

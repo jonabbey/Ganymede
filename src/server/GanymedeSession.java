@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.177 $
-   Last Mod Date: $Date: 2000/03/03 02:18:39 $
+   Version: $Revision: 1.178 $
+   Last Mod Date: $Date: 2000/03/16 06:29:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.177 $ $Date: 2000/03/03 02:18:39 $
+ * @version $Revision: 1.178 $ $Date: 2000/03/16 06:29:51 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2622,10 +2622,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
     Vector fieldDefs = new Vector();
     DBObjectBaseField field;
+    Vector baseFields = containingBase.getFields();
 
-    for (int i = 0; i < containingBase.customFields.size(); i++)
+    for (int i = 0; i < baseFields.size(); i++)
       {
-	field = (DBObjectBaseField) containingBase.customFields.elementAt(i);
+	field = (DBObjectBaseField) baseFields.elementAt(i);
 	
 	if (query.permitList == null)
 	  {
@@ -2727,6 +2728,13 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    * <p>This method may not be called from a DBEditObject's
    * commitPhase1/2() methods without risking deadlock.</p>
+   *
+   * @param query The query to be performed
+   * @param perspectiveObject There are occasions when the server will want to do internal
+   * querying in which the label of an object matching the query criteria is synthesized
+   * for use in a particular context.  If non-null, perspectiveObject's 
+   * {@link arlut.csd.ganymede.DBObject#lookupLabel(arlut.csd.ganymede.DBObject) lookupLabel}
+   * method will be used to generate the label for a result entry.
    */
 
   public QueryResult query(Query query, DBEditObject perspectiveObject)
@@ -3334,11 +3342,26 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * <P>This method is not synchronized for performance reasons, but
    * is only to be called from methods synchronized on this
    * GanymedeSession.</P> 
+   *
+   * @param obj The object to add to the query results
+   * @param query The query that we are processing, used to get
+   * the list of fields we're wanting to return
+   * @param result The QueryResult we're building up
+   * @param internal If true, we won't check permissions
+   * @param perspectiveObject This is an object that can be consulted
+   * to see what its
+   * {@link arlut.csd.ganymede.DBObject#lookupLabel(arlut.csd.ganymede.DBObject) lookupLabel()}
+   * method will return.  This can be null without harmful effect, but if
+   * is it not null, a custom DBEditObject subclass can choose to present
+   * the label of obj from its perspective.  This is used to simulate
+   * a sort of relational effect for objects linked from the object
+   * being added, by letting different fields in the object take on the
+   * role of the label when seen from different objects.
    */
 
-  private  void addResultRow(DBObject obj, Query query, 
-			     QueryResult result, boolean internal,
-			     DBEditObject perspectiveObject)
+  private void addResultRow(DBObject obj, Query query, 
+			    QueryResult result, boolean internal,
+			    DBEditObject perspectiveObject)
   {
     PermEntry perm;
 

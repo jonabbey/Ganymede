@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.62 $
-   Last Mod Date: $Date: 2000/03/04 00:54:09 $
+   Version: $Revision: 1.63 $
+   Last Mod Date: $Date: 2000/03/16 06:29:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -595,7 +595,7 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
       {
 	while (activeUsers.containsKey(username))
 	  {
-	    username = temp + i;
+	    username = temp + "[" + i + "]";
 	    i++;
 	  }
 	

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.122 $
-   Last Mod Date: $Date: 2000/03/08 22:43:59 $
+   Version: $Revision: 1.123 $
+   Last Mod Date: $Date: 2000/03/16 06:29:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -87,7 +87,7 @@ import arlut.csd.Util.VectorUtils;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.122 $ %D%
+ * @version $Revision: 1.123 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -1606,7 +1606,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    return Ganymede.createErrorDialog("InvidDBField.establish(): schema logic error",
 					      "The backfield pointer in vector invid field " + getName() +
 					      " in object " + getOwner().getLabel() + 
-					      "refused the pointer binding because it already points " +
+					      " refused the pointer binding because it already points " +
 					      "back to the object requesting binding.  This sugests that " +
 					      "multiple fields in the originating object " + newInvid + 
 					      " are trying to link to one scalar field in we, the target, which " +
@@ -1658,7 +1658,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		return Ganymede.createErrorDialog("InvidDBField.establish(): schema logic error",
 						  "The backfield pointer in scalar invid field " + getName() +
 						  " in object " + getOwner().getLabel() + 
-						  "refused the pointer binding because it already points " +
+						  " refused the pointer binding because it already points " +
 						  "back to the object requesting binding.  This sugests that " +
 						  "multiple fields in the originating object " + newInvid + 
 						  " are trying to link to one scalar field in we, the target, which " +
