@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.104 $ %D%
+   Version: $Revision: 1.105 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1303,11 +1303,13 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 			      "<p>Ganymede was developed by the Computer Science Division of the Applied " +
 			      "Research Laboratories at The University of Texas at Austin</p>" +
 			      "<p>The primary designer and author of Ganymede was Jonathan Abbey, " +
-			      "jonabbey@arlut.utexas.edu.  The client was primarily written by " +
-			      "Michael Mulvaney, mikem@mail.utexas.edu.  Portions of the client were " +
-			      "written by Navin Manohar and Erik Grostic while they worked as student " +
-			      "employees in CSD.  Dan Scott, dscott@arlut.utexas.edu, oversaw the development " +
-			      " of Ganymede and its predecessor, GASH.</p>" +
+			      "jonabbey@arlut.utexas.edu.  Michael Mulvaney, mikem@mail.utexas.edu, "+
+			      "developed large portions of the client.  Significant portions of the client " +
+			      "were initially developed by Navin Manohar.   Erik Grostic also contributed code " +
+			      "to the client.  Both Navin and Erik worked on Ganymede while working as student " +
+			      "employees at ARL.  Dan Scott, dscott@arlut.utexas.edu, oversaw the development " +
+			      " of Ganymede and its predecessor, GASH, and provided high-level " +
+			      "direction and support.</p><br>" +
 			      "<p>The Ganymede web page is currently at " +
 			      "<a href=\"http://www.arlut.utexas.edu/gash2\">" +
 			      "http://www.arlut.utexas.edu/gash2</a>.</p>");
