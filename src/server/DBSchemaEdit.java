@@ -5,7 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Version: $Revision: 1.3 $ %D%
+   Version: $Revision: 1.4 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -261,7 +261,7 @@ public class DBSchemaEdit extends UnicastRemoteObject implements Unreferenced, S
 	enum = store.nameSpaces.elements();
 	while (enum.hasMoreElements())
 	  {
-	    spaces[i] = (NameSpace) enum.nextElement();
+	    spaces[i++] = (NameSpace) enum.nextElement();
 	  }
       }
 
