@@ -290,9 +290,9 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     // Title at top of dialog
     //
 
-    JLabel titleLabel = new JLabel(resource.title == null ? "": resource.title, SwingConstants.CENTER);
-    titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
-    mainPanel.add(titleLabel, "North");
+    //    JLabel titleLabel = new JLabel(resource.title == null ? "": resource.title, SwingConstants.CENTER);
+    //    titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
+    //    mainPanel.add(titleLabel, "North");
 
     //
     // Image on left hand side
@@ -322,6 +322,8 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     JScrollPane pane = new JScrollPane(textLabel,
 				       JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+    pane.getViewport().setOpaque(false);
 
     if (resource.getText() != null && !resource.getText().equals(""))
       {
