@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.17 $
-   Last Mod Date: $Date: 2001/12/04 05:15:32 $
+   Version: $Revision: 1.18 $
+   Last Mod Date: $Date: 2001/12/04 09:22:52 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.17 $ $Date: 2001/12/04 05:15:32 $ $Name:  $
+ * @version $Revision: 1.18 $ $Date: 2001/12/04 09:22:52 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1139,10 +1139,10 @@ public class xmlfield implements FieldType {
 		    needToBeRemoved = VectorUtils.difference(currentValues, getExtantInvids(setValues));
 		  }
 
-		if (addValues != null)
+		if (addIfNotPresentValues != null || addValues != null)
 		  {
-		    needToBeEdited = getExtantObjects(addValues);
-		    needToBeCreated = getNonRegisteredObjects(addValues);
+		    needToBeCreated = getNonRegisteredObjects(VectorUtils.union(addIfNotPresentValues, addValues));
+		    needToBeEdited = getExtantObjects(VectorUtils.union(addIfNotPresentValues, addValues));
 		  }
 
 		if (delValues != null)
