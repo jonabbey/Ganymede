@@ -6,8 +6,8 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/02/16 19:51:21 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 1999/03/19 05:12:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -104,6 +104,36 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
   /**
    *
+   * This method is used to provide a hook to allow different
+   * objects to generate different labels for a given object
+   * based on their perspective.  This is used to sort
+   * of hackishly simulate a relational-type capability for
+   * the purposes of viewing backlinks.<br><br>
+   *
+   * See the automounter map and NFS volume DBEditObject
+   * subclasses for how this is to be used, if you have
+   * them.
+   *
+   */
+  
+  public String lookupLabel(DBObject object)
+  {
+    if (object.getTypeID() == SchemaConstants.UserBase)
+      {
+	String fullName = (String) object.getFieldValueLocal(userSchema.FULLNAME);
+	String name = (String) object.getFieldValueLocal(userSchema.USERNAME);
+
+	if (fullName != null && name != null)
+	  {
+	    return name + " (" + fullName + ")";
+	  }
+      }
+
+    return super.lookupLabel(object);
+  }
+
+  /**
+   *
    * This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
@@ -156,9 +186,9 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 	QueryNode root3 = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.getInvid()));
 	Query query3 = new Query((short) 274, root3, false); // list all other email groups, but not ourselves
 	
-	QueryResult result = editset.getSession().getGSession().query(query1);
-	result.append(editset.getSession().getGSession().query(query2));
-	result.append(editset.getSession().getGSession().query(query3));
+	QueryResult result = editset.getSession().getGSession().query(query1, this);
+	result.append(editset.getSession().getGSession().query(query2, this));
+	result.append(editset.getSession().getGSession().query(query3, this));
 	
 	membersChoice = result;
       }
