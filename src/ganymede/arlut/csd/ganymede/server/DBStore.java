@@ -546,7 +546,7 @@ public final class DBStore implements JythonMap {
 
 	if (invidPoolSize != -1)
 	  {
-	    Invid.setAllocator(new InvidPool(invidPoolSize));
+	    Invid.setAllocator(new InvidPool(invidPoolSize*2 + 1)); // let's make sure we don't immediately rehash
 	  }
 	else
 	  {
