@@ -56,7 +56,7 @@
 package arlut.csd.Util;
 
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ public class VectorUtils {
 	// temporary hashtable so that we have better scalability for
 	// item lookup.
 
-	Hashtable workSet = new Hashtable();
+	HashMap workSet = new HashMap(vectA.size() + vectB.size());
 	Vector result = new Vector(threshold);
 	Enumeration en;
 	Object item;
@@ -213,7 +213,7 @@ public class VectorUtils {
 
     if ((vectA.size() + vectB.size()) > 20)		// ass, again
       {
-	Hashtable workSet = new Hashtable(vectA.size());
+	HashMap workSet = new HashMap(vectA.size());
 	
 	for (int i = 0; i < vectA.size(); i++)
 	  {
@@ -265,10 +265,10 @@ public class VectorUtils {
 
   public static Vector intersection(Vector vectA, Vector vectB)
   {
-    Hashtable 
-      workSetA = new Hashtable(),
-      workSetB = new Hashtable(),
-      resultSet = new Hashtable();
+    HashMap 
+      workSetA = new HashMap(),
+      workSetB = new HashMap(),
+      resultSet = new HashMap();
 
     Vector result = new Vector();
     Enumeration en;
@@ -359,7 +359,7 @@ public class VectorUtils {
 
     if (vectA.size() + vectB.size() > 10) // ass
       {
-	Hashtable workSetB = new Hashtable();
+	HashMap workSetB = new HashMap(vectA.size() + vectB.size());
 	Enumeration en;
 
 	/* -- */
@@ -416,7 +416,7 @@ public class VectorUtils {
       }
 
     Vector result = null;
-    Hashtable found = new Hashtable();
+    HashMAp found = new HashMap();
 
     for (int i = 0; i < vector.size(); i++)
       {
