@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -284,9 +284,9 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
 	    historyBuffer = gc.getSession().viewAdminHistory(invid, selectedDate);
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get object history.");
+	    gc.processExceptionRethrow(rx, "Could not get admin history.");
 	  }
 	finally
 	  {

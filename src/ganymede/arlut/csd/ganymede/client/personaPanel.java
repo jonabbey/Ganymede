@@ -143,9 +143,9 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
       {
 	fieldIsEditable = field.isEditable();
       }
-    catch(RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not call field.isEditable in personaPanel: " + rx);
+	gc.processExceptionRethrow(rx, "Could not call field.isEditable() in personaPanel: ");
       }
 
     if (editable && fieldIsEditable)
@@ -177,9 +177,9 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
       {
 	personas = field.getValues();
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not get values for persona field: " + rx);
+	gc.processExceptionRethrow(rx, "Could not get values for persona field: ");
       }
 
     total = personas.size();
@@ -239,12 +239,9 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 		  }
 	      }		
       	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    if (debug)
-	      {
-		gc.showErrorMessage("Could not check if the field is editable: " + rx);
-	      }
+	    gc.processExceptionRethrow(rx);
 	  }
 	
 	panels.addElement(pc);
@@ -326,15 +323,16 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	  {
 	    gc.showErrorMessage("You don't have permission to create objects of this type.");
 	    add.setEnabled(false);
-	    gc.setNormalCursor();
 	    return;
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not create new persona: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not create new persona: ");
 	  }
-
-	gc.setNormalCursor();
+	finally
+	  {
+	    gc.setNormalCursor();
+	  }
       }
     else if (e.getActionCommand().equals("Delete"))
       {
@@ -419,12 +417,12 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	      }
 	    else
 	      {
-	       gc.setStatus("Could not delete the object.");
+		gc.setStatus("Could not delete the object.");
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not delete this persona: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not delete persona: ");
 	  }
 
 	if (deleted && removed)

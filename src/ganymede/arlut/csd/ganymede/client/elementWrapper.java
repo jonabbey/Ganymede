@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -280,9 +280,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	  {
 	    setValidated(((containerPanel)my_component).getObject().isValid());
 	  }
-	catch (RemoteException ex)
+	catch (Exception ex)
 	  {
-	    throw new RuntimeException("couldn't check object validation " + ex.getMessage());
+	    gclient.client.processExceptionRethrow(ex, "elementWrapper couldn't check object validation: ");
 	  }
       }
   }
@@ -311,9 +311,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	    titleText = cp.getObject().getLabel();
 	    title.setText((index + 1) + ". " + titleText);
 	  }
-	catch (java.rmi.RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("RemoteException getting label: " + rx);
+	    gclient.client.processExceptionRethrow(rx, "elementWrapper: exception in refreshTitle");
 	  }
       }
   }

@@ -132,8 +132,10 @@ public class notesPanel extends JPanel implements KeyListener {
 	  {
 	    local_editable = notes_field.isEditable();
 	  }
-	catch (RemoteException ex)
+	catch (Exception ex)
 	  {
+	    gclient.client.processException(ex);
+
 	    local_editable = false;
 	  }
       }
@@ -159,9 +161,9 @@ public class notesPanel extends JPanel implements KeyListener {
 		notesArea.append(s);
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get note text: " + rx);
+	    gclient.client.processExceptionRethrow(rx, "Could not get note text: ");
 	  }
       }
   }
@@ -194,9 +196,9 @@ public class notesPanel extends JPanel implements KeyListener {
 	    System.out.println("notes_field is null, not updating.");
 	  }
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not set notes field: " + rx);
+	gclient.client.processExceptionRethrow(rx, "Could not set notes field: ");
       }
   }
 

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -156,9 +156,9 @@ class personaContainer extends JScrollPane implements Runnable{
 	cp.setBorder(pp.empty);
 	setViewportView(cp);
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not load persona into container panel: " + rx);
+	gclient.client.processExceptionRethrow(rx, "Could not load persona into container panel: ");
       }
 
     loaded = true;

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -245,12 +245,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    */
 
   JScrollPane admin_history;
-
-  /**
-   * Holds an ownershipPanel (only for owner groups)
-   */
- 
-  JScrollPane objects_owned;
 
   datePanel
     exp_date_panel,
@@ -524,9 +518,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		  }
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not check if this is ownerbase: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not check if this is ownerbase: ");
 	  }
     
 	// the client Loader thread should have already downloaded and
@@ -546,9 +540,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get notes_field: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not get notes_field: ");
 	  }
     
 	notes = new JScrollPane();
@@ -598,9 +592,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		addRemovalDatePanel();
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get date fields: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not get date fields");
 	  }
     
 	pane.addChangeListener(this);
@@ -687,11 +681,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    invid = getObject().getInvid();
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get object's invid");
+	    gc.processExceptionRethrow(rx, "Could not get object invid");
 	  }
       }
+
     return invid;
   }
 
@@ -812,9 +807,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	gc.getSession().sendMail(address, subject, body);
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("sending mail: " + rx);
+	gc.processExceptionRethrow(rx, "Sending Mail");
       }
   }
 
@@ -922,9 +917,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	buffer = getObject().getSummaryDescription();
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not get field info for encoding: " + rx);
+	gc.processExceptionRethrow(rx);
       }
 
     if (showHistory)
@@ -942,9 +937,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	    buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(), 
 							    startDate, showTransactions).toString());
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("RemoteException getting history: " + rx);
+	    gc.processExceptionRethrow(rx);
 	  }
       }
 
@@ -1009,8 +1004,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		fileM.add(setExpirationMI);
 	      }
 	  }
-	catch (RemoteException ex)
+	catch (Exception ex)
 	  {
+	    gc.processExceptionRethrow(ex);
 	  }
 
 	if (removal_Editable)
@@ -1103,9 +1099,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    exp_field = (date_field) getObject().getField(SchemaConstants.ExpirationField);
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get removal field: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not get expiration field");
 	  }
       }
 
@@ -1153,9 +1149,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    rem_field = (date_field) getObject().getField(SchemaConstants.RemovalField);
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get removal field: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not get removal field");
 	  }
       }
 
@@ -1207,9 +1203,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	owner_panel = new ownerPanel(invf, editable && invf.isEditable(), this);
 	owner.setViewportView(owner_panel);
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not generate Owner field: " + rx);
+	gc.processExceptionRethrow(rx, "Could not get owner field");
       }
     
     createdList.addElement(new Integer(owner_index));
@@ -1224,9 +1220,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	owner_panel.updateInvidStringSelector();
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
-	throw new RuntimeException(ex.getMessage());
+	gc.processExceptionRethrow(ex);
       }
   }
 
@@ -1241,9 +1237,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	modification_date_field = (date_field) getObject().getField(SchemaConstants.ModificationDateField);
 	modifier_field = (string_field) getObject().getField(SchemaConstants.ModifierField);
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not get field information: " + rx);
+	gc.processExceptionRethrow(rx);
       }
 
     history_panel = new historyPanel(getObjectInvid(),
@@ -1291,51 +1287,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     createdList.addElement(new Integer(notes_index));
     
     notes.invalidate();
-    validate();
-  }
-  
-  /*
-    XXX
-    all of this needs to be reworked, the ownershipPanel and everything, because
-    the Owner Group DBObjectBase no longer includes an OwnerObjectsOwned field.  We'll
-    have to synthesize a special panel which will present a virtualized viewing/editing
-    display based on discrete queries on the server rather than InvidDBField RMI calls.
-    XXX 
-  */
-
-  void create_objects_owned_panel()
-  {
-    if (debug)
-      {
-	println("Creating ownership panel");
-      }
-
-    invid_field oo = null;
-
-    try
-      {
-	oo = (invid_field) getObject().getField(SchemaConstants.OwnerObjectsOwned);
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not get owner objects owned: " + rx);
-      }
-
-    if (oo == null)
-      {
-	JPanel null_oo = new JPanel();
-	null_oo.add(new JLabel("There are no objects owned here."));
-	objects_owned.getVerticalScrollBar().setUnitIncrement(15);
-	objects_owned.setViewportView(null_oo);
-      }
-    else
-      {
-	objects_owned.getVerticalScrollBar().setUnitIncrement(15);
-	objects_owned.setViewportView(new ownershipPanel(oo, editable, this));
-	createdList.addElement(new Integer(objects_owned_index));
-      }
-
-    objects_owned.invalidate();
     validate();
   }
 
@@ -1436,9 +1387,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	    System.err.println("notes_field is null in framePanel");
 	  }
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not get notes Text: " + rx);
+	gc.processExceptionRethrow(rx);
       }
   }
 
@@ -1568,11 +1519,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	setStatus("Creating owner panel");
 	create_owner_panel();
       }
-    else if (index == objects_owned_index)
-      {
-	// setStatus("Creating objects owned panel");
-	//	create_objects_owned_panel();
-      }
     else if (index == personae_index)
       {
 	setStatus("Creating persona panel");
@@ -1626,8 +1572,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	result = getObject().getTypeName();
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
+	gc.processExceptionRethrow(ex, "Problem in getObjectType()");
       }
 
     return result;
@@ -1641,8 +1588,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	result = getObject().getLabel();
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
+	gc.processExceptionRethrow(ex, "Problem in getObjectLabel()");
       }
 
     return result;
@@ -2007,7 +1955,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     owner = null;
     owner_panel = null;
     notes = null;
-    objects_owned = null;
     exp_date_panel = null;
     rem_date_panel = null;
     history = null;

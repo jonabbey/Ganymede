@@ -709,8 +709,9 @@ public final class xmlclient implements ClientListener, Runnable {
 	    return true;
 	  }
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
+	// for remote and other
 	ex.printStackTrace();
 
 	return false;
@@ -755,8 +756,9 @@ public final class xmlclient implements ClientListener, Runnable {
 
 	return true;
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
+	// for remote and other
 	ex.printStackTrace();
 	return false;
       }
@@ -1012,8 +1014,10 @@ public final class xmlclient implements ClientListener, Runnable {
 		this.finishedErrStream = true;
 	      }
 	  }
-	catch (RemoteException ex)
+	catch (Exception ex)
 	  {
+	    // for remote and other
+
 	    ex.printStackTrace();
 
 	    // we won't exit our err stream thread on one or two

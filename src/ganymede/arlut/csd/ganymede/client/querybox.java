@@ -25,7 +25,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -119,6 +119,7 @@ import arlut.csd.ganymede.common.QueryDataNode;
 import arlut.csd.ganymede.common.QueryDeRefNode;
 import arlut.csd.ganymede.common.QueryNode;
 import arlut.csd.ganymede.common.QueryNotNode;
+import arlut.csd.ganymede.common.RegexpException;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.rmi.Base;
 
@@ -825,9 +826,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	      {
 		buffer = gc.session.dump(query);
 	      }
-	    catch (RemoteException ex)
+	    catch (Exception ex)
 	      {
-		throw new RuntimeException("caught remote: " + ex);
+		gc.processExceptionRethrow(ex);
 	      }
 	    catch (Error ex)
 	      {
@@ -1162,9 +1163,9 @@ class QueryRow implements ItemListener {
 	fields = parent.gc.getTemplateVector(parent.selectedBase.getTypeID());
 	resetFieldChoices();
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
-	throw new RuntimeException("remote exception in QueryRow constructor:" + ex.getMessage());
+	parent.gc.processExceptionRethrow(ex, "Remote exception in QueryRow constructor: ");
       }
 
     GridBagConstraints gbc = parent.gbc;

@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -201,9 +201,9 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	    remove(holdOnPanel);
 	    add("Center", ownerList);
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not addDateField: " + rx);
+	    gc.processExceptionRethrow(rx);
 	  }
       }
 
@@ -492,9 +492,9 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 		succeeded = (retVal == null) ? true : retVal.didSucceed();
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not change owner field: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not change owner field: ");
 	  }
       }
     

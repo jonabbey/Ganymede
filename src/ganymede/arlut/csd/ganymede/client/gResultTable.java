@@ -86,6 +86,7 @@ import arlut.csd.Util.PackageResources;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.RegexpException;
 import arlut.csd.ganymede.rmi.Session;
 
 /*------------------------------------------------------------------------------
@@ -288,10 +289,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 		session.sendMail(addresses, dialog.getSubject(), report);
 	      }
 	  }
-	catch (RemoteException ex)
+	catch (Exception ex)
 	  {
-	    wp.gc.showErrorMessage("Trouble sending report", "Could not send mail.");
-	    throw new RuntimeException("Couldn't mail report " + ex);
+	    wp.gc.processException(ex, "Could not send mail.");
 	  }
 
 	return;
@@ -357,9 +357,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  {
 	    buffer = session.dump(query);
 	  }
-	catch (RemoteException ex)
+	catch (Exception ex)
 	  {
-	    throw new RuntimeException("caught remote exception in refreshQuery " + ex);
+	    this.wp.getgclient().processException(ex);
 	  }
 
 	if (buffer == null)

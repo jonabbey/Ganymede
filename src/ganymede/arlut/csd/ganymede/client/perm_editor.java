@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -258,9 +258,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	this.matrix = permField.getMatrix();
 	this.templateMatrix = permField.getTemplateMatrix();
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
-	throw new RuntimeException("couldn't get permission matrix\n" + ex.getMessage());
+	gc.processExceptionRethrow(ex, "Couldn't get permission matrix: ");
       }
     
     if (debug)
@@ -345,9 +345,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	    System.err.println("got it, it " + (rowRootNode == null ? "is " : "isn't ") + "equal to null");
 	  }
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
-	throw new RuntimeException("Caught RemoteException" + ex);
+	gc.processExceptionRethrow(ex);
       }
     
     getContentPane().remove(waitPanel);
@@ -766,9 +766,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 		  
 			gc.handleReturnVal(permField.setPerm(baseid, new PermEntry (view, edit, create, delete)));
 		      }
-		    catch (RemoteException ex)
+		    catch (Exception ex)
 		      {
-			throw new RuntimeException("Caught RemoteException" + ex);
+			gc.processExceptionRethrow(ex);
 		      }
 		  } 
 		else 
@@ -794,9 +794,9 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 			gc.handleReturnVal(permField.setPerm(template.getBaseID(), template.getID(), 
 							     new PermEntry (view, edit, create, delete)));
 		      }
-		    catch (RemoteException ex)
+		    catch (Exception ex)
 		      {
-			throw new RuntimeException("Caught RemoteException" + ex);
+			gc.processExceptionRethrow(ex);
 		      }
 		  }
 	      }

@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -360,9 +360,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		addElement(ipf, false);
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new IllegalArgumentException("Can't make ip field: " + rx);
+	    gc.processExceptionRethrow(rx, "Can't make IP vector field");
 	  }
       }
     else if (my_field instanceof invid_field)
@@ -440,9 +440,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		addElement(object.getLabel(), cp, false, false);
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new IllegalArgumentException("Can't make invid field: " + rx);
+	    gc.processExceptionRethrow(rx, "Can't make embedded object field: ");
 	  }
       }
     else
@@ -576,9 +576,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  }
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not create new containerPanel: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not create new containerPanel: ");
 	  }
       }
     else if (my_field instanceof ip_field)
@@ -597,9 +597,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    ipf.setCallback(this);
 	    addElement(ipf);
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not make new ip field: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not make new IP field");
 	  }
       }
     else
@@ -811,9 +811,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    showErrorMessage("Server will not allow delete.");
 	  }
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not delete element:" + rx);
+	gc.processExceptionRethrow(rx, "Could not delete element: ");
       }
   }
 
@@ -1052,9 +1052,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    System.err.println("Unknown type in vectorPanel.refresh compVector: " + my_field.getClass());
 	  }
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("vectorPanel.refresh(): " + rx);
+	gc.processExceptionRethrow(rx, "vectorPanel.refresh(): ");
       }
 
     if (needFullRefresh)
@@ -1305,9 +1305,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  {
 		    returnValue = changeElement((Byte[])v.getValue(), index);
 		  }
-		catch (RemoteException rx)
+		catch (Exception rx)
 		  {
-		    throw new RuntimeException("Could not set value of date field: " + rx);
+		    gc.processExceptionRethrow(rx, "Could not update IP field: ");
 		  }
 	      }
 	  }
@@ -1470,9 +1470,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  {
 	    myFieldIsEditable = new Boolean(my_field.isEditable());
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not check if field was editable: " + rx);
+	    gc.processExceptionRethrow(rx, "VectorPanel: Could not check if field was editable: ");
 	  }
       }
     

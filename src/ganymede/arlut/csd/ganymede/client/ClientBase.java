@@ -564,8 +564,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 	      }
 	  }
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
+	sendErrorMessage("Exception caught in client async message loop: " + ex.toString());
       }
     finally
       {

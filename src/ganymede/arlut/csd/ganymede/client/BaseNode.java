@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -96,9 +96,9 @@ class BaseNode extends arlut.csd.JTree.treeNode {
       {
 	canBeInactivated = base.canInactivate();
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not check inactivate.");
+	gclient.client.processExceptionRethrow(rx);
       }
   }
 
@@ -110,9 +110,9 @@ class BaseNode extends arlut.csd.JTree.treeNode {
 	  {
 	    type = new Short(base.getTypeID());
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get the base type in BaseNode: " + rx);
+	    gclient.client.processExceptionRethrow(rx);
 	  }
       }
 

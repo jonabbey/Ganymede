@@ -704,11 +704,16 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       {
 	my_client.disconnect();
       }
-    catch (NullPointerException ex)
+    catch (Exception ex)
       {
-      }
-    catch (RemoteException ex)
-      {
+	if (glogin.g_client != null)
+	  {
+	    glogin.g_client.processException(ex);
+	  }
+	else
+	  {
+	    ex.printStackTrace();
+	  }
       }
     finally
       {
@@ -899,9 +904,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       {
 	glogin.helpBase = session.getHelpBase();
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
-	System.err.println("Couldn't get help base from server: remote exception: " + ex.getMessage());
+	ex.printStackTrace();
 	glogin.helpBase = null;
       }
 

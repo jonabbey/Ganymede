@@ -301,7 +301,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   public void addWindow(Invid invid, db_object object, boolean editable, String objectType, boolean isNewlyCreated)
   {
     Invid finalInvid = invid;
-    String temp, title;
+    String title = null;
 
     /* -- */
 
@@ -356,9 +356,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	      }
 	  }
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("RemoteException: " + rx);
+	gc.processExceptionRethrow(rx);
       }
 
     gc.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -401,9 +401,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 		  }
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get label of object: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not get label of object: ");
 	  }
     
 	framePanel w = null;
@@ -686,9 +686,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       {
 	rt = new gResultTable(this, session, query, results);
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("could not make results table: " + rx);
+	gc.processExceptionRethrow(rx, "Could not make results table");
       }
 
     if (rt == null)

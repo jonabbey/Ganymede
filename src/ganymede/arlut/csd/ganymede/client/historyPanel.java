@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -265,9 +265,9 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
 	    historyBuffer = gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get object history.");
+	    gc.processExceptionRethrow(rx, "Could not get object history.");
 	  }
 	finally
 	  {
@@ -395,9 +395,9 @@ class datesPanel extends JPanel {
 	    mod_date = (Date) modification_date_field.getValue();
 	  }
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not get creation info: " + rx);
+	gclient.client.processExceptionRethrow(rx, "Could not get object creation info: ");
       }
     
     if (creator == null)

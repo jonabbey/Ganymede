@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -563,9 +563,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    infoVector = object.getFieldInfoVector();
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get FieldInfoVector: " + rx);
+	    gc.processExceptionRethrow(rx);
 	  }
 
 	if (infoVector.size() == 0)
@@ -658,9 +658,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 		addFieldComponent(fieldInfo.getField(), fieldInfo, fieldTemplate);
 	      }
-	    catch (RemoteException ex)
+	    catch (Exception ex)
 	      {
-		throw new RuntimeException("caught remote exception adding field " + ex);
+		gc.processExceptionRethrow(ex);
 	      }
 	  }
     
@@ -784,9 +784,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    invid = object.getInvid();
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not get the object's Invid in containerPanel: " + rx);
+	    gc.processExceptionRethrow(rx);
 	  }
       }
 
@@ -1420,9 +1420,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    printErr("field of unknown type: " + comp);
 	  }
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not check visibility in updateComponent: " + rx);
+	gc.processExceptionRethrow(rx);
       }
   }
 
@@ -1642,9 +1642,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 		returnValue = field.setValue(v.getValue());
 	      }
-	    catch (RemoteException rx)
+	    catch (Exception rx)
 	      {
-		println("Could not set field value: " + rx);
+		gc.processException(rx);
+
 		return false;
 	      }
 	  }
@@ -1663,9 +1664,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 		returnValue = field.setPlainTextPass((String)v.getValue());
 	      }
-	    catch (RemoteException rx)
+	    catch (Exception rx)
 	      {
-		println("Could not set field value: " + rx);
+		gc.processException(rx);
+
 		return false;
 	      }
  	  }
@@ -1785,9 +1787,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			returnValue = field.deleteElements((Vector) v.getValue());
 		      }
 		  }
-		catch (RemoteException rx)
+		catch (Exception rx)
 		  {
-		    throw new RuntimeException("Could not change add/delete invid from field: " + rx);
+		    gc.processExceptionRethrow(rx, "Could not change add/delete invid from field");
 		  }
 	      }
 	    else if (objectHash.get(v.getSource()) instanceof string_field)
@@ -1820,9 +1822,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			returnValue = field.deleteElements((Vector) v.getValue());
 		      }
 		  }
-		catch (RemoteException rx)
+		catch (Exception rx)
 		  {
-		    throw new RuntimeException("Could not add/remove string from string_field: " + rx);
+		    gc.processExceptionRethrow(rx, "Could not add/remove string from string_field: ");
 		  }
 	      }
 	    else
@@ -1927,9 +1929,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    returnValue = field.setValue(new Boolean(newValue));
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new IllegalArgumentException("Could not set field value: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not set field value: ");
 	  }
       
 	
@@ -1974,9 +1976,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    Boolean b = (Boolean)field.getValue();
 	    cb.setSelected((b == null) ? false : b.booleanValue());
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not talk to server: " + rx);
+	    gc.processExceptionRethrow(rx);
 	  }
       }
   }
@@ -2112,9 +2114,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    cb.addItemListener(this);
 	  }
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not set combo box value: " + rx);
+	gc.processExceptionRethrow(rx);
       }
   }
 
@@ -2725,9 +2727,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    mustChoose = field.mustChoose();
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not check to see if field was mustChoose.");
+	    gc.processException(rx);
+	    throw new RuntimeException(rx);
 	  }
 
 	combo.setEditable(!mustChoose); 
@@ -3373,9 +3376,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       {
 	mustChoose = field.mustChoose();
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not get mustChoose: " + rx);
+	gc.processExceptionRethrow(rx, "Could not get mustChoose: ");
       }
 
     // Find currentListHandle
@@ -3529,9 +3532,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	ipf = new JIPField(editable && fieldInfo.isEditable(),
 			   (editable && fieldInfo.isEditable()) ? field.v6Allowed() : field.isIPV6());
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not determine if v6 Allowed for ip field: " + rx);
+	gc.processException(rx, "Could not determine if v6 Allowed for ip field: ");
+	throw new RuntimeException(rx);
       }
     
     objectHash.put(ipf, field);

@@ -197,9 +197,9 @@ class fieldoption_editor extends JDialog
 	    return;
 	  }
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
-        throw new RuntimeException(ex);
+	gc.processExceptionRethrow(ex);
       }
     
     TreeTableModel model = new FieldOptionModel(rowRootNode, this);
@@ -520,9 +520,9 @@ class fieldoption_editor extends JDialog
 
                     gc.handleReturnVal(opField.setOption(bd.getTypeID(), String.valueOf(value)));
                   }
-                catch (RemoteException ex)
+                catch (Exception ex)
                   {
-                    throw new RuntimeException("Caught RemoteException" + ex);
+		    gc.processExceptionRethrow(ex);
                   }
               } 
             else 
@@ -539,9 +539,9 @@ class fieldoption_editor extends JDialog
                   {
                     gc.handleReturnVal(opField.setOption(template.getBaseID(), template.getID(), String.valueOf(value)));
                   }
-                catch (RemoteException ex)
+                catch (Exception ex)
                   {
-                    throw new RuntimeException("Caught RemoteException" + ex);
+		    gc.processExceptionRethrow(ex);
                   }
               }
           }

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -268,9 +268,9 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 
 	top_pane.add(clear, "East");
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not get date: " + rx);
+	gclient.client.processExceptionRethrow(rx, "Could not get date: ");
       }
   }
 
@@ -303,9 +303,9 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	
 	top_pane.add(noneditable_dateLabel, "Center");
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not check visibility: " + rx);
+	gclient.client.processExceptionRethrow(rx, "Could not check visibility in datePanel: ");
       }
   }
 
@@ -336,9 +336,9 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 
 	top_pane.add(topLabel, "Center");
       }
-    catch (RemoteException rx)
+    catch (Exception rx)
       {
-	throw new RuntimeException("Could not get date: " + rx);
+	gclient.client.processExceptionRethrow(rx, "Could not get date in datePanel: ");
       }
   }
   
@@ -368,9 +368,9 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 		gc.handleReturnVal(retVal);
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not clear date field: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not clear date field: ");
 	  }
 
 	if (ok)
@@ -417,9 +417,9 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 		gc.handleReturnVal(retVal);
 	      }
 	  }
-	catch (RemoteException rx)
+	catch (Exception rx)
 	  {
-	    throw new RuntimeException("Could not set Value in removal field: " + rx);
+	    gc.processExceptionRethrow(rx, "Could not set value in datePanel.");
 	  }
 	
 	if (ok)
@@ -504,9 +504,9 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	
 	this.setDate(date);
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
-	throw new RuntimeException("datePanel.refresh(): error, couldn't refresh date panel.");
+	gc.processExceptionRethrow(ex, "datePanel.refresh(): error, couldn't refresh date panel.");
       }
   }
 
