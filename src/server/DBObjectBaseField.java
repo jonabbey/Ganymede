@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1133,6 +1133,12 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
       {
 	throw new IllegalArgumentException("not an invid field");
       }
+
+    if (val == -1)
+      {
+	allowedTarget = val;
+	return;
+      }
     
     b = base.editor.getBase(val);
 
@@ -1260,7 +1266,9 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   /**
    * 
    * Sets the field of the target object of this invid field that should
-   * be managed in the symmetry relationship if isSymmetric().
+   * be managed in the symmetry relationship if isSymmetric().  If
+   * val == -1, the targetField will be set to a value representing
+   * no selection.
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1280,6 +1288,12 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     if (!isInvid())
       {
 	throw new IllegalArgumentException("not an invid field");
+      }
+
+    if (val == -1)
+      {
+	targetField = val;
+	return;
       }
 
     if (allowedTarget == -1)
@@ -1314,7 +1328,8 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
   /**
    * 
    * Sets the field of the target object of this invid field that should
-   * be managed in the symmetry relationship if isSymmetric().
+   * be managed in the symmetry relationship if isSymmetric().  If <fieldName>
+   * is null, the targetField will be cleared.
    *
    * @see arlut.csd.ganymede.BaseField
    */
@@ -1334,6 +1349,12 @@ public class DBObjectBaseField extends UnicastRemoteObject implements BaseField,
     if (!isInvid())
       {
 	throw new IllegalArgumentException("not an invid field");
+      }
+
+    if (fieldName == null)
+      {
+	targetField = -1;
+	return;
       }
 
     // look for fieldName in the base currently specified in
