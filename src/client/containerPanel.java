@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.64 $ %D%
+    Version: $Revision: 1.65 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -2603,9 +2603,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       
 	sf = new JstringField(20,
 			      field.maxSize(),
-			      //new JcomponentAttr(null,
-			      //			 new Font("Helvetica",Font.PLAIN,12),
-			      //			 Color.black,Color.white),
 			      editable && fieldInfo.isEditable(),
 			      false,
 			      fieldTemplate.getOKChars(),
@@ -2661,9 +2658,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       {
 	sf = new JstringField(20,
 			      field.maxSize(),
-			      //      new JcomponentAttr(null,
-				//		 new Font("Helvetica",Font.PLAIN,12),
-			      //	 Color.black,Color.white),
 			      true,
 			      false,
 			      null,
@@ -3116,10 +3110,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
     try
       {
-	ipf = new JIPField(new JcomponentAttr(null,
-					      new Font("Helvetica",Font.PLAIN,12),
-					      Color.black,Color.white),
-			   editable && fieldInfo.isEditable(),
+	ipf = new JIPField(editable && fieldInfo.isEditable(),
 			   (editable && fieldInfo.isEditable()) ? field.v6Allowed() : field.isIPV6());
       }
     catch (RemoteException rx)
