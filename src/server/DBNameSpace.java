@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2001/03/03 07:19:35 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2001/03/03 07:31:42 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -974,6 +974,9 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
     if (!reserved.containsKey(editSet))
       {
+	// very important!  else we will have DBEditSet's loitering!
+
+	checkpoints.remove(editSet);
 	return;
       }
 
@@ -1040,6 +1043,9 @@ public final class DBNameSpace extends UnicastRemoteObject implements NameSpace 
 
     if (!reserved.containsKey(editSet))
       {
+	// very important!  else we will have DBEditSet's loitering!
+
+	checkpoints.remove(editSet);
 	return;
       }
 
