@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -175,7 +175,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
     this.original = original;
   }
 
-  void emit(DataOutput out) throws IOException
+  synchronized void emit(DataOutput out) throws IOException
   {
     int size;
     Enumeration enum;
@@ -208,7 +208,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
       }
   }
 
-  void receive(DataInput in) throws IOException
+  synchronized void receive(DataInput in) throws IOException
   {
     int size;
     DBObject tempObject;
@@ -450,7 +450,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
    *
    */
 
-  public void print(PrintStream out)
+  public synchronized void print(PrintStream out)
   {
     Enumeration enum;
 
@@ -485,7 +485,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
    * @see arlut.csd.ganymede.Base
    */
 
-  public void setName(String newName)
+  public synchronized void setName(String newName)
   {
     if (editor == null)
       {
@@ -515,7 +515,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
    * @see arlut.csd.ganymede.Base
    */
 
-  public void setClassName(String newName)
+  public synchronized void setClassName(String newName)
   {
     if (editor == null)
       {
@@ -588,7 +588,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
    * @see arlut.csd.ganymede.Base
    */
 
-  public boolean canInactivate()
+  public synchronized boolean canInactivate()
   {
     if (classdef == null)
       {
@@ -665,7 +665,7 @@ public class DBObjectBase extends UnicastRemoteObject implements Base {
    * @see arlut.csd.ganymede.Base
    */
 
-  public Vector getFields()
+  public synchronized Vector getFields()
   {
     Vector result;
     Enumeration enum;
