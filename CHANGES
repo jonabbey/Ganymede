@@ -17,7 +17,7 @@ of mail by plug-in code and custom tasks.
 
 2. [SERVER] Fixed startup default permissions for non-supergash users
 
-Muller Miklos, mmuller@lbcons.net, reported a bug that caused Ganymede
+Miklos Muller, mmuller@lbcons.net, reported a bug that caused Ganymede
 to not allow non-supergash users to login to a freshly initialized
 Ganymede server.  Editing the Default Role object's Default Access
 Bits field, works around the problem, but unless this is done, an
@@ -33,10 +33,11 @@ to initialize the Ganymede database.
 3. [SERVER] Fixed infinite loop bug in XML parser
 
 The XML parsing code had a bug that would leave it looping infinitely
-if the XML stream was closed before completion of parsing.  This
-didn't break the server, but it did take up a lot of processor
-time, and kept all of the memory associated with an XML session
-pinned in the server's heap.
+if the XML stream was closed before completion of parsing, either due
+to an incomplete XML file being fed to the xmlclient, or through the
+xmlclient dying suddenly.  This didn't break the server, but it did
+take up a lot of processor time, and kept all of the memory associated
+with an XML session pinned in the server's heap.
 
 4. [SERVER] Fixed default label field for persona objects
 
@@ -45,7 +46,7 @@ the older 'name' field as the label, rather than the composite 'label'
 field.  This could cause errors when trying to login with a newly
 created persona.
 
-This bug was reported by Muller Miklos as well.
+This bug was reported by Miklos Muller as well.
 
 -------------------- Changes from 1.01 to 1.02 -------------------
 
