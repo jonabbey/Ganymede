@@ -5,7 +5,7 @@
    This file is a management class for system objects in Ganymede.
    
    Created: 15 October 1997
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,13 +36,13 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * vector of ip network Object Handles in current room
    */
 
-  Vector netsInRoom = null;
+  Vector netsInRoom = new Vector();
 
   /**
    * vector of ip network Object Handles free in current room
    */
 
-  Vector freeNets = null;
+  Vector freeNets = new Vector();
 
   /**
    * map of IPNet Invids to addresses
@@ -219,6 +219,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     if (netInvid == null)
       {
 	System.err.println("systemCustom.freeNet(): trying to free null");
+	return true;
       }
 
     String label = getGSession().viewObjectLabel(netInvid);
@@ -246,6 +247,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    System.err.println("systemCustom.freeNet(): " + label + " is already freed");
 	  }
+
 	return true;
       }
 
@@ -374,6 +376,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	label = getGSession().viewObjectLabel(netInvid);
 	handle = new ObjectHandle(label, netInvid, false, false, false, true);
 
+	if (debug)
+	  {
+	    System.err.println("systemCustom.initializeNets(): processing net " + label);
+	  }
+
 	netsInRoom.addElement(handle);
 
 	// find out what nets are new with this new room invid and which we
@@ -381,6 +388,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	if (!ipAddresses.containsKey(netInvid))
 	  {
+	    // ok, we don't have an address for this net stored yet.. see whether
+	    // an interface hooked up to us is using this net.. if so, see if
+	    // it has an address and keep that if so.
+
 	    usingNet = false;
 
 	    if (interfaces != null)
@@ -395,14 +406,17 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 		    if (netInvid2 != null && netInvid2.equals(netInvid))
 		      {
-			usingNet = true;
-
-			// remember this address for this net
-
 			address = (Byte[]) interfaceObj.getFieldValueLocal(interfaceSchema.ADDRESS);
+
+			if (address != null)
+			  {
+			    usingNet = true;
+
+			    // remember this address for this net
 			
-			ipAddresses.put(netInvid, address);
-			break;
+			    ipAddresses.put(netInvid, address);
+			    break;
+			  }
 		      }
 		  }
 	      }
@@ -424,12 +438,17 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     // nets are full, we'll remove that network from netsInRoom to
     // mark that net as not being usable for a new address
 
-
     Enumeration enum = localAddresses.keys();
 
     while (enum.hasMoreElements())
       {
 	netInvid = (Invid) enum.nextElement();
+
+	if (debug)
+	  {
+	    System.err.println("systemCustom.initializeNets() trying to find an address on " + 
+			       getGSession().viewObjectLabel(netInvid));
+	  }
 
 	address = getIPAddress(netInvid);
 
@@ -437,32 +456,21 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    // we've allocated a new address for a net that
 	    // we don't yet have an address for.. store
-	    // the address we allocated and add the net
-	    // to the freeNets vector.
+	    // the address we allocated
 
 	    ipAddresses.put(netInvid, address);
-
-	    for (int i = 0; i < netsInRoom.size(); i++)
-	      {
-		handle = (ObjectHandle) netsInRoom.elementAt(i);
-
-		if (handle.getInvid().equals(netInvid))
-		  {
-		    if (debug)
-		      {
-			System.err.println("systemCustom.initializeNets(): freeing net " + 
-					   handle.getLabel());
-		      }
-
-		    freeNets.addElement(handle);
-		    break;
-		  }
-	      }
 	  }
 	else
 	  {
 	    // we couldn't get an address for netInvid.. take the net
 	    // out of our netsInRoom vector.
+
+	    if (debug)
+	      {
+		System.err.println("systemCustom.initializeNets(): net " + 
+				   getGSession().viewObjectLabel(netInvid) + 
+				   " can't be used for allocation, we couldn't find an address on it.");
+	      }
 
 	    for (int i = 0; i < netsInRoom.size(); i++)
 	      {
@@ -471,6 +479,56 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		if (handle.getInvid().equals(netInvid))
 		  {
 		    netsInRoom.removeElementAt(i);
+		    break;
+		  }
+	      }
+	  }
+      }
+
+    // okay, we have ipAddresses loaded with addresses available for
+    // this system in this room.  we need to go through the nets that
+    // we have registered and for those addresses that are both
+    // available in this room and not already taken, we need to
+    // add handles to them to the freeNets vector which we
+    // cleared upon entering initializeNets().
+
+    enum = ipAddresses.keys();
+
+    while (enum.hasMoreElements())
+      {
+	netInvid = (Invid) enum.nextElement();
+
+	// is this netInvid really available in our current room?
+
+	for (int i = 0; i < netsInRoom.size(); i++)
+	  {
+	    handle = (ObjectHandle) netsInRoom.elementAt(i);
+		
+	    if (handle.getInvid().equals(netInvid))
+	      {
+		if (debug)
+		  {
+		    System.err.println("systemCustom.initializeNets(): net " + 
+				       handle.getLabel() + " is available for allocation");
+		  }
+
+		usingNet = false;
+		
+		for (int j = 0; j < interfaces.size(); j++)
+		  {
+		    interfaceObj = getSession().viewDBObject((Invid) interfaces.elementAt(j));
+
+		    Invid netInvid2 = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
+
+		    if (netInvid2 != null && netInvid2.equals(netInvid))
+		      {
+			usingNet = true;
+		      }
+		  }
+
+		if (!usingNet)
+		  {
+		    freeNets.addElement(handle);
 		    break;
 		  }
 	      }
@@ -498,7 +556,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     if (namespace == null)
       {
-	System.err.println("systemCustom.setIPAddress(): couldn't get IP namespace");
+	System.err.println("systemCustom.getIPAddress(): couldn't get IP namespace");
 	return null;
       }
 
@@ -548,6 +606,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     int i = start;
     address[3] = new Byte(u2s(i));
+
+    // find an unused hostname on this net
 
     if (start > stop)
       {
@@ -637,7 +697,6 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       {
       case systemSchema.SYSTEMNAME:
       case systemSchema.INTERFACES:
-      case systemSchema.DNSDOMAIN:
       case systemSchema.SYSTEMTYPE:
       case systemSchema.ROOM:
 	return true;
@@ -751,6 +810,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public boolean finalizeSetValue(DBField field, Object value)
   {
+    if (!gSession.enableOversight)
+      {
+	return true;
+      }
+
     if (field.getID() == systemSchema.ROOM)
       {
 	// need to update the net information from this room
@@ -761,10 +825,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 			       getGSession().viewObjectLabel((Invid) value));
 	  }
 	
-	if (gSession.enableOversight)
-	  {
-	    initializeNets((Invid) value);
-	  }
+	initializeNets((Invid) value);
       }
     
     if (field.getID() == systemSchema.SYSTEMTYPE)
@@ -777,10 +838,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 			       getGSession().viewObjectLabel((Invid) value));
 	  }
 	
-	if (gSession.enableOversight)
-	  {
-	    initializeNets((Invid) getFieldValueLocal(systemSchema.ROOM));
-	  }
+	initializeNets((Invid) getFieldValueLocal(systemSchema.ROOM));
       }
 
     return true;
