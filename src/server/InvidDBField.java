@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.14 $ %D%
+   Version: $Revision: 1.15 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1049,14 +1049,47 @@ public class InvidDBField extends DBField implements invid_field {
 
   /**
    *
-   * Returns a vector of acceptable invid values for
-   * this field. 
+   * Returns a StringBuffer encoded list of the current values
+   * stored in this field.
    *
    * @see arlut.csd.ganymede.invid_field
    *
    */
 
-  public Vector choices()
+  public synchronized StringBuffer encodedValues()
+  {
+    StringBuffer results = new StringBuffer();
+    Invid invid;
+
+    /* -- */
+
+    if (!isVector())
+      {
+	throw new IllegalArgumentException("can't call encodedValues on scalar field");
+      }
+
+    results.append(DBEditObject.objectDumpHeader(true));
+
+    for (int i = 0; i < values.size(); i++)
+      {
+	invid = (Invid) values.elementAt(i);
+	results.append(DBEditObject.resultDump(new Result(invid,
+							  Ganymede.internalSession.viewObjectLabel(invid))));
+      }
+
+    return results;
+  }
+
+  /**
+   *
+   * Returns a StringBuffer encoded list of acceptable invid values
+   * for this field.
+   *
+   * @see arlut.csd.ganymede.invid_field
+   * 
+   */
+
+  public StringBuffer choices()
   {
     DBEditObject eObj;
 
