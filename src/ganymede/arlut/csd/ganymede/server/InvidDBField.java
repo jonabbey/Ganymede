@@ -924,6 +924,92 @@ public final class InvidDBField extends DBField implements invid_field {
   // ****
 
   /**
+   * <p>This private helper method attempts to verify that a
+   * prospective bind operation in an vector add context can succeed
+   * without forcing an unbinding on a scalar remote field.</p>
+   *
+   * <p>This method <b>only</b> checks to see if we're trying to bind
+   * to an already bound scalar InvidDBField.  If there are any other
+   * schema problems that would cause a bind to fail, this method will
+   * return a null (success) ReturnVal, trusting the later bind attempt
+   * to fail and produce an informative message.</p>
+   *
+   * @return null on 'no problems' or 'a problem that bind will
+   * detect', and a non-null ReturnVal with a dialog encoded if there
+   * is a scalar conflict in place.
+   */
+
+  private final ReturnVal checkBindConflict(Invid newRemote)
+  {
+    short targetField;
+    DBObject remobj;
+    InvidDBField remoteField;
+    DBEditObject myParent;
+    DBSession mySession;
+
+    /* -- */
+
+    if (!getFieldDef().isSymmetric())
+      {
+	return null;
+      }
+
+    myParent = (DBEditObject) this.owner;
+    mySession = myParent.getSession();
+
+    targetField = getFieldDef().getTargetField();
+
+    remobj = mySession.viewDBObject(newRemote);
+
+    if (remobj == null)
+      {
+	return null;		// failure that bind will catch
+      }
+
+    try
+      {
+	remoteField = (InvidDBField) remobj.getField(targetField);
+      }
+    catch (ClassCastException ex)
+      {
+	return null;
+      }
+
+    if (remoteField == null)
+      {
+	// the target is either non-edited and doesn't contain the
+	// field in question, or it's been checked out for editing and
+	// the field in question just isn't defined.  it's either not
+	// a problem because there's no conflicting bind, or the
+	// schema is screwed up.  Not for us to worry about either way.
+
+	return null;
+      }
+
+    if (!remoteField.isVector() && remoteField.isDefined())
+      {
+	Invid myInvid = (Invid) remoteField.getValueLocal();
+
+	if (myInvid.equals(myParent.getInvid()))
+	  {
+	    return null;	// rebinding self.. bind() will catch this
+	  }
+
+	// this is the case we care about
+
+	// "Link Error"
+	// "Your operation could not be performed.  The target object {0} can only be linked to one {1} at a time."
+
+	return Ganymede.createErrorDialog(ts.l("checkBindConflict.subj"),
+					  ts.l("checkBindConflict.overlink", 
+					       remobj.getLabel(),
+					       this.getOwner().getTypeName()));
+      }
+
+    return null;
+  }
+
+  /**
    * <p>This method is used to link the remote invid to this checked-out invid
    * in accordance with this field's defined symmetry constraints.</p>
    *
@@ -2725,6 +2811,17 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
+    // check to make sure that we're not trying to add a remote
+    // reference that we can't safely link to without breaking a
+    // symmetric relationship.
+
+    retVal = checkBindConflict(remote);
+
+    if (retVal != null)
+      {
+	return retVal;
+      }
+
     checkkey = "addElement" + getName() + owner.getLabel();
 
     eObj.getSession().checkpoint(checkkey); // may block if another thread has already checkpointed this transaction
@@ -2941,6 +3038,22 @@ public final class InvidDBField extends DBField implements invid_field {
 	// if a wizard intercedes, we are going to let it take the ball.
 
 	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
+    // check to make sure that we're not trying to add a remote
+    // reference that we can't safely link to without breaking a
+    // symmetric relationship.
+
+    for (int i = 0; i < approvedValues.size(); i++)
+      {
+	Invid remote = (Invid) approvedValues.elementAt(i);
+
+	retVal = checkBindConflict(remote);
+
+	if (retVal != null)
 	  {
 	    return retVal;
 	  }
