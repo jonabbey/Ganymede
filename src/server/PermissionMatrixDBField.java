@@ -6,7 +6,7 @@
    'Admin' DBObjectBase class.
    
    Created: 27 June 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -39,6 +39,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   PermissionMatrixDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException, RemoteException
   {
+    super();			// initialize UnicastRemoteObject
+
     value = values = null;
     this.owner = owner;
     this.definition = definition;
@@ -59,6 +61,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   PermissionMatrixDBField(DBObject owner, DBObjectBaseField definition) throws RemoteException
   {
+    super();			// initialize UnicastRemoteObject
+
     this.owner = owner;
     this.definition = definition;
     
@@ -76,13 +80,29 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermissionMatrixDBField(DBObject owner, PermissionMatrixDBField field) throws RemoteException
   {
+    super();			// initialize UnicastRemoteObject
+
     value = values = null;
 
     this.definition = field.definition;
     this.owner = owner;
-    this.matrix = field.matrix.clone();
+    this.matrix = (Hashtable) field.matrix.clone();
 
     defined = true;
+  }
+
+  // we never allow setValue
+
+  public boolean verifyTypeMatch(Object v)
+  {
+    return false;
+  }
+
+  // we never allow setValue
+
+  public boolean verifyNewValue(Object v)
+  {
+    return false;
   }
 
   // fancy equals method really does check for value equality
@@ -174,7 +194,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     while (keys.hasMoreElements())
       {
 	key = (String) keys.nextElement();
-	pe = (PermEntry) keys.get(key);
+	pe = (PermEntry) matrix.get(key);
 
 	out.writeUTF(key);
 	pe.emit(out);
@@ -244,8 +264,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	throw new RuntimeException("caught remote: " + ex);
       }
-
-    return null;
   }
 
   /**
@@ -266,8 +284,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	throw new RuntimeException("caught remote: " + ex);
       }
-
-    return null;
   }
 
   /**
@@ -381,11 +397,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   private String matrixEntry(short baseID, short fieldID)
   {
-    return (String) baseID + ":" + fieldID;
+    return (baseID + ":" + fieldID);
   }
   
   private String matrixEntry(short baseID)
   {
-    return (String) baseID + "::";
+    return (baseID + "::");
   }
 }

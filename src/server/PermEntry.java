@@ -5,13 +5,15 @@
    This class holds the basic per-object / per-field access control bits.
    
    Created: 27 June 1997
-   Version: $Revision: 1.4 $ %D%
+   Version: $Revision: 1.5 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
 package arlut.csd.ganymede;
+
+import java.io.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -43,10 +45,14 @@ public class PermEntry implements java.io.Serializable {
   {
     PermEntry pe;
 
+    /* -- */
+
     if (!(obj.getClass().equals(this.getClass())))
       {
 	return false;
       }
+
+    pe = (PermEntry) obj;
 
     return ((visible == pe.visible) && (editable == pe.editable) && (create == pe.create));
   }
