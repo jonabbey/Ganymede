@@ -5,7 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -220,6 +220,30 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     return success;
+  }
+
+  /**
+   *
+   * This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this DBObject type when the
+   * user only has editing access for the source InvidDBField and not
+   * the target.<br><br>
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   * @param object The object that the link is to be created in
+   * @param fieldID The field that the link is to be created in
+   *
+   */
+
+  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  {
+    if (fieldID == userSchema.GROUPLIST)
+      {
+	return true;
+      }
+
+    return super.anonymousLinkOK(object, fieldID);
   }
 
   /**
@@ -808,6 +832,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return super.obtainChoiceList(field);
       }
   }
+
+  /**
+   *
+   * We update the groupChoices list to contain all of the groups
+   * the user is currently in.
+   *
+   */
 
   void updateGroupChoiceList()
   {
