@@ -45,7 +45,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     OKButton,
     CancelButton;
 
-  JBufferedPane 
+  JPanel 
     panel,
     textPanel,
     mainPanel,
@@ -130,7 +130,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 
     // Set up the text box at the top
 
-    textPanel = new JBufferedPane();
+    textPanel = new JPanel();
     textPanel.setLayout(new BorderLayout());
 
     //textLabel = new JMultiLineLabel(Resource.getText());
@@ -148,7 +148,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 	textPanel.add("West", imageCanvas);
       }
 
-    buttonPanel = new JBufferedPane();
+    buttonPanel = new JPanel();
 
     OKButton = new JButton(Resource.OKText);
     OKButton.addActionListener(this);
@@ -163,7 +163,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
 	buttonPanel.add(CancelButton);
       }
 
-    mainPanel = new JBufferedPane();
+    mainPanel = new JPanel();
 
     mainPanel.setLayout(new BorderLayout());
     mainPanel.add("North", textBorder);
@@ -376,7 +376,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     return true;
   }
 
-  void addRow(JBufferedPane parent, Component comp,  String label, int row)
+  void addRow(JPanel parent, Component comp,  String label, int row)
   {
     Label l = new Label(label);
     
@@ -385,7 +385,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     parent.invalidate();
   }
 
-  void addSeparator(JBufferedPane parent, Component comp, int row)
+  void addSeparator(JPanel parent, Component comp, int row)
   {
     parent.add("0 " + row + " 2 1 hH", comp);
   }
