@@ -62,7 +62,7 @@ Thanks to Maura Mathieu (maura.mathieu@sdis66.fr) and Kent Wick
 Per Kent Wick, the RMIGC definition in the runServer templates has
 been surrounded by single quotes.
 
-6. [SERVER] Preparations for logging to PostGreSQL
+7. [SERVER] Preparations for logging to PostGreSQL
 
 The Ganymede log classes have been reworked in preparation for
 supporting SQL databases for log event storage and retrieval.  1.0.12
@@ -74,7 +74,7 @@ files necessary for initializing the database and what-not.
 
 Next release if all works out well.
 
-7. [SERVER, CLIENT] Reworked client and server to support direct login
+8. [SERVER, CLIENT] Reworked client and server to support direct login
 
 In all previous versions of Ganymede, the login process is a two-step
 dance.. first the client (GUI or xmlclient) calls up the appropriate
@@ -108,16 +108,16 @@ with Ganymede 1.0.12.  Surrounding the offending calls with an
 appropriate throw..catch clause should be all you need to do to make
 your code compatible with 1.0.12.
 
-8. [CLIENT] Improvements to text messages in dialogs
+9. [CLIENT] Improvements to text messages in dialogs
 
 The common composite dialog class used in the Ganymede client and
 admin console has been improved to support adaptive word wrapping and
 scrollbars.  This change was motivated by the client's new ability to
 report remote exception traces in a dialog.
 
-9. [CLIENT/CONSOLE/SERVER] Reworked RMI API to be system firewall transparent
+10. [CLIENT/CONSOLE/SERVER] Reworked RMI API to be system firewall transparent
 
-This is an extension of the 1.0.12#7 work.  It used to be that the
+This is an extension of the 1.0.12#8 work.  It used to be that the
 server used RMI calls to the client and admin console to send
 notification for build status and force off (on the client) and all of
 the data displays on the admin console.  The problem with this is that
@@ -136,7 +136,7 @@ firewall.
 This change also speeds up login and noticeably reduces the memory
 loading on the server.  A win/win/win deal.
 
-10. [CLIENT] Fixed gclient.getObjectHandle()
+11. [CLIENT] Fixed gclient.getObjectHandle()
 
 The getObjectHandle() method in the client's gclient class didn't
 properly deal with an empty list back from the GanymedeSession's
@@ -145,26 +145,26 @@ rather than a dialog being shown in certain circumstances in the
 client in which a user tries to edit an object reference that he
 doesn't have permission to edit or view.
 
-11. [SERVER] Improved namespace conflict message
+12. [SERVER] Improved namespace conflict message
 
 The DBField class in several places had code to report namespace
 conflicts.  Created a common method to generate a more detailed error
 dialog which informs the user what object/field is conflicting.
 
-12. [SERVER] Cleaned up DBObject.getTypeName()/getTypeDesc()
+13. [SERVER] Cleaned up DBObject.getTypeName()/getTypeDesc()
 
 The DBObject class had two methods, getTypeName() and getTypeDesc()
 which did exactly the same thing.  Embarassing.  I went through and
 changed all instances of DBObject.getTypeDesc() to
 DBObject.getTypeName() calls, in keeping with the db_object interface.
 
-13. [CLIENT] Added row count indicator to query window
+14. [CLIENT] Added row count indicator to query window
 
 In response to a so-simple-it's-brilliant suggestion by David Cummins,
 I have tweaked the Ganymede client to display a count of the rows
 returned in the title bar of the client's query results window.
 
-14. [CLIENT] Various tweaks for better behavior under JDK 1.5 beta
+15. [CLIENT] Various tweaks for better behavior under JDK 1.5 beta
 
 I've made some slight tweaks to the client and console's GUI layout to
 improve behavior when running under the JDK 1.5 beta.  This includes
