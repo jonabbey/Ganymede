@@ -2,8 +2,8 @@
 #
 # Ganymede server jar build script
 #
-# Version: $Revision: 1.2 $
-# Date: $Date: 1999/01/19 23:58:20 $
+# Version: $Revision: 1.3 $
+# Date: $Date: 1999/01/20 04:16:03 $
 #
 ############################################################
 
@@ -24,7 +24,7 @@ cd $builddir
 
 echo "Building admin jar"
 
-mv ganymedeServer.jar ganymedeServer.jar.old
+mv -f ganymedeServer.jar ganymedeServer.jar.old
 
 cd server_classes
 
