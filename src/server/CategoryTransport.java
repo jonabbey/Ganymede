@@ -7,7 +7,7 @@
    and base structures on the server to the client.
    
    Created: 12 February 1998
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -111,7 +111,7 @@ public class CategoryTransport implements java.io.Serializable {
 
 		if (session != null)
 		  {
-		    if (session.getPerm(base.getTypeID()).isEditable())
+		    if (session.getPerm(base.getTypeID(), true).isEditable())
 		      {
 			result = true;
 			addBaseInfo(base);
@@ -163,7 +163,7 @@ public class CategoryTransport implements java.io.Serializable {
 	      {
 		DBObjectBase base = (DBObjectBase) node;
 
-		if (session.getPerm(base.getTypeID()).isEditable())
+		if (session.getPerm(base.getTypeID(), true).isEditable())
 		  {
 		    result = true;
 		  }
@@ -203,7 +203,7 @@ public class CategoryTransport implements java.io.Serializable {
 	      {
 		DBObjectBase base = (DBObjectBase) node;
 
-		if (session.getPerm(base.getTypeID()).isVisible())
+		if (session.getPerm(base.getTypeID(), true).isVisible())
 		  {
 		    result = true;
 		  }
