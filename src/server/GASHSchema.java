@@ -6,7 +6,7 @@
    Admin console.
    
    Created: 24 April 1997
-   Version: $Revision: 1.39 $ %D%
+   Version: $Revision: 1.40 $ %D%
    Module By: Jonathan Abbey and Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1601,7 +1601,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
     card;
 
   Panel 
-    mainPanel,
     editPanel;
 
   GASHSchema 
@@ -1671,9 +1670,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
 
     fieldDef = null;
     this.owner = owner;
-    
-    mainPanel = new Panel();
-    mainPanel.setLayout(new BorderLayout());
     
     editPanel = new InsetPanel(10, 10, 10, 10);
     editPanel.setLayout(new TableLayout(false));
@@ -1869,7 +1865,6 @@ class BaseFieldEditor extends ScrollPane implements setValueCallback, ActionList
       }
 
     editPanel.doLayout();
-    mainPanel.invalidate();
     this.validate();
   }
 
