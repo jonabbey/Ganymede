@@ -137,8 +137,6 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     textLabel = new JLabel(Resource.getText());
     textPanel.add("Center", textLabel);
       
-    textBorder = new EtchedBorder(textPanel, 2, 5);
-      
     image = Resource.getImage();
 
     if (image != null)
@@ -166,7 +164,7 @@ public class StringDialog extends Dialog implements ActionListener, JsetValueCal
     mainPanel = new JPanel();
 
     mainPanel.setLayout(new BorderLayout());
-    mainPanel.add("North", textBorder);
+    mainPanel.add("North", textPanel);
       
     mainPanel.add("South", buttonPanel);
     this.setSize(600, 600);
