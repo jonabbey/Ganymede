@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.35 $
-   Last Mod Date: $Date: 2000/11/24 04:43:59 $
+   Version: $Revision: 1.36 $
+   Last Mod Date: $Date: 2000/11/24 06:41:46 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * the file to the server for server-side integration into the Ganymede
  * database.</p>
  *
- * @version $Revision: 1.35 $ $Date: 2000/11/24 04:43:59 $ $Name:  $
+ * @version $Revision: 1.36 $ $Date: 2000/11/24 06:41:46 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -95,6 +95,14 @@ public final class xmlclient implements ClientListener {
    */
 
   public static final int majorVersion = 1;
+
+  /**
+   * <p>This minor version number is provided to the server
+   * when handling raw schema files (files whose document element
+   * is &lt;ganyschema&gt;.</p>
+   */
+
+  public static final int minorVersion = 0;
 
   // ---
 
@@ -508,7 +516,7 @@ public final class xmlclient implements ClientListener {
 
     if (schemaOnly)
       {
-	String startWrap = "<ganymede>\n";
+	String startWrap = "<ganymede major=\"" + majorVersion + "\" minor=\"" + minorVersion + "\">\n";
 	data = startWrap.getBytes();
 
 	retVal = xSession.xmlSubmit(data);
