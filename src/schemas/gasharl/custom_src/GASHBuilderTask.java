@@ -6,8 +6,8 @@
    
    Created: 21 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.40 $
-   Last Mod Date: $Date: 2000/07/28 20:43:03 $
+   Version: $Revision: 1.41 $
+   Last Mod Date: $Date: 2000/08/05 17:23:03 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1770,7 +1770,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeSysFile(): couldn't open rshNT.txt file: " + ex);
+	System.err.println("GASHBuilderTask.writeNTFile(): couldn't open rshNT.txt file: " + ex);
 	return false;
       }
 
@@ -2444,6 +2444,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // we need to assemble the information that gash uses for our output
 
     MAC = (String) object.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
+
+    // We want to use dashes to separate the hex bytes in our ethernet addr
+
+    MAC = MAC.replace(':','-');
 
     // an interface is contained in the associated system, so we check our
     // containing object for its name.. we assume that this interface *does*
