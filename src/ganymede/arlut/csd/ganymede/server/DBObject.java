@@ -805,8 +805,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	if (val == -1)
 	  {
-	    //	    Ganymede.debug("val == -1");
-	    return "<" + getTypeName() + ":" + getID() + ">";
+	    // if we have no label field and no get label hook, we'll
+	    // return a guaranteed unique label based on our invid
+	    // number
+
+	    return getTypeName() + "[" + getID() + "]";
 	  }
 	else
 	  {
@@ -825,7 +828,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 		if (!f.isDefined())
 		  {
-		    return "<" + getTypeName() + ":" + getID() + ">";
+		    return getTypeName() + "[" + getID() + "]";
 		  }
 		else
 		  {
