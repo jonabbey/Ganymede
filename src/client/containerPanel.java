@@ -5,7 +5,7 @@
     This is the container for all the information in a field.  Used in window Panels.
 
     Created:  11 August 1997
-    Version: $Revision: 1.87 $ %D%
+    Version: $Revision: 1.88 $ %D%
     Module By: Michael Mulvaney
     Applied Research Laboratories, The University of Texas at Austin
 
@@ -45,7 +45,7 @@ import arlut.csd.Util.VecQuickSort;
  * multiple values.  
  */
 
-public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener{  
+public class containerPanel extends JPanel implements ActionListener, JsetValueCallback, ItemListener {
 
   boolean debug = false;
   static final boolean debug_persona = false;
@@ -370,10 +370,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	if (progressBar != null)
 	  {
 	    int totalSize = infoVector.size() + 2;
+
 	    for (int i = 0; i < infoSize; i++)
 	      {
 		FieldInfo info = (FieldInfo)infoVector.elementAt(i);
 		FieldTemplate template = findtemplate(info.getID());
+
 		if (template.isArray())
 		  {
 		    if ((template.getType() == FieldType.INVID) && template.isEditInPlace())
@@ -478,6 +480,30 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 
   /**
    *
+   * This method is reponsible for cleaning up after this
+   * containerPanel when it is shut down.
+   * 
+   */
+
+  public synchronized void unregister()
+  {
+    Enumeration enum = shortToComponentHash.elements();
+
+    while (enum.hasMoreElements())
+      {
+	Object x = enum.nextElement();
+
+	if (x instanceof JdateField)
+	  {
+	    JdateField df = (JdateField) x;
+
+	    df.unregister();
+	  }
+      }
+  }
+
+  /**
+   *
    * Helper method to keep the load() method clean.
    *
    */
@@ -558,6 +584,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * Get the invid for the object in this containerPanel.
    *
    */
+
   public Invid getObjectInvid()
   {
     if (invid == null)
@@ -605,6 +632,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    * This method returns false when the containerPanel loading has
    * been interupted.  The vectorPanel checks this.  
    */
+
   public boolean keepLoading()
   {
     return keepLoading;
@@ -752,7 +780,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else 
 	  {
-	    if (! c.equals(currentlyChangingComponent))
+	    if (!c.equals(currentlyChangingComponent))
 	      {
 		updateComponent(c);
 	      }
@@ -1174,14 +1202,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     /* -- */
 
     // If the field is not editable, there will be no available vector
+
     if (ss.isEditable())
       {
-	
 	key = field.choicesKey();
 	
 	if (key == null)
 	  {
 	    QueryResult qr = field.choices();
+
 	    if (qr != null)
 	      {
 		available = qr.getListHandles();
@@ -1224,6 +1253,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
       }
 
     // now find the chosen vector
+
     chosen = field.getValues();
 
     ss.update(available, chosen);
@@ -1238,14 +1268,15 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     /* -- */
 
     // Only editable fields have available vectors
+
     if (ss.isEditable())
       {
-
 	key = field.choicesKey();
     
 	if (key == null)
 	  {
 	    QueryResult qr = field.choices();
+
 	    if (qr != null)
 	      {
 		available = qr.getListHandles();
@@ -1285,10 +1316,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 	  }
-
       }
     
     QueryResult res = field.encodedValues();
+
     if (res != null)
       {
 	chosen = res.getListHandles();
@@ -1355,8 +1386,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-  writer.close();
-
+    writer.close();
   }
 
   /**
@@ -2684,10 +2714,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    if (debug)
 	      {
 		println("Setting current value to <none>, because the current choice is null. " + currentChoice);
-	      }	  
+	      }
+
 	    combo.addItem("<none>");
 	    combo.setSelectedItem("<none>");
-
 
 	    /*
 	     * Currently, string_fields aren't smart enough to
@@ -2726,8 +2756,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		combo.setSelectedItem(currentChoice);
 	      }
 	  }
-
-
 
 	if (editable && fieldInfo.isEditable())
 	  {
@@ -2814,7 +2842,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addPasswordField(pass_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
+  private void addPasswordField(pass_field field, 
+				FieldInfo fieldInfo, 
+				FieldTemplate fieldTemplate) throws RemoteException
   {
     JstringField sf;
 
@@ -2873,7 +2903,9 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addNumericField(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
+  private void addNumericField(db_field field, 
+			       FieldInfo fieldInfo, 
+			       FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
@@ -2925,10 +2957,12 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addDateField(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
+  private void addDateField(db_field field, 
+			    FieldInfo fieldInfo, 
+			    FieldTemplate fieldTemplate) throws RemoteException
   {
     JdateField df = new JdateField();
-		      
+
     objectHash.put(df, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), df);
     df.setEditable(editable && fieldInfo.isEditable());
@@ -2948,7 +2982,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	df.setCallback(this);
       }
 
-    addRow( df, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
+    addRow(df, templates.indexOf(fieldTemplate), 
+	   fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
@@ -2958,18 +2993,22 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addBooleanField(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
+  private void addBooleanField(db_field field, FieldInfo fieldInfo, 
+			       FieldTemplate fieldTemplate) throws RemoteException
   {
-    //JcheckboxField cb = new JcheckboxField();
-
     JCheckBox cb = new JCheckBox();
+
+    /* -- */
+
     objectHash.put(cb, field);
     shortToComponentHash.put(new Short(fieldInfo.getID()), cb);
     cb.setEnabled(editable && fieldInfo.isEditable());
+
     if (editable && fieldInfo.isEditable())
       {
 	cb.addActionListener(this);	// register callback
       }
+
     try
       {
 	cb.setSelected(((Boolean)fieldInfo.getValue()).booleanValue());
@@ -2982,8 +3021,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
       }
 
-    addRow( cb, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
-    
+    addRow(cb, templates.indexOf(fieldTemplate), 
+	   fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
@@ -2993,7 +3032,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
    *
    */
 
-  private void addPermissionField(db_field field, FieldInfo fieldInfo, FieldTemplate fieldTemplate) throws RemoteException
+  private void addPermissionField(db_field field, FieldInfo fieldInfo,
+				  FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
@@ -3011,8 +3051,8 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 				     false,
 				     fieldTemplate.getName());
     
-    addRow( pb, templates.indexOf(fieldTemplate), fieldTemplate.getName(), fieldInfo.isVisible());
-    
+    addRow(pb, templates.indexOf(fieldTemplate),
+	   fieldTemplate.getName(), fieldInfo.isVisible());
   }
 
   /**
@@ -3042,7 +3082,7 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	if (debug)
 	  {
 	    println("Hey, " + fieldTemplate.getName() +
-			       " is edit in place but not a vector, what gives?");
+		    " is edit in place but not a vector, what gives?");
 	  }
 
 	addRow(new JLabel("edit in place non-vector"), 
@@ -3061,9 +3101,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	    
 	    String label = (String)gc.getSession().viewObjectLabel(thisInvid);
 
-	    //JstringField sf = new JstringField(20, false);
-	    //sf.setText(label);
-
 	    if (label == null)
 	      {
 		if (debug)
@@ -3074,18 +3111,14 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 		label = "Permission denied!";
 	      }
 
-	    //JPanel p = new JPanel(new BorderLayout());
-
 	    JButton b = new JButton(label);
 
 	    b.addActionListener(new ActionListener() {
 	      public void actionPerformed(ActionEvent e)
 		{
 		  getgclient().viewObject(thisInvid);
-		}});
-
-	    //p.add("Center", sf);
-	    //p.add("West", b);
+		}
+	    });
 
 	    addRow(b, 
 		   templates.indexOf(fieldTemplate), 
@@ -3094,10 +3127,10 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
 	  }
 	else
 	  {
-	    addRow( new JTextField("null invid"), 
-		    templates.indexOf(fieldTemplate), 
-		    fieldTemplate.getName(), 
-		    fieldInfo.isVisible());
+	    addRow(new JTextField("null invid"), 
+		   templates.indexOf(fieldTemplate), 
+		   fieldTemplate.getName(), 
+		   fieldInfo.isVisible());
 	  }
 
 	return;
@@ -3369,7 +3402,6 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
   //
   //
 
-
   public static boolean comboBoxContains(JComboBox combo, Object o)
   {
     boolean found = false;
@@ -3419,9 +3451,11 @@ class stringComboNoneListener implements ItemListener {
     if (e.getStateChange() == ItemEvent.DESELECTED)
       {
 	Object item = combo.getSelectedItem();
+
 	if (item == null)
 	  {
 	    // If <none> is not already in there, add it
+
 	    if (!containerPanel.comboBoxContains(combo, "<none>"))
 	      {
 		combo.addItem("<none>");
@@ -3442,6 +3476,4 @@ class stringComboNoneListener implements ItemListener {
 	  }
       }
   }
-
-
 }
