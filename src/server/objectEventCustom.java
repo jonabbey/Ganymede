@@ -6,8 +6,8 @@
    
    Created: 9 July 1998
    Release: $Name:  $
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2003/01/31 02:24:22 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2003/03/12 02:53:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -238,7 +238,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == SchemaConstants.ObjectEventObjectName)
       {

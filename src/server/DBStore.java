@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.150 $
-   Last Mod Date: $Date: 2002/08/07 18:39:20 $
+   Version: $Revision: 1.151 $
+   Last Mod Date: $Date: 2003/03/12 02:53:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -107,7 +107,7 @@ import arlut.csd.Util.*;
  * {@link arlut.csd.ganymede.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</P>
  *
- * @version $Revision: 1.150 $ %D%
+ * @version $Revision: 1.151 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2358,9 +2358,16 @@ public final class DBStore {
     DBEditObject eO = null;
     ReturnVal retVal;
 
-    if (session.getGSession().findLabeledObject(token, SchemaConstants.EventBase) != null)
+    try
       {
-	return null;
+	if (session.getGSession().findLabeledObject(token, SchemaConstants.EventBase) != null)
+	  {
+	    return null;
+	  }
+      }
+    catch (NotLoggedInException ex)
+      {
+	throw new Error("Mysterious not logged in exception: " + ex.getMessage());
       }
 
     System.err.println("Creating " + token + " system event object");

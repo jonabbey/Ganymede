@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.7 $
-   Last Mod Date: $Date: 2003/02/11 02:29:34 $
+   Version: $Revision: 1.8 $
+   Last Mod Date: $Date: 2003/03/12 02:53:06 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -72,7 +72,7 @@ import java.util.Hashtable;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.GanymedeXMLSession GanymedeXMLSession}.</p>
  *
- * @version $Revision: 1.7 $ $Date: 2003/02/11 02:29:34 $ $Name:  $
+ * @version $Revision: 1.8 $ $Date: 2003/03/12 02:53:06 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -332,7 +332,7 @@ public class xmlobject {
    * <p>This method uses the standard {@link arlut.csd.ganymede.ReturnVal ReturnVal}
    * return semantics.</p> */
 
-  public ReturnVal editOnServer(Session session)
+  public ReturnVal editOnServer(Session session) throws NotLoggedInException
   {
     ReturnVal result;
     Invid localInvid;
@@ -389,7 +389,7 @@ public class xmlobject {
    * @param mode 0 to register all non-invids, 1 to register just invids, 2 to register both
    */
 
-  public ReturnVal registerFields(int mode)
+  public ReturnVal registerFields(int mode) throws NotLoggedInException
   {
     ReturnVal result = null;
 
@@ -463,7 +463,7 @@ public class xmlobject {
    * performing a lookup on the server if necessary.</p> 
    */
 
-  public Invid getInvid()
+  public Invid getInvid() throws NotLoggedInException
   {
     if (invid == null && !knownNonExistent)
       {

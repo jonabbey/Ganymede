@@ -2,8 +2,8 @@
 #
 # sync_tree.client
 #
-# $Revision: 1.10 $
-# $Date: 2001/07/14 02:03:31 $
+# $Revision: 1.11 $
+# $Date: 2003/03/12 02:54:54 $
 #
 # This perl script is designed to create a tree of files
 # suitable for jar'ing into a downloadable archive.  Only
@@ -23,7 +23,7 @@
 		     "FieldInfo", "FieldTemplate", "FieldType",
 		     "Invid", "NameSpace", "PermEntry", "PermMatrix",
 		     "Server", "Session", "SpaceNode", "SchemaConstants",
-		     "XMLSession",
+		     "XMLSession", "NotLoggedInException",
 
 		     # remote interfaces for fields
 

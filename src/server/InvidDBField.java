@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.173 $
-   Last Mod Date: $Date: 2002/08/07 18:39:21 $
+   Version: $Revision: 1.174 $
+   Last Mod Date: $Date: 2003/03/12 02:53:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.173 $ %D%
+ * @version $Revision: 1.174 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -3184,7 +3184,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * @see arlut.csd.ganymede.invid_field
    */
 
-  public ReturnVal createNewEmbedded()
+  public ReturnVal createNewEmbedded() throws NotLoggedInException
   {
     return createNewEmbedded(false);
   }
@@ -3206,7 +3206,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * field before creating the new object.  
    */
 
-  public synchronized ReturnVal createNewEmbedded(boolean local)
+  public synchronized ReturnVal createNewEmbedded(boolean local) throws NotLoggedInException
   {
     ReturnVal retVal = null;
 
@@ -4036,7 +4036,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * @see arlut.csd.ganymede.invid_field
    */
 
-  public QueryResult choices()
+  public QueryResult choices() throws NotLoggedInException
   {
     return choices(true);	// by default, the filters are on
   }
@@ -4048,7 +4048,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * @see arlut.csd.ganymede.invid_field
    */
 
-  public QueryResult choices(boolean applyFilter)
+  public QueryResult choices(boolean applyFilter) throws NotLoggedInException
   {
     DBEditObject eObj;
 
@@ -4196,7 +4196,15 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (qr == null && eObj.getSession().isInteractive())
 	      {
-		qr = eObj.obtainChoiceList(this); // allow any value, even if filtered
+		try
+		  {
+		    qr = eObj.obtainChoiceList(this); // allow any value, even if filtered
+		  }
+		catch (NotLoggedInException ex)
+		  {
+		    return Ganymede.createErrorDialog("Error",
+						      "Not Logged In");
+		  }
 	      }
 
 	    if (qr != null)

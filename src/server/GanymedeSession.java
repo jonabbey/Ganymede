@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.264 $
-   Last Mod Date: $Date: 2003/03/11 20:27:45 $
+   Version: $Revision: 1.265 $
+   Last Mod Date: $Date: 2003/03/12 02:53:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.264 $ $Date: 2003/03/11 20:27:45 $
+ * @version $Revision: 1.265 $ $Date: 2003/03/12 02:53:05 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -867,7 +867,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     if (client == null)
       {
-	return;			// server-local session
+	return;			// server-local session, we won't time it out
       }
 
     long millisIdle = System.currentTimeMillis() - lastActionTime.getTime();
@@ -1423,7 +1423,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public Vector getPersonae()
+  public Vector getPersonae() throws NotLoggedInException
   {
     checklogin();
 
@@ -1470,7 +1470,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized boolean selectPersona(String persona, String password)
+  public synchronized boolean selectPersona(String persona, String password) throws NotLoggedInException
   {
     checklogin();		// this resets lastAction
 
@@ -1633,7 +1633,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * with all of the owner groups those owner groups own, and so on.</p>
    */
 
-  public synchronized QueryResult getOwnerGroups()
+  public synchronized QueryResult getOwnerGroups() throws NotLoggedInException
   {
     checklogin();
 
@@ -1689,7 +1689,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * ownergroup objects.
    */
 
-  public synchronized ReturnVal setDefaultOwner(Vector ownerInvids)
+  public synchronized ReturnVal setDefaultOwner(Vector ownerInvids) throws NotLoggedInException
   {
     checklogin();
 
@@ -1769,7 +1769,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
    */
 
-  public synchronized ReturnVal filterQueries(Vector ownerInvids)
+  public synchronized ReturnVal filterQueries(Vector ownerInvids) throws NotLoggedInException
   {
     checklogin();
 
@@ -1806,7 +1806,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public Vector getTypes()
+  public Vector getTypes() throws NotLoggedInException
   {
     checklogin();
 
@@ -1841,7 +1841,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public Category getRootCategory()
+  public Category getRootCategory() throws NotLoggedInException
   {
     checklogin();
 
@@ -1859,7 +1859,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public CategoryTransport getCategoryTree()
+  public CategoryTransport getCategoryTree() throws NotLoggedInException
   {
     return this.getCategoryTree(true);
   }
@@ -1880,7 +1880,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized CategoryTransport getCategoryTree(boolean hideNonEditables)
+  public synchronized CategoryTransport getCategoryTree(boolean hideNonEditables) throws NotLoggedInException
   {
     checklogin();
 
@@ -1949,7 +1949,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized BaseListTransport getBaseList()
+  public synchronized BaseListTransport getBaseList() throws NotLoggedInException
   {
     checklogin();
 
@@ -1975,7 +1975,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public Vector getFieldTemplateVector(short baseId)
+  public Vector getFieldTemplateVector(short baseId) throws NotLoggedInException
   {
     checklogin();
 
@@ -2001,7 +2001,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public ReturnVal openTransaction(String describe)
+  public ReturnVal openTransaction(String describe) throws NotLoggedInException
   {
     return this.openTransaction(describe, true);
   }
@@ -2022,7 +2022,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal openTransaction(String describe, boolean interactive)
+  public synchronized ReturnVal openTransaction(String describe, boolean interactive) throws NotLoggedInException
   {
     checklogin();
 
@@ -2046,7 +2046,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  }
 	else
 	  {
-	    sendMessage(ClientMessage.BUILDSTATUS, "building2");
+	    sendMessage(ClientMessage.BUILDSTATUS, "idle");
 	  }
       }
 
@@ -2100,7 +2100,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session 
    */
 
-  public synchronized ReturnVal commitTransaction(boolean abortOnFail)
+  public synchronized ReturnVal commitTransaction(boolean abortOnFail) throws NotLoggedInException
   {
     checklogin();
 
@@ -2189,7 +2189,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session 
    */
 
-  public ReturnVal commitTransaction()
+  public ReturnVal commitTransaction() throws NotLoggedInException
   {
     return commitTransaction(false);
   }
@@ -2205,7 +2205,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal abortTransaction()
+  public synchronized ReturnVal abortTransaction() throws NotLoggedInException
   {
     checklogin();
 
@@ -2250,7 +2250,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @param body The content of the message.
    */
 
-  public void sendMail(String address, String subject, StringBuffer body)
+  public void sendMail(String address, String subject, StringBuffer body) throws NotLoggedInException
   {
     checklogin();
 
@@ -2349,7 +2349,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  public void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody)
+  public void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody) throws NotLoggedInException
   {
     checklogin();
 
@@ -2453,7 +2453,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized QueryResult queryInvids(Vector invidVector)
+  public synchronized QueryResult queryInvids(Vector invidVector) throws NotLoggedInException
   {
     checklogin();
 
@@ -2510,7 +2510,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @param type Object type id number
    */
 
-  public Invid findLabeledObject(String name, short type)
+  public Invid findLabeledObject(String name, short type) throws NotLoggedInException
   {
     Invid value;
 
@@ -2571,7 +2571,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized DumpResult dump(Query query)
+  public synchronized DumpResult dump(Query query) throws NotLoggedInException
   {
     checklogin();
 
@@ -2826,7 +2826,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session 
    */
 
-  public QueryResult query(Query query)
+  public QueryResult query(Query query) throws NotLoggedInException
   {
     checklogin();
     return queryDispatch(query, false, true, null, null);
@@ -2845,7 +2845,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * method will be used to generate the label for a result entry.
    */
 
-  public QueryResult query(Query query, DBEditObject perspectiveObject)
+  public QueryResult query(Query query, DBEditObject perspectiveObject) throws NotLoggedInException
   {
     checklogin();
 
@@ -3817,8 +3817,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public String viewObjectLabel(Invid invid)
   {
-    checklogin();
-
     // We don't check permissions here, as we use session.viewDBObject().
 
     // We have made the command decision that finding the label for an
@@ -3845,8 +3843,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public String describe(Invid invid)
   {
-    checklogin();
-
     // We don't check permissions here, as we use session.viewDBObject().
 
     // We have made the command decision that finding the label for an
@@ -3876,7 +3872,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public StringBuffer viewObjectHistory(Invid invid, Date since)
+  public StringBuffer viewObjectHistory(Invid invid, Date since) throws NotLoggedInException
   {
     return viewObjectHistory(invid, since, true);
   }
@@ -3893,7 +3889,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public StringBuffer viewObjectHistory(Invid invid, Date since, boolean fullTransactions)
+  public StringBuffer viewObjectHistory(Invid invid, Date since, boolean fullTransactions) throws NotLoggedInException
   {
     DBObject obj;
 
@@ -3946,7 +3942,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public StringBuffer viewAdminHistory(Invid invid, Date since)
+  public StringBuffer viewAdminHistory(Invid invid, Date since) throws NotLoggedInException
   {
     DBObject obj;
 
@@ -4023,7 +4019,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @return A ReturnVal carrying an object reference and/or error dialog
    */
 
-  public synchronized ReturnVal view_db_object(Invid invid)
+  public synchronized ReturnVal view_db_object(Invid invid) throws NotLoggedInException
   {
     ReturnVal result;
     db_object objref;
@@ -4122,7 +4118,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @return A ReturnVal carrying an object reference and/or error dialog
    */
 
-  public synchronized ReturnVal edit_db_object(Invid invid)
+  public synchronized ReturnVal edit_db_object(Invid invid) throws NotLoggedInException
   {
     ReturnVal result;
     db_object objref;
@@ -4245,7 +4241,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public ReturnVal create_db_object(short type)
+  public ReturnVal create_db_object(short type) throws NotLoggedInException
   {
     return this.create_db_object(type, false);
   }
@@ -4270,7 +4266,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @return A ReturnVal carrying an object reference and/or error dialog
    */
 
-  public synchronized ReturnVal create_db_object(short type, boolean embedded)
+  public synchronized ReturnVal create_db_object(short type, boolean embedded) throws NotLoggedInException
   {
     DBObject newObj;
     ReturnVal retVal;
@@ -4461,7 +4457,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal clone_db_object(Invid invid)
+  public synchronized ReturnVal clone_db_object(Invid invid) throws NotLoggedInException
   {
     DBObject vObj;
     DBEditObject newObj;
@@ -4531,7 +4527,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal inactivate_db_object(Invid invid) 
+  public synchronized ReturnVal inactivate_db_object(Invid invid) throws NotLoggedInException
   {
     DBObject vObj;
     DBEditObject eObj;
@@ -4611,7 +4607,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal reactivate_db_object(Invid invid)
+  public synchronized ReturnVal reactivate_db_object(Invid invid) throws NotLoggedInException
   {
     DBObject vObj;
     DBEditObject eObj;
@@ -4683,7 +4679,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @see arlut.csd.ganymede.Session
    */
 
-  public synchronized ReturnVal remove_db_object(Invid invid) 
+  public synchronized ReturnVal remove_db_object(Invid invid) throws NotLoggedInException
   {
     checklogin();
 
@@ -4789,7 +4785,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * GanymedeSession.</p>
    */
 
-  public ReturnVal getSchemaXML(FileReceiver receiver, boolean logOffOnFailure)
+  public ReturnVal getSchemaXML(FileReceiver receiver, boolean logOffOnFailure) throws NotLoggedInException
   {
     return this.sendXML(receiver, false, true, logOffOnFailure);
   }
@@ -4809,7 +4805,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * GanymedeSession.</p> 
    */
 
-  public ReturnVal getDataXML(FileReceiver receiver, boolean logOffOnFailure)
+  public ReturnVal getDataXML(FileReceiver receiver, boolean logOffOnFailure) throws NotLoggedInException
   {
     return this.sendXML(receiver, true, false, logOffOnFailure);
   }
@@ -4829,7 +4825,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * GanymedeSession.</p> 
    */
 
-  public ReturnVal getXMLDump(FileReceiver receiver, boolean logOffOnFailure)
+  public ReturnVal getXMLDump(FileReceiver receiver, boolean logOffOnFailure) throws NotLoggedInException
   {
     return this.sendXML(receiver, true, true, logOffOnFailure);
   }
@@ -4840,7 +4836,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * interface.</p>
    */
 
-  private ReturnVal sendXML(FileReceiver receiver, boolean sendData, boolean sendSchema, boolean logOffOnFailure)
+  private ReturnVal sendXML(FileReceiver receiver, boolean sendData, boolean sendSchema, boolean logOffOnFailure) throws NotLoggedInException
   {
     checklogin();
 
@@ -5038,7 +5034,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * @return a Vector of DBObject references.
    */
 
-  public synchronized Vector getObjects(short baseid)
+  public synchronized Vector getObjects(short baseid) throws NotLoggedInException
   {
     DBObjectBase base;
 
@@ -6611,11 +6607,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    *
    */
 
-  void checklogin()
+  void checklogin() throws NotLoggedInException
   {
     if (!loggedInSemaphore.isSet())
       {
-	throw new IllegalArgumentException("Client no longer logged in.");
+	throw new NotLoggedInException();
       }
 
     lastActionTime.setTime(System.currentTimeMillis());

@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.168 $
-   Last Mod Date: $Date: 2003/03/10 19:31:29 $
+   Version: $Revision: 1.169 $
+   Last Mod Date: $Date: 2003/03/12 02:53:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -114,7 +114,7 @@ import arlut.csd.Util.booleanSemaphore;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.</p>
  *   
- * @version $Revision: 1.168 $ $Date: 2003/03/10 19:31:29 $ $Name:  $
+ * @version $Revision: 1.169 $ $Date: 2003/03/12 02:53:04 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1776,7 +1776,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * still be overridden to do customization, if needed.</p>
    */
 
-  public ReturnVal createNewEmbeddedObject(InvidDBField field)
+  public ReturnVal createNewEmbeddedObject(InvidDBField field) throws NotLoggedInException
   {    
     DBEditObject newObject;
     DBObjectBase targetBase;
@@ -2104,7 +2104,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * deadlocks.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.isEditable() && (field instanceof InvidDBField) && 
 	!field.isEditInPlace())

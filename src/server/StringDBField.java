@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.47 $
-   Last Mod Date: $Date: 2002/03/29 03:57:58 $
+   Version: $Revision: 1.48 $
+   Last Mod Date: $Date: 2003/03/12 02:53:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -657,7 +657,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  public boolean canChoose()
+  public boolean canChoose() throws NotLoggedInException
   {
     if (owner instanceof DBEditObject)
       {
@@ -679,7 +679,7 @@ public class StringDBField extends DBField implements string_field {
    *
    */
 
-  public boolean mustChoose()
+  public boolean mustChoose() throws NotLoggedInException
   {
     if (!canChoose())
       {
@@ -717,7 +717,7 @@ public class StringDBField extends DBField implements string_field {
    * @see arlut.csd.ganymede.string_field
    */
 
-  public QueryResult choices()
+  public QueryResult choices() throws NotLoggedInException
   {
     if (!(owner instanceof DBEditObject))
       {
@@ -933,18 +933,26 @@ public class StringDBField extends DBField implements string_field {
 	  }
       }
 
-    if (mustChoose())
+    try
       {
-	ok = false;
-	qr = choices();
-
-	if (!qr.containsLabel(s))
+	if (mustChoose())
 	  {
-	    return Ganymede.createErrorDialog("String Field Error",
-					      "string value " + s +
-					      " is not a valid choice for field " +
-					      getName() + " in object " + owner.getLabel());
+	    ok = false;
+	    qr = choices();
+	    
+	    if (!qr.containsLabel(s))
+	      {
+		return Ganymede.createErrorDialog("String Field Error",
+						  "string value " + s +
+						  " is not a valid choice for field " +
+						  getName() + " in object " + owner.getLabel());
+	      }
 	  }
+      }
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Not Logged In");
       }
 
     // have our parent make the final ok on the value

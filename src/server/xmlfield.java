@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.23 $
-   Last Mod Date: $Date: 2003/02/11 02:29:57 $
+   Version: $Revision: 1.24 $
+   Last Mod Date: $Date: 2003/03/12 02:53:06 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.23 $ $Date: 2003/02/11 02:29:57 $ $Name:  $
+ * @version $Revision: 1.24 $ $Date: 2003/03/12 02:53:06 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -1394,7 +1394,7 @@ public class xmlfield implements FieldType {
    * input.</P>
    */ 
 
-  private Vector getExtantInvids(Vector values)
+  private Vector getExtantInvids(Vector values) throws NotLoggedInException
   {
     Invid invid;
     Vector invids = new Vector();
@@ -1448,7 +1448,7 @@ public class xmlfield implements FieldType {
    * will be omitted from the returned vector.</P>
    */ 
 
-  private Vector getExtantObjects(Vector values)
+  private Vector getExtantObjects(Vector values) throws NotLoggedInException
   {
     Vector objects = new Vector();
     Invid invid;
@@ -1497,7 +1497,7 @@ public class xmlfield implements FieldType {
    * that could not be resolved on the server.</P>
    */
 
-  private Vector getNonRegisteredObjects(Vector values)
+  private Vector getNonRegisteredObjects(Vector values) throws NotLoggedInException
   {
     Vector objects = new Vector();
     Invid invid;
@@ -1687,7 +1687,7 @@ class xInvid {
    * if necessary to resolve an id string.</p>
    */
 
-  public Invid getInvid()
+  public Invid getInvid() throws NotLoggedInException
   {
     if (objectId != null)
       {

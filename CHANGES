@@ -74,6 +74,32 @@ files necessary for initializing the database and what-not.
 
 Next release if all works out well.
 
+7. [SERVER, CLIENT] Reworked client and server to support direct login
+
+In all previous versions of Ganymede, the login process is a two-step
+dance.. first the client (GUI or xmlclient) calls up the appropriate
+login method on the server, passing a reference to a callback object
+hosted by the client, then the server uses that callback object to
+query the client or xmlclient for username and password.
+
+I initially did this (6-7 years ago) to throw a (vanishingly small)
+roadblock into the path of people trying to packet sniff the login
+process, and so that people wanting to do a replay attack would have
+to emulate the full RMI protocol.
+
+This was really always complete silliness, of course.  Despite that, I
+had no real motivation to rework the login process until David Cummins
+reported that he was unable to use the Ganymede client from his
+firewalled desktop systems.  Given the increasing prevalence of
+defensive firewalling on the local system level, it seemed like it was
+time to rejigger the Ganymede login process.
+
+Users of a locally firewalled system will now be able to log in and
+use Ganymede, but the experience will still be second rate.. the
+server won't be able to send any build status messages to the client,
+and if the server needs to timeout or force disconnect the client, the
+client won't get the message.
+
 -------------------- Changes from 1.0.10 to 1.0.11 -------------------
 
 RELEASE DATE: December 9, 2002

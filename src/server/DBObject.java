@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.141 $
-   Last Mod Date: $Date: 2002/08/28 21:55:18 $
+   Version: $Revision: 1.142 $
+   Last Mod Date: $Date: 2003/03/12 02:53:04 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -152,7 +152,7 @@ import com.jclark.xml.output.*;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Revision: 1.141 $ $Date: 2002/08/28 21:55:18 $
+ * @version $Revision: 1.142 $ $Date: 2003/03/12 02:53:04 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2705,11 +2705,18 @@ public class DBObject implements db_object, FieldType, Remote {
 			    // viewing by a session, we'll use
 			    // view_db_object() so that we don't
 			    // reveal fields that should not be seen.
-			    
-			    ReturnVal retVal = gSession.view_db_object(x);
-			    remObj = (DBObject) retVal.getObject();
+			   
+			    try
+			      {
+				ReturnVal retVal = gSession.view_db_object(x);
+				remObj = (DBObject) retVal.getObject();
+			      }
+			    catch (NotLoggedInException ex)
+			      {
+			      }
 			  }
-			else
+
+			if (remObj == null)
 			  {
 			    // we use DBStore's static viewDBObject
 			    // method so that we can call this even

@@ -6,15 +6,15 @@
    
    Created: 8 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2002/08/07 18:39:22 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2003/03/12 02:53:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -350,7 +350,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (debug)
       {

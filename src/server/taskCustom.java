@@ -6,15 +6,16 @@
    
    Created: 5 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/02/26 22:25:27 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/03/12 02:53:06 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -134,7 +135,7 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == SchemaConstants.TaskPeriodUnit)
       {

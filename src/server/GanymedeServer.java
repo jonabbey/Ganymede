@@ -9,8 +9,8 @@
    
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.98 $
-   Last Mod Date: $Date: 2003/03/11 20:27:45 $
+   Version: $Revision: 1.99 $
+   Last Mod Date: $Date: 2003/03/12 02:53:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1938,6 +1938,11 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
 
 	return gSession.commitTransaction();
+      }
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.createErrorDialog("Error",
+					  "Mysterious not logged in error:" + ex.getMessage());
       }
     finally
       {

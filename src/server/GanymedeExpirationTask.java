@@ -7,8 +7,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 2001/10/13 00:49:16 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 2003/03/12 02:53:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -323,6 +323,10 @@ public class GanymedeExpirationTask implements Runnable {
 	    Ganymede.debug("Expiration Task: Transaction committed");
 	  }
       }
+    catch (NotLoggedInException ex)
+      {
+	Ganymede.debug("Mysterious not logged in exception: " + ex.getMessage());
+      }
     catch (InterruptedException ex)
       {
       }
@@ -331,11 +335,18 @@ public class GanymedeExpirationTask implements Runnable {
 	if (started && !finished)
 	  {
 	    // we'll get here if this task's thread is stopped early
-
+	    
 	    Ganymede.debug("Expiration Task: Forced to terminate early, aborting transaction");
-	    mySession.abortTransaction();
-	    Ganymede.debug("Expiration Task: Transaction aborted");
-	    mySession.logout();
+
+	    try
+	      {
+		mySession.abortTransaction();
+		Ganymede.debug("Expiration Task: Transaction aborted");
+		mySession.logout();
+	      }
+	    catch (NotLoggedInException ex)
+	      {
+	      }
 	  }
       }
   }

@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.143 $
-   Last Mod Date: $Date: 2003/03/11 20:27:44 $
+   Version: $Revision: 1.144 $
+   Last Mod Date: $Date: 2003/03/12 02:53:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -535,7 +535,14 @@ public class Ganymede {
 
     // take care of any startup-time database modifications
 
-    startupHook();
+    try
+      {
+	startupHook();
+      }
+    catch (NotLoggedInException ex)
+      {
+	throw new Error("Mysterious not logged in exception: " + ex.getMessage());
+      }
 
     // Create the background scheduler
 
@@ -547,7 +554,14 @@ public class Ganymede {
 
     // and install the tasks listed in the database
 
-    registerTasks();
+    try
+      {
+	registerTasks();
+      }
+    catch (NotLoggedInException ex)
+      {
+	throw new Error("Mysterious not logged in exception: " + ex.getMessage());
+      }
 
     // Bind the GanymedeServer object in the RMI registry so clients
     // and admin consoles can connect to us.
@@ -732,7 +746,15 @@ public class Ganymede {
     debug("Fixing up passwords");
 
     resetadmin = true;
-    startupHook();
+
+    try
+      {
+	startupHook();
+      }
+    catch (NotLoggedInException ex)
+      {
+	throw new Error("Mysterious not logged in exception: " + ex.getMessage());
+      }
 
     debug("Sweeping invid links");
     server.sweepInvids();
@@ -832,7 +854,7 @@ public class Ganymede {
    * the schema.</p>
    */
 
-  static public void startupHook()
+  static public void startupHook() throws NotLoggedInException
   {
     Invid supergashinvid = Invid.createInvid(SchemaConstants.PersonaBase,
 					     SchemaConstants.PersonaSupergashObj);
@@ -970,7 +992,7 @@ public class Ganymede {
    * adds them to the builderTasks vector.
    */
 
-  static private void registerTasks()
+  static private void registerTasks() throws NotLoggedInException
   {
     String builderName;
     String builderClass;

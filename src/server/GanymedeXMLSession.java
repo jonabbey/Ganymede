@@ -7,15 +7,15 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.41 $
-   Last Mod Date: $Date: 2002/08/21 05:29:53 $
+   Version: $Revision: 1.42 $
+   Last Mod Date: $Date: 2003/03/12 02:53:05 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -382,7 +382,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * and must wait to digest more of the already submitted XML.</p> 
    */
 
-  public ReturnVal xmlSubmit(byte[] bytes)
+  public ReturnVal xmlSubmit(byte[] bytes) throws NotLoggedInException
   {
     session.checklogin();
 
@@ -1914,7 +1914,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * @param objId The unique label of the object
    */
 
-  public Invid getInvid(short typeId, String objId)
+  public Invid getInvid(short typeId, String objId) throws NotLoggedInException
   {
     Invid invid = null;
     Short typeKey;
@@ -2180,7 +2180,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * had problems and was abandoned.
    */
 
-  private boolean integrateXMLTransaction()
+  private boolean integrateXMLTransaction() throws NotLoggedInException
   {
     boolean success = true;
     ReturnVal attempt;
