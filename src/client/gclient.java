@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.28 $ %D%
+   Version: $Revision: 1.29 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -527,7 +527,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 
     try
       {
-	session.openTransaction();
+	session.openTransaction("gclient");
       }
     catch (RemoteException rx)
       {
@@ -1147,7 +1147,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    wp.closeEditables();
 	    session.abortTransaction();
 	    somethingChanged = false;
-	    session.openTransaction();
+	    session.openTransaction("glient");
 	    refreshTree(false);
 	  }
 	catch (RemoteException rx)
@@ -1166,7 +1166,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	    somethingChanged = false;
 	    session.commitTransaction();
 	    wp.refreshTableWindows();
-	    session.openTransaction();
+	    session.openTransaction("gclient");
 
 	    System.out.println("Done committing");
 	    this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
