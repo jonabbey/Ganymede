@@ -7,8 +7,8 @@
 
    Created: 7 March 2000
    Release: $Name:  $
-   Version: $Revision: 1.22 $
-   Last Mod Date: $Date: 2000/10/25 09:15:10 $
+   Version: $Revision: 1.23 $
+   Last Mod Date: $Date: 2000/10/26 03:38:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -472,6 +472,26 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       }
 
     return result;
+  }
+
+  /**
+   * <P>This method reads the next XMLItem from the reader stream and,
+   * if it is an non-empty XMLElement, will return that element as the
+   * root node of a tree of all elements contained under it.  All
+   * XMLItems in the tree will be linked using the getParent() and
+   * getChildren() methods supported by every XMLItem class.</P>
+   *
+   * <P>This method is recursive, and so may cause a
+   * StackOverflowError to be thrown if the XML under the startingItem
+   * is extremely deeply nested.</P> 
+   *
+   * <P>This variant of getNextItem() uses the default skipWhiteSpace setting for
+   * this XMLReader.</P> 
+   */
+
+  public XMLItem getNextTree()
+  {
+    return getNextTree(null, this.skipWhiteSpace);
   }
 
   /**
