@@ -5,13 +5,13 @@
    A 1.1 compatible YesNoDialog box
    
    Created: 6 February 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
 */
 
-package csd.Dialog;
+package arlut.csd.Dialog;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -46,11 +46,15 @@ public class YesNoDialog extends Dialog implements ActionListener {
     pack();
   }
 
-  public void show()
+  public void setVisible(boolean b)
   {
-    answer = false;
-    yesButton.requestFocus();
-    super.show();
+    if (b)
+      {
+	answer = false;
+	yesButton.requestFocus();
+      }
+
+    super.setVisible(b);
   }
   
   public boolean answeredYes()
@@ -69,7 +73,7 @@ public class YesNoDialog extends Dialog implements ActionListener {
 	answer = false;
       }
 
-    hide();
+    setVisible(false);
     listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
   }
 
@@ -82,7 +86,7 @@ class MessagePanel extends Panel {
     add("Center", new Label(message, Label.CENTER));
   }
 
-  public Insets insets()
+  public Insets getInsets()
   {
     return new Insets(10,10,10,10);
   }
