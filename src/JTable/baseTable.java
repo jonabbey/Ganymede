@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 29 May 1996
-  Version: $Revision: 1.37 $ %D%
+  Version: $Revision: 1.38 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,7 +69,7 @@ import javax.swing.*;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Revision: 1.37 $ %D%
+ * @version $Revision: 1.38 $ %D%
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
@@ -402,7 +402,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
     
     if (row.elementAt(x) == null)
       {
-	row.setElementAt(new tableCell(this, (tableCol)cols.elementAt(x)), x);
+	row.setElementAt(new tableCell((tableCol)cols.elementAt(x)), x);
       }
 
     return row.elementAt(x);
@@ -2386,9 +2386,12 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
   // -------------------- Access Methods --------------------
 
-  //
-  // Copy the backing image into the canvas
-  //
+  /**
+   *
+   * Copy the backing image into the canvas
+   *
+   */
+
   public synchronized void paint(Graphics g) 
   {
     if (debug)
@@ -2418,15 +2421,20 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       }
   }
 
-  //
-  // Scheduled for us by repaint()
-  //
+  /**
+   *
+   * Scheduled for us by repaint()
+   *
+   */
+
   public void update(Graphics g)
   {
     if (debug)
       {
 	System.err.println("update called");
       }
+
+    // don't blank out the background, just overwrite it
 
     if (backing != null)
       {
@@ -3613,16 +3621,6 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     cell = ((tableRow) rt.rows.elementAt(clickRow)).elementAt(clickCol);
 
-    if (cell.menu != null)
-      {
-	if (debug)
-	  {
-	    System.err.println("Showing cell menu");
-	  }
-	cell.menu.show(this, x, y);
-	return;
-      }
-
     col = (tableCol) rt.cols.elementAt(clickCol);
 
     if (col.menu != null)
@@ -3817,22 +3815,56 @@ class tableCell {
 
   // --
 
-  String 
-    origText,
-    text;
+  /**
+   *
+   * The non-word-wrapped text for this cell
+   *
+   */
 
-  Object
-    data = null;
+  String origText;
 
-  tableAttr 
-    attr;
+  /**
+   *
+   * The word-wrapped text for this cell
+   *
+   */
 
-  boolean 
-    selected;
+  String text;
 
-  JPopupMenu menu;
+  /**
+   *
+   * We may have a binary representation of the text displayed in this
+   * cell recorded for convenience.
+   *
+   */
 
-  baseTable rt;
+  Object data = null;
+
+  /**
+   *
+   * An individual cell may have a special font and colors set.. if so,
+   * we'll track it with this variable.
+   *
+   */
+
+  tableAttr attr;
+
+  /**
+   *
+   * Remember whether we are selected or not.
+   *
+   */
+
+  boolean selected;
+
+  /**
+   *
+   * What column is this cell in?  We use this not only to handle
+   * column-specific attributes, but also to get a reference to our
+   * baseTable when we need it for internal calculations.
+   *
+   */
+
   tableCol col;
 
   int
@@ -3841,13 +3873,18 @@ class tableCell {
 				// cell, after wrapping
     lastOfficialWidth = 0;	// what were we last wrapped to?
 
+  /**
+   *
+   * How many rows has this cell been wrapped across?
+   *
+   */
+
   private int rowSpan;
 
   /* -- */
 
-  public tableCell(baseTable rt, tableCol col, String text, tableAttr attr, JPopupMenu menu)
+  public tableCell(tableCol col, String text, tableAttr attr)
   {
-    this.rt = rt;
     this.col = col;
     this.attr = attr;
     this.selected = false;
@@ -3855,55 +3892,17 @@ class tableCell {
     this.currentWidth = 0;
     this.setText(text);
 
-    if (rt == null && menu != null)
-      {
-	throw new IllegalArgumentException("must define baseTable in cell to attach popup menu.");
-      }
-    else
-      {
-	this.menu = menu;
-
-	if (menu!= null)
-	  {
-	    Component elements[];
-	    JMenuItem temp;
-	
-	    elements = menu.getComponents();
-
-	    for (int i = 0; i < elements.length; i++)
-	      {
-		if (elements[i] instanceof JMenuItem)
-		  {
-		    temp = (JMenuItem) elements[i];
-		    temp.addActionListener(rt);
-		  }
-	      }
-
-	    rt.canvas.add(menu);
-	  }
-      }
-
     calcRowSpan();
   }
 
-  public tableCell(baseTable rt, tableCol col, String text)
+  public tableCell(tableCol col, String text)
   {
-    this(rt, col, text, null, null);
+    this(col, text, null);
   }
 
-  public tableCell(baseTable rt, String text)
+  public tableCell(tableCol col)
   {
-    this(rt, null, text, null, null);
-  }
-
-  public tableCell(baseTable rt, tableCol col)
-  {
-    this(rt, col, null, null, null);
-  }
-
-  public tableCell(baseTable rt)
-  {
-    this(rt, null, null, null, null);
+    this(col, null, null);
   }
 
   /**
@@ -4010,7 +4009,7 @@ class tableCell {
       }
     else 
       {
-	return rt.tableAttrib.fontMetric;
+	return col.rt.tableAttrib.fontMetric;
       }
   }
 
@@ -4032,7 +4031,7 @@ class tableCell {
       }
     else 
       {
-	return rt.tableAttrib.font;
+	return col.rt.tableAttrib.font;
       }
   }
 
@@ -4054,7 +4053,7 @@ class tableCell {
       }
     else 
       {
-	return rt.tableAttrib.align;
+	return col.rt.tableAttrib.align;
       }
   }
 
@@ -4152,7 +4151,9 @@ class tableCell {
 
      /* -- */
 
-    if (text == null)
+    // if we're empty, don't bother trying to wrap anything
+
+    if (origText == null)
       {
 	return;
       }
@@ -4185,6 +4186,8 @@ class tableCell {
 
     this.currentWidth = 0;
     this.rowSpan = 1;
+
+    // figure out what we want to do about wrapping the origText
 
     charAry = origText.toCharArray();
 
@@ -4447,7 +4450,7 @@ class tableRow {
 
     for (int i = 0; i < size; i++)
       {
-	this.cells.addElement(new tableCell(rt));
+	this.cells.addElement(new tableCell((tableCol) rt.cols.elementAt(i)));
       }
   }
 
