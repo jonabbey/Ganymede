@@ -8,8 +8,8 @@
    
    Created: 17 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 1999/10/29 16:14:09 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 1999/12/14 23:44:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -120,7 +120,7 @@ public abstract class GanymedeBuilderTask implements Runnable, FilenameFilter {
       {
 	try
 	  {
-	    session = new GanymedeSession();
+	    session = new GanymedeSession("builder");
 	  }
 	catch (java.rmi.RemoteException ex)
 	  {

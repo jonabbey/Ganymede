@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/06/15 02:48:17 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/12/14 23:44:13 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -95,15 +95,20 @@ class DBDumpLock extends DBLock {
 
     synchronized (lockManager)
       {
-	enum = lockManager.objectBases.elements();
-	    
-	while (enum.hasMoreElements())
+	try
 	  {
-	    base = (DBObjectBase) enum.nextElement();
-	    baseSet.addElement(base);
-	  }    
-
-	lockManager.notifyAll();
+	    enum = lockManager.objectBases.elements();
+	    
+	    while (enum.hasMoreElements())
+	      {
+		base = (DBObjectBase) enum.nextElement();
+		baseSet.addElement(base);
+	      }    
+	  }
+	finally
+	  {
+	    lockManager.notifyAll();
+	  }
       }
 
     locked = false;
@@ -140,104 +145,109 @@ class DBDumpLock extends DBLock {
 
     synchronized (lockManager)
       {
-	done = false;
-
-	if (lockManager.lockHash.containsKey(key))
+	try
 	  {
-	    lockManager.notifyAll();
-	    throw new RuntimeException("Error: lock sought by owner of existing lockset.");
-	  }
+	    done = false;
 
-	lockManager.lockHash.put(key, this);
-	this.key = key;
-	inEstablish = true;
-
-	// add ourselves to the ObjectBase dump queues..
-	// we don't have to wait for anything to do this.. it's
-	// up to the writers to hold off on adding themselves to
-	// the writerlists until the dumperlist is empty.
-
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.addDumper(this);
-	  }
-
-	while (!done)
-	  {
-	    okay = true;
-
-	    if (abort)
+	    if (lockManager.lockHash.containsKey(key))
 	      {
-		for (int i = 0; i < baseSet.size(); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-		    base.removeDumper(this);
-		  }
-		
-		inEstablish = false;
-		key = null;
-		lockManager.lockHash.remove(key);
-		lockManager.notifyAll();
-		throw new InterruptedException();
+		throw new RuntimeException("Error: lock sought by owner of existing lockset.");
 	      }
 
-	    if (lockManager.schemaEditInProgress)
-	      {
-		okay = false;
-	      }
-	    else
-	      {
-		for (int i = 0; okay && (i < baseSet.size()); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
+	    lockManager.lockHash.put(key, this);
+	    this.key = key;
+	    inEstablish = true;
 
-		    if (!base.isWriterEmpty() || base.dumpInProgress)
-		      {
-			okay = false;
-		      }
-		  }
+	    // add ourselves to the ObjectBase dump queues..
+	    // we don't have to wait for anything to do this.. it's
+	    // up to the writers to hold off on adding themselves to
+	    // the writerlists until the dumperlist is empty.
+
+	    for (int i = 0; i < baseSet.size(); i++)
+	      {
+		base = (DBObjectBase) baseSet.elementAt(i);
+		base.addDumper(this);
 	      }
 
-	    // if okay, we know that none of the bases we're concerned
-	    // with have writers queued or dumps in progress.. we can
-	    // go ahead and lock the bases.
-
-	    if (okay)
+	    while (!done)
 	      {
-		for (int i = 0; i < baseSet.size(); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-		    base.dumpInProgress = true;
-		    base.currentLock = this;
-		  }
+		okay = true;
 
-		done = true;
-	      }
-	    else
-	      {
-		try
-		  {
-		    lockManager.wait(500);
-		  }
-		catch (InterruptedException ex)
+		if (abort)
 		  {
 		    for (int i = 0; i < baseSet.size(); i++)
 		      {
 			base = (DBObjectBase) baseSet.elementAt(i);
 			base.removeDumper(this);
 		      }
+		
+		    inEstablish = false;
+		    key = null;
 		    lockManager.lockHash.remove(key);
-		    lockManager.notifyAll();
-		    throw ex;
-		  } 
-	      }
-	  }
 
-	inEstablish = false;
-	locked = true;
-	lockManager.addLock();	// notify consoles
-	lockManager.notifyAll(); // let a thread trying to release this lock proceed
+		    throw new InterruptedException();
+		  }
+
+		if (lockManager.schemaEditInProgress)
+		  {
+		    okay = false;
+		  }
+		else
+		  {
+		    for (int i = 0; okay && (i < baseSet.size()); i++)
+		      {
+			base = (DBObjectBase) baseSet.elementAt(i);
+
+			if (!base.isWriterEmpty() || base.dumpInProgress)
+			  {
+			    okay = false;
+			  }
+		      }
+		  }
+
+		// if okay, we know that none of the bases we're concerned
+		// with have writers queued or dumps in progress.. we can
+		// go ahead and lock the bases.
+
+		if (okay)
+		  {
+		    for (int i = 0; i < baseSet.size(); i++)
+		      {
+			base = (DBObjectBase) baseSet.elementAt(i);
+			base.dumpInProgress = true;
+			base.currentLock = this;
+		      }
+
+		    done = true;
+		  }
+		else
+		  {
+		    try
+		      {
+			lockManager.wait(500);
+		      }
+		    catch (InterruptedException ex)
+		      {
+			for (int i = 0; i < baseSet.size(); i++)
+			  {
+			    base = (DBObjectBase) baseSet.elementAt(i);
+			    base.removeDumper(this);
+			  }
+			lockManager.lockHash.remove(key);
+
+			throw ex;
+		      } 
+		  }
+	      }
+
+	    inEstablish = false;
+	    locked = true;
+	    lockManager.addLock();	// notify consoles
+	  }
+	finally
+	  {
+	    lockManager.notifyAll(); // let a thread trying to release this lock proceed
+	  }
 
       } // synchronized (lockManager)
   }
@@ -256,40 +266,45 @@ class DBDumpLock extends DBLock {
 
     synchronized (lockManager)
       {
-	while (inEstablish)
+	try
 	  {
-	    try
+	    while (inEstablish)
 	      {
-		lockManager.wait(500);
-	      } 
-	    catch (InterruptedException ex)
-	      {
+		try
+		  {
+		    lockManager.wait(500);
+		  } 
+		catch (InterruptedException ex)
+		  {
+		  }
 	      }
+
+	    // note that we have to check locked here or else we might accidentally
+	    // release somebody else's lock below
+
+	    if (!locked)
+	      {
+		return;
+	      }
+
+	    for (int i = 0; i < baseSet.size(); i++)
+	      {
+		base = (DBObjectBase) baseSet.elementAt(i);
+		base.removeDumper(this);
+		base.dumpInProgress = false;
+		base.currentLock = null;
+	      }
+
+	    locked = false;
+	    lockManager.lockHash.remove(key);
+	    key = null;
+
+	    lockManager.removeLock();	// notify consoles
 	  }
-
-	// note that we have to check locked here or else we might accidentally
-	// release somebody else's lock below
-
-	if (!locked)
+	finally
 	  {
-	    lockManager.notifyAll();
-	    return;
+	    lockManager.notify();
 	  }
-
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.removeDumper(this);
-	    base.dumpInProgress = false;
-	    base.currentLock = null;
-	  }
-
-	locked = false;
-	lockManager.lockHash.remove(key);
-	key = null;
-
-	lockManager.removeLock();	// notify consoles
-	lockManager.notify();
       }
   }
 
@@ -310,9 +325,15 @@ class DBDumpLock extends DBLock {
   {
     synchronized (lockManager)
       {
-	abort = true;
-	lockManager.notifyAll();
-	release();
+	try
+	  {
+	    abort = true;
+	    release();
+	  }
+	finally
+	  {
+	    lockManager.notifyAll();
+	  }
       }
   }
 }

@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.163 $
-   Last Mod Date: $Date: 1999/11/19 01:01:57 $
+   Version: $Revision: 1.164 $
+   Last Mod Date: $Date: 1999/12/14 23:44:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -124,7 +124,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.163 $ %D%
+ * @version $Revision: 1.164 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -442,15 +442,36 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public GanymedeSession() throws RemoteException
   {
+    this("internal");
+  }
+
+  /**
+   * </p>Constructor for a server-internal GanymedeSession.  Used when
+   * the server's internal code needs to do a query, etc.  Note that
+   * the Ganymede server will create one of these this fairly early on, and will
+   * keep it around for internal usage.  Note that we don't add
+   * this to the data structures used for the admin console.</p>
+   *
+   * <p>Note that all internal session activities (queries, etc.) are
+   * currently using a single, synchronized GanymedeSession object.. this
+   * mean that only one user at a time can currently be processed for
+   * login. 8-(</p>
+   * 
+   * <p>Internal sessions, as created by this constructor, have full
+   * privileges to do any possible operation.</p>
+   */
+
+  public GanymedeSession(String sessionLabel) throws RemoteException
+  {
     super();			// UnicastRemoteObject initialization
 
     // construct our DBSession
 
     logged_in = true;
     client = null;
-    username = "internal";
-    clienthost = "internal";
-    session = new DBSession(Ganymede.db, this, "internal");
+    username = sessionLabel;
+    clienthost = sessionLabel;
+    session = new DBSession(Ganymede.db, this, sessionLabel);
 
     supergashMode = true;
     beforeversupergash = true;

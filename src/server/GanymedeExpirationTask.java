@@ -7,8 +7,8 @@
    
    Created: 4 February 1998
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 1999/01/27 21:49:37 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 1999/12/14 23:44:15 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -103,7 +103,7 @@ public class GanymedeExpirationTask implements Runnable {
       {
 	try
 	  {
-	    mySession = new GanymedeSession();
+	    mySession = new GanymedeSession("expiration");
 	  }
 	catch (RemoteException ex)
 	  {

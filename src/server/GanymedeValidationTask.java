@@ -7,8 +7,8 @@
    
    Created: 26 January 1999
    Release: $Name:  $
-   Version: $Revision: 1.2 $
-   Last Mod Date: $Date: 1999/01/27 23:12:27 $
+   Version: $Revision: 1.3 $
+   Last Mod Date: $Date: 1999/12/14 23:44:16 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -108,7 +108,7 @@ public class GanymedeValidationTask implements Runnable {
       {
 	try
 	  {
-	    mySession = new GanymedeSession();
+	    mySession = new GanymedeSession("validation");
 	  }
 	catch (RemoteException ex)
 	  {

@@ -7,8 +7,8 @@
    
    Created: 27 June 1997
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 1999/10/29 21:46:49 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 1999/12/14 23:44:17 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -1540,6 +1540,4 @@ class PermMatrixCkPoint {
 	matrix.put(key, new PermEntry(val));
       }
   }
-
 }
-

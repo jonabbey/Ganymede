@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.16 $
-   Last Mod Date: $Date: 1999/06/15 02:48:22 $
+   Version: $Revision: 1.17 $
+   Last Mod Date: $Date: 1999/12/14 23:44:14 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -106,15 +106,20 @@ public class DBWriteLock extends DBLock {
 
     synchronized (lockManager)
       {
-	enum = lockManager.objectBases.elements();
-	
-	while (enum.hasMoreElements())
+	try
 	  {
-	    base = (DBObjectBase) enum.nextElement();
-	    baseSet.addElement(base);
+	    enum = lockManager.objectBases.elements();
+	
+	    while (enum.hasMoreElements())
+	      {
+		base = (DBObjectBase) enum.nextElement();
+		baseSet.addElement(base);
+	      }
 	  }
-
-	lockManager.notifyAll();
+	finally
+	  {
+	    lockManager.notifyAll();
+	  }
       }
   }
 
@@ -154,216 +159,222 @@ public class DBWriteLock extends DBLock {
 
     synchronized (lockManager)
       {
-	while (lockManager.lockHash.containsKey(key))
+	try
 	  {
-	    if (debug)
+	    while (lockManager.lockHash.containsKey(key))
 	      {
-		System.err.println("DBWriteLock: Spinning waiting for existing lock with same key to be released");
-	      }
-
-	    if (abort)
-	      {
-		for (int i = 0; i < baseSet.size(); i++)
+		if (debug)
 		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-		    base.removeWriter(this);
+		    System.err.println("DBWriteLock: Spinning waiting for existing lock with same key to be released");
 		  }
 
-		inEstablish = false;
-		lockManager.notifyAll();
-		throw new InterruptedException();
-	      }
-	    else
-	      {
-		lockManager.wait(500);	// we might have to wait for multiple readers on our key to release
-	      }
-	  }
-
-	lockManager.lockHash.put(key, this);
-
-	if (debug)
-	  {
-	    System.err.println(key + ": DBWriteLock.establish(): added myself to the DBStore lockHash.");
-	  }
-
-	this.key = key;
-	inEstablish = true;
-
-	done = false;
-
-	// wait until there are no dumpers 
-
-	do
-	  {
-	    if (abort)
-	      {
-		lockManager.lockHash.remove(key);
-		key = null;
-		inEstablish = false;
-		lockManager.notifyAll();
-		throw new InterruptedException();
-	      }
-
-	    okay = true;
-
-	    if (lockManager.schemaEditInProgress)
-	      {
-		okay = false;
-	      }
-	    else
-	      {
-		for (int i = 0; okay && (i < baseSet.size()); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-
-		    if (!base.isDumperEmpty())
-		      {
-			if (debug)
-			  {
-			    System.err.println(key + ": DBWriteLock.establish(): waiting for dumpers on base " + 
-					       base.object_name);
-			    System.err.println(key + ": DBWriteLock.establish(): dumperList size: " + 
-					       base.getDumperSize());
-			  }
-
-			okay = false;
-		      }
-		  }
-	      }
-
-	    if (!okay)
-	      {
-		try
-		  {
-		    lockManager.wait(2500);
-		  }
-		catch (InterruptedException ex)
-		  {
-		    lockManager.lockHash.remove(key);
-		    inEstablish = false;
-		    lockManager.notifyAll();
-		    throw ex;
-		  }
-	      }
-
-	  } while (!okay);	// waiting for dumpers / schema editing to clear out
-
-	if (debug)
-	  {
-	    System.err.println(key + ": DBWriteLock.establish(): no dumpers queued.");
-	  }
-
-	// add our selves to the ObjectBase write queues
-
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
- 	    base.addWriter(this);
-	  }
-
-	if (debug)
-	  {
-	    System.err.println(key + ": DBWriteLock.establish(): added ourself to the writerList.");
-	  }
-
-	// spinwait until we can get into all of the ObjectBases
-	// note that since we added ourselves to the writer
-	// queues, we know the dumpers are waiting until we
-	// finish. 
-
-	while (!done)
-	  {
-	    if (debug)
-	      {
-		System.err.println(key + ": DBWriteLock.establish(): spinning.");
-	      }
-
-	    if (abort)
-	      {
-		for (int i = 0; i < baseSet.size(); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-		    base.removeWriter(this);
-		  }
-
-		lockManager.lockHash.remove(key);
-		key = null;
-		inEstablish = false;
-		lockManager.notifyAll();
-		throw new InterruptedException();
-	      }
-
-	    okay = true;
-
-	    for (int i = 0; okay && (i < baseSet.size()); i++)
-	      {
-		base = (DBObjectBase) baseSet.elementAt(i);
-
-		if (base.writeInProgress || !base.isReaderEmpty())
-		  {
-		    if (debug)
-		      {
-			if (!base.isReaderEmpty())
-			  {
-			    System.err.println(key +
-					       ": DBWriteLock.establish(): " +
-					       "waiting for readers to release.");
-			  }
-			else if (base.writeInProgress)
-			  {
-			    System.err.println(key +
-					       ": DBWriteLock.establish(): " + 
-					       "waiting for writer to release.");
-			  }
-		      }
-		    okay = false;
-		  }
-	      }
-
-	    // at this point, okay == true only if we were able to
-	    // verify that no bases have writeInProgress to be true.
-	    // Note that we don't try to insure that writers write in
-	    // the order they were put into the writerList, since this
-	    // may vary from base to base
-
-	    if (okay)
-	      {
-		for (int i = 0; i < baseSet.size(); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-		    base.writeInProgress = true;
-		    base.currentLock = this;
-		  }
-		
-		done = true;
-	      }
-	    else
-	      {
-		try
-		  {
-		    lockManager.wait(2500);
-		  }
-		catch (InterruptedException ex)
+		if (abort)
 		  {
 		    for (int i = 0; i < baseSet.size(); i++)
 		      {
 			base = (DBObjectBase) baseSet.elementAt(i);
 			base.removeWriter(this);
 		      }
-	
+
+		    inEstablish = false;
+
+		    throw new InterruptedException();
+		  }
+		else
+		  {
+		    lockManager.wait(500);	// we might have to wait for multiple readers on our key to release
+		  }
+	      }
+
+	    lockManager.lockHash.put(key, this);
+
+	    if (debug)
+	      {
+		System.err.println(key + ": DBWriteLock.establish(): added myself to the DBStore lockHash.");
+	      }
+
+	    this.key = key;
+	    inEstablish = true;
+
+	    done = false;
+
+	    // wait until there are no dumpers 
+
+	    do
+	      {
+		if (abort)
+		  {
 		    lockManager.lockHash.remove(key);
 		    key = null;
 		    inEstablish = false;
-		    lockManager.notifyAll();
-		    throw ex;
-		  }
-	      }
-	  } // while (!done)
 
-	locked = true;
-	inEstablish = false;
-	lockManager.addLock();	// notify consoles
-	lockManager.notifyAll();
+		    throw new InterruptedException();
+		  }
+
+		okay = true;
+
+		if (lockManager.schemaEditInProgress)
+		  {
+		    okay = false;
+		  }
+		else
+		  {
+		    for (int i = 0; okay && (i < baseSet.size()); i++)
+		      {
+			base = (DBObjectBase) baseSet.elementAt(i);
+
+			if (!base.isDumperEmpty())
+			  {
+			    if (debug)
+			      {
+				System.err.println(key + ": DBWriteLock.establish(): waiting for dumpers on base " + 
+						   base.object_name);
+				System.err.println(key + ": DBWriteLock.establish(): dumperList size: " + 
+						   base.getDumperSize());
+			      }
+
+			    okay = false;
+			  }
+		      }
+		  }
+
+		if (!okay)
+		  {
+		    try
+		      {
+			lockManager.wait(2500);
+		      }
+		    catch (InterruptedException ex)
+		      {
+			lockManager.lockHash.remove(key);
+			inEstablish = false;
+
+			throw ex;
+		      }
+		  }
+
+	      } while (!okay);	// waiting for dumpers / schema editing to clear out
+
+	    if (debug)
+	      {
+		System.err.println(key + ": DBWriteLock.establish(): no dumpers queued.");
+	      }
+
+	    // add our selves to the ObjectBase write queues
+
+	    for (int i = 0; i < baseSet.size(); i++)
+	      {
+		base = (DBObjectBase) baseSet.elementAt(i);
+		base.addWriter(this);
+	      }
+
+	    if (debug)
+	      {
+		System.err.println(key + ": DBWriteLock.establish(): added ourself to the writerList.");
+	      }
+
+	    // spinwait until we can get into all of the ObjectBases
+	    // note that since we added ourselves to the writer
+	    // queues, we know the dumpers are waiting until we
+	    // finish. 
+
+	    while (!done)
+	      {
+		if (debug)
+		  {
+		    System.err.println(key + ": DBWriteLock.establish(): spinning.");
+		  }
+
+		if (abort)
+		  {
+		    for (int i = 0; i < baseSet.size(); i++)
+		      {
+			base = (DBObjectBase) baseSet.elementAt(i);
+			base.removeWriter(this);
+		      }
+
+		    lockManager.lockHash.remove(key);
+		    key = null;
+		    inEstablish = false;
+
+		    throw new InterruptedException();
+		  }
+
+		okay = true;
+
+		for (int i = 0; okay && (i < baseSet.size()); i++)
+		  {
+		    base = (DBObjectBase) baseSet.elementAt(i);
+
+		    if (base.writeInProgress || !base.isReaderEmpty())
+		      {
+			if (debug)
+			  {
+			    if (!base.isReaderEmpty())
+			      {
+				System.err.println(key +
+						   ": DBWriteLock.establish(): " +
+						   "waiting for readers to release.");
+			      }
+			    else if (base.writeInProgress)
+			      {
+				System.err.println(key +
+						   ": DBWriteLock.establish(): " + 
+						   "waiting for writer to release.");
+			      }
+			  }
+			okay = false;
+		      }
+		  }
+
+		// at this point, okay == true only if we were able to
+		// verify that no bases have writeInProgress to be true.
+		// Note that we don't try to insure that writers write in
+		// the order they were put into the writerList, since this
+		// may vary from base to base
+
+		if (okay)
+		  {
+		    for (int i = 0; i < baseSet.size(); i++)
+		      {
+			base = (DBObjectBase) baseSet.elementAt(i);
+			base.writeInProgress = true;
+			base.currentLock = this;
+		      }
+		
+		    done = true;
+		  }
+		else
+		  {
+		    try
+		      {
+			lockManager.wait(2500);
+		      }
+		    catch (InterruptedException ex)
+		      {
+			for (int i = 0; i < baseSet.size(); i++)
+			  {
+			    base = (DBObjectBase) baseSet.elementAt(i);
+			    base.removeWriter(this);
+			  }
+	
+			lockManager.lockHash.remove(key);
+			key = null;
+			inEstablish = false;
+
+			throw ex;
+		      }
+		  }
+	      } // while (!done)
+
+	    locked = true;
+	    inEstablish = false;
+	    lockManager.addLock();	// notify consoles
+	  }
+	finally
+	  {
+	    lockManager.notifyAll();
+	  }
 
       } // synchronized(lockManager)
 
@@ -387,38 +398,44 @@ public class DBWriteLock extends DBLock {
 
     synchronized (lockManager)
       {
-	while (inEstablish)
+	try
 	  {
-	    try
+	    while (inEstablish)
 	      {
-		lockManager.wait(2500);
-	      } 
-	    catch (InterruptedException ex)
-	      {
+		try
+		  {
+		    lockManager.wait(2500);
+		  } 
+		catch (InterruptedException ex)
+		  {
+		  }
 	      }
+
+	    // note that we have to check locked here or else we might accidentally
+	    // release somebody else's lock below
+
+	    if (!locked)
+	      {
+		return;
+	      }
+
+	    for (int i = 0; i < baseSet.size(); i++)
+	      {
+		base = (DBObjectBase) baseSet.elementAt(i);
+		base.removeWriter(this);
+		base.writeInProgress = false;
+		base.currentLock = null;
+	      }
+
+	    locked = false;
+	    lockManager.lockHash.remove(key);
+	    key = null;
+	    lockManager.removeLock();	// notify consoles
 	  }
-
-	// note that we have to check locked here or else we might accidentally
-	// release somebody else's lock below
-
-	if (!locked)
+	finally
 	  {
-	    return;
+	    lockManager.notifyAll();	// many readers may want in
 	  }
-
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.removeWriter(this);
-	    base.writeInProgress = false;
-	    base.currentLock = null;
-	  }
-
-	locked = false;
-	lockManager.lockHash.remove(key);
-	key = null;
-	lockManager.removeLock();	// notify consoles
-	lockManager.notifyAll();	// many readers may want in
       }
   }
 
@@ -439,9 +456,15 @@ public class DBWriteLock extends DBLock {
   {
     synchronized (lockManager)
       {
-	abort = true;
-	lockManager.notifyAll();
-	release();
+	try
+	  {
+	    abort = true;
+	    release();
+	  }
+	finally
+	  {
+	    lockManager.notifyAll();
+	  }
       }
   }
 }
