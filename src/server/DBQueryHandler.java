@@ -5,7 +5,7 @@
    This is the query processing engine for the Ganymede database.
    
    Created: 10 July 1997
-   Version: $Revision: 1.7 $ %D%
+   Version: $Revision: 1.8 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -172,234 +172,13 @@ public class DBQueryHandler {
 
 	    if (n.value instanceof String)
 	      {
-		if (n.comparator == n.EQUALS)
+		if (n.arrayOp == n.NONE)
 		  {
-		    if (n.arrayOp == n.NONE)
-		      {
-			if (value == null)
-			  {
-			    return false;
-			  }
-
-			return (value.equals(n.value));
-		      }
-		    else
-		      {
-			switch (n.arrayOp)
-			  {
-			  case n.CONTAINSANY:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (n.value.equals(values.elementAt(i)))
-				  {
-				    return true;
-				  }
-			      }
-
-			    return false;
-
-			  case n.CONTAINSALL:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (!n.value.equals(values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  case n.CONTAINSNONE:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (n.value.equals(values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  default:
-
-			    return false;
-			  }
-		      }
-		  }
-		else if (n.comparator == n.NOCASEEQ)
-		  {
-		    if (n.arrayOp == n.NONE)
-		      {
-			return (((String) value).equalsIgnoreCase((String) n.value));
-		      }
-		    else
-		      {
-			String tmpValString = (String) n.value;
-
-			/* -- */
-
-			switch (n.arrayOp)
-			  {
-			  case n.CONTAINSANY:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (tmpValString.equalsIgnoreCase((String) values.elementAt(i)))
-				  {
-				    return true;
-				  }
-			      }
-
-			    return false;
-
-			  case n.CONTAINSALL:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (!tmpValString.equalsIgnoreCase((String) values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  case n.CONTAINSNONE:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (tmpValString.equalsIgnoreCase((String) values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  default:
-
-			    return false;
-			  }
-		      }
-		  }
-		else if (n.comparator == n.STARTSWITH)
-		  {
-		    if (n.arrayOp == n.NONE)
-		      {
-			return (((String) value).startsWith((String) n.value));
-		      }
-		    else
-		      {
-			String tmpValString = (String) n.value;
-
-			/* -- */
-
-			switch (n.arrayOp)
-			  {
-			  case n.CONTAINSANY:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (tmpValString.startsWith((String) values.elementAt(i)))
-				  {
-				    return true;
-				  }
-			      }
-
-			    return false;
-
-			  case n.CONTAINSALL:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (!tmpValString.startsWith((String) values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  case n.CONTAINSNONE:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (tmpValString.startsWith((String) values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  default:
-			    
-			    return false;
-			  }
-		      }
-		  }
-		else if (n.comparator == n.ENDSWITH)
-		  {
-		    if (n.arrayOp == n.NONE)
-		      {
-			return (((String) value).endsWith((String) n.value));
-		      }
-		    else
-		      {
-			String tmpValString = (String) n.value;
-
-			/* -- */
-
-			switch (n.arrayOp)
-			  {
-			  case n.CONTAINSANY:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (tmpValString.endsWith((String) values.elementAt(i)))
-				  {
-				    return true;
-				  }
-			      }
-
-			    return false;
-
-			  case n.CONTAINSALL:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (!tmpValString.endsWith((String) values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  case n.CONTAINSNONE:
-			
-			    for (int i = 0; i < values.size(); i++)
-			      {
-				if (tmpValString.endsWith((String) values.elementAt(i)))
-				  {
-				    return false;
-				  }
-			      }
-
-			    return true;
-
-			  default:
-
-			    return false;
-			  }
-		      }
+		    return compareStrings(n, (String) n.value, (String) value);
 		  }
 		else
 		  {
-		    return false;	// invalid comparator
+		    return compareStringArray(n, (String) n.value, values);
 		  }
 	      }
 
@@ -657,6 +436,107 @@ public class DBQueryHandler {
       {
 	return false;
       }
+  }
+
+  private static boolean compareStrings(QueryDataNode n, String queryValue, String value)
+  {
+    return compareString(n.comparator, queryValue, value);
+  }
+
+  private static boolean compareStringArray(QueryDataNode n, String queryValue, Vector values)
+  {
+    if (values == null)
+      {
+	return false;
+      }
+
+    switch (n.arrayOp)
+      {
+      case n.CONTAINSANY:
+	
+	for (int i = 0; i < values.size(); i++)
+	  {
+	    if (compareString(n.comparator, queryValue, (String) values.elementAt(i)))
+	      {
+		return true;
+	      }
+	  }
+
+	return false;
+	    
+      case n.CONTAINSALL:
+	    
+	for (int i = 0; i < values.size(); i++)
+	  {
+	    if (!compareString(n.comparator, queryValue, (String) values.elementAt(i)))
+	      {
+		return false;
+	      }
+	  }
+
+	return true;
+	    
+      case n.CONTAINSNONE:
+
+	for (int i = 0; i < values.size(); i++)
+	  {
+	    if (compareString(n.comparator, queryValue, (String) values.elementAt(i)))
+	      {
+		return false;
+	      }
+	  }
+
+	return true;
+
+      default:
+	
+	return false;
+      }
+  }
+
+  private static boolean compareString(int comparator, String string1, String string2)
+  {
+    int result;
+
+    /* -- */
+
+    if (string1 == null || string2 == null)
+      {
+	return false;
+      }
+
+    switch (comparator)
+      {
+      case QueryDataNode.EQUALS:
+	return string1.equals(string2);
+
+      case QueryDataNode.NOCASEEQ:
+	return string1.equalsIgnoreCase(string2);
+
+      case QueryDataNode.STARTSWITH:
+	return string2.startsWith(string1);
+
+      case QueryDataNode.ENDSWITH:
+	return string2.endsWith(string1);
+
+      case QueryDataNode.LESS:
+	result = string1.compareTo(string2);
+	return result < 0;
+
+      case QueryDataNode.LESSEQ:
+	result = string1.compareTo(string2);
+	return result <= 0;
+
+      case QueryDataNode.GREAT:
+	result = string1.compareTo(string2);
+	return result > 0;
+
+      case QueryDataNode.GREATEQ:
+	result = string1.compareTo(string2);
+	return result >= 0;
+      }
+
+    return false;
   }
 
   // helpers
