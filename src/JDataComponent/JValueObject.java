@@ -22,17 +22,20 @@ import java.awt.*;
 
 public class JValueObject {
 
-  public static final int FIRST = -1007;
+  public static final int FIRST = -1009;
   public static final int ADD = -1001;
   public static final int INSERT = -1002;
   public static final int DELETE = -1003;
   public static final int SET = -1004;
   public static final int NONE = -1005;
   public static final int ERROR = -1006;
+  public static final int SPECIAL = -1007;  //Use this for those hacks
+  public static final int PARAMETER = -1008;
   public static final int LAST = -1000;
 
   private Component source;
   private Object value;
+  private Object parameter;  // for JValueObjects with PARAMETER
   private int index;
   private int operationValue = NONE;
 
@@ -75,16 +78,24 @@ public class JValueObject {
       Operation = true;
     }
 
+  public JValueObject(Component source,
+		      int index,
+		      int operation,
+		      Object value)
+    {
+      this(source, index, operation, value, null);
+    }
 
   public JValueObject(Component source,
-		     int index,
-		     int operation,
-		     Object value)
+		      int index,
+		      int operation,
+		      Object value,
+		      Object parameter)
     {
 
       this.source = source;
       this.index = index;
-
+      this.parameter = parameter;
      
       if ((operation < FIRST) || (operation > LAST))
 	{
@@ -104,6 +115,10 @@ public class JValueObject {
     return source;
   }
 
+  public Object getParameter() {
+   
+    return parameter;
+  }
 
   public boolean isOperation() {
 
