@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.61 $ %D%
+   Version: $Revision: 1.62 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -1398,10 +1398,29 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
    * @see arlut.csd.ganymede.Base
    */
 
-  public synchronized Vector getFields()
+  public Vector getFields()
+  {
+    return getFields(true);
+  }
+
+  /**
+   *
+   * Returns the field definitions for the objects stored in this
+   * ObjectBase.
+   *
+   * Returns a vector of DBObjectBaseField objects.
+   *
+   * Question: do we want to return an array of DBFields here instead
+   * of a vector?
+   *
+   * @see arlut.csd.ganymede.Base
+   */
+
+  public synchronized Vector getFields(boolean includeBuiltIns)
   {
     Vector result;
     Enumeration enum;
+    DBObjectBaseField field;
 
     /* -- */
 
@@ -1410,7 +1429,12 @@ public class DBObjectBase extends UnicastRemoteObject implements Base, CategoryN
     
     while (enum.hasMoreElements())
       {
-	result.addElement(enum.nextElement());
+	field = (DBObjectBaseField) enum.nextElement();
+
+	if (includeBuiltIns || field.isBuiltIn())
+	  {
+	    result.addElement(field);
+	  }
       }
 
     return result;
