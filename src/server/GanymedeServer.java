@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -233,6 +233,53 @@ public class GanymedeServer extends UnicastRemoteObject implements Server {
 	  }
 
 	return null;
+      }
+  }
+
+  /**
+   *
+   * This method is used by GanymedeSession.login() to find
+   * a unique name for a session.  It is matched with
+   * clearActiveUser(), below.
+   *
+   */
+
+  static String registerActiveUser(String username)
+  {
+    String temp;
+    int i = 2;
+
+    /* -- */
+
+    temp = username;
+
+    synchronized (activeUsers)
+      {
+	while (activeUsers.containsKey(username))
+	  {
+	    username = temp + i;
+	    i++;
+	  }
+	
+	activeUsers.put(username, username);
+      }
+
+    return username;
+  }
+
+  /**
+   *
+   * This method is used by GanymedeSession.login() to find
+   * a unique name for a session.  It is matched with
+   * registerActiveUser(), above.
+   *
+   */
+
+  static void clearActiveUser(String username)
+  {
+    synchronized (activeUsers)
+      {
+	activeUsers.remove(username);
       }
   }
 
