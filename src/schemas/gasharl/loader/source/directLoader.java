@@ -10,7 +10,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.11 $ %D%
+   Version: $Revision: 1.12 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -224,9 +224,7 @@ public class directLoader {
 	    pf.setPerm((short) 263, defPerm); // systems privs
 	    pf.setPerm((short) 267, defPerm); // I.P. network
 	    pf.setPerm((short) 268, defPerm); // DNS domain
-	    pf.setPerm((short) 264, defPerm); // DNS record
 	    pf.setPerm((short) 265, defPerm); // System Interface
-	    pf.setPerm((short) 266, defPerm); // I.P. Record
 	    pf.setPerm((short) 271, defPerm); // Systems Netgroups
 	    pf.setPerm((short) 270, defPerm); // User Netgroups
 	    pf.setPerm((short) 269, defPerm); // room
@@ -1795,14 +1793,6 @@ public class directLoader {
 	interfaceObj iO;
 	db_object interfaceRef;
 	db_field interfaceField;
-	
-	Invid ipInvid;
-	db_object ipRec;
-	db_field ipField;
-
-	Invid dInvid;
-	db_object dRec;
-	db_field dField;
 
 	for (int i = 0; i < sysObj.interfaces.size(); i++)
 	  {
@@ -1817,17 +1807,7 @@ public class directLoader {
 
 	    // set the IP address for this interface
 
-	    // step 1: create an ip record
-
-	    interfaceField = interfaceRef.getField(interfaceSchema.IPRECS);
-	    ipInvid = ((invid_field) interfaceField).createNewEmbedded();
-
-	    // we've created an ip record.. let's get an edit reference
-	    // to it
-
-	    ipRec = my_client.session.edit_db_object(ipInvid);
-
-	    ipRec.setFieldValue(ipSchema.ADDRESS, iO.IP); // ip address
+	    interfaceRef.setFieldValue(interfaceSchema.ADDRESS, iO.IP);	// ip address
 
 	    // if the system has a single interface record in GASH, it's
 	    // really a single interface system, and we don't need to
@@ -1835,33 +1815,21 @@ public class directLoader {
 
 	    if (sysObj.interfaces.size() > 1)
 	      {
-		// step 2: create the dns record for this i.p. address
-
-		ipField = ipRec.getField(ipSchema.DNSRECORDS); // dns records
-
-		dInvid = ((invid_field) ipField).createNewEmbedded();
-
-		// we've created a dns record.. get an edit reference
-
-		dRec = my_client.session.edit_db_object(dInvid);
-
 		// set the name of the interface if this isn't a single-interface
 		// systems (single interface systems don't have distinct interface
 		// names in GASH)
 		
 		if (iO.interfaceName != null && !iO.interfaceName.equals(""))
 		  {
-		    dRec.setFieldValue(dnsRecSchema.NAME, iO.interfaceName);	// dns name
+		    interfaceRef.setFieldValue(interfaceSchema.NAME, iO.interfaceName);
 		  }
 		
-		dField = dRec.getField(dnsRecSchema.ALIASES);	// aliases
+		interfaceField = interfaceRef.getField(interfaceSchema.ALIASES);	// aliases
 		
 		for (int j = 0; j < iO.aliases.size(); j++)
 		  {
-		    dField.addElement(iO.aliases.elementAt(j));
+		    interfaceField.addElement(iO.aliases.elementAt(j));
 		  }
-		
-		dRec.setFieldValue(dnsRecSchema.DNSDOMAIN, dnsInvid); // dns domain
 	      }
 	  }
 
