@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.33 $ %D%
+   Version: $Revision: 1.34 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -260,6 +260,7 @@ public final class InvidDBField extends DBField implements invid_field {
   public synchronized String getValueString()
   {
     Invid localInvid;
+    DBObject object;
 
     /* -- */
 
@@ -277,37 +278,68 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	localInvid = (Invid) this.value();
 
-	if (Ganymede.internalSession != null)
+	// where do we go to see the object?  we first wanna check to see if
+	// we're in a transaction.. if so, look in our own transaction in case
+	// the referenced object has not been checked into the master DBObjectBase 
+	// hashes yet.
+
+	if (owner.editset != null)
 	  {
-	    return Ganymede.internalSession.viewObjectLabel(localInvid);
+	    object = (DBObject) owner.editset.getSession().getGSession().view_db_object(localInvid);
+	    
+	    return owner.lookupLabel(object);
+	  }
+	else if (Ganymede.internalSession != null)
+	  {
+	    object = (DBObject) Ganymede.internalSession.view_db_object(localInvid);
+	    
+	    return owner.lookupLabel(object);
 	  }
 	else
 	  {
 	    return this.value().toString();
 	  }
       }
-
-    String result = "";
-    int size = size();
-
-    for (int i = 0; i < size; i++)
+    else
       {
-	if (!result.equals(""))
+	String result = "";
+	int size = size();
+	Invid tmp;
+
+	for (int i = 0; i < size; i++)
 	  {
-	    result = result + ", ";
+	    if (i != 0)
+	      {
+		result = result + ", ";
+	      }
+
+	    tmp = this.value(i);
+
+	    // where do we go to see the object?  we first wanna check to see if
+	    // we're in a transaction.. if so, look in our own transaction in case
+	    // the referenced object has not been checked into the master DBObjectBase 
+	    // hashes yet.
+
+	    if (owner.editset != null)
+	      {
+		object = (DBObject) owner.editset.getSession().getGSession().view_db_object(tmp);
+
+		result = result + owner.lookupLabel(object);
+	      }
+	    else if (Ganymede.internalSession != null)
+	      {
+		object = (DBObject) Ganymede.internalSession.view_db_object(tmp);
+
+		result = result + owner.lookupLabel(object);
+	      }
+	    else
+	      {
+		result = result + this.value(i).toString();
+	      }
 	  }
 
-	if (Ganymede.internalSession != null)
-	  {
-	    result = result + Ganymede.internalSession.viewObjectLabel(this.value(i));
-	  }
-	else
-	  {
-	    result = result + this.value(i).toString();
-	  }
+	return result;
       }
-
-    return result;
   }
 
   /**
@@ -341,6 +373,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     StringBuffer result = new StringBuffer();
     InvidDBField origI;
+    DBObject object;
 
     /* -- */
 
@@ -440,9 +473,17 @@ public final class InvidDBField extends DBField implements invid_field {
 			result.append(", ");
 		      }
 
-		    if (Ganymede.internalSession != null)
+		    if (owner.editset != null)
 		      {
-			result.append(Ganymede.internalSession.viewObjectLabel(elementA));
+			object = (DBObject) owner.editset.getSession().getGSession().view_db_object(elementA);
+			
+			result.append(owner.lookupLabel(object));
+		      }
+		    else if (Ganymede.internalSession != null)
+		      {
+			object = (DBObject) Ganymede.internalSession.view_db_object(elementA);
+			
+			result.append(owner.lookupLabel(object));
 		      }
 		    else
 		      {
@@ -466,9 +507,17 @@ public final class InvidDBField extends DBField implements invid_field {
 			result.append(", ");
 		      }
 
-		    if (Ganymede.internalSession != null)
+		    if (owner.editset != null)
 		      {
-			result.append(Ganymede.internalSession.viewObjectLabel(elementA));
+			object = (DBObject) owner.editset.getSession().getGSession().view_db_object(elementA);
+			
+			result.append(owner.lookupLabel(object));
+		      }
+		    else if (Ganymede.internalSession != null)
+		      {
+			object = (DBObject) Ganymede.internalSession.view_db_object(elementA);
+			
+			result.append(owner.lookupLabel(object));
 		      }
 		    else
 		      {
@@ -492,9 +541,17 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    result.append("\tOld: ");
 
-	    if (Ganymede.internalSession != null)
+	    if (owner.editset != null)
 	      {
-		result.append(Ganymede.internalSession.viewObjectLabel(origI.value()));
+		object = (DBObject) owner.editset.getSession().getGSession().view_db_object(origI.value());
+		
+		result.append(owner.lookupLabel(object));
+	      }
+	    else if (Ganymede.internalSession != null)
+	      {
+		object = (DBObject) Ganymede.internalSession.view_db_object(origI.value());
+		
+		result.append(owner.lookupLabel(object));
 	      }
 	    else
 	      {
@@ -503,9 +560,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    result.append("\n\tNew: ");
 
-	    if (Ganymede.internalSession != null)
+	    if (owner.editset != null)
 	      {
-		result.append(Ganymede.internalSession.viewObjectLabel(this.value()));
+		object = (DBObject) owner.editset.getSession().getGSession().view_db_object(this.value());
+		
+		result.append(owner.lookupLabel(object));
+	      }
+	    else if (Ganymede.internalSession != null)
+	      {
+		object = (DBObject) Ganymede.internalSession.view_db_object(this.value());
+		
+		result.append(owner.lookupLabel(object));
 	      }
 	    else
 	      {
@@ -1063,7 +1128,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		String fieldName = ((DBField) target.getField(targetField)).getName();
 
 		Ganymede.debug("**** InvidDBField.test(): schema error!  back-reference field not an invid field!!\n\t>" +
-			       target.getLabel() + ":" + fieldName + ", referenced from " + objectName +
+			       owner.lookupLabel(target) + ":" + fieldName + ", referenced from " + objectName +
 			       ":" + getName());
 		result = false;
 
@@ -1664,6 +1729,7 @@ public final class InvidDBField extends DBField implements invid_field {
     QueryResult results = new QueryResult();
     Invid invid;
     String label;
+    DBObject object;
 
     /* -- */
 
@@ -1675,7 +1741,16 @@ public final class InvidDBField extends DBField implements invid_field {
     for (int i = 0; i < values.size(); i++)
       {
 	invid = (Invid) values.elementAt(i);
-	label = Ganymede.internalSession.viewObjectLabel(invid);
+	
+	if (Ganymede.internalSession != null)
+	  {
+	    object = (DBObject) Ganymede.internalSession.view_db_object(invid);
+	    label = owner.lookupLabel(object); // do our own interpretation of the label
+	  }
+	else
+	  {
+	    label = invid.toString();
+	  }
 	
 	if (label != null)
 	  {
