@@ -8,7 +8,7 @@
    will directly interact with.
    
    Created: 17 January 1997
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -36,7 +36,7 @@ import java.rmi.server.UnicastRemoteObject;
  *
  */
 
-class GanymedeServer extends UnicastRemoteObject implements Server {
+public class GanymedeServer extends UnicastRemoteObject implements Server {
 
   static GanymedeServer server = null;
   static Vector sessions = new Vector();
