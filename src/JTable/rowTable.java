@@ -21,7 +21,7 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
   Created: 14 June 1996
-  Version: $Revision: 1.21 $ %D%
+  Version: $Revision: 1.22 $ %D%
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
 
@@ -47,7 +47,7 @@ import java.util.*;
  *
  * @see arlut.csd.Table.baseTable
  * @author Jonathan Abbey
- * @version $Revision: 1.21 $ %D% 
+ * @version $Revision: 1.22 $ %D% 
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -377,6 +377,60 @@ public class rowTable extends baseTable implements ActionListener {
       }
 
     return null;
+  }
+
+  /**
+   *
+   * This method unselects any rows currently selected that do not
+   * match key and selects the row that does match key (if any).
+   *
+   * @param key The key to the row to be selected
+   *
+   */
+
+  public void selectRow(Object key)
+  {
+    Object rowKey;
+
+    /* -- */
+
+    // unselect the currently selected row, if any.  Note that we
+    // are currently only supporting single row selection.
+
+    for (int i = 0; i < rows.size(); i++)
+      {
+	rowKey = ((rowHandle) crossref.elementAt(i)).key;
+
+	if (rowKey.equals(key))
+	  {
+	    selectRow(i);
+	  }
+	else
+	  {
+	    if (testRowSelected(i))
+	      {
+		unSelectRow(i);
+
+		if (callback != null)
+		  {
+		    // if we get a nullpointer exception on
+		    // element here, it means that the tableCanvas
+		    // code didn't properly check to make sure that
+		    // the location clicked on corresponded to
+		    // a proper row
+
+		    callback.rowUnSelected(rowKey, true);
+		  }
+	      }
+	  }
+      }
+
+    refreshTable();
+
+    if (callback != null)
+      {
+	callback.rowSelected(key);
+      }
   }
 
   /**
