@@ -6,7 +6,7 @@
    types and fields.
    
    Created: 21 July 1997
-   Version: $Revision: 1.12 $ %D%
+   Version: $Revision: 1.13 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -70,6 +70,10 @@ public interface SchemaConstants {
   final static short PersonaPrivs = 104; // vector of permission invids for this admin account
   final static short PersonaAdminConsole = 105; // boolean, does this role have access to the admin console?
   final static short PersonaAdminPower = 106; // boolean, does this role have *full* access to the admin console?
+
+  // fixed object id's
+
+  final static short PersonaSupergashObj = 1;
 
   /* permission */
 
