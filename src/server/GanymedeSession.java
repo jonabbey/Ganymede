@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.90 $ %D%
+   Version: $Revision: 1.91 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2320,7 +2320,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 	    if (obj == null)
 	      {
-		Ganymede.debug("Error, no containing object for embedded query");
+		if (debug)
+		  {
+		    Ganymede.debug("queryDispatch(): Couldn't find containing object!");
+		  }
+
 		continue;	// try next match
 	      }
 
@@ -2396,6 +2400,11 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
 			if (obj.getTypeID() != containingBase.getTypeID())
 			  {
+			    if (debug)
+			      {
+				Ganymede.debug("queryDispatch(): Type mismatch in object open in trans!");
+			      }
+
 			    continue;
 			  }
 
