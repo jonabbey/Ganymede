@@ -572,9 +572,24 @@ public class SyncRunner implements Runnable {
 
 	// changed
 
-	if (memberField.isDefined() && origField != null && shouldInclude(memberField, origField))
+	if (memberField.isDefined() && origField != null)
 	  {
-	    return true;
+	    // check to see if the field has changed and whether we
+	    // should include it.  The 'hasChanged()' check is
+	    // required because this shouldInclude() call will always
+	    // return true if memberField is defined as an 'always
+	    // include' field, whereas in this object-level
+	    // shouldInclude() check loop, we are looking to see
+	    // whether a field that we care about was changed.
+
+	    // Basically the hasChanged() call checks to see if the
+	    // field changed, and the shouldInclude() call checks to
+	    // see if it's a field that we care about.
+
+	    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField))
+	      {
+		return true;
+	      }
 	  }
       }
 
