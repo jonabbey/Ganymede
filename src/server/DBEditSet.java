@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.78 $
-   Last Mod Date: $Date: 2000/07/26 00:30:21 $
+   Version: $Revision: 1.79 $
+   Last Mod Date: $Date: 2000/09/13 06:06:50 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -417,6 +417,11 @@ public class DBEditSet {
 	System.err.println("DBEditSet.checkpoint(): checkpointing key " + name);
       }
 
+    if (!interactive)
+      {
+	return;
+      }
+
     // checkpoint our objects, logEvents, and deletion locks
 
     checkpoints.push(new DBCheckPoint(name, this));
@@ -490,6 +495,11 @@ public class DBEditSet {
     if (debug)
       {
 	System.err.println("DBEditSet.popCheckpoint(): seeking to pop " + name);
+      }
+
+    if (!interactive)
+      {
+	return null;
       }
 
     found = false;
@@ -583,6 +593,12 @@ public class DBEditSet {
     if (debug)
       {
 	System.err.println("DBEditSet.rollback(): rollback key " + name);
+      }
+
+    if (!interactive)
+      {
+	setMustAbort();
+	return true;
       }
 
     point = popCheckpoint(name, true);

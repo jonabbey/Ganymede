@@ -7,8 +7,8 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.140 $
-   Last Mod Date: $Date: 2000/08/25 21:54:13 $
+   Version: $Revision: 1.141 $
+   Last Mod Date: $Date: 2000/09/13 06:06:56 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -90,7 +90,7 @@ import arlut.csd.Util.*;
  * through the server's in-memory {@link arlut.csd.ganymede.DBStore#backPointers backPointers}
  * hash structure.</P>
  *
- * @version $Revision: 1.140 $ %D%
+ * @version $Revision: 1.141 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -2276,7 +2276,6 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
     ReturnVal retVal = null, newRetVal;
-    boolean checkpoint = false;
     String checkkey = null;
 
     /* -- */
@@ -2333,17 +2332,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    // if we are doing bulk-loaded, we don't want to go through the
-    // time consuming checkpoint() operation for each invid link.
+    checkkey = "setValue" + getName() + owner.getLabel();
 
-    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
-
-    if (checkpoint)
-      {
-	checkkey = "setValue" + getName() + owner.getLabel();
-
-	eObj.getSession().checkpoint(checkkey);
-      }
+    eObj.getSession().checkpoint(checkkey);
 
     // try to do the binding
 
@@ -2353,14 +2344,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (newRetVal != null && !newRetVal.didSucceed())
 	  {
-	    if (checkpoint)
-	      {
-		eObj.getSession().rollback(checkkey);
-	      }
-	    else if (!eObj.getSession().isInteractive())
-	      {
-		eObj.getSession().setMustAbort();
-	      }
+	    eObj.getSession().rollback(checkkey);
 
 	    return newRetVal;
 	  }
@@ -2380,14 +2364,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	
 	if (newRetVal != null && !newRetVal.didSucceed())
 	  {
-	    if (checkpoint)
-	      {
-		eObj.getSession().rollback(checkkey);
-	      }
-	    else if (!eObj.getSession().isInteractive())
-	      {
-		eObj.getSession().setMustAbort();
-	      }
+	    eObj.getSession().rollback(checkkey);
 
 	    return newRetVal;
 	  }
@@ -2413,10 +2390,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	this.value = value;
 	qr = null;
 
-	if (checkpoint)
-	  {
-	    eObj.getSession().popCheckpoint(checkkey);
-	  }
+	eObj.getSession().popCheckpoint(checkkey);
 
 	if (retVal != null)
 	  {
@@ -2429,15 +2403,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	if (checkpoint)
-	  {
-	    eObj.getSession().rollback(checkkey);
-	  }
-	else if (!eObj.getSession().isInteractive())
-	  {
-	    eObj.getSession().setMustAbort();
-	  }
-
+	eObj.getSession().rollback(checkkey);
 
 	return newRetVal;
       }
@@ -2475,7 +2441,6 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
     ReturnVal retVal = null, newRetVal;
-    boolean checkpoint = false;
     String checkkey = null;
 
     /* -- */
@@ -2539,16 +2504,8 @@ public final class InvidDBField extends DBField implements invid_field {
     oldRemote = (Invid) values.elementAt(index);
     newRemote = (Invid) value;
 
-    // if we are doing bulk-loaded, we don't want to go through the
-    // time consuming checkpoint() operation for each invid link.
-
-    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
-
-    if (checkpoint)
-      {
-	checkkey = "setElement" + getName() + owner.getLabel();
-	eObj.getSession().checkpoint(checkkey);
-      }
+    checkkey = "setElement" + getName() + owner.getLabel();
+    eObj.getSession().checkpoint(checkkey);
     
     // try to do the binding
 
@@ -2556,14 +2513,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newRetVal != null && !newRetVal.didSucceed())
       {
-	if (checkpoint)
-	  {
-	    eObj.getSession().rollback(checkkey);
-	  }
-	else if (!eObj.getSession().isInteractive())
-	  {
-	    eObj.getSession().setMustAbort();
-	  }
+	eObj.getSession().rollback(checkkey);
 
 	return newRetVal;
       }
@@ -2588,10 +2538,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	values.setElementAt(value, index);
 	qr = null;
 
-	if (checkpoint)
-	  {
-	    eObj.getSession().popCheckpoint(checkkey);
-	  }
+	eObj.getSession().popCheckpoint(checkkey);
 
 	if (retVal != null)
 	  {
@@ -2604,14 +2551,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	if (checkpoint)
-	  {
-	    eObj.getSession().rollback(checkkey);
-	  }
-	else if (!eObj.getSession().isInteractive())
-	  {
-	    eObj.getSession().setMustAbort();
-	  }
+	eObj.getSession().rollback(checkkey);
 
 	return newRetVal;
       }
@@ -2645,7 +2585,6 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid remote;
     ReturnVal retVal = null, newRetVal;
-    boolean checkpoint = false;
     String checkkey = null;
 
     /* -- */
@@ -2711,30 +2650,15 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    // if we are doing bulk-loaded, we don't want to go through the
-    // time consuming checkpoint() operation for each invid link.
+    checkkey = "addElement" + getName() + owner.getLabel();
 
-    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
-
-    if (checkpoint)
-      {
-	checkkey = "addElement" + getName() + owner.getLabel();
-
-	eObj.getSession().checkpoint(checkkey);
-      }
+    eObj.getSession().checkpoint(checkkey);
 
     newRetVal = bind(null, remote, local);
 
     if (newRetVal != null && !newRetVal.didSucceed())
       {
-	if (checkpoint)
-	  {
-	    eObj.getSession().rollback(checkkey);
-	  }
-	else if (!eObj.getSession().isInteractive())
-	  {
-	    eObj.getSession().setMustAbort();
-	  }
+	eObj.getSession().rollback(checkkey);
 
 	return newRetVal;
       }
@@ -2755,10 +2679,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	values.addElement(value);
 	qr = null;
 
-	if (checkpoint)
-	  {
-	    eObj.getSession().popCheckpoint(checkkey);
-	  }
+	eObj.getSession().popCheckpoint(checkkey);
 
 	if (retVal != null)
 	  {
@@ -2771,14 +2692,7 @@ public final class InvidDBField extends DBField implements invid_field {
       } 
     else
       {
-	if (checkpoint)
-	  {
-	    eObj.getSession().rollback(checkkey);
-	  }
-	else if (!eObj.getSession().isInteractive())
-	  {
-	    eObj.getSession().setMustAbort();
-	  }
+	eObj.getSession().rollback(checkkey);
 
 	return newRetVal;
       }
@@ -2819,7 +2733,6 @@ public final class InvidDBField extends DBField implements invid_field {
 					    boolean noWizards,
 					    boolean partialSuccessOk)
   {
-    boolean checkpoint = false;
     boolean success = false;
     String checkkey = null;
     ReturnVal retVal = null;
@@ -2942,26 +2855,18 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    // unless we're doing bulk-loading, checkpoint to make sure we can
-    // undo this operation cleanly if it fails in the middle
-    
-    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
+    checkkey = "addElements" + getName() + owner.getLabel();
 
-    if (checkpoint)
+    if (debug)
       {
-	checkkey = "addElements" + getName() + owner.getLabel();
+	System.err.println("InvidDBField.addElements(): checkpointing " + checkkey);
+      }
 
-	if (debug)
-	  {
-	    System.err.println("InvidDBField.addElements(): checkpointing " + checkkey);
-	  }
+    eObj.getSession().checkpoint(checkkey);
 
-	eObj.getSession().checkpoint(checkkey);
-
-	if (debug)
-	  {
-	    System.err.println("InvidDBField.addElements(): completed checkpointing " + checkkey);
-	  }
+    if (debug)
+      {
+	System.err.println("InvidDBField.addElements(): completed checkpointing " + checkkey);
       }
 
     try
@@ -3054,32 +2959,25 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     finally
       {
-	if (checkpoint)
+	if (success)
 	  {
-	    if (success)
+	    if (debug)
 	      {
-		if (debug)
-		  {
-		    System.err.println("InvidDBField.addElements(): popping checkpoint " + checkkey);
-		  }
-
-		eObj.getSession().popCheckpoint(checkkey);
+		System.err.println("InvidDBField.addElements(): popping checkpoint " + checkkey);
 	      }
-	    else
-	      {
-		// undo the bindings
 
-		if (debug)
-		  {
-		    System.err.println("InvidDBField.addElements(): rolling back checkpoint " + checkkey);
-		  }
-
-		eObj.getSession().rollback(checkkey);
-	      }
+	    eObj.getSession().popCheckpoint(checkkey);
 	  }
-	else if (!success && !eObj.getSession().isInteractive())
+	else
 	  {
-	    eObj.getSession().setMustAbort();
+	    // undo the bindings
+
+	    if (debug)
+	      {
+		System.err.println("InvidDBField.addElements(): rolling back checkpoint " + checkkey);
+	      }
+
+	    eObj.getSession().rollback(checkkey);
 	  }
       }
   }
@@ -3261,15 +3159,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	// defer that activity for embedded objects until after we
 	// get the embedded object linked to the parent
 
-	boolean checkpointset = false;
 	DBSession session = eObj.getSession();
 	String ckp_label = eObj.getLabel() + "addEmbed";
 
-	if (eObj.getGSession().enableOversight && eObj.getSession().isInteractive())
-	  {
-	    session.checkpoint(ckp_label);
-	    checkpointset = true;
-	  }
+	session.checkpoint(ckp_label);
+	boolean checkpointed = true;
 
 	try
 	  {
@@ -3279,11 +3173,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		// sweet, success, forget the checkpoint
 
-		if (checkpointset)
-		  {
-		    session.popCheckpoint(ckp_label);
-		    checkpointset = false;
-		  }
+		session.popCheckpoint(ckp_label);
+		checkpointed = false;
 
 		if (retVal == null)
 		  {
@@ -3299,24 +3190,17 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		// crap, failure. rollback the checkpoint
 
-		if (checkpointset)
-		  {
-		    session.rollback(ckp_label);
-		    checkpointset = false;
-		  }
-		else if (!session.isInteractive())
-		  {
-		    session.setMustAbort();
-		  }
+		session.rollback(ckp_label);
 
 		return retVal;
 	      }
 	  }
 	finally
 	  {
-	    // ups, something tanked.  rollback.
+	    // ups, something tanked.  rollback if it happened
+	    // before we popped
 
-	    if (checkpointset)
+	    if (checkpointed)
 	      {
 		session.rollback(ckp_label);
 	      }
@@ -3378,7 +3262,6 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Invid remote;
     ReturnVal retVal = null, newRetVal;
-    boolean checkpoint = false;
     String checkkey = null;
 
     /* -- */
@@ -3433,15 +3316,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	System.err.println("][ InvidDBField.deleteElement() checkpointing " + checkkey);
       }
 
-    // if we are doing bulk-loaded, we don't want to go through the
-    // time consuming checkpoint() operation for each invid link.
-
-    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
-
-    if (checkpoint)
-      {
-	eObj.getSession().checkpoint(checkkey);
-      }
+    eObj.getSession().checkpoint(checkkey);
 
     if (debug)
       {
@@ -3500,14 +3375,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (newRetVal != null && !newRetVal.didSucceed())
 	      {
-		if (checkpoint)
-		  {
-		    eObj.getSession().rollback(checkkey);
-		  }
-		else if (!eObj.getSession().isInteractive())
-		  {
-		    eObj.getSession().setMustAbort();
-		  }
+		eObj.getSession().rollback(checkkey);
 
 		return newRetVal;	// go ahead and return our error code
 	      }
@@ -3524,23 +3392,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	// success
 
-	if (checkpoint)
-	  {
-	    eObj.getSession().popCheckpoint(checkkey);
-	  }
+	eObj.getSession().popCheckpoint(checkkey);
 
 	return retVal;
       }
     else
       {
-	if (checkpoint)
-	  {
-	    eObj.getSession().rollback(checkkey);
-	  }
-	else if (!eObj.getSession().isInteractive())
-	  {
-	    eObj.getSession().setMustAbort();
-	  }
+	eObj.getSession().rollback(checkkey);
 
 	if (newRetVal.getDialog() != null)
 	  {
@@ -3572,7 +3430,6 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBEditObject eObj;
     ReturnVal retVal = null, newRetVal;
-    boolean checkpoint = false;
     boolean success = false;
     String checkkey = null;
     Vector currentValues;
@@ -3632,26 +3489,18 @@ public final class InvidDBField extends DBField implements invid_field {
     // so we can easily undo any changes that we make
     // if we have to return failure.
 
-    // if we are doing bulk-loaded, we don't want to go through the
-    // time consuming checkpoint() operation for each invid link.
+    checkkey = "delElements" + getName() + owner.getLabel();
 
-    checkpoint = eObj.getGSession().enableOversight && eObj.getSession().isInteractive();
-
-    if (checkpoint)
+    if (debug)
       {
-	checkkey = "delElements" + getName() + owner.getLabel();
+	System.err.println("][ InvidDBField.deleteElements() checkpointing " + checkkey);
+      }
+    
+    eObj.getSession().checkpoint(checkkey);
 
-	if (debug)
-	  {
-	    System.err.println("][ InvidDBField.deleteElements() checkpointing " + checkkey);
-	  }
-
-	eObj.getSession().checkpoint(checkkey);
-
-	if (debug)
-	  {
-	    System.err.println("][ InvidDBField.deleteElements() checkpointed " + checkkey);
-	  }
+    if (debug)
+      {
+	System.err.println("][ InvidDBField.deleteElements() checkpointed " + checkkey);
       }
 
     // if we are an edit in place object, we don't want to do an
@@ -3726,22 +3575,15 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    // if we've had success, clear the checkpoint, else rollback
 
-	    if (checkpoint)
+	    if (success)
 	      {
-		if (success)
-		  {
-		    eObj.getSession().popCheckpoint(checkkey);
-		  }
-		else
-		  {
-		    // undo the bindings
-
-		    eObj.getSession().rollback(checkkey);
-		  }
+		eObj.getSession().popCheckpoint(checkkey);
 	      }
-	    else if (!success && !eObj.getSession().isInteractive())
+	    else
 	      {
-		eObj.getSession().setMustAbort();
+		// undo the bindings
+		
+		eObj.getSession().rollback(checkkey);
 	      }
 	  }
       }
@@ -3784,22 +3626,15 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	finally
 	  {
-	    if (checkpoint)
+	    if (success)
 	      {
-		if (success)
-		  {
-		    eObj.getSession().popCheckpoint(checkkey);
-		  }
-		else
-		  {
-		    // undo the bindings
-
-		    eObj.getSession().rollback(checkkey);
-		  }
+		eObj.getSession().popCheckpoint(checkkey);
 	      }
-	    else if (!success && !eObj.getSession().isInteractive())
+	    else
 	      {
-		eObj.getSession().setMustAbort();
+		// undo the bindings
+		
+		eObj.getSession().rollback(checkkey);
 	      }
 	  }
       }

@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 2000/09/08 02:02:25 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 2000/09/13 06:06:51 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.89 $ %D%
+ * @version $Revision: 1.90 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -273,7 +273,6 @@ final public class DBSession {
     DBObjectBase base;
     DBEditObject e_object;
     ReturnVal retVal = null;
-    boolean checkpointset = false;
 
     /* -- */
 
@@ -304,16 +303,8 @@ final public class DBSession {
     // it needs to go into
 
     String ckp_label = "createX" + base.getName();
-
-    // we're only going to do the checkpoint here if
-    // oversight is enabled.. otherwise it would be far, far
-    // too expensive a burden during bulk loading.
     
-    if (GSession.enableOversight)
-      {
-	checkpoint(ckp_label);
-	checkpointset = true;
-      }
+    checkpoint(ckp_label);
 
     try
       {
@@ -346,11 +337,7 @@ final public class DBSession {
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
-		    if (checkpointset)
-		      {
-			rollback(ckp_label);
-			checkpointset = false;
-		      }
+		    rollback(ckp_label);
 
 		    try
 		      {
@@ -383,11 +370,7 @@ final public class DBSession {
 
 	if (!editSet.addObject(e_object))
 	  {
-	    if (checkpointset)
-	      {
-		rollback(ckp_label);
-		checkpointset = false;
-	      }
+	    rollback(ckp_label);
 
 	    return Ganymede.createErrorDialog("Object creation failure",
 					      "Couldn't create the object, because it came pre-linked " +
@@ -426,11 +409,7 @@ final public class DBSession {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		if (checkpointset)
-		  {
-		    rollback(ckp_label);
-		    checkpointset = false;
-		  }
+		rollback(ckp_label);
 
 		return retVal;
 	      }
@@ -439,19 +418,11 @@ final public class DBSession {
 	// okay, we're good, and we won't need to revert to the checkpoint.  
 	// Clear out the checkpoint and continue
 
-	if (checkpointset)
-	  {
-	    popCheckpoint(ckp_label);
-	    checkpointset = false;
-	  }
+	popCheckpoint(ckp_label);
       }
     finally
       {
-	if (checkpointset)
-	  {
-	    rollback(ckp_label);
-	    checkpointset = false;
-	  }
+	rollback(ckp_label);
       }
 
     // set the following false to true to view the initial state of the object
@@ -974,16 +945,10 @@ final public class DBSession {
       }
     else
       {
-	// ok, go ahead and finalize
+	// ok, go ahead and finalize.. the finalizeRemove method will
+	// handle doing a rollback or popCheckpoint if necessary
 
 	retVal2 = eObj.finalizeRemove(true);
-
-	if (retVal2 != null && !retVal2.didSucceed())
-	  {
-	    // oops, irredeemable failure.  rollback.
-		
-	    rollback(key);
-	  }
 
 	return retVal2;
       }

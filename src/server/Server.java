@@ -10,8 +10,8 @@
 
    Created: 1 April 1996
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2000/08/09 02:22:19 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/09/13 06:06:57 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -58,7 +58,7 @@ import java.rmi.*;
 
 public interface Server extends Remote {
   Session login(Client client) throws RemoteException;
-  XMLSession xmlLogin(String clientName, String clientPass) throws RemoteException;
+  XMLSession xmlLogin(Client client) throws RemoteException;
   adminSession admin(Admin admin) throws RemoteException;
   boolean up() throws RemoteException;
 }
