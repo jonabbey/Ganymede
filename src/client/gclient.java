@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.118 $ %D%
+   Version: $Revision: 1.119 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -4588,32 +4588,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public Vector sortStringVector(Vector v)
   {
-    (new VecQuickSort(v, 
-		      new arlut.csd.Util.Compare() {
-      public int compare(Object a, Object b) 
-	{
-	  String aF, bF;
-	  
-	  aF = (String) a;
-	  bF = (String) b;
-	  int comp = 0;
-	  
-	  comp =  aF.compareTo(bF);
-	  
-	  if (comp < 0)
-	    {
-	      return -1;
-	    }
-	  else if (comp > 0)
-	    { 
-	      return 1;
-	    } 
-	  else
-	    { 
-	      return 0;
-	    }
-	}
-    })).sort();
+    new VecQuickSort(v, null).sort();
     
     return v;
   }
