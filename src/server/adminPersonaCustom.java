@@ -5,7 +5,7 @@
    This file is a management class for admin personae objects in Ganymede.
    
    Created: 8 October 1997
-   Version: $Revision: 1.10 $ %D%
+   Version: $Revision: 1.11 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -69,80 +69,14 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   // and now the customizations
 
   /**
-   * This method is the hook that DBEditObject subclasses use to interpose
-   * wizards when a field's value is being changed.<br><br>
    *
-   * Whenever a field is changed in this object, this method will be
-   * called with details about the change. This method can refuse to
-   * perform the operation, it can make changes to other objects in
-   * the database in response to the requested operation, or it can
-   * choose to allow the operation to continue as requested.<br><br>
-   *
-   * In the latter two cases, the wizardHook code may specify a list
-   * of fields and/or objects that the client may need to update in
-   * order to maintain a consistent view of the database.<br><br>
-   *
-   * If server-local code has called
-   * GanymedeSession.enableOversight(false), this method will never be
-   * called.  This mode of operation is intended only for initial
-   * bulk-loading of the database.<br><br>
-   *
-   * This method may also be bypassed when server-side code uses
-   * setValueLocal() and the like to make changes in the database.<br><br>
-   *
-   * This method is called before the finalize*() methods.. the finalize*()
-   * methods is where last minute cascading changes should be performed..
-   * the finalize*() methods have no power to set object/field rescan
-   * or return dialogs to the client, however.. in cases where such
-   * is necessary, a custom plug-in class must have wizardHook() and
-   * finalize*() configured to work together to both provide proper field
-   * rescan notification and to check the operation being performed and
-   * make any changes necessary to other fields and/or objects.<br><br>
-   *
-   * Note as well that wizardHook() is called before the namespace checking
-   * for the proposed value is performed, while the finalize*() methods are
-   * called after the namespace checking.
-   *
-   * @return a ReturnVal object indicated success or failure, objects and
-   * fields to be rescanned by the client, and a doNormalProcessing flag
-   * that will indicate to the field code whether or not the operation
-   * should continue to completion using the field's standard logic.
-   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
-   * if the wizardHook wishes to simply specify rescan information while
-   * having the field perform its standard operation.</b>  wizardHook() may
-   * return new ReturnVal(true, false) if the wizardHook performs the operation
-   * (or a logically related operation) itself.  The same holds true for the
-   * respond() method in GanymediatorWizard subclasses.
-   *
+   * We want any change to the 'name' or associated user field to
+   * update our hidden label field, which both provides our composite
+   * label and does our namespace checks for us.  We do this in
+   * finalizeSetValue() so that this operation is always done, even
+   * if our GanymedeSession's enableOversight is set to false.
+   * 
    */
-
-  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
-  {
-    // if we are being deleted, go ahead and approve whatever.
-
-    if (deleting)
-      {
-	return null;
-      }
-
-    // otherwise, if they aren't setting the associated user field,
-    // complain if the associated user isn't set.
-
-    if (field.getID() != SchemaConstants.PersonaAssocUser)
-      {
-	DBField assocUser = (DBField) getField(SchemaConstants.PersonaAssocUser);
-
-	if (assocUser == null || !assocUser.isDefined())
-	  {
-	    return Ganymede.createErrorDialog("Client Error",
-					      "Error, the client has not set the associated user for " +
-					      "this admin persona.  The client is supposed to handle linking " +
-					      "this admin persona with a user.  Something's wrong on the client.");
-	  }
-      }
-
-    return null;		// by default, we just ok whatever
-  }
 
   public boolean finalizeSetValue(DBField field, Object value)
   {
@@ -157,66 +91,66 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (field.getID() == SchemaConstants.PersonaNameField)
       {
-	// whoops, looks like our persona name is being changed.. make
-	// sure that it's okay to do that.
+	return refreshLabelField((String) value, null);
+      }
 
-	str = (String) value;
-
-	// if we are being deleted, sure, we're ok with the persona name
-	// being cleared.
-
-	if (str == null && deleting)
-	  {
-	    return true;
-	  }
-
-	inv = (InvidDBField) getField(SchemaConstants.PersonaAssocUser);
-
-	if (inv != null)
-	  {
-	    invid = (Invid) inv.getValue();
-	    
-	    if (invid != null)
-	      {
-		obj = session.viewDBObject(invid);
-
-		if (obj != null)
-		  {
-		    sf = (StringDBField) obj.getField(SchemaConstants.UserUserName);
-		
-		    name = (String) sf.getNewValue();
-
-		    // now, if we weren't called from inside the user rename
-		    // logic, getNewValue() will be null.  Check it out.
-
-		    if (name == null)
-		      {
-			name = (String) sf.getValue();
-		      }
-		
-		    if (!str.startsWith(name + ":"))
-		      {
-			session.setLastError("persona names must start with username:, not " + name);
-			return false;
-		      }
-		  }
-		else
-		  {
-		    session.setLastError("adminPersona customizer: can't find associated user");
-		  }
-	      }
-	    else
-	      {
-		session.setLastError("adminPersona customizer: no associated user set");
-	      }
-	  }
-	else
-	  {
-	    session.setLastError("adminPersona customizer: no associated user set");
-	  }
+    if (field.getID() == SchemaConstants.PersonaAssocUser)
+      {
+	return refreshLabelField(null, (Invid) value);
       }
 
     return true;
+  }
+
+  /**
+   *
+   * This private method is used to keep the hidden label field up-to-date.
+   *
+   */
+
+  private boolean refreshLabelField(String descrip, Invid userInvid)
+  {
+    ReturnVal result;
+
+    if (descrip == null)
+      {
+	StringDBField nameField = (StringDBField) getField(SchemaConstants.PersonaNameField);
+
+	if (nameField != null)
+	  {
+	    descrip = (String) nameField.getValueLocal();
+	  }
+      }
+
+    if (userInvid == null)
+      {
+	InvidDBField assocUserField = (InvidDBField) getField(SchemaConstants.PersonaAssocUser);
+
+	if (assocUserField != null)
+	  {
+	    userInvid = (Invid) assocUserField.getValueLocal();
+	  }
+      }
+
+    if (getInvid().getNum() <= 2)
+      {
+	result = setFieldValueLocal(SchemaConstants.PersonaLabelField, descrip);
+
+	return (result == null || result.didSucceed());
+      }
+
+    if (userInvid == null || descrip == null)
+      {
+	result = setFieldValueLocal(SchemaConstants.PersonaLabelField, null);
+
+	return (result == null || result.didSucceed());
+      }
+
+    String username = this.getGSession().viewObjectLabel(userInvid);
+
+    result = setFieldValueLocal(SchemaConstants.PersonaLabelField, username + ":" + descrip);
+
+    return (result == null || result.didSucceed());
   }
 
   /**
@@ -330,8 +264,18 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     switch (fieldid)
       {
       case SchemaConstants.PersonaAssocUser:
+
+	// supergash and monitor don't have to have associated users
+	// defined.
+
+	if (object.getInvid().getNum() <= 2)
+	  {
+	    return false;
+	  }
+
       case SchemaConstants.PersonaNameField:
       case SchemaConstants.PersonaPasswordField:
+      case SchemaConstants.PersonaLabelField:
 	return true;
       }
 
@@ -358,11 +302,11 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
   public boolean canSeeField(DBSession session, DBField field)
   {
-    // hide the associated user field.. this cannot be changed by
-    // the client, and should be treated as a 'behind-the-scenes'
-    // field used to tie things together in the background.
+    // hide the label field.. this cannot be changed by the client,
+    // and should be treated as a 'behind-the-scenes' field used to
+    // tie things together in the background.
 
-    if (field.getID() == SchemaConstants.PersonaAssocUser)
+    if (field.getID() == SchemaConstants.PersonaLabelField)
       {
 	return false;
       }
@@ -396,6 +340,5 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     return false;		// by default, permission is denied
   }
-
 
 }
