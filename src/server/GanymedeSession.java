@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.271 $
-   Last Mod Date: $Date: 2003/09/09 02:01:54 $
+   Version: $Revision: 1.272 $
+   Last Mod Date: $Date: 2003/09/09 02:52:28 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.271 $ $Date: 2003/09/09 02:01:54 $
+ * @version $Revision: 1.272 $ $Date: 2003/09/09 02:52:28 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -1344,7 +1344,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
    * is no message to send, and the client will poll for new messages.</p>
    */
 
-  public synchronized ClientAsyncResponder getAsyncPort()
+  public synchronized ClientAsyncResponder getAsyncPort() throws RemoteException
   {
     if (asyncPort != null)
       {
