@@ -7,8 +7,8 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2001/06/15 20:57:31 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2001/06/15 21:37:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -220,14 +220,7 @@ public class PasswordAgingTask implements Runnable {
 
 	// get the password expiration threshold for this user, if any
 
-	DateDBField dateField = (DateDBField) object.getFieldValueLocal(userSchema.PASSWORDCHANGETIME);
-
-	if (dateField == null)
-	  {
-	    continue;
-	  }
-
-	Date passwordTime = dateField.value();
+	Date passwordTime = (Date) object.getFieldValueLocal(userSchema.PASSWORDCHANGETIME);
 
 	if (passwordTime == null)
 	  {
@@ -287,9 +280,9 @@ public class PasswordAgingTask implements Runnable {
 	  }
 
 	lowerBound.setTime(currentTime);
+	lowerBound.add(Calendar.DATE, -1);
 
 	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.DATE, 1);
 
 	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
@@ -298,10 +291,10 @@ public class PasswordAgingTask implements Runnable {
 	  }
 
 	lowerBound.setTime(currentTime);
-	lowerBound.add(Calendar.DATE, 1);
+	lowerBound.add(Calendar.DATE, -2);
 
 	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.DATE, 2);
+	upperBound.add(Calendar.DATE, -1);
 
 	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
@@ -310,22 +303,10 @@ public class PasswordAgingTask implements Runnable {
 	  }
 
 	lowerBound.setTime(currentTime);
-	lowerBound.add(Calendar.DATE, 2);
+	lowerBound.add(Calendar.DATE, -3);
 
 	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.DATE, 3);
-
-	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
-	  {
-	    warnOvertimePassword(object);
-	    continue;
-	  }
-
-	lowerBound.setTime(currentTime);
-	lowerBound.add(Calendar.DATE, 3);
-
-	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.DATE, 4);
+	upperBound.add(Calendar.DATE, -2);
 
 	if (passwordTime.after(lowerBound.getTime()) && passwordTime.before(upperBound.getTime()))
 	  {
@@ -334,7 +315,7 @@ public class PasswordAgingTask implements Runnable {
 	  }
 
 	upperBound.setTime(currentTime);
-	upperBound.add(Calendar.DATE, 5);
+	upperBound.add(Calendar.DATE, -4);
 
 	if (passwordTime.before(upperBound.getTime()))
 	  {
@@ -365,7 +346,7 @@ public class PasswordAgingTask implements Runnable {
 
     Vector objVect = new Vector();
 
-    objVect.addElement(userObject);
+    objVect.addElement(userObject.getInvid());
 
     String titleString = "Password Expiring Soon For User " + userObject.toString();
 
@@ -388,7 +369,7 @@ public class PasswordAgingTask implements Runnable {
 
     Vector objVect = new Vector();
 
-    objVect.addElement(userObject);
+    objVect.addElement(userObject.getInvid());
 
     String titleString = "Password Expiring Very Soon For User " + userObject.toString();
 
@@ -413,7 +394,7 @@ public class PasswordAgingTask implements Runnable {
 
     Vector objVect = new Vector();
 
-    objVect.addElement(userObject);
+    objVect.addElement(userObject.getInvid());
 
     String titleString = "Password Has Expired For User " + userObject.toString();
 
