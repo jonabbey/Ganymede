@@ -1206,7 +1206,7 @@ need to move to an incremental model for synchronization.</p>
 </transaction>
  </xmp>
 
-    <p>The attributes in the &lt;transaction&gt; element are as follows:</p>
+    <p id="transaction_element">The attributes in the &lt;transaction&gt; element are as follows:</p>
 
     <div align="center">
       <table border="1">
@@ -1434,7 +1434,86 @@ need to move to an incremental model for synchronization.</p>
     SyncUtils package and works with it from there.</p>
 
     <h3 id="xml_full_state">The Sync Channel Full State Model</h3>
- 
+
+    <p>The Sync Channel Full State model is based on the <a
+    href="#xml_incrementals">Sync Channel Incremental Model</a>.
+    Unlike the <a href="#buildertask">GanymedeBuilderTask</a> and <a
+    href="#xml_incrementals">Sync Channel Incremental</a> models, the
+    Sync Channel Full State model is not supported by the Ganymede
+    server as an automated build system.</p>
+
+    <p>Instead, the Sync Channel Full State model refers to the
+    ability to use the <a href="../xml/xmlclient.html">xmlclient</a>
+    to dump out a subset of the Ganymede datastore, using a <a
+    href="#configuring_sync_incremental">Sync Channel</a> object to
+    constrain the object and field types dumped.  The idea is that,
+    after dumping out your information using <a
+    href="../xml/xmlclient.html">xmlclient</a>, you use a variant of
+    the <a href="#xml_incremental_service_program">Sync Channel
+    Incremental Service Program</a> to synchronize the full state of
+    your Ganymede data with your target directory service.</p>
+
+    <p>The SyncUtils Python package that we have written knows how to
+    read a Ganymede full state XML dump, and can support you in doing
+    manual full state synchronization.</p>
+
+    <p>To generate a Sync Channel Full State dump, you can run:</p>
+
+    <xmp class="listing">xmlclient -dumpdata sync=Users > user_full_state.xml</xmp>
+
+    <p>And you'll get something that looks like this:</p>
+
+    <xmp class="listing">
+<ganymede major="1" minor="0">
+  <ganydata>
+    <object type="User" id="jonabbey" oid="3:1143">
+      <Username>jonabbey</Username>
+      <UID>6074</UID>
+      <Global_UID>7cea5c0d-7a22-11d8-a1a0-080020fd6b07</Global_UID>
+      <Password><password crypt="zv16nogZ9eRP5" md5crypt="$1$bH3vxykP$dkmWhIdVuqC8Y1h0s7PQU1" lanman="8AF317306D28CA711D0DC6E\
+72A9441BB" ntmd4="D3A6370C044FD34C6A487A6F5F53A6C1" ssha="{SSHA}cdHEG7iIMT2ZSHkJEf4fR62v/b23rnMO"/></Password>
+      <Account_Category><invid type="User_Category" id="normal" oid="279:5"/></Account_Category>
+      <Full_Name>Jonathan Abbey</Full_Name>
+      <Badge>x819</Badge>
+      <Division>ITS</Division>
+      <Room>S321</Room>
+      <Office_Phone>835-3199</Office_Phone>
+      <Groups>
+        <invid type="Group" id="omssys" oid="257:245"/>
+        <invid type="Group" id="csdweb" oid="257:114"/>
+        <invid type="Group" id="omrgen" oid="257:264"/>
+      </Groups>
+      <Home_Group><invid type="Group" id="omssys" oid="257:245"/></Home_Group>
+      <Login_Shell>/bin/tcsh</Login_Shell>
+      <Home_Directory>/home/jonabbey</Home_Directory>
+      <Directory_Volume>
+      <object type="Embedded_Automounter_Map_Entry" id="Embedded Automounter Map Entry[1257]" oid="278:1257">
+        <Automounter_Map><invid type="Automounter_Map" id="auto.home.default" oid="277:2"/></Automounter_Map>
+        <NFS_Volume><invid type="NFS_Volume" id="omg2" oid="276:636"/></NFS_Volume>
+      </object>
+      </Directory_Volume>
+      <Email_Aliases>
+        <string val="abbey"/>
+      </Email_Aliases>
+      <Signature_Alias>jonabbey</Signature_Alias>
+      <Email_target>
+        <string val="jonabbey@arlmail.arlut.utexas.edu"/>
+      </Email_target>
+      <Password_Expiration><date val="Tue, 03 May 2005 07:57:22" timecode="1115125042144"/></Password_Expiration>
+      <Owner_list>
+        <invid type="Owner_Group" id="ITS" oid="0:9"/>
+       </Owner_list>
+    </object>
+  </ganydata> 
+</ganymede>
+</xmp>
+
+<p>The particulars of this XML schema is dependent on the particular
+schema configured in the Ganymede server.  Field names come straight
+from the Ganymede server's schema, with a simple <a
+href="../xml.html#underscore">spaces to underscores</a> encoding to
+make sure that field names cohere with proper XML specs.</p>
+
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
     <p class="address">$Date$, $Rev$, $Author$</p>
