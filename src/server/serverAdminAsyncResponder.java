@@ -17,8 +17,8 @@
    
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 2003/09/09 02:49:06 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2003/09/09 04:18:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -89,7 +89,7 @@ import java.rmi.server.Unreferenced;
  *
  * @see arlut.csd.ganymede.clientAsyncMessage
  *
- * @version $Revision: 1.4 $ $Date: 2003/09/09 02:49:06 $
+ * @version $Revision: 1.5 $ $Date: 2003/09/09 04:18:22 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -221,12 +221,6 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 	while (ebSz > 0)
 	  {
 	    event = dequeue();
-
-	    // clear the direct pointer to this event so that
-	    // replaceEvent() will know that we don't have an event of
-	    // this kind in our buffer anymore.
-	    
-	    lookUp[event.getMethod()] = null;
 	    items.addElement(event);
 	  }
       }
@@ -379,7 +373,7 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 
 	newLogEvent = new adminAsyncMessage(adminAsyncMessage.CHANGESTATUS, new StringBuffer().append(status));
 
-	// queue the log evennt
+	// queue the log event
 
 	addEvent(newLogEvent);
 
@@ -579,6 +573,16 @@ public class serverAdminAsyncResponder extends UnicastRemoteObject implements Ad
 	  }
 	
 	ebSz--;
+
+	// if we're dequeueing something that we've been using
+	// replaceEvent with, replace the dequeue'd event with the
+	// latest of that type from the lookUp array.
+
+	if (lookUp[result.getMethod()] != null)
+	  {
+	    result = lookUp[result.getMethod()];
+	    lookUp[result.getMethod()] = null;
+	  }
 	
 	return result;
       }

@@ -4,8 +4,8 @@
 
    Created: 4 September 2003
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2003/09/09 02:49:05 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2003/09/09 04:18:22 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -65,7 +65,7 @@ import java.rmi.*;
  * calls {@link arlut.csd.ganymede.serverClientAsyncResponder#getNextMsgs()} to
  * receive asynchonous notifications from the server.</p>
  *
- * @version $Revision: 1.9 $ $Date: 2003/09/09 02:49:05 $
+ * @version $Revision: 1.10 $ $Date: 2003/09/09 04:18:22 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -188,6 +188,7 @@ public class adminAsyncMessage implements java.io.Serializable {
 
       case SETMEMORYSTATE:
 	result.append("setMemoryState");
+	break;
 	
       default:
 	result.append("<" + method + ">??");
