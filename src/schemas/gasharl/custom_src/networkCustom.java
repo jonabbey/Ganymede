@@ -6,8 +6,8 @@
    
    Created: 20 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.4 $
-   Last Mod Date: $Date: 1999/01/22 18:05:05 $
+   Version: $Revision: 1.5 $
+   Last Mod Date: $Date: 2000/06/22 04:26:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -173,7 +173,8 @@ public class networkCustom extends DBEditObject {
   {
     if (field.getID() == networkSchema.INTERFACES)
       {
-	if (operation == DELELEMENT)
+	if (operation == DELELEMENT && getStatus() != DBEditObject.DELETING &&
+	    getStatus() != DBEditObject.DROPPING)
 	  {
 	    return Ganymede.createErrorDialog("Sorry, you can't delete interfaces here",
 					      "You can't delete interfaces from the network object.  If you were " +
@@ -182,6 +183,7 @@ public class networkCustom extends DBEditObject {
 					      "interface on this net directly to change its network connection.");
 	  }
       }
+
     return null;		// by default, we just ok whatever
   }
 
