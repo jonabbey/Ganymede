@@ -1,0 +1,23 @@
+Ganymede Template Schema README
+-------------------------------
+
+This directory was installed because you installed the Ganymede server
+without a schema kit.  The installServer script has placed config.sh
+files in the directories contained hereunder to customize the build
+scripts you'll also find here.
+
+The custom_src directory is where you can put .java files for custom
+subclasses of arlut.csd.ganymede.DBEditObject and
+arlut.csd.ganymede.GanymedeBuilderTask.  The build script will compile
+.java files placed here, and buildCustomJar will package them all into
+a custom.jar file for use by the server.
+
+The loader directory is where you can put your code for taking
+pre-existing data files and processing them with a runDirectLoader
+script into a ganymede.db directory.  You'll need a ganymede.schema
+file dumped from the Ganymede server after using the schema editor in
+the loader directory, as well as custom code for processing your input
+files and generating the ganymede.db file with the loaded data.  Take
+a look at the source code in the defined schema kits to see how this
+is done.
+
