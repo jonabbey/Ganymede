@@ -5,7 +5,7 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -24,7 +24,7 @@ import gjt.Box;
 
 //import com.sun.java.swing.*
 
-import arlut.csd.Table.*;
+import arlut.csd.JTable.*;
 import arlut.csd.JDialog.*;
 
 import jdj.PackageResources;
