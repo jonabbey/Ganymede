@@ -157,6 +157,18 @@ public class FieldInfo implements java.io.Serializable {
 
   public short getID()
   {
+    return new Short(ID);
+  }
+
+  /**
+   * <p>Returns the field's id number within the containing {@link
+   * arlut.csd.ganymede.server.DBObject DBObject} on the server as a
+   * boxed java.lang.Short, suitable for use in a Hashtable or Vector or
+   * the like.</p>
+   */
+
+  public Short getIDObj()
+  {
     return ID;
   }
 
