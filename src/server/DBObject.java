@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.48 $ %D%
+   Version: $Revision: 1.49 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -53,7 +53,7 @@ import arlut.csd.JDialog.*;
  * <p>The constructors of this object can throw RemoteException because of the
  * UnicastRemoteObject superclass' constructor.</p>
  *
- * @version $Revision: 1.48 $ %D% (Created 2 July 1996)
+ * @version $Revision: 1.49 $ %D% (Created 2 July 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -1499,5 +1499,32 @@ public class DBObject extends UnicastRemoteObject implements db_object, FieldTyp
 	DBField field = (DBField) enum.nextElement();
 	field.definition = (DBObjectBaseField) newBase.getField(field.getID());
       }
+  }
+
+  /**
+   *
+   * This method is a convenience for server-side code.  If
+   * this object is an embedded object, this method will
+   * return the label of the containing object.  If this
+   * object is not embedded, or the containing object's
+   * label cannot be determined, null will be returned.
+   *
+   */
+  
+  public String getContainingLabel()
+  {
+    if (!isEmbedded())
+      {
+	return null;
+      }
+
+    InvidDBField field = (InvidDBField) getField(SchemaConstants.ContainerField);
+
+    if (field == null)
+      {
+	return null;
+      }
+
+    return field.getValueString();
   }
 }
