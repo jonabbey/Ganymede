@@ -5,7 +5,7 @@
    A wizard to manage user rename interactions for the userCustom object.
    
    Created: 29 January 1998
-   Version: $Revision: 1.8 $ %D%
+   Version: $Revision: 1.9 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -212,6 +212,7 @@ public class userRenameWizard extends GanymediatorWizard {
 	    retVal.addRescanField(userSchema.ALIASES);
 	    retVal.addRescanField(userSchema.SIGNATURE);
 	    retVal.addRescanField(userSchema.VOLUMES);
+	    retVal.addRescanField(userSchema.EMAILTARGET);
 	  }
 	
 	// just in case the setValue didn't go through
