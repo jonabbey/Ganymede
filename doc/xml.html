@@ -1272,12 +1272,14 @@ reference field, and the "Email Aliases" field is a vector String
 field.</p>
 
 <p>In the above example, the <b>Groups</b> and <b>Email_Aliases</b>
-elements both contain a couple of items.  These items will be
-added to those fields, but if those fields already contain additional
-items, those items will be left alone.  There are two approaches to
-editing vector fields if you want to add or remove items.</p>
+vector field elements both contain a couple of items.  These items
+will be added to those fields if they are not already present, but the
+xmlclient will not remove any other items which may already be in
+those fields.</p>
 
-<p>One method looks like this:</p>
+<p>If you want to assure that after xmlclient finishes its work that
+there will only be a given list of items in a vector field, you need
+to di this:</p>
 
 <pre>
   &lt;object type="User" id="broccol" action="edit"&gt;
