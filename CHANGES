@@ -1,7 +1,27 @@
-Ganymede Release 1.0.7
-October 11, 2001
+Ganymede Release 1.0.8
+October ??, 2001
 CHANGES
 ---------------------------------------------
+
+-------------------- Changes from 1.0.7 to 1.0.8 -------------------
+
+RELEASE DATE: October ??, 2001
+
+1. [SERVER] Fixed Invid, String, IP array fields disk i/o to handle large arrays
+
+The InvidDBField, StringDBField, and IPDBField classes support array
+values for object pointeers, strings, and IP addresses, respectively.
+
+Prior to this release, the length of these arrays were limited to 32k
+entries, as a 16 bit signed short was used to store the array length
+on disk.
+
+This has now been changed to a 32 bit signed int, so that Ganymede's
+disk format can now handle 2 billion items per array.
+
+That doesn't mean that the server will be able to behave well with 2
+billion items in a String field, but there at least won't be an
+artificial cap of 32k items anymore.
 
 -------------------- Changes from 1.0.6 to 1.0.7 -------------------
 
