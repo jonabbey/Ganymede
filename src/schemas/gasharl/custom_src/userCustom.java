@@ -6,15 +6,15 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.109 $
-   Last Mod Date: $Date: 2002/10/10 01:48:42 $
+   Version: $Revision: 1.110 $
+   Last Mod Date: $Date: 2003/03/12 03:48:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -203,154 +203,161 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public ReturnVal initializeNewObject()
   {
-    ReturnVal retVal;
-    Random rand = new Random();
-    Integer uidVal = null;
-
-    /* -- */
-
-    // we don't want to do any of this initialization during
-    // bulk-loading.
-
-    if (!getGSession().enableOversight)
+    try
       {
-	return null;
-      }
+	ReturnVal retVal;
+	Random rand = new Random();
+	Integer uidVal = null;
 
-    // need to find a uid for this user
+	/* -- */
 
-    // see if we have an owner set, check it for our starting uid
+	// we don't want to do any of this initialization during
+	// bulk-loading.
 
-    Vector owners = getFieldValuesLocal(SchemaConstants.OwnerListField);
+	if (!getGSession().enableOversight)
+	  {
+	    return null;
+	  }
 
-    /*
+	// need to find a uid for this user
 
-    if (owners != null && owners.size() > 0)
-      {
+	// see if we have an owner set, check it for our starting uid
+
+	Vector owners = getFieldValuesLocal(SchemaConstants.OwnerListField);
+
+	/*
+
+	if (owners != null && owners.size() > 0)
+	{
 	Invid primaryOwner = (Invid) owners.elementAt(0);
 
 	DBObject owner = getSession().viewDBObject(primaryOwner);
 
 	if (owner != null)
-	  {
-	    // field 256 in the owner group is the GASHARL starting
-	    // uid/gid
+	{
+	// field 256 in the owner group is the GASHARL starting
+	// uid/gid
 
-	    uidVal = (Integer) owner.getFieldValueLocal((short) 256);
+	uidVal = (Integer) owner.getFieldValueLocal((short) 256);
 
-	    if (uidVal == null)
-	      {
-		uidVal = new Integer(lowUID);
-	      }
-	  }
-      }
-
-    */
-
-    NumericDBField numField = (NumericDBField) getField(UID);
-
-    if (numField == null)
-      {
-	return Ganymede.createErrorDialog("User Initialization Failure",
-					  "Couldn't find the uid field.. schema problem?");
-      }
-
-    DBNameSpace namespace = numField.getNameSpace();
-
-    if (namespace == null)
-      {
-	return Ganymede.createErrorDialog("User Initialization Failure",
-					  "Couldn't find the uid namespace.. schema problem?");
-      }
-
-    // now, find a uid.. unfortunately, we have to use immutable Integers here.. not
-    // the most efficient at all.
-
-    int count = 0;
-    uidVal = new Integer(rand.nextInt(31767) + lowUID);
-    
-    while (!namespace.reserve(getEditSet(), uidVal, true) && count < 30000)
-      {
-	uidVal = new Integer(rand.nextInt(31767) + lowUID);
-	count++;
-      }
-
-    if (count > 30000)
-      {
-	// we've been looping too long, maybe there's no
-	// uid's free?  let's do an exhaustive search
-	
+	if (uidVal == null)
+	{
 	uidVal = new Integer(lowUID);
-	
-	while (!namespace.reserve(getEditSet(), uidVal, true))
+	}
+	}
+	}
+
+	*/
+
+	NumericDBField numField = (NumericDBField) getField(UID);
+
+	if (numField == null)
 	  {
-	    uidVal = new Integer(uidVal.intValue() + 1);
+	    return Ganymede.createErrorDialog("User Initialization Failure",
+					      "Couldn't find the uid field.. schema problem?");
+	  }
+
+	DBNameSpace namespace = numField.getNameSpace();
+
+	if (namespace == null)
+	  {
+	    return Ganymede.createErrorDialog("User Initialization Failure",
+					      "Couldn't find the uid namespace.. schema problem?");
+	  }
+
+	// now, find a uid.. unfortunately, we have to use immutable Integers here.. not
+	// the most efficient at all.
+
+	int count = 0;
+	uidVal = new Integer(rand.nextInt(31767) + lowUID);
+    
+	while (!namespace.reserve(getEditSet(), uidVal, true) && count < 30000)
+	  {
+	    uidVal = new Integer(rand.nextInt(31767) + lowUID);
+	    count++;
+	  }
+
+	if (count > 30000)
+	  {
+	    // we've been looping too long, maybe there's no
+	    // uid's free?  let's do an exhaustive search
+	
+	    uidVal = new Integer(lowUID);
+	
+	    while (!namespace.reserve(getEditSet(), uidVal, true))
+	      {
+		uidVal = new Integer(uidVal.intValue() + 1);
 	    
-	    if (uidVal.intValue() > 32767)
-	      {
-		throw new RuntimeException("Couldn't find an allocatable uid through random search");
+		if (uidVal.intValue() > 32767)
+		  {
+		    throw new RuntimeException("Couldn't find an allocatable uid through random search");
+		  }
 	      }
 	  }
-      }
 
-    // we use setValueLocal so we can set a value that the user can't edit.
+	// we use setValueLocal so we can set a value that the user can't edit.
 
-    retVal = numField.setValueLocal(uidVal);
+	retVal = numField.setValueLocal(uidVal);
 
-    if (retVal != null && !retVal.didSucceed())
-      {
-	return retVal;
-      }
-
-    // create a volume entry for the user.
-    
-    InvidDBField invf = (InvidDBField) getField(userSchema.VOLUMES);
-
-    retVal = invf.createNewEmbedded(true);
-    
-    if ((retVal == null) || (!retVal.didSucceed()))
-      {
-	return retVal;
-      }
-    
-    Invid invid = retVal.getInvid();
-    
-    if (invid != null)
-      {
-	// find the auto.home.default map, if we can.
-
-	Vector results = getGSession().internalQuery(new Query((short) 277, 
-							       new QueryDataNode(QueryDataNode.EQUALS,
-										 "auto.home.default"),
-							       false));
-	
-	// if we found auto.home.default, set the new volume entry map
-	// field to point to auto.home.default.
-    
-	if (results != null && results.size() == 1)
+	if (retVal != null && !retVal.didSucceed())
 	  {
-	    Result objid = (Result) results.elementAt(0);
-	
-	    DBEditObject eObj = getSession().editDBObject(invid);
-	    invf = (InvidDBField) eObj.getField(mapEntrySchema.MAP);
-	
-	    retVal = invf.setValueLocal(objid.getInvid());
-
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		return retVal;
-	      }
-	
-	    // we want the permissions system to reject edit privs
-	    // on this now.. by setting permCache to null, we allow
-	    // the mapEntryCustom permOverride method to get a chance
-	    // to refuse edit privileges.
-
-	    eObj.clearFieldPerm(mapEntrySchema.MAP);
+	    return retVal;
 	  }
-      }
 
-    return null;
+	// create a volume entry for the user.
+    
+	InvidDBField invf = (InvidDBField) getField(userSchema.VOLUMES);
+
+	retVal = invf.createNewEmbedded(true);
+    
+	if ((retVal == null) || (!retVal.didSucceed()))
+	  {
+	    return retVal;
+	  }
+    
+	Invid invid = retVal.getInvid();
+    
+	if (invid != null)
+	  {
+	    // find the auto.home.default map, if we can.
+
+	    Vector results = getGSession().internalQuery(new Query((short) 277, 
+								   new QueryDataNode(QueryDataNode.EQUALS,
+										     "auto.home.default"),
+								   false));
+	
+	    // if we found auto.home.default, set the new volume entry map
+	    // field to point to auto.home.default.
+    
+	    if (results != null && results.size() == 1)
+	      {
+		Result objid = (Result) results.elementAt(0);
+	
+		DBEditObject eObj = getSession().editDBObject(invid);
+		invf = (InvidDBField) eObj.getField(mapEntrySchema.MAP);
+	
+		retVal = invf.setValueLocal(objid.getInvid());
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+	
+		// we want the permissions system to reject edit privs
+		// on this now.. by setting permCache to null, we allow
+		// the mapEntryCustom permOverride method to get a chance
+		// to refuse edit privileges.
+
+		eObj.clearFieldPerm(mapEntrySchema.MAP);
+	      }
+	  }
+
+	return null;
+      }
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.loginError(ex);
+      }
   }
 
   /**
@@ -435,124 +442,75 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
   {
-    if (debug)
-      {
-	System.err.println("Attempting to clone User " + origObj.getLabel());
-      }
-
-    boolean problem = false;
-    ReturnVal tmpVal;
-    StringBuffer resultBuf = new StringBuffer();
-    ReturnVal retVal = super.cloneFromObject(session, origObj, local);
-
-    if (retVal != null && retVal.getDialog() != null)
-      {
-	resultBuf.append("\n\n");
-	resultBuf.append(retVal.getDialog().getText());
-	
-	problem = true;
-      }
-
-    // we have the default canCloneField() refuse to clone
-    // userSchema.CATEGORY to avoid dealing or bypassing with the
-    // wizard.  If we are cloning a normal user, it is safe enough to
-    // copy that value.  Else we'll leave it blank for the user to
-    // set.
-
-    Invid category = (Invid) origObj.getFieldValue(userSchema.CATEGORY);
-	
-    if (session.getGSession().viewObjectLabel(category).equals("normal"))
-      {
-	((DBField) getField(userSchema.CATEGORY)).setValue(category, local, true);
-      }
-    
-    if (debug)
-      {
-	System.err.println("User " + origObj.getLabel() + " cloned, working on embeddeds");
-      }
-
-    // and clone the embedded objects
-
-    InvidDBField newVolumes = (InvidDBField) getField(userSchema.VOLUMES);
-    InvidDBField oldVolumes = (InvidDBField) origObj.getField(userSchema.VOLUMES);
-
-    Vector newOnes;
-    Vector oldOnes;
-
-    if (local)
-      {
-	newOnes = (Vector) newVolumes.getValuesLocal().clone();
-	oldOnes = (Vector) oldVolumes.getValuesLocal().clone();
-      }
-    else
-      {
-	newOnes = newVolumes.getValues();
-	oldOnes = oldVolumes.getValues();
-      }
-
-    DBObject origVolume;
-    DBEditObject workingVolume;
-    int i;
-
-    for (i = 0; i < newOnes.size(); i++)
+    try
       {
 	if (debug)
 	  {
-	    System.err.println("User clone sub " + i);
+	    System.err.println("Attempting to clone User " + origObj.getLabel());
 	  }
 
-	workingVolume = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
-	origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
+	boolean problem = false;
+	ReturnVal tmpVal;
+	StringBuffer resultBuf = new StringBuffer();
+	ReturnVal retVal = super.cloneFromObject(session, origObj, local);
 
-	if (debug)
-	  {
-	    System.err.println("Attempting to clone user volume " + origVolume.getLabel());
-	  }
-
-	tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
-
-	if (tmpVal != null && tmpVal.getDialog() != null)
+	if (retVal != null && retVal.getDialog() != null)
 	  {
 	    resultBuf.append("\n\n");
-	    resultBuf.append(tmpVal.getDialog().getText());
-	    
+	    resultBuf.append(retVal.getDialog().getText());
+	
 	    problem = true;
 	  }
-      }
 
-    Invid newInvid;
+	// we have the default canCloneField() refuse to clone
+	// userSchema.CATEGORY to avoid dealing or bypassing with the
+	// wizard.  If we are cloning a normal user, it is safe enough to
+	// copy that value.  Else we'll leave it blank for the user to
+	// set.
 
-    if (i < oldOnes.size())
-      {
-	for (; i < oldOnes.size(); i++)
+	Invid category = (Invid) origObj.getFieldValue(userSchema.CATEGORY);
+	
+	if (session.getGSession().viewObjectLabel(category).equals("normal"))
+	  {
+	    ((DBField) getField(userSchema.CATEGORY)).setValue(category, local, true);
+	  }
+    
+	if (debug)
+	  {
+	    System.err.println("User " + origObj.getLabel() + " cloned, working on embeddeds");
+	  }
+
+	// and clone the embedded objects
+
+	InvidDBField newVolumes = (InvidDBField) getField(userSchema.VOLUMES);
+	InvidDBField oldVolumes = (InvidDBField) origObj.getField(userSchema.VOLUMES);
+
+	Vector newOnes;
+	Vector oldOnes;
+
+	if (local)
+	  {
+	    newOnes = (Vector) newVolumes.getValuesLocal().clone();
+	    oldOnes = (Vector) oldVolumes.getValuesLocal().clone();
+	  }
+	else
+	  {
+	    newOnes = newVolumes.getValues();
+	    oldOnes = oldVolumes.getValues();
+	  }
+
+	DBObject origVolume;
+	DBEditObject workingVolume;
+	int i;
+
+	for (i = 0; i < newOnes.size(); i++)
 	  {
 	    if (debug)
 	      {
-		System.err.println("User clone sub sub " + i);
+		System.err.println("User clone sub " + i);
 	      }
 
-	    tmpVal = newVolumes.createNewEmbedded(local);
-
-	    if (!tmpVal.didSucceed())
-	      {
-		if (debug)
-		  {
-		    System.err.println("User clone couldn't allocate new embedded");
-		  }
-
-		if (tmpVal != null && tmpVal.getDialog() != null)
-		  {
-		    resultBuf.append("\n\n");
-		    resultBuf.append(tmpVal.getDialog().getText());
-		    
-		    problem = true;
-		  }
-		continue;
-	      }
-
-	    newInvid = tmpVal.getInvid();
-
-	    workingVolume = (DBEditObject) session.editDBObject(newInvid);
+	    workingVolume = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
 	    origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
 
 	    if (debug)
@@ -570,17 +528,73 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		problem = true;
 	      }
 	  }
-      }
 
-    retVal = new ReturnVal(true, !problem);
+	Invid newInvid;
 
-    if (problem)
-      {
-	retVal.setDialog(new JDialogBuff("Possible Clone Problem", resultBuf.toString(),
-					 "Ok", null, "ok.gif"));
-      }
+	if (i < oldOnes.size())
+	  {
+	    for (; i < oldOnes.size(); i++)
+	      {
+		if (debug)
+		  {
+		    System.err.println("User clone sub sub " + i);
+		  }
+
+		tmpVal = newVolumes.createNewEmbedded(local);
+
+		if (!tmpVal.didSucceed())
+		  {
+		    if (debug)
+		      {
+			System.err.println("User clone couldn't allocate new embedded");
+		      }
+
+		    if (tmpVal != null && tmpVal.getDialog() != null)
+		      {
+			resultBuf.append("\n\n");
+			resultBuf.append(tmpVal.getDialog().getText());
+		    
+			problem = true;
+		      }
+		    continue;
+		  }
+
+		newInvid = tmpVal.getInvid();
+
+		workingVolume = (DBEditObject) session.editDBObject(newInvid);
+		origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
+
+		if (debug)
+		  {
+		    System.err.println("Attempting to clone user volume " + origVolume.getLabel());
+		  }
+
+		tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
+
+		if (tmpVal != null && tmpVal.getDialog() != null)
+		  {
+		    resultBuf.append("\n\n");
+		    resultBuf.append(tmpVal.getDialog().getText());
+	    
+		    problem = true;
+		  }
+	      }
+	  }
+
+	retVal = new ReturnVal(true, !problem);
+
+	if (problem)
+	  {
+	    retVal.setDialog(new JDialogBuff("Possible Clone Problem", resultBuf.toString(),
+					     "Ok", null, "ok.gif"));
+	  }
     
-    return retVal;
+	return retVal;
+      }
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.loginError(ex);
+      }
   }
 
   /**
@@ -1256,7 +1270,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     switch (field.getID())
       {

@@ -6,15 +6,15 @@
    
    Created: 16 February 1999
    Release: $Name:  $
-   Version: $Revision: 1.15 $
-   Last Mod Date: $Date: 2002/04/10 05:21:57 $
+   Version: $Revision: 1.16 $
+   Last Mod Date: $Date: 2003/03/12 03:48:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -186,7 +186,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * invid fields.
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() != emailListSchema.MEMBERS)
       {

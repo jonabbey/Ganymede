@@ -5,14 +5,15 @@
   A wizard to allow deletion of a user's home group from the group edit window.
 
   Created: 8 April 1998
-  Version: $Revision: 1.7 $ %D%
+  Version: $Revision: 1.8 $ %D%
   Module by: Mike Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -116,7 +117,7 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 		"ok.gif");
   }
 
-  public ReturnVal processDialog0()
+  public ReturnVal processDialog0() throws NotLoggedInException
   {
     JDialogBuff dialog;
     ReturnVal retVal = null;
@@ -166,7 +167,7 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
       }
   }
 
-  public ReturnVal processDialog1()
+  public ReturnVal processDialog1() throws NotLoggedInException
   {
     ReturnVal retVal = null;
 
@@ -218,7 +219,7 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
     return retVal;
   }
 
-  public ReturnVal processDialog2()
+  public ReturnVal processDialog2() throws NotLoggedInException
   {
     ReturnVal retVal = null;
 

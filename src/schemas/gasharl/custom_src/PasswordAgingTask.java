@@ -7,15 +7,15 @@
    
    Created: 14 June 2001
    Release: $Name:  $
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2002/02/01 06:34:28 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2003/03/12 03:48:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -171,6 +171,9 @@ public class PasswordAgingTask implements Runnable {
     catch (InterruptedException ex)
       {
       }
+    catch (NotLoggedInException ex)
+      {
+      }
     finally
       {
 	if (transactionOpen)
@@ -182,7 +185,7 @@ public class PasswordAgingTask implements Runnable {
       }
   }
 
-  private void handlePasswords() throws InterruptedException
+  private void handlePasswords() throws InterruptedException, NotLoggedInException
   {
     Query q;
     Vector results;

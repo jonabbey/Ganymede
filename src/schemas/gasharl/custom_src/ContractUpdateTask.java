@@ -6,15 +6,16 @@
    
    Created: 9 March 1999
    Release: $Name:  $
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 2002/06/19 23:19:24 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2003/03/12 03:48:39 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -42,7 +43,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -196,8 +198,15 @@ public class ContractUpdateTask implements Runnable {
 
 	if (session != null)
 	  {
-	    session.commitTransaction();
-	    session.logout();
+	    try
+	      {
+		session.commitTransaction();
+		session.logout();
+	      }
+	    catch (NotLoggedInException ex)
+	      {
+		// internal session, won't happen
+	      }
 	  }
 
 	if (in != null)

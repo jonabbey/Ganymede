@@ -5,15 +5,16 @@
 
    Created: 23 June 1998
    Release: $Name:  $
-   Version: $Revision: 1.5 $
-   Last Mod Date: $Date: 1999/07/14 21:51:50 $
+   Version: $Revision: 1.6 $
+   Last Mod Date: $Date: 2003/03/12 03:48:40 $
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -233,7 +234,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
    *
    */
   
-  public ReturnVal processDialog1()
+  public ReturnVal processDialog1() throws NotLoggedInException
   {
     ReturnVal retVal;
 
@@ -374,7 +375,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
    * 
    */
 
-  public ReturnVal processDialog2()
+  public ReturnVal processDialog2() throws NotLoggedInException
   {
     ReturnVal finalReturnVal = new ReturnVal(true);
 
@@ -440,7 +441,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
    * "are you sure?" dialog has been shown.  From here, we just inactivate
    * the group and go about our merry ways.
    */
-  public ReturnVal processDialog50()
+  public ReturnVal processDialog50() throws NotLoggedInException
   {
     groupObject.inactivate(true, true);
     if (debug)

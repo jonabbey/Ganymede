@@ -6,15 +6,15 @@
    
    Created: 20 May 1998
    Release: $Name:  $
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2001/04/26 03:06:01 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2003/03/12 03:48:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -294,7 +294,7 @@ public class networkCustom extends DBEditObject {
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     // no choices for interfaces.. make them edit the system
 

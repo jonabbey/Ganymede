@@ -6,15 +6,16 @@
    
    Created: 6 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 1999/03/16 22:13:31 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2003/03/12 03:48:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -175,7 +176,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == volumeSchema.ENTRIES)
       {
@@ -279,115 +280,121 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    if (field.getID() != volumeSchema.ENTRIES)
+    try
       {
-	return null;		// by default, we just ok whatever
-      }
-
-    // ok, they are trying to mess with the embedded list.. we really
-    // can't allow any deletions from the default map.  If the entry
-    // isn't in the default map, we'll allow deletions, but we have to
-    // do it by editing the user referenced in the entry specified,
-    // and deleting the entry reference in the embedded vector.
-
-    switch (operation)
-      {
-      case DELELEMENT:
-
-	int index = ((Integer) param1).intValue();
-
-	Vector entries = getFieldValuesLocal(volumeSchema.ENTRIES);
-
-	if (entries == null)
+	if (field.getID() != volumeSchema.ENTRIES)
 	  {
-	    return Ganymede.createErrorDialog("Logic error in server",
-					      "volumeCustom.wizardHook(): can't delete element out of empty field");
+	    return null;		// by default, we just ok whatever
 	  }
+
+	// ok, they are trying to mess with the embedded list.. we really
+	// can't allow any deletions from the default map.  If the entry
+	// isn't in the default map, we'll allow deletions, but we have to
+	// do it by editing the user referenced in the entry specified,
+	// and deleting the entry reference in the embedded vector.
+
+	switch (operation)
+	  {
+	  case DELELEMENT:
+
+	    int index = ((Integer) param1).intValue();
+
+	    Vector entries = getFieldValuesLocal(volumeSchema.ENTRIES);
+
+	    if (entries == null)
+	      {
+		return Ganymede.createErrorDialog("Logic error in server",
+						  "volumeCustom.wizardHook(): can't delete element out of empty field");
+	      }
 	
-	Invid invid = null;	// the invid for the entry
+	    Invid invid = null;	// the invid for the entry
 
-	try
-	  {
-	    invid = (Invid) entries.elementAt(index);
-	  }
-	catch (ClassCastException ex)
-	  {
-	    return Ganymede.createErrorDialog("Logic error in server",
-					      "volumeCustom.wizardHook(): unexpected element in entries field");
-	  }
-	catch (ArrayIndexOutOfBoundsException ex)
-	  {
-	    return Ganymede.createErrorDialog("Logic error in server",
-					      "volumeCustom.wizardHook(): deleteElement index out of range in entries field");
-	  }
-
-	DBObject vObj = getSession().viewDBObject(invid); // should be a mapEntry object
-
-	InvidDBField invf = (InvidDBField) vObj.getField(mapEntrySchema.MAP);
-
-	String mapName = invf.getValueString();
-
-	if (mapName != null && mapName.equals("auto.home.default"))
-	  {
-	    return Ganymede.createErrorDialog("Cannot remove entries from auto.home.default",
-					      "Error, cannot remove entries from auto.home.default. " +
-					      "All UNIX users in Ganymede must have an entry in auto.home.default " +
-					      "to represent the location of their home directory.");
-	  }
-	else
-	  {
-	    // we'll allow the deletion, but we're going to do it the
-	    // right way here, rather than having
-	    // DBField.deleteElement() try to do it in its naive
-	    // fashion.
-	    
-	    // we need to get the user
-
-	    Invid user = (Invid) vObj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
-
-	    // and we need to edit the user.. we'll want to check permissions
-	    // for this, so we'll use edit_db_object()
-
-	    DBEditObject eObj = (DBEditObject) (getGSession().edit_db_object(user).getObject());
-
-	    if (eObj == null)
+	    try
 	      {
-		return Ganymede.createErrorDialog("Couldn't remove map entry",
-						  "Couldn't remove map entry for " + 
-						  getGSession().viewObjectLabel(user) +
-						  ", permissions denied to edit the user.");
+		invid = (Invid) entries.elementAt(index);
+	      }
+	    catch (ClassCastException ex)
+	      {
+		return Ganymede.createErrorDialog("Logic error in server",
+						  "volumeCustom.wizardHook(): unexpected element in entries field");
+	      }
+	    catch (ArrayIndexOutOfBoundsException ex)
+	      {
+		return Ganymede.createErrorDialog("Logic error in server",
+						  "volumeCustom.wizardHook(): deleteElement index out of range in entries field");
 	      }
 
-	    invf = (InvidDBField) eObj.getField(userSchema.VOLUMES);
+	    DBObject vObj = getSession().viewDBObject(invid); // should be a mapEntry object
 
-	    if (invf == null)
+	    InvidDBField invf = (InvidDBField) vObj.getField(mapEntrySchema.MAP);
+
+	    String mapName = invf.getValueString();
+
+	    if (mapName != null && mapName.equals("auto.home.default"))
 	      {
-		return Ganymede.createErrorDialog("Couldn't remove map entry",
-						  "Couldn't remove map entry for " + 
-						  getGSession().viewObjectLabel(user) +
-						  ", couldn't access the volumes field in the user record.");
-	      }
-
-	    // by doing the deleteElement on the field containing
-	    // the embedded volume object, we will let the user
-	    // object take care of deleting the embedded volume
-	    // object.  The invid linking system will then take care
-	    // of removing it from the map object's MAPENTRIES field.
-
-	    ReturnVal retVal = invf.deleteElement(invid);
-
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		return retVal;
+		return Ganymede.createErrorDialog("Cannot remove entries from auto.home.default",
+						  "Error, cannot remove entries from auto.home.default. " +
+						  "All UNIX users in Ganymede must have an entry in auto.home.default " +
+						  "to represent the location of their home directory.");
 	      }
 	    else
 	      {
-		return new ReturnVal(true);
+		// we'll allow the deletion, but we're going to do it the
+		// right way here, rather than having
+		// DBField.deleteElement() try to do it in its naive
+		// fashion.
+	    
+		// we need to get the user
+
+		Invid user = (Invid) vObj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
+
+		// and we need to edit the user.. we'll want to check permissions
+		// for this, so we'll use edit_db_object()
+
+		DBEditObject eObj = (DBEditObject) (getGSession().edit_db_object(user).getObject());
+
+		if (eObj == null)
+		  {
+		    return Ganymede.createErrorDialog("Couldn't remove map entry",
+						      "Couldn't remove map entry for " + 
+						      getGSession().viewObjectLabel(user) +
+						      ", permissions denied to edit the user.");
+		  }
+
+		invf = (InvidDBField) eObj.getField(userSchema.VOLUMES);
+
+		if (invf == null)
+		  {
+		    return Ganymede.createErrorDialog("Couldn't remove map entry",
+						      "Couldn't remove map entry for " + 
+						      getGSession().viewObjectLabel(user) +
+						      ", couldn't access the volumes field in the user record.");
+		  }
+
+		// by doing the deleteElement on the field containing
+		// the embedded volume object, we will let the user
+		// object take care of deleting the embedded volume
+		// object.  The invid linking system will then take care
+		// of removing it from the map object's MAPENTRIES field.
+
+		ReturnVal retVal = invf.deleteElement(invid);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+		else
+		  {
+		    return new ReturnVal(true);
+		  }
 	      }
 	  }
+
+	return null;
       }
-
-    return null;
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.loginError(ex);
+      }
   }
-
 }

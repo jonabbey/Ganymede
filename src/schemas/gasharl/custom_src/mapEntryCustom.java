@@ -6,15 +6,16 @@
    
    Created: 9 December 1997
    Release: $Name:  $
-   Version: $Revision: 1.10 $
-   Last Mod Date: $Date: 2002/08/21 07:07:47 $
+   Version: $Revision: 1.11 $
+   Last Mod Date: $Date: 2003/03/12 03:48:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999  The University of Texas at Austin.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   The University of Texas at Austin.
 
    Contact information
 
@@ -200,7 +201,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() != mapEntrySchema.MAP)
       {

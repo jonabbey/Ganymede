@@ -6,15 +6,15 @@
    
    Created: 30 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.25 $
-   Last Mod Date: $Date: 2001/12/05 18:38:19 $
+   Version: $Revision: 1.26 $
+   Last Mod Date: $Date: 2003/03/12 03:48:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -492,264 +492,271 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    groupHomeGroupWizard homeWizard;
-    ReturnVal retVal = null;
-
-    /* -- */
-
-    // First find out what they are changing
-
-    if (debug)
+    try
       {
-	System.out.println("Field name: " + field.getName() + 
-			   " Field typeDesc: " + field.getTypeDesc());
-      }
+	groupHomeGroupWizard homeWizard;
+	ReturnVal retVal = null;
 
-    if (field.getID() == HOMEUSERS) // from groupSchema
-      {    
-	// What are they doing to the home users?
+	/* -- */
 
-	switch (operation) 
+	// First find out what they are changing
+
+	if (debug)
 	  {
-	  case ADDELEMENT:
-	  case ADDELEMENTS:
+	    System.out.println("Field name: " + field.getName() + 
+			       " Field typeDesc: " + field.getTypeDesc());
+	  }
 
-	    if (debug)
+	if (field.getID() == HOMEUSERS) // from groupSchema
+	  {    
+	    // What are they doing to the home users?
+
+	    switch (operation) 
 	      {
-		print("it's an ADDELEMENT, ignoring it.");
-	      }
+	      case ADDELEMENT:
+	      case ADDELEMENTS:
 
-	    // we don't need to rescan anything, do we?
-	    return null;
-
-	  case DELELEMENTS:
-
-	    if (gSession == null)
-	      {
-		// If there is no session, the server is doing something special.
-		// Assume the server knows what is going on, and let it do the deed.
-		return null;
-	      }
-	    else
-	      {
-		return Ganymede.createErrorDialog("Group Validation Error",
-						  "Can't do bulk removal of home group entries right now.");
-	      }
-
-	  case DELELEMENT:
-
-	    if (debug)
-	      {
-		print("HOMEUSERS field changing.");
-	      }
-	
-	    Vector users = getFieldValuesLocal(HOMEUSERS);
-	    int index = ((Integer) param1).intValue();
-	    Invid userInvid = (Invid)users.elementAt(index);
-
-	    if (gSession == null)
-	      {
-		// If there is no session, the server is doing something special.
-		// Assume the server knows what is going on, and let it do the deed.
-		return null;
-	      }
-	    else if (!gSession.enableWizards)
-	      {
-		// Stupid client won't let us show wizards.  We'll teach them!
-		// First, find out what is going on.  How many groups is this user in?
-		
-		db_object user = gSession.edit_db_object(userInvid).getObject();
-		int size = 0;
-
-		try
-		  {
-		    size = user.getField(userSchema.GROUPLIST).size();
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("How come I can't talk to the server, when I AM the server? " + rx);
-		  }
-	      
-		if (size == 2)
-		  {
-		    // They belong to two groups: this one, and one other one.
-		    // We will make the other one the home group.
-
-		    try
-		      {
-			db_field groupListField = user.getField(userSchema.GROUPLIST);
-			Vector groupList = groupListField.getValues();    
-			
-			for (int i = 0; i < groupList.size() ;i++)
-			  {
-			    if (!this.equals(groupList.elementAt(i)))
-			      {
-				// this will be the new home group
-
-				if (debug)
-				  {
-				    print("Found the other group, changing the user's home group.");
-				  }
-			      
-				db_field homeGroup = user.getField(userSchema.HOMEGROUP);
-				retVal = homeGroup.setValue(groupList.elementAt(i));
-				
-				break;
-			      }
-			  }
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new RuntimeException("Again, with the remote exceptions: " + rx);
-		      }
-		  }
-		else if (size < 1)
-		  {
-		    // They are only in one group, so what good is that?
-		    return Ganymede.createErrorDialog("Group Change Failed",
-						      "This user has this group for a home group. " +
-						      " You cannot remove this user, since this is his only group.");
-		  }
-		else 
-		  {
-		    return Ganymede.createErrorDialog("Group Change Failed",
-						      "This user has many groups to choose from. " +
-						      " You must choose one to be the home group, or turn wizards on.");
-		  }
-	      }
-  
-	    // This calls for a wizard.  See if one is running already
-
-	    if (gSession.isWizardActive() && gSession.getWizard() instanceof groupHomeGroupWizard)
-	      {
 		if (debug)
 		  {
-		    print("Ok, wizard is running.  Checking to see if it is done.");
+		    print("it's an ADDELEMENT, ignoring it.");
 		  }
 
-		// We are already in this wizard, lets see where we are
+		// we don't need to rescan anything, do we?
+		return null;
 
-		homeWizard = (groupHomeGroupWizard)gSession.getWizard();
-	      
-		if (homeWizard.getState() == homeWizard.DONE)
+	      case DELELEMENTS:
+
+		if (gSession == null)
 		  {
-		    // Ok, the home wizard has done its deed, so get
-		    // rid of it
-
-		    homeWizard.unregister();
-
-		    // I don't think it is a good idea to return null
-		    // here.
-
-		    if (debug)
-		      {
-			print("Returning null, because I am in groupCustom.wizardHook " +
-			      "with an active wizard that is done.");
-		      }
-
+		    // If there is no session, the server is doing something special.
+		    // Assume the server knows what is going on, and let it do the deed.
 		    return null;
 		  }
 		else
 		  {
-		    if (homeWizard.groupObject != this)
-		      {
-			print("bad object, group objects confused somehow.");
-		      }
-		    
-		    if (homeWizard.getState() != homeWizard.DONE)
-		      {
-			print(" bad state: " + homeWizard.getState());
-		      }
-		  
-		    homeWizard.unregister(); // get rid of it, so it doesn't mess other stuff up
-		    return Ganymede.createErrorDialog("Group object error",
-						      "The client is attempting to do an operation " +
-						      "on a user object with an active wizard.");
+		    return Ganymede.createErrorDialog("Group Validation Error",
+						      "Can't do bulk removal of home group entries right now.");
 		  }
-	      }
-	    else if (gSession.isWizardActive() &&
-		     !(gSession.getWizard() instanceof groupHomeGroupWizard))
-	      {
-		return Ganymede.createErrorDialog("Group Object Error",
-						  "The client is trying to change the group object " +
-						  "while other wizards are running around.");
-	      }
-	  
-	    // Ok, if we get to here, then we need to start up a new wizard.
-	    // The user is trying to remove someone out of the HOMEUSER field, which may cause problems.
-	    
-	    try
-	      {
+
+	      case DELELEMENT:
+
 		if (debug)
 		  {
-		    print("Starting up a new wizard");
+		    print("HOMEUSERS field changing.");
 		  }
+	
+		Vector users = getFieldValuesLocal(HOMEUSERS);
+		int index = ((Integer) param1).intValue();
+		Invid userInvid = (Invid)users.elementAt(index);
+
+		if (gSession == null)
+		  {
+		    // If there is no session, the server is doing something special.
+		    // Assume the server knows what is going on, and let it do the deed.
+		    return null;
+		  }
+		else if (!gSession.enableWizards)
+		  {
+		    // Stupid client won't let us show wizards.  We'll teach them!
+		    // First, find out what is going on.  How many groups is this user in?
+
+		    db_object user = gSession.edit_db_object(userInvid).getObject();
+		    int size = 0;
+
+		    try
+		      {
+			size = user.getField(userSchema.GROUPLIST).size();
+		      }
+		    catch (RemoteException rx)
+		      {
+			throw new RuntimeException("How come I can't talk to the server, when I AM the server? " + rx);
+		      }
+	      
+		    if (size == 2)
+		      {
+			// They belong to two groups: this one, and one other one.
+			// We will make the other one the home group.
+
+			try
+			  {
+			    db_field groupListField = user.getField(userSchema.GROUPLIST);
+			    Vector groupList = groupListField.getValues();    
+			
+			    for (int i = 0; i < groupList.size() ;i++)
+			      {
+				if (!this.equals(groupList.elementAt(i)))
+				  {
+				    // this will be the new home group
+
+				    if (debug)
+				      {
+					print("Found the other group, changing the user's home group.");
+				      }
+			      
+				    db_field homeGroup = user.getField(userSchema.HOMEGROUP);
+				    retVal = homeGroup.setValue(groupList.elementAt(i));
+				
+				    break;
+				  }
+			      }
+			  }
+			catch (RemoteException rx)
+			  {
+			    throw new RuntimeException("Again, with the remote exceptions: " + rx);
+			  }
+		      }
+		    else if (size < 1)
+		      {
+			// They are only in one group, so what good is that?
+			return Ganymede.createErrorDialog("Group Change Failed",
+							  "This user has this group for a home group. " +
+							  " You cannot remove this user, since this is his only group.");
+		      }
+		    else 
+		      {
+			return Ganymede.createErrorDialog("Group Change Failed",
+							  "This user has many groups to choose from. " +
+							  " You must choose one to be the home group, or turn wizards on.");
+		      }
+		  }
+  
+		// This calls for a wizard.  See if one is running already
+
+		if (gSession.isWizardActive() && gSession.getWizard() instanceof groupHomeGroupWizard)
+		  {
+		    if (debug)
+		      {
+			print("Ok, wizard is running.  Checking to see if it is done.");
+		      }
+
+		    // We are already in this wizard, lets see where we are
+
+		    homeWizard = (groupHomeGroupWizard)gSession.getWizard();
+	      
+		    if (homeWizard.getState() == homeWizard.DONE)
+		      {
+			// Ok, the home wizard has done its deed, so get
+			// rid of it
+
+			homeWizard.unregister();
+
+			// I don't think it is a good idea to return null
+			// here.
+
+			if (debug)
+			  {
+			    print("Returning null, because I am in groupCustom.wizardHook " +
+				  "with an active wizard that is done.");
+			  }
+
+			return null;
+		      }
+		    else
+		      {
+			if (homeWizard.groupObject != this)
+			  {
+			    print("bad object, group objects confused somehow.");
+			  }
+		    
+			if (homeWizard.getState() != homeWizard.DONE)
+			  {
+			    print(" bad state: " + homeWizard.getState());
+			  }
+		  
+			homeWizard.unregister(); // get rid of it, so it doesn't mess other stuff up
+			return Ganymede.createErrorDialog("Group object error",
+							  "The client is attempting to do an operation " +
+							  "on a user object with an active wizard.");
+		      }
+		  }
+		else if (gSession.isWizardActive() &&
+			 !(gSession.getWizard() instanceof groupHomeGroupWizard))
+		  {
+		    return Ganymede.createErrorDialog("Group Object Error",
+						      "The client is trying to change the group object " +
+						      "while other wizards are running around.");
+		  }
+	  
+		// Ok, if we get to here, then we need to start up a new wizard.
+		// The user is trying to remove someone out of the HOMEUSER field, which may cause problems.
+	    
+		try
+		  {
+		    if (debug)
+		      {
+			print("Starting up a new wizard");
+		      }
 		
-		homeWizard = new groupHomeGroupWizard(this.gSession, this, userInvid);
+		    homeWizard = new groupHomeGroupWizard(this.gSession, this, userInvid);
 		
-		return homeWizard.respond(null);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not send wizard to client: " + rx);
+		    return homeWizard.respond(null);
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not send wizard to client: " + rx);
+		  }
 	      }
 	  }
-      }
-    else if (field.getID() == USERS) // from groupSchema
-      {
-	switch (operation)
+	else if (field.getID() == USERS) // from groupSchema
 	  {
-	  case DELELEMENTS:
+	    switch (operation)
+	      {
+	      case DELELEMENTS:
 
-	    if (gSession == null)
-	      {
-		return null;	// fine, whatever
-	      }
-	    else
-	      {
+		if (gSession == null)
+		  {
+		    return null;	// fine, whatever
+		  }
+		else
+		  {
+		    return Ganymede.createErrorDialog("Group Validation Error",
+						      "Can't do bulk removal of group entries right now.");
+		  }
+
+	      case DELELEMENT:
+		Vector users = getFieldValuesLocal(USERS);
+		int index = ((Integer) param1).intValue();
+		Invid userInvid = (Invid)users.elementAt(index);
+
+		Vector homeUsers = getFieldValuesLocal(HOMEUSERS);
+
+		if (!homeUsers.contains(userInvid))
+		  {
+		    return null;	// fine, whatever
+		  }
+
+		if (gSession == null)
+		  {
+		    // no session, this is being done by an automated process, let
+		    // it go
+
+		    return null;
+		  }
+
+		if (!gSession.getSession().isInteractive())
+		  {
+		    // let it go for now, we'll verify at transaction commit if we have to
+
+		    return null;
+		  }
+
+		String username = gSession.viewObjectLabel(userInvid);
+
 		return Ganymede.createErrorDialog("Group Validation Error",
-						  "Can't do bulk removal of group entries right now.");
+						  "Can't remove user " + username + " from group " + getLabel() 
+						  + "'s list of users, this user is using " + getLabel() + 
+						  " as their home group.  Remove this user from the home users list first.");
 	      }
-
-	  case DELELEMENT:
-	    Vector users = getFieldValuesLocal(USERS);
-	    int index = ((Integer) param1).intValue();
-	    Invid userInvid = (Invid)users.elementAt(index);
-
-	    Vector homeUsers = getFieldValuesLocal(HOMEUSERS);
-
-	    if (!homeUsers.contains(userInvid))
-	      {
-		return null;	// fine, whatever
-	      }
-
-	    if (gSession == null)
-	      {
-		// no session, this is being done by an automated process, let
-		// it go
-
-		return null;
-	      }
-
-	    if (!gSession.getSession().isInteractive())
-	      {
-		// let it go for now, we'll verify at transaction commit if we have to
-
-		return null;
-	      }
-
-	    String username = gSession.viewObjectLabel(userInvid);
-
-	    return Ganymede.createErrorDialog("Group Validation Error",
-					      "Can't remove user " + username + " from group " + getLabel() 
-					      + "'s list of users, this user is using " + getLabel() + 
-					      " as their home group.  Remove this user from the home users list first.");
 	  }
+
+	// otherwise, we don't care, at least not yet
+
+	return retVal;
       }
-
-    // otherwise, we don't care, at least not yet
-
-    return retVal;
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.loginError(ex);
+      }
   }
 
   /**

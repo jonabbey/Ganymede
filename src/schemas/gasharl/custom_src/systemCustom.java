@@ -6,15 +6,15 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.53 $
-   Last Mod Date: $Date: 2003/02/10 22:40:01 $
+   Version: $Revision: 1.54 $
+   Last Mod Date: $Date: 2003/03/12 03:48:41 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -199,7 +199,14 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	// we shouldn't throw a null pointer here, as we should always have the
 	// INTERFACES field available
 
-	return invField.createNewEmbedded(true);
+	try
+	  {
+	    return invField.createNewEmbedded(true);
+	  }
+	catch (NotLoggedInException ex)
+	  {
+	    return Ganymede.loginError(ex);
+	  }
       }
 
     return null;
@@ -223,99 +230,52 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
   {
-    boolean problem = false;
-    ReturnVal tmpVal;
-    StringBuffer resultBuf = new StringBuffer();
-    ReturnVal retVal = super.cloneFromObject(session, origObj, local);
-
-    if (retVal != null && retVal.getDialog() != null)
+    try
       {
-	resultBuf.append("\n\n");
-	resultBuf.append(retVal.getDialog().getText());
-	
-	problem = true;
-      }
+	boolean problem = false;
+	ReturnVal tmpVal;
+	StringBuffer resultBuf = new StringBuffer();
+	ReturnVal retVal = super.cloneFromObject(session, origObj, local);
 
-    // and clone the embedded objects.  Remember,
-    // systemCustom.initializeNewObject() will create a single
-    // embedded interface as part of the normal system creation
-    // process.  We need to handle cloning into the (single) embedded
-    // interface we'll have had created, then create any new embedded
-    // interfaces necessary when cloning a multiple interface system.
-
-    InvidDBField newInterfaces = (InvidDBField) getField(systemSchema.INTERFACES);
-    InvidDBField oldInterfaces = (InvidDBField) origObj.getField(systemSchema.INTERFACES);
-
-    Vector newOnes;
-    Vector oldOnes;
-
-    if (local)
-      {
-	newOnes = (Vector) newInterfaces.getValuesLocal().clone();
-	oldOnes = (Vector) oldInterfaces.getValuesLocal().clone();
-      }
-    else
-      {
-	newOnes = newInterfaces.getValues();
-	oldOnes = oldInterfaces.getValues();
-      }
-
-    DBObject origVolume;
-    DBEditObject workingVolume;
-    int i;
-
-    for (i = 0; i < newOnes.size(); i++)
-      {
-	workingVolume = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
-	origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
-	tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
-
-	if (tmpVal != null && tmpVal.getDialog() != null)
+	if (retVal != null && retVal.getDialog() != null)
 	  {
 	    resultBuf.append("\n\n");
-	    resultBuf.append(tmpVal.getDialog().getText());
-	    
+	    resultBuf.append(retVal.getDialog().getText());
+	
 	    problem = true;
 	  }
 
-	// clear the ethernet MAC address field in the interface,
-	// since we don't want to duplicate MAC addresses when we
-	// clone a system.
-	
-	tmpVal = workingVolume.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
-	
-	if (tmpVal != null && tmpVal.getDialog() != null)
+	// and clone the embedded objects.  Remember,
+	// systemCustom.initializeNewObject() will create a single
+	// embedded interface as part of the normal system creation
+	// process.  We need to handle cloning into the (single) embedded
+	// interface we'll have had created, then create any new embedded
+	// interfaces necessary when cloning a multiple interface system.
+
+	InvidDBField newInterfaces = (InvidDBField) getField(systemSchema.INTERFACES);
+	InvidDBField oldInterfaces = (InvidDBField) origObj.getField(systemSchema.INTERFACES);
+
+	Vector newOnes;
+	Vector oldOnes;
+
+	if (local)
 	  {
-	    resultBuf.append("\n\n");
-	    resultBuf.append(tmpVal.getDialog().getText());
-	      
-	    problem = true;
+	    newOnes = (Vector) newInterfaces.getValuesLocal().clone();
+	    oldOnes = (Vector) oldInterfaces.getValuesLocal().clone();
 	  }
-      }
-
-    Invid newInvid;
-
-    if (i < oldOnes.size())
-      {
-	for (; i < oldOnes.size(); i++)
+	else
 	  {
-	    tmpVal = newInterfaces.createNewEmbedded(local);
+	    newOnes = newInterfaces.getValues();
+	    oldOnes = oldInterfaces.getValues();
+	  }
 
-	    if (!tmpVal.didSucceed())
-	      {
-		if (tmpVal != null && tmpVal.getDialog() != null)
-		  {
-		    resultBuf.append("\n\n");
-		    resultBuf.append(tmpVal.getDialog().getText());
-		    
-		    problem = true;
-		  }
-		continue;
-	      }
+	DBObject origVolume;
+	DBEditObject workingVolume;
+	int i;
 
-	    newInvid = tmpVal.getInvid();
-
-	    workingVolume = (DBEditObject) session.editDBObject(newInvid);
+	for (i = 0; i < newOnes.size(); i++)
+	  {
+	    workingVolume = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
 	    origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
 	    tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
 
@@ -330,28 +290,82 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    // clear the ethernet MAC address field in the interface,
 	    // since we don't want to duplicate MAC addresses when we
 	    // clone a system.
-	    
+	
 	    tmpVal = workingVolume.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
-
+	
 	    if (tmpVal != null && tmpVal.getDialog() != null)
 	      {
 		resultBuf.append("\n\n");
 		resultBuf.append(tmpVal.getDialog().getText());
-	    
+	      
 		problem = true;
 	      }
 	  }
-      }
 
-    retVal = new ReturnVal(true, !problem);
+	Invid newInvid;
 
-    if (problem)
-      {
-	retVal.setDialog(new JDialogBuff("Possible Clone Problem", resultBuf.toString(),
-					 "Ok", null, "ok.gif"));
-      }
+	if (i < oldOnes.size())
+	  {
+	    for (; i < oldOnes.size(); i++)
+	      {
+		tmpVal = newInterfaces.createNewEmbedded(local);
+
+		if (!tmpVal.didSucceed())
+		  {
+		    if (tmpVal != null && tmpVal.getDialog() != null)
+		      {
+			resultBuf.append("\n\n");
+			resultBuf.append(tmpVal.getDialog().getText());
+		    
+			problem = true;
+		      }
+		    continue;
+		  }
+
+		newInvid = tmpVal.getInvid();
+
+		workingVolume = (DBEditObject) session.editDBObject(newInvid);
+		origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
+		tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
+
+		if (tmpVal != null && tmpVal.getDialog() != null)
+		  {
+		    resultBuf.append("\n\n");
+		    resultBuf.append(tmpVal.getDialog().getText());
+	    
+		    problem = true;
+		  }
+
+		// clear the ethernet MAC address field in the interface,
+		// since we don't want to duplicate MAC addresses when we
+		// clone a system.
+	    
+		tmpVal = workingVolume.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
+
+		if (tmpVal != null && tmpVal.getDialog() != null)
+		  {
+		    resultBuf.append("\n\n");
+		    resultBuf.append(tmpVal.getDialog().getText());
+	    
+		    problem = true;
+		  }
+	      }
+	  }
+
+	retVal = new ReturnVal(true, !problem);
+
+	if (problem)
+	  {
+	    retVal.setDialog(new JDialogBuff("Possible Clone Problem", resultBuf.toString(),
+					     "Ok", null, "ok.gif"));
+	  }
     
-    return retVal;
+	return retVal;
+      }
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.loginError(ex);
+      }
   }
 
   /**
@@ -490,88 +504,95 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   private void initializeNets(boolean onlyDoSystemType)
   {
-    if (debug)
+    try
       {
-	System.err.println("systemCustom.initializeNets()");
-      }
-
-    if (!onlyDoSystemType)
-      {
-	// what embedded interfaces do we have right now?
-	
-	Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
-	
-	// what networks are available to us?
-	
-	Query netQuery = new Query((short) 267);
-	
-	QueryResult netsEditable = editset.getSession().getGSession().query(netQuery);
-	
-	netsToChooseFrom = netsEditable.getHandles();
-	
-	// add any nets that are already connected to interfaces
-
-	for (int i = 0; i < interfaces.size(); i++)
+	if (debug)
 	  {
-	    Invid interfaceInvid = (Invid) interfaces.elementAt(i);
-	    DBObject interfaceObj = (DBObject) getSession().viewDBObject(interfaceInvid);
-	    Invid netInvid = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
+	    System.err.println("systemCustom.initializeNets()");
+	  }
 
-	    if (netInvid == null)
+	if (!onlyDoSystemType)
+	  {
+	    // what embedded interfaces do we have right now?
+	
+	    Vector interfaces = getFieldValuesLocal(systemSchema.INTERFACES);
+	
+	    // what networks are available to us?
+	
+	    Query netQuery = new Query((short) 267);
+	
+	    QueryResult netsEditable = editset.getSession().getGSession().query(netQuery);
+	
+	    netsToChooseFrom = netsEditable.getHandles();
+	
+	    // add any nets that are already connected to interfaces
+
+	    for (int i = 0; i < interfaces.size(); i++)
 	      {
-		Ganymede.debug("Missing netinvid in object " + this.toString());
-		continue;
-	      }
+		Invid interfaceInvid = (Invid) interfaces.elementAt(i);
+		DBObject interfaceObj = (DBObject) getSession().viewDBObject(interfaceInvid);
+		Invid netInvid = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
 
-	    DBObject netObj = (DBObject) getSession().viewDBObject(netInvid);
-	    String netLabel = netObj.getLabel();
-
-	    // okay, is this network already in our choice list?
-
-	    boolean found = false;
-
-	    for (int j = 0; j < netsToChooseFrom.size(); j++)
-	      {
-		ObjectHandle handle = (ObjectHandle) netsToChooseFrom.elementAt(j);
-
-		if (handle.getInvid().equals(netInvid))
+		if (netInvid == null)
 		  {
-		    found = true;
+		    Ganymede.debug("Missing netinvid in object " + this.toString());
+		    continue;
+		  }
+
+		DBObject netObj = (DBObject) getSession().viewDBObject(netInvid);
+		String netLabel = netObj.getLabel();
+
+		// okay, is this network already in our choice list?
+
+		boolean found = false;
+
+		for (int j = 0; j < netsToChooseFrom.size(); j++)
+		  {
+		    ObjectHandle handle = (ObjectHandle) netsToChooseFrom.elementAt(j);
+
+		    if (handle.getInvid().equals(netInvid))
+		      {
+			found = true;
+		      }
+		  }
+
+		if (!found)
+		  {
+		    netsToChooseFrom.addElement(new ObjectHandle(netLabel, netInvid, false, false, false, true));
 		  }
 	      }
-
-	    if (!found)
-	      {
-		netsToChooseFrom.addElement(new ObjectHandle(netLabel, netInvid, false, false, false, true));
-	      }
 	  }
-      }
 
-    // see if we have an attached system type which modifies our IP
-    // search pattern
+	// see if we have an attached system type which modifies our IP
+	// search pattern
 
-    Invid systemTypeInvid = (Invid) getFieldValueLocal(systemSchema.SYSTEMTYPE);
+	Invid systemTypeInvid = (Invid) getFieldValueLocal(systemSchema.SYSTEMTYPE);
 
-    if (systemTypeInvid != null)
-      {
-	DBObject systemTypeInfo = getSession().viewDBObject(systemTypeInvid);
-	
-	if (systemTypeInfo != null)
+	if (systemTypeInvid != null)
 	  {
-	    Boolean rangeRequired = (Boolean) systemTypeInfo.getFieldValueLocal(systemTypeSchema.USERANGE);
+	    DBObject systemTypeInfo = getSession().viewDBObject(systemTypeInvid);
+	
+	    if (systemTypeInfo != null)
+	      {
+		Boolean rangeRequired = (Boolean) systemTypeInfo.getFieldValueLocal(systemTypeSchema.USERANGE);
 	    
-	    if (rangeRequired != null && rangeRequired.booleanValue())
-	      {
-		startSearchRange = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STARTIP)).intValue();
-		stopSearchRange = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STOPIP)).intValue();
-		
-		if (debug)
+		if (rangeRequired != null && rangeRequired.booleanValue())
 		  {
-		    System.err.println("systemCustom.initializeNets(): found start and stop for this type: " + 
-				       startSearchRange + "->" + stopSearchRange);
+		    startSearchRange = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STARTIP)).intValue();
+		    stopSearchRange = ((Integer) systemTypeInfo.getFieldValueLocal(systemTypeSchema.STOPIP)).intValue();
+		
+		    if (debug)
+		      {
+			System.err.println("systemCustom.initializeNets(): found start and stop for this type: " + 
+					   startSearchRange + "->" + stopSearchRange);
+		      }
 		  }
 	      }
 	  }
+      }
+    catch (NotLoggedInException ex)
+      {
+	throw new RuntimeException(ex.getMessage());
       }
   }
 
@@ -581,7 +602,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * since the cache was last updated.</p>
    */
 
-  void updateSystemTypeChoiceList()
+  void updateSystemTypeChoiceList() throws NotLoggedInException
   {
     synchronized (systemTypes)
       {
@@ -886,7 +907,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * deadlocks.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == systemSchema.VOLUMES)
       {

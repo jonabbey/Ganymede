@@ -6,15 +6,15 @@
    
    Created: 15 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.42 $
-   Last Mod Date: $Date: 2002/08/21 07:07:47 $
+   Version: $Revision: 1.43 $
+   Last Mod Date: $Date: 2003/03/12 03:48:40 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    The University of Texas at Austin.
 
    Contact information
@@ -235,7 +235,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    * 
    */
 
-  public QueryResult obtainChoiceList(DBField field)
+  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() != interfaceSchema.IPNET)
       {
