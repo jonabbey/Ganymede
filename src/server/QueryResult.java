@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.20 $ %D%
+   Version: $Revision: 1.21 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -303,12 +303,35 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   * returns a Vector of listhandles
    *
-   * listHandle gives Label, Invid.
+   * Returns a complete listHandle Vector representation of the
+   * results included in this QueryResult.
+   *
+   * @see arlut.csd.JDataComponen.listHandle
+   *
    */
 
-  public synchronized Vector getListHandles()
+  public Vector getListHandles()
+  {
+    return getListHandles(true, true);
+  }
+
+  /**
+   *
+   * Returns a (possibly filtered) listHandle Vector representation of the
+   * results included in this QueryResult.
+   *
+   * @param includeInactives if false, inactive objects' handles won't be included
+   * in the returned vector
+   * @param includeNonEditables if false, non-editable objects' handles won't be included
+   * in the returned vector
+   *
+   * @see arlut.csd.JDataComponen.listHandle
+   *
+   */
+
+  public synchronized Vector getListHandles(boolean includeInactives,
+					    boolean includeNonEditables)
   {
     Vector valueHandles = new Vector();
     ObjectHandle handle;
@@ -323,7 +346,12 @@ public class QueryResult implements java.io.Serializable {
     for (int i = 0; i < handles.size(); i++)
       {
 	handle = (ObjectHandle) handles.elementAt(i);
-	valueHandles.addElement(handle.getListHandle());
+
+	if ((includeInactives || !handle.isInactive()) &&
+	    (includeNonEditables || handle.isEditable()))
+	  {
+	    valueHandles.addElement(handle.getListHandle());
+	  }
       }
     
     return valueHandles;
