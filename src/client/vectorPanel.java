@@ -9,7 +9,7 @@
   or edit in place (composite) objects.
 
   Created: 17 Oct 1996
-  Version: $Revision: 1.23 $ %D%
+  Version: $Revision: 1.24 $ %D%
   Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
   Applied Research Laboratories, The University of Texas at Austin
 */
@@ -17,7 +17,7 @@
 
 package arlut.csd.ganymede.client;
 
-import arlut.csd.ganymede.client.*;
+//import arlut.csd.ganymede.client.*;
 import arlut.csd.ganymede.*;
 
 import java.awt.event.*;
@@ -62,6 +62,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   Vector
     compVector;
 
+  String 
+    name = null;
+
   Hashtable
     ewHash;
 
@@ -93,7 +96,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   private db_field my_field;
 
-  protected windowPanel parent;
+  protected windowPanel wp;
 
   containerPanel
     container;
@@ -112,38 +115,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	System.out.println("Adding new vectorPanel");
       }
 
-    try
-      {
-	if (field == null)
-	  {
-	    throw new IllegalArgumentException("Illegal Argument: handle to field is null");
-	  }
-	
-	if (!field.isVector())
-	  {
-	    throw new IllegalArgumentException("Invalid field type: attempt to populate a vectorPanel with a non-vector field");
-	  }
-	
-	if (field.size() < 0)
-	  {
-	    throw new IllegalArgumentException("Error: vector field length has a negative value");
-	  }
-	
-	if (parent == null)
-	  {
-	    throw new IllegalArgumentException("Error: Where's my windowPanel?");
-	  }
-	
-	my_field = field;
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Could not init vectorPanel: " + rx);
-      }
+    // Took out some checking for null stuff
 
+    my_field = field;
+    
     this.editable = editable;
     this.isEditInPlace = isEditInPlace;
-    this.parent = parent;
+    this.wp = parent;
     this.container = container;
 
     centerPanel = new JPanel(false);
@@ -164,12 +142,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     
     setLayout(new BorderLayout());
 
-    EmptyBorder eb = parent.emptyBorder10;
+    EmptyBorder eb = wp.emptyBorder10;
     TitledBorder tb;
 
     try
       {
-	tb = BorderFactory.createTitledBorder(field.getName() + ": Vector");
+	name = field.getName();
+	tb = BorderFactory.createTitledBorder(name + ": Vector");
       }
     catch (RemoteException ex)
       {
@@ -179,8 +158,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     CompoundBorder cb = BorderFactory.createCompoundBorder(tb,eb);
     setBorder(cb);
 
-    addB = new JButton("Add Element");
-    addB.addActionListener(this);
+    addB = new JButton("Add " + name);
 
     //setBackground(container.frame.getVectorBG());
 
@@ -189,27 +167,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     createVectorComponents();
 
-    invalidateRight();
+    //invalidateRight();
   }
   
   private void createVectorComponents()
   {
-    if (my_field == null)
-      {
-	throw new RuntimeException("Error: my_field is null -- cannot create components");
-      }
-
-    try
-      {
-	if (!my_field.isVector())
-	  {
-	    throw new RuntimeException("Error: my_field is non-vector field");
-	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Can't tell if field is vector" + rx);
-      }
+    // Took out some more redundant checking
 
     if (my_field instanceof ip_field)
       {
@@ -221,8 +184,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	try
 	  {
 	    ip_field ipfield = (ip_field) my_field;
+
+	    int size = ipfield.size();
 	    
-	    for (int i=0;i < ipfield.size();i++) 
+	    for (int i=0;i < size;i++) 
 	      {
 		JIPField ipf = new JIPField(new JcomponentAttr(null,
 							       new Font("Helvetica",Font.PLAIN,12),
@@ -233,7 +198,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		ipf.setValue((Byte[]) ipfield.getElement(i));
 		ipf.setCallback(this);
 		
-		addElement(ipf);
+		addElement(ipf, false);
 	      }
 	  }
 	catch (RemoteException rx)
@@ -259,7 +224,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    System.out.println("Adding edit in place invid vector, size = " + invidfield.size());
 		  }
 
-		for (int i=0; i < invidfield.size() ; i++)
+		int size = invidfield.size();
+		for (int i=0; i < size ; i++)
 		  {
 		    if (debug)
 		      {
@@ -268,18 +234,17 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 		    Invid inv = (Invid)(invidfield.getElement(i));
 		   
-		    db_object object = parent.getgclient().getSession().edit_db_object(inv);
+		    db_object object = wp.getgclient().getSession().edit_db_object(inv);
 		    
 		    containerPanel cp = new containerPanel(object,
 							   invidfield.isEditable() && editable,
-							   parent.parent,
-							   parent, container.frame,
+							   wp.gc,
+							   wp, container.frame,
 							   null, false);
-		    cp.setBorder(parent.lineEmptyBorder);
-		    //cp.setBorder(parent.blackLineB);
+		    cp.setBorder(wp.lineEmptyBorder);
 		    
 		    //		    addElement(object.getLabel(), cp);
-		    addElement((i+1) + ". " + object.getLabel(), cp);
+		    addElement((i+1) + ". " + object.getLabel(), cp, false, false);
 		  }
 	      }
 	    else
@@ -299,9 +264,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     // do it
 
-    try
-      {
-	if (my_field.isEditable())
+    //try
+    //{
+	//if (editable && my_field.isEditable())
+	if (editable)
 	  {
 	    if (debug)
 	      {
@@ -310,6 +276,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	    JPanel addPanel = new JPanel();
 	    addPanel.setLayout(new BorderLayout());
+	    addB.addActionListener(this);
+
 	    addPanel.add("East", addB);
 
 	    add("South", addPanel);
@@ -321,11 +289,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		System.out.println("Field is not editable, no button added");
 	      }
 	  }
-      }
-    catch (RemoteException rx)
-      {
-	throw new RuntimeException("Can't check if field is editable: " + rx);
-      }
+	//   }
+	//catch (RemoteException rx)
+	// {
+	//throw new RuntimeException("Can't check if field is editable: " + rx);
+	//}
   } 
 
   public void addNewElement()
@@ -362,15 +330,14 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    try
 	      {
 		Invid invid = ((invid_field)my_field).createNewEmbedded();
-		db_object object = parent.parent.getSession().edit_db_object(invid);
+		db_object object = wp.gc.getSession().edit_db_object(invid);
 
 		containerPanel cp = new containerPanel(object,
 						       my_field.isEditable() && editable,
-						       parent.parent,
-						       parent, container.frame);
+						       wp.gc,
+						       wp, container.frame);
 
-		cp.setBorder(parent.lineEmptyBorder);
-		//cp.setBorder(parent.blackLineB);
+		cp.setBorder(wp.lineEmptyBorder);
 
 		addElement("New Element", cp, true);
 	      }
@@ -410,23 +377,54 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
     }
 
-  
+  /*
+  public void validate()
+  {
+    System.out.println("--Validate: vectorP: " + this);
+    super.validate();
+  }
+  public void invalidate()
+  {
+    System.out.println("--inValidate: vectorP: " + this);
+    super.invalidate();
+  }
+
+  public void doLayout()
+  {
+    System.out.println("[[doLayout vect: " + this);
+    super.doLayout();
+    System.out.println("]]doLayout vect");
+
+  }
+  */
+
   public void addElement(Component c)
   {
-    addElement(null, c, false);
+    addElement(null, c, false, true);
   }
-	
+
+  public void addElement(Component c, boolean invalidateNow)
+  {
+    addElement(null, c, false, invalidateNow);
+  }
   public void addElement(String title, Component c)
   {
-    addElement(title,c,false);
+    addElement(title,c,false, true);
   }
 
   public void addElement(String title, Component c, boolean expand)
+  {
+    addElement(title, c, expand, true);
+  }
+
+  public void addElement(String title, Component c, boolean expand, boolean invalidateNow)
   {
     if (c == null)
       {
 	throw new IllegalArgumentException("Component parameter is null");
       }
+
+    setStatus("adding new elementWrapper");
       
     compVector.addElement(c);
 
@@ -443,19 +441,23 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	centerPanelAdded = true;
       }
 
-    if (editable)
+    elementWrapper ew = new elementWrapper(title, c, this, editable);
+    ewHash.put(c, ew);
+    centerPanel.add(ew);
+    
+    if (expand && (c instanceof containerPanel))
       {
-	elementWrapper ew = new elementWrapper(title, c, this);
-	ewHash.put(c, ew);
-	centerPanel.add(ew);
-      }
-    else
-      {
-	centerPanel.add(c);
+	ew.expand();
       }
 
-    invalidate();
-    container.frame.validate_general();
+    if (invalidateNow)
+      {
+	invalidate();
+      }
+
+    setStatus("Done adding elementWrapper");
+
+    //container.frame.validate_general();
   }
   
   public void deleteElement(Component c) 
@@ -487,15 +489,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	throw new RuntimeException("Could not check field: " + rx);
       }
 
-      /* If there is only one element remaining in the vector,
-	 the the user should not be able to delete the element. */
-    /*
-    if (compVector.size() == 1)
-      {
-	System.err.println("You cannot delete the only element in a vector");
-	return;
-      }
-      */
     try
       {
 	if (debug)
@@ -536,17 +529,21 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	return false;
       }
-    else if (v.getValue().equals("plus") )
-      {
-	System.out.println("You clicked on a plus (no action)?");
-      }
     else if (v.getValue().equals("remove") )
       {
 	if (debug)
 	  {
 	    System.out.println("You clicked on a minus");
 	  }
-	deleteElement(v.getSource());
+	if (editable)
+	  {
+	    deleteElement(v.getSource());
+	  }
+	else
+	  {
+	    setStatus("You can't delete elements in a view window.");
+	    returnValue = false;
+	  }
       }
     else if (v.getSource() instanceof JIPField)
       {
@@ -554,26 +551,33 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  {
 	    System.out.println("IP field changed");
 	  }
-
-	short index = (short)compVector.indexOf(v.getSource());
-	System.out.println(" index = " + index);
-
 	
-	if (v.getOperationType() == JValueObject.ERROR)
+	if (editable)
 	  {
-	    parent.getgclient().setStatus((String)v.getValue());
-	    returnValue = false;
+	    short index = (short)compVector.indexOf(v.getSource());
+	    System.out.println(" index = " + index);
+	    
+	
+	    if (v.getOperationType() == JValueObject.ERROR)
+	      {
+		setStatus((String)v.getValue());
+		returnValue = false;
+	      }
+	    else
+	      {
+		try
+		  {
+		    returnValue = changeElement((Byte[])v.getValue(), index);
+		  }
+		catch (RemoteException rx)
+		  {
+		    throw new RuntimeException("Could not set value of date field: " + rx);
+		  }
+	      }
 	  }
-	else
+	else     //editable == false, so can't make changes
 	  {
-	    try
-	      {
-		returnValue = changeElement((Byte[])v.getValue(), index);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not set value of date field: " + rx);
-	      }
+	    returnValue = false; 
 	  }
       }
     else
@@ -583,7 +587,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (returnValue)
       {
-	parent.parent.somethingChanged = true;
+	wp.gc.somethingChanged = true;
       }
 
     return returnValue;
@@ -608,7 +612,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	else
 	  {
 	    System.out.println("Add Element returned false");
-	    System.out.println(" here's why: " + parent.getgclient().getSession().getLastError());
+	    System.out.println(" here's why: " + wp.getgclient().getSession().getLastError());
 	    return false;
 	  }
       }
@@ -624,11 +628,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	else
 	  {
 	    System.out.println("set Element returned false");
-	    System.out.println(" here's why: " + parent.getgclient().getSession().getLastError());
+	    System.out.println(" here's why: " + wp.getgclient().getSession().getLastError());
 	    return false;
 	  }
       }	    
   }
+
+  // What is this for?
   
   public Session getSession() 
   {
@@ -652,11 +658,17 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     while ((c != null) && !(c instanceof JViewport))
       {
-	//System.out.println("doLayout on " + c);
+	System.out.println("doLayout on " + c);
 
 	c.doLayout();
 	c = c.getParent();
       }
   }
+
+  public final void setStatus(String status)
+  {
+    wp.gc.setStatus(status);
+  }
+
 }
 
