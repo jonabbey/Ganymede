@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.9 $
-   Last Mod Date: $Date: 2000/05/30 05:53:37 $
+   Version: $Revision: 1.10 $
+   Last Mod Date: $Date: 2000/05/31 21:11:36 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -74,7 +74,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.9 $ $Date: 2000/05/30 05:53:37 $ $Name:  $
+ * @version $Revision: 1.10 $ $Date: 2000/05/31 21:11:36 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -119,7 +119,7 @@ public class xmlfield implements FieldType {
 
     if (fieldDef == null)
       {
-	System.err.println("Did not recognize field " + elementName + " in object " + owner);
+	System.err.println("\nDid not recognize field " + elementName + " in object " + owner);
 
 	if (openElement.isEmpty())
 	  {
@@ -245,7 +245,7 @@ public class xmlfield implements FieldType {
 
 	if (!nextItem.matches("permissions"))
 	  {
-	    System.err.println("Unrecognized tag while parsing data for a permissions field: " + nextItem);
+	    System.err.println("\nUnrecognized tag while parsing data for a permissions field: " + nextItem);
 
 	    skipToEndField(elementName);
 
@@ -378,6 +378,9 @@ public class xmlfield implements FieldType {
 	  {
 	    if (setMode)
 	      {
+		System.err.println("\nxmlclient: error, can't enter " + nextItem.getName() +
+				   " mode with a previous <set> directive in field " + openElement);
+
 		throw new RuntimeException("xmlclient: error, can't enter " + nextItem.getName() +
 					   " mode with a previous <set> directive in field " + openElement);
 	      }
@@ -401,6 +404,9 @@ public class xmlfield implements FieldType {
 	      }
 	    else
 	      {
+		System.err.println("\nxmlclient: error, can't enter set" +
+				   " mode with a previous mode directive in field " + openElement);
+
 		throw new RuntimeException("xmlclient: error, can't enter set" +
 					   " mode with a previous mode directive in field " + openElement);
 	      }
@@ -415,6 +421,9 @@ public class xmlfield implements FieldType {
 	      }
 	    else
 	      {
+		System.err.println("\nError, found a mismatched </" +
+				   nextItem.getName() + "> while parsing a vector field.");
+
 		throw new RuntimeException("Error, found a mismatched </" +
 					   nextItem.getName() + "> while parsing a vector field.");
 	      }
@@ -526,6 +535,7 @@ public class xmlfield implements FieldType {
 
     if (nextItem instanceof XMLEndDocument)
       {
+	System.err.println("\nRan into end of XML file while processing field " + elementName);
 	throw new RuntimeException("Ran into end of XML file while processing field " + elementName);
       }
   }
@@ -534,13 +544,13 @@ public class xmlfield implements FieldType {
   {
     if (!item.matches("boolean"))
       {
-	System.err.println("Unrecognized XML item found when boolean expected: " + item);
+	System.err.println("\nUnrecognized XML item found when boolean expected: " + item);
 	return null;
       }
 
     if (!item.isEmpty())
       {
-	System.err.println("Error, found a non-empty boolean field value element: " + item);
+	System.err.println("\nError, found a non-empty boolean field value element: " + item);
       }
 
     return new Boolean(item.getAttrBoolean("val"));
@@ -550,13 +560,13 @@ public class xmlfield implements FieldType {
   {
     if (!item.matches("int"))
       {
-	System.err.println("Unrecognized XML item found when int expected: " + item);
+	System.err.println("\nUnrecognized XML item found when int expected: " + item);
 	return null;
       }
 
     if (!item.isEmpty())
       {
-	System.err.println("Error, found a non-empty int field value element: " + item);
+	System.err.println("\nError, found a non-empty int field value element: " + item);
       }
 
     return item.getAttrInt("val");
@@ -574,13 +584,13 @@ public class xmlfield implements FieldType {
 
     if (!item.matches("date"))
       {
-	System.err.println("Unrecognized XML item found when date expected: " + item);
+	System.err.println("\nUnrecognized XML item found when date expected: " + item);
 	return null;
       }
 
     if (!item.isEmpty())
       {
-	System.err.println("Error, found a non-empty date field value element: " + item);
+	System.err.println("\nError, found a non-empty date field value element: " + item);
       }
 
     formattedDate = item.getAttrStr("val");
@@ -593,7 +603,7 @@ public class xmlfield implements FieldType {
 	  }
 	catch (ParseException ex)
 	  {
-	    System.err.println("Error, could not parse date entity val " + formattedDate + " in element " + item);
+	    System.err.println("\nError, could not parse date entity val " + formattedDate + " in element " + item);
 	    System.err.println(ex.getMessage());
 	  }
       }
@@ -609,7 +619,7 @@ public class xmlfield implements FieldType {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    System.err.println("Error, could not parse date numeric timecode " + 
+	    System.err.println("\nError, could not parse date numeric timecode " + 
 			       timecodeStr + " in element " + item);
 	    System.err.println(ex.getMessage());
 	  }
@@ -617,7 +627,7 @@ public class xmlfield implements FieldType {
 
     if (result2 != null && result1 != null && !result1.equals(result2))
       {
-	System.err.println("Warning, date element " + item + " is not internally consistent.");
+	System.err.println("\nWarning, date element " + item + " is not internally consistent.");
 	System.err.println("Ignoring date string \"" + formattedDate + "\".");
 	System.err.println("Using timecode data string \"" + formatter.format(result2) + "\".");
 
@@ -641,13 +651,13 @@ public class xmlfield implements FieldType {
   {
     if (!item.matches("string"))
       {
-	System.err.println("Unrecognized XML item found when vector string element expected: " + item);
+	System.err.println("\nUnrecognized XML item found when vector string element expected: " + item);
 	return null;
       }
 
     if (!item.isEmpty())
       {
-	System.err.println("Error, found a non-empty vector string element: " + item);
+	System.err.println("\nError, found a non-empty vector string element: " + item);
       }
 
     return item.getAttrStr("val");
@@ -657,13 +667,13 @@ public class xmlfield implements FieldType {
   {
     if (!item.matches("ip"))
       {
-	System.err.println("Unrecognized XML item found when ip expected: " + item);
+	System.err.println("\nUnrecognized XML item found when ip expected: " + item);
 	return null;
       }
 
     if (!item.isEmpty())
       {
-	System.err.println("Error, found a non-empty ip field value element: " + item);
+	System.err.println("\nError, found a non-empty ip field value element: " + item);
       }
 
     return item.getAttrStr("val");
@@ -678,20 +688,20 @@ public class xmlfield implements FieldType {
 
     if (!item.matches("float"))
       {
-	System.err.println("Unrecognized XML item found when float expected: " + item);
+	System.err.println("\nUnrecognized XML item found when float expected: " + item);
 	return null;
       }
 
     if (!item.isEmpty())
       {
-	System.err.println("Error, found a non-empty float field value element: " + item);
+	System.err.println("\nError, found a non-empty float field value element: " + item);
       }
 
     valStr = item.getAttrStr("val");
 
     if (valStr == null)
       {
-	System.err.println("Error, float element " + item + " has no val attribute.");
+	System.err.println("\nError, float element " + item + " has no val attribute.");
 	return null;
       }
 
@@ -701,7 +711,7 @@ public class xmlfield implements FieldType {
       }
     catch (NumberFormatException ex)
       {
-	System.err.println("Error, float element " + item + " has a malformed val attribute.");
+	System.err.println("\nError, float element " + item + " has a malformed val attribute.");
 	return null;
       }
 

@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2000/05/31 00:56:56 $
+   Version: $Revision: 1.13 $
+   Last Mod Date: $Date: 2000/05/31 21:11:35 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * transfer the objects specified in the XML file to the server using
  * the standard Ganymede RMI API.</p>
  *
- * @version $Revision: 1.12 $ $Date: 2000/05/31 00:56:56 $ $Name:  $
+ * @version $Revision: 1.13 $ $Date: 2000/05/31 21:11:35 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -381,7 +381,13 @@ public class xmlclient implements ClientListener {
 
 	if (nextElement.matches("ganydata"))
 	  {
-	    processData();
+	    if (!processData())
+	      {
+		// don't both processing rest of XML
+		// doc.. just jump down to finally clause
+
+		return; 
+	      }
 
 	    nextElement = getNextItem();
 	  }
@@ -392,18 +398,12 @@ public class xmlclient implements ClientListener {
 	    nextElement = getNextItem();
 	  }
       }
-    catch (IOException ex)
-      {
-	ex.printStackTrace();
-      }
-    catch (SAXException ex)
+    catch (Exception ex)
       {
 	ex.printStackTrace();
       }
     finally
       {
-	System.err.println("XML parsing ended");
-
 	if (reader != null)
 	  {
 	    reader.close();
@@ -518,7 +518,7 @@ public class xmlclient implements ClientListener {
 
   public void processSchema() throws SAXException
   {
-    System.err.println("processSchema");
+    System.err.println("Skipping <ganyschema> element (no schema loading support yet)");
 
     XMLItem item = getNextItem();
 
@@ -527,7 +527,7 @@ public class xmlclient implements ClientListener {
 	item = getNextItem();
       }
 
-    System.err.println("/processSchema");
+    System.err.println("</ganyschema>");
   }
 
   /**
@@ -556,11 +556,16 @@ public class xmlclient implements ClientListener {
    * commit is attempted.  Once again, if there are any errors reported
    * from the server, they are printed and processData aborts.  Otherwise,
    * success!</p>
+   *
+   * @returns true if the &lt;ganydata&gt; element was successfully
+   * processed, or false if a fatal error in the XML stream was
+   * encountered during processing 
    */
 
-  public void processData() throws SAXException
+  public boolean processData() throws SAXException
   {
     XMLItem item;
+    boolean committedTransaction = false;
 
     /* -- */
 
@@ -573,50 +578,90 @@ public class xmlclient implements ClientListener {
 
     connectAsClient();
 
-    System.err.println("Reading object data");
-
-    item = getNextItem();
-
-    while (!item.matchesClose("ganydata") && !(item instanceof XMLEndDocument))
+    try
       {
-	if (item.matches("object"))
-	  {
-	    String mode = item.getAttrStr("action");
-
-	    xmlobject objectRecord = new xmlobject((XMLElement) item);
-
-	    System.err.print(".");
-
-	    //	    System.err.println(item);
-	    
-	    if (mode == null || mode.equals("create"))
-	      {
-		createdObjects.addElement(objectRecord);
-	      }
-	    else if (mode.equals("edit"))
-	      {
-		editedObjects.addElement(objectRecord);
-	      }
-	    else if (mode.equals("delete"))
-	      {
-		deletedObjects.addElement(objectRecord);
-	      }
-	    else if (mode.equals("inactivate"))
-	      {
-		inactivatedObjects.addElement(objectRecord);
-	      }
-
-	    storeObject(objectRecord);
-	  }
+	System.err.println("Reading object data");
 
 	item = getNextItem();
+
+	while (!item.matchesClose("ganydata") && !(item instanceof XMLEndDocument))
+	  {
+	    if (item.matches("object"))
+	      {
+		String mode = item.getAttrStr("action");
+
+		xmlobject objectRecord = null;
+
+		try
+		  {
+		    objectRecord = new xmlobject((XMLElement) item);
+		  }
+		catch (NullPointerException ex)
+		  {
+		    // bad field or object error.. return out of this
+		    // method without committing the transaction
+		    // our finally clause will log us out
+
+		    return false;
+		  }
+
+		System.err.print(".");
+
+		//	    System.err.println(item);
+	    
+		if (mode == null || mode.equals("create"))
+		  {
+		    createdObjects.addElement(objectRecord);
+		  }
+		else if (mode.equals("edit"))
+		  {
+		    editedObjects.addElement(objectRecord);
+		  }
+		else if (mode.equals("delete"))
+		  {
+		    deletedObjects.addElement(objectRecord);
+		  }
+		else if (mode.equals("inactivate"))
+		  {
+		    inactivatedObjects.addElement(objectRecord);
+		  }
+
+		if (!storeObject(objectRecord))
+		  {
+		    System.err.println("\nError, xml object " + objectRecord + " is not unique within the XML file.");
+		    
+		    // our finally clause will log us out
+
+		    return false;
+		  }
+	      }
+
+	    item = getNextItem();
+	  }
+
+	System.err.print("\n\n");
+
+	committedTransaction = transmitData();
+
+	System.err.println("/processData");
+
+	return committedTransaction;
       }
+    finally
+      {
+	if (!committedTransaction)
+	  {
+	    System.err.println("Aborted transaction, logging out.");
+	  }
 
-    System.err.print("\n\n");
-
-    transmitData();
-
-    System.err.println("/processData");
+	try
+	  {
+	    my_client.disconnect();
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+      }
   }
 
   /**
@@ -711,10 +756,13 @@ public class xmlclient implements ClientListener {
 
   /**
    * <p>This method records an xmlobject that has been loaded from the
-   * XML file into the xmlclient objectTypes hash.
+   * XML file into the xmlclient objectTypes hash.</p>
+   *
+   * <p>This method returns false if the object to be stored has an id
+   * conflict with a previously stored object.</p>
    */
 
-  public void storeObject(xmlobject object)
+  public boolean storeObject(xmlobject object)
   {
     Hashtable objectHash = (Hashtable) objectStore.get(object.type);
 
@@ -726,12 +774,26 @@ public class xmlclient implements ClientListener {
 
     if (object.id != null)
       {
+	if (objectHash.containsKey(object.id))
+	  {
+	    return false;
+	  }
+
 	objectHash.put(object.id, object);
       }
     else if (object.num != -1)
       {
-	objectHash.put(new Integer(object.num), object);
+	Integer intKey = new Integer(object.num);
+
+	if (objectHash.containsKey(intKey))
+	  {
+	    return false;
+	  }
+
+	objectHash.put(intKey, object);
       }
+    
+    return true;
   }
 
   /**
@@ -944,9 +1006,13 @@ public class xmlclient implements ClientListener {
   /**
    * <p>This method actually does the work of sending our data to the
    * server.</p>
+   *
+   * @returns true if the data was successfully sent to the server and
+   * the transaction committed successfully, false if the transaction
+   * had problems and was abandoned.
    */
 
-  private void transmitData()
+  private boolean transmitData()
   {
     boolean success = true;
     ReturnVal attempt;
@@ -955,337 +1021,328 @@ public class xmlclient implements ClientListener {
 
     try
       {
-	try
-	  {
-	    System.err.println("Opening transaction");
+	System.err.println("Opening transaction");
 
-	    attempt = session.openTransaction("xmlclient client (" + username + ")");
+	attempt = session.openTransaction("xmlclient client (" + username + ")");
 	    
-	    if (attempt != null && !attempt.didSucceed())
-	      {
-		if (attempt.getDialog() != null)
-		  {
-		    System.err.println("Ganymede xmlclient: couldn't open transaction " + username +
-				       ": " + attempt.getDialog().getText());
-		  }
-		else
-		  {
-		    System.err.println("Ganymede xmlclient: couldn't open transaction " + username);
-		  }
-
-		return;
-	      }
-
-	    session.enableWizards(false); // we're not interactive, don't give us no wizards
-	  }
-	catch (RemoteException ex)
+	if (attempt != null && !attempt.didSucceed())
 	  {
-	    System.err.println("Ganymede xmlclient: couldn't open transaction " + 
-			       username + ": " + ex.getMessage());
-	    return;
-	  }
-
-	System.err.println("Creating objects");
-
-	for (int i = 0; success && i < createdObjects.size(); i++)
-	  {
-	    xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
-	
-	    // if the object has enough information that we can look
-	    // it up on the server, assume that it already exists and
-	    // go ahead and pull it for editing rather than creating
-	    // it.
-
-	    // otherwise, create it.
-
-	    if (newObject.getInvid() != null)
+	    if (attempt.getDialog() != null)
 	      {
-		System.err.println("Editing " + newObject);
-
-		attempt = newObject.editOnServer(session);
-
-		if (attempt != null && !attempt.didSucceed())
-		  {
-		    String msg = attempt.getDialogText();
-
-		    if (msg != null)
-		      {
-			System.err.println("Error editing object " + newObject + ", reason: " + msg);
-		      }
-		    else
-		      {
-			System.err.println("Error editing object " + newObject + ", no reason given.");
-		      }
-
-		    success = false;
-		    continue;
-		  }
+		System.err.println("Ganymede xmlclient: couldn't open transaction " + username +
+				   ": " + attempt.getDialog().getText());
 	      }
 	    else
 	      {
-		System.err.println("Creating " + newObject);
-
-		attempt = newObject.createOnServer(session);
-
-		if (attempt != null && !attempt.didSucceed())
-		  {
-		    String msg = attempt.getDialogText();
-
-		    if (msg != null)
-		      {
-			System.err.println("Error creating " + newObject + ", reason: " + msg);
-		      }
-		    else
-		      {
-			System.err.println("Error creating " + newObject + ", no reason given.");
-		      }
-
-		    success = false;
-		    continue;
-		  }
+		System.err.println("Ganymede xmlclient: couldn't open transaction " + username);
 	      }
 
-	    // we can't be sure that we can register invid fields
-	    // until all objects that we need to create are
-	    // created.. for now, just register non-invid fields
-
-	    attempt = newObject.registerFields(0); // everything but invids
-
-	    if (attempt != null && !attempt.didSucceed())
-	      {
-		String msg = attempt.getDialogText();
-
-		if (msg != null)
-		  {
-		    System.err.println("Error registering fields for " + newObject + ", reason: " + msg);
-		  }
-		else
-		  {
-		    System.err.println("Error registering fields for " + newObject + ", no reason given.");
-		  }
-
-		success = false;
-		continue;
-	      }
+	    return false;
 	  }
 
-	// at this point, all objects we need to create are created,
-	// and any non-invid fields in those new objects have been
-	// registered.  We now need to register any invid fields in
-	// the newly created objects, which should be able to resolve
-	// now.
-
-	for (int i = 0; success && i < createdObjects.size(); i++)
-	  {
-	    xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
-
-	    System.err.println("Resolving invids for " + newObject);
-	
-	    attempt = newObject.registerFields(1); // just invids
-
-	    if (attempt != null && !attempt.didSucceed())
-	      {
-		String msg = attempt.getDialogText();
-
-		if (msg != null)
-		  {
-		    System.err.println("Error registering fields for " + newObject + ", reason: " + msg);
-		  }
-		else
-		  {
-		    System.err.println("Error registering fields for " + newObject + ", no reason given.");
-		  }
-
-		success = false;
-		continue;
-	      }
-	  }
-
-	// now we need to register fields in the edited objects
-
-	for (int i = 0; success && i < editedObjects.size(); i++)
-	  {
-	    xmlobject object = (xmlobject) editedObjects.elementAt(i);
-
-	    System.err.println("Editing " + object);
-
-	    attempt = object.editOnServer(session);
-
-	    if (attempt != null && !attempt.didSucceed())
-	      {
-		String msg = attempt.getDialogText();
-
-		if (msg != null)
-		  {
-		    System.err.println("Error editing object " + object + ", reason: " + msg);
-		  }
-		else
-		  {
-		    System.err.println("Error editing object " + object + ", no reason given.");
-		  }
-
-		success = false;
-		continue;
-	      }
-	
-	    attempt = object.registerFields(2); // invids and others
-
-	    if (attempt != null && !attempt.didSucceed())
-	      {
-		String msg = attempt.getDialogText();
-
-		if (msg != null)
-		  {
-		    System.err.println("Error registering fields for " + object + ", reason: " + msg);
-		  }
-		else
-		  {
-		    System.err.println("Error registering fields for " + object + ", no reason given.");
-		  }
-
-		success = false;
-		continue;
-	      }
-	  }
-
-	// now we need to inactivate any objects to be inactivated
-
-	for (int i = 0; success && i < inactivatedObjects.size(); i++)
-	  {
-	    xmlobject object = (xmlobject) inactivatedObjects.elementAt(i);
-
-	    System.err.println("Inactivating " + object);
-	    
-	    Invid target = object.getInvid();
-
-	    if (target == null)
-	      {
-		System.err.println("Error, couldn't find Invid for object to be inactivated: " + object);
-
-		success = false;
-		continue;
-	      }
-
-	    try
-	      {
-		attempt = session.inactivate_db_object(target);
-	      }
-	    catch (RemoteException ex)
-	      {
-		ex.printStackTrace();
-		throw new RuntimeException(ex.getMessage());
-	      }
-	
-	    if (attempt != null && !attempt.didSucceed())
-	      {
-		String msg = attempt.getDialogText();
-
-		if (msg != null)
-		  {
-		    System.err.println("Error inactivating " + object + ", reason: " + msg);
-		  }
-		else
-		  {
-		    System.err.println("Error inactivating  " + object + ", no reason given.");
-		  }
-
-		success = false;
-		continue;
-	      }
-	  }
-
-	// and we need to delete any objects to be deleted
-
-	for (int i = 0; success && i < deletedObjects.size(); i++)
-	  {
-	    xmlobject object = (xmlobject) deletedObjects.elementAt(i);
-
-	    System.err.println("Deleting " + object);
-	    
-	    Invid target = object.getInvid();
-
-	    if (target == null)
-	      {
-		System.err.println("Error, couldn't find Invid for object to be deleted: " + object);
-
-		success = false;
-		continue;
-	      }
-
-	    try
-	      {
-		attempt = session.remove_db_object(target);
-	      }
-	    catch (RemoteException ex)
-	      {
-		ex.printStackTrace();
-		throw new RuntimeException(ex.getMessage());
-	      }
-
-	    if (attempt != null && !attempt.didSucceed())
-	      {
-		String msg = attempt.getDialogText();
-
-		if (msg != null)
-		  {
-		    System.err.println("Error deleting " + object + ", reason: " + msg);
-		  }
-		else
-		  {
-		    System.err.println("Error deleting  " + object + ", no reason given.");
-		  }
-
-		success = false;
-		continue;
-	      }
-	  }
-
-	// and close up the transaction, one way or another
-
-	try
-	  {
-	    if (success)
-	      {	
-		System.err.println("Committing transaction");
-
-		attempt = session.commitTransaction(true);
-
-		if (attempt != null && !attempt.didSucceed())
-		  {
-		    String msg = attempt.getDialogText();
-
-		    if (msg != null)
-		      {
-			System.err.println("Error committing transaction, reason: " + msg);
-		      }
-		    else
-		      {
-			System.err.println("Error committing transaction, no reason given.");
-		      }
-		  }
-	      }
-	    else
-	      {
-		System.err.println("Errors encountered, aborting transaction.");
-
-		// the disconnect below will abort the transaction and log us out
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("Ganymede.xmlclient: remote exception " + ex.getMessage());
-	  }
+	session.enableWizards(false); // we're not interactive, don't give us no wizards
       }
-    finally
+    catch (RemoteException ex)
       {
+	System.err.println("Ganymede xmlclient: couldn't open transaction " + 
+			   username + ": " + ex.getMessage());
+	return false;
+      }
+
+    System.err.println("Creating objects");
+
+    for (int i = 0; success && i < createdObjects.size(); i++)
+      {
+	xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
+	
+	// if the object has enough information that we can look
+	// it up on the server, assume that it already exists and
+	// go ahead and pull it for editing rather than creating
+	// it.
+
+	// otherwise, create it.
+
+	if (newObject.getInvid() != null)
+	  {
+	    System.err.println("Editing " + newObject);
+
+	    attempt = newObject.editOnServer(session);
+
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    System.err.println("Error editing object " + newObject + ", reason: " + msg);
+		  }
+		else
+		  {
+		    System.err.println("Error editing object " + newObject + ", no reason given.");
+		  }
+
+		success = false;
+		continue;
+	      }
+	  }
+	else
+	  {
+	    System.err.println("Creating " + newObject);
+
+	    attempt = newObject.createOnServer(session);
+
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    System.err.println("Error creating " + newObject + ", reason: " + msg);
+		  }
+		else
+		  {
+		    System.err.println("Error creating " + newObject + ", no reason given.");
+		  }
+
+		success = false;
+		continue;
+	      }
+	  }
+
+	// we can't be sure that we can register invid fields
+	// until all objects that we need to create are
+	// created.. for now, just register non-invid fields
+
+	attempt = newObject.registerFields(0); // everything but invids
+
+	if (attempt != null && !attempt.didSucceed())
+	  {
+	    String msg = attempt.getDialogText();
+
+	    if (msg != null)
+	      {
+		System.err.println("Error registering fields for " + newObject + ", reason: " + msg);
+	      }
+	    else
+	      {
+		System.err.println("Error registering fields for " + newObject + ", no reason given.");
+	      }
+
+	    success = false;
+	    continue;
+	  }
+      }
+
+    // at this point, all objects we need to create are created,
+    // and any non-invid fields in those new objects have been
+    // registered.  We now need to register any invid fields in
+    // the newly created objects, which should be able to resolve
+    // now.
+    
+    for (int i = 0; success && i < createdObjects.size(); i++)
+      {
+	xmlobject newObject = (xmlobject) createdObjects.elementAt(i);
+
+	System.err.println("Resolving invids for " + newObject);
+	
+	attempt = newObject.registerFields(1); // just invids
+
+	if (attempt != null && !attempt.didSucceed())
+	  {
+	    String msg = attempt.getDialogText();
+
+	    if (msg != null)
+	      {
+		System.err.println("Error registering fields for " + newObject + ", reason: " + msg);
+	      }
+	    else
+	      {
+		System.err.println("Error registering fields for " + newObject + ", no reason given.");
+	      }
+
+	    success = false;
+	    continue;
+	  }
+      }
+
+    // now we need to register fields in the edited objects
+
+    for (int i = 0; success && i < editedObjects.size(); i++)
+      {
+	xmlobject object = (xmlobject) editedObjects.elementAt(i);
+
+	System.err.println("Editing " + object);
+
+	attempt = object.editOnServer(session);
+
+	if (attempt != null && !attempt.didSucceed())
+	  {
+	    String msg = attempt.getDialogText();
+
+	    if (msg != null)
+	      {
+		System.err.println("Error editing object " + object + ", reason: " + msg);
+	      }
+	    else
+	      {
+		System.err.println("Error editing object " + object + ", no reason given.");
+	      }
+
+	    success = false;
+	    continue;
+	  }
+	
+	attempt = object.registerFields(2); // invids and others
+
+	if (attempt != null && !attempt.didSucceed())
+	  {
+	    String msg = attempt.getDialogText();
+
+	    if (msg != null)
+	      {
+		System.err.println("Error registering fields for " + object + ", reason: " + msg);
+	      }
+	    else
+	      {
+		System.err.println("Error registering fields for " + object + ", no reason given.");
+	      }
+
+	    success = false;
+	    continue;
+	  }
+      }
+
+    // now we need to inactivate any objects to be inactivated
+
+    for (int i = 0; success && i < inactivatedObjects.size(); i++)
+      {
+	xmlobject object = (xmlobject) inactivatedObjects.elementAt(i);
+
+	System.err.println("Inactivating " + object);
+	    
+	Invid target = object.getInvid();
+
+	if (target == null)
+	  {
+	    System.err.println("Error, couldn't find Invid for object to be inactivated: " + object);
+
+	    success = false;
+	    continue;
+	  }
+
 	try
 	  {
-	    my_client.disconnect();
+	    attempt = session.inactivate_db_object(target);
 	  }
 	catch (RemoteException ex)
 	  {
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
+	  }
+	
+	if (attempt != null && !attempt.didSucceed())
+	  {
+	    String msg = attempt.getDialogText();
+
+	    if (msg != null)
+	      {
+		System.err.println("Error inactivating " + object + ", reason: " + msg);
+	      }
+	    else
+	      {
+		System.err.println("Error inactivating  " + object + ", no reason given.");
+	      }
+
+	    success = false;
+	    continue;
 	  }
       }
+
+    // and we need to delete any objects to be deleted
+
+    for (int i = 0; success && i < deletedObjects.size(); i++)
+      {
+	xmlobject object = (xmlobject) deletedObjects.elementAt(i);
+
+	System.err.println("Deleting " + object);
+	    
+	Invid target = object.getInvid();
+
+	if (target == null)
+	  {
+	    System.err.println("Error, couldn't find Invid for object to be deleted: " + object);
+
+	    success = false;
+	    continue;
+	  }
+
+	try
+	  {
+	    attempt = session.remove_db_object(target);
+	  }
+	catch (RemoteException ex)
+	  {
+	    ex.printStackTrace();
+	    throw new RuntimeException(ex.getMessage());
+	  }
+
+	if (attempt != null && !attempt.didSucceed())
+	  {
+	    String msg = attempt.getDialogText();
+
+	    if (msg != null)
+	      {
+		System.err.println("Error deleting " + object + ", reason: " + msg);
+	      }
+	    else
+	      {
+		System.err.println("Error deleting  " + object + ", no reason given.");
+	      }
+
+	    success = false;
+	    continue;
+	  }
+      }
+
+    // and close up the transaction, one way or another
+    
+    try
+      {
+	if (success)
+	  {	
+	    System.err.println("Committing transaction");
+
+	    attempt = session.commitTransaction(true);
+
+	    if (attempt != null && !attempt.didSucceed())
+	      {
+		String msg = attempt.getDialogText();
+
+		if (msg != null)
+		  {
+		    System.err.println("Error committing transaction, reason: " + msg);
+		  }
+		else
+		  {
+		    System.err.println("Error committing transaction, no reason given.");
+		  }
+
+		success = false;
+	      }
+	  }
+	else
+	  {
+	    System.err.println("Errors encountered, aborting transaction.");
+
+	    // the disconnect below will abort the transaction and log us out
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	System.err.println("Ganymede.xmlclient: remote exception " + ex.getMessage());
+      }
+
+    return success;
   }
   
   /**
