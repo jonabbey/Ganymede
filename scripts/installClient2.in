@@ -3,8 +3,8 @@
 # Install script for Ganymede
 #
 # $Name:  $
-# $Revision: 1.3 $
-# $Date: 1999/01/21 17:06:31 $
+# $Revision: 1.4 $
+# $Date: 1999/01/21 17:20:11 $
 #
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
@@ -115,7 +115,11 @@ $success = 1; # Assume success until we find out otherwise
 if (!-e $vars{"JAVAHOME"}."/java") {
   die "*Can't find the java command*\n\nAborting..";
 } else {
-  $teststring=`$vars{"JAVAHOME"}/java -version`;
+
+  # Thanks, Sun, for making java -version emit to
+  # stderr.
+
+  $teststring=`$vars{"JAVAHOME"}/java -version 2>&1`;
 
   if ($teststring =~ /\"1\.1\./) {
 
