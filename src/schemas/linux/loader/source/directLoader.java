@@ -11,7 +11,7 @@
    --
 
    Created: 20 October 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -475,11 +475,12 @@ public class directLoader {
   private static void registerGroups() throws RemoteException
   {
     String key;
-    Invid invid, objInvid;
+    Invid invid, objInvid, localGroupInvid;
     Enumeration enum;
-    DBEditObject current_obj;
+    DBEditObject current_obj, userObject, groupObject;
     db_field current_field, current_field2;
     User userObj;
+    Group groupObj;
 
     /* -- */
 
@@ -552,9 +553,9 @@ public class directLoader {
 		  {
 		    if (userObj.gid == groupObj.gid)
 		      {
-		    System.err.println("-- home group add " + username);
-		    current_field2 = current_obj.getField(groupSchema.HOMEUSERS);
-		    ((DBField) current_field2).addElementLocal(invid);
+			System.err.println("-- home group add " + username);
+			current_field2 = current_obj.getField(groupSchema.HOMEUSERS);
+			((DBField) current_field2).addElementLocal(invid);
 		      }
 		  }
 	      }
@@ -564,11 +565,65 @@ public class directLoader {
 	      }
 	  }
       }
+
+    // now get the user home groups worked out
+
+    enum = users.keys();
+
+    while (enum.hasMoreElements())
+      {
+	key = (String) enum.nextElement();
+	userObj = (User) users.get(key);
+
+	invid = (Invid) userInvids.get(userObj.name);
+
+	if (invid == null)
+	  {
+	    System.err.println("Couldn't find " + userObj.name +
+			       " to fix up its home group");
+	    continue;
+	  }
+
+	groupObj = (Group) groupID.get(new Integer(userObj.gid));
+
+	if (groupObj == null)
+	  {
+	    System.err.println("Couldn't find group " + userObj.gid +
+			       " to fix up user " + userObj.name +
+			       "'s home group");
+	    continue;
+	  }
+
+	localGroupInvid = (Invid) groupInvid.get(groupObj.name);
+
+	if (localGroupInvid == null)
+	  {
+	    System.err.println("Couldn't find group " + userObj.gid +
+			       "'s invid to fix up user " + userObj.name +
+			       "'s home group");
+	    continue;
+	  }
+
+	groupObject = editObject(localGroupInvid);
+
+	current_field2 = groupObject.getField(groupSchema.HOMEUSERS);
+	((DBField) current_field2).addElementLocal(invid);
+
+	userObject = editObject(invid);
+
+	current_field2 = userObject.getField(userSchema.GROUPLIST);
+	((DBField) current_field2).addElementLocal(localGroupInvid);
+      }
   }
 
   private static db_object createObject(short type)
   {
     return my_client.session.create_db_object(type).getObject();
+  }
+
+  private static DBEditObject editObject(Invid invid)
+  {
+    return (DBEditObject) my_client.session.edit_db_object(invid).getObject();
   }
 }  
 
