@@ -273,43 +273,42 @@ public class JnumberField extends JentryField {
   }
 
   /**
-   *  invoked whenever a key is pressed within the JnumberField. 
-   *  If the key pressed was valid, then it will echo to the
-   *  screen.  If the character was invalid, then nothing will
-   *  happen.
    *
-   * @param e the KeyEvent that needs to be processed
+   * We only want certain keystrokes to be registered by the stringfield.
+   *
+   * This method overrides the processKeyEvent() method in JComponent and
+   * gives us a way of intercepting characters that we don't want in our
+   * string field.
+   *
    */
-  public void processKeyEvent(KeyEvent e)
-  {
-    if (e.getID() == KeyEvent.KEY_PRESSED)
-      {
-	
-	// Handle the tab key
-	   
-	if (e.getKeyCode() == KeyEvent.VK_TAB)
-	  {
-	    super.processKeyEvent(e);
-	    return;
-	  }
-	
-	// At this point, we know that the character pressed is 
-	// going to change the string in the JnumberField in some
-	// way. 
 
-	// Handle any of the other keys
-	if (isAllowed(e.getKeyChar()) || e.getKeyCode() == KeyEvent.VK_BACK_SPACE ||
-	    e.getKeyCode() == KeyEvent.VK_DELETE)
-	  {
-	    changed = true;
-	  
-	    oldvalue = value;
-  
-	    super.processKeyEvent(e);
-	    return;
-	  }
+  protected void processKeyEvent(KeyEvent e)
+  {
+    // always pass through useful editing keystrokes.. this seems to be
+    // necessary because backspace and delete apparently have defined
+    // Unicode representations, so they don't match CHAR_UNDEFINED below
+
+    if ((e.getKeyCode() == KeyEvent.VK_BACK_SPACE) ||
+	(e.getKeyCode() == KeyEvent.VK_DELETE) ||
+	(e.getKeyCode() == KeyEvent.VK_END) ||
+	(e.getKeyCode() == KeyEvent.VK_HOME))
+      {
+	super.processKeyEvent(e);
       }
-    e.consume();
+
+    // We check against KeyEvent.CHAR_UNDEFINED so that we pass
+    // through things like backspace, arrow keys, etc.
+
+    if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
+      {
+	super.processKeyEvent(e);
+      }
+    else if (isAllowed(e.getKeyChar()) && (getText().length() < maxSize))
+      {
+	super.processKeyEvent(e);
+      }
+
+    // otherwise, we ignore it
   }
 
   /************************************************************/
