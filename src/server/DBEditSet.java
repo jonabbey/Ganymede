@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.13 $ %D%
+   Version: $Revision: 1.14 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -290,6 +290,7 @@ public class DBEditSet {
 	    try
 	      {
 		base.objectHash.put(new Integer(eObj.id), new DBObject(eObj));
+		base.store.checkIn(); // update checkout count
 	      }
 	    catch (RemoteException ex)
 	      {
@@ -299,10 +300,12 @@ public class DBEditSet {
 
 	  case DBEditObject.DELETING:
 	    base.objectHash.remove(new Integer(eObj.id));
+	    base.store.checkIn(); // count it as checked out until it's deleted
 	    break;
 
 	  case DBEditObject.DROPPING:
 	    base.releaseId(eObj.getID()); // relinquish the unused invid
+	    base.store.checkIn(); // count it as checked out until it's deleted
 	    break;
 	  }
       }
@@ -361,10 +364,14 @@ public class DBEditSet {
 	  case DBEditObject.CREATING:
 	  case DBEditObject.DROPPING:
 	    eObj.getBase().releaseId(eObj.getID()); // relinquish the unused invid
+	    eObj.getBase().store.checkIn(); // update checked out count
 	    break;
 
 	  case DBEditObject.EDITING:
 	  case DBEditObject.DELETING:
+
+	    // note that clearShadow updates the checked out count for us.
+
 	    if (!eObj.original.clearShadow(this))
 	      {
 		throw new RuntimeException("editset ownership synchronization error");
