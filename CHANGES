@@ -47,10 +47,93 @@ a file named <date>.zip in an 'old' directory in the output directory.
 Actually, didn't modify all of the kits.. I didn't bother to modify
 the ganymede.old kit, which is really in need of a major overhaul.
 
-5. [CLIENT] Better taskbar icons, taskbar on/off menu
+The ganymede.db file itself is now archived when the newly created
+archive task is run (on command by an admin console currently), or
+when the server starts up with a dirty journal.
 
-Brian enlarged the taskbar icons and added a menu item to allow the
-taskbar to be turned off in the client.
+5. [SERVER] Enhanced Task Management
+
+The server's task scheduling system was basically replaced.  The old
+'Builder Tasks' object type is now a generic 'Tasks' type, with
+support for editing scheduling parameters directly from the Ganymede
+client.
+
+Previously, of course, all but the builder tasks were configured by
+hand in Ganymede.java.  Now it will be possible for Ganymede adopters
+to have total control over task registration and scheduling without
+having to edit code.
+
+The downside to this is that the server will not have the 'standard'
+tasks scheduled unless the ganymede.db file you are using has the
+tasks registered.  And of course, the change in basic schema means
+that 0.97 is not really compatible with pre-existing ganymede.db
+files.  You *can* use your existing ganymede.db file, but you'll
+need to register the 'standard' tasks yourself.
+
+If you have an existing ganymede.db file, you can bring it up to date
+by creating tasks with the following information:
+
+  1) Name: Archive Task
+     Class: arlut.csd.ganymede.dumpAndArchiveTask
+
+  2) Name: Database Consistency Test
+     Class: arlut.csd.ganymede.GanymedeValidationTask
+
+  3) Name: Database Dumper Task
+     Class: arlut.csd.ganymede.dumpTask
+     Run Periodically: True
+     Period Unit: Hours
+     Period Count: 2
+
+  4) Name: Expiration Task
+     Class: arlut.csd.ganymede.GanymedeExpirationTask
+     Run Periodically: True
+     Period Unit: Days
+     Period Count: 1 (or undefined, same thing)
+     Period Anchor: Any date, with the time of day set as you like
+
+  5) Name: Warning Task
+     Class: arlut.csd.ganymede.GanymedeWarningTask
+     Run Periodically: True
+     Period Unit: Days
+     Period Count: 1 (or undefined, same thing)
+     Period Anchor: Any date, with the time of day set as you like
+
+You'll also need to edit any old builder tasks you had registered, and
+check 'Run On Transaction Commit'.  Then you can restart the server and
+all the tasks will be registered properly.
+
+Note that the 'Run On Transaction Commit' and 'Run Periodically' check
+boxes are mutually exclusive choices.  You can choose to select neither,
+in which case the task will simply be available for manual execution
+from the admin console's task table.
+
+For tasks with 'Run Periodically' checked, the server uses the Period
+Unit and Period Counter to determine how often to schedule the task,
+and the Period Anchor to determine the time of day and week to base
+the task interval on.  If you have set the task to run once a day and
+have set a Period Anchor of midnight on any date, that task will run
+each day at midnight.  If you have set the Period Anchor to midnight on
+a Monday and have set the Period Unit to 'Weeks', the server will run
+the task on Mondays at midnight.  If Period Count is set to 2, the
+task will run every other Monday at midnight.
+
+If you don't set the Period Anchor for a periodically run task, the
+server will calculate the task intervals from the server start time.
+In the above list, the Database Dumper Task will first be run 2 hours
+from the server's start, and every 2 hours thereafter.
+
+6. [CLIENT] Better taskbar icons, taskbar on/off menu
+
+Brian reworked the taskbar significantly, enlarging the taskbar icons
+and adding a menu item to allow the taskbar to be turned off in the
+client.
+
+7. [CLIENT] Fixes to date GUI code
+
+The date selector dialog now properly shows the time of day set in a
+date field.  You could set the time of day before, but upon reloading,
+it would not be displayed properly.
 
 -------------------- Changes from 0.95 to 0.96 -------------------
 
