@@ -8,7 +8,7 @@
    --
 
    Created: 22 Jan 1997
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -363,6 +363,10 @@ class LoginHandler implements ActionListener {
 	    
 	    my_glogin._infoD.show();
 	    
+	    my_glogin.connector.setEnabled(true);
+	    my_glogin._quitButton.setEnabled(true);
+
+
 	    return;
 	  }
 	catch (NullPointerException ex)
@@ -380,6 +384,9 @@ class LoginHandler implements ActionListener {
 	    my_glogin._infoD.setSize(d.width,d.height);
 	    
 	    my_glogin._infoD.show();
+
+	    my_glogin.connector.setEnabled(true);
+	    my_glogin._quitButton.setEnabled(true);
 	    
 	    return;
 	  }
@@ -397,6 +404,9 @@ class LoginHandler implements ActionListener {
 	    
 	    my_glogin._infoD.show();
 	    
+	    my_glogin.connector.setEnabled(true);
+	    my_glogin._quitButton.setEnabled(true);
+
 	    return;
 	  }
 
@@ -416,7 +426,9 @@ class LoginHandler implements ActionListener {
 	    
 	    // We re-enable the "Login to server" button so that the user can try again.
 	    my_glogin.connector.setEnabled(true);
-	    my_glogin.connector.setEnabled(false);
+	    my_glogin._quitButton.setEnabled(true);
+	    // Why is this line here? I'm commenting it out.
+	    //my_glogin.connector.setEnabled(false);
 	  }
       }
     else if (e.getSource() == my_glogin._quitButton)
