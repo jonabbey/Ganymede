@@ -6,8 +6,8 @@
 
     Created:  11 August 1997
    Release: $Name:  $
-   Version: $Revision: 1.89 $
-   Last Mod Date: $Date: 1999/01/22 18:04:11 $
+   Version: $Revision: 1.90 $
+   Last Mod Date: $Date: 1999/02/23 00:36:28 $
     Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -2525,18 +2525,18 @@ public class containerPanel extends JPanel implements ActionListener, JsetValueC
     JPopupMenu invidTablePopup = new JPopupMenu();
     JMenuItem viewO = new JMenuItem("View object");
     JMenuItem editO = new JMenuItem("Edit object");
-    JMenuItem createO = new JMenuItem("Create new Object");
+    //    JMenuItem createO = new JMenuItem("Create new Object");
     invidTablePopup.add(viewO);
     invidTablePopup.add(editO);
-    invidTablePopup.add(createO);
+    //invidTablePopup.add(createO);
     
     JPopupMenu invidTablePopup2 = new JPopupMenu();
     JMenuItem viewO2 = new JMenuItem("View object");
     JMenuItem editO2 = new JMenuItem("Edit object");
-    JMenuItem createO2 = new JMenuItem("Create new Object");
+    //JMenuItem createO2 = new JMenuItem("Create new Object");
     invidTablePopup2.add(viewO2);
     invidTablePopup2.add(editO2);
-    invidTablePopup2.add(createO2);
+    //invidTablePopup2.add(createO2);
 
     if (debug)
       {
