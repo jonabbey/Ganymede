@@ -453,7 +453,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     out.print(attribute);
     out.print(":: ");
     
-    String binaryEncoded = fixNewlines(Base64.encodeString(value));
+    String binaryEncoded = fixNewlines(Base64.encodeBytes(value.getBytes()));
 
     if (binaryEncoded.indexOf('\n') != -1)
       {
