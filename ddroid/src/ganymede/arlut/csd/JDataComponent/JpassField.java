@@ -12,7 +12,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -66,7 +66,7 @@ import javax.swing.JPanel;
 
 /**
  * <p>JpassField is the composite two-field GUI component used for entering
- * passwords in the Directory Droid client.</p>
+ * passwords in the Ganymede client.</p>
  */
 
 public class JpassField extends JPanel implements JsetValueCallback {

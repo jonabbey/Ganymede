@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -95,7 +95,7 @@ import arlut.csd.Util.VecQuickSort;
  * JstringListBoxes to support adding or removing Strings and Objects from String
  * and Invid vector fields.</p>
  *
- * @see arlut.csd.ddroid.common.Invid
+ * @see arlut.csd.ganymede.common.Invid
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback

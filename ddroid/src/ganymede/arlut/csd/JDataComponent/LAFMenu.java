@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -129,7 +129,7 @@ public class LAFMenu extends JMenu implements ActionListener
   /**
    * <p>This method is used to register a severely old-school
    * Ganymede-style pre-JDK 1.1 callback so that this code can cause
-   * the Directory Droid code base to throw up an error dialog if an attempt
+   * the Ganymede code base to throw up an error dialog if an attempt
    * to change the look and feel using this menu fails.</p>
    */
 

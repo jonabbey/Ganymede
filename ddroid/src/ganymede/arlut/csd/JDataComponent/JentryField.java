@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
@@ -72,7 +72,7 @@ import javax.swing.text.PlainDocument;
 
 /**
  * <p>JentryField serves as an abstract base class for all GUI fields in the
- * client that use textfields.  All text entry fields in the Directory Droid client
+ * client that use textfields.  All text entry fields in the Ganymede client
  * are done using JentryField.  Among other responsibilities, JentryField is
  * responsible for dispatching a callback event when the user tabs out of
  * a field he has been entering text into.</p>

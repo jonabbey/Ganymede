@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -68,10 +68,10 @@ import java.util.Vector;
  * is to allow the viewing and editing of either 4 or 16 byte Internet addresses
  * and subnet masks.<br><br>
  *
- * Note that wherever Directory Droid manipulates IP addresses, it does so in terms
+ * Note that wherever Ganymede manipulates IP addresses, it does so in terms
  * of unsigned bytes.  Since Java does not provide an unsigned byte type, Ganymede
  * uses the s2u() and u2s() static methods defined in this class to convert from
- * the signed Java byte to the Directory Droid 0-255 IP octet range.
+ * the signed Java byte to the Ganymede 0-255 IP octet range.
  *
  */
 
@@ -428,7 +428,7 @@ public class JIPField extends JentryField {
   /**
    *
    * This method takes an IPv4 string in standard format
-   * and generates an array of 4 bytes that the Directory Droid server
+   * and generates an array of 4 bytes that the Ganymede server
    * can accept.
    *
    */
@@ -560,7 +560,7 @@ public class JIPField extends JentryField {
    *
    * This method takes an IPv6 string in any of the standard RFC 1884
    * formats or a standard IPv4 string and generates an array of 16
-   * bytes that the Directory Droid server can accept as an IPv6 address.
+   * bytes that the Ganymede server can accept as an IPv6 address.
    * 
    */
 

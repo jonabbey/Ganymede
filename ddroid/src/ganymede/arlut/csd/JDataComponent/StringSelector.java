@@ -15,7 +15,7 @@
 
    -----------------------------------------------------------------------
 	    
-   Directory Droid Directory Management System
+   Ganymede Directory Management System
  
    Copyright (C) 1996-2004
    The University of Texas at Austin
@@ -1121,7 +1121,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  }
 
 	// We only want to put it in if it's not already there.
-	// Sometimes this happens in Directory Droid if we update a field
+	// Sometimes this happens in Ganymede if we update a field
 	// before we are changing.  It happens like this: the "add"
 	// button is clicked.  Then the return value decides to update
 	// this field, which loads the value in the in box.  Then it
