@@ -7,7 +7,7 @@
    can be used to extract the results out of the query/list.
    
    Created: 1 October 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -89,6 +89,21 @@ public class QueryResult implements java.io.Serializable {
   public void addRow(Invid invid, String label, boolean editable)
   {
     addRow(invid, label, false, false, false, editable);
+  }
+
+  /**
+   *
+   * This method is used to add an object's information to
+   * the QueryResult's serializable buffer.  It is intended
+   * to be called on the server.  
+   *
+   */
+
+  public void addRow(ObjectHandle handle)
+  {
+    addRow(handle.invid, handle.label, handle.inactive,
+	   handle.expirationSet, handle.removalSet,
+	   handle.editable);
   }
 
   /**
@@ -191,7 +206,7 @@ public class QueryResult implements java.io.Serializable {
   /**
    *
    * This method is used by arlut.csd.ganymede.client.objectList to
-   * get access to the raw vector of ObjectHandle's post-serialization.
+   * get access to the raw vector of ObjectHandle's post-serialization.<br><br>
    *
    * Note that this method does not clone our handles vector, we'll just
    * assume that whatever the objectList class on the client does to this
@@ -305,6 +320,26 @@ public class QueryResult implements java.io.Serializable {
     handle = (ObjectHandle) handles.elementAt(row);
 
     return handle.getListHandle();
+  }
+
+  /**
+   * Returns the ObjectHandle for this row.
+   */
+
+  public ObjectHandle getObjectHandle(int row)
+  {
+    ObjectHandle handle;
+
+    /* -- */
+
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+
+    handle = (ObjectHandle) handles.elementAt(row);
+
+    return handle;
   }
 
   // ***
