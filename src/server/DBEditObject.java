@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -438,6 +438,27 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     while (enum.hasMoreElements())
       {
 	fields.remove(enum.nextElement());
+      }
+  }
+
+  /**
+   *
+   * Shortcut method to set a field's value.  Using this
+   * method saves a roundtrip to the server, which is
+   * particularly useful in database loading.
+   *
+   * @see arlut.csd.ganymede.db_object
+   */
+
+  public boolean setFieldValue(short fieldID, Object value)
+  {
+    try
+      {
+	return getField(fieldID).setValue(value);
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException("caught remote on a local op: " + ex);
       }
   }
 
@@ -891,7 +912,21 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	// and we want to return a list of choices.. can use the regular
 	// query output here
 
-	return Ganymede.internalSession.query(new Query(baseId));
+	QueryNode root;
+
+	// if we are pointing to objects of our own type, we don't want ourselves to be
+	// a valid choice by default.. (DBEditObject subclasses can override this, of course)
+
+	if (baseId == getTypeID())
+	  {
+	    root = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, getInvid()));
+	  }
+	else
+	  {
+	    root = null;
+	  }
+
+	return editset.getSession().getGSession().query(new Query(baseId, root, true));
       }
     
     //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());

@@ -7,7 +7,7 @@ import java.rmi.RemoteException;
  *
  * Base class for GANYMEDE client-visible objects.
  *
- * @version $Revision: 1.3 $ %D% (Original file created 11 April 1996)
+ * @version $Revision: 1.4 $ %D% (Original file created 11 April 1996)
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  *
  */
@@ -131,4 +131,14 @@ public interface db_object extends java.rmi.Remote {
    */
 
   public Date getExpirationDate() throws RemoteException;
+
+  /**
+   *
+   * Shortcut method to set a field's value.  Using this
+   * method saves a roundtrip to the server, which is
+   * particularly useful in database loading.
+   *
+   */
+
+  public boolean setFieldValue(short fieldID, Object value) throws RemoteException;
 }
