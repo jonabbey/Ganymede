@@ -7,8 +7,8 @@
    
    Created: 14 July 1997
    Release: $Name:  $
-   Version: $Revision: 1.26 $
-   Last Mod Date: $Date: 1999/04/09 20:31:40 $
+   Version: $Revision: 1.27 $
+   Last Mod Date: $Date: 1999/04/12 21:37:26 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -91,7 +91,7 @@ import javax.swing.*;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.</p>
  *
- * @version $Revision: 1.26 $ $Date: 1999/04/09 20:31:40 $ $Name:  $
+ * @version $Revision: 1.27 $ $Date: 1999/04/12 21:37:26 $ $Name:  $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -135,7 +135,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   Container contentPane;
 
-  JMenuBar mb;
   JPopupMenu popMenu;
   JMenuItem viewMI;
   JMenuItem editMI;
@@ -155,9 +154,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     this.setTitle("Query Results");
 
-    mb = createMenuBar();
-    setJMenuBar(mb);
-
     this.wp = wp;
     this.session = session;
     this.query = query;
@@ -175,6 +171,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     toolbar = createToolBar();
     contentPane.add("North",toolbar);
+    toolbar.grabFocus();
 
     loadResults(results);
 
@@ -185,18 +182,21 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     if (event.getActionCommand().equals("Refresh Query"))
       {
 	refreshQuery();
+	toolbar.requestFocus();
 	return;
       }
 
     if (event.getActionCommand().equals("Save Report"))
       {
 	sendReport(false);
+	toolbar.requestFocus();
 	return;
       }
     
     if (event.getActionCommand().equals("Mail Report"))
       {
 	sendReport(true);
+	toolbar.requestFocus();
 	return;
       }
   }
@@ -732,35 +732,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     wp.gc.setStatus(s, timeLimit);
   }
 
-  private JMenuBar createMenuBar()
-  {
-    JMenuBar menuBar = new JMenuBar();
-    menuBar.setBorderPainted(true);
-
-    JMenu fileM = new JMenu("File");
-    menuBar.add(fileM);
-      
-    JMenuItem mailMI = new JMenuItem("Mail Report");
-    mailMI.addActionListener(this);
-
-    fileM.add(mailMI);
-
-    if (!glogin.isApplet())
-      {
-	JMenuItem saveMI = new JMenuItem("Save Report");
-	saveMI.addActionListener(this);
-	fileM.add(saveMI);
-      }
-
-    fileM.addSeparator();
-
-    JMenuItem reloadMI = new JMenuItem("Refresh Query");
-    reloadMI.addActionListener(this);
-    fileM.add(reloadMI);
-    
-    return menuBar;
-  }
-
 
   /**
    * Creates and initializes the JInternalFrame's toolbar.
@@ -780,6 +751,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     toolBarTemp.setMargin(insets);
 
     JButton b = new JButton("  Mail  ", new ImageIcon(mailIcon));
+    b.setMnemonic('M');
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
     b.setMargin(insets);
     b.setActionCommand("Mail Report");
@@ -793,6 +765,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     if (!glogin.isApplet())
       {
 	b = new JButton("  Save  ", new ImageIcon(saveIcon));
+	b.setMnemonic('S');
 	b.setFont(new Font("SansSerif", Font.PLAIN, 10));
 	b.setMargin(insets);
 	b.setActionCommand("Save Report");
@@ -804,6 +777,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       }
     
     b = new JButton("Refresh", new ImageIcon(refreshIcon));
+    b.setMnemonic('R');
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
     b.setMargin(insets);
     b.setActionCommand("Refresh Query");
@@ -816,4 +790,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     return toolBarTemp;
   }
 
+  JToolBar getToolBar() 
+    {
+      return toolbar;
+    }
 }
