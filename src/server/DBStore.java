@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.17 $ %D%
+   Version: $Revision: 1.18 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -40,7 +40,7 @@ public class DBStore {
 
   static final String id_string = "Gstore";
   static final byte major_version = 1;
-  static final byte minor_version = 3;
+  static final byte minor_version = 4;
 
   static final boolean debug = true;
 
@@ -56,7 +56,9 @@ public class DBStore {
   Hashtable objectBases;	// hash mapping object type to DBObjectBase's
   Hashtable lockHash;		// identifier keys for current locks
   Vector nameSpaces;		// unique valued hashes
-  Vector categories;		// what kind of object categories do we have?
+  boolean loading = false;	// if true, DBObjectBase set methods will be enabled
+
+  DBBaseCategory rootCategory;
 
   byte file_major, file_minor;
 
@@ -85,7 +87,16 @@ public class DBStore {
     objectBases = new Hashtable(20); // default 
     lockHash = new Hashtable(20); // default
     nameSpaces = new Vector();
-    categories = new Vector();
+
+    try
+      {
+	rootCategory = new DBBaseCategory(this, "Categories");
+      }
+    catch (RemoteException ex)
+      {
+	throw new Error("couldn't initialize rootCategory");
+      }
+
     schemaEditInProgress = false;
     GanymedeAdmin.setState("Normal Operation");
   }
@@ -115,8 +126,9 @@ public class DBStore {
 
     /* -- */
 
+    loading = true;
+
     nameSpaces.removeAllElements();
-    categories.removeAllElements();
 
     try
       {
@@ -143,6 +155,11 @@ public class DBStore {
 	file_major = in.readByte();
 	file_minor = in.readByte();
 
+	if (debug)
+	  {
+	    System.err.println("DBStore load(): file version " + file_major + ":" + file_minor);
+	  }
+
 	if (file_major != major_version)
 	  {
 	    System.err.println("DBStore initialization error: major version mismatch");
@@ -153,6 +170,11 @@ public class DBStore {
 
 	namespaceCount = in.readShort();
 
+	if (debug)
+	  {
+	    System.err.println("DBStore load(): loading " + namespaceCount + " namespaces");
+	  }
+
 	for (int i = 0; i < namespaceCount; i++)
 	  {
 	    nameSpaces.addElement(new DBNameSpace(in));
@@ -160,17 +182,22 @@ public class DBStore {
 
 	// read in the object categories
 
+	if (debug)
+	  {
+	    System.err.println("DBStore load(): loading  category definitions");
+	  }
+
 	if (file_major >= 1 && file_minor >= 3)
 	  {
-	    categoryCount = in.readShort();
-
-	    for (int i = 0; i < categoryCount; i++)
-	      {
-		categories.addElement(in.readUTF());
-	      }
+	    rootCategory = new DBBaseCategory(this, in);
 	  }
 	
 	baseCount = in.readShort();
+
+	if (debug)
+	  {
+	    System.err.println("DBStore load(): loading " + baseCount + " bases");
+	  }
 
 	if (baseCount > 0)
 	  {
@@ -188,6 +215,11 @@ public class DBStore {
 	    tempBase = new DBObjectBase(in, this);
 	    
 	    setBase(tempBase);
+
+	    if (debug)
+	      {
+		System.err.println("loaded base " + tempBase.getTypeID());
+	      }
 	  }
 
 	maxBaseId = baseCount;
@@ -251,6 +283,8 @@ public class DBStore {
 	    throw new RuntimeException("couldn't load journal");
 	  }
       }
+
+    loading = false;
   }
 
   /**
@@ -286,6 +320,7 @@ public class DBStore {
     short baseCount, namespaceCount, categoryCount;
     DBDumpLock lock = null;
     DBNameSpace ns;
+    DBBaseCategory bc;
 
     /* -- */
 
@@ -335,14 +370,7 @@ public class DBStore {
 
 	if (major_version >= 1 && minor_version >= 3)
 	  {
-	    categoryCount = (short) categories.size();
-
-	    out.writeShort(categoryCount);
-
-	    for (int i = 0; i < categoryCount; i++)
-	      {
-		out.writeUTF((String) categories.elementAt(i));
-	      }
+	    rootCategory.emit(out);
 	  }
 
 	baseCount = (short) objectBases.size();
@@ -527,35 +555,83 @@ public class DBStore {
   }
 
   /**
-   * 
-   * Method to add a new category to the category list.
+   *
+   * Method to get a category from the category list, by
+   * it's full path name.
    *
    */
 
-  public synchronized void addCategory(String category)
+  public DBBaseCategory getCategory(String pathName)
   {
-    if (category == null || category.equals(""))
+    DBBaseCategory 
+      bc;
+
+    int
+      tok;
+
+    /* -- */
+
+    if (pathName == null)
       {
-	throw new IllegalArgumentException("bad category name");
+	throw new IllegalArgumentException("can't deal with null pathName");
       }
 
-    categories.addElement(category);
-  }
+    System.err.println("DBStore.getCategory(): searching for " + pathName);
 
-  /**
-   * 
-   * Method to delete a category from the category list.
-   *
-   */
+    StringReader reader = new StringReader(pathName);
+    StreamTokenizer tokens = new StreamTokenizer(reader);
 
-  public synchronized void removeCategory(String category)
-  {
-    if (category == null || category.equals(""))
+    tokens.wordChars(Integer.MIN_VALUE, Integer.MAX_VALUE);
+    tokens.ordinaryChar('/');
+
+    tokens.slashSlashComments(false);
+    tokens.slashStarComments(false);
+
+    try
       {
-	throw new IllegalArgumentException("bad category name");
+	tok = tokens.nextToken();
+
+	bc = rootCategory;
+
+	// The path is going to include the name of the root node
+	// itself (unlike in the UNIX filesystem, where the root node
+	// has no 'name' of its own), so we need to skip into the
+	// root node.
+
+	if (tok == '/')
+	  {
+	    tok = tokens.nextToken();
+	  }
+
+	if (tok == StreamTokenizer.TT_WORD && tokens.sval.equals(rootCategory.getName()))
+	  {
+	    tok = tokens.nextToken();
+	  }
+
+	while (tok != StreamTokenizer.TT_EOF && bc != null)
+	  {
+	    // note that slashes are the only non-word token we
+	    // should ever get, so they are implicitly separators.
+	    
+	    if (tok == StreamTokenizer.TT_WORD)
+	      {
+		System.err.println("DBStore.getCategory(): Looking for node " + tokens.sval);
+		bc = (DBBaseCategory) bc.getNode(tokens.sval);
+		if (bc == null)
+		  {
+		    System.err.println("DBStore.getCategory(): found null");
+		  }
+	      }
+	    
+	    tok = tokens.nextToken();
+	  }
+      }
+    catch (IOException ex)
+      {
+	throw new RuntimeException("parse error in getCategory: " + ex);
       }
 
-    categories.removeElement(category);
+    return bc;
   }
 
   /**
@@ -578,14 +654,18 @@ public class DBStore {
 
     /* -- */
 
+    loading = true;
+
     try
       {
 	ns = new DBNameSpace("username", true);
 	nameSpaces.addElement(ns);
-
 	b = new DBObjectBase(this);
 	b.object_name = "Admin";
 	b.type_code = getNextBaseID(); // 0
+	b.displayOrder = 0;
+
+	rootCategory.addNode(b, false, false);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.AdminGroupField;
@@ -689,6 +769,8 @@ public class DBStore {
 	b = new DBObjectBase(this);
 	b.object_name = "User";
 	b.type_code = getNextBaseID(); // 1
+	b.displayOrder = 1;
+	rootCategory.addNode(b, true, false);
 
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.UserUserName;
@@ -739,6 +821,8 @@ public class DBStore {
       {
 	throw new RuntimeException("remote :" + ex);
       }
+
+    loading = false;
   }
 
   void initializeObjects()
