@@ -7,7 +7,7 @@
    used to extract the results  out of the dump.
    
    Created: 25 September 1997
-   Version: $Revision: 1.1 $ %D%
+   Version: $Revision: 1.2 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -108,7 +108,7 @@ public class DumpResult implements java.io.Serializable {
    *
    */
 
-  public void addRow(DBObject object)
+  public void addRow(DBObject object, GanymedeSession owner)
   {
     DBObjectBaseField fieldDef;
     DBField field;
@@ -127,6 +127,14 @@ public class DumpResult implements java.io.Serializable {
     for (int i = 0; i < fieldDefs.size(); i++)
       {
 	fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
+
+	// make sure we have permission to see this field
+
+	if (!owner.getPerm(object, fieldDef.getID()).isVisible())
+	  {
+	    buffer.append("|");
+	    continue;
+	  }
 	
 	field = (DBField) object.getField(fieldDef.getID());
 
@@ -453,7 +461,8 @@ public class DumpResult implements java.io.Serializable {
 		
 	      case FieldType.NUMERIC:
 
-		if (tempString.toString().equals("null"))
+		if (tempString.toString().equals("null") ||
+		    tempString.toString().equals(""))
 		  {
 		    rowVect.addElement(null);
 		  }
@@ -465,7 +474,8 @@ public class DumpResult implements java.io.Serializable {
 		      }
 		    catch (NumberFormatException ex)
 		      {
-			throw new RuntimeException("couldn't parse numeric encoding" + ex);
+			throw new RuntimeException("couldn't parse numeric encoding for string *" + 
+						   tempString.toString() + "* :" + ex);
 		      }
 		  }
 		break;
