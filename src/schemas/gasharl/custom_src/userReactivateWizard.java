@@ -5,7 +5,7 @@
    A wizard to manage user reactivation interactions for the userCustom object.
 
    Created: 29 January 1998
-   Version: $Revision: 1.2 $ %D%
+   Version: $Revision: 1.3 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -139,8 +139,8 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
     if (returnHash == null)
       {
 	retVal = new ReturnVal(false);
-	dialog = new JDialogBuff("User Reactivation Canceled",
-				 "User Reactivation Canceled",
+	dialog = new JDialogBuff("User Reactivation Cancelled",
+				 "User Reactivation Cancelled",
 				 "OK",
 				 null,
 				 "ok.gif");
@@ -207,7 +207,8 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 	shell = (String) returnHash.get("Shell");
 	password = (String) returnHash.get("New Password");
 
-	// and do the inactivation
+	// and do the inactivation.. userObject will consult us for
+	// forward, shell, and password
 	    
 	retVal = userObject.reactivate(this);
 
