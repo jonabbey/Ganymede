@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.46 $ %D%
+   Version: $Revision: 1.47 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -2175,7 +2175,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
     if (node instanceof BaseNode && !((BaseNode) node).isLoaded())
       {
 	setStatus("Loading objects for base " + node.getText());
-
+	setWaitCursor();
 	try
 	  {
 	    refreshObjects((BaseNode)node, true);
@@ -2189,6 +2189,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener {
 	setStatus("Done loading objects for base " + node.getText());
 
 	((BaseNode) node).markLoaded();
+	setNormalCursor();
       }
   }
 
