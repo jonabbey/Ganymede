@@ -7,7 +7,7 @@
    the Ganymede server.
    
    Created: 17 January 1997
-   Version: $Revision: 1.73 $ %D%
+   Version: $Revision: 1.74 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -31,7 +31,10 @@ import arlut.csd.JDialog.*;
  *
  * The GanymedeSession class is the template for the server-side objects
  * that track a client's login and provide operations to be performed in
- * the Ganymede server.
+ * the Ganymede server.<br><br>
+ *
+ * Most methods in this class are synchronized to avoid race condition
+ * security holes between the persona change logic and the actual operations.
  *
  */
 
@@ -532,7 +535,9 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   /**
    *
    * Log out this session.  After this method is called, no other
-   * methods may be called on this session object.
+   * methods may be called on this session object.<br><br>
+   *
+   * This method is partially synchronized.
    *
    * @see arlut.csd.ganymede.Session
    * 
@@ -650,7 +655,6 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
   {
     return Ganymede.helpbaseProperty;
   }
-
 
   /**
    *
@@ -2520,11 +2524,31 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public synchronized ReturnVal inactivate_db_object(Invid invid) 
   {
+    DBObject vObj;
     DBEditObject eObj;
 
     /* -- */
 
     checklogin();
+
+    vObj = session.viewDBObject(invid);
+
+    if (vObj == null)
+      {
+	setLastError("Can't inactivate non-existent object");
+
+	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
+					  "Error.. can't inactivate non-existent object");
+      }
+
+    if (!getPerm(vObj).isDeletable())
+      {
+	setLastError("Don't have permission to inactivate object" + vObj.getLabel());
+
+	return Ganymede.createErrorDialog("Server: Error in inactivate_db_object()",
+					  "Don't have permission to inactivate object" +
+					  vObj.getLabel());
+      }
 
     eObj = (DBEditObject) edit_db_object(invid); // *sync* DBSession DBObject
 
@@ -2567,11 +2591,33 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 
   public synchronized ReturnVal reactivate_db_object(Invid invid)
   {
+    DBObject vObj;
     DBEditObject eObj;
 
     /* -- */
 
     checklogin();
+
+    vObj = session.viewDBObject(invid);
+
+    if (vObj == null)
+      {
+	setLastError("Can't reactivate non-existent object");
+
+	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
+					  "Error.. can't inactivate non-existent object");
+      }
+
+    // we'll treat the object's deletion bit as the power-over-life-and-death bit
+
+    if (!getPerm(vObj).isDeletable())
+      {
+	setLastError("Don't have permission to reactivate object" + vObj.getLabel());
+
+	return Ganymede.createErrorDialog("Server: Error in reactivate_db_object()",
+					  "Don't have permission to reactivate object" +
+					  vObj.getLabel());
+      }
 
     eObj = (DBEditObject) edit_db_object(invid); // *sync* DBSession DBObject
 
@@ -2591,7 +2637,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
     setLastEvent("reactivate_db_object: " + eObj.getLabel());
 
     // note!  DBEditObject's finalizeReactivate() method does the
-    // event logging
+    // event logging at transaction commit time
 
     return session.reactivateDBObject(eObj); // *sync* DBSession, DBObject possible
   }
