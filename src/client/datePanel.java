@@ -6,8 +6,8 @@
    
    Created: 9 September 1997
    Release: $Name:  $
-   Version: $Revision: 1.19 $
-   Last Mod Date: $Date: 2002/01/29 05:39:20 $
+   Version: $Revision: 1.20 $
+   Last Mod Date: $Date: 2002/01/29 10:41:31 $
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -42,7 +42,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
@@ -62,6 +63,24 @@ import arlut.csd.JDataComponent.*;
 import arlut.csd.JCalendar.*;
 
 import arlut.csd.JDialog.*;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                       datePanel
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>GUI date panel used in the Ganymede client to allow the display
+ * and/or editing of the standard expiration and removal time fields
+ * that are defined on all object types in the Ganymede server.</p>
+ *
+ * <p>The datePanel is contained within a {@link
+ * arlut.csd.ganymede.client.framePanel framePanel} in the Ganymede
+ * client.  See the {@link arlut.csd.ganymede.client.gclient gclient}
+ * class for more information on the structure of the Ganymede
+ * client.</p>
+ */
 
 public class datePanel extends JPanel implements ActionListener, JsetValueCallback, Runnable {
 
@@ -96,7 +115,15 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 
   /**
    *
-   * Label field used only in editable context.
+   * Display button used only in editable context.
+   *
+   */
+
+  JButton    topButton;
+
+  /**
+   *
+   * Display label used only in editable context.
    *
    */
 
@@ -117,8 +144,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     _myTimeZone = SimpleTimeZone.getDefault();
 
   SimpleDateFormat
-    dateformat,
-    timeformat;
+    dateformat;
 
   String
     name,
@@ -161,7 +187,6 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     top_pane.setMaximumSize(top_pane.getPreferredSize());
 
     dateformat = new SimpleDateFormat("MMM dd, yyyy",Locale.getDefault());
-    timeformat = new SimpleDateFormat("MMM dd, yyyy, 'at' HH:mm a", Locale.getDefault());
 
     if (editable)
       {
@@ -169,7 +194,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       }
     else
       {
-	create_non_editable_panel();
+	create_non_editable_panel2();
       }
 
     if (debug)
@@ -179,10 +204,10 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 
     if (cal != null)  // in a non-editable the calendar might not be there
       {
-	add("Center", cal);
+	add(cal, "Center");
       }
 
-    add("North", top_pane);
+    add(top_pane, "North");
 
     invalidate();
     fp.validate();
@@ -194,8 +219,10 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     
     try
       {
-	topLabel = new JLabel();
-	topLabel.setBorder(new EmptyBorder(new Insets(5,1,5,1)));
+	topButton = new JButton();
+	topButton.setActionCommand("back");
+	topButton.addActionListener(this);
+	topButton.setBorder(new EmptyBorder(new Insets(5,1,5,1)));
 
 	this.name = template.getName();
 
@@ -204,16 +231,16 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	    Date date = ((Date)field.getValue());
 	    my_Calendar.setTime(date);
 
-	    topLabel.setText(label + ": " + dateformat.format(date));
+	    topButton.setText(label + ": " + dateformat.format(date));
 	  }
 	else
 	  {
-	    topLabel.setText(label + " has not been set.");
+	    topButton.setText(label + " has not been set.");
 	  }
 	
 	cal = new JpanelCalendar(my_Calendar, this, true, true);
 
-	top_pane.add("Center", topLabel);
+	top_pane.add(topButton, "Center");
 	clear = new JButton("Clear date");
 	clear.setActionCommand("Clear");
 	clear.addActionListener(this);
@@ -223,7 +250,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	    System.out.println("adding clear button to top_pane");
 	  }
 
-	top_pane.add("East", clear);
+	top_pane.add(clear, "East");
       }
     catch (RemoteException rx)
       {
@@ -258,11 +285,44 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	    noneditable_dateLabel = new JLabel("No date is set");
 	  }
 	
-	top_pane.add("Center", noneditable_dateLabel);
+	top_pane.add(noneditable_dateLabel, "Center");
       }
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not check visibility: " + rx);
+      }
+  }
+
+  void create_non_editable_panel2()
+  {
+    my_Calendar = new GregorianCalendar(_myTimeZone,Locale.getDefault());
+    
+    try
+      {
+	topLabel = new JLabel();
+	topLabel.setBorder(new EmptyBorder(new Insets(5,1,5,1)));
+
+	this.name = template.getName();
+
+	if ((field != null) && (field.getValue() != null))
+	  {
+	    Date date = ((Date)field.getValue());
+	    my_Calendar.setTime(date);
+
+	    topLabel.setText(label + ": " + dateformat.format(date));
+	  }
+	else
+	  {
+	    topLabel.setText(label + " has not been set.");
+	  }
+	
+	cal = new JpanelCalendar(my_Calendar, this, true, false); // non-editable
+
+	top_pane.add(topLabel, "Center");
+      }
+    catch (RemoteException rx)
+      {
+	throw new RuntimeException("Could not get date: " + rx);
       }
   }
   
@@ -307,6 +367,11 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	    setStatus("Server says:  Could not clear date field.");
 	  }
       }
+
+    if (e.getActionCommand().equals("back"))
+      {
+	cal.displaySelectedPage();
+      }
   }
 
   public boolean setValuePerformed(JValueObject o)
@@ -343,7 +408,14 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	
 	if (ok)
 	  {
-	    topLabel.setText(label + ": " + dateformat.format(d));
+	    if (editable)
+	      {
+		topButton.setText(label + ": " + dateformat.format(d));
+	      }
+	    else
+	      {
+		topLabel.setText(label + ": " + dateformat.format(d));
+	      }
 	  }
       }
 
@@ -380,7 +452,11 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     if (cal != null)
       {
 	cal.setDate(newDate);
-	topLabel.setText(newLabel);
+
+	if (editable)
+	  {
+	    topButton.setText(newLabel);
+	  }
       }
     else
       {

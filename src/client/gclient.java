@@ -4,8 +4,8 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.203 $
-   Last Mod Date: $Date: 2002/01/26 06:20:46 $
+   Version: $Revision: 1.204 $
+   Last Mod Date: $Date: 2002/01/29 10:41:31 $
    Release: $Name:  $
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
@@ -80,19 +80,23 @@ import javax.swing.plaf.basic.BasicToolBarUI;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Main ganymede client class.  When {@link arlut.csd.ganymede.client.glogin glogin}
- * is run and a user logs in to the server, the client obtains a
- * {@link arlut.csd.ganymede.Session Session} reference that allows it to talk
- * to the server on behalf of a user, and a single instance of this class
- * is created to handle all client GUI and networking operations for that user.</p>
+ * <p>Main ganymede client class.  When {@link
+ * arlut.csd.ganymede.client.glogin glogin} is run and a user logs in
+ * to the server, the client obtains a {@link
+ * arlut.csd.ganymede.Session Session} reference that allows it to
+ * talk to the server on behalf of a user, and a single instance of
+ * this class is created to handle all client GUI and networking
+ * operations for that user.</p>
  *
- * <p>gclient creates a {@link arlut.csd.ganymede.client.windowPanel windowPanel}
- * object to contain internal object and query windows on the right side of
- * a Swing JSplitPane.  The left side contains a custom {@link arlut.csd.JTree.treeControl
- * treeControl} GUI component displaying object categories, types, and instances
- * for the user to browse and edit.</p>
+ * <p>gclient creates a {@link arlut.csd.ganymede.client.windowPanel
+ * windowPanel} object to contain internal object ({@link
+ * arlut.csd.ganymede.client.framePanel framePanel}) and query windows
+ * on the right side of a Swing JSplitPane.  The left side contains a
+ * custom {@link arlut.csd.JTree.treeControl treeControl} GUI
+ * component displaying object categories, types, and instances for
+ * the user to browse and edit.</p>
  *
- * @version $Revision: 1.203 $ $Date: 2002/01/26 06:20:46 $ $Name:  $
+ * @version $Revision: 1.204 $ $Date: 2002/01/29 10:41:31 $ $Name:  $
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 

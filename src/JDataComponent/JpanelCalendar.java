@@ -4,8 +4,8 @@
    A GUI Calendar for use with the arlut.csd.JDataComponent JdateField class.
 
    Created: 17 March 1997
-   Version: $Revision: 1.11 $
-   Last Mod Date: $Date: 2002/01/29 09:55:12 $
+   Version: $Revision: 1.12 $
+   Last Mod Date: $Date: 2002/01/29 10:41:31 $
    Release: $Name:  $
 
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
@@ -290,35 +290,34 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     setLayout(new BorderLayout());
 
-    JPanel northPanel = new JPanel(false);
-    northPanel.setLayout(new GridLayout(2,1));
-
     monthYearPanel = new JMonthYearPanel(this);
-    northPanel.add(monthYearPanel);
 
-    JPanel p2 = new JPanel(false);
-    p2.setLayout(new GridLayout(1,7));
-    northPanel.add(p2);
-
-    add(northPanel,"North");
+    add(monthYearPanel,"North");
 
     // Next, the center ( this part contains a bunch of buttons with numbers)
 
     JPanel centerPanel = new JPanel(false);
+
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
     centerPanel.setLayout(gbl);
     
     gbc.gridy = 0;
+    gbc.gridx = 0;
     gbc.anchor = GridBagConstraints.CENTER;
     gbc.fill = GridBagConstraints.BOTH;
-    gbc.insets = new Insets(0,2,0,2);
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbl.setConstraints(monthYearPanel, gbc);
+    centerPanel.add(monthYearPanel);
 
     gbc.ipadx = 5;
+    gbc.insets = new Insets(0,2,0,2);
 
+    gbc.gridy = 1;
     JLabel sun = new JLabel("SUN");
     sun.setFont(todayFont);
     gbc.gridx = 0;
+    gbc.gridwidth = 1;
     gbl.setConstraints(sun, gbc);
     centerPanel.add(sun);
 
@@ -358,21 +357,23 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     gbl.setConstraints(sat, gbc);
     centerPanel.add(sat);
 
-    gbc.gridy = 1;
+    gbc.gridy = 2;
     gbc.gridx = 0;
     gbc.ipadx = 0;
 
     for (int i=0;i<37;i++) 
       {
 	gbc.gridx = i % 7;
-	gbc.gridy = (i / 7) + 1;
+	gbc.gridy = (i / 7) + 2;
 
 	_datebuttonArray[i] = new JdateButton(this, compact);
 	gbl.setConstraints(_datebuttonArray[i], gbc);
 	centerPanel.add(_datebuttonArray[i]);
       }
 
-    add(centerPanel,"Center");
+    JPanel testPanel = new JPanel();
+    testPanel.add(centerPanel);
+    add(testPanel,"Center");
 
     // Next, the south ( this part will contain only a label for now)
 
@@ -400,9 +401,18 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	  }
 
 	southPanel.add(timePanel,"Center");
-	
-	add(southPanel,"South");
       }
+
+    gbc.gridy++;
+    gbc.gridx = 0;
+    gbc.ipadx = 0;
+    gbc.anchor = GridBagConstraints.CENTER;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbl.setConstraints(southPanel, gbc);
+
+    centerPanel.add(southPanel);
+    //    add(southPanel,"South");
 
     writeDates();
 
@@ -1259,6 +1269,8 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
   private int currentYear;
   private JLabel mYLabel;
 
+  private Font titleFont = new Font("serif", Font.BOLD, 14);
+
   /* -- */
 
   public JMonthYearPanel(JpanelCalendar parent)
@@ -1425,6 +1437,7 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
     setLayout(new BorderLayout());
 
     mYLabel = new JLabel(JpanelCalendar.month_names[currentMonth] + " " + currentYear);
+    mYLabel.setFont(titleFont);
     add(mYLabel, "Center");
 
     validate();

@@ -151,6 +151,18 @@ shutdown sequence to be more verbose and to ensure that arbitrary
 exceptions thrown late in the server shutdown process won't prevent
 the server from exiting.
 
+10. [CLIENT] Cleanups to the GUI calendar widget
+
+I did a cleanup job on the JpanelCalendar class, to make the thing
+easier to read and maintain, and to improve its layout in the face of
+window sizing.  When viewing, rather than editing, objects' expiration
+and removal date fields, the client will now show a full-size,
+display-only calendar rather than the cheap text label that it used to
+show in that circumstance.  When editing these fields, the old label
+showing what the expiration/removal field was set to in the calendar
+panel can now be used to jump the calendar back to the calendar page
+containing the selected time.
+
 -------------------- Changes from 1.0.8 to 1.0.9 -------------------
 
 RELEASE DATE: December 4, 2001
