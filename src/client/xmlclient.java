@@ -10,8 +10,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.33 $
-   Last Mod Date: $Date: 2000/11/07 09:30:43 $
+   Version: $Revision: 1.34 $
+   Last Mod Date: $Date: 2000/11/24 03:23:43 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -80,7 +80,7 @@ import org.xml.sax.*;
  * the file to the server for server-side integration into the Ganymede
  * database.</p>
  *
- * @version $Revision: 1.33 $ $Date: 2000/11/07 09:30:43 $ $Name:  $
+ * @version $Revision: 1.34 $ $Date: 2000/11/24 03:23:43 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -108,6 +108,7 @@ public final class xmlclient implements ClientListener {
   private boolean dumpSchema = false;
   private boolean dumpData = false;
   private boolean doTest = false;
+  private boolean schemaOnly = false;
 
   /**
    * RMI reference to a Ganymede server
@@ -503,6 +504,31 @@ public final class xmlclient implements ClientListener {
     ReturnVal retVal = null;
     byte[] data = null;
     int oldavail = 0;
+
+    if (schemaOnly)
+      {
+	String startWrap = "<ganymede>\n";
+	data = startWrap.getBytes();
+
+	retVal = xSession.xmlSubmit(data);
+
+	if (retVal != null)
+	  {
+	    String message = retVal.getDialogText();
+	    
+	    if (message != null)
+	      {
+		System.err.println(message);
+	      }
+	    
+	    if (!retVal.didSucceed())
+	      {
+		xSession.abort();
+		return false;
+	      }
+	  }
+      }
+
     int avail = inStream.available();
 
     while (avail > 0)
@@ -548,6 +574,30 @@ public final class xmlclient implements ClientListener {
 	// and round and round we go
 
 	avail = inStream.available();
+      }
+
+    if (schemaOnly)
+      {
+	String endWrap = "\n</ganymede>";
+	data = endWrap.getBytes();
+
+	retVal = xSession.xmlSubmit(data);
+
+	if (retVal != null)
+	  {
+	    String message = retVal.getDialogText();
+	    
+	    if (message != null)
+	      {
+		System.err.println(message);
+	      }
+	    
+	    if (!retVal.didSucceed())
+	      {
+		xSession.abort();
+		return false;
+	      }
+	  }
       }
 
     try
@@ -600,7 +650,12 @@ public final class xmlclient implements ClientListener {
 
 	XMLItem docElement = getNextItem();
 
-	if (!docElement.matches("ganymede"))
+	if (docElement.matches("ganyschema"))
+	  {
+	    schemaOnly = true;
+	    return true;
+	  }
+	else if (!docElement.matches("ganymede"))
 	  {
 	    System.err.println("Error, " + xmlFilename + " does not contain a Ganymede XML file.");
 	    System.err.println("Unrecognized XML element: " + docElement);
