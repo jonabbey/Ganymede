@@ -13,8 +13,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.96 $
-   Last Mod Date: $Date: 2000/04/01 01:15:10 $
+   Version: $Revision: 1.97 $
+   Last Mod Date: $Date: 2000/06/17 00:23:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -240,6 +240,7 @@ public class Ganymede {
   public static String messageDirectoryProperty = null;
   public static String schemaDirectoryProperty = null;
   public static int    registryPortProperty = 1099;
+  public static String logHelperProperty = null;
 
   /**
    * <p>If the server is started with the -resetadmin command line flag,
@@ -1229,6 +1230,7 @@ public class Ganymede {
     defaultmonitorpassProperty = System.getProperty("ganymede.defaultmonitorpass");
     messageDirectoryProperty = System.getProperty("ganymede.messageDirectory");
     schemaDirectoryProperty = System.getProperty("ganymede.schemaDirectory");
+    logHelperProperty = System.getProperty("ganymede.loghelper");
 
     if (dbFilename == null)
       {

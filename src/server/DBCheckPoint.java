@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 1999/11/16 08:00:56 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2000/06/17 00:23:52 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -99,6 +99,9 @@ class DBCheckPoint {
     logEvents = (Vector) transaction.logEvents.clone();
 
     objects = new Vector();
+
+    // we can safely iterate on transaction.objects since we're being
+    // created from within a synchronized block in DBEditSet.
 
     for (int i = 0; i < transaction.objects.size(); i++)
       {

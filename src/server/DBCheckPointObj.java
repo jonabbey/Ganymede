@@ -6,8 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Revision: 1.3 $
-   Last Mod Date: $Date: 1999/10/12 18:56:08 $
+   Version: $Revision: 1.4 $
+   Last Mod Date: $Date: 2000/06/17 00:23:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -59,20 +59,21 @@ import java.rmi.*;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBCheckPoint is a class designed to allow server-side code that
- * needs to attempt a multi-step operation that might not successfully
- * complete to be able to undo all changes made without having to
- * abort the entire transaction.</p>
- * 
- * <p>In other words, a DBCheckPoint is basically a transaction within a 
- * transaction.</p>
+ * <p>DBCheckPointObj holds a snapshot of an object's state at a moment
+ * in time.  It is used by the {@link arlut.csd.ganymede.DBCheckPoint DBCheckPoint}
+ * class to record the state of the fields in an object.</p>
  */
 
 class DBCheckPointObj {
 
   Invid invid;
-  Hashtable fields;
   byte status;
+
+  /**
+   * <p>This field actually holds the object value state.</p>
+   */
+
+  Hashtable fields;
 
   /* -- */
 

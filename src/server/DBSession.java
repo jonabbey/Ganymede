@@ -6,8 +6,8 @@
 
    Created: 26 August 1996
    Release: $Name:  $
-   Version: $Revision: 1.83 $
-   Last Mod Date: $Date: 2000/06/02 21:12:08 $
+   Version: $Revision: 1.84 $
+   Last Mod Date: $Date: 2000/06/17 00:23:54 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -92,7 +92,7 @@ import arlut.csd.JDialog.*;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.DBLock DBLock} class.</P>
  * 
- * @version $Revision: 1.83 $ %D%
+ * @version $Revision: 1.84 $ %D%
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -644,13 +644,7 @@ final public class DBSession {
 
 	DBEditObject eObj = obj.createShadow(editSet); // *sync* DBObject
 
-	if (eObj == null)
-	  {
-	    setLastError("Couldn't edit " + obj.getLabel() + 
-			 ", someone else is working with the object.");
-	  }
-
-	return eObj;
+	return eObj; // if null, GanymedeSession.edit_db_object() will handle the error
       }
   }
 

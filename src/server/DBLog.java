@@ -12,8 +12,8 @@
    
    Created: 31 October 1997
    Release: $Name:  $
-   Version: $Revision: 1.31 $
-   Last Mod Date: $Date: 2000/03/20 22:10:57 $
+   Version: $Revision: 1.32 $
+   Last Mod Date: $Date: 2000/06/17 00:23:53 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -657,18 +657,6 @@ public class DBLog {
   public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin,
 						   boolean fullTransactions)
   {
-    FileReader reader;
-
-    try
-      {
-	reader = new FileReader(logFileName);
-      }
-    catch (FileNotFoundException ex)
-      {
-	return null;
-      }
-
-    BufferedReader in = new BufferedReader(reader);
     StringBuffer buffer = new StringBuffer();
     DBLogEvent event = null;
     String line;
@@ -678,6 +666,52 @@ public class DBLog {
     String dateString;
     long timeCode;
     Date time;
+
+    BufferedReader in = null;
+    FileReader reader = null;
+
+    // if we don't have a log helper or we aren't looking for a
+    // specific invid, just read from the file directly
+
+    if (Ganymede.logHelperProperty != null && invid != null)
+      {
+	java.lang.Runtime runtime = java.lang.Runtime.getRuntime();
+
+	try
+	  {
+	    java.lang.Process helperProcess;
+
+	    if (keyOnAdmin)
+	      {
+		helperProcess = runtime.exec(Ganymede.logHelperProperty + " -a " + invid.toString());
+	      }
+	    else
+	      {
+		helperProcess = runtime.exec(Ganymede.logHelperProperty + " " + invid.toString());
+	      }
+
+	    in = new BufferedReader(new InputStreamReader(helperProcess.getInputStream()));
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("DBLog.retrieveHistory(): Couldn't use helperProcess " + Ganymede.logHelperProperty);
+	    in = null;
+	  }
+      }
+    
+    if (in == null)
+      {
+	try
+	  {
+	    reader = new FileReader(logFileName);
+	  }
+	catch (FileNotFoundException ex)
+	  {
+	    return null;
+	  }
+
+	in = new BufferedReader(reader);
+      }
 
     /* -- */
 
@@ -817,7 +851,10 @@ public class DBLog {
 
 	try
 	  {
-	    reader.close();
+	    if (reader != null)
+	      {
+		reader.close();
+	      }
 	  }
 	catch (IOException ex)
 	  {

@@ -595,6 +595,35 @@ reference as well as a serialized Invid.  This removes the need for
 the XML client to make an additional round trip request to the server
 in order to get an editing handle on a newly created object.
 
+40. [SERVER] Added support for high speed log scanning
+
+The Ganymede server has always had support for scanning its own log
+file to produce an object summary report for the Ganymede client.
+Unfortunately, Java is rather inefficient at text file parsing, and
+the log scanning code converts each line of the log file scanned into
+a DBLogEvent object.  This conversion made coding convenient, but made
+scanning a very large log file much much slower than a simple grep
+would be.
+
+The Ganymede server now supports an external Perl script which
+prefilters the log file on request, so the Ganymede server only needs
+to process those lines that match the object being reported on.  This
+makes the object history feature much much faster, as the server
+doesn't have to process unrelated log entries.
+
+If an object (such as an owner group) actually does have a very large
+number of lines in the log file, parsing and reporting on what might
+be megabytes of log data will still be very slow, however.  At some
+point, the log scanning code should probably be written to avoid the
+object conversion step in favor of simply identifying matching lines
+through textual means and appending the text of such lines to the
+object history report.
+
+The external helper program is an optional acceleration.. if the
+'ganymede.loghelper' property isn't defined in the server's
+ganymede.properties file, then log scanning will be performed in the
+old-fashioned style.
+
 -------------------- Changes from 0.99.8 to 0.99.9 -------------------
 
 RELEASE DATE: January 13, 2000

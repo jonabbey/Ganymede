@@ -15,8 +15,8 @@
 
    Created: 17 January 1997
    Release: $Name:  $
-   Version: $Revision: 1.182 $
-   Last Mod Date: $Date: 2000/05/24 22:52:47 $
+   Version: $Revision: 1.183 $
+   Last Mod Date: $Date: 2000/06/17 00:23:55 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
@@ -126,7 +126,7 @@ import arlut.csd.JDialog.*;
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
  * 
- * @version $Revision: 1.182 $ $Date: 2000/05/24 22:52:47 $
+ * @version $Revision: 1.183 $ $Date: 2000/06/17 00:23:55 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
@@ -2875,7 +2875,7 @@ final public class GanymedeSession extends UnicastRemoteObject implements Sessio
 	  {
 	    // we're looking for the label of an object
 
-	    if (node.fieldId == -1 && base.getLabelField() != -1)
+	    if (base.getLabelField() != -1)
 	      {
 		fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
 	      }
