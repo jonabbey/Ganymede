@@ -626,6 +626,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBObject target = null;
     DBField targetField;
+    boolean editing = false;
 
     /* -- */
 
@@ -636,6 +637,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	// editing transaction
 
 	target = ((DBEditObject) getOwner()).getEditSet().findObject(invid);
+	editing = true;
       }
 
     // and if that doesn't work, pull it out of the persistent store
@@ -673,6 +675,34 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (xmlOut.isSyncing())
 	  {
 	    xmlOut.attribute("oid", invid.toString());
+
+	    if (editing)
+	      {
+		String extras[] = ((DBEditObject) getOwner()).getForeignSyncKeys(invid, xmlOut.getSyncChannelName());
+
+		if (extras != null && extras.length > 0)
+		  {
+		    if (extras.length % 2 != 0)
+		      {
+			// "InvidDBField.emitInvidXML(): mismatched attribute/value pairs returned from getForeignSyncKeys() call on {0}"
+			throw new RuntimeException(ts.l("emitInvidXML.bad_foreign_keys", getOwner().toString()));
+		      }
+
+		    for (int i = 0; i < extras.length; i = i + 2)
+		      {
+			String name = extras[i];
+			String value = extras[i+1];
+
+			if (name.equals("id") || name.equals("num") || name.equals("type") || name.equals("oid"))
+			  {
+			    // "InvidDBField.emitInvidXML(): improper use of a reserved attribute name in attribute/value pairs returned from getForeignSyncKeys call on {0}"
+			    throw new RuntimeException(ts.l("emitInvidXML.bad_attribute_name", getOwner().toString()));
+			  }
+
+			xmlOut.attribute(name, value);
+		      }
+		  }
+	      }
 	  }
 
 	xmlOut.endElement("invid");

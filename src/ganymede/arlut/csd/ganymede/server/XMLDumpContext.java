@@ -152,6 +152,21 @@ public class XMLDumpContext {
   }
 
   /**
+   * <p>Returns the name of the Sync Channel we're writing to, if we
+   * are writing to one.</p>
+   */
+
+  public String getSyncChannelName()
+  {
+    if (this.syncConstraints == null)
+      {
+	return null;
+      }
+
+    return this.syncConstraints.getName();
+  }
+
+  /**
    * <p>Returns true if the DBObject passed in needs to be synced to
    * this channel.  This version of shouldInclude() assumes that the
    * object passed in is a read-only DBObject.  In this case, the

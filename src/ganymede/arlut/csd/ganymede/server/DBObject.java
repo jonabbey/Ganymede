@@ -1292,6 +1292,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
     xmlOut.attribute("id", getXMLLabel());
+
+    if (xmlOut.isSyncing())
+      {
+	xmlOut.attribute("oid", this.getInvid().toString());
+      }
+
     xmlOut.indentOut();
 
     // by using getFieldVector(), we get the fields in display

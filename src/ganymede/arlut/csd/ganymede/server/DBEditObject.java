@@ -1909,6 +1909,34 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     return null;
   }
 
+  /**
+   * <p>This method provides a hook that can be used by subclasses of
+   * DBEditObject to return a list of attribute names and attribute
+   * values to include when writing out &lt;invid&gt; elements to a
+   * sync channel during transactional sync'ing.</p>
+   *
+   * <p>The point of this is to allow DBEditObject subclasses to
+   * inject additional data into a transactional sync record so that
+   * external sync channel service code can have enough information to
+   * identify a relationship that was made or broken within the
+   * tranaction.</p>
+   *
+   * <p>The array returned shoulw have an even number of values.  The
+   * first value should be an attribute name, the second should be
+   * the value for that attribute name, the third should be another
+   * attribute name, and etc.</p>
+   *
+   * <p>It is an error to return an attribute name that conflicts with
+   * the set pre-defined for use with the &lt;invid&gt; XML element.
+   * This includes <code>type</code>, <code>num</code>, <code>id</code>,
+   * and <code>oid</code>.</p>
+   */
+
+  public String[] getForeignSyncKeys(Invid invid, String syncChannel)
+  {
+    return null;
+  }
+
   // ****
   //
   // The following methods are here to allow our DBEditObject
