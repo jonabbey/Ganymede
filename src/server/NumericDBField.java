@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.29 $
-   Last Mod Date: $Date: 2000/08/25 21:54:14 $
+   Version: $Revision: 1.30 $
+   Last Mod Date: $Date: 2001/01/08 06:07:10 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -177,9 +177,7 @@ public class NumericDBField extends DBField implements num_field {
 
   public void emitIntXML(XMLDumpContext xmlOut, int value) throws IOException
   {
-    xmlOut.startElement("int");
-    xmlOut.attribute("val", java.lang.Integer.toString(value));
-    xmlOut.endElement("int");
+    xmlOut.write(java.lang.Integer.toString(value));
   }
 
   // ****

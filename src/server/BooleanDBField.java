@@ -7,15 +7,15 @@
 
    Created: 2 July 1996
    Release: $Name:  $
-   Version: $Revision: 1.27 $
-   Last Mod Date: $Date: 2000/08/25 21:54:09 $
+   Version: $Revision: 1.28 $
+   Last Mod Date: $Date: 2001/01/08 06:07:09 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -173,9 +173,7 @@ public class BooleanDBField extends DBField implements boolean_field {
     xmlOut.indent();
 
     xmlOut.startElement(this.getXMLName());
-    xmlOut.startElement("boolean");
-    xmlOut.attribute("val", value() ? "true" : "false");
-    xmlOut.endElement("boolean");
+    xmlOut.write(value() ? "true" : "false");
     xmlOut.endElement(this.getXMLName());
   }
 

@@ -7,8 +7,8 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision: 1.6 $
-   Last Mod Date: $Date: 2000/11/10 05:05:02 $
+   Version: $Revision: 1.7 $
+   Last Mod Date: $Date: 2001/01/08 06:07:11 $
    Release: $Name:  $
 
    Module By: Jonathan Abbey
@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001
    The University of Texas at Austin.
 
    Contact information
@@ -73,7 +73,7 @@ import java.rmi.server.*;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Revision: 1.6 $ $Date: 2000/11/10 05:05:02 $ $Name:  $
+ * @version $Revision: 1.7 $ $Date: 2001/01/08 06:07:11 $ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -595,6 +595,25 @@ public class xmlfield implements FieldType {
 
   public Boolean parseBoolean(XMLItem item) throws SAXException
   {
+    if (item instanceof XMLCharData)
+      {
+	String val = item.getString();
+
+	if (val.equalsIgnoreCase("true") || val.equalsIgnoreCase("t"))
+	  {
+	    return new Boolean(true);
+	  }
+	else if (val.equalsIgnoreCase("false") || val.equalsIgnoreCase("f"))
+	  {
+	    return new Boolean(false);
+	  }
+	else
+	  {
+	    owner.xSession.err.println("\nUnrecognized character string found when boolean expected: " + item);
+	    return null;
+	  }
+      }
+
     if (!item.matches("boolean"))
       {
 	owner.xSession.err.println("\nUnrecognized XML item found when boolean expected: " + item);
@@ -611,6 +630,21 @@ public class xmlfield implements FieldType {
 
   public Integer parseNumeric(XMLItem item) throws SAXException
   {
+    if (item instanceof XMLCharData)
+      {
+	String val = item.getString();
+
+	try
+	  {
+	    return new Integer(val);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    owner.xSession.err.println("\nUnrecognized character string found when integer numeric value expected: " + item);
+	    return null;
+	  }
+      }
+
     if (!item.matches("int"))
       {
 	owner.xSession.err.println("\nUnrecognized XML item found when int expected: " + item);
