@@ -321,7 +321,7 @@ public class JnumberField extends JentryField {
    *
    * @param e the FocusEvent that needs to be processed
    */
-  public void processFocusEvent(FocusEvent e)
+  public synchronized void processFocusEvent(FocusEvent e)
     {
       // When the JnumberField widget looses focus, we must check
       // to see whether the number, if any, within the input field

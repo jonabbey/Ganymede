@@ -5,7 +5,7 @@
    An IPv4/IPv6 data display / entry widget for Ganymede
    
    Created: 13 October 1997
-   Version: $Revision: 1.6 $ %D%
+   Version: $Revision: 1.7 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -169,7 +169,7 @@ public class JIPField extends JentryField {
    * @param e the FocusEvent that needs to be process
    */
 
-  public void processFocusEvent(FocusEvent e)
+  public synchronized void processFocusEvent(FocusEvent e)
   {
     String str;
     Byte[] bytes;
