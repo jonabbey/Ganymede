@@ -4,7 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-   Version: $Revision: 1.74 $ %D%
+   Version: $Revision: 1.75 $ %D%
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -341,8 +341,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     logoutMI = new JMenuItem("Logout");//, new MenuShortcut(KeyEvent.VK_L));
     logoutMI.addActionListener(this);
 
-    removeAllMI = new JMenuItem("Remove All Windows");
-    removeAllMI.addActionListener(this);
     clearTreeMI = new JMenuItem("Clear Tree");
     clearTreeMI.addActionListener(this);
 
@@ -352,7 +350,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     defaultOwnerMI.addActionListener(this);
 
     fileMenu.add(clearTreeMI);
-    fileMenu.add(removeAllMI);
     fileMenu.add(filterQueryMI);
     fileMenu.add(defaultOwnerMI);
     fileMenu.addSeparator();
@@ -1125,19 +1122,31 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
     while ((retVal != null) && (retVal.getDialog() != null))
       {
-	System.err.println("** gclient: retrieving dialog");
+	if (debug)
+	  {
+	    System.err.println("** gclient: retrieving dialog");
+	  }
 
 	JDialogBuff jdialog = retVal.getDialog();
 
-	System.err.println("** gclient: extracting dialog");
+	if (debug)
+	  {
+	    System.err.println("** gclient: extracting dialog");
+	  }
 
 	DialogRsrc resource = jdialog.extractDialogRsrc(this);
 
-	System.err.println("** gclient: constructing dialog");
+	if (debug)
+	  {
+	    System.err.println("** gclient: constructing dialog");
+	  }
 
 	StringDialog dialog = new StringDialog(resource);
 
-	System.err.println("** gclient: displaying dialog");
+	if (debug)
+	  {
+	    System.err.println("** gclient: displaying dialog");
+	  }
 
 	setNormalCursor();
 
@@ -1145,7 +1154,10 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 
 	setWaitCursor();
 
-	System.err.println("** gclient: dialog done");
+	if (debug)
+	  {
+	    System.err.println("** gclient: dialog done");
+	  }
 
 	if (retVal.getCallback() != null)
 	  {
@@ -3601,10 +3613,6 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	    wp.addTableWindow(session, q, buffer, "Query Results");
 	  }
       }
-    else if (source == removeAllMI)
-      {
-	wp.closeAll();
-      }
     else if (source == clearTreeMI)
       {
 	clearTree();
@@ -3775,6 +3783,14 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
     validate();
   }
 
+  public void treeNodeDoubleClicked(treeNode node)
+  {
+    if (node instanceof InvidNode)
+      {
+	viewObject(((InvidNode)node).getInvid());
+      }
+  }
+
   public void treeNodeUnSelected(treeNode node, boolean otherNode)
   {
   }
@@ -3910,7 +3926,7 @@ public class gclient extends JFrame implements treeCallback,ActionListener, Jset
 	if (node instanceof BaseNode)
 	  {
 	    setWaitCursor();
-	    Base base = ((BaseNode) node).getBase();
+	    BaseDump base = (BaseDump)((BaseNode) node).getBase();
 
 	    querybox box = new querybox(base, this,  this, "Query Panel");
 
@@ -4549,7 +4565,7 @@ class PersonaListener implements ActionListener{
 	  else
 	    {
 	      gc.showErrorMessage("Error: could not change persona", 
-				  "Could not change persona.");
+				  "Could not change persona.  Perhaps the password was wrong.");
 
 	      gc.setStatus("Persona change failed");
 	    }

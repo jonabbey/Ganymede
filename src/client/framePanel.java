@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 4 September 1997
-   Version: $Revision: 1.24 $ %D%
+   Version: $Revision: 1.25 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -462,22 +462,28 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
   /* Private stuff */
   JMenuBar createMenuBar(boolean editable)
   {
+    // Took out the "Edit" menu, that's what all the commented out
+    // stuff is.
+
+
     // Adding a menu bar, checking it out
     JMenuBar menuBar = new JMenuBar();
     menuBar.setBorderPainted(true);
     //menuBar.setBackground(ClientColor.WindowBG.darker());
     
     JMenu fileM = new JMenu("File");
-    JMenu editM = new JMenu("Edit");
+    //JMenu editM = new JMenu("Edit");
     menuBar.add(fileM);
-    menuBar.add(editM);
+    //menuBar.add(editM);
     
+    /*
     JMenuItem iconifyMI = new JMenuItem("Iconify");
     iconifyMI.addActionListener(this);
 
     JMenuItem closeMI = null;
     closeMI = new JMenuItem("Close");
     closeMI.addActionListener(this);
+    */
 
     JMenu deleteM = new JMenu("Delete");
     JMenuItem reallyDeleteMI = new JMenuItem("Yes, I'm sure");
@@ -517,17 +523,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Runnab
       }
 
     fileM.addSeparator();
-    fileM.add(iconifyMI);
-    fileM.add(closeMI);
+    //fileM.add(iconifyMI);
+    //fileM.add(closeMI);
 
     JMenuItem queryMI = new JMenuItem("Query");
     queryMI.addActionListener(this);
     JMenuItem editMI = new JMenuItem("Edit");
-    editMI.setEnabled(!editable);
-    editMI.addActionListener(this);
+    //editMI.setEnabled(!editable);
+    //editMI.addActionListener(this);
     
-    editM.add(queryMI);
-    editM.add(editMI);
+    //editM.add(queryMI);
+    //editM.add(editMI);
+    fileM.add(queryMI);
+    fileM.add(editMI);
 
     if (debug)
       {

@@ -5,7 +5,7 @@
    The individual frames in the windowPanel.
    
    Created: 9 September 1997
-   Version: $Revision: 1.15 $ %D%
+   Version: $Revision: 1.16 $ %D%
    Module By: Michael Mulvaney
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -27,7 +27,7 @@ import arlut.csd.JDialog.*;
 
 public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
-  private final static boolean debug = true;
+  boolean debug = true;
 
   boolean
     editable;
@@ -48,16 +48,17 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
   public ownerPanel(invid_field field, boolean editable, framePanel fp)
   {
-    if (debug)
-      {
-	System.out.println("Adding ownerPanel");
-      }
-    
     this.editable = editable;
     this.field = field;
     this.fp = fp;
 
     gc = fp.wp.gc;
+    debug = gc.debug;
+
+    if (debug)
+      {
+	System.out.println("Adding ownerPanel");
+      }
 
     setLayout(new BorderLayout());
 
@@ -77,7 +78,10 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 
   public void run()
   {
-    System.out.println("Starting new thread");
+    if (debug)
+      {
+	System.out.println("Starting new thread");
+      }
 
     if (field == null)
       {
@@ -215,7 +219,10 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 	  
 	  if (command.equals("Edit object"))
 	    {
-	      System.out.println("Edit object: " + v.getValue());
+	      if (debug)
+		{
+		  System.out.println("Edit object: " + v.getValue());
+		}
 	      
 	      if (v.getValue() instanceof listHandle)
 		{
@@ -225,7 +232,11 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		}
 	      else if (v.getValue() instanceof Invid)
 		{
-		  System.out.println("It's an invid!");
+		  if (debug)
+		    {
+		      System.out.println("It's an invid!");
+		    }
+
 		  Invid invid = (Invid)v.getValue();
 		  
 		  gc.editObject(invid);
@@ -294,6 +305,11 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		Invid invid = obj.getInvid();
 		retVal = field.addElement(invid);
 		
+		if (retVal != null)
+		  {
+		    gc.handleReturnVal(retVal);
+		  }
+
 		gc.showNewlyCreatedObject(obj, invid, new Short(type));
 		
 		if ((retVal == null) || retVal.didSucceed())
@@ -302,6 +318,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		      {
 			System.out.println("--Adding it to the StringSelector");
 		      }
+
 		    if (label == null)
 		      {
 			((StringSelector)v.getSource()).addNewItem(new listHandle("New item", invid), true);
@@ -337,23 +354,25 @@ public class ownerPanel extends JPanel implements JsetValueCallback, Runnable {
 		  {
 		    retVal = field.addElement(invid);
 
-		    succeeded = (retVal == null) ? true : retVal.didSucceed();
-
 		    if (retVal != null)
 		      {
 			gc.handleReturnVal(retVal);
 		      }
+
+		    succeeded = (retVal == null) ? true : retVal.didSucceed();
+
 		  }
 		else if (o.getOperationType() == JValueObject.DELETE)
 		  {
 		    retVal = field.deleteElement(invid);
 
-		    succeeded = (retVal == null) ? true : retVal.didSucceed();
-
 		    if (retVal != null)
 		      {
 			gc.handleReturnVal(retVal);
 		      }
+
+		    succeeded = (retVal == null) ? true : retVal.didSucceed();
+
 		  }
 	      }
 	    catch (RemoteException rx)
