@@ -6,7 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision: 1.41 $ %D%
+   Version: $Revision: 1.42 $ %D%
    Module By: Jonathan Abbey
    Applied Research Laboratories, The University of Texas at Austin
 
@@ -26,6 +26,23 @@ import arlut.csd.JDialog.*;
                                                                          DBField
 
 ------------------------------------------------------------------------------*/
+
+/**
+ *
+ * This abstract base class encapsulates the basic logic for fields in the
+ * Ganymede data store, including permissions and unique value handling.<br><br>
+ *
+ * An important note about synchronization: it is possible to encounter a
+ * condition called a <b>nested monitor deadlock<b>, where a synchronized
+ * method on a field can block trying to enter a synchronized method on
+ * a DBSession, GanymedeSession, or DBEditObject object that is itself blocked
+ * on another thread trying to call a synchronized method on the same field.<br><br>
+ *
+ * To avoid this condition, no field methods that call synchronized methods on
+ * other objects should themselves be synchronized in any fashion.
+ *
+ */
+
 public abstract class DBField extends UnicastRemoteObject implements db_field, Cloneable {
 
   Object 
@@ -37,11 +54,24 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   DBObjectBaseField definition;
   boolean defined;
 
+  /**
+   *
+   * This permissions record is used when an object has been checked
+   * out to avoid redundant synchronized calls on the owning
+   * GanymedeSession context, both for dead lock prevention and for
+   * speed-ups.
+   * 
+   */
+
+  PermEntry
+    permCache = null;
+
   /* -- */
 
   public DBField() throws RemoteException
   {
     super();
+    permCache = null;
   }
   
   /**
@@ -122,11 +152,14 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   /**
    *
    * Returns true if obj is a field with the same value(s) as
-   * this one.
+   * this one.<br><br>
+   *
+   * This method is ok to be synchronized because it does not
+   * call synchronized methods on any other object.
    *
    */
 
-  public boolean equals(Object obj)
+  public synchronized boolean equals(Object obj)
   {
     if (!(obj.getClass().equals(this.getClass())))
       {
@@ -359,15 +392,17 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   /**
    *
    * Returns true if this field is editable, false
-   * otherwise.
+   * otherwise.<br><br>
    *
    * Note that DBField are only editable if they are
-   * contained in a subclass of DBEditObject.
+   * contained in a subclass of DBEditObject.<br><br>
    *
-   * Server-side method only
+   * Server-side method only<br><br>
    *
-   * @param local If true, skip permissions checking 
+   * *Deadlock Hazard.*
    *
+   * @param local If true, skip permissions checking
+   *   
    */
 
   public final boolean isEditable(boolean local)
@@ -381,7 +416,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 	return false;
       }
 
-    if (!local && !verifyWritePermission())
+    if (!local && !verifyWritePermission()) // *sync* possible on GanymedeSession
       {
 	return false;
       }
@@ -630,7 +665,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     /* -- */
 
-    if (!isEditable(local))
+    if (!isEditable(local))	// *sync* possible
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object for field " +
 					   getName());
@@ -852,7 +887,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
   
-  public ReturnVal setElement(int index, Object value, boolean local)
+  public synchronized ReturnVal setElement(int index, Object value, boolean local)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -861,7 +896,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     /* -- */
 
-    if (!isEditable(local))
+    if (!isEditable(local))	// *sync* on GanymedeSession possible.
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object, field " +
 					   getName());
@@ -952,7 +987,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Adds an element to the end of this field, if a vector.
+   * Adds an element to the end of this field, if a vector.<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -969,9 +1004,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Adds an element to the end of this field, if a vector.
+   * Adds an element to the end of this field, if a vector.<br><br>
    *
-   * Server-side method only
+   * Server-side method only<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -986,9 +1021,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Adds an element to the end of this field, if a vector.
+   * Adds an element to the end of this field, if a vector.<br><br>
    *
-   * Server-side method only
+   * Server-side method only<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -996,7 +1031,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public ReturnVal addElement(Object value, boolean local)
+  public synchronized ReturnVal addElement(Object value, boolean local)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1005,7 +1040,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     /* -- */
 
-    if (!isEditable(local))
+    if (!isEditable(local))	// *sync*
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
 					   getName());
@@ -1054,7 +1089,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (ns != null)
       {
-	if (!mark(value))
+	if (!mark(value))	// *sync* DBNameSpace
 	  {
 	    setLastError("value " + value + " already taken in namespace");
 
@@ -1073,7 +1108,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	if (ns != null)
 	  {
-	    unmark(value);
+	    unmark(value);	// *sync* DBNameSpace
 	  }
 
 	return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
@@ -1084,7 +1119,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Deletes an element of this field, if a vector.
+   * Deletes an element of this field, if a vector.<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -1101,9 +1136,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Deletes an element of this field, if a vector.
+   * Deletes an element of this field, if a vector.<br><br>
    *
-   * Server-side method only
+   * Server-side method only<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -1118,9 +1153,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
   /**
    *
-   * Deletes an element of this field, if a vector.
+   * Deletes an element of this field, if a vector.<br><br>
    *
-   * Server-side method only
+   * Server-side method only<br><br>
    *
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
@@ -1128,7 +1163,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public ReturnVal deleteElement(int index, boolean local)
+  public synchronized ReturnVal deleteElement(int index, boolean local)
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1137,7 +1172,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     /* -- */
 
-    if (!isEditable(local))
+    if (!isEditable(local))	// *sync* GanymedeSession possible
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " + 
 					   getName());
@@ -1176,7 +1211,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
     if (ns != null)
       {
-	unmark(values.elementAt(index));
+	unmark(values.elementAt(index)); // *sync* DBNameSpace
       }
 
     if (eObj.finalizeDeleteElement(this, index))
@@ -1191,7 +1226,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
       {
 	if (ns != null)
 	  {
-	    mark(values.elementAt(index));
+	    mark(values.elementAt(index)); // *sync* DBNameSpace
 	  }
 
 	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
@@ -1246,14 +1281,14 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    *
    */
 
-  public ReturnVal deleteElement(Object value, boolean local)
+  public synchronized ReturnVal deleteElement(Object value, boolean local)
   {
     DBNameSpace ns;
     DBEditObject eObj;
 
     /* -- */
 
-    if (!isEditable(local))
+    if (!isEditable(local))	// *sync* GanymedeSession possible
       {
 	throw new IllegalArgumentException("don't have permission to change field /  non-editable object " +
 					   getName());
@@ -1270,7 +1305,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 					  "Could not delete value " + value + ", not present in field");
       }
 
-    return deleteElement(values.indexOf(value), local);
+    return deleteElement(values.indexOf(value), local);	// *sync* DBNameSpace possible
   }
 
   /**
@@ -1284,6 +1319,7 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   synchronized void setOwner(DBObject owner)
   {
     this.owner = owner;
+    permCache = null;
   }
 
   // ****
@@ -1292,10 +1328,14 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
   //
   // ****
 
-  /** unmark() is used to make any and all namespace values in this
+  /** 
+   *
+   * unmark() is used to make any and all namespace values in this
    * field as available for use by other objects in the same editset.
    * When the editset is committed, any unmarked values will be
-   * flushed from the namespace.
+   * flushed from the namespace.<br><br>
+   *
+   * *Calls synchronized methods on DBNameSpace*
    * 
    */
 
@@ -1351,8 +1391,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * currently associated with this field, it just goes ahead
    * and unmarks it.  This is to be used by the vector
    * modifiers (setElement, addElement, deleteElement, etc.)
-   * to keep track of namespace modifications as we go along.
+   * to keep track of namespace modifications as we go along.<br><br>
    *
+   * *Calls synchronized methods on DBNameSpace*
    */
 
   boolean unmark(Object value)
@@ -1384,8 +1425,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * in the namespace.  When the editset is committed, marked values
    * will be permanently reserved in the namespace.  If the editset is
    * instead aborted, the namespace values will be returned to their
-   * pre-editset status.
+   * pre-editset status.<br><br>
    *  
+   * *Calls synchronized methods on DBNameSpace*
    */
 
   boolean mark()
@@ -1434,8 +1476,9 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
    * method does not in any way associate this value with this field
    * (add it, set it, etc.), it just marks it.  This is to be used by
    * the vector modifiers (setElement, addElement, etc.)  to keep
-   * track of namespace modifications as we go along.
+   * track of namespace modifications as we go along.<br><br>g
    * 
+   * *Calls synchronized methods on DBNameSpace*
    */
 
   boolean mark(Object value)
@@ -1538,82 +1581,82 @@ public abstract class DBField extends UnicastRemoteObject implements db_field, C
 
      /* -- */
 
-     if (owner.editset != null && owner.editset.getSession() != null)
-       {
-	 gSession = owner.editset.getSession().getGSession();
-       }
-     else if (owner.gSession != null)
-       {
-	 gSession = owner.gSession;
-       }
-     else
+     if (!((owner.editset != null && owner.editset.getSession() != null) ||
+	   (owner.gSession != null)))
        {
 	 return true; // we don't know who is looking at us, assume it's a server-local access
        }
 
-     perm2 = gSession.getPerm(owner, getID());
-
-     if (perm2 == null)
-       {
-	 perm1 = gSession.getPerm(owner);
-	 
-	 if (perm1 != null)
-	   {
-	     return perm1.isVisible();
-	   }
-	 else
-	   {
-	     return false;
-	   }
-       }
-     else
-       {
-	 return perm2.isVisible();
-       }
+     updatePermCache();		// *sync* this GanymedeSession
+	
+     return permCache.isVisible();
    }
 
   /**
    *
    * Overridable method to verify that the current
    * DBSession / DBEditSet has permission to write
-   * values into this field.
+   * values into this field.<br><br>
    *
    */
 
   public boolean verifyWritePermission()
   {
-    GanymedeSession gSession;
-    PermEntry perm1, perm2;
-
-    /* -- */
-
     if (owner.editset != null)
       {
-	gSession = owner.editset.getSession().getGSession();
+	updatePermCache();	// *sync* this GanymedeSession
 
-	perm2 = gSession.getPerm(owner, getID());
-
-	if (perm2 == null)
-	  {
-	    perm1 = gSession.getPerm(owner);
-	
-	    if (perm1 != null)
-	      {
-		return perm1.isEditable();
-	      }
-	    else
-	      {
-		return false;
-	      }
-	  }
-	else
-	  {
-	    return perm2.isEditable();
-	  }
+	return permCache.isEditable();
       }
     else
       {
 	return false;  // if we're not in a transaction, we certainly can't be edited.
+      }
+  }
+
+  /**
+   *
+   * This method is a deadlock hazard, due to its
+   * calling synchronized methods on GanymedeSession,
+   * but since it caches permissions, the window
+   * of vulnerability is significantly reduced.
+   *
+   */
+
+  synchronized private void updatePermCache()
+  {
+    GanymedeSession gSession;
+
+    /* -- */
+
+    if (permCache != null)
+      {
+	return;
+      }
+
+    if (owner.editset != null && owner.editset.getSession() != null)
+      {
+	gSession = owner.editset.getSession().getGSession();
+      }
+    else if (owner.gSession != null)
+      {
+	gSession = owner.gSession;
+      }
+    else
+      {
+	return;			// can't update permCache
+      }
+
+    permCache = gSession.getPerm(owner, getID()); // *sync* on gSession
+    
+    if (permCache == null)
+      {
+	permCache = gSession.getPerm(owner); // *sync* on gSession
+	
+	if (permCache == null)
+	  {
+	    permCache = PermEntry.noPerms;
+	  }
       }
   }
 
