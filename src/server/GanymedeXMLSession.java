@@ -7,8 +7,8 @@
 
    Created: 1 August 2000
    Release: $Name:  $
-   Version: $Revision: 1.34 $
-   Last Mod Date: $Date: 2001/06/11 21:35:38 $
+   Version: $Revision: 1.35 $
+   Last Mod Date: $Date: 2001/06/23 02:34:11 $
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -760,20 +760,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     XMLItem item = null;
 
-    while (item == null)
+    item = reader.getNextItem();
+    
+    if (item instanceof XMLError)
       {
+	throw new SAXException(item.toString());
+      }
+    
+    while (item instanceof XMLWarning)
+      {
+	err.println("Warning!: " + item);
+	
 	item = reader.getNextItem();
-
-	if (item instanceof XMLError)
-	  {
-	    throw new SAXException(item.toString());
-	  }
-
-	if (item instanceof XMLWarning)
-	  {
-	    err.println("Warning!: " + item);
-	    item = null;	// trigger retrieval of next, and check for warning
-	  }
       }
 
     return item;
