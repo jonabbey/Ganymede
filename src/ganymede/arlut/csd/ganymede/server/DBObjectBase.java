@@ -3550,6 +3550,43 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
+   * This method is used to put a new user field into both the hashed
+   * field table and the customFields vector, with the new field
+   * definition to be added in the display list after the field
+   * definition with the previousField code.
+   */
+
+  synchronized void addFieldAfter(DBObjectBaseField field, short previousField)
+  {
+    if (field.getID() <= SchemaConstants.FinalSystemField)
+      {
+	// "Error, attempted to add a system field using addFieldToStart()."
+	throw new IllegalArgumentException(ts.l("addFieldAfter.sysfield"));
+      }
+
+    synchronized (customFields)
+      {
+	for (int i = 0; i < customFields.size(); i++)
+	  {
+	    DBObjectBaseField myDef = (DBObjectBaseField) customFields.elementAt(i);
+
+	    if (myDef.field_code == previousField)
+	      {
+		customFields.insertElementAt(field,i+1);
+
+		fieldTable.put(field);
+		fieldDefAry = null; // force re-init
+
+		return;
+	      }
+	  }
+      }
+
+    // "Error, couldn''t add field def {0} after field {1}, field {1} was not found in object base."
+    throw new IllegalArgumentException(ts.l("addFieldAfter.noSuchPrevious", field, new Integer(previousField)));
+  }
+
+  /**
    * <p>This method is used to put a new user field into both the hashed field
    * table and the customFields vector.</p>
    */
