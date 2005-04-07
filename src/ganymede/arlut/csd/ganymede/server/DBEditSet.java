@@ -1571,7 +1571,7 @@ public class DBEditSet {
 	      {
 		SyncRunner sync = Ganymede.getSyncChannel((String)Ganymede.syncRunners.elementAt(i));
 
-		if (!sync.isFullState())
+		if (sync.isIncremental())
 		  {
 		    sync.writeSync(persistedTransaction, objectList, this);
 		  }
@@ -1633,7 +1633,7 @@ public class DBEditSet {
 	  {
 	    SyncRunner sync = Ganymede.getSyncChannel((String) Ganymede.syncRunners.elementAt(i));
 
-	    if (!sync.isFullState())
+	    if (sync.isIncremental())
 	      {
 		try
 		  {

@@ -259,12 +259,20 @@ public class SyncRunner implements Runnable {
   private Hashtable matrix;
 
   /**
-   * All registered SyncRunner objects are full state or incremental.
-   * If this one is fullState, this variable will be true.  If it
-   * is incremental, this variable will be false.
+   * This variable will be true if this SyncRunner is configured to run as a
+   * full state, buildertask-style thingy.  May not be set if incremental is
+   * set.
    */
 
   private boolean fullState;
+
+  /**
+   * This variable will be true if this SyncRunner is configured to run as a
+   * synchronous, incremental XML build channel.  May not be set if fullState
+   * is set.
+   */
+
+  private boolean incremental;
 
   /* -- */
 
@@ -303,14 +311,8 @@ public class SyncRunner implements Runnable {
 	type = 1;		// the default old behavior
       }
 
-    if (type == 2)
-      {
-	this.fullState = true;
-      }
-    else if (type == 1)
-      {
-	this.fullState = false;
-      }
+    this.fullState = (type == 2);
+    this.incremental = (type == 1);
 
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
@@ -354,12 +356,22 @@ public class SyncRunner implements Runnable {
 
   /**
    * Returns true if this SyncRunner is configured as a full state
-   * sync channel, false if it is incremental.
+   * sync channel.
    */
 
   public boolean isFullState()
   {
     return this.fullState;
+  }
+
+  /**
+   * Returns true if this SyncRunner is configured as an incremental
+   * sync channel.
+   */
+
+  public boolean isIncremental()
+  {
+    return this.incremental;
   }
 
   /**
@@ -857,7 +869,7 @@ public class SyncRunner implements Runnable {
       {
 	runFullState();
       }
-    else
+    else if (this.incremental)
       {
 	runIncremental();
       }

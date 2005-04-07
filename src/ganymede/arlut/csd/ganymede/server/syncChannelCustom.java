@@ -498,30 +498,12 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	break;
 
       case EDITING:
-	if (origType == 1 || origType == 2)
-	  {
-	    // we may have changed the name of a registered
-	    // channel.. find the old channel runner, and unregister
-	    // it by that name
-		
-	    Ganymede.unregisterSyncChannel(origName);
-	  }
-
-	if (type == 1 || type == 2)
-	  {
-	    // the new state of the channel is still one that needs to
-	    // be registered.  Re-register it, using the new name if
-	    // the name changed
-
-	    Ganymede.registerSyncChannel(new SyncRunner(this));
-	  }
+	Ganymede.unregisterSyncChannel(origName);
+	Ganymede.registerSyncChannel(new SyncRunner(this));
 	break;
 
       case CREATING:
-	if (type == 1 || type == 2)
-	  {
-	    Ganymede.registerSyncChannel(new SyncRunner(this));
-	  }
+	Ganymede.registerSyncChannel(new SyncRunner(this));
       }
   }
 }
