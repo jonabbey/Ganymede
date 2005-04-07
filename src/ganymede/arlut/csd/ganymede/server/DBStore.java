@@ -1069,6 +1069,8 @@ public final class DBStore implements JythonMap {
 
     if (!dumpDataObjects && !dumpSchema)
       {
+	outStream.close();
+
 	// "One of dumpDataObjects and dumpSchema must be true."
 	throw new IllegalArgumentException(ts.l("dumpXML.doNothing"));
       }
@@ -1094,6 +1096,8 @@ public final class DBStore implements JythonMap {
 
 	if (syncConstraint == null)
 	  {
+	    outStream.close();
+
 	    // "No such sync channel defined: {0}"
 	    throw new IllegalArgumentException(ts.l("dumpXML.badSyncChannel", syncChannel));
 	  }
