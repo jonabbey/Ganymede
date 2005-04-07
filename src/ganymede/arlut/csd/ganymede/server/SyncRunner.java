@@ -292,7 +292,16 @@ public class SyncRunner implements Runnable {
     this.serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
     this.includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
 
-    int type = ((Integer) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+    int type = 0;
+
+    try
+      {
+	type = ((Integer) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+      }
+    catch (NullPointerException ex)
+      {
+	type = 1;		// the default old behavior
+      }
 
     if (type == 2)
       {
