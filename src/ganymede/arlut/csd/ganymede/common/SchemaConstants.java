@@ -553,6 +553,32 @@ public interface SchemaConstants {
 
   final static short SyncChannelPlaintextOK = 104;
 
+  /**
+   * Are we going to act as an incremental, full-state, or manual XML
+   * sync channel?  Scalar string field, used for display and input
+   * only.. we'll actually put an integer into the SyncChannelTypeNum
+   * field instead to do the real tracking.
+   */
+
+  final static short SyncChannelTypeString = 105;
+
+  /**
+   * If we're a full-state XML sync program, what file will we write to?
+   * The external channel servicer will take this filename as a command
+   * line argument.  Scalar string field.
+   */
+
+  final static short SyncChannelFullStateFile = 106;
+
+  /**
+   * Are we going to act as an incremental, full-state, or manual XML
+   * sync channel?  Hidden integer field, used to abstract the type
+   * from whatever localization is in effect in the server.
+   */
+
+  final static short SyncChannelTypeNum = 107;
+
+
   // ======================================================================
   // ======================================================================
   // ======================================================================

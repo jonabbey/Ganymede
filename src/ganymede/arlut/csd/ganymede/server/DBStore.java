@@ -2124,10 +2124,23 @@ public final class DBStore implements JythonMap {
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.SyncChannelTypeString;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Sync Channel Type";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.SyncChannelDirectory;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Queue Directory";
 	bf.comment = "Location of the sync channel directory on disk";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.SyncChannelFullStateFile;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Full State File";
+	bf.comment = "Path to the file to use for full-state XML dumps";
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
@@ -2148,6 +2161,13 @@ public final class DBStore implements JythonMap {
 	bf.field_code = SchemaConstants.SyncChannelPlaintextOK;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Allow Plaintext Passwords";
+	bf.comment = "Allow Plaintext Passwords to be written to this Sync Channel";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.SyncChannelTypeNum;
+	bf.field_type = FieldType.NUMERIC;
+	bf.field_name = "Channel Type Index";
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.SyncChannelName);
@@ -2214,10 +2234,23 @@ public final class DBStore implements JythonMap {
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
+	    bf.field_code = SchemaConstants.SyncChannelTypeString;
+	    bf.field_type = FieldType.STRING;
+	    bf.field_name = "Sync Channel Type";
+	    b.addFieldToEnd(bf);
+
+	    bf = new DBObjectBaseField(b);
 	    bf.field_code = SchemaConstants.SyncChannelDirectory;
 	    bf.field_type = FieldType.STRING;
 	    bf.field_name = "Queue Directory";
 	    bf.comment = "Location of the sync channel directory on disk";
+	    b.addFieldToEnd(bf);
+
+	    bf = new DBObjectBaseField(b);
+	    bf.field_code = SchemaConstants.SyncChannelFullStateFile;
+	    bf.field_type = FieldType.STRING;
+	    bf.field_name = "Full State File";
+	    bf.comment = "Path to the file to use for full-state XML dumps";
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
@@ -2238,6 +2271,13 @@ public final class DBStore implements JythonMap {
 	    bf.field_code = SchemaConstants.SyncChannelPlaintextOK;
 	    bf.field_type = FieldType.BOOLEAN;
 	    bf.field_name = "Allow Plaintext Passwords";
+	    bf.comment = "Allow Plaintext Passwords to be written to this Sync Channel";
+	    b.addFieldToEnd(bf);
+
+	    bf = new DBObjectBaseField(b);
+	    bf.field_code = SchemaConstants.SyncChannelTypeNum;
+	    bf.field_type = FieldType.NUMERIC;
+	    bf.field_name = "Channel Type Index";
 	    b.addFieldToEnd(bf);
 
 	    b.setLabelField(SchemaConstants.SyncChannelName);
@@ -2248,6 +2288,42 @@ public final class DBStore implements JythonMap {
 
 	    setBase(b);
 	  }
+	else
+	  {
+	    // we added the SyncChannelTypeString, SyncChannelTypeNum and
+	    // SyncChannelFullStateFile fields after releasing a
+	    // version without, check to see if we need to add them
+
+	    DBObjectBase syncBase = (DBObjectBase) getObjectBase(SchemaConstants.SyncChannelBase);
+
+	    if (syncBase.getField(SchemaConstants.SyncChannelTypeString) == null)
+	      {
+		bf = new DBObjectBaseField(syncBase);
+		bf.field_code = SchemaConstants.SyncChannelTypeString;
+		bf.field_type = FieldType.STRING;
+		bf.field_name = "Sync Channel Type";
+		syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelName);
+	      }
+
+	    if (syncBase.getField(SchemaConstants.SyncChannelFullStateFile) == null)
+	      {
+		bf = new DBObjectBaseField(syncBase);
+		bf.field_code = SchemaConstants.SyncChannelFullStateFile;
+		bf.field_type = FieldType.STRING;
+		bf.field_name = "Full State File";
+		bf.comment = "Path to the file to use for full-state XML dumps";
+		syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelDirectory);
+	      }
+
+	    if (syncBase.getField(SchemaConstants.SyncChannelTypeNum) == null)
+	      {
+		bf = new DBObjectBaseField(syncBase);
+		bf.field_code = SchemaConstants.SyncChannelTypeNum;
+		bf.field_type = FieldType.NUMERIC;
+		bf.field_name = "Channel Type Index";
+		syncBase.addFieldToEnd(bf);
+	      }
+	  }
 
 	// now make sure that the Task base has the TaskOptionStrings field
 
@@ -2257,7 +2333,7 @@ public final class DBStore implements JythonMap {
 	  {
 	    Ganymede.debug("Adding TaskOptionStrings to task base");
 
-	    bf = new DBObjectBaseField(b);
+	    bf = new DBObjectBaseField(taskBase);
 	    bf.field_code = SchemaConstants.TaskOptionStrings;
 	    bf.field_type = FieldType.STRING;
 	    bf.array = true;

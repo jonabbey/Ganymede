@@ -1571,7 +1571,10 @@ public class DBEditSet {
 	      {
 		SyncRunner sync = Ganymede.getSyncChannel((String)Ganymede.syncRunners.elementAt(i));
 
-		sync.writeSync(persistedTransaction, objectList, this);
+		if (!sync.isFullState())
+		  {
+		    sync.writeSync(persistedTransaction, objectList, this);
+		  }
 	      }
 	  }
 	catch (Throwable ex)
@@ -1630,16 +1633,19 @@ public class DBEditSet {
 	  {
 	    SyncRunner sync = Ganymede.getSyncChannel((String) Ganymede.syncRunners.elementAt(i));
 
-	    try
+	    if (!sync.isFullState())
 	      {
-		sync.unSync(persistedTransaction);
-	      }
-	    catch (Throwable inex)
-	      {
-		// what can we do?  keep clearing them out as best we
-		// can
+		try
+		  {
+		    sync.unSync(persistedTransaction);
+		  }
+		catch (Throwable inex)
+		  {
+		    // what can we do?  keep clearing them out as best we
+		    // can
 
-		inex.printStackTrace();
+		    inex.printStackTrace();
+		  }
 	      }
 	  }
       }

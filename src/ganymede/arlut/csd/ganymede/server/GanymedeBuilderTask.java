@@ -359,14 +359,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		label = ts.l("run.label_pattern", new Integer(id++));
 	      }
 
-	    try
-	      {
-		session = new GanymedeSession(label);
-	      }
-	    catch (java.rmi.RemoteException ex)
-	      {
-		throw new RuntimeException(ex);
-	      }
+	    session = new GanymedeSession(label);
 
 	    try
 	      {

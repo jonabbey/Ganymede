@@ -96,7 +96,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private static String path = null;
   private static String dnsdomain = null;
   private static String buildScript = null;
-  private static Runtime runtime = null;
 
   // ---
 
@@ -368,11 +367,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (file.exists())
       {
-	if (runtime == null)
-	  {
-	    runtime = Runtime.getRuntime();
-	  }
-
 	try
 	  {
 	    FileOps.runProcess(buildScript);

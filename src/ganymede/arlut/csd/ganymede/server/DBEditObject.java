@@ -2465,40 +2465,40 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     return Integer.MAX_VALUE;
   }
 
-   /**
-    * This method provides a hook that a DBEditObject subclass
-    * can use to indicate that a given
-    * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}
-    * has a restricted range of possibilities.
-    */
+  /**
+   * This method provides a hook that a DBEditObject subclass
+   * can use to indicate that a given
+   * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}
+   * has a restricted range of possibilities.
+   */
+  
+  public boolean isFloatLimited(DBField field)
+  {
+    return false;
+  }
+  
+  /**
+   * This method is used to specify the minimum acceptable value
+   * for the specified
+   * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.
+   */
+  
+  public double minFloat(DBField field)
+  {
+    return Double.MIN_VALUE;
+  }
  
-   public boolean isFloatLimited(DBField field)
-   {
-     return false;
-   }
- 
-   /**
-    * This method is used to specify the minimum acceptable value
-    * for the specified
-    * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.
-    */
- 
-   public double minFloat(DBField field)
-   {
-     return Double.MIN_VALUE;
-   }
- 
-   /**
-    * This method is used to specify the maximum acceptable value
-    * for the specified    
-    * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.
-    */
- 
-   public double maxFloat(DBField field)
-   {
-     return Double.MAX_VALUE;
-   }
-
+  /**
+   * This method is used to specify the maximum acceptable value
+   * for the specified    
+   * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.
+   */
+  
+  public double maxFloat(DBField field)
+  {
+    return Double.MAX_VALUE;
+  }
+  
   /**
    * <p>This method handles inactivation logic for this object type.  A
    * DBEditObject must first be checked out for editing, then the

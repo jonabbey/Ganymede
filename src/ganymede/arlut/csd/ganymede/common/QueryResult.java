@@ -158,6 +158,17 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
+   * This method is used to add a simple String to the QueryResult's
+   * serializable buffer.  It is intended to be called on the server,
+   * but may also be called on the client for result augmentation.
+   */
+
+  public void addRow(String label)
+  {
+    addRow(null, label, false, false, false, false);
+  }
+
+  /**
    *
    * This method is used to add an object's information to
    * the QueryResult's serializable buffer.  It is intended

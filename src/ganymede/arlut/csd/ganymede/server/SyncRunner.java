@@ -59,14 +59,18 @@ package arlut.csd.ganymede.server;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.FileTransmitter;
 
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.TranslationService;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -229,7 +233,7 @@ public class SyncRunner implements Runnable {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.SyncRunner");
 
-  private static Runtime runtime = null;
+  private static int id = 0;
 
   /**
    * XML version major id
@@ -248,10 +252,19 @@ public class SyncRunner implements Runnable {
   private Invid syncChannelInvid;
   private String name;
   private String directory;
+  private String fullStateFile;
   private String serviceProgram;
   private int transactionNumber;
   private boolean includePlaintextPasswords;
   private Hashtable matrix;
+
+  /**
+   * All registered SyncRunner objects are full state or incremental.
+   * If this one is fullState, this variable will be true.  If it
+   * is incremental, this variable will be false.
+   */
+
+  private boolean fullState;
 
   /* -- */
 
@@ -275,8 +288,20 @@ public class SyncRunner implements Runnable {
     this.syncChannelInvid = syncChannel.getInvid();
     this.name = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelName);
     this.directory = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelDirectory);
+    this.fullStateFile = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFullStateFile);
     this.serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
     this.includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
+
+    int type = ((Integer) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+
+    if (type == 2)
+      {
+	this.fullState = true;
+      }
+    else if (type == 1)
+      {
+	this.fullState = false;
+      }
 
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
@@ -318,9 +343,33 @@ public class SyncRunner implements Runnable {
     return name;
   }
 
+  /**
+   * Returns true if this SyncRunner is configured as a full state
+   * sync channel, false if it is incremental.
+   */
+
+  public boolean isFullState()
+  {
+    return this.fullState;
+  }
+
+  /**
+   * Returns the queue directory we'll write to if we're an
+   * incremental build channel.
+   */
+
   public String getDirectory()
   {
     return directory;
+  }
+
+  /**
+   * Returns the file we'll write to for a full state build.
+   */
+
+  public String getFullStateFile()
+  {
+    return this.fullStateFile;
   }
 
   public String getServiceProgram()
@@ -780,7 +829,253 @@ public class SyncRunner implements Runnable {
     return (String) matrix.get(FieldOptionDBField.matrixEntry(baseID));
   }
 
+  /**
+   * This is the method that will run when the GanymedeScheduler
+   * schedules us for execution after a transaction commit.  If our
+   * fullState flag is set to false, we'll consider ourselves as
+   * servicing an incremental build, in which case we just call our
+   * servicer script with the last transaction committed as our
+   * command line argument.  If we are full state, we'll do more like
+   * a {@link arlut.csd.ganymede.server.GanymedeBuilderTask}| and
+   * write out a complete, filtered dump of the server's contents to
+   * an XML file and then call the servicer with that file name as a
+   * command line argument.
+   */
+
   public void run()
+  {
+    if (this.fullState)
+      {
+	runFullState();
+      }
+    else
+      {
+	runIncremental();
+      }
+  }
+
+  /**
+   * This method handles running a full state XML build.
+   */
+
+  public void runFullState()
+  {
+    String label = null;
+    Thread currentThread = java.lang.Thread.currentThread();
+    boolean
+      success1 = false;
+    boolean alreadyDecdCount = false;
+    GanymedeSession session = null;
+    DBDumpLock lock = null;
+
+    /* -- */
+
+    String shutdownState = GanymedeServer.shutdownSemaphore.checkEnabled();
+
+    if (shutdownState != null)
+      {
+	// "Aborting full state sync channel {0} for shutdown condition: {1}"
+	Ganymede.debug(ts.l("runFullState.shutting_down", this.getClass().getName(), shutdownState));
+	return;
+      }
+
+    try
+      {
+	GanymedeBuilderTask.incPhase1(true);
+
+	try
+	  {
+	    // we need a unique label for our session so that multiple
+	    // builder tasks can have their own lock keys.. our label
+	    // will start at sync:0 and work our way up as we go along
+	    // during the server's lifetime
+
+	    synchronized (SyncRunner.class) 
+	      {
+		// "sync channel: {0,number,#}"
+		label = ts.l("runFullState.label_pattern", new Integer(id++));
+	      }
+
+	    session = new GanymedeSession(label);
+
+	    try
+	      {
+		lock = session.getSession().openDumpLock();
+	      }
+	    catch (InterruptedException ex)
+	      {
+		// "Could not run full state sync channel {0}, couldn''t get dump lock."
+		Ganymede.debug(ts.l("runFullState.failed_lock_acquisition", this.getClass().getName()));
+		return;
+	      }
+
+	    writeFullStateSync(session);
+	  }
+	catch (Exception ex)
+	  {
+	    GanymedeBuilderTask.decPhase1(true);
+	    alreadyDecdCount = true;
+
+	    Ganymede.debug(Ganymede.stackTrace(ex));
+	    return;
+	  }
+	finally
+	  {
+	    if (!alreadyDecdCount)
+	      {
+		GanymedeBuilderTask.decPhase1(false); // false since we don't want to force stat update yet
+	      }
+
+	    // release the lock, and so on
+
+	    if (session != null)
+	      {
+		session.logout();	// will clear the dump lock
+		session = null;
+		lock = null;
+	      }
+	  }
+	
+	if (currentThread.isInterrupted())
+	  {
+	    // "Full state sync channel {0} interrupted, not doing network build."
+	    Ganymede.debug(ts.l("runFullState.task_interrupted", this.getClass().getName()));
+	    Ganymede.updateBuildStatus();
+	    return;
+	  }
+
+	try
+	  {
+	    GanymedeBuilderTask.incPhase2(true);
+
+	    // tell the server not to shut down while we are running our external build
+
+	    try
+	      {
+		shutdownState = GanymedeServer.shutdownSemaphore.increment(0);
+
+		if (shutdownState != null)
+		  {
+		    // "Aborting full state sync channel {0} for shutdown condition: {1}"
+		    Ganymede.debug(ts.l("runFullState.shutting_down", this.getClass().getName(), shutdownState));
+		    return;
+		  }
+	      }
+	    catch (InterruptedException ex)
+	      {
+		// will never happen, since we are giving 0 to
+		// increment
+	      }
+		
+	    try
+	      {
+		runFullStateService();
+	      }
+	    finally
+	      {
+		GanymedeServer.shutdownSemaphore.decrement();
+	      }
+	  }
+	finally
+	  {
+	    GanymedeBuilderTask.decPhase2(true);
+	  }
+      }
+    finally
+      {
+	// we need the finally in case our thread is stopped
+
+	if (session != null)
+	  {
+	    try
+	      {
+		session.logout();	// this will clear the dump lock if need be.
+	      }
+	    finally
+	      {
+		session = null;
+		lock = null;
+	      }
+	  }
+      }
+  }
+
+  /**
+   * This method writes out a full state XML dump to the fullStateFile
+   * registered in this SyncRunner.
+   */
+
+  private void writeFullStateSync(GanymedeSession session) throws NotLoggedInException, RemoteException, IOException
+  {
+    ReturnVal retVal = session.getDataXML(this.name);
+    FileTransmitter transmitter = retVal.getFileTransmitter();
+    BufferedOutputStream out = null;
+
+    out = new BufferedOutputStream(new FileOutputStream(this.fullStateFile));
+
+    try
+      {
+	byte[] chunk = transmitter.getNextChunk();
+
+	while (chunk != null)
+	  {
+	    out.write(chunk, 0, chunk.length);
+	    chunk = transmitter.getNextChunk();
+	  }
+      }
+    finally
+      {
+	out.close();
+      }
+  }
+
+  /**
+   * This method executes the external build, feeding the external
+   * service script the name of the full state XML file that we dumped
+   * out.
+   */
+
+  private void runFullStateService()
+  {
+    // "Full State Sync Channel {0} external build running."
+    Ganymede.debug(ts.l("runFullStateService.running", this.name));
+
+    File file = new File(this.serviceProgram);
+
+    if (file.exists())
+      {
+	try
+	  {
+	    FileOps.runProcess(this.serviceProgram);
+	  }
+	catch (IOException ex)
+	  {
+	    // "Couldn''t exec full state sync channel build script {0} for Sync Channel {1}, due to IOException:\n{2}"
+	    Ganymede.debug(ts.l("runFullStateService.exception_running", this.serviceProgram,
+				this.name, Ganymede.stackTrace(ex)));
+	  }
+	catch (InterruptedException ex)
+	  {
+	    // "Failure during exec of full state sync channel build script {0} for Sync Channel {1}:\n{2}"
+	    Ganymede.debug(ts.l("runFullStateService.interrupted", this.serviceProgram,
+				this.name, Ganymede.stackTrace(ex)));
+	  }
+
+	// "Full State Sync Channel {0} external build completed."
+	Ganymede.debug(ts.l("runFullStateService.ran", this.name));
+      }
+    else
+      {
+	// "Full State Sync Channel {1} error: external build script {0} does not exist."
+	Ganymede.debug(ts.l("runFullStateService.whaa", this.serviceProgram, this.name));
+      }
+  }
+
+  /**
+   * This method handles running an incremental XML build.
+   */
+
+  public void runIncremental()
   {
     int myTransactionNumber;
     String myName, myServiceProgram, invocation;
@@ -802,13 +1097,16 @@ public class SyncRunner implements Runnable {
 
     try
       {
+	// tell the Ganymede server not to shut down while we are
+	// running our external build
+
 	shutdownState = GanymedeServer.shutdownSemaphore.increment(0);
 	GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
 
 	if (shutdownState != null)
 	  {
 	    // "Refusing to run Sync Channel {0}, due to shutdown condition: {1}"
-	    Ganymede.debug(ts.l("run.shutting_down", this.getName(), shutdownState));
+	    Ganymede.debug(ts.l("runIncremental.shutting_down", this.getName(), shutdownState));
 	    return;
 	  }
       }
@@ -821,7 +1119,7 @@ public class SyncRunner implements Runnable {
     try
       {
 	// "SyncRunner {0} running"
-	Ganymede.debug(ts.l("run.running", myName));
+	Ganymede.debug(ts.l("runIncremental.running", myName));
 
 	if (getServiceProgram() != null)
 	  {
@@ -829,11 +1127,6 @@ public class SyncRunner implements Runnable {
 	    
 	    if (file.exists())
 	      {
-		if (runtime == null)
-		  {
-		    runtime = Runtime.getRuntime();
-		  }
-		
 		try
 		  {
 		    FileOps.runProcess(invocation);
@@ -841,24 +1134,24 @@ public class SyncRunner implements Runnable {
 		catch (IOException ex)
 		  {
 		    // "Couldn''t exec SyncRunner {0}''s service program "{1}" due to IOException: {2}"
-		    Ganymede.debug(ts.l("run.ioException", myName, myServiceProgram, ex));
+		    Ganymede.debug(ts.l("runIncremental.ioException", myName, myServiceProgram, ex));
 		  }
 		catch (InterruptedException ex)
 		  {
 		    // "Failure during exec of SyncRunner {0}''s service program "{1}""
-		    Ganymede.debug(ts.l("run.interrupted", myName, myServiceProgram));
+		    Ganymede.debug(ts.l("runIncremental.interrupted", myName, myServiceProgram));
 		  }
 	      }
 	    else
 	      {
 		// ""{0}" doesn''t exist, not running external service program for SyncRunner {1}"
-		Ganymede.debug(ts.l("run.nonesuch", myServiceProgram, myName));
+		Ganymede.debug(ts.l("runIncremental.nonesuch", myServiceProgram, myName));
 	      }
 	  }
 	else
 	  {
 	    // "No external service program defined for SyncRunner {0}, not servicing {0}!"
-	    Ganymede.debug(ts.l("run.undefined", myName));
+	    Ganymede.debug(ts.l("runIncremental.undefined", myName));
 	  }
       }
     finally
@@ -868,7 +1161,7 @@ public class SyncRunner implements Runnable {
       }
 
     // "SyncRunner {0} finished"
-    Ganymede.debug(ts.l("run.done", myName));
+    Ganymede.debug(ts.l("runIncremental.done", myName));
   }
 
   public String toString()
