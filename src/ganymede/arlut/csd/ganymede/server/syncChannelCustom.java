@@ -355,11 +355,8 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
   public boolean canSeeField(DBSession session, DBField field)
   {
-    Ganymede.debug("canSeeField() called on syncChannelCustom.");
-
     if (field.getFieldDef().base != this.objectBase)
       {
-	Ganymede.debug("visibility short circuited");
 	throw new IllegalArgumentException("field/object mismatch");
       }
 
