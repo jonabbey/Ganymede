@@ -1,0 +1,23 @@
+1. Ganymede, Synchronization, and You (Intro)
+2. Approaches To Synchronization
+ a) Full State Synchronization
+ b) Incremental Synchronization
+3. Ganymede Synchronization Options
+   Discuss two phase logic.. writing out data, running external builder script
+   Mention GanymedeBuilderTask, link to specific document on that topic
+   "We'll be focusing on Sync Channels"
+4. Sync Channels
+5. Full State Sync Channels
+ a) Configuring
+ b) External Service Programs
+6. Incremental Sync Channels
+ a) Configuring
+ b) External Service Programs
+7. Manual Synchronization with Sync Channels
+8. XML Formats
+9. Python Sync Utils
+10. Active Directory Example
+    Discuss OU elaborations on invid elements
+    Show simple output
+    Shouw Sync Util callback?
+    LDAPModeler?
