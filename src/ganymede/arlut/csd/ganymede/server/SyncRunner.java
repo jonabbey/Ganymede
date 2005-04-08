@@ -63,6 +63,7 @@ import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.FileTransmitter;
 
+import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.TranslationService;
 
@@ -274,6 +275,13 @@ public class SyncRunner implements Runnable {
 
   private boolean incremental;
 
+  /**
+   * This variable is true if we've seen a transaction that requires us to issue
+   * a build on the next run().  Used only for full state build channels.
+   */
+
+  private booleanSemaphore needBuild = new booleanSemaphore(false);
+
   /* -- */
 
   public SyncRunner(DBObject syncChannel)
@@ -484,6 +492,31 @@ public class SyncRunner implements Runnable {
       }
 
     setTransactionNumber(transRecord.getTransactionNumber());
+  }
+
+  /**
+   * This method checks this full state SyncRunner against the objects involved in the provided
+   * transaction.  If this SyncRunner's Sync Channel definition matches against the transaction,
+   * a flag will be set causing a full state build to be executed upon the next run of this Sync Runner.
+   *
+   * @param transRecord A transaction description record describing the transaction we are checking
+   * @param objectList An array of DBEditObjects that the transaction has checked out at commit time
+   * @param transaction The DBEditSet that is being committed.
+   */
+
+  public void checkBuildNeeded(DBJournalTransaction transRecord, DBEditObject[] objectList,
+			       DBEditSet transaction) throws IOException
+  {
+    for (int i = 0; i < objectList.length; i++)
+      {
+	DBEditObject syncObject = objectList[i];
+
+	if (shouldInclude(syncObject))
+	  {
+	    this.needBuild.set(true);
+	    return;
+	  }
+      }
   }
 
   /**
@@ -867,7 +900,10 @@ public class SyncRunner implements Runnable {
   {
     if (this.fullState)
       {
-	runFullState();
+	if (this.needBuild.isSet())
+	  {
+	    runFullState();
+	  }
       }
     else if (this.incremental)
       {
@@ -1023,11 +1059,28 @@ public class SyncRunner implements Runnable {
 
   /**
    * This method writes out a full state XML dump to the fullStateFile
-   * registered in this SyncRunner.
+   * registered in this SyncRunner.  It is run within the context of a
+   * {@link arlut.csd.ganymede.server.DBDumpLock} asserted on the
+   * Ganymede {@link arlut.csd.ganymede.server.DBStore}.
    */
 
   private void writeFullStateSync(GanymedeSession session) throws NotLoggedInException, RemoteException, IOException
   {
+    // Clear the needBuild flag, since we're already committed to
+    // trying to do a full state build, and the DBDumpLock that is
+    // held for us by runFullState() will keep any new commits from
+    // being integrated until we finish.
+    //
+    // We could wait and clear the flag after we write, but if we run
+    // into an exception opening the output file, we don't want to
+    // perseverate on trying to write this file out when whatever
+    // caused the exception will presumably need someone's
+    // intervention to cure.  Waiting until someone again modifies an
+    // object that matches this SyncRunner's criteria shouldn't hurt
+    // anything significantly.
+
+    this.needBuild.set(false); 
+
     ReturnVal retVal = session.getDataXML(this.name);
     FileTransmitter transmitter = retVal.getFileTransmitter();
     BufferedOutputStream out = null;

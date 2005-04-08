@@ -1575,6 +1575,10 @@ public class DBEditSet {
 		  {
 		    sync.writeSync(persistedTransaction, objectList, this);
 		  }
+		else if (sync.isFullState())
+		  {
+		    sync.checkBuildNeeded(persistedTransaction, objectList, this);
+		  }
 	      }
 	  }
 	catch (Throwable ex)
