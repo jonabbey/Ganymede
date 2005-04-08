@@ -78,84 +78,90 @@
         the external managed services</li>
 
         <li>Just send out information about the transactions that were 
-        made since the last synchronization</li>
+        committed since the last synchronization</li>
     </ol> 
 
-    <p>Directory services like NIS and DNS have
-    traditionally required a 'full state' build system, as those
-    services originally provided no mechanism for applying incremental
-    changes to their configuration.  Modern directory services like
-    LDAP, on the other hand, explicitly support incremental change
-    commands.  These kinds of directories work most efficiently when a
-    small list of recent changes (or "deltas") can be provided.  Other
-    possible synchronization targets, such as relational databases,
-    may be handled in either manner.</p>
+    <p>Directory services like NIS and DNS have traditionally required
+    a 'full state' build system, as those services originally provided
+    no mechanism for applying incremental changes to their
+    configuration.  Modern directory services like LDAP, on the other
+    hand, explicitly support incremental change commands.  Applying
+    changes to these kinds of directories works most efficiently when
+    a small list of recent changes ("deltas") can be provided.</p>
 
     <p>These two synchronization styles each have their own strengths
-    and weaknesses.  With a full state synchronization, it really
-    doesn't matter whether any previous synchronizations were
-    successful or not, because each synchronization will contain a
-    complete description of the desired configuration for the target
-    service.  This means that missing a synchronization (perhaps
-    because the target directory service is temporarily unavailable)
-    is no problem.  The target directory will just catch up the next
-    time a synchronization occurs.  The inherent redundancy of this
-    approach can make the synchronization process very robust, but the
-    downside is that a full state synchronization can be very time
-    consuming.  In addition, if it isn't possible to efficiently wipe
-    and reload the target directory service, a process of comparison
-    must be undertaken to calculate what has changed between the data
+    and weaknesses.</p>
+
+    <h3 id="describing_full_state">Full State Synchronization</h3>
+
+    <p>With a full state synchronization, it really doesn't matter
+    whether any previous synchronizations were successful or not,
+    because each synchronization will contain a complete description
+    of the desired configuration for the target service.  This means
+    that missing a synchronization (perhaps because the target
+    directory service is temporarily unavailable) is no problem.  The
+    target directory will just catch up the next time a
+    synchronization occurs.  The inherent redundancy of this approach
+    can make the synchronization process very robust, but the downside
+    is that a full state synchronization can be very time
+    consuming.</p>
+
+    <p>In addition, if it isn't possible to efficiently wipe and
+    reload the target directory service, a process of comparison must
+    be undertaken to calculate what has changed between the data
     written out for the synchronization requires and the pre-existing
-    configuration of the target directory service.  In some cases,
-    including that of passwords in Active Directory, it may not even
-    be possible to completely read the pre-existing data from the
+    configuration of the target directory service.  In some cases it
+    may not even be possible to read the pre-existing data from the
     target directory service in order to be able to detect what has
-    changed.  This may mean that more data will need to be sent to the
-    target service than is strictly necessary, even if that same data
-    is already securely (but irretrievably) held in the target
-    service.</p>
+    changed.  This is the case of <code class="type">ntPassword</code>
+    in Active Directory, for instance, which is a write-only field.
+    Without being able properly to compare the full state data with
+    the contents of the target service may mean that more changes will
+    have to be sent to the target than would be necessary with a true
+    incremental synchronization.</p>
+
+    <h3 id="describing_incremental">Incremental Synchronization</h3>
 
     <p>Synchronizing only the recently applied transactions can be far
     more efficient, assuming the target directory service can accept
     and apply a set of changes.  Only a very small amount of data may
-    need to be synchronized at each synchronization, and the target
-    directory service doesn't need to erase or reload anything other
-    than what actually changed.  This kind of "delta" synchronization,
-    however, has some severe shortcomings.  The first problem is that
-    if we are only sending the most recent transactions, we must
-    absolutely rely on the target directory service to remember all
-    previous changes.  If a transaction were to get lost somehow, the
-    target directory service would become out of sync with the master
-    data held in Ganymede, and later synchronizations might never
-    detect or fix the problem.  Another problem is that if we limit
-    the amount of data we send to the synchronization channel to only
-    that which recently changed, we might fail to provide enough
-    surrounding context to allow the synchronization system to
-    translate the synchronization data into a form suitable to the
-    target directory service.  It wouldn't do, for example, to try and
-    write to a synchronization channel the fact that a user's password
-    changed without also including enough surrounding context to allow
-    the synchronization system to locate the user record to be changed
-    in the target service.</p>
+    need to be synchronized at each synchronization, and it's not
+    necessary for the target directory service to erase or reload
+    anything other than what actually changed.  This kind of "delta"
+    synchronization, however, has some severe shortcomings.  The first
+    problem is that if we are only sending the most recent
+    transactions, we must absolutely rely on the target directory
+    service to remember all previous changes.  If a transaction were
+    to get lost somehow, the target directory service would become out
+    of sync with the master data held in Ganymede, and later
+    synchronizations might never detect or fix the problem.  Another
+    problem is that if we limit the amount of data we send to the
+    synchronization channel to only that which recently changed, we
+    might fail to provide enough surrounding context to allow the
+    synchronization system to translate the synchronization data into
+    a form suitable to the target directory service.  It wouldn't do,
+    for example, to try and write to a synchronization channel the
+    fact that a user's password changed without also including enough
+    surrounding context to allow the synchronization system to locate
+    the user record to be changed in the target service.</p>
 
     <h2 id="options">3. Ganymede Synchronization Options</h2>
 
-    <p>As it happens, Ganymede 2.0 provides three distinct systems for
-    data synchronization, all of which work in the same general way.
-    The Ganymede server writes out synchronization data to files on
-    your server system's disk.  An external, free-standing program is
-    then run to read in these data files and do whatever may be
-    required to transmit the synchronization information to target
-    services.  This division of labor between the Ganymede server and
-    your external code allows for a great degree of flexibility,
-    without requiring extensive code development within the Ganymede
-    server itself.</p>
+    <p>Ganymede 2.0 provides four distinct systems for data
+    synchronization, all of which work in the same general way.  The
+    Ganymede server writes out synchronization data to files on your
+    server system's disk.  An external, free-standing program is then
+    run to read in these data files and do whatever may be required to
+    transmit the synchronization information to target services.  This
+    division of labor between the Ganymede server and your external
+    code allows for a great degree of flexibility, without requiring
+    extensive code development within the Ganymede server itself.</p>
 
-    <p>The three options for synchronization in the Ganymede system
+    <p>The four options for synchronization in the Ganymede system
     differ on the form of the synchronization data files, on whether
     the synchronizations are full-state or incremental, and on whether
-    or not the Ganymede server automatically emits the synchronization
-    data and runs your external code.</p>
+    or not the Ganymede server automatically schedules builds for
+    you.</p>
 
     <p>The <a href="#buildertask">GanymedeBuilderTask</a>
     synchronization model is the original Ganymede synchronization
