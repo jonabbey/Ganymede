@@ -173,16 +173,18 @@
     <p>With Ganymede 2.0, we introduce a new synchronization
     infrastructure built around a new Ganymede construct, the <code
     class="type">Sync Channel</code>.  Sync Channel synchronization
-    takes advantage of code that we've built into the Ganymede server
-    for you that uses an XML file format for writing out both
-    incremental and full state synchronization data.</p>
+    allows you to configure synchronization in the Ganymede server
+    using nothing but the Ganymede GUI client and/or the Ganymede <a
+    href="../xml/xmlclient.html">xmlclient</a>.  Sync Channels don't
+    require you to write any Java code.. once configured, step 1 of
+    synchronization (writing out data files) is handled automatically
+    by the Ganymede server using a standardized XML file format.</p>
 
-    <p>You can configure <code class="type">Sync Channels</code>
-    through the Ganymede GUI client and/or the Ganymede <a
-    href="../xml/xmlclient.html">xmlclient</a>, and you can redefine
-    them whenever you like.
+    <h2 id="sync_channels">3. Sync Channels</h2>
 
-    <h2 id="xml_incrementals">5 Incremental Sync Channels</h2>
+    <h2 id="xml_full_state">4. Full State Sync Channels</h2>
+
+    <h2 id="xml_incrementals">5. Incremental Sync Channels</h2>
 
     <h3 id="explaining_xml_incrementals">The Sync Channel Incremental Model Explained</h3>
 
