@@ -14,72 +14,59 @@
       <IMG SRC="../gifs/ganymede_title.gif" alt="Ganymede Logo"/>
 
       <div id="title">
-        <h1>Ganymede Synchronization Guide</h1>
+        <h1>Ganymede 2.0 Sync Channel Guide</h1>
         <p>Release 2.0 dev - ? ? 2005<br/>$Rev$</p>
       </div>
 
       <div id="abstract">
-        <p>This guide will descibe how to take data from Ganymede and feed it into
-        your target directory services or databases.</p>
-        
-        <p>You'll learn about Ganymede's super-flexible
-        synchronization system; the sky's the limit!</p>
+        <p>This document is intended to be a comprehensive guide to
+        implementing data synchronization from Ganymede to your target
+        directory services, using the new Ganymede 2.0 Sync Channel
+        mechanism.  This guide covers neither importing data
+        <b>into</b> Ganymede (see the <a
+        href="../xml/index.html">Ganymede XML Guide</a> for that), nor
+        the use of the older and more tricky Ganymede 1.0
+        synchronization system.  For the latter, consult the <a
+        href="ganymedebuildertask.html">GanymedeBuilderTask
+        Synchronization Guide</a>.</p>
+
+        <p>This guide likewise assumes that you already know enough
+        about the Ganymede data model to configure a Ganymede schema
+        that is capable of containing and modeling the directory
+        services data that you want to manage with Ganymede.  If this
+        is not the case, you might want to read the <a
+        href="../xml/schema.html">Ganymede XML Schema</a> document for
+        some details on how a Ganymede schema is specified.</p>
+
+        <p class="note">A more general Ganymede data model / schema
+        document still needs to be put together at the time of this
+        writing (11 April 2005).</p>
       </div>
 
       <p>By <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></p>
     </div>
 
-    <h2>1. Ganymede, Synchronization, and You</h2>
-
-    <p>Ganymede is a synchronization engine.  Leave aside the
-    graphical interface, the programmable business rules, the
-    transactional database, all of that.  Ganymede is basically about
-    copying data around.  Users and automated processes feed changes
-    into Ganymede, and Ganymede makes sure that the updated data gets
-    properly fed into whatever directory services or databases the
-    adopter might wish to support.</p>
-
-    <p>This document is intended to be a comprehensive guide to
-    implementing data synchronization from Ganymede to your target
-    directory services.  If you're interested in reading about how to
-    format data for importing into Ganymede, you should consult the <a
-    href="../xml/index.html">Ganymede XML Guide</a>, which covers that
-    topic.</p>
-
-    <p>Whether you are importing data into or exporting data out of
-    Ganymede, you will need to be sure that your Ganymede server is
-    configured with a schema (and programmable object plug-ins)
-    appropriate to the sort of data you want to manage.  See the <a
-    href="../xml/schema.html">Ganymede XML Schema</a> document for some
-    details on how a Ganymede schema is specified.  (I need to add
-    more discussion of this somewhere in the docs, though).</p>
-
-    <p>Now, assuming that you have gotten your Ganymede server's
-    schema and plug-in logic set up appropriately and that you have
-    got data successfully imported, we need to talk about getting that
-    data back out again, and transferred to the services you are
-    trying to administer.</p>
-
-    <h2>2. Approaches to Synchronization</h2>
+    <h2>1. Approaches to Synchronization</h2>
 
     <p>Ganymede is designed around a transactional model, in which a
     set of changes that transition the Ganymede server from one
-    consistent state to another are processed as a single unit of
-    work.  As such, the transaction is both the minimum unit of change
-    for Ganymede and the trigger that causes the Ganymede server to
+    consistent state to another is processed as a single unit of work.
+    As such, the transaction is both the minimum unit of change for
+    Ganymede and the trigger that causes the Ganymede server to
     synchronize its data to target directory services.</p>
 
-    <p>There are, in principle, two ways that Ganymede might handle
-    synchronizing data to the services that it feeds:</p>
+    <p>Given this, there are in principle two ways that Ganymede might
+    handle synchronizing data to the services that it feeds:</p>
 
     <ol>
-        <li>Dump out everything it knows and arrange for that 'full
-        state' information to completely replace the previous state of 
-        the external managed services</li>
+      <li>Dump out everything it knows relevant to the
+      synchronization and arrange for that 'full state' information
+      to completely replace the previous state of the external
+      managed services.</li>
 
-        <li>Just send out information about the transactions that were 
-        committed since the last synchronization</li>
-    </ol> 
+      <li>Just send out relevant information that has changed since
+      the last synchronization.</li>
+    </ol>
 
     <p>Directory services like NIS and DNS have traditionally required
     a 'full state' build system, as those services originally provided
@@ -127,927 +114,77 @@
     and apply a set of changes.  Only a very small amount of data may
     need to be synchronized at each synchronization, and it's not
     necessary for the target directory service to erase or reload
-    anything other than what actually changed.  This kind of "delta"
-    synchronization, however, has some severe shortcomings.  The first
-    problem is that if we are only sending the most recent
-    transactions, we must absolutely rely on the target directory
-    service to remember all previous changes.  If a transaction were
-    to get lost somehow, the target directory service would become out
-    of sync with the master data held in Ganymede, and later
-    synchronizations might never detect or fix the problem.  Another
-    problem is that if we limit the amount of data we send to the
-    synchronization channel to only that which recently changed, we
-    might fail to provide enough surrounding context to allow the
-    synchronization system to translate the synchronization data into
-    a form suitable to the target directory service.  It wouldn't do,
-    for example, to try and write to a synchronization channel the
-    fact that a user's password changed without also including enough
-    surrounding context to allow the synchronization system to locate
-    the user record to be changed in the target service.</p>
+    anything other than what actually changed.</p>
 
-    <h2 id="options">3. Ganymede Synchronization Options</h2>
+    <p>This kind of "delta" synchronization, however, has some severe
+    shortcomings.  The first problem is that if we are only sending
+    the most recent transactions, we must absolutely rely on the
+    target directory service to remember all previous changes.  If a
+    transaction were to get lost somehow, the target directory service
+    would become out of sync with the master data held in Ganymede,
+    and later synchronizations might never detect or fix the problem.</p>
 
-    <p>Ganymede 2.0 provides four distinct systems for data
-    synchronization, all of which work in the same general way.  The
-    Ganymede server writes out synchronization data to files on your
-    server system's disk.  An external, free-standing program is then
-    run to read in these data files and do whatever may be required to
-    transmit the synchronization information to target services.  This
-    division of labor between the Ganymede server and your external
-    code allows for a great degree of flexibility, without requiring
-    extensive code development within the Ganymede server itself.</p>
+    <p>Another problem is that if we limit the amount of data we send
+    to the synchronization channel to only that which recently
+    changed, we might fail to provide enough surrounding context to
+    allow the synchronization system to translate the synchronization
+    data into a form suitable to the target directory service.  It
+    wouldn't do, for example, to try and write to a synchronization
+    channel the fact that a user's password changed without also
+    including enough surrounding context to allow the synchronization
+    system to locate the user record to be changed in the target
+    service.</p>
 
-    <p>The four options for synchronization in the Ganymede system
-    differ on the form of the synchronization data files, on whether
-    the synchronizations are full-state or incremental, and on whether
-    or not the Ganymede server automatically schedules builds for
-    you.</p>
+    <h2 id="options">2. Ganymede Synchronization</h2>
 
-    <p>The <a href="#buildertask">GanymedeBuilderTask</a>
-    synchronization model is the original Ganymede synchronization
-    system.  It requires you to write Java code to scan the Ganymede
-    data store and write out custom synchronization data files, but
-    scheduling of your synchronization builds is done for you.  This
-    model is only suitable for full-state synchronization.</p>
+    <p>Ganymede synchronization is organized around a two step
+    process.  In the first step, the Ganymede server writes out
+    synchronization data, typically to files on your server system's
+    disk. In the second step, an external, free-standing program is
+    then run to read in these data files and do whatever may be
+    required to transmit the synchronization information to target
+    services.  This division of labor between the Ganymede server and
+    your external code allows for a great degree of flexibility,
+    without requiring extensive code development within the Ganymede
+    server itself.</p>
 
-    <p>The <a href="#xml_incrementals">Sync Channel Incremental</a>
-    model is an incremental synchronization model based on XML
-    synchronization files generated for you by code built into the
-    Ganymede server.  Synchronization information is put into a
-    message queue for you, transaction by transaction, and the
-    Ganymede server will automatically schedule builds from the sync
-    channel message queues.</p>
-
-    <p>The <a href="#xml_full_state">Sync Channel Full State</a> model
-    is essentially a hybrid of the Sync Channel Incremental model and
-    the GanymedeBuilderTask models.  Like the Sync Channel Incremental
-    model, a standardized XML format is used to write out
-    synchronization information.  Like the GanymedeBuilderTask model,
-    the synchronization is automatically scheduled by the Ganymede
-    server after transactions are committed.</p>
-
-    <p>The <a href="#xml_manual">Sync Channel Manual</a> model is
-    identical to the Sync Channel Full State model, except that the
-    Ganymede server never schedules the synchronizations.  This model
-    is, in fact, primarily intended as a backup for the Sync Channel
-    Incremental model.  Since the Sync Channel Incremental can only do
-    transaction-by-transaction incremental synchronization, you'll
-    need some other way to get your target services into initial
-    synchronization with the contents of the Ganymede data store.  The
-    Sync Channel Full State model is probably the way that you will
-    want to use.  This model is also useful if a service that you
-    normally maintain with the Sync Channel Incremental model gets
-    corrupted or out of sync with your Ganymede server and you need to
-    force a full re-sync.</p>
-
-    <div align="center">
-    <table border="1">
-      <tr>
-        <th>Name</th>
-        <th>Full State/Incremental</th>
-        <th>Scheduled by Ganymede Server</th>
-        <th>XML-based</th>
-        <th>Requires Custom Java Code</th>
-        <th>Requires Custom External Code</th>
-      </tr>
-      <tr>
-        <td><a href="#buildertask">GanymedeBuilderTask</a></td>
-        <td align="center">Full State</td>
-        <td align="center">Yes</td>
-        <td align="center">No</td>
-        <td align="center">Yes</td>
-        <td align="center">Yes</td>
-      </tr>
-      <tr>
-        <td><a href="#xml_incrementals">Sync Channel Incremental</a></td>
-        <td align="center">Incremental</td>
-        <td align="center">Yes</td>
-        <td align="center">Yes</td>
-        <td align="center">No</td>
-        <td align="center">Yes</td>
-      </tr>
-      <tr>
-        <td><a href="#xml_full_state">Sync Channel Full</a></td>
-        <td align="center">Full State</td>
-        <td align="center">Yes</td>
-        <td align="center">Yes</td>
-        <td align="center">No</td>
-        <td align="center">Yes</td>
-      </tr>
-      <tr>
-        <td><a href="#xml_manual">Sync Channel Manual</a></td>
-        <td align="center">Full State</td>
-        <td align="center">No</td>
-        <td align="center">Yes</td>
-        <td align="center">No</td>
-        <td align="center">Yes</td>
-      </tr>
-    </table>
-    </div>
-
-    <h3 id="buildertask">3.1 The GanymedeBuilderTask Synchronization Model</h3>
-
-    <p>The original Ganymede synchronization model is based around
-    full state synchronization, and was designed in conjunction with
-    the Ganymede transactional model to support NIS and DNS.  Both of
-    those directory services require all related changes to be made
-    all at once before rebuilding their state ("pushing the maps" in
-    NIS terminology, "rebuilding the BIND zone files" in DNS terms).</p>
-
-    <p>Ganymede's approach to supporting these services is to
-    implement a two phase building approach, using custom-written
-    subclasses of the <a
+    <p>Originally, the implementing the first step of this process
+    required subclassing the <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">arlut.csd.ganymede.server.GanymedeBuilderTask</a>
-    class.  When a transaction is committed in Ganymede, the <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeScheduler.html">
-    arlut.csd.ganymede.server.GanymedeScheduler</a> class schedules a
-    set of builder tasks for execution as soon as possible.  When a
-    builder task runs, it locks the Ganymede database to prevent any
-    new transactions from committing and it executes <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>.
-    The builderPhase1() method scans the Ganymede database for
-    whatever objects are relevant to the builder task's
-    synchronization duties and writes that data out to disk, using
-    whatever data format is convenient for the purposes of that
-    synchronization channel.  When the builder task has completed its
-    scan of the Ganymede database and all of its data has been written
-    out, the builderPhase1() method returns, and the Ganymede database
-    is unlocked so that any pending transactions can proceed
-    to commit.</p>
-
-    <p>The builder tasks then runs <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2()</a>.
-    builderPhase2() is designed to execute an external program or script
-    which reads the data written out by builderPhase1() and does
-    whatever is necessary to integrate that data into the target
-    directory services.  During the time that builderPhase2() is
-    running, users are free to commit changes into the Ganymede
-    database, but the Ganymede Scheduler is blocked from re-running the
-    same builder task again.  This prevents any possibility of the
-    builder task synchronization overlapping itself and overwriting
-    data that a previous external build process may still be working
-    with.</p>
-
-    <p>Because the Ganymede Scheduler waits until a builder task has
-    completed running before it relaunches the task, transactions are
-    effectively transmitted in bulk to the target service.  If it
-    takes 5 minutes for the external script run by builderPhase2() to
-    complete, potentially hundreds or thousands of changes can be
-    'saved up' for the builder task to handle when it finishes with
-    the first synchronization.  In this way, the Ganymede server can
-    allow users to commit changes at the fastest rate possible, while
-    simultaneously synchronizing data to the target services at the
-    fastest rate the synchronization process will allow.</p>
-
-    <p>There are two difficulties with this synchronization model.
-    The first is that by the time a builder task is executed by the
-    Ganymede Scheduler, several minutes might have passed, during
-    which time the Ganymede server will have completely forgotten
-    about what the Ganymede server's data looked like before the
-    transactions were committed.  Because of this, the
-    GanymedeBuilderTask model is completely incapable of doing
-    delta-style builds.  The best that it can do is to write out
-    everything it knows to be true at the time the builderPhase1()
-    method is run, and to depend on the external build process run by
-    builderPhase2() to do any necessary before-and-after comparisons
-    between the synchronization and the previous target state.</p>
-
-    <p>The second difficulty with the GanymedeBuilderTask model is
-    that it depends on a lot of custom code being written in Java and
-    compiled into the Ganymede server.  In order to create a custom
-    GanymedeBuilderTask, the adopter must create his own subclass of
-    GanymedeBuilderTask and write all the logic for builderPhase1()
-    and builderPhase2().  Further, if the code in either of these
-    methods needs to be changed, either to fix a bug or to respond to
-    a change made in the Ganymede server's schema, the server would
-    have to be stopped and restarted after compiling and loading the
-    new version of the builder task's code.</p>
-
-    <p>The advantage of using the GanymedeBuilderTask system is that
-    it is the only full state synchronization model that is fully
-    integrated into the Ganymede server's scheduler.  By creating and
-    registering a GanymedeBuilderTask, you can rely on the server to
-    handle scheduling your builds.  The alternative XML-based full
-    state synchronization model (<a href="xml_full_state">described
-    below</a>) is meant only to serve as a manual backup for the
-    Ganymede 2.0 XML-based delta synchronization model.</p>
-
-    <p>Right now, we need to discuss how to actually go about
-    constructing a GanymedeBuilderTask subclass to handle a full state
-    build.</p>
-
-    <h4 id="buildertask_creation">How To Create A Custom GanymedeBuilderTask Subclass</h4>
-
-    <p>The <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
-    class is responsible for coordinating all of the activities
-    involved in scheduling and executing full state builds.  As an
-    adopter and customizer of Ganymede, all you are responsible for is
-    creating a subclass of <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
-    that defines the <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
-    and <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2()</a>
-    methods.</p>
-
-    <p>The steps involved in creating a <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
-    subclass and linking it into the server are very similar to those
-    involved in <a
-    href="../customization/index.html#subclass_creation">creating a
-    DBEditObject subclass</a>.  You have to create a <code
-    class="filename">.java</code> file that contains your subclass and
-    place it under the server's <code
-    class="filename">schema/custom_src</code> directory.  You then
-    compile your code with the <code class="filename">build</code>
-    script.  After you are sure that your code compiles successfully,
-    you must shut down the server, rebuild the <a
-    href="../glossary.html#custom.jar">custom.jar</a> file with the
-    <code class="filename">buildCustomJar</code> script, and install
-    the rebuilt <a href="../glossary.html#custom.jar">custom.jar</a>
-    into the appropriate location.  You can then start up your server
-    and your new <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
-    subclass should be available for use by the Ganymede server.
-    Available, but not yet configured for actual use.</p>
-
-    <h4 id="creating_buildertask">Registering Your Builder Task For Execution</h4>
-
-    <p>Once you have updated your server's <a
-    href="../glossary.html#custom.jar">custom.jar</a> file with your
-    new builder task, you have to register your new builder task with
-    the server.  You do this by creating a new <code
-    class="type">Task</code> object in the Ganymede server.  The <code
-    class="type">Task</code> Object type is fully described in the <a
-    href="../server.html#servertasks">Ganymede Server
-    Overview</a>.</p>
-
-    <p>For a builder task, there are four fields you need to worry
-    about:</p>
-
-    <ul>
-      <li><code class="type">Task Name</code> -- The name of the Task
-      as seen in the admin console, must be unique in the Ganymede
-      server.</li>
-
-      <li><code class="type">Task Class</code> -- The fully qualified
-      class name for your custom <a
-      href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
-      subclass, as defined in your <a
-      href="../glossary.html#custom.jar">custom.jar</a> file.</li>
-
-      <li><code class="type">Run On Transaction Commit</code> -- A
-      check-box, should be checked to indicate that this task is to be
-      scheduled for automatic execution.</li>
-
-      <li>
-	<code class="type">Option Strings</code> -- A Vector String
-	field, used to provide optional run-time configuration
-	information to builder tasks that are programmed to look for
-	it.
-	<br/>
-	The strings in the <code class="type">Option Strings</code>
-	field should all be in the form: <code class="example">key =
-	value</code>.
-      </li>
-    </ul>
-
-    <p>Below is an example of a builder task that has been
-    registered in the Ganymede server.  It is configured to be
-    scheduled for execution after transactions are committed, and it
-    has a name and a class.</p>
-
-    <center><img src="screenshots/builder_task.png" class="screenshot"/></center>
-
-    <p>As soon as the admin hits the <code type="button">Commit</code>
-    button at the bottom right, the task will be registered in the
-    server.  From this commit on, the task will be scheduled for
-    execution whenever a transaction is committed.</p>
-
-    <p>Now, not every transaction or sequence of transactions
-    committed will necessarily be of interest to any given builder
-    task.  To help you deal with this, <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">GanymedeBuilderTask</a>
-    provides a method called <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#baseChanged(short)">baseChanged()</a>,
-    which allows you to test to see whether any changes have been made
-    to a given object type since the last time your builder task was
-    run.  You'll see how this works in our example builder task in the
-    next section.</p>
-    
-    <h4 id="buildertask_whaaaa">What A Builder Task Looks Like</h4>
-
-    <p>What follows is a slightly simplified version of the
-    UNIXBuilderTask class from the Ganymede userKit.  It will
-    illustrate a lot of the principles of writing a full-state builder
-    task with the GanymedeBuilderTask class.</p>
-
-    <pre class="listing">package arlut.csd.ganymede.userKit;
-
-import arlut.csd.ganymede.server.*;
-import arlut.csd.ganymede.common.*;
-import arlut.csd.Util.FileOps;
-
-import java.util.*;
-import java.text.*;
-import java.io.*; </pre>
-
-    <p>First we have our beginning declarations.  Generally speaking,
-    you'll create a separate package for your custom schema classes, and
-    you'll need to import everything from the
-    <code>arlut.csd.ganymede.server</code> and
-    <code>arlut.csd.ganymede.common</code> packages.</p>
-
-<pre class="listing">/**
- * This class is intended to dump the Ganymede datastore to the
- * UNIX passwd and group files.
- */
-
-public class UNIXBuilderTask extends GanymedeBuilderTask {
-
-  private String buildScript = null;
-  private String passwdFile = null;
-  private String groupFile = null;
-
-  // ---
-
-  private boolean backedup = false;
-
-  /* -- */
-
-  /**
-   * &lt;p&gt;The constructor for GanymedeBuilderTask subclasses takes an
-   * Invid for the DBObject in the Ganymede data store that defines
-   * the task.  The taskDefObjInvid member variable is comes from the
-   * GanymedeBuilderTask that we are inheriting from.  Setting it
-   * in this constructor allows us to use the getOptionValue() method to read
-   * our configuration strings for this task.&lt;/p&gt;
-   */
-
-  public UNIXBuilderTask(Invid _taskObjInvid)
-  {
-    // set the taskDefObjInvid in GanymedeBuilderTask so
-    // we can look up option strings
-
-    taskDefObjInvid = _taskObjInvid;
-  } </pre>
-
-    <p>And here we see the class declaration subclassing
-    GanymedeBuilderTask, member variable declarations, and our
-    constructor, which must take an <a
-    href="../javadoc/arlut/csd/ganymede/common/Invid.html">Invid</a>
-    parameter, and set the <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#taskDefObjInvid">taskDefObjInvid</a>
-    variable from the GanymedeBuilderTask class.</p>
-
-<pre class="listing">/**
-  * This method runs with a dumpLock obtained for the builder task.
-  *
-  * Code run in builderPhase1() can call enumerateObjects() and
-  * baseChanged().
-  *
-  * @return true if builderPhase1() made changes necessitating the
-  * execution of builderPhase2().
-  */
-
-public boolean builderPhase1()
-{
-  PrintWriter out;
-  boolean result = false;
-
-  /* -- */
-
-  // now see what our current option values are
-
-  passwdFile = getOptionValue("passwdFile");
-
-  if (passwdFile == null)
-    {
-      Ganymede.debug("UNIXBuilderTask: error, no passwdFile specified");
-    }
-
-  groupFile = getOptionValue("groupFile");
-
-  if (groupFile == null)
-    {
-      Ganymede.debug("UNIXBuilderTask: error, no groupFile specified");
-    }
-
-  // passwd
-
-  if (baseChanged(SchemaConstants.UserBase))
-    {
-      Ganymede.debug("UNIXBuilderTask: Need to build user map");
-
-      if (passwdFile != null) 
-        {
-          out = null;
-
-          try
-            {
-              out = openOutFile(passwdFile, "unix");
-            }
-          catch (IOException ex)
-            {
-              ex.printStackTrace();
-              Ganymede.debug("UNIXBuilderTask.builderPhase1(): couldn't open " + passwdFile + ": " + ex);
-            }
-        
-          if (out != null)
-            {
-              Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-            
-              while (users.hasMoreElements())
-                {
-                  DBObject user = (DBObject) users.nextElement();
-                
-                  writeUserLine(user, out);
-                }
-            
-              out.close();
-            }
-
-          result = true;
-        }
-    }
-
-  // group
-
-  if (baseChanged((short) 257))
-    {
-      Ganymede.debug("UNIXBuilderTask: Need to build group map");
-
-      if (groupFile != null)
-        {
-          out = null;
-
-          try
-            {
-              out = openOutFile(groupFile, "unix");
-            }
-          catch (IOException ex)
-            {
-              ex.printStackTrace();
-              Ganymede.debug("UNIXBuilderTask.builderPhase1(): couldn't open " + groupFile + ": " + ex);
-            }
-      
-          if (out != null)
-            {
-              Enumeration groups = enumerateObjects((short) 257);
-
-              while (groups.hasMoreElements())
-                {
-                  DBObject group = (DBObject) groups.nextElement();
-
-                  writeGroupLine(group, out);
-                }
-
-              out.close();
-            }
-
-          result = true;
-        }
-    }
-
-  return result;
-}</pre>
-
-<p>And here we have our <a
-href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
-method.  The important things to note here are the use of the <a
-href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#getOptionValue(java.lang.String)">getOptionValue()</a>
-method to look for option strings from our Task object, the use of the
-<a
-href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#baseChanged(short)">baseChanged()</a>
-method to determine whether any objects of a given type have changed
-since this builder task was last run, the use of the <a
-href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#openOutFile(java.lang.String,
-java.lang.String)">openOutFile()</a> method for opening files for
-writing, and the use of the <a
-href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#enumerateObjects(short)">enumerateObjects()</a>
-method for iterating over objects of a given type.  Each of these
-methods take advantage of logic built in to the GanymedeBuilderTask
-class, and will help your builder task behave properly in the Ganymede
-environment.</p>
-
-<p class="note">As you may notice above, baseChanged() and
-enumerateObjects() both take a numeric parameter (a short) to describe
-what object type the method is to operate on.  This is a common idiom
-in the internal Ganymede <a
-href="../javadoc/arlut/csd/ganymede/server/DBStore.html">DBStore</a> API.</p>
-
-<p>The overall effect of this implementation of builderPhase1() is to
-look to see whether any users or groups, as defined in the userKit
-schema, have changed since this builder task was last run, and if so,
-to write out passwd and group files suitable for integration into a
-simple NIS or <code class="filename">/etc/passwd</code>, <code
-class="filename">/etc/group</code> type environment.</p>
-
-<p>If no users or groups have changed, this builderPhase1() method
-will return false, which will tell the GanymedeBuilderTask base class
-not to bother running builderPhase2().</p>
-
-<pre class="listing">/**
- *
- * This method runs after this task's dumpLock has been
- * relinquished.  This method is intended to be used to finish off a
- * build process by running (probably external) code that does not
- * require direct access to the database.
- *
- * builderPhase2() is only run if builderPhase1() returns true.
- *
- */
-
-public boolean builderPhase2()
-{
-  File
-    file;
-
-  /* -- */
-
-  buildScript = getOptionValue("buildScript");
-
-  if (buildScript == null || buildScript.equals(""))
-    {
-      Ganymede.debug("UNIXBuilderTask: no buildScript defined in task object's option string vector");
-      Ganymede.debug("                 not running any external update script.");
-      return false;
-    }
-
-  file = new File(buildScript);
-
-  if (file.exists())
-    {
-      Ganymede.debug("UNIXBuilderTask builderPhase2 running");
-
-      try
-        {
-          FileOps.runProcess(buildScript);
-        }
-      catch (IOException ex)
-        {
-          Ganymede.debug("Couldn't exec buildScript (" + buildScript + ") due to IOException: " + ex);
-        }
-      catch (InterruptedException ex)
-        {
-          Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
-        }
-    }
-  else
-    {
-      Ganymede.debug(buildScript + " doesn't exist, not running external UNIX build script");
-    }
-
-  Ganymede.debug("UNIXBuilderTask builderPhase2 completed");
-
-  return true;
-}</pre>
-
-<p><a
-href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2()</a>,
-by contrast, is much simpler.  It uses the <a
-href="../javadoc/arlut/csd/Util/FileOps.html#runProcess(java.lang.String)">runProcess()</a>
-method to try to run a builder script that is designated in the Task
-object's <code class="type">Option Strings</code> field.  Finding and
-running the external script is all that builderPhase2() is responsible
-for.  The external builder script is responsible for making sure that
-everything is set up for it to run.  The Ganymede server makes no
-guarantees as to the working directory the script will be run in, and
-no guarantees about what any environment variables will be set to.  If
-your external builder script needs to worry about things like that,
-you should make sure that your external builder script sets all that
-up for itself.</p>
-
-<p>The other thing you need to know when writing your external builder
-script is that it should block until it finishes with its build.  The
-Ganymede Scheduler creates an independent thread for each builder task
-that runs, and it is expected that that thread will block until your
-external builder task has completely finished its work.  If your
-external builder script were to put itself into the background and
-return early, the Ganymede Scheduler would consider the builder task
-completely finished, and it would feel free to run the task all over
-again, which might cause your builderPhase1() method to overwrite
-files that your external builder script is still working with.</p>
-
-<pre class="listing">// ***
-//
-// The following private methods are used to support the UNIX builder logic.
-//
-// ***
-
-/**
- *
- * This method writes out a line to the passwd UNIX source file.
- *
- * The lines in this file look like the following.
- *
- * broccol:393T6k3e/9/w2:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh
- *
- * @param object An object from the Ganymede user object base
- * @param writer The destination for this user line
- *
- */
-
-private void writeUserLine(DBObject object, PrintWriter writer)
-{
-  String username;
-  String cryptedPass = null;
-  int uid;
-  int gid;
-  String name;
-  String room;
-  String officePhone;
-  String homePhone;
-  String directory;
-  String shell;
-
-  PasswordDBField passField;
-  Vector invids;
-  Invid groupInvid;
-  DBObject group;
-
-  StringBuffer result = new StringBuffer();
-
-  /* -- */
-
-  username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
-
-  passField = (PasswordDBField) object.getField(SchemaConstants.UserPassword);
-
-  if (passField != null)
-    {
-      cryptedPass = passField.getUNIXCryptText();
-    }
-  else
-    {
-      Ganymede.debug("UNIXBuilderTask.writeUserLine(): null password for user " + username);
-      cryptedPass = "**Nopass**";
-    }
-
-  uid = ((Integer) object.getFieldValueLocal(userSchema.UID)).intValue();
-
-  // get the gid
-  
-  groupInvid = (Invid) object.getFieldValueLocal(userSchema.HOMEGROUP); // home group
-
-  if (groupInvid == null)
-    {
-      Ganymede.debug("UNIXBuilderTask.writeUserLine(): null gid for user " + username);
-      gid = -1;
-    }
-  else
-    {
-      group = getObject(groupInvid);
-
-      if (group == null)
-        {
-          Ganymede.debug("UNIXBuilderTask.writeUserLine(): couldn't get reference to home group");
-
-          gid = -1;
-        }
-      else
-        {
-          Integer gidInt = (Integer) group.getFieldValueLocal(groupSchema.GID);
-
-          if (gidInt == null)
-            {
-              Ganymede.debug("UNIXBuilderTask.writeUserLine(): couldn't get gid value");
-
-              gid = -1;
-            }
-          else
-            {
-              gid = gidInt.intValue();
-            }
-        }
-    }
-
-  name = (String) object.getFieldValueLocal(userSchema.FULLNAME);
-  room = (String) object.getFieldValueLocal(userSchema.ROOM);
-  officePhone = (String) object.getFieldValueLocal(userSchema.OFFICEPHONE);
-  homePhone = (String) object.getFieldValueLocal(userSchema.HOMEPHONE);
-  directory = (String) object.getFieldValueLocal(userSchema.HOMEDIR);
-  shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
-
-  // now build our output line
-
-  result.append(username);
-  result.append(":");
-  result.append(cryptedPass);
-  result.append(":");
-  result.append(Integer.toString(uid));
-  result.append(":");
-  result.append(Integer.toString(gid));
-  result.append(":");
-
-  result.append(name);
-
-  if (room != null && !room.equals(""))
-    {
-      result.append(",");
-      result.append(room);
-    }
-
-  if (officePhone != null && !officePhone.equals(""))
-    {
-      result.append(",");
-      result.append(officePhone);
-    }
-
-  if (homePhone != null && !homePhone.equals(""))
-    {
-      result.append(",");
-      result.append(homePhone);
-    }
-
-  result.append(":");
-  result.append(directory);
-  result.append(":");
-  result.append(shell);
-
-  if (result.length() > 1024)
-    {
-      Ganymede.debug("UNIXBuilderTask.writeUserLine(): Warning!  user " + 
-                     username + " overflows the UNIX line length!");
-    }
-
-  writer.println(result.toString());
-}
-
-/**
- *
- * This method writes out a line to the group UNIX source file.
- *
- * The lines in this file look like the following.
- *
- * adgacc:ZzZz:4015:hammp,jgeorge,dd,doodle,dhoss,corbett,monk
- *
- * @param object An object from the Ganymede user object base
- * @param writer The destination for this user line
- *
- */
-
-private void writeGroupLine(DBObject object, PrintWriter writer)
-{
-  String groupname;
-  String pass;
-  int gid;
-  Vector users = new Vector();
-
-  PasswordDBField passField;
-  Vector invids;
-  Invid userInvid;
-  String userName;
-
-  StringBuffer result = new StringBuffer();
-
-  /* -- */
-
-  groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
-
-  // currently in the Ganymede schema, group passwords aren't in passfields.
-
-  pass = (String) object.getFieldValueLocal(groupSchema.PASSWORD);
-
-  Integer gidInt = (Integer) object.getFieldValueLocal(groupSchema.GID);
-
-  if (gidInt == null)
-    {
-      Ganymede.debug("Error, couldn't find gid for group " + groupname);
-      return;
-    }
-
-  gid = gidInt.intValue();
-  
-  // we currently don't explicitly record the home group.. just take the first group
-  // that the user is in.
-
-  invids = object.getFieldValuesLocal(groupSchema.USERS);
-
-  if (invids == null)
-    {
-      // Ganymede.debug("UNIXBuilder.writeUserLine(): null user list for group " + groupname);
-    }
-  else
-    {
-      for (int i = 0; i < invids.size(); i++)
-        {
-          userInvid = (Invid) invids.elementAt(i);
-          
-          userName = getLabel(userInvid);
-
-          if (userName != null)
-            {
-              users.addElement(userName);
-            }
-        }
-    }
-
-  // now build our output line
-
-  result.append(groupname);
-  result.append(":");
-  result.append(pass);
-  result.append(":");
-  result.append(Integer.toString(gid));
-  result.append(":");
-
-  for (int i = 0; i < users.size(); i++)
-    {
-      if (i > 0)
-        {
-          result.append(",");
-        }
-
-      result.append((String) users.elementAt(i));
-    }
-
-  if (result.length() > 1024)
-    {
-      Ganymede.debug("UNIXBuilderTask.writeGroupLine(): Warning!  group " + 
-                     groupname + " overflows the UNIX line length!");
-    }
-
-  writer.println(result.toString());
-}</pre>
-
-<p>All of the rest of the class is dedicated to utility helper methods
-that are used to handle chores for the <a
-href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
-method.  One of the things you will notice about these methods is
-that they have been written to use the Ganymede <a
-href="../javadoc/arlut/csd/ganymede/server/DBObject.html">DBObject</a>
-class API to access data from objects in the Ganymede data store.  You
-will also notice that the calls to <a
-href="../javadoc/arlut/csd/ganymede/server/DBObject.html#getFieldValueLocal(short)">getFieldValueLocal()</a>
-are using numeric identifiers, in this case defined in the <code
-class="type">userSchema</code> and <code
-class="type">groupSchema</code> interfaces, to retrieve specific
-fields.</p>
-
-<p>In general, whenever you use the GanymedeBuilderTask model for
-handling synchronization, you will have to write Java code that uses
-low-level details of the internal Ganymede API and that is aware of
-the specific structure and details of your schema.  You're quite
-correct if you consider the necessity of coding at this level to be a
-disadvantage of using the GanymedeBuilderTask approach.</p>
-
-    <h4 id="external_builder">Creating An External Sync Script For Use With GanymedeBuilderTask</h4>
-
-<p>The <a href="UNIXBuilderTask.java">UNIXBuilderTask class</a> is the
-piece of the GanymedeBuilderTask sync puzzle that is operating inside
-the Ganymede server.  As you can see above, all the <a
-href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase2()">builderPhase2()</a>
-method does is call out to an external builder script, which must read
-the files written by <a
-href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a> and
-do something productive with them.</p>
-
-<p>What "something productive" means may vary considerably from
-installation to installation, and that's up for you to determine.
-Whatever builder script you create will need to keep the following
-things in mind:</p>
-
-<ul>
-<li>The Ganymede server will not write to your builder script's
-standard input stream.</li>
-
-<li>Anything your script writes to its standard output or error
-streams will be completely ignored by Ganymede, and lost.  You are
-responsible for making your builder script log any error conditions to
-something other than standard error.</li>
-
-<li>Your script should not expect any command line arguments from Ganymede.</li>
-
-<li>Your script should not expect to have any useful environment
-variables set by Ganymede.</li>
-
-<li>Your script should not expect to have its current working
-directory set to anything useful or meaningful by Ganymede.</li>
-
-<li>Your script should not terminate until the synchronization process
-is truly finished, and it is safe for the Ganymede server to begin a
-new external synchronization.</li>
-</ul>
-
-<p>At ARL:UT, our Ganymede builder script is a simple Bourne shell
-script that sets environment variables and working conditions before
-running make on a makefile, redirecting make's output to log files for
-later examination.  By creating appropriate makefile dependencies on
-the various synchronization files written by Ganymede, the make
-program can make decisions for us as to what pieces of the build need
-to be redone.  If the Ganymede server didn't write a new group file,
-we don't bother doing any group updates.  Building this sort of
-intelligence into your external builder script may reduce the time it
-takes to run the average build for your network.</p>
-
-<p>If you want to reduce your average build time still further, you'll
-need to move to an incremental model for synchronization.</p>
-
-    <h3 id="xml_incrementals">3.2 The Sync Channel Incremental Model</h3>
-
-    <h4 id="explaining_xml_incrementals">The Sync Channel Incremental Model Explained</h4>
+    class in the Ganymede server and writing custom Java code to scan
+    the portions of the Ganymede data store relevant to a specific
+    synchronization task and to write out custom-formatted data files.
+    This approach required the adopter to get intimately familiar with
+    the complex internal Ganymede <a
+    href="../javadoc/arlut/csd/ganymede/server/DBStore.html">DBStore</a>
+    APIs for examining data in the Ganymede server.  Not an easy thing
+    to do (or to document), and the necessity of recompiling Java code
+    and stopping and restarting the Ganymede server made things more
+    difficult.</p>
+
+    <p>We still support (and ourselves rely on) the
+    GanymedeBuilderTask synchronization infrastructure, but we don't
+    want to emphasize its use for new adopters of Ganymede.  If you're
+    interested in reading about the advantages of the older sync
+    model, please consult the <a
+    href="ganymedebuildertask.html">GanymedeBuilderTask
+    Synchronization Guide</a> for details.</p>
+
+    <p>With Ganymede 2.0, we introduce a new synchronization
+    infrastructure built around a new Ganymede construct, the <code
+    class="type">Sync Channel</code>.  Sync Channel synchronization
+    takes advantage of code that we've built into the Ganymede server
+    for you that uses an XML file format for writing out both
+    incremental and full state synchronization data.</p>
+
+    <p>You can configure <code class="type">Sync Channels</code>
+    through the Ganymede GUI client and/or the Ganymede <a
+    href="../xml/xmlclient.html">xmlclient</a>, and you can redefine
+    them whenever you like.
+
+    <h2 id="xml_incrementals">5 Incremental Sync Channels</h2>
+
+    <h3 id="explaining_xml_incrementals">The Sync Channel Incremental Model Explained</h3>
 
     <p>Ganymede 2.0 introduces an incremental XML-based
     synchronization system, which we call the "Sync Channel
@@ -1478,7 +615,7 @@ need to move to an incremental model for synchronization.</p>
     as writing a callback Python function that takes data from the
     SyncUtils package and works with it from there.</p>
 
-    <h3 id="xml_full_state">3.3 The Sync Channel Full State Model</h3>
+    <h3 id="xml_full_state">2.2 The Sync Channel Full State Model</h3>
 
     <p>The Sync Channel Full State Model is a hybrid of the <a
     href="#xml_incrementals">Sync Channel Incremental</a> and the <a
@@ -1577,9 +714,9 @@ need to move to an incremental model for synchronization.</p>
     <p>Notice that this format is basically identical to the output of
     an <a href="../xml/xmlclient.html">xmlclient</a> data object dump,
     as documented in the <a href="../xml/data.html">Ganymede XML
-    &lt;ganydata&lt; Guide</a>.</p>
+    &lt;ganydata&gt; Guide</a>.</p>
 
-    <h3 id="xml_manual">3.4 The Sync Channel Manual Model</h3>
+    <h3 id="xml_manual">2.3 The Sync Channel Manual Model</h3>
 
     <p>The Sync Channel Manual model is based on the <a
     href="#xml_full_state">Sync Channel Full State Model</a>.
