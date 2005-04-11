@@ -102,8 +102,8 @@
     target directory service in order to be able to detect what has
     changed.  This is the case of <code class="type">ntPassword</code>
     in Active Directory, for instance, which is a write-only field.
-    Without being able properly to compare the full state data with
-    the contents of the target service may mean that more changes will
+    Not being able properly to compare the full state data with the
+    contents of the target service may mean that more changes will
     have to be sent to the target than would be necessary with a true
     incremental synchronization.</p>
 
@@ -135,20 +135,39 @@
     system to locate the user record to be changed in the target
     service.</p>
 
+    <p>Ganymede supports both full state and incremental
+    synchronization to target data services.  Which of the two you'll
+    want to use will depend on the type of directory service you're
+    wanting to synchronize to, the size of your data set and the
+    frequency with which it will change, and the confidence you have
+    as to how reliable your target directory service is.  The more
+    reliable your target directory service, the larger your data set,
+    and the more frequent your synchronizations, the more an
+    incremental style may be appropriate for you.</p>
+
+    <p>Contrariwise, if your target directory service is not reliable
+    enough to always retain changes that are passed to it from
+    Ganymede (either because the target service lost data or because
+    individual changes were refused due to tight or even unpredictable
+    integrity constraints on the target service), you may want to
+    stick with a slower but more redundant full state synchronization
+    approach.</p>
+
     <h2 id="options">2. Ganymede Synchronization</h2>
 
-    <p>Ganymede synchronization is organized around a two step
-    process.  In the first step, the Ganymede server writes out
-    synchronization data, typically to files on your server system's
-    disk. In the second step, an external, free-standing program is
-    then run to read in these data files and do whatever may be
-    required to transmit the synchronization information to target
-    services.  This division of labor between the Ganymede server and
-    your external code allows for a great degree of flexibility,
-    without requiring extensive code development within the Ganymede
-    server itself.</p>
+    <p>Whether incremental or full state, all Ganymede synchronization
+    is organized around a two step process.  In the first step, the
+    Ganymede server writes out synchronization data, typically to
+    files on your server system's disk. In the second step, an
+    external, free-standing program is then run to read in these data
+    files and do whatever may be required to transmit the
+    synchronization information to target services.  This division of
+    labor between the Ganymede server and your external code allows
+    for a great degree of flexibility in implementing the
+    synchronization logic without requiring extensive code development
+    and maintenance within the Ganymede server itself.</p>
 
-    <p>Originally, the implementing the first step of this process
+    <p>Originally, implementing the first step of this process
     required subclassing the <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">arlut.csd.ganymede.server.GanymedeBuilderTask</a>
     class in the Ganymede server and writing custom Java code to scan
@@ -176,11 +195,17 @@
     allows you to configure synchronization in the Ganymede server
     using nothing but the Ganymede GUI client and/or the Ganymede <a
     href="../xml/xmlclient.html">xmlclient</a>.  Sync Channels don't
-    require you to write any Java code.. once configured, step 1 of
-    synchronization (writing out data files) is handled automatically
-    by the Ganymede server using a standardized XML file format.</p>
+    require you to write any Java code.. once configured, the first
+    step of synchronization (writing out data files) is handled
+    automatically by the Ganymede server using a standardized XML file
+    format.</p>
 
     <h2 id="sync_channels">3. Sync Channels</h2>
+
+    <p>A <code class="type">Sync Channel</code> is a type of object in
+    the Ganymede data store.  It looks something like this:</p>
+
+    <center><img src="screenshots/sync_channel.png" class="screenshot"/></center>
 
     <h2 id="xml_full_state">4. Full State Sync Channels</h2>
 
