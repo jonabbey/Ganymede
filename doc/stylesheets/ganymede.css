@@ -52,7 +52,7 @@ $Author$
         border: 1px solid #c9d1d7;
         background-color: #f1f5f9;
         color: #006;
-        width: 30%;
+        width: 50%;
         padding-left: 0.7em;
         padding-right: 0.7em;
         font-style: italic;
@@ -143,6 +143,21 @@ $Author$
     }
 
     p.note:before {
+        content: "Note: ";
+        font-weight: bold;
+    }
+
+    div.note { 
+        margin: auto;
+        margin-top: 1.5em;
+        margin-bottom: 1.5em;
+        background-color: #ff9;
+        border: 1px solid #f90;
+        padding: 0.7em;
+        width: 80%;
+    }
+
+    div.note:before {
         content: "Note: ";
         font-weight: bold;
     }
