@@ -135,37 +135,38 @@
     system to locate the user record to be changed in the target
     service.</p>
 
-    <p>Ganymede supports both full state and incremental
-    synchronization to target data services.  Which of the two you'll
-    want to use will depend on the type of directory service you're
-    wanting to synchronize to, the size of your data set and the
-    frequency with which it will change, and the confidence you have
-    as to how reliable your target directory service is.  The more
-    reliable your target directory service, the larger your data set,
-    and the more frequent your synchronizations, the more an
-    incremental style may be appropriate for you.</p>
+    <div class="note">
+      <p>Ganymede supports both full state and incremental
+      synchronization to target data services.  Which of the two
+      you'll want to use will depend on the type of directory service
+      you're wanting to synchronize to, the size of your data set, the
+      frequency with which it will change, and the confidence you have
+      as to how reliable your target directory service is.  The more
+      reliable your target directory service, the larger your data
+      set, and the more frequent your synchronizations, the more an
+      incremental style may be appropriate for you.</p>
 
-    <p>Contrariwise, if your target directory service is not reliable
-    enough to always retain changes that are passed to it from
-    Ganymede (either because the target service lost data or because
-    individual changes were refused due to tight or even unpredictable
-    integrity constraints on the target service), you may want to
-    stick with a slower but more redundant full state synchronization
-    approach.</p>
+      <p>Contrariwise, if your target directory service is not
+      reliable enough to always retain changes that are passed to it
+      from Ganymede (either because the target service lost data or
+      because individual changes were refused due to tight or even
+      unpredictable integrity constraints on the target service), you
+      may want to stick with a slower but more redundant full state
+      synchronization approach.</p>
+    </div>
 
     <h2 id="options">2. Ganymede Synchronization</h2>
 
     <p>Whether incremental or full state, all Ganymede synchronization
     is organized around a two step process.  In the first step, the
-    Ganymede server writes out synchronization data, typically to
-    files on your server system's disk. In the second step, an
-    external, free-standing program is then run to read in these data
-    files and do whatever may be required to transmit the
-    synchronization information to target services.  This division of
-    labor between the Ganymede server and your external code allows
+    Ganymede server writes files containing synchronization data. In
+    the second step, an external, free-standing program is run to read
+    in these data files and do whatever may be required to transmit
+    the synchronization information to target services.  This division
+    of labor between the Ganymede server and your external code allows
     for a great degree of flexibility in implementing the
-    synchronization logic without requiring extensive code development
-    and maintenance within the Ganymede server itself.</p>
+    synchronization logic, without requiring extensive code
+    development and maintenance within the Ganymede server itself.</p>
 
     <p>Originally, implementing the first step of this process
     required subclassing the <a
@@ -203,9 +204,105 @@
     <h2 id="sync_channels">3. Sync Channels</h2>
 
     <p>A <code class="type">Sync Channel</code> is a type of object in
-    the Ganymede data store.  It looks something like this:</p>
+    the Ganymede data store.  You create and edit them in order to
+    configure XML-based synchronization channels in the Ganymede
+    server.</p>
+
+    <p>Sync Channels come in three flavors, according to the style of
+    synchronization they are configured to support:</p>
+
+    <ul>
+      <li>Automatic Full State</li>
+      <li>Automatic Incremental</li>
+      <li>Manual</li>
+    </ul>
+
+    <p>An <code class="type">Automatic Full State</code> sync channel
+    is one that causes the Ganymede server to schedule a
+    synchronization as soon as possible after a transaction is
+    committed.  When a synchronization is run, the Ganymede server's
+    data store is locked against commits while a full-state XML file
+    is written.  After the file is written, the data store is unlocked
+    and the external build process is run on the full-state XML
+    file.</p>
+
+    <p>An <code class="type">Automatic Incremental</code> sync channel
+    is one in which incremental synchronization information is written
+    to the sync channel as an integral part of the transaction commit
+    process.  Each transaction committed to the Ganymede data store
+    causes an XML file to be written which contains the before and
+    after state of all objects that were modified during the
+    transaction and which the sync channel is configured to care
+    about.  As soon as possible after a transaction is committed, an
+    external build process is run which processes all unprocessed XML
+    transaction files in commit order.</p>
+
+    <p>A <code class="type">Manual</code> sync channel is one that has
+    a name and a list of object and field types to be synchronized,
+    but which is never scheduled.  Rather, the channel is defined so
+    that a privileged user can use the <a
+    href="../xml/xmlclient.html">xmlclient</a> <code
+    class="filename">-dumpdata</code> command with the <code
+    class="filename">sync=channel</code> option to manually write out
+    a full state XML sync file.</p>
+
+    <p>An instance of the <code class="type">Sync Channel</code>
+    object type looks like this:</p>
 
     <center><img src="screenshots/sync_channel.png" class="screenshot"/></center>
+
+    <p>and has the following fields:</p>
+
+    <ul>
+      <li><code class="type">Name</code> -- The unique name for this
+      Sync Channel.</li>
+
+      <li><code class="type">Sync Channel Type</code> -- Your choice
+      among 'Manual', 'Automatic Full State', and 'Automatic
+      Incremental'.</li>
+
+      <li><code class="type">Queue Directory</code> -- Path to the
+      directory that the Ganymede server will write incremental
+      synchronization files into.  Only meaningful in incremental Sync
+      Channels.</li>
+
+      <li><code class="type">Full State File</code> -- Fully specified
+      path to the file to which that the Ganymede server will write
+      full state synchronization files.  Only meaningful in full state
+      Sync Channels.</li>
+
+      <li><code class="type">Service Program</code> -- Path to the
+      executable external program that will process the
+      synchronization files.  Meaningful for both incremental and full
+      state Sync Channels.</li>
+
+      <li><code class="type">Sync Data</code> -- Map of object and
+      field types to the conditions under which they are (or are not)
+      to be written to this Sync Channel.</li>
+
+      <li>
+	<code class="type">Allow Plaintext Passwords</code> --
+	Check-box controlling whether or not password plaintext is
+	allowed to be written to this Sync Channel.
+
+	<br/>
+
+	If this check-box is not selected, the Ganymede server will
+	still permit stored password hashes to be written to the Sync
+	Channel, but plaintext will be disallowed.  You might want to
+	restrict plaintext passwords if you know that your Service
+	Program doesn't need access to the plain text in order to
+	synchronize passwords.
+
+	<br/>
+
+	See the <a
+	href="../xml/data.html#PASSWORD">&lt;password&gt;</a> element
+	guide for more details on password hashing vs. plaintext.
+      </li>
+    </ul>
+
+    <p>We'll talk about 
 
     <h2 id="xml_full_state">4. Full State Sync Channels</h2>
 
