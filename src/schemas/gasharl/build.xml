@@ -124,7 +124,7 @@ refresh the jar files.
   
 
   <target name="clean">
-    <delete>
+    <delete failonerror="false">
       <fileset dir="${build.classes}" includes="**/*.class"/>
       <fileset dir="${build.lib}" includes="*.jar"/>
     </delete>
