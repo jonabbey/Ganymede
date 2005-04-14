@@ -2580,12 +2580,31 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public void reportClientBug(String clientIdentifier, String exceptionReport) throws NotLoggedInException
   {
-    // "\nCLIENT ERROR DETECTED:\nclient id string == "{0}"\nexception trace == "{1}"\n"
-    Ganymede.debug(ts.l("reportClientBug.logPattern", clientIdentifier, exceptionReport));
+    String userIdentifier;
+
+    if (personaName != null)
+      {
+	userIdentifier = personaName;
+      }
+    else if (personaName == null)
+      {
+	userIdentifier = username;
+      }
+    else
+      {
+	userIdentifier = "unknown user";
+      }
+
+    StringBuffer report = new StringBuffer();
+
+    // "\nCLIENT ERROR DETECTED:\nuser == "{0}"\nclient id string == "{1}"\nexception trace == "{2}"\n"
+    report.append(ts.l("reportClientBug.logPattern", userIdentifier, clientIdentifier, exceptionReport));
+
+    Ganymede.debug(report.toString());
 
     if (Ganymede.bugReportAddressProperty != null && !Ganymede.bugReportAddressProperty.equals(""))
       {
-	sendMail(Ganymede.bugReportAddressProperty, "Ganymede Client Bug Report", new StringBuffer(exceptionReport));
+	sendMail(Ganymede.bugReportAddressProperty, "Ganymede Client Bug Report", report);
       }
   }
 
