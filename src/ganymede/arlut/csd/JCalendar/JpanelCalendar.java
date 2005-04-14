@@ -705,7 +705,11 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   public void update() 
   {
     displaySelectedPage();
-    timePanel.update();
+
+    if (timePanel != null)
+      {
+	timePanel.update();
+      }
   }
 
   /**
