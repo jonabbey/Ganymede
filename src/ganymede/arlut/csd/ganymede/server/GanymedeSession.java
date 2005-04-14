@@ -2597,8 +2597,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     StringBuffer report = new StringBuffer();
 
-    // "\nCLIENT ERROR DETECTED:\nuser == "{0}"\nclient id string == "{1}"\nexception trace == "{2}"\n"
-    report.append(ts.l("reportClientBug.logPattern", userIdentifier, clientIdentifier, exceptionReport));
+    // "\nCLIENT ERROR DETECTED:\nuser == "{0}"\nhost == "{1}"\nclient id string == "{2}"\nexception trace == "{3}"\n"
+    report.append(ts.l("reportClientBug.logPattern", userIdentifier, clienthost, clientIdentifier, exceptionReport));
 
     Ganymede.debug(report.toString());
 
