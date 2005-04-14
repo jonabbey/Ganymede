@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -505,7 +505,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 
 	// The user has pressed Tab or clicked elsewhere which has caused the
 	// _date component to lose focus.  This means that we need to update
-	// the date value (using the value in _date) and then propogate that value
+	// the date value (using the value in _date) and then propagate that value
 	// up to the server object.
 	
 	Date d = null;
@@ -574,10 +574,12 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	    d = null;
 	  }
 
-	// Now, the date value needs to be propogated up to the server
+	// Now, the date value needs to be propagated up to the server
 	
 	if (allowCallback) 
 	  {
+	    retval = false;
+
 	    try 
 	      {
 		retval = callback.setValuePerformed(new JSetValueObject(this,d));
@@ -589,6 +591,14 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		new JErrorDialog(new JFrame(), "Date Field Error",
                     "There was an error communicating with the server!\n"
                         + e.getMessage());
+	      }
+
+	    // if setValuePerformed() didn't work, revert the date
+
+	    if (!retval)
+	      {
+		setDate(old_date, false);
+		return false;
 	      }
 	  }
       }
@@ -683,7 +693,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
       case FocusEvent.FOCUS_LOST:
 	// When the JdateField looses focus, any changes
 	// made to the value in the JdateField must be
-	// propogated to the db_field on the server.
+	// propagated to the db_field on the server.
 	
 	// But first, if nothing in the JstringField has changed
 	// then there is no reason to do anything.
@@ -711,7 +721,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	      }
 	  }
 	
-	// Now, the new value has propogated to the server, so we set
+	// Now, the new value has propagated to the server, so we set
 	// changed to false, so that the next time we loose focus from
 	// this widget, we won't unnecessarily update the server value
 	// if nothing has changed locally.
