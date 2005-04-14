@@ -3556,8 +3556,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     
   
-    // we can delete objects if they are newly created.. the server has support
-    // for discarding newly created objects, in fact
+    // we can delete objects if they are newly created.. the server
+    // has support for discarding newly created objects, in fact.  If
+    // the user attempted to close a created object window, the
+    // framePanel.vetoableChange() method will have set
+    // closingApproved on the editing frame, which will cause the
+    // wp.isApprovedForClosing(invid) check here to be true, and we'll
+    // skip this question.
 
     if (wp.isOpenForEdit(invid) && !wp.isApprovedForClosing(invid))
       {	
