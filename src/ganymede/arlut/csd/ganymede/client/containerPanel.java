@@ -3627,6 +3627,20 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (objectHash != null)
       {
+	en = objectHash.keys();
+
+	while (en.hasMoreElements())
+	  {
+	    Object element = en.nextElement();
+
+	    if (element instanceof JdateField)
+	      {
+		JdateField df = (JdateField) element;
+
+		df.unregister();
+	      }
+	  }
+
 	objectHash.clear();
 	objectHash = null;
       }
