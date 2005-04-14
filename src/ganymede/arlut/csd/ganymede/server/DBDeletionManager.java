@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -67,34 +67,34 @@ import arlut.csd.ganymede.common.Invid;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>The DBDeletionManager class is used to handle deletion locking
- * in the Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
+ * The DBDeletionManager class is used to handle deletion locking
+ * in the Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore}.
  */
 
 public class DBDeletionManager {
 
   /**
-   * <p>A hashtable mapping {@link arlut.csd.ganymede.server.DBSession
-   * DBSession} objects to a Vector of {@link arlut.csd.ganymede.common.Invid
-   * Invid} objects.</p>
+   * A hashtable mapping {@link arlut.csd.ganymede.server.DBSession
+   * DBSession} objects to a Vector of {@link
+   * arlut.csd.ganymede.common.Invid Invid} objects.
    *
-   * <p>DBSession will appear as keys in this hash when those
-   * sessions have locked Invids in the database against deletion.
-   * The Vector of Invids mapped from the DBSession is the list of
-   * Invids that that DBSession has locked.</p>
+   * DBSession will appear as keys in this hash when those sessions
+   * have locked Invids in the database against deletion.  The Vector
+   * of Invids mapped from the DBSession is the list of Invids that
+   * that DBSession has locked.
    */
 
   private static Hashtable sessions = new Hashtable();
 
   /**
-   * <p>A hashtable mapping {@link arlut.csd.ganymede.common.Invid Invid}
+   * A hashtable mapping {@link arlut.csd.ganymede.common.Invid Invid}
    * objects to a Vector of {@link arlut.csd.ganymede.server.DBSession
-   * DBSession} objects.</p>
+   * DBSession} objects.
    *
-   * <p>Invids will appear as keys in this hash when the DBObjects
+   * Invids will appear as keys in this hash when the DBObjects
    * corresponding to those Invids have been delete locked by
-   * DBSessions in the server.  The Vector of DBSession objects
-   * is the list of DBSessions that have locked the Invid.</p>
+   * DBSessions in the server.  The Vector of DBSession objects is the
+   * list of DBSessions that have locked the Invid.
    */
 
   private static Hashtable invids = new Hashtable();
@@ -102,10 +102,10 @@ public class DBDeletionManager {
   /* -- */
 
   /**
-   * <p>This method is used by the Invid binding logic to attempt to block
-   * an object from being deleted.  If this method returns true, the object
-   * will be forbidden from being deleted until such time as the DBSession
-   * that asserted the lock clears it.</p>
+   * This method is used by the Invid binding logic to attempt to
+   * block an object from being deleted.  If this method returns true,
+   * the object will be forbidden from being deleted until such time
+   * as the DBSession that asserted the lock clears it.
    */
 
   public static synchronized boolean deleteLockObject(DBObject obj, DBSession session)
@@ -175,11 +175,11 @@ public class DBDeletionManager {
   }
 
   /**
-   * <p>This method is used by the DBSession deleteDBObject() method to
+   * This method is used by the DBSession deleteDBObject() method to
    * safely convert a DBEditObject's status to a deletion state.  This
    * method returns true if the object was able to be converted to a
    * deletion state, or false if the object has been deletion locked
-   * by another DBSession.</p>
+   * by another DBSession.
    */
 
   public static synchronized boolean setDeleteStatus(DBEditObject obj, DBSession session)
@@ -228,8 +228,8 @@ public class DBDeletionManager {
   }
 
   /**
-   * <p>When a DBSession releases or commits a transaction, this method
-   * is called to clear any deletion locks asserted by it.</p>
+   * When a DBSession releases or commits a transaction, this method
+   * is called to clear any deletion locks asserted by it.
    */
 
   public static synchronized void releaseSession(DBSession session)
@@ -261,9 +261,8 @@ public class DBDeletionManager {
   }
 
   /**
-   * <p>This method deletion-locks a vector of invids, returning false
-   * without changes if the deletion-locks could not all be
-   * performed.</p>
+   * This method deletion-locks a vector of invids, returning false
+   * without changes if the deletion-locks could not all be performed.
    */
 
   public static synchronized boolean addSessionInvids(DBSession session, Vector invidList)
@@ -323,14 +322,14 @@ public class DBDeletionManager {
   }
 
   /**
-   * <p>This method returns a snapshot of what Invids are locked by a
+   * This method returns a snapshot of what Invids are locked by a
    * given session at the time the method is called.  It is used by
    * the DBEditSet checkpoint code to allow a transaction to
    * checkpoint the objects that the transaction had delete-locked at
    * a moment in time.  With revertSessionCheckpoint(), below, a
-   * transaction can provisionally carry out some object linkages which
-   * delete-locks objects, then undo those additional locks if the
-   * transaction is rolled back.</p>
+   * transaction can provisionally carry out some object linkages
+   * which delete-locks objects, then undo those additional locks if
+   * the transaction is rolled back.
    */
 
   public static synchronized Vector getSessionCheckpoint(DBSession session)
@@ -346,11 +345,11 @@ public class DBDeletionManager {
   }
 
   /**
-   * <p>This method rolls back the invids delete-locked by a session to
+   * This method rolls back the invids delete-locked by a session to
    * an earlier state.  revertSessionCheckpoint() cannot cause more
    * invids to be delete-locked.. the only effect it can have is to
    * undelete-lock invids that were provisionally delete-locked by
-   * session between a checkpoint and rollback.</p>
+   * session between a checkpoint and rollback.
    */
 
   public static synchronized void revertSessionCheckpoint(DBSession session, Vector invidList)
