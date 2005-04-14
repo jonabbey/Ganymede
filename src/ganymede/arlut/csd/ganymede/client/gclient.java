@@ -1971,7 +1971,19 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 					 try
 					   {
-					     session.reportClientBug("GUI Client", Message);
+					     StringBuffer clientInfo = new StringBuffer();
+
+					     clientInfo.append("GUI Client, running on java version \"");
+					     clientInfo.append(System.getProperty("java.version"));
+					     clientInfo.append("\", on OS: \"");
+					     clientInfo.append(System.getProperty("os.name"));
+					     clientInfo.append("\", version: \"");
+					     clientInfo.append(System.getProperty("os.version"));
+					     clientInfo.append("\", on \"");
+					     clientInfo.append(System.getProperty("os.arch"));
+					     clientInfo.append("\"");
+
+					     session.reportClientBug(clientInfo.toString(), Message);
 					     success = true;
 					   }
 					 catch (Throwable ex)
