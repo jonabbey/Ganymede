@@ -2561,8 +2561,15 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>This method allows clients to report client-side error/exception traces to
-   * the server for logging and what-not.</p>
+   * This method allows clients to report client-side error/exception traces to
+   * the server for logging and what-not.
+   *
+   * This method will also email the bug report to the email address
+   * specified in the ganymede.bugsaddress property if it is set in
+   * the server's ganymede.properties file.  This doesn't happen, of course,
+   * if the server's emailing is disabled, either through the use of the
+   * -suppressEmail flag in runServer, or by leaving the ganymede.mailhost
+   * property undefined in ganymede.properties.
    *
    * @param clientIdentifier A string identifying any information
    * about the client that the client feels like providing.
