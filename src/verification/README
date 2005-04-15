@@ -7,13 +7,22 @@ SVN URL: $HeadURL$
 
 --------------------------------------------------------------------------------
 
-This directory tree contains a Perl script (and supporting modules)
-used to verify that string localization statements in the Ganymede
-source tree mates up properly with the localization resources in
-../resources.
+This directory tree contains a modest set of support files used to
+help with verification and testing of the Ganymede tree.
 
-To check the sources for proper string localization, run 'ant
-validate' in the src directory.
+The resource_validator.pl file is a Perl script used to verify that
+string localization statements in the Ganymede source tree mates up
+properly with the localization resources in ../resources.
+
+The Modules subdirectory contains Perl support modules used by the
+resource_validator.pl script.
+
+To use the resource_validator script to check the sources for proper
+string localization, run 'ant validate' in the ../src directory.
+
+The launchers directory contains utility scripts to run the Ganymede
+software under the Emma code coverage tool.  These scripts are for use
+during development and debugging.
 
 Jonathan Abbey
 14 April 2005
