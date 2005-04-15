@@ -12,7 +12,10 @@ implementing DBEditObject and GanymedeBuilderTask plugin classes in
 the Ganymede server.
 
 None of this is documented yet, and won't actually do anything unless
-you include the telnet=<portnum> in the runServer script.
+you include the telnet=<portnum> in the runServer script, or unless
+you configure a DBEditObject or GanymedeBuilderTask plugin to use a
+Jython-implemented class.  Which is not documented, so don't worry
+about it for now.
 
 Jonathan Abbey
 14 April 2005
