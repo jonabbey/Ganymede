@@ -1,0 +1,18 @@
+README -- jython
+
+Last Revision Changed: $Rev$
+Last Changed By: $Author$
+Last Mod Date: $Date$
+SVN URL: $HeadURL$
+
+--------------------------------------------------------------------------------
+
+This directory tree contains pieces to support the use of Jython in
+implementing DBEditObject and GanymedeBuilderTask plugin classes in
+the Ganymede server.
+
+None of this is documented yet, and won't actually do anything unless
+you include the telnet=<portnum> in the runServer script.
+
+Jonathan Abbey
+14 April 2005
