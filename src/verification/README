@@ -1,0 +1,19 @@
+README -- verification
+
+Last Revision Changed: $Rev$
+Last Changed By: $Author$
+Last Mod Date: $Date$
+SVN URL: $HeadURL$
+
+--------------------------------------------------------------------------------
+
+This directory tree contains a Perl script (and supporting modules)
+used to verify that string localization statements in the Ganymede
+source tree mates up properly with the localization resources in
+../resources.
+
+To check the sources for proper string localization, run 'ant
+validate' in the src directory.
+
+Jonathan Abbey
+14 April 2005
