@@ -21,7 +21,8 @@ Contained hereunder:
   target, as well as the antlr.jar file used to support the
   ANTLR-derived parser Deepak wrote as a tool for Jython use, and the
   gnu-regexp-1.1.4.jar file used to support the use of GNU Regexp in
-  the Ganymede server.
+  the Ganymede server.  These files, in fact, are copied from ../lib
+  by the Ant build.xml file when you build stuff.
 
   The doc directory is where the ant javadoc target will put the
   javadoc tree when built.
