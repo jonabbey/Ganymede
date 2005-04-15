@@ -307,24 +307,39 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
 	String type = (String) value;
 
-	if (type.equals(ts.l("global.manual")))
+	if (type == null)
 	  {
-	    indexField.setValueLocal(new Integer(0));
-	  }
-	else if (type.equals(ts.l("global.incremental")))
-	  {
-	    indexField.setValueLocal(new Integer(1));
-	  }
-	else if (type.equals(ts.l("global.fullstate")))
-	  {
-	    indexField.setValueLocal(new Integer(2));
+	    if (this.isDeleting())
+	      {
+		indexField.setValueLocal(new Integer(-1));
+	      }
+	    else
+	      {
+		// "Error, couldn''t set Sync Channel type string to null when not deleting the object."
+		return Ganymede.createErrorDialog(ts.l("finalizeSetValue.null_token"));
+	      }
 	  }
 	else
 	  {
-	    /* this shouldn't happen if mustChoose is set, but just in case.. */
+	    if (type.equals(ts.l("global.manual")))
+	      {
+		indexField.setValueLocal(new Integer(0));
+	      }
+	    else if (type.equals(ts.l("global.incremental")))
+	      {
+		indexField.setValueLocal(new Integer(1));
+	      }
+	    else if (type.equals(ts.l("global.fullstate")))
+	      {
+		indexField.setValueLocal(new Integer(2));
+	      }
+	    else
+	      {
+		/* this shouldn't happen if mustChoose is set, but just in case.. */
 
-	    // Error, couldn''t recognize Sync Channel type string "{0}".
-	    return Ganymede.createErrorDialog(ts.l("finalizeSetValue.unrecognized_type_token", type));
+		// Error, couldn''t recognize Sync Channel type string "{0}".
+		return Ganymede.createErrorDialog(ts.l("finalizeSetValue.unrecognized_type_token", type));
+	      }
 	  }
 
 	ReturnVal result = new ReturnVal(true);
