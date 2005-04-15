@@ -281,9 +281,12 @@
       synchronization files.  Meaningful for both incremental and full
       state Sync Channels.</li>
 
-      <li><code class="type">Sync Data</code> -- Map of object and
-      field types to the conditions under which they are (or are not)
-      to be written to this Sync Channel.</li>
+      <li><code class="type">Sync Data</code> -- Agregate field that
+      contains a map of object and field types to the conditions under
+      which they are (or are not) to be written to this Sync Channel.
+      By editing this field, you control what types of objects and
+      what fields thereunder will be written to this sync channel, and
+      under what circumstances.</li>
 
       <li>
 	<code class="type">Allow Plaintext Passwords</code> --
@@ -307,10 +310,9 @@
       </li>
     </ul>
 
-    <p>Most of these fields are simple, but the <code
-    class="type">Sync Data</code> field is rather complex.</p>
+    <h3 id="sync_data">The Sync Data Field</h3>
 
-    <p id="sync_data">You configure the data that will be synchronized to the Sync
+    <p>You configure the data that will be synchronized to the Sync
     Channel by editing the <code class="type">Sync Data</code> field
     with the Ganymede client.  For each type of object defined on your
     Ganymede server, you will see a check-box that lets you choose
@@ -318,38 +320,53 @@
     the Sync Channel.</p>
 
     <p>If you open up the folder for a given object type, you will be
-    able to select three options for every field:</p>
+    able to select three options for every field: <b>Never</b>,
+    <b>When Changed</b>, and <b>Always</b>.</p>
 
-    <ul>
-      <li><b>Never</b> -- This field will never be synchronized to this Sync
-      Channel, and whether or not the field was changed by a given
-      transaction will have no effect on the decision as to whether or
-      not to include the containing object in a synchronization
-      file.</li>
+    <p>These three options control whether or not that field should be
+    written and/or considered when deciding whether to write an object
+    to the Sync Channel.  The interpretation of these fields is
+    slightly different in the incremental and full state cases, as
+    follows:</p>
 
-      <li><b>When Changed</b> -- This field will be written to the Sync
-      Channel whenever it changes.</li>
+    <div align="center">
+      <table border="1">
+        <tr><th>Option</th><th>Full State</th><th>Incremental</th></tr>
+        <tr>
+          <td><b>Never</b></td>
+          <td>This field will never be written.</td>
+          <td>This field will never be written and it will never be
+          considered when determining whether an object in a
+          transaction should be written to the Sync Channel.</td>
+        </tr>
+        <tr>
+          <td><b>When Changed</b></td>
+          <td>This field will be written.</td>
+          <td>This field be written only if it changed during the
+          transaction. If this field is changed during a transaction,
+          the object as a whole will be written to the Sync Channel at
+          commit time.</td>
+        </tr>
+        <tr>
+          <td><b>Always</b></td>
+          <td>This field will be written.</td>
+          <td>This field be written if any field in the object marked
+          'When Changed' or 'Always' was changed during the
+          transaction.  If this field is changed during a transaction,
+          the object as a whole will be written to the Sync Channel at
+          commit time.</td>
+        </tr>
+      </table>
+    </div>
 
-      <li><b>Always</b> -- This field will always be written to the
-      Sync Channel, so long as at least one field in the containing
-      object that is marked "Always" or "When Changed" was changed in
-      the transaction.</li>
-    </ul>
-
-    <p>The <b>Always</b> option is intended to allow you to mark
-    fields whose data must always be included in a synchronization
-    file if the object itself is modified in any way significant to
-    the Sync Channel.  If you know, for instance, that your Sync
-    Channel service program will always need to know the contents of a
-    user object's <code class="type">Username</code> field every time
-    anything of significance in the object changes, you can configure
-    your Sync Channel's <code class="type">Sync Data</code> to always
-    include it when the object is significantly changed.</p>
-
-    <p>A "significantly changed object," of course, means an object in
-    which any field marked with <b>Always</b> or <b>When Changed</b>
-    in the <code class="type">Sync Channel</code> definition was
-    created, changed, or removed during the transaction.</p>
+    <p>The purpose of the <b>Always</b> option is intended to allow
+    you to mark fields whose data must always be included when that
+    kind of object is written to the Sync Channel.  If your service
+    program will always need to know the contents of a user object's
+    <code class="type">Username</code> field every time the object is
+    changed, even if the Username itself did not change, you can
+    configure your Sync Channel's <code class="type">Sync Data</code>
+    to always include it with the <b>Always</b> option.</p>
 
     <p>Here's an example of what you'll see when you edit a <code
     class="type">Sync Data</code> field in a <code class="type">Sync
