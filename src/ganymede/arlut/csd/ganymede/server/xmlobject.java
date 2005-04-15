@@ -351,7 +351,11 @@ public class xmlobject {
 
 	try
 	  {
-	    this.setInvid(objref.getInvid());
+	    Invid myInvid = objref.getInvid();
+
+	    setInvid(myInvid);
+	    
+	    xSession.duplications.add(myInvid);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -391,23 +395,21 @@ public class xmlobject {
 
     if (localInvid != null)
       {
-	// also, make sure that the GanymedeSession/DBStore hasn't
-	// already checked this object out for editing/creation for
-	// us.. this is subtly different than the check above, because
-	// there is nothing else to prevent two xmlobjects from being
-	// created that will get mapped to the same invid in the
-	// DBStore, due to case-insensitivity and so forth.
+	// We'll check for duplicates here.  This check is subtly
+	// different from the one above, and its purpose is to make
+	// sure that the GanymedeXMLSession storeObject() wasn't
+	// fooled by a case sensitivity issue.  Different case labels
+	// may or may not map to the same Invid in the DBStore,
+	// depending on the configuration of the object's label
+	// handling.
 
-	objref = ((GanymedeSession) session).session.viewDBObject(localInvid);
-
-	if (objref != null)
+	if (xSession.duplications.contains(localInvid))
 	  {
-	    if (objref instanceof DBEditObject)
-	      {
-		return Ganymede.createErrorDialog("GanymedeXMLServer",
-						  "Error, have already edited this object: " + ((DBEditObject) objref).toString());
-	      }
+	    // "xmlobject editOnServer(): Encountered duplicate xmlobject for creating or editing: {0}"
+	    return Ganymede.createErrorDialog(ts.l("editOnServer.duplicate", this.toString()));
 	  }
+
+	xSession.duplications.add(localInvid);
 
 	try
 	  {

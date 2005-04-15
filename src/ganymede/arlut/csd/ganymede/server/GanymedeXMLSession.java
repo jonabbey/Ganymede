@@ -62,6 +62,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.Unreferenced;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
@@ -211,6 +212,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    */
 
   public Hashtable objectStore = new Hashtable();
+
+  /**
+   * HashSet used to detect <object> elements that map to the same Invid
+   * in the DBStore.
+   */
+
+  public HashSet duplications = null;
 
   /**
    * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
@@ -2091,7 +2099,16 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	err.println();
 
-	committedTransaction = integrateXMLTransaction();
+	try
+	  {
+	    this.duplications = new HashSet();
+
+	    committedTransaction = integrateXMLTransaction();
+	  }
+	finally
+	  {
+	    this.duplications = null;
+	  }
 
 	if (committedTransaction)
 	  {
