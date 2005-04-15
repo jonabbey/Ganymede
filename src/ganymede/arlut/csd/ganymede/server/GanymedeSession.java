@@ -3332,7 +3332,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	// do a direct look up on, or we will be scanning labels using
 	// the label hook
 
-	if (!scanUsingLabelHook && fieldDef.namespace != null)
+	if (!scanUsingLabelHook && fieldDef != null && fieldDef.namespace != null)
 	  {
 	    // if we're not scanning on the label hook, see if we have a
 	    // hash namespace constraint on the field we're searching

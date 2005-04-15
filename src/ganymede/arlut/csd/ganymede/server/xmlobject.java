@@ -64,6 +64,7 @@ import java.util.Vector;
 
 import org.xml.sax.SAXException;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.XMLElement;
 import arlut.csd.Util.XMLEndDocument;
 import arlut.csd.Util.XMLItem;
@@ -92,6 +93,13 @@ import arlut.csd.ganymede.rmi.db_object;
 public class xmlobject {
 
   final static boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in the Ganymede
+   * server.</p>
+   */
+
+  static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.xmlobject");
 
   /**
    * <p>The local identifier string for this object</p>
@@ -234,7 +242,8 @@ public class xmlobject {
       }
     catch (NullPointerException ex)
       {
-	xSession.err.println("\n\nERROR: Unrecognized object type \"" + openElement.getAttrStr("type") + "\"");
+	// "\n\nERROR: Unrecognized object type "{0}""
+	xSession.err.println(ts.l("init.unrecognized_type", openElement.getAttrStr("type")));
       }
 
     id = openElement.getAttrStr("id"); // may be null
@@ -264,8 +273,8 @@ public class xmlobject {
 
     if ("delete".equals(actionMode) || "inactivate".equals(actionMode))
       {
-	throw new NullPointerException("XMLObject error: can't " + actionMode + 
-				       " a non-empty <object> element.");
+	// "XMLObject error: can''t {0} a non-empty <object> element."
+	throw new NullPointerException(ts.l("init.cant_operate", actionMode));
       }
 
     // okay, we should contain some fields, then
@@ -289,8 +298,8 @@ public class xmlobject {
 	  }
 	else
 	  {
-	    xSession.err.println("Unrecognized XML content in object " + 
-			       openElement + ":" + nextItem);
+	    // "Unrecognized XML content in object {0}: {1}"
+	    xSession.err.println(ts.l("init.unrecognized_xml", openElement, nextItem));
 	  }
 
 	nextItem = xSession.getNextItem();
@@ -298,8 +307,8 @@ public class xmlobject {
 
     if (nextItem instanceof XMLEndDocument)
       {
-	throw new RuntimeException("Ran into end of XML file while parsing data object " + 
-				   this.toString());
+	// "Ran into end of XML file while parsing data object {0}"
+	throw new RuntimeException(ts.l("init.early_end", this.toString()));
       }
   }
 
@@ -374,8 +383,8 @@ public class xmlobject {
 
     if (objref != null)
       {
-	return Ganymede.createErrorDialog("GanymedeXMLServer",
-					  "Error, have already edited this xmlobject: " + this.toString());
+	// "xmlobject editOnServer(): Encountered duplicate xmlobject for creating or editing: {0}"
+	return Ganymede.createErrorDialog(ts.l("editOnServer.duplicate", this.toString()));
       }
 
     localInvid = getInvid();
