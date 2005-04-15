@@ -1,0 +1,17 @@
+README -- lib
+
+Last Revision Changed: $Rev$
+Last Changed By: $Author$
+Last Mod Date: $Date$
+SVN URL: $HeadURL$
+
+--------------------------------------------------------------------------------
+
+This directory tree contains jar files used by the Ganymede build
+process.  The ant build.xml file will copy these to ../build/lib
+during the build so as to put the jar files in the Ant class path.
+
+No, I'm not sure why this is necessary either.  Deepak?
+
+Jonathan Abbey
+14 April 2005
