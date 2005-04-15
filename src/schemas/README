@@ -1,0 +1,17 @@
+README -- schemas
+
+Last Revision Changed: $Rev$
+Last Changed By: $Author$
+Last Mod Date: $Date$
+SVN URL: $HeadURL$
+
+--------------------------------------------------------------------------------
+
+This directory tree contains sources for the gasharl schema kit custom
+code that we use at ARL:UT.  This tree does not contain any of the
+external, auxiliary components required to handle the laboratory's
+build environment, but the sources might prove of interest as an
+example of what can be done with the Ganymede API.
+
+JONATHAN Abbey
+14 April 2005
