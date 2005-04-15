@@ -1,0 +1,30 @@
+README -- build
+
+Last Revision Changed: $Rev$
+Last Changed By: $Author$
+Last Mod Date: $Date$
+SVN URL: $HeadURL$
+
+--------------------------------------------------------------------------------
+
+This directory tree contains build directories used by Ant when
+building the Ganymede software.
+
+Contained hereunder:
+
+  The classes directory contains the compiled class files.
+
+  The crypto directory contains the cryptographic key material created
+  by the ant genkeys/regenkeys targets.
+
+  The lib directory contains the jar files produced by the ant jars
+  target, as well as the antlr.jar file used to support the
+  ANTLR-derived parser Deepak wrote as a tool for Jython use, and the
+  gnu-regexp-1.1.4.jar file used to support the use of GNU Regexp in
+  the Ganymede server.
+
+  The doc directory is where the ant javadoc target will put the
+  javadoc tree when built.
+
+JONATHAN Abbey
+14 April 2005
