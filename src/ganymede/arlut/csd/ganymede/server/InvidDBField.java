@@ -467,7 +467,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	xmlOut.startElement("invid");
 	xmlOut.attribute("type", XMLUtils.XMLEncode(target.getTypeName()));
-	xmlOut.attribute("id", target.getXMLLabel());
+	xmlOut.attribute("id", target.getLabel());
 
 	if (xmlOut.isSyncing())
 	  {

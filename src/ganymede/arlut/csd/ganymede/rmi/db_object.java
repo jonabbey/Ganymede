@@ -143,20 +143,14 @@ public interface db_object extends java.rmi.Remote {
   public short getFieldId(String fieldname) throws RemoteException;
 
   /**
-   * <p>Get access to the field that serves as this object's label</p>
-   *
-   * <p>Not all objects use simple field values as their labels.  If an
-   * object has a calculated label, this method will return null.</p>
+   * Get access to the field that serves as this object's label
    */
 
   public db_field getLabelField() throws RemoteException;
 
   /**
-   * <p>Get access to the field id for the field that serves as this
-   * object's label, if any.</p>
-   *
-   * <p>Not all objects use simple field values as their labels.  If an
-   * object has a calculated label, this method will return -1.</p> 
+   * Get access to the field id for the field that serves as this
+   * object's label.
    */
 
   public short getLabelFieldID() throws RemoteException;
@@ -169,13 +163,7 @@ public interface db_object extends java.rmi.Remote {
   public db_field[] listFields() throws RemoteException;
 
   /**
-   * <p>Returns the primary label of this object.</p>
-   *
-   * <p>The label returned will usually be defined to be unique among
-   * objects of this type, but this is unfortunately not a hard
-   * guarantee at present.  See {@link
-   * arlut.csd.ganymede.server.DBObject#getLabel()} for full
-   * details.</p>
+   * Returns the label of this object.
    */
 
   public String getLabel() throws RemoteException;

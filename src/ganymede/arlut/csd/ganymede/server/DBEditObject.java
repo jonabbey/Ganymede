@@ -595,23 +595,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * Returns the primary label of this object.. calls
-   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
-   * on the {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} serving
-   * as the {@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook} for
-   * this object's {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * to get the label for this object.
-   *
-   * If the objectHook customization object doesn't define a getLabelHook()
-   * method, this base implementation will return a string based on the
-   * designated label field for this object, or a generic
-   * label constructed based on the object type and invid if no label
-   * field is designated.
+   * Returns the primary label of this object.
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public String getLabel()
+  public final String getLabel()
   {
     if (getStatus() == DELETING)
       {
@@ -1366,73 +1355,6 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     // interface.
 
     return false;
-  }
-
-  /**
-   * This method should be defined to return true in DBEditObject subclasses
-   * which provide a getLabelHook() method.
-   *
-   * If this method is not redefined to return true in any subclasses which
-   * define a getLabelHook() method, then searches on objects of this type
-   * may not properly reflect the desired label.
-   *
-   * <b>*PSEUDOSTATIC*</b>
-   */
-
-  public boolean useLabelHook()
-  {
-    return false;		// by default, no labelhook
-  }
-
-  /**
-   * This method should be defined to return true in DBEditObject
-   * subclasses which provide a {@link
-   * arlut.csd.ganymede.server.DBEditObject#getLabelHook()} method
-   * that is guaranteed to return a label value which is both unique
-   * across all objects of this type and persistent across multiple
-   * calls to get this object type's label.
-   *
-   * If a subclass doesn't override this method, the labels
-   * produced by getLabelHook() method will not be considered adequate
-   * for unique naming in xml dumps and etc., and we will default to
-   * using a label synthesized from the object base type name and the
-   * object id number derived from the object's invid.
-   *
-   * If a DBEditObject subclass does not override {@link
-   * arlut.csd.ganymede.server.DBEditObject#useLabelHook()} to
-   * return true, this method has no effect.
-   *
-   * <b>*PSEUDOSTATIC*</b>
-   */
-
-  public boolean labelHookGuaranteedUnique()
-  {
-    return false;		// by default, no labelhook
-  }
-
-  /**
-   * Hook to allow intelligent generation of labels for DBObjects
-   * of this type.  Subclasses of DBEditObject should override
-   * this method to provide for custom generation of the
-   * object's label type
-   *
-   * If you override this method to define a custom labelHook method
-   * for a DBEditObject subclass, you _must_ also override the
-   * {@link arlut.csd.ganymede.server.DBEditObject#useLabelHook()}
-   * method to return true.
-   *
-   * If you can affirmatively declare that the labels returned by
-   * getLabelHook() will always be unique among objects of this type,
-   * you should be sure to override
-   * {@link arlut.csd.ganymede.server.DBEditObject#labelHookGuaranteedUnique()}
-   * so that it returns true in your DBEditObject subclass.
-   *
-   * <b>*PSEUDOSTATIC*</b>
-   */
-
-  public String getLabelHook(DBObject object)
-  {
-    return null;		// no default
   }
 
   /**
@@ -3701,7 +3623,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
-    xmlOut.attribute("id", original.getXMLLabel());
+    xmlOut.attribute("id", original.getLabel());
     xmlOut.attribute("oid", getInvid().toString());
     xmlOut.indentOut();
 
@@ -3752,7 +3674,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
-    xmlOut.attribute("id", getXMLLabel());
+    xmlOut.attribute("id", getLabel());
     xmlOut.attribute("oid", getInvid().toString());
     xmlOut.indentOut();
 

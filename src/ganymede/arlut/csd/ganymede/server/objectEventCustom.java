@@ -180,23 +180,6 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * <p>This method should be defined to return true in DBEditObject subclasses
-   * which provide a getLabelHook() method.</p>
-   *
-   * <p>If this method is not redefined to return true in any subclasses which
-   * define a getLabelHook() method, then searches on objects of this type
-   * may not properly reflect the desired label.</p>
-   *
-   * <p><b>*PSEUDOSTATIC*</b></p>
-   */
-
-  public boolean useLabelHook()
-  {
-    return true;
-  }
-
-
-  /**
    *
    * Hook to allow intelligent generation of labels for DBObjects
    * of this type.  Subclasses of DBEditObject should override

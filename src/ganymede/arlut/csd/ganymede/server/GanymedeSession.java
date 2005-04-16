@@ -3179,7 +3179,6 @@ final public class GanymedeSession implements Session, Unreferenced {
     Enumeration en;
     DBObject obj;
     DBLock rLock = null;
-    boolean scanUsingLabelHook = false;
 
     /* -- */
 
@@ -3244,232 +3243,139 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
 	else if (node.fieldId == -1)
 	  {
-	    // we're looking for the label of an object
-
-	    if (base.getObjectHook().useLabelHook() && base.getObjectHook().labelHookGuaranteedUnique())
-	      {
-		scanUsingLabelHook = true;
-	      }
-
-	    // we'll scanUsingLabelHook if we can, but we'll still
-	    // check out the label field as well if the object base
-	    // we're looking at has a label field.  May not make much
-	    // sense, but "be strict on output, and lenient on input".
-	    // A query parameter counts as input under those terms.
-
-	    if (base.getLabelField() != -1)
-	      {
-		fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
-	      }
-
-	    // We may have a fieldDef for a direct lookup, and we
-	    // might have a unique value label hook, but we are still
-	    // going to check to see if we've been given a
-	    // properly-formated
-	    // DBObject.getDefaultUniqueLabel()-style label, just in
-	    // case the user gave us one for some reason.
-
-	    if (node.value instanceof String)
-	      {
-		String testLabel = (String) node.value;
-
-		if (testLabel != null && testLabel.endsWith("]"))
-		  {
-		    int braceIndex = testLabel.lastIndexOf('[');
-			
-		    if (braceIndex != -1)
-		      {
-			// if we really match the
-			// getDefaultUniqueLabel() output, we need to
-			// have a number in braces prefixed with the
-			// name of the object base we're searching on.
-			// If we see this pattern, we'll try to do a
-			// direct lookup on the Invid encoded thereby
-
-			String numberString = testLabel.substring(braceIndex+1, testLabel.length()-1);
-			String baseLabel = testLabel.substring(0, braceIndex);
-			String matchingBaseLabel = base.getName();
-
-			if (matchingBaseLabel != null && matchingBaseLabel.equals(baseLabel))
-			  {
-			    int index = 0;
-			    boolean localSuccess = false;
-
-			    try
-			      {
-				index = Integer.parseInt(numberString);
-				localSuccess = true;
-			      }
-			    catch (NumberFormatException ex)
-			      {
-			      }
-			    
-			    if (localSuccess)
-			      {
-				DBObject resultobject = session.viewDBObject(Invid.createInvid(base.getTypeID(), index));
-				
-				if (resultobject != null)
-				  {
-				    if (testLabel.equals(resultobject.getDefaultUniqueLabel()))
-				      {
-					addResultRow(resultobject, query, result, internal, perspectiveObject);
-					return result;
-				      }
-				    else
-				      {
-					// this really shouldn't ever happen
-					throw new RuntimeException("ASSERT: getDefaultUniqueLabel() mismatch");
-				      }
-				  }
-			      }
-			  }
-		      }
-		  }
-	      }
+	    fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
 	  }
 
-	// now we've either got a field definition that we can try to
-	// do a direct look up on, or we will be scanning labels using
-	// the label hook
+	// now we've got a field definition that we can try to do a
+	// direct look up on.  check to see if it has a namespace
+	// index we can use
 
-	if (!scanUsingLabelHook && fieldDef != null && fieldDef.namespace != null)
+	if (fieldDef.namespace != null)
 	  {
-	    // if we're not scanning on the label hook, see if we have a
-	    // hash namespace constraint on the field we're searching
-	    // against, and if so, do a direct hash lookup rather than
-	    // iterating over the object base
-
-	    if (fieldDef == null)
-	      {
-		Ganymede.debug("ERROR: wound up with a null fieldDef in query optimizer for base " + base);
-		Ganymede.debug("       query node: " + node);
-		return null;
-	      }
-	    else
-	      {
-		// aha!  We've got an optimized case!
+	    // aha!  We've got an optimized case!
 	    
-		if (debug)
+	    if (debug)
+	      {
+		System.err.println("Eureka!  Optimized query!\n" + query.toString());
+	      }
+
+	    DBObject resultobject;
+	    DBNameSpace ns = fieldDef.namespace;
+
+	    synchronized (ns)
+	      {
+		DBField resultfield = null;
+
+		// if we are looking to match against an IP address
+		// field and we were given a String, we need to
+		// convert that String to an array of Bytes before
+		// looking it up in the namespace
+
+		if (fieldDef.isIP() && node.value instanceof String)
 		  {
-		    System.err.println("Eureka!  Optimized query!\n" + query.toString());
-		  }
+		    Byte[] ipBytes = null;
 
-		DBObject resultobject;
-		DBNameSpace ns = fieldDef.namespace;
-
-		synchronized (ns)
-		  {
-		    DBField resultfield = null;
-
-		    // if we are looking to match against an IP address
-		    // field and we were given a String, we need to
-		    // convert that String to an array of Bytes before
-		    // looking it up in the namespace
-
-		    if (fieldDef.isIP() && node.value instanceof String)
+		    try
 		      {
-			Byte[] ipBytes = null;
+			ipBytes = IPDBField.genIPV4bytes((String) node.value);
+		      }
+		    catch (IllegalArgumentException ex)
+		      {
+		      }
+		    
+		    if (ipBytes != null)
+		      {
+			resultfield = ns.lookupMyValue(this, ipBytes);
+		      }
 
+		    // it's hard to tell here whether any fields of
+		    // this type will accept IPv6 bytes, so if we
+		    // don't find it as an IPv4 address, look for it
+		    // as an IPv6 address
+
+		    if (resultfield == null)
+		      {
 			try
 			  {
-			    ipBytes = IPDBField.genIPV4bytes((String) node.value);
+			    ipBytes = IPDBField.genIPV6bytes((String) node.value);
 			  }
 			catch (IllegalArgumentException ex)
 			  {
 			  }
-		    
+
 			if (ipBytes != null)
 			  {
 			    resultfield = ns.lookupMyValue(this, ipBytes);
 			  }
-
-			// it's hard to tell here whether any fields of
-			// this type will accept IPv6 bytes, so if we
-			// don't find it as an IPv4 address, look for it
-			// as an IPv6 address
-
-			if (resultfield == null)
-			  {
-			    try
-			      {
-				ipBytes = IPDBField.genIPV6bytes((String) node.value);
-			      }
-			    catch (IllegalArgumentException ex)
-			      {
-			      }
-		    
-			    if (ipBytes != null)
-			      {
-				resultfield = ns.lookupMyValue(this, ipBytes);
-			      }
-			  }
 		      }
-		    else
+		  }
+		else
+		  {
+		    // we don't allow associating Invid fields
+		    // with a namespace, so we don't need to try
+		    // to convert strings to invids here for a
+		    // namespace-optimized lookup
+
+		    resultfield = ns.lookupMyValue(this, node.value); // *sync* DBNameSpace
+
+		    if (debug)
 		      {
-			// we don't allow associating Invid fields
-			// with a namespace, so we don't need to try
-			// to convert strings to invids here for a
-			// namespace-optimized lookup
+			System.err.println("Did a namespace lookup in " + ns.getName() + 
+					   " for value " + node.value);
+			System.err.println("Found " + resultfield);
+		      }
+		  }
 
-			resultfield = ns.lookupMyValue(this, node.value); // *sync* DBNameSpace
+		if (resultfield == null)
+		  {
+		    return result;
+		  }
+		else
+		  {
+		    // a namespace can map across different field and
+		    // object types.. make sure we've got an instance
+		    // of the right kind of field
 
+		    if (resultfield.getFieldDef() != fieldDef)
+		      {
 			if (debug)
 			  {
-			    System.err.println("Did a namespace lookup in " + ns.getName() + 
-					       " for value " + node.value);
-			    System.err.println("Found " + resultfield);
+			    System.err.println("Error, didn't find the right kind of field");
+			    System.err.println("Found: " + resultfield.getFieldDef());
+			    System.err.println("Wanted: " + fieldDef);
 			  }
-		      }
 
-		    if (resultfield == null)
-		      {
 			return result;
 		      }
-		    else
+
+		    // since we used this GanymedeSession to do
+		    // the namespace lookup, we know that the
+		    // owner object will be in the version we are
+		    // editing, if any
+
+		    resultobject = resultfield.owner;
+
+		    if (debug)
 		      {
-			// a namespace can map across different field and
-			// object types.. make sure we've got an instance
-			// of the right kind of field
-
-			if (resultfield.getFieldDef() != fieldDef)
-			  {
-			    if (debug)
-			      {
-				System.err.println("Error, didn't find the right kind of field");
-				System.err.println("Found: " + resultfield.getFieldDef());
-				System.err.println("Wanted: " + fieldDef);
-			      }
-
-			    return result;
-			  }
-
-			// since we used this GanymedeSession to do
-			// the namespace lookup, we know that the
-			// owner object will be in the version we are
-			// editing, if any
-
-			resultobject = resultfield.owner;
-
-			if (debug)
-			  {
-			    System.err.println("Found object: " + resultobject);
-			  }
-
-			// addResultRow() will do our permissions checking for us
-
-			addResultRow(resultobject, query, result, internal, perspectiveObject);
-		
-			if (debug)
-			  {
-			    System.err.println("Returning result from optimized query");
-			  }
-		
-			return result;
+			System.err.println("Found object: " + resultobject);
 		      }
+
+		    // addResultRow() will do our permissions checking for us
+
+		    addResultRow(resultobject, query, result, internal, perspectiveObject);
+
+		    if (debug)
+		      {
+			System.err.println("Returning result from optimized query");
+		      }
+		
+		    return result;
 		  }
 	      }
 	  }
       }
+
+    // okay, so we weren't able to do a namespace index lookup
 
     // now we need to generate a vector listing the object bases that
     // need to be locked to perform this query.  Note that we need to

@@ -2647,11 +2647,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>Choose what field will serve as this objectBase's label.  A fieldName
-   * parameter of null will cause the object's label field to be undefined,
-   * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
-   * method.</p>
+   * Choose what field will serve as this objectBase's label.
    *
    * <p>This method is only valid when the Base reference is obtained
    * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
@@ -2669,12 +2665,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException(ts.l("global.notediting"));
-      }
-
-    if (fieldName == null)
-      {
-	label_id = -1;
-	return null;
       }
 
     bF = getField(fieldName);
@@ -2699,15 +2689,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>Choose what field will serve as this objectBase's label.  A fieldID
-   * parameter of -1 will cause the object's label field to be undefined,
-   * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
-   * method.</p>
+   * Choose what field will serve as this objectBase's label.
    *
-   * <p>This method is only valid when the Base reference is obtained
+   * This method is only valid when the Base reference is obtained
    * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
-   * by the Ganymede schema editor.</p>
+   * by the Ganymede schema editor.
    *
    * @see arlut.csd.ganymede.rmi.Base
    */
@@ -2719,7 +2705,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
-    if ((fieldID != -1) && (null == getField(fieldID)))
+    if (getField(fieldID) == null)
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
 					  // "setLabelField() called with an unrecognized field id."

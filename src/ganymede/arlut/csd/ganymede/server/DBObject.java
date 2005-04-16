@@ -794,199 +794,46 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>Returns the primary label of this object.. calls
-   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
-   * on the {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} serving
-   * as the {@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook} for
-   * this object's {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * to get the label for this object.</P>
+   * Returns the primary label of this object.
    *
-   * <P>If the objectHook customization object doesn't define a getLabelHook()
-   * method, this base implementation will return a string based on the
-   * designated label field for this object, or a generic
-   * label constructed based on the object type and invid if no label
-   * field is designated.</P>
-   *
-   * <P>We don't synchronize getLabel(), as it is very, very frequently
+   * We don't synchronize getLabel(), as it is very, very frequently
    * called from all over, and we don't want to chance deadlock.  getField()
    * and getValueString() are both synchronized on subcomponents of DBObject,
-   * so this method should be adequately safe as written.</P>
-   *
-   * <P>Note that while you probably should seek to do so, it is not
-   * necessarily guaranteed that the label returned by getLabel() will
-   * be unique amongst all objects of the same type as this object.
-   * The labels will be unique if a namespace-constrained label field
-   * is assigned in the schema editor, or if the DBEditObject plug-in
-   * class for this object type has a getLabelHook() method defined
-   * and has overridden labelHookGuaranteedUnique() to return true,
-   * thus affirmatively declaring that the labels returned by
-   * getLabelHook() will always be unique.</P>
+   * so this method should be adequately safe as written.
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public String getLabel()
   {
-    String result = null;
+    DBField f = (DBField) getField(objectBase.getLabelField());
 
-    if (objectBase.getObjectHook().useLabelHook())
+    if (f != null && f.isDefined())
       {
-	result = objectBase.getObjectHook().getLabelHook(this);
-      }
-
-    if (result == null)
-      {
-	// no class for this object.. just go
-	// ahead and use the default label
-	// obtaining bit
-
-	short val = objectBase.getLabelField();
-
-	if (val == -1)
-	  {
-	    return getDefaultUniqueLabel();
-	  }
-	else
-	  {
-	    // Ganymede.debug("Getting field " + val + " for label");
-
-	    DBField f = (DBField) getField(val);
-
-	    if (f != null && f.isDefined())
-	      {
-		// Ganymede.debug("Got field " + f);
-
-		// string fields are most common for 
-		// label fields.. return as quickly as possible,
-		// without bothering with permission checking
-		// for this common case.
-
-		return f.getValueString();
-	      }
-	    else
-	      {
-		return getDefaultUniqueLabel();
-	      }
-	  }
+	return f.getValueString();
       }
     else
       {
-	return result;
+	return "";
       }
   }
 
   /**
-   * <p>This method returns a guaranteed unique label for this object,
-   * for use in xml dumps.  The returned string will be one of three
-   * things.. it will either be 1) the contents of the label field, if
-   * this object type has a defined label field and that label field
-   * is namespace constrained, or 2) the custom label synthesized by this
-   * object type's DBObjectBase's getObjectHook() plug-in's getLabelHook(),
-   * if and only if the plug-in overrides labelHookGuaranteedUnique() to
-   * return true, or 3) the output of getDefaultUniqueLabel(), which is a simple
-   * fixed format that provides a combination of the type name and the invid
-   * object number for this object.</p>
-   *
-   * <p>In any of these cases, the label will be guaranteed to be
-   * persistent and unique for the purposes of the xml dumping, and
-   * findable using the GanymedeSession class' internalQuery
-   * mechanism.</p>
-   */
-
-  public final String getXMLLabel()
-  {
-    DBField labelField = (DBField) getLabelField();
-    String result = null;
-
-    if ((labelField != null && labelField.getNameSpace() != null) ||
-	(objectBase.getObjectHook().useLabelHook() && objectBase.getObjectHook().labelHookGuaranteedUnique()))
-      {
-	result = getLabel();
-      }
-
-    // we shouldn't get a null or empty string from the above, but
-    // just in case, fall back to our known good (if invid-dependent)
-    // label
-
-    if (result == null || result.equals(""))
-      {
-	result = getDefaultUniqueLabel();
-      }
-
-    return result;
-  }
-
-  /**
-   * <p>This method returns a guaranteed unique label for this object.
-   * The format of this string is not arbitrary.. the GanymedeSession
-   * internalQuery() mechanism has special logic for doing optimized
-   * lookups with this format.
-   */
-
-  public final String getDefaultUniqueLabel()
-  {
-    return getTypeName() + "[" + getID() + "]";
-  }
-
-  /**
-   *
-   * <p>Get access to the field that serves as this object's label</p>
-   *
-   * <p>Not all objects use simple field values as their labels.  If an
-   * object has a calculated label, this method will return null.</p>
-   *
+   * Get access to the field that serves as this object's label.
    */
 
   public db_field getLabelField()
   {
-    // check to see if getLabelHook() is used to generate a string
-    // label..  if so, there is no label field per se, and we'll
-    // return null.
-
-    if (objectBase.getObjectHook().useLabelHook())
-      {
-	return null;
-      }
-
-    // no calculated label for this object.. just go ahead and use the
-    // default label obtaining bit
-    
-    short val = objectBase.getLabelField();
-
-    if (val != -1)
-      {
-	// Ganymede.debug("Getting field " + val + " for label");
-
-	DBField f = (DBField) getField(val);
-
-	return f;
-      }
-
-    return null;
+    return getField(objectBase.getLabelField());
   }
 
   /**
-   * <p>Get access to the field id for the field that serves as this
-   * object's label, if any.</p>
-   *
-   * <p>Not all objects use simple field values as their labels.  If an
-   * object has a calculated label, this method will return -1.</p> 
+   * Get access to the field id for the field that serves as this
+   * object's label.
    */
 
   public short getLabelFieldID()
   {
-    // check to see if getLabelHook() is used to generate a string
-    // label..  if so, there is no label field per se, and we'll
-    // return null.
-
-    if (objectBase.getObjectHook().useLabelHook())
-      {
-	return -1;
-      }
-
-    // no calculated label for this object.. just go ahead and use the
-    // default label obtaining bit
-    
     return objectBase.getLabelField();
   }
 
@@ -1291,7 +1138,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
-    xmlOut.attribute("id", getXMLLabel());
+    xmlOut.attribute("id", getLabel());
 
     if (xmlOut.isSyncing())
       {
