@@ -395,22 +395,6 @@ public class xmlobject {
 
     if (localInvid != null)
       {
-	// We'll check for duplicates here.  This check is subtly
-	// different from the one above, and its purpose is to make
-	// sure that the GanymedeXMLSession storeObject() wasn't
-	// fooled by a case sensitivity issue.  Different case labels
-	// may or may not map to the same Invid in the DBStore,
-	// depending on the configuration of the object's label
-	// handling.
-
-	if (xSession.duplications.contains(localInvid))
-	  {
-	    // "xmlobject editOnServer(): Encountered duplicate xmlobject for creating or editing: {0}"
-	    return Ganymede.createErrorDialog(ts.l("editOnServer.duplicate", this.toString()));
-	  }
-
-	xSession.duplications.add(localInvid);
-
 	try
 	  {
 	    result = session.edit_db_object(localInvid);
@@ -424,6 +408,23 @@ public class xmlobject {
 	if (result.didSucceed())
 	  {
 	    objref = result.getObject();
+
+	    // We'll check for duplicates here.  This check is subtly
+	    // different from the one above, and its purpose is to make
+	    // sure that the GanymedeXMLSession storeObject() wasn't
+	    // fooled by a case sensitivity issue.  Different case labels
+	    // may or may not map to the same Invid in the DBStore,
+	    // depending on the configuration of the object's label
+	    // handling.
+
+	    if (xSession.duplications.contains(localInvid))
+	      {
+		// "xmlobject editOnServer(): Encountered duplicate xmlobject for creating or editing: {0}"
+		return Ganymede.createErrorDialog(ts.l("editOnServer.duplicate", objref.toString()));
+	      }
+
+	    xSession.duplications.add(localInvid);
+
 	    return result;
 	  }
 	else
