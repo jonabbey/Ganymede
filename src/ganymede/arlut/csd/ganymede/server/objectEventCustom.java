@@ -190,44 +190,6 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * Hook to allow intelligent generation of labels for DBObjects
-   * of this type.  Subclasses of DBEditObject should override
-   * this method to provide for custom generation of the
-   * object's label type
-   *
-   */
-
-  public String getLabelHook(DBObject object)
-  {
-    if (object.getTypeID() != getTypeID())
-      {
-	throw new IllegalArgumentException("bad object type");
-      }
-
-    StringBuffer result = new StringBuffer();
-
-    Integer id = (Integer) object.getFieldValueLocal(SchemaConstants.ObjectEventObjectType);
-
-    if (id != null)
-      {
-	DBObjectBase base = Ganymede.db.getObjectBase(id.shortValue());
-
-	if (base != null)
-	  {
-	    result.append(base.getName());
-	    result.append(":");
-	  }
-      }
-
-    String name = (String) object.getFieldValueLocal(SchemaConstants.ObjectEventToken);
-
-    result.append(name);
-
-    return result.toString();
-  }
-
-  /**
    * This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
@@ -333,7 +295,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.ObjectEventToken)
       {
-	return updateLabel((String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventName),
+	return updateLabel((String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
 			   (String) value);
       }
 
@@ -347,24 +309,26 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
   private ReturnVal updateLabel(String typeName, String token)
   {
-    if (typeName == null && token == null)
+    // we only set the label if we have both a typename and a
+    // token.. otherwise, the setFieldValueLocal() call we do here
+    // will allocate a partial label in the namespace, and once a
+    // namespace value is associated with a transaction, it sticks
+    // until the transaction is committed or cancelled.
+    //
+    // by only setting null or a complete label, we avoid having
+    // partial names block other transactions who might be assembling
+    // an object event themselves.
+
+    if (typeName == null || token == null)
       {
 	return setFieldValueLocal(SchemaConstants.ObjectEventLabel, null);
       }
 
     StringBuffer result = new StringBuffer();
 
-    if (typeName != null)
-      {
-	result.append(typeName);
-      }
-
+    result.append(typeName);
     result.append(":");
-
-    if (token != null)
-      {
-	result.append(token);
-      }
+    result.append(token);
 
     return setFieldValueLocal(SchemaConstants.ObjectEventLabel, result.toString());
   }
