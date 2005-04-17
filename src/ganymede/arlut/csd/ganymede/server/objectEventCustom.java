@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -61,6 +61,8 @@ import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                objectEventCustom
@@ -77,6 +79,14 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    */
 
   static QueryResult eventNames = null;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts =
+    TranslationService.getTranslationService("arlut.csd.ganymede.server.objectEventCustom");
 
   // ---
 
@@ -132,7 +142,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   /**
    *
    * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
+   * is required to be defined at commit time for a given object.
    *
    * To be overridden in DBEditObject subclasses.
    *
@@ -218,7 +228,6 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
@@ -226,7 +235,6 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    *
    * This method will provide a reasonable default for targetted
    * invid fields.
-   * 
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
@@ -272,23 +280,21 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method allows the DBEditObject to have executive approval
    * of any scalar set operation, and to take any special actions
    * in reaction to the set.. if this method returns true, the
    * DBField that called us will proceed to make the change to
    * it's value.  If this method returns false, the DBField
    * that called us will not make the change, and the field
-   * will be left unchanged.<br><br>
+   * will be left unchanged.
    *
    * The DBField that called us will take care of all possible checks
    * on the operation (including a call to our own verifyNewValue()
    * method.  Under normal circumstances, we won't need to do anything
-   * here.<br><br>
+   * here.
    *
    * If we do return false, we should set editset.setLastError to
    * provide feedback to the client about what we disapproved of.
-   *  
    */
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
@@ -304,28 +310,79 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
 	DBObjectBase base = Ganymede.db.getObjectBase((String) value);
 
-	return setFieldValueLocal(SchemaConstants.ObjectEventObjectType, new Integer(base.getTypeID()));
+	if (base == null)
+	  {
+	    // "Error, no object type matching "{0}" could be found.  This is probably an error in the Ganymede code."
+	    return Ganymede.createErrorDialog(ts.l("finalizeSetValue.bad_base", (String) value));
+	  }
+
+	ReturnVal retVal = null;
+
+	retVal = setFieldValueLocal(SchemaConstants.ObjectEventObjectType, new Integer(base.getTypeID()));
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+
+	// the change was accepted and made sense so far.. update our hidden label field
+
+	return updateLabel((String) value,
+			   (String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventToken));
+      }
+
+    if (field.getID() == SchemaConstants.ObjectEventToken)
+      {
+	return updateLabel((String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventName),
+			   (String) value);
       }
 
     return null;
   }
 
   /**
-   *
+   * This private helper method updates the hidden, composite, label
+   * field for us.
+   */
+
+  private ReturnVal updateLabel(String typeName, String token)
+  {
+    if (typeName == null && token == null)
+      {
+	return setFieldValueLocal(SchemaConstants.ObjectEventLabel, null);
+      }
+
+    StringBuffer result = new StringBuffer();
+
+    if (typeName != null)
+      {
+	result.append(typeName);
+      }
+
+    result.append(":");
+
+    if (token != null)
+      {
+	result.append(token);
+      }
+
+    return setFieldValueLocal(SchemaConstants.ObjectEventLabel, result.toString());
+  }
+
+  /**
    * Customization method to verify whether the user should be able to
    * see a specific field in a given object.  Instances of DBField will
    * wind up calling up to here to let us override the normal visibility
-   * process.<br><br>
+   * process.
    *
    * Note that it is permissible for session to be null, in which case
    * this method will always return the default visiblity for the field
-   * in question.<br><br>
+   * in question.
    *
    * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.<br><br>
+   * an exception will be thrown.
    *
    * To be overridden in DBEditObject subclasses.
-   * 
    */
 
   public boolean canSeeField(DBSession session, DBField field)
@@ -348,6 +405,4 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     return field.getFieldDef().isVisible(); 
   }
-
-
 }

@@ -1910,13 +1910,21 @@ public final class DBStore implements JythonMap {
 	eventCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
+	bf.field_code = SchemaConstants.ObjectEventLabel;
+	bf.field_type = FieldType.STRING;
+	bf.field_name = "Label";
+	bf.loading = true;
+	bf.setNameSpace("eventtoken");
+	bf.loading = false;
+	bf.visibility = false;	// hidden
+	bf.comment = "Hidden composite label field";
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.ObjectEventToken;
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Event Token";
 	bf.badChars = " :";
-	bf.loading = true;
-	bf.setNameSpace("eventtoken");
-	bf.loading = false;
 	bf.comment = "Single-word token to identify this event type in Ganymede source code";
 	b.addFieldToEnd(bf);
 
@@ -1972,6 +1980,10 @@ public final class DBStore implements JythonMap {
 	bf.visibility = false;	// we don't want this to be seen by the client
 	bf.comment = "The type code of the object that this event is tracking";
 	b.addFieldToEnd(bf);
+
+	// set the label field
+
+	b.setLabelField(SchemaConstants.ObjectEventLabel);
 
 	// link in the class we specified
 

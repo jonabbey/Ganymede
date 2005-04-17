@@ -415,6 +415,13 @@ public interface SchemaConstants {
   final static short ObjectEventBase = 6;
 
   /**
+   * Hidden label field used for synthesizing composite label from
+   * the ObjectEventToken and ObjectEventObjectName fields.
+   */
+
+  final static short ObjectEventLabel = 110;
+
+  /**
    * single-word token for this event class (String field)
    */
   final static short ObjectEventToken = 100;
@@ -429,7 +436,9 @@ public interface SchemaConstants {
    * fuller description of this event class, suitable for an email
    * body (String field) 
    */
-  final static short ObjectEventDescription = 102; 
+  final static short ObjectEventDescription = 102;
+
+  // skip 103 and 104, previously used field id's, presumably
 
   /**
    * if true, the admin performing the action will get a copy of any
