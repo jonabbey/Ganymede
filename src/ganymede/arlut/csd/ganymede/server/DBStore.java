@@ -2398,7 +2398,6 @@ public final class DBStore implements JythonMap {
     try
       {
 	gSession = new GanymedeSession();
-	gSession.enableOversight(false);
       }
     catch (RemoteException ex)
       {

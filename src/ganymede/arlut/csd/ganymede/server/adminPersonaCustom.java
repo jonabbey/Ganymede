@@ -448,13 +448,16 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     Vector roles = object.getFieldValuesLocal(SchemaConstants.PersonaPrivs);
     Vector ownerSets = object.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
 
-    Invid supergashOwner = Invid.createInvid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
-    Invid supergashPersona = Invid.createInvid(SchemaConstants.PersonaBase, SchemaConstants.PersonaSupergashObj);
 
-    if (object.getInvid() == supergashPersona)
+    Invid supergashPersona = Invid.createInvid(SchemaConstants.PersonaBase, SchemaConstants.PersonaSupergashObj);
+    Invid monitor = Invid.createInvid(SchemaConstants.PersonaBase, SchemaConstants.PersonaMonitorObj);
+
+    if (supergashPersona.equals(object.getInvid()) || monitor.equals(object.getInvid()))
       {
 	return null;
       }
+
+    Invid supergashOwner = Invid.createInvid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
 
     if ((roles != null && roles.size() != 0) || (ownerSets != null && ownerSets.contains(supergashOwner))) {
       return null;
