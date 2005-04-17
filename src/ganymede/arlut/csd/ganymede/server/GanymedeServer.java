@@ -208,8 +208,6 @@ public class GanymedeServer implements Server {
       }
 
     loginSession = new GanymedeSession(); // supergash
-    loginSession.enableWizards(false);
-    loginSession.enableOversight(false);
 
     Ganymede.rmi.publishObject(this);
   } 
