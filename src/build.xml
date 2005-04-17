@@ -203,7 +203,7 @@ refresh the jar files.
 
 
   <target name ="validate">
-    <echo>Validating localization resources
+    <echo>Validating default localization resources
     </echo>
     <exec executable="verification/resource_validator.pl" failonerror="true">
       <arg file="."/>
