@@ -878,10 +878,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       {
 	if (dumpDialog == null)
 	  {
+	    // "Ganymede Server Dump"
+	    // "Are you sure you want to schedule\na full dump of the Ganymede database to disk?"
+
 	    dumpDialog = new StringDialog(this,
-					  "Ganymede Server Dump",
-					  "Are you sure you want to schedule \na full dump of the Ganymede database?", 
-					  "Yes", "No", question);
+					  ts.l("actionPerformed.dump_title"),
+					  ts.l("actionPerformed.dump_question"),
+					  ts.l("global.yes"), ts.l("global.no"), question);
 	  }
 
 	if (dumpDialog.DialogShow() != null)
@@ -903,11 +906,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     else if (event.getSource() == runInvidTestMI)
       {
+	// "Invid Test"
+	// "Are you sure you want to trigger a full Invid consistency test?\nIt may take awhile."
+
 	StringDialog invidTestDialog = new StringDialog(this,
-							"Invid Test",
-							"Are you sure you want to trigger a full invid consistency test?\n"+
-							"It may take awhile.",
-							"Yes", "No", question);
+							ts.l("actionPerformed.invid_title"),
+							ts.l("actionPerformed.invid_question"),
+							ts.l("global.yes"), ts.l("global.no"), question);
 
 	if (invidTestDialog.DialogShow() != null)
 	  {
@@ -928,11 +933,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     else if (event.getSource() == runInvidSweepMI)
       {
+	// "Invid Sweep"
+	// "Are you sure you want to trigger a full Invid fixup sweep?\nIt may take awhile."
 	StringDialog invidTestDialog = new StringDialog(this,
-							"Invid Sweep",
-							"Are you sure you want to trigger a full invid sweep?\n"+
-							"It may take awhile.",
-							"Yes", "No", question);
+							ts.l("actionPerformed.invidsweep_title"),
+							ts.l("actionPerformed.invidsweep_question"),
+							ts.l("global.yes"), ts.l("global.no"), question);
 
 	if (invidTestDialog.DialogShow() != null)
 	  {
@@ -953,10 +959,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     else if (event.getSource() == runEmbeddedTestMI)
       {
+	// "Embedded Object Consistency Test"
+	// "Are you sure you want to trigger a full embedded object consistency test?"
 	StringDialog invidTestDialog = new StringDialog(this,
-							"Embedded Object Test",
-							"Are you sure you want to trigger a full embedded object consistency test?",
-							"Yes", "No", question);
+							ts.l("actionPerformed.embedded_title"),
+							ts.l("actionPerformed.embedded_question"),
+							ts.l("global.yes"), ts.l("global.no"), question);
 
 	if (invidTestDialog.DialogShow() != null)
 	  {
@@ -977,10 +985,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     else if (event.getSource() == runEmbeddedSweepMI)
       {
+	// "Embedded Object Sweep"
+	// "Are you sure you want to trigger a full embedded object consistency fixup sweep?"
+
 	StringDialog invidTestDialog = new StringDialog(this,
-							"Embedded Object Sweep",
-							"Are you sure you want to trigger a full embedded object consistency sweep?",
-							"Yes", "No", question);
+							ts.l("actionPerformed.embedded_sweep_title"),
+							ts.l("actionPerformed.embedded_sweep_question"),
+							ts.l("global.yes"), ts.l("global.no"), question);
 
 	if (invidTestDialog.DialogShow() != null)
 	  {
@@ -1056,10 +1067,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	DialogRsrc killAllDLGR;
 	StringDialog killAllDLG;
 
+	// "Force Disconnect"
+	// "Are you sure you want to force all connected users to log out from the Ganymede server?"
+
 	killAllDLGR = new DialogRsrc(this,
-				     "Are you sure you want to log out all users?", 
-				     "Are you sure you want to log out all users?", 
-				     "Yes", "No", question);
+				     ts.l("actionPerformed.killall_title"),
+				     ts.l("actionPerformed.killall_question"),
+				     ts.l("global.yes"), ts.l("global.no"), question);
     
 	killAllDLG = new StringDialog(killAllDLGR);
 	
@@ -1169,10 +1183,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
 	killVictim = (String) key;
 
+	// "Force Disconnect"
+	// "Are you sure you want to force user {0} to be logged out from the Ganymede server?"
+
 	if (new StringDialog(this,
-			     "Confirm User Kill",
-			     "Are you sure you want to disconnect user " + key + "?",
-			     "Yes", "No", question).DialogShow() != null)
+			     ts.l("rowMenuPerformed.kill_title"),
+			     ts.l("rowMenuPerformed.kill_question", key),
+			     ts.l("global.yes"), ts.l("global.no"), question).DialogShow() != null)
 	  {
 	    if (debug)
 	      {
@@ -1305,6 +1322,13 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
 
   private final static boolean debug = false;
 
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede admin console.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.consoleShutdownDialog");
+
   GridBagLayout
     gbl;
   
@@ -1325,11 +1349,6 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
   JLabel
     imageCanvas;
 
-  String body = "Shut down the Ganymede server?";
-  String buttonText[] = {"Yes, Immediately",
-			 "Yes, When Users Log Off",
-			 "No, Cancel"};
-
   JButton
     button1, button2, button3;
 
@@ -1340,7 +1359,8 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
 
   public consoleShutdownDialog(Frame frame)
   {
-    super(frame, "Confirm Ganymede Server Shutdown?", true);
+    // "Confirm Ganymede Server Shutdown?"
+    super(frame, ts.l("global.title"), true);
 
     this.addWindowListener(this);
 
@@ -1359,7 +1379,9 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
     // Title at top of dialog
     //
 
-    JLabel titleLabel = new JLabel("Confirm Ganymede Server Shutdown?", SwingConstants.CENTER);
+    // "Confirm Ganymede Server Shutdown?"
+
+    JLabel titleLabel = new JLabel(ts.l("global.title"), SwingConstants.CENTER);
     titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
 
     gbc.gridx = 0;
@@ -1373,7 +1395,9 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
     // Text message under title
     //
 
-    textLabel = new JMultiLineLabel(body);
+    // "Are you sure you want to shut down the Ganymede server running at {0}?"
+
+    textLabel = new JMultiLineLabel(ts.l("global.question", GASHAdmin.url));
     
     gbc.gridy = 1;
     gbc.gridx = 1;
@@ -1402,15 +1426,15 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
 
     buttonPanel = new JFocusRootPanel();
 
-    button1 = new JButton(buttonText[0]);
+    button1 = new JButton(ts.l("global.right_now_button"));
     button1.addActionListener(this);
     buttonPanel.add(button1);
 
-    button2 = new JButton(buttonText[1]);
+    button2 = new JButton(ts.l("global.later_button"));
     button2.addActionListener(this);
     buttonPanel.add(button2);
 
-    button3 = new JButton(buttonText[2]);
+    button3 = new JButton(ts.l("global.no_button"));
     button3.addActionListener(this);
     buttonPanel.add(button3);
 
