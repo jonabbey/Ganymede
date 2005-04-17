@@ -422,6 +422,9 @@ public final class xmlclient implements ClientListener, Runnable {
 	return false;
       }
 
+    // since we're only doing data or schema dumping, we don't
+    // actually need a GanymedeXMLSession on the server side.
+
     Session session = client.login(username, password);
 
     if (session == null)
@@ -613,6 +616,9 @@ public final class xmlclient implements ClientListener, Runnable {
 	System.err.println(ts.l("global.errorConnecting", stackTrace(ex)));
 	return false;
       }
+
+    // since we're transmitting changes, we'll need a
+    // GanymedeXMLSession on the server side.
 
     this.xSession = client.xmlLogin(username, password);
 

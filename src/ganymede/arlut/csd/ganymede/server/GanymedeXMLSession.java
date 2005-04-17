@@ -1191,7 +1191,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      }
 	  }
 
-	// 5. rename any bases that need to be renamedn
+	// 5. rename any bases that need to be renamed
 
 	if (schemadebug)
 	  {
@@ -1216,7 +1216,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    XMLItem _entry = (XMLItem) basesToAdd.elementAt(i);
 
-	    err.println("\tCreating " + _entry.getAttrStr("name"));
+	    // "\tCreating object base {0}"
+	    err.println(ts.l("processSchema.creating_objectbase", _entry.getAttrStr("name")));
 
 	    Integer _id = _entry.getAttrInt("id");
 
