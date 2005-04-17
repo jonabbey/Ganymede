@@ -1395,7 +1395,7 @@ public class DBEditSet {
 
     DBField labelField = eObj.retrieveField(eObj.getLabelFieldID());
 
-    if (labelField == null)
+    if (labelField == null || !labelField.isDefined())
       {
 	missingFields = new Vector();
 
