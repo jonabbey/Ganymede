@@ -65,6 +65,8 @@ import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                               adminPersonaCustom
@@ -80,6 +82,14 @@ import arlut.csd.ganymede.common.SchemaConstants;
 public class adminPersonaCustom extends DBEditObject implements SchemaConstants {
   
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts =
+    TranslationService.getTranslationService("arlut.csd.ganymede.server.adminPersonaCustom");
 
   /**
    * <P>This method takes an Invid pointing to an Admin persona
@@ -249,9 +259,8 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	if ((field.getID() == SchemaConstants.PersonaAssocUser) &&
 	    (getID() <= 2))
 	  {
-	    return Ganymede.createErrorDialog("Permissions Error",
-					      "It is not permitted to set an associated user on either the supergash " +
-					      "or monitor persona objects.");
+	    // "It is not permitted (or necessary) to set an associated user on the supergash or monitor persona objects."
+	    return Ganymede.createErrorDialog(ts.l("finalizeSetValue.restricted_persona"));
 	  }
 
 	return refreshLabelField(null, (Invid) value, null);
@@ -440,13 +449,21 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     Vector ownerSets = object.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
 
     Invid supergashOwner = Invid.createInvid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
+    Invid supergashPersona = Invid.createInvid(SchemaConstants.PersonaBase, SchemaConstants.PersonaSupergashObj);
+
+    if (object.getInvid() == supergashPersona)
+      {
+	return null;
+      }
 
     if ((roles != null && roles.size() != 0) || (ownerSets != null && ownerSets.contains(supergashOwner))) {
       return null;
-    } else {
-      return Ganymede.createErrorDialog("Persona Incomplete",
-					"Personas should either have a role defined or be a member of the supergash owner set.");
-    }
+    } 
+
+    // "Persona object "{0}" is incomplete. Personas must either have
+    // a role defined or be a member of the supergash owner set."
+
+    return Ganymede.createErrorDialog(ts.l("consistencyCheck.role_needed", this.getLabel()));
   }
 
   /**
