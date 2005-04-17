@@ -1581,7 +1581,7 @@ public final class DBStore implements JythonMap {
 	ns = new DBNameSpace("username", true);
 	nameSpaces.addElement(ns);
 
-	ns = new DBNameSpace("access", true);
+	ns = new DBNameSpace("rolespace", true);
 	nameSpaces.addElement(ns);
 
 	ns = new DBNameSpace("persona", true);
@@ -1629,7 +1629,6 @@ public final class DBStore implements JythonMap {
 	bf.field_code = SchemaConstants.OwnerCcAdmins;
 	bf.field_type = FieldType.BOOLEAN;
 	bf.field_name = "Cc All Admins";
-	bf.loading = false;
 	bf.comment = "If checked, mail to this owner group will be sent to the admins";
 	b.addFieldToEnd(bf);
 
@@ -1776,7 +1775,7 @@ public final class DBStore implements JythonMap {
 	bf.field_type = FieldType.STRING;
 	bf.field_name = "Name";
 	bf.loading = true;
-	bf.setNameSpace("access");
+	bf.setNameSpace("rolespace");
 	bf.loading = false;
 	bf.comment = "The name of this permission matrix";
 	b.addFieldToEnd(bf);
@@ -1912,12 +1911,12 @@ public final class DBStore implements JythonMap {
 	bf = new DBObjectBaseField(b);
 	bf.field_code = SchemaConstants.ObjectEventLabel;
 	bf.field_type = FieldType.STRING;
-	bf.field_name = "Label";
+	bf.field_name = "Hidden Label";
 	bf.loading = true;
 	bf.setNameSpace("eventtoken");
 	bf.loading = false;
 	bf.visibility = false;	// hidden
-	bf.comment = "Hidden composite label field";
+	bf.comment = "Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.";
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
