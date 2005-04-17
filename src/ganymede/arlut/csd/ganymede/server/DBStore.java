@@ -2357,6 +2357,26 @@ public final class DBStore implements JythonMap {
 	    taskBase.addFieldToEnd(bf);
 	  }
 
+	// make sure that the ObjectEvent type has the new hidden label field
+
+	DBObjectBase objectEventBase = (DBObjectBase) getObjectBase(SchemaConstants.ObjectEventBase);
+
+	if (objectEventBase.getField(SchemaConstants.ObjectEventLabel) == null)
+	  {
+	    Ganymede.debug("Adding ObjectEventLabel to ObjectEvent base");
+
+	    bf = new DBObjectBaseField(objectEventBase);
+	    bf.field_code = SchemaConstants.ObjectEventLabel;
+	    bf.field_name = "Hidden Label";
+	    bf.field_type = FieldType.STRING;
+	    bf.loading = true;
+	    bf.setNameSpace("eventtoken");
+	    bf.loading = false;
+	    bf.visibility = false;	// hidden
+	    bf.comment = "Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.";
+	    objectEventBase.addFieldToStart(bf);
+	  }
+
 	// and this last check is for the old ARL database, which
 	// somehow did not get namespace constrained on the task name
 	// field
