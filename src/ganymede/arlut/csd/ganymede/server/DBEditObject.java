@@ -1124,6 +1124,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * GanymedeSession's enableOversight is turned off, as in
    * bulk loading.
    *
+   * Note as well that the designated label field for objects are
+   * always required, whatever this method returns, and that this
+   * requirement holds without regard to the GanymedeSession's
+   * enableOversight value.
+   *
    * <b>*PSEUDOSTATIC*</b>
    */
 

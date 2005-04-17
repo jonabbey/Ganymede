@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -859,10 +859,11 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * method has been called.</P>
    */
 
-  public synchronized void commit()
+  public synchronized ReturnVal commit()
   {
     Enumeration en;
     DBObjectBase base;
+    ReturnVal retVal = null;
 
     /* -- */
 
@@ -877,6 +878,15 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     synchronized (store)
       {
+	// make sure our schema passes all required constraints.
+
+	retVal = checkCommitState();
+
+	if (retVal != null)
+	  {
+	    return retVal;
+	  }
+
       	// Clear the Jython class cache
       
       	JythonEditObjectFactory.unloadAllURIs();
@@ -979,7 +989,35 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     GanymedeServer.lSemaphore.enable("schema edit");
 
-    return;
+    return null;
+  }
+
+  /**
+   * This private helper method verifies that the proposed schema is
+   * acceptable to be committed.
+   */
+
+  private synchronized ReturnVal checkCommitState()
+  {
+    Enumeration en;
+    DBObjectBase base;
+    ReturnVal retVal = null;
+
+    en = newBases.elements();
+
+    while (en.hasMoreElements())
+      {
+	base = (DBObjectBase) en.nextElement();
+
+	retVal = base.checkSchemaState();
+
+	if (retVal != null)
+	  {
+	    return retVal;
+	  }
+      }
+
+    return null;
   }
 
   /**

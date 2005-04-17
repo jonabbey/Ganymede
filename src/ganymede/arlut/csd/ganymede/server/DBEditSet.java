@@ -1377,13 +1377,12 @@ public class DBEditSet {
   private final void commit_checkObjectMissingFields(DBEditObject eObj) throws CommitNonFatalException
   {
     ReturnVal retVal;
+    Vector missingFields = null;
 
     /* -- */
 
-    if (!isOversightOn())
-      {
-	return;
-      }
+    // if we're deleting or dropping an object, we won't ever require
+    // fields to be set
 
     if (eObj.getStatus() == ObjectStatus.DELETING ||
 	eObj.getStatus() == ObjectStatus.DROPPING)
@@ -1391,9 +1390,28 @@ public class DBEditSet {
 	return;
       }
 
-    Vector missingFields = eObj.checkRequiredFields();
+    // otherwise, we always insist on the label field being present.
+    // We'll check that up front.
+
+    DBField labelField = eObj.retrieveField(eObj.getLabelFieldID());
+
+    if (labelField == null)
+      {
+	missingFields = new Vector();
+
+	// the label field is missing.  look it up.
+
+	DBObjectBaseField fieldDef = (DBObjectBaseField) eObj.getBase().getField(eObj.getLabelFieldID());
+
+	missingFields.addElement(fieldDef.getName());
+      }
+
+    if (isOversightOn())
+      {
+	missingFields = VectorUtils.union(missingFields, eObj.checkRequiredFields());
+      }
 		    
-    if (missingFields != null)
+    if (missingFields != null && missingFields.size() > 0)
       {
 	StringBuffer errorBuf = new StringBuffer();
 

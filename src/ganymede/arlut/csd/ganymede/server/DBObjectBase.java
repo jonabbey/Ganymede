@@ -272,7 +272,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   String classOptionString;
 
   /**
-   * which field represents our label?
+   * Which field represents our label?  This should always be a field
+   * code corresponding to a namespace-constrained string,
+   * i.p. address or numeric field.
+   *
+   * This member variable will be set to -1 if the label field has not
+   * yet been set.
    */
 
   short label_id;
@@ -2658,7 +2663,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public ReturnVal setLabelField(String fieldName)
   {
-    BaseField bF;
+    DBObjectBaseField bF;
 
     /* -- */
 
@@ -2667,7 +2672,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
-    bF = getField(fieldName);
+    bF = (DBObjectBaseField) getField(fieldName);
 
     if (bF == null)
       {
@@ -2676,14 +2681,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					  ts.l("setLabelField.badfieldname"));
       }
 
-    try
+    if (bF.getNameSpace() == null)
       {
-	label_id = bF.getID();
+	// "Error, label fields must be namespace-constrained."
+	return Ganymede.createErrorDialog(ts.l("setLabelField.nonamespace"));
       }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("runtime except: " + ex);
-      }
+
+    label_id = bF.getID();
 
     return null;
   }
@@ -2700,16 +2704,28 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public ReturnVal setLabelField(short fieldID)
   {
+    DBObjectBaseField bF;
+
+    /* -- */
+
     if (!store.loading && editor == null)
       {
 	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
-    if (getField(fieldID) == null)
+    bF = (DBObjectBaseField) getField(fieldID);
+
+    if (bF == null)
       {
 	return Ganymede.createErrorDialog("Schema Editing Error",
 					  // "setLabelField() called with an unrecognized field id."
 					  ts.l("setLabelField.badfieldid"));
+      }
+
+    if (bF.getNameSpace() == null)
+      {
+	// "Error, label fields must be namespace-constrained."
+	return Ganymede.createErrorDialog(ts.l("setLabelField.nonamespace"));
       }
 
     label_id = fieldID;
@@ -3036,6 +3052,36 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   public final DBObjectTable getObjectTable()
   {
     return objectTable;
+  }
+
+  /**
+   * This method is used by the {@link arlut.csd.ganymede.server.DBSchemaEdit}
+   * class' {@link arlut.csd.ganymede.server.DBSchemaEdit#checkCommitState()}
+   * method.  It is used to verify that this DBObjectBase is in a state
+   * suitable to be committed.
+   *
+   * Returns null on success, or a ReturnVal encoding an error dialog
+   * on failure.
+   */
+
+  synchronized ReturnVal checkSchemaState()
+  {
+    if (label_id == -1)
+      {
+	// "Error, object type {0} has no label field defined."
+	return Ganymede.createErrorDialog(ts.l("checkSchemaState.nolabel", this.getName()));
+      }
+
+    DBObjectBaseField labelFieldDef = (DBObjectBaseField) getField(label_id);
+
+    if (labelFieldDef.getNameSpace() == null)
+      {
+	// Error, object type {0}''s label field ({1}) is not unique value-constrained.
+	// You must set a namespace constraint for this field before committing this schema change.
+	return Ganymede.createErrorDialog(ts.l("checkSchemaState.notunique", this.getName(), labelFieldDef.getName()));
+      }
+
+    return null;
   }
 
   /**
