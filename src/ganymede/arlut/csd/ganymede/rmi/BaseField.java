@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information

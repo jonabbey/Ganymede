@@ -1456,7 +1456,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     try
       {
-	editor.commit();
+	ReturnVal retVal = editor.commit();
+
+	if (retVal != null)
+	  {
+	    handleReturnVal(retVal);
+	    return;
+	  }
+
 	editor = null;
       }
     catch (RemoteException ex)

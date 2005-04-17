@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -175,7 +175,7 @@ public interface SchemaEdit extends Remote {
    * method has been called.</P>
    */
 
-  public void commit() throws RemoteException;
+  public ReturnVal commit() throws RemoteException;
 
   /**
    * <P>Abort this schema edit, return the schema to its prior state.</P>

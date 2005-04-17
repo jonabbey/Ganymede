@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -282,7 +282,7 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
 	throw new RuntimeException("exception getting fields: " + rx);
       }
     
-    labelC.addItem("<none>");
+    //labelC.addItem("<none>");
     
     if (fields == null)
       {
@@ -301,8 +301,9 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
 	  {
 	    try
 	      {
-		if (currentField.isString() || currentField.isNumeric() ||
-		    currentField.isIP() || currentField.isFloat())
+		if ((currentField.isString() || currentField.isNumeric() ||
+		     currentField.isIP()) &&
+		    currentField.getNameSpaceLabel() != null)
 		  {
 		    labelC.addItem(currentField.getName());
 		  }
