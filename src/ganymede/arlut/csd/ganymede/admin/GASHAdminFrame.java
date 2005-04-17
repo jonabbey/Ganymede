@@ -1376,30 +1376,14 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
     setContentPane(mainPanel);
 
     //
-    // Title at top of dialog
-    //
-
-    // "Confirm Ganymede Server Shutdown?"
-
-    JLabel titleLabel = new JLabel(ts.l("global.title"), SwingConstants.CENTER);
-    titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
-
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbc.gridwidth = 2;
-    gbc.gridheight = 1;
-    gbl.setConstraints(titleLabel, gbc);
-    mainPanel.add(titleLabel);
-
-    //
     // Text message under title
     //
 
-    // "Are you sure you want to shut down the Ganymede server running at {0}?"
+    // "Are you sure you want to shut down the Ganymede server\nrunning at {0}?"
 
     textLabel = new JMultiLineLabel(ts.l("global.question", GASHAdmin.url));
     
-    gbc.gridy = 1;
+    gbc.gridy = 0;
     gbc.gridx = 1;
     gbc.gridwidth = 1;
     gbc.gridheight = 1;
@@ -1413,7 +1397,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
     JSeparator sep = new JSeparator();
 
     gbc.gridx = 0;
-    gbc.gridy = 3;
+    gbc.gridy = 2;
     gbc.gridwidth = 2;
     gbc.gridheight = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -1443,7 +1427,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
     //
 
     gbc.gridx = 0;
-    gbc.gridy = 4;
+    gbc.gridy = 3;
     gbc.gridwidth = 2;
     gbc.gridheight = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -1468,7 +1452,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
       }
 
     gbc.gridx = 0;
-    gbc.gridy = 1;
+    gbc.gridy = 0;
     gbc.gridwidth = 1;
     gbc.gridheight = 2;
     gbc.weightx = 0.0;
