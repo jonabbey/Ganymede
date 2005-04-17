@@ -98,7 +98,7 @@ import arlut.csd.ganymede.rmi.XMLSession;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class handles all XML loading operations for the Ganymede
+ * This class handles all XML loading operations for the Ganymede
  * server.  GanymedeXMLSession's are created by the {@link
  * arlut.csd.ganymede.server.GanymedeServer GanymedeServer}'s {@link
  * arlut.csd.ganymede.server.GanymedeServer#xmlLogin(arlut.csd.ganymede.Client)
@@ -111,19 +111,19 @@ import arlut.csd.ganymede.rmi.XMLSession;
  * manipulate the server's login semaphore to force the server into
  * schema editing mode.  This will fail if there are any remote
  * clients connected to the server at the time the XML file is
- * processed.</p>
+ * processed.
  *
- * <p>Once xmlLogin creates (and RMI exports) a GanymedeXMLSession, an xmlclient
+ * Once xmlLogin creates (and RMI exports) a GanymedeXMLSession, an xmlclient
  * repeatedly calls the {@link arlut.csd.ganymede.server.GanymedeXMLSession#xmlSubmit(byte[]) xmlSubmit()}
  * method, which writes the bytes received into a pipe.  The GanymedeXMLSession's
  * thread (also initiated by GanymedeServer.xmlLogin()) then loops, reading
  * data off of the pipe with an {@link arlut.csd.Util.XMLReader XMLReader} and
- * doing various schema editing and data loading operations.</p>
+ * doing various schema editing and data loading operations.
  *
- * <p>The &lt;ganydata&gt; processing section was originally written as part
+ * The &lt;ganydata&gt; processing section was originally written as part
  * of xmlclient, and did all xml parsing on the client side and all data operations
  * remotely over RMI.  Pulling this logic into a server-side
- * GanymedeXMLSession sped things up by a factor of 300 in my testing.</p>
+ * GanymedeXMLSession sped things up by a factor of 300 in my testing.
  */
 
 public final class GanymedeXMLSession extends java.lang.Thread implements XMLSession, Unreferenced {
@@ -132,83 +132,83 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public static final boolean schemadebug = true;
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede server.</p>
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeXMLSession");
 
   /**
-   * <p>This major version number is compared with the "major"
+   * This major version number is compared with the "major"
    * attribute in the Ganymede XML document element.  We won't
    * try to read Ganymede XML files whose major and/or minor numbers
-   * are too high.</p> 
+   * are too high. 
    */
 
   public static final int majorVersion = 1;
 
   /**
-   * <p>This minor version number is compared with the "minor"
+   * This minor version number is compared with the "minor"
    * attribute in the Ganymede XML document element.  We won't
    * try to read Ganymede XML files whose major and/or minor numbers
-   * are too high.</p> 
+   * are too high. 
    */
 
   public static final int minorVersion = 0;
 
   /**
-   * <p>The working GanymedeSession underlying this XML session.</p>
+   * The working GanymedeSession underlying this XML session.
    */
 
   GanymedeSession session;
 
   /**
-   * <p>The XML parser object handling XML data from the client</p>
+   * The XML parser object handling XML data from the client
    */
 
   arlut.csd.Util.XMLReader reader;
 
   /**
-   * <p>The data stream used to write data from the client to the
-   * XML parser.</p>
+   * The data stream used to write data from the client to the
+   * XML parser.
    */
 
   PipedOutputStream pipe;
 
   /**
-   * <p>The default buffer size in the {@link arlut.csd.Util.XMLReader XMLReader}.
+   * The default buffer size in the {@link arlut.csd.Util.XMLReader XMLReader}.
    * This value determines how far ahead the XMLReader's i/o thread can get in
    * reading from the XML file.  Higher or lower values of this variable may
    * give better performance, depending on the characteristics of the JVM with
-   * regards threading, etc.</p>
+   * regards threading, etc.
    */
 
   public int bufferSize = 100;
 
   /**
-   * <p>Hashtable mapping object type names to
+   * Hashtable mapping object type names to
    * hashtables mapping field names to 
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
-   * objects.</p>
+   * objects.
    */
 
   public Hashtable objectTypes = new Hashtable();
 
   /**
-   * <p>Hashtable mapping Short object type ids to
+   * Hashtable mapping Short object type ids to
    * hashtables mapping field names to 
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
-   * objects.</p>
+   * objects.
    */
 
   public Hashtable objectTypeIDs = new Hashtable();
 
   /**
-   * <P>Hashtable mapping Short type ids to
+   * Hashtable mapping Short type ids to
    * hashes which map local object designations (either id Strings or
    * num Integers from the &lt;object&gt; elements) to
    * actual {@link arlut.csd.ganymede.server.xmlobject xmlobject}
-   * records.</P>
+   * records.
    */
 
   public Hashtable objectStore = new Hashtable();
@@ -221,165 +221,165 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public HashSet duplications = null;
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
+   * Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
    * that correspond to new Ganymede server objects
-   * that have been/need to be created by this GanymedeXMLSession.</p>
+   * that have been/need to be created by this GanymedeXMLSession.
    */
 
   public Vector createdObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
+   * Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
    * that correspond to pre-existing Ganymede
    * server objects that have been/need to be checked out for editing by this
-   * GanymedeXMLSession.</p> 
+   * GanymedeXMLSession. 
    */
 
   public Vector editedObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject
+   * Vector of {@link arlut.csd.ganymede.server.xmlobject
    * xmlobjects} that correspond to Ganymede server objects that have
    * been created/checked out for editing during embedded invid field
    * processing, and which need to have their invid fields registered
-   * after everything else is done.</p> 
+   * after everything else is done. 
    */
 
   public Vector embeddedObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
+   * Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
    * that correspond to pre-existing Ganymede
    * server objects that have been/need to be inactivated by this
-   * GanymedeXMLSession.</p>
+   * GanymedeXMLSession.
    */
 
   public Vector inactivatedObjects = new Vector();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
+   * Vector of {@link arlut.csd.ganymede.server.xmlobject xmlobjects}
    * that correspond to pre-existing Ganymede
    * server objects that have been/need to be deleted by this
-   * GanymedeXMLSession.</p>
+   * GanymedeXMLSession.
    */
 
   public Vector deletedObjects = new Vector();
 
   /**
-   * <p>This StringWriter holds output generated by the GanymedeXMLSession's
-   * parser thread.</p>
+   * This StringWriter holds output generated by the GanymedeXMLSession's
+   * parser thread.
    */
 
   public StringWriter errBuf = new StringWriter();
 
   /**
-   * <p>This PrintWriter is used to handle all debug/error output
-   * on behalf of the GanymedeXMLSession.</p>
+   * This PrintWriter is used to handle all debug/error output
+   * on behalf of the GanymedeXMLSession.
    */
 
   public PrintWriter err = new PrintWriter(errBuf);
 
   /**
-   * <p>This flag is used to track whether the background parser thread
-   * is active.</p>
+   * This flag is used to track whether the background parser thread
+   * is active.
    *
-   * <p>We set it true here so that we avoid any race conditions.</p>
+   * We set it true here so that we avoid any race conditions.
    */
 
   private booleanSemaphore parsing = new booleanSemaphore(true);
 
   /**
-   * <p>This flag is used to track whether the background parser thread
-   * was successful in committing the transaction.</p>
+   * This flag is used to track whether the background parser thread
+   * was successful in committing the transaction.
    */
 
   private boolean success = false;
 
   /**
-   * <p>If we are editing the server's schema from the XML source, this
-   * field will hold a reference to a DBSchemaEdit object.</p>
+   * If we are editing the server's schema from the XML source, this
+   * field will hold a reference to a DBSchemaEdit object.
    */
 
   private DBSchemaEdit editor = null;
 
   /**
-   * <p>This vector is used by the XML schema editing logic to track
+   * This vector is used by the XML schema editing logic to track
    * namespaces from the xml file that need to be added to the current
    * schema.  Elements in this vector are empty XMLElements that contain
-   * name and optional case-sensitive attributes.</p>
+   * name and optional case-sensitive attributes.
    */
 
   private Vector spacesToAdd;
 
   /**
-   * <p>This vector is used by the XML schema editing logic to track
+   * This vector is used by the XML schema editing logic to track
    * namespaces from the xml file that need to be removed from the
    * current schema. Elements in this vector are Strings representing
-   * the level of name spaces to be deleted..</p> 
+   * the level of name spaces to be deleted.. 
    */
 
   private Vector spacesToRemove;
 
   /**
-   * <p>This vector is used by the XML schema editing logic to track
+   * This vector is used by the XML schema editing logic to track
    * namespaces from the xml file that need to be edited in the
    * current schema.  Since namespaces can only be edited in the sense
    * of toggling the case sensitivity flag, this vector will only
    * contain XMLElements for namespaces that need to have their case
    * sensitivity toggled. Elements in this vector are empty
    * XMLElements that contain name and optional case-sensitive
-   * attributes.</p> 
+   * attributes. 
    */
 
   private Vector spacesToEdit;
 
   /**
-   * <p>This vector is used by the XML schema editing logic to track
+   * This vector is used by the XML schema editing logic to track
    * object types from the xml file that need to be added to the current
    * schema.  Elements in this vector are XMLItem trees rooted
-   * with the appropriate &lt;objectdef&gt; elements.</p>
+   * with the appropriate &lt;objectdef&gt; elements.
    */
 
   private Vector basesToAdd;
 
   /**
-   * <p>This vector is used by the XML schema editing logic to track
+   * This vector is used by the XML schema editing logic to track
    * object types in the current schema that were not mentioned in the
    * xml file and thus need to be removed from the current
    * schema. Elements of this vector are the names of existing bases
-   * to be removed.</p>
+   * to be removed.
    */
 
   private Vector basesToRemove;
 
   /**
-   * <p>This vector is used by the XML schema editing logic to track
+   * This vector is used by the XML schema editing logic to track
    * object types from the xml file that need to be edited in the
    * current schema.  Elements in this vector are XMLItem trees rooted
-   * with the appropriate &lt;objectdef&gt; elements.</p> 
+   * with the appropriate &lt;objectdef&gt; elements. 
    */
 
   private Vector basesToEdit;
 
   /**
-   * <p>This XMLItem is the XMLElement root of the namespace tree,
+   * This XMLItem is the XMLElement root of the namespace tree,
    * rooted with the &lt;namespaces&gt; element.  Children of this
-   * node will be &lt;namespace&gt; elements.</p>
+   * node will be &lt;namespace&gt; elements.
    */
 
   private XMLItem namespaceTree = null;
 
   /**
-   * <p>This XMLItem is the XMLElement root of the category tree,
+   * This XMLItem is the XMLElement root of the category tree,
    * rooted with the top-level &lt;category&gt; element.
    * Children of this node will be either &lt;category&gt; or
-   * &lt;objectdef&gt; elements.</p> 
+   * &lt;objectdef&gt; elements. 
    */
 
   private XMLItem categoryTree = null;
 
   /**
-   * <p>Semaphore to gate the cleanup() method.</p>
+   * Semaphore to gate the cleanup() method.
    */
 
   private booleanSemaphore cleanedup = new booleanSemaphore(false);
@@ -402,6 +402,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// the XML client into.  The XMLReader will create a matching
 	// PipedInputStream internally, that it will use to read data
 	// that we feed into the pipe.
+	//
+	// Used only for processing input from xmlclient.  If the
+	// xmlclient only wanted to dump data, it would just use a
+	// GanymedeSession and call one of that class' getXML()
+	// methods
 
 	pipe = new PipedOutputStream();
 	reader = new arlut.csd.Util.XMLReader(pipe, bufferSize, true, err);
@@ -414,8 +419,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method returns a remote reference to the underlying
-   * GanymedeSession in use on the server.</p>
+   * This method returns a remote reference to the underlying
+   * GanymedeSession in use on the server.
    *
    * @see arlut.csd.ganymede.rmi.XMLSession
    */
@@ -426,7 +431,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method is called repeatedly by the XML client in order to
+   * This method is called repeatedly by the XML client in order to
    * send the next packet of XML data to the server.  If the server
    * has detected any errors in the already-received XML stream,
    * xmlSubmit() may return a non-null ReturnVal with a description of
@@ -434,7 +439,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * XML data for the server's continued processing and immediately
    * return a null value, indicating success.  The xmlSubmit() method
    * will only block if the server has filled up its internal buffers
-   * and must wait to digest more of the already submitted XML.</p> 
+   * and must wait to digest more of the already submitted XML. 
    *
    * @see arlut.csd.ganymede.rmi.XMLSession
    */
@@ -538,10 +543,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method is called by the XML client once the end of the XML
+   * This method is called by the XML client once the end of the XML
    * stream has been transmitted, whereupon the server will attempt
    * to finalize the XML transaction and return an overall success or
-   * failure message in the ReturnVal.</p>
+   * failure message in the ReturnVal.
    *
    * @see arlut.csd.ganymede.rmi.XMLSession
    */
@@ -559,15 +564,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method is called by the XML client on a dedicated thread
-   * to pull stderr messages from the server.</p>
+   * This method is called by the XML client on a dedicated thread
+   * to pull stderr messages from the server.
    *
-   * <p>This call will block on the server until err stream data is
+   * This call will block on the server until err stream data is
    * available, but will always block for at least half a second so
-   * that the client doesn't loop on getNextErrChunk() too fast.</p>
+   * that the client doesn't loop on getNextErrChunk() too fast.
    *
-   * <p>This method will return null after the server closes its error
-   * stream.</p>
+   * This method will return null after the server closes its error
+   * stream.
    *
    * @see arlut.csd.ganymede.rmi.XMLSession
    */
@@ -634,9 +639,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method is for use on the server, and is called by the
+   * This method is for use on the server, and is called by the
    * GanymedeSession to let us know if the server is forcing our login
-   * off.</p>
+   * off.
    *
    * @see arlut.csd.ganymede.rmi.XMLSession
    */
@@ -683,11 +688,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 
   /**
-   * <p>This method is called when the Java RMI system detects that this
-   * remote object is no longer referenced by any remote objects.</p>
+   * This method is called when the Java RMI system detects that this
+   * remote object is no longer referenced by any remote objects.
    *
-   * <p>This method handles abnormal logouts and time outs for us.  By
-   * default, the 1.1 RMI time-out is 10 minutes.</p>
+   * This method handles abnormal logouts and time outs for us.  By
+   * default, the 1.1 RMI time-out is 10 minutes.
    *
    * @see java.rmi.server.Unreferenced
    */
@@ -706,7 +711,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method handles cleanup post-schema edit.</p>
+   * This method handles cleanup post-schema edit.
    */
 
   public void cleanupSchemaEdit()
@@ -814,10 +819,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method handles the actual XML processing in the
+   * This method handles the actual XML processing in the
    * background.  All activity which ultimately draws from
    * the XMLReader will block as necessary to wait for more
-   * data from the client.</p>
+   * data from the client.
    */
 
   public synchronized void run()
@@ -956,10 +961,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>Private helper method to process events from
+   * Private helper method to process events from
    * the {@link arlut.csd.Util.XMLReader XMLReader}.  By using
    * this method, the rest of the code in GanymedeXMLSession doesn't
-   * have to check for error and warning conditions.</p>
+   * have to check for error and warning conditions.
    */
 
   public XMLItem getNextItem() throws SAXException
@@ -985,12 +990,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method is called after the &lt;ganyschema&gt; element has been
+   * This method is called after the &lt;ganyschema&gt; element has been
    * read and consumes everything up to and including the matching
    * &lt;/ganyschema&gt; element, if such is to be found.  Eventually,
    * this method will actually process the contents of the 
    * &lt;ganyschema&gt; element and transmit the schema change information
-   * to the server.</p>
+   * to the server.
    */
 
   public boolean processSchema(XMLItem ganySchemaItem) throws SAXException
@@ -1467,7 +1472,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method fills in spacesToAdd, spacesToRemove, and spacesToEdit.</p>
+   * This method fills in spacesToAdd, spacesToRemove, and spacesToEdit.
    */
 
   private boolean calculateNameSpaces()
@@ -1570,7 +1575,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method fills in basesToAdd, basesToRemove, and basesToEdit.</p>
+   * This method fills in basesToAdd, basesToRemove, and basesToEdit.
    */
 
   private boolean calculateBases()
@@ -1719,9 +1724,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This is a recursive method to do a traversal of an XMLItem
+   * This is a recursive method to do a traversal of an XMLItem
    * tree, adding object base definition roots found to the foundBases
-   * vector.</p> 
+   * vector. 
    */
 
   private void findBasesInXMLTree(XMLItem treeRoot, Vector foundBases)
@@ -1750,8 +1755,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This private method takes care of doing any object type
-   * renaming, prior to resolving invid field definitions.</p>
+   * This private method takes care of doing any object type
+   * renaming, prior to resolving invid field definitions.
    */
 
   private boolean handleBaseRenaming() throws RemoteException
@@ -1817,10 +1822,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method is used by the XML schema editing code
+   * This method is used by the XML schema editing code
    * in {@link arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}
    * to fix up the category tree to match that specified in the XML
-   * &lt;ganyschema&gt; element.</p>
+   * &lt;ganyschema&gt; element.
    */
 
   public synchronized ReturnVal reshuffleCategories(XMLItem categoryRoot)
@@ -1847,8 +1852,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method tests an XML category tree to make sure that all
-   * categories in the tree have unique names.</p>
+   * This method tests an XML category tree to make sure that all
+   * categories in the tree have unique names.
    */
 
   public boolean testXMLCategories(XMLItem categoryRoot, Hashtable names)
@@ -1886,9 +1891,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This recursive method takes an XMLItem category tree and returns
+   * This recursive method takes an XMLItem category tree and returns
    * a new DBBaseCategory tree with all categories and object definitions
-   * from the XMLItem category tree ordered correctly.</p>
+   * from the XMLItem category tree ordered correctly.
    */
 
   public DBBaseCategory buildXMLCategories(XMLItem categoryRoot)
@@ -1943,27 +1948,27 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method is called after the &lt;ganydata&gt; element has been
+   * This method is called after the &lt;ganydata&gt; element has been
    * read and consumes everything up to and including the matching
-   * &lt;/ganydata&gt; element, if such is to be found.</p>
+   * &lt;/ganydata&gt; element, if such is to be found.
    *
-   * <p>Before starting to read data from the &lt;ganydata&gt; element,
+   * Before starting to read data from the &lt;ganydata&gt; element,
    * this method communicates with the Ganymede server database through the
-   * normal client {@link arlut.csd.ganymede.rmi.Session Session} interface.</p>
+   * normal client {@link arlut.csd.ganymede.rmi.Session Session} interface.
    *
-   * <p>The contents of &lt;ganydata&gt; are scanned, and an in-memory
+   * The contents of &lt;ganydata&gt; are scanned, and an in-memory
    * datastructure is constructed in the GanymedeXMLSession.  All
    * objects are organized in memory by type and id, and inter-object
-   * invid references are resolved to the extent possible.</p>
+   * invid references are resolved to the extent possible.
    *
-   * <p>If all of that succeeds, processData() will start a transaction
+   * If all of that succeeds, processData() will start a transaction
    * on the server, and will start transferring the data from the XML
    * file's &lt;ganydata&gt; element into the database.  If any errors
    * are reported, the returned error message is printed and processData
    * aborts.  If no errors are reported at this stage, a transaction
    * commit is attempted.  Once again, if there are any errors reported
    * from the server, they are printed and processData aborts.  Otherwise,
-   * success!</p>
+   * success!
    *
    * @returns true if the &lt;ganydata&gt; element was successfully
    * processed, or false if a fatal error in the XML stream was
@@ -2138,9 +2143,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This private method handles data structures initialization for
+   * This private method handles data structures initialization for
    * the GanymedeXMLSession, prepping hash lookups that are used
-   * to accelerate XML processing.</p>
+   * to accelerate XML processing.
    */
 
   private void initializeLookups()
@@ -2171,11 +2176,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method records an xmlobject that has been loaded from the
-   * XML file into the GanymedeXMLSession objectStore hash.</p>
+   * This method records an xmlobject that has been loaded from the
+   * XML file into the GanymedeXMLSession objectStore hash.
    *
-   * <p>This method returns false if the object to be stored has an id
-   * conflict with a previously stored object.</p>
+   * This method returns false if the object to be stored has an id
+   * conflict with a previously stored object.
    */
 
   public boolean storeObject(xmlobject object)
@@ -2218,12 +2223,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method is used to look up an xmlobject that we have seen,
+   * This method is used to look up an xmlobject that we have seen,
    * in order to get a partial resolution of an invid target that we
    * have found in our XML processing.  It is called by {@link
    * arlut.csd.ganymede.server.xInvid#getInvid()} in the event that an
    * &gt;invid&lt; element is found which does not resolve to a
-   * pre-existing object in the server.</p>
+   * pre-existing object in the server.
    */
 
   public xmlobject getXMLObjectTarget(short typeId, String objectId)
@@ -2239,10 +2244,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method resolves an Invid from a type/id pair, talking
-   * to the server if the type/id pair has not previously been seen.</p>
+   * This method resolves an Invid from a type/id pair, talking
+   * to the server if the type/id pair has not previously been seen.
    *
-   * <p>Returns null on failure to retrieve.</p>
+   * Returns null on failure to retrieve.
    *
    * @param typeId The object type number of the invid to find
    * @param objId The unique label of the object
@@ -2335,9 +2340,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method resolves an Invid from a type/num pair</p>
+   * This method resolves an Invid from a type/num pair
    *
-   * <p>Returns null on failure to retrieve.</p>
+   * Returns null on failure to retrieve.
    *
    * @param typename The name of the object type, in XML encoded form
    * @param num The numeric id of 
@@ -2349,8 +2354,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method retrieves an xmlobject that has been previously
-   * loaded from the XML file.</p>
+   * This method retrieves an xmlobject that has been previously
+   * loaded from the XML file.
    *
    * @param baseName An XML-encoded object type string
    * @param objectID The id string for the object in question
@@ -2362,8 +2367,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method retrieves an xmlobject that has been previously
-   * loaded from the XML file.</p>
+   * This method retrieves an xmlobject that has been previously
+   * loaded from the XML file.
    *
    * @param baseID a Short holding the number of object type sought
    * @param objectID The id string for the object in question
@@ -2382,8 +2387,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method retrieves an xmlobject that has been previously
-   * loaded from the XML file.</p>
+   * This method retrieves an xmlobject that has been previously
+   * loaded from the XML file.
    *
    * @param baseName An XML-encoded object type string
    * @param objectNum The Integer object number for the object sought
@@ -2395,8 +2400,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method retrieves an xmlobject that has been previously
-   * loaded from the XML file.</p>
+   * This method retrieves an xmlobject that has been previously
+   * loaded from the XML file.
    *
    * @param baseID a Short holding the number of object type sought
    * @param objectNum The Integer object number for the object sought
@@ -2415,12 +2420,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This helper method returns the short id number of an object
+   * This helper method returns the short id number of an object
    * type based on its underscore-for-space encoded XML object type
-   * name.</p>
+   * name.
    *
-   * <p>If the named object type cannot be found, a
-   * NullPointerException will be thrown.</p>
+   * If the named object type cannot be found, a
+   * NullPointerException will be thrown.
    */
 
   public short getTypeNum(String objectTypeName)
@@ -2441,11 +2446,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This helper method returns the object type string for an object
-   * type based on its short object type ID number.</p>
+   * This helper method returns the object type string for an object
+   * type based on its short object type ID number.
    *
-   * <p>If the named object type cannot be found, a
-   * NullPointerException will be thrown.</p>
+   * If the named object type cannot be found, a
+   * NullPointerException will be thrown.
    */
 
   public String getTypeName(short objectTypeID)
@@ -2455,12 +2460,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This helper method returns a hash of field names to
+   * This helper method returns a hash of field names to
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate} based
-   * on the underscore-for-space XML encoded object type name.</p>
+   * on the underscore-for-space XML encoded object type name.
    *
-   * <p>The Hashtable returned by this method is intended to be used
-   * with the getObjectFieldType method.</p>
+   * The Hashtable returned by this method is intended to be used
+   * with the getObjectFieldType method.
    */
 
   public Hashtable getFieldHash(String objectTypeName)
@@ -2469,11 +2474,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This helper method takes a hash of field names to
+   * This helper method takes a hash of field names to
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate} and an
    * underscore-for-space XML encoded field name and returns the
    * FieldTemplate for that field, if known.  If not, null is
-   * returned.</p> 
+   * returned. 
    */
 
   public FieldTemplate getObjectFieldType(Hashtable fieldHash, String fieldName)
@@ -2482,10 +2487,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This helper method takes a short object type id and an
+   * This helper method takes a short object type id and an
    * underscore-for-space XML encoded field name and returns the
    * FieldTemplate for that field, if known.  If not, null is
-   * returned.</p> */
+   * returned. */
 
   public FieldTemplate getFieldTemplate(short type, String fieldName)
   {
@@ -2493,10 +2498,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This helper method takes a short object type id and an
+   * This helper method takes a short object type id and an
    * underscore-for-space XML encoded field name and returns the
    * FieldTemplate for that field, if known.  If not, null is
-   * returned.</p> */
+   * returned. */
 
   public FieldTemplate getFieldTemplate(Short type, String fieldName)
   {
@@ -2523,8 +2528,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This method actually does the work of integrating our data into the
-   * DBStore.</p>
+   * This method actually does the work of integrating our data into the
+   * DBStore.
    *
    * @returns true if the data was successfully integrated to the server and
    * the transaction committed successfully, false if the transaction
@@ -3038,18 +3043,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This private helper method is responsible for working through
+   * This private helper method is responsible for working through
    * the objectStore hash and dereferencing any xInvids contained
    * therein to objects in the XML file and/or server, before any
-   * actual edits are performed.</p>
+   * actual edits are performed.
    *
-   * <p>This is necessary so that we can deal with the possibility of
+   * This is necessary so that we can deal with the possibility of
    * objects being renamed before we have all of our invid field
    * updates made.  By looking up all Invids that we can before we
    * start editing anything (but after we've done a storeObject() on
    * all objects that we are editing or creating), we can be sure that
    * we will resolve Invid references in xInvid objects to the proper,
-   * pre-rename object labels.</p>
+   * pre-rename object labels.
    */
 
   private void knitInvidReferences() throws NotLoggedInException
@@ -3152,12 +3157,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This private helper method creates a ReturnVal object to be
+   * This private helper method creates a ReturnVal object to be
    * passed back to the xmlclient.  Any text printed to the err
    * object will be included in the ReturnVal object, followed by
    * the content of message, if any.  If success is true, the
    * ReturnVal returned will encode that.  If success is false,
-   * the returned ReturnVal will indicate failure.</p>
+   * the returned ReturnVal will indicate failure.
    */
 
   private ReturnVal getReturnVal(String message, boolean success)
@@ -3200,7 +3205,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>This is a copy of the editSchema method from the GanymedeAdmin
+   * This is a copy of the editSchema method from the GanymedeAdmin
    * class which has been modified so that it will assert a schema
    * edit lock without requiring that the login semaphore count be
    * zero.  This way we can get a DBSchemaEdit context that we can use
@@ -3208,7 +3213,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * GanymedeSession's semaphore increment.  This is safe to do only
    * because we know that the GanymedeXMLSession is single-threaded
    * and will not do any database activity while the schema is opened
-   * for editing.</p>
+   * for editing.
    *
    * @return null if the server could not be put into schema edit mode.
    */
@@ -3321,9 +3326,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * <p>Private helper method to print to the client the text of
+   * Private helper method to print to the client the text of
    * any return val dialog.  Returns true if the retval codes
-   * for success, false otherwise.</p>
+   * for success, false otherwise.
    */
 
   private boolean handleReturnVal(ReturnVal retval)
