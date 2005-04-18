@@ -1080,24 +1080,59 @@ public class Ganymede {
 	      }
 	  }
       }
-      
-    /** Used to add Task option strings to an existing database
-    DBObjectBase b = Ganymede.db.getObjectBase(SchemaConstants.TaskBase);
-    try
+
+    // At DBStore 2.11, we added a hidden label field for objectEvent
+    // objects.  We'll edit any old ones here and fix up their labels
+
+    if (Ganymede.db.isLessThan(2,11))
       {
-        DBObjectBaseField bf = new DBObjectBaseField(b);
-        bf.field_code = SchemaConstants.TaskOptionStrings;
-        bf.field_type = FieldType.STRING;
-        bf.array = true;
-        bf.field_name = "Option Strings";
-        bf.comment = "Optional task parameters, interpreted by specific tasks if needed";
-        b.addFieldToEnd(bf);
+	boolean success = true;
+	Vector objects = internalSession.getObjects(SchemaConstants.ObjectEventBase);
+
+	if (objects.size() > 0)
+	  {
+	    internalSession.openTransaction("Ganymede objectEvent fixup hook");
+
+	    try
+	      {
+		for (int i = 0; i < objects.size(); i++)
+		  {
+		    DBObject object = (DBObject) objects.elementAt(i);
+
+		    StringDBField labelField = (StringDBField) object.getField(SchemaConstants.ObjectEventLabel);
+
+		    if (labelField == null)
+		      {
+			objectEventCustom objectEventObj = (objectEventCustom) internalSession.session.editDBObject(object.getInvid());
+
+			if (objectEventObj != null)
+			  {
+			    ReturnVal retVal = objectEventObj.updateLabel((String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
+									  (String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventToken));
+
+			    if (retVal != null && !retVal.didSucceed())
+			      {
+				success = false;
+			      }
+			  }
+		      }
+		  }
+
+		if (success)
+		  {
+		    internalSession.commitTransaction();
+		  }
+		else
+		  {
+		    internalSession.abortTransaction();
+		  }
+	      }
+	    catch (Throwable ex)
+	      {
+		internalSession.abortTransaction();
+	      }
+	  }
       }
-    catch (RemoteException rex)
-      {
-        Ganymede.stackTrace(rex);
-      }
-    **/
   }
 
 

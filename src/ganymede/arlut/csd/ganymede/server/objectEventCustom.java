@@ -307,7 +307,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    * field for us.
    */
 
-  private ReturnVal updateLabel(String typeName, String token)
+  ReturnVal updateLabel(String typeName, String token)
   {
     // we only set the label if we have both a typename and a
     // token.. otherwise, the setFieldValueLocal() call we do here
