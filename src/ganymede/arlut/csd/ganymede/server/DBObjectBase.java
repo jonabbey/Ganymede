@@ -205,7 +205,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	upgradeClassMap = new Hashtable();
 	upgradeClassMap.put("arlut.csd.ganymede.eventCustom", "arlut.csd.ganymede.server.eventCustom");
 	upgradeClassMap.put("arlut.csd.ganymede.objectEventCustom", "arlut.csd.ganymede.server.objectEventCustom");
-	upgradeClassMap.put("arlut.csd.ganymede.objectEventCustom", "arlut.csd.ganymede.server.objectEventCustom");
 	upgradeClassMap.put("arlut.csd.ganymede.ownerCustom", "arlut.csd.ganymede.server.ownerCustom");
 	upgradeClassMap.put("arlut.csd.ganymede.adminPersonaCustom", "arlut.csd.ganymede.server.adminPersonaCustom");
 	upgradeClassMap.put("arlut.csd.ganymede.permCustom", "arlut.csd.ganymede.server.permCustom");
