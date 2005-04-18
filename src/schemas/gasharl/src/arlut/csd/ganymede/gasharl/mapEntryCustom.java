@@ -319,42 +319,19 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
   }
 
   /**
-   * <p>This method should be defined to return true in DBEditObject subclasses
-   * which provide a getLabelHook() method.</p>
+   * If this DBEditObject is managing an embedded object, the
+   * getEmbeddedObjectLabel() can be overridden to display a synthetic
+   * label in the context of viewing or editing the containing object,
+   * and when doing queries on the containing type.
    *
-   * <p>If this method is not redefined to return true in any subclasses which
-   * define a getLabelHook() method, then searches on objects of this type
-   * may not properly reflect the desired label.</p>
+   * The getLabel() method will not consult this hook, however, and
+   * embedded objects will be represented with their unique label
+   * field when processed in an XML context.
    *
-   * <p><b>*PSEUDOSTATIC*</b></p>
+   * <b>*PSEUDOSTATIC*</b>
    */
 
-  public boolean useLabelHook()
-  {
-    return true;
-  }
-
-  /**
-   * <p>Hook to allow intelligent generation of labels for DBObjects
-   * of this type.  Subclasses of DBEditObject should override
-   * this method to provide for custom generation of the
-   * object's label type</p>
-   *
-   * <p>If you override this method to define a custom labelHook method
-   * for a DBEditObject subclass, you _must_ also override the
-   * {@link arlut.csd.ganymede.server.DBEditObject#useLabelHook()}
-   * method to return true.</p>
-   *
-   * <p>If you can affirmatively declare that the labels returned by
-   * getLabelHook() will always be unique among objects of this type,
-   * you should be sure to override
-   * {@link arlut.csd.ganymede.server.DBEditObject#labelHookGuaranteedUnique()}
-   * so that it returns true in your DBEditObject subclass.</p>
-   *
-   * <p><b>*PSEUDOSTATIC*</b></p>
-   */
-
-  public String getLabelHook(DBObject object)
+  public final String getEmbeddedObjectDisplayLabelHook(DBObject object)
   {
     InvidDBField field, field2;
     StringBuffer buff = new StringBuffer();
