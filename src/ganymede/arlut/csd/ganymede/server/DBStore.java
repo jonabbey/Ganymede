@@ -168,7 +168,7 @@ public final class DBStore implements JythonMap {
    * after id_string
    */
 
-  static final byte minor_version = 10;
+  static final byte minor_version = 11;
 
   /**
    * XML version major id
@@ -626,6 +626,32 @@ public final class DBStore implements JythonMap {
 	// that have come into use since Ganymede 1.0.12.
 
 	verifySchema2_0();
+
+	// make sure that all object bases have namespace-constrained
+	// label fields.  This is a new requirement with Ganymede 2.0
+	// (DBStore rev 2.11), and not one that we can really automate
+	// in any way.  So we just warn the admin and hope that they
+	// start up the schema editor so that we can force them to fix
+	// it.
+
+	if (!verify_label_fields())
+	  {
+	    /*
+	     *
+	     *
+	     * WARNING: DBStore load error: one or more object bases are missing
+	     *          namespace constrained label fields.
+	     *
+	     *          Ganymede 2.0 now requires all object types to have
+	     *          namespace-constrained label fields.
+	     *
+	     *          You MUST edit the schema before proceeding and define label fields
+	     *          for all object types, or else Ganymede will behave unreliably.
+	     *
+	     */
+
+	    System.err.println(ts.l("load.missing_labels"));
+	  }
       }
     catch (IOException ex)
       {
@@ -2203,6 +2229,12 @@ public final class DBStore implements JythonMap {
     loading = false;
   }
 
+  /**
+   * This method is designed to transition from a Ganymede 1.0
+   * database schema to a Ganymede 2.0 database schema, by adding the
+   * new built-in object and fields that 1.0 lacked.
+   */
+
   void verifySchema2_0()
   {
     DBObjectBase b = null;
@@ -2305,9 +2337,12 @@ public final class DBStore implements JythonMap {
 	  }
 	else
 	  {
-	    // we added the SyncChannelTypeString, SyncChannelTypeNum and
-	    // SyncChannelFullStateFile fields after releasing a
+	    // we added the SyncChannelTypeString, SyncChannelTypeNum
+	    // and SyncChannelFullStateFile fields after releasing a
 	    // version without, check to see if we need to add them
+
+	    // note that we redefined the SyncChannel type to have
+	    // these fields in DBStore version 2.11.
 
 	    DBObjectBase syncBase = (DBObjectBase) getObjectBase(SchemaConstants.SyncChannelBase);
 
@@ -2377,6 +2412,8 @@ public final class DBStore implements JythonMap {
 	    objectEventBase.addFieldToStart(bf);
 	  }
 
+	objectEventBase.setLabelField(SchemaConstants.ObjectEventLabel);
+
 	// and this last check is for the old ARL database, which
 	// somehow did not get namespace constrained on the task name
 	// field
@@ -2396,6 +2433,43 @@ public final class DBStore implements JythonMap {
       {
 	throw new RuntimeException(ex);
       }
+  }
+
+  /**
+   * This method scans through all of the object bases defined and
+   * verifies that all bases have a designated label field that is
+   * namespace constrained.
+   */
+
+  boolean verify_label_fields()
+  {
+    boolean ok = true;
+    Enumeration en = objectBases.elements();
+
+    while (en.hasMoreElements())
+      {
+	DBObjectBase base = (DBObjectBase) en.nextElement();
+
+	if (base.label_id == -1)
+	  {
+	    // "Error, object base {0} has no label field defined."
+	    System.err.println(ts.l("verify_label_fields.no_label", base.getName()));
+	    ok = false;
+	  }
+	else
+	  {
+	    DBObjectBaseField labelFieldDef = (DBObjectBaseField) base.getField(base.label_id);
+
+	    if (labelFieldDef.getNameSpace() == null)
+	      {
+		// "Error, object base {0}''s label field ({1}) must be namespace-constrained."
+		System.err.println(ts.l("verify_label_fields.no_namespace", base.getName(), labelFieldDef.getName()));
+		ok = false;
+	      }
+	  }
+      }
+
+    return ok;
   }
 
   /**
