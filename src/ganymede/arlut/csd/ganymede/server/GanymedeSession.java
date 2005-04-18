@@ -3674,8 +3674,6 @@ final public class GanymedeSession implements Session, Unreferenced {
     
     if (internal || !query.filtered || filterMatch(obj))
       {
-	DBEditObject x;
-
 	if (debug)
 	  {
 	    Ganymede.debug("not discounting out of hand");
@@ -3687,10 +3685,19 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      {
 		    Ganymede.debug("not using perspective object");
 	      }
-	    
-	    result.addRow(obj.getInvid(), obj.getLabel(), 
-			  obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
-			  perm.isEditable());
+
+	    if (obj.isEmbedded())
+	      {
+		result.addRow(obj.getInvid(), obj.getEmbeddedObjectDisplayLabel(),
+			      obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
+			      perm.isEditable());
+	      }
+	    else
+	      {
+		result.addRow(obj.getInvid(), obj.getLabel(), 
+			      obj.isInactivated(), obj.willExpire(), obj.willBeRemoved(),
+			      perm.isEditable());
+	      }
 	  }
 	else
 	  {

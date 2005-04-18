@@ -437,7 +437,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 		cp.setBorder(wp.lineEmptyBorder);
 
-		addElement(object.getLabel(), cp, false, false);
+		addElement(object.getEmbeddedObjectDisplayLabel(), cp, false, false);
 	      }
 	  }
 	catch (Exception rx)

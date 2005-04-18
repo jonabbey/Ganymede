@@ -175,6 +175,17 @@ public interface db_object extends java.rmi.Remote {
   public boolean isEmbedded() throws RemoteException;
 
   /**
+   * If this object type is embedded, this method will return the
+   * desired display label for the embedded object.
+   *
+   * This label may not be the same as returned by getLabel(), which
+   * is guaranteed to be derived from a namespace constrained label
+   * field, suitable for use in the XML context.
+   */
+
+  public String getEmbeddedObjectDisplayLabel() throws RemoteException;
+
+  /**
    * <p>Returns true if inactivate() is a valid operation on
    * checked-out objects of this type.</p>
    */

@@ -1084,7 +1084,7 @@ public class Ganymede {
     // At DBStore 2.11, we added a hidden label field for objectEvent
     // objects.  We'll edit any old ones here and fix up their labels
 
-    if (Ganymede.db.isLessThan(2,11))
+    if (true || Ganymede.db.isLessThan(2,11))
       {
 	boolean success = true;
 	Vector objects = internalSession.getObjects(SchemaConstants.ObjectEventBase);

@@ -611,6 +611,45 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
+   * If this object type is embedded, this method will return the
+   * desired display label for the embedded object.
+   *
+   * This label may not be the same as returned by getLabel(), which
+   * is guaranteed to be derived from a namespace constrained label
+   * field, suitable for use in the XML context.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final String getEmbeddedObjectDisplayLabel()
+  {
+    if (getStatus() == DELETING)
+      {
+	return getOriginal().getEmbeddedObjectDisplayLabel();
+      }
+
+    return super.getEmbeddedObjectDisplayLabel();
+  }
+
+  /**
+   * If this DBEditObject is managing an embedded object, the
+   * getEmbeddedObjectLabel() can be overridden to display a synthetic
+   * label in the context of viewing or editing the containing object,
+   * and when doing queries on the containing type.
+   *
+   * The getLabel() method will not consult this hook, however, and
+   * embedded objects will be represented with their unique label
+   * field when processed in an XML context.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public final String getEmbeddedObjectDisplayLabelHook(DBObject object)
+  {
+    return object.getLabel();
+  }
+
+  /**
    * This method is used to make sure that the built-in fields that
    * the server assumes will always be present in any editable object
    * will be in place.
