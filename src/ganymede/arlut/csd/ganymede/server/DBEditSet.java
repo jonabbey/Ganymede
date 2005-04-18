@@ -1126,6 +1126,7 @@ public class DBEditSet {
 
     try
       {
+	commit_run_precommit_hooks();
 	commit_lockBases(); // may block
 	commit_verifyNamespaces();
 	commit_handlePhase1();
@@ -1161,6 +1162,56 @@ public class DBEditSet {
 
 	releaseWriteLock();
       }
+  }
+
+  /**
+   * This hook is run before we lock the bases, so we're still able to
+   * make changes to our objects in transaction.
+   *
+   * The main use of this hook will be to allow DBEditObject
+   * subclasses to refresh their hidden unique label fields, if any.
+   * If such a hook has a problem, it should return a ReturnVal
+   * indicating the problem.
+   */
+
+  private final void commit_run_precommit_hooks() throws CommitException
+  {
+    Vector committedObjects;
+    Iterator iter;
+    ReturnVal retVal;
+    String checkpointKey = description + " precommit hook";
+    DBEditObject eObj;
+
+    /* -- */
+
+    committedObjects = new Vector();
+
+    iter = this.objects.values().iterator();
+
+    checkpoint(checkpointKey);
+    
+    while (iter.hasNext())
+      {
+	eObj = (DBEditObject) iter.next();
+
+	try
+	  {
+	    retVal = eObj.preCommitHook();
+
+	    if (retVal != null && !retVal.didSucceed())
+	      {
+		rollback(checkpointKey);
+		throw new CommitNonFatalException(retVal);
+	      }
+	  }
+	catch (Throwable ex)
+	  {
+	    retVal = Ganymede.createErrorDialog(Ganymede.stackTrace(ex));
+	    throw new CommitNonFatalException(retVal);
+	  }
+      }
+
+    popCheckpoint(checkpointKey);
   }
 
   /**

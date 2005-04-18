@@ -57,6 +57,7 @@ import java.util.Vector;
 
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -303,8 +304,35 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * This private helper method updates the hidden, composite, label
-   * field for us.
+   * This method provides a pre-commit hook that runs after the user
+   * has hit commit but before the system has established write locks
+   * for the commit.
+   *
+   * The intended purpose of this hook is to allow objects that
+   * dynamically maintain hidden label fields to update those fields
+   * from the contents of the object's other fields at commit time.
+   *
+   * This method runs in a checkpointed context.  If this method fails
+   * in any operation, you should return a ReturnVal with a failure
+   * dialog encoded, and the transaction's commit will be blocked and
+   * a dialog explaining the problem will be presented to the user.
+   */
+
+  public ReturnVal preCommitHook()
+  {
+    if (this.getStatus() == ObjectStatus.DELETING ||
+	this.getStatus() == ObjectStatus.DROPPING)
+      {
+	return null;
+      }
+
+    return updateLabel((String) getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
+		       (String) getFieldValueLocal(SchemaConstants.ObjectEventToken));
+  }
+
+  /**
+   * This local method updates the hidden, composite, label field for
+   * us.
    */
 
   ReturnVal updateLabel(String typeName, String token)
