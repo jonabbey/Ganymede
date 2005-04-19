@@ -287,7 +287,11 @@ public class DBLog {
     if (mailController != null)
       {
 	mailController.close();
-	mailer.stopThreaded();	// we'll block here while the mailer's email thread drains
+
+	if (mailer != null)
+	  {
+	    mailer.stopThreaded();	// we'll block here while the mailer's email thread drains
+	  }
       }
 
     closed = true;
