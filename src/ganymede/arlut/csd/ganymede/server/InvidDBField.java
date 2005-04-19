@@ -467,7 +467,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	xmlOut.startElement("invid");
 	xmlOut.attribute("type", XMLUtils.XMLEncode(target.getTypeName()));
-	xmlOut.attribute("id", target.getLabel());
+	xmlOut.attribute("id", target.getLabel()); // getLabel() gives us the XML-friendly label
 
 	if (xmlOut.isSyncing())
 	  {
@@ -721,7 +721,14 @@ public final class InvidDBField extends DBField implements invid_field {
 	    return ts.l("getRemoteLabel.nonesuch", invid.toString());
 	  }
 
-	return objectRef.getLabel();
+	if (objectRef.isEmbedded())
+	  {
+	    return objectRef.getEmbeddedObjectDisplayLabel();
+	  }
+	else
+	  {
+	    return objectRef.getLabel();
+	  }
       }
     else
       {
