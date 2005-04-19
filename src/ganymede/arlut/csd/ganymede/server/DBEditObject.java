@@ -644,7 +644,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * <b>*PSEUDOSTATIC*</b>
    */
 
-  public final String getEmbeddedObjectDisplayLabelHook(DBObject object)
+  public String getEmbeddedObjectDisplayLabelHook(DBObject object)
   {
     return object.getLabel();
   }
