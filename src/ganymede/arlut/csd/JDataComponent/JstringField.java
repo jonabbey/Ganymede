@@ -250,8 +250,8 @@ public class JstringField extends JentryField {
       {
 	if (!isAllowed(str.charAt(i)))
 	  {
-	    throw new IllegalArgumentException("invalid char in string: " + 
-					       str.charAt(i));
+	    throw new IllegalArgumentException("invalid char in string (\"" + str + "\") : '" + 
+					       str.charAt(i) + "'");
 	  }
       }
   }
