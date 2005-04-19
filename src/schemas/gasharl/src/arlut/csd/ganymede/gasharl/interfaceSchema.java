@@ -77,4 +77,5 @@ public interface interfaceSchema {
   final static short ALIASES=260;
   final static short IPNET=261;
   final static short ADDRESS=258;
+  final static short HIDDENLABEL=262;
 }

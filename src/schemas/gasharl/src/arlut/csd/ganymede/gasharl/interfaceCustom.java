@@ -58,6 +58,7 @@ import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectHandle;
+import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -124,68 +125,58 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * <p>This method should be defined to return true in DBEditObject subclasses
-   * which provide a getLabelHook() method.</p>
+   * This method provides a pre-commit hook that runs after the user
+   * has hit commit but before the system has established write locks
+   * for the commit.
    *
-   * <p>If this method is not redefined to return true in any subclasses which
-   * define a getLabelHook() method, then searches on objects of this type
-   * may not properly reflect the desired label.</p>
+   * The intended purpose of this hook is to allow objects that
+   * dynamically maintain hidden label fields to update those fields
+   * from the contents of the object's other fields at commit time.
    *
-   * <p><b>*PSEUDOSTATIC*</b></p>
+   * This method runs in a checkpointed context.  If this method fails
+   * in any operation, you should return a ReturnVal with a failure
+   * dialog encoded, and the transaction's commit will be blocked and
+   * a dialog explaining the problem will be presented to the user.
    */
 
-  public boolean useLabelHook()
+  public ReturnVal preCommitHook()
   {
-    return true;
+    if (this.getStatus() == ObjectStatus.DELETING ||
+	this.getStatus() == ObjectStatus.DROPPING)
+      {
+	return null;
+      }
+
+    return updateHiddenLabel();
   }
 
   /**
-   * <p>This method should be defined to return true in DBEditObject
-   * subclasses which provide a {@link
-   * arlut.csd.ganymede.server.DBEditObject#getLabelHook()} method
-   * that is guaranteed to return a label value which is both unique
-   * across all objects of this type and persistent across multiple
-   * calls to get this object type's label.</p>
-   *
-   * <p>If a subclass doesn't override this method, the labels
-   * produced by getLabelHook() method will not be considered adequate
-   * for unique naming in xml dumps and etc., and we will default to
-   * using a label synthesized from the object base type name and the
-   * object id number derived from the object's invid.</p>
-   *
-   * <p>If a DBEditObject subclass does not override {@link
-   * arlut.csd.ganymede.server.DBEditObject#useLabelHook()} to
-   * return true, this method has no effect.</p>
-   *
-   * <p><b>*PSEUDOSTATIC*</b></p>
+   * This method patches up the hidden label field in this object.
    */
 
-  public boolean labelHookGuaranteedUnique()
+  public ReturnVal updateHiddenLabel()
   {
-    return true;
+    String newLabel = calcLabel(this);
+
+    return setFieldValueLocal(interfaceSchema.HIDDENLABEL, newLabel);
   }
 
-  /**
-   * <p>Hook to allow intelligent generation of labels for DBObjects
-   * of this type.  Subclasses of DBEditObject should override
-   * this method to provide for custom generation of the
-   * object's label type</p>
-   *
-   * <p>If you override this method to define a custom labelHook method
-   * for a DBEditObject subclass, you _must_ also override the
-   * {@link arlut.csd.ganymede.server.DBEditObject#useLabelHook()}
-   * method to return true.</p>
-   *
-   * <p>If you can affirmatively declare that the labels returned by
-   * getLabelHook() will always be unique among objects of this type,
-   * you should be sure to override
-   * {@link arlut.csd.ganymede.server.DBEditObject#labelHookGuaranteedUnique()}
-   * so that it returns true in your DBEditObject subclass.</p>
-   *
-   * <p><b>*PSEUDOSTATIC*</b></p>
-   */
+  private final String calcLabel(interfaceCustom object)
+  {
+    String name = (String) object.getFieldValueLocal(interfaceSchema.NAME);
+    String macAddress = (String) object.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
+    IPDBField ipfield = (IPDBField) object.getField(interfaceSchema.ADDRESS);
+    String ipString = null;
 
-  public String getLabelHook(DBObject object)
+    if (ipfield != null)
+      {
+	ipString = ipfield.getValueString();
+      }
+
+    return genLabel(name, ipString, macAddress);
+  }
+
+  private final String genLabel(String interfaceName, String ipString, String macAddress)
   {
     StringBuffer result = new StringBuffer();
     boolean openIP = false;
@@ -193,16 +184,12 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     /* -- */
 
-    String name = (String) object.getFieldValueLocal(interfaceSchema.NAME);
-
-    if (name != null)
+    if (interfaceName != null)
       {
-	result.append(name);
+	result.append(interfaceName);
       }
 
-    IPDBField ipfield = (IPDBField) object.getField(interfaceSchema.ADDRESS);
-
-    if (ipfield != null)
+    if (ipString != null && !ipString.equals(""))
       {
 	if (result.length() != 0)
 	  {
@@ -210,12 +197,9 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  }
 
 	result.append("[");
-	result.append(ipfield.getValueString());
-
+	result.append(ipString);
 	openIP = true;
       }
-
-    String macAddress = (String) object.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
 
     if (macAddress != null && macAddress.length() != 0)
       {
@@ -243,14 +227,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	result.append("]");
       }
 
-    if (result.length() == 0)
-      {
-	return null;
-      }
-    else
-      {
-	return result.toString();
-      }
+    return result.toString();
   }
 
   /**
@@ -405,6 +382,13 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  }
       }
 
+    // don't show off our hidden label for direct editing/viewing
+
+    if (field.getID() == interfaceSchema.HIDDENLABEL)
+      {
+	return false;
+      }
+
     return super.canSeeField(session, field);
   }
 
@@ -448,7 +432,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method allows the DBEditObject to have executive approval of
    * any scalar set operation, and to take any special actions in
    * reaction to the set.. if this method returns null or a success
@@ -456,13 +439,12 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    * make the change to its value.  If this method returns a
    * non-success code in its ReturnVal, the DBField that called us
    * will not make the change, and the field will be left
-   * unchanged.<br><br>
+   * unchanged.
    *
    * The DBField that called us will take care of all possible checks
    * on the operation (including a call to our own verifyNewValue()
    * method.  Under normal circumstances, we won't need to do anything
-   * here.<br><br>
-   *
+   * here.
    */
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
@@ -567,6 +549,9 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == interfaceSchema.ADDRESS)
       {
+	Invid netInvid = (Invid) getFieldValueLocal(interfaceSchema.IPNET);
+	Byte[] address = (Byte[]) value;
+
 	// if the address is being set in response to a network change,
 	// don't bounce back and set the network again
 
@@ -574,9 +559,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    return null;
 	  }
-
-	Invid netInvid = (Invid) getFieldValueLocal(interfaceSchema.IPNET);
-	Byte[] address = (Byte[]) value;
 
 	if (systemCustom.checkMatchingNet(getSession(), netInvid, address))
 	  {
@@ -588,7 +570,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// we need to find a new network to match, and to set that
 	// into our network field
 
-	netInvid = getParentObj().findMatchingNet((Byte[]) value);
+	netInvid = getParentObj().findMatchingNet(address);
 
 	if (netInvid == null)
 	  {
@@ -615,7 +597,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 		return Ganymede.createErrorDialog("schema error",
 						  "interfaceCustom.finalizeSetValue(): failed to set ip net");
 	      }
-	    
+
 	    retVal = new ReturnVal(true, true);
 	    retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
 	    
