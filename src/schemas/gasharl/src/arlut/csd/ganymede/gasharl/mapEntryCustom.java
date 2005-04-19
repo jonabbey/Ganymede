@@ -65,6 +65,7 @@ import arlut.csd.ganymede.server.DBEditSet;
 import arlut.csd.ganymede.server.DBField;
 import arlut.csd.ganymede.server.DBObject;
 import arlut.csd.ganymede.server.DBObjectBase;
+import arlut.csd.ganymede.server.DBSession;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeSession;
 import arlut.csd.ganymede.server.InvidDBField;
@@ -364,6 +365,38 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
       }
 
     return buff.toString();
+  }
+
+  /**
+   *
+   * Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of DBField will
+   * wind up calling up to here to let us override the normal visibility
+   * process.<br><br>
+   *
+   * Note that it is permissible for session to be null, in which case
+   * this method will always return the default visiblity for the field
+   * in question.<br><br>
+   *
+   * If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.<br><br>
+   *
+   * To be overridden in DBEditObject subclasses.
+   * 
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   */
+
+  public boolean canSeeField(DBSession session, DBField field)
+  {
+    // don't show off our hidden label for direct editing or viewing
+
+    if (field.getID() == mapEntrySchema.XMLLABEL)
+      {
+	return false;
+      }
+
+    return super.canSeeField(session, field);
   }
 
   private Vector getSiblingInvids()

@@ -130,6 +130,8 @@ public class FixupLabelsTask implements Runnable {
 	// we don't want interactive handholding
 
 	mySession.enableWizards(false);
+
+	mySession.enableOversight(false); // don't bother us about inconsistencies
 	
 	ReturnVal retVal = mySession.openTransaction("FixupLabels conversion task");
 
@@ -229,7 +231,7 @@ public class FixupLabelsTask implements Runnable {
 
   private boolean fixupInterfaceLabels() throws InterruptedException, NotLoggedInException
   {
-    Vector systems = mySession.getObjects(systemSchema.BASE);
+    Vector systems = mySession.getObjects(interfaceSchema.BASE);
     
     for (int i = 0; i < systems.size(); i++)
       {

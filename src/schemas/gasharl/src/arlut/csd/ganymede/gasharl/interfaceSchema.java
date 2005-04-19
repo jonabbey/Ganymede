@@ -72,6 +72,8 @@ public interface interfaceSchema {
   // you change the schema for the interface, you'll want to change
   // this file to match.
 
+  final static short BASE = 265;
+
   final static short ETHERNETINFO=256;
   final static short NAME=259;
   final static short ALIASES=260;
