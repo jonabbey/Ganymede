@@ -1286,11 +1286,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (false)
 	      {
 		// "7.  pass 1 - fixups on {0}"
-		err.println(ts.l("processSchema.schemadebug_7_1", _oldBase));
+		err.println(ts.l("processSchema.schemadebug_7_1", _oldBase.getName()));
 	      }
 
 	    // "\tEditing object base {0}"
-	    err.println(ts.l("processSchema.editing_objectbase", _oldBase));
+	    err.println(ts.l("processSchema.editing_objectbase", _oldBase.getName()));
 
 	    // don't yet try to resolve invid links, since we haven't
 	    // done a complete pass through basesToEdit to fix up
@@ -1325,7 +1325,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (schemadebug)
 	      {
 		// "7.  pass 2 - fixups on object base {0}"
-		err.println(ts.l("processSchema.schemadebug_7_2", _oldBase));
+		err.println(ts.l("processSchema.schemadebug_7_2", _oldBase.getName()));
 	      }
 
 	    //	    err.println("\tResolving " + _oldBase);
