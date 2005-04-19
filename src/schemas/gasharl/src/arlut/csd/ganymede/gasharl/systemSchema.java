@@ -72,6 +72,8 @@ public interface systemSchema {
   // you change the schema for the system, you'll want to change
   // this file to match.
 
+  final static short BASE=263;
+
   final static short OS=256;
   final static short MANUFACTURER=257;
   final static short MODEL=258;

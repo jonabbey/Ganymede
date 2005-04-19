@@ -262,34 +262,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	// need to find a uid for this user
 
-	// see if we have an owner set, check it for our starting uid
-
-	/*
-	 * 
-	Vector owners = getFieldValuesLocal(SchemaConstants.OwnerListField);
-
-	if (owners != null && owners.size() > 0)
-	{
-	Invid primaryOwner = (Invid) owners.elementAt(0);
-
-	DBObject owner = getSession().viewDBObject(primaryOwner);
-
-	if (owner != null)
-	{
-	// field 256 in the owner group is the GASHARL starting
-	// uid/gid
-
-	uidVal = (Integer) owner.getFieldValueLocal((short) 256);
-
-	if (uidVal == null)
-	{
-	uidVal = new Integer(lowUID);
-	}
-	}
-	}
-
-	*/
-
 	StringDBField guidField = (StringDBField) getField(GUID);
 
 	if (guidField == null)
@@ -437,6 +409,56 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     org.doomdark.uuid.UUID guid = gen.generateTimeBasedUUID(new EthernetAddress("8:0:20:fd:6b:7")); // csdsun9
 
     return guid.toString();
+  }
+
+  /**
+   * This method provides a pre-commit hook that runs after the user
+   * has hit commit but before the system has established write locks
+   * for the commit.
+   *
+   * The intended purpose of this hook is to allow objects that
+   * dynamically maintain hidden label fields to update those fields
+   * from the contents of the object's other fields at commit time.
+   *
+   * This method runs in a checkpointed context.  If this method fails
+   * in any operation, you should return a ReturnVal with a failure
+   * dialog encoded, and the transaction's commit will be blocked and
+   * a dialog explaining the problem will be presented to the user.
+   */
+
+  public ReturnVal preCommitHook()
+  {
+    if (this.getStatus() == ObjectStatus.DELETING ||
+	this.getStatus() == ObjectStatus.DROPPING)
+      {
+	return null;
+      }
+
+    ReturnVal retVal = null;
+    InvidDBField volumeMapEntries = (InvidDBField) getField(userSchema.VOLUMES);
+    Vector values = volumeMapEntries.getValuesLocal();
+    
+    for (int i = 0; i < values.size(); i++)
+      {
+	Invid entryInvid = (Invid) values.elementAt(i);
+
+	DBEditObject eObj = getSession().editDBObject(entryInvid);
+
+	Invid mapInvid = (Invid) eObj.getFieldValueLocal(mapEntrySchema.MAP);
+
+	DBObject mapObj = getSession().viewDBObject(mapInvid);
+
+	String mapName = mapObj.getLabel();
+
+	retVal = eObj.setFieldValueLocal(mapEntrySchema.XMLLABEL, this.getLabel() + "/" + mapName);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
+      }
+
+    return null;
   }
 
   /**
