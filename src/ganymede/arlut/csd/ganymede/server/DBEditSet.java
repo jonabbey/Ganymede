@@ -1186,13 +1186,13 @@ public class DBEditSet {
 
     committedObjects = new Vector();
 
-    iter = this.objects.values().iterator();
+    DBEditObject[] myObjects = getObjectList();
 
     checkpoint(checkpointKey);
-    
-    while (iter.hasNext())
+
+    for (int i = 0; i < myObjects.length; i++)
       {
-	eObj = (DBEditObject) iter.next();
+	eObj = myObjects[i];
 
 	try
 	  {
