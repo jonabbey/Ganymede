@@ -343,6 +343,14 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   public boolean canSeeField(DBSession session, DBField field)
   {
+    // don't show off our hidden label for direct editing or viewing
+
+    if (field.getID() == interfaceSchema.HIDDENLABEL)
+      {
+	return false;
+      }
+
+    // For the rest of our fields that we are concerned with, the
     // session will be null if we are being checked outside of an
     // editable context.  If we are not being edited, we don't
     // care.. if the fields are there, they can see them.
@@ -380,13 +388,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    return true;
 	  }
-      }
-
-    // don't show off our hidden label for direct editing/viewing
-
-    if (field.getID() == interfaceSchema.HIDDENLABEL)
-      {
-	return false;
       }
 
     return super.canSeeField(session, field);
