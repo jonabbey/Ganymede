@@ -67,6 +67,8 @@ import arlut.csd.ganymede.rmi.FileTransmitter;
 import arlut.csd.ganymede.rmi.adminSession;
 import arlut.csd.ganymede.rmi.db_object;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                        ReturnVal
@@ -125,6 +127,13 @@ public class ReturnVal implements java.io.Serializable {
   public static final byte EXPIRATIONSET = 1;
   public static final byte DELETED = 2;
   public static final byte LAST = 2;
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede system.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.ReturnVal");
 
   // ---
 
@@ -832,6 +841,68 @@ public class ReturnVal implements java.io.Serializable {
   public void setCallback(Ganymediator callback)
   {
     this.callback = callback;
+  }
+
+  /**
+   * This method sets up a basic error text dialog for this ReturnVal.
+   *
+   * Unlike {@link
+   * arlut.csd.ganymede.server.Ganymede#createErrorDialog(java.lang.String,
+   * java.lang.String)}, this method does not write the error text to
+   * stderr.
+   */
+
+  public void setErrorText(String body)
+  {
+    this.setErrorText(ts.l("setErrorText.default_title"), body);
+  }
+
+  /**
+   * This method sets up a basic error text dialog for this ReturnVal.
+   *
+   * Unlike {@link
+   * arlut.csd.ganymede.server.Ganymede#createErrorDialog(java.lang.String,
+   * java.lang.String)}, this method does not write the error text to
+   * stderr.
+   */
+
+  public void setErrorText(String title, String body)
+  {
+    this.dialog = new JDialogBuff(title, body, 
+				  ts.l("setErrorText.ok"),
+				  null,
+				  "error.gif");
+  }
+
+  /**
+   * This method sets up a basic info text dialog for this ReturnVal.
+   *
+   * Unlike {@link
+   * arlut.csd.ganymede.server.Ganymede#createErrorDialog(java.lang.String,
+   * java.lang.String)}, this method does not write the error text to
+   * stderr.
+   */
+
+  public void setInfoText(String body)
+  {
+    this.setInfoText(ts.l("setInfoText.default_title"), body);
+  }
+
+  /**
+   * This method sets up a basic info text dialog for this ReturnVal.
+   *
+   * Unlike {@link
+   * arlut.csd.ganymede.server.Ganymede#createErrorDialog(java.lang.String,
+   * java.lang.String)}, this method does not write the error text to
+   * stderr.
+   */
+
+  public void setInfoText(String title, String body)
+  {
+    this.dialog = new JDialogBuff(title, body, 
+				  ts.l("setInfoText.ok"),
+				  null,
+				  "ok.gif");
   }
 
   /**
