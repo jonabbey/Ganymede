@@ -395,9 +395,9 @@ public class PasswordAgingTask implements Runnable {
 
     objVect.addElement(userObject.getInvid());
 
-    String titleString = "Password Expiring Soon For User " + userObject.toString() + ", at " + passwordChangeTime;
+    String titleString = "Password Expiring Soon For User " + userObject.getLabel() + ", at " + passwordChangeTime;
 
-    String messageString = "The password for user account " + userObject.toString() + 
+    String messageString = "The password for user account " + userObject.getLabel() + 
       " will expire soon.  You will need to change your password before " + passwordChangeTime +
       " or else your user account will be inactivated.\n\n" +
       "You can change your password online by visiting http://www.arlut.utexas.edu/password/\n\n" +
@@ -419,9 +419,9 @@ public class PasswordAgingTask implements Runnable {
 
     objVect.addElement(userObject.getInvid());
 
-    String titleString = "Password Expiring Very Soon For User " + userObject.toString() + ", at " + passwordChangeTime;
+    String titleString = "Password Expiring Very Soon For User " + userObject.getLabel() + ", at " + passwordChangeTime;
 
-    String messageString = "The password for user account " + userObject.toString() + 
+    String messageString = "The password for user account " + userObject.getLabel() + 
       " will expire very soon.  The password for this user account will need to be changed before " + passwordChangeTime +
       " or else the account will be inactivated.\n\n" +
       "You can change your password online by visiting http://www.arlut.utexas.edu/password/\n\n" +
@@ -445,9 +445,9 @@ public class PasswordAgingTask implements Runnable {
 
     objVect.addElement(userObject.getInvid());
 
-    String titleString = "Password Has Expired For User " + userObject.toString() + "!!!";
+    String titleString = "Password Has Expired For User " + userObject.getLabel() + "!!!";
 
-    String messageString = "The password for user account " + userObject.toString() + 
+    String messageString = "The password for user account " + userObject.getLabel() + 
       " expired at " + passwordChangeTime + ".  The password for this user account *must* be changed immediately, or else" +
       " the account will be inactivated.  If this account is inactivated, extension of the password" +
       " expiration deadline will be impossible, and a new password will need to be chosen to re-enable" +
