@@ -3023,7 +3023,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	buffer.append(volName);
 	buffer.append(".  The user's home directory has been registered in the ");
 	buffer.append(mapName);
-	buffer.append(" automounter home map.");
+	buffer.append(" automounter home map.\n");
 
 	subject = "User " + getLabel() + " home directory created";
       }

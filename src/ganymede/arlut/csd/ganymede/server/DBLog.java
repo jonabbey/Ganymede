@@ -954,9 +954,13 @@ public class DBLog {
 	  {
 	    message = transdescrip + "\n\n" + type.description + "\n\n" + event.description + "\n\n";
 	  }
-	else
+	else if (type.description != null && (!type.description.equals("")))
 	  {
 	    message = type.description + "\n\n" + event.description + "\n\n";
+	  }
+	else
+	  {
+	    message = event.description + "\n\n";
 	  }
 
 	message = arlut.csd.Util.WordWrap.wrap(message, 78);
