@@ -452,6 +452,59 @@ public abstract class DBField implements Remote, db_field {
   }
 
   /**
+   * This method is intended to run a consistency check on the
+   * contents of this field against the constraints specified in the
+   * {@link arlut.csd.ganymede.server.DBObjectBaseField} controlling
+   * this field.
+   *
+   * Returns a {@link arlut.csd.ganymede.common.ReturnVal} describing
+   * the error if the field's contents does not meet its constraints, or null
+   * if the field is in compliance with its constraints.
+   */
+
+  public ReturnVal validateContents()
+  {
+    if (!isVector())
+      {
+	return this.verifyBasicConstraints(this.value);
+      }
+    else
+      {
+	if (isVector())
+	  {
+	    Vector values = (Vector) this.value;
+
+	    synchronized (values)
+	      {
+		for (int i = 0; i < values.size(); i++)
+		  {
+		    Object element = values.elementAt(i);
+
+		    ReturnVal retVal = this.verifyBasicConstraints(element);
+
+		    if (retVal != null && !retVal.didSucceed())
+		      {
+			return retVal;
+		      }
+		  }
+	      }
+
+	    if (size() > getMaxArraySize())
+	      {
+		// "Field {0} in object {1} contains more elements ({2,number,#}) than is allowed ({3,number,#})."
+		return Ganymede.createErrorDialog(ts.l("validateContents.too_big_array",
+						       this.getName(),
+						       owner.getLabel(),
+						       new Integer(size()),
+						       new Integer(getMaxArraySize())));
+	      }
+	  }
+      }
+
+    return null;
+  }
+
+  /**
    * <p>This method is intended to be called when this field is being checked into
    * the database.  Subclasses of DBField will override this method to clean up
    * data that is cached for speed during editing.</p>
@@ -2929,9 +2982,44 @@ public abstract class DBField implements Remote, db_field {
   abstract public boolean verifyTypeMatch(Object o);
 
   /**
+   * Overridable method to verify that an object submitted to this
+   * field has an appropriate value.
+   *
+   * This check is more limited than that of verifyNewValue().. all it
+   * does is make sure that the object parameter passes the simple
+   * value constraints of the field.  verifyNewValue() does that plus
+   * a bunch more, including calling to the DBEditObject hook for the
+   * containing object type to see whether it happens to feel like
+   * accepting the new value or not.
+   *
+   * verifyBasicConstraints() is used to double check for values that
+   * are already in fields, in addition to being used as a likely
+   * component of verifyNewValue() to verify new values.
+   */
+
+  public ReturnVal verifyBasicConstraints(Object o)
+  {
+    return null;
+  }
+
+  /**
    * Overridable method to verify that an object
    * submitted to this field has an appropriate
    * value.
+   *
+   * This method is intended to make the final go/no go decision about
+   * whether a given value is appropriate to be placed in this field,
+   * by whatever means (vector add, vector replacement, scalar
+   * replacement).
+   *
+   * This method is expected to call the {@link
+   * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
+   * java.lang.Object)} method on {@link
+   * arlut.csd.ganymede.server.DBEditObject} in order to allow custom
+   * plugin classes to deny any given value that the plugin might not
+   * care for, for whatever reason.  Otherwise, the go/no-go decision
+   * will be made based on the checks performed by {@link
+   * arlut.csd.ganymede.DBField#verifyBasicConstraints(java.lang.Object)}.
    */
 
   abstract public ReturnVal verifyNewValue(Object o);

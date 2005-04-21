@@ -62,6 +62,8 @@ import java.util.Vector;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.num_field;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                   NumericDBField
@@ -79,6 +81,13 @@ import arlut.csd.ganymede.rmi.num_field;
  */
 
 public class NumericDBField extends DBField implements num_field {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.NumericDBField");
 
   /**
    * <P>Receive constructor.  Used to create a NumericDBField from a
@@ -264,12 +273,12 @@ public class NumericDBField extends DBField implements num_field {
 
     if (origN.value() != this.value())
       {
-	result.append("\tOld: ");
-	result.append(Integer.toString(origN.value()));
-	result.append("\n\tNew: ");
-	result.append(Integer.toString(this.value()));
-	result.append("\n");
-	
+	// "\tOld: {0,numeric,#}\n"
+	result.append(ts.l("getDiffString.old", origN.getValueLocal()));
+
+	// "\n\tNew: {0,numeric,#}\n"
+	result.append(ts.l("getDiffString.new", this.getValueLocal()));
+
 	return result.toString();
       }
     else
@@ -370,26 +379,55 @@ public class NumericDBField extends DBField implements num_field {
     return ((o == null) || (o instanceof Integer));
   }
 
+  /**
+   * Overridable method to verify that an object submitted to this
+   * field has an appropriate value.
+   *
+   * This check is more limited than that of verifyNewValue().. all it
+   * does is make sure that the object parameter passes the simple
+   * value constraints of the field.  verifyNewValue() does that plus
+   * a bunch more, including calling to the DBEditObject hook for the
+   * containing object type to see whether it happens to feel like
+   * accepting the new value or not.
+   *
+   * verifyBasicConstraints() is used to double check for values that
+   * are already in fields, in addition to being used as a likely
+   * component of verifyNewValue() to verify new values.
+   */
+
+  public ReturnVal verifyBasicConstraints(Object o)
+  {
+    if (!verifyTypeMatch(o))
+      {
+	// "Submitted value {0} is not a number!  Major client error while trying to edit field {1} in object {2}."
+	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+					  ts.l("verifyBasicConstraints.type_error",
+					       o, this.getName(), owner.getLabel()));
+      }
+
+    return null;
+  }
+
   public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     Integer I;
+    ReturnVal retVal;
 
     /* -- */
 
     eObj = (DBEditObject) owner;
 
-    if (!verifyTypeMatch(o))
-      {
-	return Ganymede.createErrorDialog("Numeric Field Error",
-					  "Submitted value " + o + " is not an integer!  Major client error while" +
-					  " trying to edit field " + getName() +
-					  " in object " + owner.getLabel());
-      }
-
     if (o == null)
       {
 	return eObj.verifyNewValue(this, o);
+      }
+
+    retVal = verifyBasicConstraints(o);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
       }
 
     I = (Integer) o;
@@ -398,18 +436,18 @@ public class NumericDBField extends DBField implements num_field {
       {
 	if (getMinValue() > I.intValue())
 	  {
-	    return Ganymede.createErrorDialog("Numeric Field Error",
-					      "Submitted integer  " + I + " is out of range for field " +
-					      getName() + " in object " + owner.getLabel() + 
-					      ".  This field will not accept integers less than " + getMinValue());
+	    return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+					      ts.l("verifyNewValue.over_range",
+						   I, this.getName(), owner.getLabel(),
+						   new Integer(this.getMinValue())));
 	  }
 
 	if (getMaxValue() < I.intValue())
 	  {
-	    return Ganymede.createErrorDialog("Numeric Field Error",
-					      "Submitted integer  " + I + " is out of range for field " +
-					      getName() + " in object " + owner.getLabel() + 
-					      ".  This field will not accept integers greater than " + getMaxValue());
+	    return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+					      ts.l("verifyNewValue.under_range",
+						   I, this.getName(), owner.getLabel(),
+						   new Integer(this.getMinValue())));
 	  }
       }
 

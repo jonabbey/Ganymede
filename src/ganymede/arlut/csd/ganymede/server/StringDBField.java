@@ -67,6 +67,7 @@ import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.db_field;
 import arlut.csd.ganymede.rmi.string_field;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 
 /*------------------------------------------------------------------------------
@@ -85,6 +86,13 @@ import arlut.csd.Util.VectorUtils;
  */
 
 public class StringDBField extends DBField implements string_field {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.StringDBField");
 
   /**
    * <P>Receive constructor.  Used to create a StringDBField from a
@@ -523,36 +531,38 @@ public class StringDBField extends DBField implements string_field {
 	  {
 	    if (deleted.size() != 0)
 	      {
-		result.append("\tDeleted: ");
+		StringBuffer itemList = new StringBuffer();
 	    
 		for (int i = 0; i < deleted.size(); i++)
 		  {
 		    if (i > 0)
 		      {
-			result.append(", ");
+			itemList.append(", ");
 		      }
 
-		    result.append((String) deleted.elementAt(i));
+		    itemList.append((String) deleted.elementAt(i));
 		  }
 
-		result.append("\n");
+		// "\tDeleted: {0}\n"
+		result.append(ts.l("getDiffString.deleted", itemList.toString()));
 	      }
 
 	    if (added.size() != 0)
 	      {
-		result.append("\tAdded: ");
-	    
+		StringBuffer itemList = new StringBuffer();
+
 		for (int i = 0; i < added.size(); i++)
 		  {
 		    if (i > 0)
 		      {
-			result.append(", ");
+			itemList.append(", ");
 		      }
 
-		    result.append((String) added.elementAt(i));
+		    itemList.append((String) added.elementAt(i));
 		  }
 
-		result.append("\n");
+		// "\tAdded: {0}\n"
+		result.append(ts.l("getDiffString.added", itemList.toString()));
 	      }
 
 	    return result.toString();
@@ -566,11 +576,11 @@ public class StringDBField extends DBField implements string_field {
 	  }
 	else
 	  {
-	    result.append("\tOld: ");
-	    result.append(origS.value());
-	    result.append("\n\tNew: ");
-	    result.append(this.value());
-	    result.append("\n");
+	    // "\tOld: {0}\n"
+	    result.append(ts.l("getDiffString.old", origS.value()));
+
+	    // "\n\tNew: {0}\n"
+	    result.append(ts.l("getDiffString.new", this.value()));
 	
 	    return result.toString();
 	  }
@@ -815,66 +825,60 @@ public class StringDBField extends DBField implements string_field {
   //
   // ****
 
+
   public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) || (o instanceof String));
   }
 
-  public ReturnVal verifyNewValue(Object o)
+  /**
+   * Overridable method to verify that an object submitted to this
+   * field has an appropriate value.
+   *
+   * This check is more limited than that of verifyNewValue().. all it
+   * does is make sure that the object parameter passes the simple
+   * value constraints of the field.  verifyNewValue() does that plus
+   * a bunch more, including calling to the DBEditObject hook for the
+   * containing object type to see whether it happens to feel like
+   * accepting the new value or not.
+   *
+   * verifyBasicConstraints() is used to double check for values that
+   * are already in fields, in addition to being used as a likely
+   * component of verifyNewValue() to verify new values.
+   */
+
+  public ReturnVal verifyBasicConstraints(Object o)
   {
-    DBEditObject eObj;
-    String s;
-    QueryResult qr;
-
-    /* -- */
-
-    if (!isEditable(true))
-      {
-	return Ganymede.createErrorDialog("String Field Error",
-					  "Don't have permission to edit field " + getName() +
-					  " in object " + owner.getLabel());
-      }
-
-    eObj = (DBEditObject) owner;
-
     if (!verifyTypeMatch(o))
       {
-	return Ganymede.createErrorDialog("String Field Error",
-					  "Submitted value " + o + " is not a string!  Major client error while" +
-					  " trying to edit field " + getName() +
-					  " in object " + owner.getLabel());
+	// "Submitted value {0} is not a String!  Major client error while trying to edit field {1} in object {2}."
+	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+					  ts.l("verifyBasicConstraints.type_error",
+					       o, this.getName(), owner.getLabel()));
       }
 
-    s = (String) o;
-
-    if (s == null)
-      {
-	return eObj.verifyNewValue(this, s);
-      }
+    String s = (String) o;
 
     if (s.length() > maxSize())
       {
 	// string too long
+
+	// "String value {0} is too long for field {1} in object {2}.  Strings in this field must be less than or equal to {3,number,#} characters long."
 	
-	return Ganymede.createErrorDialog("String Field Error",
-					  "string value " + s +
-					  " is too long for field " + 
-					  getName() + " in object " +
-					  owner.getLabel() +
-					  ", which has a length limit of " + 
-					  maxSize());
+	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+					  ts.l("verifyBasicConstraints.overlength",
+					       s, this.getName(), owner.getLabel(), new Integer(this.maxSize())));
       }
 
     if (s.length() < minSize())
       {
 	// string too short
+
+	// "String value {0} is too short for field {1} in object {2}.  Strings in this field must be greater than or equal to {3,number,#} characters long."
 	
-	return Ganymede.createErrorDialog("String Field Error",
-					  "string value " + s +
-					  " is too short for field " + 
-					  getName() +
-					  " which has a minimum length of " + 
-					  minSize());
+	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+					  ts.l("verifyBasicConstraints.underlength",
+					       s, this.getName(), owner.getLabel(), new Integer(this.minSize())));
       }
 
     if (getFieldDef().regexp != null)
@@ -887,23 +891,27 @@ public class StringDBField extends DBField implements string_field {
 
 	    if (desc == null || desc.equals(""))
 	      {
-		return Ganymede.createErrorDialog("String Field Error",
-						  "String value " + s + " " +
-						  "does not conform to the regular expression pattern established " +
-						  "for this string field.\n\n" +
-						  "This string field only accepts strings matching the " +
-						  "following regular expression:\n\n\"" +
-						  getFieldDef().getRegexpPat() + "\"");
+		/*
+		  String value "{0}" does not conform to the regular expression pattern established for string field {1} in object {2}.\n\n\
+		  This string field only accepts strings matching the following regular expression pattern:\n\n\
+		  "{3}"
+		*/
+
+		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+						  ts.l("verifyBasicConstraints.regexp_nodesc",
+						       s, this.getName(), owner.getLabel(), getFieldDef().getRegexpPat()));
 	      }
 	    else
 	      {
-		return Ganymede.createErrorDialog("String Field Error",
-						  "String value " + s + " " +
-						  "does not conform to the regular expression pattern established " +
-						  "for this string field.\n\n" +
-						  "This string field only accepts strings matching the " +
-						  "following criteria:\n\n\"" +
-						  desc + "\"");
+		/*
+		  String value "{0}" does not conform to the regular expression pattern established for string field {1} in object {2}.\n\n\
+		  This string field only accepts strings matching the following criteria:\n\n\
+		  "{3}"
+		*/
+
+		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+						  ts.l("verifyBasicConstraints.regexp_desc",
+						       s, this.getName(), owner.getLabel(), desc));
 	      }
 	  }
       }
@@ -916,11 +924,10 @@ public class StringDBField extends DBField implements string_field {
 	  {
 	    if (okChars.indexOf(s.charAt(i)) == -1)
 	      {
-		return Ganymede.createErrorDialog("String Field Error",
-						  "string value " + s +
-						  " contains a character '" + 
-						  s.charAt(i) + "' which is not allowed in field " +
-						  getName() + " in object " + owner.getLabel());
+		// "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
+		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+						  ts.l("verifyBasicConstraints.bad_char",
+						       s, new Character(s.charAt(i)), this.getName(), owner.getLabel()));
 	      }
 	  }
       }
@@ -933,14 +940,70 @@ public class StringDBField extends DBField implements string_field {
 	  {
 	    if (badChars.indexOf(s.charAt(i)) != -1)
 	      {
-		return Ganymede.createErrorDialog("String Field Error",
-						  "string value " + s +
-						  " contains a character '" + 
-						  s.charAt(i) + "' which is not allowed in field " +
-						  getName() + " in object " + owner.getLabel());
+		// "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
+		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+						  ts.l("verifyBasicConstraints.bad_char",
+						       s, new Character(s.charAt(i)), this.getName(), owner.getLabel()));
 	      }
 	  }
       }
+
+    return null;
+  }
+
+  /**
+   * Overridable method to verify that an object
+   * submitted to this field has an appropriate
+   * value.
+   *
+   * This method is intended to make the final go/no go decision about
+   * whether a given value is appropriate to be placed in this field,
+   * by whatever means (vector add, vector replacement, scalar
+   * replacement).
+   *
+   * This method is expected to call the {@link
+   * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
+   * java.lang.Object)} method on {@link
+   * arlut.csd.ganymede.server.DBEditObject} in order to allow custom
+   * plugin classes to deny any given value that the plugin might not
+   * care for, for whatever reason.  Otherwise, the go/no-go decision
+   * will be made based on the checks performed by {@link
+   * arlut.csd.ganymede.DBField#verifyBasicConstraints(java.lang.Object)}.
+   */
+
+  public ReturnVal verifyNewValue(Object o)
+  {
+    DBEditObject eObj;
+    String s;
+    QueryResult qr;
+    ReturnVal retVal = null;
+
+    /* -- */
+
+    if (!isEditable(true))
+      {
+	// "Don''t have permission to edit field {0} in object {1}."
+	return Ganymede.createErrorDialog(ts.l("verifyNewValue.non_editable", getName(), owner.getLabel()));
+      }
+
+    eObj = (DBEditObject) owner;
+
+    // for a null value, have the DBEditObject plugin check it and
+    // give the yea/nay.
+
+    if (o == null)
+      {
+	return eObj.verifyNewValue(this, o);
+      }
+
+    retVal = verifyBasicConstraints(o);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+    s = (String) o;
 
     try
       {
@@ -950,17 +1013,16 @@ public class StringDBField extends DBField implements string_field {
 	    
 	    if (!qr.containsLabel(s))
 	      {
-		return Ganymede.createErrorDialog("String Field Error",
-						  "string value " + s +
-						  " is not a valid choice for field " +
-						  getName() + " in object " + owner.getLabel());
+		// "String value "{0}" is not a valid choice for field {1} in object {2}."
+
+		return Ganymede.createErrorDialog(ts.l("verifyNewValue.invalid_choice",
+						       s, getName(), owner.getLabel()));
 	      }
 	  }
       }
     catch (NotLoggedInException ex)
       {
-	return Ganymede.createErrorDialog("Error",
-					  "Not Logged In");
+	return Ganymede.loginError(ex);
       }
 
     // have our parent make the final ok on the value

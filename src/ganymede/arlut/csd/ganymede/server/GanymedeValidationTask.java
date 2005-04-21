@@ -212,6 +212,36 @@ public class GanymedeValidationTask implements Runnable {
 
 		    everythingsfine = false;
 		  }
+
+		try
+		  {
+		    retVal = object.validateFieldIntegrity();
+
+		    if (retVal != null && !retVal.didSucceed())
+		      {
+			String dialogText = retVal.getDialogText();
+			
+			if (dialogText != null)
+			  {
+			    // {0}:{1} failed field-level consistency check: {2}
+			    Ganymede.debug(ts.l("run.field_inconsistent", base.getName(), object.getLabel(), dialogText));
+			  }
+			else
+			  {
+			    // {0}:{1} failed field-level consistency check
+			    Ganymede.debug(ts.l("run.field_inconsistent_notext", base.getName(), object.getLabel()));
+			  }
+			
+			everythingsfine = false;
+		      }
+		  }
+		catch (Throwable ex)
+		  {
+		    // "{0}:{1} threw exception in validateFieldIntegrity():\n{2}"
+		    Ganymede.debug(ts.l("run.field_exceptioned", base.getName(), object.getLabel(), Ganymede.stackTrace(ex)));
+
+		    everythingsfine = false;
+		  }
 	      }
 	  }
 

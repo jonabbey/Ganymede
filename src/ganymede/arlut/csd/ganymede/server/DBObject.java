@@ -1851,6 +1851,79 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * This method examines all fields in the object and verifies that
+   * they satisfy the elementary value constraints specified in the
+   * Ganymede schema.
+   *
+   * If any fields do not meet the field constraints, a ReturnVal will
+   * be returned with a free-form dialog describing the violations.
+   *
+   * If there are no field constraint violations, null will be
+   * returned.
+   */
+
+  public final ReturnVal validateFieldIntegrity()
+  {
+    DBField field = null;
+    StringBuffer resultBuffer = new StringBuffer();
+
+    /* -- */
+
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
+    // sync on fieldAry since we are looping over our fields and since
+    // retrieveField itself sync's on fieldAry.  if we sync up front
+    // we may reduce our lock acquisition time marginally
+
+    synchronized (fieldAry)
+      {
+	// loop over the fields in display order (rather than the hash
+	// order in the fieldAry)
+	
+	Vector fieldTemplates = objectBase.getFieldTemplateVector();
+
+	for (int i = 0; i < fieldTemplates.size(); i++)
+	  {
+	    FieldTemplate template = (FieldTemplate) fieldTemplates.elementAt(i);
+
+	    field = retrieveField(template.getID());
+
+	    if (field != null && field.isDefined())
+	      {
+		ReturnVal retVal = field.validateContents();
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    if (resultBuffer.length() > 0)
+		      {
+			resultBuffer.append("\n");
+		      }
+
+		    resultBuffer.append(retVal.getDialogText());
+		  }
+	      }
+	  }
+      }
+
+    if (resultBuffer.length() > 0)
+      {
+	// we're using the non-logging ReturnVal.setErrorText() rather
+	// than using Ganymede.createErrorDialog() because the
+	// DBField.validateContents() call itself uses
+	// Ganymede.createErrorDialog().
+
+	ReturnVal retVal = new ReturnVal(false);
+	retVal.setErrorText(resultBuffer.toString());
+	return retVal;
+      }
+
+    return null;
+  }
+
+  /**
    * <p>Returns true if this object has all its required fields defined</p>
    *
    * <p>This method can be overridden in DBEditObject subclasses to do a
