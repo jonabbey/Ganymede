@@ -1569,10 +1569,11 @@ public class DBEditSet {
 
     // we've successfully persisted the transaction, written the
     // transaction to the sync channels, and finalized the
-    // transaction.. clean up our RAM store and carry on
+    // transaction.. we can proceed
 
-    commit_handlePhase2();	// let the DBEditObject handle external actions, once we have finalized the transaction
-    commit_logTransaction(fieldsTouched); // log and reabsorb objects
+    commit_handlePhase2();
+    commit_logTransaction(fieldsTouched);
+    commit_replace_objects();
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
     commit_updateBases(fieldsTouched);
@@ -1812,37 +1813,20 @@ public class DBEditSet {
   }
 
   /**
-   * <p>This private helper method is executed in the middle of the
+   * This private helper method is executed in the middle of the
    * commit() method, and handles logging for any changes made to
-   * objects during the committed transaction.</p>
+   * objects during the committed transaction.
    *
-   * <p>While this method is examining each object in the transaction
+   * While this method is examining each object in the transaction
    * to determine the diffs, we'll also take the opportunity to track
    * the identity of all fields in all object bases that have
    * themselves been touched.  We use the fieldsTouched hashtable for
    * this purpose, storing identity maps for the DBObjectBaseFields
-   * that were touched.</p>
-   *
-   * <p>When this method has finished logging information on an object
-   * in the transaction, it goes ahead and updates the persistent
-   * hashes to reflect the change to the object in this transaction,
-   * before freeing the object from the transaction.  This is intended
-   * to reduce memory usage when committing truly massive transactions,
-   * as we allow garbage collection to help out in the middle of the
-   * commit.</p>
+   * that were touched.
    */
 
   private final void commit_log_events(HashMap fieldsTouched)
   {
-    // iterate over the objects in our objects Map, logging changes to
-    // each object, updating our persistent hashes, and dropping the
-    // object from our objects Map as we go.
-
-    // we are doing the logging and the object replacement in one loop
-    // so that we can discard objects from our transaction as fast as
-    // possible, to make it possible to handle bigger single
-    // transactions without running out of memory
-
     Iterator iter = objects.values().iterator();
 
     while (iter.hasNext())
@@ -1861,9 +1845,6 @@ public class DBEditSet {
 	    // "Error!  Problem occured while writing log entry, continuing with transaction commit.\n{0}"
 	    Ganymede.debug(ts.l("commit_log_events.log_failure", ex));
 	  }
-
-	commit_replace_object(eObj);
-	iter.remove();
       }
   }
 
@@ -2272,16 +2253,17 @@ public class DBEditSet {
     if (Ganymede.log == null)
       {
 	// if our log is null, as it is with DBStore bootstrap, then
-	// we don't need to do any logging.. just go ahead and
-	// integrate the objects and return
-
-	Iterator iter = objects.values().iterator();
-
-	while (iter.hasNext())
-	  {
-	    commit_replace_object((DBEditObject) iter.next());
-	    iter.remove();
-	  }
+	// we don't need to do any logging..  we'll just return.
+	//
+	// note that this means that when we have a log, we also won't
+	// be updating the per-field-type timestamps in
+	// DBObjectBaseField.
+	//
+	// This is acceptable, since the DBStore bootstrap is only for
+	// creating the mandatory Ganymede objects, which we shouldn't
+	// care about in a GanymedeBuilderTask context (the only thing
+	// that cares about the DBObjectBase/DBObjectBaseField
+	// timestamps).
 
 	return;
       }
@@ -2337,7 +2319,7 @@ public class DBEditSet {
 
 	    // then create and stream log events describing the
 	    // objects that are in this transaction at the time of
-	    // commit, freeing the objects as we go
+	    // commit
 
 	    commit_log_events(fieldsTouched);
 
@@ -2356,6 +2338,24 @@ public class DBEditSet {
 	    Ganymede.log.cleanupTransaction();
 	  }
       }
+  }
+
+  /**
+   * This method integrates commiteted objects back into our in-memory
+   * DBStore data structures, and clears the transaction of objects as
+   * it does so.
+   */
+
+  private final void commit_replace_objects()
+  {
+    Iterator iter = objects.values().iterator();
+
+    while (iter.hasNext())
+      {
+	commit_replace_object((DBEditObject) iter.next());
+      }
+
+    objects.clear();
   }
 
   /**
@@ -2469,13 +2469,13 @@ public class DBEditSet {
   }
 
   /**
-   * <p>Private helper method for commit() which causes all bases that
-   * were touched by this transaction to be updated.</p>
+   * Private helper method for commit() which causes all bases that
+   * were touched by this transaction to be updated.
    *
-   * <p>This should be run as late as possible in the commit()
+   * This should be run as late as possible in the commit()
    * sequence to minimize the chance that a previously scheduled
    * builder task completes and updates its lastRunTime field after we
-   * have touched the timestamps on the changed bases.</p>
+   * have touched the timestamps on the changed bases.<
    *
    * @param baseSet Vector of DBObjectBases that contain objects
    * created, changed, or deleted during this transaction
