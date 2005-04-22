@@ -1186,6 +1186,15 @@ public class DBEditSet {
 
     committedObjects = new Vector();
 
+    // make a copy of the object references currently in the
+    // transaction.  right now, if an object's preCommitHook() causes
+    // another object to be pulled into the transaction (as by doing
+    // invid linkage operations or discrete remote object editing),
+    // those new objects will not have their preCommitHook() run.
+    //
+    // this shouldn't be a big concern since the main purpose of
+    // preCommitHook() is to update hidden label fields.
+
     DBEditObject[] myObjects = getObjectList();
 
     checkpoint(checkpointKey);
