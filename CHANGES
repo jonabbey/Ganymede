@@ -477,50 +477,44 @@ as would occur in an XML file that required
   System B to be renamed as System C
   System C to be renamed as System A
 
-26. [SERVER, XML] Rectified label handling for objects in XML
+26. [SERVER, XML, EVERYTHING] Object labels no longer virtualizable, must be namespace constrained
 
-A number of pieces in the server have been tweaked to better assure
-useful and consistent naming in the xmlclient's dumps and loads.
-Formerly, if the server tried to dump out objects whose labels were
-not guaranteed to be unique, the server would synthesize a unique
-label that could not be used upon later loading to retrieve the
-object.  This made it difficult to impossible to properly address such
-objects.
+The Ganymede server has never previously actually enforced a
+requirement that all objects must have unique labels.  I thought this
+very clever in my initial design, allowing DBEditObject plugin classes
+to completely fabricate labels for objects on demand.
 
-Several changes have been made to ameliorate this solution.
+In fact, this was a very stupid idea, as it makes all sorts of things
+much more complicated, including the XML dump and load logic.  Not
+being able to know for sure that an object's name is unique in an xml
+dump means that the xml file format is basically kind-of-close to
+useful, but not actually trustworthy.
 
-First, the algorithm used to synthesize a unique label when no
-guaranteed unique label is available has been standardized, and the
-GanymedeSession class' query mechanism has been elaborated to allow
-for high speed lookups using these synthesized unique labels.
+In Ganymede 2.0, all object types registed in the Ganymede server must
+have honest to goodness label fields, guarded with a namespace
+constraint to ensure unique labels within the object type.  It is
+still permissible to allow multiple kinds of objects to have their
+label fields share a namespace if you so desire.
 
-Second, the DBEditObject 'plug-in' class has had a new
-labelHookGuaranteedUnique() method which a plug-in subclass can use to
-affirmatively decalre that the custom label produced by getLabelHook()
-is guaranteed unique.  If a subclass provides a guaranteed unique
-label, that label will be used in the xmlclient, and will be properly
-found by the GanymedeSession query system when XML changes are loaded
-back into the server with the xmlclient.
+Object types in the base Ganymede system that did not meet this
+criterion, such as the Object Event type, have been modified to
+include a hidden label field that is automatically maintained by the
+new preCommitHook() method added to the DBEditObject class.
 
-Thirdly, the logic for determining the best and most reliable label
-for invid and object elements in the xmlclient's dump output has been
-put into the DBObject class' new getXMLLabel() method.  That method is
-responsible for considering the known uniqueness constraints on the
-specified label generation mechanism, and selecting the most specific
-unique label possible.
+This change may cause some difficulty for people trying to transition
+a Ganymede 1.0 environment to 2.0, but I've put in some logic to try
+and help you out.  When you load an old 1.0 database that has any
+object types without namespace constrained label fields, the Ganymede
+server will print a warning on startup.  When you go to edit the
+schema, either with the GUI schema editor or the xmlclient, your
+schema change will refuse to commit unless you make sure that all
+objects meet this constraint.
 
-These changes should make the xmlclient more reliable in loading xml
-segments with reliable addressing, though if an object type does not
-provide unique labels, the synthesized object labels will only be
-portable so long as the desired object has the same invid number in
-the server as was assumed in the generation of the input to xmlclient.
+As well, any built-in Ganymede types that are affected by this change
+will automatically be tweaked for you by the system the first time you
+start the server on top of an old ganymede.db file.
 
-This is all made rather complicated by the degree of freedom that I
-designed into Ganymede, allowing objects to have synthetic, non-unique
-labels.  I wanted all references done through reliable invid's and to
-be able to support object renaming easily, but the xml client has a
-greater need for consistency.  With these changes, we should be able
-to offer it as needed.
+This change bumped the DBStore version number to 2.11.
 
 27. [SERVER] Clarified that Vector fields may not hold duplicates
 
@@ -713,6 +707,30 @@ Made sure to clear the qr cache in a few more places so as to not
 allow lingering choice lists to be retained.
 
 This bug was reported by Fredrik.A.Bergman@ericsson.com.
+
+41. [SERVER] String field schema consistency checks now in GanymedeValidationTask
+
+I've added support in the DBField class to allow a consistency check
+to be made on values held in a field against the static constraints
+specified in the Ganymede schema.  This check is integrated into the
+old verifyNewValue() call for StringDBField, and the
+GanymedeValidationTask will run the field contents integrity test when
+you do the database consistency test from the admin console.
+
+Most constraints on fields are still implemented by dynamic method
+hooks in the DBEditObject class, and those constraints can't really be
+tested out except at commit time, when the editing context is
+available.
+
+This change came about because we found that a system record in the
+laboratory's Ganymede server had a colon character in its Manufacturer
+field, despite our having modified the schema to prevent that some
+time ago.
+
+Note that if you apply a new constraint to a string field, there is no
+guarantee that previously existing data will match the new constraint
+until you run the Database Consistency Test / GanymedeValidationTask
+to be sure.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
