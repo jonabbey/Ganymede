@@ -1354,7 +1354,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (schemadebug)
 	      {
 		// "7.  pass 3 - fixups on object base {0}"
-		err.println(ts.l("processSchema.schemadebug_7_3", _oldBase));
+		err.println(ts.l("processSchema.schemadebug_7_3", _oldBase.getName()));
 	      }
 
 	    if (!handleReturnVal(_oldBase.setXML(_entry, true, err)))
