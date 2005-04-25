@@ -3916,11 +3916,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		changedFieldDefs.put(fieldDef, fieldDef);
 	      }
 
-	    added.append("\t");
-	    added.append(fieldDef.getName());
-	    added.append(":");
-	    added.append(currentField.getValueString());
-	    added.append("\n");
+	    // "\t{0}: {1}\n"
+	    added.append(ts.l("diff.field_template", fieldDef.getName(), currentField.getValueString()));
 
 	    diffFound = true;
 
@@ -3939,11 +3936,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		changedFieldDefs.put(fieldDef, fieldDef);
 	      }
 
-	    deleted.append("\t");
-	    deleted.append(fieldDef.getName());
-	    deleted.append(":");
-	    deleted.append(origField.getValueString());
-	    deleted.append("\n");
+	    // "\t{0}: {1}\n"
+	    deleted.append(ts.l("diff.field_template", fieldDef.getName(), origField.getValueString()));
 
 	    diffFound = true;
 
