@@ -205,6 +205,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	writeMailDirect2();
 	writeSambafileVersion1();
+	writeSambafileVersion2();
 	writeNTfile();
 	writeUserSyncFile();
 	writeHTTPfiles();
@@ -1830,11 +1831,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	sambaFile = openOutFile(path + "smb.passwd", "gasharl");
+	sambaFile = openOutFile(path + "smb.passwd2", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeSambaFileVersion2(): couldn't open smb.passwd file: " + ex);
+	System.err.println("GASHBuilderTask.writeSambaFileVersion2(): couldn't open smb.passwd2 file: " + ex);
 	return false;
       }
 
