@@ -1079,9 +1079,11 @@ public class GanymedeServer implements Server {
 	    
     if (pdbf != null && pdbf.matchPlainText(clientPass))
       {
-        // Are we the One True Amazing Supergash Root User Person? He gets
-      	// full privileges by default.
-        if (clientName.equals(Ganymede.rootname))
+        // Are we the One True Amazing Supergash Root User Person? He
+        // gets full privileges by default.
+
+        if (obj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
+						    SchemaConstants.PersonaSupergashObj)))
           {
             return 3;
           }
