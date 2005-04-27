@@ -1087,8 +1087,7 @@ public class GanymedeServer implements Server {
           }
         else
           {
-            BooleanDBField privField = (BooleanDBField) obj
-                .getField(SchemaConstants.PersonaAdminConsole);
+            BooleanDBField privField = (BooleanDBField) obj.getField(SchemaConstants.PersonaAdminConsole);
 
             // Is this user prohibited from accessing the admin console?
             if (privField != null && !privField.value())
@@ -1096,8 +1095,7 @@ public class GanymedeServer implements Server {
                 return 0;
               }
 
-            BooleanDBField fullField = (BooleanDBField) obj
-                .getField(SchemaConstants.PersonaAdminPower);
+            BooleanDBField fullField = (BooleanDBField) obj.getField(SchemaConstants.PersonaAdminPower);
 
             // Ok, they can access the admin console...but do they have full
             // privileges?
@@ -1106,8 +1104,7 @@ public class GanymedeServer implements Server {
               	return 1;
               }
             
-            BooleanDBField interpreterField = (BooleanDBField) obj
-            	.getField(SchemaConstants.PersonaInterpreterPower);
+            BooleanDBField interpreterField = (BooleanDBField) obj.getField(SchemaConstants.PersonaInterpreterPower);
             
             // Ok, they have full privileges...but can they access the admin 
             // interpreter?
