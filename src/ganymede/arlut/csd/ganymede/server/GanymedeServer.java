@@ -1087,36 +1087,31 @@ public class GanymedeServer implements Server {
           }
         else
           {
-            BooleanDBField privField = (BooleanDBField) obj.getField(SchemaConstants.PersonaAdminConsole);
+            // Is this user prohibited from accessing the admin
+            // console?
 
-            // Is this user prohibited from accessing the admin console?
-            if (privField != null && !privField.value())
-              {
-                return 0;
-              }
+	    if (!obj.isSet(SchemaConstants.PersonaAdminConsole))
+	      {
+		return 0;
+	      }
 
-            BooleanDBField fullField = (BooleanDBField) obj.getField(SchemaConstants.PersonaAdminPower);
+            // Ok, they can access the admin console...but do they
+            // have full privileges?
 
-            // Ok, they can access the admin console...but do they have full
-            // privileges?
-            if (fullField != null && !fullField.value())
-              {
-              	return 1;
-              }
-            
-            BooleanDBField interpreterField = (BooleanDBField) obj.getField(SchemaConstants.PersonaInterpreterPower);
-            
-            // Ok, they have full privileges...but can they access the admin 
-            // interpreter?
-            if (interpreterField != null && interpreterField.value())
-              {
-              	return 3;
-              }
-            else
-              {
-              	return 2;
-              }
-            
+	    if (!obj.isSet(SchemaConstants.PersonaAdminPower))
+	      {
+		return 1;
+	      }
+
+            // Ok, they have full privileges...but can they access the
+            // admin interpreter?
+
+	    if (!obj.isSet(SchemaConstants.PersonaInterpreterPower))
+	      {
+		return 2;
+	      }
+
+	    return 3;
           }
       }
     else
