@@ -76,6 +76,8 @@ import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.SchemaConstants;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                       DBLog.java
@@ -99,6 +101,13 @@ import arlut.csd.ganymede.common.SchemaConstants;
 public class DBLog {
 
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBLog");
 
   // -- 
 
@@ -387,7 +396,8 @@ public class DBLog {
 
     if (closed)
       {
-	throw new RuntimeException("log already closed.");
+	// "log already closed."
+	throw new RuntimeException(ts.l("global.log_closed"));
       }
 
     if (debug)
@@ -418,7 +428,8 @@ public class DBLog {
 	  }
 	else
 	  {
-	    Ganymede.debug("DBLog.mailNotify(): Skipping mailout event due to mail being disabled at startup.");
+	    // "DBLog.mailNotify(): Skipping mailout event ({0}) due to mail being disabled at startup."
+	    Ganymede.debug(ts.l("mailNotify.no_mail", title));
 	  }
       }
     else
@@ -429,15 +440,17 @@ public class DBLog {
 	
 	if (type == null)
 	  {
-	    Ganymede.debug("Error in DBLog.mailNotify(): unrecognized eventClassToken: " + 
-			   event.eventClassToken);
+	    // "Error in DBLog.mailNotify(): unrecognized eventClassToken: {0}."
+	    Ganymede.debug(ts.l("mailNotify.unrecognized_token", event.eventClassToken));
+
 	    return;
 	  }
 	
 	if (!type.mail)
 	  {
-	    Ganymede.debug("Logic error in DBLog.mailNotify():  eventClassToken not configured for mail delivery: " + 
-			   event.eventClassToken);
+	    // "Logic error in DBLog.mailNotify(): eventClassToken not configured for mail delivery: {0}."
+	    Ganymede.debug(ts.l("mailNotify.whaaa", event.eventClassToken));
+
 	    return;
 	  }
       }
@@ -518,7 +531,10 @@ public class DBLog {
           }
         catch (IOException ex)
           {
-            Ganymede.debug("DBLog.mailNotify(): mailer error " + ex);
+	    // "DBLog.mailNotify(): mailer error:\n{0}\n\nwhile processing: {1}"
+	    Ganymede.debug(ts.l("mailNotify.mailer_error",
+				Ganymede.stackTrace(ex),
+				event));
           }
       }
 
@@ -538,9 +554,9 @@ public class DBLog {
 
   public synchronized void logSystemEvent(DBLogEvent event)
   {
-    if (closed)
-      {
-	throw new RuntimeException("log already closed.");
+    if (closed) 
+     {
+	throw new RuntimeException(ts.l("global.log_closed"));
       }
 
     if (debug)
@@ -581,7 +597,7 @@ public class DBLog {
   {
     if (closed)
       {
-	throw new RuntimeException("log already closed.");
+	throw new RuntimeException(ts.l("global.log_closed"));
       }
 
     if (debug)
@@ -597,8 +613,9 @@ public class DBLog {
 
     // write out a start-of-transaction line to the log
 
+    // "Start Transaction: {0}"
     DBLogEvent start = new DBLogEvent("starttransaction",
-				      "Start Transaction: " + transaction.description,
+				      ts.l("startTransactionLog.start_template", transaction.description),
 				      admin,
 				      adminName,
 				      invids,
@@ -634,12 +651,13 @@ public class DBLog {
   {
     if (closed)
       {
-	throw new RuntimeException("log already closed.");
+	throw new RuntimeException(ts.l("global.log_closed"));
       }
 
     if (transactionID == null)
       {
-	throw new RuntimeException("not in a transaction.");
+	// "Not in a transaction."
+	throw new RuntimeException(ts.l("streamEvent.no_transaction"));
       }
 
     event.setTransactionID(this.transactionID);
@@ -747,7 +765,10 @@ public class DBLog {
 	      }
 	    catch (IOException ex)
 	      {
-		Ganymede.debug("DBLog.logTransaction(): mailer error " + ex);
+		// "DBLog.streamEvent(): mailer error:\n{0}\n\nwhile processing: {1}"
+		Ganymede.debug(ts.l("streamEvent.mailer_error",
+				    Ganymede.stackTrace(ex),
+				    event));
 	      }
 	  }
       }
@@ -780,9 +801,10 @@ public class DBLog {
     /* -- */
 
     // write out an end-of-transaction line to the log
-    
+
+    // "Finish Transaction: {0}"
     DBLogEvent finish = new DBLogEvent("finishtransaction",
-				       "Finish Transaction: " + transaction.description,
+				       ts.l("endTransactionLog.finish_template", transaction.description),
 				       admin,
 				       adminName,
 				       null,
@@ -832,9 +854,12 @@ public class DBLog {
 	while (iter.hasNext())
 	  {
 	    MailOut mailout = (MailOut) iter.next();
-	    String description = "Transaction summary: User " + adminName + ":" + 
-	      this.transactionTimeStamp.toString() + "\n\n" + 
-	      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + signature;
+
+	    // "Transaction summary: User {0}:{1}\n\n{2}{3}"
+	    String description = ts.l("endTransactionLog.summary_template",
+				      adminName, this.transactionTimeStamp.toString(),
+				      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+				      signature);
 
 	    // we don't want any \n's between wordwrap and signature above,
 	    // since appendMailOut() adds "\n\n" at the end of each transaction
@@ -854,7 +879,10 @@ public class DBLog {
 	      }
 	    catch (IOException ex)
 	      {
-		Ganymede.debug("DBLog.logTransaction(): mailer error " + ex);
+		// "DBLog.endTransactionLog(): mailer error:\n{0}\n\nwhile processing: {1}"
+		Ganymede.debug(ts.l("endTransactionLog.mailer_error",
+				    Ganymede.stackTrace(ex),
+				    finish));
 	      }
 	  }
       }
@@ -1042,9 +1070,10 @@ public class DBLog {
 	  }
 	catch (IOException ex)
 	  {
-	    Ganymede.debug("DBLog.sendSysEventMail(): mailer error " + ex);
-	    ex.printStackTrace();
-	    Ganymede.debug("\n\nwhile processing " + event);
+	    // "DBLog.sendSysEventMail(): mailer error:\n{0}\n\nwhile processing: {1}"
+	    Ganymede.debug(ts.l("sendSysEventMail.mailer_error",
+				Ganymede.stackTrace(ex),
+				event));
 	  }
 
 	if (debug)
@@ -1194,10 +1223,14 @@ public class DBLog {
 
 	    objectEventType type = (objectEventType) objEventCodes.get(key);
 
-	    String description = type.name + " summary: User " + adminName + ":" + 
-	      currentTime.toString() + "\n\n" + 
-	      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78) + signature;
+	    // "{0} summary: User {1}:{2}\n\n{3}{4}"
 
+	    String description = ts.l("sendObjectMail.template",
+				      type.name,
+				      adminName,
+				      currentTime,
+				      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+				      signature);
 	    String title;
 
 	    if (mailout.entryCount == 1)
@@ -1220,11 +1253,19 @@ public class DBLog {
 	      {
 		if (type.name != null)
 		  {
-		    title = Ganymede.subjectPrefixProperty + type.name + " (x" + mailout.entryCount + ")";
+		    // "{0}{1} (x{2,number,#})"
+		    title = ts.l("sendObjectMail.multi_object_subject",
+				 Ganymede.subjectPrefixProperty,
+				 type.name,
+				 new Integer(mailout.entryCount));
 		  }
 		else
 		  {
-		    title = Ganymede.subjectPrefixProperty + type.token + " (x" + mailout.entryCount + ")";
+		    // "{0}{1} (x{2,number,#})"
+		    title = ts.l("sendObjectMail.multi_object_subject",
+				 Ganymede.subjectPrefixProperty,
+				 type.token,
+				 new Integer(mailout.entryCount));
 		  }
 	      }
 
@@ -1237,7 +1278,10 @@ public class DBLog {
 	      }
 	    catch (IOException ex)
 	      {
-		Ganymede.debug("DBLog.logTransaction(): mailer error " + ex);
+		// "DBLog.sendObjectMail(): mailer error:\n{0}\n\nwhile processing: {1}"
+		Ganymede.debug(ts.l("sendObjectMail.mailer_error",
+				    Ganymede.stackTrace(ex),
+				    title));
 	      }
 	  }
       }
