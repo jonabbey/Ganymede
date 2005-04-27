@@ -69,6 +69,8 @@ import arlut.csd.ganymede.rmi.AdminAsyncResponder;
 import arlut.csd.ganymede.rmi.SchemaEdit;
 import arlut.csd.ganymede.rmi.adminSession;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                    GanymedeAdmin
@@ -76,18 +78,18 @@ import arlut.csd.ganymede.rmi.adminSession;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>GanymedeAdmin is the server-side implementation of the
+ * GanymedeAdmin is the server-side implementation of the
  * {@link arlut.csd.ganymede.rmi.adminSession adminSession}
  * interface;  GanymedeAdmin provides the means by which privileged users
  * can carry out privileged operations on the Ganymede server, including
- * status monitoring and administrative activities.</p>
+ * status monitoring and administrative activities.
  *
- * <p>GanymedeAdmin is actually a dual purpose class.  One the one hand,
+ * GanymedeAdmin is actually a dual purpose class.  One the one hand,
  * GanymedeAdmin implements {@link arlut.csd.ganymede.rmi.adminSession adminSession},
  * providing a hook for the admin console to talk to.  On the other,
  * GanymedeAdmin contains a lot of static fields and methods which the
  * server code uses to communicate information to any admin consoles
- * that are attached to the server at any given time.</p>
+ * that are attached to the server at any given time.
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
@@ -96,6 +98,13 @@ import arlut.csd.ganymede.rmi.adminSession;
 final class GanymedeAdmin implements adminSession, Unreferenced {
 
   private static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeAdmin");
 
   /**
    * Static vector of GanymedeAdmin instances, used to
@@ -146,9 +155,9 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
      -----====================--------------------====================----- */
 
   /**
-   * <p>This static method handles sending disconnect messages
+   * This static method handles sending disconnect messages
    * to all attached consoles and cleaning up the
-   * GanymedeAdmin.consoles Vector.</p>
+   * GanymedeAdmin.consoles Vector.
    */
 
   public static void closeAllConsoles(String reason)
@@ -188,10 +197,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This static method is used to send debug log info to
+   * This static method is used to send debug log info to
    * the consoles.  It is used by
    * {@link arlut.csd.ganymede.server.Ganymede#debug(java.lang.String) Ganymede.debug()}
-   * to append information to the console logs.</p>
+   * to append information to the console logs.
    */
 
   public static void setStatus(String status)
@@ -203,11 +212,13 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       {
 	if (GanymedeServer.lSemaphore.checkEnabled() == null)
 	  {
-	    stampedLine = new Date() + " [" + GanymedeServer.lSemaphore.getCount() + "] " + status + "\n";
+	    // "{0, Date} [{1, number, #}] {2}\n"
+	    stampedLine = ts.l("setStatus.enabled_template", new Date(), new Integer(GanymedeServer.lSemaphore.getCount()), status);
 	  }
 	else
 	  {
-	    stampedLine = new Date() + " [*] " + status + "\n";
+	    // "{0, Date} [*] {1}\n"
+	    stampedLine = ts.l("setStatus.disabled_template", new Date(), status);
 	  }
       }
 
@@ -234,8 +245,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This static method sends an updated console count figure to
-   * all of the attached admin consoles.</p>
+   * This static method sends an updated console count figure to
+   * all of the attached admin consoles.
    */
 
   public static void setConsoleCount()
@@ -247,7 +258,16 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	message = consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached";
+	if (consoles.size() > 1)
+	  {
+	    // "{0, number, #} consoles attached"
+	    message = ts.l("setConsoleCount.multiple_attached", new Integer(consoles.size()));
+	  }
+	else
+	  {
+	    // "1 console attached"
+	    message = ts.l("setConsoleCount.single_attached");
+	  }
 
 	for (int i = 0; i < consoles.size(); i++)
 	  {
@@ -478,9 +498,9 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This static method is used to update the list of connnected
+   * This static method is used to update the list of connnected
    * users that appears in any admin consoles attached to the Ganymede
-   * server.</p>
+   * server.
    */
 
   public static void refreshUsers()
@@ -517,9 +537,9 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This static method is used to update the list of connnected
+   * This static method is used to update the list of connnected
    * users that appears in any admin consoles attached to the Ganymede
-   * server.</p>
+   * server.
    */
 
   public static void refreshTasks()
@@ -557,15 +577,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This private static method handles communications link
+   * This private static method handles communications link
    * failures.  Note that the serverAdminAsyncResponder will handle
    * single instances of admin console RemoteExceptions so that only
    * two RemoteExceptions in sequence will raise a
-   * RemoteException.</p>
+   * RemoteException.
    *
-   * <p>Any code that calls this method should call detachBadConsoles()
+   * Any code that calls this method should call detachBadConsoles()
    * once it has exited any loops over the static consoles vector to
-   * actually expunge any failed consoles from our consoles vector.</p>
+   * actually expunge any failed consoles from our consoles vector.
    */
 
   private final static void handleConsoleRMIFailure(GanymedeAdmin console, RemoteException ex)
@@ -578,10 +598,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This private static method is called to remove any consoles
+   * This private static method is called to remove any consoles
    * that have experienced RMI failures from the static
    * GanymedeAdmin.consoles vector.  This method should never be
-   * called from within a loop over GanymedeAdmin.consoles.</p>
+   * called from within a loop over GanymedeAdmin.consoles.
    */
    
   private static void detachBadConsoles()
@@ -601,7 +621,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	    // which is why we are synchronized on
 	    // GanymedeAdmin.consoles here.
 
-	    temp.logout("error communicating with console");
+	    // "error communicating with console"
+	    temp.logout(ts.l("detachBadConsoles.error"));
 	  }
 
 	badConsoles.setSize(0);
@@ -635,8 +656,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   private boolean fullprivs = false;
 
   /**
-   * <p>A server-side asyncPort that maintains an event queue for the
-   * admin console attached to this GanymedeAdmin object.</p>
+   * A server-side asyncPort that maintains an event queue for the
+   * admin console attached to this GanymedeAdmin object.
    */
 
   private serverAdminAsyncResponder asyncPort;
@@ -644,16 +665,16 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   /* -- */
 
   /**
-   * <p>This is the GanymedeAdmin constructor, used to create a new
-   * server-side admin console attachment.</p>
+   * This is the GanymedeAdmin constructor, used to create a new
+   * server-side admin console attachment.
    *
-   * <p>Admin is an RMI remote object exported by the client in the
-   * form of a callback.</p>
+   * Admin is an RMI remote object exported by the client in the
+   * form of a callback.
    *
-   * <P>This constructor is called from
+   * This constructor is called from
    * {@link arlut.csd.ganymede.server.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin()},
    * which is responsible for authenticating the name and password before
-   * calling this constructor.</P>
+   * calling this constructor.
    */
 
   public GanymedeAdmin(boolean fullprivs, String adminName, String clientHost) throws RemoteException
@@ -699,8 +720,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This private method is used to update this admin console
-   * handle's transaction count.</p>
+   * This private method is used to update this admin console
+   * handle's transaction count.
    */
 
   private void doUpdateTransCount() throws RemoteException
@@ -779,14 +800,14 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This public method forces a disconnect of the remote admin console
-   * and cleans up the asyncPort.</p>
+   * This public method forces a disconnect of the remote admin console
+   * and cleans up the asyncPort.
    *
-   * <p>This method *does not* handle removing this GanymedeAdmin
+   * This method *does not* handle removing this GanymedeAdmin
    * console object from the static GanymedeAdmin.consoles Vector, so
    * that it can safely be called from a loop over
    * GanymedeAdmin.consoles in closeAllConsoles() when the server is
-   * being shut down.</p>
+   * being shut down.
    */
 
   public void forceDisconnect(String reason) throws RemoteException
@@ -798,11 +819,13 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (fullprivs)
       {
-	return "console: " + adminName + " on " + clientHost + " with full access";
+	// "{0} on {1} with full access"
+	return ts.l("toString.fullprivs", adminName, clientHost);
       }
     else
       {
-	return "console: " + adminName + " on " + clientHost + " with monitor access";
+	// "{0} on {1} with monitor access"
+	return ts.l("toString.not_fullprivs", adminName, clientHost);
       }
   }
 
@@ -813,17 +836,17 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
      -----====================--------------------====================----- */
 
   /**
-   * <p>Disconnect the remote admin console associated with this
-   * object</p>
+   * Disconnect the remote admin console associated with this
+   * object
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    *
-   * <p>No server-side code should call this method from a thread that
+   * No server-side code should call this method from a thread that
    * is looping over the static GanymedeAdmin.consoles Vector, or else
    * the Vector will be changed from within the loop, possibly
-   * resulting in an exception being thrown.</p>
+   * resulting in an exception being thrown.
    */
 
   public void logout()
@@ -832,17 +855,17 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>Disconnect the remote admin console associated with this
-   * object</p>
+   * Disconnect the remote admin console associated with this
+   * object
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    *
-   * <p>No server-side code should call this method from a thread that
+   * No server-side code should call this method from a thread that
    * is looping over the static GanymedeAdmin.consoles Vector, or else
    * the Vector will be changed from within the loop, possibly
-   * resulting in an exception being thrown.</p>
+   * resulting in an exception being thrown.
    */
 
   public void logout(String reason)
@@ -857,14 +880,28 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	if (consoles.contains(this))
 	  {
 	    consoles.removeElement(this);
-	
+
+	    String eventStr = null;
+
 	    if (reason == null)
 	      {
-		Ganymede.debug("Admin console " + adminName + " detached from " + clientHost);
+		// "Admin console {0} detached from {1}"
+		eventStr = ts.l("logout.without_reason", adminName, clientHost);
 	      }
 	    else
 	      {
-		Ganymede.debug("Admin console " + adminName + " detached from " + clientHost + ": " + reason);
+		// "Admin console {0} detached from {1}: {2}"
+		eventStr = ts.l("logout.with_reason", adminName, clientHost, reason);
+	      }
+
+	    if (Ganymede.log != null)
+	      {
+		Ganymede.log.logSystemEvent(new DBLogEvent("admindisconnect",
+							   eventStr,
+							   null,
+							   adminName,
+							   null,
+							   null));
 	      }
 
 	    setConsoleCount();
@@ -873,30 +910,31 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This method is called when the Java RMI system detects that this
-   * remote object is no longer referenced by any remote objects.</p>
+   * This method is called when the Java RMI system detects that this
+   * remote object is no longer referenced by any remote objects.
    *
-   * <p>This method handles abnormal logouts and time outs for us.  By
-   * default, the 1.1 RMI time-out is 10 minutes.</p>
+   * This method handles abnormal logouts and time outs for us.  By
+   * default, the 1.1 RMI time-out is 10 minutes.
    *
    * @see java.rmi.server.Unreferenced
    */
 
   public void unreferenced()
   {
-    this.logout("dead console");
+    // "RMI timeout/dead console"
+    this.logout(ts.l("unreferenced.dead"));
   }
 
   /**
-   * <p>This method is used to allow the admin console to retrieve a remote reference to
+   * This method is used to allow the admin console to retrieve a remote reference to
    * a {@link arlut.csd.ganymede.server.serverAdminAsyncResponder}, which will allow
-   * the admin console to poll the server for asynchronous messages from the server.</p>
+   * the admin console to poll the server for asynchronous messages from the server.
    *
-   * <p>This is used to allow the server to send admin notifications
+   * This is used to allow the server to send admin notifications
    * to the console, even if the console is behind a network or
    * personal system firewall.  The serverAdminAsyncResponder blocks
    * while there is no message to send, and the console will poll for
-   * new messages.</p>
+   * new messages.
    */
 
   public AdminAsyncResponder getAsyncPort() throws RemoteException
@@ -910,22 +948,33 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <P>This method lets the admin console explicitly request a
+   * This method lets the admin console explicitly request a
    * refresh.  Upon being called, the server will call several methods
    * on the admin console's {@link
    * arlut.csd.ganymede.server.serverAdminAsyncResponder
    * serverAdminAsyncResponder} interface to pass current status
-   * information to the console.</P>
+   * information to the console.
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public void refreshMe() throws RemoteException
   {
     asyncPort.setServerStart(Ganymede.startTime);
-    asyncPort.changeAdmins(consoles.size() + " console" + (consoles.size() > 1 ? "s" : "") + " attached");
+
+    if (consoles.size() > 1)
+      {
+	// "{0, number, #} consoles attached"
+	asyncPort.changeAdmins(ts.l("setConsoleCount.multiple_attached", new Integer(consoles.size())));
+      }
+    else
+      {
+	// "1 console attached"
+	asyncPort.changeAdmins(ts.l("setConsoleCount.single_attached"));
+      }
+
     doUpdateTransCount();
     doUpdateLastDump();
     doUpdateCheckedOut();
@@ -938,26 +987,29 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>This method is called by admin console code to force
+   * This method is called by admin console code to force
    * a complete rebuild of all external builds.  This means that
    * all databases will have their last modification timestamp
    * cleared and all builder tasks will be scheduled for immediate
-   * execution.</p>
+   * execution.
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal forceBuild()
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to force a full rebuild");
+	// "Permissions Denied
+	// "You do not have permissions to force a full rebuild."
+	return Ganymede.createErrorDialog(ts.l("forceBuild.denied_title"),
+					  ts.l("forceBuild.denied_text"));
       }
 
-    Ganymede.debug("Admin console forcing full network build...");
+    // "Admin console forcing full network build..."
+    Ganymede.debug(ts.l("forceBuild.proceeding"));
 
     Ganymede.forceBuilderTasks();
 
@@ -965,79 +1017,90 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <p>Kick all users off of the Ganymede server on behalf of this
-   * admin console</p>
+   * Kick all users off of the Ganymede server on behalf of this
+   * admin console
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal killAll()
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to knock all users off of the server");
+	// "Permissions Denied"
+	// "You do not have permissions to knock all users off of the server"
+	return Ganymede.createErrorDialog(ts.l("killAll.denied_title"),
+					  ts.l("killAll.denied_text"));
       }
 
-    GanymedeServer.server.killAllUsers("Admin console disconnecting you");
+    // "Admin console disconnecting you"
+    GanymedeServer.server.killAllUsers(ts.l("killAll.message_to_users"));
 
     return null;
   }
 
   /**
-   * <p>Kick a user off of the Ganymede server on behalf of this admin
-   * console</p>
+   * Kick a user off of the Ganymede server on behalf of this admin
+   * console
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal kill(String user)
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to kill off user " + user);
+	// "Permissions Denied"
+	// "You do not have permission to forcibly disconnect user {0}."
+	return Ganymede.createErrorDialog(ts.l("kill.denied_title"),
+					  ts.l("kill.denied_text", user));
       }
 
-    if (GanymedeServer.server.killUser(user, "Admin console disconnecting you"))
+    // "Admin console disconnecting you"
+    if (GanymedeServer.server.killUser(user, ts.l("kill.message_to_user")))
       {
 	return null;
       }
 
-    return Ganymede.createErrorDialog("Kill Error",
-				      "I couldn't find any active user named " + user);
+    // "Kill Error"
+    // "I couldn''t find any active user named {0}."
+    return Ganymede.createErrorDialog(ts.l("kill.error_title"),
+				      ts.l("kill.error_text", user));
   }
 
   /**
-   * <p>shutdown the server cleanly, on behalf of this admin console.</p>
+   * shutdown the server cleanly, on behalf of this admin console.
    *
    * @param waitForUsers if true, shutdown will be deferred until all users are logged
    * out.  No new users will be allowed to login.
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal shutdown(boolean waitForUsers)
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to shut down the server");
+	// "Permissions Denied"
+	// "You do not have permission to shut down the Ganymede server."
+	return Ganymede.createErrorDialog(ts.l("shutdown.denied_title"),
+					  ts.l("shutdown.denied_text"));
       }
 
     if (waitForUsers)
       {
 	GanymedeServer.setShutdown();
 
-	return Ganymede.createInfoDialog("Server Set For Shutdown",
-					 "The server is prepared for shut down.  Shutdown will commence as soon " +
-					 "as all current users log out.");
+	// "Server Set For Shutdown"
+	// "The server is prepared for shut down.  Shutdown will commence as soon as all current users log out."
+	return Ganymede.createInfoDialog(ts.l("shutdown.advisory_title"),
+					 ts.l("shutdown.advisory_text"));
       }
     else
       {
@@ -1047,22 +1110,25 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * <P>dump the current state of the db to disk</P>
+   * dump the current state of the db to disk
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal dumpDB()
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to execute a database dump");
+	// "Permissions Denied"
+	// "You do not have permission to execute a database dump."
+	return Ganymede.createErrorDialog(ts.l("dumpDB.denied_title"),
+					  ts.l("dumpDB.denied_text"));
       }
 
-    setState("Dumping database");
+    // "Dumping Database"
+    setState(ts.l("dumpDB.dump_state"));
 
     try
       {
@@ -1070,159 +1136,184 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
     catch (IOException ex)
       {
-	return Ganymede.createErrorDialog("Database Dump Error",
-					  "Database could not be dumped successfully. " + ex);
+	// "Database Dump Error"
+	// "Database could not be dumped successfully: {0}"
+	return Ganymede.createErrorDialog(ts.l("dumpDB.error_title"),
+					  ts.l("dumpDB.error_text", ex.toString()));
       }
     catch (InterruptedException ex)
       {
-	return Ganymede.createErrorDialog("Database Dump Error",
-					  "Database could not be dumped successfully. " + ex);
+	// "Database Dump Error"
+	// "Database could not be dumped successfully: {0}"
+	return Ganymede.createErrorDialog(ts.l("dumpDB.error_title"),
+					  ts.l("dumpDB.error_text", ex.toString()));
       }
     finally
       {
-	setState("Normal Operation");
+	// "Normal Operation"
+	setState(ts.l("global.normal_state"));
       }
 
-    Ganymede.debug("Database dumped");
+    Ganymede.debug(ts.l("dumpDB.dumped"));
 
     return null;
   }
 
   /**
-   * <p>run a long-running verification suite on the Ganymede server
-   * database's invid links</p>
+   * run a long-running verification suite on the Ganymede server
+   * database's invid links
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal runInvidTest()
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to execute an Invid integrity test on the server");
+	// "Permissions Denied"
+	// "You do not have permission to execute an Invid integrity test on the server."
+	return Ganymede.createErrorDialog(ts.l("runInvidTest.denied_title"),
+					  ts.l("runInvidTest.denied_text"));
       }
 
-    GanymedeAdmin.setState("Running Invid Test");
+    // "Running Invid Test"
+    GanymedeAdmin.setState(ts.l("runInvidTest.running_state"));
 	 
     if (Ganymede.server.checkInvids())
       {
-	Ganymede.debug("Invid Test completed successfully, no problems boss.");
+	// "Invid Test completed successfully, no problems boss."
+	Ganymede.debug(ts.l("runInvidTest.good_result"));
       }
     else
       {
-	Ganymede.debug("Invid Test encountered problems.  Oi, you're in the soup now, boss.");
+	// "Invid Test encountered problems.  Oi, you're in the soup now, boss."
+	Ganymede.debug(ts.l("runInvidTest.bad_result"));
       }
 
-    GanymedeAdmin.setState("Normal Operation");
+    // "Normal Operation"
+    GanymedeAdmin.setState(ts.l("global.normal_state"));
 
     return null;
   }
 
   /**
-   * <p>run a long-running verification and repair operation on the Ganymede
-   * server's invid database links</p>   
+   * run a long-running verification and repair operation on the Ganymede
+   * server's invid database links   
    *
-   * <p>Removes any invid pointers in the Ganymede database whose
+   * Removes any invid pointers in the Ganymede database whose
    * targets are not properly defined.  This should not ever happen
-   * unless there is a bug some place in the server.</p>
+   * unless there is a bug some place in the server.
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal runInvidSweep()
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to execute an Invid sweep on the server");
+	// "Permissions Denied"
+	// "You do not have permission to execute an Invid sweep on the server."
+	return Ganymede.createErrorDialog(ts.l("runInvidSweep.denied_title"),
+					  ts.l("runInvidSweep.denied_text"));
       }
 
-    GanymedeAdmin.setState("Running Invid Sweep");
-    Ganymede.debug("Running Invid Sweep");
+    // "Running Invid Sweep"
+    GanymedeAdmin.setState(ts.l("runInvidSweep.running_state"));
+    Ganymede.debug(ts.l("runInvidSweep.running_state"));
 	 
     Ganymede.server.sweepInvids();
 
-    GanymedeAdmin.setState("Normal Operation");
-    Ganymede.debug("Normal Operation");
+    // "Normal Operation"
+    GanymedeAdmin.setState(ts.l("global.normal_state"));
+    Ganymede.debug(ts.l("global.normal_state"));
 
     return null;
   }
 
   /**
-   * <p>run a verification on the integrity of embedded objects and
-   * their containers</p>
+   * run a verification on the integrity of embedded objects and
+   * their containers
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal runEmbeddedTest()
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to execute an embedded objects integrity test on the server");
+	// "Permissions Denied"
+	// "You do not have permission to execute an embedded objects integrity test on the server."
+	return Ganymede.createErrorDialog(ts.l("runEmbeddedTest.denied_title"),
+					  ts.l("runEmbeddedTest.denied_text"));
       }
 
-    GanymedeAdmin.setState("Running Embedded Test");
+    // "Running Embedded Test"
+    GanymedeAdmin.setState(ts.l("runEmbeddedTest.running_state"));
 	 
     if (Ganymede.server.checkEmbeddedObjects())
       {
-	Ganymede.debug("Embedded Objects Test completed successfully, no problems boss.");
+	// "Embedded Objects Test completed successfully, no problems boss."
+	Ganymede.debug(ts.l("runEmbeddedTest.good_result"));
       }
     else
       {
-	Ganymede.debug("Embedded Objects Test encountered problems.  Oi, you're in the soup now, boss.");
+	// "Embedded Objects Test encountered problems.  Oi, you're in the soup now, boss."
+	Ganymede.debug(ts.l("runEmbeddedTest.bad_result"));
       }
 
-    GanymedeAdmin.setState("Normal Operation");
+    // "Normal Operation"
+    GanymedeAdmin.setState(ts.l("global.normal_state"));
 
     return null;
   }
 
   /**
-   * <p>Removes any embedded objects which do not have containers.</p>
+   * Removes any embedded objects which do not have containers.
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal runEmbeddedSweep()
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to execute an Embedded objects sweep on the server");
+	// "Permissions Denied"
+	// "You do not have permission to execute an Embedded Objects sweep on the server."
+	return Ganymede.createErrorDialog(ts.l("runEmbeddedSweep.denied_title"),
+					  ts.l("runEmbeddedSweep.denied_text"));
       }
 
     return Ganymede.server.sweepEmbeddedObjects();
   }
 
   /**
-   * <p>Causes a pre-registered task in the Ganymede server
+   * Causes a pre-registered task in the Ganymede server
    * to be executed as soon as possible.  This method call
-   * will have no effect if the task is currently running.</p>
+   * will have no effect if the task is currently running.
    *
    * @param name The name of the task to run
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal runTaskNow(String name)
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to execute tasks on the server");
+	// "Permissions Denied"
+	// "You do not have permission to execute tasks on the server."
+	return Ganymede.createErrorDialog(ts.l("runTaskNow.denied_title"),
+					  ts.l("runTaskNow.denied_text"));
       }
 
     if (Ganymede.scheduler.runTaskNow(name))
@@ -1230,30 +1321,32 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	return null;
       }
 
-    return Ganymede.createErrorDialog("Couldn't run task",
-				      "Couldn't run task " + name + ", perhaps the task isn't registered?");
+    // "Couldn''t run task {0}.  Some sort of error on the server?"
+    return Ganymede.createErrorDialog(ts.l("runTaskNow.error", name));
   }
 
   /**
-   * <p>Causes a running task to be interrupted as soon as possible.
+   * Causes a running task to be interrupted as soon as possible.
    * Ganymede tasks need to be specifically written to be able
    * to respond to interruption, so it is not guaranteed that the
    * task named will always be able to safely or immediately respond
-   * to a stopTask() command.</p>
+   * to a stopTask() command.
    *
    * @param name The name of the task to interrupt
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal stopTask(String name)
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to stop tasks on the server");
+	// "Permissions Denied"
+	// "You do not have permission to stop tasks on the server."
+	return Ganymede.createErrorDialog(ts.l("stopTask.denied_title"),
+					  ts.l("stopTask.denied_text"));
       }
 
     if (Ganymede.scheduler.stopTask(name))
@@ -1261,29 +1354,31 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	return null;
       }
 
-    return Ganymede.createErrorDialog("Couldn't stop task",
-				      "Couldn't stop task " + name + ", perhaps the task isn't running?");
+    // "Couldn''t stop task {0}.  Perhaps the task wasn't running?"
+    return Ganymede.createErrorDialog(ts.l("stopTask.error", name));
   }
 
   /**
-   * <p>Causes a registered task to be made ineligible for execution
+   * Causes a registered task to be made ineligible for execution
    * until {@link arlut.csd.ganymede.server.GanymedeAdmin#enableTask(java.lang.String) enableTask()}
    * is called.  This method will not stop a task that is currently
-   * running.</p>
+   * running.
    *
    * @param name The name of the task to disable
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal disableTask(String name)
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to disable tasks on the server");
+	// "Permissions Denied"
+	// "You do not have permission to disable tasks on the server."
+	return Ganymede.createErrorDialog(ts.l("disableTask.denied_title"),
+					  ts.l("disableTask.denied_text"));
       }
 
     if (Ganymede.scheduler.disableTask(name))
@@ -1291,28 +1386,30 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	return null;
       }
 
-    return Ganymede.createErrorDialog("Couldn't disable task",
-				      "Couldn't disable task " + name + ", perhaps the task isn't registered?");
+    // "Couldn''t disable task {0}.  Some sort of error on the server?"
+    return Ganymede.createErrorDialog(ts.l("disableTask.error", name));
   }
 
   /**
-   * <p>Causes a task that was temporarily disabled by
+   * Causes a task that was temporarily disabled by
    * {@link arlut.csd.ganymede.server.GanymedeAdmin#disableTask(java.lang.String) disableTask()}
-   * to be available for execution again.</p>
+   * to be available for execution again.
    *
    * @param name The name of the task to enable
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal enableTask(String name)
   {
     if (!fullprivs)
       {
-	return Ganymede.createErrorDialog("Permissions Denied",
-					  "You do not have permissions to enable tasks on the server");
+	// "Permissions Denied"
+	// "You do not have permission to re-enable tasks on the server."
+	return Ganymede.createErrorDialog(ts.l("enableTask.denied_title"),
+					  ts.l("enableTask.denied_text"));
       }
 
     if (Ganymede.scheduler.enableTask(name))
@@ -1320,12 +1417,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	return null; 
       }
 
-    return Ganymede.createErrorDialog("Couldn't enable task",
-				      "Couldn't enable task " + name + ", perhaps the task isn't registered?");
+    // "Couldn''t enable task {0}.  Perhaps the task isn't registered?"
+    return Ganymede.createErrorDialog(ts.l("enableTask.error", name));
   }
 
   /**
-   * <p>Lock the server to prevent client logins and edit the server
+   * Lock the server to prevent client logins and edit the server
    * schema.  This method will return a {@link
    * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote reference to the
    * admin console, which will present a graphical schema editor using
@@ -1334,11 +1431,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * either through affirmative action or through the death of the
    * admin console or the network connection.  The {@link
    * arlut.csd.ganymede.server.DBSchemaEdit DBSchemaEdit} class on the server
-   * coordinates everything.</p>
+   * coordinates everything.
    *
-   * <p>This method is part of the {@link
+   * This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * and may be called remotely by attached admin consoles.
    */
 
   public SchemaEdit editSchema()
@@ -1350,23 +1447,27 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (!fullprivs)
       {
-	Ganymede.debug("Attempt made to edit schema by a non-privileged console:" + this.toString());
+	// "Attempt made to edit schema by a non-privileged console: {0}"
+	Ganymede.debug(ts.l("editSchema.no_privs", this.toString()));
 	return null;
       }
 
-    Ganymede.debug("entering editSchema");
+    // "entering editSchema"
+    Ganymede.debug(ts.l("editSchema.entering"));
 
     // synchronize on server so we don't get logins while we're checking
     // things out
 
     try
       {
-	String semaphoreCondition = GanymedeServer.lSemaphore.disable("schema edit", true, 0);
+	// "schema edit"
+	String semaphoreCondition = GanymedeServer.lSemaphore.disable(ts.l("editSchema.semaphore_token"), true, 0);
 
 	if (semaphoreCondition != null)
 	  {
-	    Ganymede.debug(this.toString() + ", can't edit schema, semaphore error: " +
-			   semaphoreCondition);
+	    // "Admin console {0} can''t edit schema.  Ganymede login semaphore already locked with condition "{1}"."
+	    Ganymede.debug(ts.l("editSchema.semaphore_error", this.toString(), semaphoreCondition));
+
 	    return null;
 	  }
       }
@@ -1394,7 +1495,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (Ganymede.db.lockSync)
       {
-	Ganymede.debug("entering editSchema synchronization block");
+	// "Admin console {0} entering editSchema synchronization block."
+	Ganymede.debug(ts.l("editSchema.synchronizing", this.toString()));
 
 	en = Ganymede.db.objectBases.elements();
 
@@ -1403,33 +1505,39 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	    while (en.hasMoreElements())
 	      {
 		base = (DBObjectBase) en.nextElement();
-
+		
 		if (base.isLocked())
 		  {
-		    Ganymede.debug(this.toString() + ", can't edit Schema, lock held on " + 
-				   base.getName());
-		    GanymedeServer.lSemaphore.enable("schema edit");
+		    // "Admin console {0} can''t edit Schema, lock held on {1}."
+		    Ganymede.debug(ts.l("editSchema.locked_base", this.toString(), base.getName()));
+		    
+		    // "schema edit"
+		    GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
+		    
 		    return null;
 		  }
 	      }
 	  }
-
-	 // should be okay
-
-	 Ganymede.debug("Ok to create DBSchemaEdit for " + this.toString());
-
-	 GanymedeAdmin.setState("Schema Edit In Progress");
-
-	 try
-	   {
-	     DBSchemaEdit result = new DBSchemaEdit();
-	     return result;
-	   }
-	 catch (RemoteException ex)
-	   {
-	     GanymedeServer.lSemaphore.enable("schema edit");
-	     return null;
-	   }
+	
+	// should be okay
+	
+	// "Ok to create DBSchemaEdit for admin console {0}."
+	Ganymede.debug(ts.l("editSchema.okay_to_go", this.toString()));
+	
+	// "Schema Edit In Progress"
+	GanymedeAdmin.setState(ts.l("editSchema.edit_state"));
+	
+	try
+	  {
+	    DBSchemaEdit result = new DBSchemaEdit();
+	    return result;
+	  }
+	catch (RemoteException ex)
+	  {
+	    // "schema edit"
+	    GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
+	    return null;
+	  }
       }
   }
 }
