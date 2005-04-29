@@ -132,6 +132,7 @@ class memoryStatusTask implements Runnable, silentTask {
 	
 	if (count == 0)
 	  {
+	    // ">> [ {0} ] memory status dump: in use = {1}, free = {2}, total = {3}"
 	    Ganymede.debug(ts.l("status_dump",
 				new Date(),
 				new Long(rt.totalMemory() - rt.freeMemory()),
