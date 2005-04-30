@@ -14,21 +14,36 @@
       <IMG SRC="../gifs/ganymede_title.gif" alt="Ganymede Logo"/>
 
       <div id="title">
-        <h1>Ganymede 2.0 Sync Channel Guide</h1>
+        <h1>The GanymedeBuildTask Synchronization Guide</h1>
         <p>Release 2.0 dev - ? ? 2005<br/>$Rev: 6615 $</p>
       </div>
 
       <div id="abstract">
-        <p>This guide will descibe how to take data from Ganymede and
-        feed it into your target directory services or databases,
-        using the new XML-based Sync Channel mechanism introduced in
-        Ganymede 2.0.</p>
+        <p>This document is a guide to the use of the original
+        Ganymede 1.0 GanymedeBuilderTask-based synchronization
+        system.</p>
+
+        <p>Most users new to Ganymede will want to avoid this style of
+        implementing synchronization in favor of the newer and more
+        simple XML synchronization system implemented in Ganymede
+        2.0.</p>
+
+        <p>Some users may be running legacy synchronization code from
+        a Ganymede 1.0 installation, however, and others may need the
+        flexibility to run custom logic to assemble their
+        synchronization data.</p>
+
+        <p>This guide is for them.</p>
+
+        <p id="note">This document should be read after reading the <a
+        href="index.html">Sync Channel Synchronization Guide</a>
+        which, in addition to describing the new XML sync system, also
+        provides a good conceptual overview of the ways in which
+        synchronization can be carried out.</p>
       </div>
 
       <p>By <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></p>
     </div>
-
-    <h3 id="buildertask">3.1 The GanymedeBuilderTask Synchronization Model</h3>
 
     <p>The original Ganymede synchronization model is based around
     full state synchronization, and was designed in conjunction with
@@ -105,15 +120,6 @@
     a change made in the Ganymede server's schema, the server would
     have to be stopped and restarted after compiling and loading the
     new version of the builder task's code.</p>
-
-    <p>The advantage of using the GanymedeBuilderTask system is that
-    it is the only full state synchronization model that is fully
-    integrated into the Ganymede server's scheduler.  By creating and
-    registering a GanymedeBuilderTask, you can rely on the server to
-    handle scheduling your builds.  The alternative XML-based full
-    state synchronization model (<a href="xml_full_state">described
-    below</a>) is meant only to serve as a manual backup for the
-    Ganymede 2.0 XML-based delta synchronization model.</p>
 
     <p>Right now, we need to discuss how to actually go about
     constructing a GanymedeBuilderTask subclass to handle a full state
