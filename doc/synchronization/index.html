@@ -695,10 +695,12 @@
     <code class="attribute">oid</code> attribute may be useful to your
     Sync Channel service program as a foreign key that does not change
     between the <b>&lt;before&gt;</b> and <b>&lt;after&gt;</b>
-    elements, even if the object is renamed in the transaction.  In
-    the same way, the <code class="attribute">oid</code> attribute is
-    added to the <a href="../xml/data.html#INVID">&lt;invid&gt;</a>
-    element.</p>
+    elements, even if the object is renamed in the transaction.</p>
+
+    <p class="note"><a href="../xml/data.html#INVID">&lt;invid&gt;</a>
+    also have <code class="attribute">oid</code> attributes.  Any
+    cross-referencing you need to do in your service program you
+    should do with these oids.</p>
 
     <p>The other big difference with the <b>&lt;object&gt;</b> elements in
     the Sync Channel XML output is that they will only include the
