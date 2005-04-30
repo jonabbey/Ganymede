@@ -679,13 +679,14 @@
       </table>
     </div>
 
-    <p>Within the &lt;transaction&gt; element are a series of
-    &lt;object_delta&gt; elements.  Each &lt;object_delta&gt; element
-    contains a &lt;before&gt; element and an &lt;after&gt;
+    <p>The <b>&lt;transaction&gt;</b> element contains a series of one
+    or more <b>&lt;object_delta&gt;</b> elements.  Each
+    <b>&lt;object_delta&gt;</b> element contains a
+    <b>&lt;before&gt;</b> element and an <b>&lt;after&gt;</b>
     element.</p>
 
-    <p>The &lt;before&gt; and &lt;after&gt; elements contain one
-    &lt;object&gt; element each.  These &lt;object&gt; elements are
+    <p>The <b>&lt;before&gt;</b> and <b>&lt;after&gt;</b> elements contain one
+    <b>&lt;object&gt;</b> element each.  These <b>&lt;object&gt;</b> elements are
     identical to the <a
     href="../xml/data.html#OBJECT">&lt;object&gt;</a> elements as they
     are used with the <a
@@ -698,7 +699,7 @@
     href="../xml/data.html#INVID">&lt;invid&gt;</a> element, strictly
     to act as a reliable fixed key in the face of object renames.</p>
 
-    <p>The other big difference with the &lt;object&gt; elements in
+    <p>The other big difference with the <b>&lt;object&gt;</b> elements in
     the Sync Channel XML output is that they will only include the
     fields that the <code class="type">Sync Channel</code> was
     configured to write.  This is where our friends <b>Always</b> and
@@ -715,17 +716,18 @@
     mean.</p>
 
     <p>If a field did change during the transaction, its before state
-    will be written in the &lt;before&gt; element, and its after state
-    will be written in the &lt;after&gt; element.  If a field was
-    newly created during the transaction, the field will not appear in
-    the &lt;before&gt; element but it will appear in the &lt;after&gt;
-    element.  Likewise, if a field was deleted during the transaction,
-    it will appear in the &lt;before&gt; element but not in the
-    &lt;after&gt; element.</p>
+    will be written in the <b>&lt;before&gt;</b> element, and its
+    after state will be written in the <b>&lt;after&gt;</b> element.
+    If a field was newly created during the transaction, the field
+    will not appear in the <b>&lt;before&gt;</b> element but it will
+    appear in the <b>&lt;after&gt;</b> element.  Likewise, if a field
+    was deleted during the transaction, it will appear in the
+    &lt;before&gt; element but not in the <b>&lt;after&gt;</b>
+    element.</p>
 
     <p>If an object is created or destroyed in a transaction rather
-    than merely edited, the &lt;before&gt; or &lt;after&gt; elements,
-    respectively, will be empty.</p>
+    than merely edited, the <b>&lt;before&gt;</b> or
+    <b>&lt;after&gt;</b> elements, respectively, will be empty.</p>
 
     <p>Here's an example of a user in the laboratory's Ganymede server
     being deleted by the expiration task:</p>
