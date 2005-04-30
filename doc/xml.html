@@ -1274,6 +1274,15 @@ cause a new object to be created on the Ganymede server, the
 attribute for an object that does not already exist on the server at
 the time the xml file is processed.</dd>
 
+<dt><b>oid</b></dt>
+
+<dd><p>This attribute is provided when an object is dumped out by a <a
+href="synchronization/index.html">Sync Channel</a>.  It is a globally
+unique identifier which encodes both the type of the object and its
+unique id number.</p>
+
+<p>This attribute is disregarded when loading data.</p></dd>
+
 <dt><b>action</b></dt>
 
 <dd>
@@ -2103,6 +2112,13 @@ server, and is used to address a pre-existing object on the server.  This
 attribute should only be used when you explicitly want to address an
 object on the server, regardless of whatever other activity the
 &lt;ganydata&gt; element in the XML file defines.</dd>
+
+<dt><b>oid</b></dt>
+
+<dd>This attribute is present when an &lt;invid&gt; element is dumped
+out by a <a href="synchronization/index.html">Sync Channel</a>.  It is
+a globally unique identifier for a pre-existing object, encoding both
+the type of the object target and its specific identity.</dd>
 
 </dl>
 </td>

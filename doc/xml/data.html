@@ -141,6 +141,15 @@ cause a new object to be created on the Ganymede server, the
 attribute for an object that does not already exist on the server at
 the time the xml file is processed.</dd>
 
+<dt><b>oid</b></dt>
+
+<dd><p>This attribute is provided when an object is dumped out by a <a
+href="synchronization/index.html">Sync Channel</a>.  It is a globally
+unique identifier which encodes both the type of the object and its
+unique id number.</p>
+
+<p>This attribute is disregarded when loading data.</p>
+
 <dt><b>action</b></dt>
 
 <dd>
@@ -942,7 +951,7 @@ the kind of object this &lt;invid&gt; element is pointing to.</dd>
 
 <dt><b>id</b></dt>
 
-<dd><p>This attribute, if present, contains a string that is meant to
+<dd>This attribute, if present, contains a string that is meant to
 uniquely identify a target object of type matching the value of the
 type attribute in this &lt;invid&gt; element on the Ganymede server.
 The targeted object may exist prior to XML file processing on the
@@ -953,15 +962,7 @@ is defined with an <b>action</b> attribute value of <b>create</b>,
 then all &lt;invid&gt; elements in the XML file with that
 <b>type</b> and <b>id</b> will point to the newly created object,
 and not any pre-existing object on the server that shared that
-<b>type</b> and <b>id</b>.</p>
-
-<p>Not all types of objects on the server will have be addressable by
-<b>id</b>.  Some types of objects, such as embedded objects within
-user or system objects, may not have a defined unique label field.
-This should be by far the exception rather than the rule, but for such
-cases, objects on the server may be addressed using the <b>num</b>
-attribute rather than the <b>id</b> attribute.</p>
-</dd>
+<b>type</b> and <b>id</b>.</dd>
 
 <dt><b>num</b></dt>
 
@@ -970,6 +971,13 @@ server, and is used to address a pre-existing object on the server.  This
 attribute should only be used when you explicitly want to address an
 object on the server, regardless of whatever other activity the
 &lt;ganydata&gt; element in the XML file defines.</dd>
+
+<dt><b>oid</b></dt>
+
+<dd>This attribute is present when an &lt;invid&gt; element is dumped
+out by a <a href="synchronization/index.html">Sync Channel</a>.  It is
+a globally unique identifier for a pre-existing object, encoding both
+the type of the object target and its specific identity.</dd>
 
 </dl>
 </td>
