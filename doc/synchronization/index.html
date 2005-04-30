@@ -534,23 +534,33 @@
   </ganydata> 
 </ganymede></xmp>
 
-    <p>The particulars of this XML schema is dependent on the
-    particular schema configured in the Ganymede server.  Field names
-    come straight from the Ganymede server's schema, with a simple <a
+    <p>Some of the details of the XML schema used are dependent on the
+    specific Ganymede schema in on the Ganymede server.  In
+    particular, the names of the field elements (and what sorts of
+    data the field elements contain) are up to you when you define the
+    Ganymede schema.</p>
+
+    <p>Because whitespace is not allowed in element names, the field
+    names you'll see in the XML file are processed with a simple <a
     href="../xml.html#underscore">spaces to underscores</a> encoding
     to make sure that field names cohere with proper XML specs.</p>
 
-    <p>Notice that this format is basically identical to the output of
-    an <a href="../xml/xmlclient.html">xmlclient</a> data object dump,
-    as documented in the <a href="../xml/data.html">Ganymede XML
+    <p>This format is basically identical to the output of an <a
+    href="../xml/xmlclient.html">xmlclient</a> data object dump, as
+    documented in the <a href="../xml/data.html">Ganymede XML
     &lt;ganydata&gt; Guide</a>.</p>
 
-    <p>The differences are that the <a
-    href="../xml/data.html#INVID">&lt;invid&gt;</a> elements have an
-    extra <b>oid</b> attribute (more on which when we talk about the
-    Incremental Sync Channel), and that the objects and fields dumped
-    are only a subset of the server's data, according to the
-    constraints specified in the Sync Channel.</p>
+    <p>The only differences are that:</p>
+
+    <ul>
+      <li>The <a href="../xml/data.html#INVID">&lt;invid&gt;</a>
+      elements have an extra <b>oid</b> attribute (more on which when
+      we talk about the Incremental Sync Channel).</li>
+
+      <li>The data that is dumped is filtered by the <a
+      href="#sync_data">Sync Data</a> constraints specified in the
+      Sync Channel.</li>
+    </ul>
 
     <h2 id="xml_incrementals">5. Incremental Sync Channels</h2>
 
