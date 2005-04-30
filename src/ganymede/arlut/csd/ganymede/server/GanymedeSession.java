@@ -278,17 +278,25 @@ final public class GanymedeSession implements Session, Unreferenced {
   Date lastActionTime = new Date();
 
   /**
-   * <p>The unique name that the user is connected to the server under.. this
-   * may be &lt;username&gt;[2], &lt;username&gt;[3], etc., if the user is
-   * connected to the server multiple times.  The username will be
-   * unique on the server at any given time.</p>
-   *
-   * <p>username should never be null.  If a client logs in directly
-   * to a persona, username will be that personaname plus an optional
-   * session id.</p> 
+   * The name of the user logged in.  If the person logged in is using
+   * supergash, username will be supergash, even though supergash
+   * isn't technically a user.
    */
 
-  String username;
+  private String username;
+
+  /**
+   * The unique name that the user is connected to the server
+   * under.. this may be &lt;username&gt;[2], &lt;username&gt;[3],
+   * etc., if the user is connected to the server multiple times.  The
+   * sessionName will be unique on the server at any given time.
+   *
+   * sessionName should never be null.  If a client logs in directly
+   * to a persona, sessionName will be that personaname plus an
+   * optional session integer.
+   */
+
+  private String sessionName;
 
   /**
    *
@@ -609,6 +617,8 @@ final public class GanymedeSession implements Session, Unreferenced {
     // construct our DBSession
 
     loggedInSemaphore.set(true);
+
+    sessionName = sessionLabel;
     username = sessionLabel;
     clienthost = sessionLabel;
     session = new DBSession(Ganymede.db, this, sessionLabel);
@@ -677,6 +687,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     if (userObject != null)
       {
 	userInvid = userObject.getInvid();
+	username = userObject.getLabel();
       }
     else
       {
@@ -687,6 +698,11 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	personaInvid = personaObject.getInvid();
 	personaName = personaObject.getLabel();
+
+	if (username == null)
+	  {
+	    username = personaName; // for supergash, monitor
+	  }
       }
     else
       {
@@ -695,7 +711,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // find a unique name for this session
 
-    username = GanymedeServer.registerActiveUser(loginName);
+    sessionName = GanymedeServer.registerActiveUser(loginName);
 
     // find out where the user is coming from
 
@@ -724,7 +740,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // construct our DBSession
 
-    session = new DBSession(Ganymede.db, this, username);
+    session = new DBSession(Ganymede.db, this, sessionName);
 
     // Let the GanymedeServer know that this session is now active for
     // purposes of admin console updating.
@@ -842,7 +858,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	try
 	  {
-	    throw new RuntimeException(ts.l("checkIn.exception", username));
+	    throw new RuntimeException(ts.l("checkIn.exception", sessionName));
 	  }
 	catch (RuntimeException ex)
 	  {
@@ -871,7 +887,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (info == null)
       {
-	info = new AdminEntry(username,
+	info = new AdminEntry(sessionName,
 			      personaName,
 			      clienthost,
 			      (status == null) ? "" : status,
@@ -896,7 +912,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   void setLastError(String error)
   {
-    Ganymede.debug("GanymedeSession [" + username + "]: setLastError (" + error + ")");
+    Ganymede.debug("GanymedeSession [" + sessionName + "]: setLastError (" + error + ")");
   }
 
   /**
@@ -934,25 +950,56 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    return;
 	  }
 
-	if ((minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0) ||
-	    minutesIdle > Ganymede.timeoutIdleWithObjs)
-	  {
-	    System.err.println(ts.l("timeCheck.sending", this.toString()));
+	// if the time has come to kick the user off, we'll send him a
+	// signal telling him to drop down to non-privileged.  If the
+	// sendMessage() call throws an exception for some reason,
+	// we'll log that.
 
-	    timedout = true;
-	    sendMessage(ClientMessage.SOFTTIMEOUT, null);
+	try
+	  {
+	    if ((minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0) ||
+		minutesIdle > Ganymede.timeoutIdleWithObjs)
+	      {
+		// if we've got a non-user based admin (i.e.,
+		// supergash) logged in, we can't force them
+		// non-privileged, so we'll skip sending the timeout
+		// message and just wait another couple of minutes for
+		// the forceoff.
+
+		if (userInvid != null)
+		  {
+		    // "Sending a timeout message to {0}"
+		    System.err.println(ts.l("timeCheck.sending", this.toString()));
+		
+		    timedout = true;
+
+		    // sending this message to the client should cause it
+		    // to set persona back to the unprivileged state,
+		    // coincidentally resetting the lastActionTime in the
+		    // process.
+
+		    sendMessage(ClientMessage.SOFTTIMEOUT, null);
+		  }
+	      }
 	  }
-
-	// we give the client two minutes to respond to the
-	// SOFTTIMEOUT message, then we get mean.
-
-	if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
+	catch (Throwable ex)
 	  {
-	    forceOff(ts.l("timeCheck.forceOffNoObjs", new Integer(Ganymede.timeoutIdleNoObjs)));
+	    // "Throwable condition caught while trying to send a timeout message to {0}:\n\n{1}"
+	    Ganymede.debug(Ganymede.stackTrace(ex));
 	  }
-	else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
+	finally
 	  {
-	    forceOff(ts.l("timeCheck.forceOffWithObjs", new Integer(Ganymede.timeoutIdleWithObjs)));
+	    // we give the client two minutes to respond to the
+	    // SOFTTIMEOUT message, then we get mean.
+
+	    if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
+	      {
+		forceOff(ts.l("timeCheck.forceOffNoObjs", new Integer(Ganymede.timeoutIdleNoObjs)));
+	      }
+	    else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
+	      {
+		forceOff(ts.l("timeCheck.forceOffWithObjs", new Integer(Ganymede.timeoutIdleWithObjs)));
+	      }
 	  }
 
 	return;
@@ -1007,6 +1054,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 						       null));
 	  }
 
+	// "Forcing {0} off for {1}."
 	Ganymede.debug(ts.l("forceOff.forcing", username, reason));
 
 	if (asyncPort != null)
@@ -1243,7 +1291,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // server down, so the rest of of the stuff below may not
 	    // happen
 	    
-	    GanymedeServer.clearActiveUser(username);
+	    GanymedeServer.clearActiveUser(sessionName);
 
 	    // help the garbage collector
 
@@ -1445,15 +1493,26 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>This method returns the identification string that the server
-   * has assigned to the user.</p>
+   * This method returns the name of the user that is logged into this session.
+   *
+   * If supergash is using this session, this method will return supergash as
+   * well, even though technically supergash isn't a user.
    * 
    * @see arlut.csd.ganymede.rmi.Session
    */
 
   public String getMyUserName()
   {
-    return username;
+    return this.username;
+  }
+
+  /**
+   * This method returns the unique name of this session.
+   */
+
+  public String getSessionName()
+  {
+    return this.sessionName;
   }
 
   /**
@@ -1463,7 +1522,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public String getClientHostName()
   {
-    return clienthost;
+    return this.clienthost;
   }
 
   /**
@@ -1529,7 +1588,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public synchronized boolean selectPersona(String persona, String password) throws NotLoggedInException
+  public synchronized boolean selectPersona(String newPersona, String password) throws NotLoggedInException
   {
     checklogin();		// this resets lastAction
 
@@ -1552,17 +1611,22 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return false;
       }
 
-    // if they are selecting their username, go ahead and 
-    // clear out the persona privs and return true
+    // if they are selecting their base username, go ahead and clear
+    // out the persona privs and return true
 
-    if (user.getLabel().equals(persona))
+    if (user.getLabel().equals(newPersona))
       {
-	// we trust the client not to send us a null password when it
-	// has received a soft timeout
+	// if we've timed out, one of two things might be happening
+	// here.  if the client gave us a password, they may be
+	// revalidating their login for end-user access.
+	// 
+	// if they gave us no password, the client is itself
+	// downshifting to the non-privileged level.
 
 	if (timedout && password != null)
 	  {
-	    Ganymede.debug(ts.l("selectPersona.attempting_timecheck", username));
+	    // "User {0} attempting to re-authenticate non-privileged login after being timed out."
+	    Ganymede.debug(ts.l("selectPersona.attempting_timecheck", this.username));
 
 	    pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 	    
@@ -1572,13 +1636,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      }
 	    else
 	      {
-		Ganymede.debug(ts.l("selectPersona.failed_timecheck", username));
+		// "User {0} failed to re-authenticate a login that timed out."
+		Ganymede.debug(ts.l("selectPersona.failed_timecheck", this.username));
 		return false;
 	      }
 	  }
 	else
 	  {
-	    Ganymede.debug(ts.l("selectPersona.giving_up", username));
+	    // "User {0}''s privileged login as {1} timed out.  Downshifting to non-privileged access."
+	    Ganymede.debug(ts.l("selectPersona.giving_up", this.username, this.personaName));
 	  }
 
 	// the GUI client will close transactions first, but since we
@@ -1601,12 +1667,13 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
 
 	personaObject = null;
-	personaInvid = null;
-	personaName = null;
+	this.personaInvid = null;
+	this.personaName = null;
 	updatePerms(true);
-	visibilityFilterInvids = null;
-	userInfo = null;	// null our admin console cache
-	setLastEvent("selectPersona: " + persona);
+	this.visibilityFilterInvids = null;
+	this.userInfo = null;	// null our admin console cache
+	this.username = user.getLabel(); // in case they logged in directly as an admin account
+	setLastEvent("selectPersona: " + newPersona);
 	return true;
       }
 
@@ -1626,20 +1693,20 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	personaObject = session.viewDBObject(invid);
 
-	if (personaObject.getLabel().equals(persona))
+	if (!personaObject.getLabel().equals(newPersona))
 	  {
-	    personaName = personaObject.getLabel();
-	    break;
+	    personaObject = null;
 	  }
 	else
 	  {
-	    personaObject = null;
+	    break;
 	  }
       }
 
     if (personaObject == null)
       {
-	Ganymede.debug(ts.l("selectPersona.no_persona", persona, username));
+	// "Couldn''t find persona {0} for user: {1}"
+	Ganymede.debug(ts.l("selectPersona.no_persona", newPersona, this.username));
 	return false;
       }
 
@@ -1647,7 +1714,10 @@ final public class GanymedeSession implements Session, Unreferenced {
     
     if (pdbf != null && pdbf.matchPlainText(password))
       {
-	Ganymede.debug(ts.l("selectPersona.switched", username, persona));
+	// "User {0} switched to persona {1}."
+	Ganymede.debug(ts.l("selectPersona.switched", this.username, newPersona));
+
+	this.personaName = personaObject.getLabel();
 
 	if (timedout)
 	  {
@@ -1673,11 +1743,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    openTransaction(description, interactive);
 	  }
 
-	personaInvid = personaObject.getInvid();
+	this.personaInvid = personaObject.getInvid();
 	updatePerms(true);
-	userInfo = null;	// null our admin console cache
-	visibilityFilterInvids = null;
-	setLastEvent("selectPersona: " + persona);
+	this.userInfo = null;	// null our admin console cache
+	this.username = user.getLabel(); // in case they logged in directly as an admin account
+	this.visibilityFilterInvids = null;
+	setLastEvent("selectPersona: " + newPersona);
 	return true;
       }
 
@@ -2404,18 +2475,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     else
       {
-	if (username.indexOf(':') == -1)
-	  {
-	    // real username, save it as is
+	returnAddr = this.username;
 
-	    returnAddr = username;
-	  }
-	else
-	  {
-	    // persona, extract the user's name out of it
-	    returnAddr = username.substring(0, username.indexOf(':'));
-	  }
-    
 	mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
 
 	if (mailsuffix != null)
@@ -2426,6 +2487,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // create the signature
 
+    // "This message was sent by {0}, who is running the Ganymede client on {1}."
     signature.append(ts.l("sendMail.signature", username, clienthost));
 
     body.append("\n--------------------------------------------------------------------------------\n");

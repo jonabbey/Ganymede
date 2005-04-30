@@ -65,7 +65,7 @@ public class AdminEntry implements java.io.Serializable {
   // ---
 
   public String
-    username,
+    sessionName,
     personaName,
     hostname,
     status,
@@ -77,12 +77,12 @@ public class AdminEntry implements java.io.Serializable {
 
   /* -- */
 
-  public AdminEntry(String username, String personaName,
+  public AdminEntry(String sessionName, String personaName,
 		    String hostname, String status,
 		    String connecttime, String event,
 		    int objectsCheckedOut)
   {
-    this.username = username;
+    this.sessionName = sessionName;
     this.personaName = personaName;
     this.hostname = hostname;
     this.status = status;

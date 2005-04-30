@@ -838,7 +838,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    String uname = username.getText().trim();
 	    String pword = new String(passwd.getPassword());
 
-	    my_username = uname;
 	    my_passwd = pword;
 	    my_session = null;
 	
@@ -856,6 +855,18 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    
 	    if (my_session != null) 
 	      {
+		// we need to look up our real username from the
+		// server, since we might have been logged in using a
+		// composite username:persona string.
+
+		try
+		  {
+		    my_username = my_session.getMyUserName();
+		  }
+		catch (Exception ex)
+		  {
+		  }
+
 		enableButtons(false);
 		startSession(my_session);
 	      }

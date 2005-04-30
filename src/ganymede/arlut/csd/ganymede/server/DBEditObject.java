@@ -2547,7 +2547,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 					    buffer.toString(),
 					    (gSession.personaInvid == null ?
 					     gSession.userInvid : gSession.personaInvid),
-					    gSession.username,
+					    gSession.getMyUserName(),
 					    invids,
 					    getEmailTargets(this)));
 	  }
@@ -2566,7 +2566,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 					    buffer.toString(),
 					    (gSession.personaInvid == null ?
 					     gSession.userInvid : gSession.personaInvid),
-					    gSession.username,
+					    gSession.getMyUserName(),
 					    invids,
 					    getEmailTargets(this)));
 	  }
@@ -2653,7 +2653,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 					buffer.toString(),
 					(gSession.personaInvid == null ?
 					 gSession.userInvid : gSession.personaInvid),
-					gSession.username,
+					gSession.getMyUserName(),
 					invids,
 					getEmailTargets(this)));
       }

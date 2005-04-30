@@ -389,6 +389,11 @@ public class GanymedeServer implements Server {
 		if (pdbf != null && pdbf.matchPlainText(clientPass))
 		  {
 		    found = true;
+
+		    // and re-canonicalize the name so that later on
+		    // we can match when we do case sensitive searches
+
+		    clientName = user.getLabel();
 		  }
 	      }
 
@@ -473,7 +478,7 @@ public class GanymedeServer implements Server {
 		// (broccol:GASH Admin, etc.), try to find his base user
 		// account.
 	
-		if (clientName.indexOf(':') != -1)
+		if (found && clientName.indexOf(':') != -1)
 		  {
 		    String userName = clientName.substring(0, clientName.indexOf(':'));
 	    
@@ -485,6 +490,10 @@ public class GanymedeServer implements Server {
 		    if (results.size() == 1)
 		      {
 			user = loginSession.session.viewDBObject(((Result) results.elementAt(0)).getInvid());
+
+			// recanonicalize
+
+			clientName = user.getLabel();
 		      }
 		  }
 	      }
@@ -499,7 +508,8 @@ public class GanymedeServer implements Server {
 							      user, persona, 
 							      directSession, clientIsRemote);
 
-		Ganymede.debug(ts.l("processLogin.loggedin", session.username, session.clienthost));
+		// "{0} logged in from {1}"
+		Ganymede.debug(ts.l("processLogin.loggedin", session.getMyUserName(), session.clienthost));
 
 		Vector objects = new Vector();
 
@@ -724,8 +734,9 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * This method is called by the admin console via the {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
-   * class to kick a specific user off of the server.
+   * This method is called by the admin console via the {@link
+   * arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} class to
+   * kick a specific user session off of the server.
    */
 
   public boolean killUser(String username, String reason)
@@ -740,7 +751,7 @@ public class GanymedeServer implements Server {
 	  {
 	    GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
 
-	    if (session.username.equals(username))
+	    if (session.getSessionName().equals(username))
 	      {
 		session.forceOff(reason);
 		return true;

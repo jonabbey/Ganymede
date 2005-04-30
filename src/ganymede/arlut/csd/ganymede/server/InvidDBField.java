@@ -1247,7 +1247,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    if (editing.gSession != null)
 		      {
-			edit_username = editing.gSession.username;
+			edit_username = editing.gSession.getMyUserName();
 			edit_hostname = editing.gSession.clienthost;
 
 			// "InvidDBField.bind(): Couldn''t unlink from old reference"
@@ -1419,7 +1419,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		if (editing.gSession != null)
 		  {
-		    edit_username = editing.gSession.username;
+		    edit_username = editing.gSession.getMyUserName();
 		    edit_hostname = editing.gSession.clienthost;
 		    
 		    // "InvidDBField.bind(): Couldn''t link to new reference"

@@ -338,9 +338,9 @@ public class DBEditSet {
 	return gSession.personaName;
       }
 
-    if (gSession.username != null)
+    if (gSession.getMyUserName() != null)
       {
-	return gSession.username;
+	return gSession.getMyUserName();
       }
 
     return null;
@@ -1893,7 +1893,7 @@ public class DBEditSet {
 	    responsibleInvid = getGSession().userInvid;
 	  }
 
-	responsibleName = getGSession().username;
+	responsibleName = getGSession().getMyUserName();
       }
     else
       {
@@ -2279,7 +2279,7 @@ public class DBEditSet {
 
     if (getGSession() != null)
       {
-	responsibleName = getGSession().username;
+	responsibleName = getGSession().getMyUserName();
 	responsibleInvid = getGSession().personaInvid;
 	
 	if (responsibleInvid == null)

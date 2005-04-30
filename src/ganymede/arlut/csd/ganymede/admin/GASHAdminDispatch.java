@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -585,22 +585,35 @@ class GASHAdminDispatch implements Runnable {
 	      {
 		e = (AdminEntry) localEntries[i];
 
-		frame.table.newRow(e.username);
+		frame.table.newRow(e.sessionName);
+
+		// the sessionName from the AdminEntry is constant,
+		// and gives us a unique session name for the session.
+		//
+		// if we don't have a persona name, we'll display that
+		// unique session name, otherwise we'll show the
+		// user's persona name, so as to show the user's
+		// active privilege level.
+		//
+		// either way, the table tracks the unique session
+		// name for us, so that when the user right-clicks on
+		// the entry to kick a user off, the proper session is
+		// targeted.
 
 		if (e.personaName == null || e.personaName.equals(""))
 		  {
-		    frame.table.setCellText(e.username, 0, e.username, false);
+		    frame.table.setCellText(e.sessionName, 0, e.sessionName, false);
 		  }
 		else
 		  {
-		    frame.table.setCellText(e.username, 0, e.personaName, false);
+		    frame.table.setCellText(e.sessionName, 0, e.personaName, false);
 		  }
 
-		frame.table.setCellText(e.username, 1, e.hostname, false);
-		frame.table.setCellText(e.username, 2, e.status, false);
-		frame.table.setCellText(e.username, 3, e.connecttime, false);
-		frame.table.setCellText(e.username, 4, e.event, false);
-		frame.table.setCellText(e.username, 5, Integer.toString(e.objectsCheckedOut), false);
+		frame.table.setCellText(e.sessionName, 1, e.hostname, false);
+		frame.table.setCellText(e.sessionName, 2, e.status, false);
+		frame.table.setCellText(e.sessionName, 3, e.connecttime, false);
+		frame.table.setCellText(e.sessionName, 4, e.event, false);
+		frame.table.setCellText(e.sessionName, 5, Integer.toString(e.objectsCheckedOut), false);
 	      }
 
 	    frame.table.refreshTable();
