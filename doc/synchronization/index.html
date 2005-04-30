@@ -281,7 +281,7 @@
       synchronization files.  Meaningful for both incremental and full
       state Sync Channels.</li>
 
-      <li><code class="type">Sync Data</code> -- Agregate field that
+      <li><code class="type">Sync Data</code> -- Aggregate field that
       contains a map of object and field types to the conditions under
       which they are (or are not) to be written to this Sync Channel.
       By editing this field, you control what types of objects and
@@ -293,7 +293,7 @@
 	Check-box controlling whether or not password plaintext is
 	allowed to be written to this Sync Channel.
 
-	<br/>
+	<br/><br/>
 
 	If this check-box is not selected, the Ganymede server will
 	still permit stored password hashes to be written to the Sync
@@ -302,7 +302,7 @@
 	Program doesn't need access to the plain text in order to
 	synchronize passwords.
 
-	<br/>
+	<br/><br/>
 
 	See the <a
 	href="../xml/data.html#PASSWORD">&lt;password&gt;</a> element
@@ -329,183 +329,262 @@
     slightly different in the incremental and full state cases, as
     follows:</p>
 
-    <div align="center">
-      <table border="1">
-        <tr><th>Option</th><th>Full State</th><th>Incremental</th></tr>
-        <tr>
-          <td><b>Never</b></td>
-          <td>This field will never be written.</td>
-          <td>This field will never be written and it will never be
-          considered when determining whether an object in a
-          transaction should be written to the Sync Channel.</td>
-        </tr>
-        <tr>
-          <td><b>When Changed</b></td>
-          <td>This field will be written.</td>
-          <td>This field be written only if it changed during the
-          transaction. If this field is changed during a transaction,
-          the object as a whole will be written to the Sync Channel at
-          commit time.</td>
-        </tr>
-        <tr>
-          <td><b>Always</b></td>
-          <td>This field will be written.</td>
-          <td>This field be written if any field in the object marked
-          'When Changed' or 'Always' was changed during the
-          transaction.  If this field is changed during a transaction,
-          the object as a whole will be written to the Sync Channel at
-          commit time.</td>
-        </tr>
-      </table>
-    </div>
+    <table>
+      <tr><th>Option</th><th>Manual / Full State</th><th>Incremental</th></tr>
+      <tr>
+        <td><b>Never</b></td>
+        <td>This field will never be written.</td>
+        <td>This field will never be written and it will never be
+        considered when determining whether an object in a
+        transaction should be written to the Sync Channel.</td>
+      </tr>
+      <tr>
+        <td><b>When Changed</b></td>
+        <td>This field will be written.</td>
+        <td>This field be written only if it changed during the
+        transaction. If this field is changed during a transaction,
+        the object as a whole will be written to the Sync Channel at
+        commit time.</td>
+      </tr>
+      <tr>
+        <td><b>Always</b></td>
+        <td>This field will be written.</td>
+        <td>This field be written if any field in the object marked
+        'When Changed' or 'Always' was changed during the
+        transaction.  If this field is changed during a transaction,
+        the object as a whole will be written to the Sync Channel at
+        commit time.</td>
+      </tr>
+    </table>
 
     <p>The purpose of the <b>Always</b> option is intended to allow
-    you to mark fields whose data must always be included when that
-    kind of object is written to the Sync Channel.  If your service
-    program will always need to know the contents of a user object's
-    <code class="type">Username</code> field every time the object is
-    changed, even if the Username itself did not change, you can
-    configure your Sync Channel's <code class="type">Sync Data</code>
-    to always include it with the <b>Always</b> option.</p>
+    you to mark fields whose data must always be included when an
+    object of that type is written to the Sync Channel.  If your
+    service program will always need to know the contents of a user
+    object's <code class="type">Username</code> field every time the
+    object is changed (even if the Username itself did not change),
+    you can configure your Sync Channel's <code class="type">Sync
+    Data</code> to always include it with the <b>Always</b>
+    option.</p>
 
-    <p>Here's an example of what you'll see when you edit a <code
+    <p>For Full State and Manual Sync Channels, <b>Always</b> and
+    <b>When Changed</b> are synonyms.  The difference between the two
+    is only significant for Incremental Sync channels, where a <b>When
+    Changed</b> field will only be written to a transaction record if
+    it changed during the transaction.</p>
+
+    <p>Here's an example of what you might see when you edit a <code
     class="type">Sync Data</code> field in a <code class="type">Sync
-    Channel</code> object.  This image shows a <code class="type">Sync
-    Channel</code> object that is configured to write <code
-    class="type">User</code> objects to the Sync Channel whenever any
-    field but the <code class="type">Removal Date</code> and <code
-    class="type">Expiration Date</code> fields change.  Whenever any
-    such field changes, the object record in the synchronization file
-    will include the <code class="type">Username</code> and the <code
-    class="type">Notes</code> fields.</p>
-      
+    Channel</code> object:</p>
+
     <center><img src="screenshots/sync_field_options.png" class="screenshot"/></center>
 
     <h2 id="xml_full_state">4. Full State Sync Channels</h2>
 
+    <p>Full State Sync Channels are Ganymede 2.0's XML-based answer to
+    the traditional Ganymede 1.0 <a
+    href="ganymedebuildertask.html">GanymedeBuilderTask</a> build system.</p>
+
+    <p>When a transaction is committed in Ganymede, the server
+    examines every Full State Sync Channel registered in the server
+    and determines whether the committed transaction contained any
+    objects and fields that match up against the Sync Channel's <a
+    href="#sync_data">Sync Data</a> field. If so, as soon thereafter
+    as the GanymedeScheduler can manage (that is, as soon as any
+    previous build on the Sync Channel has finished), a
+    synchronization to the Sync Channel will be performed.</p>
+
+    <p>As we have discussed, this synchronization is a two phase
+    process.  The server executes a <a
+    href="../javadoc/arlut/csd/ganymede/server/SyncRunner.html">SyncRunner</a>
+    object associated with the Sync Channel, which locks the database
+    against commits and writes out everything in the Ganymede Server
+    which matches the Sync Channel's <code class="type">Sync
+    Data</code> constraints to the defined <code class="type">Full
+    State File</code>.  When the file is finished being written out,
+    the database is unlocked to allow commits to take place and the
+    Sync Channel's external <code class="type">Service Program</code>
+    is run to process the synchronization data.</p>
+
+    <p>Here's what a Full State Sync Channel looks like:</p>
+
+    <center><img src="screenshots/full_sync_channel.png" class="screenshot"/></center>
+
+    <h4 id="xml_full_state_service_program">Writing a Sync Channel Full State Service Program</h4>
+
+    <p>The Sync Channel Full State Service Program is tasked with
+    taking an XML file written by the Ganymede server which contains
+    all objects and fields in the server which match an <b>Always</b>
+    or <b>When Changed</b> specification in the Sync Channel's <a
+    href="#sync_data">Sync Data</a> field.  The Service Program must
+    read this file and then take whatever actions are required to
+    bring the external target service into congruence with the data in
+    the XML file.</p>
+
+    <p>We don't know what sort of external target service you may find
+    yourself wanting to support with a Full State Sync Channel, but we
+    can guess at the sort of things your Service Program may need to
+    do.  Creating records, deleting records, editing records, and
+    possibly renaming or moving records.  Implementing the logic to
+    interact with any given external service is necessarily a custom
+    job, according to how unique the external service you're trying to
+    support is.</p>
+
+    <p>It's very simple to say what the Ganymede server will give your
+    Service Program to help it along.</p>
+
+    <p>Almost nothing.</p>
+
+    <p>Because of practical limitations on how well Java code can
+    interact with the native operating system environment (UNIX-style
+    systems, typically, for Ganymede), the Ganymede server doesn't try
+    to set up any environment variables for your program.  It doesn't
+    even try to ensure that your program is started in any specific
+    working directory.  It certainly doesn't try to do any logging for
+    your Service Program in any way.</p>
+
+    <p>What it does give the Service Program is a single command line
+    parameter, which provides the file path to the XML file written
+    out by the Sync Channel's <a
+    href="../javadoc/arlut/csd/ganymede/server/SyncRunner.html">SyncRunner</a>.
+    </p>
+
+    <p>The Service Program should start off by changing its working
+    directory to a suitable location, setting any environment
+    variables necessary (PATH or LD_LIBRARY_PATH included), and
+    arranging for its own logging to the appropriate log mechanism.</p>
+
+    <p>Once all that is done, it should read in the XML file and start
+    to work.</p>
+
+    <p>Here's an example of the sort of XML file that the Full State
+    Service Program must be prepared to process:</p>
+
+    <xmp class="listing"><ganymede major="1" minor="0">
+  <ganydata>
+    <object type="User" id="jonabbey" oid="3:1143">
+      <Username>jonabbey</Username>
+      <UID>6074</UID>
+      <Password><password plaintext="S00perSekret" crypt="zv16nogZ9eRP5" md5crypt="$1$bH3vxykP$dkmWhIdVuqC8Y1h0s7PQU1" lanman="8AF317306D28CA711D0DC6E\
+72A9441BB" ntmd4="D3A6370C044FD34C6A487A6F5F53A6C1" ssha="{SSHA}cdHEG7iIMT2ZSHkJEf4fR62v/b23rnMO"/></Password>
+      <Account_Category><invid type="User_Category" id="normal" oid="279:5"/></Account_Category>
+      <Full_Name>Jonathan Abbey</Full_Name>
+      <Badge>x819</Badge>
+      <Division>ITS</Division>
+      <Room>S321</Room>
+      <Office_Phone>835-3199</Office_Phone>
+      <Groups>
+        <invid type="Group" id="omssys" oid="257:245"/>
+        <invid type="Group" id="csdweb" oid="257:114"/>
+        <invid type="Group" id="omrgen" oid="257:264"/>
+      </Groups>
+      <Home_Group><invid type="Group" id="omssys" oid="257:245"/></Home_Group>
+      <Login_Shell>/bin/tcsh</Login_Shell>
+      <Home_Directory>/home/jonabbey</Home_Directory>
+      <Directory_Volume>
+      <object type="Embedded_Automounter_Map_Entry" id="jonabbey/auto.home.default" oid="278:1257">
+        <Automounter_Map><invid type="Automounter_Map" id="auto.home.default" oid="277:2"/></Automounter_Map>
+        <NFS_Volume><invid type="NFS_Volume" id="omg2" oid="276:636"/></NFS_Volume>
+      </object>
+      </Directory_Volume>
+      <Email_Aliases>
+        <string val="abbey"/>
+      </Email_Aliases>
+      <Signature_Alias>jonabbey</Signature_Alias>
+      <Email_target>
+        <string val="jonabbey@arlmail.arlut.utexas.edu"/>
+      </Email_target>
+    </object>
+  </ganydata> 
+</ganymede></xmp>
+
+    <p>The particulars of this XML schema is dependent on the
+    particular schema configured in the Ganymede server.  Field names
+    come straight from the Ganymede server's schema, with a simple <a
+    href="../xml.html#underscore">spaces to underscores</a> encoding
+    to make sure that field names cohere with proper XML specs.</p>
+
+    <p>Notice that this format is basically identical to the output of
+    an <a href="../xml/xmlclient.html">xmlclient</a> data object dump,
+    as documented in the <a href="../xml/data.html">Ganymede XML
+    &lt;ganydata&gt; Guide</a>.</p>
+
+    <p>The differences are that the <a
+    href="../xml/data.html#INVID">&lt;invid&gt;</a> elements have an
+    extra <b>oid</b> attribute (more on which when we talk about the
+    Incremental Sync Channel), and that the objects and fields dumped
+    are only a subset of the server's data, according to the
+    constraints specified in the Sync Channel</p>
+
     <h2 id="xml_incrementals">5. Incremental Sync Channels</h2>
 
-    <h3 id="explaining_xml_incrementals">The Sync Channel Incremental Model Explained</h3>
-
-    <p>Ganymede 2.0 introduces an incremental XML-based
-    synchronization system, which we call the "Sync Channel
-    Incremental Model".  The Sync Channel Incremental model shares
-    enough similarities to the GanymedeBuilderTask model that you will
-    recognize some familiar concepts, but the differences are
-    significant.</p>
+    <p>While the Full State Sync Channel is very closely modeled after
+    the <a href="ganymedebuildertask.html">GanymedeBuilderTask</a>,
+    except that it is XML based and does not require custom code to be
+    integrated into the Ganymede server, the Incremental Sync Channel
+    system (the Sync Channel Incremental model) is something wholly
+    new.</p>
 
     <p>The general structure and timing of the Sync Channel
-    Incremental system is both similar to and different from the
-    GanymedeBuilderTask model.  As with GanymedeBuilderTask,
-    synchronization is a two-step process.  In the first step, the
-    Ganymede server writes out files with synchronization information.
-    In the second step, an external process is initiated to
-    incorporate that synchronization data into targeted services.  In
-    the GanymedeBuilderTask model, both of these steps are scheduled
-    to occur as soon as possible after a transaction is committed, and
-    the second step follows immediately after the first.</p>
+    Incremental system is both similar to and different from the Full
+    State GanymedeBuilderTask / Sync Channel model.  As with the Full
+    State model, synchronization is a two-step process.  In the first
+    step, the Ganymede server writes out files with synchronization
+    information.  In the second step, an external process is initiated
+    to incorporate that synchronization data into targeted services.</p>
+
+    <p>However, whereas in the Full State GanymedeBuilderTask / Sync
+    Channel model, both of these steps are scheduled to occur as soon
+    as possible after a transaction is finished being committed, with
+    the second step following immediately after the first.</p>
 
     <p>In the Sync Channel Incremental model, the first step of
     writing out the synchronization data is always done synchronously
-    with the transaction commit process.  (So much so, in fact, that a
-    transaction is not considered committed until all registered Sync
-    Channels have finished writing out their synchronization files.)
-    The second step is scheduled for asynchronous execution with the
-    Ganymede Scheduler as soon as possible after a transaction is
+    with the transaction commit process.</p>
+
+    <p>(So much so, in fact, that a transaction is not considered
+    committed until all registered Sync Channels have finished writing
+    out their synchronization files.)</p>
+
+    <p>The second step is scheduled for asynchronous execution with
+    the Ganymede Scheduler as soon as possible after a transaction is
     committed.  This usually means that the external synchronization
     will occur immediately, but if the Sync Channel is still executing
     a previous external synchronization, the external process for step
     two will not run until the previous run finishes.</p>
 
-    <p>Because synchronization data may be written out with every
-    transaction that is committed while the external processing step
-    may execute after some delay, synchronization data can accumulate
-    as it waits to be processed.  The Sync Channel Synchronization
-    Model therefore acts as a message queuing system.  The message
-    queue represents the 'channel' that gives the Sync Channel
-    Incremental Model its name.</p>
+    <p>Synchronization data may be written out with every transaction
+    that is committed, yet the external processing step may execute
+    after some delay.  Because of this, transactions to be
+    synchronized can pile up in the Queue Directory as they wait to be
+    processed.  To deal with this, the Incremental Sync Channel system
+    actually is designed to act as a message queuing system.  The
+    message queue aspect of this design represents the 'channel' that
+    originally gave the Sync Channel its name.</p>
 
-    <p>The Sync Channel Incremental Model is designed to require less
-    customization of the Ganymede server.  Where the
-    GanymedeBuilderTask model requires adopters to write their own <a
-    href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html#builderPhase1()">builderPhase1()</a>
-    methods in order to write out custom data files, the Sync Channel
-    Incremental system uses a standard XML format which is generated
-    by standard logic in the <a
+    <p>As with the Full State Sync Channel system, The Incremental
+    Sync Channel system is designed around the use of XML.
+    Incremental Sync Channels system use a standard XML format which
+    is generated (once again) by standard logic in the <a
     href="../javadoc/arlut/csd/ganymede/server/SyncRunner.html">SyncRunner</a>
     class.  The external synchronization process must be smart enough
     to interpret the XML synchronization data, but it generally works
     out better to have this logic be outside of the Ganymede server,
-    where it can more easily be maintained.</p>
-
-    <p>You can create as many Sync Channels as you like in the
-    Ganymede server, and each Sync Channel can be configured to
-    include whatever subset of data you care about for that channel in
-    particular.</p>
+    where it can more easily be maintained, rather than requiring
+    custom code to be written inside the Ganymede server, as <a
+    href="ganymedebuildertask.html">GanymedeBuilderTask</a> did.</p>
 
     <h4 id="configuring_sync_incremental">Configuring Sync Channels</h4>
 
     <p>All that you need to do to configure an incremental Sync
-    Channel in Ganymede is to create a <code class="type">Sync
-    Channel</code> object in the Ganymede server.  the <code
-    class="type">Sync Channel</code> object has the following fields
-    that you can set:</p>
+    Channel in Ganymede is to create an <b>Automatic Incremental</b>
+    <code class="type">Sync Channel</code> object in the Ganymede
+    server.</p>
 
-    <ul>
-      <li><code class="type">Name</code> -- The unique name for this
-      Sync Channel.</li>
-
-      <li><code class="type">Sync Channel Type</code> -- Your choice
-      among 'Manual', 'Automatic Full State', and 'Automatic
-      Incremental'.  These three choices correspond to the three Sync
-      Channel synchronization models you can use in the Ganymede
-      server.</li>
-
-      <li><code class="type">Queue Directory</code> -- Path to the
-      directory that the Ganymede server will write synchronization
-      files into.  Only meaningful in incremental Sync Channels.</li>
-
-      <li><code class="type">Full State File</code> -- Fully specified
-      path to the file to which that the Ganymede server will write
-      full state synchronization files.  Only meaningful in full state
-      Sync Channels.</li>
-
-      <li><code class="type">Service Program</code> -- Path to the
-      executable external program that will process the
-      synchronization files.  Meaningful for both incremental and full
-      state Sync Channels.</li>
-
-      <li><code class="type">Sync Data</code> -- Map of object and
-      field types to the conditions under which they are (or are not)
-      to be written to this Sync Channel.</li>
-
-      <li>
-	<code class="type">Allow Plaintext Passwords</code> --
-	Check-box controlling whether or not password plaintext is
-	allowed to be written to this Sync Channel.
-
-	<br/>
-
-	If this check-box is not selected, the Ganymede server will
-	still permit stored password hashes to be written to the Sync
-	Channel, but plaintext will be disallowed.  You might want to
-	restrict plaintext passwords if you know that your Service
-	Program doesn't need access to the plain text in order to
-	synchronize passwords.
-
-	<br/>
-
-	See the <a
-	href="../xml/data.html#PASSWORD">&lt;password&gt;</a> element
-	guide for more details on password hashing vs. plaintext.
-      </li>
-    </ul>
- 
     <p>An incremental <code class="type">Sync Channel</code> object
     looks like this:</p>
 
     <center><img src="screenshots/sync_channel.png" class="screenshot"/></center>
-
 
     <h4 id="what_xml_incremental_writes">What The Sync Channel Incremental Model Writes Out</h4>
 
@@ -567,23 +646,22 @@
     <p>The &lt;before&gt; and &lt;after&gt; elements contain one
     &lt;object&gt; element each.  These &lt;object&gt; elements are
     identical to the <a
-    href="../xml/data.html#OBJECT">&lt;object&gt;</a> elements
-    as they are used with the <a
-    href="../glossary.html#xmlclient">xmlclient</a>, except that the <code
-    class="attribute">oid</code> attribute has been added.  The <code
-    class="attribute">oid</code> attribute may be useful to your Sync
-    Channel service program as a foreign key, constant against object
-    renames.  In the same way, the <code class="attribute">oid</code>
-    attribute is added to the <a
-    href="../xml/data.html#INVID">&lt;invid&gt;</a> element,
-    strictly to act as a reliable reference in the face of object
-    renames.</p>
+    href="../xml/data.html#OBJECT">&lt;object&gt;</a> elements as they
+    are used with the <a
+    href="../glossary.html#xmlclient">xmlclient</a>, except that the
+    <code class="attribute">oid</code> attribute has been added.  The
+    <code class="attribute">oid</code> attribute may be useful to your
+    Sync Channel service program as a foreign key, constant against
+    object renames.  In the same way, the <code
+    class="attribute">oid</code> attribute is added to the <a
+    href="../xml/data.html#INVID">&lt;invid&gt;</a> element, strictly
+    to act as a reliable fixed key in the face of object renames.</p>
 
     <p>The other big difference with the &lt;object&gt; elements in
     the Sync Channel XML output is that they will only include the
     fields that the <code class="type">Sync Channel</code> was
-    configured to write.  This will usually just be fields that have
-    changed.</p>
+    configured to write.  This is where our friends <b>Always</b> and
+    <b>When Changed</b> come into play.</p>
 
     <p class="note">There is yet a third difference, having to do with
     how embedded objects are handled.  In <a
@@ -659,23 +737,23 @@
 
     <p>Writing a Service Program for use with the Sync Channel
     Incremental Mode is generally rather more complicated than <a
-    href="#external_builder">writing an external sync script for use
-    with GanymedeBuilderTask</a>.  Your Service Program has to be able
-    to cooperate with the Ganymede server in handling the message
-    queuing protocol for your Sync Channel Queue Directory, and it has
-    to be able to parse and process the XML written out by the
-    Ganymede server.</p>
+    href="#xml_full_state_service_program">writing an external sync
+    script for use with a Full State Service Program</a>.  In addition
+    to parsing and processing the XML written out by the Ganymede
+    server, your Service Program has to be able to cooperate with the
+    Ganymede server in carrying out the message queuing protocol for
+    the Incremental Sync Channel.</p>
 
-    <p>Here are the rules for a Sync Channel Incremental Service
+    <p>Here are the rules for an Incremental Sync Channel Service
     Program:</p>
 
     <ul>
-      <li>As with the GanymedeBuilderTask external sync scripts, your
-      Service Program is on its own with regard to setting up
-      environment variables, working directory, logging/output
-      streams, and locating files.  Your Service Program must be able
-      to find its Queue Directory with no hints from the Ganymede
-      server at runtime.</li>
+      <li>As with the Full State Service Program external sync
+      scripts, your Service Program is on its own with regard to
+      setting up environment variables, working directory,
+      logging/output streams, and locating files.  Of particular note,
+      your Service Program must know how to find its Queue Directory
+      with no hints from the Ganymede server at runtime.</li>
 
       <li>The Ganymede server will run your Service Program with a
       single command line argument.  This will be the highest
@@ -683,10 +761,12 @@
       during this run.  Any transactions with higher numbers that your
       Service Program may come across in the Sync Channel Queue
       Directory are not safe to operate on, as they may not be fully
-      written or committed.  If they are fully written, they may later
-      be withdrawn if the server runs into an I/O problem while
-      writing XML to other configured Sync Channel Queue
-      Directories.</li>
+      written or committed.  Even if they are fully written, they may
+      later be withdrawn if the server runs into an I/O problem while
+      writing XML to other configured Sync Channel Queue Directories.
+      Never, ever trust a transaction with a higher number than you
+      are given on the command line.  Don't read them, don't look at
+      them, just don't do it.</li>
 
       <li>Your Service Program is required to process transactions in
       increasing numeric order.  Be careful to use a numeric sort and
@@ -754,7 +834,7 @@
       logic before doing this, however.</li>
     </ul>
 
-    <p>As you can see, writing a Sync Channel Incremental Service
+    <p>As you can see, writing an Incremental Sync Channel's Service
     Program can be quite involved.  To make it easier on you, we have
     written a Python package, SyncUtils, which knows how to set up
     logging, how to parse Ganymede XML transaction files, and how to
@@ -763,126 +843,25 @@
     as writing a callback Python function that takes data from the
     SyncUtils package and works with it from there.</p>
 
-    <h3 id="xml_full_state">2.2 The Sync Channel Full State Model</h3>
 
-    <p>The Sync Channel Full State Model is a hybrid of the <a
-    href="#xml_incrementals">Sync Channel Incremental</a> and the <a
-    href="#buildertask">GanymedeBuilderTask</a> model.  Like the Sync
-    Channel Incremental model, the Sync Channel Full State model uses
-    a standardized XML format for writing out synchronization
-    information.  Unlike the Sync Channel Incremental model, however,
-    the full state model is automatically scheduled by the Ganymede
-    server, in the same way that GanymedeBuilderTasks are.</p>
-
-    <p>Precisely, what this means is that whenever a transaction is
-    committed, each full state sync channel examines the transaction
-    and determines whether that transaction contained any <a
-    href="#sync_data">significantly changed objects</a>. If so, as
-    soon thereafter as the GanymedeScheduler can manage, the Sync
-    Channel's <a
-    href="../javadoc/arlut/csd/ganymede/server/SyncRunner.html">SyncRunner</a>
-    object will write out everything in the Ganymede Server which
-    matches the Sync Channel's <code class="type">Sync Data</code>
-    constraints to the defined <code class="type">Full State
-    File</code>, and then run the defined external sync channel <code
-    class="type">Service Program</code>.</p>
-
-    <p>Here's what a Full State Sync Channel looks like:</p>
-
-    <center><img src="screenshots/full_sync_channel.png" class="screenshot"/></center>
-
-    <h4 id="xml_full_state_service_program">Writing a Sync Channel Full State Service Program</h4>
-
-    <p>The Sync Channel Full State Service Program is similar to but
-    simpler than the <a href="#xml_incremental_service_program">Sync
-    Channel Incremental Service Program</a>.  In particular, the Full
-    State Service Program is only required to deal with a single XML
-    file, whose full filename is provided to the Full State Service
-    Program as its sole command line argument.</p>
-
-    <p>The only real rule that applies is that the Full State Service
-    Program is required to be fully self sufficient about setting up
-    paths, working directories, and any necessary environment
-    variables.  The only thing the Full State Service Program is given
-    is a filename that the Full State Service Program must open and
-    read on its own.</p>
-
-    <p>Here's an example of the sort of XML file that the Full State
-    Service Program must be prepared to process:</p>
-
-    <xmp class="listing"><ganymede major="1" minor="0">
-  <ganydata>
-    <object type="User" id="jonabbey" oid="3:1143">
-      <Username>jonabbey</Username>
-      <UID>6074</UID>
-      <Global_UID>7cea5c0d-7a22-11d8-a1a0-080020fd6b07</Global_UID>
-      <Password><password crypt="zv16nogZ9eRP5" md5crypt="$1$bH3vxykP$dkmWhIdVuqC8Y1h0s7PQU1" lanman="8AF317306D28CA711D0DC6E\
-72A9441BB" ntmd4="D3A6370C044FD34C6A487A6F5F53A6C1" ssha="{SSHA}cdHEG7iIMT2ZSHkJEf4fR62v/b23rnMO"/></Password>
-      <Account_Category><invid type="User_Category" id="normal" oid="279:5"/></Account_Category>
-      <Full_Name>Jonathan Abbey</Full_Name>
-      <Badge>x819</Badge>
-      <Division>ITS</Division>
-      <Room>S321</Room>
-      <Office_Phone>835-3199</Office_Phone>
-      <Groups>
-        <invid type="Group" id="omssys" oid="257:245"/>
-        <invid type="Group" id="csdweb" oid="257:114"/>
-        <invid type="Group" id="omrgen" oid="257:264"/>
-      </Groups>
-      <Home_Group><invid type="Group" id="omssys" oid="257:245"/></Home_Group>
-      <Login_Shell>/bin/tcsh</Login_Shell>
-      <Home_Directory>/home/jonabbey</Home_Directory>
-      <Directory_Volume>
-      <object type="Embedded_Automounter_Map_Entry" id="Embedded Automounter Map Entry[1257]" oid="278:1257">
-        <Automounter_Map><invid type="Automounter_Map" id="auto.home.default" oid="277:2"/></Automounter_Map>
-        <NFS_Volume><invid type="NFS_Volume" id="omg2" oid="276:636"/></NFS_Volume>
-      </object>
-      </Directory_Volume>
-      <Email_Aliases>
-        <string val="abbey"/>
-      </Email_Aliases>
-      <Signature_Alias>jonabbey</Signature_Alias>
-      <Email_target>
-        <string val="jonabbey@arlmail.arlut.utexas.edu"/>
-      </Email_target>
-      <Password_Expiration><date val="Tue, 03 May 2005 07:57:22" timecode="1115125042144"/></Password_Expiration>
-      <Owner_list>
-        <invid type="Owner_Group" id="ITS" oid="0:9"/>
-       </Owner_list>
-    </object>
-  </ganydata> 
-</ganymede></xmp>
-
-    <p>The particulars of this XML schema is dependent on the
-    particular schema configured in the Ganymede server.  Field names
-    come straight from the Ganymede server's schema, with a simple <a
-    href="../xml.html#underscore">spaces to underscores</a> encoding
-    to make sure that field names cohere with proper XML specs.</p>
-
-    <p>Notice that this format is basically identical to the output of
-    an <a href="../xml/xmlclient.html">xmlclient</a> data object dump,
-    as documented in the <a href="../xml/data.html">Ganymede XML
-    &lt;ganydata&gt; Guide</a>.</p>
-
-    <h3 id="xml_manual">2.3 The Sync Channel Manual Model</h3>
+    <h2 id="xml_manual">6. The Sync Channel Manual Model</h3>
 
     <p>The Sync Channel Manual model is based on the <a
-    href="#xml_full_state">Sync Channel Full State Model</a>.
-    Unlike the <a href="#buildertask">GanymedeBuilderTask</a> and <a
-    href="#xml_full_state">Sync Channel Full State</a> models, the
-    Sync Channel Manual model is not supported by the Ganymede server
-    as an automated build system.</p>
+    href="#xml_full_state">Sync Channel Full State Model</a>.  Unlike
+    any other synchronization systems supported by the Ganymede server
+    the Sync Channel Manual model is not supported by the Ganymede
+    server as an automated build system.</p>
 
     <p>Instead, the Sync Channel Manual model refers to the ability to
     use the <a href="../xml/xmlclient.html">xmlclient</a> to dump out
     a subset of the Ganymede datastore, using a <a
-    href="#configuring_sync_incremental">Sync Channel</a> object to
-    constrain the object and field types dumped.  The idea is that,
-    after dumping out your information using <a
+    href="#sync_channels">Sync Channel</a> object to constrain the
+    object and field types dumped.  The idea is that, after dumping
+    out your information using <a
     href="../xml/xmlclient.html">xmlclient</a>, you use a variant of
-    the <a href="#xml_incremental_service_program">Sync Channel
-    Incremental Service Program</a> to synchronize the full state of
-    your Ganymede data with your target directory service.</p>
+    the <a href="#xml_full_state_service_program">Sync Channel Full
+    State Service Program</a> to synchronize the full state of your
+    Ganymede data with your target directory service.</p>
 
     <p>The SyncUtils Python package that we have written knows how to
     read a Ganymede full state and/or manual XML dump, and can support
@@ -911,6 +890,10 @@
     be done when you know that you don't want the server ever to
     automatically generate an incremental or full state build for you
     using the Sync Channel.</p>
+
+    <h2 id="xml_formats">7. XML Formats</h2>
+    <h2 id="sync_utils">8. Python Sync Utils</h2>
+    <h2 id="ad_example">9. Active Directory Example</h2>
 
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
