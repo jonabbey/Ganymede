@@ -685,19 +685,20 @@
     <b>&lt;before&gt;</b> element and an <b>&lt;after&gt;</b>
     element.</p>
 
-    <p>The <b>&lt;before&gt;</b> and <b>&lt;after&gt;</b> elements contain one
-    <b>&lt;object&gt;</b> element each.  These <b>&lt;object&gt;</b> elements are
-    identical to the <a
+    <p>The <b>&lt;before&gt;</b> and <b>&lt;after&gt;</b> elements
+    contain one <b>&lt;object&gt;</b> element each.  These
+    <b>&lt;object&gt;</b> elements are identical to the <a
     href="../xml/data.html#OBJECT">&lt;object&gt;</a> elements as they
     are used with the <a
     href="../glossary.html#xmlclient">xmlclient</a>, except that the
     <code class="attribute">oid</code> attribute has been added.  The
     <code class="attribute">oid</code> attribute may be useful to your
-    Sync Channel service program as a foreign key, constant against
-    object renames.  In the same way, the <code
-    class="attribute">oid</code> attribute is added to the <a
-    href="../xml/data.html#INVID">&lt;invid&gt;</a> element, strictly
-    to act as a reliable fixed key in the face of object renames.</p>
+    Sync Channel service program as a foreign key that does not change
+    between the <b>&lt;before&gt;</b> and <b>&lt;after&gt;</b>
+    elements, even if the object is renamed in the transaction.  In
+    the same way, the <code class="attribute">oid</code> attribute is
+    added to the <a href="../xml/data.html#INVID">&lt;invid&gt;</a>
+    element.</p>
 
     <p>The other big difference with the <b>&lt;object&gt;</b> elements in
     the Sync Channel XML output is that they will only include the
