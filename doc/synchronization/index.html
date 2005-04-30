@@ -431,7 +431,7 @@
     support is.</p>
 
     <p>It's very simple to say what the Ganymede server will give your
-    Service Program to help it along.</p>
+    Service Program to help it along:</p>
 
     <p>Almost nothing.</p>
 
@@ -456,6 +456,42 @@
 
     <p>Once all that is done, it should read in the XML file and start
     to work.</p>
+
+    <p>Here's a quick summary of things you should know when creating
+    your Full State Service Program:</p>
+
+    <ul>
+      <li>The Ganymede server will not write to your service program's
+      standard input stream.</li>
+
+      <li>Anything your service program writes to its standard output or
+      error streams will be completely ignored by Ganymede, and lost.
+      You are responsible for making your service program log any error
+      conditions to something other than standard error.</li>
+
+      <li>Your service program should expect a single command line
+      argument from Ganymede, that being the path to the full state XML
+      file to be processed.</li>
+
+      <li>Your service program should not expect to have any useful environment
+      variables set by Ganymede.</li>
+
+      <li>Your service program should not expect to have its current
+      working directory set to anything useful or meaningful by
+      Ganymede.</li>
+
+      <li>Your service program should not terminate until the
+      synchronization process is truly finished, and it is safe for the
+      Ganymede server to begin a new external synchronization.</li>
+    </ul>
+
+    <p>That last point is critical to ensuring that the Ganymede
+    server will not try and schedule multiple overlapping external
+    builds.  Ganymede will wait for your service program to complete
+    before processing the next full state synchronization to your Sync
+    Channel.  This is what you want, so don't confuse the Ganymede
+    server by having your service program try and run things in the
+    background.</p>
 
     <p>Here's an example of the sort of XML file that the Full State
     Service Program must be prepared to process:</p>
