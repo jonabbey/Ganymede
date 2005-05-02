@@ -419,4 +419,9 @@ class DBNameSpaceHandle implements Cloneable {
 
     return result.toString();
   }
+
+  public String getConflictString()
+  {
+    return "Conflict: " + shadowField.toString() + " and " + shadowFieldB.toString();
+  }
 }

@@ -1331,7 +1331,7 @@ public class DBEditSet {
     if (totalConflicts != null)
       {
 	// "Error, namespace conflicts remaining at transaction commit time.  The following values are in namespace conflict: {0}"
-	ReturnVal retVal = Ganymede.createErrorDialog("",ts.l("commit_verifyNamespaces.conflicts", VectorUtils.vectorString(totalConflicts)));
+	ReturnVal retVal = Ganymede.createErrorDialog("",ts.l("commit_verifyNamespaces.conflicts", VectorUtils.vectorString(totalConflicts, ",\n")));
 	throw new CommitNonFatalException(retVal);
       }
   }
