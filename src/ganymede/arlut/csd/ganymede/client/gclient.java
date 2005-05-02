@@ -618,14 +618,24 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     session = s;
     _myglogin = g;
-    my_username = g.getUserName().toLowerCase();
+    my_username = g.getUserName();
 
     try
       {
 	currentPersonaString = session.getActivePersonaName();
+
+	// In gclient, currentPersonaString must not be null.. if we
+	// didn't get a privileged persona, assume unprivileged
+	// end-user account name.
+
+	if (currentPersonaString == null)
+	  {
+	    currentPersonaString = my_username;
+	  }
       }
-    catch (RemoteException ex)
+    catch (RemoteException rx)
       {
+	processExceptionRethrow(rx);
       }
 
     mainPanel = new JPanel(true);
