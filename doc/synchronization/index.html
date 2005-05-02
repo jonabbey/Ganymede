@@ -581,18 +581,19 @@
 
     <p>In the Sync Channel Incremental model, the first step of
     writing out the synchronization data is done as an integral part
-    of with the transaction commit process.  A transaction is not
+    of the transaction commit process.  A transaction is not
     considered persistently committed unless and until all Incremental
-    Sync Channels have successfully written out XML files describing
-    everything that happened in the transaction relevant to the
-    individual Sync Channel.</p>
+    Sync Channels have successfully written out their XML files
+    describing everything that happened in the transaction relevant to
+    the individual Sync Channel.</p>
 
     <p>The second step is scheduled for asynchronous execution with
     the Ganymede Scheduler at some later point in time.  Usually, this
     is carried out almost immediately after a transaction is
-    committed.  But if the Sync Channel is still working on a previous
-    execution of the Service Program, the external process for step
-    two will be delayed until the previous run is finished.</p>
+    committed.  If the Sync Channel is still working on a previous
+    execution of the Service Program, however, the external process
+    for step two will be delayed until the previous run is
+    finished.</p>
 
     <p>At no point is the Ganymede server's database locked to prevent
     transaction commits.  This is very important for performance,
@@ -600,9 +601,9 @@
     Channel's external service program to complete before committing
     additional changes to the Ganymede server.</p>
 
-    <p>And if transactions are being committed, that means
-    transactions are being written to the Incremental Sync
-    Channels.</p>
+    <p>This does mean, though, that transactions can start to pile up
+    in an Incremental Sync Channel's Queue Directory while an external
+    synchronization is being carried out.</p>
 
     <p>To deal with this, Incremental Sync Channels are designed to
     function as message queues.  Transactions are written to the Queue
