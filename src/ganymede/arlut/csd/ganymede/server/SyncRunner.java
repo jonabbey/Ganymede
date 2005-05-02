@@ -276,11 +276,14 @@ public class SyncRunner implements Runnable {
   private boolean incremental;
 
   /**
-   * This variable is true if we've seen a transaction that requires us to issue
-   * a build on the next run().  Used only for full state build channels.
+   * This variable is true if we've seen a transaction that requires
+   * us to issue a build on the next run().
+   *
+   * We set this to true on startup so that we will initiate a
+   * "catch-up" build on server startup, just in case.
    */
 
-  private booleanSemaphore needBuild = new booleanSemaphore(false);
+  private booleanSemaphore needBuild = new booleanSemaphore(true);
 
   /* -- */
 
@@ -888,7 +891,7 @@ public class SyncRunner implements Runnable {
   /**
    * This is the method that will run when the GanymedeScheduler
    * schedules us for execution after a transaction commit.  If our
-   * fullState flag is set to false, we'll consider ourselves as
+   * incremental flag is set to true, we'll consider ourselves as
    * servicing an incremental build, in which case we just call our
    * servicer script with the last transaction committed as our
    * command line argument.  If we are full state, we'll do more like
@@ -906,12 +909,22 @@ public class SyncRunner implements Runnable {
 	  {
 	    runFullState();
 	  }
+	else
+	  {
+	    // "{0} has not seen any changes that need to be processed."
+	    Ganymede.debug(ts.l("run.skipping_full", this.getName()));
+	  }
       }
     else if (this.incremental)
       {
 	if (this.needBuild.isSet())
 	  {
 	    runIncremental();
+	  }
+	else
+	  {
+	    // "{0} has no incremental transactions to process."
+	    Ganymede.debug(ts.l("run.skipping_incremental", this.getName()));
 	  }
       }
   }
