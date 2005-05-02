@@ -489,6 +489,8 @@ public class SyncRunner implements Runnable {
 	xmlOut.endElementIndent("transaction");
 	xmlOut.skipLine();
 	xmlOut.close();		// close() automatically flushes before closing
+
+	needBuild.set(true);
       }
 
     setTransactionNumber(transRecord.getTransactionNumber());
@@ -907,7 +909,10 @@ public class SyncRunner implements Runnable {
       }
     else if (this.incremental)
       {
-	runIncremental();
+	if (this.needBuild.isSet())
+	  {
+	    runIncremental();
+	  }
       }
   }
 
@@ -1164,6 +1169,7 @@ public class SyncRunner implements Runnable {
 	myTransactionNumber = getTransactionNumber();
 	myServiceProgram = getServiceProgram();
 	invocation = myServiceProgram + " " + String.valueOf(myTransactionNumber);
+	needBuild.set(false);
       }
 
     // increment the shutdownSemaphore so that the system knows we are
