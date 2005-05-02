@@ -1581,6 +1581,20 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
+   * This method returns the persona name for the user, or null if
+   * the session is non-privileged.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
+   */
+
+  public synchronized String getActivePersonaName() throws NotLoggedInException
+  {
+    checklogin();		// this resets lastAction
+
+    return personaName;
+  }
+
+  /**
    * <p>This method is used to select an admin persona, changing the
    * permissions that the user has and the objects that are
    * accessible in the database.</p>

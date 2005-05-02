@@ -619,7 +619,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     session = s;
     _myglogin = g;
     my_username = g.getUserName().toLowerCase();
-    currentPersonaString = my_username;
+
+    try
+      {
+	currentPersonaString = session.getActivePersonaName();
+      }
+    catch (RemoteException ex)
+      {
+      }
 
     mainPanel = new JPanel(true);
     mainPanel.setLayout(new BorderLayout());

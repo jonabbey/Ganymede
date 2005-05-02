@@ -202,6 +202,13 @@ public interface Session extends Remote {
   Vector      getPersonae() throws RemoteException;
 
   /**
+   * <p>This method returns the persona name for the user, or null if
+   * the session is non-privileged.</p>
+   */
+
+  String      getActivePersonaName() throws RemoteException;
+
+  /**
    * <p>This method is used to select an admin persona, changing the
    * permissions that the user has and the objects that are
    * accessible in the database.</p>
