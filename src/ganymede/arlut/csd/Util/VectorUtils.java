@@ -477,6 +477,16 @@ public class VectorUtils {
 
   public static String vectorString(Vector vec)
   {
+    return VectorUtils.vectorString(vec, ",");
+  }
+
+  /**
+   * <P>This method returns a string containing all the elements in vec
+   * concatenated together, comma separated.</P>
+   */
+
+  public static String vectorString(Vector vec, String separator)
+  {
     if (vec == null)
       {
 	return "";
@@ -488,7 +498,7 @@ public class VectorUtils {
       {
 	if (i > 0)
 	  {
-	    temp.append(",");
+	    temp.append(separator);
 	  }
 
 	temp.append(vec.elementAt(i));
