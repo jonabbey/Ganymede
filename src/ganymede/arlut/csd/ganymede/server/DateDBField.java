@@ -65,6 +65,8 @@ import java.util.Vector;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.date_field;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                      DateDBField
@@ -89,6 +91,13 @@ public class DateDBField extends DBField implements date_field {
 
   static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss",
 						     java.util.Locale.US);
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DateDBField");
 
   // ---
 
@@ -225,24 +234,32 @@ public class DateDBField extends DBField implements date_field {
     throw new IllegalArgumentException("vector accessor called on scalar");
   }
 
+  /**
+   * This method returns a text encoded value for this DBField
+   * without checking permissions.
+   */
+
   public synchronized String getValueString()
   {
     /* -- */
 
     if (value == null)
       {
-	return "null";
+	// "null"
+	return ts.l("getValueString.null");
       }
     
-    return this.value.toString();
+    // pass the date through the localized default formatter rather
+    // than using the toString() method.
+
+    // "{0}"
+    return ts.l("getValueString.date", this.value);
   }
 
   /**
-   *
    * Date fields need a special encoding that can be easily
    * reversed to obtain a date object on the client for sorting
    * and selection purposes.
-   *
    */
 
   public synchronized String getEncodingString()
@@ -254,7 +271,6 @@ public class DateDBField extends DBField implements date_field {
 
     return Long.toString(((Date) this.value).getTime());
   }
-
 
   /**
    * <P>Returns a String representing the change in value between this
@@ -282,11 +298,11 @@ public class DateDBField extends DBField implements date_field {
 
     if (!origD.value().equals(this.value()))
       {
-	result.append("\tOld: ");
-	result.append(origD.value.toString());
-	result.append("\n\tNew: ");
-	result.append(this.value.toString());
-	result.append("\n");
+	// "\tOld: {0}\n"
+	result.append(ts.l("getDiffString.old", origD.value));
+
+	// "\n\tNew: {0}\n"
+	result.append(ts.l("getDiffString.new", this.value));
 	
 	return result.toString();
       }
@@ -402,19 +418,20 @@ public class DateDBField extends DBField implements date_field {
 
     if (!isEditable(true))
       {
-	return Ganymede.createErrorDialog("Date Field Error",
-					  "Don't have permission to edit field " + getName() +
-					  " in object " + owner.getLabel());
+	// "Date Field Error"
+	// "Don''t have permission to edit field {0} in object {1}."
+	return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+					  ts.l("verifyNewValue.bad_perm", getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	return Ganymede.createErrorDialog("Date Field Error",
-					  "Submitted value " + o + " is not a date!  Major client error while" +
-					  " trying to edit field " + getName() +
-					  " in object " + owner.getLabel());
+	// "Date Field Error"
+	// "Type error.  Submitted value {0} is not a Date!  Major client error while trying to edit field {0} in object {1}."
+	return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+					  ts.l("verifyNewValue.bad_type", getName(), owner.getLabel()));
       }
 
     if (o == null)
@@ -432,10 +449,10 @@ public class DateDBField extends DBField implements date_field {
 	  {
 	    if (d.before(d2))
 	      {
-		return Ganymede.createErrorDialog("Date Field Error",
-						  "Submitted date  " + d + " is out of range for field " +
-						  getName() + " in object " + owner.getLabel() + 
-						  ".\nThis field will not accept dates before " + d2);
+		// "Date Field Error"
+		// "Submitted Date {0} is out of range for field {1} in object {2}.\nThis field will not accept dates before {3}."
+		return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+						  ts.l("verifyNewValue.under_range", d, getName(), owner.getLabel(), d2));
 	      }
 	  }
 
@@ -444,10 +461,10 @@ public class DateDBField extends DBField implements date_field {
 	  {
 	    if (d.after(d2))
 	      {
-		return Ganymede.createErrorDialog("Date Field Error",
-						  "Submitted date  " + d + " is out of range for field " +
-						  getName() + " in object " + owner.getLabel() + 
-						  ".\nThis field will not accept dates after " + d2);
+		// "Date Field Error"
+		// "Submitted Date {0} is out of range for field {1} in object {2}.\nThis field will not accept dates after {3}."
+		return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+						  ts.l("verifyNewValue.over_range", d, getName(), owner.getLabel(), d2));
 	      }
 	  }
       }
