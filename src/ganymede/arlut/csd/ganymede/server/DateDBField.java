@@ -252,7 +252,7 @@ public class DateDBField extends DBField implements date_field {
     // pass the date through the localized default formatter rather
     // than using the toString() method.
 
-    // "{0,date,EEE, MMM yyyy hh:mm:ss aaa zz}"
+    // "{0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}"
     return ts.l("getValueString.date", this.value);
   }
 
@@ -298,10 +298,10 @@ public class DateDBField extends DBField implements date_field {
 
     if (!origD.value().equals(this.value()))
       {
-	// "\tOld: {0,date,EEE, MMM yyyy hh:mm:ss aaa zz}\n"
+	// "\tOld: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
 	result.append(ts.l("getDiffString.old", origD.value));
 
-	// "\n\tNew: {0,date,EEE, MMM yyyy hh:mm:ss aaa zz}\n"
+	// "\n\tNew: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
 	result.append(ts.l("getDiffString.new", this.value));
 	
 	return result.toString();
@@ -450,8 +450,8 @@ public class DateDBField extends DBField implements date_field {
 	    if (d.before(d2))
 	      {
 		// "Date Field Error"
-		// "Submitted Date {0,date,EEE, MMM yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
-		// This field will not accept dates before {3,date,EEE, MMM yyyy hh:mm:ss aaa zz}."
+		// "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
+		// This field will not accept dates before {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
 		return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
 						  ts.l("verifyNewValue.under_range", d, getName(), owner.getLabel(), d2));
 	      }
@@ -463,8 +463,8 @@ public class DateDBField extends DBField implements date_field {
 	    if (d.after(d2))
 	      {
 		// "Date Field Error"
-		// "Submitted Date {0,date,EEE, MMM yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
-		// This field will not accept dates after {3,date,EEE, MMM yyyy hh:mm:ss aaa zz}."
+		// "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
+		// This field will not accept dates after {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
 		return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
 						  ts.l("verifyNewValue.over_range", d, getName(), owner.getLabel(), d2));
 	      }
