@@ -985,7 +985,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	catch (Throwable ex)
 	  {
 	    // "Throwable condition caught while trying to send a timeout message to {0}:\n\n{1}"
-	    Ganymede.debug(Ganymede.stackTrace(ex));
+	    Ganymede.debug(ts.l("timeCheck.caught_throwable", this.toString(), Ganymede.stackTrace(ex)));
 	  }
 	finally
 	  {

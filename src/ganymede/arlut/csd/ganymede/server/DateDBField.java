@@ -252,7 +252,7 @@ public class DateDBField extends DBField implements date_field {
     // pass the date through the localized default formatter rather
     // than using the toString() method.
 
-    // "{0}"
+    // "{0,full}"
     return ts.l("getValueString.date", this.value);
   }
 
@@ -298,10 +298,10 @@ public class DateDBField extends DBField implements date_field {
 
     if (!origD.value().equals(this.value()))
       {
-	// "\tOld: {0}\n"
+	// "\tOld: {0,full}\n"
 	result.append(ts.l("getDiffString.old", origD.value));
 
-	// "\n\tNew: {0}\n"
+	// "\n\tNew: {0,full}\n"
 	result.append(ts.l("getDiffString.new", this.value));
 	
 	return result.toString();
@@ -429,9 +429,9 @@ public class DateDBField extends DBField implements date_field {
     if (!verifyTypeMatch(o))
       {
 	// "Date Field Error"
-	// "Type error.  Submitted value {0} is not a Date!  Major client error while trying to edit field {0} in object {1}."
+	// "Type error.  Submitted value {0} is not a Date!  Major client error while trying to edit field {1} in object {2}."
 	return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-					  ts.l("verifyNewValue.bad_type", getName(), owner.getLabel()));
+					  ts.l("verifyNewValue.bad_type", o, getName(), owner.getLabel()));
       }
 
     if (o == null)
@@ -450,7 +450,7 @@ public class DateDBField extends DBField implements date_field {
 	    if (d.before(d2))
 	      {
 		// "Date Field Error"
-		// "Submitted Date {0} is out of range for field {1} in object {2}.\nThis field will not accept dates before {3}."
+		// "Submitted Date {0,full} is out of range for field {1} in object {2}.\nThis field will not accept dates before {3,full}."
 		return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
 						  ts.l("verifyNewValue.under_range", d, getName(), owner.getLabel(), d2));
 	      }
@@ -462,7 +462,7 @@ public class DateDBField extends DBField implements date_field {
 	    if (d.after(d2))
 	      {
 		// "Date Field Error"
-		// "Submitted Date {0} is out of range for field {1} in object {2}.\nThis field will not accept dates after {3}."
+		// "Submitted Date {0,full} is out of range for field {1} in object {2}.\nThis field will not accept dates after {3,full}."
 		return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
 						  ts.l("verifyNewValue.over_range", d, getName(), owner.getLabel(), d2));
 	      }
