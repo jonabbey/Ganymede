@@ -62,6 +62,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.NamedStack;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.rmi.NameSpace;
 
@@ -110,6 +111,13 @@ import arlut.csd.ganymede.rmi.NameSpace;
 public final class DBNameSpace implements NameSpace {
 
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBNameSpace");
 
   /**
    * <p>The number of simultaneous transactions in progress
@@ -616,7 +624,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     DBNameSpaceHandle handle;
@@ -679,7 +687,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     DBNameSpaceHandle handle;
@@ -755,7 +763,10 @@ public final class DBNameSpace implements NameSpace {
 
 		handle.setShadowFieldB(field);
 
-		Ganymede.debug("Set shadowFieldB for value " + String.valueOf(value) + " -- handle = " + handle.toString());
+		if (debug)
+		  {
+		    Ganymede.debug("Set shadowFieldB for value " + String.valueOf(value) + " -- handle = " + handle.toString());
+		  }
 	      }
 	    else
 	      {
@@ -862,7 +873,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     DBNameSpaceHandle handle;
@@ -984,7 +995,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     DBNameSpaceHandle handle;
@@ -1044,7 +1055,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     if (oldField == null || editSet == null)
@@ -1187,7 +1198,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     getTransactionRecord(editSet).pushCheckpoint(name, new DBNameSpaceCkPoint(this, editSet));
@@ -1217,7 +1228,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     getTransactionRecord(editSet).popCheckpoint(name);
@@ -1245,7 +1256,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     Object value;
@@ -1394,7 +1405,8 @@ public final class DBNameSpace implements NameSpace {
 		results = new Vector();
 	      }
 
-	    results.addElement(handle.getConflictString() + ", value in conflict = " + String.valueOf(value));
+	    // "{0}, value in conflict = {1}"
+	    results.addElement(ts.l("verify_noninteractive.template", handle.getConflictString(), String.valueOf(value)));
 	  }
       }
 
@@ -1419,7 +1431,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     DBNameSpaceTransaction tRecord;
@@ -1485,7 +1497,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
-	throw new RuntimeException("still in schema edit");
+	throw new RuntimeException(ts.l("global.editing"));
       }
 
     DBNameSpaceTransaction tRecord;
@@ -1622,18 +1634,23 @@ public final class DBNameSpace implements NameSpace {
 	DBNameSpaceHandle handleCopy = (DBNameSpaceHandle) handle.clone();
 
 	// a DBNameSpace copy should only be constructed during schema
-	// editing
+	// editing.  check a couple of things to warn with.  we don't
+	// really need to be exhaustive in testing here.
 
 	if (handleCopy.owner != null)
 	  {
-	    throw new RuntimeException("Error, non-null handle owner found during copy of namespace " + 
-				       this.toString() + " for key: " + key);
+	    // "Error, non-null handle owner found during copy of namespace {0} for key: {1}."
+	    throw new RuntimeException(ts.l("schemaEditCheckout.non_null_owner",
+					    this.toString(),
+					    key));
 	  }
 
 	if (handleCopy.shadowField != null)
 	  {
-	    throw new RuntimeException("Error, non-null handle shadowField found during copy of namespace " + 
-				       this.toString() + " for key: " + key);
+	    // "Error, non-null handle shadowField found during copy of namespace {0} for key {1}."
+	    throw new RuntimeException(ts.l("schemaEditCheckout.non_null_shadowField",
+					    this.toString(),
+					    key));
 	  }
 
 	this.uniqueHash.put(key, handleCopy);
@@ -1691,7 +1708,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash == null)
       {
-	throw new RuntimeException("not in schema edit");
+	throw new RuntimeException(ts.l("global.not_editing"));
       }
 
     if (uniqueHash.containsKey(value))
@@ -1719,7 +1736,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash == null)
       {
-	throw new RuntimeException("not in schema edit");
+	throw new RuntimeException(ts.l("global.not_editing"));
       }
 
     DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
@@ -1748,7 +1765,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash == null)
       {
-	throw new RuntimeException("not in schema edit");
+	throw new RuntimeException(ts.l("global.not_editing"));
       }
 
     Vector elementsToRemove = new Vector();

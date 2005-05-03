@@ -54,6 +54,8 @@ package arlut.csd.ganymede.server;
 
 import arlut.csd.ganymede.common.Invid;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                DBNameSpaceHandle
@@ -72,6 +74,13 @@ import arlut.csd.ganymede.common.Invid;
  */
 
 class DBNameSpaceHandle implements Cloneable {
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBNameSpaceHandle");
 
   /**
    * if this value is currently being shuffled
@@ -422,6 +431,7 @@ class DBNameSpaceHandle implements Cloneable {
 
   public String getConflictString()
   {
-    return "Conflict: " + shadowField.toString() + " and " + shadowFieldB.toString();
+    // "Conflict: {0} and {1}"
+    return ts.l("getConflictString.template", shadowField.toString(), shadowFieldB.toString());
   }
 }
