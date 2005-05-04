@@ -1322,7 +1322,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		  {
 		    results.addElement(new FieldInfo(field));
 		  }
-		catch (IllegalArgumentException ex)
+		catch (RuntimeException ex)
 		  {
 		    // we had a permissions failure reading this
 		    // field.. skip it.
