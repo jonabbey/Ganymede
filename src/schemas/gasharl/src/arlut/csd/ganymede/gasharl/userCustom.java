@@ -434,6 +434,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return null;
       }
 
+    return renameEntries(this.getLabel());
+  }
+
+  /**
+   * This private helper method goes through all embedded automounter
+   * map entries and updates their hidden labels, using the newName as
+   * the prefix.
+   */
+
+  private ReturnVal renameEntries(String newName)
+  {
     ReturnVal retVal = null;
     InvidDBField volumeMapEntries = (InvidDBField) getField(userSchema.VOLUMES);
     Vector values = volumeMapEntries.getValuesLocal();
@@ -450,7 +461,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	String mapName = mapObj.getLabel();
 
-	retVal = eObj.setFieldValueLocal(mapEntrySchema.XMLLABEL, this.getLabel() + "/" + mapName);
+	retVal = eObj.setFieldValueLocal(mapEntrySchema.XMLLABEL, newName + "/" + mapName);
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -1951,6 +1962,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    if (isDeleting() && (value == null))
 	      {
 		return null;
+	      }
+
+	    // so we're renaming.  rename the hidden label for any
+	    // embedded automounter entries, please.
+
+	    ReturnVal retVal = renameEntries(newUsername);
+
+	    if (retVal != null & !retVal.didSucceed())
+	      {
+		return retVal;
 	      }
 
 	    // signature alias field will need to be rescanned
