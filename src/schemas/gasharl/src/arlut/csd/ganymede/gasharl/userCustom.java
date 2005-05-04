@@ -1969,7 +1969,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    ReturnVal retVal = renameEntries(newUsername);
 
-	    if (retVal != null & !retVal.didSucceed())
+	    if (retVal != null && !retVal.didSucceed())
 	      {
 		return retVal;
 	      }
