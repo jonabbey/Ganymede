@@ -587,16 +587,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     /* -- */
 
-
-    try
-      {
-	setTitle("Ganymede Client: " + s.getMyUserName() + " logged in");
-      }
-    catch (Exception rx)
-      {
-	processExceptionRethrow(rx);
-      }
-
     client = this;
 
     if (!debug)
@@ -632,6 +622,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  {
 	    currentPersonaString = my_username;
 	  }
+
+	setTitle("Ganymede Client: " + currentPersonaString + " logged in");
       }
     catch (RemoteException rx)
       {
