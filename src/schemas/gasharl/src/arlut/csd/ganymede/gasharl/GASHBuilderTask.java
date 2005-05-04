@@ -1963,7 +1963,21 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	throw new IllegalArgumentException("Time code has overflowed");
       }
 
-    return java.lang.Integer.toHexString(((int) timecode / 1000));
+    StringBuffer timeString = new StringBuffer();
+
+    timeString.append(java.lang.Integer.toHexString((int) timecode));
+
+    // make sure we pad it out to 8 characters if it is less
+
+    if (timeString.length() < 8)
+      {
+	for (int i = timeString.length(); i < 8; i++)
+	  {
+	    timeString.insert(0, "0");
+	  }
+      }
+
+    return timeString.toString();
   }
 
   /**
