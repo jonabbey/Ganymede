@@ -1977,7 +1977,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
       }
 
-    return timeString.toString();
+    return timeString.toString().toUpperCase();
   }
 
   /**
