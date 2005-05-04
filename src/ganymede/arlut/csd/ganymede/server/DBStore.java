@@ -1109,155 +1109,163 @@ public final class DBStore implements JythonMap {
       }
     catch (InterruptedException ex)
       {
-      }
-
-    if (debug)
-      {
-	System.err.println("DBStore.dumpXML(): got dump lock");
-      }
-
-    if (dumpDataObjects && !dumpSchema && syncChannel != null)
-      {
-	syncConstraint = Ganymede.getSyncChannel(syncChannel);
-
-	if (syncConstraint == null)
-	  {
-	    outStream.close();
-
-	    // "No such sync channel defined: {0}"
-	    throw new IllegalArgumentException(ts.l("dumpXML.badSyncChannel", syncChannel));
-	  }
-	else
-	  {
-	    includePlaintext = syncConstraint.includePlaintextPasswords();
-	  }
+	// "DBStore.dumpXML(): Interrupted waiting for dump lock:\n\n{0}"
+	Ganymede.debug(ts.l("dumpXML.interrupted", Ganymede.stackTrace(ex)));
+	throw new RuntimeException(ex);
       }
 
     try
       {
-	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
-				    includePlaintext,
-				    false, // don't include creator/modifier data
-				    syncConstraint);
-
 	if (debug)
 	  {
-	    System.err.println("DBStore.dumpXML(): created XMLDumpContext");
+	    System.err.println("DBStore.dumpXML(): got dump lock");
 	  }
 
-	// start writing
-
-	if (dumpDataObjects)
+	if (dumpDataObjects && !dumpSchema && syncChannel != null)
 	  {
-	    xmlOut.startElement("ganymede");
-	    xmlOut.attribute("major", Byte.toString(major_xml_version));
-	    xmlOut.attribute("minor", Byte.toString(minor_xml_version));
+	    syncConstraint = Ganymede.getSyncChannel(syncChannel);
+	    
+	    if (syncConstraint == null)
+	      {
+		outStream.close();
+		
+		// "No such sync channel defined: {0}"
+		throw new IllegalArgumentException(ts.l("dumpXML.badSyncChannel", syncChannel));
+	      }
+	    else
+	      {
+		includePlaintext = syncConstraint.includePlaintextPasswords();
+	      }
 	  }
 
-	if (dumpSchema)
+	try
 	  {
+	    xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+					includePlaintext,
+					false, // don't include creator/modifier data
+					syncConstraint);
+	    
+	    if (debug)
+	      {
+		System.err.println("DBStore.dumpXML(): created XMLDumpContext");
+	      }
+	    
+	    // start writing
+	    
 	    if (dumpDataObjects)
 	      {
-		xmlOut.indentOut();
-	      }
-
-	    xmlOut.startElementIndent("ganyschema");
-
-	    xmlOut.indentOut();
-	    xmlOut.startElementIndent("namespaces");
-	    
-	    xmlOut.indentOut();
-	    
-	    for (int i = 0; i < nameSpaces.size(); i++)
-	      {
-		ns = (DBNameSpace) nameSpaces.elementAt(i);
-		ns.emitXML(xmlOut);
+		xmlOut.startElement("ganymede");
+		xmlOut.attribute("major", Byte.toString(major_xml_version));
+		xmlOut.attribute("minor", Byte.toString(minor_xml_version));
 	      }
 	    
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("namespaces");
-	    
-	    // write out our category tree
-	    
-	    xmlOut.skipLine();
-	    
-	    xmlOut.startElementIndent("object_type_definitions");
-    
-	    xmlOut.indentOut();
-	    rootCategory.emitXML(xmlOut);
-	    
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("object_type_definitions");
-    
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("ganyschema");
-	  }
-    
-	if (dumpDataObjects)
-	  {
-	    if (!dumpSchema)
+	    if (dumpSchema)
 	      {
-		xmlOut.indentOut();
-	      }
-
-	    xmlOut.startElementIndent("ganydata");
-	    xmlOut.indentOut();
-
-	    Vector bases = getBases();
-	    
-	    for (int i = 0; i < bases.size(); i++)
-	      {
-		DBObjectBase base = (DBObjectBase) bases.elementAt(i);
-
-		if (base.isEmbedded())
+		if (dumpDataObjects)
 		  {
-		    continue;
+		    xmlOut.indentOut();
 		  }
-
-		Enumeration en = base.objectTable.elements();
-
-		while (en.hasMoreElements())
+		
+		xmlOut.startElementIndent("ganyschema");
+		
+		xmlOut.indentOut();
+		xmlOut.startElementIndent("namespaces");
+		
+		xmlOut.indentOut();
+		
+		for (int i = 0; i < nameSpaces.size(); i++)
 		  {
-		    DBObject x = (DBObject) en.nextElement();
-
-		    if (xmlOut.mayInclude(x))
+		    ns = (DBNameSpace) nameSpaces.elementAt(i);
+		    ns.emitXML(xmlOut);
+		  }
+		
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("namespaces");
+		
+		// write out our category tree
+		
+		xmlOut.skipLine();
+		
+		xmlOut.startElementIndent("object_type_definitions");
+		
+		xmlOut.indentOut();
+		rootCategory.emitXML(xmlOut);
+		
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("object_type_definitions");
+		
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("ganyschema");
+	      }
+    
+	    if (dumpDataObjects)
+	      {
+		if (!dumpSchema)
+		  {
+		    xmlOut.indentOut();
+		  }
+		
+		xmlOut.startElementIndent("ganydata");
+		xmlOut.indentOut();
+		
+		Vector bases = getBases();
+		
+		for (int i = 0; i < bases.size(); i++)
+		  {
+		    DBObjectBase base = (DBObjectBase) bases.elementAt(i);
+		    
+		    if (base.isEmbedded())
 		      {
-			x.emitXML(xmlOut);
+			continue;
+		      }
+		    
+		    Enumeration en = base.objectTable.elements();
+		    
+		    while (en.hasMoreElements())
+		      {
+			DBObject x = (DBObject) en.nextElement();
+			
+			if (xmlOut.mayInclude(x))
+			  {
+			    x.emitXML(xmlOut);
+			  }
 		      }
 		  }
+		
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("ganydata");
+		
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("ganymede");
 	      }
-
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("ganydata");
-
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("ganymede");
+	    
+	    xmlOut.write("\n");
+	    xmlOut.close();
+	    xmlOut = null;
 	  }
-
-	xmlOut.write("\n");
-	xmlOut.close();
-	xmlOut = null;
+	finally
+	  {
+	    if (debug)
+	      {
+		System.err.println("DBStore.dumpXML(): finally!");
+	      }
+	    
+	    if (xmlOut != null)
+	      {
+		xmlOut.close();
+	      }
+	    
+	    if (outStream != null)
+	      {
+		outStream.close();
+	      }
+	  }
       }
     finally
       {
-	if (debug)
-	  {
-	    System.err.println("DBStore.dumpXML(): finally!");
-	  }
-
 	if (lock != null)
 	  {
 	    lock.release();
-	  }
-
-	if (xmlOut != null)
-	  {
-	    xmlOut.close();
-	  }
-
-	if (outStream != null)
-	  {
-	    outStream.close();
 	  }
       }
   }
