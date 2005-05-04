@@ -138,7 +138,7 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
 	    {
 	      Ganymede.db.dumpXML(outpipe, doSendData, doSendSchema, myFinalSyncChannel);
 	    }
-	  catch (IOException ex)
+	  catch (Throwable ex)
 	    {
 	      // dumpXML will close outpipe on any exception,
 	      // nothing we can productively do here, go

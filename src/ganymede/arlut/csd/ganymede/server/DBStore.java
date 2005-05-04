@@ -1127,8 +1127,6 @@ public final class DBStore implements JythonMap {
 	    
 	    if (syncConstraint == null)
 	      {
-		outStream.close();
-		
 		// "No such sync channel defined: {0}"
 		throw new IllegalArgumentException(ts.l("dumpXML.badSyncChannel", syncChannel));
 	      }
@@ -1138,134 +1136,143 @@ public final class DBStore implements JythonMap {
 	      }
 	  }
 
-	try
+	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+				    includePlaintext,
+				    false, // don't include creator/modifier data
+				    syncConstraint);
+	    
+	if (debug)
 	  {
-	    xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
-					includePlaintext,
-					false, // don't include creator/modifier data
-					syncConstraint);
+	    System.err.println("DBStore.dumpXML(): created XMLDumpContext");
+	  }
 	    
-	    if (debug)
-	      {
-		System.err.println("DBStore.dumpXML(): created XMLDumpContext");
-	      }
+	// start writing
 	    
-	    // start writing
+	if (dumpDataObjects)
+	  {
+	    xmlOut.startElement("ganymede");
+	    xmlOut.attribute("major", Byte.toString(major_xml_version));
+	    xmlOut.attribute("minor", Byte.toString(minor_xml_version));
+	  }
 	    
+	if (dumpSchema)
+	  {
 	    if (dumpDataObjects)
 	      {
-		xmlOut.startElement("ganymede");
-		xmlOut.attribute("major", Byte.toString(major_xml_version));
-		xmlOut.attribute("minor", Byte.toString(minor_xml_version));
+		xmlOut.indentOut();
 	      }
 	    
-	    if (dumpSchema)
+	    xmlOut.startElementIndent("ganyschema");
+	    
+	    xmlOut.indentOut();
+	    xmlOut.startElementIndent("namespaces");
+	    
+	    xmlOut.indentOut();
+	    
+	    for (int i = 0; i < nameSpaces.size(); i++)
 	      {
-		if (dumpDataObjects)
-		  {
-		    xmlOut.indentOut();
-		  }
-		
-		xmlOut.startElementIndent("ganyschema");
-		
-		xmlOut.indentOut();
-		xmlOut.startElementIndent("namespaces");
-		
-		xmlOut.indentOut();
-		
-		for (int i = 0; i < nameSpaces.size(); i++)
-		  {
-		    ns = (DBNameSpace) nameSpaces.elementAt(i);
-		    ns.emitXML(xmlOut);
-		  }
-		
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("namespaces");
-		
-		// write out our category tree
-		
-		xmlOut.skipLine();
-		
-		xmlOut.startElementIndent("object_type_definitions");
-		
-		xmlOut.indentOut();
-		rootCategory.emitXML(xmlOut);
-		
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("object_type_definitions");
-		
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("ganyschema");
-	      }
-    
-	    if (dumpDataObjects)
-	      {
-		if (!dumpSchema)
-		  {
-		    xmlOut.indentOut();
-		  }
-		
-		xmlOut.startElementIndent("ganydata");
-		xmlOut.indentOut();
-		
-		Vector bases = getBases();
-		
-		for (int i = 0; i < bases.size(); i++)
-		  {
-		    DBObjectBase base = (DBObjectBase) bases.elementAt(i);
-		    
-		    if (base.isEmbedded())
-		      {
-			continue;
-		      }
-		    
-		    Enumeration en = base.objectTable.elements();
-		    
-		    while (en.hasMoreElements())
-		      {
-			DBObject x = (DBObject) en.nextElement();
-			
-			if (xmlOut.mayInclude(x))
-			  {
-			    x.emitXML(xmlOut);
-			  }
-		      }
-		  }
-		
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("ganydata");
-		
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("ganymede");
+		ns = (DBNameSpace) nameSpaces.elementAt(i);
+		ns.emitXML(xmlOut);
 	      }
 	    
-	    xmlOut.write("\n");
-	    xmlOut.close();
-	    xmlOut = null;
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("namespaces");
+	    
+	    // write out our category tree
+	    
+	    xmlOut.skipLine();
+	    
+	    xmlOut.startElementIndent("object_type_definitions");
+	    
+	    xmlOut.indentOut();
+	    rootCategory.emitXML(xmlOut);
+	    
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("object_type_definitions");
+	    
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("ganyschema");
 	  }
-	finally
+	
+	if (dumpDataObjects)
 	  {
-	    if (debug)
+	    if (!dumpSchema)
 	      {
-		System.err.println("DBStore.dumpXML(): finally!");
+		xmlOut.indentOut();
 	      }
 	    
-	    if (xmlOut != null)
+	    xmlOut.startElementIndent("ganydata");
+	    xmlOut.indentOut();
+	    
+	    Vector bases = getBases();
+	    
+	    for (int i = 0; i < bases.size(); i++)
 	      {
-		xmlOut.close();
+		DBObjectBase base = (DBObjectBase) bases.elementAt(i);
+		
+		if (base.isEmbedded())
+		  {
+		    continue;
+		  }
+		
+		Enumeration en = base.objectTable.elements();
+		
+		while (en.hasMoreElements())
+		  {
+		    DBObject x = (DBObject) en.nextElement();
+		    
+		    if (xmlOut.mayInclude(x))
+		      {
+			x.emitXML(xmlOut);
+		      }
+		  }
 	      }
 	    
-	    if (outStream != null)
-	      {
-		outStream.close();
-	      }
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("ganydata");
+	    
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("ganymede");
 	  }
+	
+	xmlOut.write("\n");
+	xmlOut.close();
+	xmlOut = null;
       }
     finally
       {
+	if (debug)
+	  {
+	    System.err.println("DBStore.dumpXML(): finally!");
+	  }
+
 	if (lock != null)
 	  {
 	    lock.release();
+	  }
+	    
+	if (xmlOut != null)
+	  {
+	    try
+	      {
+		xmlOut.close();
+	      }
+	    catch (IOException ex)
+	      {
+		ex.printStackTrace();
+	      }
+	  }
+	
+	if (outStream != null)
+	  {
+	    try
+	      {
+		outStream.close();
+	      }
+	    catch (IOException ex)
+	      {
+		ex.printStackTrace();
+	      }
 	  }
       }
   }
