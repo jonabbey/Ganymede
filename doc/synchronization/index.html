@@ -100,7 +100,7 @@
     configuration of the target directory service.  In some cases it
     may not even be possible to read the pre-existing data from the
     target directory service in order to be able to detect what has
-    changed.  This is the case of <code class="type">ntPassword</code>
+    changed.  This is the case of <code class="type">unicodePwd</code>
     in Active Directory, for instance, which is a write-only field.
     Not being able properly to compare the full state data with the
     contents of the target service may mean that more changes will
@@ -168,6 +168,7 @@
     synchronization logic, without requiring extensive code
     development and maintenance within the Ganymede server itself.</p>
 
+    <div class="note">
     <p>Originally, implementing the first step of this process
     required subclassing the <a
     href="../javadoc/arlut/csd/ganymede/server/GanymedeBuilderTask.html">arlut.csd.ganymede.server.GanymedeBuilderTask</a>
@@ -189,6 +190,7 @@
     model, please consult the <a
     href="ganymedebuildertask.html">GanymedeBuilderTask
     Synchronization Guide</a> for details.</p>
+    </div>
 
     <p>With Ganymede 2.0, we introduce a new synchronization
     infrastructure built around a new Ganymede construct, the <code
@@ -237,7 +239,7 @@
     transaction and which the sync channel is configured to care
     about.  As soon as possible after a transaction is committed, an
     external build process is run which processes all unprocessed XML
-    transaction files in commit order.</p>
+    transaction files in chronological order.</p>
 
     <p><code class="type">Manual</code> sync channels are never
     scheduled.  The only purpose of a manual sync channel is to
@@ -381,10 +383,6 @@
 
     <h2 id="xml_full_state">4. Full State Sync Channels</h2>
 
-    <p>Full State Sync Channels are Ganymede 2.0's XML-based answer to
-    the traditional Ganymede 1.0 <a
-    href="ganymedebuildertask.html">GanymedeBuilderTask</a> build system.</p>
-
     <p>When a transaction is committed in Ganymede, the server
     examines every Full State Sync Channel registered in the server
     and determines whether the committed transaction contained any
@@ -433,7 +431,7 @@
     <p>It's very simple to say what the Ganymede server will give your
     Service Program to help it along:</p>
 
-    <p>Almost nothing.</p>
+    <p><i>Almost nothing</i>.</p>
 
     <p>Because of practical limitations on how well Java code can
     interact with the native operating system environment (UNIX-style
@@ -644,14 +642,12 @@
   <object_delta>
     <before>
       <object type="User" id="barkerr" oid="3:1175">
-        <Username>barkerr</Username>
-        <Signature_Alias>barkerr</Signature_Alias>
+        <Home_Phone>512-555-3481</Home_Phone>
       </object>
     </before>
     <after>
-      <object type="User" id="freeman" oid="3:1175">
-        <Username>freeman</Username>
-        <Signature_Alias>freeman</Signature_Alias>
+      <object type="User" id="barkerr" oid="3:1175">
+        <Home_Phone>512-555-3522</Home_Phone>
       </object>
     </after>
   </object_delta>
@@ -811,13 +807,13 @@
       written or committed.  Even if they are fully written, they may
       later be withdrawn if the server runs into an I/O problem while
       writing XML to other configured Sync Channel Queue Directories.
-      Never, ever trust a transaction with a higher number than you
+      <b>Never, ever trust a transaction with a higher number than you
       are given on the command line.  Don't read them, don't look at
-      them, just don't do it.</li>
+      them, just don't do it</b>.</li>
 
       <li>Your Service Program is required to process transactions in
-      increasing numeric order.  Be careful to use a numeric sort and
-      not a textual sort when ordering your processing.</li>
+      increasing numeric order.  <b>Be careful to use a numeric sort
+      and not a textual sort when ordering your processing</b>.</li>
 
       <li>Your Service Program must process transactions.  This
       involves reading an XML transaction file from the Queue
@@ -828,10 +824,10 @@
 
       <li>Your Service Program is responsible for removing
       successfully processed transactions from the Queue Directory.
-      Your Service Program must only remove a transaction from the
+      <b>Your Service Program must only remove a transaction from the
       Queue Directory when it is certain that the change has been
-      properly synchronized into the target service.  You may wish to
-      move successfully committed transactions to another directory
+      properly synchronized into the target service</b>.  You may wish
+      to move successfully committed transactions to another directory
       for record keeping (and the possibility of playback in the event
       of a rollback of your target service), or you may delete them
       from the Queue Directory entirely.  Your Service Program must
@@ -845,9 +841,9 @@
       able to recognize that the target service is already compliant
       with the after state of a given transaction.  This should only
       ever happen with the first transaction your Service Program, as
-      your Service Program should never start processing a transaction
-      before it has cleared the previous transaction from the Queue
-      Directory.</li>
+      <b>your Service Program should never start processing a
+      transaction before it has cleared the previous transaction from
+      the Queue Directory</b>.</li>
 
       <li>If your Service Program encounters a transaction that it
       cannot process due to a transient error, it must stop processing
@@ -857,8 +853,8 @@
       <li>
 	If your Service Program encounters a transaction that it
 	cannot process due to a data mismatch with the target service,
-	you must attempt to notify a human to take a look at the
-	problem.  This may be through logging to a Service
+	<b>you must attempt to notify a human to take a look at the
+	problem</b>.  This may be through logging to a Service
 	Program-specific log, by writing to a syslog service, by
 	creating an SNMP trap, or by sending email.  Or all of the
 	above, if you can.  Your Service Program must process no
