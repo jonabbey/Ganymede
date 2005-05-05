@@ -105,6 +105,14 @@ public class scheduleHandle implements java.io.Serializable {
   public boolean suspend;
 
   /**
+   * isSyncTask will be true if the task in question is instanceof
+   * either arlut.csd.ganymede.server.GanymedeBuilderTask or
+   * arlut.csd.ganymede.server.SyncRunner.
+   */
+
+  public boolean isSyncTask;
+
+  /**
    * if we are doing a on-demand and we get a request while running it,
    * we'll want to immediately re-run it on completion
    */
@@ -213,6 +221,12 @@ public class scheduleHandle implements java.io.Serializable {
     this.task = task;
     this.name = name;
     this.rerun = false;
+
+    if (task instanceof arlut.csd.ganymede.server.GanymedeBuilderTask ||
+	task instanceof arlut.csd.ganymede.server.SyncRunner)
+      {
+	this.isSyncTask = true;
+      }
 
     setInterval(interval);
 

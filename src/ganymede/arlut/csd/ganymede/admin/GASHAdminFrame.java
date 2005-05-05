@@ -214,6 +214,17 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   int colWidths[] = {100,100,100,100,100,100};
 
+  // resources for the sync task monitor table
+
+  rowTable syncTaskTable = null;
+
+  String syncTaskHeaders[] = {ts.l("global.task_col_0"), // "Task"
+			      ts.l("global.task_col_1"), // "Status"
+			      ts.l("global.task_col_2"), // "Last Run"
+			      ts.l("global.task_col_3"), // "Next Run"
+			      ts.l("global.task_col_4")}; // "Interval"
+  int syncTaskColWidths[] = {100,100,100,100,100};
+
   // resources for the task monitor table
 
   rowTable taskTable = null;
@@ -739,7 +750,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     // "Users Connected"
     tableBox.setBorder(new TitledBorder(ts.l("init.users_title")));
 
+    //
     // create background task monitor
+    //
 
     taskPopMenu = new JPopupMenu();
 
@@ -760,9 +773,22 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     taskPopMenu.add(disableTaskMI);
     taskPopMenu.add(enableTaskMI);
 
+    // first the sync monitor
+
+    syncTaskTable = new rowTable(syncTaskColWidths, syncTaskHeaders, this, false, taskPopMenu, false);
+
+    // 0b5a0e
+    syncTaskTable.setHeadBackColor(new java.awt.Color(11,90,14), false);
+
+    JPanel syncTaskBox = new JPanel(new java.awt.BorderLayout());
+    syncTaskBox.add("Center", syncTaskTable);
+    syncTaskBox.setBorder(new TitledBorder(ts.l("init.sync_title")));
+
+    // then the miscellaneous task monitor
+
     taskTable = new rowTable(taskColWidths, taskHeaders, this, false, taskPopMenu, false);
     taskTable.setHeadBackColor(Color.red, false);
-
+			  
     JPanel taskBox = new JPanel(new java.awt.BorderLayout());
     taskBox.add("Center", taskTable);
 
@@ -775,6 +801,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Users Connected"
     tabPane.addTab(ts.l("init.users_title"), tableBox);
+
+    // "Sync Monitor"
+    tabPane.addTab(ts.l("init.sync_title"), syncTaskBox);
+
     // "Task Monitor"
     tabPane.addTab(ts.l("init.task_title"), taskBox);
 

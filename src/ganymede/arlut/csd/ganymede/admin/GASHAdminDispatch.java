@@ -67,6 +67,7 @@ import javax.swing.SwingUtilities;
 import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.JDialog.StringDialog;
+import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.AdminEntry;
@@ -634,8 +635,9 @@ class GASHAdminDispatch implements Runnable {
    * <p>This method is remotely called by the Ganymede server to update the
    * admin console's task table.</p>
    *
-   * @param tasks a Vector of {@link arlut.csd.ganymede.common.scheduleHandle scheduleHandle}
-   * objects describing the tasks registered in the Ganymede server.
+   * @param tasks an array of {@link
+   * arlut.csd.ganymede.common.scheduleHandle scheduleHandle} objects
+   * describing the tasks registered in the Ganymede server.
    */
 
   public void changeTasks(Object tasks[])
@@ -690,68 +692,94 @@ class GASHAdminDispatch implements Runnable {
 			      );
       }
 
-    Vector taskNames = new Vector();
-
-    // now reload the table with the current stats
+    Vector syncTasks = new Vector();
+    Vector miscTasks = new Vector();
 
     for (int i = 0; i < tasks.length; i++)
       {
 	handle = (scheduleHandle) tasks[i];
 
+	if (handle.isSyncTask)
+	  {
+	    syncTasks.addElement(handle);
+	  }
+	else
+	  {
+	    miscTasks.addElement(handle);
+	  }
+      }
+
+    updateTaskTable(frame.syncTaskTable, syncTasks);
+    updateTaskTable(frame.taskTable, miscTasks);
+  }
+
+  private void updateTaskTable(rowTable table, Vector tasks)
+  {
+    scheduleHandle handle = null;
+    Vector taskNames = new Vector();
+
+    /* -- */
+
+    // now reload the table with the current stats
+
+    for (int i = 0; i < tasks.size(); i++)
+      {
+	handle = (scheduleHandle) tasks.elementAt(i);
+
 	taskNames.addElement(handle.name);
 
-	if (!frame.taskTable.containsKey(handle.name))
+	if (!table.containsKey(handle.name))
 	  {
-	    frame.taskTable.newRow(handle.name);
+	    table.newRow(handle.name);
 	  }
 
-	frame.taskTable.setCellText(handle.name, 0, handle.name, false); // task name
+	table.setCellText(handle.name, 0, handle.name, false); // task name
 
 	if (handle.isRunning)
 	  {
 	    // "Running"
-	    frame.taskTable.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
-	    frame.taskTable.setCellColor(handle.name, 1, Color.blue, false);
-	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
+	    table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
+	    table.setCellColor(handle.name, 1, Color.blue, false);
+	    table.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
 	else if (handle.suspend)
 	  {
 	    // "Suspended"
-	    frame.taskTable.setCellText(handle.name, 1, ts.l("changeTasks.suspendedState"), false);
-	    frame.taskTable.setCellColor(handle.name, 1, Color.red, false);
-	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
+	    table.setCellText(handle.name, 1, ts.l("changeTasks.suspendedState"), false);
+	    table.setCellColor(handle.name, 1, Color.red, false);
+	    table.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
 	else if (handle.startTime != null)
 	  {
 	    // "Scheduled"
-	    frame.taskTable.setCellText(handle.name, 1, ts.l("changeTasks.scheduledState"), false);
-	    frame.taskTable.setCellColor(handle.name, 1, Color.black, false);
-	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
+	    table.setCellText(handle.name, 1, ts.l("changeTasks.scheduledState"), false);
+	    table.setCellColor(handle.name, 1, Color.black, false);
+	    table.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
 	else
 	  {
 	    // "Waiting"
-	    frame.taskTable.setCellText(handle.name, 1, ts.l("changeTasks.waitingState"), false);
-	    frame.taskTable.setCellColor(handle.name, 1, Color.black, false);
-	    frame.taskTable.setCellBackColor(handle.name, 1, Color.white, false);
+	    table.setCellText(handle.name, 1, ts.l("changeTasks.waitingState"), false);
+	    table.setCellColor(handle.name, 1, Color.black, false);
+	    table.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
 
 	if (handle.lastTime != null)
 	  {
-	    frame.taskTable.setCellText(handle.name, 2, handle.lastTime.toString(), false);
+	    table.setCellText(handle.name, 2, handle.lastTime.toString(), false);
 	  }
 
 	if (handle.startTime != null)
 	  {
-	    frame.taskTable.setCellText(handle.name, 3, handle.startTime.toString(), false);
+	    table.setCellText(handle.name, 3, handle.startTime.toString(), false);
 	  }
 	else
 	  {
 	    // "On Demand"
-	    frame.taskTable.setCellText(handle.name, 3, ts.l("changeTasks.onDemandState"), false);
+	    table.setCellText(handle.name, 3, ts.l("changeTasks.onDemandState"), false);
 	  }
 
-	frame.taskTable.setCellText(handle.name, 4, handle.intervalString, false);
+	table.setCellText(handle.name, 4, handle.intervalString, false);
       }
 
     // and take any rows out that are gone
@@ -766,7 +794,7 @@ class GASHAdminDispatch implements Runnable {
 
 	for (int i = 0; i < removedTasks.size(); i++)
 	  {
-	    frame.taskTable.deleteRow(removedTasks.elementAt(i), false);
+	    table.deleteRow(removedTasks.elementAt(i), false);
 	  }
 
 	tasksKnown = taskNames;
@@ -776,11 +804,13 @@ class GASHAdminDispatch implements Runnable {
     // don't get the server sending us more updates before the table
     // finishes drawing
 
+    final rowTable localTableRef = table;
+
     try
       {
 	SwingUtilities.invokeAndWait(new Runnable() {
 	  public void run() {
-	    frame.taskTable.refreshTable();
+	    localTableRef.refreshTable();
 	  }
 	});
       }
