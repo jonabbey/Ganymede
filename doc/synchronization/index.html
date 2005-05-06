@@ -921,6 +921,16 @@
     requirements of the <a href="#xml_full_state_service_program">Sync
     Channel Full State Service Program</a>.</p>
 
+    <div class="note"><p>If you want to use the xmlclient to dump data from
+    any of your Sync Channels, be sure not to have any whitespace in
+    the Sync Channel's name.</p>
+
+    <p>Java's support for command line argument parsing is just plain
+    broken, and there's nothing we can do with the xmlclient code to
+    make the use of whitespace in Sync Channel names work.</p>
+
+    <p>When in doubt, keep whitespace out.</p></div>
+
     <p>Here is a screenshot of a Sync Channel configured for manual
     operation:</p>
 
