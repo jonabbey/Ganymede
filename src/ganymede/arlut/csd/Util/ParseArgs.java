@@ -109,38 +109,8 @@ public class ParseArgs {
 
 	    if (index > 0)
 	      {
-		String result = args[i].substring(index + 1);
-
-		// MEGAHACK!!!! Sun insists on being completely
-		// f'cking incompetent to provide proper command line
-		// parsing, so any command line argument with embedded
-		// whitespace gets busted up by the system before
-		// passing it to static main().
-		//
-		// Example: sync="bad boy", sync=bad\ boy, "sync=bad boy"
-		// .. all of these will result in "sync=bad" and "boy" being
-		// two separate command line arguments.  MUST KILL!!!
-		//
-		// So what I'm doing here, is if the user on Unix says
-		// sync="bad\ boy", Java will split that into
-		// "sync=bad\" and "boy", and I'll treat that as "bad
-		// boy" for the sake of dealing with a (presumed)
-		// single white space.
-		//
-		// Whoever at Sun is responsible for this utter
-		// monstrosity of a completely broken command line
-		// parser should be put out of the world's suffering.
-		//
-		// On television.  With lots of suffering first so
-		// that they really appreciate how nice it is that
-		// they are being put out of it.
-
-		if (result.endsWith("\\") && i+1 < args.length)
-		  {
-		    result = result + " " + args[i+1];
-		  }
-
-		return result;
+		// do %20 to space decoding
+		return args[i].substring(index + 1).replaceAll("%20", " ");
 	      }
 	    else
 	      {
