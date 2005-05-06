@@ -41,30 +41,17 @@ arlut.csd.Util.TranslationService, has been added which handles string
 lookup and templatization from string resource files held in the
 src/resources tree.
 
-The following classes have had their message strings pulled out into
-localization resource files:
+A considerable portion of the Ganymede server has been modified to use
+this localization mechanism, as has the admin console.  The client as
+of this writing is still largely non-localized.
 
-	DBEditObject		GanymedeServer
-	DBEditSet		GanymedeSession
-	DBField			GanymedeValidationTask
-	DBJournal		GanymedeXMLSession
-	DBObjectBaseField	gcTask
-	DBObjectBase		InvidDBField
-	DBObject		IPDBField
-	DBSession		JythonServerProtocol
-	DBStore			JythonServerWorker
-	dumpAndArchiveTask	memoryStatusTask
-	dumpTask		SyncRunner
-	GanymedeBuilderTask	XMLTransmitter
-	Ganymede		xmlclient
-	GASHAdmin		GASHAdminFrame
-	fieldoption_button	fieldoption_editor		
+The default, American English version of these localization files held
+in the src/resources tree are simply called <classname>.properties.
 
-The default, American English versions of these localization files are
-simply called <classname>.properties.  When the Ganymede server is run
-under a JVM that is configured with a different locality string, the
-TranslationService class will automatically read any translated
-resources from the appropriate file.
+When the Ganymede server is run under a JVM that is configured with a
+different locality string, the TranslationService class will
+automatically read any translated resources from the appropriate file,
+if it is present in the appropriate directory.
 
 For instance, if an adopter wanted to translate the messages used by
 the arlut.csd.ganymede.server.GanymedeSession class into French, he
@@ -76,7 +63,7 @@ Ganymede uses the standard Java Internationalization method for
 handling message strings, with interpolated parameters injected into
 the message strings with tokens like {0}, {1}, and etc.
 
-The new Ant build system provides a task to cross check the
+The new Ant build system provides a task to cross check the default
 localization resources against the Ganymede source code, to ensure
 that the localization message strings match the usage in the Ganymede
 source code.  If you run 'ant validate' in the src directory, a Perl
@@ -546,8 +533,8 @@ permissions failures may now throw GanyPermissionException.
 
 29. [SERVER] Added entirely new Sync Channel build system
 
-With Ganymede 2.0, the Ganymede server now has a second way of
-handling synchronization to target directory services.
+With Ganymede 2.0, the Ganymede server now has an entirely new family
+of synchronization services.
 
 Previously, all builds were done through the use of the
 GanymedeBuilderTask and its subclasses, using a two phase process.  In
@@ -562,26 +549,40 @@ task.
 
 All of that is still there, and it all works the same way that it ever
 did.  Now, though, there is a second system, based on the SyncRunner
-and syncChannelCustom classes.  I call it the 'Sync Channel' system.
+and syncChannelCustom classes and the use of an XML file format.  I
+call it the 'Sync Channel' system.
 
-The Sync Channel system is based on tracking the changes made to the
-Ganymede data store.  When a change is made, the Ganymede transaction
-commit logic examines all Sync Channels registered in the server,
-looking to see if any of them are interested in the objects and fields
-that have changed.  If any Sync Channel is so interested, that Sync
+The Sync Channel system comes in three flavors.. "Automatic Full
+State", "Automatic Incremental", and "Manual".
+
+The Automatic Incremental Sync Channel system is the most different
+from GanymedeBuilderTask.
+
+It is based on tracking the changes made to the Ganymede data store.
+When a change is made, the Ganymede transaction commit logic examines
+all Incremental Sync Channels registered in the server, looking to see
+if any of them are interested in the objects and fields that have
+changed.  If any Incremental Sync Channel is so interested, that Sync
 Channel will write out an XML description of the transaction with
 respect to the objects and fields that the Sync Channel cares about.
 
 Each standardized transaction description is written out to a
-directory devoted to the Sync Channel, in a file whose name is the
-transaction's id number.  The Ganymede server then triggers the
-external service program specified for each Sync Channel, passing it
-the number of the highest transaction known to have been successfully
-written out at the time that the service program is run.
+directory devoted to the Incremental Sync Channel, in a file whose
+name is the transaction's id number.  The Ganymede server then
+triggers the external service program specified for each Incremental
+Sync Channel, passing it the number of the highest transaction known
+to have been successfully written out at the time that the service
+program is run.
 
 The service program is intended to read all of the transactions up to
 and including the number given it, and to integrate those changes into
 whatever directory service the Sync Channel is intended to support.
+
+There's much more to read about this major new feature, including
+details about the "Automatic Full State" and "Manual" Sync Channels,
+in doc/synchronization/index.html, or you can go on the web to
+http://tools.arlut.utexas.edu/svn/ganymede/trunk/ganymede/doc/synchronization/index.html
+for the details.
 
 30. [SERVER] Forced java.rmi.server.randomIDs on by default
 
