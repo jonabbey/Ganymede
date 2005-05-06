@@ -732,6 +732,16 @@ guarantee that previously existing data will match the new constraint
 until you run the Database Consistency Test / GanymedeValidationTask
 to be sure.
 
+42. [ADMIN CONSOLE] Split sync tasks into separate task table
+
+The admin console now includes a second task monitor table, devoted to
+sync tasks (i.e., schedulable tasks derived from
+arlut.csd.ganymede.server.GanymedeBuilderTask or
+arlut.csd.ganymede.server.SyncRunner).
+
+Adding a third tab for this in the admin console makes it easier to
+track builds and what-not.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
