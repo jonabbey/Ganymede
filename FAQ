@@ -57,12 +57,14 @@ to create temporary user accounts and so forth.
 and propagate it into NIS, DNS, or anything else when changes are made
 in the Ganymede database.  At ARL:UT, we take the data from Ganymede and
 propagate it into NIS, DNS, tacacs+ for router configuration, Samba,
-NT, Sendmail, LDAP, and more.  In addition to maintaining the
-directory services, Ganymede also triggers external scripts to create
-users' home directories, handle user rename, NFS volume creation,
-etc. Having a central point through which all network information
-changes go through before fanning out to all of your network
-distribution mechanisms is extremely powerful.
+Active Directory, Sendmail, OpenLDAP, and more.
+
+   In addition to maintaining the directory services, Ganymede also
+triggers external scripts to create users' home directories, handle
+user rename, NFS volume creation, etc. Having a central point
+through which all network information changes go through before
+fanning out to all of your network distribution mechanisms is
+extremely powerful.
 
    Ganymede is much more than a simple directory system like LDAP,
 NIS, or even DNS. Ganymede is a total system for managing your
