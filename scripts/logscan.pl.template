@@ -1,4 +1,4 @@
-#!/opt/bin/perl5
+#!/opt/bin/perl
 #
 # This script is designed to assist the Ganymede server by
 # quickly scanning through the Ganymede log file and printing

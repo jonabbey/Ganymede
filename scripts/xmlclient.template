@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/opt/bin/perl
 #
 # Ganymede XML client script
 #
@@ -16,21 +16,41 @@
 
 # These lines should be in the form X=Y, with nothing else on
 # the line.. they are customized by the installClient.perl
-# script
+# script, and transformed into valid perl.
+#
+# Yes, I know the template doesn't look like valid perl.
 
 JAVA=/opt/bin/java
-CLASSPATH=/v/site/packages/ganymede/etc/ganymede.jar:/v/site/packages/swing-1.0/swingall.jar
+CLASSPATH=/v/site/packages/ganymede/etc/ganymede.jar
 PROPERTIES=/opt/depot/ganymede/etc/ganymede.properties
 
-############################################### 
+###############################################
 
-trap "echo Aborted" 2
+$ENV{'CLASSPATH'} = $CLASSPATH;
 
-export CLASSPATH
+#
+# parse argv
+#
 
-stty -echo
-$JAVA arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES $*;SAVE=$?
-stty echo
+@my_args = @ARGV;
 
-exit $SAVE
+# On Unix-style systems, Perl receives the command line arguments
+# after they have already been broken apart following the shell's
+# rules.  This may allow whitespace embedded in arguments, which is
+# what we want for the xmlclient, so that we can handle Sync Channel
+# names with spaces.
+#
+# Java can't deal with that, though, so we'll go through and do a
+# space to html-style encoding.
 
+foreach $arg (@my_args) {
+  $arg =~ s/ /%20/g;
+}
+
+# Thank you as well, java, for not having any way to turn off
+# character echo.
+
+system("stty -echo; $JAVA arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES @my_args;SAVE=$?;stty echo;$SAVE");
+
+$exit_value = $? >> 8;
+exit $exit_value;

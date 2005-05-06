@@ -1,4 +1,4 @@
-#!/opt/bin/perl5
+#!/opt/bin/perl
 #
 # Install script for Ganymede web resources
 #
@@ -13,7 +13,9 @@
 use File::Copy;
 use Cwd;
 
-$perlloc = "/opt/bin/perl5";
+# the following line is fixed up by the configurator script.
+
+$perlloc = "/opt/bin/perl";
 
 # Make sure our current working directory is in the same directory as
 # the script

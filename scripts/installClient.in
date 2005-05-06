@@ -1,4 +1,4 @@
-#!/opt/bin/perl5
+#!/opt/bin/perl
 #
 # Unix Install script for Ganymede client stuff
 #
@@ -13,6 +13,7 @@
 use File::Copy;
 use Cwd;
 
+$perlname = "<#PERLEXE#>";
 $homedir = $ENV{HOME};
 &removelastslash($homedir);
 
@@ -266,10 +267,14 @@ open OUTPUT, ">$installdir/bin/xmlclient" or die "Couldn't write xmlclient";
 
 while (<INPUT>) {
 
+    # xmlclient is now a perl script.  fix up the interpreter path
+
+    s/\/opt\/bin\/perl/$perlname/g;
+
     if (!/^([A-Z]*)=/) {
 	print OUTPUT $_;
     } elsif (defined $runconvert{$1}) {
-	print OUTPUT "$1=$runconvert{$1}\n";
+	print OUTPUT "\$" . "$1=\"$runconvert{$1}\";\n";
     } else {
       if ($debug) {
 	print "Error.. unrecognized template entry $1 - copying template value\n";

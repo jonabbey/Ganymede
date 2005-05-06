@@ -1,4 +1,4 @@
-#!/opt/bin/perl5
+#!/opt/bin/perl
 #
 # This script is designed to walk through the Ganymede package
 # and make all the build scripts.  It is run by the configure script
@@ -115,7 +115,7 @@ sub write_install {
     open(INSTOUT, ">$rootdir/$target") || die("Can't create the $target");
 
     while (<INSTIN>){
-	s/\/opt\/bin\/perl5/$perlname/g;
+	s/\/opt\/bin\/perl/$perlname/g;
 	s/\<\#JAVADIR\#\>/$javadir/g;
 	s/\<\#SWINGDIR\#\>/$swingdir/g;
 	s/\<\#PERLEXE\#\>/$perlname/g;

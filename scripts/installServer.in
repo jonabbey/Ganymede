@@ -1,4 +1,4 @@
-#!/opt/bin/perl5
+#!/opt/bin/perl
 #
 # Install script for Ganymede Server
 #
@@ -350,7 +350,7 @@ open OUTPUT, ">$installdir/bin/logscan.pl" or die "Couldn't write logscan";
 # logscan.pl is a perl script.. write out the name of our interpreter
 
 while (<INPUT>) {
-  s/\/opt\/bin\/perl5/$perlname/g;
+  s/\/opt\/bin\/perl/$perlname/g;
   s/<<LOGFILE>>/$installdir\/db\/log/g;
 
   print OUTPUT $_;
@@ -372,10 +372,14 @@ open OUTPUT, ">$installdir/bin/xmlclient" or die "Couldn't write xmlclient";
 
 while (<INPUT>) {
 
+    # xmlclient is now a perl script.  fix up the interpreter path
+
+    s/\/opt\/bin\/perl/$perlname/g;
+
     if (!/^([A-Z]*)=/) {
 	print OUTPUT $_;
     } elsif (defined $runconvert{$1}) {
-	print OUTPUT "$1=$runconvert{$1}\n";
+	print OUTPUT "\$" . "$1=\"$runconvert{$1}\";\n";
     } else {
       if ($debug) {
 	print "Unrecognized template entry $1 - copying template value\n";
