@@ -57,6 +57,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.text.NumberFormat;
@@ -108,7 +109,6 @@ class GASHAdminDispatch implements Runnable {
   private adminSession aSession = null;	// remote reference
 
   private boolean tasksLoaded = false;
-  private Vector tasksKnown = null;
 
   private AdminAsyncResponder asyncPort = null;	// remote reference
 
@@ -784,20 +784,19 @@ class GASHAdminDispatch implements Runnable {
 
     // and take any rows out that are gone
 
-    if (tasksKnown == null)
+    Vector tasksKnown = new Vector();
+    Enumeration en = table.keys();
+
+    while (en.hasMoreElements())
       {
-	tasksKnown = taskNames;
+	tasksKnown.addElement(en.nextElement());
       }
-    else
+
+    Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
+    
+    for (int i = 0; i < removedTasks.size(); i++)
       {
-	Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
-
-	for (int i = 0; i < removedTasks.size(); i++)
-	  {
-	    table.deleteRow(removedTasks.elementAt(i), false);
-	  }
-
-	tasksKnown = taskNames;
+	table.deleteRow(removedTasks.elementAt(i), false);
       }
 
     // And refresh our table.. we'll wait until this succeeds so we
