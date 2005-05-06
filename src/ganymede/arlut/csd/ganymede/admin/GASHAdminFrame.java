@@ -778,7 +778,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     syncTaskTable = new rowTable(syncTaskColWidths, syncTaskHeaders, this, false, taskPopMenu, false);
 
     // 0b5a0e
-    syncTaskTable.setHeadBackColor(new java.awt.Color(11,90,14), false);
+    syncTaskTable.setHeadBackColor(new java.awt.Color(7,212,16), false);
 
     JPanel syncTaskBox = new JPanel(new java.awt.BorderLayout());
     syncTaskBox.add("Center", syncTaskTable);
