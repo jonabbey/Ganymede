@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-?? ??, 2005
+? ??, 2005
 FAQ
 ---------------------------------------------
 
@@ -13,18 +13,17 @@ Questions Answered:
 6) How scalable is Ganymede, with its memory-based database?
 7) Why isn't Ganymede LDAP-based?  What about replication?
 8) What's up with DNS management?  The current stuff is weak.
-9) What's this rpcpass thing in the client bin directory?
-10) Where's the documentation?
-11) How can I help?
-12) Why is it called Ganymede?
-13) What is Ganymede's development history like?
-14) I see a bunch of messages about missing fonts when I run the
+9) Where's the documentation?
+10) How can I help?
+11) Why is it called Ganymede?
+12) What is Ganymede's development history like?
+13) I see a bunch of messages about missing fonts when I run the
     Ganymede client or admin console GUI under Linux, what's up?
-15) When I try to start the Ganymede server, I see a message complaining about
+14) When I try to start the Ganymede server, I see a message complaining about
     the system hostname resolving to the 127.0.0.1 loopback address and
     the server quits.  What's going on?
-16) Where's the Ganymede web site?
-17) What's the best way to report bugs?  How should I ask questions?
+15) Where's the Ganymede web site?
+16) What's the best way to report bugs?  How should I ask questions?
 
 --====================================================================--
 
@@ -56,7 +55,7 @@ to create temporary user accounts and so forth.
 
    Customizers/adopters can write code to take the data from Ganymede
 and propagate it into NIS, DNS, or anything else when changes are made
-in the Ganymede database.  At ARL, we take the data from Ganymede and
+in the Ganymede database.  At ARL:UT, we take the data from Ganymede and
 propagate it into NIS, DNS, tacacs+ for router configuration, Samba,
 NT, Sendmail, LDAP, and more.  In addition to maintaining the
 directory services, Ganymede also triggers external scripts to create
@@ -86,7 +85,7 @@ and scripts that will take information from Ganymede and propagate it
 into your network.
 
    Ganymede comes with a few demonstration schema kits, and one very
-complex schema kit that manages the ARL laboratory environment, but if
+complex schema kit that manages the ARL:UT laboratory environment, but if
 you are serious about Ganymede you're going to need to do some work to
 design your network environment management system.
 
@@ -141,24 +140,13 @@ someone else's client.
 and requires GNU tar to decompress it, due to extremely long
 file/path names in the archive.
 
-   Because the Ganymede distribution includes various symbolically linked
-files, it is best unpacked and used on a UNIX system.  The Ganymede
-server and clients should have no UNIX-specific code in them, but all
-the build and install scaffolding requires Bourne shell and Perl 5.
+   The Ganymede system requires Java 1.4 or better.  Since Ganymede
+supports running the Ganymede client and admin console on Windows
+browsers with Sun's Plug-In (see http://java.sun.com/products/plugin/),
+you can get away with just the basic Java environment on your UNIX
+system to run the server on.
 
-   To run the Ganymede server on UNIX systems, you need Java 1.1.7 or
-better for your system.  Since Ganymede supports running the Ganymede
-client and admin console on Windows browsers with Sun's Plug-In (see
-http://java.sun.com/products/plugin/), you can get away with just
-the basic Java environment on your UNIX system to run the server on.
-
-   To run the Ganymede client and admin console on your UNIX system,
-you will either need Java 1.2 or better for your system, or Java 1.1.7
-or better and Swing version 1.1 or better.  Ganymede does not
-currently have much in the way of text-mode clients, so X Windows is
-essential.
-
-   The Ganymede server is memory intensive, as all data registered in
+   The Ganymede server can be memory intensive, as all data registered in
 Ganymede is kept in an in-memory database backed by disk.  A 64 meg
 system dedicated to Ganymede is adequate to run a lab like ours, with
 DNS for a couple thousand systems, and user, group, and email records
@@ -167,31 +155,30 @@ Pentium 200 or better for good performance on something like Linux.
 JITs are great, anything with a good generational garbage collector
 like Sun's HotSpot VM are super-great.
 
-   To run the Ganymede client and admin console on Windows 95/98/NT,
-you'll want Sun's Java Plug-In version 1.2.2 or later, and at least a
-P133 with 32 megs.
+   (The above paragraph is pretty old, obviously, but it's still true,
+   so I'm perfectly happy leaving it as it is. ;-)
 
-   Newer versions of Java are just about always better.  Use the
-latest production release of Java 1.3 if you can.
-
-   Ganymede 1.0.5 and later also includes support for launching the
-Ganymede clients using the JNLP protocol, which is supported by Sun's
-Java Web Start product at http://java.sun.com/products/javawebstart/.
+   The best way to launch the Ganymede clients is to use Sun's Java
+Web Start product, which comes with Sun's Java environment.  Mac OS
+X ships with very good Java Web Start support, as well.
 
      ------------------------------------------------------------
 
 6) How scalable is Ganymede, with its memory-based database?
 
-   Fairly scalable.  At ARL, we use Ganymede to manage a rather
+   Fairly scalable.  At ARL:UT, we use Ganymede to manage a rather
 complex NIS domain containing around 800 users and our DNS domain with
 over 2500 system records defined. During execution our Ganymede server
 takes up only about 9 megabytes of JVM heap space.
 
-   The Ganymede server should be able to scale up to handle the
-largest NIS domain, and to handle DNS information for many thousand
-systems without much difficulty.  If you try to manage information
-from many NIS domains in one server, you may well overflow what the
-memory resident database is designed to handle.
+   During development of Ganymede 2.0, we test-loaded the Ganymede
+server to 250,000 users and 250,000 groups of random data, using the
+userKit.  At those crazy levels, the Ganymede server balloons up to
+600 megs of RAM, but it still works fine.
+
+   So we feel very confident in saying that the Ganymede server should be
+able to scale up to handle just about as large a set of data as you'd ever
+want to manage on a single server.
 
    The server should degrade gracefully if the heap usage gets to be
 too much.  As the amount of data loaded into the server increases
@@ -207,16 +194,6 @@ server re-started.  If the heap size is bumping up against the maximum
 available on a given machine, it would be necessary to export the
 server's data to XML, split the data, and create separate Ganymede
 servers for separate subdomains or separate object types.
-
-   It may be possible in the not-too-distant future to rearchitect
-Ganymede to be more scalable by going to a disk-based database runtime
-and using the Java 1.2 weak references API to manage in-process object
-caching, but given the current Ganymede design of doing complete
-dataset rebuilds when transactions are committed, it seems that most
-data would be continuously brought back in-process during the build
-phase after a transaction was committed.  Garbage collection should
-keep everything viable, but the i/o overhead would be very much
-greater.
 
    The final word on scalability remains that you should be sure and
 test with a representative dataset before committing to Ganymede, and
@@ -258,44 +235,24 @@ Instead, Ganymede is intended to feed things like NIS, DNS, and LDAP,
 which have their own means of doing replication and redundant servers
 for backups.
 
-   If you are interested in using Ganymede in conjunction with LDAP,
-you should be aware of Thomas Reith's excellent ldapdiff utility,
-which may be found at http://webtomware.rhoen.de/.  ldapdiff is
-designed to take an LDIF file from a data source and merge it into an
-LDAP server's dataset, merging only those object and attribute types
-defined in a configuration file.  ldapdiff provides the missing link
-to allow Ganymede to manage portions of an LDAP server without
-necessitating a complete tear-down and rebuild of the LDAP server's
-dataset.  With ldapdiff, Ganymede can co-exist peacefully with
-non-Ganymede-mastered LDAP data in a single server.
+   In Ganymede 2.0, we have a new Synchronization system based on
+XML deltas which we use at the laboratory to manage Active Directory and
+OpenLDAP servers.  The external code we use to do this is Deepak Giridharagopal's
+excellent but cryptically named 'SyncUtils' package for Python.
 
      ------------------------------------------------------------
 
 8) What's up with DNS management?  The current stuff is weak.
 
-   Yes, that's true.  We're working on code to support arbitrary DNS
-management.  Instead of the current hosts_info file-of-evil that we
-inherited from GASH, we're developing an XML-based DNS system that
-will allow us to do both bulk and incremental DNS updates and, if we
-play our cards right, even flexible BIND file importing.  It's coming.
+   Yes, that's true.  Our use of Ganymede to manage DNS is limited to only
+that which we need in our environment, and it's part of the larger GASHARL
+schema kit, which is partially shipped with Ganymede 2.0.  If you want a more full featured
+DNS management kit built on top of Ganymede, and you can speak German, take a look at
+DoctorDNS, at http://www.fg-networking.de/software/doctordns.html.
 
      ------------------------------------------------------------
 
-9) What's this rpcpass thing in the client bin directory?
-
-   It's a proxy utility to allow integrating the NIS rpc.yppasswd
-daemon with Ganymede, so users can change their Ganymede (Samba, NT,
-whatever else you're supporting with Ganymede) password through the
-UNIX NIS passwd command.  This works with version 1.3.6.92 or
-later of the Linux NISkit's rpc.yppasswdd daemon using the --x
-or --execute option.
-
-   See the rpcpass entry in doc/glossary.html file for details,
-and the entry for 0.99.1 in the CHANGES file.
-
-     ------------------------------------------------------------
-
-10) Where's the documentation?
+9) Where's the documentation?
 
    What documentation do you want?  I know more and better docs are
 needed, but feedback is pretty scarce.  Are the current docs adequate
@@ -311,7 +268,7 @@ struggling to get more operational documentation written.
 
      ------------------------------------------------------------
 
-11) How can I help?
+10) How can I help?
 
    Send in bug reports and success reports, to
 jonabbey@arlut.utexas.edu or, preferably, ganymede@arlut.utexas.edu to
@@ -328,7 +285,7 @@ know.
 
      ------------------------------------------------------------
 
-12) Why is it called Ganymede?
+11) Why is it called Ganymede?
 
    It's actually an acronym, standing for GAsh Network Manager, Deluxe
 Edition.  I wanted a name that connected this project to GASH, and I
@@ -337,10 +294,10 @@ fashion (I did come up with a lot of really bad names, though...)
 
      ------------------------------------------------------------
 
-13) What is Ganymede's development history like?
+12) What is Ganymede's development history like?
 
    Ganymede is the successor to GASH, the Group Admin Shell, which was
-developed at ARL starting in early 1993, and which was presented at
+developed at ARL:UT starting in early 1993, and which was presented at
 the USENIX LISA VIII conference in San Diego, CA in September, 1994.
 Refinements and further development of GASH continued into mid-1995,
 before we decided that the GASH design wouldn't carry us much further
@@ -352,17 +309,22 @@ started around June 1996.  In March 1998, the first binary developer's
 pre-release was put on the ftp site.  In December 1998, we presented
 Ganymede at the USENIX LISA XII conference in Boston, MA.  The first
 full source distribution, under GPL licensing, was sent out in
-January, 1999.  Development and refinement has continued since then.
+January, 1999.
 
-   For the majority of that time, there has probably been on average
-1.5 developers working on the code.  Doing Ganymede in Java rather
-than in something like C or C++ made it possible.  We still wound up
-with the massive pain and effort, however.  Hopefully it'll be useful
-to people.
+  Minor refinements continued for several years as ARL:UT used Ganymede in
+24/7 production.
+
+  Work on Ganymede 2.0 began in earnest in 2004 when the release of Subversion
+made it feasible to really move things around and start breaking things in
+the source tree.  For about a year and a half, Jonathan Abbey and Deepak
+Giridharagopal developed a blizzard of new features and fixed a tremendous
+number of bugs.
+
+   At this point, Ganymede proper has been under development for ten years.
 
      ------------------------------------------------------------
 
-14) I see a bunch of messages about missing fonts when I run the
+13) I see a bunch of messages about missing fonts when I run the
     Ganymede client or admin console GUI under Linux, what's up?
 
    The common implementations of the JVM provided by both Sun and the
@@ -380,7 +342,7 @@ http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.ht
 
      ------------------------------------------------------------
 
-15) When I try to start the Ganymede server, I see a message complaining about
+14) When I try to start the Ganymede server, I see a message complaining about
     the system hostname resolving to the 127.0.0.1 loopback address and
     the server quits.  What's going on?
 

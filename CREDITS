@@ -35,7 +35,8 @@ Deepak has made extensive contributions to the development of Ganymede
 2.0, including transitioning Ganymede's build system from old Perl
 scripts to using Ant.  Deepak also developed the Jython integration,
 and worked on the new Sync Channel software, both in the Ganymede
-client and in the Python Sync Channel servicing code.
+client and especially in the wonder Python Sync Channel servicing
+code.
 
 --
 
@@ -122,7 +123,7 @@ Ganymede into NIS and DNS.
 Outside ARL, we have gotten very helpful bug reports and feedback
 from:
 
-Pug Bainter, pug@pug.net - lots of really good bug reports
+Pug Bainter, pug@pug.net - lots of really good early bug reports
 Martin Schneider, martin@ira.uka.de - server customization bug reports
 Michael McEniry, mmceniry@itsc.uah.edu - linux localhost patch
 Christoph Litauer, litauer@uni-koblenz.de - xmlclient testing
@@ -148,7 +149,7 @@ Miklos Muller, mmuller@lbcons.net - many wonderful bug reports for Ganymede 1.0
 Gaurav Bhargava, gaurav.bhargava@villanova.edu - Bug reports, schema development
 Martin Vogt <vogt@itwm.uni-kl.de> - bug reports
 Steve Lemons, steve.lemons@arrisi.com - bug reports
-Fredrik.A.Bergman@ericsson.com - bug reports
+Fredrik.A.Bergman@ericsson.com - many excellect bug reports for Ganymede 2.0
 Stefan Bier <bier@fg-networking.de> - bug reports
 
 --
