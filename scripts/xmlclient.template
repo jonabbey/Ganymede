@@ -50,7 +50,7 @@ foreach $arg (@my_args) {
 # Thank you as well, java, for not having any way to turn off
 # character echo.
 
-system("stty -echo; $JAVA arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES @my_args;SAVE=$?;stty echo;$SAVE");
+system("stty -echo; $JAVA arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES @my_args;SAVE=\$?;stty echo;exit \$SAVE");
 
 $exit_value = $? >> 8;
 exit $exit_value;
