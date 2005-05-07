@@ -48,10 +48,10 @@ of this writing is still largely non-localized.
 The default, American English version of these localization files held
 in the src/resources tree are simply called <classname>.properties.
 
-When the Ganymede server is run under a JVM that is configured with a
-different locality string, the TranslationService class will
-automatically read any translated resources from the appropriate file,
-if it is present in the appropriate directory.
+When the Ganymede server is run under a JVM that is configured to use
+a different locale, the TranslationService class will automatically
+read any translated resources from the appropriate file, if it is
+present in the appropriate directory.
 
 For instance, if an adopter wanted to translate the messages used by
 the arlut.csd.ganymede.server.GanymedeSession class into French, he
@@ -405,18 +405,18 @@ admin console schema editor has been rewritten to behave better in a
 greater variety of circumstances.  In particular, bugs that were seen
 when using the multi-line label field have been addressed.
 
-23. [SERVER,ADMIN CONSOLE,CLIENT] New data field type added for GanymedeBuilderQueue
+23. [SERVER,ADMIN CONSOLE,CLIENT] New data field type added for Sync Channel
 
 Introducing the first new DBField type since the introduction of Float
 back in 1999.. the FieldOptionDBField!
 
 The purpose of the FieldOptionDBField is to allow the client and/or
 xmlclient to configure the list of objects and fields that the new
-GanymedeBuilderQueue synchronization channels (to be introduced
-hereafter) will use when writing out an XML description of
-transactions to disk as they happen.
+Sync Channel synchronization channels (to be introduced hereafter)
+will use when writing out an XML description of transactions to disk
+as they happen.
 
-The intention is that the GanymedeBuilderQueue will write out an XML
+The intention is that the Sync Channel will write out an XML
 description in a known format for each transaction that is committed,
 and a dedicated queue runner will be launched on an asynchronous basis
 to sweep up the XML records for the queue, up to a fixed transaction
@@ -531,7 +531,7 @@ from RemoteException for compatibility with the client.
 In some cases, methods that previously returned ReturnVal to indicate
 permissions failures may now throw GanyPermissionException.
 
-29. [SERVER] Added entirely new Sync Channel build system
+29. [SERVER] Added entirely new Sync Channel build systems
 
 With Ganymede 2.0, the Ganymede server now has an entirely new family
 of synchronization services.
