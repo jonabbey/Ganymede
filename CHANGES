@@ -743,6 +743,29 @@ arlut.csd.ganymede.server.SyncRunner).
 Adding a third tab for this in the admin console makes it easier to
 track builds and what-not.
 
+43. [SERVER, XMLCLIENT] Added logic for handling space characters on the command line
+
+Previously, the Ganymede xmlclient and server, both of which require
+the ability to process command line arguments, did not properly handle
+command line arguments containing whitespace.
+
+This was due to a major design flaw in how the Java runtime
+environment handles command line arguments.. in Java, rather than
+letting the shell break the command line into an argument list, the
+runtime is responsible for doing this, and it always breaks on
+whitespace, regardless of attempts at quoting or escaping arguments.
+
+This made it impossible to use xmlclient to do sync channel dumps with
+sync channels whose names contained whitespace.
+
+Now, the Ganymede command line argument parser recognizes HTTP-style
+space character encoding.. any "%20" sequence encountered on the
+command line will be treated as a space character instead.
+
+The xmlclient wrapper script is now written in Perl, and converts
+space characters in arguments to %20 for passing into the xmlclient
+Java executable.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
