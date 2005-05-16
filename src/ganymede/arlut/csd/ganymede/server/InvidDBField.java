@@ -2832,11 +2832,11 @@ public final class InvidDBField extends DBField implements invid_field {
     // reference that we can't safely link to without breaking a
     // symmetric relationship.
 
-    retVal = checkBindConflict(remote);
+    newRetVal = checkBindConflict(remote);
 
-    if (retVal != null)
+    if (newRetVal != null)
       {
-	return retVal;
+	return newRetVal;
       }
 
     checkkey = "addElement" + getName() + owner.getLabel();
@@ -3068,11 +3068,11 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	Invid remote = (Invid) approvedValues.elementAt(i);
 
-	retVal = checkBindConflict(remote);
+	newRetVal = checkBindConflict(remote);
 
-	if (retVal != null)
+	if (newRetVal != null)
 	  {
-	    return retVal;
+	    return newRetVal;
 	  }
       }
 
