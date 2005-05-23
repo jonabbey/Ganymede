@@ -313,6 +313,15 @@ public class Ganymede {
   public static String bugReportAddressProperty = null;
 
   /**
+   * If the Ganymede server is started with the -historyOverride
+   * command line flag, this field will be set to true and the server
+   * will allow creation timestamps and creator info to be injected
+   * into objects loaded from the xmlclient.
+   */
+
+  public static boolean allowHistoryOverride = false;
+
+  /**
    * <p>If the server is started with the -resetadmin command line flag,
    * this field will be set to true and the server's startupHook() will
    * reset the supergash password to that specified in the server's
@@ -432,6 +441,8 @@ public class Ganymede {
       }
 
     resetadmin = ParseArgs.switchExists("resetadmin", argv);
+
+    allowHistoryOverride = ParseArgs.switchExists("historyOverride", argv);
 
     forcelocalhost = ParseArgs.switchExists("forcelocalhost", argv);
 

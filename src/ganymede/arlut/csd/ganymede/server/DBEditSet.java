@@ -197,6 +197,13 @@ public class DBEditSet {
   String description;
 
   /**
+   * Will be true if we are running this transaction on behalf of an
+   * XML client.
+   */
+
+  private boolean allowXMLHistoryOverride = false;
+
+  /**
    * A stack of {@link arlut.csd.ganymede.server.DBCheckPoint DBCheckPoint} objects
    * to keep track of check points performed during the course of this transaction.
    */
@@ -278,6 +285,11 @@ public class DBEditSet {
     objects = Collections.synchronizedMap(new HashMap());
     logEvents = new Vector();
     basesModified = new HashMap(dbStore.objectBases.size());
+
+    if (session.GSession != null && session.GSession.xSession != null && Ganymede.allowHistoryOverride)
+      {
+	this.allowXMLHistoryOverride = true;
+      }
   }
 
   /**
@@ -1538,10 +1550,31 @@ public class DBEditSet {
 	    if (!eObj.isEmbedded())
 	      {
 		df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
-		df.value = modDate;
+
+		// If we're processing an XML transaction and the XML
+		// transaction already specified a creation date (the
+		// df field is not undefined), we'll go ahead and
+		// leave it alone.
+
+		// this behavior is intended to allow data to be
+		// dumped from a Ganymede 1.0 server, manually
+		// massaged to bring it into compliance with a
+		// Ganymede 2.0 server's schema, and then reloaded
+		// without losing the original creation information.
+
+		if (!allowXMLHistoryOverride || !df.isDefined())
+		  {
+		    df.value = modDate;
+		  }
+
+		// ditto for the creator info field.
 		
 		sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
-		sf.value = result;
+
+		if (!allowXMLHistoryOverride || !sf.isDefined())
+		  {
+		    sf.value = result;
+		  }
 	      }
 	    
 	    // * fall-through *

@@ -173,6 +173,13 @@ RMISECURITY='-Djava.rmi.server.randomIDs=true'
 # use this if you are needing to do high-speed offline bulk loading,
 # or the like.
 #
+# The optional -historyOverride parameter will cause the Ganymede
+# server to allow loads from the xmlclient to override the creation
+# date and user information with information from the loaded xml file.
+# This is to allow data to be imported (possibly after hand-massaging
+# to change schema information) from another Ganymede server without
+# losing creation information.
+#
 # The optional telnet=<portnumber> parameter, if provided, causes the
 # Ganymede server to open a Jython interpreter service on port
 # <portnumber> which a Ganymede administrator with adequate
