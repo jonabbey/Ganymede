@@ -768,6 +768,25 @@ Java executable.
 
 44. [SERVER, XMLCLIENT] Added support for full-fidelity dumping and loading
 
+The xmlclient now has support for an -includeHistory command line
+argument, which causes the Ganymede server to include the historical
+fields (creation time, creator info, modification time, modification
+info) when dumping out Ganymede objects.
+
+The xmlclient now has support for an -includeOid command line
+argument, which causes the Ganymede server to include the precise
+invid for dumped objects in the <object> element's oid attribute.
+
+The Ganymede server now has support for a -magic_import command line
+argument, which causes the Ganymede server to support loading the
+historical fields from an xml file, as well as using the oid attribute
+to create objects with a predetermined invid number.
+
+Between -includeHistory, -includeOid, and -magic_import, it's now
+possible to dump a server's complete state to an XML file, modify the
+XML dump by hand to alter the schema (for instance) and then load it
+into a new server, with all invids and historical fields matching the
+original server's state.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 

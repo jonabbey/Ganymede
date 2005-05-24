@@ -20,9 +20,9 @@
 
     <p><ol>
 	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] &lt;xmlfile&gt;</li>
-	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dump [-includeHistory]</li>
+	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dump [-includeHistory] [-includeOid]</li>
 	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpschema</li>
-	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpdata [-includeHistory] [sync=channel]</li>
+	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpdata [-includeHistory] [-includeOid] [sync=channel]</li>
     </ol></p>
 
     <p>Running xmlclient with a file name for a parameter will cause
@@ -45,6 +45,14 @@
     xmlclient to dump out the historical fields (creation time,
     creator information, last modified time, last modifier
     information) in the dump.</p>
+
+    <p>The <code>-includeOid</code> command line flag causes the
+    xmlclient to dump out the oid attribute for dumped objects,
+    containing the full Invid for the object.  This can be useful in
+    cases where the xml dump is going to be loaded into a server
+    running the -magic_import command line flag, and in cases where
+    the Invid string for the object is used elsewhere as a foreign key
+    against the Ganymede representation.</p>
 
     <p>The xmlclient assumes that it is being run by the supergash
     account by default.  Only supergash-level admins are allowed to

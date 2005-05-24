@@ -4819,7 +4819,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal getSchemaXML() throws NotLoggedInException
   {
-    return this.getXML(false, true, null, false);
+    return this.getXML(false, true, null, false, false);
   }
 
   /**
@@ -4839,12 +4839,15 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param includeHistory If true, the historical fields (creation
    * date & info, last modification date & info) will be included in
    * the xml stream.
+   * @param includeOid If true, the objects written out to the xml
+   * stream will include an "oid" attribute which contains the precise
+   * Invid of the object.
    */
 
-  public ReturnVal getDataXML(String syncChannel, boolean includeHistory) throws NotLoggedInException
+  public ReturnVal getDataXML(String syncChannel, boolean includeHistory, boolean includeOid) throws NotLoggedInException
   {
     Ganymede.debug("GanymedeSession.getDataXML(" + syncChannel + ")");
-    return this.getXML(true, false, syncChannel, includeHistory);
+    return this.getXML(true, false, syncChannel, includeHistory, includeOid);
   }
 
   /**
@@ -4861,11 +4864,14 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param includeHistory If true, the historical fields (creation
    * date & info, last modification date & info) will be included in
    * the xml stream.
+   * @param includeOid If true, the objects written out to the xml
+   * stream will include an "oid" attribute which contains the precise
+   * Invid of the object.
    */
 
-  public ReturnVal getXMLDump(boolean includeHistory) throws NotLoggedInException
+  public ReturnVal getXMLDump(boolean includeHistory, boolean includeOid) throws NotLoggedInException
   {
-    return this.getXML(true, true, null, includeHistory);
+    return this.getXML(true, true, null, includeHistory, includeOid);
   }
 
   /**
@@ -4875,7 +4881,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * transmission.</p>
    */
 
-  private ReturnVal getXML(boolean sendData, boolean sendSchema, String syncChannel, boolean includeHistory) throws NotLoggedInException
+  private ReturnVal getXML(boolean sendData, boolean sendSchema, String syncChannel, boolean includeHistory, boolean includeOid) throws NotLoggedInException
   {
     checklogin();
 
@@ -4900,7 +4906,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     try
       {
-	transmitter = new XMLTransmitter(sendData, sendSchema, syncChannel, includeHistory);
+	transmitter = new XMLTransmitter(sendData, sendSchema, syncChannel, includeHistory, includeOid);
       }
     catch (IOException ex)
       {

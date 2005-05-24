@@ -774,10 +774,12 @@ public interface Session extends Remote {
    * @param includeHistory If true, the historical fields (creation
    * date & info, last modification date & info) will be included in
    * the xml stream.
+   * @param includeOid If true, the objects written out to the xml
+   * stream will include an "oid" attribute which contains the precise
+   * Invid of the object.
    */
 
-
-  public ReturnVal getDataXML(String syncChannel, boolean includeHistory) throws RemoteException;
+  public ReturnVal getDataXML(String syncChannel, boolean includeHistory, boolean includeOid) throws RemoteException;
 
   /**
    * <p>This method is called by the XML client to initiate a dump of
@@ -793,7 +795,10 @@ public interface Session extends Remote {
    * @param includeHistory If true, the historical fields (creation
    * date & info, last modification date & info) will be included in
    * the xml stream.
+   * @param includeOid If true, the objects written out to the xml
+   * stream will include an "oid" attribute which contains the precise
+   * Invid of the object.
    */
 
-  public ReturnVal getXMLDump(boolean includeHistory) throws RemoteException;
+  public ReturnVal getXMLDump(boolean includeHistory, boolean includeOid) throws RemoteException;
 }

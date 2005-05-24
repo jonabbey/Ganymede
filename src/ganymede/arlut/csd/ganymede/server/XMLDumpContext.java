@@ -119,6 +119,13 @@ public class XMLDumpContext {
   private boolean beforeState = false;
 
   /**
+   * If true, this XMLDumpContext will write out oid attributes for
+   * dumped objects.
+   */
+
+  private boolean includeOid = false;
+
+  /**
    * <p>The actual writer, from James Clark's XML package.</p>
    */
 
@@ -143,14 +150,18 @@ public class XMLDumpContext {
    * whether a given object or field should be emitted to the Sync Channel this XMLDumpContext
    * is writing to.  If null, the mayInclude and shouldInclude methods will always
    * return true.
+   * @param includeOid If true, the objects written out to the xml
+   * stream will include an "oid" attribute which contains the precise
+   * Invid of the object.
    */
   
-  public XMLDumpContext(XMLWriter xmlOut, boolean passwords, boolean historyInfo, SyncRunner syncConstraints)
+  public XMLDumpContext(XMLWriter xmlOut, boolean passwords, boolean historyInfo, SyncRunner syncConstraints, boolean includeOid)
   {
     this.xmlOut = xmlOut;
     dumpPlaintextPasswords = passwords;
     dumpCreatorModifierInfo = historyInfo;
     this.syncConstraints = syncConstraints;
+    this.includeOid = includeOid;
   }
 
   public XMLWriter getWriter()
@@ -212,6 +223,18 @@ public class XMLDumpContext {
   public boolean isBeforeStateDumping()
   {
     return this.beforeState;
+  }
+
+  /**
+   * This method returns true if this XMLDumpContext wants to include
+   * oid attributes in dumped objects.  This will ultimately be true
+   * when the -includeOid command line flag is set on the xmlclient,
+   * or when the server is dumping to a sync channel.
+   */
+
+  public boolean isDumpingOid()
+  {
+    return includeOid;
   }
 
   /**

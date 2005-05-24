@@ -1035,7 +1035,7 @@ public final class DBStore implements JythonMap {
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema, String syncChannel, boolean includeHistory) throws IOException
+  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema, String syncChannel, boolean includeHistory, boolean includeOid) throws IOException
   {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
@@ -1045,7 +1045,7 @@ public final class DBStore implements JythonMap {
     outStream = new FileOutputStream(filename);
     bufStream = new BufferedOutputStream(outStream);
 
-    this.dumpXML(bufStream, dumpDataObjects, dumpSchema, syncChannel, includeHistory);
+    this.dumpXML(bufStream, dumpDataObjects, dumpSchema, syncChannel, includeHistory, includeOid);
   }
 
   /**
@@ -1081,11 +1081,16 @@ public final class DBStore implements JythonMap {
    * date & info, last modification date & info) will be included in
    * the xml stream.
    *
+   * @param includeOid If true, the objects written out to the xml
+   * stream will include an "oid" attribute which contains the precise
+   * Invid of the object.
+   *
    * @see arlut.csd.ganymede.server.DBEditSet
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema, String syncChannel, boolean includeHistory) throws IOException
+  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema, String syncChannel,
+				   boolean includeHistory, boolean includeOid) throws IOException
   {
     XMLDumpContext xmlOut = null;
     
@@ -1147,7 +1152,8 @@ public final class DBStore implements JythonMap {
 	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
 				    includePlaintext,
 				    includeHistory,
-				    syncConstraint);
+				    syncConstraint,
+				    includeOid);
 	    
 	if (debug)
 	  {

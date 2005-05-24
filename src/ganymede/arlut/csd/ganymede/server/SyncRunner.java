@@ -566,7 +566,8 @@ public class SyncRunner implements Runnable {
     XMLDumpContext xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
 					       includePlaintextPasswords, // whether we include plaintext passwords when we have alternate hashes
 					       false, // don't include creator/modifier data
-					       this);
+					       this,
+					       true); // include oid's in the object to act as remote foreign keys
 
     xmlOut.startElement("transaction");
     xmlOut.attribute("major_version", Byte.toString(major_xml_sync_version));
@@ -1099,7 +1100,7 @@ public class SyncRunner implements Runnable {
 
     this.needBuild.set(false); 
 
-    ReturnVal retVal = session.getDataXML(this.name, false); // don't include history fields
+    ReturnVal retVal = session.getDataXML(this.name, false, true); // don't include history fields, do include oid's
     FileTransmitter transmitter = retVal.getFileTransmitter();
     BufferedOutputStream out = null;
 
