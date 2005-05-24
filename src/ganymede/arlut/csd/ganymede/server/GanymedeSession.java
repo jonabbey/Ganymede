@@ -4404,8 +4404,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	try
           {
-            retVal = session.createDBObject(type, null, ownerInvids); // *sync*
-                                                                      // DBSession
+            retVal = session.createDBObject(type, preferredInvid, ownerInvids); // *sync*
+                                                                                // DBSession
           }
         catch (GanymedeManagementException ex)
           {
