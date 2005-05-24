@@ -1027,11 +1027,15 @@ public final class DBStore implements JythonMap {
    * we want to apply to this dump.  May be null if the client wants
    * an unfiltered dump.
    *
+   * @param includeHistory If true, the historical fields (creation
+   * date & info, last modification date & info) will be included in
+   * the xml stream.
+   *
    * @see arlut.csd.ganymede.server.DBEditSet
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema, String syncChannel) throws IOException
+  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema, String syncChannel, boolean includeHistory) throws IOException
   {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
@@ -1041,7 +1045,7 @@ public final class DBStore implements JythonMap {
     outStream = new FileOutputStream(filename);
     bufStream = new BufferedOutputStream(outStream);
 
-    this.dumpXML(bufStream, dumpDataObjects, dumpSchema, syncChannel);
+    this.dumpXML(bufStream, dumpDataObjects, dumpSchema, syncChannel, includeHistory);
   }
 
   /**
@@ -1073,11 +1077,15 @@ public final class DBStore implements JythonMap {
    * we want to apply to this dump.  May be null if the client wants
    * an unfiltered dump.
    *
+   * @param includeHistory If true, the historical fields (creation
+   * date & info, last modification date & info) will be included in
+   * the xml stream.
+   *
    * @see arlut.csd.ganymede.server.DBEditSet
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema, String syncChannel) throws IOException
+  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema, String syncChannel, boolean includeHistory) throws IOException
   {
     XMLDumpContext xmlOut = null;
     
@@ -1138,7 +1146,7 @@ public final class DBStore implements JythonMap {
 
 	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
 				    includePlaintext,
-				    false, // don't include creator/modifier data
+				    includeHistory,
 				    syncConstraint);
 	    
 	if (debug)

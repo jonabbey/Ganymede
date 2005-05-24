@@ -4218,7 +4218,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal create_db_object(short type) throws NotLoggedInException
   {
-    return this.create_db_object(type, false);
+    return this.create_db_object(type, false, null);
   }
 
   /**
@@ -4241,7 +4241,38 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @return A ReturnVal carrying an object reference and/or error dialog
    */
 
-  public synchronized ReturnVal create_db_object(short type, boolean embedded) throws NotLoggedInException
+  public ReturnVal create_db_object(short type, boolean embedded) throws NotLoggedInException
+  {
+    return this.create_db_object(type, embedded, null);
+  }
+
+  /**
+   * <p>Create a new object of the given type.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.</p>
+   *
+   * <p>Keep in mind that only one GanymedeSession can have a particular
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once created, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
+   *
+   * @param type The kind of object to create.
+   * @param embedded If true, assume the object created is embedded and
+   * does not need to have owners set.
+   * @param preferredInvid If not null, the created object will be
+   * given the preferredInvid.  This is only expected to be used by
+   * the GanymedeXMLSession if the -magic_import command line flag was
+   * given on the Ganymede server's startup.  If preferredInvid is
+   * null, the Invid id number will be automatically picked in
+   * monotonically increasing fashion.
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   */
+
+  public synchronized ReturnVal create_db_object(short type, boolean embedded, Invid preferredInvid) throws NotLoggedInException
   {
     DBObject newObj;
     ReturnVal retVal = null;
@@ -4280,7 +4311,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	try
           {
-            retVal = session.createDBObject(type, null); // *sync* DBSession
+            retVal = session.createDBObject(type, preferredInvid, null); // *sync* DBSession
           }
         catch (GanymedeManagementException ex)
           {
@@ -4788,7 +4819,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal getSchemaXML() throws NotLoggedInException
   {
-    return this.getXML(false, true, null);
+    return this.getXML(false, true, null, false);
   }
 
   /**
@@ -4805,12 +4836,15 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param syncChannel The name of the sync channel whose constraints
    * we want to apply to this dump.  May be null if the client wants
    * an unfiltered dump.
+   * @param includeHistory If true, the historical fields (creation
+   * date & info, last modification date & info) will be included in
+   * the xml stream.
    */
 
-  public ReturnVal getDataXML(String syncChannel) throws NotLoggedInException
+  public ReturnVal getDataXML(String syncChannel, boolean includeHistory) throws NotLoggedInException
   {
     Ganymede.debug("GanymedeSession.getDataXML(" + syncChannel + ")");
-    return this.getXML(true, false, syncChannel);
+    return this.getXML(true, false, syncChannel, includeHistory);
   }
 
   /**
@@ -4822,12 +4856,16 @@ final public class GanymedeSession implements Session, Unreferenced {
    * transmission down in sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
-   * GanymedeSession.</p> 
+   * GanymedeSession.</p>
+   *
+   * @param includeHistory If true, the historical fields (creation
+   * date & info, last modification date & info) will be included in
+   * the xml stream.
    */
 
-  public ReturnVal getXMLDump() throws NotLoggedInException
+  public ReturnVal getXMLDump(boolean includeHistory) throws NotLoggedInException
   {
-    return this.getXML(true, true, null);
+    return this.getXML(true, true, null, includeHistory);
   }
 
   /**
@@ -4837,7 +4875,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * transmission.</p>
    */
 
-  private ReturnVal getXML(boolean sendData, boolean sendSchema, String syncChannel) throws NotLoggedInException
+  private ReturnVal getXML(boolean sendData, boolean sendSchema, String syncChannel, boolean includeHistory) throws NotLoggedInException
   {
     checklogin();
 
@@ -4862,7 +4900,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     try
       {
-	transmitter = new XMLTransmitter(sendData, sendSchema, syncChannel);
+	transmitter = new XMLTransmitter(sendData, sendSchema, syncChannel, includeHistory);
       }
     catch (IOException ex)
       {

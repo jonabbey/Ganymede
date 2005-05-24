@@ -766,6 +766,9 @@ The xmlclient wrapper script is now written in Perl, and converts
 space characters in arguments to %20 for passing into the xmlclient
 Java executable.
 
+44. [SERVER, XMLCLIENT] Added support for full-fidelity dumping and loading
+
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004

@@ -142,6 +142,7 @@ public final class xmlclient implements ClientListener, Runnable {
   private boolean dumpData = false;
   private boolean doTest = false;
   private boolean schemaOnly = false;
+  private boolean includeHistory = false;
   private boolean finishedErrStream = false;
 
   /**
@@ -316,6 +317,9 @@ public final class xmlclient implements ClientListener, Runnable {
 	// "sync"
 	syncChannel = ParseArgs.getArg(ts.l("global.syncArg"), argv);
 
+	// "includeHistory"
+	includeHistory = ParseArgs.switchExists(ts.l("global.includeHistory"), argv);
+
 	return;
       }
     
@@ -324,6 +328,10 @@ public final class xmlclient implements ClientListener, Runnable {
       {
 	dumpData = true;
 	dumpSchema = true;
+
+	// "includeHistory"
+	includeHistory = ParseArgs.switchExists(ts.l("global.includeHistory"), argv);
+
 	return;
       }
 
@@ -355,9 +363,9 @@ public final class xmlclient implements ClientListener, Runnable {
   {
     // "Usage:\n\
     // 1: xmlclient [username=<username>] [password=<password>] <xmlfile>\n \
-    // 2: xmlclient [username=<username>] [password=<password>] -dump\n\
+    // 2: xmlclient [username=<username>] [password=<password>] -dump [-includeHistory]\n\
     // 3: xmlclient [username=<username>] [password=<password>] -dumpschema\n\
-    // 4: xmlclient [username=<username>] [password=<password>] -dumpdata [sync=<sync channel>]"
+    // 4: xmlclient [username=<username>] [password=<password>] -dumpdata [-includeHistory] [sync=<sync channel>]"
 
     System.err.println(ts.l("printUsage.text"));
   }
@@ -440,7 +448,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (sendData && !sendSchema)
       {
-	retVal = session.getDataXML(syncChannel);
+	retVal = session.getDataXML(syncChannel, includeHistory);
       }
     else if (sendSchema && !sendData)
       {
@@ -448,7 +456,7 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     else if (sendSchema && sendData)
       {
-	retVal = session.getXMLDump();
+	retVal = session.getXMLDump(includeHistory);
       }
 
     if (retVal != null && !retVal.didSucceed())

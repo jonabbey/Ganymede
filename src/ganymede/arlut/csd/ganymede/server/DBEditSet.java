@@ -198,7 +198,8 @@ public class DBEditSet {
 
   /**
    * Will be true if we are running this transaction on behalf of an
-   * XML client.
+   * XML client and the server was started with the -historyOverride
+   * command line parameter.
    */
 
   private boolean allowXMLHistoryOverride = false;
@@ -286,7 +287,7 @@ public class DBEditSet {
     logEvents = new Vector();
     basesModified = new HashMap(dbStore.objectBases.size());
 
-    if (session.GSession != null && session.GSession.xSession != null && Ganymede.allowHistoryOverride)
+    if (session.GSession != null && session.GSession.xSession != null && Ganymede.allowMagicImport)
       {
 	this.allowXMLHistoryOverride = true;
       }
@@ -1584,10 +1585,16 @@ public class DBEditSet {
 	    if (!eObj.isEmbedded())
 	      {
 		df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
-		df.value = modDate;
+		if (!allowXMLHistoryOverride || !df.isDefined())
+		  {
+		    df.value = modDate;
+		  }
 
 		sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
-		sf.value = result;
+		if (!allowXMLHistoryOverride || !sf.isDefined())
+		  {
+		    sf.value = result;
+		  }
 	      }
 	  }
       }

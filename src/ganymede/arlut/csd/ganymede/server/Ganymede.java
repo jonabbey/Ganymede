@@ -313,13 +313,14 @@ public class Ganymede {
   public static String bugReportAddressProperty = null;
 
   /**
-   * If the Ganymede server is started with the -historyOverride
-   * command line flag, this field will be set to true and the server
-   * will allow creation timestamps and creator info to be injected
-   * into objects loaded from the xmlclient.
+   * If the Ganymede server is started with the -magic_import command
+   * line flag, this field will be set to true and the server will
+   * allow invids, creation timestamps, creator info, last
+   * modification timestamps and last modification information to be
+   * injected into objects loaded from the xmlclient.
    */
 
-  public static boolean allowHistoryOverride = false;
+  public static boolean allowMagicImport = false;
 
   /**
    * <p>If the server is started with the -resetadmin command line flag,
@@ -442,7 +443,7 @@ public class Ganymede {
 
     resetadmin = ParseArgs.switchExists("resetadmin", argv);
 
-    allowHistoryOverride = ParseArgs.switchExists("historyOverride", argv);
+    allowMagicImport = ParseArgs.switchExists("magic_import", argv);
 
     forcelocalhost = ParseArgs.switchExists("forcelocalhost", argv);
 

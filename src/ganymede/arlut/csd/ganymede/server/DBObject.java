@@ -1156,10 +1156,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
     xmlOut.attribute("id", getLabel());
 
-    if (xmlOut.isSyncing())
-      {
-	xmlOut.attribute("oid", this.getInvid().toString());
-      }
+    xmlOut.attribute("oid", this.getInvid().toString());
 
     xmlOut.indentOut();
 

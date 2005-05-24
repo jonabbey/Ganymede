@@ -113,7 +113,7 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
    * to download chunks of XML.</p>
    */
 
-  public XMLTransmitter(boolean sendData, boolean sendSchema, String syncChannel) throws IOException, RemoteException
+  public XMLTransmitter(boolean sendData, boolean sendSchema, String syncChannel, boolean includeHistory) throws IOException, RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -131,12 +131,13 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
     // background to our pipe
 
     final String myFinalSyncChannel = syncChannel;
+    final boolean myIncludeHistory = includeHistory;
 
     Thread dumpThread = new Thread(new Runnable() {
 	public void run() {
 	  try
 	    {
-	      Ganymede.db.dumpXML(outpipe, doSendData, doSendSchema, myFinalSyncChannel);
+	      Ganymede.db.dumpXML(outpipe, doSendData, doSendSchema, myFinalSyncChannel, myIncludeHistory);
 	    }
 	  catch (Throwable ex)
 	    {

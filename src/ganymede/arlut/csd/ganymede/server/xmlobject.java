@@ -138,6 +138,14 @@ public class xmlobject {
   Invid invid = null;
 
   /**
+   * The prospective invid to create this object as.  Will only be set
+   * if the object in question has an oid attribute, and if the server
+   * has the -magic_import flag set.
+   */
+
+  private Invid oidCreateInvid = null;
+
+  /**
    * <p>If true, the invid for this field is known to not exist on the
    * server.</p>
    */
@@ -260,6 +268,27 @@ public class xmlobject {
 	num = numInt.intValue();
       }
 
+    // If the server was run with the -magic_import flag, we'll record
+    // the contents of the oid attribute as the oidCreateInvid.  If it
+    // turns out that we wind up trying to create this object, we'll
+    // try to force the oidCreateInvid as the invid for the newly
+    // created object.
+
+    // This is used for dumping the full state of a Ganymede server
+    // and loading it into another.  We *will not* use the oid
+    // attribute to select pre-existing objects to edit on the loading
+    // server.
+
+    if (Ganymede.allowMagicImport)
+      {
+	String oidString = openElement.getAttrStr("oid");
+
+	if (oidString != null)
+	  {
+	    oidCreateInvid = Invid.createInvid(oidString);
+	  }
+      }
+
     // if we get an inactivate or delete request, our object element
     // might be empty, in which case, deal.
 
@@ -325,7 +354,7 @@ public class xmlobject {
    * return semantics.</p>
    */
 
-  public ReturnVal createOnServer(Session session)
+  public ReturnVal createOnServer(GanymedeSession session)
   {
     ReturnVal result;
 
@@ -333,7 +362,7 @@ public class xmlobject {
 
     try
       {
-	result = session.create_db_object(getType());
+	result = session.create_db_object(getType(), false, oidCreateInvid);
       }
     catch (RemoteException ex)
       {

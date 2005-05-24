@@ -771,10 +771,13 @@ public interface Session extends Remote {
    * @param syncChannel The name of the sync channel whose constraints
    * we want to apply to this dump.  May be null if the client wants
    * an unfiltered dump.
+   * @param includeHistory If true, the historical fields (creation
+   * date & info, last modification date & info) will be included in
+   * the xml stream.
    */
 
 
-  public ReturnVal getDataXML(String syncChannel) throws RemoteException;
+  public ReturnVal getDataXML(String syncChannel, boolean includeHistory) throws RemoteException;
 
   /**
    * <p>This method is called by the XML client to initiate a dump of
@@ -785,8 +788,12 @@ public interface Session extends Remote {
    * transmission down in sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
-   * GanymedeSession.</p> 
+   * GanymedeSession.</p>
+   *
+   * @param includeHistory If true, the historical fields (creation
+   * date & info, last modification date & info) will be included in
+   * the xml stream.
    */
 
-  public ReturnVal getXMLDump() throws RemoteException;
+  public ReturnVal getXMLDump(boolean includeHistory) throws RemoteException;
 }
