@@ -3757,7 +3757,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	  }
 	else
 	  {
-	    // we had this field in the before state, let's see if we
+	    // we have this field in the after state, let's see if we
 	    // need to write it out, either because this field was
 	    // newly created in the after state and our sync
 	    // constraints require us to write it out, or because the
