@@ -3658,11 +3658,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * XMLDumpContext parameter will be used to control what fields are
    * written.
    *
-   * This method should only be called on a DBEditObject that is
-   * known to have been edited.. calling this method on a newly
-   * created object should not be done.. use the normal DBObject
-   * emitXML() method in a &lt;delta state="object created"&gt;
-   * element instead.
+   * This method should only be called on a DBEditObject that is known
+   * to have been edited.. calling this method on a newly created
+   * object should not be done.. use the normal DBObject emitXML()
+   * method in an &lt;object_delta&gt; element's &lt;after&gt; element
+   * instead.
    */
 
   public void emitXMLDelta(XMLDumpContext xmlOut) throws IOException
