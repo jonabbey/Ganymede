@@ -29,6 +29,30 @@
 
     <h2>Schema Changes</h2>
 
+    <p>A number of fields have been renamed since Ganymede 1.0.  These
+    renames will be handled automatically for you if you try to load a
+    Ganymede 1.0 series database file with a Ganymede 2.0 server, but
+    if you are doing XML loading, you'll need to be aware of the
+    following name changes:</p>
+
+    <table border="1">
+    <tr><th>Object</th><th>Field Number</th><th>Field Type</th><th>Old Field Name</th><th>New Field Name</th></tr>
+    <tr><td>System Event</td><td>103</td><td>boolean</td><td>Event Mail</td><td>Send Mail</td></tr>
+    <tr><td>System Event</td><td>106</td><td>boolean</td><td>Cc Owner Groups</td><td>Cc Owners</td></tr>
+    <tr><td>Owner Group</td><td>105</td><td>string</td><td>Mail List</td><td>External Mail List</td></tr>
+    <tr><td>Role</td><td>101</td><td>permission matrix</td><td>Owned Object Bits</td><td>Objects Owned Access Bits</td></tr>
+    <tr><td>Role</td><td>103</td><td>permission matrix</td><td>Default Bits</td><td>Default Access Bits</td></tr>
+    </table>
+
+    <p>In addition, the <b>Objects Owned</b> Invid field in the
+    <b>Owner Group</b> object has been removed.  (It has been made
+    redundant.  It is now enough for the Ganymede server to know what
+    each object thinks are its owners.. the Owner Groups themselves
+    don't need to know anymore.)  This will again be handled for you
+    automatically if you load a Ganymede 1.0 db file, but if you are
+    working with XML, you may need be aware of this, particularly when
+    loading Permission Matrix dumps.</p>
+
     <h2>Miscellaneous Incompatibilities</h2>
       
     <hr/>
