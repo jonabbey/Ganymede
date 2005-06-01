@@ -80,25 +80,25 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>SMTP mailer class, used to send email messages (with optional HTML MIME
+ * SMTP mailer class, used to send email messages (with optional HTML MIME
  * attachments) through direct TCP/IP communication with Internet SMTP mail
- * servers.</P>
+ * servers.
  *
- * <P>The Qsmtp constructors take an address for a SMTP mail server, and all 
+ * The Qsmtp constructors take an address for a SMTP mail server, and all 
  * messages subsequently sent out by the Qstmp object are handled by
- * that SMTP server.</P>
+ * that SMTP server.
  *
- * <P>Once created, a Qsmtp object can be used to send any number of messages
+ * Once created, a Qsmtp object can be used to send any number of messages
  * through that mail server.  Each call to 
  * {@link Qsmtp#sendmsg(java.lang.String, java.util.Vector, java.lang.String, 
  * java.lang.String) sendmsg} or
  * {@link Qsmtp#sendHTMLmsg(java.lang.String, java.util.Vector, java.lang.String, 
  * java.lang.String, java.lang.String, java.lang.String) sendHTMLmsg} opens a
  * separate SMTP connection to the designated mail server and transmits a
- * single message.</P>
+ * single message.
  *
- * <P>Because this class opens a socket to a potentially remote TCP/IP server,
- * this class may not function properly when used within an applet.</P>
+ * Because this class opens a socket to a potentially remote TCP/IP server,
+ * this class may not function properly when used within an applet.
  */
 
 public class Qsmtp implements Runnable {
@@ -424,9 +424,9 @@ public class Qsmtp implements Runnable {
 		  {
 		    dispatchMessage(message);
 		  }
-		catch (IOException ex)
+		catch (Throwable ex)
 		  {
-		    System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
+ 		    System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
 		    System.err.println(message.toString());
 		    ex.printStackTrace();
 		    System.err.println();
@@ -463,7 +463,7 @@ public class Qsmtp implements Runnable {
 
 			    dispatchMessage(message);
 			  }
-			catch (IOException ex)
+			catch (Throwable ex)
 			  {
 			    System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
 			    System.err.println(message.toString());
@@ -477,13 +477,11 @@ public class Qsmtp implements Runnable {
 	finally
 	  {
 	    this.backgroundThread = null;
+	    this.threaded = false;
 	  }
       }
 
-    if (debug)
-      {
-	System.err.println("Qsmtp: background thread finishing");
-      }
+    System.err.println("Qsmtp: background thread finishing");
   }
 
   /**
@@ -538,7 +536,6 @@ public class Qsmtp implements Runnable {
       {
 	sock = new Socket(address, port);
       }
-
 
     try
       {
