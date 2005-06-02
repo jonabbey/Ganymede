@@ -465,7 +465,7 @@ public class Qsmtp implements Runnable {
 			  }
 			catch (Throwable ex)
 			  {
-			    System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
+			    System.err.println("Qstmp: dispatch thread found error when draining mail:\n");
 			    System.err.println(message.toString());
 			    ex.printStackTrace();
 			    System.err.println();
