@@ -948,7 +948,7 @@ class rowSorter {
 
 	// okay, not null.
 	
-	return one.compareTo(two);
+	return one.toLowerCase().compareTo(two).toLowerCase();
       }
 
     // if we are sorting dates, we expect everything in this column
