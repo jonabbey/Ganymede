@@ -93,7 +93,7 @@ public class QueryResult implements java.io.Serializable {
 	  b = (ObjectHandle) o_b;
 	  int comp = 0;
 	  
-	  comp = a.getLabel().compareTo(b.getLabel());
+	  comp = a.getLabel().toLowerCase().compareTo(b.getLabel().toLowerCase());
 	  
 	  if (comp < 0)
 	    {
