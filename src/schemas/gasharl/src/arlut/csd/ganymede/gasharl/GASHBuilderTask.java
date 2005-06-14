@@ -704,12 +704,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
 
-    // currently in the GASH schema, group passwords aren't in
-    // passfields.
+    // currently in the GASH schema, we skip group passwords
 
-    pass = (String) object.getFieldValueLocal(groupSchema.PASSWORD);
     gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
-
     
     invids = object.getFieldValuesLocal(groupSchema.USERS);
 
@@ -735,9 +732,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // now build our output line
 
     result.append(groupname);
-    result.append(":");
-    result.append(pass);
-    result.append(":");
+    result.append("::");
     result.append(Integer.toString(gid));
     result.append(":");
 
@@ -749,6 +744,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 
 	result.append((String) users.elementAt(i));
+      }
+
+    // okay, this marks the end of what we care about for the NIS
+    // group map.  We'll check the line length here, even though we
+    // may add more GASH-type stuff afterwards.  All of that gets
+    // skipped when it comes time to make the maps.
+
+    if (result.length() > 1024)
+      {
+	System.err.println("GASHBuilder.writeGroupLine(): Warning!  group " + 
+			   groupname + " overflows the GASH line length!");
       }
 
     description = (String) object.getFieldValueLocal(groupSchema.DESCRIPTION);
@@ -768,12 +774,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(contract);
     result.append(":");
     result.append(description);
-
-    if (result.length() > 1024)
-      {
-	System.err.println("GASHBuilder.writeGroupLine(): Warning!  group " + 
-			   groupname + " overflows the GASH line length!");
-      }
 
     writer.println(result.toString());
   }
