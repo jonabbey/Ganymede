@@ -579,7 +579,7 @@ public class StringDBField extends DBField implements string_field {
 	    // "\tOld: {0}\n"
 	    result.append(ts.l("getDiffString.old", origS.value()));
 
-	    // "\n\tNew: {0}\n"
+	    // "\tNew: {0}\n"
 	    result.append(ts.l("getDiffString.new", this.value()));
 	
 	    return result.toString();

@@ -301,7 +301,7 @@ public class DateDBField extends DBField implements date_field {
 	// "\tOld: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
 	result.append(ts.l("getDiffString.old", origD.value));
 
-	// "\n\tNew: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
+	// "\tNew: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
 	result.append(ts.l("getDiffString.new", this.value));
 	
 	return result.toString();
