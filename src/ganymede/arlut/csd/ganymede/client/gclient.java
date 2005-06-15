@@ -5424,7 +5424,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  bF = (listHandle) b;
 	  int comp = 0;
 	  
-	  comp =  aF.toString().toLowerCase().compareTo(bF.toString().toLowerCase());
+	  comp =  aF.toString().compareToIgnoreCase(bF.toString());
 	  
 	  if (comp < 0)
 	    {
