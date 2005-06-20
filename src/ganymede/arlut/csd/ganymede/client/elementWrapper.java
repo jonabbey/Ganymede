@@ -308,7 +308,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	try
 	  {
 	    containerPanel cp = (containerPanel) my_component;
-	    titleText = cp.getObject().getLabel();
+	    titleText = cp.getObject().getEmbeddedObjectDisplayLabel();
 	    title.setText((index + 1) + ". " + titleText);
 	  }
 	catch (Exception rx)
