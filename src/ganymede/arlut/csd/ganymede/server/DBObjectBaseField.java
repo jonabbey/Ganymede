@@ -175,6 +175,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   Class classdef;
 
   /**
+   * name of the tab this field should be placed in on the client
+   */
+
+  String tabName = null;
+
+  /**
    * true if this field is an array type
    */
 
@@ -389,6 +395,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     array = original.array;	// true if this field is an array type
     limit = original.limit;
 
+    tabName = original.tabName;
+
     labeled = original.labeled;
     trueLabel = original.trueLabel;
     falseLabel = original.falseLabel;
@@ -474,6 +482,15 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     else
       {
 	out.writeUTF(comment);
+      }
+
+    if (tabName == null)
+      {
+	out.writeUTF("");
+      }
+    else
+      {
+	out.writeUTF(tabName);	// added at file version 2.12
       }
 
     out.writeBoolean(visibility); // added at file version 1.6
@@ -631,6 +648,23 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	in.readBoolean();	// skip editable
 	in.readBoolean();	// skip removable
+      }
+
+    // at file version 2.12, we introduce tab names per object base
+    // field
+
+    if (base.store.isAtLeast(2,12))
+      {
+	tabName = in.readUTF();
+
+	if (tabName.equals(""))
+	  {
+	    tabName = ts.l("receive.default_tab_name");	// "General"
+	  }
+      }
+    else
+      {
+	tabName = ts.l("receive.default_tab_name");	// "General"
       }
 
     // at file version 1.6, we introduced field visibility
@@ -2755,6 +2789,35 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     return classdef;
   }
+
+  /**
+   * Returns the name of the tab that is to contain this field on the client.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public String getTabName()
+  {
+    return tabName;
+  }
+
+  /**
+   * Sets the name of the tab that is to contain this field on the client.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public synchronized ReturnVal setTabName(String s)
+  {
+    if (!base.store.loading && editor == null)
+      {
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+      }
+
+    this.tabName = s;
+    
+    return null;
+  }      
 
   /**
    * <p>Returns the comment defined in the schema for this field</p>

@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -251,6 +251,26 @@ public class StringUtils {
       }
 
     return buffer.toString();
+  }
+
+  /**
+   * This static method can be used to compare two string variables,
+   * whether they are null or not.
+   */
+
+  public static boolean stringEquals(String stringA, String stringB)
+  {
+    if (stringA == null)
+      {
+	return stringB == null;
+      }
+
+    if (stringB == null)
+      {
+	return false;
+      }
+
+    return stringA.equals(stringB);
   }
 
   /**

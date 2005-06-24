@@ -11,7 +11,7 @@
    and can have a pop-up menu attached.  Nodes can be dragged, with
    both 'drag-tween' and 'drag on' drag supported.
 
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    This program is free software; you can redistribute it and/or modify
@@ -355,10 +355,11 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
   /**
    *
-   * <p>Inserts a new node into the tree.  newNode's prevSibling is checked
-   * first.  If it is non-null, newNode is inserted after newNode.prevSibling,
-   * regardless of what newNode.parent says.  If prevSibling is null,
-   * newNode is made the first child of its requested parent.</p>
+   * Inserts a new node into the tree.  newNode's prevSibling is
+   * checked first.  If it is non-null, newNode is inserted after
+   * newNode.prevSibling, regardless of what newNode.parent says.  If
+   * prevSibling is null, newNode is made the first child of its
+   * requested parent.
    *
    * @param newNode The node to be inserted.  Properties of the node determine where the node is inserted.
    * @param repaint If true, immediately re-render and refresh the treeCanvas.
@@ -634,13 +635,22 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	throw new IllegalArgumentException("can't move null");
       }
 
+    if (node == parent)
+      {
+	throw new IllegalArgumentException("error, attempt made to move node under itself.");
+      }
+
     /* - */
 
     treeNode newNode, child, oldchild, nextchild;
 
     /* -- */
 
-    // make a copy of the node to put into the new position, 
+    // make a copy of the node to put into the new position.  we clone
+    // it so that we can get any additional data-carrying fields held
+    // by subclasses of treeNode, even though the resetNode() call
+    // immediately after clears the node of all of its previous
+    // linkages
 
     newNode = (treeNode) node.clone();
 
@@ -680,8 +690,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
-   * <p>Removes all children of the specified node from the tree.</p>
+   * Removes all children of the specified node from the tree.
    *
    * @param node The node whose children should be removed
    * @param repaint If true, immediately re-render and refresh the treeCanvas.
@@ -709,8 +718,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	refresh();
       }
   }
-
-
 
   /**
    *
@@ -1095,7 +1102,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    *
    */
 
-  void selectNode(treeNode node)
+  public void selectNode(treeNode node)
   {
     if (node.selected)
       {
@@ -1165,7 +1172,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    *
    */
 
-  void unselectAllNodes(boolean anySelected)
+  public void unselectAllNodes(boolean anySelected)
   {
     treeNode node;
 
@@ -2345,11 +2352,11 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     row = (e.getY() + v_offset) / ctrl.row_height;
 
-    if (dragSelected)
+    if (dragSelected && (ctrl.dragNode != ctrl.dragOverNode))
       {
 	ctrl.dCallback.iconDragDrop(ctrl.dragNode, ctrl.dragOverNode);
       }
-    else if (drawLine)
+    else if (drawLine && (ctrl.dragNode != ctrl.dragAboveNode) && (ctrl.dragNode != ctrl.dragBelowNode))
       {
 	ctrl.dCallback.dragLineRelease(ctrl.dragNode, ctrl.dragAboveNode, ctrl.dragBelowNode);
       }

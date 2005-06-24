@@ -135,6 +135,12 @@ public interface BaseField extends Remote {
   public String getComment() throws RemoteException;
 
   /**
+   * Returns the name of the tab that is to contain this field on the client.
+   */
+
+  public String getTabName() throws RemoteException;
+
+  /**
    * <p>Returns id code for this field.  Each field in a
    * {@link arlut.csd.ganymede.server.DBObject DBObject}
    * has a unique code which identifies the field.  This code represents
@@ -165,6 +171,12 @@ public interface BaseField extends Remote {
    */
 
   public ReturnVal setComment(String s) throws RemoteException;
+
+  /**
+   * Sets the name of the tab that is to contain this field on the client.
+   */
+
+  public ReturnVal setTabName(String s) throws RemoteException;
 
   // type info
 

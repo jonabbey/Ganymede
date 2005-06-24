@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -58,6 +58,8 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                       DialogRsrc
@@ -93,6 +95,13 @@ import java.util.Vector;
 public class DialogRsrc {
 
   private final static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede system.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDialog.DialogRsrc");
 
   /**
    * A static (persistent, shared) image cache used to translate
@@ -131,7 +140,7 @@ public class DialogRsrc {
    */
   public DialogRsrc(Frame frame, String Title, String Text)
   {
-    this(frame, Title, Text, "Ok", "Cancel", (Image) null);
+    this(frame, Title, Text, ts.l("global.ok"), ts.l("global.cancel"), (Image) null);
   }
 
   /** 

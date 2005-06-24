@@ -308,6 +308,39 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	selectDate.unregister();
       }
   }
+
+
+  /**
+   * This method is called to break down this historyPanel object.
+   * Any auxiliary windows open will be closed as well.
+   */
+
+
+  public void dispose()
+  {
+    removeAll();
+    historyText = null;
+    showHistory = null;
+    showFullHistory = null;
+
+    if (historyTextPanel != null)
+      {
+	historyTextPanel.removeAll();
+	historyTextPanel = null;
+      }
+
+    if (selectDate != null)
+      {
+	selectDate.unregister();
+	selectDate = null;
+      }
+
+    titledBorder = null;
+    invid = null;
+    gc = null;
+    selectedDate = null;
+    historyBuffer = null;
+  }
 }
 
 /*------------------------------------------------------------------------------

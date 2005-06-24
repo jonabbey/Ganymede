@@ -272,6 +272,15 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   private Vector templates = null;
 
+  /**
+   * The name of the tab this containerPanel is limited to showing
+   * when the load() method is called.  If this variable is null,
+   * load() will load and display all custom field definitions from
+   * the server.
+   */
+
+  private String tabName = null;
+
   boolean
     isCreating,
     editable;
@@ -474,6 +483,33 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
+   * This method is used to set the name of the tab that this
+   * containerPanel is limited to showing.
+   *
+   * If the tabName is null (or if setTabName() has not been called),
+   * the load() method in this class will simply display all fields.
+   *
+   * This method will not have any effect if it is called after load()
+   */
+
+  public void setTabName(String tabName)
+  {
+    this.tabName = tabName;
+  }
+
+  /**
+   * This method is used to pre-load a Vector of {@link
+   * arlut.csd.ganymede.common.FieldInfo} objects into this
+   * containerPanel.  The goal is to allow multiple tabs to share a
+   * FieldInfo Vector that only needs to be downloaded once.
+   */
+
+  public void setInfoVector(Vector infoVector)
+  {
+    this.infoVector = infoVector;
+  }
+
+  /**
    * Downloads all necessary information from the server
    * about the object being viewed or edited.  Typically this is called
    * when the containerPanel is initialized by the containerPanel
@@ -555,19 +591,28 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	setProgressBar(2);
 
-	// ok, got the list of field definitions.  Now we need to
-	// get the current values and visibility information for
-	// the fields in this object.
+	//
+	// ok, got the list of field definitions.  Now we need to get
+	// the current values and visibility information for the fields
+	// in this object.
+        //
+	// Note that if we have previously been pre-loaded with a
+	// FieldInfo Vector, we won't bother calling the server to get
+	// one.
+	//
 
-	try
+	if (infoVector == null)
 	  {
-	    infoVector = object.getFieldInfoVector();
+	    try
+	      {
+		infoVector = object.getFieldInfoVector();
+	      }
+	    catch (Exception rx)
+	      {
+		gc.processExceptionRethrow(rx);
+	      }
 	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
-
+	    
 	if (infoVector.size() == 0)
 	  {
 	    System.err.println("No field info in getFieldInfoVector()");
@@ -585,12 +630,21 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	if (progressBar != null)
 	  {
-	    int totalSize = infoSize + 2;
+	    int totalSize = 0;
 
 	    for (int i = 0; i < infoSize; i++)
 	      {
 		FieldInfo info = (FieldInfo)infoVector.elementAt(i);
 		FieldTemplate template = findtemplate(info.getID());
+
+		if (this.tabName == null)
+		  {
+		    totalSize++;
+		  }
+		else if (this.tabName.equals(template.getTabName()))
+		  {
+		    totalSize++;
+		  }
 
 		if (template.isArray())
 		  {
@@ -651,6 +705,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			println("Skipping a special field: " + fieldTemplate.getName());
 		      }
 
+		    continue;
+		  }
+
+		// skip fields for other tabs
+
+		if (this.tabName != null && !this.tabName.equals(fieldTemplate.getTabName()))
+		  {
 		    continue;
 		  }
 

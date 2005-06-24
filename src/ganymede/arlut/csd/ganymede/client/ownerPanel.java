@@ -505,4 +505,13 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
     
     return succeeded;
   }
+
+  public void dispose()
+  {
+    field = null;
+    fp = null;
+    gc = null;
+    removeAll();
+    holdOnPanel = null;
+  }
 }

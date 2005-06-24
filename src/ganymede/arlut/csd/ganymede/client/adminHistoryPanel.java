@@ -301,4 +301,27 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     historyThread.start();
   }
 
+  public void dispose()
+  {
+    removeAll();
+
+    if (historyTextPanel != null)
+      {
+	historyTextPanel.removeAll();
+	historyTextPanel = null;
+      }
+
+    historyTextCard = null;
+    historyText = null;
+    popupCal = null;
+    clearDate = null;
+    showHistory = null;
+    selectDate = null;
+    invid = null;
+    gc = null;
+    selectedDate = null;
+    titledBorder = null;
+    historyBuffer = null;
+  }
+
 }

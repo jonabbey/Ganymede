@@ -1,10 +1,11 @@
 /*
 
-   CatTreeNode.java
+   TabNode.java
 
-   Category tree node for GASHSchema
+   Tree node to represent a Tab in the list of fields in the admin
+   console's GASHSchema class.
    
-   Created: 14 August 1997
+   Created: 3 June 2005
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
@@ -15,7 +16,7 @@
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
-
+ 
    Copyright (C) 1996-2005
    The University of Texas at Austin
 
@@ -50,52 +51,23 @@
 
 */
 
-package arlut.csd.ganymede.common;
+package arlut.csd.ganymede.admin;
 
+import arlut.csd.ganymede.rmi.BaseField;
 import arlut.csd.JTree.treeMenu;
 import arlut.csd.JTree.treeNode;
-import arlut.csd.ganymede.rmi.Category;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     CatTreeNode
+                                                                         TabNode
 
 ------------------------------------------------------------------------------*/
 
-/**
- * This class is a simple {@link arlut.csd.JTree.treeNode treeNode}
- * subclass with a {@link arlut.csd.ganymede.rmi.Category Category}
- * data element.  Used in the Ganymede admin console's schema editor.
- *
- * This class is in the common package because it is also used in the
- * Ganymede client.
- */
+class TabNode extends arlut.csd.JTree.treeNode {
 
-public class CatTreeNode extends arlut.csd.JTree.treeNode {
-
-  private Category category;	// remote reference
-
-  /* -- */
-
-  public CatTreeNode(treeNode parent, String text, Category category, treeNode insertAfter,
-		     boolean expandable, int openImage, int closedImage, treeMenu menu)
+  TabNode(treeNode parent, String text, treeNode insertAfter,
+	  boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
-    this.category = category;
-  }
-
-  public Category getCategory()
-  {
-    return category;
-  }
-
-  public void setCategory(Category category)
-  {
-    this.category = category;
-  }
-
-  public void cleanup()
-  {
-    this.category = null;
   }
 }

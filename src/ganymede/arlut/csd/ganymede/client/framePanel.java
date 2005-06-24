@@ -68,6 +68,7 @@ import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -87,9 +88,13 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
 import arlut.csd.JDialog.StringDialog;
-import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.booleanSemaphore;
+import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.StringUtils;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.BaseDump;
+import arlut.csd.ganymede.common.FieldInfo;
+import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -105,7 +110,7 @@ import arlut.csd.ganymede.rmi.string_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>An internal client window displaying and/or editing a particular database
+ * An internal client window displaying and/or editing a particular database
  * object from the Ganymede server. A framePanel is a JInternalFrame which contains a
  * tabbed pane which incorporates a
  * {@link arlut.csd.ganymede.client.containerPanel containerPanel} for
@@ -113,7 +118,7 @@ import arlut.csd.ganymede.rmi.string_field;
  * auxiliary panes such as an
  * {@link arlut.csd.ganymede.client.ownerPanel ownerPanel},
  * {@link arlut.csd.ganymede.client.historyPanel historyPanel}, and other
- * panels as appropriate for specific object types.</p>
+ * panels as appropriate for specific object types.
  *
  * @version $Id$
  * @author Michael Mulvaney 
@@ -121,6 +126,14 @@ import arlut.csd.ganymede.rmi.string_field;
 
 public class framePanel extends JInternalFrame implements ChangeListener, ActionListener,
 							  VetoableChangeListener, InternalFrameListener {
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.framePanel");
+
+  // ---
 
   /**  
    * This will be loaded from gclient anyway.
@@ -129,53 +142,36 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   boolean debug = false;
 
   /**
-   * <p>used with vetoableChange() to work around Swing 1.1 bug preventing
+   * Used with vetoableChange() to work around Swing 1.1 bug preventing
    * setDefaultCloseOperation(DO_NOTHING_ON_CLOSE) from doing anything
-   * useful.</p>
+   * useful.
    *
-   * <p>This variable needs to be set to true in order for setClosed() calls
-   * in windowPanel to avoid bringing up the dialogs.</p>
+   * This variable needs to be set to true in order for setClosed() calls
+   * in windowPanel to avoid bringing up the dialogs.
    *
-   * <p>Actually, this variable has now been overloaded with an
+   * Actually, this variable has now been overloaded with an
    * additional function.  When we are closing a newly created window,
    * we set closingApproved to true so that the gclient deleteObject()
-   * method won't balk at our deleting the newly created objects.</p>
+   * method won't balk at our deleting the newly created objects.
    *
-   * <p>This is totally like biological evolution, in which a
+   * This is totally like biological evolution, in which a
    * pre-existing feature is adapted for a new purpose over time.
-   * Hot-cha-cha.</p>
+   * Hot-cha-cha.
    */
 
   boolean closingApproved = false;
 
   /**
-   * <p>Used with internalFrameClosed() to make our JInternalFrame close
-   * interception hack from Swing 1.1 work with Kestrel.</p>
+   * Used with internalFrameClosed() to make our JInternalFrame close
+   * interception hack from Swing 1.1 work with Kestrel.
    *
-   * <p>If this variable is set to true, internalFrameClosed() will
+   * If this variable is set to true, internalFrameClosed() will
    * not attempt to call dispose().
    */
 
   private booleanSemaphore closed = new booleanSemaphore(false);
   private booleanSemaphore running = new booleanSemaphore(false);
   private booleanSemaphore stopped = new booleanSemaphore(false);
-
-  // Indexes for the tabs in the JTabbedPane These numbers have to
-  // correspond to the order they are added as tabs, so they are set
-  // to current++ when one is added.  -1 means not added yet.(to the
-  // pane) An index of > -1 does NOT mean the pane has been created.
-
-  public int 
-    current = 0,
-    general_index = -1,
-    removal_date_index = -1,
-    expiration_date_index = -1,
-    history_index = -1,
-    owner_index = -1,
-    admin_history_index = -1,
-    notes_index = -1,
-    objects_owned_index = -1,
-    personae_index = -1;
 
   /**
    * We'll show a progressBar while the general panel is loading.  The
@@ -201,78 +197,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   JTabbedPane 
     pane;
 
-  // Each of these panes is one of the tabs in the tabbedPane.  Some
-  // objects don't use every scrollpane.
-
-  /**
-   * Holds a containerPanel in the ViewportView
-   */
-
-  JScrollPane general;
-
-  /**
-   * Holds a datePanel
-   */
-
-  JScrollPane expiration_date;
-
-  /**
-   * Holds a datePanel
-   */
-
-  JScrollPane removal_date;
-
-  /**
-   * Holds an ownerPanel
-   */
-
-  JScrollPane owner;
-
-  /**
-   * <p>The ownerPanel held</p>
-   */
-
-  ownerPanel owner_panel;
-
-  /**
-   * holds a notePanel
-   */
-
-  JScrollPane notes;
-
-  /**
-   * holds an adminHistoryPanel (only for adminPersonae)
-   */
-
-  JScrollPane admin_history;
-
-  /**
-   * Holds an ownershipPanel (only for owner groups)
-   */
- 
-  JScrollPane objects_owned;
-
-  datePanel
-    exp_date_panel,
-    rem_date_panel;
-
-  JPanel
-    history,      // holds an historyPanel
-    personae;
-
-  historyPanel
-    history_panel;
-
   /** 
-   * <p>A vector of {@link arlut.csd.ganymede.client.containerPanel}s,
+   * A vector of {@link arlut.csd.ganymede.client.containerPanel}s,
    * used to allow the gclient to refresh containerPanels on demand,
    * and to allow the gclient to order any containerPanels contained
-   * in this framePanel to stop loading on a transaction cancel.</p>
+   * in this framePanel to stop loading on a transaction cancel.
    *
-   * <p>Note that the cleanUp() method in this class can null out
+   * Note that the cleanUp() method in this class can null out
    * this reference, so all methods that loop over containerPanels
    * should be synchronized.  This is also why containerPanels
-   * is kept private.</p>
+   * is kept private.
    */
 
   private Vector containerPanels = new Vector();
@@ -285,27 +219,39 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   Vector templates;
 
   /**
-   * Vector of Integers used to track the tab panels that have been created.
+   * Vector of {@link arlut.csd.ganymede.client.clientTab} objects
+   * representing tabs that need to be created from the server-side
+   * tab definitions.
    */
 
-  Vector createdList = new Vector(); 
+  private Vector tabList = new Vector();
+
+  private personaeTab personae_tab;
+  private ownerTab owner_tab;
+  private objectsOwnedTab objects_owned_tab;
+  private notesTab notes_tab;
+  private historyTab history_tab;
+  private adminHistoryTab admin_history_tab;
+  private expirationRemovalTab expiration_tab;
+  private expirationRemovalTab removal_tab;
+
+  /**
+   * RMI references to server-side fields that we'll consult to render
+   * the various fixed information fields in our object window.
+   */
 
   date_field
     exp_field,
-    rem_field,
-    creation_date_field,
-    modification_date_field;
+    rem_field;
 
-  string_field
-    notes_field,
-    creator_field,
-    modifier_field;
-
-  invid_field 
-    persona_field;
-
-  boolean 
+  boolean
     editable;
+
+  boolean
+    expiration_Editable;
+
+  boolean
+    removal_Editable;
 
   /**
    * Remote reference to the server-side object we are viewing or editing.
@@ -329,9 +275,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   gclient
     gc;
 
-  notesPanel
-    my_notesPanel = null;
-
   /**
    * Invid of the object edited.  DO NOT access invid directly; use
    * getObjectInvid().  invid will be null until the first time
@@ -348,8 +291,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   boolean isCreating;
 
-  private boolean removal_Editable = false;
-  private boolean expiration_Editable = false;
+  /**
+   * If true, we've already done clean up on this framePanel.
+   */
+
+  boolean isCleaned;
 
   /* -- */
 
@@ -376,39 +322,38 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	debug = wp.gc.debug;
       }
-    
-    setStatus("Building window.");
+
+    // "Building window."    
+    setStatus(ts.l("init.building_window_status"));
     
     // Window properties
 
     setMaximizable(true);
     setResizable(true);
-
     setClosable(true);
-
     setIconifiable(true);
 
     /*
       we want to be able to take control of closing ourselves.
 
       Unfortunately, the setDefaultCloseOperation() method is useless
-      on JInternalFrames in Swing 1.1.  We'll use a VetoableChangeListener
-      instead.
+      on JInternalFrames in Swing 1.1.  We'll use a
+      VetoableChangeListener instead.
 
       // setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
+      This came around in JDK 1.2/Swing 1.1.1.. bug parade #4176136,
+      but the use of a VetoableChangeListener still works just fine,
+      so we'll stick with this implementation.
+      
       */
-
-    // gah!  we need to work around a bug in JDK 1.2/Swing 1.1.1.. bug parade #4176136
 
     this.addVetoableChangeListener(this);
     this.addInternalFrameListener(this);
 
-    //setFrameIcon(new ImageIcon((Image)PackageResources.getImageResource(this, "folder-red.gif", getClass())));
-    
-    progressPanel = new JPanel();
+    progressPanel = new JPanel(); // flow layout by default
     progressBar = new JProgressBar();
-    progressPanel.add(new JLabel("Loading..."));
+    progressPanel.add(new JLabel(ts.l("init.loading_label"))); // "Loading..."
     progressPanel.add(progressBar);
     
     setContentPane(progressPanel);
@@ -417,25 +362,29 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>Communicates with the server to download all of the information
+   * Communicates with the server to download all of the information
    * needed to present the database object associated with this window
    * to the user.  Some of this data (types of fields defined in objects
    * of this type, for instance) will have been already loaded into
    * {@link arlut.csd.ganymede.client.gclient gclient}, but this method
    * is reponsible for loading all data specific to the object being
-   * viewed and/or edited.</p>
+   * viewed and/or edited.
    *
-   * <p>This method also handles the creation of this window's tabbed
+   * This method also handles the creation of this window's tabbed
    * pane, and adding the various tabs to it.  The actual panels
    * attached to the various tabs will not actually be created and
    * initialized unless and until the user selects the appropriate tab
    * at some point.  The only panel actually created by this method is
    * the general panel, which shows all of the non-built-in fields of
-   * the object we're talking to.</p>
+   * the object we're talking to.
    */
 
   public void load()
   {
+    Vector infoVector = null;
+
+    /* -- */
+
     running.set(true);
 
     try
@@ -447,63 +396,113 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	// Now setup the framePanel layout
 
 	pane = new JTabbedPane();
-    
-	// Add the panels to the tabbedPane (add just the panels that
-	// every object has.)
 
-	general = new JScrollPane();
-	pane.addTab("General", null, general);
-	general_index = current++;
-	owner = new JScrollPane();
-	pane.addTab("Owner", null, owner);
-	owner_index = current++;
-    
+	// the client Loader thread should have already downloaded and
+	// cached the field template vector we're getting here.  If not,
+	// we'll block here while the Loader gets the information we need.
+
+	short id = getObjectInvid().getType();
+
+	templates = gc.getTemplateVector(id);
+
+	try
+	  {
+	    infoVector = getObject().getFieldInfoVector();
+	  }
+	catch (Exception rx)
+	  {
+	    gc.processExceptionRethrow(rx);
+	  }
+	
+	// loop over the field templates and identify the
+	// server-defined tabs
+
+	serverTab newTab = null;
+	serverTab oldTab = null;
+
+	for (int i = 0; i < templates.size(); i++)
+	  {
+	    FieldTemplate template = (FieldTemplate) templates.elementAt(i);
+
+	    // make sure that we don't create a tab if the field isn't
+	    // actually present in this instance of the object
+
+	    short fieldID = template.getID();
+	    boolean field_present = false;
+
+	    for (int j = 0; !field_present && j < infoVector.size(); j++)
+	      {
+		FieldInfo field_info = (FieldInfo) infoVector.elementAt(j);
+
+		if (field_info.getID() == fieldID)
+		  {
+		    field_present = true;
+		  }
+	      }
+
+	    if (field_present && !template.isBuiltIn() && !(id == SchemaConstants.UserBase && fieldID == SchemaConstants.UserAdminPersonae))
+	      {
+		if (oldTab == null)
+		  {
+		    oldTab = new serverTab(this, pane, template.getTabName());
+		    oldTab.setInfoVector(infoVector);
+		    oldTab.addToPane(tabList);
+		  }
+		else
+		  {
+		    if (!StringUtils.stringEquals(template.getTabName(), oldTab.getTabName()))
+		      {
+			newTab = new serverTab(this, pane, template.getTabName());
+			newTab.setInfoVector(infoVector);
+			newTab.addToPane(tabList);
+			
+			oldTab = newTab;
+		      }
+		  }
+	      }
+	  }
+
+	// okay, now we we've added the server--side tabs are.  time
+	// to start in on the predefined tabs.
+
+	owner_tab = new ownerTab(this, pane, ts.l("load.owner_tab"));	// "Owner"
+	owner_tab.addToPane(tabList);
+
 	if (stopped.isSet())
 	  {
 	    return;
 	  }
 
-	// Check to see if this gets an objects_owned panel
+	// Check to see if this gets an objects_owned panel (for Owner
+	// Group objects) or an Admin Personae panel (for User
+	// objects)
 	//
-	// Only OwnerBase objects get an objects_owned panel.  The
-	// supergash OwnerBase does not get an objects_owned panel.
-	//
-	// Only user objects get a persona panel.
+	// Note that the supergash OwnerBase does not get an
+	// objects_owned panel.
     
-	short id = -1;
-
 	try
 	  {
-	    id = getObjectInvid().getType();
-
 	    if (id == SchemaConstants.OwnerBase)
 	      {
-		if (getObjectInvid().equals(Invid.createInvid((short)0, 1)))
-		  {
-		    if (debug)
-		      {
-			System.out.println("framePanel:  Supergash doesn't get an ownership panel.");
-		      }
-		  }
-		else
+		if (!getObjectInvid().equals(Invid.createInvid((short)0, 1)))
 		  {
 		    if (stopped.isSet())
 		      {
 			return;
 		      }
 
-		    objects_owned = new JScrollPane();
-		    pane.addTab("Objects Owned", null, objects_owned);
-		    objects_owned_index = current++;
+		    objects_owned_tab = new objectsOwnedTab(this, pane, ts.l("load.objects_owned_tab")); // "Objects Owned"
+		    objects_owned_tab.addToPane(tabList);
 		  }
 	      }
 	    else if (id == SchemaConstants.UserBase)
 	      {
-		persona_field = (invid_field)getObject().getField(SchemaConstants.UserAdminPersonae);
+		invid_field persona_field = (invid_field)getObject().getField(SchemaConstants.UserAdminPersonae);
 	     
-		// If the field is null, then that means that the aren't
-		// any personas, and this is jsut a view window, so we
-		// don't need the panel at all
+		// If the field is null, then this must be a view-only
+		// object with no persona field defined (because
+		// editable objects always have all valid fields
+		// instantiated)
 
 		if (persona_field != null)
 		  {
@@ -512,9 +511,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 			return;
 		      }
 
-		    personae = new JPanel(false);
-		    pane.addTab("Personae", null, personae);
-		    personae_index = current++;
+		    personae_tab = new personaeTab(this, pane, ts.l("load.personae_tab")); // "Personae"
+		    personae_tab.addToPane(tabList);
 		  }
 	      }
 	  }
@@ -523,12 +521,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	    gc.processExceptionRethrow(rx, "Could not check if this is ownerbase: ");
 	  }
     
-	// the client Loader thread should have already downloaded and
-	// cached the field template vector we're getting here.  If not,
-	// we'll block here while the Loader gets the information we need.
-
-	templates = gc.getTemplateVector(id);
-    
 	// Add the notes panel
 
 	if (stopped.isSet())
@@ -536,17 +528,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	    return;
 	  }
 
-	try
-	  {
-	    notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx, "Could not get notes_field: ");
-	  }
-    
-	notes = new JScrollPane();
-	addNotesPanel();
+	addNotesTab();
 
 	if (stopped.isSet())
 	  {
@@ -555,19 +537,20 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	// Add the history tab
 
-	history = new JPanel(new BorderLayout());
-	pane.addTab("History", null, history);
-	history_index = current++;
+	history_tab = new historyTab(this, pane, ts.l("load.history_tab")); // "History"
+	history_tab.addToPane(tabList);
+
+	// If we're an admin persona, add the admin history tab
 
 	if (id == SchemaConstants.PersonaBase)
 	  {
-	    admin_history = new JScrollPane();
-	    pane.addTab("Admin History", null, admin_history);
-	    admin_history_index = current++;
+	    admin_history_tab = new adminHistoryTab(this, pane, ts.l("load.admin_history_tab")); // "Admin History"
+	    admin_history_tab.addToPane(tabList);
 	  }
 
-	// Only add the date panels if the date has been set.  In order
-	// to set the date, use the menu items.
+	// Only add the expiration and removal date panels if the date
+	// has been set.  In order to set the date, use the menu
+	// items.
 
 	if (stopped.isSet())
 	  {
@@ -584,12 +567,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	    if ((exp_field != null) && (exp_field.getValue() != null))
 	      {
-		addExpirationDatePanel();
+		addExpirationDateTab();
 	      }
 
 	    if ((rem_field != null) && (rem_field.getValue() != null))
 	      {
-		addRemovalDatePanel();
+		addRemovalDateTab();
 	      }
 	  }
 	catch (Exception rx)
@@ -604,35 +587,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	    return;
 	  }
 
-	createPanel(general_index);
-	showTab(general_index);
+	// and let's initialize and show our main tab before we make
+	// the tab set visible
 
-	// Under Swing 1.1, making a JTabbedPane a contentPane for an internal
-	// frame causes the JTabbedPane to have some rendering bugs, so we
-	// wrap our JTabbedPane with a generic JPanel to avoid this.
+	((clientTab) tabList.elementAt(0)).showTab();
 
-	JPanel contentPanel = new JPanel();
-	contentPanel.setLayout(new BorderLayout());
-	contentPanel.add("Center", pane);
+	setContentPane(pane);
+    
+	setJMenuBar(createMenuBar(editable));
 
-	setContentPane(contentPanel);
-    
-	// Need to add the menubar at the end, so the user doesn't get
-	// into the menu items before the tabbed pane is all set up
-    
-	JMenuBar mb = createMenuBar(editable);
-    
-	try
-	  {
-	    setJMenuBar(mb);
-	  }
-	catch (Error ex)
-	  {
-	    // Swing 1.0.2 doesn't have this method, it is only in 1.0.3 and later
-	
-	    System.err.println("Not running recent version of swing.. no setJMenuBar method.");
-	  }
-    
 	pane.invalidate();
 	validate();
       }
@@ -648,6 +611,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
+   * Returns true if this framePanel is editing/creating an object, false if it
+   * is viewing only.
    */
 
   public boolean isEditable()
@@ -656,8 +621,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
   
   /**
-   * <p>This method returns true if the window is in the middle of closing,
-   * which only happens if it has been approved by vetoableChange.</p>
+   * This method returns true if the window is in the middle of closing,
+   * which only happens if it has been approved by vetoableChange.
    */
   
   public boolean isApprovedForClosing()
@@ -666,9 +631,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>Returns the invid of the object contained in this frame panel.</p>
+   * Returns the invid of the object contained in this frame panel.
    *
-   * <p>If the invid has not been loaded, this method will load it first.</p>
+   * If the invid has not been loaded, this method will load it first.
    *
    * @return The invid of the object in this frame panel.  
    */
@@ -683,7 +648,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Could not get object invid");
+	    // "Could not get object invid"
+	    gc.processExceptionRethrow(rx, ts.l("getObjectInvid.error_msg"));
 	  }
       }
 
@@ -691,9 +657,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>Returns the type name of the object contained in this frame panel.</p>
+   * Returns the type name of the object contained in this frame panel.
    *
-   * <p>If the invid has not been loaded, this method will load it first.</p>
+   * If the invid has not been loaded, this method will load it first.
    *
    * @return The name of the type of the object in this frame panel.  
    */
@@ -706,26 +672,31 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>Used by gclient.commitTransaction to get access to our notes panel.
+   * Used by gclient.commitTransaction to get access to our notes panel.
    * gclient does this so that it can survey any open notes panels to make
    * sure that the contents are updated to the server.  This is ugly as
    * sin, but we don't currently put a change listener on the notes panels,
-   * so it needs to be done.</p>
+   * so it needs to be done.
    *
-   * <p>This method will often return null if the user hasn't visited the
-   * notes panel tab.</p>
+   * This method will often return null if the user hasn't visited the
+   * notes panel tab.
    */
 
   public notesPanel getNotesPanel()
   {
-    return my_notesPanel;
+    if (notes_tab == null)
+      {
+	return null;
+      }
+
+    return notes_tab.getNotesPanel();
   }
 
   /**
-   * <p>Refreshes the tab that is showing.</p>
+   * Refreshes the tab that is showing.
    *
-   * <p>Currently, this only refreshes the general panel.  Other panels
-   * will generate a nice dialog telling the user to go away.</p>
+   * Currently, this only refreshes the general panel.  Other panels
+   * will generate a nice dialog telling the user to go away.
    */
 
   public void refresh()
@@ -740,11 +711,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    ((containerPanel)comp).updateAll();
 	  }
-	else
+ 	else
 	  {
-	    getgclient().showErrorMessage("Not implemented yet",
-					  "Sorry, you can only refresh the panel containing " +
-					  "the general panel at this time.");
+	    // this error message isn't localized because i think it
+	    // should be eliminated
+
+	    System.err.println("Sorry, you can only refresh the panel containing " +
+			       "the general panel at this time.");
 	  }
       }
   }
@@ -766,8 +739,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     /* -- */
 
-    dialog = new SaveObjDialog(gc, "Mail summary for " + getObjectType() + " " + getObjectLabel(),
-			       true, "Status summary for " + getObjectType() + " " + getObjectLabel());
+    // "Mail summary for {0} {1}"
+    // "Status summary for {0} {1}"
+    dialog = new SaveObjDialog(gc, ts.l("sendMail.saveobj_title", getObjectType(), getObjectLabel()),
+			       true, ts.l("sendMail.saveobj_subject", getObjectType(), getObjectLabel()));
 
     if (!dialog.showDialog())
       {
@@ -792,7 +767,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if ((address == null) || (address.equals("")))
       {
-	gc.showErrorMessage("You must specify at least one recipient.");
+	// "You must specify at least one recipient."
+	gc.showErrorMessage(ts.l("sendMail.no_recipient_msg"));
 	return;
       }
     
@@ -809,7 +785,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx, "Sending Mail");
+	// "Sending Mail"
+	gc.processExceptionRethrow(rx, ts.l("sendMail.error_rethrow"));
       }
   }
 
@@ -833,7 +810,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     /* -- */
 
-    dialog = new SaveObjDialog(gc, "Save summary for " + getObjectType() + " " + getObjectLabel(),
+    // "Save summary for {0} {1}"
+    dialog = new SaveObjDialog(gc, ts.l("save.saveobj_title", getObjectType(), getObjectLabel()),
 			       false, null);
 
     if (!dialog.showDialog())
@@ -857,7 +835,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
 
     chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-    chooser.setDialogTitle("Save window as");
+    chooser.setDialogTitle(ts.l("save.file_dialog_title")); // "Save window as"
 
     returnValue = chooser.showDialog(gc, null);
 
@@ -870,10 +848,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     
     if (file.exists())
       {
-	StringDialog d = new StringDialog(gc, "Warning", 
-					  file.getName() + 
-					  " exists.  Are you sure you want to replace this file?",
-					  "Overwrite", "Cancel", null);
+	// "Warning"
+	// "{0} already exists.  Are you sure you want to replace this file?"
+	// "Overwrite"
+	// "Cancel"
+	StringDialog d = new StringDialog(gc,
+					  ts.l("save.warning_title"),
+					  ts.l("save.conflict_warning", file.getName()),
+					  ts.l("save.overwrite_button"),
+					  ts.l("global.cancel"),
+					  null);
 	Hashtable result = d.DialogShow();
 
 	if (result == null)
@@ -894,7 +878,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
     catch (java.io.IOException e)
       {
-	gc.showErrorMessage("Trouble saving", "Could not open the file.");
+	// "Save Error"
+	// "Could not open the file for writing:\n{0}"
+	gc.showErrorMessage(ts.l("save.io_error_title"),
+			    ts.l("save.io_error_text", e.toString()));
 	return;
       }
 
@@ -926,11 +913,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	if (showTransactions)
 	  {
-	    buffer.append("\nTransactional History:\n\n");
+	    // "\nTransactional History:\n\n"
+	    buffer.append(ts.l("encodeObjectToStringBuffer.transaction_history_header"));
 	  }
 	else
 	  {
-	    buffer.append("\nHistory:\n\n");
+	    // "\nHistory:\n\n"
+	    buffer.append(ts.l("encodeObjectToStringBuffer.history_header"));
 	  }
 	try
 	  {
@@ -958,32 +947,74 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     JMenuBar menuBar = new JMenuBar();
     menuBar.setBorderPainted(true);
     
-    JMenu fileM = new JMenu("Object");
-    fileM.setMnemonic('o');
+    // "Object"
+    JMenu fileM = new JMenu(ts.l("createMenuBar.object_menu"));
+
+    if (ts.hasPattern("createMenuBar.object_menu_key_optional"))
+      {
+	fileM.setMnemonic((int) ts.l("createMenuBar.object_menu_key_optional").charAt(0)); // "o"
+      }
+
     menuBar.add(fileM);
 
     if (!editable)
       {
-	JMenuItem refreshMI = new JMenuItem("Refresh");
-	refreshMI.setMnemonic('r');
+	JMenuItem refreshMI = new JMenuItem(ts.l("createMenuBar.object_menu_0"));// "Refresh"
+
+	refreshMI.setActionCommand("refresh_obj");
+
+	if (ts.hasPattern("createMenuBar.object_menu_0_key_optional"))
+	  {
+	    refreshMI.setMnemonic((int) ts.l("createMenuBar.object_menu_0_key_optional").charAt(0)); // "r"
+	  }
+
+	if (ts.hasPattern("createMenuBar.object_menu_0_tip_optional"))
+	  {
+	    // "Update this window with the current state of this object in the database"
+	    refreshMI.setToolTipText(ts.l("createMenuBar.object_menu_0_tip_optional"));
+	  }
+
 	refreshMI.addActionListener(this);
-	refreshMI.setToolTipText("Update this window with the current state of this object in the database");
 	fileM.add(refreshMI);
       }
 
     if (!gc.isApplet())
       {
-	JMenuItem saveMI = new JMenuItem("Save");
-	saveMI.setMnemonic('s');
+	JMenuItem saveMI = new JMenuItem(ts.l("createMenuBar.object_menu_1"));  // "Save";
+
+	saveMI.setActionCommand("save_obj");
+
+	if (ts.hasPattern("createMenuBar.object_menu_1_key_optional"))
+	  {
+	    saveMI.setMnemonic((int) ts.l("createMenuBar.object_menu_1_key_optional").charAt(0)); // "s"
+	  }
+
+	if (ts.hasPattern("createMenuBar.object_menu_1_tip_optional"))
+	  {
+	    // "Saves a text dump of this object''s state and history to disk"
+	    saveMI.setToolTipText(ts.l("createMenuBar.object_menu_1_tip_optional"));
+	  }
+
 	saveMI.addActionListener(this);
-	saveMI.setToolTipText("Saves a text dump of this object's state and history to disk");
 	fileM.add(saveMI);
       }
 
-    JMenuItem mailMI = new JMenuItem("Mail to...");
-    mailMI.setMnemonic('m');
+    JMenuItem mailMI = new JMenuItem(ts.l("createMenuBar.object_menu_2")); // "Mail to..."
+
+    mailMI.setActionCommand("send_mail");
+
+    if (ts.hasPattern("createMenuBar.object_menu_2_key_optional"))
+      {
+	mailMI.setMnemonic((int) ts.l("createMenuBar.object_menu_2_key_optional").charAt(0)); // "m"
+      }
+
+    if (ts.hasPattern("createMenuBar.object_menu_2_tip_optional"))
+      {
+	// "Mails a text dump of this object''s state and history"
+	mailMI.setToolTipText(ts.l("createMenuBar.object_menu_2_tip_optional"));
+      }
+
     mailMI.addActionListener(this);
-    mailMI.setToolTipText("Mails a text dump of this object's state and history");
     fileM.add(mailMI);
 
     if (editable)
@@ -997,10 +1028,23 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		fileM.addSeparator();
 		sepAdded = true;
 
-		JMenuItem setExpirationMI = new JMenuItem("Set Expiration Date");
-		setExpirationMI.setMnemonic('e');
+		// "Set Expiration Date"
+		JMenuItem setExpirationMI = new JMenuItem(ts.l("createMenuBar.object_menu_3"));
+
+		setExpirationMI.setActionCommand("set_expiration");
+
+		if (ts.hasPattern("createMenuBar.object_menu_3_key_optional"))
+		  {
+		    setExpirationMI.setMnemonic((int) ts.l("createMenuBar.object_menu_3_key_optional").charAt(0)); // "x"
+		  }
+
+		if (ts.hasPattern("createMenuBar.object_menu_3_tip_optional"))
+		  {
+		    // "Set a date for this object to be inactivated"
+		    setExpirationMI.setToolTipText(ts.l("createMenuBar.object_menu_3_tip_optional"));
+		  }
+
 		setExpirationMI.addActionListener(this);
-		setExpirationMI.setToolTipText("Set a date for this object to be inactivated");
 		fileM.add(setExpirationMI);
 	      }
 	  }
@@ -1016,10 +1060,23 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		fileM.addSeparator();
 	      }
 
-	    JMenuItem setRemovalMI = new JMenuItem("Set Removal Date");
-	    setRemovalMI.setMnemonic('v');
+	    // "Set Removal Date"
+	    JMenuItem setRemovalMI = new JMenuItem(ts.l("createMenuBar.object_menu_4"));
+
+	    setRemovalMI.setActionCommand("set_removal");
+
+	    if (ts.hasPattern("createMenuBar.object_menu_4_key_optional"))
+	      {
+		setRemovalMI.setMnemonic((int) ts.l("createMenuBar.object_menu_4_key_optional").charAt(0)); // "v"
+	      }
+	    
+	    if (ts.hasPattern("createMenuBar.object_menu_4_tip_optional"))
+	      {
+		// "Set a date for this object to be removed from the database"
+		setRemovalMI.setToolTipText(ts.l("createMenuBar.object_menu_4_tip_optional"));
+	      }
+
 	    setRemovalMI.addActionListener(this);
-	    setRemovalMI.setToolTipText("Set a date for this object to be removed from the database");
 	    fileM.add(setRemovalMI);
 	  }
       }
@@ -1030,8 +1087,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	String typeName = getObjectTypeName();
 
-	JMenuItem editObjMI = new JMenuItem("Edit this " + typeName);
-	editObjMI.setMnemonic('e');
+	// "Edit this {0}"
+	JMenuItem editObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_5", typeName));
+
+	if (ts.hasPattern("createMenuBar.object_menu_5_key_optional"))
+	  {
+	    editObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_4_key_optional").charAt(0)); // "e"
+	  }
+	    
+	if (ts.hasPattern("createMenuBar.object_menu_5_tip_optional"))
+	  {
+	    editObjMI.setToolTipText(ts.l("createMenuBar.object_menu_5_tip_optional"));
+	  }
+
 	editObjMI.setActionCommand("edit_obj");
 	editObjMI.addActionListener(this);
 	fileM.add(editObjMI);
@@ -1040,21 +1108,54 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	if (bd.canInactivate())
 	  {
-	    JMenuItem inactObjMI = new JMenuItem("Inactivate this " + typeName);
-	    inactObjMI.setMnemonic('i');
+	    // "Inactivate this {0}"
+	    JMenuItem inactObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_6", typeName));
+
+	    if (ts.hasPattern("createMenuBar.object_menu_6_key_optional"))
+	      {
+		inactObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_6_key_optional").charAt(0)); // "i"
+	      }
+	    
+	    if (ts.hasPattern("createMenuBar.object_menu_6_tip_optional"))
+	      {
+		inactObjMI.setToolTipText(ts.l("createMenuBar.object_menu_6_tip_optional"));
+	      }
+
 	    inactObjMI.setActionCommand("inact_obj");
 	    inactObjMI.addActionListener(this);
 	    fileM.add(inactObjMI);
 	  }
 
-	JMenuItem delObjMI = new JMenuItem("Delete this " + typeName);
-	delObjMI.setMnemonic('d');
+	// "Delete this {0}"
+	JMenuItem delObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_7", typeName));
+	
+	if (ts.hasPattern("createMenuBar.object_menu_7_key_optional"))
+	  {
+	    delObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_7_key_optional").charAt(0)); // "d"
+	  }
+	
+	if (ts.hasPattern("createMenuBar.object_menu_7_tip_optional"))
+	  {
+	    delObjMI.setToolTipText(ts.l("createMenuBar.object_menu_7_tip_optional"));
+	  }
+
 	delObjMI.setActionCommand("del_obj");
 	delObjMI.addActionListener(this);
 	fileM.add(delObjMI);
 
-	JMenuItem cloneObjMI = new JMenuItem("Clone this " + typeName);
-	cloneObjMI.setMnemonic('c');
+	// "Clone this {0}"
+	JMenuItem cloneObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_8", typeName));
+	
+	if (ts.hasPattern("createMenuBar.object_menu_8_key_optional"))
+	  {
+	    cloneObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_8_key_optional").charAt(0)); // "c"
+	  }
+	
+	if (ts.hasPattern("createMenuBar.object_menu_8_tip_optional"))
+	  {
+	    cloneObjMI.setToolTipText(ts.l("createMenuBar.object_menu_8_tip_optional"));
+	  }
+
 	cloneObjMI.setActionCommand("clone_obj");
 	cloneObjMI.addActionListener(this);
 	fileM.add(cloneObjMI);
@@ -1068,258 +1169,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     return menuBar;
   }
 
-  void create_general_panel()
-  {
-    if (debug)
-      {
-	println("Creating general panel");
-      }
-    
-    containerPanel cp = new containerPanel(getObject(), getObjectInvid(), editable, wp.gc, wp, 
-					   this, progressBar, false, isCreating, null);
-    cp.load();
-    cp.setBorder(wp.emptyBorder10);
-    
-    general.getVerticalScrollBar().setUnitIncrement(15);
-    general.setViewportView(cp);
-    createdList.addElement(new Integer(general_index));
-    setStatus("Done");
-  }
-
-  void create_expiration_date_panel()
-  {
-    if (debug)
-      {
-	println("Creating expiration date panel");
-      }
-    
-    if (exp_field == null)
-      {
-	try
-	  {
-	    exp_field = (date_field) getObject().getField(SchemaConstants.ExpirationField);
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx, "Could not get expiration field");
-	  }
-      }
-
-    expiration_date.getVerticalScrollBar().setUnitIncrement(15);
-
-    exp_date_panel = new datePanel(exp_field, gc.getFieldTemplate(getObjectInvid().getType(), SchemaConstants.ExpirationField),
-				   "Expiration date", 
-				   expiration_Editable, 
-				   this);
-
-    expiration_date.setViewportView(exp_date_panel);
-    
-    createdList.addElement(new Integer(expiration_date_index));
-  }
-
-  void refresh_expiration_date_panel()
-  {
-    if (debug)
-      {
-	println("Refreshing expiration date panel");
-      }
-    
-    if (exp_date_panel == null)
-      {
-	addExpirationDatePanel();
-	create_expiration_date_panel();
-	return;
-      }
-    else
-      {
-	exp_date_panel.refresh();
-      }
-  }
-
-  void create_removal_date_panel()
-  {
-    if (debug)
-      {
-	println("Creating removal date panel");
-      }
-    
-    if (rem_field == null)
-      {
-	try
-	  {
-	    rem_field = (date_field) getObject().getField(SchemaConstants.RemovalField);
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx, "Could not get removal field");
-	  }
-      }
-
-    removal_date.getVerticalScrollBar().setUnitIncrement(15);
-
-    rem_date_panel = new datePanel(rem_field, 
-				   gc.getFieldTemplate(getObjectInvid().getType(), SchemaConstants.RemovalField),
-				   "Removal date", removal_Editable, this);
-    removal_date.setViewportView(rem_date_panel);
-	  
-    createdList.addElement(new Integer(removal_date_index));
-
-    removal_date.invalidate();
-    validate();
-  }
-
-  void refresh_removal_date_panel()
-  {
-    if (debug)
-      {
-	println("Refreshing expiration date panel");
-      }
-    
-    if (rem_date_panel == null)
-      {
-	addRemovalDatePanel();
-	create_removal_date_panel();
-	return;
-      }
-    else
-      {
-	rem_date_panel.refresh();
-      }
-  }
-
-  void create_owner_panel()
-  {
-    if (debug)
-      {
-	println("Creating owner panel");
-      }
-
-    try
-      {
-	owner.getVerticalScrollBar().setUnitIncrement(15);
-
-	invid_field invf = (invid_field) getObject().getField(SchemaConstants.OwnerListField);
-	
-	owner_panel = new ownerPanel(invf, editable && invf.isEditable(), this);
-	owner.setViewportView(owner_panel);
-      }
-    catch (Exception rx)
-      {
-	gc.processExceptionRethrow(rx, "Could not get owner field");
-      }
-    
-    createdList.addElement(new Integer(owner_index));
-
-    owner.invalidate();
-    validate();
-  }
-
-  void updateOwnerPanel()
-  {
-    try
-      {
-	owner_panel.updateInvidStringSelector();
-      }
-    catch (Exception ex)
-      {
-	gc.processExceptionRethrow(ex);
-      }
-  }
-
-  void create_history_panel()
-  {
-    setStatus("Creating history panel");
-
-    try
-      {
-	creation_date_field = (date_field) getObject().getField(SchemaConstants.CreationDateField);
-	creator_field = (string_field) getObject().getField(SchemaConstants.CreatorField);
-	modification_date_field = (date_field) getObject().getField(SchemaConstants.ModificationDateField);
-	modifier_field = (string_field) getObject().getField(SchemaConstants.ModifierField);
-      }
-    catch (Exception rx)
-      {
-	gc.processExceptionRethrow(rx);
-      }
-
-    history_panel = new historyPanel(getObjectInvid(),
-				     getgclient(),
-				     creator_field,
-				     creation_date_field,
-				     modifier_field,
-				     modification_date_field);
-
-    history.add("Center", history_panel);
-
-    // remember that we've already created the history panel
-
-    createdList.addElement(new Integer(history_index));
-      
-    history.invalidate();
-    validate();
-  }
-
-  void create_admin_history_panel()
-  {
-    setStatus("Creating admin history panel");
-    admin_history.getVerticalScrollBar().setUnitIncrement(15);
-    admin_history.setViewportView(new adminHistoryPanel(getObjectInvid(), getgclient()));
-    
-    createdList.addElement(new Integer(admin_history_index));
-    
-    admin_history.invalidate();
-    validate();
-  }
-
-  void create_notes_panel()
-  {
-    if (debug)
-      {
-	println("Creating notes panel");
-      }
-
-    my_notesPanel = new notesPanel(notes_field, 
-				   editable, this);
-
-    notes.getVerticalScrollBar().setUnitIncrement(15);
-    notes.setViewportView(my_notesPanel);
-
-    createdList.addElement(new Integer(notes_index));
-    
-    notes.invalidate();
-    validate();
-  }
-
-  void create_objects_owned_panel()
-  {
-    if (debug)
-      {
-	println("Creating ownership panel");
-      }
-
-    objects_owned.getVerticalScrollBar().setUnitIncrement(15);
-    objects_owned.setViewportView(new ownershipPanel(editable, this));
-    createdList.addElement(new Integer(objects_owned_index));
-
-    objects_owned.invalidate();
-    validate();
-  }
-
-  void create_personae_panel()
-  {
-    if (debug)
-      {
-	println("Creating personae panel()");
-      }
-      
-    personae.setLayout(new BorderLayout());
-    personae.add("Center", new personaPanel(persona_field, editable, this));
-    createdList.addElement(new Integer(personae_index));
-    
-    personae.invalidate();
-    validate();
-  }
-
   /**
    * These add the tabs to the framePanel, but they don't create the content
    *
@@ -1327,53 +1176,73 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * If you want to create a panel, call addWhateverPanel, then showWhateverPanel.
    */
 
-  public void addExpirationDatePanel()
+  public void addExpirationDateTab()
   {
-    if (expiration_date_index == -1)
+    if (expiration_tab != null)
       {
-	if (debug)
-	  {
-	    println("Adding date tabs");
-	  }
-
-	ImageIcon expireIcon = new ImageIcon((Image) PackageResources.getImageResource(this, 
-										       "expire.gif", 
-										       getClass()));
-	expiration_date = new JScrollPane();
-	pane.addTab("Expiration", expireIcon, expiration_date);
-	expiration_date_index = current++;
+	return;
       }
+
+    if (debug)
+      {
+	println("Adding expiration tab");
+      }
+    
+    expiration_tab = new expirationRemovalTab(this, pane, ts.l("addExpirationDateTab.expiration_tab")); // "Expiration"
+    expiration_tab.setImageIcon(new ImageIcon((Image) PackageResources.getImageResource(this, 
+											"expire.gif", 
+											getClass())));
+    expiration_tab.setPanelTitle(ts.l("addExpirationDateTab.panel_title")); // "Expiration date"
+    expiration_tab.setDateField(exp_field);
+    expiration_tab.addToPane(tabList);
   }
 
-  public void addRemovalDatePanel()
+  public void addRemovalDateTab()
   {
-    if (removal_date_index == -1)
+    if (removal_tab != null)
       {
-	if (debug)
-	  {
-	    println("Adding removal date tabs");
-	  }
-
-	ImageIcon removalIcon = new ImageIcon((Image) PackageResources.getImageResource(this, 
-										       "remove.gif", 
-										       getClass()));
-	  
-	removal_date = new JScrollPane();
-	pane.addTab("Removal", removalIcon, removal_date);
-	removal_date_index = current++;
+	return;
       }
+
+    if (debug)
+      {
+	println("Adding removal date tabs");
+      }
+
+    removal_tab = new expirationRemovalTab(this, pane, ts.l("addRemovalDateTab.removal_tab")); // "Expiration"
+    removal_tab.setImageIcon(new ImageIcon((Image) PackageResources.getImageResource(this, 
+										     "expire.gif", 
+										     getClass())));
+    removal_tab.setPanelTitle(ts.l("addRemovalDateTab.panel_title")); // "Expiration date"
+    removal_tab.setDateField(rem_field);
+    removal_tab.addToPane(tabList);
   }
 
-  public void addNotesPanel()
+  public void addNotesTab()
   {
+    if (notes_tab != null)
+      {
+	return;
+      }
+
     if (debug)
       {
 	println("Adding notes tab");
       }
 
-    pane.addTab("Notes", null, notes);
-    notes_index = current++;
-      
+    string_field notes_field = null;
+
+    try
+      {
+	notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
+      }
+    catch (Exception rx)
+      {
+	gc.processExceptionRethrow(rx, "Could not get notes_field: ");
+      }
+
+    ImageIcon noteIcon = null;
+
     try
       {
 	if (notes_field != null)
@@ -1387,45 +1256,60 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		    println("Setting notes test to *" + notesText + "*.");
 		  }
 
-		ImageIcon noteIcon = new ImageIcon((Image) PackageResources.getImageResource(this, 
-											     "note02.gif", 
-											     getClass()));
-		pane.setIconAt(notes_index, noteIcon);
+		noteIcon = new ImageIcon((Image) PackageResources.getImageResource(this, 
+										   "note02.gif", 
+										   getClass()));
 	      }
-	    else if (debug)
-	      {
-		println("Empty notes");
-	      }
-	  }
-	else if (debug)
-	  {
-	    System.err.println("notes_field is null in framePanel");
 	  }
       }
     catch (Exception rx)
       {
 	gc.processExceptionRethrow(rx);
       }
+
+    notes_tab = new notesTab(this, pane, ts.l("addNotesTab.notes_panel_name"));	// "Notes"
+    notes_tab.setImageIcon(noteIcon);
+    notes_tab.addToPane(tabList);
   }
 
-  //
-  // showPanel(int) will generate the actual panel.  I don't know if we need
-  // showPanel after each of these, or just for the first one.  It is kinda
-  // a hack anyway, since the whole framePanel changed so many times.  Maybe
-  // the whole thing should be overhauled.
-  //
+  /**
+   * This method is called by {@link
+   * arlut.csd.ganymede.client.containerPanel#update(java.util.Vector)}
+   * to cause the expiration date panel to be refreshed whenever we
+   * get a {@link arlut.csd.ganymede.common.ReturnVal} back from the
+   * server so ordering us.
+   */
 
-  // I don't know if need these at all.  There could be one showTab(int).  Why use these
-  // anyway?
-
-  public void showTab(int index)
+  public void refresh_expiration_date_panel()
   {
-    if (index == -1)
+    if (expiration_tab != null)
       {
-	println("This tab has not been added to the pane yet.");
+	expiration_tab.update();
       }
+    else
+      {
+	addExpirationDateTab();
+      }
+  }
 
-    pane.setSelectedIndex(index);
+  /**
+   * This method is called by {@link
+   * arlut.csd.ganymede.client.containerPanel#update(java.util.Vector)}
+   * to cause the removal date panel to be refreshed whenever we get a
+   * {@link arlut.csd.ganymede.common.ReturnVal} back from the server
+   * so ordering us.
+   */
+
+  public void refresh_removal_date_panel()
+  {
+    if (removal_tab != null)
+      {
+	removal_tab.update();
+      }
+    else
+      {
+	addRemovalDateTab();
+      }
   }
 
   public void actionPerformed(ActionEvent e)
@@ -1435,7 +1319,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	println("Menu item action: " + e.getActionCommand());
       }
     
-    if (e.getActionCommand().equals("Save"))
+    if (e.getActionCommand().equals("save_obj"))
       {
 	if (debug)
 	  {
@@ -1444,23 +1328,23 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	save();
       }
-    else if (e.getActionCommand().equals("Mail to..."))
+    else if (e.getActionCommand().equals("send_mail"))
       {
 	sendMail();
       }
-    else if (e.getActionCommand().equals("Refresh"))
+    else if (e.getActionCommand().equals("refresh_obj"))
       {
 	refresh();
       }
-    else if (e.getActionCommand().equals("Set Expiration Date"))
+    else if (e.getActionCommand().equals("set_expiration"))
       {
-	addExpirationDatePanel();
-	showTab(expiration_date_index);
+	addExpirationDateTab();
+	expiration_tab.showTab();
       }
-    else if (e.getActionCommand().equals("Set Removal Date"))
+    else if (e.getActionCommand().equals("set_removal"))
       {
-	addRemovalDatePanel();
-	showTab(removal_date_index);
+	addRemovalDateTab();
+	removal_tab.showTab();
       }
     else if (e.getActionCommand().equals("edit_obj"))
       {
@@ -1488,78 +1372,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   public void stateChanged(ChangeEvent e)
   {
+    // make sure we tell the tab to create itself.
+
     int index = pane.getSelectedIndex();
 
-    if (!createdList.contains(new Integer(index)))
-      {
-	createPanel(index);
-      }
-  }
+    clientTab tab = (clientTab) tabList.elementAt(index);
 
-  /**
-   * This checks to see if the panel is created, and creates it if needed.
-   */
-
-  public void createPanel(int index)
-  {
-    wp.gc.setWaitCursor();
-
-    if (debug)
-      {
-	println("index = " + index + " general_index= " + general_index);
-      }
-    
-    if (index == general_index)
-      {
-	setStatus("Creating general panel");
-	create_general_panel();
-      }
-    else if (index == expiration_date_index)
-      {
-	setStatus("Creating dates panel");
-	create_expiration_date_panel();
-      }
-    else if (index == removal_date_index)
-      {
-	setStatus("Creating dates panel");
-	create_removal_date_panel();
-      }
-    else if (index == notes_index)
-      {
-	setStatus("Creating notes panel");
-	create_notes_panel();
-      }
-    else if (index == owner_index)
-      {
-	setStatus("Creating owner panel");
-	create_owner_panel();
-      }
-    else if (index == objects_owned_index)
-      {
-	setStatus("Creating objects owned panel");
-	create_objects_owned_panel();
-      }
-    else if (index == personae_index)
-      {
-	setStatus("Creating persona panel");
-	create_personae_panel();
-      }
-    else if (index == history_index)
-      {
-	setStatus("Creating history panel.");
-	create_history_panel();
-      }
-    else if (index == admin_history_index)
-      {
-	setStatus("Creating admin history");
-	create_admin_history_panel();
-      }
-    else
-      {
-	System.err.println("Unknown pane index: " + pane.getSelectedIndex());
-      }
-    
-    wp.gc.setNormalCursor();
+    tab.showTab();		// causes the tab's contents to be
+				// created if it is not already
   }
 
   // Convienence methods
@@ -1657,8 +1477,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>This method is called to force an update on this framePanel.  All
-   * fields will be refreshed and the choice lists reloaded.</p>
+   * This method is called to force an update on this framePanel.  All
+   * fields will be refreshed and the choice lists reloaded.
    */
 
   public void updateContainerPanels()
@@ -1667,12 +1487,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>This method is called to force an update on this framePanel in accordance
+   * This method is called to force an update on this framePanel in accordance
    * with the rescan instructions encoded in retVal.  The invid passed is the
    * one we are interested in updating in this method call.  If the invid
    * is null, all contained panels will be forced to update.  Likewise, if
    * the retVal passed is null, all fields in the container panels will
-   * be refreshed.</p>
+   * be refreshed.
    */
 
   public synchronized void updateContainerPanels(Invid invid, ReturnVal retVal)
@@ -1682,14 +1502,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	return;
       }
 
-    // Loop over each containerPanel in the framePanel
-    // window.. there may be more than one due to embedded
-    // objects
+    // Loop over each containerPanel in the framePanel window.. there
+    // may be more than one due to embedded objects and multiple
+    // server tabs
     
-    // we count down here so that we can handle things if
-    // the cp.update*() call causes the count of
-    // containerPanels in this frame to decrement we'll be
-    // able to handle it.
+    // we count down here so that we can handle things if the
+    // cp.update*() call causes the count of containerPanels in this
+    // frame to decrement (as if an embedded object panel's field is
+    // made invisible) we'll be able to handle it.
     
     // if the count of containerPanels increments during this
     // loop, we'll just not see the new panel(s), which is of
@@ -1758,25 +1578,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	
 	return;
       }
-    
-    if (history_panel != null)
-      {
-	history_panel.unregister();
-      }
-    
+
     if (debug)
       {
 	System.err.println("framePanel.internalFrameClosed(): going invisible");
       }
-    
-    this.setVisible(false);
     
     if (debug)
       {
 	System.err.println("framePanel.internalFrameClosed(): disposing");
       }
     
-    this.dispose();
+    this.cleanUp();
     
     this.removeAll();
     
@@ -1831,11 +1644,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>This is a vetoableChangeListener implementation method, and is used
+   * This is a vetoableChangeListener implementation method, and is used
    * to allow the framePanel to intercede in window close attempts for
    * editable objects.  We use this intercession to explain to the user
    * what the meaning of closing an edit-object or create-object window
-   * is, and to allow them to think again.</p>
+   * is, and to allow them to think again.
    */
 
   public void vetoableChange(PropertyChangeEvent pce) throws PropertyVetoException
@@ -1855,13 +1668,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	    
 	    if (isCreating)
 	      {
+		// "Ok to discard {0}?"
+
+		// "If you close this newly created window before
+		// committing this transaction, this newly created
+		// object will be forgotten and abandoned on commit."
+
 		okToKill = new StringDialog(gclient.client, 
-					    "Ok to discard " + getTitle() + "?",
-					    "If you close this newly created window before committing this " +
-					    "transaction, this newly created object will be forgotten and " +
-					    "abandoned on commit.",
-					    "Discard It",
-					    "Cancel",
+					    ts.l("vetoableChange.discard_title", getTitle()),
+					    ts.l("vetoableChange.discard_text"),
+					    ts.l("vetoableChange.discard_button"),
+					    ts.l("global.cancel"),
 					    gclient.client.getQuestionImage());
 
 		Hashtable result = okToKill.DialogShow();
@@ -1886,16 +1703,22 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	      }
 	    else
 	      {
-		okToKill = new StringDialog(gclient.client, 
-					    "Ok to hide " + getTitle() + "?",
-					    "Closing this window will not undo changes made to it, nor will it make " +
-					    "this object available to other Ganymede users to edit. If you want to " +
-					    "undo changes to this object, you will have to either manually undo them " +
-					    "or cancel the transaction.\n\n" +
-					    "If this window is closed, you will be able to re-open it from the tree " +
-					    "later if needed.",
-					    "Hide it",
-					    "Cancel",
+		// "Ok to hide {0}?"
+
+		// "Closing this window will not undo changes made to
+		// it, nor will it make this object available to other
+		// Ganymede users to edit.  If you want to undo
+		// changes to this object, you either will have to
+		// manually undo them, or you will have to cancel this
+		// transaction.\n\nIf this window is cloed, you will
+		// be able to re-open it from the tree later if
+		// needed."
+
+		okToKill = new StringDialog(gclient.client,
+					    ts.l("vetoableChange.hide_title", getTitle()),
+					    ts.l("vetoableChange.hide_text"),
+					    ts.l("vetoableChange.hide_button"),
+					    ts.l("global.cancel"),
 					    gclient.client.getQuestionImage());
 
 		Hashtable result = okToKill.DialogShow();
@@ -1910,8 +1733,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>This method is intended to stop any container panels from loading, in the
-   * event that the user has pressed the transaction cancel button in the gclient.</p>
+   * This method is intended to stop any container panels from loading, in the
+   * event that the user has pressed the transaction cancel button in the gclient.
    */
 
   public final void stopNow()
@@ -1928,8 +1751,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>This method may be called by objects of other classes who want to check to
-   * see if this framePanel has asserted a stop on all loading activities.</p>
+   * This method may be called by objects of other classes who want to check to
+   * see if this framePanel has asserted a stop on all loading activities.
    */
 
   public final boolean isStopped()
@@ -1938,11 +1761,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * <p>This method provides a handy way to null out data structures held in
+   * This method provides a handy way to null out data structures held in
    * relationship to this framePanel, particularly network reference
-   * resources.</p>
+   * resources.
    *
-   * <p>This method should be called on the Java GUI thread.</p>
+   * This method should be called on the Java GUI thread.
    */
 
   public final synchronized void cleanUp()
@@ -1952,9 +1775,16 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	System.err.println("framePanel.cleanUp()");
       }
 
+    if (isCleaned)
+      {
+	return;
+      }
+
     // let everyone know that we'll do no more loading in this window
-    
+
     stopNow();
+
+    this.setVisible(false);
 
     this.removeVetoableChangeListener(this);
     this.removeInternalFrameListener(this);
@@ -1964,23 +1794,36 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	this.removeInternalFrameListener(getWindowPanel());
       }
 
-    pane.removeChangeListener(this);
+    if (pane != null)
+      {
+	pane.removeChangeListener(this);
+	pane = null;
+      }
+
+    if (tabList != null)
+      {
+	synchronized (tabList)
+	  {
+	    for (int i = 0; i < tabList.size(); i++)
+	      {
+		clientTab tab = (clientTab) tabList.elementAt(i);
+		tab.dispose();
+	      }
+	  }
+
+	tabList = null;
+      }
     
     progressBar = null;
     progressPanel = null;
-    pane = null;
-    general = null;
-    expiration_date = null;
-    removal_date = null;
-    owner = null;
-    owner_panel = null;
-    notes = null;
-    objects_owned = null;
-    exp_date_panel = null;
-    rem_date_panel = null;
-    history = null;
-    personae = null;
-    history_panel = null;
+    personae_tab = null;
+    owner_tab = null;
+    objects_owned_tab = null;
+    notes_tab = null;
+    history_tab = null;
+    admin_history_tab = null;
+    expiration_tab = null;
+    removal_tab = null;
 
     if (containerPanels != null)
       {
@@ -1994,20 +1837,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
 
     templates = null;
-    createdList = null;
     exp_field = null;
     rem_field = null;
-    creation_date_field = null;
-    modification_date_field = null;
-    notes_field = null;
-    creator_field = null;
-    modifier_field = null;
-    persona_field = null;
-    //    objects_owned_field = null;
     server_object = null;
     wp = null;
     gc = null;
-    my_notesPanel = null;
     invid = null;
+
+    isCleaned = true;
   }
 }

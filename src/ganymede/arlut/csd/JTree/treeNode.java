@@ -300,6 +300,23 @@ public class treeNode implements Cloneable {
     return expanded;
   }
 
+  public boolean isUnder(treeNode node)
+  {
+    treeNode pNode = this;
+
+    while (pNode != null)
+      {
+	if (pNode == node)
+	  {
+	    return true;
+	  }
+
+	pNode = pNode.getParent();
+      }
+
+    return false;
+  }
+
   /**
    * Clean up any additional fields the node may be carrying along, to
    * be overridden in subclasses.

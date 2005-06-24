@@ -1,22 +1,23 @@
 /*
 
-   CatTreeNode.java
+   adminHistoryTab.java
 
-   Category tree node for GASHSchema
+   This class manages the admin history tab (for admin persona
+   objects) in the Ganymede client.
    
-   Created: 14 August 1997
+   Created: 21 June 2005
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
    SVN URL: $HeadURL$
 
-   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+   Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
-
-   Copyright (C) 1996-2005
+ 
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -50,52 +51,72 @@
 
 */
 
-package arlut.csd.ganymede.common;
+package arlut.csd.ganymede.client;
 
-import arlut.csd.JTree.treeMenu;
-import arlut.csd.JTree.treeNode;
-import arlut.csd.ganymede.rmi.Category;
+import javax.swing.JComponent;
+import javax.swing.JTabbedPane;
+import javax.swing.JScrollPane;
+
+import arlut.csd.ganymede.rmi.date_field;
+import arlut.csd.ganymede.rmi.string_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     CatTreeNode
+                                                                 adminHistoryTab
 
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is a simple {@link arlut.csd.JTree.treeNode treeNode}
- * subclass with a {@link arlut.csd.ganymede.rmi.Category Category}
- * data element.  Used in the Ganymede admin console's schema editor.
- *
- * This class is in the common package because it is also used in the
- * Ganymede client.
+ * This class manages the admin history tab (for admin persona
+ * objects) in the Ganymede client.
  */
 
-public class CatTreeNode extends arlut.csd.JTree.treeNode {
+public class adminHistoryTab extends clientTab {
 
-  private Category category;	// remote reference
+  private JScrollPane contentPane;
+  private adminHistoryPanel admin_history_panel;
 
-  /* -- */
-
-  public CatTreeNode(treeNode parent, String text, Category category, treeNode insertAfter,
-		     boolean expandable, int openImage, int closedImage, treeMenu menu)
+  public adminHistoryTab(framePanel parent, JTabbedPane pane, String tabName)
   {
-    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
-    this.category = category;
+    super(parent, pane, tabName);
   }
 
-  public Category getCategory()
+  public JComponent getComponent()
   {
-    return category;
+    if (contentPane == null)
+      {
+	contentPane = new JScrollPane();
+      }
+
+    return contentPane;
   }
 
-  public void setCategory(Category category)
+  public void initialize()
   {
-    this.category = category;
+    admin_history_panel = new adminHistoryPanel(parent.getObjectInvid(), parent.getgclient());
+
+    contentPane.getVerticalScrollBar().setUnitIncrement(15);
+    contentPane.setViewportView(admin_history_panel);
   }
 
-  public void cleanup()
+  public void update()
   {
-    this.category = null;
+  }
+
+  public void dispose()
+  {
+    if (contentPane != null)
+      {
+	contentPane.removeAll();
+	contentPane = null;
+      }
+
+    if (admin_history_panel != null)
+      {
+	admin_history_panel.dispose();
+	admin_history_panel = null;
+      }
+
+    super.dispose();
   }
 }

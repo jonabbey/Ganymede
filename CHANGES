@@ -788,6 +788,16 @@ XML dump by hand to alter the schema (for instance) and then load it
 into a new server, with all invids and historical fields matching the
 original server's state.
 
+45. [EVERYTHING] Added support for server-defined custom tabs in the client
+
+This change introduces tabs to the Ganymede schema model.  Adopters
+can now place user-defined fields into user-defined tabs, and the
+client will display the appropriate fields in separate fields,
+accordingly.
+
+The goal here is to make it possible to add more data fields to an
+object type without overwhelming the user.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004

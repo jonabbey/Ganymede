@@ -465,4 +465,29 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	delete.setEnabled(pc.isEditable());
       }
   }
+
+  public void dispose()
+  {
+    fp = null;
+    gc = null;
+    field = null;
+    removeAll();
+    add = null;
+    delete = null;
+    middle = null;
+
+    if (personas != null)
+      {
+	personas.clear();
+	personas = null;
+      }
+
+    if (panels != null)
+      {
+	panels.clear();
+	panels = null;
+      }
+
+    empty = null;
+  }
 } 

@@ -1,22 +1,23 @@
 /*
 
-   CatTreeNode.java
+   objectsOwnedTab.java
 
-   Category tree node for GASHSchema
+   This class manages the objects owned tab (for Owner Group objects)
+   in the Ganymede client.
    
-   Created: 14 August 1997
+   Created: 21 June 2005
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
    SVN URL: $HeadURL$
 
-   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+   Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
-
-   Copyright (C) 1996-2005
+ 
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -50,52 +51,68 @@
 
 */
 
-package arlut.csd.ganymede.common;
+package arlut.csd.ganymede.client;
 
-import arlut.csd.JTree.treeMenu;
-import arlut.csd.JTree.treeNode;
-import arlut.csd.ganymede.rmi.Category;
+import javax.swing.JComponent;
+import javax.swing.JTabbedPane;
+import javax.swing.JScrollPane;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     CatTreeNode
+                                                                 objectsOwnedTab
 
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is a simple {@link arlut.csd.JTree.treeNode treeNode}
- * subclass with a {@link arlut.csd.ganymede.rmi.Category Category}
- * data element.  Used in the Ganymede admin console's schema editor.
- *
- * This class is in the common package because it is also used in the
- * Ganymede client.
+ * This class manages the objects owned tab (for Owner Group objects)
+ * in the Ganymede client.
  */
 
-public class CatTreeNode extends arlut.csd.JTree.treeNode {
+public class objectsOwnedTab extends clientTab {
 
-  private Category category;	// remote reference
+  private ownershipPanel objects_owned_panel;
+  private JScrollPane contentPane;
 
-  /* -- */
-
-  public CatTreeNode(treeNode parent, String text, Category category, treeNode insertAfter,
-		     boolean expandable, int openImage, int closedImage, treeMenu menu)
+  public objectsOwnedTab(framePanel parent, JTabbedPane pane, String tabName)
   {
-    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
-    this.category = category;
+    super(parent, pane, tabName);
   }
 
-  public Category getCategory()
+  public JComponent getComponent()
   {
-    return category;
+    if (contentPane == null)
+      {
+	contentPane = new JScrollPane();
+      }
+
+    return contentPane;
   }
 
-  public void setCategory(Category category)
+  public void initialize()
   {
-    this.category = category;
+    contentPane.getVerticalScrollBar().setUnitIncrement(15);
+    objects_owned_panel = new ownershipPanel(parent.isEditable(), parent);
+    contentPane.setViewportView(objects_owned_panel);
   }
 
-  public void cleanup()
+  public void update()
   {
-    this.category = null;
+  }
+
+  public void dispose()
+  {
+    if (contentPane != null)
+      {
+	contentPane.removeAll();
+	contentPane = null;
+      }
+
+    if (objects_owned_panel != null)
+      {
+	objects_owned_panel.dispose();
+	objects_owned_panel = null;
+      }
+
+    super.dispose();
   }
 }

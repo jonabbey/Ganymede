@@ -227,6 +227,55 @@ public class ownershipPanel extends JPanel implements ItemListener {
   {
     System.out.println("OwnershipPanel: " + s);
   }
+
+  public void dispose()
+  {
+    parent = null;
+    gc = null;
+    removeAll();
+
+    if (center != null)
+      {
+	center.removeAll();
+	center = null;
+      }
+
+    bases = null;
+
+    if (objects_owned != null)
+      {
+	objects_owned.clear();
+	objects_owned = null;
+      }
+
+    if (paneHash != null)
+      {
+	paneHash.clear();
+	paneHash = null;
+      }
+
+    cards = null;
+
+    if (owners != null)
+      {
+	owners.clear();
+	owners = null;
+      }
+
+    if (result != null)
+      {
+	result.clear();
+	result = null;
+      }
+
+    if (holder != null)
+      {
+	holder.removeAll();
+	holder = null;
+      }
+
+    node = null;
+  }
 }
 
 /*------------------------------------------------------------------------------

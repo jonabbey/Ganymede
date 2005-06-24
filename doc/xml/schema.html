@@ -104,23 +104,25 @@
             &lt;objectdef name="System_Events" id="4"&gt;
               &lt;classdef name="arlut.csd.ganymede.eventCustom"/&gt;
               &lt;label fieldid="100"/&gt;
-              &lt;fielddef name="Event_Token" id="100"&gt;
-                &lt;comment&gt;Single-word token for this event class&lt;/comment&gt;
-                &lt;typedef type="string"&gt;
-                  &lt;maxlength val="32"/&gt;
-                  &lt;badchars val=" |"/&gt;
-                  &lt;namespace val="eventtoken"/&gt;
-                &lt;/typedef&gt;
-              &lt;/fielddef&gt;
-              &lt;fielddef name="Event_Mail" id="103"&gt;
-                &lt;comment&gt;If true, events of this type should be mailed&lt;/comment&gt;
-                &lt;typedef type="boolean"/&gt;
-              &lt;/fielddef&gt;
-              &lt;fielddef name="Mail_List" id="107"&gt;
-                &lt;typedef type="string"&gt;
-                  &lt;vector/&gt;
-                &lt;/typedef&gt;
-              &lt;/fielddef&gt;
+              &lt;tab name="General"/&gt;
+                &lt;fielddef name="Event_Token" id="100"&gt;
+                  &lt;comment&gt;Single-word token for this event class&lt;/comment&gt;
+                  &lt;typedef type="string"&gt;
+                    &lt;maxlength val="32"/&gt;
+                    &lt;badchars val=" |"/&gt;
+                    &lt;namespace val="eventtoken"/&gt;
+                  &lt;/typedef&gt;
+                &lt;/fielddef&gt;
+                &lt;fielddef name="Event_Mail" id="103"&gt;
+                  &lt;comment&gt;If true, events of this type should be mailed&lt;/comment&gt;
+                  &lt;typedef type="boolean"/&gt;
+                &lt;/fielddef&gt;
+                &lt;fielddef name="Mail_List" id="107"&gt;
+                  &lt;typedef type="string"&gt;
+                    &lt;vector/&gt;
+                  &lt;/typedef&gt;
+                &lt;/fielddef&gt;
+              &lt;/tab&gt;
             &lt;/objectdef&gt;
           &lt;/category&gt;
         &lt;/category&gt;
@@ -130,10 +132,11 @@
 
     <p>This example is of a small portion of a Ganymede server's
     schema definition.  This fragment shows an object type called
-    'System Events' which has three fields defined; a scalar string
-    field called 'Event Token' which is connected to the 'eventtoken'
-    namespace, a boolean checkbox field caleld 'Event Mail', and a
-    vector string field called 'Mail List'.</p>
+    'System Events' which holds a single tab, 'General, containing
+    three fields; a scalar string field called 'Event Token' which is
+    connected to the 'eventtoken' namespace, a boolean checkbox field
+    called 'Event Mail', and a vector string field called 'Mail
+    List'.</p>
 
     <p>The 'System Events' object is contained within an 'Events'
     category, which is contained in turn within a 'Admin-Level
@@ -245,14 +248,35 @@
     </pre>
 
     <p>Once the optional elements are out of the way, we get down to
-    the meat of an object definition element.. the fields.  The
-    <b>objectdef</b> element will typically contain a series of
-    <b>fielddef</b> elements, one for each field defined in this
-    object type.  These <b>fielddef</b> elements are listed in
-    the order they should appear in the client.  The first <b>fielddef</b>
-    element in an <b>objectdef</b> element will appear at the
-    top of the object editing window in the Ganymede client, with
-    subsequent <b>fielddef</b>'s in order below the first.</p>
+    the meat of an object definition element.. the fields, and the
+    tabs they are contained in.  The <b>objectdef</b> element contains
+    a series of one or more <b>tab</b> elements.  These <b>tab</b>
+    elements, in turn, contain <b>fielddef</b> elements, one for each
+    field defined in this object type.  These <b>fielddef</b> elements
+    are listed in the order they should appear in the client.  The
+    first <b>fielddef</b> element in an <b>tab</b> element will appear
+    at the top of the object editing window in the Ganymede client,
+    with subsequent <b>fielddef</b>'s in the same <b>tab</b> in order
+    below the first.</p>
+
+    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+      <tr BGCOLOR="#CCCCFF">
+	<td colspan="1" align="right"><h3><b>&lt;tab&gt;</b></h3></td></tr></table>
+
+    <p>The <b>tab</b> element is a container for <b>fielddef</b>
+    elements.  It has a single attribute, <b>name</b>, which contains
+    the name of the tab.</p>
+
+    <p>The Ganymede client uses the <b>tab</b> structure to display
+    the collection of user-defined fields contained within an
+    <b>objectdef</b> element split across the named tabs defined on
+    the server.</p>
+
+    <p>In all other contents (logging, email, the contents of the XML
+    <b>&lt;ganydata&gt;</b> element), the <b>tab</b> information is
+    irrelevant, and will not be included.  In particular, this means
+    that field names have to be unique across an entire object
+    definition, and not merely unique within a tab.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
@@ -768,140 +792,142 @@
           &lt;objectdef name="User" id="3"&gt;
             &lt;classdef name="arlut.csd.ganymede.gasharl.userCustom"/&gt;
             &lt;label fieldid="100"/&gt;
-            &lt;fielddef name="Username" id="100"&gt;
-              &lt;comment&gt;User name for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;
-              &lt;typedef type="string"&gt;
-                &lt;maxlength val="8"/&gt;
-                &lt;badchars val=" :"/&gt;
-                &lt;namespace val="username"/&gt;
-                &lt;regexp val="^[a-z]+[a-z|\d]*$" desc="User names may consist of letters and numbers, but must begin with a letter"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="UID" id="256"&gt;
-              &lt;typedef type="numeric"&gt;
-                &lt;namespace val="uid"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Password" id="101"&gt;
-              &lt;comment&gt;Password for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;
-              &lt;typedef type="password"&gt;
-                &lt;minlength val="3"/&gt;
-                &lt;maxlength val="32"/&gt;
-                &lt;crypted/&gt;
-                &lt;plaintext/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Account_Category" id="273"&gt;
-              &lt;typedef type="invid"&gt;
-                &lt;targetobject name="User_Category"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Full_Name" id="257"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;maxlength val="64"/&gt;
-                &lt;badchars val=":,"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Social_Security" id="274"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;okchars val="0123456789-"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Division" id="258"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;maxlength val="32"/&gt;
-                &lt;badchars val=":,"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Room" id="259"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;maxlength val="32"/&gt;
-                &lt;badchars val=": ,"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Office_Phone" id="260"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;maxlength val="16"/&gt;
-                &lt;badchars val=":"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Home_Phone" id="261"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;maxlength val="16"/&gt;
-                &lt;badchars val=":, "/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Groups" id="264"&gt;
-              &lt;comment&gt;List of non-primary groups the user is a member of.  
+            &lt;tab name="General"/&gt;
+              &lt;fielddef name="Username" id="100"&gt;
+                &lt;comment&gt;User name for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="8"/&gt;
+                  &lt;badchars val=" :"/&gt;
+                  &lt;namespace val="username"/&gt;
+                  &lt;regexp val="^[a-z]+[a-z|\d]*$" desc="User names may consist of letters and numbers, but must begin with a letter"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="UID" id="256"&gt;
+                &lt;typedef type="numeric"&gt;
+                  &lt;namespace val="uid"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Password" id="101"&gt;
+                &lt;comment&gt;Password for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;
+                &lt;typedef type="password"&gt;
+                  &lt;minlength val="3"/&gt;
+                  &lt;maxlength val="32"/&gt;
+                  &lt;crypted/&gt;
+                  &lt;plaintext/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Account_Category" id="273"&gt;
+                &lt;typedef type="invid"&gt;
+                  &lt;targetobject name="User_Category"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Full_Name" id="257"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="64"/&gt;
+                  &lt;badchars val=":,"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Social_Security" id="274"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;okchars val="0123456789-"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Division" id="258"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="32"/&gt;
+                  &lt;badchars val=":,"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Room" id="259"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="32"/&gt;
+                  &lt;badchars val=": ,"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Office_Phone" id="260"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="16"/&gt;
+                  &lt;badchars val=":"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Home_Phone" id="261"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="16"/&gt;
+                  &lt;badchars val=":, "/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Groups" id="264"&gt;
+                &lt;comment&gt;List of non-primary groups the user is a member of.  
 Limited to 16 for NFS.&lt;/comment&gt;
-              &lt;typedef type="invid"&gt;
-                &lt;vector maxSize="16"/&gt;
-                &lt;targetobject name="Group"/&gt;
-                &lt;targetfield name="Users"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Home_Group" id="265"&gt;
-              &lt;typedef type="invid"&gt;
-                &lt;targetobject name="Group"/&gt;
-                &lt;targetfield name="Home_Users"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Login_Shell" id="263"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;maxlength val="128"/&gt;
-                &lt;badchars val=" :"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Home_Directory" id="262"&gt;
-              &lt;comment&gt;UNIX default directory, normally assigned by Ganymede&lt;/comment&gt;
-              &lt;typedef type="string"&gt;
-                &lt;maxlength val="128"/&gt;
-                &lt;badchars val=" :"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Admin_Personae" id="102"&gt;
-              &lt;comment&gt;A list of admin personae this user can assume&lt;/comment&gt;
-              &lt;typedef type="invid"&gt;
-                &lt;vector/&gt;
-                &lt;targetobject name="Admin_Persona"/&gt;
-                &lt;targetfield name="User"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Netgroups" id="266"&gt;
-              &lt;typedef type="invid"&gt;
-                &lt;vector/&gt;
-                &lt;targetobject name="User_Netgroup"/&gt;
-                &lt;targetfield name="Users"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Directory_Volume" id="271"&gt;
-              &lt;typedef type="invid"&gt;
-                &lt;vector/&gt;
-                &lt;targetobject name="Embedded_Automounter_Map_Entry"/&gt;
-                &lt;targetfield name="Containing_Object"/&gt;
-                &lt;embedded/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Email_Aliases" id="267"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;vector/&gt;
-                &lt;maxlength val="32"/&gt;
-                &lt;badchars val="@"/&gt;
-                &lt;namespace val="username"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Signature_Alias" id="268"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;maxlength val="32"/&gt;
-                &lt;badchars val="@"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
-            &lt;fielddef name="Email_target" id="269"&gt;
-              &lt;typedef type="string"&gt;
-                &lt;vector/&gt;
-                &lt;badchars val=":"/&gt;
-              &lt;/typedef&gt;
-            &lt;/fielddef&gt;
+                &lt;typedef type="invid"&gt;
+                  &lt;vector maxSize="16"/&gt;
+                  &lt;targetobject name="Group"/&gt;
+                  &lt;targetfield name="Users"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Home_Group" id="265"&gt;
+                &lt;typedef type="invid"&gt;
+                  &lt;targetobject name="Group"/&gt;
+                  &lt;targetfield name="Home_Users"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Login_Shell" id="263"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="128"/&gt;
+                  &lt;badchars val=" :"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Home_Directory" id="262"&gt;
+                &lt;comment&gt;UNIX default directory, normally assigned by Ganymede&lt;/comment&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="128"/&gt;
+                  &lt;badchars val=" :"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Admin_Personae" id="102"&gt;
+                &lt;comment&gt;A list of admin personae this user can assume&lt;/comment&gt;
+                &lt;typedef type="invid"&gt;
+                  &lt;vector/&gt;
+                  &lt;targetobject name="Admin_Persona"/&gt;
+                  &lt;targetfield name="User"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Netgroups" id="266"&gt;
+                &lt;typedef type="invid"&gt;
+                  &lt;vector/&gt;
+                  &lt;targetobject name="User_Netgroup"/&gt;
+                  &lt;targetfield name="Users"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Directory_Volume" id="271"&gt;
+                &lt;typedef type="invid"&gt;
+                  &lt;vector/&gt;
+                  &lt;targetobject name="Embedded_Automounter_Map_Entry"/&gt;
+                  &lt;targetfield name="Containing_Object"/&gt;
+                  &lt;embedded/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Email_Aliases" id="267"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;vector/&gt;
+                  &lt;maxlength val="32"/&gt;
+                  &lt;badchars val="@"/&gt;
+                  &lt;namespace val="username"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Signature_Alias" id="268"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;maxlength val="32"/&gt;
+                  &lt;badchars val="@"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+              &lt;fielddef name="Email_target" id="269"&gt;
+                &lt;typedef type="string"&gt;
+                  &lt;vector/&gt;
+                  &lt;badchars val=":"/&gt;
+                &lt;/typedef&gt;
+              &lt;/fielddef&gt;
+            &lt;/tab&gt;
           &lt;/objectdef&gt;
     </pre>
 

@@ -94,6 +94,8 @@ import arlut.csd.JTree.treeDragDropCallback;
 import arlut.csd.JTree.treeMenu;
 import arlut.csd.JTree.treeNode;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.StringUtils;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.CatTreeNode;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.Base;
@@ -119,6 +121,23 @@ import arlut.csd.ganymede.rmi.SchemaEdit;
 public class GASHSchema extends JFrame implements treeCallback, treeDragDropCallback, ActionListener {
 
   public static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede system.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHSchema");
+
+  public static final int OPENFOLDERICON = 0;
+  public static final int CLOSEDFOLDERICON = 1;
+  public static final int BASEICON = 2;
+  public static final int FIELDICON = 3;
+  public static final int EMBEDDEDBASEICON = 4;
+  public static final int OPENTAB = 5;
+  public static final int CLOSEDTAB = 6;
+
+  public static final int IMAGECOUNT = 7;
 
   // --
 
@@ -153,12 +172,18 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     deleteObjectMI = null,
     createNameMI = null,
     deleteNameMI = null,
+    createTabMI = null,
+    deleteTabMI = null,
     createFieldMI = null,
-    deleteFieldMI = null;
+    deleteFieldMI = null,
+    createEmbeddedFieldMI = null,
+    deleteEmbeddedObjectMI = null;
   
   treeMenu
     categoryMenu = null,
     baseMenu = null,
+    embeddedBaseMenu = null,
+    tabMenu = null,
     fieldMenu = null,
     nameSpaceMenu = null,
     nameSpaceObjectMenu = null;
@@ -171,7 +196,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     attribPane,
     attribCardPane,
     emptyPane,
-    categoryEditPane;
+    categoryEditPane,
+    tabEditPane;
 
   JScrollPane
     fieldEditPane,
@@ -189,6 +215,9 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   CategoryEditor
     ce;				// contains remote ref
+
+  TabEditor
+    te;
   
   boolean
     showingBase,
@@ -277,6 +306,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     ce = new CategoryEditor(this);
     categoryEditPane.add("Center", ce);
 
+    // set up the tab editor
+
+    tabEditPane = new JPanel();
+    tabEditPane.setLayout(new java.awt.BorderLayout());
+
+    te = new TabEditor(this);
+    tabEditPane.add("Center", te);
+
     // set up the empty card
 
     emptyPane = new JPanel();
@@ -289,6 +326,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     attribCardPane.add("field", fieldEditPane);
     attribCardPane.add("name", namespaceEditPane);
     attribCardPane.add("category", categoryEditPane);
+    attribCardPane.add("tab", tabEditPane);
 
     attribPane.add("Center", attribCardPane);
 
@@ -296,7 +334,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     JPanel rightTop = new JPanel(false);
     rightTop.setBorder(statusBorderRaised);
-    JLabel rightL = new JLabel("Attributes");
+
+    // "Attributes"
+    JLabel rightL = new JLabel(ts.l("init.attributeLabel"));
+
     rightTop.setLayout(new BorderLayout());
     rightTop.add("Center", rightL);
     
@@ -308,10 +349,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     buttonPane = new JPanel();
 
-    okButton = new JButton("ok");
+    // "Ok"
+    okButton = new JButton(ts.l("global.ok"));
     okButton.addActionListener(this);
 
-    cancelButton = new JButton("cancel");
+    // "Cancel"
+    cancelButton = new JButton(ts.l("global.cancel"));
     cancelButton.addActionListener(this);
 
     buttonPane.add(okButton);
@@ -327,13 +370,15 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     //
     //
 
-    treeImages = new java.awt.Image[5];
+    treeImages = new java.awt.Image[IMAGECOUNT];
 
-    treeImages[0] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
-    treeImages[1] = PackageResources.getImageResource(this, "folder.gif", getClass());
-    treeImages[2] = PackageResources.getImageResource(this, "list.gif", getClass());
-    treeImages[3] = PackageResources.getImageResource(this, "i043.gif", getClass());
-    treeImages[4] = PackageResources.getImageResource(this, "transredlist.gif", getClass());
+    treeImages[OPENFOLDERICON] = PackageResources.getImageResource(this, "openfolder.gif", getClass());
+    treeImages[CLOSEDFOLDERICON] = PackageResources.getImageResource(this, "folder.gif", getClass());
+    treeImages[BASEICON] = PackageResources.getImageResource(this, "list.gif", getClass());
+    treeImages[FIELDICON] = PackageResources.getImageResource(this, "i043.gif", getClass());
+    treeImages[EMBEDDEDBASEICON] = PackageResources.getImageResource(this, "transredlist.gif", getClass());
+    treeImages[OPENTAB] = PackageResources.getImageResource(this, "opentab.gif", getClass());
+    treeImages[CLOSEDTAB] = PackageResources.getImageResource(this, "closedtab.gif", getClass());
 
     tree = new treeControl(new java.awt.Font("SansSerif",java.awt.Font.BOLD, 12),
 			   java.awt.Color.black, java.awt.Color.white, this, treeImages,
@@ -352,7 +397,9 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     JPanel leftTop = new JPanel(false);
     leftTop.setBorder(statusBorderRaised);
-    JLabel leftL = new JLabel("Schema Objects");
+
+    // "Schema Objects"
+    JLabel leftL = new JLabel(ts.l("init.schemaObjectsLabel"));
     leftTop.setLayout(new BorderLayout());
 
     leftTop.add("Center", leftL);
@@ -378,10 +425,17 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     categoryMenu = new treeMenu();
 
-    createCategoryMI = new javax.swing.JMenuItem("Create Category");
-    deleteCategoryMI = new javax.swing.JMenuItem("Delete Category");
-    createObjectMI = new javax.swing.JMenuItem("Create Object Type");
-    createInternalObjectMI = new javax.swing.JMenuItem("Create Embedded Object Type");
+    // "Create Category"
+    createCategoryMI = new javax.swing.JMenuItem(ts.l("init.createCategoryMenu"));
+
+    // "Delete Category"
+    deleteCategoryMI = new javax.swing.JMenuItem(ts.l("init.deleteCategoryMenu"));
+
+    // "Create Object Type"
+    createObjectMI = new javax.swing.JMenuItem(ts.l("init.createBaseMenu"));
+
+    // "Create Embedded Object Type"
+    createInternalObjectMI = new javax.swing.JMenuItem(ts.l("init.createEmbeddedMenu"));
 
     categoryMenu.add(createCategoryMI);
     categoryMenu.add(deleteCategoryMI);
@@ -390,30 +444,65 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     // namespace menu
 
-    nameSpaceMenu = new treeMenu("Namespace Menu");
-    createNameMI = new javax.swing.JMenuItem("Create Namespace");
+    // "Namespace Menu"
+    nameSpaceMenu = new treeMenu(ts.l("init.namespaceMenu"));
+
+    // "Create Namespace"
+    createNameMI = new javax.swing.JMenuItem(ts.l("init.createNamespaceMenu"));
     nameSpaceMenu.add(createNameMI);
 
     // namespace object menu
 
     nameSpaceObjectMenu = new treeMenu();
-    deleteNameMI = new javax.swing.JMenuItem("Delete Namespace");
+
+    // "Delete Namespace"
+    deleteNameMI = new javax.swing.JMenuItem(ts.l("init.deleteNamespaceMenu"));
     nameSpaceObjectMenu.add(deleteNameMI);
 
     // base menu
 
-    baseMenu = new treeMenu("Base Menu");
-    deleteObjectMI = new javax.swing.JMenuItem("Delete Object Type");
-    createFieldMI = new javax.swing.JMenuItem("Create Field");
+    // "Object Menu"
+    baseMenu = new treeMenu(ts.l("init.baseMenu"));
 
-    baseMenu.add(createFieldMI);
+    // "Delete Object Type"
+    deleteObjectMI = new javax.swing.JMenuItem(ts.l("init.deleteBaseMenu"));
+
+    // "Create Tab"
+    createTabMI = new javax.swing.JMenuItem(ts.l("init.createTabMenu"));
 
     baseMenu.add(deleteObjectMI);
+    baseMenu.add(createTabMI);
+
+    // tab menu
+
+    // "Tab Menu"
+    tabMenu = new treeMenu(ts.l("init.tabMenu"));
+
+    // "Create Field"
+    createFieldMI = new javax.swing.JMenuItem(ts.l("init.createFieldMenu"));
+
+    tabMenu.add(createFieldMI);
+
+    // "Embedded Object Menu"
+    embeddedBaseMenu = new treeMenu(ts.l("init.embeddedBaseMenu"));
+
+    // "Delete Object Type"
+    deleteEmbeddedObjectMI = new javax.swing.JMenuItem(ts.l("init.deleteBaseMenu"));
+
+    // "Create Field"
+    createEmbeddedFieldMI = new javax.swing.JMenuItem(ts.l("init.createFieldMenu"));
+
+    embeddedBaseMenu.add(deleteEmbeddedObjectMI);
+    embeddedBaseMenu.add(createEmbeddedFieldMI);
 
     // field menu
 
-    fieldMenu = new treeMenu("Field Menu");
-    deleteFieldMI = new javax.swing.JMenuItem("Delete Field");
+    // "Field Menu"
+    fieldMenu = new treeMenu(ts.l("init.fieldMenu"));
+
+    // "Delete Field"
+    deleteFieldMI = new javax.swing.JMenuItem(ts.l("init.deleteFieldMenu"));
+
     fieldMenu.add(deleteFieldMI);
 
     //
@@ -442,8 +531,9 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     tree.setRoot(objects);
 
     // create namespaces node
-	
-    namespaces = new treeNode(null, "Namespaces", objects, true, 0, 1, nameSpaceMenu);
+
+    // "Namespaces"	
+    namespaces = new treeNode(null, ts.l("init.namespaceNodeText"), objects, true, 0, 1, nameSpaceMenu);
     tree.insertNode(namespaces, false);
     
     nodeAfterCategories = namespaces;
@@ -472,14 +562,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
    */
 
   public SchemaEdit getSchemaEdit()
-    {
-      if (editor == null)
-	{
-	  System.out.println("editor is null in GASHSchema");
-	}
-
-      return editor;
-    }
+  {
+    if (editor == null)
+      {
+	System.out.println("editor is null in GASHSchema");
+      }
+    
+    return editor;
+  }
 
   void initializeDisplayTree()
   {
@@ -556,12 +646,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	if (base.isEmbedded())
 	  {
 	    newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-				   false, 4, 4, baseMenu);
+				   false, EMBEDDEDBASEICON, EMBEDDEDBASEICON, baseMenu);
 	  }
 	else
 	  {
 	    newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-				   false, 2, 2, baseMenu);
+				   false, BASEICON, BASEICON, baseMenu);
 	  }
       }
     else if (node instanceof Category)
@@ -569,121 +659,204 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	Category category = (Category) node;
 
 	newNode = new CatTreeNode(parentNode, category.getName(), category,
-				  prevNode, true, 0, 1, categoryMenu);
+				  prevNode, true, OPENFOLDERICON, CLOSEDFOLDERICON, categoryMenu);
       }
 
     tree.insertNode(newNode, true);
 
     if (newNode instanceof BaseNode)
       {
-	refreshFields((BaseNode)newNode, false);
+	refreshFields((BaseNode)newNode, false, true);
       }
 
     return newNode;
   }
 
   /**
-   *
-   * This method generates the per-field children of the specified baseNode.
-   *
+   * This method deletes all tab and field nodes contained under a
+   * BaseNode in the tree and regenerates all the nodes from the
+   * base's current fields on the server.
    */
 
-  void refreshFields(BaseNode node, boolean doRefresh) throws RemoteException
+  void refreshFields(BaseNode baseNode, boolean doRefresh, boolean openAllTabs) throws RemoteException
   {
     Base base;
-    BaseField field, fields[];
+    BaseField field;
     Vector vect;
-    BaseNode parentNode;
-    FieldNode oldNode, newNode, fNode;
-    int i;
+    FieldNode oldNode, newNode;
+    TabNode tabNode;
+    boolean openAtStart;
+    String tabString = null, oldTabString = null;
+    boolean needTabs = true;
+    Hashtable tabNodes = null;
 
     /* -- */
 
-    base = node.getBase();
+    // the tree.removeChildren call will collapse the folder if it is
+    // open.. remember whether it (and any tab folders underneath it)
+    // were open before our call so that we can restore the open
+    // states before the tree is repainted
+
+    openAtStart = baseNode.isOpen();
+
+    if (!openAllTabs && baseNode.getChild() instanceof TabNode)
+      {
+	tabNodes = new Hashtable();
+	tabNode = (TabNode) baseNode.getChild();
+
+	while (tabNode != null)
+	  {
+	    tabNodes.put(tabNode.getText(), new Boolean(tabNode.isOpen()));
+	    tabNode = (TabNode) tabNode.getNextSibling();
+	  }
+      }
+
+    tree.removeChildren(baseNode, false);
+
+    base = baseNode.getBase();
+
+    if (base.isEmbedded())
+      {
+	needTabs = false;
+      }
 
     // get the list of fields we want to display
     // note that we don't want to show built-in fields
 
     vect = base.getFields(false);
 
-    // we copy the fields into a local array for historical reasons,
-    // plus laziness..  no good reason to do this anymore, but no
-    // pressing reason to mess with it, either
+    // our algorithm is as follows.  we go over the list of fields
+    // from the object base in display order.  at the start, we create
+    // a tab node with the name of the tab string specified in the
+    // first field in the object base.  If the first field has a
+    // 'null' tab string, we'll use
+    // ts.l("global.defaultTabName")
 
-    fields = new BaseField[vect.size()];
-    
-    for (i = 0; i < fields.length; i++)
-      {
-	fields[i] = (BaseField) vect.elementAt(i);
-      }
+    // from this point on, we iterate through the list.  whenever we
+    // look at a new field, we check the tab string.  if it is the
+    // same as the last one, we'll just add the field.  if it
+    // different, we'll pop up one level and add a new tab node to the
+    // base children and then add the field there under.
 
-    parentNode = node;
     oldNode = null;
-    fNode = (FieldNode) node.getChild();
-    i = 0;
+    tabNode = null;
 
-    // this loop here is intended to do a minimum-work updating of a
-    // field list, using a ratcheting algorithm similar to that used
-    // in gclient.refreshObjects().
-	
-    while ((i < fields.length) || (fNode != null))
+    for (int i = 0; i < vect.size(); i++)
       {
-	if (i < fields.length)
+	field = (BaseField) vect.elementAt(i);
+
+	if (needTabs)
 	  {
-	    field = fields[i];
-	  }
-	else
-	  {
-	    field = null;
-	  }
+	    tabString = field.getTabName();
 
-	if ((fNode == null) ||
-	    ((field != null) && 
-	     (field.getID() < fNode.getField().getID())))
-	  {
-	    // insert a new field node
-
-	    newNode = new FieldNode(parentNode, field.getName(), field,
-				    oldNode, false, 3, 3, fieldMenu);
-
-	    tree.insertNode(newNode, true);
-
-	    oldNode = newNode;
-	    fNode = (FieldNode) oldNode.getNextSibling();
-
-	    i++;
-	  }
-	else if ((field == null) ||
-		 (field.getID() > fNode.getField().getID()))
-	  {
-	    // delete a field node
-
-	    if (showingField && (fe.fieldDef == fNode.getField()))
+	    if (tabString == null)
 	      {
-		card.show(attribCardPane, "empty");
+		tabString = ts.l("global.defaultTabName"); // "General"
 	      }
 
-	    // System.err.println("Deleting: " + fNode.getText());
-	    newNode = (FieldNode) fNode.getNextSibling();
-	    tree.deleteNode(fNode, false);
+	    if (!StringUtils.stringEquals(tabString, oldTabString))
+	      {
+		tabNode = new TabNode(baseNode, tabString, tabNode, // we insert after the old tabnode, if non-null
+				      true, OPENTAB, CLOSEDTAB, tabMenu);
 
-	    fNode = newNode;
+		tree.insertNode(tabNode, false);
+
+		// if we previously saw this tab node and it was open,
+		// keep it open here
+
+		if (openAllTabs || (tabNodes != null &&tabNodes.containsKey(tabString) && ((Boolean) tabNodes.get(tabString)).booleanValue()))
+		  {
+		    tree.expandNode(tabNode, false);
+		  }
+
+		// since we're creating a new tab node for the rest of the
+		// fields to be added with, we want to clear the oldNode
+		// reference which we are using to handle setting
+		// 'prevSibling' at field node creation time.
+
+		oldNode = null;
+		oldTabString = tabString;
+	      }
+
+	    newNode = new FieldNode(tabNode, field.getName(), field, oldNode,
+				    false, FIELDICON, FIELDICON, fieldMenu);
 	  }
 	else
 	  {
-	    fNode.setText(field.getName());
-	    // System.err.println("Setting: " + field.getName());
-
-	    oldNode = fNode;
-	    fNode = (FieldNode) oldNode.getNextSibling();
-
-	    i++;
+	    newNode = new FieldNode(baseNode, field.getName(), field, oldNode,
+				    false, FIELDICON, FIELDICON, fieldMenu);
 	  }
+
+	tree.insertNode(newNode, false);
+
+	oldNode = newNode;
       }
 
+    if (openAtStart)
+      {
+	tree.expandNode(baseNode, false, false);
+      }
+      
     if (doRefresh)
       {
 	tree.refresh();
+      }
+  }
+
+  /**
+   * This method scans nodes under a BaseNode in the tree, looking for
+   * tabs and fields, and sets the appropriate tab names and field
+   * ordering, using the tree as the template.
+   *
+   * This method basically does the reverse of refreshFields().
+   */
+
+  void syncFieldsFromTree(BaseNode bNode) throws RemoteException
+  {
+    Base base = bNode.getBase();
+    TabNode tNode;
+    FieldNode fNode;
+    String previousFieldName;
+
+    /* -- */
+
+    if (!base.isEmbedded())
+      {
+	tNode = (TabNode) bNode.getChild();
+	previousFieldName = null;
+
+	while (tNode != null)
+	  {
+	    fNode = (FieldNode) tNode.getChild();
+
+	    while (fNode != null)
+	      {
+		BaseField bF = fNode.getField();
+		bF.setTabName(tNode.getText());
+		
+		base.moveFieldAfter(fNode.getText(), previousFieldName);
+		previousFieldName = fNode.getText();
+		
+		fNode = (FieldNode) fNode.getNextSibling();
+	      }
+
+	    tNode = (TabNode) tNode.getNextSibling();
+	  }
+      }
+    else
+      {
+	fNode = (FieldNode) bNode.getChild();
+	previousFieldName = null;
+
+	while (fNode != null)
+	  {
+	    BaseField bF = fNode.getField();
+		
+	    base.moveFieldAfter(fNode.getText(), previousFieldName);
+	    previousFieldName = fNode.getText();
+	    
+	    fNode = (FieldNode) fNode.getNextSibling();
+	  }
       }
   }
 
@@ -709,14 +882,13 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	try 
 	  {
 	    SpaceNode newNode = new SpaceNode(namespaces, spaces[i].getName(), spaces[i], 
-					      null, false, 2, 2, nameSpaceObjectMenu);
+					      null, false, BASEICON, BASEICON, nameSpaceObjectMenu);
 	    tree.insertNode(newNode, true);
 	  }
 	catch (RemoteException e)
 	  {
 	    System.out.println("Exception getting NameSpaces: " + e);
 	  }
-
       }
 
     if (isOpen)
@@ -814,6 +986,29 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     validate();
   }
 
+  void editTab(TabNode node)
+  {
+    if (showingField)
+      {
+	fe.switchAway();
+      }
+
+    te.editTab(node);
+    card.show(attribCardPane, "tab");
+
+    showingBase = false;
+    showingField = false;
+
+    // if we switch back to the field editor
+    // or base editor, they need to know that they'll
+    // need to refresh
+
+    fe.fieldNode = null;
+    be.baseNode = null;
+
+    validate();
+  }
+
   public void setWaitCursor()
   {
     this.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
@@ -859,6 +1054,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  }
 
 	editNameSpace((SpaceNode) node);
+      }
+    else if (node instanceof TabNode)
+      {
+	editTab((TabNode) node);
       }
     else if (node instanceof CatTreeNode)
       {
@@ -915,8 +1114,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     return;
   }
 
-  public void treeNodeMenuPerformed(treeNode node,
-				    java.awt.event.ActionEvent event)
+  public void treeNodeMenuPerformed(treeNode node, java.awt.event.ActionEvent event)
   {
     String nodeText;
 
@@ -951,11 +1149,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      }
 	    
 	    CatTreeNode newNode = new CatTreeNode(node, newCategory.getName(), newCategory,
-						  n, true, 0, 1, categoryMenu);
+						  n, true, OPENFOLDERICON, CLOSEDFOLDERICON, categoryMenu);
 
 	    tree.insertNode(newNode, false);
-	    
-	    tree.expandNode(node, true);
+	    tree.expandNode(node, false);
+	    tree.refresh();
 
 	    editCategory(newNode);
 	  }
@@ -972,10 +1170,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	if (node == objects)
 	  {
+	    // "Error: Category not removable"
+	    // "You are not allowed to remove the root category node."
 	    new StringDialog(this,
-			     "Error:  Category not removable",
-			     "You are not allowed to remove the root category node.",
-			     "Ok",
+			     ts.l("treeNodeMenuPerformed.mandatory_category"),
+			     ts.l("treeNodeMenuPerformed.root_category_delete"),
+			     ts.l("global.ok"),
 			     null).DialogShow();
 	    return;
 	  }
@@ -984,18 +1184,22 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    if (category.getNodes().size() != 0)
 	      {
+		// "Error: Category not removable"
+		// "This category has nodes under it.  You must remove the contents before deleting this category."
 		new StringDialog(this,
-				 "Error:  Category not removable",
-				 "This category has nodes under it.  You must remove the contents before deleting this category.",
-				 "Ok",
+				 ts.l("treeNodeMenuPerformed.mandatory_category"),
+				 ts.l("treeNodeMenuPerformed.category_not_empty"),
+				 ts.l("global.ok"),
 				 null).DialogShow();
 		return;
 	      }
 
-	    dialogResource = new DialogRsrc(this, 
-					    "Delete category", 
-					    "Are you sure you want to delete category " + category.getPath() + "?",
-					    "Delete", "Cancel", 
+	    // "Delete Category"
+	    // "Are you sure you want to delete category {0}?"
+	    dialogResource = new DialogRsrc(this,
+					    ts.l("treeNodeMenuPerformed.delete_category"),
+					    ts.l("treeNodeMenuPerformed.verify_delete_category", node.getText()),
+					    ts.l("treeNodeMenuPerformed.deleteButton"), ts.l("global.cancel"),
 					    questionImage);
 
 	    Hashtable results = new StringDialog(dialogResource).DialogShow();
@@ -1021,15 +1225,19 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    Base newBase = editor.createNewBase(category, false, false);
 	    
 	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
-					    null, false, 2, 2, baseMenu);
+					    null, false, BASEICON, BASEICON, baseMenu);
 
 	    tree.insertNode(newNode, false);
-
 	    tree.expandNode(node, false);
+	    refreshFields(newNode, true, false);
+	    tree.unselectAllNodes(true);
+	    tree.selectNode(newNode); // triggers an editBase call on the node
 
-	    refreshFields(newNode, true);
-
-	    editBase(newNode);
+	    TabNode genTabNode = new TabNode(newNode, ts.l("global.defaultTabName"), null,
+					     true, OPENTAB, CLOSEDTAB, tabMenu);
+	    tree.expandNode(newNode, false);
+	    tree.insertNode(genTabNode, false);
+	    tree.refresh();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1045,15 +1253,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    Base newBase = editor.createNewBase(category, true, false);
 	    
 	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
-					    null, false, 4, 4, baseMenu);
+					    null, false, EMBEDDEDBASEICON, EMBEDDEDBASEICON, embeddedBaseMenu);
 
 	    tree.insertNode(newNode, false);
-
 	    tree.expandNode(node, false);
-
-	    refreshFields(newNode, true);
-
-	    editBase(newNode);
+	    refreshFields(newNode, true, false);
+	    tree.unselectAllNodes(true);
+	    tree.selectNode(newNode); // triggers an editBase call on the node
+	    tree.refresh();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1067,14 +1274,17 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    System.out.println("Create namespace chosen");
 	  }
 
-	DialogRsrc dialogResource = new DialogRsrc(this, 
-						   "Create new namespace", 
-						   "Create a new namespace", 
-						   "Create", "Cancel", 
+	// "Create New Namespace"
+	// "Enter the name of the namespace you want to create, and select the checkbox if you want this namespace to be case insensitive."
+	DialogRsrc dialogResource = new DialogRsrc(this,
+						   ts.l("treeNodeMenuPerformed.create_namespace_title"),
+						   ts.l("treeNodeMenuPerformed.create_namespace_text"),
+						   ts.l("treeNodeMenuPerformed.createButton"),
+						   ts.l("global.cancel"),
 						   questionImage);
 
-	dialogResource.addString("Namespace:");
-	dialogResource.addBoolean("Case Insensitive:");
+	dialogResource.addString(ts.l("treeNodeMenuPerformed.namespace_name_field")); // "Namespace:"
+	dialogResource.addBoolean(ts.l("treeNodeMenuPerformed.namespace_case_field")); // "Case Insensitive:"
 
 	Hashtable results = new StringDialog(dialogResource).DialogShow();
 
@@ -1106,7 +1316,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 		if (ob instanceof String) 
 		  {
-		    if (label == "Namespace:")
+		    if (label.equals(ts.l("treeNodeMenuPerformed.namespace_name_field")))
 		      {
 			if (debug)
 			  {
@@ -1115,7 +1325,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 			newNameSpace = (String)ob;
 		      }
-		    else
+		    else if (debug)
 		      {
 			System.out.println("Red alert!  unknown string returned: " + (String)ob);
 		      }
@@ -1124,7 +1334,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		  {
 		    Boolean bool = (Boolean)ob;
 
-		    if (label == "Case Insensitive:")
+		    if (label.equals(ts.l("treeNodeMenuPerformed.namespace_case_field")))
 		      {
 			if (debug)
 			  {
@@ -1133,12 +1343,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 			insensitive = bool;
 		      }
-		    else 
+		    else if (debug)
 		      {
 			System.out.println("Unknown Boolean returned by Dialog.");
 		      }
 		  }
-		else 
+		else if (debug)
 		  {
 		    System.out.println("Unknown type returned by Dialog.");
 		  }
@@ -1221,10 +1431,13 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    System.out.println("deleting Namespace");
 	  }
 
+	// "Confirm Name Space Deletion"
+	// "Are you sure you want to delete the {0} namespace?"
 	DialogRsrc dialogResource = new DialogRsrc(this,
-						   "Confirm Name Space Deletion",
-						   "Confirm Name Space Deletion",
-						   "Delete", "Cancel",
+						   ts.l("treeNodeMenuPerformed.deleteNamespaceTitle"),
+						   ts.l("treeNodeMenuPerformed.deleteNamespaceText", node.getText()),
+						   ts.l("treeNodeMenuPerformed.deleteButton"),
+						   ts.l("global.cancel"),
 						   questionImage);
 
 	Hashtable results = new StringDialog(dialogResource).DialogShow();
@@ -1248,7 +1461,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      }
 	  }
       }
-    else if (event.getSource() == deleteObjectMI)
+    else if (event.getSource() == deleteObjectMI || event.getSource() == deleteEmbeddedObjectMI)
       {
 	BaseNode bNode = (BaseNode) node;
 	Base b = bNode.getBase();
@@ -1270,11 +1483,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	if (isRemovable)
 	  {
+	    // "Confirm Object Type Deletion"
+	    // "Are you sure you want to delete the {0} object type?"
+
 	    if (new StringDialog(this,
-				 "Confirm deletion of Object",
-				 "Are you sure you want to delete this object?",
-				 "Confirm",
-				 "Cancel").DialogShow() == null)
+				 ts.l("treeNodeMenuPerformed.deleteObjectTitle"),
+				 ts.l("treeNodeMenuPerformed.deleteObjectText", node.getText()),
+				 ts.l("treeNodeMenuPerformed.deleteButton"),
+				 ts.l("global.cancel")).DialogShow() == null)
 	      {
 		if (debug)
 		  {
@@ -1302,58 +1518,289 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  }
 	else
 	  {
+	    // "Object Type Deletion Error"
+	    // "Sorry, you are not allowed to delete the {0} object type, as the Ganymede server is dependent on it for proper functioning."
+
 	    new StringDialog(this,
-			     "Error:  Base not removable",
-			     "You are not allowed to remove this base.",
-			     "Ok",
-			     null).DialogShow();
+			     ts.l("treeNodeMenuPerformed.badDeleteObjectTitle"),
+			     ts.l("treeNodeMenuPerformed.badDeleteObjectText", node.getText()),
+			     ts.l("global.ok"), null).DialogShow();
 	  }
       }
-    else if (event.getSource() == createFieldMI)
+    else if (event.getSource() == createTabMI)
       {
-	// find the base that asked for the field
+	BaseNode bNode = (BaseNode) node;
+
+	// create a name for the new tab
+
+	String name = null;
+	boolean safeName = false;
+
+	int i = 1;
+
+	while (!safeName)
+	  {
+	    if (i < 2)
+	      {
+		name = ts.l("treeNodeMenuPerformed.newTabName");	// "New Tab"
+	      }
+	    else
+	      {
+		name = ts.l("treeNodeMenuPerformed.newTabNumName", new Integer(i)); // "New Tab {0}"
+	      }
+
+	    TabNode tabNode = (TabNode) bNode.getChild();
+
+	    safeName = true;
+
+	    while (safeName && tabNode != null)
+	      {
+		if (tabNode.getText().equals(name))
+		  {
+		    safeName = false;
+		  }
+
+		tabNode = (TabNode) tabNode.getNextSibling();
+	      }
+
+	    i = i + 1;
+	  }
+
+	// we want to insert the new tab at the bottom of the object
+	// display order
+
+	treeNode n = bNode.getChild();
+	    
+	if (n != null)
+	  {
+	    while (n.getNextSibling() != null)
+	      {
+		n = n.getNextSibling();
+	      }
+	  }
+
+	TabNode newNode = new TabNode(bNode, name, n,
+				      true, OPENTAB, CLOSEDTAB, tabMenu);
+	tree.insertNode(newNode, false);
+	tree.expandNode(bNode, false);
+	tree.unselectAllNodes(true);
+	tree.selectNode(newNode); // to trigger the call back and bring up the editTab() pane
+	tree.refresh();
+      }
+    else if (event.getSource() == deleteTabMI)
+      {
+	TabNode tNode = (TabNode) node;
+	BaseNode bNode = (BaseNode) tNode.getParent();
+
+	if (tNode.getPrevSibling() == null)
+	  {
+	    // "Tab Deletion Error"
+	    // "Sorry, you are not allowed to delete the first tab in an object type."
+	    new JErrorDialog(this,
+			     ts.l("treeNodeMenuPerformed.badDeleteTabTitle"),
+			     ts.l("treeNodeMenuPerformed.badDeleteTabText"));
+	  }
+	else if (tNode.getChild() != null)
+	  {
+	    // "Tab Deletion Error"
+	    // "Error, the {0} tab in the {1} object type still contains fields."
+	    new JErrorDialog(this,
+			     ts.l("treeNodeMenuPerformed.badDeleteTabTitle"),
+			     ts.l("treeNodeMenuPerformed.nonEmptyDeleteTabText", tNode.getText(), bNode.getText()));
+	  }
+	else
+	  {
+	    if (new StringDialog(this,
+				 ts.l("treeNodeMenuPerformed.deleteTabTitle"),
+				 ts.l("treeNodeMenuPerformed.deleteTabText", tNode.getText(), bNode.getText()),
+				 ts.l("treeNodeMenuPerformed.deleteButton"),
+				 ts.l("global.cancel")).DialogShow() == null)
+	      {
+		if (debug)
+		  {
+		    System.out.println("Deletion canceled");
+		  }
+	      }
+	    else //Returned confirm
+	      {
+		// we want to delete the tab node from the tree, then call
+		// a function on the base node to fix up all of the tab
+		// names under the base node.
+		
+		tree.deleteNode(tNode, false);
+
+		try
+		  {
+		    syncFieldsFromTree(bNode);
+		  }
+		catch (RemoteException ex)
+		  {
+		    throw new RuntimeException(ex);
+		  }
+	      }
+	  }
+      }
+    else if (event.getSource() == createFieldMI || event.getSource() == createEmbeddedFieldMI)
+      {
+	// createFieldMI is called on a tab node in the tree for
+	// non-embedded objects, and on a baseNode for embedded
+	// objects.
 
 	try
 	  {
-	    BaseNode bNode = (BaseNode) node;
-
-	    if (debug)
+	    if (node instanceof TabNode)
 	      {
-		System.err.println("Calling editField");
-	      }
+		TabNode tNode = (TabNode) node;
+		BaseNode bNode = (BaseNode) tNode.getParent();
+		FieldNode newNode = null;
 
-	    // create a name for the new field
-
-	    BaseField bF;
-	    Base b = bNode.getBase();
-
-	    bF = b.createNewField(); // the server picks a new default field name
-
-	    String name = bF.getName();
-
-	    // we want to insert the child's field node at the bottom
-	    // of the base, which is where createNewField() places it.
-
-	    treeNode n = node.getChild();
-	    
-	    if (n != null)
-	      {
-		while (n.getNextSibling() != null)
+		if (debug)
 		  {
-		    n = n.getNextSibling();
+		    System.err.println("Calling editField");
+		  }
+
+		// create a name for the new field
+
+		BaseField bF;
+		Base b = bNode.getBase();
+
+		bF = b.createNewField(); // the server picks a new default field name
+
+		String name = bF.getName();
+
+		bF.setTabName(tNode.getText());
+
+		// we want to insert the child's field node at the bottom
+		// of the tab, which is where createNewField() places it.
+
+		treeNode pSiblingNode = tNode.getChild();
+	    
+		if (pSiblingNode != null)
+		  {
+		    while (pSiblingNode.getNextSibling() != null)
+		      {
+			pSiblingNode = pSiblingNode.getNextSibling();
+		      }
+
+		    newNode = new FieldNode(tNode, name, bF, pSiblingNode,
+					    false, FIELDICON, FIELDICON, fieldMenu);
+		  }
+		else
+		  {
+		    // we're creating a field in an empty tab.  we
+		    // can't compare its position with other fields in
+		    // the tab, so we have to look around to find the
+		    // field that this new field will go after
+
+		    if (tNode.getPrevSibling() != null)
+		      {
+			TabNode prevTabNode = (TabNode) tNode.getPrevSibling();
+
+			while (prevTabNode.getChild() == null && prevTabNode.getPrevSibling() != null)
+			  {
+			    prevTabNode = (TabNode) prevTabNode.getPrevSibling();
+			  }
+
+			if (prevTabNode.getChild() == null)
+			  {
+			    pSiblingNode = null;
+			  }
+			else
+			  {
+			    // we've found the next most previous tab
+			    // node that has children.. find the last
+			    // node in the tab
+
+			    pSiblingNode = prevTabNode.getChild();
+			    
+			    while (pSiblingNode.getNextSibling() != null)
+			      {
+				pSiblingNode = pSiblingNode.getNextSibling();
+			      }
+			  }
+		      }
+
+		    // The tree node we're creating has no previous
+		    // sibling under the tab node, so we'll pass null
+		    // as the fourth param.  We'll just use the
+		    // pSiblingNode below to figure out how to tell
+		    // the server to order the fields in the display
+		    // list.  Remember that tabs don't actually exist
+		    // as any kind of container in the server
+		    // structures.. we just mark each field in display
+		    // order with a string describing the tab it
+		    // belongs in
+
+		    newNode = new FieldNode(tNode, name, bF, null,
+					    false, FIELDICON, FIELDICON, fieldMenu);
+		  }
+
+		// we've put the node into the right place in the tree
+
+		if (pSiblingNode == null)
+		  {
+		    b.moveFieldBefore(name, null);
+		  }
+		else
+		  {
+		    b.moveFieldAfter(name, pSiblingNode.getText());
+		  }
+
+		tree.insertNode(newNode, false);
+		tree.expandNode(tNode, false);
+		tree.unselectAllNodes(true);
+		tree.selectNode(newNode); // to trigger the editField() call that brings up the new field in the pane
+		tree.refresh();
+
+		if (debug)
+		  {
+		    System.err.println("Called editField");
 		  }
 	      }
-
-	    FieldNode newNode = new FieldNode(node, name, bF, n,
-					      false, 3, 3, fieldMenu);
-	    tree.insertNode(newNode, false);
-	    tree.expandNode(node, true);
-
-	    editField(newNode);
-
-	    if (debug)
+	    else
 	      {
-		System.err.println("Called editField");
+		BaseNode bNode = (BaseNode) node;
+
+		if (debug)
+		  {
+		    System.err.println("Calling editField on embedded type");
+		  }
+
+		// create a name for the new field
+
+		BaseField bF;
+		Base b = bNode.getBase();
+
+		bF = b.createNewField(); // the server picks a new default field name
+
+		String name = bF.getName();
+
+		// we want to insert the child's field node at the
+		// bottom of the object, which is where
+		// createNewField() places it.
+
+		treeNode n = bNode.getChild();
+	    
+		if (n != null)
+		  {
+		    while (n.getNextSibling() != null)
+		      {
+			n = n.getNextSibling();
+		      }
+		  }
+
+		FieldNode newNode = new FieldNode(bNode, name, bF, n,
+						  false, FIELDICON, FIELDICON, fieldMenu);
+		tree.insertNode(newNode, false);
+		tree.expandNode(bNode, false);
+		tree.unselectAllNodes(true);
+		tree.selectNode(newNode); // to trigger the editField() call that brings up the new field in the pane
+		tree.refresh();
+
+		if (debug)
+		  {
+		    System.err.println("Called editField");
+		  }
 	      }
 	  }
 	catch (RemoteException ex)
@@ -1363,24 +1810,43 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
     else if (event.getSource() == deleteFieldMI)
       {
-	FieldNode fNode = (FieldNode) node;
+	String label, baseLabel;
+	TabNode tNode;
+	BaseNode bNode;
+	FieldNode fNode;
 
-	String label = fNode.getText();
-	String parentLabel = fNode.getParent().getText();
+	/* -- */
+
+	if (node.getParent() instanceof BaseNode)
+	  {
+	    tNode = null;
+	    bNode = (BaseNode) node.getParent();
+	  }
+	else
+	  {
+	    tNode = (TabNode) node.getParent();
+	    bNode = (BaseNode) tNode.getParent();
+	  }
+
+	fNode = (FieldNode) node;
+
+	label = fNode.getText();
+	baseLabel = bNode.getText();
+
+	// "Confirm Field Deletion"
+	// "Are you sure you want to delete the {0} field from the {1} object type?"
 
 	DialogRsrc dialogResource = new DialogRsrc(this,
-						   "Confirm Field Deletion",
-						   "Ok to delete field " + label + 
-						   " from object type " + parentLabel + "?",
-						   "Delete", "Cancel",
+						   ts.l("treeNodeMenuPerformed.deleteFieldTitle"),
+						   ts.l("treeNodeMenuPerformed.deleteFieldText", label, baseLabel),
+						   ts.l("treeNodeMenuPerformed.deleteButton"),
+						   ts.l("global.cancel"),
 						   questionImage);
 
 	Hashtable results = new StringDialog(dialogResource).DialogShow();
 
 	if (results != null)
 	  {
-	    BaseNode bNode = (BaseNode) node.getParent();
-		
 	    try
 	      {
 		ReturnVal retVal = bNode.getBase().deleteField(fNode.getText());
@@ -1391,15 +1857,17 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		    return;
 		  }
 		
-		refreshFields(bNode, true);
+		refreshFields(bNode, true, false);
 		ne.refreshSpaceList();
 		be.refreshLabelChoice();
 	      }
 	    catch (RemoteException ex)
 	      {
+		// "Field Deletion Error"
+		// "An exception was caught from the server while trying to delete the {0} field from the {1} object type:\n{2}"
 		new JErrorDialog(this,
-				 "Couldn't delete field",
-				 "Caught an exception from the server trying to delete field.. " + ex);
+				 ts.l("treeNodeMenuPerformed.badDeleteFieldTitle"),
+				 ts.l("treeNodeMenuPerformed.badDeleteFieldText", label, baseLabel, ex));
 	      }
 	  }
       }
@@ -1582,6 +2050,9 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   public boolean startDrag(treeNode dragNode)
   {
     return ((dragNode instanceof FieldNode) ||
+	    ((dragNode instanceof TabNode &&
+	      (dragNode.getPrevSibling() != null ||
+	       dragNode.getNextSibling() != null))) ||
 	    (dragNode instanceof BaseNode) ||
 	    (dragNode instanceof CatTreeNode &&
 	     dragNode != objects));
@@ -1610,12 +2081,27 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (dragNode instanceof FieldNode)
       {
+	if (dragNode.getParent() instanceof TabNode)
+	  {
+	    BaseNode bNode = (BaseNode) dragNode.getParent().getParent();
+
+	    if (targetNode instanceof TabNode && targetNode.getParent() == bNode)
+	      {
+		return true;
+	      }
+	  }
+
 	if (debug)
 	  {
 	    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
 			       "over " + targetNode.getText() + " because can't drag over field nodes");
 	  }
 
+	return false;
+      }
+
+    if (dragNode instanceof TabNode)
+      {
 	return false;
       }
 
@@ -1745,7 +2231,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 		BaseNode newNode = (BaseNode) tree.moveNode(dragNode, targetNode, null, true);
 
-		refreshFields(newNode, true);
+		refreshFields(newNode, true, false);
 
 		if (be.baseNode == dragNode)
 		  {
@@ -1803,13 +2289,31 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    throw new RuntimeException("caught remote: " + ex);
 	  }
       }
+    else if (dragNode instanceof FieldNode)
+      {
+	try
+	  {
+	    if (!(targetNode instanceof TabNode))
+	      {
+		throw new RuntimeException("what?  field node dropped on a non-tab node..");
+	      }
+
+	    FieldNode fNode = (FieldNode) dragNode;
+	    TabNode tNode = (TabNode) targetNode;
+
+	    tree.moveNode(dragNode, targetNode, null, true);
+	    syncFieldsFromTree((BaseNode) tNode.getParent());
+	  }
+	catch (RemoteException ex)
+	  {
+	    throw new RuntimeException("caught remote: " + ex);
+	  }
+      }
   }
 
   /**
-   *
    * Method to control whether the drag line may be moved between a pair of given
    * nodes.
-   *
    * @see arlut.csd.JTree.treeDragDropCallback
    */
 
@@ -1843,10 +2347,103 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	return false;
       }
 
-    if (dragNode instanceof FieldNode)
+    if (dragNode instanceof TabNode)
       {
-	return (((aboveNode instanceof FieldNode) && (aboveNode != null) && (aboveNode.getParent() == parent)) || 
-		((belowNode instanceof FieldNode) && (belowNode != null) && (belowNode.getParent() == parent)));
+	BaseNode bNode = (BaseNode) dragNode.getParent();
+
+	if (aboveNode instanceof BaseNode)
+	  {
+	    return aboveNode == bNode;
+	  }
+
+	if (aboveNode instanceof TabNode)
+	  {
+	    return aboveNode.getParent() == bNode && !aboveNode.isOpen();
+	  }
+
+	if (aboveNode instanceof FieldNode)
+	  {
+	    if (belowNode instanceof TabNode)
+	      {
+		return belowNode.getParent() == bNode;
+	      }
+	    else if (aboveNode.getNextSibling() == null && aboveNode.getParent() != dragNode && aboveNode.getParent().getParent() == bNode)
+	      {
+		return true;
+	      }
+	    else
+	      {
+		return false;
+	      }
+	  }
+
+	return false;
+      }
+    else if (dragNode instanceof FieldNode)
+      {
+	TabNode tNode;
+	BaseNode bNode;
+
+	if (dragNode.getParent() instanceof TabNode)
+	  {
+	    tNode = (TabNode) dragNode.getParent();
+	    bNode = (BaseNode) tNode.getParent();
+	  }
+	else
+	  {
+	    tNode = null;
+	    bNode = (BaseNode) dragNode.getParent();
+	  }
+
+	if (aboveNode instanceof BaseNode && tNode != null)
+	  {
+	    return false;
+	  }
+
+	if (aboveNode instanceof BaseNode && aboveNode != bNode)
+	  {
+	    return false;
+	  }
+	
+	if (aboveNode instanceof TabNode)
+	  {
+	    TabNode aboveTabNode = (TabNode) aboveNode;
+
+	    if (aboveTabNode.getParent() != bNode || !aboveTabNode.isOpen())
+	      {
+		return false;
+	      }
+	  }
+
+	if (aboveNode instanceof FieldNode)
+	  {
+	    BaseNode aboveBaseNode = null;
+
+	    if (aboveNode.getParent() instanceof TabNode)
+	      {
+		// non-embedded field above
+
+		aboveBaseNode = (BaseNode) aboveNode.getParent().getParent();
+	      }
+	    else if (aboveNode.getParent() instanceof BaseNode)
+	      {
+		// embedded field above
+
+		aboveBaseNode = (BaseNode) aboveNode.getParent();
+	      }
+
+	    if (aboveBaseNode != bNode || !aboveBaseNode.isOpen())
+	      {
+		return false;
+	      }
+	  }
+
+	if (!(aboveNode instanceof BaseNode || aboveNode instanceof TabNode || aboveNode instanceof FieldNode))
+	  {
+	    return false;
+	  }
+
+	return true;
       }
     else if (dragNode instanceof BaseNode)
       {
@@ -1855,8 +2452,30 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    return false;
 	  }
 
+	if (belowNode instanceof TabNode)
+	  {
+	    return false;
+	  }
+
 	if (belowNode == nodeAfterCategories)
 	  {
+	    return true;
+	  }
+
+	if (aboveNode instanceof FieldNode)
+	  {
+	    if (aboveNode.getParent() instanceof TabNode)
+	      {
+		if (aboveNode.getParent().getParent() == dragNode)
+		  {
+		    return false;
+		  }
+	      }
+	    else if (aboveNode.getParent() == dragNode)
+	      {
+		return false;
+	      }
+
 	    return true;
 	  }
 
@@ -1867,44 +2486,45 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
     else if (dragNode instanceof CatTreeNode)
       {
-	try
+	if (belowNode instanceof FieldNode)
 	  {
-	    if (belowNode instanceof FieldNode)
-	      {
-		return false;
-	      }
-
-	    if (belowNode == nodeAfterCategories)
-	      {
-		return true;
-	      }
-
-	    if (aboveNode instanceof CatTreeNode)
-	      {
-		return !((CatTreeNode) aboveNode).getCategory().isUnder(((CatTreeNode) dragNode).getCategory());
-	      }
-	    
-	    if (belowNode instanceof CatTreeNode)
-	      {
-		return !((CatTreeNode) belowNode).getCategory().isUnder(((CatTreeNode) dragNode).getCategory());
-	      }
-
-	    if (aboveNode instanceof BaseNode)
-	      {
-		return !((BaseNode) aboveNode).getBase().getCategory().isUnder(((CatTreeNode) dragNode).getCategory());
-	      }
-  
-	    if (belowNode instanceof BaseNode)
-	      {
-		return !((BaseNode) belowNode).getBase().getCategory().isUnder(((CatTreeNode) dragNode).getCategory());
-	      }
-		    
 	    return false;
 	  }
-	catch (RemoteException ex)
+
+	if (belowNode instanceof TabNode)
 	  {
-	    throw new RuntimeException("couldn't get category details for drag " + ex);
+	    return false;
 	  }
+
+	// if we're already the last category, we don't want to
+	// drag to the bottom
+
+	if (belowNode == nodeAfterCategories && dragNode.getNextSibling() != null)
+	  {
+	    return true;
+	  }
+
+	if (aboveNode instanceof CatTreeNode)
+	  {
+	    return !aboveNode.isUnder(dragNode);
+	  }
+	    
+	if (belowNode instanceof CatTreeNode)
+	  {
+	    return !belowNode.isUnder(dragNode);
+	  }
+
+	if (aboveNode instanceof BaseNode)
+	  {
+	    return !aboveNode.isUnder(dragNode);
+	  }
+  
+	if (belowNode instanceof BaseNode)
+	  {
+	    return !belowNode.isUnder(dragNode);
+	  }
+		    
+	return false;
       }
     else
       {
@@ -1938,87 +2558,153 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	return;
       }
 
-    if (dragNode instanceof FieldNode)
+    try
       {
-	FieldNode oldNode = (FieldNode)dragNode;
-	BaseNode parentNode = (BaseNode)oldNode.getParent();
-	Base base = parentNode.getBase();
-
-	if (debug)
+	if (dragNode instanceof FieldNode)
 	  {
-	    System.out.println("parent = " + parentNode);
-	  }
+	    TabNode tNode;
+	    BaseNode bNode;
+	    FieldNode oldNode = (FieldNode) dragNode;
+
+	    if (oldNode.getParent() instanceof TabNode)
+	      {
+		tNode = (TabNode) oldNode.getParent();
+		bNode = (BaseNode) tNode.getParent();
+	      }
+	    else
+	      {
+		tNode = null;
+		bNode = (BaseNode) oldNode.getParent();
+	      }
+
+	    Base base = bNode.getBase();
+
+	    if (debug)
+	      {
+		System.out.println("base = " + bNode);
+	      }
 	
-	if (aboveNode instanceof FieldNode)
-	  {
-	    if (aboveNode != dragNode)
+	    if (aboveNode instanceof FieldNode)
 	      {
-		// Insert below the aboveNode
+		TabNode aboveTabNode;
+		BaseNode aboveBaseNode;
 
-		try
+		/* -- */
+
+		if (aboveNode.getParent() instanceof TabNode)
 		  {
-		    base.moveFieldAfter(dragNode.getText(), aboveNode.getText());
+		    aboveTabNode = (TabNode) aboveNode.getParent();
+		    aboveBaseNode = (BaseNode) aboveTabNode.getParent();
 		  }
-		catch (RemoteException ex)
+		else
 		  {
-		    ex.printStackTrace();
-		    throw new RuntimeException(ex.getMessage());
+		    aboveTabNode = null;
+		    aboveBaseNode = (BaseNode) aboveNode.getParent();
 		  }
 
-		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, parentNode, aboveNode, true);
+		base.moveFieldAfter(dragNode.getText(), aboveNode.getText());
+
+		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, aboveTabNode != null ? (treeNode) aboveTabNode: (treeNode) aboveBaseNode, aboveNode, true);
+
+		if (aboveTabNode != null)
+		  {
+		    BaseField bF = newNode.getField();
+		    bF.setTabName(aboveTabNode.getText());
+		  }
 
 		if (fe.fieldNode == dragNode)
 		  {
 		    fe.fieldNode = newNode;
 		  }
 	      }
-	    else if (debug)
+	    else if (aboveNode instanceof TabNode)
 	      {
-		System.out.println("aboveNode == dragNode, Not moving it");
-	      }
-	  }
-	else if (belowNode instanceof FieldNode)
-	  {
-	    if (belowNode != dragNode)
-	      {
-		// First node, insert below parent
+		TabNode aboveTabNode = (TabNode) aboveNode;
 
-		try
+		if (belowNode instanceof FieldNode)
 		  {
-		    base.moveFieldAfter(dragNode.getText(), null);
+		    base.moveFieldBefore(dragNode.getText(), belowNode.getText());
 		  }
-		catch (RemoteException ex)
+		else
 		  {
-		    ex.printStackTrace();
-		    throw new RuntimeException(ex.getMessage());
+		    // we need to make this field the first field in the
+		    // tab, but we don't know where the field goes in the
+		    // display order, since this tab has no fields under
+		    // it that we can easily use for comparison.
+		    //
+		    // so we'll have to root around a little bit to find
+		    // our bearings.
+
+		    TabNode prevTabNode = (TabNode) aboveTabNode.getPrevSibling();
+
+		    while (prevTabNode != null && prevTabNode.getChild() == null)
+		      {
+			prevTabNode = (TabNode) prevTabNode.getPrevSibling();
+		      }
+
+		    if (prevTabNode == null)
+		      {
+			// move the field to the top of the display list
+			base.moveFieldAfter(dragNode.getText(), null);
+		      }
+		    else
+		      {
+			// okay, we've got a preceding tab node that has
+			// fields under it.. find the last one
+
+			FieldNode prevTabFNode = (FieldNode) prevTabNode.getChild();
+		    
+			while (prevTabFNode.getNextSibling() != null)
+			  {
+			    prevTabFNode = (FieldNode) prevTabFNode.getNextSibling();
+			  }
+
+			base.moveFieldAfter(dragNode.getText(), prevTabFNode.getText());
+		      }
 		  }
 
-		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, parentNode, null, true);
+		// okay, we've fixed up the field ordering on the server.
+		// go ahead and move the field node in the tree
+
+		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, aboveTabNode, null, true);
+
+		BaseField bF = newNode.getField();
+		bF.setTabName(tNode.getText());
 
 		if (fe.fieldNode == dragNode)
 		  {
 		    fe.fieldNode = newNode;
 		  }
 	      }
-	    else if (debug)
+	    else if (aboveNode instanceof BaseNode)
 	      {
-		System.out.println("belowNode == dragNode, Not moving it");
+		// the dragLineTween routine will only allow a field to be
+		// dragged under a an object base node if it is contained
+		// in an embedded object
+
+		BaseNode aboveBaseNode = (BaseNode) aboveNode;
+
+		base.moveFieldAfter(dragNode.getText(), null);
+
+		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, aboveBaseNode, null, true);
+
+		if (fe.fieldNode == dragNode)
+		  {
+		    fe.fieldNode = newNode;
+		  }
+	      }
+	    else
+	      {
+		System.err.println("Dropped away from FieldNodes, shouldn't happen");
 	      }
 	  }
-	else
+	else if (dragNode instanceof BaseNode)
 	  {
-	    System.err.println("Dropped away from FieldNodes, shouldn't happen");
-	  }
-      }
-    else if (dragNode instanceof BaseNode)
-      {
-	if (debug)
-	  {
-	    System.err.println("Releasing baseNode");
-	  }
+	    if (debug)
+	      {
+		System.err.println("Releasing baseNode");
+	      }
 
-	try
-	  {
 	    BaseNode bn = (BaseNode) dragNode;
 	    Base base = bn.getBase();
 
@@ -2066,7 +2752,15 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    else if (aboveNode instanceof FieldNode)
 	      {
 		newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
-		newParent = (CatTreeNode) aboveNode.getParent().getParent();
+
+		if (aboveNode.getParent() instanceof TabNode)
+		  {
+		    newParent = (CatTreeNode) aboveNode.getParent().getParent().getParent();
+		  }
+		else
+		  {
+		    newParent = (CatTreeNode) aboveNode.getParent().getParent();
+		  }
 		previousNode = aboveNode.getParent();
 	      }
 
@@ -2092,7 +2786,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	    BaseNode newNode = (BaseNode) tree.moveNode(dragNode, newParent, previousNode, true);
 
-	    refreshFields(newNode, true);
+	    refreshFields(newNode, true, false);
 
 	    if (be.baseNode == dragNode)
 	      {
@@ -2104,23 +2798,43 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		System.err.println("Reinserted base " + base.getName());
 		System.err.println("reinserted category = " + base.getCategory().getName());
 	      }
+	  }
+	else if (dragNode instanceof TabNode)
+	  {
+	    BaseNode bNode = (BaseNode) dragNode.getParent();
+	    TabNode newNode;
 
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote : " + ex);
-	  }
-	
-      }
-    else if (dragNode instanceof CatTreeNode)
-      {
-	if (debug)
-	  {
-	    System.err.println("Releasing CatTreeNode");
-	  }
+	    if (aboveNode instanceof TabNode)
+	      {
+		newNode = (TabNode) tree.moveNode(dragNode, bNode, aboveNode, true);
+	      }
+	    else if (aboveNode instanceof FieldNode)
+	      {
+		newNode = (TabNode) tree.moveNode(dragNode, bNode, aboveNode.getParent(), true);
+	      }
+	    else if (aboveNode instanceof BaseNode)
+	      {
+		newNode = (TabNode) tree.moveNode(dragNode, bNode, null, true);
+	      }
+	    else
+	      {
+		throw new RuntimeException("bad drag target location for tabnode tween drag");
+	      }
 
-	try
+	    syncFieldsFromTree(bNode);
+
+	    if (te.tabNode == dragNode)
+	      {
+		te.tabNode = newNode;
+	      }
+	  }
+	else if (dragNode instanceof CatTreeNode)
 	  {
+	    if (debug)
+	      {
+		System.err.println("Releasing CatTreeNode");
+	      }
+
 	    CatTreeNode cn = (CatTreeNode) dragNode;
 	    Category category = cn.getCategory();
 
@@ -2162,7 +2876,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    else if (aboveNode instanceof FieldNode)
 	      {
 		newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
-		newParent = (CatTreeNode) aboveNode.getParent().getParent();
+		newParent = (CatTreeNode) aboveNode.getParent().getParent().getParent();
 		previousNode = aboveNode.getParent();
 	      }
 
@@ -2190,7 +2904,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      {
 		System.err.println("Moved category " + category.getPath());
 	      }
-	    
 
 	    CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, newParent, previousNode, true);
 
@@ -2204,13 +2917,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		System.err.println("Reinserted category " + category.getName());
 		System.err.println("reinserted category = " + category.getCategory().getName());
 	      }
-
 	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote : " + ex);
-	  }
-
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException(ex);
       }
   }
 

@@ -79,6 +79,7 @@ import org.python.core.PyInteger;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.JythonMap;
+import arlut.csd.Util.Queue;
 import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecQuickSort;
@@ -1085,18 +1086,61 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	xmlOut.endElement("label");
       }
 
-    synchronized (customFields)
-      {
-	for (int i = 0; i < customFields.size(); i++)
-	  {
-	    DBObjectBaseField fieldDef = (DBObjectBaseField) customFields.elementAt(i);
-
-	    fieldDef.emitXML(xmlOut);
-	  }
-      }
+    emitXML_fields(xmlOut);
 
     xmlOut.indentIn();
     xmlOut.endElementIndent("objectdef");
+  }
+
+  /**
+   * This helper method writes out all the field field descriptions
+   * for this DBObjectBase, wrapping fields in <tab> container
+   * elements that identify the tab that the fields belong to.
+   *
+   * This logic is based on the assumption that all fields that are in
+   * a common tab will be contiguous in the customFields ordering, and
+   * that either all fields in the object type will have tabs defined,
+   * or none of them will.
+   */
+
+  private void emitXML_fields(XMLDumpContext xmlOut) throws IOException
+  {
+    synchronized (customFields)
+      {
+	String lastTabName = null;
+
+	for (int i = 0; i < customFields.size(); i++)
+	  {
+	    DBObjectBaseField fieldDef = (DBObjectBaseField) customFields.elementAt(i);
+	    String currentTabName = fieldDef.getTabName();
+
+	    if (currentTabName == null)
+	      {
+		currentTabName = ts.l("global.default_tab"); // "General"
+	      }
+
+	    if (i == 0 || !StringUtils.stringEquals(currentTabName, lastTabName))
+	      {
+		if (i != 0)
+		  {
+		    xmlOut.indentIn();
+		    xmlOut.endElementIndent("tab");
+		  }
+
+		xmlOut.startElementIndent("tab");
+
+		xmlOut.attribute("name", currentTabName);
+		xmlOut.indentOut();
+	      }
+
+	    fieldDef.emitXML(xmlOut);
+
+	    lastTabName = currentTabName;
+	  }
+
+	xmlOut.indentIn();
+	xmlOut.endElementIndent("tab");
+      }
   }
 
   /**
@@ -1185,17 +1229,50 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	err.println(ts.l("setXML.debugscanning"));
       }
 
+    /*
+     * loop over tab and field hierarchy, flatten everything out into
+     * a Vector so that we don't have to worry about the difference
+     * between a tab-container structure vs. a flat structure when it
+     * comes time to actually process the fields, below.
+     */
+
+    Vector fieldDefV = new Vector();
     XMLItem children[] = root.getChildren();
 
     for (int i = 0; i < children.length; i++)
       {
 	item = children[i];
 
+	if (item.matches("tab"))
+	  {
+	    fieldDefV.addElement(item);
+
+	    XMLItem tabChildren[] = item.getChildren();
+
+	    for (int j = 0; j < tabChildren.length; j++)
+	      {
+		item = tabChildren[j];
+
+		if (item.matches("fielddef"))
+		  {
+		    fieldDefV.addElement(item);
+		  }
+	      }
+	  }
+	else
+	  {
+	    fieldDefV.addElement(item);
+	  }
+      }
+
+    for (int i = 0; i < fieldDefV.size(); i++)
+      {
+	item = (XMLItem) fieldDefV.elementAt(i);
+
 	if (item.matches("fielddef"))
 	  {
 	    String _fieldNameStr = XMLUtils.XMLDecode(item.getAttrStr("name"));
 	    Integer _fieldIDInt = item.getAttrInt("id");
-
 
 	    if (_fieldNameStr == null || _fieldIDInt == null)
 	      {
@@ -1282,9 +1359,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // what fields we're going to need to delete.. go ahead and scan
     // ahead and actually create and/or edit fields as needed
 
-    for (int i = 0; i < children.length; i++)
+    String currentTabName = ts.l("global.default_tab"); // "General"
+
+    for (int i = 0; i < fieldDefV.size(); i++)
       {
-	item = children[i];
+	item = (XMLItem) fieldDefV.elementAt(i);
 
 	if (item.matches("classdef"))
 	  {
@@ -1318,6 +1397,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	    labelSet = true;
 	  }
+	else if (item.matches("tab"))
+	  {
+	    currentTabName = item.getAttrStr("name");
+	    continue;
+	  }
 	else if (item.matches("fielddef"))
 	  {
 	    newField = (DBObjectBaseField) getField(item.getAttrInt("id").shortValue());
@@ -1349,6 +1433,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 		    return retVal;
 		  }
 
+		retVal = newField.setTabName(currentTabName);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+
 		addFieldToEnd(newField);
 	      }
 	    else
@@ -1357,6 +1448,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 		err.println(ts.l("setXML.editing", item.getAttrStr("name")));
 		
 		retVal = newField.setXML(item, resolveInvidLinks, err);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return retVal;
+		  }
+
+		retVal = newField.setTabName(currentTabName);
 
 		if (retVal != null && !retVal.didSucceed())
 		  {

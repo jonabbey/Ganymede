@@ -515,4 +515,28 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     gc.setStatus(s);
   }
 
+  public void dispose()
+  {
+    removeAll();
+    fp = null;
+    gc = null;
+    field = null;
+
+    if (top_pane != null)
+      {
+	top_pane.removeAll();
+	top_pane = null;
+      }
+
+    if (bottom_pane != null)
+      {
+	bottom_pane.removeAll();
+	bottom_pane = null;
+      }
+
+    cal = null;
+    clear = null;
+    template = null;
+  }
+
 }//datePanel

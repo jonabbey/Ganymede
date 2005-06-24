@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -57,7 +57,7 @@ package arlut.csd.ganymede.common;
 import java.rmi.RemoteException;
 
 import arlut.csd.ganymede.rmi.Base;
-import arlut.csd.ganymede.server.DBObjectBaseField;
+import arlut.csd.ganymede.rmi.BaseField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -81,8 +81,6 @@ import arlut.csd.ganymede.server.DBObjectBaseField;
 
 public class FieldTemplate implements java.io.Serializable, FieldType {
 
-  static final long serialVersionUID = 7145562768349169899L;
-
   // ---
 
   // common field data
@@ -92,6 +90,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   short type;
   short fieldID;
   boolean vector;
+  String tabName;
 
   // perm_editor needs us to store this for it
 
@@ -125,69 +124,60 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   boolean editInPlace = false;
   short allowedTarget = -1;
 
-  // password attributes
-  
-  boolean crypted = false;
-  boolean md5crypted = false;
-
   /* -- */
 
-  public FieldTemplate(DBObjectBaseField fieldDef)
+  public FieldTemplate(BaseField fieldDef)
   {
-    name = fieldDef.getName();
-    comment = fieldDef.getComment();
-    type = fieldDef.getType();
-    fieldID = fieldDef.getID();
-
     try
       {
+	name = fieldDef.getName();
+	comment = fieldDef.getComment();
+	type = fieldDef.getType();
+	fieldID = fieldDef.getID();
+	tabName = fieldDef.getTabName();
+
 	Base base = fieldDef.getBase();
 	baseID = base.getTypeID();
+
+	vector = fieldDef.isArray();
+
+	if (vector)
+	  {
+	    limit = fieldDef.getMaxArraySize();
+	  }
+
+	builtIn = fieldDef.isBuiltIn();
+
+	switch (type)
+	  {
+	  case BOOLEAN:
+	    labeled = fieldDef.isLabeled();
+
+	    if (labeled)
+	      {
+		trueLabel = fieldDef.getTrueLabel();
+		falseLabel = fieldDef.getFalseLabel();
+	      }
+	    break;
+
+	  case STRING:
+	    minLength = fieldDef.getMinLength();
+	    maxLength = fieldDef.getMaxLength();
+	    okChars = fieldDef.getOKChars();
+	    badChars = fieldDef.getBadChars();
+	    multiLine = fieldDef.isMultiLine();
+	    regexpPat = fieldDef.getRegexpPat();
+	    break;
+
+	  case INVID:
+	    editInPlace = fieldDef.isEditInPlace();
+	    allowedTarget = fieldDef.getTargetBase();
+	    break;
+	  }
       }
     catch (RemoteException ex)
       {
 	throw new RuntimeException(ex.getMessage());
-      }
-
-    vector = fieldDef.isArray();
-
-    if (vector)
-      {
-	limit = fieldDef.getMaxArraySize();
-      }
-
-    builtIn = fieldDef.isBuiltIn();
-
-    switch (type)
-      {
-      case BOOLEAN:
-	labeled = fieldDef.isLabeled();
-
-	if (labeled)
-	  {
-	    trueLabel = fieldDef.getTrueLabel();
-	    falseLabel = fieldDef.getFalseLabel();
-	  }
-	break;
-
-      case STRING:
-	minLength = fieldDef.getMinLength();
-	maxLength = fieldDef.getMaxLength();
-	okChars = fieldDef.getOKChars();
-	badChars = fieldDef.getBadChars();
-	multiLine = fieldDef.isMultiLine();
-	regexpPat = fieldDef.getRegexpPat();
-	break;
-
-      case INVID:
-	editInPlace = fieldDef.isEditInPlace();
-	allowedTarget = fieldDef.getTargetBase();
-	break;
-
-      case PASSWORD:
-	crypted = fieldDef.isCrypted();
-	md5crypted = fieldDef.isMD5Crypted();
-	break;
       }
   }
 
@@ -247,6 +237,17 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   public String getComment()
   {
     return comment;
+  }
+
+  /**
+   *
+   * Returns the name of the tab that is to contain this field on the client.
+   *
+   */
+
+  public String getTabName()
+  {
+    return tabName;
   }
 
   /**
@@ -538,30 +539,6 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
       }
 
     return allowedTarget;
-  }
-
-  /**
-   *
-   * If this field is a PASSWORD, returns true if passwords are stored in
-   * this field in UNIX Crypt() form.
-   *
-   */
-
-  public boolean isCrypted()
-  {
-    return crypted;
-  }
-
-  /**
-   *
-   * If this field is a PASSWORD, returns true if passwords are stored in
-   * this field in BSD-style MD5Crypt() form.
-   *
-   */
-
-  public boolean isMD5Crypted()
-  {
-    return md5crypted;
   }
 
   /**

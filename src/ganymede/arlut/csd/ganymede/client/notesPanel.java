@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -210,4 +210,12 @@ public class notesPanel extends JPanel implements KeyListener {
   
   public void keyReleased(KeyEvent e) {}
   public void keyTyped(KeyEvent e) {}
+
+  public void dispose()
+  {
+    removeAll();
+    fp = null;
+    notes_field = null;
+    notesArea = null;
+  }
 }

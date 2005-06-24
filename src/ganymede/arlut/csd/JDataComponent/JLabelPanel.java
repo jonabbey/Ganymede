@@ -552,13 +552,26 @@ public class JLabelPanel extends JPanel {
 
   public synchronized void cleanup()
   {
-    rowHash.clear();
-    rowHash = null;
+    if (rowHash != null)
+      {
+	rowHash.clear();
+	rowHash = null;
+      }
+
     removeAll();
-    gPanel.removeAll();
-    bPanel.removeAll();
-    gPanel = null;
-    bPanel = null;
+
+    if (gPanel != null)
+      {
+	gPanel.removeAll();
+	gPanel = null;
+      }
+
+    if (bPanel != null)
+      {
+	bPanel.removeAll();
+	bPanel = null;
+      }
+
     gbl = null;
     gbc = null;
     

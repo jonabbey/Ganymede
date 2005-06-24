@@ -802,6 +802,23 @@ public class DBBaseCategory implements Category, CategoryNode {
     return name;
   }
 
+  public boolean equals(Object operand)
+  {
+    if (!(operand instanceof Category))
+      {
+	return false;
+      }
+
+    try
+      {
+	return this.getPath().equals(((Category) operand).getPath());
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException(ex);
+      }
+  }
+
   /**
    * Sets the name of this node.  The name must not include a '/'
    * character, but all other characters are acceptable.

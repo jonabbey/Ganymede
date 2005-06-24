@@ -1,26 +1,29 @@
 /*
 
-   CatTreeNode.java
+   Queue.java
 
-   Category tree node for GASHSchema
+   Convenient subclass of java.util.Vector that can act as a simple
+   FIFO queue.
    
-   Created: 14 August 1997
-   Last Mod Date: $Date$
+   Created: 2 June 2005
+
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
+   Last Mod Date: $Date$
    SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
-   Ganymede Directory Management System
-
-   Copyright (C) 1996-2005
+   Directory Directory Management System
+ 
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -50,52 +53,51 @@
 
 */
 
-package arlut.csd.ganymede.common;
-
-import arlut.csd.JTree.treeMenu;
-import arlut.csd.JTree.treeNode;
-import arlut.csd.ganymede.rmi.Category;
+package arlut.csd.Util;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     CatTreeNode
+                                                                           Queue
 
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is a simple {@link arlut.csd.JTree.treeNode treeNode}
- * subclass with a {@link arlut.csd.ganymede.rmi.Category Category}
- * data element.  Used in the Ganymede admin console's schema editor.
- *
- * This class is in the common package because it is also used in the
- * Ganymede client.
+ * Simple subclass of java.util.Vector that implements a FIFO queue.
  */
 
-public class CatTreeNode extends arlut.csd.JTree.treeNode {
+public class Queue extends java.util.Vector {
 
-  private Category category;	// remote reference
-
-  /* -- */
-
-  public CatTreeNode(treeNode parent, String text, Category category, treeNode insertAfter,
-		     boolean expandable, int openImage, int closedImage, treeMenu menu)
+  public Queue()
   {
-    super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
-    this.category = category;
   }
 
-  public Category getCategory()
+  public Queue(int initialCapacity)
   {
-    return category;
+    super(initialCapacity);
   }
 
-  public void setCategory(Category category)
+  public Queue(int initialCapacity, int capacityIncrement)
   {
-    this.category = category;
+    super(initialCapacity, capacityIncrement);
   }
 
-  public void cleanup()
+  public void enqueue(Object item)
   {
-    this.category = null;
+    insertElementAt(item, 0);
+  }
+
+  public synchronized Object dequeue()
+  {
+    int len = size();
+
+    if (len == 0)
+      {
+	return null;
+      }
+
+    Object result = elementAt(len - 1);
+    removeElementAt(len - 1);
+
+    return result;
   }
 }
