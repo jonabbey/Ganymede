@@ -1046,6 +1046,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		
 	if (Ganymede.log != null)
 	  {
+	    // "Abnormal termination for username: {0}\n\n{1}"
 	    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
 						       ts.l("forceOff.log_event", username, reason),
 						       userInvid,
@@ -1127,6 +1128,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (loggedInSemaphore.isSet())
       {
+	// "Network connection to the Ganymede client process has been lost."
 	forceOff(ts.l("unreferenced.reason"));
       }
   }
