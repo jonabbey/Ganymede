@@ -123,7 +123,10 @@ public class expirationRemovalTab extends clientTab {
 
   public void update()
   {
-    date_panel.refresh();
+    if (date_panel != null)
+      {
+	date_panel.refresh();
+      }
   }
 
   public void dispose()
