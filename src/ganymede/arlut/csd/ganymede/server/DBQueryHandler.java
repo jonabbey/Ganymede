@@ -225,7 +225,18 @@ public class DBQueryHandler {
 
 		    DBObject derefObj = DBStore.viewDBObject(invid);
 
-		    if (!session.getPerm(derefObj).isVisible())
+		    // *race*
+		    //
+		    // if we're chasing a deref query across an invid,
+		    // and the object that we're chasing was removed
+		    // from the persistent store by another thread
+		    // before we get to this point, that won't affect
+		    // this invid vector, because we're iterating over
+		    // a fixed vector.
+
+		    // if we've got a null link here, don't chase it.
+
+		    if (derefObj == null || !session.getPerm(derefObj).isVisible())
 		      {
 			continue;
 		      }
@@ -244,7 +255,11 @@ public class DBQueryHandler {
 
 		DBObject derefObj = DBStore.viewDBObject(invid);
 
-		if (!session.getPerm(derefObj).isVisible())
+		// *race*
+		//
+		// as above
+
+		if (derefObj == null || !session.getPerm(derefObj).isVisible())
 		  {
 		    return false;
 		  }
