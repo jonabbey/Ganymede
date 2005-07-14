@@ -227,14 +227,23 @@ public class DBQueryHandler {
 
 		    // *race*
 		    //
-		    // if we're chasing a deref query across an invid,
-		    // and the object that we're chasing was removed
-		    // from the persistent store by another thread
-		    // before we get to this point, that won't affect
-		    // this invid vector, because we're iterating over
-		    // a fixed vector.
-
-		    // if we've got a null link here, don't chase it.
+		    // At this point, the GanymedeSession
+		    // queryDispatch() method that called us is
+		    // iterating over a fixed DBObjectBase
+		    // "iterationSet" vector, and it is entirely
+		    // possible for another session to commit while we
+		    // are doing this iterating.
+		    //
+		    // If another session has committed a transaction
+		    // which deleted one or more objects from the
+		    // persistent store and we come across a stale
+		    // Invid while attempting to do a dereference, we
+		    // can get a null derefObj from the synchronous
+		    // DBStore.viewDBObject() call, above.
+		    //
+		    // In that case, we want to ignore the obsolete
+		    // link, rather than chase it into a
+		    // NullPointerException.
 
 		    if (derefObj == null || !session.getPerm(derefObj).isVisible())
 		      {
