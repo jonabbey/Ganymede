@@ -554,8 +554,10 @@
 
     <ul>
       <li>The <a href="../xml/data.html#INVID">&lt;invid&gt;</a>
-      elements have an extra <b>oid</b> attribute (more on which when
-      we talk about the Incremental Sync Channel).</li>
+      elements always have the <b>oid</b> attribute, whereas <a
+      href="../xml/xmlclient.html">xmlclient</>'s output only includes
+      this attribute when the <code>-includeOid</code> parameter is
+      provided.</li>
 
       <li>The data that is dumped is filtered by the <a
       href="#sync_data">Sync Data</a> constraints specified in the
