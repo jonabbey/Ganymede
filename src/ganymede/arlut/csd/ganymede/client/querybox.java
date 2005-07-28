@@ -65,6 +65,7 @@ package arlut.csd.ganymede.client;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -93,7 +94,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -812,7 +812,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	final Runnable runnableKey = this;
 
-	SwingUtilities.invokeLater(new Runnable() {
+	EventQueue.invokeLater(new Runnable() {
 	  public void run() {
 	    gc.wp.addWaitWindow(runnableKey);
 	  }
@@ -840,7 +840,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    
 	    final DumpResult bufferRef = buffer;
 
-	    SwingUtilities.invokeLater(new Runnable() {
+	    EventQueue.invokeLater(new Runnable() {
 	      public void run() {
 		gc.wp.addTableWindow(gc.session, query, bufferRef);
 	      }
@@ -848,7 +848,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
 	finally
 	  {
-	    SwingUtilities.invokeLater(new Runnable() {
+	    EventQueue.invokeLater(new Runnable() {
 	      public void run() {
 		gc.wp.removeWaitWindow(runnableKey);
 	      }
@@ -856,6 +856,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
       }});
 
+    t.setPriority(Thread.NORM_PRIORITY);
     t.start();
   }
 

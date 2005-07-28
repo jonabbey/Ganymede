@@ -190,6 +190,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
     fp.validate();
 
     Thread thread = new Thread(this);
+    thread.setPriority(Thread.NORM_PRIORITY);
     thread.start();
   }
 

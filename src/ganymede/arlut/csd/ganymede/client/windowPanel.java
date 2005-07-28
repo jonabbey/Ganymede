@@ -56,6 +56,7 @@ package arlut.csd.ganymede.client;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,7 +73,6 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -685,7 +685,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       {
 	final gclient my_gc = gc;
 	
-	SwingUtilities.invokeLater(new Runnable() 
+	EventQueue.invokeLater(new Runnable() 
 				   {
 				     public void run()
 				       {

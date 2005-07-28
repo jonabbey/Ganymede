@@ -25,8 +25,8 @@
 
 package arlut.csd.ganymede.client;
 
+import java.awt.EventQueue;
 import javax.swing.JTree;
-import javax.swing.SwingUtilities;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeModelEvent;
@@ -128,10 +128,10 @@ public class TreeTableModelAdapter extends AbstractTableModel
 
     /**
      * Invokes fireTableDataChanged after all the pending events have been
-     * processed. SwingUtilities.invokeLater is used to handle this.
+     * processed. EventQueue.invokeLater is used to handle this.
      */
     protected void delayedFireTableDataChanged() {
-	SwingUtilities.invokeLater(new Runnable() {
+	EventQueue.invokeLater(new Runnable() {
 	    public void run() {
 		fireTableDataChanged();
 	    }

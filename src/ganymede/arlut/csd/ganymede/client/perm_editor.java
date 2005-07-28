@@ -241,6 +241,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     progressDialog.setVisible(true);
 
     Thread t = new Thread(this);
+    t.setPriority(Thread.NORM_PRIORITY);
     t.start();
   }
 

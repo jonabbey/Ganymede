@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -241,6 +241,7 @@ public class Loader extends Thread {
     // start up a new thread
 
     Thread t = new Thread(this);
+    t.setPriority(Thread.NORM_PRIORITY);
     t.start();
   }
 

@@ -1,5 +1,4 @@
 /*
-
    historyPanel.java
 
    The tab that holds history information.
@@ -56,6 +55,7 @@ package arlut.csd.ganymede.client;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -76,7 +76,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.JValueObject;
@@ -248,7 +247,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	  {
 	    try
 	      {
-		SwingUtilities.invokeAndWait(new Runnable() {
+		EventQueue.invokeAndWait(new Runnable() {
 		  public void run() {
 		    me.showWait();
 		  }
@@ -271,7 +270,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	  }
 	finally
 	  {
-	    SwingUtilities.invokeLater(new Runnable() {
+	    EventQueue.invokeLater(new Runnable() {
 	      public void run() {
 		me.showText(historyBuffer.toString());
 	      }
@@ -279,6 +278,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	  }
       }}, "History loader thread");
 
+    historyThread.setPriority(Thread.NORM_PRIORITY);
     historyThread.start();
   }
 

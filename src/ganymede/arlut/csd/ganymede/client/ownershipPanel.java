@@ -216,6 +216,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
 	if (!op.isStarted())
 	  {
 	    Thread thread = new Thread(op);
+	    thread.setPriority(Thread.NORM_PRIORITY);
 	    thread.start();
 	  }
 	

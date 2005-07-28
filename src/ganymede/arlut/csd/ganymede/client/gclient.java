@@ -58,6 +58,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -89,7 +90,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -1169,7 +1169,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    final String textString = m.toString();
 	    final boolean doHTML = html;
 
-	    SwingUtilities.invokeLater(new Runnable() {
+	    EventQueue.invokeLater(new Runnable() {
 	      public void run() {
 		showMOTD(textString, doHTML);
 	      }
@@ -1182,6 +1182,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     });
 
+    motdThread.setPriority(Thread.NORM_PRIORITY);
     motdThread.start();
     
     setStatus("Ready.", 0);
@@ -1615,10 +1616,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     final String fStatus = status;
 
-    // use SwingUtilities.invokeLater so that we play nice
+    // use EventQueue.invokeLater so that we play nice
     // with the Java display thread
     
-    SwingUtilities.invokeLater(new Runnable() {
+    EventQueue.invokeLater(new Runnable() {
       public void run() {
 	statusLabel.setText(fStatus);
 	statusLabel.paintImmediately(statusLabel.getVisibleRect());
@@ -1642,7 +1643,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // which messaged us, and so we play nice with the Java
     // display thread
     
-    SwingUtilities.invokeLater(new Runnable() {
+    EventQueue.invokeLater(new Runnable() {
       public void run() {
 	personaListener.softTimeOutHandler();
       }
@@ -1968,7 +1969,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     final String Message = message;
     final Image fIcon = icon;
 
-    SwingUtilities.invokeLater(new Runnable() 
+    EventQueue.invokeLater(new Runnable() 
 			       {
 				 public void run()
 				   {
@@ -2064,7 +2065,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     final String Message = message;
     final Image fIcon = icon;
 
-    SwingUtilities.invokeLater(new Runnable() 
+    EventQueue.invokeLater(new Runnable() 
 			       {
 				 public void run()
 				   {
@@ -4885,6 +4886,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  public void run() {
 	    showAboutMessage();
 	  }});
+	thread.setPriority(Thread.NORM_PRIORITY);
 	thread.start();
       }
     else if (command.equals("Credits"))
@@ -4893,6 +4895,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  public void run() {
 	    showCredits();
 	  }});
+	thread.setPriority(Thread.NORM_PRIORITY);
 	thread.start();
       }
     else if (command.equals("Message of the day"))
@@ -4901,6 +4904,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  public void run() {
 	    showMOTD();
 	  }});
+	thread.setPriority(Thread.NORM_PRIORITY);
 	thread.start();
       }
     else
@@ -5226,6 +5230,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		  }
 	      }});
 
+	    t.setPriority(Thread.NORM_PRIORITY);
 	    t.start();
 	    
 	    setStatus("Sending query for base " + node.getText() + " to server", 0);
@@ -6150,7 +6155,7 @@ class StatusClearThread extends Thread {
 		System.err.println("StatusClearThread.run(): invoking label clear");
 	      }
 
-	    SwingUtilities.invokeLater(new Runnable() {
+	    EventQueue.invokeLater(new Runnable() {
 	      public void run() {
 		statusLabel.setText("");
 		statusLabel.paintImmediately(statusLabel.getVisibleRect());
@@ -6269,7 +6274,7 @@ class SecurityLaunderThread extends Thread {
 
 	if (messageSet)
 	  {
-	    SwingUtilities.invokeLater(new Runnable() {
+	    EventQueue.invokeLater(new Runnable() {
 	      public void run() {
 
 		switch (buildPhase)

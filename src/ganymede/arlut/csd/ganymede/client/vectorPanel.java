@@ -1133,6 +1133,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	// thread, by way of this.run().
 
 	Thread t = new Thread(this);
+	t.setPriority(Thread.NORM_PRIORITY);
 	t.start();
       }
     else

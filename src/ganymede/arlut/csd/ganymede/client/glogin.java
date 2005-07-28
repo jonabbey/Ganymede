@@ -63,6 +63,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -85,7 +86,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
@@ -331,6 +331,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     /* Spawn a thread to get connected to the server, using the
      * ClientBase we just created */
 
+    my_thread.setPriority(Thread.NORM_PRIORITY);
     my_thread.start();
   }
 
@@ -582,7 +583,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	    try
 	      {
-		SwingUtilities.invokeAndWait(new Runnable()
+		EventQueue.invokeAndWait(new Runnable()
 		  {
 		    public void run()
 		    {
@@ -638,7 +639,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	if (connected.isSet())
 	  {
-	    SwingUtilities.invokeLater(new Runnable() {
+	    EventQueue.invokeLater(new Runnable() {
 		public void run() {
 		  if (ssl)
 		    {
@@ -671,7 +672,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 			     "OK", null,
 			     getErrorImage()).DialogShow();
 
-	    SwingUtilities.invokeLater(new Runnable() 
+	    EventQueue.invokeLater(new Runnable() 
 	      {
 		public void run()
 		{
@@ -721,7 +722,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	try
 	  {
-	    SwingUtilities.invokeLater(new Runnable() {
+	    EventQueue.invokeLater(new Runnable() {
 	      public void run() {
 		gclient x = null;
 
@@ -830,7 +831,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		    // looks like the ClientBase object lost connection to
 		    // the RMI server.. let's try to re-acquire.
 
-		    new Thread(this).start();
+		    Thread reconnectThread = new Thread(this);
+		    reconnectThread.setPriority(Thread.NORM_PRIORITY);
+		    reconnectThread.start();
+
 		    return;
 		  }
 	      }
@@ -879,7 +883,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		    // looks like the ClientBase object lost connection to
 		    // the RMI server.. let's try to re-acquire.
 
-		    new Thread(this).start();
+		    Thread reconnectThread = new Thread(this);
+		    reconnectThread.setPriority(Thread.NORM_PRIORITY);
+		    reconnectThread.start();
+
 		    return;
 		  }
 		else
@@ -925,6 +932,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // method will use to knock us down.
 
     deathThread = new DeathWatcherThread();
+    deathThread.setPriority(Thread.NORM_PRIORITY);
     deathThread.start();
 
     // and pop up everything
@@ -1106,6 +1114,7 @@ class DeathWatcherThread extends Thread {
     // windows in a bit.. we hold off on just doing it now to not
     // startle the user too much.
 
+    exitThread.setPriority(Thread.NORM_PRIORITY);
     exitThread.start();
 
     // throw up a modal dialog to get the user's attention
