@@ -3196,10 +3196,10 @@ sort of mishap.
 46. [SERVER/CLIENT] Server now has soft timeout option
 
 The Ganymede server has always had the ability to time out users that
-were idle in the Ganymede client.  Tom Embleton
-(embleton@arlut.utexas.edu) expressed dissatisfaction with this, for
-the reason that having to login again from scratch forced him to
-readjust his windows and was a pain in general.
+were idle in the Ganymede client.  Tom Embleton expressed
+dissatisfaction with this, for the reason that having to login again
+from scratch forced him to readjust his windows and was a pain in
+general.
 
 In response, I implemented a soft timeout option that can be turned on
 by activating the 'ganymede.softtimeout' property in the server's
