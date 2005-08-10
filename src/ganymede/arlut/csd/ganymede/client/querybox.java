@@ -1,6 +1,6 @@
 /*
 
-   querybox
+   querybox.java
 
    This class implements a modal dialog that is popped up to generate
    a Query object that will be used by the rest of the ganymede.client
@@ -581,7 +581,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     /* -- */
     
     // Examine each field and if it's not referring to an embedded,
-    // then add it's name + basePrefix to the string vector
+    // then add its name + basePrefix to the string vector
     
     for (int j=0; fields != null && (j < fields.size()); j++)
       { 
@@ -634,7 +634,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 		// process embedded fields for target
 		    
 		getEmbedded(gc.getTemplateVector(tempID), 
-			    basePrefix, tempIDobj, Embedded);
+			    myName, tempIDobj, Embedded);
 	      }
 	  }
       }
