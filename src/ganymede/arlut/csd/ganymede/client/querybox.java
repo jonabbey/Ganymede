@@ -462,102 +462,105 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     /* -- */
 
-    fieldChoices.removeAllElements();
-
-    for (int i=0; fields != null && (i < fields.size()); i++) 
+    synchronized (fieldChoices)
       {
-	template = (FieldTemplate) fields.elementAt(i);
+	fieldChoices.removeAllElements();
 
-	// ignore containing objects and the like...
+	for (int i=0; fields != null && (i < fields.size()); i++) 
+	  {
+	    template = (FieldTemplate) fields.elementAt(i);
+
+	    // ignore containing objects and the like...
 	
-	if ((selectedBase.isEmbedded() && template.getID() == SchemaConstants.OwnerListField) ||
-	    template.getID() == SchemaConstants.BackLinksField)
-	  {
-	    continue;
-	  }
-
-	String name = template.getName();
-
-	if (template.isEditInPlace())
-	  {
-	    // We're an edit in place.. we want to recurse down to the
-	    // bottom of this edit-in-place tree, and add all of the
-	    // nodes to our Embedded vector
-
-	    // because getEmbedded is recursive, we'' pass a vector of
-	    // FieldTemplates so that getEmbedded can recurse down
-	    // with it.  Hence EIPfields.
-
-	    EIPfields.addElement(template);
-	    getEmbedded(EIPfields, null, new Short(selectedBase.getTypeID()), Embedded);
-	    EIPfields.removeElement(template); // empty again?
-
-	    if (!Embedded.isEmpty())
+	    if ((selectedBase.isEmbedded() && template.getID() == SchemaConstants.OwnerListField) ||
+		template.getID() == SchemaConstants.BackLinksField)
 	      {
-		for (int j = 0; (j < Embedded.size()); j++)
+		continue;
+	      }
+
+	    String name = template.getName();
+
+	    if (template.isEditInPlace())
+	      {
+		// We're an edit in place.. we want to recurse down to the
+		// bottom of this edit-in-place tree, and add all of the
+		// nodes to our Embedded vector.
+		//
+		// The recursive method takes a Vector of
+		// FieldTemplates as its first parameter.  We'll add
+		// to and remove from EIPfields so that we can cheaply
+		// re-use the Vector.
+
+		EIPfields.addElement(template);
+		getEmbedded(EIPfields, null, new Short(selectedBase.getTypeID()), Embedded);
+		EIPfields.removeElement(template);
+
+		if (!Embedded.isEmpty())
 		  {
-		    String embedName = (String) Embedded.elementAt(j);
+		    for (int j = 0; (j < Embedded.size()); j++)
+		      {
+			String embedName = (String) Embedded.elementAt(j);
 
-		    // Ok, let's do our string processing for our field name,
-		    // once and for all by removing the slashes and saving
-		    // the result. Erik again.
+			// Ok, let's do our string processing for our field name,
+			// once and for all by removing the slashes and saving
+			// the result. Erik again.
 
-		    String noSlash = embedName.substring(embedName.lastIndexOf("/") + 1,
-							 embedName.length());
+			String noSlash = embedName.substring(embedName.lastIndexOf("/") + 1,
+							     embedName.length());
 
-		    // Add the slash-less name to the name hash, with the key
-		    // being the slash filled name
+			// Add the slash-less name to the name hash, with the key
+			// being the slash filled name
 
-		    mapEmbeddedToField(embedName, noSlash);
+			mapEmbeddedToField(embedName, noSlash);
 
-		    // and finally add to fieldChoices
+			// and finally add to fieldChoices
 
-		    fieldChoices.addElement(embedName);
+			fieldChoices.addElement(embedName);
+		      }
+
+		    // and we're done with Embedded.  Clear it out.
+
+		    Embedded.removeAllElements();
 		  }
+	      }
+	    else
+	      {
+		// Keep a shortcut for our later fieldname parsing
+		// This was Erik's idea.. 
+	    
+		mapEmbeddedToField(name, name);
 
-		// and we're done with Embedded.  Clear it out.
+		// And keep a map from the elaborated field name to
+		// the field template.
+	    
+		mapNameToTemplate(name, template);
+	    
+		// and to the base
+	    
+		mapNameToId(name, new Short(selectedBase.getTypeID()));
 
-		Embedded.removeAllElements();
+		// and finally add to fieldChoices
+		fieldChoices.addElement(name);
 	      }
 	  }
-	else
-	  {
-	    // Keep a shortcut for our later fieldname parsing
-	    // This was Erik's idea.. 
-	    
-	    mapEmbeddedToField(name, name);
-
-	    // And keep a map from the elaborated field name to
-	    // the field template.
-	    
-	    mapNameToTemplate(name, template);
-	    
-	    // and to the base
-	    
-	    mapNameToId(name, new Short(selectedBase.getTypeID()));
-
-	    // and finally add to fieldChoices
-	    fieldChoices.addElement(name);
-	  }
-      }
     
-    // If we wound up with any embedded (edit-in-place) fields from
-    // contained objects, add those fields to our embedded map.
-    //
-    // Note that we don't try to get fancy with where these extra
-    // field possibilities are added in the fieldChoices vector at
-    // this point.  We'll sort them, after.
+	// If we wound up with any embedded (edit-in-place) fields from
+	// contained objects, add those fields to our embedded map.
+	//
+	// Note that we don't try to get fancy with where these extra
+	// field possibilities are added in the fieldChoices vector at
+	// this point.  We'll sort them, after.
 
+	// sort fieldChoices
 
-    // sort fieldChoices
+	gc.sortStringVector(fieldChoices);
 
-    gc.sortStringVector(fieldChoices);
+	// and reset the options panel checkboxes.
 
-    // and reset the options panel checkboxes.
-
-    if (optionsPanel != null)
-      {
-	optionsPanel.resetBoxes();
+	if (optionsPanel != null)
+	  {
+	    optionsPanel.resetBoxes();
+	  }
       }
   }
 
