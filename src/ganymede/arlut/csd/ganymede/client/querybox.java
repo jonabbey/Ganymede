@@ -467,21 +467,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     for (int i=0; fields != null && (i < fields.size()); i++) 
       {
 	template = (FieldTemplate) fields.elementAt(i);
-	    
-	if (template.isEditInPlace())
-	  {
-	    // We're an edit in place.. we want to recurse down
-	    // to the bottom of this edit-in-place tree, and
-	    // add the terminals to the global Embedded vector
-
-	    // because getEmbedded is recursive, we need to pass
-	    // a vector of FieldTemplate's so that getEmbedded
-	    // can recurse down with it.  Hence EIPfields.
-		 
-	    EIPfields.addElement(template);
-	    getEmbedded(EIPfields, template.getName(), null, Embedded);
-	    EIPfields.removeElement(template);
-	  }
 
 	// ignore containing objects and the like...
 	
@@ -493,58 +478,76 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	String name = template.getName();
 
-	// Keep a shortcut for our later fieldname parsing
-	// This was Erik's idea.. 
-	    
-	mapEmbeddedToField(name, name);
+	if (template.isEditInPlace())
+	  {
+	    // We're an edit in place.. we want to recurse down to the
+	    // bottom of this edit-in-place tree, and add all of the
+	    // nodes to our Embedded vector
 
-	// And keep a map from the elaborated field name to
-	// the field template.
-	
-	mapNameToTemplate(name, template);
-	
-	// and to the base
-	
-	mapNameToId(name, new Short(selectedBase.getTypeID()));
-	
-	// and finally add to fieldChoices
-	
-	fieldChoices.addElement(name);
+	    // because getEmbedded is recursive, we'' pass a vector of
+	    // FieldTemplates so that getEmbedded can recurse down
+	    // with it.  Hence EIPfields.
+
+	    EIPfields.addElement(template);
+	    getEmbedded(EIPfields, null, new Short(selectedBase.getTypeID()), Embedded);
+	    EIPfields.removeElement(template); // empty again?
+
+	    if (!Embedded.isEmpty())
+	      {
+		for (int j = 0; (j < Embedded.size()); j++)
+		  {
+		    String embedName = (String) Embedded.elementAt(j);
+
+		    // Ok, let's do our string processing for our field name,
+		    // once and for all by removing the slashes and saving
+		    // the result. Erik again.
+
+		    String noSlash = embedName.substring(embedName.lastIndexOf("/") + 1,
+							 embedName.length());
+
+		    // Add the slash-less name to the name hash, with the key
+		    // being the slash filled name
+
+		    mapEmbeddedToField(embedName, noSlash);
+
+		    // and finally add to fieldChoices
+
+		    fieldChoices.addElement(embedName);
+		  }
+
+		// and we're done with Embedded.  Clear it out.
+
+		Embedded.removeAllElements();
+	      }
+	  }
+	else
+	  {
+	    // Keep a shortcut for our later fieldname parsing
+	    // This was Erik's idea.. 
+	    
+	    mapEmbeddedToField(name, name);
+
+	    // And keep a map from the elaborated field name to
+	    // the field template.
+	    
+	    mapNameToTemplate(name, template);
+	    
+	    // and to the base
+	    
+	    mapNameToId(name, new Short(selectedBase.getTypeID()));
+
+	    // and finally add to fieldChoices
+	    fieldChoices.addElement(name);
+	  }
       }
     
     // If we wound up with any embedded (edit-in-place) fields from
     // contained objects, add those fields to our embedded map.
+    //
+    // Note that we don't try to get fancy with where these extra
+    // field possibilities are added in the fieldChoices vector at
+    // this point.  We'll sort them, after.
 
-    // note that we don't try to get fancy with where these extra
-    // field possibilities are added in the fieldChoices vector.
-    
-    if (!Embedded.isEmpty())
-      {
-	for (int i = 0; (i < Embedded.size()); i++)
-	  {
-	    String embedName = (String) Embedded.elementAt(i);
-
-	    // Ok, let's do our string processing for our field name,
-	    // once and for all by removing the slashes and saving
-	    // the result. Erik again.
-		  
-	    String noSlash = embedName.substring(embedName.lastIndexOf("/") + 1,
-						 embedName.length());
-
-	    // Add the slash-less name to the name hash, with the key
-	    // being the slash filled name
-		  
-	    mapEmbeddedToField(embedName, noSlash);
-
-	    // and finally add to fieldChoices
-
-	    fieldChoices.addElement(embedName);
-	  }
-
-	// and we're done with Embedded.  Clear it out.
-
-	Embedded.removeAllElements();
-      }
 
     // sort fieldChoices
 
@@ -567,6 +570,17 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    * It is a recursive method, and can handle any number
    * of layers of embedding. The fields are stored in
    * a 'global' vector (as strings)
+   *
+   * @param fields A Vector of FieldTemplate objects that we want
+   * to iterate over, looking for embedded fields
+   * @param basePrefix A String to prepend to field names we find
+   * in the fields Vector, so that we can uniquely place the fields
+   * in a single namespace.  Will be null upon the top-level recursive
+   * call to getEmbedded().
+   * @param lowestBase A Short representing the object type of the
+   * object base that contains the FieldTemplates in the fields Vector.
+   * @param Embedded A Vector in which we collect all the fully qualified
+   * names of embedded fields during our recursion
    *
    */
   
@@ -594,52 +608,51 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  {
 	    continue;
 	  }
-	      
-	myName = tempField.getName();
-	myName = basePrefix + "/" + myName;  // slap on the prefix
+
+	if (basePrefix != null)
+	  {
+	    myName = basePrefix + "/" + tempField.getName();  // slap on the prefix
+	  }
+	else
+	  {
+	    myName = tempField.getName();
+	  }
 
 	// save the embedded information in our Embedded vector
-	
+
 	Embedded.addElement(myName);
-		
+
 	mapNameToTemplate(myName, tempField);
-		   
+
 	// Also, save the information on the target base
 	// in a hashtable
-		      
+
 	// the ID will be used in creating the query for the 
 	// edit-in-place
-	
-	// if tempIDobj isn't null, then we've got 
-	// something beneath an edit in place. Add the
-	// id of the lowest level base to the baseIDHash
-	
+
 	mapNameToId(myName, lowestBase);
 
 	if (tempField.isEditInPlace())
 	  {
-	    // since it does refer to an embedded, call
-	    // getEmbedded again, with tempID's templateVector,
-	    // basePrefix/tempBase,
+	    // we've got an edit-in-place invid field.  if it is
+	    // constrained to point to a specific type, go ahead and
+	    // recurse down to look at its children
 
-	    myName = tempField.getName();
-	    myName = basePrefix + "/" + myName;  // slap on the prefix
-		  
 	    tempID = tempField.getTargetBase();
 
 	    if (tempID >= 0)
 	      {
 		tempIDobj = new Short(tempID);
-		    
+
 		// process embedded fields for target
-		    
+
 		getEmbedded(gc.getTemplateVector(tempID), 
 			    myName, tempIDobj, Embedded);
 	      }
 	  }
       }
   }
-  
+
   /**
    *
    * This internal method takes the current state of the rows in the
