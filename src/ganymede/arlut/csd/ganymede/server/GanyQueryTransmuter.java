@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -87,14 +87,14 @@ import java.util.HashMap;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                               GanyQueryTransmuter
+                                                             GanyQueryTransmuter
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class processes textual queries using an ANTLR-generated parser, and
+ * This class processes textual queries using an ANTLR-generated parser, and
  * generates an old, Ganymede-style arlut.csd.ganymede.common.Query, with attendant
- * arlut.csd.ganymede.common.QueryNode tree.</p>
+ * arlut.csd.ganymede.common.QueryNode tree.
  *
  * @see arlut.csd.ganymede.common.QueryNode
  * @see arlut.csd.ganymede.common.Query

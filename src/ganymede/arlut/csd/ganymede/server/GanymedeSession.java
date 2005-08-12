@@ -3060,16 +3060,14 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>This method provides the hook for doing all
-   * manner of simple object listing for the Ganymede
-   * database.</p>
+   * This method provides the hook for doing all manner of simple
+   * object listing for the Ganymede database.
    *
-   * <p>This version of query() takes a query in string
-   * form, based on Deepak's ANTLR-specified Ganymede
-   * query grammar.</p>
+   * This version of query() takes a query in string form, based on
+   * Deepak's ANTLR-specified Ganymede query grammar.
    *
-   * <p>This method may not be called from a DBEditObject's
-   * commitPhase1/2() methods without risking deadlock.</p>
+   * This method may not be called from a DBEditObject's
+   * commitPhase1/2() methods without risking deadlock.
    *
    * @see arlut.csd.ganymede.rmi.Session 
    */
