@@ -84,7 +84,7 @@ import arlut.csd.ganymede.rmi.db_object;
 /**
  * <p>This class is a data holding structure that is intended to hold
  * object and field data for an XML object element for
- * {@link arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}.</p>
+ * {@link arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}.
  *
  * @version $Id$
  * @author Jonathan Abbey
@@ -95,44 +95,44 @@ public class xmlobject {
   final static boolean debug = false;
 
   /**
-   * <p>TranslationService object for handling string localization in the Ganymede
-   * server.</p>
+   * TranslationService object for handling string localization in the Ganymede
+   * server.
    */
 
   static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.xmlobject");
 
   /**
-   * <p>The local identifier string for this object</p>
+   * The local identifier string for this object
    */
 
   String id = null;
 
   /**
-   * <p>Descriptive typeString for this object.  This is the
+   * Descriptive typeString for this object.  This is the
    * contents of the &lt;object&gt;'s type attribute, in
-   * XML (underscores for spaces) encoding.</p>
+   * XML (underscores for spaces) encoding.
    */
 
   String typeString = null;
 
   /**
-   * <p>Action mode for this object, should be null,
+   * Action mode for this object, should be null,
    * "create", "edit", "delete", or "inactivate". 
    */
 
   String actionMode = null;
 
   /**
-   * <p>The short object type id for this object type.</p>
+   * The short object type id for this object type.
    *
-   * <p>Will be null if undefined.</p>
+   * Will be null if undefined.
    */
 
   Short type = null;
 
   /**
-   * <p>The server-side object identifier for this object.  Will
-   * be null until we create or locate this object in the server.</p>
+   * The server-side object identifier for this object.  Will
+   * be null until we create or locate this object in the server.
    */
 
   Invid invid = null;
@@ -146,52 +146,52 @@ public class xmlobject {
   private Invid oidCreateInvid = null;
 
   /**
-   * <p>If true, the invid for this field is known to not exist on the
-   * server.</p>
+   * If true, the invid for this field is known to not exist on the
+   * server.
    */
 
   boolean knownNonExistent = false;
 
   /**
-   * <p>The object number, if known.  This may be used to identify
+   * The object number, if known.  This may be used to identify
    * an object on the server if the object is not thought to have
-   * a unique identifier string.</p>
+   * a unique identifier string.
    *
-   * <p>Will be negative one if undefined.</p>
+   * Will be negative one if undefined.
    */
 
   int num = -1;
 
   /**
-   * <p>Hashtable mapping non-XML-coded {@link arlut.csd.ganymede.server.xmlfield xmlfield}
-   * names to xmlfield objects.</p>
+   * Hashtable mapping non-XML-coded {@link arlut.csd.ganymede.server.xmlfield xmlfield}
+   * names to xmlfield objects.
    */
 
   Hashtable fields = null;
 
   /**
-   * <p>Reference to server-side object, if we have already created it/got a reference
-   * to it from the server.</p>
+   * Reference to server-side object, if we have already created it/got a reference
+   * to it from the server.
    */
 
   db_object objref = null;
 
   /**
-   * <p>Create only flag.  If this flag is true, this object was explicitly specified
+   * Create only flag.  If this flag is true, this object was explicitly specified
    * as a new object to be created, rather than one that should be created only
-   * if an object with the same type/id pair isn't found on the server.</p>
+   * if an object with the same type/id pair isn't found on the server.
    */
 
   boolean forceCreate = false;
 
   /**
-   * <p>If true, this object was an embedded object</p>
+   * If true, this object was an embedded object
    */
 
   boolean embedded = false;
 
   /**
-   * <p>Reference to the GanymedeXMLSession working with us.</p>
+   * Reference to the GanymedeXMLSession working with us.
    */
 
   GanymedeXMLSession xSession;
@@ -199,13 +199,13 @@ public class xmlobject {
   /* -- */
 
   /**
-   * <p>This constructor takes the XMLElement defining an object to
+   * This constructor takes the XMLElement defining an object to
    * be created or manipulated on the server and loads all information
-   * for this object into the xmlobject created.</p>
+   * for this object into the xmlobject created.
    *
-   * <p>This constructor reads all elements from the xmlclient
+   * This constructor reads all elements from the xmlclient
    * XML stream up to and including the matching close element for
-   * this object.</p>
+   * this object.
    */
   
   public xmlobject(XMLElement openElement, GanymedeXMLSession xSession) throws SAXException
@@ -214,13 +214,13 @@ public class xmlobject {
   }
 
   /**
-   * <p>This constructor takes the XMLElement defining an object to
+   * This constructor takes the XMLElement defining an object to
    * be created or manipulated on the server and loads all information
-   * for this object into the xmlobject created.</p>
+   * for this object into the xmlobject created.
    *
-   * <p>This constructor reads all elements from the xmlclient
+   * This constructor reads all elements from the xmlclient
    * XML stream up to and including the matching close element for
-   * this object.</p>
+   * this object.
    */
   
   public xmlobject(XMLElement openElement, boolean embedded, GanymedeXMLSession xSession) throws SAXException
@@ -347,11 +347,11 @@ public class xmlobject {
   }
 
   /**
-   * <p>This method causes this object to be created on
-   * the server.</p>
+   * This method causes this object to be created on
+   * the server.
    *
-   * <p>This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
-   * return semantics.</p>
+   * This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
+   * return semantics.
    */
 
   public ReturnVal createOnServer(GanymedeSession session)
@@ -384,7 +384,7 @@ public class xmlobject {
 
 	    setInvid(myInvid);
 	    
-	    xSession.duplications.add(myInvid);
+	    xSession.rememberSeenInvid(myInvid);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -397,11 +397,11 @@ public class xmlobject {
   }
 
   /**
-   * <p>This method causes this object to be checked out for editing
-   * on the server.</p>
+   * This method causes this object to be checked out for editing
+   * on the server.
    *
-   * <p>This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
-   * return semantics.</p>
+   * This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
+   * return semantics.
    */
 
   public ReturnVal editOnServer(Session session) throws NotLoggedInException
@@ -446,13 +446,13 @@ public class xmlobject {
 	    // depending on the configuration of the object's label
 	    // handling.
 
-	    if (xSession.duplications.contains(localInvid))
+	    if (xSession.haveSeenInvid(localInvid))
 	      {
 		// "xmlobject editOnServer(): Encountered duplicate xmlobject for creating or editing: {0}"
 		return Ganymede.createErrorDialog(ts.l("editOnServer.duplicate", objref.toString()));
 	      }
 
-	    xSession.duplications.add(localInvid);
+	    xSession.rememberSeenInvid(localInvid);
 
 	    return result;
 	  }
@@ -469,13 +469,13 @@ public class xmlobject {
   }
 
   /**
-   * <p>This method uploads field information contained in this object
+   * This method uploads field information contained in this object
    * up to the Ganymede server.  Unfortunately, we can't necessarily
    * upload all the field information all at once, as we have to
    * create all the objects and set enough information into them that
    * they can properly be addressed, before we can set all the invid
    * fields.  The mode paramater controls this, allowing this method
-   * to be called in multiple passes.</p>
+   * to be called in multiple passes.
    *
    * @param mode 0 to register all non-invids, 1 to register just invids, 2 to register both
    */
@@ -551,13 +551,13 @@ public class xmlobject {
   }
 
   /**
-   * <p>This method returns an invid for this xmlobject record,
-   * performing a lookup on the server if necessary.</p>
+   * This method returns an invid for this xmlobject record,
+   * performing a lookup on the server if necessary.
    *
-   * <p>The first time getInvid() is called, we'll try to find the
+   * The first time getInvid() is called, we'll try to find the
    * Invid from the DBStore by doing a look-up of the xml object's
    * label (if we're not given a num attribute).  getInvid() stores
-   * the Invid upon first lookup as a side effect.</p>
+   * the Invid upon first lookup as a side effect.
    */
 
   public Invid getInvid() throws NotLoggedInException
@@ -605,9 +605,9 @@ public class xmlobject {
   }
 
   /**
-   * <p>This method sets the invid for this object, if it is discovered
+   * This method sets the invid for this object, if it is discovered
    * from the server during processing.  Used to provide invids for
-   * newly created embedded objects, for instance.<p>
+   * newly created embedded objects, for instance.
    */
 
   public void setInvid(Invid invid)
@@ -617,9 +617,9 @@ public class xmlobject {
   }
 
   /**
-   * <p>This method returns a field definition for a named field.
+   * This method returns a field definition for a named field.
    * The fieldName string is assumed to be underscore-for-space XML
-   * encoded.</p>
+   * encoded.
    */
 
   public FieldTemplate getFieldDef(String fieldName)

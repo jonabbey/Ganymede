@@ -1288,17 +1288,21 @@ public class xmlfield implements FieldType {
 			    object.setInvid(result.getInvid());
 			    object.objref = result.getObject();
 
-			    // store this object so we can resolve
-			    // invid references to it
+			    // store this embedded object so we can
+			    // resolve xinvid references to it
 
-			    owner.xSession.storeObject(object);
+			    if (!owner.xSession.storeObject(object))
+			      {
+				// "ERROR: Ran into a name conflict when attempting to record an embedded xml object: {0}"
+				throw new RuntimeException(ts.l("registerOnServer.conflict_resolving", object.toString()));
+			      }
 			  }
 
 			// remember that we created this embedded
 			// object, so that we can refer to it
 			// elsewhere by its id
 
-			owner.xSession.embeddedObjects.addElement(object);
+			owner.xSession.rememberEmbeddedObject(object);
 
 			// register any non-invids on this embedded
 			// object.. this will trigger the creation of
@@ -1352,7 +1356,7 @@ public class xmlfield implements FieldType {
 			// object so that we can fixup any invids
 			// after all is said and done
 
-			owner.xSession.embeddedObjects.addElement(object);
+			owner.xSession.rememberEmbeddedObject(object);
 
 			// register any non-invids on this embedded
 			// object.. this will trigger the creation of
@@ -1541,13 +1545,19 @@ public class xmlfield implements FieldType {
   }
 
   /**
-   * <p>This method is used by the {@link
+   * This method is used by the {@link
    * arlut.csd.ganymede.server.GanymedeXMLSession} to cause this field
    * to attempt to do lookups on all labeled xInvids in this field, in
    * an attempt to get the Invids for them.  If a lookup cannot be
    * resolved when this method is called, it will be left unresolved
    * for a later round, after we have created the objects we need to
-   * create.</p>
+   * create.
+   *
+   * Note in the code for this method that we don't care about the
+   * actual invids returned, we're just wanting to make sure that we
+   * try to look them up on the server at this point in time, before
+   * we apply any object renaming in the processing of our containing
+   * xml transaction.
    */
 
   public void dereferenceInvids() throws NotLoggedInException
@@ -1830,55 +1840,61 @@ public class xmlfield implements FieldType {
 }
 
 /**
- * <p>This class is used by the Ganymede XML client to represent
- * an invid object reference field value.  This field value
- * may or may not be fully resolved to an actual invid on the
- * server, depending on what stage of processing the XML
- * client is in.</p>
+ * This class is used by the Ganymede XML client to represent an invid
+ * object reference field value.  This field value may or may not be
+ * fully resolved to an actual invid on the server, depending on what
+ * stage of processing the XML client is in.
  */
 
 class xInvid {
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede system.</p>
+   * TranslationService object for handling string localization in the
+   * Ganymede system.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.xInvid");
 
   /**
-   * <p>The numeric type id for the object type this xInvid is
-   * meant to point to.</p>
+   * The numeric type id for the object type this xInvid is meant to
+   * point to.
    *
-   * <p>In the XML file, this field is derived from the type attribute,
-   * after doing an object type lookup in the server's data structures</p>
+   * In the XML file, this field is derived from the type attribute,
+   * after doing an object type lookup in the server's data
+   * structures.
    */
 
   short typeId;
 
   /**
-   * <p>The id string for this xInvid from the XML file.  Will
-   * be used to resolve this xInvid to an actual {@link arlut.csd.ganymede.common.Invid Invid}
-   * on the server, if set.</p>
+   * The id string for this xInvid from the XML file.  Will be used to
+   * resolve this xInvid to an actual {@link
+   * arlut.csd.ganymede.common.Invid Invid} on the server, if set.
    *
-   * <p>In the XML file, this field is taken from the id attribute.</p>
+   * In the XML file, this field is taken from the id attribute.
    */
 
   String objectId;
 
   /**
-   * <p>This attribute will point either to an Invid, if a
-   * dereferencing could be accomplished successfully against a
-   * pre-existing object on the server, or to an xmlobject if we
-   * couldn't find a pre-existing (or registered) object on the server
-   * but we were able to find a match in our xml file.</p>
+   * This polymorphic object field is intended to contain the actual
+   * on-server Invid corresponding to this xInvid object.
+   *
+   * invidPtr will contain an actual {@link arlut.csd.ganymede.common.Invid}
+   * object if this <invid> element could be matched against a pre-existing
+   * Invid on the Ganymede server.
+   *
+   * If no server-side Invid can be found, invidPtr may instead point
+   * to the {@link arlut.csd.ganymede.server.xmlobject} object which
+   * will eventually be given the Invid we're interested in when it is
+   * integrated into the server's data store.
    */
 
   private Object invidPtr;
 
   /**
-   * <p>The numeric object id, if specified in the XML file for this
-   * xInvid.</p>
+   * The numeric object id, if specified in the XML file for this
+   * xInvid.
    */
 
   int num = -1;
@@ -1957,9 +1973,9 @@ class xInvid {
   }
 
   /**
-   * <p>This method resolves and returns the Invid for
-   * this xInvid place holder, talking to the server
-   * if necessary to resolve an id string.</p>
+   * This method resolves and returns the Invid for this xInvid place
+   * holder, talking to the server if necessary to resolve an id
+   * string.
    */
 
   public Invid getInvid() throws NotLoggedInException
@@ -1968,9 +1984,9 @@ class xInvid {
   }
 
   /**
-   * <p>This method resolves and returns the Invid for
-   * this xInvid place holder, talking to the server
-   * if necessary to resolve an id string.</p>
+   * This method resolves and returns the Invid for this xInvid place
+   * holder, talking to the server if necessary to resolve an id
+   * string.
    *
    * @param noReally If false, we're being called by the xmlfield
    * dereferenceInvids method, and we don't need to consider it a
@@ -2076,6 +2092,13 @@ class xInvid {
 
     return result.toString();
   }
+
+  /**
+   * This is a very hack-ish way of getting a GanymedeXMLSession
+   * reference without having to store it redundantly in all of the
+   * (possibly hundreds of thousands) xInvid objects stored in the
+   * server during xml transaction processing.
+   */
 
   private GanymedeXMLSession getXSession()
   {
