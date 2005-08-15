@@ -4891,10 +4891,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (sendData)
 	  {
+	    // "You do not have permissions to dump the server''s data with the xml client"
 	    message = ts.l("getXML.data_refused");
 	  }
 	else
 	  {
+	    // "You do not have permissions to dump the server''s schema definition with the xml client"
 	    message = ts.l("getXML.schema_refused");
 	  }
 

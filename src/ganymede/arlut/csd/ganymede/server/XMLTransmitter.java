@@ -72,9 +72,9 @@ import java.rmi.server.UnicastRemoteObject;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is used on the server to act as a FileTransmitter, a client
+ * This class is used on the server to act as a FileTransmitter, a client
  * pulling data to do an xmlclient dump can make iterative calls on this object
- * over RMI in order to receive the file.</p>
+ * over RMI in order to receive the file.
  */
 
 public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitter {
@@ -82,14 +82,14 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
   private static final boolean debug = false;
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede server.</p>
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.XMLTransmitter");
 
   /**
-   * <p>How big should the buffer between the XML dumping thread and
+   * How big should the buffer between the XML dumping thread and
    * the getNextChunk() method in this class?  This can be up to 64k,
    * and the larger it is up to that limit, the fewer RMI calls will
    * be required to pull a large XML dump from Ganymede.
@@ -107,10 +107,10 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
   private String syncChannel;
 
   /**
-   * <p>This constructor creates the XMLTransmitter used to send XML data from
+   * This constructor creates the XMLTransmitter used to send XML data from
    * the Ganymede server down to the xmlclient.  A XMLTransmitter serves
    * as an RMI exported object that the xmlclient can continually poll
-   * to download chunks of XML.</p>
+   * to download chunks of XML.
    */
 
   public XMLTransmitter(boolean sendData, boolean sendSchema, String syncChannel, boolean includeHistory, boolean includeOid) throws IOException, RemoteException
@@ -148,7 +148,7 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
 	      
 	      System.err.println(ts.l("init.eof"));
 	    }
-	}}, ts.l("init.threadname"));
+	}}, ts.l("init.threadname")); // "Ganymede XMLSession Schema/Data Dump Thread"
     
     // and set it running
     
@@ -156,11 +156,12 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
   }
 
   /**
-   * <p>This method pulls down the next sequence of bytes from the
+   * This method pulls down the next sequence of bytes from the
    * FileTransmitter.  This method will block if necessary until the
-   * data is ready to be transmitted.</p>
+   * data is ready to be transmitted.
    *
-   * <p>This method returns null on end of file, and will throw an excepti.</p>
+   * This method returns null on end of file, and will throw an
+   * exception if it is called again after null is returned.
    */
 
   public synchronized byte[] getNextChunk() throws RemoteException
@@ -251,8 +252,8 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
   }
 
   /**
-   * <p>This method is called to notify the FileTransmitter that no
-   * more of the file will be pulled.</p>
+   * This method is called to notify the FileTransmitter that no
+   * more of the file will be pulled.
    */
   
   public synchronized void end() throws RemoteException
