@@ -53,7 +53,7 @@
 */
 
 header {
-  package arlut.csd.ganymede.server;
+package arlut.csd.ganymede.server;
 }
 
 class QueryParser extends Parser;
@@ -67,15 +67,7 @@ query :
        ;
 
 select_clause: 
-       SELECT^ (OBJECT | (select_field (COMMA! select_field)*))
-       ;
-
-select_field:
-       STRING_VALUE
-       | INVID
-       | LABEL
-       | ACTIVE
-       | EDITABLE
+       SELECT^ (OBJECT | (STRING_VALUE (COMMA! STRING_VALUE)*))
        ;
 
 from_clause:
@@ -130,10 +122,6 @@ FROM   : "from" ;
 WHERE  : "where" ;
 DEREF  : "->" ;
 OBJECT : "object";
-INVID  : "invid";
-EDITABLE : "editable";
-LABEL  : "label";
-ACTIVE : "active";
 
 STRING_VALUE : 
          '"' (options {greedy=false;}:.)* '"' 
