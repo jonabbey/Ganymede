@@ -16,13 +16,15 @@
       can be used to load data and schema information into the Ganymede server, and
       which may be used to dump data from the server to an XML file.</p>
 
-    <p>There are four ways to run the <font color="#ff0000"><code><b>xmlclient</b></code></font>:</p>
+    <p>There are six ways to run the <font color="#ff0000"><code><b>xmlclient</b></code></font>:</p>
 
     <p><ol>
 	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] &lt;xmlfile&gt;</li>
 	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dump [-includeHistory] [-includeOid]</li>
 	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpschema</li>
 	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -dumpdata [-includeHistory] [-includeOid] [sync=channel]</li>
+	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -queryfile &lt;filename&gt;</li>
+	<li>xmlclient [username=&lt;username&gt;] [password=&lt;password&gt;] -query &lt;query&gt;</li>
     </ol></p>
 
     <p>Running xmlclient with a file name for a parameter will cause
