@@ -182,10 +182,17 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     Query query = new Query(objectBase.getName(), root);
 
-    for (int i = 0; i < selectFields.size(); i ++)
+    if (selectFields == null)
       {
-	DBObjectBaseField field = (DBObjectBaseField) selectFields.get(i);
-	query.addField(field.getID());
+	query.resetPermitList(); // return the default list of fields
+      }
+    else
+      {
+	for (int i = 0; i < selectFields.size(); i ++)
+	  {
+	    DBObjectBaseField field = (DBObjectBaseField) selectFields.get(i);
+	    query.addField(field.getID());
+	  }
       }
 
     // clear out our refs for GC
@@ -227,6 +234,11 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
   {
     ArrayList selectFields = new ArrayList();
     AST select_node = ast.getFirstChild();
+
+    if (select_node.getType() == QueryParserTokenTypes.OBJECT)
+      {
+	return null;
+      }
 
     while (select_node != null)
       {
