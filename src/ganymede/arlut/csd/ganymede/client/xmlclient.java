@@ -377,13 +377,13 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (ParseArgs.switchExists(ts.l("global.queryArg"), argv))
       {
-	queryString = argv[argv.length-1];
+	queryString = ParseArgs.decodeArg(argv[argv.length-1]);
 	return;
       }
 
     if (ParseArgs.switchExists(ts.l("global.queryfileArg"), argv))
       {
-	queryFilename = argv[argv.length-1];
+	queryFilename = ParseArgs.decodeArg(argv[argv.length-1]);
 	return;
       }
 
@@ -393,7 +393,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	doTest = true;
       }
 
-    xmlFilename = argv[argv.length-1];
+    xmlFilename = ParseArgs.decodeArg(argv[argv.length-1]);
 
     xmlFile = new File(xmlFilename);
 

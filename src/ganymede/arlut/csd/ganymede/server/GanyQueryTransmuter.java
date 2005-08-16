@@ -175,7 +175,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     if (ast == null)
       {
-	throw new GanyParseException("I couldn't parse the query, bub.  Make sure you've parenthesized everything correctly.");
+	throw new GanyParseException("I couldn't parse the query, bub.  Make sure you've parenthesized everything correctly.\n\n" + queryString);
       }
 
     QueryNode root = parse_tree(ast);

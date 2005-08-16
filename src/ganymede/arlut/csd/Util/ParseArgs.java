@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -109,8 +109,7 @@ public class ParseArgs {
 
 	    if (index > 0)
 	      {
-		// do %20 to space decoding
-		return args[i].substring(index + 1).replaceAll("%20", " ");
+		return decodeArg(args[i].substring(index + 1));
 	      }
 	    else
 	      {
@@ -120,5 +119,15 @@ public class ParseArgs {
       }
 
     return null;
+  }
+
+  /**
+   * Simple decode method to handle unescaping %20 for space
+   * substitution, as used with the xmlclient, and etc.
+   */
+
+  public static String decodeArg(String argument)
+  {
+    return argument.replaceAll("%20", " ");
   }
 }
