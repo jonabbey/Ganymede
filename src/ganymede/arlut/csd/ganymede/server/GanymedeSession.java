@@ -4807,6 +4807,44 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * This method is called by the XML client to initiate a dump of
+   * Ganymede objects in XML format matching the GanyQL search
+   * criteria specified in the queryString.  The ReturnVal returned
+   * will, if the operation is approved, contain a reference to an RMI
+   * FileTransmitter interface, which can be iteratively called by the
+   * XML client to pull pieces of the transmission down in sequence.
+   */
+
+  public ReturnVal runXMLQuery(String queryString) throws NotLoggedInException, GanyParseException
+  {
+    checklogin();
+
+    GanyQueryTransmuter transmuter = new GanyQueryTransmuter();
+    Query query = transmuter.transmuteQueryString(queryString);
+
+    // get a simple list of matching invids without bothering to do
+    // transport setup.
+
+    QueryResult rows = this.queryDispatch(query, false, false, null, null);
+
+    XMLTransmitter transmitter = null;
+
+    try
+      {
+	transmitter = new XMLTransmitter(this, queryString, query, rows);
+      }
+    catch (IOException ex)
+      {
+	return Ganymede.createErrorDialog(ts.l("getXML.transmitter_error"),
+					  ts.l("getXML.transmitter_error_msg", ex.getMessage()));
+      }
+
+    ReturnVal retVal = new ReturnVal(true);
+    retVal.setFileTransmitter(transmitter);
+    return retVal;
+  }
+
+  /**
+   * This method is called by the XML client to initiate a dump of
    * the server's schema definition in XML format.  The ReturnVal
    * returned will, if the operation is approved, contain a reference
    * to an RMI FileTransmitter interface, which can be iteratively

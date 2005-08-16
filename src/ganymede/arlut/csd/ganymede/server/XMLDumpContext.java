@@ -54,6 +54,7 @@
 
 package arlut.csd.ganymede.server;
 
+import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.Util.XMLUtils;
 import com.jclark.xml.output.XMLWriter;
@@ -66,54 +67,54 @@ import java.io.IOException;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class is used on the server to group parameters that will guide
- * the server in doing an XML dump.</P>
+ * This class is used on the server to group parameters that will guide
+ * the server in doing an XML dump.
  */
 
 public class XMLDumpContext {
 
   /**
-   * <P>If true, the Ganymede server thread using this
+   * If true, the Ganymede server thread using this
    * XMLDumpContext will include plaintext passwords
-   * to the emitted XML file whenever possible</P>
+   * to the emitted XML file whenever possible
    */
 
   boolean dumpPlaintextPasswords;
 
   /**
-   * <P>If true, the Ganymede server thread using this
+   * If true, the Ganymede server thread using this
    * XMLDumpContext will include the four standard
    * history fields for each object in the emitted XML
-   * file.</P>
+   * file.
    */
 
   boolean dumpCreatorModifierInfo;
 
   /**
-   * <p>If non-null, this SyncRunner will be consulted to answer the
-   * mayInclude and shouldInclude questions.</p>
+   * If non-null, this SyncRunner will be consulted to answer the
+   * mayInclude and shouldInclude questions.
    */
 
   private SyncRunner syncConstraints;
 
   /**
-   * <p>If true, this XMLDumpContext is being used to transmit a
+   * If true, this XMLDumpContext is being used to transmit a
    * transaction delta, in which case we'll want to let callers know
    * so that they can decide to handle certain things (such as
-   * embedded objects) differently.</p>
+   * embedded objects) differently.
    */
 
   private boolean deltaSyncing = false;
 
   /**
-   * <p>If true, this XMLDumpContext is currently writing out the
+   * If true, this XMLDumpContext is currently writing out the
    * before state of a transaction incremental dump.  We'll keep hold
    * of this information so server-side code can decide whether to
    * write information from the before or after state of a transaction
-   * in progress.</p>
+   * in progress.
    *
-   * <p>If we're not dumping out a transactional incremental dump, this
-   * variable should always be false.</p>
+   * If we're not dumping out a transactional incremental dump, this
+   * variable should always be false.
    */
 
   private boolean beforeState = false;
@@ -126,7 +127,19 @@ public class XMLDumpContext {
   private boolean includeOid = false;
 
   /**
-   * <p>The actual writer, from James Clark's XML package.</p>
+   * If non-null, this XMLDumpContext is being used to present the
+   * results of a Ganymede {@link arlut.csd.ganymede.common.Query}
+   * operation to the xmlclient.  When {@link
+   * arlut.csd.ganymede.server.DBObject DBObjects} are dumped to this
+   * XMLDumpContext in such a case, the fields included in the dump
+   * will be filtered against the fields requested in this Query
+   * object.
+   */
+
+  private Query query = null;
+
+  /**
+   * The actual writer, from James Clark's XML package.
    */
 
   XMLWriter xmlOut;
@@ -136,7 +149,21 @@ public class XMLDumpContext {
   /* -- */
 
   /**
-   * <P>Main constructor</P>
+   * Constructor for use with dumping query results to XML
+   *
+   * @param xmlOut The XMLWriter to write to
+   * @param query The {@link arlut.csd.ganymede.common.Query} object
+   * defining the fields to include
+   */
+  
+  public XMLDumpContext(XMLWriter xmlOut, Query query)
+  {
+    this.xmlOut = xmlOut;
+    this.query = query;
+  }
+
+  /**
+   * Main constructor
    *
    * @param xmlOut The XMLWriter to write to
    * @param passwords Include plaintext passwords in password field dumps,
@@ -175,8 +202,8 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Returns true if this XMLDumpContext was created to write to a
-   * sync channel.</p>
+   * Returns true if this XMLDumpContext was created to write to a
+   * sync channel.
    */
 
   public boolean isSyncing()
@@ -185,8 +212,8 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Sets whether or not this XMLDumpContext was created to write to a
-   * delta sync channel.</p>
+   * Sets whether or not this XMLDumpContext was created to write to a
+   * delta sync channel.
    */
 
   public void setDeltaSyncing(boolean param)
@@ -195,8 +222,8 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Returns true if this XMLDumpContext was created to write to a
-   * delta sync channel.</p>
+   * Returns true if this XMLDumpContext was created to write to a
+   * delta sync channel.
    */
 
   public boolean isDeltaSyncing()
@@ -205,8 +232,8 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Sets whether or not this XMLDumpContext is in the middle of writing
-   * out the before state of an incremental dump.</p>
+   * Sets whether or not this XMLDumpContext is in the middle of writing
+   * out the before state of an incremental dump.
    */
 
   public void setBeforeStateDumping(boolean param)
@@ -215,9 +242,9 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Returns true if this XMLDumpContext is writing out the before
+   * Returns true if this XMLDumpContext is writing out the before
    * state of an incremental dump, or false if we're either writing
-   * the after state or are not doing an incremental dump.</p>
+   * the after state or are not doing an incremental dump.
    */
 
   public boolean isBeforeStateDumping()
@@ -238,8 +265,8 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Returns the name of the Sync Channel we're writing to, if we
-   * are writing to one.</p>
+   * Returns the name of the Sync Channel we're writing to, if we
+   * are writing to one.
    */
 
   public String getSyncChannelName()
@@ -253,15 +280,15 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Returns true if the DBObject passed in needs to be synced to
+   * Returns true if the DBObject passed in needs to be synced to
    * this channel.  This version of shouldInclude() assumes that the
    * object passed in is a read-only DBObject.  In this case, the
    * shouldInclude() test will just determine whether an object of
    * this type should ever be written to the sync channel we are
-   * writing to, if indeed we are writing to one.</p>
+   * writing to, if indeed we are writing to one.
    *
-   * <p>If we're not writing to a sync channel, this method always
-   * returns true.</p>
+   * If we're not writing to a sync channel, this method always
+   * returns true.
    */
 
   public boolean mayInclude(DBObject object)
@@ -270,16 +297,16 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Returns true if the DBEditObject passed in needs to be synced
+   * Returns true if the DBEditObject passed in needs to be synced
    * to the sync channel we're writing to.  Because we're passed in a
    * DBEditObject, we can assume that we are being asked about whether
    * we should write out this object in the course of a sync
    * operation.  When DBStore is writing out an XML dump, all the
    * objects should be read only copies, so we will always use the
-   * DBObject version of shouldInclude().</p>
+   * DBObject version of shouldInclude().
    *
-   * <p>If we're not writing to a sync channel, this method always
-   * returns true.</p>
+   * If we're not writing to a sync channel, this method always
+   * returns true.
    */
 
   public boolean shouldInclude(DBEditObject object)
@@ -288,12 +315,12 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Returns true if the given field needs to be sent to this sync
+   * Returns true if the given field needs to be sent to this sync
    * channel.  This method is responsible for doing the determination
-   * only if both field and origField are not null and isDefined().</p>
+   * only if both field and origField are not null and isDefined().
    *
-   * <p>If we're not writing to a sync channel, this method always
-   * returns true.</p>
+   * If we're not writing to a sync channel, this method always
+   * returns true.
    */
 
   public boolean shouldInclude(DBField newField, DBField oldField)
@@ -310,17 +337,17 @@ public class XMLDumpContext {
   }
 
   /**
-   * <p>Returns true if the kind of DBField passed in needs to be
-   * synced to the sync channel attached to this XMLDumpContext.  This
-   * version of mayInclude() treats the field as always changed,
-   * and is intended for doing full dumps, rather than delta
-   * dumps.</p>
+   * Returns true if the kind of DBField passed in needs to be synced
+   * in the context of a query or sync channel attached to this
+   * XMLDumpContext.  This version of mayInclude() treats the field as
+   * always changed, and is intended for doing queries and full dumps,
+   * and not delta dumps.
    *
-   * <p>This differs from shouldInclude on DBField in that this method
-   * leaves it to the caller to decide whether the field has changed.</p>
+   * This differs from shouldInclude on DBField in that this method
+   * leaves it to the caller to decide whether the field has changed.
    *
-   * <p>If we're not writing to a sync channel, this method always
-   * returns true.</p>
+   * If we're not writing to a sync channel, this method always
+   * returns true.
    */
 
   public boolean mayInclude(DBField field)
@@ -334,21 +361,28 @@ public class XMLDumpContext {
 	return false;
       }
 
-    return syncConstraints == null || syncConstraints.mayInclude(field, true);
+    if (query != null)
+      {
+	return query.returnField(field.getID());
+      }
+    else
+      {
+	return syncConstraints == null || syncConstraints.mayInclude(field, true);
+      }
   }
 
   /**
-   * <p>Returns true if the kind of DBField passed in needs to be
+   * Returns true if the kind of DBField passed in needs to be
    * synced to the sync channel attached to this XMLDumpContext. The
    * hasChanged parameter should be set to true if the field being
    * tested was changed in the current transaction, or false if it
-   * remains unchanged.</p>
+   * remains unchanged.
    *
-   * <p>This differs from shouldInclude on DBField in that this method
-   * leaves it to the caller to decide whether the field has changed.</p>
+   * This differs from shouldInclude on DBField in that this method
+   * leaves it to the caller to decide whether the field has changed.
    *
-   * <p>If we're not writing to a sync channel, this method always
-   * returns true.</p>
+   * If we're not writing to a sync channel, this method always
+   * returns true.
    */
 
   public boolean mayInclude(DBField field, boolean hasChanged)
@@ -366,11 +400,11 @@ public class XMLDumpContext {
   }
 
   /**
-   * <P>Increase the indent level one step.  Successive indent(),
+   * Increase the indent level one step.  Successive indent(),
    * startElementIndent(), and endElementIndent() method calls
-   * will indent one level further.</P>
+   * will indent one level further.
    *
-   * <P>This method itself produces no output.</P>
+   * This method itself produces no output.
    */
 
   public void indentOut()
@@ -379,11 +413,11 @@ public class XMLDumpContext {
   }
 
   /**
-   * <P>Decreases the indent level one step.  Successive indent(),
+   * Decreases the indent level one step.  Successive indent(),
    * startElementIndent(), and endElementIndent() method calls
-   * will decrease one level fiewer.</P>
+   * will decrease one level fiewer.
    *
-   * <P>This method itself produces no output.</P>
+   * This method itself produces no output.
    */
 
   public void indentIn()
@@ -392,8 +426,8 @@ public class XMLDumpContext {
   }
 
   /**
-   * <P>This method directly sets the indention level for subsequent
-   * indent(), startElementIndent(), and endElementIndent() calls.</P>
+   * This method directly sets the indention level for subsequent
+   * indent(), startElementIndent(), and endElementIndent() calls.
    */
 
   public void setIndentLevel(int x)
@@ -402,7 +436,7 @@ public class XMLDumpContext {
   }
 
   /**
-   * <P>Returns the current indentation level.</P>
+   * Returns the current indentation level.
    */
 
   public int getIndent()
@@ -411,8 +445,8 @@ public class XMLDumpContext {
   }
 
   /**
-   * <P>This helper method writes a newline and the appropriate amount
-   * of indentation to this XMLDumpContext's stream.</p>
+   * This helper method writes a newline and the appropriate amount
+   * of indentation to this XMLDumpContext's stream.
    */
 
   public void indent() throws IOException
@@ -426,11 +460,11 @@ public class XMLDumpContext {
   }
 
   /**
-   * <P>Returns true if this XMLDumpContext is configured to dump
+   * Returns true if this XMLDumpContext is configured to dump
    * plaintext password information to disk when a password field
    * has enough information in crypt() or md5Crypt() form that the
    * Ganymede server would be able to load and authenticate against
-   * a non-plaintext version of the password.</P>
+   * a non-plaintext version of the password.
    */
 
   public boolean doDumpPlaintext()
@@ -439,9 +473,9 @@ public class XMLDumpContext {
   }
 
   /**
-   * <P>Returns true if this XMLDumpContext is configured to dump
+   * Returns true if this XMLDumpContext is configured to dump
    * creation and modification information when writing out object
-   * records.</P>
+   * records.
    */
 
   public boolean doDumpHistoryInfo()

@@ -744,6 +744,17 @@ public interface Session extends Remote {
   ReturnVal     remove_db_object(Invid invid) throws RemoteException;
 
   /**
+   * This method is called by the XML client to initiate a dump of
+   * Ganymede objects in XML format matching the GanyQL search
+   * criteria specified in the queryString.  The ReturnVal returned
+   * will, if the operation is approved, contain a reference to an RMI
+   * FileTransmitter interface, which can be iteratively called by the
+   * XML client to pull pieces of the transmission down in sequence.
+   */
+
+  public ReturnVal runXMLQuery(String queryString) throws RemoteException;
+
+  /**
    * <p>This method is called by the XML client to initiate a dump of
    * the server's schema definition in XML format.  The ReturnVal
    * returned will, if the operation is approved, contain a reference

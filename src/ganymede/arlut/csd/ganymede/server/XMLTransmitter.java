@@ -54,6 +54,9 @@
 
 package arlut.csd.ganymede.server;
 
+import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.rmi.FileTransmitter;
 import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.BigPipedInputStream;
@@ -64,6 +67,9 @@ import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Vector;
+
+import com.jclark.xml.output.UTF8XMLWriter;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -107,10 +113,10 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
   private String syncChannel;
 
   /**
-   * This constructor creates the XMLTransmitter used to send XML data from
-   * the Ganymede server down to the xmlclient.  A XMLTransmitter serves
-   * as an RMI exported object that the xmlclient can continually poll
-   * to download chunks of XML.
+   * This constructor creates the XMLTransmitter used to send XML dump
+   * data from the Ganymede server down to the xmlclient.  A
+   * XMLTransmitter serves as an RMI exported object that the
+   * xmlclient can continually poll to download chunks of XML.
    */
 
   public XMLTransmitter(boolean sendData, boolean sendSchema, String syncChannel, boolean includeHistory, boolean includeOid) throws IOException, RemoteException
@@ -149,6 +155,102 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
 	      System.err.println(ts.l("init.eof"));
 	    }
 	}}, ts.l("init.threadname")); // "Ganymede XMLSession Schema/Data Dump Thread"
+    
+    // and set it running
+    
+    dumpThread.start();
+  }
+
+  /**
+   * This constructor creates the XMLTransmitter used to send Ganymede
+   * query result data from the Ganymede server down to the xmlclient.
+   * A XMLTransmitter serves as an RMI exported object that the
+   * xmlclient can continually poll to download chunks of XML.
+   */
+
+  public XMLTransmitter(GanymedeSession session, String queryString, Query query, QueryResult rows) throws IOException, RemoteException
+  {
+    super();			// UnicastRemoteObject initialization
+
+    if (debug)
+      {
+	System.err.println("XMLTransmitter[query] constructed!");
+      }
+
+    outpipe = new PipedOutputStream();
+    inpipe = new BigPipedInputStream(outpipe, bufferSize);
+
+    // we need to get a thread to dump the XML objects in the
+    // background to our pipe
+
+    final GanymedeSession mySession = session;
+    final String myQueryString = queryString;
+    final Query myQuery = query;
+    final QueryResult myRows = rows;
+
+    Thread dumpThread = new Thread(new Runnable() {
+	public void run() {
+	  XMLDumpContext xmlOut = null;
+
+	  try
+	    {
+	      xmlOut = new XMLDumpContext(new UTF8XMLWriter(outpipe, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+					  myQuery);
+
+	      xmlOut.startElement("ganymede");
+	      xmlOut.attribute("major", Byte.toString(DBStore.major_xml_version));
+	      xmlOut.attribute("minor", Byte.toString(DBStore.minor_xml_version));
+
+	      xmlOut.startElementIndent("ganydata");
+	      xmlOut.indentOut();
+
+	      DBSession dbSession = mySession.getSession();
+
+	      Vector invids = myRows.getInvids();
+
+	      for (int i = 0; i < invids.size(); i++)
+		{
+		  Invid invid = (Invid) invids.elementAt(i);
+		  DBObject vobj = dbSession.viewDBObject(invid);
+		  vobj.emitXML(xmlOut);
+		}
+
+	      xmlOut.indentIn();
+	      xmlOut.endElementIndent("ganydata");
+	    
+	      xmlOut.indentIn();
+	      xmlOut.endElementIndent("ganymede");
+
+	      xmlOut.write("\n");
+	      xmlOut.close();
+	      xmlOut = null;
+	    }
+	  catch (Throwable ex)
+	    {
+	      if (xmlOut != null)
+		{
+		  try
+		    {
+		      xmlOut.close();
+		    }
+		  catch (IOException ioex)
+		    {
+		    }
+		}
+
+	      System.err.println(ts.l("init.eof"));
+	    }
+	  finally
+	    {
+	      try
+		{
+		  outpipe.close();
+		}
+	      catch (IOException ex)
+		{
+		}
+	    }
+	}}, ts.l("init.qthreadname")); // "Ganymede XML Query Thread"
     
     // and set it running
     

@@ -64,25 +64,26 @@ import java.rmi.RemoteException;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Interface that can be used on the server to represent a transmitter
- * that can send a file across the RMI link..</p>
+ * Interface that can be used on the server to represent a transmitter
+ * that can send a file across the RMI link..
  */
 
 public interface FileTransmitter extends Remote {
 
   /**
-   * <p>This method pulls down the next sequence of bytes from the
+   * This method pulls down the next sequence of bytes from the
    * FileTransmitter.  This method will block if necessary until the
-   * data is ready to be transmitted.</p>
+   * data is ready to be transmitted.
    *
-   * <p>This method returns null on end of file, and will throw an excepti.</p>
+   * This method returns null on end of file, and will throw an
+   * exception if it is called again after null is returned.
    */
 
   public byte[] getNextChunk() throws RemoteException;
 
   /**
-   * <p>This method is called to notify the FileTransmitter that no
-   * more of the file will be pulled.</p>
+   * This method is called to notify the FileTransmitter that no
+   * more of the file will be pulled.
    */
   
   public void end() throws RemoteException;
