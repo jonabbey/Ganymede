@@ -198,8 +198,12 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     // clear out our refs for GC
 
     objectBase = null;
-    selectFields.clear();
-    selectFields = null;
+
+    if (selectFields != null)
+      {
+	selectFields.clear();
+	selectFields = null;
+      }
 
     // et voila
 
@@ -211,10 +215,19 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     this.objectBase = parse_from_tree(ast.getNextSibling());
     this.selectFields = parse_select_tree(ast);
 
-    AST where_node = ast.getNextSibling().getNextSibling().getFirstChild();
-    QueryNode where_tree = parse_where_clause(where_node, objectBase);
+    if (ast.getNextSibling().getNextSibling().getType() == QueryParserTokenTypes.WHERE)
+      {
+	AST where_node = ast.getNextSibling().getNextSibling().getFirstChild();
 
-    return where_tree;
+	if (where_node != null)
+	  {
+	    QueryNode where_tree = parse_where_clause(where_node, objectBase);
+	    
+	    return where_tree;
+	  }
+      }
+
+    return null;
   }
 
   private DBObjectBase parse_from_tree(AST ast) throws GanyParseException
