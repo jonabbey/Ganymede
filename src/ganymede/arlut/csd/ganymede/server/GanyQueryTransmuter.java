@@ -215,7 +215,9 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     this.objectBase = parse_from_tree(ast.getNextSibling());
     this.selectFields = parse_select_tree(ast);
 
-    if (ast.getNextSibling().getNextSibling().getType() == QueryParserTokenTypes.WHERE)
+    AST whereTokenNode = ast.getNextSibling().getNextSibling();
+
+    if (whereTokenNode != null && whereTokenNode.getType() == QueryParserTokenTypes.WHERE)
       {
 	AST where_node = ast.getNextSibling().getNextSibling().getFirstChild();
 
