@@ -130,11 +130,21 @@ public final class xmlclient implements ClientListener, Runnable {
 
   // ---
 
+  /**
+   * If commandLine is true, the xmlclient will assume that it can
+   * interact with the user to prompt for a password through stderr
+   * and stdin, if one is not provided on the command line or in an
+   * XML input file.
+   */
+
+  public boolean commandLine = true;
   public String serverHostProperty = null;
   public int    registryPortProperty = 1099;
   public String server_url = null;
   public String propFilename = null;
   public String xmlFilename = null;
+  public String queryString = null;
+  public String queryFilename = null;
   public String username = null;
   public String password = null;
   public String syncChannel = null;
@@ -187,13 +197,13 @@ public final class xmlclient implements ClientListener, Runnable {
 
   public static void main(String argv[])
   {
-    xmlclient xc = new xmlclient(argv);
+    xmlclient xc = new xmlclient(true, argv);
 
     try
       {
 	if (xc.dumpData || xc.dumpSchema)
 	  {
-	    if (xc.doXMLDump(true, xc.dumpData, xc.dumpSchema))
+	    if (xc.doXMLDump(xc.dumpData, xc.dumpSchema))
 	      {
 		xc.terminate(0);
 	      }
@@ -208,8 +218,29 @@ public final class xmlclient implements ClientListener, Runnable {
 	    xc.runTest();
 	    xc.terminate(0);
 	  }
-
-	if (xc.doSendChanges(true))
+	else if (xc.queryString != null)
+	  {
+	    if (xc.doQuery(xc.queryString))
+	      {
+		xc.terminate(0);
+	      }
+	    else
+	      {
+		xc.terminate(1);
+	      }
+	  }
+	else if (xc.queryFilename != null)
+	  {
+	    if (xc.doQueryFile(xc.queryFilename))
+	      {
+		xc.terminate(0);
+	      }
+	    else
+	      {
+		xc.terminate(1);
+	      }
+	  }
+	else if (xc.doSendChanges())
 	  {
 	    xc.terminate(0);
 	  }
@@ -251,12 +282,14 @@ public final class xmlclient implements ClientListener, Runnable {
    * for xmlclient when run from the command line.
    */  
 
-  public xmlclient(String argv[])
+  public xmlclient(boolean hasCommandLine, String argv[])
   {
     boolean ok = true;
     File xmlFile = null;
 
     /* -- */
+
+    this.commandLine = hasCommandLine;
 
     // find the properties command line argument
 
@@ -342,6 +375,18 @@ public final class xmlclient implements ClientListener, Runnable {
 	return;
       }
 
+    if (ParseArgs.switchExists(ts.l("global.queryArg"), argv))
+      {
+	queryString = argv[argv.length-1];
+	return;
+      }
+
+    if (ParseArgs.switchExists(ts.l("global.queryfileArg"), argv))
+      {
+	queryFilename = argv[argv.length-1];
+	return;
+      }
+
     // "test"
     if (ParseArgs.switchExists(ts.l("global.testArg"), argv))
       {
@@ -372,12 +417,14 @@ public final class xmlclient implements ClientListener, Runnable {
     // 1: xmlclient [username=<username>] [password=<password>] <xmlfile>\n \
     // 2: xmlclient [username=<username>] [password=<password>] -dump [-includeHistory] [-includeOid]\n\
     // 3: xmlclient [username=<username>] [password=<password>] -dumpschema\n\
-    // 4: xmlclient [username=<username>] [password=<password>] -dumpdata [-includeHistory] [-includeOid] [sync=<sync channel>]"
+    // 4: xmlclient [username=<username>] [password=<password>] -dumpdata [-includeHistory] [-includeOid] [sync=<sync channel>]\n\
+    // 5. xmlclient [username=<username>] [password=<password>] -queryfile <queryfile>\n\
+    // 6. xmlclient [username=<username>] [password=<password>] -query <query>"
 
     System.err.println(ts.l("printUsage.text"));
   }
 
-  public boolean doXMLDump(boolean commandLine, boolean sendData, boolean sendSchema) throws RemoteException, NotBoundException, MalformedURLException
+  public boolean doXMLDump(boolean sendData, boolean sendSchema) throws RemoteException, NotBoundException, MalformedURLException
   {
     // now we should have the username and password if we are going to
     // get them, but do what we can here..
@@ -395,31 +442,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (password == null)
       {
-	if (commandLine)
-	  {
-	    java.io.BufferedReader in;
-	    
-	    // get an input stream so we can get the password from the user if we have to
-	    
-	    in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
-	    
-	    try
-	      {
-		// Password for "{0}":
-		System.err.print(ts.l("global.passPrompt", username));
-		password = in.readLine();
-		System.err.println();
-	      }
-	    catch (java.io.IOException ex)
-	      {
-		// "Exception getting input: {0}"
-		throw new RuntimeException(ts.l("global.inputException", ex.toString()));
-	      }
-	  }
-	else
-	  {
-	    return false;
-	  }
+	password = getPassword();
       }
 
     // find the server
@@ -553,11 +576,132 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
+   * This method handles submitting a GanyQL query to the Ganymede
+   * server and printing the results in XML to stdout.
+   */
+
+  public boolean doQuery(String queryString)  throws RemoteException, NotBoundException, MalformedURLException
+  {
+    // now we should have the username and password if we are going to
+    // get them, but do what we can here..
+
+    if (username == null)
+      {
+	// we would prompt for the username here, but java gives us no
+	// portable way to turn character echo on and off.. the script
+	// that runs us has character echo off so that we can prompt
+	// for the user's password, but since it is off, we can't
+	// really prompt for a missing user name here.
+
+	username = "supergash";
+      }
+
+    if (password == null)
+      {
+	password = getPassword();
+      }
+
+    // find the server
+
+    ClientBase client = new ClientBase(server_url, this);
+
+    try
+      {
+	client.connect();
+      }
+    catch (Throwable ex)
+      {
+	// "Error connecting to the server:\n{0}"
+	System.err.println(ts.l("global.errorConnecting", stackTrace(ex)));
+	return false;
+      }
+
+    // since we're only doing data or schema dumping, we don't
+    // actually need a GanymedeXMLSession on the server side.
+
+    Session session = client.login(username, password);
+
+    if (session == null)
+      {
+	// "Error, couldn''t log in to server.. bad username or password?"
+	System.err.println(ts.l("global.badLogin"));
+	return false;
+      }
+
+    // now do what we came for
+
+    ReturnVal retVal = session.runXMLQuery(queryString);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	String errorMessage = retVal.getDialogText();
+
+	if (errorMessage != null)
+	  {
+	    System.err.println(errorMessage);
+	  }
+
+	return false;
+      }
+
+    FileTransmitter transmitter = retVal.getFileTransmitter();
+
+    byte[] bytes = transmitter.getNextChunk();
+
+    try
+      {
+	while (bytes != null)
+	  {
+	    System.out.write(bytes);
+	    
+	    bytes = transmitter.getNextChunk();
+	  }
+      }
+    catch (Exception ex)
+      {
+	ex.printStackTrace();
+      }
+    finally
+      {
+	// and say goodbye
+
+	session.logout();
+      }
+
+    return true;
+  }
+
+  public boolean doQueryFile(String queryFilename) throws IOException, NotBoundException, RemoteException
+  {
+    StringBuffer buffer = new StringBuffer();
+    FileInputStream in = new FileInputStream(queryFilename);
+    BufferedInputStream inBuf = new BufferedInputStream(in);
+    int c;
+    
+    /* -- */
+
+    // dirt simple buffered read from filename
+
+    c = inBuf.read();
+
+    while (c != -1)
+      {
+	buffer.append((char) c);
+	c = inBuf.read();
+      }
+
+    inBuf.close();
+    in.close();
+
+    return doQuery(buffer.toString());
+  }
+
+  /**
    * This method is used for sending an XML schema edit and/or transaction to
    * the Ganymede server.
    */
 
-  public boolean doSendChanges(boolean commandLine) throws RemoteException, IOException
+  public boolean doSendChanges() throws RemoteException, IOException
   {
     // first, check the basic integrity of the xml file and attempt to
     // find the username and password out of it
@@ -590,31 +734,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (password == null)
       {
-	if (commandLine)
-	  {
-	    java.io.BufferedReader in;
-	    
-	    // get an input stream so we can get the password from the user if we have to
-	    
-	    in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
-
-	    try
-	      {
-		// Password for "{0}":
-		System.err.print(ts.l("global.passPrompt", username));
-		password = in.readLine();
-		System.err.println();
-	      }
-	    catch (java.io.IOException ex)
-	      {
-		// "Exception getting input: {0}"
-		throw new RuntimeException(ts.l("global.inputException", ex.toString()));
-	      }
-	  }
-	else
-	  {
-	    return false;
-	  }
+	password = getPassword();
       }
 
     // find the server
@@ -739,6 +859,48 @@ public final class xmlclient implements ClientListener, Runnable {
       }
   }
 
+  /**
+   * Private utility method for acquiring password from the command
+   * line if the user did not provide it on the command line.
+   */
+
+  private String getPassword()
+  {
+    if (password != null)
+      {
+	return password;
+      }
+
+    if (this.commandLine)
+      {
+	java.io.BufferedReader in;
+	    
+	// get an input stream so we can get the password from the user if we have to
+	    
+	in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
+	    
+	try
+	  {
+	    // Password for "{0}":
+	    System.err.print(ts.l("global.passPrompt", username));
+	    password = in.readLine();
+	    System.err.println();
+	  }
+	catch (java.io.IOException ex)
+	  {
+	    // "Exception getting input: {0}"
+	    throw new RuntimeException(ts.l("global.inputException", ex.toString()));
+	  }
+      }
+    else
+      {
+	// "Error, could not acquire password."
+	throw new RuntimeException(ts.l("global.nopass"));
+      }
+
+    return password;
+  }
+
   private boolean submitChunk(byte[] data)
   {
     ReturnVal retVal;
@@ -786,9 +948,9 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
-   * This method handles the actual XML processing, once the
-   * command line arguments have been parsed and handled by the
-   * xmlclient constructor.
+   * This method validates an XML input file specified in xmlFilename.
+   * scanXML() will scan the &lt;ganymede&gt; document element for any
+   * username and password information specified therein, as well.
    */
 
   public boolean scanXML()
