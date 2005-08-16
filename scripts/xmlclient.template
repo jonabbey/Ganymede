@@ -45,6 +45,9 @@ $ENV{'CLASSPATH'} = $CLASSPATH;
 
 foreach $arg (@my_args) {
   $arg =~ s/ /%20/g;
+
+  $arg =~ s/\'/\\\\\'/g;	# backslash escape any single ticks in the argument
+  $arg =~ s/(.*)/\'$1\'/;	# then wrap it with more single ticks
 }
 
 # Thank you as well, java, for not having any way to turn off
