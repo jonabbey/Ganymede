@@ -4834,8 +4834,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     catch (IOException ex)
       {
-	return Ganymede.createErrorDialog(ts.l("getXML.transmitter_error"),
-					  ts.l("getXML.transmitter_error_msg", ex.getMessage()));
+	return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
+					  ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
       }
 
     ReturnVal retVal = new ReturnVal(true);
