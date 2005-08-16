@@ -92,11 +92,11 @@ import arlut.csd.ganymede.rmi.XMLSession;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a text client for the Ganymede server.  This client is
+ * This is a text client for the Ganymede server.  This client is
  * designed to take the filename for an XML file on the command line,
  * load the file, parse it, then connect to the server and transfer
  * the file to the server for server-side integration into the Ganymede
- * database.</p>
+ * database.
  *
  * @version $Id$
  * @author Jonathan Abbey
@@ -107,23 +107,23 @@ public final class xmlclient implements ClientListener, Runnable {
   public static final boolean debug = false;
 
   /**
-   * <p>TranslationService object for handling string localization.</p>
+   * TranslationService object for handling string localization.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.xmlclient");
 
   /**
-   * <p>This major version number is compared with the "major"
-   * attribute in the Ganymede XML document element.  xmlclient won't
-   * try to read Ganymede XML files whose major number is too high</p>
+   * This major version number is compared with the "major" attribute
+   * in the Ganymede XML document element.  xmlclient won't try to
+   * read Ganymede XML files whose major number is too high
    */
 
   public static final int majorVersion = 1;
 
   /**
-   * <p>This minor version number is provided to the server
-   * when handling raw schema files (files whose document element
-   * is &lt;ganyschema&gt;.</p>
+   * This minor version number is provided to the server when handling
+   * raw schema files (files whose document element is
+   * &lt;ganyschema&gt;.
    */
 
   public static final int minorVersion = 0;
@@ -153,26 +153,26 @@ public final class xmlclient implements ClientListener, Runnable {
   private Server server = null;
 
   /**
-   * <p>Remote session interface to the Ganymede server, used while
-   * loading data objects into the server.</p>
+   * Remote session interface to the Ganymede server, used while
+   * loading data objects into the server.
    */
 
   public XMLSession xSession = null;
 
   /**
-   * <p>The default buffer size in the {@link arlut.csd.Util.XMLReader XMLReader}.
+   * The default buffer size in the {@link arlut.csd.Util.XMLReader XMLReader}.
    * This value determines how far ahead the XMLReader's i/o thread can get in
    * reading from the XML file.  Higher or lower values of this variable may
    * give better performance, depending on the characteristics of the JVM with
-   * regards threading, etc.</p>
+   * regards threading, etc.
    */
 
   public int bufferSize = 20;
 
   /**
-   * <p>Streaming XML reader.  xmlclient creates one of these on startup,
+   * Streaming XML reader.  xmlclient creates one of these on startup,
    * and from that point on, all XML reading is done through this
-   * object.</p>
+   * object.
    */
 
   public arlut.csd.Util.XMLReader reader = null;
@@ -247,8 +247,8 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
-   * <p>This constructor takes care of parsing the command line arguments
-   * for xmlclient when run from the command line.</p>
+   * This constructor takes care of parsing the command line arguments
+   * for xmlclient when run from the command line.
    */  
 
   public xmlclient(String argv[])
@@ -553,8 +553,8 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
-   * <p>This method is used for sending an XML schema edit and/or transaction to
-   * the Ganymede server.</p>
+   * This method is used for sending an XML schema edit and/or transaction to
+   * the Ganymede server.
    */
 
   public boolean doSendChanges(boolean commandLine) throws RemoteException, IOException
@@ -786,9 +786,9 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
-   * <p>This method handles the actual XML processing, once the
+   * This method handles the actual XML processing, once the
    * command line arguments have been parsed and handled by the
-   * xmlclient constructor.</p>
+   * xmlclient constructor.
    */
 
   public boolean scanXML()
@@ -865,12 +865,12 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
-   * <p>This method loads properties from the ganymede.properties
-   * file.</p>
+   * This method loads properties from the ganymede.properties
+   * file.
    *
-   * <p>This method is public so that loader code linked with the
+   * This method is public so that loader code linked with the
    * Ganymede server code can initialize the properties without
-   * going through Ganymede.main().</p>
+   * going through Ganymede.main().
    */
 
   public boolean loadProperties(String filename)
@@ -929,10 +929,10 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
-   * <p>Private helper method to process events from
+   * Private helper method to process events from
    * the {@link arlut.csd.Util.XMLReader XMLReader}.  By using
    * this method, the rest of the code in the xmlclient doesn't
-   * have to check for error and warning conditions.</p>
+   * have to check for error and warning conditions.
    */
 
   public XMLItem getNextItem() throws SAXException
@@ -961,8 +961,8 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
-   * <p>This method is called to consume XML elements until we
-   * find the matching close.</p>
+   * This method is called to consume XML elements until we
+   * find the matching close.
    */
 
   public void skipToClose(String name) throws SAXException
@@ -1006,9 +1006,9 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
-   * <p>This method is used when we transmit XML to the server.  It
+   * This method is used when we transmit XML to the server.  It
    * spins on calls to the server's getNextErrChunk() method to pull
-   * the error output stream from the server.</p>
+   * the error output stream from the server.
    */
 
   public synchronized void run()
@@ -1054,10 +1054,10 @@ public final class xmlclient implements ClientListener, Runnable {
   }
 
   /**
-   * <p>This method handles terminating the xmlclient.  It is
+   * This method handles terminating the xmlclient.  It is
    * synchronized against the run method which handles pulling the
    * error stream from the server, so that we block termination
-   * until the error stream thread completes.</p>
+   * until the error stream thread completes.
    */
 
   private synchronized void terminate(int resultCode)
