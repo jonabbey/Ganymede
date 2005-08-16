@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -67,14 +67,14 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>The Query class is used to submit query requests to the GANYMEDE server,
+ * The Query class is used to submit query requests to the GANYMEDE server,
  * both for complex database searches and for simple object listings.  A
  * Query class can fully specify a boolean search expression on any field
  * of any object type in the GANYMEDE database.  Each Query, however, can
- * only search one object type at a time.</p>
+ * only search one object type at a time.
  *
- * <p>While providing support for arbitrarily complex queries, the Query
- * class also includes constructors for the simple "list object" case.</p>
+ * While providing support for arbitrarily complex queries, the Query
+ * class also includes constructors for the simple "list object" case.
  *
  */
 
@@ -85,60 +85,60 @@ public class Query implements java.io.Serializable {
   // ---
 
   /**
-   * <p>The id of the object type that the queryNodes are looking
-   * to match on.</p>
+   * The id of the object type that the queryNodes are looking
+   * to match on.
    *
-   * <p>If this value is left at -1, objectName will be consulted
-   * instead.</p>
+   * If this value is left at -1, objectName will be consulted
+   * instead.
    */
 
   public short objectType = -1;
 
   /**
-   * <p>The name of the object type that the queryNodes are looking
-   * to match on.</p>
+   * The name of the object type that the queryNodes are looking
+   * to match on.
    *
-   * <p>This value is consulted only if objectType is left at -1.</p>
+   * This value is consulted only if objectType is left at -1.
    */
 
   public String objectName = null;
 
   /**
-   * <p>We want to be able to save a query on the server and re-issue it
+   * We want to be able to save a query on the server and re-issue it
    * on behalf of the user.  If we are saved, the name to save under
-   * will be here.  We may or may not want it here.</p>
+   * will be here.  We may or may not want it here.
    *
-   * <p>I don't believe anything in the server actually uses this yet.</p>
+   * I don't believe anything in the server actually uses this yet.
    */
 
   public String saveName = null;
 
   /**
-   * <p>The root of a graph of QueryNodes that encodes the desired
-   * search criteria.</p>
+   * The root of a graph of QueryNodes that encodes the desired
+   * search criteria.
    */
 
   public QueryNode root;
 
   /**
-   * <p>If true, this query will only be matched against objects in the
-   * database that the user has permission to edit.</p>
+   * If true, this query will only be matched against objects in the
+   * database that the user has permission to edit.
    */
 
   public boolean editableOnly;
 
   /**
-   * <p>If true, this query will only be matched against the subset of
+   * If true, this query will only be matched against the subset of
    * objects in the database that the user has requested via
-   * the Session filter mechanism.</p>
+   * the Session filter mechanism.
    */
 
   public boolean filtered = false;
 
   /**
-   * <p>A list of field id's in Short form that the server will take into
+   * A list of field id's in Short form that the server will take into
    * account when returning a data dump.  If null, the default fields
-   * will be returned.</p>
+   * will be returned.
    */
 
   public List permitList = null;
@@ -245,10 +245,10 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * <p>This method determines whether the query engine
+   * This method determines whether the query engine
    * will filter the query according to the current
    * list of visible owner groups.  Queries by default
-   * are filtered.</p>
+   * are filtered.
    *
    * @param filtered If true, the query will be masked by ownership
    *
@@ -261,8 +261,8 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * <p>This method resets the permitList, allowing
-   * all fields to be returned by default.</p>
+   * This method resets the permitList, allowing
+   * all fields to be returned by default.
    */
 
   public void resetPermitList()
@@ -271,13 +271,13 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * <p>This method adds a field identifier to the list of
+   * This method adds a field identifier to the list of
    * fields that may be returned.  Once this method
    * is called with a field identifier, the query will
-   * only return fields that have been explicitly added.</p>
+   * only return fields that have been explicitly added.
    *
-   * <p>resetPermitList() may be called to reset the
-   * list to the initial allow-all state.</p>
+   * resetPermitList() may be called to reset the
+   * list to the initial allow-all state.
    */
 
   public void addField(short id)
@@ -288,6 +288,23 @@ public class Query implements java.io.Serializable {
       }
 
     permitList.add(new Short(id));
+  }
+
+  /**
+   * This method returns true if the field with the given id number
+   * should be returned.
+   */
+
+  public boolean returnField(short id)
+  {
+    if (permitList == null)
+      {
+	return true;
+      }
+
+    Short key = new Short(id);
+
+    return permitList.contains(key);
   }
 
   public String toString()

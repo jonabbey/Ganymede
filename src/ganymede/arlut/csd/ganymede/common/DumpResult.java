@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -70,30 +70,30 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is a serializable transport object, used to transmit the results
+ * This class is a serializable transport object, used to transmit the results
  * of a data dump query to the client.  DumpResult objects are created by the
- * {@link arlut.csd.ganymede.server.DumpResultBuilder DumpResultBuilder} factory class.</p>
+ * {@link arlut.csd.ganymede.server.DumpResultBuilder DumpResultBuilder} factory class.
  *
- * <p>The way it works is that DumpResultBuilder creates the
+ * The way it works is that DumpResultBuilder creates the
  * DumpResult objects, which is transmitted through RMI to the client.
  * The client can then call the various accessor methods to access the
- * serialized query results.</p>
+ * serialized query results.
  *
- * <p>DumpResult encodes a list of field headers by name, a list of field types
+ * DumpResult encodes a list of field headers by name, a list of field types
  * encoded as {@link java.lang.Short Shorts} coded with the
  * values enumerated in the {@link arlut.csd.ganymede.common.FieldType FieldType}
  * interface, and a list of object rows, each of which contains a Vector of
- * encoded field values.</p>
+ * encoded field values.
  *
- * <p>Field values are encoded as follows:</p>
+ * Field values are encoded as follows:
  *
- * <p>Date fields as {@link java.util.Date Date} objects</p>
- * <p>Float fields as {@link java.lang.Double Double} objects</p>
- * <p>Numeric fields as {@link java.lang.Integer Integer} objects</p>
+ * Date fields as {@link java.util.Date Date} objects
+ * Float fields as {@link java.lang.Double Double} objects
+ * Numeric fields as {@link java.lang.Integer Integer} objects
  * <br/>
- * <p>And Strings for everything else.</p>
+ * And Strings for everything else.
  *
- * <p>The GUI client uses this object to generate its query result tables.</p>.
+ * The GUI client uses this object to generate its query result tables..
  */
 
 public class DumpResult implements java.io.Serializable, List {
@@ -128,9 +128,9 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * <p>This method can be called on the client to obtain a {@link
+   * This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of field names, used to generate the
-   * list of column headers in the GUI client.</p>
+   * list of column headers in the GUI client.
    */
 
   public Vector getHeaders()
@@ -144,12 +144,12 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * <p>This method can be called on the client to obtain a {@link
+   * This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of field type {@link java.lang.Short
    * Shorts} (enumerated in the {@link
    * arlut.csd.ganymede.common.FieldType FieldType} static constants),
    * identifying the types of fields for each column in the
-   * DumpResult.</p>
+   * DumpResult.
    */
 
   public Vector getTypes()
@@ -163,10 +163,10 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * <p>This method can be called on the client to obtain a {@link
+   * This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of {@link arlut.csd.ganymede.common.Invid
    * Invids}, identifying the objects that are being returned in the
-   * DumpResult.</p>
+   * DumpResult.
    */
 
   public Vector getInvids()
@@ -180,9 +180,9 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * <p>This method can be called on the client to obtain the object
+   * This method can be called on the client to obtain the object
    * identifier {@link arlut.csd.ganymede.common.Invid Invid} for a
-   * given result row.</p>
+   * given result row.
    */
 
   public Invid getInvid(int row)
@@ -196,11 +196,11 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * <p>This method can be called on the client to obtain a {@link
+   * This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of Vectors, each of which contains
    * the data values returned for each object, in field order matching
    * the field names and types returned by {@link arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()}
-   * and {@link arlut.csd.ganymede.common.DumpResult#getTypes getTypes()}.</p>
+   * and {@link arlut.csd.ganymede.common.DumpResult#getTypes getTypes()}.
    */
 
   public Vector getRows()
@@ -215,13 +215,13 @@ public class DumpResult implements java.io.Serializable, List {
 
 
   /**
-   * <p>This method can be called on the client to obtain a {@link
+   * This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} containing the data values returned for
    * the object at row <i>row</i>, in field order matching the field
    * names and types returned by {@link
    * arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()} and
    * {@link arlut.csd.ganymede.common.DumpResult#getTypes
-   * getTypes()}.</p>
+   * getTypes()}.
    */
   
   public Vector getFieldRow(int rowNumber)
@@ -245,12 +245,12 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * <p>This method can be called on the client to obtain an Object
+   * This method can be called on the client to obtain an Object
    * encoding the result value for the <i>col</i>th field in the
-   * <i>row</i>th object.</p>  These Objects may be a {@link java.lang.Double Double}
+   * <i>row</i>th object.  These Objects may be a {@link java.lang.Double Double}
    * for Float fields, an {@link java.lang.Integer Integer} for Numeric fields,
    * a {@link java.util.Date Date} for Date fields, or a String for other
-   * fields.</p>
+   * fields.
    */
 
   public Object getResult(int row, int col)
@@ -264,8 +264,8 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * <p>This method can be called on the client to determine the
-   * number of objects encoded in this DumpResult.</p>
+   * This method can be called on the client to determine the
+   * number of objects encoded in this DumpResult.
    */
 
   public int resultSize()

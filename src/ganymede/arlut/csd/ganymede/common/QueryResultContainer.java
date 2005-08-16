@@ -161,7 +161,7 @@ public class QueryResultContainer implements List, Serializable {
    * Map represents one row of the result set and the Map's keys are the headers
    * defined for this container).
    * 
-   * @param rowType
+   * @param rowType Either QueryResultContainer.ARRAYROWS or QueryResultContainer.MAPROWS
    */
   
   public QueryResultContainer(int rowType)
