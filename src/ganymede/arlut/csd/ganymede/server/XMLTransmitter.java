@@ -200,6 +200,7 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
 	      xmlOut.startElement("ganymede");
 	      xmlOut.attribute("major", Byte.toString(DBStore.major_xml_version));
 	      xmlOut.attribute("minor", Byte.toString(DBStore.minor_xml_version));
+	      xmlOut.indentOut();
 
 	      xmlOut.startElementIndent("ganydata");
 	      xmlOut.indentOut();
