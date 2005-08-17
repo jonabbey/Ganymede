@@ -1040,7 +1040,7 @@ public class DBEditSet {
 	  case ObjectStatus.DROPPING:
 	    obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
 
-	    session.GSession.checkIn();
+	    session.GSession.checkIn();	// XXX *synchronized* on GanymedeSession
 	    obj.getBase().store.checkIn(); // update checked out count
 	    break;
 		
@@ -2482,7 +2482,7 @@ public class DBEditSet {
 	// (note that we can't use a no-sync remove above, since
 	// we don't prevent asynchronous viewDBObject().
 
-	session.GSession.checkIn();
+	session.GSession.checkIn(); // *synchronized*
 	base.store.checkIn(); // count it as checked in once it's deleted
 	break;
 
