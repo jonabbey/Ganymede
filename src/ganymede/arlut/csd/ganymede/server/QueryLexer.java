@@ -133,6 +133,10 @@ tryAgain:
 						mOBJECT(true);
 						theRetToken=_returnToken;
 					}
+					else if ((LA(1)=='e') && (LA(2)=='d')) {
+						mEDITABLE(true);
+						theRetToken=_returnToken;
+					}
 					else if ((_tokenSet_0.member(LA(1))) && (true)) {
 						mNUMERIC_ARG(true);
 						theRetToken=_returnToken;
@@ -310,6 +314,19 @@ tryAgain:
 		_returnToken = _token;
 	}
 	
+	public final void mEDITABLE(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
+		int _ttype; Token _token=null; int _begin=text.length();
+		_ttype = EDITABLE;
+		int _saveIndex;
+		
+		match("editable");
+		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
+			_token = makeToken(_ttype);
+			_token.setText(new String(text.getBuffer(), _begin, text.length()-_begin));
+		}
+		_returnToken = _token;
+	}
+	
 	public final void mSTRING_VALUE(boolean _createToken) throws RecognitionException, CharStreamException, TokenStreamException {
 		int _ttype; Token _token=null; int _begin=text.length();
 		_ttype = STRING_VALUE;
@@ -320,15 +337,15 @@ tryAgain:
 		{
 			match('"');
 			{
-			_loop38:
+			_loop40:
 			do {
 				// nongreedy exit test
-				if ((LA(1)=='"') && (true)) break _loop38;
+				if ((LA(1)=='"') && (true)) break _loop40;
 				if (((LA(1) >= '\u0000' && LA(1) <= '\u007f')) && ((LA(2) >= '\u0000' && LA(2) <= '\u007f'))) {
 					matchNot(EOF_CHAR);
 				}
 				else {
-					break _loop38;
+					break _loop40;
 				}
 				
 			} while (true);
@@ -340,15 +357,15 @@ tryAgain:
 		{
 			match("'");
 			{
-			_loop40:
+			_loop42:
 			do {
 				// nongreedy exit test
-				if ((LA(1)=='\'') && (true)) break _loop40;
+				if ((LA(1)=='\'') && (true)) break _loop42;
 				if (((LA(1) >= '\u0000' && LA(1) <= '\u007f')) && ((LA(2) >= '\u0000' && LA(2) <= '\u007f'))) {
 					matchNot(EOF_CHAR);
 				}
 				else {
-					break _loop40;
+					break _loop42;
 				}
 				
 			} while (true);
@@ -436,17 +453,17 @@ tryAgain:
 		}
 		}
 		{
-		int _cnt47=0;
-		_loop47:
+		int _cnt49=0;
+		_loop49:
 		do {
 			if (((LA(1) >= '0' && LA(1) <= '9'))) {
 				mDIGIT(false);
 			}
 			else {
-				if ( _cnt47>=1 ) { break _loop47; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+				if ( _cnt49>=1 ) { break _loop49; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 			}
 			
-			_cnt47++;
+			_cnt49++;
 		} while (true);
 		}
 		if ( _createToken && _token==null && _ttype!=Token.SKIP ) {
@@ -466,17 +483,17 @@ tryAgain:
 		if ((LA(1)=='.')) {
 			match('.');
 			{
-			int _cnt51=0;
-			_loop51:
+			int _cnt53=0;
+			_loop53:
 			do {
 				if (((LA(1) >= '0' && LA(1) <= '9'))) {
 					mDIGIT(false);
 				}
 				else {
-					if ( _cnt51>=1 ) { break _loop51; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
+					if ( _cnt53>=1 ) { break _loop53; } else {throw new NoViableAltForCharException((char)LA(1), getFilename(), getLine(), getColumn());}
 				}
 				
-				_cnt51++;
+				_cnt53++;
 			} while (true);
 			}
 		}
@@ -496,10 +513,10 @@ tryAgain:
 		_ttype = NUMERIC_ARG;
 		int _saveIndex;
 		
-		boolean synPredMatched54 = false;
+		boolean synPredMatched56 = false;
 		if (((_tokenSet_0.member(LA(1))) && (true) && (true) && (true) && (true) && (true) && (true) && (true) && (true) && (true))) {
-			int _m54 = mark();
-			synPredMatched54 = true;
+			int _m56 = mark();
+			synPredMatched56 = true;
 			inputState.guessing++;
 			try {
 				{
@@ -508,12 +525,12 @@ tryAgain:
 				}
 			}
 			catch (RecognitionException pe) {
-				synPredMatched54 = false;
+				synPredMatched56 = false;
 			}
-			rewind(_m54);
+			rewind(_m56);
 			inputState.guessing--;
 		}
-		if ( synPredMatched54 ) {
+		if ( synPredMatched56 ) {
 			mDECIMAL_VALUE(false);
 			if ( inputState.guessing==0 ) {
 				_ttype = DECIMAL_VALUE;

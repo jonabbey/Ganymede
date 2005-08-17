@@ -71,9 +71,9 @@ select_clause:
        ;
 
 from_clause:
-       FROM^ STRING_VALUE
+       FROM^ (EDITABLE)? STRING_VALUE
        ;
-       
+
 where_clause:
        WHERE^
        expression;
@@ -122,6 +122,8 @@ FROM   : "from" ;
 WHERE  : "where" ;
 DEREF  : "->" ;
 OBJECT : "object";
+EDITABLE : "editable";
+
 
 STRING_VALUE : 
          '"' (options {greedy=false;}:.)* '"' 

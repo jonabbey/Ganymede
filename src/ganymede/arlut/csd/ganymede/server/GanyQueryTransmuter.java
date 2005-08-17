@@ -70,6 +70,7 @@ import arlut.csd.ganymede.common.QueryNotNode;
 import arlut.csd.ganymede.common.QueryOrNode;
 
 import arlut.csd.Util.StringUtils;
+import arlut.csd.Util.TranslationService;
 
 import antlr.ANTLRException;
 import antlr.DumpASTVisitor;
@@ -109,6 +110,13 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
   private static HashMap op_scalar_mapping;
   private static HashMap op_vector_mapping;
   private static HashMap validity_mapping;
+
+  /**
+   * TranslationService object for handling string localization in the Ganymede
+   * server.
+   */
+
+  static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanyQueryTransmuter");
 
   static
   {
@@ -152,6 +160,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
   DBObjectBase objectBase = null;
   ArrayList selectFields = null;
+  boolean editableFilter = false;
 
   public GanyQueryTransmuter()
   {
@@ -175,12 +184,13 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     if (ast == null)
       {
-	throw new GanyParseException("I couldn't parse the query, bub.  Make sure you've parenthesized everything correctly.\n\n" + queryString);
+	// "Error parsing GanyQL query string.  Make sure you've parenthesized and quoted everything properly.\n\n{0}"
+	throw new GanyParseException(ts.l("transmuteQueryString.global_parse_error", queryString));
       }
 
     QueryNode root = parse_tree(ast);
 
-    Query query = new Query(objectBase.getName(), root);
+    Query query = new Query(objectBase.getName(), root, this.editableFilter);
 
     if (selectFields == null)
       {
@@ -234,12 +244,41 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
   private DBObjectBase parse_from_tree(AST ast) throws GanyParseException
   {
-    String from_objectbase = StringUtils.dequote(ast.getFirstChild().getText());
+    String from_objectbase = null;
+    AST node = ast.getFirstChild();
+
+    if (node == null)		// the grammar _should_ prevent this
+      {
+	// "Missing from clause."
+	throw new GanyParseException(ts.l("parse_from_tree.missing_from"));
+      }
+
+    while (node != null)
+      {
+	if (node.getType() == QueryParserTokenTypes.EDITABLE)
+	  {
+	    this.editableFilter = true;
+	  }
+	else if (node.getType() == QueryParserTokenTypes.STRING_VALUE)
+	  {
+	    from_objectbase = StringUtils.dequote(node.getText());
+	  }
+
+	node = node.getNextSibling();
+      }
+
+    if (from_objectbase == null) // the grammar _should_ prevent this
+      {
+	// "From clause does not contain an object type to search."
+	throw new GanyParseException(ts.l("parse_from_tree.no_objectbase"));
+      }
+
     this.objectBase = Ganymede.db.getObjectBase(from_objectbase);
 
     if (objectBase == null)
       {
-	throw new GanyParseException("The objectBase " + from_objectbase + " doesn't exist, bub.");
+	// "The object type "{0}" in the query''s from clause does not exist."
+	throw new GanyParseException(ts.l("parse_from_tree.bad_objectbase", from_objectbase));
       }
 
     return this.objectBase;
@@ -262,7 +301,8 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
 	if (field == null)
 	  {
-	    throw new GanyParseException("Can't find field " + field_name + " in object base " + objectBase.getName());
+	    // "Can''t find field "{0}" in the "{1}" object type.  Make sure you have capitalized the field name correctly."
+	    throw new GanyParseException(ts.l("global.no_such_field", field_name, objectBase.getName()));
 	  }
 
 	selectFields.add(field);
@@ -313,12 +353,14 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
 	    if (field == null)
 	      {
-		throw new GanyParseException("Can't find field " + field_name + " in object base " + base.getName());
+		// "Can''t find field "{0}" in the "{1}" object type.  Make sure you have capitalized the field name correctly."
+		throw new GanyParseException(ts.l("global.no_such_field", field_name, base.getName()));
 	      }
 	    
 	    if (field.getType() != FieldType.INVID)
 	      {
-		throw new GanyParseException("You can only dereference an Invid field, which " + field_name + " isn't.");
+		// "The "{0}" field can''t be dereferenced.  Not an invid field."
+		throw new GanyParseException(ts.l("parse_where_clause.not_invid", field_name));
 	      }
 
 	    short target_objectbase_id = field.getTargetBase();
@@ -358,7 +400,8 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	    
 	    if (field == null)
 	      {
-		throw new GanyParseException("Can't find field " + field_name + " in object base " + base.getName());
+		// "Can''t find field "{0}" in the "{1}" object type.  Make sure you have capitalized the field name correctly."
+		throw new GanyParseException(ts.l("global.no_such_field", field_name, base.getName()));
 	      }
 
 	    field_type = field.getType();
@@ -376,12 +419,13 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	  }
 
         /*
-         * If we don't know the objectbase, then we have to think. We can't
-         * check and see if the field we're querying is a scalar or a vector
-         * field. Thus, we'll have to trust that the user knows what he wants.
-         * If he's wrong about the vector/scalar type of the field he's
-         * querying, then the query engine will try its best to figure out what
-         * the user really meant.
+         * If we don't know the objectbase, then we are chasing a
+         * vague pointer derefence, and we have to think. We can't
+         * check and see if the field we're querying is a scalar or a
+         * vector field. Thus, we'll have to trust that the user knows
+         * what he wants.  If he's wrong about the vector/scalar type
+         * of the field he's querying, then the query engine will try
+         * its best to figure out what the user really meant.
          */
          
 	if (base == null)
@@ -400,7 +444,8 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
               }
             else
               {
-              	throw new GanyParseException(op + " is not an operation that I understand.");
+		// "The "{0}" operator makes no sense to me.  GanyQueryTransmuter.java has not been kept up to date with the grammar."
+              	throw new GanyParseException(ts.l("parse_where_clause.mystery_operator", op));
               }
           }
         else
@@ -422,8 +467,8 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
                   }
                 else
                   {
-                    throw new GanyParseException(op
-                        + " is not an operation that I understand.");
+		    // "The "{0}" operator makes no sense to me.  GanyQueryTransmuter.java has not been kept up to date with the grammar."
+                    throw new GanyParseException(ts.l("parse_where_clause.mystery_operator", op));
                   }
               }
             else
@@ -439,16 +484,16 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	
 	if (base != null && scalar_operator != QueryDataNode.NONE && !valid_op(op, field_type))
 	  {
-	    throw new GanyParseException("The " + op + " operation is not valid on a " +
-				       base.getName() + "'s " + field_name + " field, which is of type " +
-				       field.getTypeDesc());
+	    // "The "{0}" operator is not valid on a "{1}" object''s "{2}" field.  {2} is of type {3}."
+	    throw new GanyParseException(ts.l("parse_where_clause.bad_operator", op, base.getName(), field_name, field.getTypeDesc()));
 	  }
 
 	return new QueryDataNode(field_name, scalar_operator, vector_operator, argument);
 
       default:
 
-	throw new GanyParseException("I couldn't process node type: " + root_type);
+	// "I couldn''t process parser node type {0}.  GanyQueryTransmuter.java has probably not been kept up to date with the grammar."
+	throw new GanyParseException(ts.l("parse_where_clause.bad_type", new Integer(root_type)));
       }
   }
 
@@ -488,7 +533,8 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	    return StringUtils.dequote(argument);
 
 	  default:
-	    throw new GanyParseException("Unrecognized argument type parsing argument " + argument);
+	    // "Unrecognized argument type parsing argument {0}."
+	    throw new GanyParseException(ts.l("parse_argument.unrecognized_argument", new Integer(argument)));
 	  }
       }
 
@@ -535,11 +581,13 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	      }
 	    catch (ParseException ex)
 	      {
-		throw new GanyParseException("I couldn't parse " + argument + " as a date value.");
+		// "I couldn''t make any sense of "{0}" as a date value."
+		throw new GanyParseException(ts.l("parse_argument.bad_date", argument));
 	      }
 	  }
       }
 
-    throw new GanyParseException("The field " + field.getName() + " takes arguments of type " + field.getTypeDesc());
+    // "Error, field "{0}" requires a {1} argument type."
+    throw new GanyParseException(ts.l("parse_argument.bad_argument_type", field.getName(), field.getTypeDesc()));
   }
 }
