@@ -1573,10 +1573,12 @@ final public class DBSession {
       {
 	if (description != null)
 	  {
+	    // "{0}: committed transaction {1}"
 	    Ganymede.debug(ts.l("commitTransaction.debug3", String.valueOf(key), description));
 	  }
 	else
 	  {
+	    // "{0}: committed transaction"
 	    Ganymede.debug(ts.l("commitTransaction.debug4", String.valueOf(key)));
 	  }
 

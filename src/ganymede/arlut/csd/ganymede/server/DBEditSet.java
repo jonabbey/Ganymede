@@ -1730,12 +1730,16 @@ public class DBEditSet {
 
 	    if (ex instanceof IOException)
 	      {
+		// "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
+		// "Couldn''t write transaction to sync channels due to an IOException.   The server may have run out of disk space.\n\n{0}"
 		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
 									  ts.l("commit_writeSyncChannels.ioexception_text",
 									       Ganymede.stackTrace(ex))));
 	      }
 	    else
 	      {
+		// "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
+		// "Exception caught while writing to sync channels.  Sync channels write aborted.\n\n{0}"
 		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
 									  ts.l("commit_writeSyncChannels.exception_text",
 									       Ganymede.stackTrace(ex))));
