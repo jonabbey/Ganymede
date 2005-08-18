@@ -37,13 +37,189 @@
       href="mailto:deepak@brownman.org">Deepak Giridharagopal</a>.</p>
     </div>
 
-    <p>Ganymede 2.0 supports an extremely simple Ganymede Query
-    Language (<span class="definition">GanyQL</span>), very loosely
-    patterned after SQL syntax.  GanyQL can be used to specify queries
-    within Java and Jython sources linked into the Ganymede server or
-    client, but it can also be used in conjunction with the Ganymede
-    2.0 <a href="../xml/xmlclient.html">xmlclient</a> in order to
-    pull specified data from the Ganymede data store.</p>
+    <h2>Introduction</h2>
+
+    <p>In Ganymede 1.0, the only way to query the Ganymede data store
+    was to manually create a Ganymede <a
+    href="../javadoc/arlut/csd/ganymede/common/Query.html">arlut.csd.ganymede.common.Query</a>
+    object with a linked tree of <a
+    href="../javadoc/arlut/csd/ganymede/common/QueryNode.html">arlut.csd.ganymede.common.QueryNode</a>
+    objects representing the query's exploded parse tree.  Programming
+    queries into the Ganymede server was difficult, and creating shell
+    scripts to pull arbitrary data from the Ganymede server was simply
+    impossible.  Any queries, no matter how simple, required the
+    creation of custom Java code to assemble the appropriate
+    structured query trees.</p>
+
+    <p>To bring light into this darkness, Ganymede 2.0 introduces a
+    simple new Ganymede Query Language called <span
+    class="definition">GanyQL</span>.  GanyQL is very loosely
+    patterned after SQL syntax, and is designed to make it possible to
+    express queries on the Ganymede data store in a human-readable and
+    direct fashion.  All you need to do is write a bit of GanyQL and
+    parsing code on the Ganymede server will take care of translating
+    your request into the Ganymede query engine's internal
+    structure.</p>
+
+    <p>GanyQL was designed and implemented by Deepak Giridharagopal
+    using Terrance Parr's excellent <a
+    href="http://www.antlr.org/">ANTLR</a> parser generation system.
+    If you ever find yourself needing to incorporate language parsing
+    into your development project, we recommend ANTLR to you without
+    reservation.  It is a superb tool.</p>
+
+    <h2>What it looks like</h2>
+
+    <p>Here are some examples of what GanyQL queries look like:</p>
+
+    <code>select object from editable "User" where "UID" &gt;= 2000</code>
+    <code>select "Username" from "User" where "Expiration Date" defined</code>
+    <code>select "GroupName","GID" from "Group" where "Owner List" =~_ci "^csd"</code>
+    <code>select "Username","UID","Home Group" from editable "User"
+    where "Home Group"->"GID" >= 2000 and "Home Group"->"GID" &lt;= 8000</code>
+    <code>select "Name" from "Owner Group" where "Admin
+    Persona"->"User"->"Home Group"->"Users" len&lt;= 5</code>
+
+    <p>In English, these queries are as follows:</p>
+
+    <ol>
+      <li>Return all user objects in the Ganymede server that I have
+      permission to edit whose UID field contains a value greater than
+      or equal to 2000.</li>
+
+      <li>Return a list of user names for all users in the Ganymede
+      server that I have permission to read and which have a non-empty
+      Expiration Date field.</li>
+
+      <li>Return a list of GroupName and GIDs for all groups in the
+      Ganymede server that I have permission to read and whose Owner
+      List field contains one or more strings which match '^csd' using
+      a case-insensitive regular expression match.</li>
+
+      <li>Return a list of Usernames, UIDs and Home Groups for users
+      in the Ganymede server that I have permission to edit and whose
+      Home Group field points to a Group object whose GID field is
+      between 2000 and 8000, inclusive.</li>
+
+      <li>Return a list of Names for Owner Group objects in the
+      Ganymede server that I have permission to read and whose Admin
+      Persona field points to an admin persona whose User field points
+      to a user whose Home Group field points to a group whose Users
+      field has five or fewer users in it.</li>
+    </ol>
+
+    <p>As you can see from these examples, you can express some quite
+    involved queries with a very little bit of GanyQL.</p>
+
+    <p>Powerful as it is, GanyQL is not as sophisticated as SQL.
+    Things like joins across "tables" are not permitted, and you can't
+    create arbitrary subqueries the way you could with SQL.  Further,
+    any query you submit can only return data from objects of a single
+    type.  If you query on User objects, you'll only ever get back
+    data from User objects.</p>
+
+    <p>This is (in part) due to the fact that Ganymede's data model is
+    object structured, with nodes and pointers, rather than
+    table-structured/relational.  GanyQL's support for pointer
+    dereferencing helps let you express queries on relationships
+    between objects, but at the end of the day you're asking the
+    Ganymede server to give you back information about one type of
+    object in a single query.</p>
+
+    <h2>The syntax</h2>
+
+    <p>The GanyQL syntax is pretty simple to state.  All queries in
+    GanyQL will take one of the following eight forms:</p>
+
+    <ul>
+      <li><span class="keyword">select object from</span> "Type"</li>
+      <li><span class="keyword">select object from</span> "Type" <span class="keyword">where</span> ..</li>
+      <li><span class="keyword">select object from editable</span> "Type"</li>
+      <li><span class="keyword">select object from editable</span> "Type" <span class="keyword">where</span> ..</li>
+      <li><span class="keyword">select</span> "Field 1","Field 2", .. <span class="keyword">from</span> "Type" <span class="keyword">where</span> ..</li>
+      <li><span class="keyword">select</span> "Field 1","Field 2", .. <span class="keyword">from</span> "Type"</li>
+      <li><span class="keyword">select</span> "Field 1","Field 2", .. <span class="keyword">from editable</span> "Type" <span class="keyword">where</span> ..</li>
+      <li><span class="keyword">select</span> "Field 1","Field 2", .. <span class="keyword">from editable</span> "Type"</li>
+    </ul>
+
+    <p>The words in boldface are keywords, that must be typed exactly
+    as they appear here, in lower case.  The rest will vary according
+    to your Ganymede schema and your particular query needs.</p>
+
+    <p>As you can see, you can select a full <span
+    class="keyword">object</span> or only a specified list of fields,
+    from either all objects of a given type that match an optional set
+    of matching criteria, or just from objects that you have
+    permission to edit on the Ganymede server that match your matching
+    optional criteria.  If you do not provide a <span
+    class="keyword">where</span> clause, your query will match all
+    candidate objects of that type.</p>
+
+    <p>The <span class="keyword">where</span> clause is where you get
+    to state specific restrictions on what objects you are interested
+    in getting back from your query.  The <span
+    class="keyword">where</span> clause will look something like one
+    of the following:</p>
+
+    <ul>
+      <li><span class="keyword">where</span> "Field" &lt;operator&gt; <i>argument</i></li>
+      <li><span class="keyword">where not</span> "Field" &lt;operator&gt; <i>argument</i></li>
+      <li><span class="keyword">where</span> "Field1" &lt;operator1&gt; <i>argument1</i> <span class="keyword">and</span> "Field1" &lt;operator2&gt; <i>argument2</i></li>
+      <li><span class="keyword">where</span> "Field1" &lt;operator1&gt; <i>argument1</i> <span class="keyword">and</span> ("Field1" &lt;operator2&gt; <i>argument2</i> <span class="keyword">or</span> "Field2" &lt;operator3&gt; <i>argument3</i>)</li>
+      <li><span class="keyword">where</span> "Field1" &lt;operator1&gt; <i>argument1</i> <span class="keyword">and not</span> ("Field1" &lt;operator2&gt; <i>argument2</i> <span class="keyword">or</span> "Field2" &lt;operator3&gt; <i>argument3</i>)</li>
+    </ul>
+
+    <p>And so on.  You can use any combination of parentheses, along
+    with <span class="keyword">and</span>, <span
+    class="keyword">or</span>, and <span class="keyword">not</span>
+    that you like to express your query logic.</p>
+
+    <p class="note">In all of the examples in this section, the double
+    quotation marks around field names and object type names are part
+    of the query syntax and are required, whereas the &lt; and &gt;
+    around the operators are just to signify that you have a selection
+    of operators to choose from.</p>
+
+    <p>The operators you have to choose from are as follows:</p>
+
+    <table>
+      <th><td>Operator</td><td>Meaning</td><td>Used On</td></th>
+      <tr><td>=~</td><td>Regular Expression match (perl5 style)</td><td>Strings, Invids (as label), I.P. Addresses</td></tr>
+      <tr><td>=~_ci</td><td>Case-insensitive Regular Expression match (perl5 style)</td><td>Strings, Invids (as label), I.P. Addresses</td></tr>
+      <tr><td>==</td><td>Equality match</td><td>Strings, Numbers, Booleans, Invids (as label), Dates, Floats, I.P. Addresses</td></tr>
+      <tr><td>==_ci</td><td>Case-insensitive Equality match</td><td>Strings, Invids (as label), I.P. Addresses</td></tr>
+      <tr><td>&lt;</td><td>Less than match</td><td>Strings, Invids (as label), Numbers, Dates, Floats</td></tr>
+      <tr><td>&lt;=</td><td>Less than or equal match</td><td>Strings, Invids (as label), Numbers, Dates, Floats</td></tr>
+      <tr><td>&gt;</td><td>Greater than match</td><td>Strings, Invids (as label), Numbers, Dates, Floats</td></tr>
+      <tr><td>&gt;=</td><td>Greater than or equal match</td><td>Strings, Invids (as label), Numbers, Dates, Floats</td></tr>
+      <tr><td>&gt;=</td><td>Greater than or equal match</td><td>Strings, Invids (as label), Numbers, Dates, Floats</td></tr>
+      <tr><td>starts</td><td>Begins with match</td><td>Strings, Invids (as label), I.P. Addresses</td></tr>
+      <tr><td>ends</td><td>Ends with match</td><td>Strings, Invids (as label), I.P. Addresses</td></tr>
+      <tr><td>len&lt;</td><td>Array field length less than match</td><td>Any array field (Strings, Invids, I.P. Addresses)</td></tr>
+      <tr><td>len&lt;=</td><td>Array field length less than or equal to match</td><td>Any array field (Strings, Invids, I.P. Addresses)</td></tr>
+      <tr><td>len&gt;</td><td>Array field length greater than match</td><td>Any array field (Strings, Invids, I.P. Addresses)</td></tr>
+      <tr><td>len&gt;=</td><td>Array field length greater than or equal to match</td><td>Any array field (Strings, Invids, I.P. Addresses)</td></tr>
+      <tr><td>len==</td><td>Array field length equal to match</td><td>Any array field (Strings, Invids, I.P. Addresses)</td></tr>
+      <tr><td>defined><td>Field is defined (not empty)</td><td>All</td></tr>
+    </table>
+
+    <p>All of these operators take a pair of arguments, with the name
+    of the field to be compared before the operator and a value to
+    compare the field to after the operator.  The one exception to
+    this is <span class="keyword">defined</span>, which takes no
+    second argument.</p>
+
+    <p class="note">To fully express the syntax of GanyQL would
+    require an exposition as long and precise as the actual <a
+    href="query.g">GanyQL grammar</a>.  If you've had any experience
+    with abstract syntax definitions, you may find grammar to be the
+    most clear and concise statement of the GanyQL language.</p>
+
+    <h2>Using GanyQL</h2>
+
+    <p>Support for GanyQL has been introduced into the primary <a
+    href="../javadoc/arlut/csd/ganymede/rmi/Session.html">Session</a>
+    RMI interface used to communicate with the Ganymede server.</p>
 
   </body>
 </html>
