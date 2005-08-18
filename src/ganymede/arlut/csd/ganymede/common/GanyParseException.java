@@ -74,4 +74,9 @@ public class GanyParseException extends java.rmi.RemoteException {
   {
     super(s);
   }
+
+  public GanyParseException(String s, Throwable cause)
+  {
+    super(s, cause);
+  }
 }
