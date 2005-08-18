@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="stylesheets/ganymede.css"/>
+    <link rel="stylesheet" type="text/css" href="../stylesheets/ganymede.css"/>
     <title>Ganymede Query Language Quide</title>
   </head>
 
   <body>
     <div id="header">
-      <IMG SRC="gifs/ganymede_title.gif" alt="Ganymede Logo"/>
+      <IMG SRC="../gifs/ganymede_title.gif" alt="Ganymede Logo"/>
 
       <div id="title">
         <h1>Ganymede 2.0 Query Language Guide</h1>
@@ -29,7 +29,7 @@
         API can make use of GanyQL to simplify their coding on plugins
         and the like and, best of all, end users can make use of
         GanyQL directly from the command line using the Ganymede 2.0
-        <a href="xml/xmlclient.html">xmlclient</a>.</p>
+        <a href="../xml/xmlclient.html">xmlclient</a>.</p>
       </div>
 
       <p>by <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan
@@ -38,8 +38,12 @@
     </div>
 
     <p>Ganymede 2.0 supports an extremely simple Ganymede Query
-    Language (<span class="definition">GanyQL</span>), which was
-    patterned after SQL syntax.</p>
+    Language (<span class="definition">GanyQL</span>), very loosely
+    patterned after SQL syntax.  GanyQL can be used to specify queries
+    within Java and Jython sources linked into the Ganymede server or
+    client, but it can also be used in conjunction with the Ganymede
+    2.0 <a href="../xml/xmlclient.html">xmlclient</a> in order to
+    pull specified data from the Ganymede data store.</p>
 
   </body>
 </html>
