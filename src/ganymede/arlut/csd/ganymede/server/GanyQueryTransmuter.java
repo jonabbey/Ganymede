@@ -149,7 +149,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     validity_mapping.put(new Integer(FieldType.NUMERIC), new String[] {"<", ">", "<=", ">=", "==", "defined"});
     validity_mapping.put(new Integer(FieldType.FLOAT), new String[] {"<", ">", "<=", ">=", "==", "defined"});
     validity_mapping.put(new Integer(FieldType.BOOLEAN), new String[] {"==", "defined"});
-    validity_mapping.put(new Integer(FieldType.IP), new String[] {"==", "=~", "starts", "ends", "defined"});
+    validity_mapping.put(new Integer(FieldType.IP), new String[] {"==", "=~", "==_ci", "=~_ci", "starts", "ends", "defined"});
     validity_mapping.put(new Integer(FieldType.STRING), new String[] {"<", ">", "<=", ">=", "=~", "=~_ci", "==", "==_ci", "starts", "ends", "defined"});
     validity_mapping.put(new Integer(FieldType.INVID), new String[] {"<", ">", "<=", ">=", "=~", "=~_ci", "==", "==_ci", "starts", "ends", "defined"});
     validity_mapping.put(new Integer(FieldType.PASSWORD), new String[] {"defined"});
