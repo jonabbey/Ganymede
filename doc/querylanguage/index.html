@@ -72,13 +72,17 @@
 
     <p>Here are some examples of what GanyQL queries look like:</p>
 
-    <code>select object from editable "User" where "UID" &gt;= 2000</code>
-    <code>select "Username" from "User" where "Expiration Date" defined</code>
-    <code>select "GroupName","GID" from "Group" where "Owner List" =~_ci "^csd"</code>
-    <code>select "Username","UID","Home Group" from editable "User"
-    where "Home Group"->"GID" >= 2000 and "Home Group"->"GID" &lt;= 8000</code>
-    <code>select "Name" from "Owner Group" where "Admin
-    Persona"->"User"->"Home Group"->"Users" len&lt;= 5</code>
+    <p><code>select object from editable "User" where "UID" &gt;= 2000</code></p>
+
+    <p><code>select "Username" from "User" where "Expiration Date" defined</code></p>
+
+    <p><code>select "GroupName","GID" from "Group" where "Owner List" =~_ci "^csd"</code></p>
+
+    <p><code>select "Username","UID","Home Group" from editable "User"
+    where "Home Group"->"GID" >= 2000 and "Home Group"->"GID" &lt;= 8000</code></p>
+
+    <p><code>select "Name" from "Owner Group" where "Admin
+    Persona"->"User"->"Home Group"->"Users" len&lt;= 5</code></p>
 
     <p>In English, these queries are as follows:</p>
 
@@ -183,7 +187,7 @@
     <p>The operators you have to choose from are as follows:</p>
 
     <table>
-      <th><td>Operator</td><td>Meaning</td><td>Used On</td></th>
+      <tr><th>Operator</th><th>Meaning</th><th>Used On</th></tr>
       <tr><td>=~</td><td>Regular Expression match (perl5 style)</td><td>Strings, Invids (as label), I.P. Addresses</td></tr>
       <tr><td>=~_ci</td><td>Case-insensitive Regular Expression match (perl5 style)</td><td>Strings, Invids (as label), I.P. Addresses</td></tr>
       <tr><td>==</td><td>Equality match</td><td>Strings, Numbers, Booleans, Invids (as label), Dates, Floats, I.P. Addresses</td></tr>
@@ -200,7 +204,7 @@
       <tr><td>len&gt;</td><td>Array field length greater than match</td><td>Any array field (Strings, Invids, I.P. Addresses)</td></tr>
       <tr><td>len&gt;=</td><td>Array field length greater than or equal to match</td><td>Any array field (Strings, Invids, I.P. Addresses)</td></tr>
       <tr><td>len==</td><td>Array field length equal to match</td><td>Any array field (Strings, Invids, I.P. Addresses)</td></tr>
-      <tr><td>defined><td>Field is defined (not empty)</td><td>All</td></tr>
+      <tr><td>defined<td>Field is defined (not empty)</td><td>All</td></tr>
     </table>
 
     <p>All of these operators take a pair of arguments, with the name
