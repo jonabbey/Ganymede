@@ -38,6 +38,9 @@ and worked on the new Sync Channel software, both in the Ganymede
 client and especially in the wonder Python Sync Channel servicing
 code.
 
+Deepak designed and implemented the Ganymede 2.0 Query Language, using
+Terrance Parr's splendiferously good ANTLR tool.
+
 --
 
  Dan Scott, dscott@arlut.utexas.edu
@@ -272,10 +275,10 @@ client while allowing the GUI thread to dispatch GUI events until the
 network activity is done.  The Foxtrot project is included in the
 Ganymede clients under the BSD license.
 
-Some code in Ganymede 2.0 is based on Terence Parr's ANTLR parser
-generator.  The src/lib directory contains a jar file of classes from
-his project, which he has placed into the public domain.  See 
-http://www.antlr.org/ for information on ANTLR.
+Some code in Ganymede 2.0 is based on Terence Parr's incredutastic
+ANTLR parser generator.  The src/lib directory contains a jar file of
+classes from his project, which he has placed into the public domain.
+See http://www.antlr.org/ for information on ANTLR.
 
 The 'ant validate' task makes use of the Perl Config::Properties
 package, copyright by Randy Jay Yarger, Craig Manley, and Salvador
