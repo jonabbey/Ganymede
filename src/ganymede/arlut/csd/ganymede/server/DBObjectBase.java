@@ -1154,7 +1154,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     String _objectName = null;
     Integer _idInt;
     DBObjectBaseField newField;
-    Hashtable nameTable = new Hashtable();
+    GHashtable nameTable = new GHashtable(true); // case insensitive
     Hashtable idTable = new Hashtable();
     String _classStr = null;
     String _classOptionStr = null;
@@ -2721,31 +2721,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public synchronized BaseField getField(String name)
   {
-    BaseField bf;
-    Enumeration en;
-
-    /* -- */
-
-    en = fieldTable.elements();
-    
-    while (en.hasMoreElements())
-      {
-	bf = (BaseField) en.nextElement();
-
-	try
-	  {
-	    if (bf.getName().equalsIgnoreCase(name))
-	      {
-		return bf;
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    // pass through to return null below
-	  }
-      }
-
-    return null;
+    return fieldTable.get(name);
   }
 
   /**
@@ -3894,6 +3870,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
     else if (key instanceof String)
       {
+	// 
+	// XXX I can't make heads or tails out of what Deepak was trying to do 
+	// XXX in this section.. wtf?  - jon 19 aug 2005
+	//
+
         /* Snag this object's label field */
         String labelFieldName = getLabelFieldName();
         if (labelFieldName == null)

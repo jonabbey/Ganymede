@@ -458,7 +458,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
       {
 	base = (DBObjectBase) en.nextElement();
 
-	if (base.getName().equals(baseName))
+	if (base.getName().equalsIgnoreCase(baseName))
 	  {
 	    return (Base) base;
 	  }

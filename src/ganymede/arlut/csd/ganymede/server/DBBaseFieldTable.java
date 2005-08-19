@@ -288,6 +288,34 @@ public class DBBaseFieldTable {
 
   /**
    *
+   * Returns the DBObjectBaseField with the specified name from this
+   * DBBaseFieldTable, or null if no object with that name is in this
+   * table.
+   *
+   * This method is unprotected by synchronization, so you must be
+   * sure to use higher level synchronization to use this safely.
+   */
+
+  public DBObjectBaseField getNoSync(String name) 
+  {
+    return this.findByName(name);
+  }
+
+  /**
+   * Returns the DBObjectBaseField with the specified name from this
+   * DBBaseFieldTable, or null if no object with that name is in this
+   * table.
+   *
+   * The comparisons done in this method are case insensitive.
+   */
+
+  public synchronized DBObjectBaseField get(String name) 
+  {
+    return this.findByName(name);
+  }
+
+  /**
+   *
    * Rehashes the contents of the DBBaseFieldTable into a DBBaseFieldTable
    * with a larger capacity. This method is called automatically when
    * the number of keys in the hashtable exceeds this DBBaseFieldTable's
@@ -526,6 +554,33 @@ public class DBBaseFieldTable {
       }
 
     count = 0;
+  }
+
+  /**
+   * This unsynchronized private helper method looks up
+   * DBObjectBaseFields by name, using a case-insensitive comparison.
+   */
+
+  private final DBObjectBaseField findByName(String name)
+  {
+    for (int i = 0; i < table.length; i++)
+      {
+	DBObjectBaseField e = table[i];
+
+	while (e != null)
+	  {
+	    String eName = e.getName();
+
+	    if (eName != null && eName.equalsIgnoreCase(name))
+	      {
+		return e;
+	      }
+
+	    e = e.next;
+	  }
+      }
+
+    return null;
   }
 }
 
