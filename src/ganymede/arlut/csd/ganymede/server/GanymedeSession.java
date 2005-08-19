@@ -2174,6 +2174,26 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
+  public Vector getFieldTemplateVector(String baseName) throws NotLoggedInException
+  {
+    checklogin();
+
+    /* - */
+    
+    DBObjectBase base = Ganymede.db.getObjectBase(baseName);
+    return base.getFieldTemplateVector();
+  }
+
+  /**
+   * Returns a vector of field definition templates, in display order.
+   *
+   * This vector may be cached, as it is static for this object type over
+   * the lifetime of any GanymedeSession.
+   *
+   * @see arlut.csd.ganymede.common.FieldTemplate
+   * @see arlut.csd.ganymede.rmi.Session
+   */
+
   public Vector getFieldTemplateVector(short baseId) throws NotLoggedInException
   {
     checklogin();
@@ -2740,6 +2760,34 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     return result;
+  }
+
+  /**
+   * Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.
+   *
+   * If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.
+   *
+   * This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.
+   *
+   * @param objectName Label for the object to lookup
+   * @param objectType Name of the object type
+   */
+
+  public Invid findLabeledObject(String objectName, String objectType) throws NotLoggedInException
+  {
+    DBObjectBase base = Ganymede.db.getObjectBase(objectType);
+
+    if (base == null)
+      {
+	// "Error, "{0}" is not a valid object type in this Ganymede server."
+	throw new RuntimeException(ts.l("global.no_such_object_type", objectType));
+      }
+
+    return this.findLabeledObject(objectName, base.getTypeID());
   }
 
   /**
@@ -4194,6 +4242,39 @@ final public class GanymedeSession implements Session, Unreferenced {
 					       viewObjectLabel(invid),
 					       String.valueOf(invid)));
       }
+  }
+
+  /**
+   * Create a new object of the given type.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.
+   *
+   * Keep in mind that only one GanymedeSession can have a particular
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once created, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.
+   *
+   * @param type The kind of object to create.
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   *
+   * @see arlut.csd.ganymede.rmi.Session
+   */
+
+  public ReturnVal create_db_object(String objectType) throws NotLoggedInException
+  {
+    DBObjectBase base = Ganymede.db.getObjectBase(objectType);
+
+    if (base == null)
+      {
+	// "Error, "{0}" is not a valid object type in this Ganymede server."
+	return Ganymede.createErrorDialog(ts.l("global.no_such_object_type", objectType));
+      }
+
+    return this.create_db_object(base.getTypeID());
   }
 
   /**

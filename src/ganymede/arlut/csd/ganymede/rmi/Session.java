@@ -323,6 +323,16 @@ public interface Session extends Remote {
   Vector      getFieldTemplateVector(short baseId) throws RemoteException;
 
   /**
+   * <p>Returns a vector of field definition templates, in display order.</p>
+   *
+   * <p>This vector may be cached, as it is static for this object type.</p>
+   *
+   * @see arlut.csd.ganymede.common.FieldTemplate
+   */
+
+  Vector      getFieldTemplateVector(String baseName) throws RemoteException;
+
+  /**
    * <p>This method call initiates a transaction on the server.  This
    * call must be executed before any objects are modified (created,
    * edited, inactivated, removed).</p>
@@ -523,6 +533,19 @@ public interface Session extends Remote {
   public Invid findLabeledObject(String name, short type) throws RemoteException;
 
   /**
+   * <p>Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.</p>
+   *
+   * <p>If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.</p>
+   *
+   * @param objectName Label for the object to lookup
+   * @param objectType Name of the object type
+   */
+
+  public Invid findLabeledObject(String objectName, String objectType) throws RemoteException;
+
+  /**
    * <p>List objects in the database meeting the given query criteria.</p>
    *
    * <p>The database will be read-locked during the query, assuring
@@ -661,6 +684,26 @@ public interface Session extends Remote {
    */
 
   ReturnVal   create_db_object(short type) throws RemoteException;
+
+  /**
+   * <p>Create a new object of the given type.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.</p>
+   *
+   * <p>Keep in mind that only one Session can have a particular
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once created, the object will be unavailable
+   * to any other sessions until this session calls 
+   * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
+   *
+   * @param objectType The kind of object to create.
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   */
+
+  ReturnVal   create_db_object(String objectType) throws RemoteException;
 
   /**
    * <p>Clone a new object from object &lt;invid&gt;.  The ReturnVal returned

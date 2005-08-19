@@ -694,9 +694,35 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    */
 
+  public final DBObjectBaseField getFieldDef(String fieldName)
+  {
+    return (DBObjectBaseField) objectBase.getField(fieldName);
+  }
+
+  /**
+   *
+   * Returns the field definition for the given field code, or
+   * null if that field code is not registered with this object
+   * type.
+   *
+   */
+
   public final DBObjectBaseField getFieldDef(short fieldcode)
   {
     return (DBObjectBaseField) objectBase.getField(fieldcode);
+  }
+
+  public final PermEntry getFieldPerm(String fieldName)
+  {
+    DBField f = (DBField) getField(fieldName);
+
+    if (f == null)
+      {
+	// "Can''t find permissions for non-existent field "{0}""
+	throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", fieldName));
+      }
+    
+    return this.getFieldPerm(f.getID());
   }
 
   public final synchronized PermEntry getFieldPerm(short fieldcode)
@@ -1595,6 +1621,34 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <p>This method retrieves a DBField from this object's fieldAry
+   * DBField array by field name.  This access is done slowly, using a
+   * simple iteration over the values in our packed hash
+   * structure.</p>
+   */
+
+  public final DBField retrieveField(String fieldName)
+  {
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
+    synchronized (fieldAry)
+      {
+	for (int i = 0; i < fieldAry.length; i++)
+	  {
+	    if (fieldAry[i] != null && fieldAry[i].getName().equalsIgnoreCase(fieldName))
+	      {
+		return fieldAry[i];
+	      }
+	  }
+      }
+
+    return null;
+  }
+
+  /**
    * <p>This method finds the index for the given field id in this object's
    * fieldAry and permCacheAry tables.</p>
    *
@@ -1706,29 +1760,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final db_field getField(String fieldname)
   {
-    DBField field;
-
-    /* -- */
-
-    if (fieldAry == null)
-      {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
-      }
-
-    synchronized (fieldAry)
-      {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    field = fieldAry[i];
-	    
-	    if (field != null && field.getName().equalsIgnoreCase(fieldname))
-	      {
-		return field;
-	      }
-	  }
-      }
-
-    return null;
+    return retrieveField(fieldname);
   }
 
   /**
@@ -2108,6 +2140,35 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
+  public ReturnVal setFieldValue(String fieldName, Object value) throws GanyPermissionsException
+  {
+    DBField field = (DBField) getField(fieldName);
+
+    if (field == null)
+      {
+	// "Error, object {0} does not contain a field named "{1}"."
+	return Ganymede.createErrorDialog(ts.l("global.bad_field_name", this.getTypeName(), fieldName));
+      }
+
+    // NB: we would go ahead and do like we did for getFieldValue(),
+    // and define a third setFieldValue() function that would take a
+    // DBField to implement the common logic, but we've had a history
+    // of letting folks subclass setFieldValue(short id, Object value)
+    // specifically to override setFieldValue behavior.  We'll keep
+    // bridging into the short-using setFieldValue() to preserve this
+    // behavior.
+
+    return this.setFieldValue(field.getID(), value);
+  }
+
+  /**
+   * <p>Shortcut method to set a field's value.  Using this
+   * method saves a roundtrip to the server, which is
+   * particularly useful in database loading.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
   public ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
   {
     // we override in DBEditObject
@@ -2127,12 +2188,26 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
+  public Object getFieldValue(String fieldName) throws GanyPermissionsException
+  {
+    return this.getFieldValue((DBField) getField(fieldName));
+  }
+
+  /**
+   * <p>Shortcut method to get a field's value.  Using this
+   * method saves a roundtrip to the server, which is
+   * particularly useful in database loading.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
   public Object getFieldValue(short fieldID) throws GanyPermissionsException
   {
-    DBField f = (DBField) getField(fieldID);
+    return this.getFieldValue((DBField) getField(fieldID));
+  }
 
-    /* -- */
-    
+  private final Object getFieldValue(DBField f) throws GanyPermissionsException
+  {
     if (f == null)
       {
 	return null;
@@ -2141,7 +2216,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (f.isVector())
       {
 	// "Couldn't get scalar value on vector field {0}"
-	throw new IllegalArgumentException(ts.l("getFieldValue.badtype", new Integer(fieldID)));
+	throw new IllegalArgumentException(ts.l("getFieldValue.badtype", f.getName()));
       }
 
     return f.getValue();
@@ -2152,12 +2227,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * on the server, as permissions are not checked.</p>
    */
 
+  public Object getFieldValueLocal(String fieldName)
+  {
+    return this.getFieldValueLocal((DBField) getField(fieldName));
+  }
+
+  /**
+   * <p>Shortcut method to get a field's value.  Used only
+   * on the server, as permissions are not checked.</p>
+   */
+
   public Object getFieldValueLocal(short fieldID)
   {
-    DBField f = (DBField) getField(fieldID);
+    return this.getFieldValueLocal((DBField) getField(fieldID));
+  }
 
-    /* -- */
-    
+  private final Object getFieldValueLocal(DBField f)
+  {
     if (f == null)
       {
 	return null;
@@ -2166,7 +2252,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (f.isVector())
       {
 	// "Couldn't get scalar value on vector field {0}"
-	throw new IllegalArgumentException(ts.l("getFieldValue.badtype", new Integer(fieldID)));
+	throw new IllegalArgumentException(ts.l("getFieldValue.badtype", f.getName()));
       }
 
     return f.getValueLocal();
@@ -2234,12 +2320,32 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <P>An exception will be thrown if the field is not a boolean.</P>
    */
 
+  public boolean isSet(String fieldName)
+  {
+    return this.isSet((DBField) getField(fieldName));
+  }
+
+  /**
+   * <P>This method is for use on the server, so that custom code can call a simple
+   * method to test to see if a boolean field is defined and has a true value.</P>
+   *
+   * <P>An exception will be thrown if the field is not a boolean.</P>
+   */
+
   public boolean isSet(short fieldID)
   {
-    DBField f = (DBField) getField(fieldID);
+    return this.isSet((DBField) getField(fieldID));
+  }
 
-    /* -- */
-    
+  /**
+   * <P>This method is for use on the server, so that custom code can call a simple
+   * method to test to see if a boolean field is defined and has a true value.</P>
+   *
+   * <P>An exception will be thrown if the field is not a boolean.</P>
+   */
+
+  private final boolean isSet(DBField f)
+  {
     if (f == null)
       {
 	return false;
@@ -2264,12 +2370,26 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
+  public Vector getFieldValues(String fieldName) throws GanyPermissionsException
+  {
+    return getFieldValues((DBField) getField(fieldName));
+  }
+
+  /**
+   * <p>Shortcut method to set a field's value.  Using this
+   * method saves a roundtrip to the server, which is
+   * particularly useful in database loading.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
   public Vector getFieldValues(short fieldID) throws GanyPermissionsException
   {
-    DBField f = (DBField) getField(fieldID);
+    return getFieldValues((DBField) getField(fieldID));
+  }
 
-    /* -- */
-    
+  private final Vector getFieldValues(DBField f) throws GanyPermissionsException
+  {
     if (f == null)
       {
 	return null;
@@ -2278,7 +2398,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (!f.isVector())
       {
 	// "Couldn't get vector values on scalar field {0}"
-	throw new IllegalArgumentException(ts.l("getFieldValues.badtype", new Integer(fieldID)));
+	throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
       }
 
     return f.getValues();
@@ -2296,12 +2416,30 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * it.</p>
    */
 
+  public Vector getFieldValuesLocal(String fieldName)
+  {
+    return getFieldValuesLocal((DBField) getField(fieldName));
+  }
+
+  /**
+   * <p>Shortcut method to set a field's value.  This
+   * is a server-side method, but it can be a quick
+   * way to get a vector of elements.</p>
+   *
+   * <p><b>Warning!</b>  The Vector returned by getFieldValuesLocal()
+   * is not a clone, but is direct access to the vector
+   * held in the DBField.  Clone the vector you get back
+   * if you need to do anything with it other than read
+   * it.</p>
+   */
+
   public Vector getFieldValuesLocal(short fieldID)
   {
-    DBField f = (DBField) getField(fieldID);
+    return getFieldValuesLocal((DBField) getField(fieldID));
+  }
 
-    /* -- */
-    
+  private final Vector getFieldValuesLocal(DBField f)
+  {
     if (f == null)
       {
 	return null;
@@ -2310,7 +2448,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (!f.isVector())
       {
 	// "Couldn't get vector values on scalar field {0}"
-	throw new IllegalArgumentException(ts.l("getFieldValues.badtype", new Integer(fieldID)));
+	throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
       }
 
     return f.getValuesLocal();

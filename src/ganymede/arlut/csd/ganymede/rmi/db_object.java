@@ -231,6 +231,14 @@ public interface db_object extends java.rmi.Remote {
    * particularly useful in database loading.</p>
    */
 
+  public ReturnVal setFieldValue(String fieldName, Object value) throws RemoteException;
+
+  /**
+   * <p>Shortcut method to set a field's value.  Using this
+   * method saves a roundtrip to the server, which is
+   * particularly useful in database loading.</p>
+   */
+
   public ReturnVal setFieldValue(short fieldID, Object value) throws RemoteException;
 
   /**
@@ -238,7 +246,21 @@ public interface db_object extends java.rmi.Remote {
    * method saves a roundtrip to the server.</p>
    */
 
+  public Object getFieldValue(String fieldName) throws RemoteException;
+
+  /**
+   * <p>Shortcut method to get a scalar field's value.  Using this
+   * method saves a roundtrip to the server.</p>
+   */
+
   public Object getFieldValue(short fieldID) throws RemoteException;
+
+  /**
+   * <p>Shortcut method to get a vector field's values.  Using this
+   * method saves a roundtrip to the server.</p>
+   */
+
+  public Vector getFieldValues(String fieldName) throws RemoteException;
 
   /**
    * <p>Shortcut method to get a vector field's values.  Using this

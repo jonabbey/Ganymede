@@ -2734,7 +2734,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	try
 	  {
-	    if (bf.getName().equals(name))
+	    if (bf.getName().equalsIgnoreCase(name))
 	      {
 		return bf;
 	      }
