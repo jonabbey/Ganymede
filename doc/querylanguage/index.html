@@ -128,9 +128,9 @@
     though, which makes up somewhat for the lack of table joins and
     the like.</p>
 
-    <p>Perhaps most significant, of course, is the fact that, unlike
-    SQL, GanyQL is just a query language.  To actually submit data
-    changes to the Ganymede server, you need to use the <a
+    <p>Perhaps most significant is the fact that, unlike SQL, GanyQL
+    is <b>just</b> a query language.  To actually submit data changes
+    to the Ganymede server, you need to use the <a
     href="../xml/xmlclient.html">xmlclient</a> in conjunction with the
     <a href="../xml.html">Ganymede XML data format</a>.</p>
 
@@ -149,11 +149,10 @@
 
     <div class="example"><span class="keyword">select</span> <i>return values</i> <span class="keyword">from</span> <span class="optkeyword">editable</span> "<i>Object Type</i>" <span class="optkeyword">where</span> <i>test expression</i></div>
 
-    <p>The words in <span class="keyword">boldface</span> are keywords
-    that must be typed in lower case, exactly as they appear here.
-    Words in <span class="optkeyword">italic boldface</span> are
-    optional, and text in <i>plain italics</i> are where you will have
-    to provide input.</p>
+    <p>The words in <span class="keyword">boldface</span> are
+    mandatory keywords.  Words in <span class="optkeyword">italic
+    boldface</span> are optional, and text in <i>plain italics</i> are
+    where you will have to provide input.</p>
 
     <p>The "<i>Object Type</i>" string is the name of the type of
     object in the Ganymede data store that you want to query.  As with
