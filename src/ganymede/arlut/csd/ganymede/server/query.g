@@ -108,6 +108,8 @@ class QueryLexer extends Lexer;
 
 options {
   k=10;                               // needed for some of our long op names
+  caseSensitive=false;
+  caseSensitiveLiterals=false;
   charVocabulary='\u0000'..'\u007F';  // allow ascii
 }
 
