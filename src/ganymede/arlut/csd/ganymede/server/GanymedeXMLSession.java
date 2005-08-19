@@ -3254,7 +3254,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    if (thing instanceof xmlobject)
 	      {
-		xmlobject storedObject = (xmlobject) objEnum.nextElement();
+		xmlobject storedObject = (xmlobject) thing;
 
 		// now go through the stored object and do lookups for
 		// any invid fields contained thereunder.
