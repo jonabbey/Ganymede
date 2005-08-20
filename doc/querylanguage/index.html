@@ -294,7 +294,16 @@
       </tr>
     </table>
 
-    <p>and they can be combined with the following operators:</p>
+    <p>Most of these field test operators take a pair of arguments,
+    with the name of the field to look at before the operator and a
+    value to compare the field to after the operator.</p>
+
+    <p>The sole exceptions to this pattern is the <span
+    class="keyword">defined</span> operator, which does not take a
+    comparison value.</p>
+
+    <p>The field tests can be combined with the following
+    operators:</p>
 
     <table><caption>Logical Operators</caption>
       <tr><th>Operator</th><th>Meaning</th></tr>
@@ -316,15 +325,38 @@
       </tr>
     </table>
 
+    <p>Finally, GanyQL features a special pointer field dereference
+    operator, which can be used to extend queries to objects linked
+    from the primary object type being queried.</p>
 
-    <p>Most of these operators take a pair of arguments, with the name
-    of the field to look at before the operator and a value to compare
-    the field to after the operator.  The two exceptions to this
-    pattern are the <span class="keyword">defined</span> operator,
-    which does not require or accept a second parameter, and the <span
-    class="keyword">-&gt;</span> operator, which allows you to execute
-    subqueries against objects pointed to by an object pointer/invid
-    field.</p>
+    <table><caption>Pointer Dereference</caption>
+      <tr><th>Operator</th><th>Meaning</th></tr>
+      <tr>
+        <td><span class="keyword">-&gt;</span></td>
+        <td>Test Linked Object</td>
+      </tr>
+    </table>
+
+    <p>There are two ways to use the <span
+    class="keyword">-&gt;</span> operator.  You can use the pointer
+    dereference operator to execute a specific test against a field in
+    the object pointed to by the invid field being dereferenced, or
+    you can use the parentheses to execute a logical combination of
+    tests on multiple fields in the object pointed to.</p>
+
+    <p>For example, both of these examples work just fine:</p>
+
+    <div class="example">
+       <p><code>"<i>invid field</i>"<span class="keyword">-&gt;</span>"<i>field</i>" <span class="keyword">==</span> "<i>value</i>"</code></p>
+       <p><code>"<i>invid field</i>"<span class="keyword">-&gt;(</span>"<i>field 1</i>" <span class="keyword">==</span> "<i>value1</i>" <span class="keyword">and</span> "<i>field2</i>" <span class="keyword"><</span> 200<span class="keyword">)</span></code></p>
+    </div>
+
+    <p>In the latter case, the tests against "field1" and "field2" are
+    evaluated in each object pointed to by "invid field".  If "invid
+    field" is an array invid field, the test will be applied against
+    all objects linked from the field.  As long as any linked object
+    passes the test on the right side of the dereference operator, the
+    test evaluated through the dereference operator succeeds.</p>
 
     <h3>GanyQL Examples</h3>
 
