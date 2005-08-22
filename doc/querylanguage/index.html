@@ -77,7 +77,7 @@
       <p><code><span class="keyword">select</span> "Username","UID" <span class="keyword">from editable</span> "User"</code></p>
       <p><code><span class="keyword">select</span> "Username" <span class="keyword">from</span> "User" <span class="keyword">where</span> "Expiration Date" <span class="keyword">defined</span></code></p>
 
-      <p><code><span class="keyword">select</span> "GroupName","GID" <span class="keyword">from</span> "Group" <span class="keyword">where</span> "Owner List" <span class="keyword">=~_ci</span> "^csd"</code></p>
+      <p><code><span class="keyword">select</span> "GroupName","GID" <span class="keyword">from</span> "Group" <span class="keyword">where</span> "Notes" <span class="keyword">=~_ci</span> "(atl|isl) group"</code></p>
 
       <p><code><span class="keyword">select</span> "Username","UID","Home Group" <span class="keyword">from editable</span> "User"
       <span class="keyword">where</span> "Home Group"<span class="keyword">-&gt;(</span>"GID" <span class="keyword">>=</span> 2000 <span class="keyword">and</span> "GID" <span class="keyword">&lt;=</span> 8000<span class="keyword">)</span></code></p>
@@ -101,9 +101,9 @@
       Expiration Date field.</li>
 
       <li>Return a list of GroupName and GIDs for all groups in the
-      Ganymede server that I have permission to read and whose Owner
-      List field contains one or more strings which match '^csd' using
-      a case-insensitive regular expression match.</li>
+      Ganymede server that I have permission to read and whose Notes
+      field contains any text that matches '(atl|isl) group' using a
+      case-insensitive Perl 5-style regular expression match.</li>
 
       <li>Return a list of Usernames, UIDs and Home Groups for users
       in the Ganymede server that I have permission to edit and whose
@@ -139,8 +139,8 @@
     <p class="note">To fully express the syntax of GanyQL would
     require an exposition as long and precise as the actual <a
     href="query.g">GanyQL grammar</a>.  If you've had any experience
-    with abstract syntax definitions, you may find grammar to be the
-    most clear and concise statement of the GanyQL language.</p>
+    with abstract syntax definitions, you may find reading the grammar
+    both interesting and informative.</p>
 
     <h3>Gross Structure</h3>
 
@@ -161,36 +161,35 @@
     and you'll need to be sure you've got the capitalization
     right.</p>
 
-    <p>The <i>return values</i> can either be the single keyword <span
-    class="optkeyword">object</span>, if you want to get back all
-    fields from the object, or a comma separated list of field name
-    strings that you want to retrieve from "<i>Object Type</i>".</p>
+    <p>The <i>return values</i> can either be the <span
+    class="keyword">object</span> keyword, if you want to get back all
+    fields from the object, or a comma-separated list of field name
+    strings to be retrieved from "<i>Object Type</i>".</p>
 
-    <p>The <span class="optkeyword">editable</span> keyword is
-    optional.  If it is present, the query will only examine and
-    return objects that you have permission to check out for editing.
-    If <span class="keyword">editable</span> is not present, the query
-    will match against all objects of the appropriate type that you
-    have permission to view.</p>
+    <p>The <span class="keyword">editable</span> keyword is optional.
+    If it is present, the query will only examine and return objects
+    that you have permission to check out for editing.  If <span
+    class="keyword">editable</span> is not present, the query will
+    match against all objects of the appropriate type that you have
+    permission to view.</p>
 
-    <p>Finally, there's the optional <span
-    class="optkeyword">where</span> clause and test expression.  If
-    you do not provide a where clause, all objects of the appropriate
-    Object Type that you have permission to see and/or edit will be
-    returned.</p>
+    <p>Finally, there's the optional where clause and test expression.
+    If you do not provide a where clause, all objects of the
+    appropriate Object Type that you have permission to see and/or
+    edit will be returned.</p>
 
     <h3>The Where Clause</h3>
 
     <p>If you do provide a where clause, you can place specific
     restrictions on the objects you are interested in querying.</p>
 
-    <p>The where clause consists of the keyword <span
-    class="keyword">where</span> followed by a logical combination of
-    field tests.  These tests are specified using simple operators,
-    and can be combined using the logical operators <span
-    class="keyword">and</span>, <span class="keyword">or</span>, and
-    <span class="keyword">not</span>.  You can also use parentheses to
-    control the grouping of expressions.</p>
+    <p>The where clause consists of the <span
+    class="keyword">where</span> keyword followed by a logical
+    combination of field tests.  These tests are specified using
+    simple operators, and can be combined using the logical operators
+    <span class="keyword">and</span>, <span class="keyword">or</span>,
+    and <span class="keyword">not</span>.  You can also use
+    parentheses to control the grouping of expressions.</p>
 
     <p>The field tests supported by GanyQL are listed in the following table:</p>
 
@@ -352,11 +351,56 @@
     </div>
 
     <p>In the latter case, the tests against "field1" and "field2" are
-    evaluated in each object pointed to by "invid field".  If "invid
-    field" is an array invid field, the test will be applied against
-    all objects linked from the field.  As long as any linked object
-    passes the test on the right side of the dereference operator, the
-    test evaluated through the dereference operator succeeds.</p>
+    evaluated for each object that is pointed to by "invid field" in
+    the primary query.  If "invid field" is a multivalued invid array
+    field, the test will be applied against each object pointed to by
+    "invid field" until the test is passed or all invids in the array
+    have been examined, whichever comes first.</p>
+
+    <p>Through the use of the pointer dereference operator, it is
+    possible to create queries that can examine quite a lot of objects
+    in an attempt to determine matches against the query expression.</p>
+
+    <p>Here's another example:</p>
+
+    <div class="example">
+      <p><code>"<i>invid field</i>"<span class="keyword">-&gt;(</span>"<i>invid field2</i>"<span class="keyword">-&gt;</span>"<i>GID</i>"<span class="keyword">&lt;=</span> 3000 <span class="keyword">or</span> "<i>invid field2</i>"<span class="keyword">-&gt;(</span>"<i>Users</i>"<span class="keyword">-&gt;</span>"UID" <span class="keyword">&lt;</span> 4000<span class="keyword">or</span> "<i>Users</i>"-&gt;"<i>User Netgroup</i>"<span class="keyword">-&gt;</span>"<i>Members</i>"<span class="keyword">-&gt;</span>"<i>UID</i>" <span class="keyword">&gt;</span> 8192))</span></code></p>
+    </div>
+
+    <p>This query expression returns true for all objects which have
+    an "invid field" which points to an object which has an "invid
+    field2" that points to an object that has a "GID" field that is
+    less than or equal to 3000, <b>or</b> which points to an object
+    which has an "invid field2" that points to an object that has
+    either a "Users" field which points to an object that has either a
+    "UID" field which is less than 4000 or a "User Netgroup" field
+    which points to an object that has a "Members" field which points
+    to an object that has a "UID" field which holds a value greater
+    than 8192.</p>
+
+    <p>If we assume that all invid fields involved in pointer
+    dereferencing in this query are single-valued (not array) fields,
+    to evaluate this query could require the Ganymede server to
+    examine fully six objects.  The object which contains "invid
+    field", the object pointed to by "invid field", the object pointed
+    to by "invid field"-&gt;"invid field2", the object pointed to by
+    "invid field"-&gt;"invid field2"-&gt;"Users", the object pointed
+    to by "invid field"-&gt;"invid field2"-&gt;"Users"-&gt;"User
+    Netgroup", and the object pointed to by "invid field"-&gt;"invid
+    field2"-&gt;"Users"-&gt;"User Netgroup"-&gt;"Members".</p>
+
+    <p>If any of those invid (object pointer) fields are actually
+    multivalued array fields, the number of objects that may need to
+    be examined to determine the truth of this expression for a single
+    object may increase by the product of the number of values in each
+    of these invid fields.  If four invid vector fields are evaluated
+    which each have four values, that takes us up to 256 objects to
+    determine the truth of this expression for this one object's
+    "invid field".</p>
+
+    <p>In general, you probably won't get this crazy with subqueries,
+    but it's nice to know that the system will do as much work for you
+    as you're willing to ask for.</p>
 
     <h3>GanyQL Examples</h3>
 
