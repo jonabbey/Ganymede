@@ -161,7 +161,7 @@
     and you'll need to be sure you've got the capitalization
     right.</p>
 
-    <p>The <i>return values</i> can either be the <span
+    <p>The <i>return values</i> can be the <span
     class="keyword">object</span> keyword, if you want to get back all
     fields from the object, or a comma-separated list of field name
     strings to be retrieved from "<i>Object Type</i>".</p>
@@ -191,10 +191,11 @@
     and <span class="keyword">not</span>.  You can also use
     parentheses to control the grouping of expressions.</p>
 
-    <p>The field tests supported by GanyQL are listed in the following table:</p>
+    <p>The field tests supported by GanyQL are listed in the following
+    table:</p>
 
     <table><caption>Field Test Operators</caption>
-      <tr><th>Operator</th><th>Meaning</th><th>Field Types</th><th>Argument Types</th></tr>
+      <tr><th>Operator</th><th>Meaning</th><th>Field Types Supporting</th><th>Argument Types</th></tr>
       <tr>
         <td><span class="keyword">=~</span></td>
         <td>Regular Expression Match</td>
@@ -293,6 +294,10 @@
       </tr>
     </table>
 
+    <p>Note that most of these field test operators only work on
+    certain kind of Ganymede data fields.  See XXX for
+    details.. ??</p>
+
     <p>Most of these field test operators take a pair of arguments,
     with the name of the field to look at before the operator and a
     value to compare the field to after the operator.</p>
@@ -370,11 +375,11 @@
     <p>This query expression returns true for all objects which have
     an "invid field" which points to an object which has an "invid
     field2" that points to an object that has either a "GID" field
-    that is less than or equal to 3000, or that has either a "Users"
-    field which points to an object that has either a "UID" field
-    which is less than 4000 or a "User Netgroup" field which points to
-    an object that has a "Members" field which points to an object
-    that has a "UID" field which holds a value greater than 8192.</p>
+    that is less than or equal to 3000, or that has a "Users" field
+    which points to an object that has either a "UID" field which is
+    less than 4000 or a "User Netgroup" field which points to an
+    object that has a "Members" field which points to an object that
+    has a "UID" field which holds a value greater than 8192.</p>
 
     <p>If we assume that all invid fields involved in pointer
     dereferencing in this query are single-valued (not array) fields,
