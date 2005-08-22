@@ -369,38 +369,41 @@
 
     <p>This query expression returns true for all objects which have
     an "invid field" which points to an object which has an "invid
-    field2" that points to an object that has a "GID" field that is
-    less than or equal to 3000, <b>or</b> which points to an object
-    which has an "invid field2" that points to an object that has
-    either a "Users" field which points to an object that has either a
-    "UID" field which is less than 4000 or a "User Netgroup" field
-    which points to an object that has a "Members" field which points
-    to an object that has a "UID" field which holds a value greater
-    than 8192.</p>
+    field2" that points to an object that has either a "GID" field
+    that is less than or equal to 3000, or that has either a "Users"
+    field which points to an object that has either a "UID" field
+    which is less than 4000 or a "User Netgroup" field which points to
+    an object that has a "Members" field which points to an object
+    that has a "UID" field which holds a value greater than 8192.</p>
 
     <p>If we assume that all invid fields involved in pointer
     dereferencing in this query are single-valued (not array) fields,
     to evaluate this query could require the Ganymede server to
-    examine fully six objects.  The object which contains "invid
-    field", the object pointed to by "invid field", the object pointed
-    to by "invid field"-&gt;"invid field2", the object pointed to by
-    "invid field"-&gt;"invid field2"-&gt;"Users", the object pointed
-    to by "invid field"-&gt;"invid field2"-&gt;"Users"-&gt;"User
-    Netgroup", and the object pointed to by "invid field"-&gt;"invid
-    field2"-&gt;"Users"-&gt;"User Netgroup"-&gt;"Members".</p>
+    examine fully six objects:</p>
+
+    <ul>
+      <li>The object that contains the "invid field"</li>
+      <li>The object pointed to by "invid field"</li>
+      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"</li>
+      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"<span class="keyword">-&gt;</span>"Users"</li>
+      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"<span class="keyword">-&gt;</span>"Users"<span class="keyword">-&gt;</span>"User Netgroup"</li>
+      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"<span class="keyword">-&gt;</span>"Users"<span class="keyword">-&gt;</span>"User Netgroup"<span class="keyword">-&gt;</span>"Members"</li>
+    </ul>
 
     <p>If any of those invid (object pointer) fields are actually
     multivalued array fields, the number of objects that may need to
     be examined to determine the truth of this expression for a single
     object may increase by the product of the number of values in each
-    of these invid fields.  If four invid vector fields are evaluated
-    which each have four values, that takes us up to 256 objects to
-    determine the truth of this expression for this one object's
-    "invid field".</p>
+    of these invid fields.  If, say, the "Users", "User Negroup", and
+    "Members" fields were each array invid fields, with four values in
+    each of the fields we examine to test this query expression, that
+    would add up to an additional 64 objects that might need to be
+    examined in order to determine the truth of this expression for a
+    single "invid field".</p>
 
-    <p>In general, you probably won't get this crazy with subqueries,
-    but it's nice to know that the system will do as much work for you
-    as you're willing to ask for.</p>
+    <p>In general, you probably won't need to get this crazy with
+    subqueries, but it's nice to know that the system is willing to do
+    so much work for you if necessary.</p>
 
     <h3>GanyQL Examples</h3>
 
