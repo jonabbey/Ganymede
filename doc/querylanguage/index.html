@@ -44,22 +44,22 @@
     href="../javadoc/arlut/csd/ganymede/common/Query.html">arlut.csd.ganymede.common.Query</a>
     object with a linked tree of <a
     href="../javadoc/arlut/csd/ganymede/common/QueryNode.html">arlut.csd.ganymede.common.QueryNode</a>
-    objects representing the query's exploded parse tree.  Programming
-    queries into the Ganymede server was difficult, and creating shell
-    scripts to pull arbitrary data from the Ganymede server was simply
-    impossible.  Any queries, no matter how simple, required the
+    objects representing the query's exploded parse tree.  Writing
+    code within Ganymede server plugins which carried out queries on
+    the data store was was difficult, and creating shell scripts to
+    run specific queries from the Ganymede server was simply
+    impossible.  All queries, no matter how simple, required the
     creation of custom Java code to assemble the appropriate
     structured query trees.</p>
 
     <p>To bring light into this darkness, Ganymede 2.0 introduces a
-    simple new Ganymede Query Language called <span
-    class="definition">GanyQL</span>.  GanyQL is very loosely
+    simple new Ganymede Query Language (<span
+    class="definition">GanyQL</span>).  GanyQL is very loosely
     patterned after SQL syntax, and is designed to make it possible to
-    express queries on the Ganymede data store in a human-readable and
-    direct fashion.  All you need to do is write a bit of GanyQL and
-    parsing code on the Ganymede server will take care of translating
-    your request into the Ganymede query engine's internal
-    structure.</p>
+    express queries on the Ganymede data store in a simple and direct
+    fashion.  All you need to do is write a bit of GanyQL and parsing
+    code on the Ganymede server will take care of translating your
+    request into the Ganymede query engine's internal structure.</p>
 
     <p>GanyQL was designed and implemented by Deepak Giridharagopal
     using Terrance Parr's excellent <a
@@ -130,11 +130,18 @@
 
     <p>Perhaps most significant is the fact that, unlike SQL, GanyQL
     is <b>just</b> a query language.  To actually submit data changes
-    to the Ganymede server, you need to use the <a
+    to the Ganymede server, you need either to use the <a
     href="../xml/xmlclient.html">xmlclient</a> in conjunction with the
-    <a href="../xml.html">Ganymede XML data format</a>.</p>
+    <a href="../xml.html">Ganymede XML data format</a>, or to write
+    custom Java code.</p>
 
-    <h2>The syntax</h2>
+    <h2>The Data Model</h2>
+
+    <p>Before we get into the specific details of the GanyQL syntax,
+    it'll be worthwhile for us to take the time to quickly review the
+    Ganymede data model.
+
+    <h2>The Syntax</h2>
 
     <p class="note">To fully express the syntax of GanyQL would
     require an exposition as long and precise as the actual <a
@@ -157,9 +164,8 @@
     <p>The "<i>Object Type</i>" string is the name of the type of
     object in the Ganymede data store that you want to query.  As with
     all strings you use in GanyQL, you'll need to surround the name of
-    the object type in either single or double quotation characters,
-    and you'll need to be sure you've got the capitalization
-    right.</p>
+    the object type in either single or double quotation
+    characters.</p>
 
     <p>The <i>return values</i> can be the <span
     class="keyword">object</span> keyword, if you want to get back all
@@ -407,8 +413,9 @@
     single "invid field".</p>
 
     <p>In general, you probably won't need to get this crazy with
-    subqueries, but it's nice to know that the system is willing to do
-    so much work for you if necessary.</p>
+    subqueries, but it's nice to know that the system is capable of
+    doing whatever work is required to get the job done for stuff like
+    this.</p>
 
     <h3>GanyQL Examples</h3>
 
