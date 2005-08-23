@@ -501,16 +501,18 @@
     elements.  It has a single attribute, <b>name</b>, which contains
     the name of the tab.</p>
 
-    <p>The Ganymede client uses the <b>tab</b> structure to display
-    the collection of user-defined fields contained within an
-    <b>objectdef</b> element split across the named tabs defined on
-    the server.</p>
+    <p>If you define multiple named <b>tab</b> elements within an
+    object definition, the Ganymede client will display the fields in
+    each <b>tab</b> element in a separate graphical tab in the object
+    viewing and editing window.  This can be useful when you start
+    getting too large a number of fields for a user to be able to
+    conveniently deal with in a single scrolling panel.</p>
 
     <p>In all other contents (logging, email, the contents of the XML
-    <b>&lt;ganydata&gt;</b> element), the <b>tab</b> information is
-    irrelevant, and will not be included.  In particular, this means
-    that field names have to be unique across an entire object
-    definition, and not merely unique within a tab.</p>
+    <b>&lt;ganydata&gt;</b> element, and so forth), the <b>tab</b>
+    information is irrelevant, and will not be used.  In particular,
+    this means that field names have to be unique across an entire
+    object definition, and not merely unique within a tab.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
@@ -577,7 +579,7 @@
     attribute can have any of the values listed in the following
     table:</p>
 
-    <table border=1>
+    <table border="1">
       <tr>
 	<th>Type</th><th>Explanation</th><th>Vector Allowed?</th>
       </tr>
@@ -645,14 +647,15 @@
 
     <p>After the optional <b>vector</b> element (for the
     <b>string</b>, <b>ip</b>, and <b>invid</b> types only), there are
-    a number of optional field constraint elements which differ by
-    type.  These are summarized in the table below.  The trickiest
-    options conceptually are those associated with the <b>invid</b>
-    field type.  I need to link this material to a general discussion
-    of invid fields.</p>
+    a number of optional field constraint elements which may be
+    present within the &lt;typedef&gt; element.  These differ
+    according to the type of the field, and are summarized in the
+    table below.  The trickiest options conceptually are those
+    associated with the <b>invid</b> field type.  I need to link this
+    material to a general discussion of invid fields.</p>
 
     <p>
-    <table border=1>
+    <table border="1">
       <tr>
 	<th>field type</th>
 	<th>element name</th>
@@ -1002,6 +1005,11 @@
 	  hashes.</p>
 	</td>
 	<td>&lt;plaintext/&gt;</td>
+      </tr>
+      <tr>
+        <td>options</td><td>n/a</td><td>The field options field type supports no configurable elements within &lt;typedef&gt;</td><td><td>
+      </tr>
+        <td>permmatrix</td><td>n/a</td><td>The permissions matrix field type supports no configurable elements within &lt;typedef&gt;</td><td><td>
       </tr>
     </table>
     </p>
