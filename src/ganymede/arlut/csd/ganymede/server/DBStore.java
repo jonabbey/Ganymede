@@ -206,6 +206,7 @@ public final class DBStore implements JythonMap {
    */
 
   private int transactionNumber = 0;
+  private Object transactionNumberLock = new Object();
 
   /**
    * Convenience function to find and return objects from the database
@@ -982,7 +983,7 @@ public final class DBStore implements JythonMap {
     
     if (journal != null)
       {
-	journal.reset();
+	journal.reset();	// ** sync **
       }
     
     GanymedeAdmin.updateLastDump(new Date());
@@ -1410,9 +1411,12 @@ public final class DBStore implements JythonMap {
    * transactionNumber.
    */
 
-  public synchronized int getNextTransactionNumber()
+  public int getNextTransactionNumber()
   {
-    return ++transactionNumber;
+    synchronized (transactionNumberLock)
+      {
+	return ++transactionNumber;
+      }
   }
 
   /**
@@ -1432,9 +1436,12 @@ public final class DBStore implements JythonMap {
 
   public void undoNextTransactionNumber(int number)
   {
-    if (number == transactionNumber)
+    synchronized (transactionNumberLock)
       {
-	--transactionNumber;
+	if (number == transactionNumber)
+	  {
+	    --transactionNumber;
+	  }
       }
   }
 
@@ -1445,27 +1452,30 @@ public final class DBStore implements JythonMap {
    * we'll throw an IntegrityConstraintException.
    */
 
-  public synchronized void updateTransactionNumber(int nextNumber) throws IntegrityConstraintException
+  public void updateTransactionNumber(int nextNumber) throws IntegrityConstraintException
   {
-    if (transactionNumber > 0 && nextNumber != transactionNumber + 1)
+    synchronized (transactionNumberLock)
       {
-	if (nextNumber == transactionNumber)
+	if (transactionNumber > 0 && nextNumber != transactionNumber + 1)
 	  {
-	    // Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.
-	    // This probably means that the server was terminated in the middle of a dump process,
-	    // and that the journal file is older than the ganymede.db file.  You should be able to
-	    // remove the journal file and restart the server.
+	    if (nextNumber == transactionNumber)
+	      {
+		// Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.
+		// This probably means that the server was terminated in the middle of a dump process,
+		// and that the journal file is older than the ganymede.db file.  You should be able to
+		// remove the journal file and restart the server.
 
-	    throw new IntegrityConstraintException(ts.l("updateTransactionNumber.lingeringJournal", new Integer(nextNumber), new Integer(transactionNumber+1)));
+		throw new IntegrityConstraintException(ts.l("updateTransactionNumber.lingeringJournal", new Integer(nextNumber), new Integer(transactionNumber+1)));
+	      }
+	    else
+	      {
+		// "Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.  Throwing up."
+		throw new IntegrityConstraintException(ts.l("updateTransactionNumber.badnumber", new Integer(nextNumber), new Integer(transactionNumber+1)));
+	      }
 	  }
-	else
-	  {
-	    // "Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.  Throwing up."
-	    throw new IntegrityConstraintException(ts.l("updateTransactionNumber.badnumber", new Integer(nextNumber), new Integer(transactionNumber+1)));
-	  }
+
+	transactionNumber = nextNumber;
       }
-
-    transactionNumber = nextNumber;
   }
 
   /**

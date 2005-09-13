@@ -73,26 +73,35 @@ import arlut.csd.ganymede.rmi.db_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>The DBJournal class is used to provide journalling of changes to the
+ * The DBJournal class is used to provide journalling of changes to the
  * {@link arlut.csd.ganymede.server.DBStore DBStore}
  * during operations.  The Journal file will contain a complete list of all
  * changes made since the last dump of the complete DBStore.  The Journal file
- * is composed of a header block followed by a number of transactions.</P>
+ * is composed of a header block followed by a number of transactions.
  *
- * <P>Each transaction consists of a number of object modification records, each
+ * Each transaction consists of a number of object modification records, each
  * record specifying the creation, deletion, or modification of a particular
  * object.  At the end of the transaction, a marker indicates the completion of
  * the transaction.  At DBStore startup time, the journal is read in and all
- * complete transactions recorded are performed on the main DBStore.</P>
+ * complete transactions recorded are performed on the main DBStore.
  *
- * <P>Generally, if the DBStore was shut down correctly, the entire memory
+ * Generally, if the DBStore was shut down correctly, the entire memory
  * structure of the DBStore will be cleanly dumped out and the Journal will
  * be removed.  The Journal is intended to insure that the DBStore remains
  * transaction consistent if the server running Ganymede crashes during
- * runtime.</P>
+ * runtime.
  *
- * <P>See the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class for
- * more information on Ganymede transactions.</P>
+ * See the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class for
+ * more information on Ganymede transactions.
+ *
+ * Nota bene: this class includes synchronized methods which serialize
+ * operations on the Ganymede transaction journal.  The DBJournal
+ * monitor is intended to be the innermost monitor for operations
+ * involving the DBStore and DBJournal objects.  Synchronized methods
+ * in DBJournal must not call synchronized methods on DBStore, as
+ * synchronized DBStore methods can and will call methods on
+ * DBJournal.
+ *
  */
 
 public class DBJournal implements ObjectStatus {
