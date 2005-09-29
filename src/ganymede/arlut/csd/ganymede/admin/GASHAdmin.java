@@ -250,7 +250,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     applet = new GASHAdmin();
 
     // "Admin console login"
-    JFrame my_frame = new GASHAdminLoginFrame(ts.l("global.loginTitle"), applet);
+    my_frame = new GASHAdminLoginFrame(ts.l("global.loginTitle"), applet);
 
     my_frame.getContentPane().setLayout(new BorderLayout());
     my_frame.getContentPane().add("Center", applet);

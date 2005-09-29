@@ -967,15 +967,15 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     passwd.setText("");
 
+    // and let's play hide the salami
+
+    hideLoginBox();
+
     // now that we've got the g_client reference DeathWatcherThread
     // will need, have the client do its post-setup initialization,
     // including perhaps blocking on the persona dialog.
     
     g_client.start();
-
-    // and let's play hide the salami
-
-    hideLoginBox();
   }
 
   public void hideLoginBox()
