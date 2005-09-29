@@ -121,19 +121,18 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   public static boolean debug = false;
 
   /**
-   * <p>If this boolean is set to true, when the Ganymede client is
+   * If this boolean is set to true, when the Ganymede client is
    * run as an application, the login box will hide itself away when
-   * the client's main frame is up.</p>
+   * the client's main frame is up.
    *
-   * <p>Unfortunately, I don't think that it's generally possible to
+   * Unfortunately, I don't think that it's generally possible to
    * duplicate this sort of behavior when running Ganymede as an
-   * applet, so it may be more confusing to enable this behavior than
-   * not.</p>
+   * applet, so it may be confusing to some to enable this behavior.
    *
-   * <p>I'm leaving it off for now. - JDA 14 February 2005 </p>
+   * I'm enabling it. - JDA 29 September 2005
    */
 
-  public static boolean hideLoginWhenApplication = false;
+  public static boolean hideLoginWhenApplication = true;
 
   public static String 
     properties_file = null,
@@ -257,21 +256,16 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     WeAreApplet = false;
 
     debug = ParseArgs.switchExists("-debug", args);
+
     properties_file = ParseArgs.getArg("properties", args);
 
-    if (properties_file == null)
-      {
-	throw new IllegalArgumentException("Usage error: glogin [-debug] properties=properties_file\n\n");
-      }
-
-    try
+    if (properties_file != null)
       {
 	loadProperties(properties_file);
       }
-    catch (Exception ex)
+    else
       {
-	System.err.println("Error, couldn't successfully load properties from file " + properties_file);
-	return;
+	loadProperties();
       }
 
     my_glogin = new glogin();
@@ -460,10 +454,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * <P>Private method to load the Ganymede client's parameters
-   * from a file.  Used when glogin is run from the command line..
-   * {@link arlut.csd.ganymede.client.glogin#loadParameters() loadParameters()}
-   * is for use in an applet context.</P>
+   * Private method to load the Ganymede client's parameters from a
+   * file.  Used when glogin is run from the command line..  {@link
+   * arlut.csd.ganymede.client.glogin#loadParameters()
+   * loadParameters()} is for use in an applet context.
    */ 
 
   static private void loadProperties(String properties_file)
@@ -510,6 +504,38 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
 			       registryPort);
+	  }
+      }
+
+    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
+  }
+
+  /**
+   * Private method to load the Ganymede client's parameters from the system
+   * property list.  Used when glogin is run as an application from within
+   * Java Web Start.
+   */
+
+  static private void loadProperties()
+  {
+    serverhost = java.lang.System.getProperty("ganymede.serverhost");
+
+    if ((serverhost == null) || (serverhost.equals("")))
+      {
+	throw new RuntimeException("Trouble:  couldn't load server host from system properties.");
+      }
+
+    String registryPort = java.lang.System.getProperty("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    System.err.println("Couldn't get a valid registry port number from system properties.");
 	  }
       }
 

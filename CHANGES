@@ -798,6 +798,18 @@ accordingly.
 The goal here is to make it possible to add more data fields to an
 object type without overwhelming the user.
 
+46. [CLIENT, ADMIN CONSOLE] One Window Support with Java Web Start
+
+Since we are shipping the Ganymede client and admin consoles as signed
+applets in Ganymede 2.0, there's little reason security-wise why we
+can't go ahead and make these clients run as an application on the
+desktop.
+
+By doing this we gain the ability to have the login applet window
+close after the user logs into the client or admin console.  This
+should make running the Ganymede client and admin console less
+confusing for the user.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004

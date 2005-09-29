@@ -23,6 +23,8 @@
     <j2se version="1.5+"/>
     <j2se version="1.4+"/>
     <jar href="ganymede.jar"/>
+    <property name="ganymede.serverhost" value="#SERVERHOST"/>
+    <property name="ganymede.registryPort" value="#REGISTRYPORT"/>
   </resources>
 
   <!-- We need to set all-permissions so that the client can connect
@@ -39,13 +41,7 @@
   <security>
     <all-permissions/>
   </security>
-  <applet-desc 
-    documentBase="#WEBROOT"
-    name="Ganymede"
-    main-class="arlut.csd.ganymede.client.glogin"
-    width="320"
-    height="350">
-    <param name="ganymede.serverhost" value="#SERVERHOST"/>
-    <param name="ganymede.registryPort" value="#REGISTRYPORT"/>
-  </applet-desc>
+  <application-desc
+    
+  <applet-desc main-class="arlut.csd.ganymede.client.glogin"/>
 </jnlp>

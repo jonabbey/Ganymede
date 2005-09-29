@@ -122,11 +122,33 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdmin");
 
   /**
+   * If this boolean is set to true, when the Ganymede admin console
+   * is run as an application, the login box will hide itself away
+   * when the admin console's main frame is up.
+   *
+   * Unfortunately, I don't think that it's generally possible to
+   * duplicate this sort of behavior when running the admin console as
+   * an applet, so it may be confusing to some to enable this
+   * behavior.
+   *
+   * I'm enabling it. - JDA 29 September 2005
+   */
+
+  public static boolean hideLoginWhenApplication = true;
+
+  /**
    * We assume that we're only ever going to have one console running in
    * any given JVM, we keep track of it here as a convenience.
    */
 
   static GASHAdmin applet = null;
+
+  /**
+   * If we are run from the command line, this frame will be used to
+   * contain the GASHAdmin applet in an application context.
+   */
+
+  protected static JFrame my_frame = null;
 
   /**
    * We keep track of the single admin window that gets opened up here.
@@ -201,22 +223,22 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     if (argv.length < 1)
       {
-	System.err.println("Error, no properties file specified.");
-	return;
+	loadProperties();
       }
     else
       {
-	if (!loadProperties(argv[0]))
+	try
 	  {
-	    System.err.println("Error, couldn't successfully load properties from file " + argv[0]);
-	    return;
+	    loadProperties(argv[0]);
 	  }
-	else
+	catch (IOException ex)
 	  {
-	    if (debug)
-	      {
-		System.err.println("Successfully loaded properties from file " + argv[0]);
-	      }
+	    throw new RuntimeException(ex);
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("Successfully loaded properties from file " + argv[0]);
 	  }
       }
 
@@ -228,15 +250,15 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     applet = new GASHAdmin();
 
     // "Admin console login"
-    JFrame loginFrame = new GASHAdminLoginFrame(ts.l("global.loginTitle"), applet);
+    JFrame my_frame = new GASHAdminLoginFrame(ts.l("global.loginTitle"), applet);
 
-    loginFrame.getContentPane().setLayout(new BorderLayout());
-    loginFrame.getContentPane().add("Center", applet);
+    my_frame.getContentPane().setLayout(new BorderLayout());
+    my_frame.getContentPane().add("Center", applet);
 
     applet.init();		// init before visible for smoothness
 
-    loginFrame.setVisible(true);
-    loginFrame.pack();		// pack after visible so we size everything properly
+    my_frame.setVisible(true);
+    my_frame.pack();		// pack after visible so we size everything properly
   }
   
   public void init()
@@ -641,7 +663,11 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 	loginButton.setEnabled(false);
 
+	// when we create the frame, it shows itself.
+
 	frame = new GASHAdminFrame(ts.l("global.consoleTitle"), applet); // "Ganymede Admin Console"
+
+	hideLoginBox();
 	
 	// Now that the frame is completely initialized, tie the
 	// GASHAdminDispatch object to the frame, and vice-versa.
@@ -693,33 +719,63 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * <P>Private method to load the Ganymede console's parameters
-   * from a file.  Used when GASHAdmin is run from the command line..
-   * {@link arlut.csd.ganymede.admin.GASHAdmin#loadParameters() loadParameters()}
-   * is for use in an applet context.</P>
+   * Private method to load the Ganymede console's parameters from a
+   * file.  Used when GASHAdmin is run from the command line..  {@link
+   * arlut.csd.ganymede.admin.GASHAdmin#loadParameters()
+   * loadParameters()} is for use in an applet context.
    */ 
 
-  private static boolean loadProperties(String filename)
+  private static void loadProperties(String filename) throws IOException
   {
     Properties props = new Properties();
-    boolean success = true;
 
     /* -- */
 
-    try
-      {
-	props.load(new BufferedInputStream(new FileInputStream(filename)));
-      }
-    catch (IOException ex)
-      {
-	return false;
-      }
+    props.load(new BufferedInputStream(new FileInputStream(filename)));
 
     serverhost = props.getProperty("ganymede.serverhost");
 
     // get the registry port number
 
     String registryPort = props.getProperty("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    throw new RuntimeException("Couldn't get a valid registry port number from the Ganymede properties file: " + 
+				       registryPort);
+	  }
+      }
+
+    if (serverhost == null)
+      {
+	throw new RuntimeException("Couldn't get the server host property from the Ganymede properties file " + filename);
+      }
+    else
+      {
+	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
+      }
+  }
+
+
+  /**
+   * Private method to load the Ganymede console's parameters from
+   * system properties.  Used when GASHAdmin is run from Java Web
+   * Start as an application.
+   */ 
+
+  private static void loadProperties()
+  {
+    serverhost = java.lang.System.getProperty("ganymede.serverhost");
+
+    // get the registry port number
+
+    String registryPort = java.lang.System.getProperty("ganymede.registryPort");
 
     if (registryPort != null)
       {
@@ -736,15 +792,12 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     if (serverhost == null)
       {
-	System.err.println("Couldn't get the server host property");
-	success = false;
+	throw new RuntimeException("Couldn't get the server host property");
       }
     else
       {
 	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
       }
-
-    return success;
   }
 
   /**
@@ -799,6 +852,28 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
       }
     
     return errorImage;
+  }
+
+  public void hideLoginBox()
+  {
+    if (hideLoginWhenApplication)
+      {
+	if (!WeAreApplet && my_frame != null)
+	  {
+	    my_frame.setVisible(false);
+	  }
+      }
+  }
+
+  public void showLoginBox()
+  {
+    if (hideLoginWhenApplication)
+      {
+	if (!WeAreApplet && my_frame != null)
+	  {
+	    my_frame.setVisible(true);
+	  }
+      }
   }
 }
 
