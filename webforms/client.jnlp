@@ -41,7 +41,5 @@
   <security>
     <all-permissions/>
   </security>
-  <application-desc
-    
-  <applet-desc main-class="arlut.csd.ganymede.client.glogin"/>
+  <application-desc main-class="arlut.csd.ganymede.client.glogin"/>
 </jnlp>
