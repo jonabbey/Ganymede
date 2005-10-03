@@ -132,7 +132,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
    * I'm enabling it. - JDA 29 September 2005
    */
 
-  public static boolean hideLoginWhenApplication = true;
+  public static final boolean hideLoginWhenApplication = true;
 
   public static String 
     properties_file = null,

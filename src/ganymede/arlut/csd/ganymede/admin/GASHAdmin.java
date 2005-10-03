@@ -134,7 +134,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
    * I'm enabling it. - JDA 29 September 2005
    */
 
-  public static boolean hideLoginWhenApplication = true;
+  public static final boolean hideLoginWhenApplication = true;
 
   /**
    * We assume that we're only ever going to have one console running in
