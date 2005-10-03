@@ -81,8 +81,8 @@ import arlut.csd.ganymede.rmi.*;
 class fieldoption_editor extends JDialog 
 {
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede system.</p>
+   * TranslationService object for handling string localization in
+   * the Ganymede system.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.fieldoption_editor");
@@ -554,8 +554,8 @@ class fieldoption_editor extends JDialog
 
 
   /**
-   * <p>This method pops down the widget and does some variable
-   * clearing to assit in garbage collection.</p>
+   * This method pops down the widget and does some variable
+   * clearing to assit in garbage collection.
    */
 
   public void cleanUp()
@@ -681,16 +681,16 @@ class FieldOptionRow {
 
 
 /**
- * <P>Custom TreeTableModel model for use with the Ganymede client's
+ * Custom TreeTableModel model for use with the Ganymede client's
  * {@link arlut.csd.ganymede.client.fieldoption_editor fieldoption_editor} 
- * field options editor dialog.</P>
+ * field options editor dialog.
  */
 
 class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel {
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede system.</p>
+   * TranslationService object for handling string localization in
+   * the Ganymede system.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.FieldOptionModel");

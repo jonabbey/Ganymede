@@ -108,7 +108,7 @@ import arlut.csd.ganymede.rmi.perm_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Permissions editor dialog in the Ganymede client.</P>
+ * Permissions editor dialog in the Ganymede client.
  */
 
 class perm_editor extends JDialog implements ActionListener, Runnable {
@@ -819,8 +819,8 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
   }
 
   /**
-   * <p>This method pops down the perm_editor and does some variable
-   * clearing to assit in garbage collection.</p>
+   * This method pops down the perm_editor and does some variable
+   * clearing to assit in garbage collection.
    */
 
   public void cleanUp()
@@ -848,10 +848,10 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>BoolRenderer is a custom TableCellRenderer class used in conjunction with the
+ * BoolRenderer is a custom TableCellRenderer class used in conjunction with the
  * Ganymede client's {@link arlut.csd.ganymede.client.perm_editor perm_editor},
  * to provide a checkbox that can be graphically disabled if a permissions
- * item may not be edited for some reason .</P>
+ * item may not be edited for some reason .
  */
 
 class BoolRenderer extends JCheckBox implements TableCellRenderer {
@@ -963,8 +963,8 @@ class BoolRenderer extends JCheckBox implements TableCellRenderer {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Data-carrying class for the Ganymede client's {@link arlut.csd.ganymede.client.perm_editor perm_editor}
- * permissions editor dialog.</P>
+ * Data-carrying class for the Ganymede client's {@link arlut.csd.ganymede.client.perm_editor perm_editor}
+ * permissions editor dialog.
  */
 
 class PermRow {
@@ -1158,9 +1158,9 @@ class PermRow {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Custom TreeTableModel model for use with the Ganymede client's
+ * Custom TreeTableModel model for use with the Ganymede client's
  * {@link arlut.csd.ganymede.client.perm_editor perm_editor} permissions
- * editor dialog.</P>
+ * editor dialog.
  */
 
 class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
@@ -1486,8 +1486,8 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
 }
 
 /**
- * <p>Custom tree renderer for the Ganymede client's permissions
- * editor treeTable.</p>
+ * Custom tree renderer for the Ganymede client's permissions
+ * editor treeTable.
  */
 
 class permEditorTreeRenderer extends DefaultTreeCellRenderer

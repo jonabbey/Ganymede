@@ -124,31 +124,32 @@ import arlut.csd.ganymede.rmi.field_option_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>One of the basic building blocks of the ganymede client, a containerPanel is
- * a GUI panel which allows the user to view and/or edit all the custom fields
- * for an object in the Ganymede database.</p>
+ * One of the basic building blocks of the ganymede client, a
+ * containerPanel is a GUI panel which allows the user to view and/or
+ * edit all the custom fields for an object in the Ganymede database.
  *
- * <p>Each containerPanel displays a single
- * {@link arlut.csd.ganymede.rmi.db_object db_object}, and allows the
- * user to edit or view each {@link arlut.csd.ganymede.rmi.db_field db_field} in the
- * object.  On loading, containerPanel loops through the fields of the object, adding the
- * appropriate type of input for each field.  This includes text fields,
- * number fields, boolean fields, and string selector fields(fields that can have
- * multiple values).</p>
+ * Each containerPanel displays a single {@link
+ * arlut.csd.ganymede.rmi.db_object db_object}, and allows the user to
+ * edit or view each {@link arlut.csd.ganymede.rmi.db_field db_field}
+ * in the object.  On loading, containerPanel loops through the fields
+ * of the object, adding the appropriate type of input for each field.
+ * This includes text fields, number fields, boolean fields, and
+ * string selector fields(fields that can have multiple values).
  *
- * <p>containerPanel handles the connection between GUI components and server
- * fields, translating GUI activity to attempted changes to server fields.  Any
- * attempted change that the server refuses will cause a dialog to be popped up via
- * gclient's
- * {@link arlut.csd.ganymede.client.gclient#handleReturnVal(arlut.csd.ganymede.common.ReturnVal) handleReturnVal()}
- * method, and the GUI component that caused the change will be reverted to its pre-change
- * status.</p>
+ * containerPanel handles the connection between GUI components and
+ * server fields, translating GUI activity to attempted changes to
+ * server fields.  Any attempted change that the server refuses will
+ * cause a dialog to be popped up via gclient's {@link
+ * arlut.csd.ganymede.client.gclient#handleReturnVal(arlut.csd.ganymede.common.ReturnVal)
+ * handleReturnVal()} method, and the GUI component that caused the
+ * change will be reverted to its pre-change status.
  *
- * <p>The gclient's handleReturnVal() method also supports extracting a list of objects
- * and fields that need to be refreshed when one change on the server is reflected
- * across more than one object.  This is handled by containerPanel's
- * {@link arlut.csd.ganymede.client.containerPanel#update(java.util.Vector) update()}
- * method.</p>
+ * The gclient's handleReturnVal() method also supports extracting a
+ * list of objects and fields that need to be refreshed when one
+ * change on the server is reflected across more than one object.
+ * This is handled by containerPanel's {@link
+ * arlut.csd.ganymede.client.containerPanel#update(java.util.Vector)
+ * update()} method.
  *
  * @version $Id$
  * @author Mike Mulvaney
@@ -204,70 +205,72 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   private JLabelPanel contentsPanel;
 
   /**
-   * <p>Vector of Short field id's used to track fields for which
-   * we receive update requests while we are still loading.  After
-   * we finish loading this panel, we'll go back and refresh any fields
-   * whose field id's are listed in this vector.</p>
+   * Vector of Short field id's used to track fields for which we
+   * receive update requests while we are still loading.  After we
+   * finish loading this panel, we'll go back and refresh any fields
+   * whose field id's are listed in this vector.
    */
 
   private Vector updatesWhileLoading = new Vector();
 
   /**
-   * <p>Vector used to list vectorPanels embedded in this object window.  This
-   * variable is used by
-   * {@link arlut.csd.ganymede.client.vectorPanel#expandAllLevels() vectorPanel.expandAllLevels()}
-   * to do recursive expansion of embedded objects.</p>
+   * Vector used to list vectorPanels embedded in this object window.
+   * This variable is used by {@link
+   * arlut.csd.ganymede.client.vectorPanel#expandAllLevels()
+   * vectorPanel.expandAllLevels()} to do recursive expansion of
+   * embedded objects.
    */
 
   Vector vectorPanelList = new Vector();
 
   /**
-   * <p>To help avoid recursive problems, we keep track of any arlut.csd.JDataComponent
-   * GUI components that are currently having their change notification messages
-   * handled, and refuse to try to refresh them re-entrantly.</p>
+   * To help avoid recursive problems, we keep track of any
+   * arlut.csd.JDataComponent GUI components that are currently having
+   * their change notification messages handled, and refuse to try to
+   * refresh them re-entrantly.
    */
 
   private JComponent currentlyChangingComponent = null;
 
   /**
-   * <p>Hashtable mapping GUI components to their associated
+   * Hashtable mapping GUI components to their associated
    * {@link arlut.csd.ganymede.rmi.db_field db_field}'s.
    */
 
   private Hashtable objectHash = new Hashtable();
 
   /**
-   * <p>Hashtable mapping Short Field ID numbers to their associated
+   * Hashtable mapping Short Field ID numbers to their associated
    * GUI components.
    */
 
   private Hashtable idHash = new Hashtable();
 
   /**
-   * <p>Hashtable mapping the combo boxes contained within
+   * Hashtable mapping the combo boxes contained within
    * {@link arlut.csd.ganymede.client.JInvidChooser JInvidChooser}
    * GUI components to their associated
-   * {@link arlut.csd.ganymede.rmi.db_field db_field}'s.</p>
+   * {@link arlut.csd.ganymede.rmi.db_field db_field}'s.
    *
-   * <p>This is required because while we want to hide or reveal the JInvidChooser
+   * This is required because while we want to hide or reveal the JInvidChooser
    * as a whole, we'll get itemStateChanged() calls from the combo
-   * box within the JInvidChooser.</p>
+   * box within the JInvidChooser.
    */
 
   private Hashtable invidChooserHash = new Hashtable();
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.common.FieldInfo FieldInfo} objects
+   * Vector of {@link arlut.csd.ganymede.common.FieldInfo FieldInfo} objects
    * holding the values for fields in this object.  Used during loading
-   * and update.</p>
+   * and update.
    */
 
   private Vector infoVector = null;
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
+   * Vector of {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
    * objects holding the constant field type information for fields in
-   * this object.</p>
+   * this object.
    */
 
   private Vector templates = null;
@@ -307,12 +310,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   short type;
 
   /**
-   * <p>If true, this containerPanel is being displayed in a persona pane in
+   * If true, this containerPanel is being displayed in a persona pane in
    * a frame panel, and we'll hide the associated user field, which is implicit
-   * when we embedded a persona panel in a framePanel showing a user object.</p>
+   * when we embedded a persona panel in a framePanel showing a user object.
    *
-   * <p>This is a dirty hack to make the client a little extra smart about one
-   * particular kind of mandatory Ganymede server object.</p>
+   * This is a dirty hack to make the client a little extra smart about one
+   * particular kind of mandatory Ganymede server object.
    */
 
   boolean isPersonaPanel = false;
@@ -320,8 +323,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   /* -- */
 
   /**
-   * <p>Constructor with default values for progressBar set to false, loadNow
-   * set to true, and isCreating set to false.</p>
+   * Constructor with default values for progressBar set to false, loadNow
+   * set to true, and isCreating set to false.
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
@@ -344,14 +347,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /** 
-   * <p>Constructor with default values for loadNow set to true, and
-   * isCreating set to false.</p>
+   * Constructor with default values for loadNow set to true, and
+   * isCreating set to false.
    *
-   * <p>The &lt;progressBar&gt; parameter is used so that
+   * The &lt;progressBar&gt; parameter is used so that
    * containerpanel can increment an external JProgressBar as
    * information on the fields for this object are loaded from
    * the server.  progressBar should be null if this containerPanel
-   * is not serving as the main panel for a framePanel.</p>
+   * is not serving as the main panel for a framePanel.
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
@@ -376,12 +379,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Constructor with default value for isCreating set to false.</p>
+   * Constructor with default value for isCreating set to false.
    *
-   * <p>The &lt;progressBar&gt; parameter is used so that
+   * The &lt;progressBar&gt; parameter is used so that
    * containerpanel can increment an external JProgressBar as
    * information on the fields for this object are loaded from
-   * the server.</p>
+   * the server.
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
@@ -407,13 +410,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Primary constructor for containerPanel</p>
+   * Primary constructor for containerPanel
    *
-   * <p>The &lt;progressBar&gt; parameter is used so that
+   * The &lt;progressBar&gt; parameter is used so that
    * containerpanel can increment an external JProgressBar as
    * information on the fields for this object are loaded from
    * the server.  progressBar should be null if this containerPanel
-   * is not serving as the main panel for a framePanel.</p>
+   * is not serving as the main panel for a framePanel.
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
@@ -885,11 +888,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /** 
-   * <p>Goes through all the components and checks to see if they should
-   * be visible, and updates their contents.</p>
+   * Goes through all the components and checks to see if they should
+   * be visible, and updates their contents.
    *
-   * <p>If this containerPanel is attached to an object that is not
-   * being edited, this method will return without doing anything.</p>
+   * If this containerPanel is attached to an object that is not
+   * being edited, this method will return without doing anything.
    */
 
   public void updateAll()
@@ -937,7 +940,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Updates a subset of the fields in this containerPanel.</p>
+   * Updates a subset of the fields in this containerPanel.
    *
    * @param fields Vector of Shorts, field ID's
    */
@@ -1057,8 +1060,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Updates the contents and visibility status of
-   * a component in this containerPanel.</p>
+   * Updates the contents and visibility status of
+   * a component in this containerPanel.
    *
    * @param comp An AWT/Swing component that we need to refresh
    */
@@ -1498,8 +1501,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Updates the contents of a vector {@link arlut.csd.ganymede.rmi.string_field string_field}
-   * value selector against the current contents of the field on the server.</p>
+   * Updates the contents of a vector {@link arlut.csd.ganymede.rmi.string_field string_field}
+   * value selector against the current contents of the field on the server.
    *
    * @param ss The StringSelector GUI component being updated
    * @param field The server-side string_field attached to the StringSelector to be updated
@@ -1574,8 +1577,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Updates the contents of a vector {@link arlut.csd.ganymede.rmi.invid_field invid_field}
-   * value selector against the current contents of the field on the server.</p>
+   * Updates the contents of a vector {@link arlut.csd.ganymede.rmi.invid_field invid_field}
+   * value selector against the current contents of the field on the server.
    *
    * @param ss The StringSelector GUI component being updated
    * @param field The server-side invid_field attached to the StringSelector to be updated
@@ -1658,11 +1661,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>This method comprises the JsetValueCallback interface, and is how
+   * This method comprises the JsetValueCallback interface, and is how
    * the customized data-carrying components in this containerPanel
-   * notify us when something changes.</p>
+   * notify us when something changes.
    *
-   * <p>Note that we don't use this method for checkboxes, or comboboxes.</p>
+   * Note that we don't use this method for checkboxes, or comboboxes.
    *
    * @see arlut.csd.JDataComponent.JsetValueCallback
    * @see arlut.csd.JDataComponent.JValueObject
@@ -1965,9 +1968,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Some of our components, most notably the checkboxes, don't
+   * Some of our components, most notably the checkboxes, don't
    * go through JDataComponent.setValuePerformed(), but instead
-   * give us direct feedback.  Those we take care of here.</p>
+   * give us direct feedback.  Those we take care of here.
    *
    * @see java.awt.event.ActionListener
    */
@@ -2055,9 +2058,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Some of our components, most notably the JComboBoxes, don't
+   * Some of our components, most notably the JComboBoxes, don't
    * go through JDataComponent.setValuePerformed(), but instead
-   * give us direct feedback.  Those we take care of here.</p>
+   * give us direct feedback.  Those we take care of here.
    *
    * @see java.awt.event.ItemListener
    */
@@ -2192,8 +2195,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Helper method to add a component during constructor operation.  This
-   * is the top-level field component adding method.</p>
+   * Helper method to add a component during constructor operation.  This
+   * is the top-level field component adding method.
    */
 
   private void addFieldComponent(db_field field, 
@@ -2458,8 +2461,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate an invid vector in this
-   * container panel</p>
+   * private helper method to instantiate an invid vector in this
+   * container panel
    */
 
   private void addInvidVector(invid_field field, 
@@ -2654,8 +2657,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate a vector panel in this
-   * container panel</p>
+   * private helper method to instantiate a vector panel in this
+   * container panel
    */
 
   private void addVectorPanel(db_field field, 
@@ -2697,10 +2700,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>If we contain any {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}s,
+   * If we contain any {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}s,
    * they will call this method during loading to let us update our progress bar if
    * we have it still up.  This is used to let us include the time it will take
-   * to get vector panels loaded in the progress bar time estimate.</p>
+   * to get vector panels loaded in the progress bar time estimate.
    */
 
   public void vectorElementAdded()
@@ -2714,8 +2717,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate a scalar string field in this
-   * container panel</p>
+   * private helper method to instantiate a scalar string field in this
+   * container panel
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
@@ -2925,8 +2928,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate a password field in this
-   * container panel</p>
+   * private helper method to instantiate a password field in this
+   * container panel
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
@@ -2996,8 +2999,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate a numeric field in this
-   * container panel</p>
+   * private helper method to instantiate a numeric field in this
+   * container panel
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
@@ -3046,8 +3049,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
    /**
-    * <p>private helper method to instantiate a numeric field in this
-    * container panel</p>
+    * private helper method to instantiate a numeric field in this
+    * container panel
     *
     * @param field Remote reference to database field to be associated with a gui component
     * @param fieldInfo Downloaded value and status information for this field
@@ -3096,8 +3099,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate a date field in this
-   * container panel</p>
+   * private helper method to instantiate a date field in this
+   * container panel
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
@@ -3141,8 +3144,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate a boolean field in this
-   * container panel</p>
+   * private helper method to instantiate a boolean field in this
+   * container panel
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
@@ -3190,8 +3193,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate a field options field in this
-   * container panel</p>
+   * private helper method to instantiate a field options field in this
+   * container panel
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
@@ -3229,8 +3232,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 
   /**
-   * <p>private helper method to instantiate a permission matrix field in this
-   * container panel</p>
+   * private helper method to instantiate a permission matrix field in this
+   * container panel
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
@@ -3268,8 +3271,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate a scalar invid field in this
-   * container panel</p>
+   * private helper method to instantiate a scalar invid field in this
+   * container panel
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
@@ -3574,8 +3577,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>private helper method to instantiate an ip address field in this
-   * container panel</p>
+   * private helper method to instantiate an ip address field in this
+   * container panel
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
@@ -3639,12 +3642,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>This method provides a handy way to null out data structures held in
+   * This method provides a handy way to null out data structures held in
    * relationship to this containerPanel, particularly network reference
-   * resources.</p>
+   * resources.
    *
-   * <p>It is essential that this method be called from the client's
-   * GUI thread.</p>
+   * It is essential that this method be called from the client's
+   * GUI thread.
    */
 
   public synchronized final void cleanUp()
@@ -3680,8 +3683,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     currentlyChangingComponent = null;
 
     /**
-     * <p>The critical ones.. this will release our references to fields
-     * on the server</p>
+     * The critical ones.. this will release our references to fields
+     * on the server
      */
 
     object = null;
@@ -3731,7 +3734,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * <p>Convenience method.</p>
+   * Convenience method.
    */
 
   private final void setStatus(String s)

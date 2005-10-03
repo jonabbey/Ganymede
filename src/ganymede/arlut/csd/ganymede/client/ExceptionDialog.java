@@ -75,15 +75,15 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class provides a dialog for the client to use to throw up an
- * exception, and to allow the user to report the bug to the server.</p>
+ * This class provides a dialog for the client to use to throw up an
+ * exception, and to allow the user to report the bug to the server.
  */
 
 public class ExceptionDialog {
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede system.</p>
+   * TranslationService object for handling string localization in
+   * the Ganymede system.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.ExceptionDialog");
@@ -128,8 +128,8 @@ public class ExceptionDialog {
   }
 
   /**
-   * <p>If this method returns true, the user asked us to send the
-   * exception report to the server.</p>
+   * If this method returns true, the user asked us to send the
+   * exception report to the server.
    */
 
   public boolean didRequestReport()

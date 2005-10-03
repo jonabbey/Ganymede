@@ -68,14 +68,14 @@ import arlut.csd.ganymede.common.QueryResult;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Implements an information cache for the client.  Client
+ * Implements an information cache for the client.  Client
  * code can store information about objects on the server here and
- * can use it wherever.</p>
+ * can use it wherever.
  *
- * <p>objectCache maintains a mapping between hash keys (typically
+ * objectCache maintains a mapping between hash keys (typically
  * Short values corresponding to object type ids on the server) and
  * {@link arlut.csd.ganymede.client.objectList objectList} objects
- * which track status of objects for that hash key.</p>
+ * which track status of objects for that hash key.
  */
 
 public class objectCache {
@@ -199,11 +199,10 @@ public class objectCache {
   }
 
   /**
-   * <p>This method retrieves an object handle matching the given
-   * invid from the specified object list.</p>
+   * This method retrieves an object handle matching the given invid
+   * from the specified object list.
    *
-   * <p>This isn't the fastest operation, but hopefully won't
-   * be too bad.</p>
+   * This isn't the fastest operation, but hopefully won't be too bad.
    *
    * @return The matching handle, or null if it wasn't found.
    */

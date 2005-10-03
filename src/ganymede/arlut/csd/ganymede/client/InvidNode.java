@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -64,9 +64,9 @@ import arlut.csd.ganymede.common.ObjectHandle;
 ---------------------------------------------------------------------*/
 
 /**
- * <p>Class used in the client to represent an individual
- * {@link arlut.csd.ganymede.rmi.db_object db_object} in the client's tree
- * display.</p>
+ * Class used in the client to represent an individual {@link
+ * arlut.csd.ganymede.rmi.db_object db_object} in the client's tree
+ * display.
  */
 
 class InvidNode extends arlut.csd.JTree.treeNode {

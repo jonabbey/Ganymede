@@ -81,13 +81,13 @@ import arlut.csd.ganymede.common.Invid;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This GUI class is used in the Ganymede client to wrap embedded objects
- * in an expandable panel for inclusion in a presentation in a {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}.
- * </p>
+ * This GUI class is used in the Ganymede client to wrap embedded
+ * objects in an expandable panel for inclusion in a presentation in a
+ * {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}.
  *
- * <p>Typically, elementWrapper objects contain
- * {@link arlut.csd.ganymede.client.containerPanel containerPanels}, which
- * themselves contain GUI elements from embedded objects.</p>
+ * Typically, elementWrapper objects contain {@link
+ * arlut.csd.ganymede.client.containerPanel containerPanels}, which
+ * themselves contain GUI elements from embedded objects.
  */
 
 class elementWrapper extends JPanel implements ActionListener, MouseListener {
@@ -264,12 +264,12 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   }
 
   /**
-   * <p>Checks to see if the object on the server wrapped by this elementWrapper
+   * Checks to see if the object on the server wrapped by this elementWrapper
    * is complete and correct, and sets the color of the elementWrapper based
-   * on this.</p>
+   * on this.
    *
-   * <p>THIS IS CURRENTLY NOT BEING USED.. NOT SURE IF THIS IS A DESIRABLE UI
-   * FEATURE IN ANY CASE.</p>
+   * THIS IS CURRENTLY NOT BEING USED.. NOT SURE IF THIS IS A DESIRABLE UI
+   * FEATURE IN ANY CASE.
    */
 
   public void checkValidation()

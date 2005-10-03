@@ -13,10 +13,10 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -161,19 +161,19 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
   /**
    *
-   * This is the constructor for openObjectDialog.  The thing worth noting
-   * about this is that when this object is first constructed, it checks
-   * gclient to see if an object node is selected in the gclient's tree.
-   * If so, it will set the object's type and name in the appropriate
-   * GUI fields as they are constructed.<BR><BR>
+   * This is the constructor for openObjectDialog.  The thing worth
+   * noting about this is that when this object is first constructed,
+   * it checks gclient to see if an object node is selected in the
+   * gclient's tree.  If so, it will set the object's type and name in
+   * the appropriate GUI fields as they are constructed.
    *
-   * Note that this field-setting only occurs when this dialog is first
-   * constructed.  I would have had to rewrite a lot of this class to
-   * make it so that the base/object name fields could have been set
-   * after the fact, so I just didn't.  gclient is set up to dispose
-   * of an old instance of this and recreate one as necessary.  It's
-   * a shameful hack, but it works, and it's not worth investing much
-   * more time here to avoid the redundant dialog creation.
+   * Note that this field-setting only occurs when this dialog is
+   * first constructed.  I would have had to rewrite a lot of this
+   * class to make it so that the base/object name fields could have
+   * been set after the fact, so I just didn't.  gclient is set up to
+   * dispose of an old instance of this and recreate one as necessary.
+   * It's a shameful hack, but it works, and it's not worth investing
+   * much more time here to avoid the redundant dialog creation.
    *
    */
 

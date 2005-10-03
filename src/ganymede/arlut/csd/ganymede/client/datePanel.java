@@ -86,15 +86,14 @@ import arlut.csd.ganymede.rmi.date_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>GUI date panel used in the Ganymede client to allow the display
+ * GUI date panel used in the Ganymede client to allow the display
  * and/or editing of the standard expiration and removal time fields
- * that are defined on all object types in the Ganymede server.</p>
+ * that are defined on all object types in the Ganymede server.
  *
- * <p>The datePanel is contained within a {@link
+ * The datePanel is contained within a {@link
  * arlut.csd.ganymede.client.framePanel framePanel} in the Ganymede
  * client.  See the {@link arlut.csd.ganymede.client.gclient gclient}
- * class for more information on the structure of the Ganymede
- * client.</p>
+ * class for more information on the structure of the Ganymede client.
  */
 
 public class datePanel extends JPanel implements ActionListener, JsetValueCallback, Runnable {

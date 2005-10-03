@@ -73,11 +73,11 @@ import arlut.csd.ganymede.common.QueryResult;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is used to keep track of a list of 
- * {@link arlut.csd.ganymede.common.ObjectHandle ObjectHandle} objects from
+ * This class is used to keep track of a list of {@link
+ * arlut.csd.ganymede.common.ObjectHandle ObjectHandle} objects from
  * the server, storing various pieces of information about the
- * objects, including their expiration/removal/inactive status,
- * their current label, and more.</p>
+ * objects, including their expiration/removal/inactive status, their
+ * current label, and more.
  *
  * @version $Id$
  * @author Jonathan Abbey

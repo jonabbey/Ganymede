@@ -350,10 +350,9 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Component panel used in the Ganymede client to hold modification and creation
- * date information in the client's
- * {@link arlut.csd.ganymede.client.historyPanel historyPanel} tab component.</p>
- *
+ * Component panel used in the Ganymede client to hold modification
+ * and creation date information in the client's {@link
+ * arlut.csd.ganymede.client.historyPanel historyPanel} tab component.
  */
 
 class datesPanel extends JPanel {

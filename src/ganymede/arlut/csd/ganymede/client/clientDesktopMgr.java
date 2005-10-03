@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -66,9 +66,10 @@ import javax.swing.JComponent;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>clientDesktopMgr is a subclass of DefaultDesktopManager which checks to
- * make sure that a inner frame resize doesn't result in the frame being stretched
- * so that its title bar is above the desktop's visible area.</p>
+ * clientDesktopMgr is a subclass of DefaultDesktopManager which
+ * checks to make sure that a inner frame resize doesn't result in the
+ * frame being stretched so that its title bar is above the desktop's
+ * visible area.
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 

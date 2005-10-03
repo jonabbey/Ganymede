@@ -96,8 +96,8 @@ import arlut.csd.ganymede.rmi.Session;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>The ownershipPanel is used in the Ganymede client to display objects owned
- * when the user opens a Ganymede Owner Group window.</P>
+ * The ownershipPanel is used in the Ganymede client to display objects owned
+ * when the user opens a Ganymede Owner Group window.
  */
 
 public class ownershipPanel extends JPanel implements ItemListener {
@@ -286,9 +286,9 @@ public class ownershipPanel extends JPanel implements ItemListener {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>The objectPane class is a JPanel subclass used in the Ganymede client
+ * The objectPane class is a JPanel subclass used in the Ganymede client
  * to display a list of objects of a given type contained in a Ganymede Owner
- * Group.</P>
+ * Group.
  */
 
 class objectPane extends JPanel implements JsetValueCallback, Runnable {
@@ -613,9 +613,9 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
   }
 
   /**
-   * <p>This private helper method attempts to edit the object whose
+   * This private helper method attempts to edit the object whose
    * Invid is provided.  If successful, it will add the Invid for the
-   * owner group we are attached to to the Owner List Field.</p>
+   * owner group we are attached to to the Owner List Field.
    */
 
   private ReturnVal addToOwnerGroup(Invid objectToAdd) throws RemoteException
@@ -639,14 +639,14 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
   }
 
   /**
-   * <p>This private helper method attempts to edit the objects whose
+   * This private helper method attempts to edit the objects whose
    * Invid are provided in the Vector parameter.  If successful, it
    * will add the Invid for the owner group we are attached to to the
-   * Owner List Field for these objects.</p>
+   * Owner List Field for these objects.
    *
-   * <p>If a failure is encountered while we are looping over the
+   * If a failure is encountered while we are looping over the
    * vector of objects to add, we will return an error message and
-   * revert the objects we've already added.</p>
+   * revert the objects we've already added.
    */
 
   private ReturnVal addToOwnerGroup(Vector objectsToAdd) throws RemoteException
@@ -722,9 +722,9 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
   }
 
   /**
-   * <p>This private helper method attempts to edit the object whose
+   * This private helper method attempts to edit the object whose
    * Invid is provided.  If successful, it will remove the Invid for the
-   * owner group we are attached to from the Owner List Field.</p>
+   * owner group we are attached to from the Owner List Field.
    */
 
   private ReturnVal removeFromOwnerGroup(Invid objectToRemove) throws RemoteException
@@ -748,14 +748,14 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
   }
 
   /**
-   * <p>This private helper method attempts to edit the objects whose
+   * This private helper method attempts to edit the objects whose
    * Invid are provided in the Vector parameter.  If successful, it
    * will remove the Invid for the owner group we are attached to from
-   * the Owner List Field for these objects.</p>
+   * the Owner List Field for these objects.
    *
-   * <p>If a failure is encountered while we are looping over the
+   * If a failure is encountered while we are looping over the
    * vector of objects to add, we will return an error message and
-   * revert the objects we've already removed.</p>
+   * revert the objects we've already removed.
    */
 
   private ReturnVal removeFromOwnerGroup(Vector objectsToRemove) throws RemoteException

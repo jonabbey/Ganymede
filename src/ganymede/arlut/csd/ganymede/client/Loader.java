@@ -104,22 +104,22 @@ public class Loader extends Thread {
     session;
 
   /**
-   * <p>Hash mapping Short object type id's to Vectors of
+   * Hash mapping Short object type id's to Vectors of
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s,
    * used by the client to quickly look up information about fields 
    * in order to populate 
-   * {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s.</p>
+   * {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s.
    *
-   * <p>This hash is used by
-   * {@link arlut.csd.ganymede.client.gclient#getTemplateVector(java.lang.Short) getTemplateVector}.</p>
+   * This hash is used by
+   * {@link arlut.csd.ganymede.client.gclient#getTemplateVector(java.lang.Short) getTemplateVector}.
    */
 
   private Hashtable templateHash;
 
   /**
-   * <p>Hash mapping Short object type id's to a Hash that
+   * Hash mapping Short object type id's to a Hash that
    * maps field name to {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
-   * object</p>
+   * object
    */
 
   private Hashtable templateNameHash;
@@ -246,7 +246,7 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Clear out all information in the loader</p>
+   * Clear out all information in the loader
    */
 
   public void cleanUp()
@@ -321,10 +321,10 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns the type name for a given object.</p>
+   * Returns the type name for a given object.
    *
-   * <p>If the loader thread hasn't yet downloaded that information, this
-   * method will block until the information is available.</p>
+   * If the loader thread hasn't yet downloaded that information, this
+   * method will block until the information is available.
    */
 
   public String getObjectType(Invid objId)
@@ -333,10 +333,10 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns the type name for a given object type number.</p>
+   * Returns the type name for a given object type number.
    *
-   * <p>If the loader thread hasn't yet downloaded that information, this
-   * method will block until the information is available.</p>
+   * If the loader thread hasn't yet downloaded that information, this
+   * method will block until the information is available.
    */
 
   public String getObjectType(short typeId)
@@ -355,12 +355,12 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a Vector of {@link arlut.csd.ganymede.common.BaseDump BaseDump} objects,
+   * Returns a Vector of {@link arlut.csd.ganymede.common.BaseDump BaseDump} objects,
    * providing a local cache of {@link arlut.csd.ganymede.rmi.Base Base}
-   * references that the client consults during operations.</p>
+   * references that the client consults during operations.
    *
-   * <p>If this thread hasn't yet downloaded that information, this method will
-   * block until the information is available.</p>
+   * If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available.
    */
 
   public Vector getBaseList()
@@ -407,11 +407,11 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a hash mapping {@link arlut.csd.ganymede.common.BaseDump BaseDump}
-   * references to their title.</p>
+   * Returns a hash mapping {@link arlut.csd.ganymede.common.BaseDump BaseDump}
+   * references to their title.
    *
-   * <p>If this thread hasn't yet downloaded that information, this method will
-   * block until the information is available.</p>
+   * If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available.
    */
 
   public Hashtable getBaseNames()
@@ -458,11 +458,11 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a hash mapping Short {@link arlut.csd.ganymede.rmi.Base Base} id's to
-   * {@link arlut.csd.ganymede.common.BaseDump BaseDump} objects.</p>
+   * Returns a hash mapping Short {@link arlut.csd.ganymede.rmi.Base Base} id's to
+   * {@link arlut.csd.ganymede.common.BaseDump BaseDump} objects.
    *
-   * <p>If this thread hasn't yet downloaded that information, this method will
-   * block until the information is available.</p>
+   * If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available.
    */
 
   public Hashtable getBaseMap()
@@ -506,13 +506,13 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a hashtable mapping {@link arlut.csd.ganymede.common.BaseDump BaseDump}
+   * Returns a hashtable mapping {@link arlut.csd.ganymede.common.BaseDump BaseDump}
    * references to their object type id in Short form.  This is
    * a holdover from a time when the client didn't create local copies
-   * of the server's Base references.</p>
+   * of the server's Base references.
    *
-   * <p>If this thread hasn't yet downloaded that information, this method will
-   * block until the information is available.</p>
+   * If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available.
    */
 
   public Hashtable getBaseToShort()
@@ -562,12 +562,12 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a hashtable mapping base names to their object type id
+   * Returns a hashtable mapping base names to their object type id
    * in Short form.  This is used by the XML client to quickly map
-   * object type names to the numeric type id.</p>
+   * object type names to the numeric type id.
    *
-   * <p>If this thread hasn't yet downloaded that information, this method will
-   * block until the information is available.</p> 
+   * If this thread hasn't yet downloaded that information, this method will
+   * block until the information is available. 
    */
 
   public Hashtable getNameToShort()
@@ -617,8 +617,8 @@ public class Loader extends Thread {
   }
 
   /**
-   * <P>Returns a {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
-   * for a field specified by object type id and field name.</P>
+   * Returns a {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
+   * for a field specified by object type id and field name.
    */
 
   public FieldTemplate getFieldTemplate(short objectid, String fieldname)
@@ -627,8 +627,8 @@ public class Loader extends Thread {
   }
 
   /**
-   * <P>Returns a {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
-   * for a field specified by object type id and field name.</P>
+   * Returns a {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
+   * for a field specified by object type id and field name.
    */
 
   public FieldTemplate getFieldTemplate(Short objectid, String fieldname)
@@ -656,8 +656,8 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a vector of 
-   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s.</p>
+   * Returns a vector of 
+   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s.
    *
    * @param id Object type id to retrieve field information for.
    */
@@ -668,10 +668,10 @@ public class Loader extends Thread {
   }
 
   /**
-   * <p>Returns a vector of 
+   * Returns a vector of 
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s
    * listing fields and field informaton for the object type identified by 
-   * id.</p>
+   * id.
    *
    * @param id The id number of the object type to be returned the base id.
    */

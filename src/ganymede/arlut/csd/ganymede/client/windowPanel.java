@@ -101,16 +101,16 @@ import foxtrot.Worker;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>windowPanel is the top level panel containing and controlling the
+ * windowPanel is the top level panel containing and controlling the
  * internal {@link arlut.csd.ganymede.client.framePanel} and
  * {@link arlut.csd.ganymede.client.gResultTable gResultTable} windows
  * that are displayed in reaction to actions taken by the user.
  * windowPanel is responsible for adding these windows, and maintaining
- * the window list in the menubar.</p>
+ * the window list in the menubar.
  *
- * <p>windowPanel is also responsible for displaying and removing the
+ * windowPanel is also responsible for displaying and removing the
  * internal 'guy working' status window that lets the user know the client
- * hasn't frozen up when it is processing a query request.</p>
+ * hasn't frozen up when it is processing a query request.
  *
  * @version $Id$
  * @author Mike Mulvaney
@@ -139,21 +139,21 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   final int topLayer = 0;
 
   /**
-   * <p>Used to keep track of multiple 'guy working' internal wait windows
-   * if we have multiple threads waiting for query results from the server.</p>
+   * Used to keep track of multiple 'guy working' internal wait windows
+   * if we have multiple threads waiting for query results from the server.
    *
-   * <p>This hashtable maps Runnable objects (objects downloading query results
-   * in their own threads) to JInternalFrame's.</p>
+   * This hashtable maps Runnable objects (objects downloading query results
+   * in their own threads) to JInternalFrame's.
    */
   
   Hashtable waitWindowHash = new Hashtable();
 
   /**
-   * <p>Hashtable mapping window titles to JInternalFrames.  Used
+   * Hashtable mapping window titles to JInternalFrames.  Used
    * to make sure that we have unique titles for all of our
    * internal windows, so that we can properly maintain a 
    * Windows menu to let the user select an active window from
-   * the menu bar.</p>
+   * the menu bar.
    */
 
   private Hashtable windowList = new Hashtable();
@@ -505,8 +505,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>This method is responsible for setting the bounds for a new window
-   * so that windows are staggered somewhat.</p>
+   * This method is responsible for setting the bounds for a new window
+   * so that windows are staggered somewhat.
    */
 
   public void placeWindow(JInternalFrame window)
@@ -651,10 +651,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>Convenience method, calls
+   * Convenience method, calls
    * {@link arlut.csd.ganymede.client.gclient#setStatus(java.lang.String) gclient.setStatus}
    * to set some text in the client's status bar, with a time-to-live of the
-   * default 5 seconds.</p>
+   * default 5 seconds.
    */
 
   public final void setStatus(String s)
@@ -663,7 +663,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>Create and add an internal query result table window.</p>
+   * Create and add an internal query result table window.
    *
    * @param session Reference to the server, used to refresh the query on command
    * @param query The Query whose results are being shown in this window, used to
@@ -746,9 +746,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>Pops up an internal 'wait..' window, showing an animated icon of a
+   * Pops up an internal 'wait..' window, showing an animated icon of a
    * guy working.  Used to show the client is still working while a query
-   * is being processed.</p>
+   * is being processed.
    */
 
   public void addWaitWindow(Runnable key)
@@ -775,7 +775,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>Pops down the internal 'wait..' window.</p>
+   * Pops down the internal 'wait..' window.
    */
 
   public void removeWaitWindow(Runnable key)
@@ -842,10 +842,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>Closes all windows that are open for editing.</p>
+   * Closes all windows that are open for editing.
    *
-   * <p>This should be called by the parent when the transaction is canceled, to get rid of
-   * windows that might confuse the user.</p>
+   * This should be called by the parent when the transaction is canceled, to get rid of
+   * windows that might confuse the user.
    */
 
   public void closeEditables()
@@ -889,7 +889,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
   
   /**
-   * <p>Closes all internal frames, editable or no.</p>
+   * Closes all internal frames, editable or no.
    *
    * @param askNoQuestions if true, closeAll() will inhibit the normal
    * dialogs brought up when create/editable windows are closed.
@@ -1006,15 +1006,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>This method handles the generation and setting of a unique
+   * This method handles the generation and setting of a unique
    * window title for a window that we are displaying.  The titles for
    * all windows are tracked in windowPanel's windowList, and this
    * method takes care of updating windowList as necessary with the
-   * new title.</p>
+   * new title.
    *
-   * <p>This method can also be used to change a pre-existing window's
+   * This method can also be used to change a pre-existing window's
    * title, in which case the old title is removed from the windowList in favor
-   * of the new one.</p>
+   * of the new one.
    */
 
   public String setWindowTitle(JInternalFrame frame, String proposedTitle)
@@ -1140,9 +1140,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>This method causes all query result windows to be refreshed,
+   * This method causes all query result windows to be refreshed,
    * with each query window's query re-issued to the Ganymede
-   * server.</p>
+   * server.
    */
 
   public void refreshTableWindows()
@@ -1166,22 +1166,22 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * <p>This method takes an {@link arlut.csd.ganymede.common.Invid}
+   * This method takes an {@link arlut.csd.ganymede.common.Invid}
    * and a {@link arlut.csd.ganymede.common.ReturnVal} that encode
    * field refresh information, and update any open windows with the
-   * appropriate information.</p>
+   * appropriate information.
    *
-   * <p>If invid is set, the only windows which will be refreshed are
+   * If invid is set, the only windows which will be refreshed are
    * those that are presenting that object for display or editing.  If
-   * it is null, all object windows will be refreshed.</p>
+   * it is null, all object windows will be refreshed.
    *
-   * <p>The retVal parameter can hold a list of fields that need to be
+   * The retVal parameter can hold a list of fields that need to be
    * refreshed, or an encoding that forces a refresh of all fields.  If
    * the retVal parameter is null, all fields on all windows that
-   * match the invid parameter will be refreshed.</p>
+   * match the invid parameter will be refreshed.
    *
-   * <p>If both invid and retVal are null, all fields in all object windows
-   * will be refreshed.</p>
+   * If both invid and retVal are null, all fields in all object windows
+   * will be refreshed.
    */
 
   public void refreshObjectWindows(Invid invid, ReturnVal retVal)

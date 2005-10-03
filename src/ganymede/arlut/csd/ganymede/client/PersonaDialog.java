@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -84,7 +84,7 @@ import arlut.csd.JDialog.JCenterDialog;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Persona selection dialog</p>
+ * Persona selection dialog
  *
  * @version $Id$
  * @author Brian O'Mara

@@ -97,21 +97,21 @@ import arlut.csd.ganymede.rmi.ip_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>A GUI vector panel that is designed to be placed inside a
+ * A GUI vector panel that is designed to be placed inside a
  * {@link arlut.csd.ganymede.client.containerPanel containerPanel} within the client.
  * This vector panel is intended to support vectors of discrete GUI components that
  * are mapped to elements in a server-side vector {@link arlut.csd.ganymede.rmi.db_field db_field},
  * but right now it only supports IP Address fields and edit-in-place
  * containerPanels.  Most of the code in this class is dedicated to handling
- * vectors of embedded containerPanels.</p>
+ * vectors of embedded containerPanels.
  *
- * <p>Whatever sort of GUI components/database elements this vectorPanel is managing,
+ * Whatever sort of GUI components/database elements this vectorPanel is managing,
  * all GUI components will be wrapped by
  * {@link arlut.csd.ganymede.client.elementWrapper elementWrapper}'s, which are responsible
- * for hiding and revealing the GUI component on the user's command.</p>
+ * for hiding and revealing the GUI component on the user's command.
  *
- * <p>vectorPanel handles communications with the server to manage the server-side
- * db_field.</p>
+ * vectorPanel handles communications with the server to manage the server-side
+ * db_field.
  *
  * @see elementWrapper
  * @see containerPanel
@@ -329,9 +329,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>Talks to the server and populates this vectorPanel with
+   * Talks to the server and populates this vectorPanel with
    * elements corresponding to values held in my_field.  Only called
-   * on vectorPanel construction.</p>
+   * on vectorPanel construction.
    */
 
   private void createVectorComponents()
@@ -475,13 +475,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   } 
 
   /**
-   * <p>Creates a new element in the vector {@link arlut.csd.ganymede.rmi.db_field db_field}
+   * Creates a new element in the vector {@link arlut.csd.ganymede.rmi.db_field db_field}
    * this vectorPanel is connected to.  Creates and adds the GUI component for the new
-   * element to the vectorPanel.</p>
+   * element to the vectorPanel.
    *
-   * <p>This is called when the add button is clicked, but there is no reason
+   * This is called when the add button is clicked, but there is no reason
    * why it couldn't be called from other places if you wanted to add a new 
-   * element.</p>
+   * element.
    */
 
   public void addNewElement()
@@ -613,13 +613,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>Adds a new element to the vectorPanel.</p>
+   * Adds a new element to the vectorPanel.
    *
-   * <p>This element gets the default title, and will not be opened in expanded
-   * form.</p>
+   * This element gets the default title, and will not be opened in expanded
+   * form.
    *
-   * <p>The vectorPanel will be revalidated to trigger a GUI refresh
-   * after this element is added.</p>
+   * The vectorPanel will be revalidated to trigger a GUI refresh
+   * after this element is added.
    *
    * @param c Component to be added
    */
@@ -630,10 +630,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>Adds a new element to the vectorPanel.</p>
+   * Adds a new element to the vectorPanel.
    *
-   * <p>This element gets the default title, and will not be expanded
-   * immediately.</p>
+   * This element gets the default title, and will not be expanded
+   * immediately.
    *
    * @param c Component to be added
    * @param invalidateNow If true, invalidate()/validate() will be called.
@@ -646,10 +646,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>Adds a new element to the vectorPanel.</p>
+   * Adds a new element to the vectorPanel.
    *
-   * <p>The vectorPanel will be revalidated to trigger a GUI refresh
-   * after this element is added.</p>
+   * The vectorPanel will be revalidated to trigger a GUI refresh
+   * after this element is added.
    *
    * @param title String used in the "title" of the elementWrapper
    * @param c Component to be added 
@@ -661,12 +661,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>Adds a new element to the vectorPanel.</p>
+   * Adds a new element to the vectorPanel.
    *
-   * <p>This element will be immediately expanded if &lt;expand&gt; is true.</p>
+   * This element will be immediately expanded if &lt;expand&gt; is true.
    *
-   * <p>The vectorPanel will be revalidated to trigger a GUI refresh
-   * after this element is added.</p>
+   * The vectorPanel will be revalidated to trigger a GUI refresh
+   * after this element is added.
    *
    * @param title String used in the "title" of the elementWrapper
    * @param c Component to be added 
@@ -818,15 +818,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>Refreshes the vectorPanel.</p>
+   * Refreshes the vectorPanel.
    *
-   * <p>This will refresh every containerPanel and IPField in this vectorPanel, and
+   * This will refresh every containerPanel and IPField in this vectorPanel, and
    * will add or remove entries as needed to bring this vectorPanel into synchronization
-   * with the field on the server that this vectorPanel is attached to.</p>
+   * with the field on the server that this vectorPanel is attached to.
    *
-   * <p>New containerPanel elements will always be added to the end of the vector..
+   * New containerPanel elements will always be added to the end of the vector..
    * we aren't worried about the order of the vector we're handling, just
-   * the values and the proper association between the GUI component and the server field.</p>
+   * the values and the proper association between the GUI component and the server field.
    */
 
   public void refresh()
@@ -1115,7 +1115,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>Expands all closed elementWrappers in this vectorPanel</p>
+   * Expands all closed elementWrappers in this vectorPanel
    *
    * @param recursive If true, it will expand any vector panels inside
    * the containerPanels in this vectorPanel as well.  The current
@@ -1248,9 +1248,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>JsetValueCallback implementation method.  Any elementWrappers we
+   * JsetValueCallback implementation method.  Any elementWrappers we
    * contain will talk to us using this method, to notify us of element
-   * deletion and to pass information to us about IP field value changes.</p>
+   * deletion and to pass information to us about IP field value changes.
    */
 
   public boolean setValuePerformed(JValueObject v)
@@ -1331,10 +1331,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>Server dispatch method for value change messages passed us by elementWrappers.</p>
+   * Server dispatch method for value change messages passed us by elementWrappers.
    *
-   * <p>Currently used only for IP fields, as embedded containerPanels communicate
-   * their field changes directly to the server.</p>
+   * Currently used only for IP fields, as embedded containerPanels communicate
+   * their field changes directly to the server.
    */
 
   public boolean changeElement(Object obj, short index) throws RemoteException
@@ -1457,10 +1457,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * <p>Returns true if the vector field we are connected to is editable.</p>
+   * Returns true if the vector field we are connected to is editable.
    *
-   * <p>This method will call the server to query the field the first time it
-   * is called.  It will return the cached result thereafter.</p>
+   * This method will call the server to query the field the first time it
+   * is called.  It will return the cached result thereafter.
    */
   
   public boolean isFieldEditable()

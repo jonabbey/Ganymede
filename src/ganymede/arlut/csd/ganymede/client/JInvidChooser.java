@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -82,7 +82,7 @@ import arlut.csd.ganymede.common.Invid;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>A GUI component for choosing an Invid for a scalar invid_field.</p>
+ * A GUI component for choosing an Invid for a scalar invid_field.
  *
  * @version $Id$
  * @author Jonathan Abbey
@@ -188,12 +188,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
 
   /**
-   * <p>Set the allowNone bit.</p>
+   * Set the allowNone bit.
    *
-   * <p>If allowNone is true, then &lt;none&gt; will remain as a choice in the
+   * If allowNone is true, then &lt;none&gt; will remain as a choice in the
    * chooser.  If it is false, &lt;none&gt; will only be included in the
    * beginning if nothing is set; it will be removed as soon as
-   * anything is chosen.</p>
+   * anything is chosen.
    */
 
   public void setAllowNone(boolean allow)
@@ -277,12 +277,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
 
   /**
-   * <p>Get the allowNone bit.</p>
+   * Get the allowNone bit.
    *
-   * <p>If allowNone is true, then &lt;none&gt; will remain as a choice in the
+   * If allowNone is true, then &lt;none&gt; will remain as a choice in the
    * chooser.  If it is false, &lt;none&gt; will only be included in the
    * beginning if nothing is set; it will be removed as soon as
-   * anything is chosen.</p>
+   * anything is chosen.
    */
 
   public boolean isAllowNone()
@@ -369,9 +369,9 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>A combobox editor class to provide intelligent keyboard handling for
+ * A combobox editor class to provide intelligent keyboard handling for
  * the {@link arlut.csd.ganymede.client.JInvidChooser JInvidChooser} scalar
- * invid field gui component.</p>
+ * invid field gui component.
  */
 
 class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, ActionListener {
@@ -447,14 +447,14 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
   }
 
   /**
-   * <p>Tap into the text field's key release to see if
+   * Tap into the text field's key release to see if
    * we can complete the user's selection.  Note that
    * we are doing this without synchronizing on the text
    * field's own user interface.. to do this properly, we might
    * ought to be doing this with a document model on the text
    * field, but this works ok.  Since we're keying on key release,
    * we can expect to be called after the text field has processed
-   * the key press.</p>
+   * the key press.
    */
 
   public void keyReleased(KeyEvent ke)
@@ -607,8 +607,8 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
   }
 
   /**
-   * <p>Handle the user hitting return in the editable area.. if they hit return
-   * without a reasonable value, revert the combo.</p>
+   * Handle the user hitting return in the editable area.. if they hit return
+   * without a reasonable value, revert the combo.
    */
 
   public void actionPerformed(ActionEvent e)

@@ -96,26 +96,26 @@ import arlut.csd.ganymede.rmi.Session;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Client internal window for displaying the results of a 
+ * Client internal window for displaying the results of a 
  * query {@link arlut.csd.ganymede.rmi.Session#dump(arlut.csd.ganymede.common.Query) dump}
- * in a table form.</p>
+ * in a table form.
  *
- * <p>This window is created when {@link arlut.csd.ganymede.client.windowPanel windowPanel}'s
+ * This window is created when {@link arlut.csd.ganymede.client.windowPanel windowPanel}'s
  * {@link arlut.csd.ganymede.client.windowPanel#addTableWindow(arlut.csd.ganymede.rmi.Session,
  * arlut.csd.ganymede.common.Query, arlut.csd.ganymede.common.DumpResult, java.lang.String) addTableWindow}
- * method is called.</p>
+ * method is called.
  * 
- * <p>Note that windowPanel's addTableWindow method is called from 
+ * Note that windowPanel's addTableWindow method is called from 
  * {@link arlut.csd.ganymede.client.gclient gclient}'s actionPerformed method,
  * which spawns a separate thread in which the query is performed and
- * the gResultTable window is created.</p>
+ * the gResultTable window is created.
  *
- * <p>Constructors for this class take a {@link arlut.csd.ganymede.common.Query Query} object
+ * Constructors for this class take a {@link arlut.csd.ganymede.common.Query Query} object
  * describing the query that this table was generated from, and a
  * {@link arlut.csd.ganymede.common.DumpResult DumpResult} object actually containing the dump
  * results from the Ganymede server.  gResultTable can resubmit the dump query to the
  * server if the user chooses to refresh the query, but normally the dump query
- * is performed by gclient.</p>
+ * is performed by gclient.
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu

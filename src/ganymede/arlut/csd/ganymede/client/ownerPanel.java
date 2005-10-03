@@ -83,9 +83,9 @@ import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.invid_field;
 
 /**
- * <p>GUI panel for displaying the list of owners for a given object in
+ * GUI panel for displaying the list of owners for a given object in
  * the client.  This panel is created in association with the "Owners"
- * tab in framePanel.</p>
+ * tab in framePanel.
  *
  * @version $Id$
  * @author Mike Mulvaney
@@ -297,8 +297,8 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
   }
 
   /**
-   * <p>Updates the contents of a vector {@link arlut.csd.ganymede.rmi.invid_field invid_field}
-   * value selector against the current contents of the field on the server.</p>
+   * Updates the contents of a vector {@link arlut.csd.ganymede.rmi.invid_field invid_field}
+   * value selector against the current contents of the field on the server.
    *
    * @param ss The StringSelector GUI component being updated
    * @param field The server-side invid_field attached to the StringSelector to be updated

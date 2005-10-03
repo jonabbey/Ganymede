@@ -70,11 +70,11 @@ import java.util.Iterator;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This panel contains labeled GUI components in a vertical stack orientation.
- * Each GUI component may be made visible or invisible at will.</p>
+ * This panel contains labeled GUI components in a vertical stack orientation.
+ * Each GUI component may be made visible or invisible at will.
  *
- * <p>All methods on a constructed JLabelPanel object should be called on the
- * GUI thread once the JLabelPanel has been added to a GUI container.</p>
+ * All methods on a constructed JLabelPanel object should be called on the
+ * GUI thread once the JLabelPanel has been added to a GUI container.
  *
  * @version $Id$
  * @author Jonathan Abbey
@@ -94,8 +94,8 @@ public class JLabelPanel extends JPanel {
   private Insets insets = new java.awt.Insets(0,0,0,0);
 
   /**
-   * <p>If true, we'll put in a JSpacer to keep the label cells
-   * at a fixed size, even if certain rows are made invisible.</p>
+   * If true, we'll put in a JSpacer to keep the label cells
+   * at a fixed size, even if certain rows are made invisible.
    */
 
   private boolean enforceFixedSize = false;
@@ -138,13 +138,13 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>If setFixedSizeLabelCells() is called with a true value, the
+   * If setFixedSizeLabelCells() is called with a true value, the
    * JLabelPanel will be configured so that it keeps the label column
    * wide enough to encompass all labels, whether they are on visible
    * rows or not.  If it is called with a false value (or not called
    * at all.. the default is off), the hiding or revealing of rows may
    * cause shifting of the horizontal position of the fields on the
-   * right column.</p>
+   * right column.
    */
 
   public synchronized void setFixedSizeLabelCells(boolean tf)
@@ -177,8 +177,8 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>Sets standardized insets around each label and component
-   * to be added to this JLabelPanel.</p>
+   * Sets standardized insets around each label and component
+   * to be added to this JLabelPanel.
    */
 
   public synchronized void setInsets(int top, int left, int bottom, int right)
@@ -188,8 +188,8 @@ public class JLabelPanel extends JPanel {
 
 
   /**
-   * <p>Sets standardized insets around each label and component
-   * to be added to this JLabelPanel.</p>
+   * Sets standardized insets around each label and component
+   * to be added to this JLabelPanel.
    */
 
   public synchronized void setInsets(java.awt.Insets insets)
@@ -205,14 +205,14 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>This method sets the style of all the labels in this label
+   * This method sets the style of all the labels in this label
    * panel.  The styles are taken from the {@link java.awt.Font
    * java.awt.Font} class's static int members, and include Font.BOLD,
    * Font.ITALIC, Font.PLAIN, or the sum of FONT.BOLD and
-   * FONT.ITALIC.</p>
+   * FONT.ITALIC.
    *
-   * <p>These are the old-school Java 1.1 styles, not the fancier Java
-   * 1.2 stuff.</p>
+   * These are the old-school Java 1.1 styles, not the fancier Java
+   * 1.2 stuff.
    */
 
   public void setFontStyle(int style)
@@ -221,9 +221,9 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>This method sets the size of all the labels in this label
+   * This method sets the size of all the labels in this label
    * panel.  If size is equal to 0.0, the default label font size
-   * will be used instead.</p>
+   * will be used instead.
    */
 
   public void setFontSize(float size)
@@ -232,9 +232,9 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>This method sets the size of all the labels in this label
+   * This method sets the size of all the labels in this label
    * panel.  If size is equal to 0.0, the default label font size
-   * will be used instead.</p>
+   * will be used instead.
    */
 
   public synchronized void setFontStyleSize(int style, float size)
@@ -260,7 +260,7 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>Returns the point size of the labels in this JLabelPanel.</p>
+   * Returns the point size of the labels in this JLabelPanel.
    */
 
   public synchronized float getFontSize()
@@ -276,7 +276,7 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>Sets the font for all labels in this JLabelPanel.</p>
+   * Sets the font for all labels in this JLabelPanel.
    */
 
   public synchronized void setFont(Font font)
@@ -319,9 +319,9 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>For adding a labeled item.</p>
+   * For adding a labeled item.
    *
-   * <p>Each row that is added is placed below all rows above it.</p>
+   * Each row that is added is placed below all rows above it.
    *
    * @param label The text to put in a label on the leftmost column for this row.  May be null.
    * @param comp The component to add in the right column, after the label, if any.
@@ -333,10 +333,10 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>For adding a labeled item that is to stretch horizontally
-   * to fill the entire component column.</p>
+   * For adding a labeled item that is to stretch horizontally
+   * to fill the entire component column.
    *
-   * <p>Each row that is added is placed below all rows above it.</p>
+   * Each row that is added is placed below all rows above it.
    *
    * @param label The text to put in a label on the leftmost column for this row.  May be null.
    * @param comp The component to add in the right column, after the label, if any.
@@ -348,10 +348,10 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>For adding a labeled item that is to stretch horizontally
-   * to fill the entire panel, and more besides.</p>
+   * For adding a labeled item that is to stretch horizontally
+   * to fill the entire panel, and more besides.
    *
-   * <p>Each row that is added is placed below all rows above it.</p>
+   * Each row that is added is placed below all rows above it.
    *
    * @param label The text to put in a label on the leftmost column for this row.  May be null.
    * @param comp The component to add in the right column, after the label, if any.
@@ -367,9 +367,9 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>For adding a component that spans the label and item columns.</p>
+   * For adding a component that spans the label and item columns.
    *
-   * <p>Each row that is added is placed below all rows above it.</p>
+   * Each row that is added is placed below all rows above it.
    * @param comp The component to add.
    */
 
@@ -379,10 +379,10 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>For adding a component that spans the label and item columns, and
-   * that is to stretch horizontally to fill the entire panel.</p>
+   * For adding a component that spans the label and item columns, and
+   * that is to stretch horizontally to fill the entire panel.
    *
-   * <p>Each row that is added is placed below all rows above it.</p>
+   * Each row that is added is placed below all rows above it.
    *
    * @param comp The component to add.
    */
@@ -393,10 +393,10 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>For adding a component that spans the label and item columns, and
-   * that is to stretch horizontally to fill the entire panel.</p>
+   * For adding a component that spans the label and item columns, and
+   * that is to stretch horizontally to fill the entire panel.
    *
-   * <p>Each row that is added is placed below all rows above it.</p>
+   * Each row that is added is placed below all rows above it.
    *
    * @param comp The component to add.
    * @param colsWidth The number of columns the component comp will
@@ -411,10 +411,10 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>Private worker method for adding a possibly labeled component
-   * to this JLabelPanel.</p>
+   * Private worker method for adding a possibly labeled component
+   * to this JLabelPanel.
    *
-   * <p>Each row that is added is placed below all rows above it.</p>
+   * Each row that is added is placed below all rows above it.
    *
    * @param label The text to put in a label on the leftmost column for this row.  May be null.
    * @param comp The component to add in the right column, after the label, if any.
@@ -495,15 +495,15 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>For making a given row visible or invisible.  If b is set to
+   * For making a given row visible or invisible.  If b is set to
    * true, the given row will be made visible, if it is set to false,
    * the given row (and its label) will be made invisible, and the
    * JLabelPanel will pull any rows beneath it up to fill in the
-   * space.</p>
+   * space.
    *
-   * <p>Note that if a setFixedSizeLabelCells(true) call has been made
+   * Note that if a setFixedSizeLabelCells(true) call has been made
    * on this JLabelPanel, making a row invisible will not cause the
-   * horizontal positioning of the second, field column to shift.</p>
+   * horizontal positioning of the second, field column to shift.
    */
 
   public synchronized void setRowVisible(Component comp, boolean b)
@@ -524,8 +524,8 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>Removes the given component and its label from this
-   * JLabelPanel.</p>
+   * Removes the given component and its label from this
+   * JLabelPanel.
    */
 
   public synchronized void removeRow(Component comp)
@@ -546,8 +546,8 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * <p>Does dissolution of this JLabelPanel.  Useful to make sure we
-   * don't keep hold of any lingering references to things.</p>
+   * Does dissolution of this JLabelPanel.  Useful to make sure we
+   * don't keep hold of any lingering references to things.
    */
 
   public synchronized void cleanup()

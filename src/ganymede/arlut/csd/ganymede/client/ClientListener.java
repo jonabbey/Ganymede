@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -61,10 +61,10 @@ package arlut.csd.ganymede.client;
 ------------------------------------------------------------------------------*/
 
 /** 
- * <P>An interface to complement the {@link
+ * An interface to complement the {@link
  * arlut.csd.ganymede.client.ClientBase ClientBase} class.  This
  * interface must be implemented by any code that creates uses
- * ClientBase to talk to the Ganymede server.</P>
+ * ClientBase to talk to the Ganymede server.
  *
  * @see arlut.csd.ganymede.client.ClientEvent
  */
@@ -72,23 +72,23 @@ package arlut.csd.ganymede.client;
 public interface ClientListener {
 
   /**
-   * <p>Called when the server forces a disconnect.</p>
+   * Called when the server forces a disconnect.
    *
-   * <p>Call getMessage() on the
+   * Call getMessage() on the
    * {@link arlut.csd.ganymede.client.ClientEvent ClientEvent} 
-   * to get the reason for the disconnect.</p>
+   * to get the reason for the disconnect.
    */
 
   public void disconnected(ClientEvent e);
 
   /**
-   * <p>Called when the ClientBase needs to report something
+   * Called when the ClientBase needs to report something
    * to the client.  The client is expected to then put
-   * up a dialog or do whatever else is appropriate.</p>
+   * up a dialog or do whatever else is appropriate.
    *
-   * <p>Call getMessage() on the
+   * Call getMessage() on the
    * {@link arlut.csd.ganymede.client.ClientEvent ClientEvent} 
-   * to get the reason for the disconnect.</p>
+   * to get the reason for the disconnect.
    */
 
   public void messageReceived(ClientEvent e);

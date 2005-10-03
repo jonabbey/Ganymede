@@ -80,8 +80,8 @@ import arlut.csd.Util.booleanSemaphore;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>The core of a client.  Provides all the logic necessary to
- * establish a connection to the server and get logged in.</p>
+ * The core of a client.  Provides all the logic necessary to
+ * establish a connection to the server and get logged in.
  *
  * @version $Id$
  * @author Mike Mulvaney
@@ -140,9 +140,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   /* -- */
 
   /**
-   * <p>This constructor takes a URL for the Ganymede server to connect to, a
+   * This constructor takes a URL for the Ganymede server to connect to, a
    * reference to an object implementing the ClientListener interface to
-   * report problems.</p>
+   * report problems.
    *
    * @param serverURL An rmi:// URL for a Ganymede server.
    * @param listener A ClientListener to report problems and disconnection to.
@@ -165,8 +165,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>This method attempts to establish and verify an RMI connection to the
-   * server.</p>
+   * This method attempts to establish and verify an RMI connection to the
+   * server.
    */
     
   public boolean connect() throws RemoteException, NotBoundException, MalformedURLException
@@ -185,11 +185,11 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>This method is used by a client to actually get logged into the
+   * This method is used by a client to actually get logged into the
    * server.  The {@link arlut.csd.ganymede.rmi.Session Session} handle
    * returned is then used to do all server operations appropriate 
    * for a normal client.  Calling the Session logout() method will
-   * end the client's connection to the server.</p>
+   * end the client's connection to the server.
    *
    * @return null if login failed, else a valid server Session reference
    *
@@ -272,12 +272,12 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>This method is used by a client to actually get logged into
+   * This method is used by a client to actually get logged into
    * the server.  The {@link arlut.csd.ganymede.rmi.XMLSession
    * XMLSession} handle returned is then used to do all server
    * operations appropriate for the xml client.  Calling the XMLSession
    * xmlEnd() method will end the client's connection to the
-   * server.</p>
+   * server.
    *
    * @return null if login failed, else a valid server Session reference
    *
@@ -374,9 +374,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>This method can be used to retrieve a handle to the client's
+   * This method can be used to retrieve a handle to the client's
    * login session.  This simply returns the same handle that
-   * login() returned, in case the client forgets it or something.</p>
+   * login() returned, in case the client forgets it or something.
    */
 
   public Session getSession()
@@ -385,9 +385,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>This method can be used to retrieve a handle to the client's
+   * This method can be used to retrieve a handle to the client's
    * login session.  This simply returns the same handle that
-   * login() returned, in case the client forgets it or something.</p>
+   * login() returned, in case the client forgets it or something.
    */
 
   public XMLSession getXSession()
@@ -396,9 +396,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>This method returns true if the client holds a valid reference to
+   * This method returns true if the client holds a valid reference to
    * the server.  This will always return true unless the server has
-   * forced a disconnect.</p>
+   * forced a disconnect.
    */
 
   public boolean isConnected()
@@ -421,10 +421,10 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>Register a client listener.  A client listener is an object
+   * Register a client listener.  A client listener is an object
    * that is to be notified if we get an asynchronous callback from
    * the Ganymede server, such as a forced log-off, or if we need
-   * to report an error during login.</p>
+   * to report an error during login.
    */
 
   public synchronized void addClientListener(ClientListener l)
@@ -433,7 +433,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>Remove a client listener.</p>
+   * Remove a client listener.
    */
 
   public synchronized void removeClientListener(ClientListener l)
@@ -442,10 +442,10 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>Calls the logout() method on the Session object.  This
+   * Calls the logout() method on the Session object.  This
    * could be done by the client using the Session reference
    * returned by the login() method, but using this method
-   * allows us to reflect login status internally.</p>
+   * allows us to reflect login status internally.
    */
 
   public void disconnect() throws RemoteException
@@ -466,8 +466,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   // **
 
   /**
-   * <p>Allows the server to force us off when it goes down, by way of
-   * a message sent us through the asyncPort.</p>
+   * Allows the server to force us off when it goes down, by way of
+   * a message sent us through the asyncPort.
    */
 
   public void forceDisconnect(String reason)
@@ -485,9 +485,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>Allows the server to send an asynchronous message to the
+   * Allows the server to send an asynchronous message to the
    * client..  Used by the server to tell the client when a build
-   * is/is not being performed on the server.</P> 
+   * is/is not being performed on the server. 
    */
 
   public void sendMessage(int messageType, String status)
@@ -503,9 +503,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>This method is from the RMISSLClientListener, and we use it to
+   * This method is from the RMISSLClientListener, and we use it to
    * get notified about the SSL cipher suite used if we wind up using
-   * SSL to connect to an RMI server.</p>
+   * SSL to connect to an RMI server.
    */
  
   public void notifySSLClient(String host, int port, String cipherSuite)
@@ -514,9 +514,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>If we are connected to the server with an SSL connection, this method will return
+   * If we are connected to the server with an SSL connection, this method will return
    * a string description of the cipher suite we are using.  If we are not connected through
-   * an SSL RMI connection, this method will return null.</p>
+   * an SSL RMI connection, this method will return null.
    */
 
   public String getCipherSuite()
@@ -525,9 +525,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
-   * <p>We continuously query the server so that any asynchronous
+   * We continuously query the server so that any asynchronous
    * messages can be passed back to us without us having to be open
-   * for a callback.</p>
+   * for a callback.
    */
 
   public void run()
@@ -581,8 +581,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   // ***
 
   /**
-   * <p>Private method to inform clientListeners if we get an error
-   * from the server after construction..</p>
+   * Private method to inform clientListeners if we get an error
+   * from the server after construction..
    */
 
   private void sendErrorMessage(String message)

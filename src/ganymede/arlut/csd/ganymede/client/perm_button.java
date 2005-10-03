@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -160,8 +160,8 @@ class perm_button extends JButton implements ActionListener {
   }
 
   /**
-   * <p>Calling this method makes this component get rid of any secondary
-   * windows and to do some gc reference clearing.</p>
+   * Calling this method makes this component get rid of any secondary
+   * windows and to do some gc reference clearing.
    */
 
   public synchronized void unregister()

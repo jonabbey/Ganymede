@@ -130,16 +130,16 @@ import arlut.csd.ganymede.rmi.Base;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class implements a modal dialog that is popped up to
+ * This class implements a modal dialog that is popped up to
  * generate a {@link arlut.csd.ganymede.common.Query Query} object that will
  * be used by the rest of the ganymede.client package to submit the
- * query to the server for handling.</P>
+ * query to the server for handling.
  *
- * <P>Once an instance of querybox is constructed, the client code will
- * call myShow() to pop up the dialog and retrieve the Query object.</P>
+ * Once an instance of querybox is constructed, the client code will
+ * call myShow() to pop up the dialog and retrieve the Query object.
  * 
- * <P>If the user chooses not to submit a Query after all, myShow() will
- * return null.</P>
+ * If the user chooses not to submit a Query after all, myShow() will
+ * return null.
  */
 
 class querybox extends JDialog implements ActionListener, ItemListener {
@@ -977,8 +977,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   }
 
   /**
-   * <p>This method causes the query box to present itself for
-   * queries on the given object type.</p>
+   * This method causes the query box to present itself for
+   * queries on the given object type.
    */
 
   public void selectBase(BaseDump base)
@@ -1624,8 +1624,8 @@ class QueryRow implements ItemListener {
   }
 
   /**
-   * <p>Private helper method to remove the operand component and
-   * handle any unregistration required.</p>
+   * Private helper method to remove the operand component and
+   * handle any unregistration required.
    */
 
   private void removeOperand()

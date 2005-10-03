@@ -66,7 +66,8 @@ import arlut.csd.ganymede.rmi.Base;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Subclass of {@link arlut.csd.JTree.treeNode treeNode} used in the client.</P>
+ * Subclass of {@link arlut.csd.JTree.treeNode treeNode} used in the
+ * client.
  */
 
 class BaseNode extends arlut.csd.JTree.treeNode {

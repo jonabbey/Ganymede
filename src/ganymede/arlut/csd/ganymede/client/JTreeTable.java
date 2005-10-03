@@ -237,7 +237,8 @@ public class JTreeTable extends JTable {
 
 	/**
 	 * Overridden to return false, and if the event is a mouse event
-	 * it is forwarded to the tree.<p>
+	 * it is forwarded to the tree.
+	 *
 	 * The behavior for this is debatable, and should really be offered
 	 * as a property. By returning false, all keyboard actions are
 	 * implemented in terms of the table. By returning true, the
@@ -250,7 +251,8 @@ public class JTreeTable extends JTable {
 	 * outside of the bounds of the tree node, but still in the tree
 	 * column will select the row, whereas if this returned true
 	 * that wouldn't be the case.
-	 * <p>By returning false we are also enforcing the policy that
+	 *
+	 * By returning false we are also enforcing the policy that
 	 * the tree will never be editable (at least by a key sequence).
 	 */
 	public boolean isCellEditable(EventObject e) {

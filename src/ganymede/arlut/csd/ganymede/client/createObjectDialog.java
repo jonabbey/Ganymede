@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -80,11 +80,12 @@ import arlut.csd.ganymede.rmi.Base;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Dialog used to create new objects from the client's toolbar or menu.  The
- * dialog shows the user a list of object types and prompts the user to pick
- * an object type to create.  If the user selects one and clicks ok, we'll
- * try to create a new object for the user and put up a window for the user
- * to edit the new object with if we succeed.</p>
+ * Dialog used to create new objects from the client's toolbar or
+ * menu.  The dialog shows the user a list of object types and prompts
+ * the user to pick an object type to create.  If the user selects one
+ * and clicks ok, we'll try to create a new object for the user and
+ * put up a window for the user to edit the new object with if we
+ * succeed.
  *
  * @version $Id$
  * @author Mike Mulvaney

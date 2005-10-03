@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -63,11 +63,11 @@ package arlut.csd.ganymede.client;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>An event object to pass information from the {@link
+ * An event object to pass information from the {@link
  * arlut.csd.ganymede.client.ClientBase ClientBase} class to users
  * thereof. Currently, this only has support for a message String and
  * integer message type, but it is here in case we need some other
- * types in there.</P>
+ * types in there.
  */
 
 public class ClientEvent implements arlut.csd.ganymede.common.ClientMessage {

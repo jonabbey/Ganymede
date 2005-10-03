@@ -5,13 +5,10 @@
    Dialog for saving or mailing a table from dialog.
    
    Created: October 19, 1999
-   Version: $Revision$
-   Last Mod Date: $Date$
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
    SVN URL: $HeadURL$
-
 
    Module By: Jonathan Abbey
 
@@ -19,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -86,8 +83,8 @@ import arlut.csd.JDialog.JCenterDialog;
 ------------------------------------------------------------------------------*/
 
 /** 
- * <p>Client dialog for saving or mailing an objects's status
- * summary, including optional history dump)</p>
+ * Client dialog for saving or mailing an objects's status summary,
+ * including optional history dump.
  */
 
 public class SaveObjDialog extends JCenterDialog implements ActionListener, ItemListener {
@@ -138,7 +135,6 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
    * and the ok button will say "mail".  Otherwise, it says "save".
    *
    * @param mailSubj The default subject, if we are mailing
-   *
    */
 
   SaveObjDialog(Frame owner, String title, boolean forMail, String mailSubj)
@@ -212,9 +208,9 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
   }
 
   /**
-   * <p>Show the dialog.</p>
+   * Show the dialog.
    *
-   * <p>Use this instead of calling setVisible(true) yourself.  You need to get the boolean
+   * Use this instead of calling setVisible(true) yourself.  You need to get the boolean
    * return from this method, in order to know if the user pressed "Ok" or "Cancel".
    *
    * @return True if user pressed "Ok".

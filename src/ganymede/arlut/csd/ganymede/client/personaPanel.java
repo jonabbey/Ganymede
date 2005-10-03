@@ -81,8 +81,8 @@ import arlut.csd.ganymede.rmi.invid_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This Panel is used to present a user's personae when viewing or editing
- * a user object in the Ganymede client.</p>
+ * This Panel is used to present a user's personae when viewing or
+ * editing a user object in the Ganymede client.
  *
  * @author Mike Mulvaney
  */

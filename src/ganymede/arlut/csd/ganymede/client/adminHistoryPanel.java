@@ -87,10 +87,11 @@ import arlut.csd.ganymede.common.Invid;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>The adminHistoryPanel is used in the Ganymede client when the user is
- * editing or viewing an admin persona object.  The adminHistoryPanel provides
- * the user with the ability to get a report of all actions taken by the admin
- * in question from the server's logs.</P>
+ * The adminHistoryPanel is used in the Ganymede client when the user
+ * is editing or viewing an admin persona object.  The
+ * adminHistoryPanel provides the user with the ability to get a
+ * report of all actions taken by the admin in question from the
+ * server's logs.
  */
 
 public class adminHistoryPanel extends JPanel implements ActionListener, JsetValueCallback{
