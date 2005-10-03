@@ -198,8 +198,8 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
       }
     catch (RuntimeException ex)
       {
-	// "An exception was encountered parsing your query string.\nQuery: "{0}"\nExpanded Parse Tree: "{1}""
-	String mesg = ts.l("global.parse_exception", queryString, ast.toStringList());
+	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+	String mesg = ts.l("global.parse_exception", ex.getMessage(), queryString, ast.toStringList());
 	throw new RuntimeException(mesg, ex);
       }
 
@@ -294,7 +294,9 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
       {
 	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
 	// "The object type "{0}" in the query''s from clause does not exist."
-	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.bad_objectbase"), myQueryString, myQueryTree.toStringList()));
+	throw new GanyParseException(ts.l("global.parse_exception", 
+					  ts.l("parse_from_tree.bad_objectbase", from_objectbase),
+					  myQueryString, myQueryTree.toStringList()));
       }
 
     return this.objectBase;
