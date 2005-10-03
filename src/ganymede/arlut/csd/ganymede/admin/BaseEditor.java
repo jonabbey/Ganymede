@@ -88,9 +88,9 @@ import arlut.csd.ganymede.rmi.BaseField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Part of the admin console's graphical schema editor.  This panel
+ * Part of the admin console's graphical schema editor.  This panel
  * is responsible for displaying and editing base definitions (title,
- * label, class).</p>
+ * label, class).
  */
 
 class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListener, ActionListener {
@@ -353,7 +353,7 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
   }
 
   /**
-   * <p>implementing {@link java.awt.event.ItemListener ItemListener}</p>
+   * implementing {@link java.awt.event.ItemListener ItemListener}
    */
 
   public void itemStateChanged(ItemEvent e)
@@ -414,7 +414,7 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
   }
 
   /**
-   * <p>implementing {@link java.awt.event.ActionListener ActionListener}</p>
+   * implementing {@link java.awt.event.ActionListener ActionListener}
    */
 
   public void actionPerformed(ActionEvent e)
@@ -454,7 +454,7 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
   }
 
   /**
-   * <p>implementing {@link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}</p>
+   * implementing {@link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}
    */
 
   public boolean setValuePerformed(JValueObject v)
@@ -518,7 +518,7 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
   }
 
   /**
-   * <p>GC-aiding dissolution method.  Should be called on GUI thread.</p>
+   * GC-aiding dissolution method.  Should be called on GUI thread.
    */
 
   public void cleanup()

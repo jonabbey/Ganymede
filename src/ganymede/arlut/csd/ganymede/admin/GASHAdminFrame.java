@@ -122,8 +122,8 @@ import arlut.csd.Util.TranslationService;
 public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede admin console.</p>
+   * TranslationService object for handling string localization in
+   * the Ganymede admin console.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdminFrame");
@@ -1295,11 +1295,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   }
 
   /**
-   * <P>Method to handle properly logging out if the main admin
-   * frame is closed by the window system.</P>
+   * Method to handle properly logging out if the main admin
+   * frame is closed by the window system.
    *
-   * <P>We do an enableEvents(AWT.WINDOW_EVENT_MASK) in the
-   * GASHAdminFrame constructor to activate this method.</P>
+   * We do an enableEvents(AWT.WINDOW_EVENT_MASK) in the
+   * GASHAdminFrame constructor to activate this method.
    */
 
   protected void processWindowEvent(WindowEvent e) 
@@ -1345,7 +1345,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>GUI dialog for presenting server shutdown options in the admin console.</P>
+ * GUI dialog for presenting server shutdown options in the admin console.
  */
 
 class consoleShutdownDialog extends JCenterDialog implements ActionListener, WindowListener {
@@ -1353,8 +1353,8 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
   private final static boolean debug = false;
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede admin console.</p>
+   * TranslationService object for handling string localization in
+   * the Ganymede admin console.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.consoleShutdownDialog");
@@ -1494,13 +1494,13 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
   }
 
   /**
-   * <p>Display the dialog box, locks this thread while the dialog is being
+   * Display the dialog box, locks this thread while the dialog is being
    * displayed, and returns a hashtable of data field values when the
-   * user closes the dialog box.</p>
+   * user closes the dialog box.
    *
-   * <p>Use this instead of Dialog.show().  If Hashtable returned is null,
+   * Use this instead of Dialog.show().  If Hashtable returned is null,
    * then the cancel button was clicked.  Otherwise, it will contain a 
-   * hash of labels(String) to results (Object).</p>
+   * hash of labels(String) to results (Object).
    *
    * @return HashTable of labels to values
    */

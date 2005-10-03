@@ -87,10 +87,10 @@ import arlut.csd.ganymede.rmi.adminSession;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Logical interface class that provides the connectivity between
- * the Ganymede admin console and the server, bidirectionally.
- * This class is part of the Ganymede admin console code, not
- * the Ganymede server.</p>
+ * Logical interface class that provides the connectivity between the
+ * Ganymede admin console and the server, bidirectionally.  This class
+ * is part of the Ganymede admin console code, not the Ganymede
+ * server.
  */
 
 class GASHAdminDispatch implements Runnable {
@@ -98,8 +98,8 @@ class GASHAdminDispatch implements Runnable {
   static final boolean debug = false;
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede server.</p>
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdminDispatch");
@@ -125,11 +125,12 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method connects the admin console to the server RMI reference
-   * that was provided to the GASHAdminDispatch constructor.  If the
-   * server returns a failure message, connect() will pop up a dialog
-   * providing the error text.  If the connection failed through a 
-   * RemoteException, it will be passed up for the calling code to handle.</p>
+   * This method connects the admin console to the server RMI
+   * reference that was provided to the GASHAdminDispatch constructor.
+   * If the server returns a failure message, connect() will pop up a
+   * dialog providing the error text.  If the connection failed
+   * through a RemoteException, it will be passed up for the calling
+   * code to handle.
    */
 
   public boolean connect(String name, String pass) throws RemoteException
@@ -194,12 +195,12 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method spins continuously, polling the server for {@link
-   * arlut.csd.ganymede.common.adminAsyncMessage adminAsyncMessages}.  The
-   * server will block until something happens, then download a set of
-   * adminAsyncMessages.  This run method will then dispatch those messages
-   * to the appropriate GASHAdminDispatch methods for propagation into the
-   * admin console's GUI.</p>
+   * This method spins continuously, polling the server for {@link
+   * arlut.csd.ganymede.common.adminAsyncMessage adminAsyncMessages}.
+   * The server will block until something happens, then download a
+   * set of adminAsyncMessages.  This run method will then dispatch
+   * those messages to the appropriate GASHAdminDispatch methods for
+   * propagation into the admin console's GUI.
    */
 
   public void run()
@@ -295,8 +296,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server
-   * to set the server start date in the admin console.</p>
+   * This method is remotely called by the Ganymede server to set the
+   * server start date in the admin console.
    */
 
   public void setServerStart(Date date)
@@ -321,8 +322,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to set the last dump
-   * date in the admin console.</p>
+   * This method is remotely called by the Ganymede server to set the
+   * last dump date in the admin console.
    */
 
   public void setLastDumpTime(Date date)
@@ -354,8 +355,9 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to set the number of
-   * transactions in the server's journal in the admin console.</p>
+   * This method is remotely called by the Ganymede server to set the
+   * number of transactions in the server's journal in the admin
+   * console.
    */
 
   public void setTransactionsInJournal(int trans)
@@ -380,8 +382,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to set the number of
-   * objects checked out in the admin console.</p>
+   * This method is remotely called by the Ganymede server to set the
+   * number of objects checked out in the admin console.
    */
 
   public void setObjectsCheckedOut(int objs)
@@ -406,8 +408,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to set the number of
-   * locks held in the admin console.</p>
+   * This method is remotely called by the Ganymede server to set the
+   * number of locks held in the admin console.
    */
 
   public void setLocksHeld(int locks)
@@ -432,8 +434,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * memory statistics display in the admin console.</p>
+   * This method is remotely called by the Ganymede server to update
+   * the memory statistics display in the admin console.
    */
 
   public void setMemoryState(long freeMemory, long totalMemory)
@@ -463,11 +465,11 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to add to the
-   * admin console's log display.</p>
+   * This method is remotely called by the Ganymede server to add to
+   * the admin console's log display.
    *
-   * @param status A string to add to the console's log display, with the
-   * trailing newline included.
+   * @param status A string to add to the console's log display, with
+   * the trailing newline included.
    */
 
   public void changeStatus(String status)
@@ -493,8 +495,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * number of admin consoles attached to the server.</p>
+   * This method is remotely called by the Ganymede server to update
+   * the number of admin consoles attached to the server.
    */
 
   public void changeAdmins(String adminStatus)
@@ -519,8 +521,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * admin console's server state display.</p>
+   * This method is remotely called by the Ganymede server to update
+   * the admin console's server state display.
    */
 
   public void changeState(String state)
@@ -545,8 +547,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * admin console's connected user table.</p>
+   * This method is remotely called by the Ganymede server to update
+   * the admin console's connected user table.
    *
    * @param entries a Vector of {@link arlut.csd.ganymede.common.AdminEntry AdminEntry}
    * login description objects.
@@ -632,8 +634,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is remotely called by the Ganymede server to update the
-   * admin console's task table.</p>
+   * This method is remotely called by the Ganymede server to update
+   * the admin console's task table.
    *
    * @param tasks an array of {@link
    * arlut.csd.ganymede.common.scheduleHandle scheduleHandle} objects
@@ -824,11 +826,10 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is called by admin console code to force
-   * a complete rebuild of all external builds.  This means that
-   * all databases will have their last modification timestamp
-   * cleared and all builder tasks will be scheduled for immediate
-   * execution.</p>
+   * This method is called by admin console code to force a complete
+   * rebuild of all external builds.  This means that all databases
+   * will have their last modification timestamp cleared and all
+   * builder tasks will be scheduled for immediate execution.
    */
 
   public void forceBuild() throws RemoteException
@@ -842,10 +843,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   *
    * Callback: The server can tell us to disconnect if the server is 
    * going down.
-   *
    */
 
   public void forceDisconnect(String reason)
@@ -967,8 +966,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method is designed to be called by the GASHSchema schema editor when
-   * it closes down.</p>
+   * This method is designed to be called by the GASHSchema schema editor when
+   * it closes down.
    */
 
   public void clearSchemaEditor()
@@ -978,21 +977,22 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * <p>This method takes a ReturnVal object from the server and, if necessary,
-   * runs through a wizard interaction sequence, possibly displaying several
-   * dialogs before finally returning a final result code.</p>
+   * This method takes a ReturnVal object from the server and, if
+   * necessary, runs through a wizard interaction sequence, possibly
+   * displaying several dialogs before finally returning a final
+   * result code.
    *
-   * <p>Use the ReturnVal returned from this function after this function is
-   * called to determine the ultimate success or failure of any operation
-   * which returns ReturnVal, because a wizard sequence may determine the
-   * ultimate result.</p>
+   * Use the ReturnVal returned from this function after this function
+   * is called to determine the ultimate success or failure of any
+   * operation which returns ReturnVal, because a wizard sequence may
+   * determine the ultimate result.
    *
-   * <p>This method should not be synchronized, since handleReturnVal
-   * may pop up modal (thread-blocking) dialogs, and if we we
-   * synchronize this, some Swing or AWT code seems to block on our
+   * This method should not be synchronized, since handleReturnVal may
+   * pop up modal (thread-blocking) dialogs, and if we we synchronize
+   * this, some Swing or AWT code seems to block on our
    * synchronization when we do pop-up dialogs.  It's not any of my
    * code, so I assume that AWT tries to synchronize on the frame when
-   * parenting a new dialog.</p> 
+   * parenting a new dialog.
    */
 
   public ReturnVal handleReturnVal(ReturnVal retVal)

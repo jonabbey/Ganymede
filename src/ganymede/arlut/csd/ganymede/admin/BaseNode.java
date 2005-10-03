@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -64,8 +64,8 @@ import arlut.csd.ganymede.rmi.Base;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Subclass of {@link arlut.csd.JTree.treeNode treeNode} used in the admin
- * console's schema editor.</P>
+ * Subclass of {@link arlut.csd.JTree.treeNode treeNode} used in the
+ * admin console's schema editor.
  */
 
 class BaseNode extends arlut.csd.JTree.treeNode {

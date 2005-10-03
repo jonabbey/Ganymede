@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -238,7 +238,7 @@ public class NameSpaceEditor extends JStretchPanel implements ActionListener {
   }
 
   /**
-   * <p>GC-aiding dissolution method.  Should be called on GUI thread.</p>
+   * GC-aiding dissolution method.  Should be called on GUI thread.
    */
 
   public void cleanup()

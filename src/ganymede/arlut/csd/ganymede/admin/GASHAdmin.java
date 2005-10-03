@@ -97,17 +97,17 @@ import arlut.csd.ganymede.rmi.Server;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Ganymede GUI admin console.</P>
+ * Ganymede GUI admin console.
  *
- * <P>GASHAdmin is a dual-mode (applet/application) GUI app for monitoring and
+ * GASHAdmin is a dual-mode (applet/application) GUI app for monitoring and
  * controlling the Ganymede server.  In addition to monitoring users and tasks
  * on the Ganymede server, the admin console includes a full-functioned
- * {@link arlut.csd.ganymede.admin.GASHSchema schema editor}.</P>
+ * {@link arlut.csd.ganymede.admin.GASHSchema schema editor}.
  *
- * <P>GASHAdmin connects to a running
+ * GASHAdmin connects to a running
  * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer} using the 
  * {@link arlut.csd.ganymede.server.GanymedeServer#admin(java.lang.String, java.lang.String) admin()}
- * method.</P>
+ * method.
  */
 
 public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMISSLClientListener {
@@ -115,8 +115,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   static final boolean debug = false;
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede admin console.</p>
+   * TranslationService object for handling string localization in
+   * the Ganymede admin console.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdmin");
@@ -195,8 +195,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   private String cipherSuite = null;
 
   /**
-   * <p>We set this to true if we have set the logo to display the
-   * SSL icon.</p>
+   * We set this to true if we have set the logo to display the
+   * SSL icon.
    */
 
   private boolean ssl_logo = false;
@@ -696,8 +696,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * <p>This method returns true if we have created an RMI SSL socket
-   * to our server.</p>
+   * This method returns true if we have created an RMI SSL socket
+   * to our server.
    */
 
   public boolean isSSL()
@@ -706,11 +706,11 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * <p>This method is called when an RMI SSL client socket is created on the
-   * Ganymede client.</p>
+   * This method is called when an RMI SSL client socket is created on the
+   * Ganymede client.
    *
-   * <p>This method implements the {@link arlut.csd.ganymede.common.RMISSLClientListener}
-   * interface.</p>
+   * This method implements the {@link arlut.csd.ganymede.common.RMISSLClientListener}
+   * interface.
    */
 
   public void notifySSLClient(String host, int port, String cipherSuite)
@@ -801,10 +801,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * <P>Private method to load the Ganymede console's parameters
+   * Private method to load the Ganymede console's parameters
    * from an applet's HTML parameters.  Used when GASHAdmin is run as an applet..
    * {@link arlut.csd.ganymede.admin.GASHAdmin#loadProperties(java.lang.String) loadProperties()}
-   * is for use in an application context.</P>
+   * is for use in an application context.
    */ 
 
   private void loadParameters()
@@ -838,10 +838,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * <p>Loads and returns the error Image for use in client dialogs.</p>
+   * Loads and returns the error Image for use in client dialogs.
    * 
-   * <p>Once the image is loaded, it is cached for future calls to 
-   * getErrorImage().</p>
+   * Once the image is loaded, it is cached for future calls to 
+   * getErrorImage().
    */
 
   public final Image getErrorImage()
@@ -884,9 +884,9 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>JFrame subclass which is used to hold the {@link
+ * JFrame subclass which is used to hold the {@link
  * arlut.csd.ganymede.admin.GASHAdmin GASHAdmin} applet when the Ganymede 
- * admin console is run as an application rather than an applet.</p>
+ * admin console is run as an application rather than an applet.
  */
 
 class GASHAdminLoginFrame extends JFrame {

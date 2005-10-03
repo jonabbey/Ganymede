@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -91,8 +91,8 @@ import arlut.csd.ganymede.rmi.SchemaEdit;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Part of the admin console's graphical schema editor.  This panel is
- * responsible for displaying and editing field definitions.</p>
+ * Part of the admin console's graphical schema editor.  This panel is
+ * responsible for displaying and editing field definitions.
  */
 
 class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemListener {
@@ -885,7 +885,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   }
 
   /**
-   * <p>Helper method for changeTypeChoice().</p>
+   * Helper method for changeTypeChoice().
    */
 
   private void clearTypeChoice()
@@ -1425,7 +1425,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   }
 
   /**
-   * <p>Reinitialize the BaseFieldEditor with the current field.</p>
+   * Reinitialize the BaseFieldEditor with the current field.
    */
 
   public void refreshFieldEdit(boolean updateTargetC)
@@ -1435,11 +1435,11 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 
   /*
-   * <p>This method is called when we switch away from editing this
+   * This method is called when we switch away from editing this
    * field.. this gives us a chance to process the stringArea
    * components.. they, like the one-line string fields, are
    * focus-sensitive, but it's generally not as obvious to people that
-   * a multi-line string component is focus sensitive in the same way.</p>
+   * a multi-line string component is focus sensitive in the same way.
    */
 
   public void switchAway()
@@ -1448,7 +1448,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   }
 
   /**
-   * <p>For string, numeric, and checkbox fields</p>
+   * For string, numeric, and checkbox fields
    *
    * @see arlut.csd.JDataComponent.JsetValueCallback
    */
@@ -2155,7 +2155,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   }
 
   /**
-   * <p>GC-aiding dissolution method.  Should be called on GUI thread.</p>
+   * GC-aiding dissolution method.  Should be called on GUI thread.
    */
 
   public void cleanup()

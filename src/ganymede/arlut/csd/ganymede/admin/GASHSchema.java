@@ -112,10 +112,10 @@ import arlut.csd.ganymede.rmi.SchemaEdit;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>GUI Schema Editor, part of the Ganymede admin console.</P>
+ * GUI Schema Editor, part of the Ganymede admin console.
  *
- * <P>GASHSchema talks to the server by way of the
- * {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote interface.</P>
+ * GASHSchema talks to the server by way of the
+ * {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote interface.
  */
 
 public class GASHSchema extends JFrame implements treeCallback, treeDragDropCallback, ActionListener {
@@ -1897,9 +1897,9 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   }
 
   /**
-   * <p>Make sure that we clean up and get rid of our
+   * Make sure that we clean up and get rid of our
    * remote references to the server's schema editing
-   * objects if our window is closed on us.</p>
+   * objects if our window is closed on us.
    */
 
   protected void processWindowEvent(WindowEvent e) 
@@ -1965,9 +1965,9 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   }
 
   /**
-   * <p>GC-aiding dissolution method.  Should be called after the
+   * GC-aiding dissolution method.  Should be called after the
    * schema editor window has been removed from view, on the GUI
-   * thread.</p>
+   * thread.
    */
 
   private void cleanup()
@@ -2926,21 +2926,22 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   }
 
   /**
-   * <p>This method takes a ReturnVal object from the server and, if necessary,
-   * runs through a wizard interaction sequence, possibly displaying several
-   * dialogs before finally returning a final result code.</p>
+   * This method takes a ReturnVal object from the server and, if
+   * necessary, runs through a wizard interaction sequence, possibly
+   * displaying several dialogs before finally returning a final
+   * result code.
    *
-   * <p>Use the ReturnVal returned from this function after this function is
-   * called to determine the ultimate success or failure of any operation
-   * which returns ReturnVal, because a wizard sequence may determine the
-   * ultimate result.</p>
+   * Use the ReturnVal returned from this function after this function
+   * is called to determine the ultimate success or failure of any
+   * operation which returns ReturnVal, because a wizard sequence may
+   * determine the ultimate result.
    *
-   * <p>This method should not be synchronized, since handleReturnVal
-   * may pop up modal (thread-blocking) dialogs, and if we we
-   * synchronize this, some Swing or AWT code seems to block on our
+   * This method should not be synchronized, since handleReturnVal may
+   * pop up modal (thread-blocking) dialogs, and if we we synchronize
+   * this, some Swing or AWT code seems to block on our
    * synchronization when we do pop-up dialogs.  It's not any of my
    * code, so I assume that AWT tries to synchronize on the frame when
-   * parenting a new dialog.</p> 
+   * parenting a new dialog.
    */
 
   public ReturnVal handleReturnVal(ReturnVal retVal)

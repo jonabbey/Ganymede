@@ -196,7 +196,7 @@ public class TabEditor extends JStretchPanel implements JsetValueCallback {
   }
 
   /**
-   * <p>GC-aiding dissolution method.  Should be called on GUI thread.</p>
+   * GC-aiding dissolution method.  Should be called on GUI thread.
    */
 
   public void cleanup()
