@@ -92,6 +92,7 @@ import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.ParseArgs;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.rmi.Server;
 import arlut.csd.ganymede.rmi.Session;
 
@@ -119,6 +120,13 @@ import arlut.csd.ganymede.rmi.Session;
 public class glogin extends JApplet implements Runnable, ActionListener, ClientListener {
 
   public static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.glogin");
 
   /**
    * If this boolean is set to true, when the Ganymede client is
@@ -270,7 +278,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     my_glogin = new glogin();
 
-    my_frame = new gloginFrame("Ganymede Client", my_glogin);
+    my_frame = new gloginFrame(ts.l("main.frame_name"),	// "Ganymede Client"
+			       my_glogin);
 
     my_frame.getContentPane().setLayout(new BorderLayout());
     my_frame.getContentPane().add("Center", my_glogin);
@@ -359,10 +368,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     JPanel labelPanel = new JPanel();
     labelPanel.setLayout(new BorderLayout());
 
-    JLabel label = new JLabel("Ganymede Server on: ");
+    // "Ganymede Server on:"
+    JLabel label = new JLabel(ts.l("createLoginPanel.server_label1"));
     labelPanel.add("North", label);
 
-    JLabel hostLabel = new JLabel(serverhost + ", port " + registryPortProperty);
+    // "{0}, port {1,number,#}"
+    JLabel hostLabel = new JLabel(ts.l("createLoginPanel.server_label2", 
+				       serverhost, 
+				       new Integer(registryPortProperty)));
     Font x = new Font("Courier", Font.ITALIC, 14);
     hostLabel.setFont(x);
     hostLabel.setForeground(Color.black);
@@ -385,7 +398,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     gbc.ipady = 4;
 
-    JLabel userL = new JLabel("Username:");
+    // "Username:"
+    JLabel userL = new JLabel(ts.l("createLoginPanel.username"));
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridx = 0;
     gbc.gridy = 2;
@@ -403,7 +417,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     username.setEnabled(false);
     loginBox.add(username);
     
-    JLabel passL = new JLabel("Password:");
+    // "Password:"
+    JLabel passL = new JLabel(ts.l("createLoginPanel.password"));
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridx = 0;
     gbc.gridy = 3;
@@ -422,10 +437,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     loginBox.add(passwd);
 
     gbc.ipady = 0;
-    
-    _quitButton = new JButton("Quit");
 
-    connector = new JButton("Connecting... " + spinAry[spindex]);
+    // "Quit"    
+    _quitButton = new JButton(ts.l("createLoginPanel.quitButton"));
+
+    // "Connecting... {0}"
+    connector = new JButton(ts.l("global.connecting_text",
+				 new Character(spinAry[spindex])));
     connector.setOpaque(true);
     connector.addActionListener(this);
 
@@ -613,7 +631,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		  {
 		    public void run()
 		    {
-		      connector.setText("Connecting... " + spinAry[spindex]);
+		      // "Connecting... {0}"
+		      connector.setText(ts.l("global.connecting_text",
+					     new Character(spinAry[spindex])));
 		    }
 		  });
 	      }
@@ -669,11 +689,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		public void run() {
 		  if (ssl)
 		    {
-		      connector.setText("Login to server");
+		      // "Login to server"
+		      connector.setText(ts.l("run.login_ssl"));
 		    }
 		  else
 		    {
-		      connector.setText("Login to server (NO SSL)");
+		      // "Login to server (NO SSL)"
+		      connector.setText(ts.l("run.login_nossl"));
 		    }
 		  enableButtons(true);
 		  connector.paintImmediately(connector.getVisibleRect());
@@ -692,17 +714,22 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  }
 	else
 	  {
+	    // "Login Error"
+	    // "Couldn''t locate Ganymede server.  Perhaps it is down?\n\n{0}"
+	    // "OK"
 	    new StringDialog(my_frame,
-			     "Login error",
-			     "Couldn't locate Ganymede server... perhaps it is down?\n\n" + connectError,
-			     "OK", null,
+			     ts.l("run.login_error"), 
+			     ts.l("run.login_error_text", connectError),
+			     ts.l("global.ok"),
+			     null,
 			     getErrorImage()).DialogShow();
 
 	    EventQueue.invokeLater(new Runnable() 
 	      {
 		public void run()
 		{
-		  connector.setText("Connect");
+		  // "Connect"
+		  connector.setText(ts.l("global.connect_text"));
 		  username.setEnabled(false);
 		  passwd.setEnabled(false);
 		  
@@ -877,8 +904,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	      }
 	    catch (Exception ex)
 	      {
-		new JErrorDialog(my_frame, "Couldn't log into server: \n"
-				 + ex.getMessage(), getErrorImage());
+		// "Couldn''t log into server: \n{0}"
+		new JErrorDialog(my_frame,
+				 ts.l("actionPerformed.login_failure", ex.getMessage()),
+				 getErrorImage());
 	    
 		enableButtons(true);
 	      }
@@ -1095,6 +1124,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 class DeathWatcherThread extends Thread {
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.DeathWatcherThread");
+
   final boolean debug = false;
 
   String message = null;
@@ -1145,8 +1181,9 @@ class DeathWatcherThread extends Thread {
 
     // throw up a modal dialog to get the user's attention
 
+    // "The Ganymede Server is disconnecting us:\n\n{0} "
     new JErrorDialog(glogin.g_client,
-		     "The server is disconnecting us: \n\n" + message,
+		     ts.l("run.kicked_off", message),
 		     glogin.g_client.getErrorImage());
 
     // if we get here, the dialog has been put down
@@ -1174,15 +1211,17 @@ class DeathWatcherThread extends Thread {
 ------------------------------------------------------------------------------*/
 
 /**
- * Client-side self-destruction thread.  This thread will be created and run
- * when the server sends the client's
- * {@link arlut.csd.ganymede.client.ClientBase ClientBase} a forced disconnect 
- * RMI call.  When run, this thread starts a 30 second timer, while the 
- * {@link arlut.csd.ganymede.client.DeathWatcherThread DeathWatcherThread} shows
- * a dialog to the user, explaining the disconnect.  The user can click ok on
- * that dialog, causing this thread's dieNow() method to terminate the timer.  In
- * any case, when the timer counts down to zero, the glogin's logout() method 
- * will be called, and the client's main window will be shutdown.
+ * Client-side self-destruction thread.  This thread will be created
+ * and run when the server sends the client's {@link
+ * arlut.csd.ganymede.client.ClientBase ClientBase} a forced
+ * disconnect RMI call.  When run, this thread starts a 30 second
+ * timer, while the {@link
+ * arlut.csd.ganymede.client.DeathWatcherThread DeathWatcherThread}
+ * shows a dialog to the user, explaining the disconnect.  The user
+ * can click ok on that dialog, causing this thread's dieNow() method
+ * to terminate the timer.  In any case, when the timer counts down to
+ * zero, the glogin's logout() method will be called, and the client's
+ * main window will be shutdown.
  *
  * @version $Id$
  * @author Jonathan Abbey
@@ -1211,24 +1250,38 @@ class ExitThread extends Thread {
       }
 
     int i = 30;
-    
-    System.out.print("System shutting down in 30 seconds");
+
+    if (debug)
+      {
+	System.out.print("System shutting down in 30 seconds");
+      }
 
     try
       {
 	while (!dieNow && i > 0)
 	  {
 	    sleep(1000);
-	    System.out.print(".");
+
+	    if (debug)
+	      {
+		System.out.print(".");
+	      }
+
 	    i--;
 	  }
       }
     catch (InterruptedException ie)
       {
-	System.out.println("glogin: Interupted trying to sleep and quit: " + ie);
+	if (debug)
+	  {
+	    System.out.println("glogin: Interupted trying to sleep and quit: " + ie);
+	  }
       }
-    
-    System.out.println("\nGanymede disconnected: " + message);
+
+    if (debug)
+      {
+	System.out.println("\nGanymede disconnected: " + message);
+      }
 
     glogin.my_glogin.logout();
   }
