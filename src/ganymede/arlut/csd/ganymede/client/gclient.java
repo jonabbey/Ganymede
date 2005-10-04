@@ -114,6 +114,7 @@ import arlut.csd.JTree.treeControl;
 import arlut.csd.JTree.treeMenu;
 import arlut.csd.JTree.treeNode;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecQuickSort;
 import arlut.csd.ganymede.common.BaseDump;
 import arlut.csd.ganymede.common.CatTreeNode;
@@ -164,6 +165,13 @@ import arlut.csd.ganymede.rmi.db_object;
 public class gclient extends JFrame implements treeCallback, ActionListener, JsetValueCallback {
 
   public static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.gclient");
 
   /**
    * we're only going to have one gclient at a time per running client (singleton pattern).
@@ -347,7 +355,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   private boolean
     toolToggle = true,
-    showToolbar = true,       // Show the toolbar
     somethingChanged = false;  // This will be set to true if the user changes anything
 
   private int
@@ -461,16 +468,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   //
 
   treeMenu 
-    objectViewPM,
-    objectReactivatePM,
-    objectInactivatePM,
-    objectRemovePM;
-
-  treeMenu 
     pMenuAll = new treeMenu(),
     pMenuEditable= new treeMenu(),
     pMenuEditableCreatable = new treeMenu(),
-    pMenuAllCreatable = new treeMenu();
+    pMenuAllCreatable = new treeMenu(),
+    objectViewPM = new treeMenu(),
+    objectReactivatePM = new treeMenu(),
+    objectInactivatePM = new treeMenu(),
+    objectRemovePM = new treeMenu();
   
   JMenuBar 
     menubar;
@@ -583,7 +588,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       leftP,
       leftTop,
       rightTop,
-      mainPanel;   //Everything is in this, so it is double buffered
+      mainPanel;   // Everything is in this, so it is double buffered
 
     /* -- */
 
@@ -623,7 +628,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    currentPersonaString = my_username;
 	  }
 
-	setTitle("Ganymede Client: " + currentPersonaString + " logged in");
+	// "Ganymede Client: {0} logged in"
+	setTitle(ts.l("global.logged_in_title", currentPersonaString));
       }
     catch (RemoteException rx)
       {
@@ -643,310 +649,20 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     // Make the menu bar
 
-    menubar = new JMenuBar();
-
-    //menubar.setBorderPainted(true);
-    
-    // File menu
-
-    fileMenu = new JMenu("File");
-    fileMenu.setMnemonic('f');
-    fileMenu.setDelay(0);
-
-    toggleToolBarMI = new JMenuItem("Toggle Toolbar");
-    toggleToolBarMI.setMnemonic('t');
-    toggleToolBarMI.addActionListener(this);
-
-    logoutMI = new JMenuItem("Logout");
-    logoutMI.setMnemonic('l');
-    logoutMI.addActionListener(this);
-
-    clearTreeMI = new JMenuItem("Clear Tree");
-    clearTreeMI.setMnemonic('c');
-    clearTreeMI.addActionListener(this);
-
-    filterQueryMI = new JMenuItem("Set Owner Filter");
-    filterQueryMI.setMnemonic('f');
-    filterQueryMI.addActionListener(this);
-
-    defaultOwnerMI = new JMenuItem("Set Default Owner");
-    defaultOwnerMI.setMnemonic('d');
-    defaultOwnerMI.addActionListener(this);
-
-    hideNonEditablesMI = new JCheckBoxMenuItem("Hide non-editable objects", true);
-    hideNonEditablesMI.addActionListener(this);
-
-    fileMenu.add(clearTreeMI);
-    fileMenu.add(filterQueryMI);
-    fileMenu.add(defaultOwnerMI);
-    fileMenu.add(hideNonEditablesMI);
-    fileMenu.addSeparator();
-    fileMenu.add(logoutMI);
-
-    // Action menu
-
-    actionMenu = new JMenu("Actions");
-    actionMenu.setMnemonic('a');
-
-    createObjectMI = new JMenuItem("Create Object");
-    createObjectMI.setMnemonic('c');
-    createObjectMI.setActionCommand("create new object");
-    createObjectMI.addActionListener(this);
-    
-    editObjectMI = new JMenuItem("Edit Object");
-    editObjectMI.setMnemonic('e');
-    editObjectMI.setActionCommand("open object for editing");
-    editObjectMI.addActionListener(this);
-
-    viewObjectMI = new JMenuItem("View Object");
-    viewObjectMI.setMnemonic('v');
-    viewObjectMI.setActionCommand("open object for viewing");
-    viewObjectMI.addActionListener(this);
-    
-    deleteObjectMI = new JMenuItem("Delete Object");
-    deleteObjectMI.setMnemonic('d');
-    deleteObjectMI.setActionCommand("delete an object");
-    deleteObjectMI.addActionListener(this);
-
-    inactivateObjectMI = new JMenuItem("Inactivate Object");
-    inactivateObjectMI.setMnemonic('i');
-    inactivateObjectMI.setActionCommand("inactivate an object");
-    inactivateObjectMI.addActionListener(this);
-
-    menubarQueryMI = new JMenuItem("Query");
-    menubarQueryMI.setMnemonic('q');
-    menubarQueryMI.addActionListener(this);
-
-   // Personae init
-
-    try
-      {
-	personae = session.getPersonae();
-      }
-    catch (Exception rx)
-      {
-	processExceptionRethrow(rx, "Could not load personas");
-      }
-
-    personaListener = new PersonaListener(session, this);
-
-    if ((personae != null) && personae.size() > 1)
-      {
-	changePersonaMI = new JMenuItem("Change Persona");
-	changePersonaMI.setMnemonic('p');
-	changePersonaMI.setActionCommand("change persona");
-	changePersonaMI.addActionListener(this);
-	actionMenu.add(changePersonaMI);
-      }
-
-    actionMenu.add(menubarQueryMI);
-    actionMenu.addSeparator();
-    actionMenu.add(viewObjectMI);
-    actionMenu.add(createObjectMI);
-    actionMenu.add(editObjectMI);
-    actionMenu.add(deleteObjectMI);
-    actionMenu.add(inactivateObjectMI);
-
-    if (debug)
-      {
-	JMenuItem viewAnInvid = new JMenuItem("Show me an Invid");
-	viewAnInvid.addActionListener(this);
-	actionMenu.addSeparator();
-	actionMenu.add(viewAnInvid);
-      }
-
-    // windowMenu
-
-    windowMenu = new JMenu("Windows");
-    windowMenu.setMnemonic('w');
-    windowMenu.add(toggleToolBarMI);
-   
-    // Look and Feel menu
-
-    LandFMenu = new arlut.csd.JDataComponent.LAFMenu(this);
-    LandFMenu.setMnemonic('l');
-    LandFMenu.setCallback(this);
-
-    // Help menu
-
-    helpMenu = new JMenu("Help");
-    helpMenu.setMnemonic('h');
-
-    // we don't have anything done for help.. disable the help menu for now.
-
-    //    showHelpMI = new JMenuItem("Help");
-    //    showHelpMI.setMnemonic('h');  // swing can't handle menu and menuitem with same mnemonic
-    //    showHelpMI.addActionListener(this);
-    //    helpMenu.add(showHelpMI);
-    //
-    //    helpMenu.addSeparator();
-
-    // This uses action commands, so you don't need to globally declare these
-
-    JMenuItem showAboutMI = new JMenuItem("About Ganymede");
-    showAboutMI.setMnemonic('a');
-    showAboutMI.addActionListener(this);
-    helpMenu.add(showAboutMI);
-
-    JMenuItem showCreditsMI = new JMenuItem("Credits");
-    showCreditsMI.setMnemonic('c');
-    showCreditsMI.addActionListener(this);
-    helpMenu.add(showCreditsMI);
-
-    JMenuItem showMOTDMI = new JMenuItem("Message of the day");
-    showMOTDMI.setMnemonic('m');
-    showMOTDMI.addActionListener(this);
-    helpMenu.add(showMOTDMI);
-
-    menubar.add(fileMenu);
-    menubar.add(LandFMenu);
-    menubar.add(actionMenu);
-    menubar.add(windowMenu);
-
-    menubar.add(Box.createGlue());
-    menubar.add(helpMenu);    
+    menubar = createMenuBar();
     setJMenuBar(menubar);
 
-    // Create menus for the tree
-
-    pMenuAll.add(new JMenuItem("Hide Non-Editables"));
-    pMenuAll.add(new JMenuItem("Query"));
-    pMenuAll.add(new JMenuItem("Report editable"));
-    pMenuAll.add(new JMenuItem("Report all"));
-
-    pMenuEditable.add(new JMenuItem("Show Non-Editables"));
-    pMenuEditable.add(new JMenuItem("Query"));
-    pMenuEditable.add(new JMenuItem("Report editable"));
-    pMenuEditable.add(new JMenuItem("Report all"));
-
-    pMenuAllCreatable.add(new JMenuItem("Hide Non-Editables"));
-    pMenuAllCreatable.add(new JMenuItem("Query"));
-    pMenuAllCreatable.add(new JMenuItem("Report editable"));
-    pMenuAllCreatable.add(new JMenuItem("Report all"));
-    pMenuAllCreatable.add(new JMenuItem("Create"));
-
-    pMenuEditableCreatable.add(new JMenuItem("Show Non-Editables"));
-    pMenuEditableCreatable.add(new JMenuItem("Query"));
-    pMenuEditableCreatable.add(new JMenuItem("Report editable"));
-    pMenuEditableCreatable.add(new JMenuItem("Report all"));
-    pMenuEditableCreatable.add(new JMenuItem("Create"));
-
-    if (debug)
-      {
-	System.out.println("Loading images for tree");
-      }
-
-    ganymede_logo = _myglogin.ganymede_logo;
-
-    Image openFolder = PackageResources.getImageResource(this, "openfolder.gif", getClass());
-    Image closedFolder = PackageResources.getImageResource(this, "folder.gif", getClass());
-    Image list = PackageResources.getImageResource(this, "list.gif", getClass());
-    Image listnowrite = PackageResources.getImageResource(this, "listnowrite.gif", getClass());
-    Image redOpenFolder = PackageResources.getImageResource(this, "openfolder-red.gif", getClass());
-    Image redClosedFolder = PackageResources.getImageResource(this, "folder-red.gif", getClass());
-    
-    search = PackageResources.getImageResource(this, "srchfol2.gif", getClass());
-    queryIcon = PackageResources.getImageResource(this, "query.gif", getClass());
-    cloneIcon = PackageResources.getImageResource(this, "clone.gif", getClass());
-    idleIcon = new ImageIcon(PackageResources.getImageResource(this, "nobuild.gif", getClass()));
-    buildUnknownIcon = new ImageIcon(PackageResources.getImageResource(this, "buildunknown.gif", getClass()));
-    buildIcon = new ImageIcon(PackageResources.getImageResource(this, "build1.gif", getClass()));
-    buildIcon2 = new ImageIcon(PackageResources.getImageResource(this, "build2.gif", getClass()));
-    trash = PackageResources.getImageResource(this, "trash.gif", getClass());
-    creation = PackageResources.getImageResource(this, "creation.gif", getClass());
-    newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
-    pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
-    //    inactivateIcon = PackageResources.getImageResource(this, "inactivate.gif", getClass());
-    personaIcon = PackageResources.getImageResource(this, "persona.gif", getClass());
-    setIconImage(pencil);
-    createDialogImage = PackageResources.getImageResource(this, "wiz3b.gif", getClass());
-
-    treepencil = PackageResources.getImageResource(this, "treepencil.gif", getClass());
-    treetrash = PackageResources.getImageResource(this, "treetrash.gif", getClass());
-    treecreation = PackageResources.getImageResource(this, "treenewicon.gif", getClass());
-
-    Image remove = PackageResources.getImageResource(this, "remove.gif", getClass());
-    Image expire = PackageResources.getImageResource(this, "expire.gif", getClass());
-
-    images = new Image[NUM_IMAGE];
-    images[OPEN_BASE] =  openFolder;
-    images[CLOSED_BASE ] = closedFolder;
-    
-    images[OPEN_FIELD] = list;
-    images[OPEN_FIELD_DELETE] = treetrash;
-    images[OPEN_FIELD_CREATE] = treecreation;
-    images[OPEN_FIELD_CHANGED] = treepencil;
-    images[OPEN_FIELD_EXPIRESET] = expire;
-    images[OPEN_FIELD_REMOVESET] = remove;
-    images[CLOSED_FIELD] = list;
-    images[CLOSED_FIELD_DELETE] = treetrash;
-    images[CLOSED_FIELD_CREATE] = treecreation;
-    images[CLOSED_FIELD_CHANGED] = treepencil;
-    images[CLOSED_FIELD_EXPIRESET] = expire;
-    images[CLOSED_FIELD_REMOVESET] = remove;
-    
-    images[OPEN_CAT] = redOpenFolder;
-    images[CLOSED_CAT] = redClosedFolder;
-
-    images[OBJECTNOWRITE] = listnowrite;
-
-    tree = new treeControl(new Font("SansSerif", Font.PLAIN, 12),
-			   Color.black, Color.white, this, images,
-			   null);
-
-    tree.setMinimumWidth(200);
+    createTree();
 
     if (debug)
       {
 	System.out.println("Adding left and right panels");
       }
 
-    //    Box leftBox = new Box(tree, "Objects");
-
     leftP = new JPanel(false);
     leftP.setLayout(new BorderLayout());
     leftP.add("Center", tree);
     
-    if (!showToolbar)
-      {
-	leftTop = new JPanel(false);
-	leftTop.setBorder(statusBorderRaised);
-	
-	leftTop.setLayout(new BorderLayout());
-
-	leftTop.add("Center", new JLabel("Objects"));
-	
-	leftP.add("North", leftTop);
-      }
-
-    if (debug)
-      {
-	System.out.println("Creating pop up menus");
-      }
-
-    objectViewPM = new treeMenu();
-    objectViewPM.add(new JMenuItem("View Object"));
-
-    objectRemovePM = new treeMenu();
-    objectRemovePM.add(new JMenuItem("View Object"));
-    objectRemovePM.add(new JMenuItem("Edit Object"));
-    objectRemovePM.add(new JMenuItem("Clone Object"));
-    objectRemovePM.add(new JMenuItem("Delete Object"));
-
-    objectInactivatePM = new treeMenu();
-    objectInactivatePM.add(new JMenuItem("View Object"));
-    objectInactivatePM.add(new JMenuItem("Edit Object"));
-    objectInactivatePM.add(new JMenuItem("Clone Object"));
-    objectInactivatePM.add(new JMenuItem("Delete Object"));
-    objectInactivatePM.add(new JMenuItem("Inactivate Object"));
-
-    objectReactivatePM = new treeMenu();
-    objectReactivatePM.add(new JMenuItem("View Object"));
-    objectReactivatePM.add(new JMenuItem("Edit Object"));
-    objectReactivatePM.add(new JMenuItem("Clone Object"));
-    objectReactivatePM.add(new JMenuItem("Delete Object"));
-    objectReactivatePM.add(new JMenuItem("Reactivate Object"));
-
     try
       {
 	buildTree();
@@ -959,7 +675,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // The right panel which will contain the windowPanel
 
     JPanel rightP = new JPanel(true);
-    //    rightP.setBackground(ClientColor.background);
     rightP.setLayout(new BorderLayout());
 
     wp = new windowPanel(this, windowMenu);
@@ -971,21 +686,20 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     
     toolBar = createToolbar();
 
-    if (showToolbar)
-      {
-	getContentPane().add("North", toolBar);
-      }
-    
-    commit = new JButton("Commit");
+    getContentPane().add("North", toolBar);
+
+    // "Commit"    
+    commit = new JButton(ts.l("init.commit_button"));
     commit.setEnabled(false);
     commit.setOpaque(true);
-    commit.setToolTipText("Click this to commit all changes to database");
+    commit.setToolTipText(ts.l("init.commit_tooltip")); // "Click this to commit your transaction to the database"
     commit.addActionListener(this);
 
-    cancel = new JButton("Cancel");
+    // "Cancel"
+    cancel = new JButton(ts.l("init.cancel_button"));
     cancel.setEnabled(false);
     cancel.setOpaque(true);
-    cancel.setToolTipText("Click this to cancel all changes");
+    cancel.setToolTipText(ts.l("init.cancel_tooltip"));	// "Click this to cancel your transaction"
     cancel.addActionListener(this);
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
@@ -1092,6 +806,351 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
 
     getContentPane().validate();
+  }
+
+  /* Private stuff */
+
+  /**
+   * Create our client's menu bar from localization resources.
+   */
+
+  private JMenuBar createMenuBar()
+  {
+    JMenuBar menubar = new JMenuBar();
+
+    //menubar.setBorderPainted(true);
+    
+    // File menu
+
+    // "File"
+    fileMenu = new JMenu(ts.l("createMenuBar.file_menu"));
+    setMenuMnemonic(fileMenu, ts.l("createMenuBar.file_menu_key_optional"));
+
+    // "Clear Tree"
+    clearTreeMI = new JMenuItem(ts.l("createMenuBar.file_menu_0"));
+    setMenuMnemonic(clearTreeMI, ts.l("createMenuBar.file_menu_0_key_optional"));
+    clearTreeMI.addActionListener(this);
+
+    // "Set Owner Filter"
+    filterQueryMI = new JMenuItem(ts.l("createMenuBar.file_menu_1"));
+    setMenuMnemonic(filterQueryMI, ts.l("createMenuBar.file_menu_1_key_optional"));
+    filterQueryMI.addActionListener(this);
+
+    // "Set Default Owner"
+    defaultOwnerMI = new JMenuItem(ts.l("createMenuBar.file_menu_2"));
+    setMenuMnemonic(defaultOwnerMI, ts.l("createMenuBar.file_menu_2_key_optional"));
+    defaultOwnerMI.addActionListener(this);
+
+    // "Hide non-editable objects"
+    hideNonEditablesMI = new JCheckBoxMenuItem(ts.l("createMenuBar.file_menu_3"), true);
+    setMenuMnemonic(hideNonEditablesMI, ts.l("createMenuBar.file_menu_3_key_optional"));
+    hideNonEditablesMI.addActionListener(this);
+
+    // "Logout"
+    logoutMI = new JMenuItem(ts.l("createMenuBar.file_menu_4"));
+    setMenuMnemonic(logoutMI, ts.l("createMenuBar.file_menu_4_key_optional"));    
+    logoutMI.addActionListener(this);
+
+    fileMenu.add(clearTreeMI);
+    fileMenu.add(filterQueryMI);
+    fileMenu.add(defaultOwnerMI);
+    fileMenu.add(hideNonEditablesMI);
+    fileMenu.addSeparator();
+    fileMenu.add(logoutMI);
+
+    // Action menu
+
+    // "Actions"
+    actionMenu = new JMenu(ts.l("createMenuBar.action_menu"));
+    setMenuMnemonic(actionMenu, ts.l("createMenuBar.action_menu_key_optional"));
+
+    // Personae init
+
+    try
+      {
+	personae = session.getPersonae();
+      }
+    catch (Exception rx)
+      {
+	processExceptionRethrow(rx, "Could not load personas");
+      }
+
+    personaListener = new PersonaListener(session, this);
+
+    if ((personae != null) && personae.size() > 1)
+      {
+	// "Change Persona"
+	changePersonaMI = new JMenuItem(ts.l("createMenuBar.action_menu_0"));
+	setMenuMnemonic(changePersonaMI, ts.l("createMenuBar.action_menu_0_key_optional"));
+	changePersonaMI.setActionCommand("change persona");
+	changePersonaMI.addActionListener(this);
+      }
+
+    // "Query"
+    menubarQueryMI = new JMenuItem(ts.l("createMenuBar.action_menu_1"));
+    setMenuMnemonic(menubarQueryMI, ts.l("createMenuBar.action_menu_1_key_optional"));
+    menubarQueryMI.addActionListener(this);
+
+    // "View Object"
+    viewObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_2"));
+    setMenuMnemonic(viewObjectMI, ts.l("createMenuBar.action_menu_2_key_optional"));
+    viewObjectMI.setActionCommand("open object for viewing");
+    viewObjectMI.addActionListener(this);
+
+    // "Create Object"    
+    createObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_3"));
+    setMenuMnemonic(createObjectMI, ts.l("createMenuBar.action_menu_3_key_optional"));
+    createObjectMI.setActionCommand("create new object");
+    createObjectMI.addActionListener(this);
+
+    // "Edit Object"    
+    editObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_4"));
+    setMenuMnemonic(editObjectMI, ts.l("createMenuBar.action_menu_4_key_optional"));
+    editObjectMI.setActionCommand("open object for editing");
+    editObjectMI.addActionListener(this);
+
+    // "Delete Object"
+    deleteObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_5"));
+    setMenuMnemonic(deleteObjectMI, ts.l("createMenuBar.action_menu_5_key_optional"));
+    deleteObjectMI.setActionCommand("delete an object");
+    deleteObjectMI.addActionListener(this);
+
+    // "Inactivate Object"
+    inactivateObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_6"));
+    setMenuMnemonic(inactivateObjectMI, ts.l("createMenuBar.action_menu_6_key_optional"));
+    inactivateObjectMI.setActionCommand("inactivate an object");
+    inactivateObjectMI.addActionListener(this);
+
+    if (changePersonaMI != null)
+      {
+	actionMenu.add(changePersonaMI);
+      }
+
+    actionMenu.add(menubarQueryMI);
+    actionMenu.addSeparator();
+    actionMenu.add(viewObjectMI);
+    actionMenu.add(createObjectMI);
+    actionMenu.add(editObjectMI);
+    actionMenu.add(deleteObjectMI);
+    actionMenu.add(inactivateObjectMI);
+
+    if (debug)
+      {
+	// "Access Invid"
+	JMenuItem viewAnInvid = new JMenuItem(ts.l("createMenuBar.action_menu_7"));
+	setMenuMnemonic(viewAnInvid, ts.l("createMenuBar.action_menu_7_key_optional"));
+	viewAnInvid.addActionListener(this);
+	actionMenu.addSeparator();
+	actionMenu.add(viewAnInvid);
+      }
+
+    // windowMenu
+
+    // "Windows"
+    windowMenu = new JMenu(ts.l("createMenuBar.window_menu"));
+    setMenuMnemonic(windowMenu, ts.l("createMenuBar.window_menu_key_optional"));
+
+    // "Toggle Toolbar"
+    toggleToolBarMI = new JMenuItem(ts.l("createMenuBar.window_menu_0"));
+    setMenuMnemonic(toggleToolBarMI, ts.l("createMenuBar.window_menu_0_key_optional"));
+    toggleToolBarMI.addActionListener(this);
+
+    windowMenu.add(toggleToolBarMI);
+   
+    // Look and Feel menu
+
+    LandFMenu = new arlut.csd.JDataComponent.LAFMenu(this);
+    LandFMenu.setMnemonic('l');
+    LandFMenu.setCallback(this);
+
+    // Help menu
+
+    // "Help"
+    helpMenu = new JMenu(ts.l("createMenuBar.help_menu"));
+    setMenuMnemonic(helpMenu, ts.l("createMenuBar.help_menu_key_optional"));
+
+    // These use action commands, so you don't need to globally
+    // declare these
+
+    // "About Ganymede"
+    JMenuItem showAboutMI = new JMenuItem(ts.l("createMenuBar.help_menu_0"));
+    setMenuMnemonic(showAboutMI, ts.l("createMenuBar.help_menu_0_key_optional"));
+    showAboutMI.setActionCommand("About Ganymede");
+    showAboutMI.addActionListener(this);
+    helpMenu.add(showAboutMI);
+
+    // "Credits"
+    JMenuItem showCreditsMI = new JMenuItem(ts.l("createMenuBar.help_menu_1"));
+    setMenuMnemonic(showCreditsMI, ts.l("createMenuBar.help_menu_1_key_optional"));
+    showCreditsMI.setActionCommand("Credits");
+    showCreditsMI.addActionListener(this);
+    helpMenu.add(showCreditsMI);
+
+    // "Message of the day"
+    JMenuItem showMOTDMI = new JMenuItem(ts.l("createMenuBar.help_menu_2"));
+    setMenuMnemonic(showMOTDMI, ts.l("createMenuBar.help_menu_2_key_optional"));
+    showMOTDMI.setActionCommand("Message of the day");
+    showMOTDMI.addActionListener(this);
+    helpMenu.add(showMOTDMI);
+
+    menubar.add(fileMenu);
+    menubar.add(LandFMenu);
+    menubar.add(actionMenu);
+    menubar.add(windowMenu);
+    // we want to force the helpMenu to be on the far right side of
+    // the menu bar..
+    menubar.add(Box.createGlue());
+    menubar.add(helpMenu);
+
+    return menubar;
+  }
+
+  private void setMenuMnemonic(JMenuItem item, String pattern)
+  {
+    if (pattern != null)
+      {
+	item.setMnemonic((int) pattern.charAt(0));
+      }
+  }
+
+  /**
+   * Create the tree component used in the left hand side of the client.
+   */
+
+  private void createTree()
+  {
+    if (debug)
+      {
+	System.out.println("Creating tree");
+      }
+
+    String
+      hide = ts.l("createTree.hide_non_editable"), // "Hide Non-Editables"
+      show = ts.l("createTree.show_non_editable"), // "Show Non-Editables"
+      query = ts.l("createTree.query"),	// "Query"
+      report_editable = ts.l("createTree.report_editable"), // "Report Editable"
+      report = ts.l("createTree.report"), // "Report All"
+      create = ts.l("createTree.create"), // "Create"
+      view = ts.l("createTree.view_object"), // "View Object"
+      edit = ts.l("createTree.edit_object"), // "Edit Object"
+      clone = ts.l("createTree.clone_object"), // "Clone Object"
+      delete = ts.l("createTree.delete_object"), // "Delete Object"
+      inactivate = ts.l("createTree.inactivate_object"), // "Inactivate Object"
+      reactivate = ts.l("createTree.reactivate_object"); // "Reactivate Object"
+
+    // note that a lot of these are given the same text, but a
+    // JMenuItem can only belong to one menu at a time, so we have to
+    // create multiple copies
+
+    pMenuAll.add(new JMenuItem(hide));
+    pMenuAll.add(new JMenuItem(query));
+    pMenuAll.add(new JMenuItem(report_editable));
+    pMenuAll.add(new JMenuItem(report));
+
+    pMenuEditable.add(new JMenuItem(show));
+    pMenuEditable.add(new JMenuItem(query));
+    pMenuEditable.add(new JMenuItem(report_editable));
+    pMenuEditable.add(new JMenuItem(report));
+
+    pMenuAllCreatable.add(new JMenuItem(hide));
+    pMenuAllCreatable.add(new JMenuItem(query));
+    pMenuAllCreatable.add(new JMenuItem(report_editable));
+    pMenuAllCreatable.add(new JMenuItem(report));
+    pMenuAllCreatable.add(new JMenuItem(create));
+
+    pMenuEditableCreatable.add(new JMenuItem(show));
+    pMenuEditableCreatable.add(new JMenuItem(query));
+    pMenuEditableCreatable.add(new JMenuItem(report_editable));
+    pMenuEditableCreatable.add(new JMenuItem(report));
+    pMenuEditableCreatable.add(new JMenuItem(create));
+
+    objectViewPM.add(new JMenuItem(view));
+
+    objectRemovePM.add(new JMenuItem(view));
+    objectRemovePM.add(new JMenuItem(edit));
+    objectRemovePM.add(new JMenuItem(clone));
+    objectRemovePM.add(new JMenuItem(delete));
+
+    objectInactivatePM.add(new JMenuItem(view));
+    objectInactivatePM.add(new JMenuItem(edit));
+    objectInactivatePM.add(new JMenuItem(clone));
+    objectInactivatePM.add(new JMenuItem(delete));
+    objectInactivatePM.add(new JMenuItem(inactivate));
+
+    objectReactivatePM.add(new JMenuItem(view));
+    objectReactivatePM.add(new JMenuItem(edit));
+    objectReactivatePM.add(new JMenuItem(clone));
+    objectReactivatePM.add(new JMenuItem(delete));
+    objectReactivatePM.add(new JMenuItem(reactivate));
+
+    if (debug)
+      {
+	System.out.println("Loading images for tree");
+      }
+
+    ganymede_logo = _myglogin.ganymede_logo;
+
+    Image openFolder = PackageResources.getImageResource(this, "openfolder.gif", getClass());
+    Image closedFolder = PackageResources.getImageResource(this, "folder.gif", getClass());
+    Image list = PackageResources.getImageResource(this, "list.gif", getClass());
+    Image listnowrite = PackageResources.getImageResource(this, "listnowrite.gif", getClass());
+    Image redOpenFolder = PackageResources.getImageResource(this, "openfolder-red.gif", getClass());
+    Image redClosedFolder = PackageResources.getImageResource(this, "folder-red.gif", getClass());
+    
+    search = PackageResources.getImageResource(this, "srchfol2.gif", getClass());
+    queryIcon = PackageResources.getImageResource(this, "query.gif", getClass());
+    cloneIcon = PackageResources.getImageResource(this, "clone.gif", getClass());
+    idleIcon = new ImageIcon(PackageResources.getImageResource(this, "nobuild.gif", getClass()));
+    buildUnknownIcon = new ImageIcon(PackageResources.getImageResource(this, "buildunknown.gif", getClass()));
+    buildIcon = new ImageIcon(PackageResources.getImageResource(this, "build1.gif", getClass()));
+    buildIcon2 = new ImageIcon(PackageResources.getImageResource(this, "build2.gif", getClass()));
+    trash = PackageResources.getImageResource(this, "trash.gif", getClass());
+    creation = PackageResources.getImageResource(this, "creation.gif", getClass());
+    newToolbarIcon = PackageResources.getImageResource(this, "newicon.gif", getClass());
+    pencil = PackageResources.getImageResource(this, "pencil.gif", getClass());
+    personaIcon = PackageResources.getImageResource(this, "persona.gif", getClass());
+    //    inactivateIcon = PackageResources.getImageResource(this, "inactivate.gif", getClass());
+
+    // we'll use the pencil/editing image for our client's application icon
+
+    setIconImage(pencil);
+
+    createDialogImage = PackageResources.getImageResource(this, "wiz3b.gif", getClass());
+
+    treepencil = PackageResources.getImageResource(this, "treepencil.gif", getClass());
+    treetrash = PackageResources.getImageResource(this, "treetrash.gif", getClass());
+    treecreation = PackageResources.getImageResource(this, "treenewicon.gif", getClass());
+
+    Image remove = PackageResources.getImageResource(this, "remove.gif", getClass());
+    Image expire = PackageResources.getImageResource(this, "expire.gif", getClass());
+
+    images = new Image[NUM_IMAGE];
+    images[OPEN_BASE] =  openFolder;
+    images[CLOSED_BASE ] = closedFolder;
+    
+    images[OPEN_FIELD] = list;
+    images[OPEN_FIELD_DELETE] = treetrash;
+    images[OPEN_FIELD_CREATE] = treecreation;
+    images[OPEN_FIELD_CHANGED] = treepencil;
+    images[OPEN_FIELD_EXPIRESET] = expire;
+    images[OPEN_FIELD_REMOVESET] = remove;
+    images[CLOSED_FIELD] = list;
+    images[CLOSED_FIELD_DELETE] = treetrash;
+    images[CLOSED_FIELD_CREATE] = treecreation;
+    images[CLOSED_FIELD_CHANGED] = treepencil;
+    images[CLOSED_FIELD_EXPIRESET] = expire;
+    images[CLOSED_FIELD_REMOVESET] = remove;
+    
+    images[OPEN_CAT] = redOpenFolder;
+    images[CLOSED_CAT] = redClosedFolder;
+
+    images[OBJECTNOWRITE] = listnowrite;
+
+    tree = new treeControl(new Font("SansSerif", Font.PLAIN, 12),
+			   Color.black, Color.white, this, images,
+			   null);
+
+    tree.setMinimumWidth(200);
   }
 
   /**
@@ -1651,9 +1710,18 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Sets text in the build status bar
+   * Updates the status icon, based on an enumerated list of strings
+   * that can be provided from the server.  These are "idle",
+   * "building", and "building2".  The "building" state applies when
+   * the server is currently running builderPhase1.  That is, when the
+   * server is (at least partially) locked while it dumps out data
+   * files.
    *
-   * @param status The text to display
+   * The "building2" phase is in effect when the server is unlocked
+   * and has one or more threads waiting for the completion of
+   * external build scripts.
+   *
+   * @param status The text to key off of.
    */
 
   public final void setBuildStatus(String status)
