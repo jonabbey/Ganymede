@@ -744,7 +744,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     mainPanel.add("South", bottomBar);
 
-    setStatus("Starting up");
+    // "Starting up"
+    setStatus(ts.l("init.startup_msg"));
 
     // Since we're logged in and have a session established, create the
     // background loader thread to read in object and field type information
@@ -960,7 +961,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // Look and Feel menu
 
     LandFMenu = new arlut.csd.JDataComponent.LAFMenu(this);
-    LandFMenu.setMnemonic('l');
+    LandFMenu.setMnemonic('l');	// XXX need to localize.. probably should be done in LAFMenu itself
     LandFMenu.setCallback(this);
 
     // Help menu
@@ -1005,6 +1006,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     return menubar;
   }
 
+  /**
+   * This helper method sets the mnemonic character for a menu item.
+   * The pattern string will generally be retrieved from the
+   * localization properties, and may be null.  This method is
+   * designed to deal with null patterns, since any given menu item
+   * may not, in fact, have a mnemonic set in the properties resource.
+   */
+
   private void setMenuMnemonic(JMenuItem item, String pattern)
   {
     if (pattern != null)
@@ -1023,6 +1032,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	System.out.println("Creating tree");
       }
+
+    /* pick up the pop-up menu strings from our localization
+     * resources */
 
     String
       hide = ts.l("createTree.hide_non_editable"), // "Hide Non-Editables"
@@ -1172,12 +1184,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	if ((rv != null) && (!rv.didSucceed()))
 	  {
-	    throw new RuntimeException("Could not open transaction.");
+	    return;
 	  }
       }
     catch (Exception rx)
       {
-	processExceptionRethrow(rx, "Could not open transaction");
+	// "Could not open transaction."
+	processExceptionRethrow(rx, ts.l("start.transaction_open_failure"));
       }
 
     // If user has multiple personas, ask which to start with.
@@ -1197,7 +1210,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       public void run() {
 	try
 	  {
-	    setStatus("Checking MOTD");
+	    // "Checking MOTD"
+	    setStatus(ts.l("start.motd_msg"));
 
 	    StringBuffer m;
 	    boolean html = true;
@@ -1236,15 +1250,17 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch (Exception rx)
 	  {
-	    processExceptionRethrow(rx, "Could not get motd");
+	    // "Could not get MOTD"
+	    processExceptionRethrow(rx, ts.l("start.motd_failure"));
 	  }
       }
     });
 
     motdThread.setPriority(Thread.NORM_PRIORITY);
     motdThread.start();
-    
-    setStatus("Ready.", 0);
+
+    // "Ready."    
+    setStatus(ts.l("start.ready_msg"), 0);
   }
   
   /**
@@ -1375,7 +1391,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      }
 	    catch (Exception rx)
 	      {
-		processExceptionRethrow(rx, "Could not do the query");
+		// "Could not do the query"
+		processExceptionRethrow(rx, ts.l("getObjectList.query_exception"));
 	      }
 	    
 	    cachedLists.putList(id, objectlist);
@@ -1406,7 +1423,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	catch (Exception rx)
 	  {
-	    processExceptionRethrow(rx, "Could not get dump");
+	    // "Could not get dump"
+	    processExceptionRethrow(rx, ts.l("getObjectList.dump_exception"));
 	  }
       }
 
@@ -1570,7 +1588,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   public String getObjectTitle(Invid objId)
   {
     ObjectHandle h = getObjectHandle(objId, null);
-    return getObjectType(objId) + " " + h.getLabel();
+    // "{0} {1}"
+    return ts.l("getObjectTitle.combine_str", getObjectType(objId), h.getLabel());
   }
 
   /**
@@ -1817,11 +1836,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     if (about == null)
       {
-	about = new aboutGanyDialog(this, "About Ganymede");
+	// "About Ganymede"
+	about = new aboutGanyDialog(this, ts.l("showAboutMessage.dialog_title"));
       }
     else
       {
-	about.setTitle("About Ganymede");
+	// "About Ganymede"
+	about.setTitle(ts.l("showAboutMessage.dialog_title"));
       }
 
     about.loadAboutText();
@@ -1836,11 +1857,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     if (about == null)
       {
-	about = new aboutGanyDialog(this, "Ganymede Credits");
+	// "Ganymede Credits"
+	about = new aboutGanyDialog(this, ts.l("showCredits.dialog_title"));
       }
     else
       {
-	about.setTitle("Ganymede Credits");
+	// "Ganymede Credits"
+	about.setTitle(ts.l("showCredits.dialog_title"));
       }
 
     about.loadCreditsText();
@@ -1893,7 +1916,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     if (motd == null)
       {
-	motd = new messageDialog(client, "MOTD", null);
+	// "MOTD"
+	motd = new messageDialog(client, ts.l("showMOTD.dialog_title"), null);
       }
     
     if (html)
@@ -2009,7 +2033,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		text = stringTarget.toString();
 	      }
 
-	    showExceptionMessage("Exception", text, getErrorImage());
+	    // "Exception"
+	    showExceptionMessage(ts.l("processException.exception"),
+				 text,
+				 getErrorImage());
 	  }
       }
 
@@ -2051,15 +2078,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 					   {
 					     StringBuffer clientInfo = new StringBuffer();
 
-					     clientInfo.append("GUI Client, running on java version \"");
-					     clientInfo.append(System.getProperty("java.version"));
-					     clientInfo.append("\", on OS: \"");
-					     clientInfo.append(System.getProperty("os.name"));
-					     clientInfo.append("\", version: \"");
-					     clientInfo.append(System.getProperty("os.version"));
-					     clientInfo.append("\", on \"");
-					     clientInfo.append(System.getProperty("os.arch"));
-					     clientInfo.append("\"");
+					     // "GUI Client, running on
+					     // java version \"{0}\" on
+					     // OS: \"{1}\", version:
+					     // \"{2}\", on \"{3}\""
+
+					     clientInfo.append(ts.l("showExceptionMessage.client_exception",
+								    System.getProperty("java.version"),
+								    System.getProperty("os.name"),
+								    System.getProperty("os.version"),
+								    System.getProperty("os.arch")));
 
 					     session.reportClientBug(clientInfo.toString(), Message);
 					     success = true;
@@ -2071,16 +2099,31 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 					 if (success)
 					   {
+					     // "Exception Reported"
+					     // "This possible error
+					     // condition has been
+					     // reported to the
+					     // Ganymede
+					     // server.\n\nThank you!"
+
 					     new JErrorDialog(gc,
-							      "Exception Reported",
-							      "This possible error condition has been reported to the Ganymede server.\n\nThank you!",
+							      ts.l("showExceptionMessage.exception_reported"),
+							      ts.l("showExceptionMessage.thank_you"),
 							      getInfoImage()); // implicit show
 					   }
 					 else
 					   {
+					     // "Failure Reporting Exception"
+					     // "This error condition
+					     // could not be reported
+					     // successfully to the
+					     // server.  Perhaps the
+					     // server or your network
+					     // has gone down?"
+
 					     new JErrorDialog(gc,
-							      "Failure Reporting Exception",
-							      "This error condition could not be reported successfully to the server.  Perhaps the server or your network has gone down?",
+							      ts.l("showExceptionMessage.failure_reporting"),
+							      ts.l("showExceptionMessage.failure_explanation"),
 							      getErrorImage()); // implicit show
 					   }
 				       }
@@ -2090,9 +2133,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     setStatus(title + ": " + message, 10);
   }
 
+  /**
+   * Display a message explaining that the user is no longer logged in
+   */
+
   public final void showNotLoggedIn()
   {
-    showErrorMessage("Error", "Not logged in to the server");
+    // "Error"
+    // "Not logged in to the server"
+    showErrorMessage(ts.l("global.error"),
+		     ts.l("showNotLoggedIn.not_logged_in"));
   }
 
   /**
@@ -2101,7 +2151,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public final void showErrorMessage(String message)
   {
-    showErrorMessage("Error", message);
+    // "Error"
+    showErrorMessage(ts.l("global.error"), message);
   }
 
   /**
@@ -2409,57 +2460,69 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     toolBarTemp.setFloatable(true);
     toolBarTemp.setMargin(insets);
 
-    JButton b = new JButton("Create", new ImageIcon(newToolbarIcon));
+    // "Create"
+    JButton b = new JButton(ts.l("createToolbar.create_button"), new ImageIcon(newToolbarIcon));
     b.setMargin(insets);
     b.setActionCommand("create new object");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.setToolTipText("Create a new object");
+    // "Create a new object"
+    b.setToolTipText(ts.l("createToolbar.create_tooltip"));
     b.addActionListener(this);
     toolBarTemp.add(b);
 
-    b = new JButton("Edit", new ImageIcon(pencil));
+    // "Edit"
+    b = new JButton(ts.l("createToolbar.edit_button"), new ImageIcon(pencil));
     b.setMargin(insets);
     b.setActionCommand("open object for editing");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.setToolTipText("Edit an object");
+    // "Edit an object"
+    b.setToolTipText(ts.l("createToolbar.edit_tooltip"));
     b.addActionListener(this);
     toolBarTemp.add(b);
 
-    b = new JButton("Delete", new ImageIcon(trash));
+    // "Delete"
+    b = new JButton(ts.l("createToolbar.delete_button"), new ImageIcon(trash));
     b.setMargin(insets);
     b.setActionCommand("delete an object");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.setToolTipText("Delete an object");
+    // "Delete an object"
+    b.setToolTipText(ts.l("createToolbar.delete_tooltip"));
     b.addActionListener(this);
     toolBarTemp.add(b);
 
-    b = new JButton("Clone", new ImageIcon(cloneIcon));
+    // "Clone"
+    b = new JButton(ts.l("createToolbar.clone_button"), new ImageIcon(cloneIcon));
     b.setMargin(insets);
     b.setActionCommand("clone an object");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.setToolTipText("Clone an object");
+    // "Clone an object"
+    b.setToolTipText(ts.l("createToolbar.clone_tooltip"));
     b.addActionListener(this);
     toolBarTemp.add(b);
 
-    b = new JButton("View", new ImageIcon(search));
+    // "View"
+    b = new JButton(ts.l("createToolbar.view_button"), new ImageIcon(search));
     b.setMargin(insets);
     b.setActionCommand("open object for viewing");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.setToolTipText("View an object");
+    // "View an object"
+    b.setToolTipText(ts.l("createToolbar.view_tooltip"));
     b.addActionListener(this);
     toolBarTemp.add(b);
 
-    b = new JButton("Query", new ImageIcon(queryIcon));
+    // "Query"
+    b = new JButton(ts.l("createToolbar.query_button"), new ImageIcon(queryIcon));
     b.setMargin(insets);
     b.setActionCommand("compose a query");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.setToolTipText("Compose a query");
+    // "Compose a query"
+    b.setToolTipText(ts.l("createToolbar.query_tooltip"));
     b.addActionListener(this);
     toolBarTemp.add(b);
 
@@ -2476,12 +2539,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if ((personae != null)  && personae.size() > 1)
       {
-	b = new JButton("Persona", new ImageIcon(personaIcon));  
+	// "Persona"
+	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));  
 	b.setMargin(insets);
 	b.setActionCommand("change persona");
 	b.setVerticalTextPosition(b.BOTTOM);
 	b.setHorizontalTextPosition(b.CENTER);
-	b.setToolTipText("Change Persona");
+	// "Change Persona"
+	b.setToolTipText(ts.l("createToolbar.persona_tooltip"));
 	b.addActionListener(this);
 	toolBarTemp.add(b);
       }
