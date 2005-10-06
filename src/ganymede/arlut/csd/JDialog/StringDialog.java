@@ -129,6 +129,27 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDialog.StringDialog");
 
+
+  /**
+   * Returns the localized Ok string for the language used by the
+   * client's Java environment.
+   */
+
+  public static String getDefaultOk()
+  {
+    return ts.l("global.ok");
+  }
+
+  /**
+   * Returns the localized Cancel string for the language used by the
+   * client's Java environment.
+   */
+
+  public static String getDefaultCancel()
+  {
+    return ts.l("global.cancel");
+  }
+
   // --
 
   DialogRsrc resource = null;
