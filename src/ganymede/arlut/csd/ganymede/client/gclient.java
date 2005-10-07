@@ -5212,6 +5212,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   /**
    * This is a debugging hook, to allow the user to enter an invid in 
    * string form for direct viewing.
+   *
+   * Since this is just for debugging, I haven't bothered to localize
+   * this method.
    */
 
   void openAnInvid()
@@ -6018,6 +6021,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 class PersonaListener implements ActionListener {
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.PersonaListener");
+
   Session session;
 
   DialogRsrc
@@ -6025,8 +6035,6 @@ class PersonaListener implements ActionListener {
 
   gclient
     gc;
-
-  boolean debug = false;
 
   boolean
     listen = true;
@@ -6041,20 +6049,14 @@ class PersonaListener implements ActionListener {
 
   public void actionPerformed(ActionEvent event)
   {
-    if (debug) { System.err.println("personaListener: action Performed!"); }
-    
     // Check to see if we need to commit the transaction first.
     
     String newPersona = null;
     
     if (event.getSource() instanceof JRadioButton)
       {
-	if (debug) { System.err.println("From radiobutton"); }
-	
 	newPersona = event.getActionCommand();
 	gc.getPersonaDialog().updatePassField(newPersona);
-
-	if (debug) { System.err.println("radiobutton says: " + newPersona); }
       }
     else if (event.getSource() instanceof JButton)
       {    
@@ -6062,40 +6064,33 @@ class PersonaListener implements ActionListener {
 
 	if (!gc.getPersonaDialog().requirePassword && newPersona.equals(gc.currentPersonaString))
 	  {
-	    if (debug) {gc.showErrorMessage("You are already in that persona."); }
 	    return;
-	  }
-
-	if (gc.getPersonaDialog().debug)
-	  {
-	    System.err.println("personaListener processing jbutton");
 	  }
 
 	// Deal with trying to change w/ uncommitted transactions
 	if (gc.getSomethingChanged() && !gc.getPersonaDialog().requirePassword)
 	  {
-	    if (gc.getPersonaDialog().debug)
-	      {
-		System.err.println("personaListener attempting to verify transaction commit/cancel");
-	      }
-
-	    // need to ask: commit, cancel, abort?
+	    // "Changing Personae"
+	    // "Changing personae requires that the current transaction be closed out.\n\nWould you like to commit this transaction now?"
+	    // "Yes, Commit My Changes"
+	    // "No, Never Mind"
 	    StringDialog d = new StringDialog(gc,
-					      "Changing personas",
-					      "Before changing personas, the transaction must " +
-					      "be closed.  Would you like to commit your changes?",
-					      "Commit",
-					      "Cancel");
+					      ts.l("actionPerformed.commit_dialog_subj"),
+					      ts.l("actionPerformed.commit_dialog_txt"),
+					      ts.l("actionPerformed.commit_dialog_yes"),
+					      ts.l("actionPerformed.commit_dialog_no"));
 	    Hashtable result = d.DialogShow();
 	    
 	    if (result == null)
 	      {
-		gc.setStatus("Persona change canceled");
+		// "Persona Change Canceled"
+		gc.setStatus(ts.l("actionPerformed.canceled"));
 		return;
 	      }
 	    else
 	      {
-		gc.setStatus("Committing transaction.");
+		// "Committing Transaction"
+		gc.setStatus(ts.l("actionPerformed.committing"));
 		gc.commitTransaction();
 	      }
 	  }
@@ -6104,56 +6099,37 @@ class PersonaListener implements ActionListener {
 	
 	String password = null;
 	
-	// All admin level personas have a : in them.  Only admin level
-	// personas need passwords, unless we are forcing a password
+	// All admin level personae have a : in them.  Only admin level
+	// personae need passwords, unless we are forcing a password
 	
 	if (gc.getPersonaDialog().requirePassword || newPersona.indexOf(":") > 0)
 	  {
 	    password = gc.getPersonaDialog().getPasswordField();
-	  }
-	
-	if (gc.getPersonaDialog().debug)
-	  {
-	    System.err.println("personaListener attempting to set the persona");
 	  }
 
 	if (!setPersona(newPersona, password))
 	  {
 	    if (gc.getPersonaDialog().requirePassword)
 	      {
-		if (gc.getPersonaDialog().debug)
-		  {
-		    System.err.println("personaListener requirePassword=true, failed to setPersona");
-		  }
-
 		return;
 		//		gc.showErrorMessage("Wrong password"); 
 	      }
 	    else
 	      {
-		gc.showErrorMessage("Error: could not change persona", 
-				    "Perhaps the password was wrong.");
+		// "Persona Change Failed
+		// "Your attempt to change personae was
+		// unsuccessful.\n\nThis is probably due to your
+		// password being entered incorrectly."
+
+		gc.showErrorMessage(ts.l("actionPerformed.error_subj"),
+				    ts.l("actionPerformed.error_txt"));
 	      }
 	  }
 	else
 	  {
-	    if (gc.getPersonaDialog().debug)
-	      {
-		System.err.println("personaListener succeeded setPersona");
-	      }
-
 	    gc.getPersonaDialog().changedOK = true;
 	    gc.getPersonaDialog().setHidden(true);
-
-	    if (gc.getPersonaDialog().debug)
-	      {
-		System.err.println("personaListener called setHidden");
-	      }
 	  }
-      }
-    else
-      {
-	System.err.println("Persona Listener doesn't understand that action.");
       }
   }
 
@@ -6161,45 +6137,29 @@ class PersonaListener implements ActionListener {
   {
     boolean personaChangeSuccessful = false;	
 
-    if (gc.getPersonaDialog().debug)
-      {
-	System.err.println("personaListener setPersona()");
-      }
-
     try
       {
-	if (gc.getPersonaDialog().debug)
-	  {
-	    System.err.println("personaListener setPersona() calling server");
-	  }
-
 	personaChangeSuccessful = session.selectPersona(newPersona, password);
 
-	// when we change personas, we lose our filter.  Clear the
+	// when we change personae, we lose our filter.  Clear the
 	// reference to our filterDialog so that we will recreate it
 	// from scratch if we need to.
 
 	gc.filterDialog = null;
 
-	if (gc.getPersonaDialog().debug)
-	  {
-	    System.err.println("personaListener setPersona() called server");
-	  }
-	
 	if (personaChangeSuccessful)
 	  {
-	    if (gc.getPersonaDialog().debug)
-	      {
-		System.err.println("personaListener setPersona() succeeded");
-	      }
-
 	    gc.setWaitCursor();
-	    gc.setStatus("Changing persona.");
-		
-	    // List of creatable object types might have changed.
-		
 	    gc.createDialog = null;
-	    gc.setTitle("Ganymede Client: " + newPersona + " logged in.");
+
+	    // "Changing Persona"
+	    gc.setStatus(ts.l("setPersona.changing_status"));
+
+	    // "Ganymede Client: {0} logged in"
+
+	    gc.setTitle(ts.l("setPersona.new_window_title", newPersona));
+
+	    // List of creatable object types might have changed.
 		
 	    gc.ownerGroups = null;
 	    gc.clearCaches();
@@ -6209,24 +6169,21 @@ class PersonaListener implements ActionListener {
 	    gc.currentPersonaString = newPersona;
 	    gc.defaultOwnerChosen = false; // force a new default owner to be chosen
 	    gc.setNormalCursor();
-		
-	    gc.setStatus("Successfully changed persona to " + newPersona);
+
+	    // "Successfully changed persona to {0}."		
+	    gc.setStatus(ts.l("setPersona.changed_status", newPersona));
 
 	    return true;
 	  }
 	else
 	  {
-	    if (gc.getPersonaDialog().debug)
-	      {
-		System.err.println("personaListener setPersona() failed");
-	      }
-
 	    return false;
 	  }
       }
     catch (Exception rx)
       {
-	gc.processException(rx, "Could not set persona to " + newPersona + ": ");
+	// "Exception encountered trying to change persona to {0}:\n"
+	gc.processException(rx, ts.l("setPersona.exception_txt", newPersona));
 	return false;
       }
   }
