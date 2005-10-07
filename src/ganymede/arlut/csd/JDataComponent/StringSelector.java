@@ -82,6 +82,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import arlut.csd.Util.Compare;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -123,6 +124,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   static final boolean debug = false;
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede system.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDataComponent.StringSelector");
+
   // --
 
   JsetValueCallback
@@ -145,8 +153,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     outTitle = new JButton();
 
   String
-    org_in = "Members",
-    org_out = "Available";
+    org_in = ts.l("global.items_in"), // "Members"
+    org_out = ts.l("global.items_out");	// "Available"
 
   JButton
     addCustom;
@@ -229,11 +237,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	if (canChoose)
 	  {
-	    remove = new JButton("remove >>");
+	    // "Remove >>"
+	    remove = new JButton(ts.l("global.remove_and_remember_button"));
 	  }
 	else
 	  {
-	    remove = new JButton("remove");
+	    // "Remove"
+	    remove = new JButton(ts.l("global.remove_and_forget_button"));
 	  }
 
 	remove.setEnabled(false);
@@ -268,7 +278,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	out = new JstringListBox();
 	out.setCallback(this);
 
-	add = new JButton("<< add");
+	// "<< Add"
+	add = new JButton(ts.l("global.add_choice_button"));
 	add.setEnabled(false);
 	add.setOpaque(true);
 	add.setActionCommand("Add");
@@ -311,7 +322,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (!(mustChoose && out == null))
 	  {
-	    addCustom = new JButton("Add");
+	    // "Add"
+	    addCustom = new JButton(ts.l("global.add_button"));
 	    addCustom.setEnabled(false);
 	    addCustom.setActionCommand("AddNewString");
 	    addCustom.addActionListener(this);
@@ -1264,16 +1276,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		try
 		  {
-		    if (out == null)
-		      {
-			my_callback.setValuePerformed(new JErrorValueObject(this,
-									    "You can't choose stuff for this vector.  Sorry."));
-		      }
-		    else
-		      {
-			my_callback.setValuePerformed(new JErrorValueObject(this, 
-									    "That choice is not appropriate.  Please choose from the list."));
-		      }
+		    // "Sorry, you must enter strings from the list of
+		    // available choices.  Please choose from the
+		    // available list."
+
+		    my_callback.setValuePerformed(new JErrorValueObject(this,
+									ts.l("addNewString.bad_choice")));
 		  }
 		catch (RemoteException rx)
 		  {
