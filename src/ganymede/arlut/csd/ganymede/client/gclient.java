@@ -6220,7 +6220,7 @@ class CacheInfo {
     originalHandle = null,
     handle;
 
-  private final boolean debug = false;
+  private static final boolean debug = false;
 
   /* -- */
 
