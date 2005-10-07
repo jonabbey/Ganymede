@@ -100,6 +100,7 @@ import arlut.csd.JDataComponent.JstringField;
 import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecSortInsert;
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
@@ -157,9 +158,19 @@ import arlut.csd.ganymede.rmi.field_option_field;
 
 public class containerPanel extends JStretchPanel implements ActionListener, JsetValueCallback, ItemListener {
 
-  boolean debug = false;
+  static final boolean debug = false;
   static final boolean debug_persona = false;
   static final int FIELDWIDTH = 25;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.containerPanel");
+
+  static final String edit_action = ts.l("global.edit_action");	// "Edit Object"
+  static final String view_action = ts.l("global.view_action");	// "View Object"
 
   // ---
 
@@ -446,11 +457,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     this.gc = gc;
 
-    if (!debug)
-      {
-	debug = gc.debug;
-      }
-
     if (object == null)
       {
 	throw new NullPointerException("null object passed to containerPanel constructor");
@@ -577,18 +583,17 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	if (templates == null || templates.size() == 0)
 	  {
-	    System.err.println("No fields defined for this object type.. ??");
+	    printErr("No fields defined for this object type.. ??");
 
 	    if (templates == null)
 	      {
-		System.err.println("templates is *null*");
+		printErr("templates is *null*");
 	      }
 	    else
 	      {
-		System.err.println("templates is empty");
+		printErr("templates is empty");
 	      }
 
-	    setStatus("No fields defined for this object type.. error.");
 	    return;
 	  }
 
@@ -618,7 +623,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    
 	if (infoVector.size() == 0)
 	  {
-	    System.err.println("No field info in getFieldInfoVector()");
+	    printErr("No field info in getFieldInfoVector()");
 	  }
 
 	// keep a copy of the infoVector size so we don't have to
@@ -742,8 +747,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    println("Done with loop");
 	  }
-
-	setStatus("Finished loading containerPanel");
       }
     finally
       {
@@ -1070,7 +1073,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   {
     if (debug)
       {
-	System.err.println("containerPanel.updateComponent(" + comp + ")");
+	printErr("containerPanel.updateComponent(" + comp + ")");
       }
 
     try
@@ -1087,12 +1090,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    println("Updating " + field.getName() + " " + comp); 
 	  }
 	
-	if (field == null)
-	  {
-	    println("-----Field is null, skipping.");
-	    return;
-	  }
-
 	// if the field is not visible, just hide it and 
 	// return.. otherwise, set it visible and update
 	// the value and choices for the field
@@ -1238,12 +1235,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    if (!mustChoose || currentValue == null)
 	      {
-		labels.addElement("<none>");
+		// "<none>"
+		labels.addElement(ts.l("global.none"));
 	      }
 
 	    if (currentValue == null)
 	      {
-		currentValue = "<none>";
+		// "<none>"
+		currentValue = ts.l("global.none");
 	      }
 
 	    // create a new model to avoid O(n^2) order time hassles when
@@ -1254,7 +1253,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    if (debug)
 	      {
-		System.err.println("setting currentvalue in JComboBox to " + currentValue);
+		printErr("setting currentvalue in JComboBox to " + currentValue);
 	      }
 
 	    // put us back on as an item listener so we are live for updates
@@ -1267,7 +1266,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    JInvidChooser chooser = (JInvidChooser) comp;
 	    invid_field invf = (invid_field) field;
-	    listHandle noneHandle = new listHandle("<none>", null);
+
+	    // "<none">
+	    listHandle noneHandle = new listHandle(ts.l("global.none"), null);
 	    boolean mustChoose;
 
 	    /* -- */
@@ -1353,8 +1354,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    if (debug)
 	      {
-		System.err.println("containerPanel.updateComponent(): updating invid chooser combo box");
-		System.err.println("containerPanel.updateComponent(): searching for value " + currentValue);
+		printErr("containerPanel.updateComponent(): updating invid chooser combo box");
+		printErr("containerPanel.updateComponent(): searching for value " + currentValue);
 	      }
 
 	    for (int i = 0; i < choiceHandles.size(); i++)
@@ -1420,7 +1421,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    if (debug)
 	      {
-		System.err.println("containerPanel.updateComponent(): got handles, setting model");
+		printErr("containerPanel.updateComponent(): got handles, setting model");
 	      }
 
 	    // aaaand resort
@@ -1438,7 +1439,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    if (debug)
 	      {
-		System.err.println("setting currentvalue in JInvidChooser to " + currentHandle);
+		printErr("setting currentvalue in JInvidChooser to " + currentHandle);
 	      }
 
 	    // put us back on as an item listener so we are live for updates
@@ -1780,7 +1781,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 		String command = (String) v.getParameter();
 
-		if (command.equals("Edit object"))
+		if (command.equals(edit_action))
 		  {
 		    if (debug)
 		      {
@@ -1793,7 +1794,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 		    return true;
 		  }
-		else if (command.equals("View object"))
+		else if (command.equals(view_action))
 		  {
 		    if (debug)
 		      {
@@ -2043,7 +2044,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       {
 	// An exception was thrown, most likely from the server.  We need to revert the check box.
 
-	println("Exception occured in containerPanel.actionPerformed: " + ex);
+	printErr("Exception occured in containerPanel.actionPerformed: " + ex);
 
 	try
 	  {
@@ -2054,6 +2055,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    gc.processExceptionRethrow(rx);
 	  }
+
+	gc.processExceptionRethrow(ex);
       }
   }
 
@@ -2320,8 +2323,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (field == null)
       {
-	println("Hey, this is a null field! " + fieldTemplate.getName());
-	return;
+	throw new NullPointerException();
       }
 
     if (editable && fieldInfo.isEditable())
@@ -2480,7 +2482,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("Adding StringSelector, its a vector of invids!");
+	println("Adding StringSelector, it's a vector of invids!");
       }
 
     QueryResult qres = field.encodedValues();
@@ -2610,14 +2612,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     // ss is canChoose, mustChoose
     JPopupMenu invidTablePopup = new JPopupMenu();
-    JMenuItem viewO = new JMenuItem("View object");
-    JMenuItem editO = new JMenuItem("Edit object");
+    JMenuItem viewO = new JMenuItem(view_action);
+    JMenuItem editO = new JMenuItem(edit_action);
     invidTablePopup.add(viewO);
     invidTablePopup.add(editO);
     
     JPopupMenu invidTablePopup2 = new JPopupMenu();
-    JMenuItem viewO2 = new JMenuItem("View object");
-    JMenuItem editO2 = new JMenuItem("Edit object");
+    JMenuItem viewO2 = new JMenuItem(view_action);
+    JMenuItem editO2 = new JMenuItem(edit_action);
     invidTablePopup2.add(viewO2);
     invidTablePopup2.add(editO2);
 
@@ -2633,11 +2635,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     ss.setCellWidth(editable && fieldInfo.isEditable() ? 150: 300);
     ss.update(choiceHandles, true, null, valueHandles, true, null);
     ss.setPopups(invidTablePopup, invidTablePopup2);
-
-    if (choiceHandles == null)
-      {
-	ss.setButtonText("Create");
-      }
 
     objectHash.put(ss, field);
     
@@ -3325,7 +3322,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		    println("-you don't have permission to view this object.");
 		  }
 
-		label = "Permission denied!";
+		// "Can''t Show Target"
+		label = ts.l("addInvidField.no_view_perm");
 	      }
 
 	    JButton b = new JButton(label);
@@ -3349,7 +3347,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  }
 	else
 	  {
-	    JLabel errorLabel = new JLabel("Null Invid");
+	    // "Null Pointer"
+	    JLabel errorLabel = new JLabel(ts.l("addInvidField.null_invid"));
 
 	    contentsPanel.addFillRow(fieldTemplate.getName(), errorLabel);
 	    contentsPanel.setRowVisible(errorLabel, fieldInfo.isVisible());
@@ -3441,7 +3440,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
 	
     listHandle currentListHandle = null;
-    listHandle noneHandle = new listHandle("<none>", null);
+    listHandle noneHandle = new listHandle(ts.l("global.none"), null); // "<none>"
     boolean found = false;
     JInvidChooser combo;
     boolean mustChoose = false;
@@ -3452,7 +3451,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx, "Could not get mustChoose: ");
+	gc.processExceptionRethrow(rx);
       }
 
     // Find currentListHandle
@@ -3658,7 +3657,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	System.err.println("containerPanel cleanUp()");
+	printErr("containerPanel cleanUp()");
       }
 
     contentsPanel.cleanup();
@@ -3731,14 +3730,5 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
 
     progressBar = null;
-  }
-
-  /**
-   * Convenience method.
-   */
-
-  private final void setStatus(String s)
-  {
-    gc.setStatus(s);
   }
 }

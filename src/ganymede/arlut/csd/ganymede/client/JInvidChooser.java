@@ -73,6 +73,7 @@ import javax.swing.JTextField;
 import arlut.csd.JDataComponent.JPanelCombo;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.Util.TranslationService;
 
 
 /*------------------------------------------------------------------------------
@@ -92,6 +93,13 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
   private final static boolean debug = false;
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.JInvidChooser");
+
   // ---
 
   JButton
@@ -108,7 +116,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
     allowNone = true;
 
   private listHandle
-    noneHandle = new listHandle("<none>", null);
+    noneHandle = new listHandle(ts.l("global.none"), null); // "<none>"
 
   JInvidChooserFieldEditor editor;
 
@@ -144,7 +152,8 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
 
-    view = new JButton("View");
+    // "View"
+    view = new JButton(ts.l("global.view_button"));
     view.addActionListener(this);
 
     editor = new JInvidChooserFieldEditor(this);
@@ -343,7 +352,10 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	
 	    if (invid == null)
 	      {
-		showErrorMessage("You don't have permission to view that object.");
+		/* XXX I don't think this can ever occur.. */
+
+		// "You don''t have permission to view {0}."
+		showErrorMessage(ts.l("actionPerformed.permissions_error", lh));
 	      }
 	    else
 	      {
@@ -354,7 +366,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
   
   private final void  showErrorMessage(String message) {
-    showErrorMessage("Error", message);
+    cp.getgclient().showErrorMessage(message);
   }
 
   private final void  showErrorMessage(String title, String message) {
