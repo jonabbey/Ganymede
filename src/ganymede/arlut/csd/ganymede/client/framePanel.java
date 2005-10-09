@@ -1092,7 +1092,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	if (ts.hasPattern("createMenuBar.object_menu_5_key_optional"))
 	  {
-	    editObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_4_key_optional").charAt(0)); // "e"
+	    editObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_5_key_optional").charAt(0)); // "e"
 	  }
 	    
 	if (ts.hasPattern("createMenuBar.object_menu_5_tip_optional"))
