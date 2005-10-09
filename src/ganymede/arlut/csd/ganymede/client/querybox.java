@@ -1166,6 +1166,43 @@ class QueryRow implements ItemListener {
 
   static final boolean debug = false;
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.QueryRow");
+
+  static final public String 
+    start_with = ts.l("global.start_with"), // "Start With"
+    end_with = ts.l("global.end_with"), // "End With"
+    contain = ts.l("global.contain"), // "Contain"
+    contain_matching = ts.l("global.contain_matching"),	// "Contain Matching"
+    contain_matching_ci = ts.l("global.contain_matching_ci"), // "Contain Matching [Case Insensitive]"
+    matching = ts.l("global.matching"),	// "matching"
+    matching_ci = ts.l("global.matching_ci"), // "matching [Case Insensitive]"
+    equals = ts.l("global.equals"), // "=="
+    equals_ci = ts.l("global.equals_ci"), // "== [Case Insensitive]"
+    defined = ts.l("global.defined"); // "Defined"
+
+  static final public String
+    does = ts.l("global.does"),	// "does"
+    does_not = ts.l("global.does_not"),	// does not"
+    is = ts.l("global.is"),	// "is"
+    is_not = ts.l("global.is_not"); // "is not"
+
+  static final public String
+    length_less = ts.l("global.length_less"), // "Length <"
+    length_greater = ts.l("global.length_greater"), // "Length >"
+    length_equal = ts.l("global.length_equal");	// "Length =="
+
+  static final public String
+    before = ts.l("global.before"), // "Before"
+    after = ts.l("global.after"), // "After"
+    same_day = ts.l("global.same_day"),	// "Same Day As"
+    same_week = ts.l("global.same_week"), // "Same Week As"
+    same_month = ts.l("global.same_month"); // "Same Month As"
+
   // ---
 
   querybox parent;
@@ -1331,7 +1368,7 @@ class QueryRow implements ItemListener {
 
   void resetBoolean(FieldTemplate field, String opName)
   {
-    boolean does;
+    boolean does_flag;
 
     /* -- */
 
@@ -1345,13 +1382,13 @@ class QueryRow implements ItemListener {
     // Do we have a phrase in the operator box which requires does
     // instead of is?
 
-    does = opName.equalsIgnoreCase("Start With") ||
-      opName.equalsIgnoreCase("End With") ||
-      opName.equalsIgnoreCase("Contain") ||
-      opName.equalsIgnoreCase("Contain Matching") ||
-      opName.equalsIgnoreCase("Contain Matching [Case Insensitive]");
+    does_flag = opName.equalsIgnoreCase(start_with) ||
+      opName.equalsIgnoreCase(end_with) ||
+      opName.equalsIgnoreCase(contain) ||
+      opName.equalsIgnoreCase(contain_matching) ||
+      opName.equalsIgnoreCase(contain_matching_ci);
 
-    if (does && (!showDoes || boolChoice.getItemCount() == 0))
+    if (does_flag && (!showDoes || boolChoice.getItemCount() == 0))
       {
 	boolChoice.setVisible(false);
 
@@ -1360,13 +1397,13 @@ class QueryRow implements ItemListener {
 	    boolChoice.removeAllItems();
 	  }
 
-	boolChoice.addItem("does");
-	boolChoice.addItem("does not");
+	boolChoice.addItem(does);
+	boolChoice.addItem(does_not);
 
 	boolChoice.setVisible(true);
 	showDoes = true;
       }
-    else if (!does && (showDoes || boolChoice.getItemCount() == 0))
+    else if (!does_flag && (showDoes || boolChoice.getItemCount() == 0))
       {
 	boolChoice.setVisible(false);
 	if (boolChoice.getItemCount() > 0)
@@ -1374,8 +1411,8 @@ class QueryRow implements ItemListener {
 	    boolChoice.removeAllItems();
 	  }
 
-	boolChoice.addItem("is");
-	boolChoice.addItem("is not");
+	boolChoice.addItem(is);
+	boolChoice.addItem(is_not);
 
 	boolChoice.setVisible(true);
 	showDoes = false;
@@ -1408,9 +1445,9 @@ class QueryRow implements ItemListener {
 
     if (field.isEditInPlace())
       {
-	compareChoice.addItem("Length <");
-	compareChoice.addItem("Length >");
-	compareChoice.addItem("Length ==");
+	compareChoice.addItem(length_less);
+	compareChoice.addItem(length_greater);
+	compareChoice.addItem(length_equal);
       }
     else if (field.isArray())
       {
@@ -1418,25 +1455,25 @@ class QueryRow implements ItemListener {
 	
 	if (field.isString() || field.isInvid() || field.isIP())
 	  {
-	    compareChoice.addItem("Contain Matching [Case Insensitive]");
-	    compareChoice.addItem("Contain Matching");
+	    compareChoice.addItem(contain_matching_ci);
+	    compareChoice.addItem(contain_matching);
 	  }
 
-	compareChoice.addItem("Length <");
-	compareChoice.addItem("Length >");
-	compareChoice.addItem("Length ==");
+	compareChoice.addItem(length_less);
+	compareChoice.addItem(length_greater);
+	compareChoice.addItem(length_equal);
       }
     else if (field.isDate())
       {
-	compareChoice.addItem("Before");
-	compareChoice.addItem("After");
-	compareChoice.addItem("Same Day As");
-	compareChoice.addItem("Same Week As");
-	compareChoice.addItem("Same Month As");
+	compareChoice.addItem(before);
+	compareChoice.addItem(after);
+	compareChoice.addItem(same_day);
+	compareChoice.addItem(same_week);
+	compareChoice.addItem(same_month);
       }
     else if (field.isNumeric() || field.isFloat())
       {
-	compareChoice.addItem("==");
+	compareChoice.addItem(equals);
 	compareChoice.addItem("<");
 	compareChoice.addItem(">");
 	compareChoice.addItem("<=");
@@ -1444,31 +1481,31 @@ class QueryRow implements ItemListener {
       }
     else if (field.isBoolean())
       {
-	compareChoice.addItem("==");
+	compareChoice.addItem(equals);
       }
     else if (field.isIP())
       {
-	compareChoice.addItem("==");
-	compareChoice.addItem("matching [Case Insensitive]");
-	compareChoice.addItem("matching");
-	compareChoice.addItem("Start With");
-	compareChoice.addItem("End With");
+	compareChoice.addItem(equals);
+	compareChoice.addItem(matching_ci);
+	compareChoice.addItem(matching);
+	compareChoice.addItem(start_with);
+	compareChoice.addItem(end_with);
       }
     else if (field.isString() || field.isInvid())
       {
-	compareChoice.addItem("matching [Case Insensitive]");
-	compareChoice.addItem("matching");
-	compareChoice.addItem("==");
-	compareChoice.addItem("== [Case Insensitive]");
+	compareChoice.addItem(matching_ci);
+	compareChoice.addItem(matching);
+	compareChoice.addItem(equals);
+	compareChoice.addItem(equals_ci);
 	compareChoice.addItem("<");
 	compareChoice.addItem(">");
 	compareChoice.addItem("<=");
 	compareChoice.addItem(">=");
-	compareChoice.addItem("Start With");
-	compareChoice.addItem("End With");
+	compareChoice.addItem(start_with);
+	compareChoice.addItem(end_with);
       }
 
-    compareChoice.addItem("Defined");
+    compareChoice.addItem(defined);
     compareChoice.setVisible(true);
     compareChoice.addItemListener(this);
   }
@@ -1492,13 +1529,15 @@ class QueryRow implements ItemListener {
 
     // when we test for defined, we won't have an operand value
 
-    if (opName.equals("Defined"))
+    if (opName.equals(defined))
       {
 	removeOperand();
 	return;
       }
 
-    if (opName.startsWith("Length"))
+    if (opName.equals(length_less) ||
+	opName.equals(length_greater) ||
+	opName.equals(length_equal))
       {
 	if (!(operand instanceof JnumberField))
 	  {
@@ -1801,10 +1840,10 @@ class QueryRow implements ItemListener {
 	    // we'll send a binary array of Byte objects up to the
 	    // server for the IP match.
 
-	    if (!opName.equals("matching") && 
-		!opName.equals("matching [Case Insensitive]") &&
-		!opName.equals("Contain Matching [Case Insensitive]") &&
-		!opName.equals("Contain Matching"))
+	    if (!opName.equals(matching) && 
+		!opName.equals(matching_ci) &&
+		!opName.equals(contain_matching_ci) &&
+		!opName.equals(contain_matching))
 	      {
 		if (strValue.indexOf(':') != -1)
 		  {
@@ -1845,34 +1884,34 @@ class QueryRow implements ItemListener {
     
     if (field.isArray())
       {
-	if (operator.equals("Contain"))
+	if (operator.equals(contain))
 	  {
 	    opValue = QueryDataNode.EQUALS;
 	    arrayOp = QueryDataNode.CONTAINS;
 	  }
-	else if (operator.equals("Contain Matching"))
+	else if (operator.equals(contain_matching))
 	  {
 	    opValue = QueryDataNode.MATCHES;
 	    arrayOp = QueryDataNode.CONTAINS;
 	  }
-	else if (operator.equals("Contain Matching [Case Insensitive]"))
+	else if (operator.equals(contain_matching_ci))
 	  {
 	    opValue = QueryDataNode.NOCASEMATCHES;
 	    arrayOp = QueryDataNode.CONTAINS;
 	  }
-	else if (operator.equals("Length =="))
+	else if (operator.equals(length_equal))
 	  {
 	    arrayOp = QueryDataNode.LENGTHEQ;
 	  } 
-	else if (operator.equals("Length >"))
+	else if (operator.equals(length_greater))
 	  {
 	    arrayOp = QueryDataNode.LENGTHGR;
 	  } 
-	else if (operator.equals("Length <"))
+	else if (operator.equals(length_less))
 	  {
 	    arrayOp = QueryDataNode.LENGTHLE;
 	  }
-	else if (operator.equals("Defined"))
+	else if (operator.equals(defined))
 	  {
 	    opValue = QueryDataNode.DEFINED;
 	  }
@@ -1907,7 +1946,9 @@ class QueryRow implements ItemListener {
 	    return terminalNode;
 	  }
       }
-    else if (!operator.startsWith("Same"))
+    else if (!(operator.equals(same_day) ||
+	       operator.equals(same_week) ||
+	       operator.equals(same_month)))
        {
 	// ok, normal scalar field, not a time window comparison
 
@@ -1915,7 +1956,7 @@ class QueryRow implements ItemListener {
 	  {
 	    opValue = QueryDataNode.EQUALS;
 	  } 
-	else if (operator.equals("<") || operator.equals("Before"))
+	else if (operator.equals("<") || operator.equals(before))
 	  {
 	    opValue = QueryDataNode.LESS;
 	  } 
@@ -1923,7 +1964,7 @@ class QueryRow implements ItemListener {
 	  {
 	    opValue = QueryDataNode.LESSEQ;
 	  } 
-	else if (operator.equals(">") || operator.equals("After"))
+	else if (operator.equals(">") || operator.equals(after))
 	  {
 	    opValue = QueryDataNode.GREAT;
 	  } 
@@ -1931,27 +1972,27 @@ class QueryRow implements ItemListener {
 	  {
 	    opValue = QueryDataNode.GREATEQ;
 	  } 
-	else if (operator.equals("== [Case Insensitive]"))
+	else if (operator.equals(equals_ci))
 	  {
 	    opValue = QueryDataNode.NOCASEEQ;
 	  }
-	else if (operator.equals("Start With"))
+	else if (operator.equals(start_with))
 	  {
 	    opValue = QueryDataNode.STARTSWITH;
 	  }
-	else if (operator.equals("End With"))
+	else if (operator.equals(end_with))
 	  {
 	    opValue = QueryDataNode.ENDSWITH;
 	  }
-	else if (operator.equals("Defined"))
+	else if (operator.equals(defined))
 	  {
 	    opValue = QueryDataNode.DEFINED;
 	  }
-	else if (operator.equals("matching"))
+	else if (operator.equals(matching))
 	  {
 	    opValue = QueryDataNode.MATCHES;
 	  }
-	else if (operator.equals("matching [Case Insensitive]"))
+	else if (operator.equals(matching_ci))
 	  {
 	    opValue = QueryDataNode.NOCASEMATCHES;
 	  }
@@ -2008,7 +2049,7 @@ class QueryRow implements ItemListener {
 	cal.set(Calendar.SECOND, 0);
 	cal.set(Calendar.MILLISECOND, 0);
 
-	if (operator.equals("Same Day As"))
+	if (operator.equals(same_day))
 	  {
 	    lowDate = cal.getTime();
 
@@ -2016,7 +2057,7 @@ class QueryRow implements ItemListener {
 
 	    hiDate = cal.getTime();
 	  }
-	else if (operator.equals("Same Week As"))
+	else if (operator.equals(same_week))
 	  {
 	    cal.set(Calendar.DAY_OF_WEEK, 0);
 	    lowDate = cal.getTime();
@@ -2025,7 +2066,7 @@ class QueryRow implements ItemListener {
 
 	    hiDate = cal.getTime();
 	  }
-	else if (operator.equals("Same Month As"))
+	else if (operator.equals(same_month))
 	  {
 	    cal.set(Calendar.DAY_OF_MONTH, 0);
 	    lowDate = cal.getTime();
@@ -2070,8 +2111,8 @@ class QueryRow implements ItemListener {
 
   private boolean isNot()
   {
-    return (boolChoice.getSelectedItem().equals("is not") ||
-	    boolChoice.getSelectedItem().equals("does not"));
+    return (boolChoice.getSelectedItem().equals(is_not) ||
+	    boolChoice.getSelectedItem().equals(does_not));
   }
 
   /**
