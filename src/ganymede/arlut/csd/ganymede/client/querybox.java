@@ -110,6 +110,7 @@ import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.Util.FixedListCompare;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.StringUtils;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.BaseDump;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.FieldTemplate;
@@ -130,10 +131,10 @@ import arlut.csd.ganymede.rmi.Base;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class implements a modal dialog that is popped up to
- * generate a {@link arlut.csd.ganymede.common.Query Query} object that will
- * be used by the rest of the ganymede.client package to submit the
- * query to the server for handling.
+ * This class implements a modal dialog that is popped up to generate
+ * a {@link arlut.csd.ganymede.common.Query Query} object that will be
+ * used by the rest of the ganymede.client package to submit the query
+ * to the server for handling.
  *
  * Once an instance of querybox is constructed, the client code will
  * call myShow() to pop up the dialog and retrieve the Query object.
@@ -145,6 +146,13 @@ import arlut.csd.ganymede.rmi.Base;
 class querybox extends JDialog implements ActionListener, ItemListener {
   
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.querybox");
 
   // ---
 
@@ -164,11 +172,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   private Hashtable myHash = new Hashtable();
 
   JButton 
-    OkButton = new JButton ("Submit"),
-    CancelButton = new JButton("Cancel"),
-    addButton = new JButton("Add Choices"),
-    removeButton = new JButton("Remove Choices");
-  
+    OkButton = new JButton(ts.l("global.submit_button")), // "Submit"
+    CancelButton = new JButton(ts.l("global.cancel_button")), // "Cancel"
+    addButton = new JButton(ts.l("global.add_choices_button")),	// "Add Choices"
+    removeButton = new JButton(ts.l("global.remove_choices_button")); // "Remove Choices"
 
   GridBagLayout gbl = new GridBagLayout();
   GridBagConstraints gbc = new GridBagConstraints();
@@ -180,8 +187,13 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     card_panel,
     query_panel = new JPanel();
   JPanel inner_choice = new JPanel();
-  JCheckBox editBox = new JCheckBox("Only objects which are editable");
-  JCheckBox allBox = new JCheckBox("All objects of type selected above");
+
+  // "Only Return Editable Objects"
+  JCheckBox editBox = new JCheckBox(ts.l("global.editable_only_checkbox"));
+
+  // "Match All Objects Of This Type"
+  JCheckBox allBox = new JCheckBox(ts.l("global.all_objects_checkbox"));
+
   JComboBox baseChoice = new JComboBox();
 
   // This is so we can hide the middle panel when the show all button is clicked
@@ -243,7 +255,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     this.getContentPane().add("Center", tabPane);
     this.getContentPane().add("South", Choice_Buttons);
 
-    tabPane.addTab("Search Criteria", null, contentPane);
+    // "Search Criteria"
+    tabPane.addTab(ts.l("init.search_term_tab"), null, contentPane);
  
     // Main constructor for the querybox window
     
@@ -372,7 +385,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // hack for Swing 1.0.2 to prevent TitledBorder from trying to
     // be clever with colors when surrounding a scrollpane
     titledPanel = new JPanel();
-    titledPanel.setBorder(new TitledBorder(new EtchedBorder(),"Match"));
+
+    // "Match"
+    titledPanel.setBorder(new TitledBorder(new EtchedBorder(), ts.l("init.match_box")));
     titledPanel.setLayout(new BorderLayout());
     titledPanel.add("Center", card_panel);
     titledPanel.add("South", query_Buttons);
@@ -386,7 +401,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     getContentPane().add("North", base_panel);
 
-    base_panel.setBorder(new TitledBorder(new EtchedBorder(),"Choose Object Type"));
+    // "Choose Object Type"
+    base_panel.setBorder(new TitledBorder(new EtchedBorder(), ts.l("init.type_box")));
 
     query_panel.add("Center", titledPanel);
     titledPanel.add("North", returnedPanel);
@@ -397,7 +413,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     optionsPanel = new OptionsPanel(this);
 
-    tabPane.addTab("Fields Returned", null, optionsPanel);
+    // "Fields Returned"
+    tabPane.addTab(ts.l("init.fields_returned_tab"), null, optionsPanel);
 
     this.pack();
   }
@@ -848,9 +865,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	      }
 	    catch (Error ex)
 	      {
-		new JErrorDialog(gc, 
-				 "Could not complete query.. may have run out of memory.\n\n" +
-				 ex.getMessage());
+		// "Could not complete query.  Possible memory exhaustion problem.\n\n{0}"
+		new JErrorDialog(gc,
+				 ts.l("doQuery.error_caught",
+				      ex.getMessage()));
 		throw ex;
 	      }
 	    
