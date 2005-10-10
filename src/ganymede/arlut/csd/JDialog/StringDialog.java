@@ -129,6 +129,8 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDialog.StringDialog");
 
+  static final String ok = ts.l("global.ok"); // "Ok"
+  static final String cancel = ts.l("global.cancel"); // "Cancel"
 
   /**
    * Returns the localized Ok string for the language used by the
@@ -137,7 +139,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   public static String getDefaultOk()
   {
-    return ts.l("global.ok");
+    return ok;
   }
 
   /**
@@ -147,7 +149,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   public static String getDefaultCancel()
   {
-    return ts.l("global.cancel");
+    return cancel;
   }
 
   // --
