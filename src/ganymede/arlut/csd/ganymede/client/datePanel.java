@@ -75,6 +75,7 @@ import javax.swing.border.EmptyBorder;
 import arlut.csd.JCalendar.JpanelCalendar;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.date_field;
@@ -99,6 +100,13 @@ import arlut.csd.ganymede.rmi.date_field;
 public class datePanel extends JPanel implements ActionListener, JsetValueCallback, Runnable {
 
   final static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.datePanel");
 
   // ---
 
@@ -209,7 +217,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       }
     else
       {
-	create_non_editable_panel2();
+	create_non_editable_panel();
       }
 
     if (debug)
@@ -238,7 +246,6 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	topButton.setActionCommand("back");
 	topButton.addActionListener(this);
 	topButton.setToolTipText("Click here to return to this date");
-	//	topButton.setBorder(new EmptyBorder(new Insets(5,1,5,1)));
 
 	this.name = template.getName();
 
@@ -247,17 +254,23 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	    Date date = ((Date)field.getValue());
 	    my_Calendar.setTime(date);
 
-	    topButton.setText(label + ": " + dateformat.format(date));
+	    // "{0}: {1}"
+	    topButton.setText(ts.l("global.short_pattern",
+				   label,
+				   dateformat.format(date)));
 	  }
 	else
 	  {
-	    topButton.setText(label + " has not been set.");
+	    // "{0} has not been set."
+	    topButton.setText(ts.l("global.not_set_pattern", label));
 	  }
 	
 	cal = new JpanelCalendar(my_Calendar, this, true, true);
 
 	top_pane.add(topButton, "Center");
-	clear = new JButton("Clear date");
+
+	// "Clear date"
+	clear = new JButton(ts.l("create_editable_panel.clear_button"));
 	clear.setActionCommand("Clear");
 	clear.addActionListener(this);
 
@@ -270,46 +283,11 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       }
     catch (Exception rx)
       {
-	gclient.client.processExceptionRethrow(rx, "Could not get date: ");
+	gclient.client.processExceptionRethrow(rx);
       }
   }
-
-  // Maybe this should have a calendar, inactivated, showing the date of the thing?
-  // only if the date is set, of course.
 
   void create_non_editable_panel()
-  {
-    try
-      {
-	if (field != null)
-	  {
-	    this.name = template.getName();
-
-	    Date d = (Date) field.getValue();
-
-	    if (d != null)
-	      {
-		noneditable_dateLabel = new JLabel(this.name + " is set to: " + d.toString());
-	      }
-	    else
-	      {
-		noneditable_dateLabel = new JLabel("No date is set");
-	      }
-	  }
-	else
-	  {
-	    noneditable_dateLabel = new JLabel("No date is set");
-	  }
-	
-	top_pane.add(noneditable_dateLabel, "Center");
-      }
-    catch (Exception rx)
-      {
-	gclient.client.processExceptionRethrow(rx, "Could not check visibility in datePanel: ");
-      }
-  }
-
-  void create_non_editable_panel2()
   {
     my_Calendar = new GregorianCalendar(_myTimeZone,Locale.getDefault());
     
@@ -325,11 +303,15 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	    Date date = ((Date)field.getValue());
 	    my_Calendar.setTime(date);
 
-	    topLabel.setText(label + ": " + dateformat.format(date));
+	    // "{0}: {1}"
+	    topLabel.setText(ts.l("global.short_pattern",
+				  label,
+				  dateformat.format(date)));
 	  }
 	else
 	  {
-	    topLabel.setText(label + " has not been set.");
+	    // "{0} has not been set."
+	    topLabel.setText(ts.l("global.not_set_pattern", label));
 	  }
 	
 	cal = new JpanelCalendar(my_Calendar, this, true, false); // non-editable
@@ -370,7 +352,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Could not clear date field: ");
+	    gc.processExceptionRethrow(rx);
 	  }
 
 	if (ok)
@@ -380,7 +362,8 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	  }
 	else
 	  {
-	    setStatus("Server says:  Could not clear date field.");
+	    // "Server says:  Could not clear date field."
+	    setStatus(ts.l("actionPerformed.failed_status"));
 	  }
       }
 
@@ -419,18 +402,24 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Could not set value in datePanel.");
+	    gc.processExceptionRethrow(rx);
 	  }
 	
 	if (ok)
 	  {
 	    if (editable)
 	      {
-		topButton.setText(label + ": " + dateformat.format(d));
+		// "{0}: {1}"
+		topButton.setText(ts.l("global.short_pattern",
+				       label,
+				       dateformat.format(d)));
 	      }
 	    else
 	      {
-		topLabel.setText(label + ": " + dateformat.format(d));
+		// "{0}: {1}"
+		topLabel.setText(ts.l("global.short_pattern",
+				      label,
+				      dateformat.format(d)));
 	      }
 	  }
       }
@@ -458,11 +447,15 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 
     if (newDate != null)
       {
-	newLabel = label + ": " + dateformat.format(newDate);
+	// "{0}: {1}"
+	newLabel = ts.l("global.short_pattern",
+			label,
+			dateformat.format(newDate));
       }
     else
       {
-	newLabel = "No date is set";
+	// "No date is set"
+	newLabel = ts.l("setDate.no_date_label");
       }
 
     if (cal != null)
@@ -506,7 +499,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       }
     catch (Exception ex)
       {
-	gc.processExceptionRethrow(ex, "datePanel.refresh(): error, couldn't refresh date panel.");
+	gc.processExceptionRethrow(ex);
       }
   }
 
