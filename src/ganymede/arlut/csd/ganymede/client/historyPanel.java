@@ -81,6 +81,7 @@ import javax.swing.border.TitledBorder;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.rmi.date_field;
 import arlut.csd.ganymede.rmi.string_field;
@@ -92,6 +93,13 @@ import arlut.csd.ganymede.rmi.string_field;
 ------------------------------------------------------------------------------*/
 
 public class historyPanel extends JPanel implements ActionListener, JsetValueCallback {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.historyPanel");
 
   JTextArea
     historyText;
@@ -140,14 +148,18 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     JPanel topPanel = new JPanel(new BorderLayout());
     JPanel buttonPanel = new JPanel(false);
 
-    showHistory = new JButton("Show history");
-    showHistory.setToolTipText("Show all changes made to this specific object");
+    // "Show history"
+    showHistory = new JButton(ts.l("init.show_history_button"));
+    // "Show all changes made to this specific object"
+    showHistory.setToolTipText(ts.l("init.show_history_button_tooltip"));
     showHistory.addActionListener(this);
     
     buttonPanel.add(showHistory);
 
-    showFullHistory = new JButton("Show Transactional History");
-    showFullHistory.setToolTipText("Show all transactions in which this object was changed");
+    // "Show Transactional History"
+    showFullHistory = new JButton(ts.l("init.show_transactional_button"));
+    // "Show all transactions in which this object was changed"
+    showFullHistory.setToolTipText(ts.l("init.show_transactional_button_tooltip"));
     showFullHistory.addActionListener(this);
     
     buttonPanel.add(showFullHistory);
@@ -165,10 +177,12 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 					 modifier_field, modification_date_field));;
 
     topPanel.add("North", midPanel);
-    topPanel.setBorder(new TitledBorder("Creation/Modification"));
+    // "Creation/Modification"
+    topPanel.setBorder(new TitledBorder(ts.l("init.top_panel_border")));
     
     JPanel p = new JPanel(new BorderLayout());
-    titledBorder = new TitledBorder("Detailed History");
+    // "Detailed History"
+    titledBorder = new TitledBorder(ts.l("init.bottom_panel_border"));
     p.setBorder(titledBorder);
     p.add("North", buttonPanel);
     
@@ -185,7 +199,8 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     JPanel waitPanel = new JPanel(new BorderLayout());
     waitPanel.setBackground(java.awt.Color.white);
 
-    JLabel waitText = new JLabel("Waiting for history from server...");
+    // "Waiting for history from server..."
+    JLabel waitText = new JLabel(ts.l("init.waiting_text"));
     waitText.setForeground(java.awt.Color.black);
     waitText.setFont(Font.getFont("Courier"));
 
@@ -359,6 +374,13 @@ class datesPanel extends JPanel {
 
   static final boolean debug = false;
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.datesPanel");
+
   string_field notes_field;
 
   JLabel
@@ -434,47 +456,55 @@ class datesPanel extends JPanel {
     
     if (creator == null)
       {
-	createdBy = new JLabel("No creator set for this object.");
+	// "No Creator set for this object."
+	createdBy = new JLabel(ts.l("init.no_creator"));
       }
     else
       {
 	createdBy = new JLabel(creator);
       }
 
-    addRow(createdBy, "Created By:");
+    // "Created By:"
+    addRow(createdBy, ts.l("init.created_by"));
     
     if (creation_date == null)
       {
-	createdOn = new JLabel("No creation date has been set for this object.");
+	// "No Creation Date has been set for this object."
+	createdOn = new JLabel(ts.l("init.no_creation_date"));
       }
     else
       {
 	createdOn = new JLabel(dateformat.format(creation_date));
       }
-    
-    addRow(createdOn, "Created On:");
+
+    // "Created On:"
+    addRow(createdOn, ts.l("init.created_on"));
     
     if (modifier == null)
       {
-	modifiedBy = new JLabel("No information about the last modifier.");
+	// "No information about the last modifier."
+	modifiedBy = new JLabel(ts.l("init.no_modifier"));
       }
     else
       {
 	modifiedBy = new JLabel(modifier);
       }
-    
-    addRow(modifiedBy, "Last Modified By:");
+
+    // "Last Modified By:"
+    addRow(modifiedBy, ts.l("init.last_modified_by"));
     
     if (mod_date == null)
       {
-	modifiedOn = new JLabel("No last modification date");
+	// "No last modification date"
+	modifiedOn = new JLabel(ts.l("init.no_modification_date"));
       }
     else
       {
 	modifiedOn = new JLabel(dateformat.format(mod_date));
       }
-    
-    addRow(modifiedOn, "Last Modified on:");
+
+    // "Last Modified On:"
+    addRow(modifiedOn, ts.l("init.last_modified_on"));
   }
 
   void addRow(JLabel comp, String title)
