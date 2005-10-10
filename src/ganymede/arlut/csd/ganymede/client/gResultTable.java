@@ -83,6 +83,7 @@ import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JTable.rowSelectCallback;
 import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
@@ -124,6 +125,23 @@ import arlut.csd.ganymede.rmi.Session;
 public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
   
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.gResultTable");
+
+  static final String
+    refresh_query = ts.l("global.refresh_query"), // "Refresh Query"
+    save_report = ts.l("global.save_report"), // "Save Report"
+    mail_report = ts.l("global.mail_report"); // "Mail Report"
+
+  static final String
+    tab_option = ts.l("global.tab_option"), // "Tab separated ASCII"
+    csv_option = ts.l("global.csv_option"), // "Comma separated ASCII"
+    html_option = ts.l("global.html_option"); // "HTML"
 
   // ---
 
@@ -187,11 +205,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     this.query = query;
 
     popMenu = new JPopupMenu();
-    viewMI = new JMenuItem("View Entry");
-    editMI = new JMenuItem("Edit Entry");
-    cloneMI = new JMenuItem("Clone Entry");
-    deleteMI = new JMenuItem("Delete Entry");
-    inactivateMI = new JMenuItem("Inactivate Entry");
+    viewMI = new JMenuItem(ts.l("init.view")); // "View Entry"
+    editMI = new JMenuItem(ts.l("init.edit")); // "Edit Entry"
+    cloneMI = new JMenuItem(ts.l("init.clone")); // "Clone Entry"
+    deleteMI = new JMenuItem(ts.l("init.delete")); // "Delete Entry"
+    inactivateMI = new JMenuItem(ts.l("init.inactivate")); // "Inactivate Entry"
 
     popMenu.add(viewMI);
     popMenu.add(editMI);
@@ -212,21 +230,21 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   public void actionPerformed(ActionEvent event)
   {
-    if (event.getActionCommand().equals("Refresh Query"))
+    if (event.getActionCommand().equals(refresh_query))
       {
 	refreshQuery();
 	toolbar.requestFocus();
 	return;
       }
 
-    if (event.getActionCommand().equals("Save Report"))
+    if (event.getActionCommand().equals(save_report))
       {
 	sendReport(false);
 	toolbar.requestFocus();
 	return;
       }
     
-    if (event.getActionCommand().equals("Mail Report"))
+    if (event.getActionCommand().equals(mail_report))
       {
 	sendReport(true);
 	toolbar.requestFocus();
@@ -244,9 +262,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     /* -- */
 
-    formatChoices.addElement("Tab separated ASCII");
-    formatChoices.addElement("Comma separated ASCII");
-    formatChoices.addElement("HTML");
+    formatChoices.addElement(tab_option);
+    formatChoices.addElement(csv_option);
+    formatChoices.addElement(html_option);
 
     dialog.setFormatChoices(formatChoices);
     
@@ -257,15 +275,15 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     format = dialog.getFormat();
 
-    if (format.equals("HTML"))
+    if (format.equals(html_option))
       {
 	report = generateHTMLRep();
       }
-    else if (format.equals("Comma separated ASCII"))
+    else if (format.equals(csv_option))
       {
 	report = generateTextRep(',');
       }
-    else if (format.equals("Tab separated ASCII"))
+    else if (format.equals(tab_option))
       {
 	report = generateTextRep('\t');
       }
@@ -280,7 +298,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	try
 	  {
-	    if (format.equals("HTML"))
+	    if (format.equals(html_option))
 	      {
 		session.sendHTMLMail(addresses, dialog.getSubject(), null, report);
 	      }
@@ -303,7 +321,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	PrintWriter writer = null;
 
 	chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-	chooser.setDialogTitle("Save Report As");
+
+	// "Save Report As"
+	chooser.setDialogTitle(ts.l("sendReport.dialog_title"));
 
 	int returnValue = chooser.showDialog(wp.gc, null);
 
@@ -316,10 +336,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     
 	if (file.exists())
 	  {
-	    StringDialog d = new StringDialog(wp.gc, "Warning, file ", 
-					      file.getName() + 
-					      " exists.  Are you sure you want to replace this file?",
-					      "Overwrite", "Cancel", null);
+	    // "Warning, file {0} already exists.  Are you sure you want to replace this file?"
+	    // "Yes, Overwrite"
+	    StringDialog d = new StringDialog(wp.gc,
+					      ts.l("sendReport.file_exists", file.getName()),
+					      ts.l("sendReport.overwrite"),
+					      StringDialog.getDefaultCancel(),
+					      null);
 	    Hashtable result = d.DialogShow();
 
 	    if (result == null)
@@ -334,7 +357,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  }
 	catch (java.io.IOException e)
 	  {
-	    wp.gc.showErrorMessage("Trouble saving", "Could not open the file.");
+	    // "Trouble saving"
+	    // "Could not open the file."
+	    wp.gc.showErrorMessage(ts.l("sendReport.save_problem_subj"),
+				   ts.l("sendReport.save_problem_text"));
 	    return;
 	  }
 
@@ -349,7 +375,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     /* -- */
 
-    setStatus("Querying server", 0);
+    // "Querying server"
+    setStatus(ts.l("refreshQuery.querying_status"), 0);
 
     if (query != null)
       {
@@ -369,7 +396,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 		System.err.println("null query dump result");
 	      }
 
-	    setStatus("No results");
+	    // "No results"
+	    setStatus(ts.l("refreshQuery.no_result_status"));
 	  }
 	else
 	  {
@@ -401,7 +429,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     /* -- */
 
-    setStatus("Loading table", 0);
+    // "Loading table"
+    setStatus(ts.l("loadResults.loading_status"), 0);
 
     headerVect = results.getHeaders();
     rows = results.resultSize();
@@ -511,11 +540,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     // sort by the first column in ascending order
 
-    setStatus("Sorting table on first column", 0);
+    // "Sorting table on first column"
+    setStatus(ts.l("loadResults.sorting_status"), 0);
 
     table.resort(0, true, false);
 
-    setStatus("Query Complete.");
+    // "Query Complete."
+    setStatus(ts.l("loadResults.complete_status"));
 
     // the first time we're called, the table will not be visible, so we
     // don't want to refresh it here..
@@ -539,10 +570,14 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       }
     else
       {
-	queryType = "<unknown>";
+	// "<unknown>"
+	queryType = ts.l("loadResults.unknown_query_type");
       }
 
-    wp.setWindowTitle(this, "Query: [" + queryType + "] results: " + rows + " entries");
+    // "Query: [{0}] results: {1,num,#} entries"
+    wp.setWindowTitle(this, ts.l("loadResults.window_title",
+				 queryType,
+				 new Integer(rows)));
     wp.updateWindowMenu();
   }
 
@@ -814,40 +849,79 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     toolBarTemp.setFloatable(false);
     toolBarTemp.setMargin(insets);
 
-    JButton b = new JButton("  Mail  ", new ImageIcon(mailIcon));
-    b.setMnemonic('M');
+    // "Mail"
+    JButton b = new JButton(ts.l("createToolBar.mail_button"), new ImageIcon(mailIcon));
+
+    // "M"
+    if (ts.hasPattern("createToolBar.mail_button_mnemonic_optional"))
+      {
+	b.setMnemonic((int) ts.l("createToolBar.mail_button_mnemonic_optional").charAt(0));
+      }
+
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
     b.setMargin(insets);
     b.setActionCommand("Mail Report");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.setToolTipText("Email results");
+
+    // "Email results"
+    if (ts.hasPattern("createToolBar.mail_button_tooltip_optional"))
+      {
+	b.setToolTipText(ts.l("createToolBar.mail_button_tooltip_optional"));
+      }
+
     b.addActionListener(this);
     toolBarTemp.add(b);
 
     // No save feature if running from applet
     if (!glogin.isApplet())
       {
-	b = new JButton("  Save  ", new ImageIcon(saveIcon));
-	b.setMnemonic('S');
+	// "Save"
+	b = new JButton(ts.l("createToolBar.save_button"), new ImageIcon(saveIcon));
+
+	// "S"
+	if (ts.hasPattern("createToolBar.save_button_mnemonic_optional"))
+	  {
+	    b.setMnemonic((int) ts.l("createToolBar.save_button_mnemonic_optional").charAt(0));
+	  }
+
 	b.setFont(new Font("SansSerif", Font.PLAIN, 10));
 	b.setMargin(insets);
 	b.setActionCommand("Save Report");
 	b.setVerticalTextPosition(b.BOTTOM);
 	b.setHorizontalTextPosition(b.CENTER);
-	b.setToolTipText("Save results");
+
+	// "Save results"
+	if (ts.hasPattern("createToolBar.save_button_tooltip_optional"))
+	  {
+	    b.setToolTipText(ts.l("createToolBar.save_button_tooltip_optional"));
+	  }
+
 	b.addActionListener(this);
 	toolBarTemp.add(b);
       }
     
-    b = new JButton("Refresh", new ImageIcon(refreshIcon));
-    b.setMnemonic('R');
+    // "Refresh"
+    b = new JButton(ts.l("createToolBar.refresh_button"), new ImageIcon(refreshIcon));
+
+    // "R"
+    if (ts.hasPattern("createToolBar.refresh_button_mnemonic_optional"))
+      {
+	b.setMnemonic((int) ts.l("createToolBar.refresh_button_mnemonic_optional").charAt(0));
+      }
+
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
     b.setMargin(insets);
     b.setActionCommand("Refresh Query");
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.setToolTipText("Refresh query");
+
+    // "Refresh query"
+    if (ts.hasPattern("createToolBar.refersh_button_tooltip_optional"))
+      {
+	b.setToolTipText(ts.l("createToolBar.refresh_button_tooltip_optional"));
+      }
+
     b.addActionListener(this);
     toolBarTemp.add(b);
 
@@ -855,7 +929,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   }
 
   JToolBar getToolBar() 
-    {
-      return toolbar;
-    }
+  {
+    return toolbar;
+  }
 }
