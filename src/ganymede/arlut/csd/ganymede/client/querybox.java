@@ -2158,6 +2158,14 @@ class OptionsPanel extends JPanel {
 
   static final boolean debug = false;
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.OptionsPanel");
+
+
   // ---
 
   querybox parent;
@@ -2198,7 +2206,8 @@ class OptionsPanel extends JPanel {
     gbc.weightx = 1.0;
     gbc.weighty = 1.0;
 
-    customPanel.setBorder(new TitledBorder(new EtchedBorder(),"Custom Fields"));
+    // "Custom Fields"
+    customPanel.setBorder(new TitledBorder(new EtchedBorder(), ts.l("init.custom_fields_panel")));
     customPanel.setLayout(new BorderLayout());
 
     gbc.gridx = 0;
@@ -2206,7 +2215,8 @@ class OptionsPanel extends JPanel {
 
     add(customPanel);
 
-    builtInPanel.setBorder(new TitledBorder(new EtchedBorder(),"Built-In Fields"));
+    // "Built-In Fields"
+    builtInPanel.setBorder(new TitledBorder(new EtchedBorder(), ts.l("init.builtin_fields_panel")));
     builtInPanel.setLayout(new BorderLayout());
 
     gbc.gridx = 1;
@@ -2337,3 +2347,4 @@ class OptionsPanel extends JPanel {
     return fieldsToReturn; 
   }
 }
+
