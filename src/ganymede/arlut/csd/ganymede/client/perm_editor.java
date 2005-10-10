@@ -92,7 +92,9 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
+import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.BaseDump;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.PermEntry;
@@ -113,6 +115,13 @@ import arlut.csd.ganymede.rmi.perm_field;
 
 class perm_editor extends JDialog implements ActionListener, Runnable {
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.perm_editor");
+
   boolean debug = false;
 
   String DialogTitle;
@@ -125,10 +134,10 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
   DefaultMutableTreeNode rowRootNode;
   gclient gc;
 
-  JButton OkButton = new JButton ("Ok");
-  JButton CancelButton = new JButton("Cancel");
-  JButton ExpandButton = new JButton ("Expand All");
-  JButton CollapseButton = new JButton("Collapse All");
+  JButton OkButton = new JButton(StringDialog.getDefaultOk());
+  JButton CancelButton = new JButton(StringDialog.getDefaultCancel());
+  JButton ExpandButton = new JButton(ts.l("global.expand_all_button"));  // "Expand All"
+  JButton CollapseButton = new JButton(ts.l("global.collapse_all_button")); // "Collapse All"
  
   boolean keepLoading = true;
 
@@ -214,11 +223,12 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     waitPanel.add("Center", progressBarPanel);
     waitPanel.add("South", new JSeparator());
 
-    progressDialog = new JDialog(gc, "Loading permission editor", false);    
+    // "Loading permission editor"
+    progressDialog = new JDialog(gc, ts.l("init.dialog_title"), false);
     progressDialog.getContentPane().setLayout(new BorderLayout(5, 5));
     progressDialog.getContentPane().add("Center", waitPanel);
     
-    cancelLoadingButton = new JButton("Cancel");
+    cancelLoadingButton = new JButton(StringDialog.getDefaultCancel());
     cancelLoadingButton.addActionListener(new ActionListener()
 					  {
 					    public void actionPerformed(ActionEvent e)
@@ -231,7 +241,8 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     cancelButtonPanel.add(cancelLoadingButton);
     progressDialog.getContentPane().add("South", cancelButtonPanel);
 
-    JLabel loadingLabel = new JLabel("Loading permissions editor", SwingConstants.CENTER);
+    // "Loading permissions editor"
+    JLabel loadingLabel = new JLabel(ts.l("init.dialog_title"), SwingConstants.CENTER);
     loadingLabel.setBorder(gc.emptyBorder10);
     progressDialog.getContentPane().add("North", loadingLabel);
 
@@ -261,7 +272,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
       }
     catch (Exception ex)
       {
-	gc.processExceptionRethrow(ex, "Couldn't get permission matrix: ");
+	gc.processExceptionRethrow(ex);
       }
     
     if (debug)
@@ -315,7 +326,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     Expansion_Buttons.add(ExpandButton);
     Expansion_Buttons.add(CollapseButton);
 
-
     // Group Expansion buttons and Choice buttons together
 
     All_Buttons = new JPanel();
@@ -323,10 +333,8 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     All_Buttons.add("West", Expansion_Buttons);
     All_Buttons.add("East", Choice_Buttons);
 
-
     progressBar.setValue(2);
     
-
     // Set up the TreeTable
 
     try 
@@ -354,12 +362,10 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     getContentPane().remove(waitPanel);
     getContentPane().setLayout(new BorderLayout());
 
-
     // The model for the JTreeTable is a PermEditorModel
 
     TreeTableModel permEditor = new PermEditorModel(rowRootNode, viewOnly);
     treeTable = new JTreeTable(permEditor);
-
 
     // Get the tree part of the JTreeTable- useful later
 
@@ -380,7 +386,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	tree.expandPath(path);
       }
     } 
-
 
     // Set default column widths
  
@@ -410,7 +415,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     
     //    table.getTableHeader().setReorderingAllowed(false); 
     
-    
     edit_pane = new JScrollPane(treeTable);
     edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     edit_pane.getViewport().setOpaque(true);
@@ -420,7 +424,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     Base_Panel.setLayout(new BorderLayout());
     Base_Panel.add("Center", edit_pane);
     Base_Panel.add("South", All_Buttons);
-
 
     // Bordered_Panel is necessary for consistency between the 
     // white background of the main part and the gray of the surrounding
