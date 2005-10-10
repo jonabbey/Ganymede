@@ -89,6 +89,7 @@ import arlut.csd.ganymede.rmi.db_field;
 import arlut.csd.ganymede.rmi.db_object;
 import arlut.csd.ganymede.rmi.invid_field;
 import arlut.csd.ganymede.rmi.ip_field;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -123,6 +124,13 @@ import arlut.csd.ganymede.rmi.ip_field;
  */
 
 public class vectorPanel extends JPanel implements JsetValueCallback, ActionListener, MouseListener, Runnable {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.vectorPanel");
 
   boolean debug = false;
 
@@ -281,17 +289,20 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (name == null)
       {
-	tb = BorderFactory.createTitledBorder("Untitled Vector");
+	// "Untitled Vector"
+	tb = BorderFactory.createTitledBorder(ts.l("init.untitled_vector"));
       }
     else
       {
-	tb = BorderFactory.createTitledBorder(name + ": Vector");
+	// "{0}: Vector"
+	tb = BorderFactory.createTitledBorder(ts.l("init.titled_vector", name));
       }
 
     CompoundBorder cb = BorderFactory.createCompoundBorder(tb,eb);
     setBorder(cb);
 
-    addB = new JButton("Add " + name);
+    // "Add {0}"
+    addB = new JButton(ts.l("init.add_button", name));
 
     // Set up pop up menu
     //
@@ -300,18 +311,29 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     // menu with either "expand" or "close" options.
 
     popupMenu = new JPopupMenu();
-    expandLevelMI = new JMenuItem("Expand this level");
+
+    // "Expand this level"
+    expandLevelMI = new JMenuItem(ts.l("init.expand_menu"));
+    expandLevelMI.setActionCommand("Expand this level");
     expandLevelMI.addActionListener(this);
-    expandAllMI = new JMenuItem("Expand all elements");
+
+    // "Expand all elements"
+    expandAllMI = new JMenuItem(ts.l("init.expand_all_menu"));
     expandAllMI.addActionListener(this);
+    expandAllMI.setActionCommand("Expand all elements");
     popupMenu.add(expandLevelMI);
     popupMenu.add(expandAllMI);
     popupMenu.addSeparator();
 
-    closeLevelMI = new JMenuItem("Close this level");
+    // "Close this level"
+    closeLevelMI = new JMenuItem(ts.l("init.close_menu"));
+    closeLevelMI.setActionCommand("Close this level");
     closeLevelMI.addActionListener(this);
-    closeAllMI = new JMenuItem("Close all elements");
+
+    // "Close all elements"
+    closeAllMI = new JMenuItem(ts.l("init.close_all_menu"));
     closeAllMI.addActionListener(this);
+    closeAllMI.setActionCommand("Close all elements");
     popupMenu.add(closeLevelMI);
     popupMenu.add(closeAllMI);
 
@@ -362,7 +384,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Can't make IP vector field");
+	    gc.processExceptionRethrow(rx);
 	  }
       }
     else if (my_field instanceof invid_field)
@@ -442,10 +464,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Can't make embedded object field: ");
+	    gc.processExceptionRethrow(rx);
 	  }
       }
-    else
+    else if (debug)
       {
 	System.out.println("\n*** Error - inappropriate field type passed to vectorPanel constructor");
       }
@@ -465,12 +487,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	add("South", addPanel);
       }
-    else
+    else if (debug)
       {
-	if (debug)
-	  {
-	    System.out.println("Field is not editable, no button added");
-	  }
+	System.out.println("Field is not editable, no button added");
       }
   } 
 
@@ -567,8 +586,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  }
 
 		// display the new containerPanel pre-expanded
-		
-		addElement("New Element", cp, true);
+
+		// "New Element"		
+		addElement(ts.l("addNewElement.new_element"), cp, true);
 
 		if (local_debug)
 		  {
@@ -578,7 +598,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Could not create new containerPanel: ");
+	    gc.processExceptionRethrow(rx);
 	  }
       }
     else if (my_field instanceof ip_field)
@@ -599,10 +619,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Could not make new IP field");
+	    gc.processExceptionRethrow(rx);
 	  }
       }
-    else
+    else if (debug)
       {
 	System.out.println("vectorPanel.addNewElement(): This type is not supported yet.");
       }
@@ -695,7 +715,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	throw new IllegalArgumentException("vectorPanel.addElement(): Component parameter is null");
       }
 
-    setStatus("adding new elementWrapper");
+    // "adding new elementWrapper"
+    setStatus(ts.l("addElement.adding_status"));
 
     try
       {
@@ -751,7 +772,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
     finally
       {
-	setStatus("Done adding elementWrapper");
+	// "Done adding elementWrapper"
+	setStatus(ts.l("addElement.done_status"));
       }
   }
 
@@ -808,12 +830,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	else
 	  {
-	    showErrorMessage("Server will not allow delete.");
+	    // "Server will not allow deletion of this element."
+	    showErrorMessage(ts.l("deleteElement.error"));
 	  }
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx, "Could not delete element: ");
+	gc.processExceptionRethrow(rx);
       }
   }
 
@@ -1104,7 +1127,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		((vectorPanel)cp.vectorPanelList.elementAt(i)).expandLevels(true);
 	      }
 	  }
-	else
+	else if (debug)
 	  {
 	    System.out.println("The likes of this I have never seen: " + comp);
 	  }
@@ -1280,7 +1303,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	else
 	  {
-	    setStatus("You can't delete elements in a view window.");
+	    // "You can''t delete elements in a view window."
+	    setStatus(ts.l("setValuePerformed.nope_status"));
 	    returnValue = false;
 	  }
       }
@@ -1308,7 +1332,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  }
 		catch (Exception rx)
 		  {
-		    gc.processExceptionRethrow(rx, "Could not update IP field: ");
+		    gc.processExceptionRethrow(rx);
 		  }
 	      }
 	  }
@@ -1317,7 +1341,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	    returnValue = false; 
 	  }
       }
-    else
+    else if (debug)
       {
 	System.out.println("Value changed in field that is not yet supported");
       }
@@ -1473,7 +1497,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "VectorPanel: Could not check if field was editable: ");
+	    gc.processExceptionRethrow(rx);
 	  }
       }
     
