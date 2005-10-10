@@ -249,7 +249,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     // "Remove All Windows"
     removeAllMI = new JMenuItem(ts.l("init.windows_menu_0"));
 
-    String pattern = ts.l("init.windows.menu_0_key_optional");
+    String pattern = ts.l("init.windows_menu_0_key_optional");
 
     if (pattern != null)
       {
