@@ -2347,4 +2347,3 @@ class OptionsPanel extends JPanel {
     return fieldsToReturn; 
   }
 }
-
