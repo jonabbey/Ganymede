@@ -78,6 +78,7 @@ import javax.swing.border.TitledBorder;
 import arlut.csd.JCalendar.JpopUpCalendar;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
@@ -95,6 +96,13 @@ import arlut.csd.ganymede.common.Invid;
  */
 
 public class adminHistoryPanel extends JPanel implements ActionListener, JsetValueCallback{
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.adminHistoryPanel");
 
   JPanel
     historyTextPanel;
@@ -141,15 +149,22 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     // create our fixed top panel
 
     JPanel topPanel = new JPanel(false);
-    selectDate = new JButton("Set starting date");
+
+    // "Set starting date"
+    selectDate = new JButton(ts.l("init.start_date_button"));
+    selectDate.setActionCommand("Set starting date");
     selectDate.addActionListener(this);
     topPanel.add(selectDate);
-    
-    clearDate = new JButton("Clear date");
+
+    // "Clear date"
+    clearDate = new JButton(ts.l("init.clear_date_button"));
+    clearDate.setActionCommand("Clear date");
     clearDate.addActionListener(this);
     topPanel.add(clearDate);
-    
-    showHistory = new JButton("Show history");
+
+    // "Show history"
+    showHistory = new JButton(ts.l("init.show_history_button"));
+    showHistory.setActionCommand("Show history");
     showHistory.addActionListener(this);
     
     topPanel.add(showHistory);
@@ -158,7 +173,8 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
     // create our history-display panel, add it to our card layout
 
-    historyTextPanel.setBorder(new TitledBorder("History"));
+    // "History"
+    historyTextPanel.setBorder(new TitledBorder(ts.l("init.history_border")));
 
     JPanel p = new JPanel(new BorderLayout());
     historyText = new JTextArea();
@@ -177,7 +193,8 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     JPanel waitPanel = new JPanel(new BorderLayout());
     waitPanel.setBackground(java.awt.Color.white);
 
-    JLabel waitText = new JLabel("Waiting for history from server...");
+    // "Waiting for history from server..."
+    JLabel waitText = new JLabel(ts.l("init.waiting_label"));
     waitText.setForeground(java.awt.Color.black);
     waitText.setFont(Font.getFont("Courier"));
 
@@ -233,7 +250,6 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
 	if (value.equals(selectedDate))
 	  {
-	    System.out.println("You are already looking at this one.");
 	    return false;
 	  }
 
@@ -287,7 +303,7 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Could not get admin history.");
+	    gc.processExceptionRethrow(rx);
 	  }
 	finally
 	  {
@@ -325,5 +341,4 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     titledBorder = null;
     historyBuffer = null;
   }
-
 }
