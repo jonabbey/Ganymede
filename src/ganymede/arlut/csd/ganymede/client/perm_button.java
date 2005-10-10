@@ -60,6 +60,7 @@ import java.util.Hashtable;
 
 import javax.swing.JButton;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.rmi.perm_field;
 
 /*------------------------------------------------------------------------------
@@ -71,6 +72,13 @@ import arlut.csd.ganymede.rmi.perm_field;
 class perm_button extends JButton implements ActionListener {
 
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.perm_button");
 
   perm_field field;
   boolean enabled;
@@ -101,11 +109,13 @@ class perm_button extends JButton implements ActionListener {
     {
       if (enabled)
 	{
-	  setText("Edit Permissions");
+	  // "Edit Permissions"
+	  setText(ts.l("init.edit"));
 	}
       else
 	{
-	  setText("View Permissions");
+	  // "View Permissions"
+	  setText(ts.l("init.view"));
 	}
       
       this.field = field;
@@ -140,9 +150,12 @@ class perm_button extends JButton implements ActionListener {
 	if ((editor == null) || (!editor.isActiveEditor())) 
 	  { 
 	    Frame parent = new Frame();
-	    editor = new perm_editor(field, 
-				     enabled, gc, 
-				     parent, "Permissions Editor: " + title);
+
+	    // "Permissions Editor: {0}"
+	    editor = new perm_editor(field,
+				     enabled, gc,
+				     parent,
+				     ts.l("actionPerformed.title", title));
 	    
 	    if (debug)
 	      {
