@@ -72,6 +72,7 @@ import arlut.csd.ganymede.rmi.Server;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.XMLSession;
 import arlut.csd.Util.booleanSemaphore;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -90,6 +91,13 @@ import arlut.csd.Util.booleanSemaphore;
 public class ClientBase implements Runnable, RMISSLClientListener {
 
   private final static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.ClientBase");
 
   // ---
 
@@ -200,8 +208,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     if (isLoggedIn())
       {
-	throw new IllegalArgumentException("Already logged in.  Construct a " +
-					   "new ClientBase if you need to login again");
+	// "Already logged in.  Construct a new ClientBase if you need to open a second concurrent session."
+	throw new IllegalArgumentException(ts.l("global.logged_in_error"));
       }
 
     try
@@ -226,7 +234,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 	      }
 	    else
 	      {
-		sendErrorMessage("Couldn't login to server... bad username/password?");
+		// "Couldn''t log in to server.  Bad username/password?"
+		sendErrorMessage(ts.l("global.login_failure_msg"));
 	      }
 
 	    return null;
@@ -254,7 +263,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 	    System.err.println("Error: Didn't get server reference.  Exiting now.");
 	  }
 
-	sendErrorMessage( "Error: Didn't get server reference.  Exiting now.");
+	// "Error: ClientBase didn''t get server reference.  Giving up on login."
+	sendErrorMessage(ts.l("global.no_ref_msg"));
       }
     catch (Exception ex)
       {
@@ -265,7 +275,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 	    System.err.println("Got some other exception: " + ex);
 	  }
 
-	sendErrorMessage("Got some other exception: " + ex);
+	// "ClientBase login caught some other exception:\n{0}"
+	sendErrorMessage(ts.l("global.other_exception_msg", ex));
       }
   
     return session;
@@ -288,8 +299,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     if (isLoggedIn())
       {
-	throw new IllegalArgumentException("Already logged in.  Construct a " +
-					   "new ClientBase if you need to login again");
+	// "Already logged in.  Construct a new ClientBase if you need to open a second concurrent session."
+	throw new IllegalArgumentException(ts.l("global.logged_in_error"));
       }
 
     try
@@ -314,7 +325,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 	      }
 	    else
 	      {
-		sendErrorMessage("Couldn't login to server... bad username/password?");
+		// "Couldn''t log in to server.  Bad username/password?"
+		sendErrorMessage(ts.l("global.login_failure_msg"));
 	      }
 
 	    return null;
@@ -345,7 +357,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 	    System.err.println("Error: Didn't get server reference.  Exiting now.");
 	  }
 
-	sendErrorMessage( "Error: Didn't get server reference.  Exiting now.");
+	// "Error: ClientBase didn''t get server reference.  Giving up on login."
+	sendErrorMessage(ts.l("global.no_ref_msg"));
       }
     catch (Exception ex)
       {
@@ -356,7 +369,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 	    System.err.println("Got some other exception: " + ex);
 	  }
 
-	sendErrorMessage("Got some other exception: " + ex);
+	// "ClientBase login caught some other exception:\n{0}"
+	sendErrorMessage(ts.l("global.other_exception_msg", ex));
       }
   
     return xSession;
@@ -474,7 +488,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     session = null;
 
-    ClientEvent e = new ClientEvent("Server forced disconect: " + reason);
+    // "Ganymede Server forced client to disconnect: {0}"
+    ClientEvent e = new ClientEvent(ts.l("forceDisconnect.forced_off", reason));
 
     Vector myVect = (Vector) listeners.clone();
 
@@ -566,7 +581,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
       }
     catch (Exception ex)
       {
-	sendErrorMessage("Exception caught in client async message loop: " + ex.toString());
+	// "Exception caught in ClientBase's async message loop: {0}"
+	sendErrorMessage(ts.l("run.exception", ex.toString()));
       }
     finally
       {
