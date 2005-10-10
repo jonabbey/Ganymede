@@ -895,7 +895,7 @@ class BoolRenderer extends JCheckBox implements TableCellRenderer {
     // Note that this just shows what to display. Whether you can select the box or not
     // is controlled in the isCellEditable() method of PermEditorModel.
 
-    if (columnName.equals("Visible")) 
+    if (columnName.equals(PermEditorModel.visible)) 
       {
 	if (myRow.canSeeView()) 
 	  {
@@ -909,7 +909,7 @@ class BoolRenderer extends JCheckBox implements TableCellRenderer {
 	    setEnabled(true);
 	  }
       }
-    else if (columnName.equals("Creatable")) 
+    else if (columnName.equals(PermEditorModel.creatable))
       {
 	if (myRow.canSeeCreate()) 
 	  {
@@ -923,7 +923,7 @@ class BoolRenderer extends JCheckBox implements TableCellRenderer {
 	    setEnabled(true);
 	  }
       }
-    else if (columnName.equals("Editable")) 
+    else if (columnName.equals(PermEditorModel.editable))
       {
 	if (myRow.canSeeEdit()) 
 	  {
@@ -937,7 +937,7 @@ class BoolRenderer extends JCheckBox implements TableCellRenderer {
 	    setEnabled(true);
 	  }
       }
-    else if (columnName.equals("Deletable"))
+    else if (columnName.equals(PermEditorModel.deletable))
       {
 	if (myRow.canSeeDelete() && myRow.isBase()) 
 	  {
@@ -1168,6 +1168,20 @@ class PermRow {
 
 class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
   
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.PermEditorModel");
+
+  public static final String
+    name = ts.l("global.name"),		// "Name"
+    visible = ts.l("global.visible"),	// "Visible"
+    creatable = ts.l("global.creatable"), // "Creatable"
+    editable = ts.l("global.editable"),	// "Editable"
+    deletable = ts.l("global.deletable"); // "Deletable"
+
   static final int NAME = 0;
   static final int VISIBLE = 1;
   static final int CREATABLE = 2;
@@ -1179,11 +1193,11 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
    * Names of the columns.
    */
 
-  static protected String[]  cNames =  {"Name", 
-					"Visible",
-					"Creatable",
-					"Editable",
-					"Deletable"};
+  static protected String[]  cNames =  {name,
+					visible,
+					creatable,
+					editable,
+					deletable};
   
   /**
    * Types of the columns.
