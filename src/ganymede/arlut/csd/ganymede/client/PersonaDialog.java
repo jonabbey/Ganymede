@@ -76,6 +76,8 @@ import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDialog.JCenterDialog;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -93,6 +95,13 @@ import arlut.csd.JDialog.JCenterDialog;
 public class PersonaDialog extends JCenterDialog implements ActionListener {
 
   public final static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.PersonaDialog");
 
   // ---
 
@@ -126,7 +135,8 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
 
   public PersonaDialog(gclient gc, boolean requirePassword)
   {
-    super(gc, "Choose Persona", true);
+    // "Choose Persona"
+    super(gc, ts.l("init.title"), true);
 
     this.requirePassword = requirePassword;
     this.gc = gc;
@@ -151,10 +161,10 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
 
     pane.add("Center", topPanel); // Personae go here.
     pane.add("South", buttonPanel); // "OK" button.
-    
+
     // "OK" button
 
-    login = new JButton("OK");
+    login = new JButton(StringDialog.getDefaultOk());
     buttonPanel.add(login);
     login.addActionListener(personaListener);
     login.addActionListener(this);
@@ -162,13 +172,15 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
     // Panel to hold persona radiobuttons and pass field
 
     JPanel personaPanel = new JPanel(new BorderLayout());
+
+    // "Select Persona"
     personaPanel.setBorder(new TitledBorder(new EtchedBorder(),
-					"Select Persona",
-					TitledBorder.LEFT,
-					TitledBorder.TOP));
+					    ts.l("init.border_title"),
+					    TitledBorder.LEFT,
+					    TitledBorder.TOP));
 
     JLabel image = new JLabel(new ImageIcon(gc.personaIcon));
-    
+
     if (requirePassword)
       {
 	image.setBorder(new EmptyBorder(new Insets(10,15,0,15)));
@@ -176,9 +188,8 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
 
 	JPanel topPersonaPanel = new JPanel(new BorderLayout());
 
-	JMultiLineLabel explanation = new JMultiLineLabel("\nThe Ganymede server timed you out due to inactivity.\n\n" +
-							  "You will have to re-authenticate with your password in " +
-							  "order to continue using Ganymede.");
+	// "\nThe Ganymede server timed you out due to inactivity.\n\nYou will have to re-authenticate with your password in order to continue using Ganymede."
+	JMultiLineLabel explanation = new JMultiLineLabel(ts.l("init.timed_out_msg"));
 
 	explanation.setBorder(new EmptyBorder(new Insets(0,0,0,10)));
 
@@ -200,7 +211,9 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
     password.addActionListener(this);
 
     JPanel passPanel = new JPanel(new BorderLayout());
-    passPanel.add("West",new JLabel("Password: "));
+
+    // "Password:\ "
+    passPanel.add("West", new JLabel(ts.l("init.password_field")));
     passPanel.add("Center",password);
     
     Box personaBox = Box.createVerticalBox();
@@ -355,4 +368,3 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
     return newPersona;
   }
 }
-
