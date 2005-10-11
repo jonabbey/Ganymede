@@ -80,7 +80,7 @@ import arlut.csd.ganymede.rmi.Session;
 
 public class Loader extends Thread {
 
-  private boolean debug = false;
+  private static final boolean debug = false;
 
   private Hashtable 
     baseMap,
@@ -130,16 +130,16 @@ public class Loader extends Thread {
   {
     if (debug)
       {
-	System.out.println("Initializing Loader");
+	System.err.println("Initializing Loader");
       }
 
-    this.debug = debug;
+    /*    this.debug = debug; */
 
     this.session = session;
 
     if (session == null)
       {
-	throw new NullPointerException("Null session paramater in Loader constructor");
+	throw new NullPointerException("Null session parameter in Loader constructor");
       }
   }
 
@@ -147,7 +147,7 @@ public class Loader extends Thread {
   {
     if (debug)
       {
-	System.out.println("Starting thread in loader");
+	System.err.println("Starting thread in loader");
       }
 
     try
@@ -160,7 +160,10 @@ public class Loader extends Thread {
 	      }
 	    else
 	      {
-		System.out.println("**Stopping before baseList is loaded");
+		if (debug)
+		  {
+		    System.err.println("**Stopping before baseList is loaded");
+		  }
 
 		// Ok, it's not really loaded, but this basically means that it is finished.
 
@@ -177,7 +180,10 @@ public class Loader extends Thread {
 	      }
 	    else
 	      {
-		System.out.println("**Stopping before baseNames are loaded");
+		if (debug)
+		  {
+		    System.err.println("**Stopping before baseNames are loaded");
+		  }
 
 		baseNamesLoaded = true;
 		this.notifyAll();
@@ -192,7 +198,7 @@ public class Loader extends Thread {
 	      }
 	    else
 	      {
-		System.out.println("**Stopping before baseMap is loaded");
+		System.err.println("**Stopping before baseMap is loaded");
 		
 		baseMapLoaded = true;
 		this.notifyAll();
@@ -215,7 +221,7 @@ public class Loader extends Thread {
 
     if (debug)
       {
-	System.out.println("Done with thread in loader.");
+	System.err.println("Done with thread in loader.");
       }
   }
 
@@ -233,7 +239,7 @@ public class Loader extends Thread {
 
     if (debug)
       {
-	System.out.println("Starting to load the loader again");
+	System.err.println("Starting to load the loader again");
       }
 
     keepGoing = true;
@@ -267,7 +273,10 @@ public class Loader extends Thread {
 
 	while (!(baseNamesLoaded && baseListLoaded && baseMapLoaded && !templateLoading))
 	  {
-	    System.out.println("Loader waiting for previous method to stop.");
+	    if (debug)
+	      {
+		System.err.println("Loader waiting for previous method to stop.");
+	      }
 
 	    try
 	      {
@@ -376,7 +385,7 @@ public class Loader extends Thread {
 	      {
 		if (debug)
 		  {
-		    System.out.println("Dang, have to wait to get the base list");
+		    System.err.println("Dang, have to wait to get the base list");
 		  }
 		
 		try
@@ -395,11 +404,11 @@ public class Loader extends Thread {
       {
 	if (baseList == null)
 	  {
-	    System.out.println("baseList is null");
+	    System.err.println("baseList is null");
 	  }
 	else
 	  {
-	    System.out.println("returning baseList");
+	    System.err.println("returning baseList");
 	  }
       }
 
@@ -427,7 +436,7 @@ public class Loader extends Thread {
 	      {
 		if (debug)
 		  {
-		    System.out.println("Dang, have to wait to get the base names list");
+		    System.err.println("Dang, have to wait to get the base names list");
 		  }
 
 		try
@@ -446,11 +455,11 @@ public class Loader extends Thread {
       {
 	if (baseNames == null)
 	  {
-	    System.out.println("baseNames is null");
+	    System.err.println("baseNames is null");
 	  }
 	else
 	  {
-	    System.out.println("returning baseNames");
+	    System.err.println("returning baseNames");
 	  }
       }
 
@@ -476,7 +485,10 @@ public class Loader extends Thread {
 
 	    while (!baseMapLoaded || !keepGoing)
 	      {
-		System.out.println("Loader: waiting for base map");
+		if (debug)
+		  {
+		    System.err.println("Loader: waiting for base map");
+		  }
 
 		try
 		  {
@@ -494,11 +506,11 @@ public class Loader extends Thread {
       {
 	if (baseMap == null)
 	  {
-	    System.out.println("baseMap is null");
+	    System.err.println("baseMap is null");
 	  }
 	else
 	  {
-	    System.out.println("returning baseMap");
+	    System.err.println("returning baseMap");
 	  }
       }
 
@@ -531,7 +543,7 @@ public class Loader extends Thread {
 	      {
 		if (debug)
 		  {
-		    System.out.println("Loader: waiting for base hash");
+		    System.err.println("Loader: waiting for base hash");
 		  }
 
 		try
@@ -550,11 +562,11 @@ public class Loader extends Thread {
       {
 	if (baseToShort == null)
 	  {
-	    System.out.println("baseToShort is null");
+	    System.err.println("baseToShort is null");
 	  }
 	else
 	  {
-	    System.out.println("returning baseToShort");
+	    System.err.println("returning baseToShort");
 	  }
       }
 
@@ -586,7 +598,7 @@ public class Loader extends Thread {
 	      {
 		if (debug)
 		  {
-		    System.out.println("Loader: waiting for base hash");
+		    System.err.println("Loader: waiting for base hash");
 		  }
 
 		try
@@ -605,11 +617,11 @@ public class Loader extends Thread {
       {
 	if (nameShorts == null)
 	  {
-	    System.out.println("nameShorts is null");
+	    System.err.println("nameShorts is null");
 	  }
 	else
 	  {
-	    System.out.println("returning nameShorts");
+	    System.err.println("returning nameShorts");
 	  }
       }
 
@@ -760,15 +772,15 @@ public class Loader extends Thread {
 
     if (debug)
       {
-	System.out.println("Finished loading base list");
+	System.err.println("Finished loading base list");
 
 	if (baseList == null)
 	  {
-	    System.out.println("****** BaseList is null after loading!!!! *****");
+	    System.err.println("****** BaseList is null after loading!!!! *****");
 	  }
 	else
 	  {
-	    System.out.println("*** BaseList is not null.");
+	    System.err.println("*** BaseList is not null.");
 	  }
       }
 
@@ -800,7 +812,7 @@ public class Loader extends Thread {
       
     if (debug)
       {
-	System.out.println("Finished loading base list");
+	System.err.println("Finished loading base list");
       }
 
     baseNamesLoaded = true;
@@ -849,12 +861,12 @@ public class Loader extends Thread {
 
 	    if (debug)
 	      {
-		System.out.println("Putting another base on the old baseHash");
+		System.err.println("Putting another base on the old baseHash");
 	      }
 	  }
-	else
+	else if (debug)
 	  {
-	    System.out.println("Base was null");
+	    System.err.println("Base was null");
 	  }
       }
 
