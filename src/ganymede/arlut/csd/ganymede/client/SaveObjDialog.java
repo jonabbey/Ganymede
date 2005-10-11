@@ -75,6 +75,8 @@ import javax.swing.JTextField;
 
 import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDialog.JCenterDialog;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -89,7 +91,14 @@ import arlut.csd.JDialog.JCenterDialog;
 
 public class SaveObjDialog extends JCenterDialog implements ActionListener, ItemListener {
 
-  private final boolean debug = false;
+  private static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.SaveObjDialog");
 
   Date startDate;
 
@@ -184,10 +193,13 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
     // and finally the ok/cancel buttons
     
     JPanel buttonPanel = new JPanel();
-    ok = new JButton(forMail ? "Mail" : "Save");
+
+    // "Mail"
+    // "Save"
+    ok = new JButton(forMail ? ts.l("init.mail_button") : ts.l("init.save_button"));
     ok.addActionListener(this);
 
-    cancel = new JButton("Cancel");
+    cancel = new JButton(StringDialog.getDefaultCancel());
     cancel.addActionListener(this);
 
     buttonPanel.add(ok);
@@ -222,7 +234,7 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
 
     if (debug)
       {
-	System.out.println("Returning " + returnValue);
+	System.err.println("Returning " + returnValue);
       }
 
     return returnValue;
@@ -280,7 +292,7 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
       {
 	if (debug)
 	  {
-	    System.out.println("ok");
+	    System.err.println("ok");
 	  }
 
 	returnValue = true;
@@ -290,7 +302,7 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
       {
 	if (debug)
 	  {
-	    System.out.println("cancel");
+	    System.err.println("cancel");
 	  }
 
 	returnValue = false;
@@ -327,7 +339,8 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridheight = 1;
 
-    JLabel rec = new JLabel("To:");
+    // "To:"
+    JLabel rec = new JLabel(ts.l("makeMailPanel.to_label"));
     gbl.setConstraints(rec, gbc);
     panel.add(rec);
 
@@ -346,7 +359,8 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
     gbc.fill = GridBagConstraints.NONE;
     gbc.weightx = 0;
 
-    JLabel sub = new JLabel("Subject:");
+    // "Subject:"
+    JLabel sub = new JLabel(ts.l("makeMailPanel.subject_label"));
     gbl.setConstraints(sub, gbc);
     panel.add(sub);
     
@@ -369,21 +383,24 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
 
     /* -- */
 
-    panel.setBorder(BorderFactory.createTitledBorder("History information"));
+    // "Historical Information"
+    panel.setBorder(BorderFactory.createTitledBorder(ts.l("makeHistoryPanel.border_title")));
     panel.setLayout(gbl);
     
     gbc.insets = new Insets(4,4,4,4);
 
     gbc.anchor = GridBagConstraints.WEST;
 
-    showHistory = new JCheckBox("Attach change log");
+    // "Attach Change Log"
+    showHistory = new JCheckBox(ts.l("makeHistoryPanel.attach_log_button"));
     showHistory.addItemListener(this);
     gbc.gridx = 0;
     gbc.gridy = 0;
     gbl.setConstraints(showHistory, gbc);
     panel.add(showHistory);
 
-    showTransactions = new JCheckBox("Include complete transactions");
+    // "Include Complete Transactions"
+    showTransactions = new JCheckBox(ts.l("makeHistoryPanel.transaction_button"));
     showTransactions.setEnabled(false);
     gbc.gridx = 0;
     gbc.gridy = 1;
