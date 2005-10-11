@@ -71,6 +71,8 @@ import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDialog.JCenterDialog;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.rmi.Base;
 
 /*------------------------------------------------------------------------------
@@ -92,6 +94,13 @@ import arlut.csd.ganymede.rmi.Base;
  */
 
 public class createObjectDialog extends JCenterDialog implements ActionListener {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.createObjectDialog");
 
   private boolean debug = false;
 
@@ -115,7 +124,8 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 
   public createObjectDialog(gclient client) 
   {
-    super(client, "Create Object", true);
+    // "Create Object"
+    super(client, ts.l("init.dialog_title"), true);
 
     this.gc = client;
 
@@ -133,7 +143,9 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     gbc.gridheight = 1;
     gbc.ipadx = 8;
     gbc.ipady = 8;
-    JMultiLineLabel text = new JMultiLineLabel("Choose the type of object\nyou wish to create");
+
+    // "Choose the type of object\nyou wish to create"
+    JMultiLineLabel text = new JMultiLineLabel(ts.l("init.dialog_text"));
     gbc.gridx = 1;
     gbc.gridwidth = 2;
     gbl.setConstraints(text, gbc);
@@ -171,7 +183,7 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 	      {
 		if (debug)
 		  {
-		    System.out.println("Skipping embedded field: " + name);
+		    System.err.println("Skipping embedded field: " + name);
 		  }
 	      }
 	    else if (thisBase.canCreate(null))
@@ -201,7 +213,8 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 
     // **  types.setLightWeightPopupEnabled(false);
 
-    JLabel l = new JLabel("Type of object:");
+    // "Type of object:"
+    JLabel l = new JLabel(ts.l("init.type_label"));
 
     gbc.gridx = 1;
     gbc.gridy = 1;
@@ -213,9 +226,9 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     p.add(types);
     
     JPanel buttonP = new JPanel();
-    ok = new JButton("Ok");
+    ok = new JButton(StringDialog.getDefaultOk());
     ok.addActionListener(this);
-    cancel = new JButton("Cancel");
+    cancel = new JButton(StringDialog.getDefaultCancel());
     cancel.addActionListener(this);
     buttonP.add(ok);
     buttonP.add(cancel);
@@ -255,7 +268,7 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 	  }
 	else
 	  {
-	    System.out.println("No type chosen");
+	    System.err.println("No type chosen");
 	  }
 	
 	setVisible(false);
