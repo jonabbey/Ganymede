@@ -71,6 +71,8 @@ import arlut.csd.JDataComponent.JDeleteVectorValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
@@ -81,7 +83,14 @@ import arlut.csd.ganymede.common.ReturnVal;
 
 public class JFilterDialog extends JDialog implements ActionListener, JsetValueCallback{
 
-  private final boolean debug = false;
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.JFilterDialog");
+
+  private final static boolean debug = false;
   JButton cancel, done;
   Vector filter, available = null;
   gclient gc;
@@ -91,7 +100,8 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
   public JFilterDialog(gclient gc)
   {
-    super(gc, "Select Query Filter");
+    // "Select Query Filter"
+    super(gc, ts.l("init.dialog_title"));
 
     this.gc = gc;
 
@@ -99,7 +109,8 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
     getContentPane().setLayout(new BorderLayout());
 
-    JLabel l =  new JLabel("Select owner groups to show.", JLabel.CENTER);
+    // "Select Owner Groups to show."
+    JLabel l =  new JLabel(ts.l("init.dialog_label"), JLabel.CENTER);
     JPanel lp = new JPanel(new BorderLayout());
 
     lp.add("Center", l);
@@ -121,9 +132,9 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
     getContentPane().add("Center", ss);
 
-    done = new JButton("Ok");
+    done = new JButton(StringDialog.getDefaultOk());
     done.addActionListener(this);
-    cancel = new JButton("Cancel");
+    cancel = new JButton(StringDialog.getDefaultCancel());
     cancel.addActionListener(this);
     
     JPanel p = new JPanel(false);
@@ -146,7 +157,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	  {
 	    System.out.println("Adding element");
 	  }
-
+	
 	changed = true;
 	filter.addElement(e.getValue());
       }
@@ -217,7 +228,8 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 	    else
 	      {
 		this.setVisible(false);
-		gc.showErrorMessage("Could not set filter query.");
+		// "Could not set Query Filter."
+		gc.showErrorMessage(ts.l("actionPerformed.error"));
 	      }
 	  }
 	catch (RemoteException rx)
