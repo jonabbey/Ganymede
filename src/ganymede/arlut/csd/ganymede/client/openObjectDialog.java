@@ -81,6 +81,8 @@ import javax.swing.border.TitledBorder;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDialog.JCenterDialog;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecQuickSort;
 import arlut.csd.ganymede.common.BaseDump;
 import arlut.csd.ganymede.common.Invid;
@@ -103,6 +105,13 @@ import arlut.csd.ganymede.common.QueryResult;
 public class openObjectDialog extends JCenterDialog implements ActionListener, MouseListener {
 
   private final static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.openObjectDialog");
 
   boolean 
     editableOnly = false;
@@ -218,8 +227,9 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     gbl.setConstraints(iconL, gbc);
 
     middle.add(iconL);
-    
-    titleL = new JLabel("Choose invid:", SwingConstants.CENTER);
+
+    // "Choose object:"
+    titleL = new JLabel(ts.l("init.initial_title_label"), SwingConstants.CENTER);
     titleL.setFont(new Font("Helvetica", Font.BOLD, 14));
     titleL.setOpaque(true);
     titleL.setBorder(client.emptyBorder5);
@@ -312,7 +322,8 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 2;
 
-    JLabel oType = new JLabel("Object Type:"); 
+    // "Object Type:"
+    JLabel oType = new JLabel(ts.l("init.type_label"));
 
     gbl.setConstraints(oType, gbc);
     middle.add(oType);
@@ -331,7 +342,9 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
       }
 
     text.addActionListener(this);
-    JLabel editTextL = new JLabel("Object Name:");
+
+    // "Object Name:"
+    JLabel editTextL = new JLabel(ts.l("init.name_label"));
     
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 2;
@@ -348,12 +361,12 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     
     JPanel buttonP = new JPanel();
     
-    ok = new JButton("Ok");
+    ok = new JButton(StringDialog.getDefaultOk());
     ok.setActionCommand("Find Object with this name");
     ok.addActionListener(this);
     buttonP.add(ok);
 
-    JButton neverMind = new JButton("Cancel");
+    JButton neverMind = new JButton(StringDialog.getDefaultCancel());
     neverMind.setActionCommand("Nevermind finding this object");
     neverMind.addActionListener(this);
     buttonP.add(neverMind);
@@ -451,13 +464,14 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
 	if ((string == null) || (string.equals("")))
 	  {
-	    client.setStatus("Error, I need to have a name of an object to work with.");
+	    // "Error, no object label provided to object open dialog."
+	    client.setStatus(ts.l("actionPerformed.name_missing_status"));
 	    return;
 	  }
 
 	if ((currentObject != null) && (string.equals(currentObject.getLabel())))
 	  {
-	    //This was set from the listbox, and hasn't been changed.
+	    // This was set from the listbox, and hasn't been changed.
 	    
 	    invid = (Invid)currentObject.getObject();
 	    close(true);
@@ -479,7 +493,9 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	    if (pane == null)
 	      {
 		pane = new JScrollPane(list);
-		pane.setBorder(new TitledBorder("Matching objects"));
+
+		// "Matching Objects"
+		pane.setBorder(new TitledBorder(ts.l("actionPerformed.matching_border")));
 	      }
 
 	    if (type == null)
@@ -508,7 +524,8 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		    System.out.println("Trying exact match...");
 		  }
 
-		client.setStatus("Searching for object named " + string);
+		// "Searching for object named {0}."
+		client.setStatus(ts.l("actionPerformed.searching_status", string));
 
 		edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 
@@ -540,7 +557,8 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 			System.out.println("Looking for Startswith...");
 		      }
 
-		    client.setStatus("Searching for objects beginning with " + string);
+		    // "Searching for objects whose names begin with {0}."
+		    client.setStatus(ts.l("actionPerformed.searching_prefix_status", string));
 
 		    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  
 		    edit_query = null;
@@ -556,10 +574,13 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		      }
 		    else if (edit_invids.size() == 0)
 		      {
-			client.showErrorMessage("Error finding object",
+			// "Error Finding Object"
+			// "No editable object starts with that string."
+			// "No viewable object starts with that string."
+			client.showErrorMessage(ts.l("actionPerformed.error_title"),
 						editableOnly ?
-						"No editable object starts with that string." :
-						"No viewable object starts with that string.");
+						ts.l("actionPerformed.no_editable_text") :
+						ts.l("actionPerformed.no_viewable_text"));
 			return;
 		      }
 		    else
