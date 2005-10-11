@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -75,6 +75,8 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import arlut.csd.JDialog.JCenterDialog;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -87,6 +89,13 @@ import arlut.csd.JDialog.JCenterDialog;
  */
 
 public class SaveDialog extends JCenterDialog implements ActionListener {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.SaveDialog");
 
   private final boolean debug = false;
 
@@ -132,7 +141,10 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 
   SaveDialog(Frame owner, boolean forMail)
   {
-    super(owner, forMail ? "Send Mail" : "Save format", true);
+    // "Email Query Report"
+    // "Save Query Report"
+
+    super(owner, forMail ? ts.l("init.mail_title") : ts.l("init.save_title"), true);
 
     panel = new JPanel(gbl);
 
@@ -156,7 +168,8 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 	gbc.gridx = 1;
 	gbc.gridy = 0;
 	gbc.fill = GridBagConstraints.NONE;
-	JLabel rec = new JLabel("To:");
+	// "To:"
+	JLabel rec = new JLabel(ts.l("init.to_label"));
 	gbl.setConstraints(rec, gbc);
 	panel.add(rec);
 
@@ -170,14 +183,16 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 	gbc.gridx = 1;
 	gbc.weightx = 0;
 	gbc.fill = GridBagConstraints.NONE;
-	JLabel sub = new JLabel("Subject:");
+	// "Subject:"
+	JLabel sub = new JLabel(ts.l("init.subject_label"));
 	gbl.setConstraints(sub, gbc);
 	panel.add(sub);
 
 	gbc.gridx = 2;
 	gbc.weightx = 1;
 	gbc.fill = GridBagConstraints.HORIZONTAL;
-	subject.setText("Query report");
+	// "Query Report"
+	subject.setText(ts.l("init.default_subject"));
 	gbl.setConstraints(subject, gbc);
 	panel.add(subject);
       }
@@ -193,10 +208,12 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
     panel.add(sep);
 
     JPanel buttonPanel = new JPanel();
-    ok = new JButton(forMail ? "Mail" : "Save");
+    // "Mail"
+    // "Save"
+    ok = new JButton(forMail ? ts.l("init.mail_button") : ts.l("init.save_button"));
     ok.addActionListener(this);
 
-    cancel = new JButton("Cancel");
+    cancel = new JButton(StringDialog.getDefaultCancel());
     cancel.addActionListener(this);
 
     buttonPanel.add(ok);
@@ -228,7 +245,7 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
     setVisible(true);
     if (debug)
       {
-	System.out.println("Returning " + returnValue);
+	System.err.println("Returning " + returnValue);
       }
 
     return returnValue;
@@ -291,7 +308,8 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
 
-    JLabel l = new JLabel("Format:");
+    // "Format:"
+    JLabel l = new JLabel(ts.l("addFormatChoice.format_label"));
     gbl.setConstraints(l, gbc);
     panel.add(l);
 
@@ -326,7 +344,7 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
       {
 	if (debug)
 	  {
-	    System.out.println("ok");
+	    System.err.println("ok");
 	  }
 
 	returnValue = true;
@@ -336,7 +354,7 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
       {
 	if (debug)
 	  {
-	    System.out.println("cancel");
+	    System.err.println("cancel");
 	  }
 
 	returnValue = false;
@@ -351,6 +369,13 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
  */
 
 class formatButtonPanel extends JPanel {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.formatButtonPanel");
 
   Hashtable modelToLabel = new Hashtable();
 
@@ -368,8 +393,9 @@ class formatButtonPanel extends JPanel {
     setLayout(layout);
 
     String s;
-    
-    setBorder(BorderFactory.createTitledBorder("Format"));
+
+    // "Format"
+    setBorder(BorderFactory.createTitledBorder(ts.l("init.title")));
     constraints.gridx = 0;
     constraints.anchor = GridBagConstraints.WEST;
 
