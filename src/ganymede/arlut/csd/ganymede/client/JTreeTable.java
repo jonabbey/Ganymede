@@ -58,205 +58,223 @@ import javax.swing.tree.TreePath;
  * @author Scott Violet
  */
 public class JTreeTable extends JTable {
-    /** A subclass of JTree. */
-    protected TreeTableCellRenderer tree;
+  /** A subclass of JTree. */
+  protected TreeTableCellRenderer tree;
 
-    public JTreeTable(TreeTableModel treeTableModel) {
-	super();
+  public JTreeTable(TreeTableModel treeTableModel)
+  {
+    super();
 
-        /* Keep the JTable from scrolling inappropriately */
-        setAutoscrolls(false);
+    /* Keep the JTable from scrolling inappropriately */
+    setAutoscrolls(false);
 
-	// Create the tree. It will be used as a renderer and editor. 
-	tree = new TreeTableCellRenderer(treeTableModel);
+    // Create the tree. It will be used as a renderer and editor. 
+    tree = new TreeTableCellRenderer(treeTableModel);
 
-	// Install a tableModel representing the visible rows in the tree. 
-	super.setModel(new TreeTableModelAdapter(treeTableModel, tree));
+    // Install a tableModel representing the visible rows in the tree. 
+    super.setModel(new TreeTableModelAdapter(treeTableModel, tree));
 
-	// Install the tree editor renderer and editor. 
-	setDefaultRenderer(TreeTableModel.class, tree); 
-	setDefaultEditor(TreeTableModel.class, new TreeTableCellEditor());
+    // Install the tree editor renderer and editor. 
+    setDefaultRenderer(TreeTableModel.class, tree); 
+    setDefaultEditor(TreeTableModel.class, new TreeTableCellEditor());
 
-	// No grid.
-	setShowGrid(false);
+    // No grid.
+    setShowGrid(false);
 
-	// No intercell spacing
-	setIntercellSpacing(new Dimension(0, 0));	
+    // No intercell spacing
+    setIntercellSpacing(new Dimension(0, 0));	
 
-	// Increase the height of the rows to match the gclient tree. 
-	setRowHeight(getRowHeight()+5);
+    // Increase the height of the rows to match the gclient tree. 
+    setRowHeight(getRowHeight()+5);
 
-	// Make the tree and table row heights the same. 
-	tree.setRowHeight(getRowHeight());
+    // Make the tree and table row heights the same. 
+    tree.setRowHeight(getRowHeight());
 
-	tree.setRootVisible(false);
-	tree.setShowsRootHandles(true);  
-	tree.putClientProperty("JTree.lineStyle", "Angled");      
+    tree.setRootVisible(false);
+    tree.setShowsRootHandles(true);  
+    tree.putClientProperty("JTree.lineStyle", "Angled");      
+  }
 
+  /**
+   * Overridden to message super and forward the method to the tree.
+   * Since the tree is not actually in the component hieachy it will
+   * never receive this unless we forward it in this manner.
+   */
+  public void updateUI()
+  {
+    super.updateUI();
+
+    if (tree != null)
+      {
+	tree.updateUI();
+      }
+
+    // Use the tree's default foreground and background colors in the
+    // table. 
+    LookAndFeel.installColorsAndFont(this, "Tree.background",
+				     "Tree.foreground", "Tree.font");
+  }
+
+  /* Workaround for BasicTableUI anomaly. Make sure the UI never tries to 
+   * paint the editor. The UI currently uses different techniques to 
+   * paint the renderers and editors and overriding setBounds() below 
+   * is not the right thing to do for an editor. Returning -1 for the 
+   * editing row in this case, ensures the editor is never painted. 
+   */
+  public int getEditingRow()
+  {
+    return (getColumnClass(editingColumn) == TreeTableModel.class) ? -1 :
+      editingRow;  
+  }
+
+  /**
+   * Overridden to pass the new rowHeight to the tree.
+   */
+  public void setRowHeight(int rowHeight)
+  {
+    super.setRowHeight(rowHeight); 
+
+    if (tree != null && tree.getRowHeight() != rowHeight)
+      {
+	tree.setRowHeight(getRowHeight()); 
+      }
+  }
+
+  /**
+   * Returns the tree that is being shared between the model.
+   */
+  public JTree getTree()
+  {
+    return tree;
+  }
+
+  /**
+   * A TreeCellRenderer that displays a JTree.
+   */
+
+  public class TreeTableCellRenderer extends JTree implements TableCellRenderer {
+
+    /** Last table/tree row asked to renderer. */
+    protected int visibleRow;
+
+    public TreeTableCellRenderer(TreeModel model)
+    {
+      super(model); 
     }
 
-
     /**
-     * Overridden to message super and forward the method to the tree.
-     * Since the tree is not actually in the component hieachy it will
-     * never receive this unless we forward it in this manner.
+     * updateUI is overridden to set the colors of the Tree's renderer
+     * to match that of the table.
      */
-    public void updateUI() {
-	super.updateUI();
-	if(tree != null) {
-	    tree.updateUI();
+    public void updateUI()
+    {
+      super.updateUI();
+      // Make the tree's cell renderer use the table's cell selection
+      // colors. 
+      TreeCellRenderer tcr = getCellRenderer();
+
+      if (tcr instanceof DefaultTreeCellRenderer)
+	{
+	  DefaultTreeCellRenderer dtcr = ((DefaultTreeCellRenderer)tcr); 
+	  // For 1.1 uncomment this, 1.2 has a bug that will cause an
+	  // exception to be thrown if the border selection color is
+	  // null.
+	  // dtcr.setBorderSelectionColor(null);
+	  dtcr.setTextSelectionColor(UIManager.getColor("Table.selectionForeground"));
+
+	  dtcr.setBackgroundSelectionColor(UIManager.getColor("Table.selectionBackground"));
+
+	  dtcr.setBackgroundNonSelectionColor(Color.white);
 	}
-	// Use the tree's default foreground and background colors in the
-	// table. 
-        LookAndFeel.installColorsAndFont(this, "Tree.background",
-                                         "Tree.foreground", "Tree.font");
-    }
-
-    /* Workaround for BasicTableUI anomaly. Make sure the UI never tries to 
-     * paint the editor. The UI currently uses different techniques to 
-     * paint the renderers and editors and overriding setBounds() below 
-     * is not the right thing to do for an editor. Returning -1 for the 
-     * editing row in this case, ensures the editor is never painted. 
-     */
-    public int getEditingRow() {
-        return (getColumnClass(editingColumn) == TreeTableModel.class) ? -1 :
-	        editingRow;  
     }
 
     /**
-     * Overridden to pass the new rowHeight to the tree.
+     * Sets the row height of the tree, and forwards the row height to
+     * the table.
      */
-    public void setRowHeight(int rowHeight) { 
-        super.setRowHeight(rowHeight); 
-	if (tree != null && tree.getRowHeight() != rowHeight) {
-            tree.setRowHeight(getRowHeight()); 
-	}
-    }
+    public void setRowHeight(int rowHeight)
+    {
+      if (rowHeight > 0)
+	{
+	  super.setRowHeight(rowHeight); 
 
-    /**
-     * Returns the tree that is being shared between the model.
-     */
-    public JTree getTree() {
-	return tree;
-    }
-
-    /**
-     * A TreeCellRenderer that displays a JTree.
-     */
-    public class TreeTableCellRenderer extends JTree implements
-	         TableCellRenderer {
-	/** Last table/tree row asked to renderer. */
-	protected int visibleRow;
-
-	public TreeTableCellRenderer(TreeModel model) {
-	    super(model); 
-	}
-
-	/**
-	 * updateUI is overridden to set the colors of the Tree's renderer
-	 * to match that of the table.
-	 */
-	public void updateUI() {
-	    super.updateUI();
-	    // Make the tree's cell renderer use the table's cell selection
-	    // colors. 
-	    TreeCellRenderer tcr = getCellRenderer();
-	    if (tcr instanceof DefaultTreeCellRenderer) {
-		DefaultTreeCellRenderer dtcr = ((DefaultTreeCellRenderer)tcr); 
-		// For 1.1 uncomment this, 1.2 has a bug that will cause an
-		// exception to be thrown if the border selection color is
-		// null.
-		// dtcr.setBorderSelectionColor(null);
-		dtcr.setTextSelectionColor(UIManager.getColor
-						 ("Table.selectionForeground"));
-					  
-
-		dtcr.setBackgroundSelectionColor(UIManager.getColor
-						 ("Table.selectionBackground"));
-
-		dtcr.setBackgroundNonSelectionColor(Color.white);
+	  if (JTreeTable.this != null &&
+	      JTreeTable.this.getRowHeight() != rowHeight)
+	    {
+	      JTreeTable.this.setRowHeight(getRowHeight()); 
 	    }
 	}
-
-	/**
-	 * Sets the row height of the tree, and forwards the row height to
-	 * the table.
-	 */
-	public void setRowHeight(int rowHeight) { 
-	    if (rowHeight > 0) {
-		super.setRowHeight(rowHeight); 
-		if (JTreeTable.this != null &&
-		    JTreeTable.this.getRowHeight() != rowHeight) {
-		    JTreeTable.this.setRowHeight(getRowHeight()); 
-		}
-	    }
-	}
-
-	/**
-	 * This is overridden to set the height to match that of the JTable.
-	 */
-	public void setBounds(int x, int y, int w, int h) {
-	    super.setBounds(x, 0, w, JTreeTable.this.getHeight());
-	}
-
-	/**
-	 * Sublcassed to translate the graphics such that the last visible
-	 * row will be drawn at 0,0.
-	 */
-	public void paint(Graphics g) {
-	    g.translate(0, -visibleRow * getRowHeight());
-	    super.paint(g);
-	}
-
-	/**
-	 * TreeCellRenderer method. Overridden to update the visible row.
-	 */
-	public Component getTableCellRendererComponent(JTable table,
-						       Object value,
-						       boolean isSelected,
-						       boolean hasFocus,
-						       int row, int column) {
-	    visibleRow = row;
-	    return this;
-	}
     }
-
+    
+    /**
+     * This is overridden to set the height to match that of the JTable.
+     */
+    public void setBounds(int x, int y, int w, int h)
+    {
+      super.setBounds(x, 0, w, JTreeTable.this.getHeight());
+    }
 
     /**
-     * TreeTableCellEditor implementation. Component returned is the
-     * JTree.
+     * Sublcassed to translate the graphics such that the last visible
+     * row will be drawn at 0,0.
      */
-    public class TreeTableCellEditor extends AbstractCellEditor implements
-	         TableCellEditor {
-	public Component getTableCellEditorComponent(JTable table,
-						     Object value,
-						     boolean isSelected,
-						     int r, int c) {
-	    return tree;
-	}
-
-	/**
-	 * Overridden to return false, and if the event is a mouse event
-	 * it is forwarded to the tree.
-	 *
-	 * The behavior for this is debatable, and should really be offered
-	 * as a property. By returning false, all keyboard actions are
-	 * implemented in terms of the table. By returning true, the
-	 * tree would get a chance to do something with the keyboard
-	 * events. For the most part this is ok. But for certain keys,
-	 * such as left/right, the tree will expand/collapse where as
-	 * the table focus should really move to a different column. Page
-	 * up/down should also be implemented in terms of the table.
-	 * By returning false this also has the added benefit that clicking
-	 * outside of the bounds of the tree node, but still in the tree
-	 * column will select the row, whereas if this returned true
-	 * that wouldn't be the case.
-	 *
-	 * By returning false we are also enforcing the policy that
-	 * the tree will never be editable (at least by a key sequence).
-	 */
-	public boolean isCellEditable(EventObject e) {
-          return true;
-	}
+    public void paint(Graphics g)
+    {
+      g.translate(0, -visibleRow * getRowHeight());
+      super.paint(g);
     }
+
+    /**
+     * TreeCellRenderer method. Overridden to update the visible row.
+     */
+    public Component getTableCellRendererComponent(JTable table,
+						   Object value,
+						   boolean isSelected,
+						   boolean hasFocus,
+						   int row, int column)
+    {
+      visibleRow = row;
+      return this;
+    }
+  }
+
+
+  /**
+   * TreeTableCellEditor implementation. Component returned is the
+   * JTree.
+   */
+  public class TreeTableCellEditor extends AbstractCellEditor implements TableCellEditor {
+    public Component getTableCellEditorComponent(JTable table,
+						 Object value,
+						 boolean isSelected,
+						 int r, int c)
+    {
+      return tree;
+    }
+
+    /**
+     * Overridden to return false, and if the event is a mouse event
+     * it is forwarded to the tree.
+     *
+     * The behavior for this is debatable, and should really be offered
+     * as a property. By returning false, all keyboard actions are
+     * implemented in terms of the table. By returning true, the
+     * tree would get a chance to do something with the keyboard
+     * events. For the most part this is ok. But for certain keys,
+     * such as left/right, the tree will expand/collapse where as
+     * the table focus should really move to a different column. Page
+     * up/down should also be implemented in terms of the table.
+     * By returning false this also has the added benefit that clicking
+     * outside of the bounds of the tree node, but still in the tree
+     * column will select the row, whereas if this returned true
+     * that wouldn't be the case.
+     *
+     * By returning false we are also enforcing the policy that
+     * the tree will never be editable (at least by a key sequence).
+     */
+    public boolean isCellEditable(EventObject e)
+    {
+      return true;
+    }
+  }
 }
