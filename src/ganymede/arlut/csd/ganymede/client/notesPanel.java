@@ -65,6 +65,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.rmi.string_field;
 
 /*------------------------------------------------------------------------------
@@ -87,6 +88,13 @@ import arlut.csd.ganymede.rmi.string_field;
  */
 
 public class notesPanel extends JPanel implements KeyListener {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.notesPanel");
 
   boolean debug = false;
   
@@ -121,7 +129,7 @@ public class notesPanel extends JPanel implements KeyListener {
     
     notesArea = new JTextArea();
     EmptyBorder eb = fp.wp.emptyBorder5;
-    TitledBorder tb = new TitledBorder("Notes");
+    TitledBorder tb = new TitledBorder(ts.l("init.notes_title")); // "Notes"
     notesArea.setBorder(new CompoundBorder(tb,eb));
     
     local_editable = editable;
