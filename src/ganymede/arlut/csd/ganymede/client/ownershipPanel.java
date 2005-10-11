@@ -77,6 +77,7 @@ import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryDataNode;
@@ -103,6 +104,13 @@ import arlut.csd.ganymede.rmi.Session;
 public class ownershipPanel extends JPanel implements ItemListener {
 
   final static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.ownershipPanel");
 
   boolean
     editable;
@@ -148,7 +156,9 @@ public class ownershipPanel extends JPanel implements ItemListener {
     setLayout(new BorderLayout());
 
     holder = new JPanel();
-    holder.add(new JLabel("Loading ownershipPanel."));
+
+    // "Loading ownershipPanel."
+    holder.add(new JLabel(ts.l("init.loading_label")));
     add("Center", holder);
 
     cards = new CardLayout();
@@ -159,7 +169,9 @@ public class ownershipPanel extends JPanel implements ItemListener {
     JPanel bp = new JPanel(false);
     bases = new JComboBox();
     bases.setKeySelectionManager(new TimedKeySelectionManager());
-    bp.add(new JLabel("Object type:"));
+
+    // "Object type:"
+    bp.add(new JLabel(ts.l("init.type_label")));
     bp.add(bases);
 
     Vector baseList = gc.getBaseList();
@@ -226,7 +238,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
   private void println(String s)
   {
-    System.out.println("OwnershipPanel: " + s);
+    System.err.println("OwnershipPanel: " + s);
   }
 
   public void dispose()
@@ -295,6 +307,13 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
   final static boolean debug = false;
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.objectPane");
+
   // ---
 
   private
@@ -341,7 +360,9 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     setLayout(new BorderLayout());
     filler = new JPanel();
-    filler.add(new JLabel("Creating panel, please wait."));
+
+    // "Creating panel, please wait."
+    filler.add(new JLabel(ts.l("init.loading_label")));
 
     add("Center", filler);
   }
@@ -396,7 +417,8 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 	  }
 	else
 	  {
-	    gc.setStatus("Downloading list of owned objects.");
+	    // "Downloading list of owned objects."
+	    gc.setStatus(ts.l("run.downloading_status"));
 
 	    result = gc.getSession().query(new Query(type)); // no filtering
 
@@ -415,24 +437,43 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     ss.update(possible, true, null, owned, true, null);
     ss.setCellWidth((possible != null && editable) ? 150 : 300);
-    ss.setTitles("Selected", "Available");
+
+    // "Selected"
+    // "Available"
+    ss.setTitles(ts.l("run.column1"), ts.l("run.column2"));
 
     // we need to create two separate pop up menus so the
     // StringSelector can attach them to its two
     // arlut.csd.JDataComponent.JstringListBox components without
-    // having each listen to the other's events.
+    // having each listen to the other's events.  Also, each menu item
+    // is limited to belonging to a single menu, so we have to create
+    // redundant menuitems with identical action commands set.
     
     JPopupMenu invidTablePopup = new JPopupMenu();
-    JMenuItem viewO = new JMenuItem("View object");
-    JMenuItem editO = new JMenuItem("Edit object");
-    invidTablePopup.add(viewO);
-    invidTablePopup.add(editO);
+
+    // "View object"
+    JMenuItem viewObj = new JMenuItem(ts.l("run.view_popup"));
+    viewObj.setActionCommand("View object");
+
+    // "Edit object"
+    JMenuItem editObj = new JMenuItem(ts.l("run.edit_popup"));
+    editObj.setActionCommand("Edit object");
+
+    invidTablePopup.add(viewObj);
+    invidTablePopup.add(editObj);
 
     JPopupMenu invidTablePopup2 = new JPopupMenu();
-    JMenuItem viewO2 = new JMenuItem("View object");
-    JMenuItem editO2 = new JMenuItem("Edit object");
-    invidTablePopup2.add(viewO2);
-    invidTablePopup2.add(editO2);
+
+    // "View object"
+    JMenuItem viewObj2 = new JMenuItem(ts.l("run.view_popup"));
+    viewObj2.setActionCommand("View object");
+
+    // "Edit object"
+    JMenuItem editObj2 = new JMenuItem(ts.l("run.edit_popup"));
+    editObj2.setActionCommand("Edit object");
+
+    invidTablePopup2.add(viewObj2);
+    invidTablePopup2.add(editObj2);
 
     ss.setPopups(invidTablePopup, invidTablePopup2);
     ss.setCallback(this);
@@ -443,7 +484,8 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
     parent.validate();
     stringSelector_loaded = true;
 
-    gc.setStatus("Done.");
+    // "Done downloading list of ownerd objects."
+    gc.setStatus(ts.l("run.done_status"));
   }
 
   public boolean isCreated()
@@ -671,7 +713,8 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 	db_object my_object = retVal.getObject();
 	db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
 
-	gc.setStatus("Adding object " + my_object.getLabel() + " to owner group.");
+	// "Adding object {0} to owner group."
+	gc.setStatus(ts.l("addToOwnerGroup.adding_status", my_object.getLabel()));
 
 	retVal = my_field.addElement(parent.parent.getObjectInvid());
 
@@ -683,7 +726,8 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     if (!success)
       {
-	gc.setStatus("Error encountered adding objects to owner group.  Reverting.", 0);
+	// "Error encountered adding objects to owner group.  Reverting."
+	gc.setStatus(ts.l("addToOwnerGroup.failure_status"), 0);
 
 	// we couldn't add all of these objects to the owner group.
 	// Go ahead and revert all the ones we successfully added.
@@ -780,7 +824,8 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 	db_object my_object = retVal.getObject();
 	db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
 
-	gc.setStatus("Removing object " + my_object.getLabel() + " from owner group.");
+	// "Removing object {0} from owner group."
+	gc.setStatus(ts.l("removeFromOwnerGroup.removing_status", my_object.getLabel()));
 
 	retVal = my_field.deleteElement(parent.parent.getObjectInvid());
 
@@ -796,7 +841,8 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 	// Go ahead and try to revert all the ones we successfully
 	// removed.
 
-	gc.setStatus("Error encountered removing objects from owner group.  Reverting.", 0);
+	// "Error encountered removing objects from owner group.  Reverting."
+	gc.setStatus(ts.l("removeFromOwnerGroup.failure_status"), 0);
 
 	for (int j = 0; j < i; j++)
 	  {
@@ -831,6 +877,6 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
   private void println(String s)
   {
-    System.out.println("OwnershipPanel.objectPane: " + s);
+    System.err.println("OwnershipPanel.objectPane: " + s);
   }
 }
