@@ -71,6 +71,8 @@ import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
@@ -80,6 +82,13 @@ import arlut.csd.ganymede.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 public class JDefaultOwnerDialog extends JDialog implements ActionListener, JsetValueCallback{
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.JDefaultOwnerDialog");
 
   private final boolean debug = false;
 
@@ -94,34 +103,36 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
   ReturnVal retVal = null;
 
   public JDefaultOwnerDialog(gclient gc, Vector groups)
-    {
-      super(gc, "Select DefaultOwner", true);
+  {
+    // "Select Default Owner"
+    super(gc, ts.l("init.title"), true);
 
-      this.gc = gc;
-      this.available = groups;
+    this.gc = gc;
+    this.available = groups;
 
-      getContentPane().setLayout(new BorderLayout());
-      getContentPane().add("North", new JLabel("Select default owner for new objects"));
+    getContentPane().setLayout(new BorderLayout());
 
-      // Maybe I should use null instead of chosen?
-      StringSelector ss = new StringSelector(this, true, true, true);
-      ss.update(available, true, null, chosen, true, null);
-      ss.setCallback(this);
-      getContentPane().add("Center", ss);
+    // "Select default owner for newly created objects"
+    getContentPane().add("North", new JLabel(ts.l("init.label")));
 
-      done = new JButton("Ok");
-      done.addActionListener(this);
-
-      JPanel p = new JPanel();
-      p.add(done);
-      p.setBorder(gc.raisedBorder);
-
-      getContentPane().add("South", p);
-
-      setBounds(50,50,50,50);
-      pack();
-
-    }
+    // Maybe I should use null instead of chosen?
+    StringSelector ss = new StringSelector(this, true, true, true);
+    ss.update(available, true, null, chosen, true, null);
+    ss.setCallback(this);
+    getContentPane().add("Center", ss);
+    
+    done = new JButton(StringDialog.getDefaultOk());
+    done.addActionListener(this);
+    
+    JPanel p = new JPanel();
+    p.add(done);
+    p.setBorder(gc.raisedBorder);
+    
+    getContentPane().add("South", p);
+    
+    setBounds(50,50,50,50);
+    pack();
+  }
 
   public boolean setValuePerformed(JValueObject e)
   {
@@ -170,7 +181,8 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
       {
 	if (chosen.size() == 0)
 	  {
-	    new JErrorDialog(gc, "You must choose a default owner group.");
+	    // "You must choose a default Owner Group."
+	    new JErrorDialog(gc, ts.l("actionPerformed.no_owner_error"));
 	    return;
 	  }
 
@@ -180,22 +192,13 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
 	    
 	    gc.handleReturnVal(retVal);
 
-	    if ((retVal == null) || retVal.didSucceed())
-	      {
-		this.setVisible(false);
-	      }
-	    else
-	      {
-		System.out.println("Could not set default owner.");
-		this.setVisible(false);
-	      }
+	    this.setVisible(false);
 	  }
 	catch (RemoteException rx)
 	  {
 	    throw new RuntimeException("Could not set filter: " + rx);
 	  }
       }
-
   }
 
   /**
