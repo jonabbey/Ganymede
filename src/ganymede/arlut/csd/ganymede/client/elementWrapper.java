@@ -72,6 +72,7 @@ import javax.swing.JPanel;
 import arlut.csd.JDataComponent.JIPField;
 import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
@@ -91,6 +92,13 @@ import arlut.csd.ganymede.common.Invid;
  */
 
 class elementWrapper extends JPanel implements ActionListener, MouseListener {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.elementWrapper");
   
   boolean debug = false;
 
@@ -144,7 +152,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     if (debug)
       {
-	System.out.println("Adding new elementWrapper");
+	System.err.println("Adding new elementWrapper");
       }
     
     setLayout(new BorderLayout());
@@ -173,7 +181,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	remove.setOpaque(false);
 	remove.setFocusPainted(false);
 	remove.setMargin(new Insets(0,0,0,0));
-	remove.setToolTipText("Delete this element");
+
+	// "Delete this element"
+	remove.setToolTipText(ts.l("init.remove_tooltip"));
 	remove.setContentAreaFilled(false);
 	remove.addActionListener(this);
       }
@@ -186,7 +196,8 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	  }
 	else
 	  {
-	    title = new JLabel("Component");
+	    // "Component"
+	    title = new JLabel(ts.l("init.default_label"));
 	  }
 	
 	title.setForeground(Color.white);
@@ -194,7 +205,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
 	expand = new JButton(vp.wp.closeIcon);
 	expand.setPressedIcon(vp.wp.closePressedIcon);
-	expand.setToolTipText("Expand this element");
+
+	// "Expand this element"
+	expand.setToolTipText(ts.l("global.expand_tooltip"));
 	expand.setOpaque(false);
 	expand.setBorderPainted(false);
 	expand.setFocusPainted(false);
@@ -230,7 +243,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   public void setIndex(int index)
   {
     this.index = index;
-    title.setText((index + 1) + ". " + titleText);
+
+    // "{0,number,#}. {1}"
+    title.setText(ts.l("setIndex.element_pattern", new Integer(index+1), titleText));
   }
 
   public Component getComponent() 
@@ -282,7 +297,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	  }
 	catch (Exception ex)
 	  {
-	    gclient.client.processExceptionRethrow(ex, "elementWrapper couldn't check object validation: ");
+	    gclient.client.processExceptionRethrow(ex);
 	  }
       }
   }
@@ -313,7 +328,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	  }
 	catch (Exception rx)
 	  {
-	    gclient.client.processExceptionRethrow(rx, "elementWrapper: exception in refreshTitle");
+	    gclient.client.processExceptionRethrow(rx);
 	  }
       }
   }
@@ -330,14 +345,16 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
 	if (!loaded)
 	  {
-	    setStatus("Loading vector element.");
+	    // "Loading vector element."
+	    setStatus(ts.l("open.loading_status"));
 
 	    if (!myContainerPanel.isLoaded())
 	      {
 		myContainerPanel.load();
 	      }
 
-	    setStatus("Finished.");
+	    // "Finished loading vector element."
+	    setStatus(ts.l("open.finished_loading_status"));
 	    add("Center", my_component);
 	    loaded = true;
 	  }
@@ -347,7 +364,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     expand.setIcon(vp.wp.openIcon);
     expand.setPressedIcon(vp.wp.openPressedIcon);
-    expand.setToolTipText("Close this element");
+
+    // "Close this element"
+    expand.setToolTipText(ts.l("global.shrink_tooltip"));
     expanded = true;
   }
 
@@ -360,7 +379,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     my_component.setVisible(false);	
     expand.setIcon(vp.wp.closeIcon);
     expand.setPressedIcon(vp.wp.closePressedIcon);
-    expand.setToolTipText("Expand this element");
+
+    // "Expand this element"
+    expand.setToolTipText(ts.l("global.expand_tooltip"));
     expanded = false;
   }
 
@@ -376,14 +397,14 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     if (debug)
       {
-	System.out.println("toggle().");
+	System.err.println("toggle().");
       }
 
     if (expanded)
       {
 	if (debug)
 	  {
-	    System.out.println("remove");
+	    System.err.println("remove");
 	  }
 
 	close();
@@ -395,7 +416,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     if (debug)
       {
-	System.out.println("Done with toggle().");
+	System.err.println("Done with toggle().");
       }
 
     vp.wp.getgclient().setNormalCursor();
@@ -405,7 +426,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (debug)
       {
-	System.out.println("Action performed: " + evt.getActionCommand());
+	System.err.println("Action performed: " + evt.getActionCommand());
       }
 
     if (evt.getSource() == remove) 
