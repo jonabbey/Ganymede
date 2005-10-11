@@ -77,6 +77,7 @@ import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDataComponent.listHandle;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -92,6 +93,13 @@ import arlut.csd.ganymede.rmi.invid_field;
  */
 
 public class ownerPanel extends JPanel implements JsetValueCallback {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.ownerPanel");
 
   boolean debug = false;
 
@@ -154,7 +162,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (debug)
       {
-	System.out.println("Adding ownerPanel");
+	System.err.println("Adding ownerPanel");
       }
 
     setLayout(new BorderLayout());
@@ -162,10 +170,12 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
     setBorder(new EmptyBorder(new Insets(5,5,5,5)));
 
     holdOnPanel = new JPanel();
-    holdOnPanel.add(new JLabel("Loading ownerPanel, please wait.", 
-			       new ImageIcon(fp.getWaitImage()), 
+
+    // "Loading ownerPanel, please wait."
+    holdOnPanel.add(new JLabel(ts.l("init.loading_label"),
+			       new ImageIcon(fp.getWaitImage()),
 			       SwingConstants.CENTER));
-      
+    
     add("Center", holdOnPanel);
     invalidate();
     fp.validate();
@@ -178,10 +188,11 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
 	if (debug)
 	  {
-	    System.out.println("ownerPanel: field is null, there is no owner for this object.");
+	    System.err.println("ownerPanel: field is null, there is no owner for this object.");
 	  }
 
-	JLabel l = new JLabel("Owned by supergash",
+	// "No owners assigned.  Supergash-level admins share ownership of this object."
+	JLabel l = new JLabel(ts.l("init.no_owner_label"),
 			      SwingConstants.CENTER);
 
 	remove(holdOnPanel);
@@ -191,7 +202,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
       {
 	if (debug)
 	  {
-	    System.out.println("ownerPanel: field is not null, creating invid selector.");
+	    System.err.println("ownerPanel: field is not null, creating invid selector.");
 	  }
 
 	try
@@ -224,7 +235,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (debug)
       {
-	System.out.println("Adding StringSelector, its a vector of invids!");
+	System.err.println("Adding StringSelector, its a vector of invids!");
       }
 
     if (editable)
@@ -245,23 +256,35 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
     // if editable is false, availableOwners will be null
 
     JPopupMenu invidTablePopup = new JPopupMenu();
-    JMenuItem viewO = new JMenuItem("View object");
-    JMenuItem editO = new JMenuItem("Edit object");
-    invidTablePopup.add(viewO);
-    invidTablePopup.add(editO);
+
+    // "View object"
+    JMenuItem viewObj = new JMenuItem(ts.l("createInvidSelector.view_popup"));
+    viewObj.setActionCommand("View object");
+
+    // "Edit object"
+    JMenuItem editObj = new JMenuItem(ts.l("createInvidSelector.edit_popup"));
+    editObj.setActionCommand("Edit object");
+    invidTablePopup.add(viewObj);
+    invidTablePopup.add(editObj);
 
     JPopupMenu invidTablePopup2 = new JPopupMenu();
-    JMenuItem viewO2 = new JMenuItem("View object");
-    JMenuItem editO2 = new JMenuItem("Edit object");
-    invidTablePopup2.add(viewO2);
-    invidTablePopup2.add(editO2);
+
+    // "View object"
+    JMenuItem viewObj2 = new JMenuItem(ts.l("createInvidSelector.view_popup"));
+    viewObj2.setActionCommand("View object");
+
+    // "Edit object"
+    JMenuItem editObj2 = new JMenuItem(ts.l("createInvidSelector.edit_popup"));
+    editObj2.setActionCommand("Edit object");
+    invidTablePopup2.add(viewObj2);
+    invidTablePopup2.add(editObj2);
 
     // We don't want the supergash owner group to show up anywhere,
     // because everything is owned by supergash.
 
     if (debug)
       {
-	System.out.println("ownerPanel: Taking out supergash");
+	System.err.println("ownerPanel: Taking out supergash");
       }
 
     if (availableOwners != null)
@@ -282,13 +305,18 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (debug)
       {
-	System.out.println("ownerPanel: creating string selector");
+	System.err.println("ownerPanel: creating string selector");
       }
 
     StringSelector ss = new StringSelector(this, editable, true, true);
     
     ss.setCellWidth(0);
-    ss.setTitles("Owners", "Owner Groups");
+
+    // "Owners"
+    // "Owner Groups"
+    ss.setTitles(ts.l("createInvidSelector.column_title1"),
+		 ts.l("createInvidSelector.column_title2"));
+
     ss.setPopups(invidTablePopup, invidTablePopup2);
     ss.update(availableOwners, true, null, currentOwners, true, null);
     ss.setCallback(this);
@@ -374,7 +402,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (!(o.getSource() instanceof StringSelector))
       {
-	System.out.println("Where did this setValuePerformed come from?");
+	System.err.println("Where did this setValuePerformed come from?");
 	return false;
       }
 
@@ -392,7 +420,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	  {
 	    if (debug)
 	      {
-		System.out.println("Edit object: " + v.getValue());
+		System.err.println("Edit object: " + v.getValue());
 	      }
 		
 	    if (v.getValue() instanceof listHandle)
@@ -405,7 +433,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	      {
 		if (debug)
 		  {
-		    System.out.println("It's an invid!");
+		    System.err.println("It's an invid!");
 		  }
 		    
 		Invid invid = (Invid)v.getValue();
@@ -419,7 +447,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	  {
 	    if (debug)
 	      {
-		System.out.println("View object: " + v.getValue());
+		System.err.println("View object: " + v.getValue());
 	      }
 		
 	    if (v.getValue() instanceof Invid)
@@ -433,7 +461,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	  }
 	else
 	  {
-	    System.out.println("Unknown action command from popup: " + command);
+	    System.err.println("Unknown action command from popup: " + command);
 	  }
       } // end of popup processing, now it's just an add or remove kind of thing.
     else
@@ -494,7 +522,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Could not change owner field: ");
+	    gc.processExceptionRethrow(rx);
 	  }
       }
     
