@@ -61,6 +61,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.rmi.db_object;
 
@@ -77,6 +78,13 @@ import arlut.csd.ganymede.rmi.db_object;
 class personaContainer extends JScrollPane implements Runnable{
 
   private final static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.personaContainer");
   
   boolean loaded = false;
 
@@ -118,7 +126,9 @@ class personaContainer extends JScrollPane implements Runnable{
 
     progressBar = new JProgressBar();
     progressPane = new JPanel();
-    progressPane.add(new JLabel("Loading..."));
+
+    // "Loading..."
+    progressPane.add(new JLabel(ts.l("global.loading_label")));
     progressPane.add(progressBar);
     getVerticalScrollBar().setUnitIncrement(15);
     setViewportView(progressPane);
@@ -133,7 +143,7 @@ class personaContainer extends JScrollPane implements Runnable{
   {
     if (debug)
       {
-	System.out.println("Starting new thread");
+	System.err.println("Starting new thread");
       }
 
     try
@@ -143,8 +153,9 @@ class personaContainer extends JScrollPane implements Runnable{
 	if ((label != null) && (!label.equals("null")))
 	  {
 	    pp.middle.setTitleAt(pp.panels.indexOf(this), label);
-	    pp.middle.repaint();
 	  }
+
+	pp.middle.repaint();
 	
 	containerPanel cp = new containerPanel(object, invid,
 					       editable,
@@ -158,14 +169,15 @@ class personaContainer extends JScrollPane implements Runnable{
       }
     catch (Exception rx)
       {
-	gclient.client.processExceptionRethrow(rx, "Could not load persona into container panel: ");
+	// "Exception caught in the client while trying to load a persona from the server into a container panel."
+	gclient.client.processExceptionRethrow(rx, ts.l("run.exception"));
       }
 
     loaded = true;
 
     if (debug)
       {
-	System.out.println("Done with thread in personaPanel");
+	System.err.println("Done with thread in personaPanel");
       }
 
     pp.invalidate();
@@ -182,14 +194,14 @@ class personaContainer extends JScrollPane implements Runnable{
 	  {
 	    if (debug)
 	      {
-		System.out.println("presona panel waiting for load!");
+		System.err.println("presona panel waiting for load!");
 	      }
 
 	    this.wait(1000);
 
 	    if (System.currentTimeMillis() - startTime > 200000)
 	      {
-		System.out.println("Something went wrong loading the persona panel. " +
+		System.err.println("Something went wrong loading the persona panel. " +
 				   " The wait for load thread was taking too long, so I gave up on it.");
 		break;
 	      }

@@ -68,6 +68,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import arlut.csd.JDialog.StringDialog;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -88,6 +89,13 @@ import arlut.csd.ganymede.rmi.invid_field;
  */
 
 public class personaPanel extends JPanel implements ActionListener, ChangeListener{
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.personaPanel");
   
   boolean debug = false;
 
@@ -153,9 +161,14 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	// Create the button panel for the bottom
 	JPanel bottom = new JPanel(false);
 
-	add = new JButton("Create");
+	// "Create"
+	add = new JButton(ts.l("init.create_button"));
+	add.setActionCommand("Create");
 	add.addActionListener(this);
-	delete = new JButton("Delete");
+
+	// "Delete"
+	delete = new JButton(ts.l("init.delete_button"));
+	delete.setActionCommand("Delete");
 	delete.addActionListener(this);
 
 	bottom.add(add);
@@ -168,7 +181,9 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
     middle = new JTabbedPane(JTabbedPane.TOP);
 
     JPanel middleP = new JPanel(new BorderLayout());
-    middleP.setBorder(new TitledBorder("Personas"));
+
+    // "Personae"
+    middleP.setBorder(new TitledBorder(ts.l("init.border_title")));
     middleP.add("Center", middle);
 
     add("Center", middleP);
@@ -204,7 +219,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 		  {
 		    if (debug)
 		      {
-			System.out.println("Whoa, got a null object(edit), trying to go to non-editable, cover me.");
+			System.err.println("Whoa, got a null object(edit), trying to go to non-editable, cover me.");
 		      }
 		    
 		    ReturnVal Vrv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
@@ -212,7 +227,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 		    
 		    if (ob == null)
 		      {
-			System.out.println("That didn't work...its still not giving me anything back.  Giving up.");
+			System.err.println("That didn't work...its still not giving me anything back.  Giving up.");
 		      }
 		    else
 		      {
@@ -231,7 +246,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 		if (ob == null)
 		  {
-		    System.out.println("Whoa, got a null object(view), skipping.");
+		    System.err.println("Whoa, got a null object(view), skipping.");
 		  }
 		else
 		  {
@@ -245,7 +260,13 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	  }
 	
 	panels.addElement(pc);
-	middle.addTab("Persona " + i, pc);
+
+	// We need to have a default name for tabs we create, even
+	// though the personaContainer will forcibly set the title to
+	// the persona object's actual title upon loading.
+
+	// "Persona {0,number,#}"
+	middle.addTab(ts.l("init.default_tab_title", new Integer(i)), pc);
 
 	Thread t = new Thread(pc);
 	t.setPriority(Thread.NORM_PRIORITY);
@@ -270,7 +291,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
     if (debug)
       {
-	System.out.println(e.getActionCommand());
+	System.err.println(e.getActionCommand());
       }
 
     if (e.getActionCommand().equals("Create"))
@@ -289,6 +310,15 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    // Create the object
 	    ReturnVal rv = fp.getgclient().handleReturnVal(fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase));
 	    db_object newObject = (db_object) rv.getObject();
+
+	    if (newObject == null)
+	      {
+		// "You don''t have permission to create objects of this type."
+		gc.showErrorMessage(ts.l("actionPerformed.null_object_created"));
+		add.setEnabled(false);
+		return;
+	      }
+
 	    Invid user = fp.getObjectInvid();
 
 	    gc.somethingChanged();
@@ -302,7 +332,9 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);
 	    
 	    personaContainer pc = new personaContainer(newObject.getInvid(), editable, this, newObject);
-	    middle.addTab("New Persona " + index, pc);
+
+	    // "New Persona {0,number,#}"
+	    middle.addTab(ts.l("actionPerformed.new_tab_title", new Integer(index)), pc);
 
 	    panels.addElement(pc);
 
@@ -315,16 +347,10 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    
 	    if (debug)
 	      {
-		System.out.println("Showing: " + index);
+		System.err.println("Showing: " + index);
 	      }
 	    
 	    middle.setSelectedIndex(index);
-	  }
-	catch (NullPointerException ne)
-	  {
-	    gc.showErrorMessage("You don't have permission to create objects of this type.");
-	    add.setEnabled(false);
-	    return;
 	  }
 	catch (Exception rx)
 	  {
@@ -350,10 +376,11 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    throw new NullPointerException("invid is null");
 	  }
 
-	StringDialog d = new StringDialog(gc, 
-					  "Confirm deletion",
-					  "Are you sure you want to delete persona " + 
-					  middle.getTitleAt(middle.getSelectedIndex()) + "?",
+	// "Confirm Deletion"
+	// "Are you sure you want to delete persona {0}?"
+	StringDialog d = new StringDialog(gc,
+					  ts.l("actionPerformed.deletion_title"),
+					  ts.l("actionPerformed.deletion_mesg", middle.getTitleAt(middle.getSelectedIndex())),
 					  true);
 
 	gc.setNormalCursor();
@@ -362,7 +389,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	  {
 	    if (debug)
 	      {
-		System.out.println("Cancelled.");
+		System.err.println("Cancelled.");
 	      }
 
 	    return;
@@ -372,7 +399,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 	if (debug)
 	  {
-	    System.out.println("invid to delete: " + invid);
+	    System.err.println("invid to delete: " + invid);
 	  }
 		
 	gc.setWaitCursor();
@@ -392,7 +419,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	      {
 		if (debug)
 		  {
-		    System.out.println("removed the element from the field ok");
+		    System.err.println("removed the element from the field ok");
 		  }
 
 		retVal = fp.getgclient().getSession().remove_db_object(invid);
@@ -408,22 +435,25 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	      {
 		if (debug)
 		  {
-		    System.out.println("could not remove the element from the field");
+		    System.err.println("could not remove the element from the field");
 		  }
 	      }
 
 	    if (deleted)
 	      {
-		gc.setStatus("Deleted the object ok");
+		// "Deleted the object ok."
+		gc.setStatus(ts.l("actionPerformed.deleted_ok"));
 	      }
 	    else
 	      {
-		gc.setStatus("Could not delete the object.");
+		// "Could not delete the object."
+		gc.setStatus(ts.l("actionPerformed.deleted_bad"));
 	      }
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Could not delete persona: ");
+	    // "Could not delete persona"
+	    gc.processExceptionRethrow(rx, ts.l("actionPerformed.deletion_exception"));
 	  }
 
 	if (deleted && removed)
@@ -431,8 +461,8 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    int x = middle.getSelectedIndex();
 	    if (debug)
 	      {
-		System.out.println("Selected number: " + x);
-		//		System.out.println("Deleting number: " + pc.index);
+		System.err.println("Selected number: " + x);
+		//		System.err.println("Deleting number: " + pc.index);
 	      }
 
 	    middle.removeTabAt(x);
@@ -445,7 +475,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	  {
 	    if (debug)
 	      {
-		System.out.println("Could not fully remove the object.");
+		System.err.println("Could not fully remove the object.");
 	      }
 	  }
 	
