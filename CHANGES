@@ -42,8 +42,8 @@ lookup and templatization from string resource files held in the
 src/resources tree.
 
 A considerable portion of the Ganymede server has been modified to use
-this localization mechanism, as has the admin console.  The client as
-of this writing is still largely non-localized.
+this localization mechanism, as has the admin console, and the
+entirety of the Ganymede graphical client.
 
 The default, American English version of these localization files held
 in the src/resources tree are simply called <classname>.properties.
@@ -798,17 +798,47 @@ accordingly.
 The goal here is to make it possible to add more data fields to an
 object type without overwhelming the user.
 
-46. [CLIENT, ADMIN CONSOLE] One Window Support with Java Web Start
+46. [CLIENT, ADMIN CONSOLE] No More Redundant Login Box When Running As Application
 
-Since we are shipping the Ganymede client and admin consoles as signed
-applets in Ganymede 2.0, there's little reason security-wise why we
-can't go ahead and make these clients run as an application on the
-desktop.
+The Ganymede client and admin console are both designed to be able to
+function either as an application or as an applet, depending on the
+manner in which they are launched.
 
-By doing this we gain the ability to have the login applet window
-close after the user logs into the client or admin console.  This
-should make running the Ganymede client and admin console less
-confusing for the user.
+When they are run as applets within a web browser's window, the applet
+must remain open in order to avoid terminating the applet.
+
+Things are different when the client and console are started as
+applications, however.  In this case, the login box that is displayed
+when the program is started is fully under control of the application.
+
+With this change, the Ganymede client and admin console, when run as
+applications, will now close their initial login windows after the
+user has logged into the client or console.
+
+This eliminates the redundant/vestigial login window that used to hang
+around uselessly after logging in to the client and console.
+
+When running as an applet (using the 'native' or 'plugin' mode from
+the Ganymede web launcher), the applet window stays up still, of
+course.
+
+47. [CLIENT, ADMIN CONSOLE] Application Mode with Java Web Launch 
+
+In order to take advantage of the previous change, I've changed the
+JNLP launch files for the Ganymede client and admin console so that
+they are run as applications rather than as applets.
+
+I had already moved in this direction by signing the client and
+console jar files with the SSL key material.  Going ahead and making
+the client and console run as applications gives me control over
+disposing the login window, allows me to manage threads a bit better,
+and lets the client/console connect to whatever machine hosts the
+Ganymede server, even if different from the web server from which the
+client or console is downloaded.
+
+This will help when it comes time to support fast failover of the
+Ganymede server.
+
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
