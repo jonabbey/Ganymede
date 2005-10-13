@@ -49,6 +49,8 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                         rowTable
@@ -68,6 +70,19 @@ import javax.swing.JPopupMenu;
 public class rowTable extends baseTable implements ActionListener {
 
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JTable.rowTable");
+
+  static final public String menuTitle = ts.l("global.menu_title"); // "Column Menu"
+  static final public String sortByStr = ts.l("global.sort_by"); // "Sort By This Column"
+  static final public String revSortByStr = ts.l("global.rev_sort_by");	// "Reverse Sort By This Column"
+  static final public String delColStr = ts.l("global.del_col"); // "Delete This Column"
+  static final public String optColWidStr = ts.l("global.opt_col_widths"); // "Optimize Column Widths"
 
   Hashtable 
     index;
@@ -138,20 +153,20 @@ public class rowTable extends baseTable implements ActionListener {
     
     rowMenu = new JPopupMenu();
     
-    rowMenu.add(new JLabel("Column Menu"));
+    rowMenu.add(new JLabel(menuTitle));
     rowMenu.addSeparator();
 
     if (colWidths.length > 1)
       {
-	SortByMI = new JMenuItem("Sort By This Column");
-	RevSortByMI = new JMenuItem("Reverse Sort By This Column");
-	DeleteColMI = new JMenuItem("Delete This Column");
-	OptimizeMI = new JMenuItem("Optimize Column Widths");
+	SortByMI = new JMenuItem(sortByStr);
+	RevSortByMI = new JMenuItem(revSortByStr);
+	DeleteColMI = new JMenuItem(delColStr);
+	OptimizeMI = new JMenuItem(optColWidStr);
       }
     else
       {
-	SortByMI = new JMenuItem("Sort");
-	RevSortByMI = new JMenuItem("Reverse Sort");
+	SortByMI = new JMenuItem(sortByStr);
+	RevSortByMI = new JMenuItem(revSortByStr);
       }
 
     rowMenu.add(SortByMI);
