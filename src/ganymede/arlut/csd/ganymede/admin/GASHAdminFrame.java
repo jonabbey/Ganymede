@@ -816,7 +816,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     JSplitPane splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
     splitterPane.setOneTouchExpandable(true);
-    splitterPane.setDividerLocation(0.5);
+
+    splitterPane.setDividerLocation(0.75);
+
+    // we want the top component, our log panel, to get almost all of
+    // the extra size when we are resized
+
+    splitterPane.setResizeWeight(0.85); 
 
     topGBL.setConstraints(splitterPane, topGBC);
     getContentPane().add(splitterPane);
