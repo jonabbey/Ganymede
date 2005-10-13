@@ -262,6 +262,8 @@ refresh the jar files.
       <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JDialog/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JTable/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JTree/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/client/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/common/**"/>
 
@@ -291,6 +293,8 @@ refresh the jar files.
       <fileset dir="${resources.dir}" includes="arlut/csd/JCalendar/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JDataComponent/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/JDialog/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JTable/**"/>
+      <fileset dir="${resources.dir}" includes="arlut/csd/JTree/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/admin/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/common/**"/>
 
