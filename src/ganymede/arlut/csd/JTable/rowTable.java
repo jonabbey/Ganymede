@@ -67,6 +67,8 @@ import javax.swing.JPopupMenu;
 
 public class rowTable extends baseTable implements ActionListener {
 
+  static final boolean debug = false;
+
   Hashtable 
     index;
 
