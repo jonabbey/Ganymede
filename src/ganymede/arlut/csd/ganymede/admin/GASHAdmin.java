@@ -254,6 +254,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     my_frame.getContentPane().setLayout(new BorderLayout());
     my_frame.getContentPane().add("Center", applet);
+    my_frame.setLocationRelativeTo(null); // center on screen
 
     applet.init();		// init before visible for smoothness
 

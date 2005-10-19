@@ -283,6 +283,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     my_frame.getContentPane().setLayout(new BorderLayout());
     my_frame.getContentPane().add("Center", my_glogin);
+    my_frame.setLocationRelativeTo(null); // center on the screen, please
 
     my_glogin.init();		// init before we setVisible(), so startup is smoother
 
