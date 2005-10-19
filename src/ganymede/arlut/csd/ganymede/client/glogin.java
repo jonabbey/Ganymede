@@ -286,10 +286,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     my_glogin.init();		// init before we setVisible(), so startup is smoother
 
+    my_frame.pack();		// pack so that we fit everything properly
+
     my_frame.setLocationRelativeTo(null); // center on the screen, please
 
     my_frame.setVisible(true);
-    my_frame.pack();		// pack after setting visible so that we fit everything properly
   }
 
   /**

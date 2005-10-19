@@ -257,10 +257,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     applet.init();		// init before visible for smoothness
 
+    my_frame.pack();		// pack so we size everything properly
     my_frame.setLocationRelativeTo(null); // center on screen
 
     my_frame.setVisible(true);
-    my_frame.pack();		// pack after visible so we size everything properly
   }
   
   public void init()
