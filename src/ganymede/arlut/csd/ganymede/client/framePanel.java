@@ -1710,7 +1710,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		// Ganymede users to edit.  If you want to undo
 		// changes to this object, you either will have to
 		// manually undo them, or you will have to cancel this
-		// transaction.\n\nIf this window is cloed, you will
+		// transaction.\n\nIf this window is closed, you will
 		// be able to re-open it from the tree later if
 		// needed."
 
