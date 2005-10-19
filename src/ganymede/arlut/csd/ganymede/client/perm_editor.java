@@ -246,9 +246,10 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     loadingLabel.setBorder(gc.emptyBorder10);
     progressDialog.getContentPane().add("North", loadingLabel);
 
-    Rectangle b = gc.getBounds();
-    progressDialog.setLocation(b.width/2 + b.x - 75, b.height/2 + b.y - 50);
+    /*    Rectangle b = gc.getBounds();
+	  progressDialog.setLocation(b.width/2 + b.x - 75, b.height/2 + b.y - 50);*/
     progressDialog.pack();
+    progressDialog.setLocationRelativeTo(parent); // center with respect to parent frame
     progressDialog.setVisible(true);
 
     Thread t = new Thread(this);

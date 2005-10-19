@@ -301,6 +301,15 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	if (pCal == null)
 	  {
 	    pCal = new JpopUpCalendar(_myCalendar, this, iseditable);
+
+	    if (callback instanceof Component)
+	      {
+		pCal.setLocationRelativeTo((Component) callback); // center relative to parent component
+	      }
+	    else
+	      {
+		pCal.setLocationRelativeTo(null); // center relative to screen
+	      }
 	  }
 
 	if (pCal.isVisible())
