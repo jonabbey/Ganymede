@@ -130,7 +130,7 @@ class fieldoption_editor extends JDialog
     Expansion_Buttons,
     All_Buttons;
 
-
+  Frame parent = null;
 
   /**
    * @param Should the widget be read only?
@@ -143,6 +143,7 @@ class fieldoption_editor extends JDialog
   {
     super(parent, DialogTitle, false); // the boolean value is to make the dialog nonmodal
 
+    this.parent = parent;
     this.opField = opField;
     this.editable = editable;
     this.gc = gc;
@@ -273,6 +274,8 @@ class fieldoption_editor extends JDialog
 				     });
  
     gc.setWaitCursor();
+    setSize(550,550);
+    this.setLocationRelativeTo(parent);
     myshow(true);
     gc.setNormalCursor();
   }
@@ -399,7 +402,6 @@ class fieldoption_editor extends JDialog
   }
 
 
-
   /**
    *
    * Method to pop-up/pop-down the editor
@@ -409,7 +411,6 @@ class fieldoption_editor extends JDialog
   {
     if (truth_value)
       {
-	setSize(550,550);
         setVisible(true);
       } 
     else 
@@ -418,7 +419,6 @@ class fieldoption_editor extends JDialog
 	cleanUp();
       }
   }
-
 
 
   /**
@@ -566,6 +566,7 @@ class fieldoption_editor extends JDialog
     CancelButton = null;
     ExpandButton = null;
     CollapseButton = null;
+    parent = null;
   }
 } 
 

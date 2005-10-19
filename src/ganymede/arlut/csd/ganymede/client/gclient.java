@@ -5207,7 +5207,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	my_querybox.selectBase(base);
       }
 
-    my_querybox.myshow();
+    my_querybox.setVisible(true);
   }
 
   /**

@@ -2,15 +2,14 @@
 
    querybox.java
 
-   This class implements a modal dialog that is popped up to generate
-   a Query object that will be used by the rest of the ganymede.client
-   package to submit the query to the server for handling.
+   This class implements a dialog that is popped up to generate a
+   Query object that will be used to submit the query to the server
+   for handling.
 
-   Once an instance of querybox is constructed, the client code will
-   call myShow() to pop up the dialog and retrieve the Query object.
-
-   If the user chooses not to submit a Query after all, myShow() will
-   return null.
+   Once an instance of the querybox dialog is constructed, the client
+   code will pop up the dialog.  When the user hits okay in the
+   dialog, a query on the server will be triggered, and a result
+   window displayed as an internal frame in the client display area.
    
    Created: 23 July 1997
    Last Mod Date: $Date$
@@ -131,16 +130,14 @@ import arlut.csd.ganymede.rmi.Base;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class implements a modal dialog that is popped up to generate
- * a {@link arlut.csd.ganymede.common.Query Query} object that will be
- * used by the rest of the ganymede.client package to submit the query
- * to the server for handling.
+ * This class implements a dialog that is popped up to generate a
+ * Query object that will be used to submit the query to the server
+ * for handling.
  *
- * Once an instance of querybox is constructed, the client code will
- * call myShow() to pop up the dialog and retrieve the Query object.
- * 
- * If the user chooses not to submit a Query after all, myShow() will
- * return null.
+ * Once an instance of the querybox dialog is constructed, the client
+ * code will pop up the dialog.  When the user hits okay in the
+ * dialog, a query on the server will be triggered, and a result
+ * window displayed as an internal frame in the client display area.
  */
 
 class querybox extends JDialog implements ActionListener, ItemListener {
@@ -421,6 +418,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     tabPane.addTab(ts.l("init.fields_returned_tab"), null, optionsPanel);
 
     this.pack();
+    setSize(800,400);
+    setLocationRelativeTo(parent);
   }
 
   /**
@@ -445,18 +444,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   ///////////////////////
   //   Public Methods  //
   ///////////////////////
-
-  /**
-   * This is the main interface to the querybox, and is used to size
-   * and display the querybox.
-   */
-
-  public void myshow()
-  {
-    setSize(800,400);
-    setLocationRelativeTo(parent);
-    setVisible(true);
-  }
 
   ////////////////////////
   //   Private Methods  //
