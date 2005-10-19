@@ -790,6 +790,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     pack();
     setSize(800, 600);
+    this.setLocationRelativeTo(null); // center gclient frame
     this.setVisible(true);
 
     // Adjust size of toolbar buttons to that of largest button

@@ -828,6 +828,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     getContentPane().add(splitterPane);
 
     pack();
+    this.setLocationRelativeTo(null); // center frame
     this.setVisible(true);
 
     // along with processWindowEvent(), this method allows us
