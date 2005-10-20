@@ -1022,6 +1022,10 @@ public class JIPField extends JentryField {
     return result.toString().toUpperCase();
   }
 
+  /**
+   * Debug rig.
+   */
+
   public static void main(String argv[])
   {
     if (argv.length != 1)

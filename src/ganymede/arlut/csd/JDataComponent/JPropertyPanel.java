@@ -6,6 +6,8 @@
    for editing a map mapping strings to ordered collections of
    strings.
 
+   This class is incomplete, and under development.
+
    Created: 14 October 2004
 
    Last Revision Changed: $Rev$
@@ -19,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin.
 
    Contact information
@@ -85,6 +87,8 @@ import javax.swing.table.AbstractTableModel;
  * A javax.swing.JTable-derived property sheet GUI component, intended
  * for editing a map mapping strings to ordered collections of
  * strings.
+ *
+ * This class is incomplete, and under development.
  */
 
 public class JPropertyPanel extends JPanel implements ActionListener {

@@ -50,6 +50,7 @@
 
 package arlut.csd.JDataComponent;
 
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -65,6 +66,13 @@ package arlut.csd.JDataComponent;
  */
 
 public class JnumberField extends JentryField {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDataComponent.JnumberField");
 
   public static int DEFAULT_COLS = 20;
 
@@ -240,7 +248,11 @@ public class JnumberField extends JentryField {
 	  {
 	    if (num.intValue() > maxSize || num.intValue() < minSize)
 	      {
-		System.err.println("Invalid Parameter: number out of range");
+		if (debug)
+		  {
+		    System.err.println("Invalid Parameter: number out of range");
+		  }
+
 		return;
 	      }
 	  }
@@ -364,7 +376,8 @@ public class JnumberField extends JentryField {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    reportError(getText() + " is not a valid number.");
+	    // ""{0}" is not a valid number."
+	    reportError(ts.l("sendCallback.not_valid", getText()));
 
 	    // revert the text field
 
@@ -393,7 +406,8 @@ public class JnumberField extends JentryField {
 	      {
 		// nope, revert.
 
-		reportError(getText() + " must be between " + minSize + " and  " + maxSize + ".");
+		// "{0}" must be between {1,num,#} and {2,num,#}.
+		reportError(ts.l("sendCallback.out_of_range", getText(), new Integer(minSize), new Integer(maxSize)));
 
 		// revert
 
@@ -471,7 +485,10 @@ public class JnumberField extends JentryField {
 	  }
 	catch (java.rmi.RemoteException rx)
 	  {
-	    System.err.println("Could not send an error callback.");
+	    if (debug)
+	      {
+		System.err.println("Could not send an error callback.");
+	      }
 	  }
       }
   }
