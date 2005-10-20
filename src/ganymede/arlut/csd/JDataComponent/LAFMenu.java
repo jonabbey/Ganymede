@@ -64,6 +64,8 @@ import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                          LAFMenu
@@ -80,6 +82,13 @@ public class LAFMenu extends JMenu implements ActionListener
 {
   public static boolean debug = false;
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDataComponent.LAFMenu");
+
   // --
 
   JsetValueCallback my_parent;
@@ -89,7 +98,8 @@ public class LAFMenu extends JMenu implements ActionListener
 
   public LAFMenu(Container root)
   {
-    this(root, "Look");
+    // "Look"
+    this(root, ts.l("init.default_menu_name"));
   }
 
   public LAFMenu(Container root, String title)
@@ -164,8 +174,9 @@ public class LAFMenu extends JMenu implements ActionListener
 	  {
 	    try
 	      {
+		// "Sorry, that look and feel is unsupported on this platform."
 		my_parent.setValuePerformed(new JErrorValueObject(this,
-								  "That look and feel is unsupported on this platform."));
+								  ts.l("setLAF.unsupported")));
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
