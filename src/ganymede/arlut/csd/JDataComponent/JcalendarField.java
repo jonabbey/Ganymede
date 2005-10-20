@@ -2,7 +2,10 @@
 /*
    JcalendarField.java
 
-   This class defines a date input field object.
+   This class defines a date input field object, suitable for use in a
+   StringDialog class.  This differs from JdateField in that the
+   calendar is displayed in-line, rather than as a popup window, and
+   in that there is no separate button to clear the date in the field.
 
    Created: 28 June 2002
 
@@ -67,6 +70,7 @@ import javax.swing.JPanel;
 
 import arlut.csd.JCalendar.JpanelCalendar;
 import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -75,14 +79,22 @@ import arlut.csd.JDialog.JErrorDialog;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class defines a date input field object.
- *
+ * This class defines a date input field object, suitable for use in a
+ * StringDialog class.  This differs from JdateField in that the
+ * calendar is displayed in-line, rather than as a popup window, and
+ * in that there is no separate button to clear the date in the field.
  */
 
 public class JcalendarField extends JPanel implements JsetValueCallback {
 
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDataComponent.JcalendarField");
 
   // ---
 
@@ -112,10 +124,7 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
   protected TimeZone
     _myTimeZone = (TimeZone)(SimpleTimeZone.getDefault());
 
-  private SimpleDateFormat
-    _dateformat = new SimpleDateFormat("MM/dd/yyyy");
-
-  //  protected SimpleTimeZone _myTimeZone = new SimpleTimeZone(-6*60*60*1000,"CST");
+  private SimpleDateFormat _dateformat = new SimpleDateFormat(ts.l("init.date_format")); // "MM/dd/yyyy"
 
   //////////////////
   // Constructors //
@@ -381,10 +390,12 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
 	    catch (java.rmi.RemoteException re) 
 	      {
 		// throw up an information dialog here
-		
-	      new JErrorDialog(new JFrame(), "Date Field Error",
-                    "There was an error communicating with the server!\n"
-                        + re.getMessage());
+
+		// "Calendar Field Error"
+		// "There was an error communicating with the server!\n{0}"
+		new JErrorDialog(new JFrame(),
+				 ts.l("global.error_subj"),
+				 ts.l("global.error_text", re.getMessage()));
 	      }
 
 	    if (!retval)
