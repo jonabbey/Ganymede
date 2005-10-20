@@ -839,6 +839,14 @@ client or console is downloaded.
 This will help when it comes time to support fast failover of the
 Ganymede server.
 
+48. [XMLCLIENT, SERVER] Added support for running queries with xmlclient
+
+The xmlclient now supports queries using the GanyQL query language
+that Deepak developed.
+
+See doc/xml/xmlclient.html and doc/querylanguage/index.html for full
+details.
+
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
