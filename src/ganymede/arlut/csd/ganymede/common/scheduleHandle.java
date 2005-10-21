@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -55,6 +55,7 @@ package arlut.csd.ganymede.common;
 
 import java.util.Date;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeBuilderTask;
 import arlut.csd.ganymede.server.GanymedeScheduler;
@@ -96,6 +97,13 @@ import arlut.csd.ganymede.server.taskMonitor;
 public class scheduleHandle implements java.io.Serializable {
 
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede client.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.scheduleHandle");
 
   // ---
 
@@ -523,15 +531,15 @@ public class scheduleHandle implements java.io.Serializable {
 
     if (weeks != 0)
       {
-	buff.append(String.valueOf(weeks));
-
 	if (weeks > 1)
 	  {
-	    buff.append(" weeks");
+	    // "{0,num,#} weeks"
+	    buff.append(ts.l("setInterval.weeks_pattern", new Integer(weeks)));
 	  }
 	else
 	  {
-	    buff.append(" week");
+	    // "1 week"
+	    buff.append(ts.l("setInterval.week_pattern"));
 	  }
       }
 
@@ -542,15 +550,15 @@ public class scheduleHandle implements java.io.Serializable {
 	    buff.append(", ");
 	  }
 
-	buff.append(String.valueOf(days));
-
 	if (days > 1)
 	  {
-	    buff.append(" days");
+	    // "{0,num,#} days"
+	    buff.append(ts.l("setInterval.days_pattern", new Integer(days)));
 	  }
 	else
 	  {
-	    buff.append(" day");
+	    // "1 day"
+	    buff.append(ts.l("setInterval.day_pattern"));
 	  }
       }
 
@@ -561,15 +569,15 @@ public class scheduleHandle implements java.io.Serializable {
 	    buff.append(", ");
 	  }
 
-	buff.append(String.valueOf(hours));
-
 	if (hours > 1)
 	  {
-	    buff.append(" hours");
+	    // "{0,num,#} hours"
+	    buff.append(ts.l("setInterval.hours_pattern", new Integer(hours)));
 	  }
 	else
 	  {
-	    buff.append(" hour");
+	    // "1 hour"
+	    buff.append(ts.l("setInterval.hour_pattern"));
 	  }
       }
 
@@ -580,15 +588,15 @@ public class scheduleHandle implements java.io.Serializable {
 	    buff.append(", ");
 	  }
 
-	buff.append(String.valueOf(minutes));
-
 	if (minutes > 1)
 	  {
-	    buff.append(" minutes");
+	    // "{0,num,#} minutes"
+	    buff.append(ts.l("setInterval.minutes_pattern", new Integer(minutes)));
 	  }
 	else
 	  {
-	    buff.append(" minute");
+	    // "1 minute"
+	    buff.append(ts.l("setInterval.minute_pattern"));
 	  }
       }
 
