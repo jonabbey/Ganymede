@@ -100,7 +100,7 @@ public class scheduleHandle implements java.io.Serializable {
 
   /**
    * TranslationService object for handling string localization in the
-   * Ganymede client.
+   * Ganymede system.
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.scheduleHandle");
