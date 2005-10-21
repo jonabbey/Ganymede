@@ -60,6 +60,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
@@ -108,6 +109,18 @@ import arlut.csd.ganymede.common.scheduleHandle;
  */
 
 public class GanymedeScheduler extends Thread {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeScheduler");
+
+  public static final String minutes_str = ts.l("global.minutes"); // "Minutes"
+  public static final String hours_str = ts.l("global.hours"); // "Hours"
+  public static final String days_str = ts.l("global.days"); // "Days"
+  public static final String weeks_str = ts.l("global.weeks"); // "Weeks"
 
   static final int minsPerDay = 1440;
   static final boolean debug = false;
@@ -297,19 +310,19 @@ public class GanymedeScheduler extends Thread {
     Date periodAnchor = (Date) object.getFieldValueLocal(SchemaConstants.TaskPeriodAnchor);
     long periodInterval, anchorTime, nowTime, nextRunTime;
     
-    if (periodType.equals("Minutes"))
+    if (periodType.equals(minutes_str))
       {
 	periodMinutes = 1;
       }
-    else if (periodType.equals("Hours"))
+    else if (periodType.equals(hours_str))
       {
 	periodMinutes = 60;
       }
-    else if (periodType.equals("Days"))
+    else if (periodType.equals(days_str))
       {
 	periodMinutes = 1440;
       }
-    else if (periodType.equals("Weeks"))
+    else if (periodType.equals(weeks_str))
       {
 	periodMinutes = 10080;
       }

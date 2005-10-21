@@ -151,10 +151,10 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    choiceList = new QueryResult(true);
 
-	    choiceList.addRow(null, "Minutes", false);
-	    choiceList.addRow(null, "Hours", false);
-	    choiceList.addRow(null, "Days", false);
-	    choiceList.addRow(null, "Weeks", false);
+	    choiceList.addRow(null, GanymedeScheduler.minutes_str, false);
+	    choiceList.addRow(null, GanymedeScheduler.hours_str, false);
+	    choiceList.addRow(null, GanymedeScheduler.days_str, false);
+	    choiceList.addRow(null, GanymedeScheduler.weeks_str, false);
 	  }
 
 	return choiceList;
