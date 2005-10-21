@@ -188,7 +188,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
   public openObjectDialog(gclient client)
   {
-    super(client, "Open object", true);
+    super(client, ts.l("init.dialog_title"), true); // "Open object"
 
     this.client = client;
 
