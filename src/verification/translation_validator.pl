@@ -213,7 +213,7 @@ if (scalar(keys(%langs)) == 0) {
 } else {
   print "\nLanguage totals:\n";
 
-  foreach $key (keys %langs) {
+  foreach $key (sort(keys %langs)) {
 
     print "\n------------------------------------------------------------\n";
     print "$key:\n\n";
