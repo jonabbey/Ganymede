@@ -202,20 +202,10 @@ sub scan_for_languages {
   }
 }
 
-# print "Scanning for languages:\n\n";
+print "\n-- Scanning non-default translations --\n";
 
 find_languages();
-
-# print "Languages found:\n\n";
-#
-# foreach $key (keys %langs) {
-#   print "\t$key\n";
-#   $results{$key} = [];
-# }
-
 scan_for_languages();
-
-print "\n-- Scanning non-default translations --\n";
 
 if (scalar(keys(%langs)) == 0) {
   print "\nNo non-default translation files found.\n\n";
