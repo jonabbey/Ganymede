@@ -215,22 +215,28 @@ find_languages();
 
 scan_for_languages();
 
-print "\nLanguage totals:\n";
+if (scalar(keys(%langs)) == 0) {
+  print "\nNo non-default translation files found.\n\n";
+} else {
+  print "\nLanguage totals:\n";
 
-foreach $key (keys %langs) {
+  foreach $key (keys %langs) {
 
-  print "\n------------------------------------------------------------\n";
-  print "$key:\n\n";
+    print "\n------------------------------------------------------------\n";
+    print "$key:\n\n";
 
-  foreach $item (@{$results{$key}}) {
-    print "$item\n";
+    foreach $item (@{$results{$key}}) {
+      print "$item\n";
+    }
+
+    $percent_string = generate_percentage_string($total_translated_property_count{$key},
+						 $total_default_count);
+
+
+    print "\n  $total_translated_count{$key} out of ". scalar(@properties) . " total property files translated to $key\n";
+    print "  $percent_string total property strings translated to $key (" . $total_translated_property_count{$key} . "/" . $total_default_count . ")\n";
+    print "\n------------------------------------------------------------\n";
   }
 
-  $percent_string = generate_percentage_string($total_translated_property_count{$key},
-					       $total_default_count);
-
-
-  print "\n  $total_translated_count{$key} out of ". scalar(@properties) . " total property files translated to $key\n";
-  print "  $percent_string total property strings translated to $key (" . $total_translated_property_count{$key} . "/" . $total_default_count . ")\n";
-  print "\n------------------------------------------------------------\n";
+  print "\n";
 }
