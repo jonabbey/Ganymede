@@ -69,10 +69,6 @@ that the localization message strings match the usage in the Ganymede
 source code.  If you run 'ant validate' in the src directory, a Perl
 script is run to do this analysis and verification.
 
-Note that the 'ant validate' task does not yet support verification of
-resources with a country or language code extension.  This means that
-translated resources are not yet properly handled.
-
 3. [SERVER] Added support for SSHA password hashing in DBPasswordField
 
 Here at ARL, we're working to move from NIS to LDAP for our Unix and
