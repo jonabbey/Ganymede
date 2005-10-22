@@ -146,6 +146,7 @@ sub scan_for_languages {
   my ($default_name, $translated_name, $default_properties, $translated_properties);
   my ($default_hashref, $translated_hashref);
   my ($translated_key);
+  my ($translated_string, $default_string);
   my (@local);
 
   foreach $default_name (@properties) {
