@@ -98,7 +98,8 @@ validate      - Cross-checks all Ganymede .java source files against
                 default localizations.  This depends on the use of a specific
                 pattern for doing string localizations.
 
-                See verification/resource_validator.pl for details.
+                See verification/resource_validator.pl and
+                verification/translation_validator.pl for details.
 
 genkeys       - Generates a new private/public key pair and cert for authenticating
                 the server when using SSL sockets for client/server communications.
@@ -206,6 +207,9 @@ refresh the jar files.
     <echo>Validating default localization resources
     </echo>
     <exec executable="verification/resource_validator.pl" failonerror="true">
+      <arg file="."/>
+    </exec>
+    <exec executable="verification/translation_validator.pl" failonerror="true">
       <arg file="."/>
     </exec>
   </target>

@@ -215,6 +215,8 @@ find_languages();
 
 scan_for_languages();
 
+print "\n-- Scanning non-default translations --\n";
+
 if (scalar(keys(%langs)) == 0) {
   print "\nNo non-default translation files found.\n\n";
 } else {
