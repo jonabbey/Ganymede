@@ -59,6 +59,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.float_field;
 
@@ -79,6 +80,13 @@ import arlut.csd.ganymede.rmi.float_field;
  */
 
 public class FloatDBField extends DBField implements float_field {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.FloatDBField");
 
   /**
    * <P>Receive constructor.  Used to create a FloatDBField from a
@@ -266,13 +274,8 @@ public class FloatDBField extends DBField implements float_field {
 
     if (origN.value() != this.value())
       {
-	result.append("\tOld: ");
-	result.append(Double.toString(origN.value()));
-	result.append("\n\tNew: ");
-	result.append(Double.toString(this.value()));
-	result.append("\n");
-	
-	return result.toString();
+	// "\tOld: {0,number}\n\tNew: {1,number}\n"
+	return ts.l("getDiffString.pattern", new Double(origN.value()), new Double(this.value()));
       }
     else
       {
@@ -383,10 +386,10 @@ public class FloatDBField extends DBField implements float_field {
 
     if (!verifyTypeMatch(o))
       {
-	return Ganymede.createErrorDialog("Float Field Error",
-					  "Submitted value " + o + " is not a double!  Major client error while" +
-					  " trying to edit field " + getName() +
-					  " in object " + owner.getLabel());
+	// "Float Field Error"
+	// "Submitted value {0} is not a Double!  Major client error while trying to edit field {1} in object {2}."
+	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+					  ts.l("verifyNewValue.type_error", o, getName(), owner.getLabel()));
       }
 
     if (o == null)
@@ -400,18 +403,18 @@ public class FloatDBField extends DBField implements float_field {
       {
 	if (getMinValue() > I.doubleValue())
 	  {
-	    return Ganymede.createErrorDialog("Float Field Error",
-					      "Submitted float  " + I + " is out of range for field " +
-					      getName() + " in object " + owner.getLabel() + 
-					      ".  This field will not accept floats less than " + getMinValue());
+	    // "Float Field Error"
+	    // "Submitted float {0} is out of range for field {1} in object {2}.  This field will not accept floats less than {3}."
+	    return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+					      ts.l("verifyNewValue.low_value_error", I, getName(), owner.getLabel(), new Double(getMinValue())));
 	  }
 
 	if (getMaxValue() < I.doubleValue())
 	  {
-	    return Ganymede.createErrorDialog("Float Field Error",
-					      "Submitted float  " + I + " is out of range for field " +
-					      getName() + " in object " + owner.getLabel() + 
-					      ".  This field will not accept floats greater than " + getMaxValue());
+	    // "Float Field Error"
+	    // "Submitted float {0} is out of range for field {1} in object {2}.  This field will not accept floats greater than {3}."
+	    return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+					      ts.l("verifyNewValue.high_value_error", I, getName(), owner.getLabel(), new Double(getMaxValue())));
 	  }
       }
 
@@ -419,5 +422,4 @@ public class FloatDBField extends DBField implements float_field {
 
     return eObj.verifyNewValue(this, o);
   }
-
 }

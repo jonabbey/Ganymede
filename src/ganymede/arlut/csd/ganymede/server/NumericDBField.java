@@ -273,10 +273,10 @@ public class NumericDBField extends DBField implements num_field {
 
     if (origN.value() != this.value())
       {
-	// "\tOld: {0,numeric,#}\n"
+	// "\tOld: {0,number,#}\n"
 	result.append(ts.l("getDiffString.old", origN.getValueLocal()));
 
-	// "\tNew: {0,numeric,#}\n"
+	// "\tNew: {0,number,#}\n"
 	result.append(ts.l("getDiffString.new", this.getValueLocal()));
 
 	return result.toString();

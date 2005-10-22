@@ -574,7 +574,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     while (getBase(newName) != null)
       {
-	// "New Base {0,num,#}"
+	// "New Base {0,number,#}"
 	newName = ts.l("createNewBase.new_base_indexed", new Integer(i++));
       }
 
