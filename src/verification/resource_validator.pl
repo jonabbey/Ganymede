@@ -435,7 +435,7 @@ sub examine_java {
 
       if ($value eq "") {
 	if ($key =~ /optional/) {
-	  print "  Warning, couldn't find optional property for key $key on line $line_number\n";
+	  print "  Optional property $key on line $line_number not used\n";
 	} else {
 	  print "*** Error, couldn't find property for key $key on line $line_number!!! ***\n";
 	  $result = 1;
