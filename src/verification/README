@@ -11,7 +11,7 @@ This directory tree contains a modest set of support files used to
 help with verification and testing of the Ganymede tree.
 
 The resource_validator.pl file is a Perl script used to verify that
-string localization statements in the Ganymede source tree mates up
+string localization statements in the Ganymede source tree mate up
 properly with the localization resources in ../resources.
 
 The translation_validator.pl file is a Perl script used to check
