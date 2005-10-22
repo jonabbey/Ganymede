@@ -63,6 +63,7 @@ import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecQuickSort;
 import arlut.csd.ganymede.common.CategoryTransport;
 import arlut.csd.ganymede.rmi.Base;
@@ -91,6 +92,13 @@ import arlut.csd.ganymede.rmi.CategoryNode;
 public class DBBaseCategory implements Category, CategoryNode {
 
   private final static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBBaseCategory");
 
   private static Comparator comparator =
     new Comparator() {
@@ -1546,13 +1554,13 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     /* -- */
 
-    name = "New Category";
+    name = ts.l("newSubCategory.new_category"); // "New Category";
 
     i = 2;
 
     while (this.contains(name))
       {
-	name = "New Category " + i++;
+	name = ts.l("newSubCategory.new_category_indexed", new Integer(i++));
       }
 
     try
