@@ -1151,7 +1151,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     finally
       {
 	// "Normal Operation"
-	setState(ts.l("global.normal_state"));
+	setState(DBStore.normal_state);
       }
 
     Ganymede.debug(ts.l("dumpDB.dumped"));
@@ -1193,7 +1193,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
 
     // "Normal Operation"
-    GanymedeAdmin.setState(ts.l("global.normal_state"));
+    GanymedeAdmin.setState(DBStore.normal_state);
 
     return null;
   }
@@ -1228,8 +1228,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     Ganymede.server.sweepInvids();
 
     // "Normal Operation"
-    GanymedeAdmin.setState(ts.l("global.normal_state"));
-    Ganymede.debug(ts.l("global.normal_state"));
+    GanymedeAdmin.setState(DBStore.normal_state);
+    Ganymede.debug(DBStore.normal_state);
 
     return null;
   }
@@ -1268,7 +1268,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
 
     // "Normal Operation"
-    GanymedeAdmin.setState(ts.l("global.normal_state"));
+    GanymedeAdmin.setState(DBStore.normal_state);
 
     return null;
   }

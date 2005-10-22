@@ -201,6 +201,8 @@ public final class DBStore implements JythonMap {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBStore");
 
+  public static final String normal_state = ts.l("init.okaystate"); // "Normal Operation"
+
   /**
    * Monotonically increasing transaction number.
    */
@@ -374,7 +376,7 @@ public final class DBStore implements JythonMap {
 
     setDBSingleton(this);
 
-    GanymedeAdmin.setState(ts.l("init.okaystate")); // "Normal Operation"
+    GanymedeAdmin.setState(DBStore.normal_state); // "Normal Operation"
   }
 
   /**

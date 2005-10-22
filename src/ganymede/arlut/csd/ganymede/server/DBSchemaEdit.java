@@ -62,6 +62,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.Base;
@@ -77,48 +78,57 @@ import arlut.csd.ganymede.rmi.SchemaEdit;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Server-side schema editing class.  This class implements the
- * {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote interface to support
- * schema editing by the admin console.</P>  
+ * Server-side schema editing class.  This class implements the {@link
+ * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote interface to
+ * support schema editing by the admin console.
  *
- * <P>Only one DBSchemaEdit object may be active in the server at a time;  only
- * one admin console can edit the server's schema at a time.  While the server's
- * schema is being edited, no users may be logged on to
- * the system. An admin console puts the server into schema-editing mode by calling the
- * {@link arlut.csd.ganymede.server.GanymedeAdmin#editSchema editSchema()} method on
- * a server-side {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object.</P>
+ * Only one DBSchemaEdit object may be active in the server at a time;
+ * only one admin console can edit the server's schema at a time.
+ * While the server's schema is being edited, no users may be logged
+ * on to the system. An admin console puts the server into
+ * schema-editing mode by calling the {@link
+ * arlut.csd.ganymede.server.GanymedeAdmin#editSchema editSchema()}
+ * method on a server-side {@link
+ * arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object.
  *
- * <P>When the DBSchemaEdit object is created, it makes copies of all of the
- * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} type definition objects
- * in the server.  The admin console can then talk to those DBObjectBase objects
- * remotely by way of the {@link arlut.csd.ganymede.rmi.Base Base} remote interface,
- * accessing data fields, reordering the type tree visible in the client, and
- * so forth.</P>
+ * When the DBSchemaEdit object is created, it makes copies of all of
+ * the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
+ * type definition objects in the server.  The admin console can then
+ * talk to those DBObjectBase objects remotely by way of the {@link
+ * arlut.csd.ganymede.rmi.Base Base} remote interface, accessing data
+ * fields, reordering the type tree visible in the client, and so
+ * forth.
  *
- * <P>When the user has made the desired changes, the 
- * {@link arlut.csd.ganymede.server.DBSchemaEdit#commit() commit()} method is called,
- * which replaces the set of DBObjectBase objects held in the server's
- * {@link arlut.csd.ganymede.server.DBStore DBStore} with the modified set that was
- * created and modified by DBSchemaEdit.</P>
+ * When the user has made the desired changes, the {@link
+ * arlut.csd.ganymede.server.DBSchemaEdit#commit() commit()} method is
+ * called, which replaces the set of DBObjectBase objects held in the
+ * server's {@link arlut.csd.ganymede.server.DBStore DBStore} with the
+ * modified set that was created and modified by DBSchemaEdit.
  *
- * <P>The schema editing code in the server currently has only a
- * limited ability to verify that changes made in the schema editor
- * will not break the database's consistency constraints in some
- * fashion.  Generally speaking, you should be using the schema editor
- * to define new fields, or to change field definitions for fields
- * that are not yet in use in the database, not to try to redefine
- * parts of the database that are in actual use and which hold actual
- * data.</P>
+ * The schema editing code in the server currently has only a limited
+ * ability to verify that changes made in the schema editor will not
+ * break the database's consistency constraints in some fashion.
+ * Generally speaking, you should be using the schema editor to define
+ * new fields, or to change field definitions for fields that are not
+ * yet in use in the database, not to try to redefine parts of the
+ * database that are in actual use and which hold actual data.
  *
- * <P>The schema editing system is really the most fragile
- * thing in the Ganymede server.  It generally works, but it is not as robust
- * as it ought to be.  It's always a good idea to make a backup copy of your
- * ganymede.db file before going in and editing your database schema.</P> 
+ * The schema editing system is really the most fragile thing in the
+ * Ganymede server.  It generally works, but it is not as robust as it
+ * ought to be.  It's always a good idea to make a backup copy of your
+ * ganymede.db file before going in and editing your database schema.
  */
 
 public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   final static boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBSchemaEdit");
 
   // ---
 
@@ -164,9 +174,9 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   /* -- */
 
   /**
-   * <P>Constructor.  This constructor should only be called in
+   * Constructor.  This constructor should only be called in
    * a critical section synchronized on the primary 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore} object.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore} object.
    */
 
   public DBSchemaEdit() throws RemoteException
@@ -229,7 +239,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>Returns the root category node from the server</P>
+   * Returns the root category node from the server
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -322,7 +332,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>Returns a list of bases from the current (non-committed) state of the system.</P>
+   * Returns a list of bases from the current (non-committed) state of the system.
    *
    * @param embedded If true, getBases() will only show bases that are intended
    * for embedding in other objects.  If false, getBases() will only show bases
@@ -404,7 +414,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>Returns a list of bases from the current (non-committed) state of the system.</P>
+   * Returns a list of bases from the current (non-committed) state of the system.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -429,8 +439,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to match the id, or
-   * null if no match.</P>
+   * Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to match the id, or
+   * null if no match.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -441,8 +451,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to match the baseName,
-   * or null if no match.</P>
+   * Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to match the baseName,
+   * or null if no match.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -468,11 +478,11 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /** 
-   * <P>This method creates a new {@link
+   * This method creates a new {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} object and returns
    * a remote handle to it so that the admin client can set fields on
    * the base, set attributes, and generally make a nuisance of
-   * itself.</P>
+   * itself.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit 
    */
@@ -511,11 +521,11 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /** 
-   * <P>This method creates a new {@link
+   * This method creates a new {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} object and returns
    * a remote handle to it so that the admin client can set fields on
    * the base, set attributes, and generally make a nuisance of
-   * itself.</P>
+   * itself.
    */
 
   public synchronized Base createNewBase(Category category, boolean embedded, short id)
@@ -558,13 +568,14 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	Ganymede.debug("DBSchemaEdit: created new base, setting title");
       }
 
-    String newName = "New Base";
+    String newName = ts.l("createNewBase.new_base"); // "New Base"
 
     int i = 2;
 
     while (getBase(newName) != null)
       {
-	newName = "New Base " + i++;
+	// "New Base {0,num,#}"
+	newName = ts.l("createNewBase.new_base_indexed", new Integer(i++));
       }
 
     base.setName(newName);
@@ -608,17 +619,17 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (debug)
       {
-	Ganymede.debug("DBScemaEdit: created base: " + base.getKey());
+	Ganymede.debug("DBSchemaEdit: created base: " + base.getKey());
       }
 
     return base;
   }
 
   /**
-   * <P>This method deletes a {@link
+   * This method deletes a {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}, removing it from the
    * Schema Editor's working set of bases.  The removal won't
-   * take place for real unless the SchemaEdit is committed.</P>
+   * take place for real unless the SchemaEdit is committed.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -635,8 +646,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (base == null)
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "Base " + baseName + " not found in DBStore, can't delete.");
+	// "Schema Editing Error"
+	// "Deletion Error.\nObject Base "{0}" not found in the Ganymede DBStore."
+	return Ganymede.createErrorDialog(ts.l("global.schema_error"),
+					  ts.l("deleteBase.none_such", baseName));
       }
 
     id = base.getTypeID();
@@ -656,29 +669,22 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (tmpBase.objectTable.size() > 0)
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "deleteBase() called on object type " + tmpBase.getName() + 
-					  " that is still in use.");
+	// "Schema Editing Error"
+	// "Deletion Error.\nObject Base "{0}" is currently in use in the Ganymede DBStore."
+	return Ganymede.createErrorDialog(ts.l("global.schema_error"),
+					  ts.l("deleteBase.in_use", tmpBase.getName()));
       }
 
-    if (tmpBase != null)
-      {
-	parent = tmpBase.getCategory();
-	parent.removeNode(tmpBase);
-	newBases.remove(new Short(id));
-      }
-    else
-      {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "Base " + baseName + " not found in DBStore, consistency error.");
-      }
+    parent = tmpBase.getCategory();
+    parent.removeNode(tmpBase);
+    newBases.remove(new Short(id));
 
     return null;
   }
 
   /**
-   * <P>This method returns an array of defined 
-   * {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} objects.</P>
+   * This method returns an array of defined 
+   * {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} objects.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -708,8 +714,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>This method returns a {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} by matching name,
-   * or null if no match is found.</P>
+   * This method returns a {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} by matching name,
+   * or null if no match is found.
    *
    * @see arlut.csd.ganymede.rmi.NameSpace
    * @see arlut.csd.ganymede.rmi.SchemaEdit
@@ -748,10 +754,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
+   * This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
    * object and returns a remote handle
    * to it so that the admin client can set attributes on the DBNameSpace,
-   * and generally make a nuisance of itself.</P>
+   * and generally make a nuisance of itself.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -785,9 +791,9 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>This method deletes a
+   * This method deletes a
    *  {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} object, returning true if
-   * the deletion could be carried out, false otherwise.</P>
+   * the deletion could be carried out, false otherwise.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -820,8 +826,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (ns == null)
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  "Can't remove namespace " + name + ", that namespace was not found.");
+	// "Schema Editing Error"
+	// "Namespace Deletion Error.\nNamespace "{0}" not found in the Ganymede DBStore."
+	return Ganymede.createErrorDialog(ts.l("global.schema_error"),
+					  ts.l("deleteNameSpace.missing_namespace", name));
       }
 
     // check to make sure this namespace isn't tied to a field still
@@ -840,9 +848,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
 	    if (fieldDef.getNameSpace() == ns)
 	      {
-		return Ganymede.createErrorDialog("Schema Editing Error",
-						  "Can't remove namespae " + name +
-						  ", that namespace is still tied to " + fieldDef);
+		// "Schema Editing Error"
+		// "Namespace Deletion Error.\nNamespace "{0}" is currently in use, bound to {1}."
+		return Ganymede.createErrorDialog(ts.l("global.schema_error"),
+						  ts.l("deleteNameSpace.in_use", name, fieldDef));
 	      }
 	  }
       }
@@ -853,10 +862,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>Commit this schema edit, instantiate the modified schema</P>
+   * Commit this schema edit, instantiate the modified schema
    *
-   * <P>It is an error to attempt any schema editing operations after this
-   * method has been called.</P>
+   * It is an error to attempt any schema editing operations after this
+   * method has been called.
    */
 
   public synchronized ReturnVal commit()
@@ -983,7 +992,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
       
     // and unlock the server
 
-    GanymedeAdmin.setState("Normal Operation");
+    GanymedeAdmin.setState(DBStore.normal_state); // "Normal Operation"
 
     Ganymede.debug("DBSchemaEdit: Re-enabling logins.");
 
@@ -1021,10 +1030,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <P>Abort this schema edit, return the schema to its prior state.</P>
+   * Abort this schema edit, return the schema to its prior state.
    *
-   * <P>It is an error to attempt any schema editing operations after this
-   * method has been called.</P>
+   * It is an error to attempt any schema editing operations after this
+   * method has been called.
    */
 
   public synchronized void release()
@@ -1054,7 +1063,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	
     Ganymede.debug("DBSchemaEdit: released");
 
-    GanymedeAdmin.setState("Normal Operation");
+    GanymedeAdmin.setState(DBStore.normal_state);
 
     locked = false;
 
