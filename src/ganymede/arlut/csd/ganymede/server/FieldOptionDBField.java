@@ -3,7 +3,11 @@
    FieldOptionDBField.java
 
    This class defines the field option matrix field used to support
-   the GanymedeBuilderQueue message queueing build system.
+   the GanymedeBuilderQueue message queueing build system.  Each
+   object and field type defined in the Ganymede schema can have an
+   option value attached to it in this field type.  These option
+   values are used to control how objects and fields are processed
+   with respect to a specific SyncChannel.
    
    Created: 25 January 2005
    Last Mod Date: $Date$
@@ -62,6 +66,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.FieldOptionMatrix;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -76,33 +81,47 @@ import arlut.csd.ganymede.rmi.field_option_field;
 ------------------------------------------------------------------------------*/
 
 /** 
- * <P>FieldOptionDBField is a subclass of {@link
+ * FieldOptionDBField is a subclass of {@link
  * arlut.csd.ganymede.server.DBField DBField} for the storage and
  * handling of Ganymede metadata.  In particular, the
  * FieldOptionDBField is used to allow the association of option
  * strings with each {@link arlut.csd.ganymede.server.DBObjectBase
  * DBObjectBase} and each {@link
- * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
- * on the Ganymede server.</P>
+ * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} on
+ * the Ganymede server.
  *
- * <P>The Ganymede client talks to FieldOptionDBFields through the
- * {@link arlut.csd.ganymede.rmi.field_option_field field_option_field} RMI interface.</P> 
+ * The option strings held by this data type, for the purpose of the
+ * Sync Channels, are "1", "2", and "3".  Where "1" corresponds to
+ * "Never", "2" corresponds to "When Changed", and "3" corresponds to
+ * "Always".
  *
- * <P>This class differs a bit from most subclasses of {@link
- * arlut.csd.ganymede.server.DBField DBField} in that the normal setValue()/getValue()
- * methods are non-functional.  Instead, there are special methods used to set or
- * access field option information from the specially coded Hashtable held by
- * a FieldOptionDBField.  This Hashtable maps strings encoded by the
- * {@link arlut.csd.ganymede.server.FieldOptionDBField#matrixEntry(short, short)
- * matrixEntry()} methods to Strings.</P>
+ * The Ganymede client talks to FieldOptionDBFields through the {@link
+ * arlut.csd.ganymede.rmi.field_option_field field_option_field} RMI
+ * interface.
  *
- * <P>FieldOptionDBField is used to support the GanymedeBuilderQueue mechanism for
- * doing delta-based builds.</P>
+ * This class differs a bit from most subclasses of {@link
+ * arlut.csd.ganymede.server.DBField DBField} in that the normal
+ * setValue()/getValue() methods are non-functional.  Instead, there
+ * are special methods used to set or access field option information
+ * from the specially coded Hashtable held by a FieldOptionDBField.
+ * This Hashtable maps strings encoded by the {@link
+ * arlut.csd.ganymede.server.FieldOptionDBField#matrixEntry(short,
+ * short) matrixEntry()} methods to Strings.
+ *
+ * FieldOptionDBField is used to support the GanymedeBuilderQueue
+ * mechanism for doing delta-based builds.
  */
 
 public class FieldOptionDBField extends DBField implements field_option_field {
 
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.FieldOptionDBField");
 
   // ---
 
@@ -121,24 +140,24 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>This method is used to mark a field as undefined when it is
+   * This method is used to mark a field as undefined when it is
    * checked out for editing.  Different subclasses of {@link
    * arlut.csd.ganymede.server.DBField DBField} may implement this in
    * different ways, if simply setting the field's value member to
    * null is not appropriate.  Any namespace values claimed by the
    * field will be released, and when the transaction is committed,
-   * this field will be released.</p>
+   * this field will be released.
    *
-   * <p>Note that this method is really only intended for those fields
+   * Note that this method is really only intended for those fields
    * which have some significant internal structure to them, such as
-   * permission matrix, field option matrix, and password fields.</p>
+   * permission matrix, field option matrix, and password fields.
    *
-   * <p>NOTE: There is, at present, no defined DBEditObject callback
+   * NOTE: There is, at present, no defined DBEditObject callback
    * method that tracks generic field nullification.  This means that
    * if your code uses setUndefined on a PermissionMatrixDBField,
    * FieldOptionDBField, or PasswordDBField, the plugin code is not
    * currently given the opportunity to review and refuse that
-   * operation.  Caveat Coder.</p>
+   * operation.  Caveat Coder.
    */
 
   public synchronized ReturnVal setUndefined(boolean local)
@@ -149,16 +168,17 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	return null;
       }
 
-    return Ganymede.createErrorDialog("Permissions Error",
-				      "Don't have permission to clear this field option field\n" +
-				      getName());
+    // "Field Option Field Error"
+    // "Don''t have permission to clear field options field "{0}"."
+    return Ganymede.createErrorDialog(ts.l("global.error_title"),
+				      ts.l("setUndefined.error", getName()));
   }
 
   /**
-   * <P>This utility method extracts the {@link
+   * This utility method extracts the {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} name from a
    * coded permission entry internally held in a FieldOptionDBField
-   * Matrix.</P>
+   * Matrix.
    */
 
   public static String decodeBaseName(String entry)
@@ -202,9 +222,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>This utility method extracts the 
+   * This utility method extracts the 
    * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} name from a coded
-   * field option entry key.</P>
+   * field option entry key.
    */
 
   public static String decodeFieldName(String entry)
@@ -279,9 +299,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>Returns true if the given String encodes the identity of
+   * Returns true if the given String encodes the identity of
    * a {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and
-   * not a field within a DBObjectBase.</P>
+   * not a field within a DBObjectBase.
    */
 
   public static boolean isBase(String matrixEntry)
@@ -290,11 +310,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>This method returns true if the given FieldOptionDBField key
+   * This method returns true if the given FieldOptionDBField key
    * refers to a currently valid {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}/ {@link
    * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} in
-   * the loaded schema.</P>
+   * the loaded schema.
    */
 
   public static boolean isValidCode(String entry)
@@ -456,9 +476,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   /* -- */
 
   /**
-   * <P>Receive constructor.  Used to create a FieldOptionDBField from a
+   * Receive constructor.  Used to create a FieldOptionDBField from a
    * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
-   * DataInput stream.</P>
+   * DataInput stream.
    */
 
   FieldOptionDBField(DBObject owner, 
@@ -472,15 +492,15 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>No-value constructor.  Allows the construction of a
+   * No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the 
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
    * but for which no value has been stored in the 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.
    *
-   * <P>Used to provide the client a template for 'creating' this
-   * field if so desired.</P>
+   * Used to provide the client a template for 'creating' this
+   * field if so desired.
    */
 
   FieldOptionDBField(DBObject owner, DBObjectBaseField definition)
@@ -544,8 +564,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public ReturnVal verifyNewValue(Object v)
   {
-    return Ganymede.createErrorDialog("Field Option Field Error",
-				      "setValue() not allowed on FieldOptionDBField.");
+    // "Field Option Field Error"
+    // "Error.. verifyNewValue() method not supported on FieldOptionDBField."
+    return Ganymede.createErrorDialog(ts.l("global.error_title"),
+				      ts.l("verifyNewValue.error_text"));
   }
 
   /**
@@ -597,11 +619,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>This method copies the current value of this DBField
+   * This method copies the current value of this DBField
    * to target.  The target DBField must be contained within a
    * checked-out DBEditObject in order to be updated.  Any actions
    * that would normally occur from a user manually setting a value
-   * into the field will occur.</p>
+   * into the field will occur.
    *
    * @param target The DBField to copy this field's contents to.
    * @param local If true, permissions checking is skipped.
@@ -613,22 +635,27 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       {
 	if (!verifyReadPermission())
 	  {
-	    return Ganymede.createErrorDialog("Copy field error", 
-					      "Can't copy field " + getName() + ", no read privileges");
+	    // "Error Copying Field Option Field"
+	    // "Can''t copy field {0}, no read privileges on source."
+	    return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+					      ts.l("copyFieldTo.no_read", getName()));
 	  }
       }
-	
+
     if (!target.isEditable(local))
       {
-	return Ganymede.createErrorDialog("Copy field error", 
-					  "Can't copy field " + getName() + ", no write privileges");
+	// "Error Copying Field Option Field"
+	// "Can''t copy field {0}, no write privileges on target."
+	return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+					  ts.l("copyFieldTo.no_write", getName()));
       }
 
     if (!(target instanceof FieldOptionDBField))
       {
-	return Ganymede.createErrorDialog("Copy field error",
-					  "Can't copy field " + getName() +
-					  ", target is not a FieldOptionDBField.");
+	// "Error Copying Field Option Field"
+	// "Can''t copy field {0}, target is not a FieldOptionDBField."
+	return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+					  ts.l("copyFieldTo.bad_param", getName()));
       }
 
     // doing a simple clone of the hashtable is okay, since both the
@@ -688,13 +715,15 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
-    return Ganymede.createErrorDialog("Server: Error in FieldOptionDBField.setValue()",
-				      "Error.. can't call setValue() on a FieldOptionDBField");
+    // "Field Option Field Error"
+    // "Error.. setValue() on method not supported on FieldOptionDBField."
+    return Ganymede.createErrorDialog(ts.l("global.error_title"),
+				      ts.l("setValue.error_text"));
   }
 
   /**
-   * <p>This method is used to return a copy of this field, with the field's owner
-   * set to newOwner.</p>
+   * This method is used to return a copy of this field, with the field's owner
+   * set to newOwner.
    */
 
   public DBField getCopy(DBObject newOwner)
@@ -777,8 +806,8 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().</p>
+   * This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().
    */
 
   void emitXML(XMLDumpContext xmlOut) throws IOException
@@ -787,8 +816,8 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().</p>
+   * This method is used when the database is being dumped, to write
+   * out this field to disk.  It is mated with receiveXML().
    */
 
   synchronized void emitXML(XMLDumpContext xmlOut, boolean writeSurroundContext) throws IOException
@@ -937,13 +966,13 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>Returns a String representing the change in value between this
+   * Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.</P>
+   * for inclusion in a log entry and in an email message.
    *
-   * <P>If there is no change in the field, null will be returned.</P>
+   * If there is no change in the field, null will be returned.
    */
 
   public String getDiffString(DBField orig)
@@ -1000,9 +1029,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
 	if (!optionA.equals(optionB))
 	  {
-	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-			  " -- \"" + optionA + "\", was \"" + optionB + "\"");
-	    result.append("\n");
+	    // "{0} {1} -- "{2}", was "{3}"\n"
+	    result.append(ts.l("getDiffString.changed_pattern",
+			       decodeBaseName(key), decodeFieldName(key),
+			       optionA, optionB));
 	  }
       }
 
@@ -1013,16 +1043,16 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	optionA = (String) matrix.get(key);
 
 	if (isBase(key))
-	  {	
-	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-			  " -- \"" + optionA + "\"");
-	    result.append("\n");
+	  {
+	    // "{0} {1} -- {2}\n"
+	    result.append(ts.l("getDiffString.new_pattern",
+			       decodeBaseName(key), decodeFieldName(key), optionA));
 	  }
 	else
 	  {
-	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-			  " -- \"" + optionA + "\" (was undefined)");
-	    result.append("\n");
+	    // "{0} {1} -- {2} (was undefined)\n"
+	    result.append(ts.l("getDiffString.new_pattern2",
+			       decodeBaseName(key), decodeFieldName(key), optionA));
 	  }
       }
 
@@ -1032,9 +1062,8 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
 	optionB = (String) origFO.matrix.get(key);
 
-	result.append(decodeBaseName(key) + " " + decodeFieldName(key) + 
-		      " -- Lost " + optionB);
-	result.append("\n");
+	// "{0} {1} -- Lost {2}\n"
+	result.append(ts.l("getDiffString.old_pattern", decodeBaseName(key), decodeFieldName(key), optionB));
       }
 
     return result.toString();
@@ -1118,12 +1147,12 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>Resets the options in this FieldOptionDBField to the empty
+   * Resets the options in this FieldOptionDBField to the empty
    * set.  Used by non-interactive clients to reset the Field Option
-   * to a known state before setting field options.</P>
+   * to a known state before setting field options.
    *
-   * <P>Returns null on success, or a failure-coded ReturnVal
-   * on permissions failure.</P>
+   * Returns null on success, or a failure-coded ReturnVal
+   * on permissions failure.
    */
 
   public ReturnVal resetOptions()
@@ -1136,18 +1165,19 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
     else
       {
-	return Ganymede.createErrorDialog("Permissions failure",
-					  "You don't have permissions to reset " + toString() +
-					  "'s field options.");
+	// "Field Option Field Error"
+	// "You don''t have permissions to reset {0}''s field options."
+	return Ganymede.createErrorDialog(ts.l("global.error_title"),
+					  ts.l("resetOptions.error_text", toString()));
       }
   }
 
   /**
-   * <P>Sets the option String for base &lt;base&gt;,
-   * field &lt;field&gt; to &lt;option&gt;</P>
+   * Sets the option String for base &lt;base&gt;,
+   * field &lt;field&gt; to &lt;option&gt;
    *
-   * <P>This operation will fail if this
-   * FieldOptionDBField is not editable.</P>
+   * This operation will fail if this
+   * FieldOptionDBField is not editable.
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
@@ -1160,17 +1190,18 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
     catch (RemoteException ex)
       {
-	return Ganymede.createErrorDialog("Couldn't process setOption",
+	// "FieldOptionDBField couldn''t process setOption()"
+	return Ganymede.createErrorDialog(ts.l("setOption.error_title"),
 					  ex.getMessage());
       }
   }
 
   /**
-   * <P>Sets the option string for base &lt;baseID&gt;,
-   * field &lt;fieldID&gt; to String &lt;option&gt;.</P>
+   * Sets the option string for base &lt;baseID&gt;,
+   * field &lt;fieldID&gt; to String &lt;option&gt;.
    *
-   * <P>This operation will fail if this
-   * FieldOptionDBField is not editable.</P>
+   * This operation will fail if this
+   * FieldOptionDBField is not editable.
    *
    * @param baseID the object type to set the option string for
    * @param fieldID the field to set the option string for.  If
@@ -1184,8 +1215,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (!isEditable())
       {
-	return Ganymede.createErrorDialog("Permissions Error",
-					  "You don't have permissions to edit this field");
+	// "Field Option Permissions Error"
+	// "You don''t have permission to edit this field."
+	return Ganymede.createErrorDialog(ts.l("global.perm_error_title"),
+					  ts.l("global.perm_error_text"));
       }
 
     if (option == null || option.equals(""))
@@ -1213,11 +1246,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>Sets the option for base &lt;baseID&gt;
-   * to String &lt;option&gt;.</P>
+   * Sets the option for base &lt;baseID&gt;
+   * to String &lt;option&gt;.
    *
-   * <P>This operation will fail if this
-   * FieldOptionDBField is not editable.</P>
+   * This operation will fail if this
+   * FieldOptionDBField is not editable.
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
@@ -1233,17 +1266,17 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
     catch (RemoteException ex)
       {
-	return Ganymede.createErrorDialog("Couldn't process setOption",
-					  ex.getMessage());
+	// "FieldOptionDBField couldn''t process setOption()."
+	return Ganymede.createErrorDialog(ts.l("setOption.error_title"), ex.getMessage());
       }
   }
 
   /**
-   * <P>Sets the option for base &lt;baseID&gt;
-   * to Stringu &lt;option&gt;</P>
+   * Sets the option for base &lt;baseID&gt;
+   * to Stringu &lt;option&gt;
    *
-   * <P>This operation will fail if this
-   * FieldOptionDBField is not editable.</P>
+   * This operation will fail if this
+   * FieldOptionDBField is not editable.
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
@@ -1252,8 +1285,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (!isEditable())
       {
-	return Ganymede.createErrorDialog("Permissions Error",
-					  "You don't have permissions to edit this field");
+	// "Field Option Permissions Error"
+	// "You don''t have permission to edit this field."
+	return Ganymede.createErrorDialog(ts.l("global.perm_error_title"),
+					  ts.l("global.perm_error_text"));
       }
 
     if (option == null || option.equals(""))
@@ -1281,10 +1316,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>This internal method is used to cull out any entries in this
+   * This internal method is used to cull out any entries in this
    * field options field that are non-operative, either by referring
    * to an object/field type that does not exist, or by being
-   * redundant.</P>
+   * redundant.
    */
 
   private void clean()
@@ -1326,11 +1361,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>Method to generate a key for use in our internal
+   * Method to generate a key for use in our internal
    * Hashtable, used to encode the option for a given {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and {@link
    * arlut.csd.ganymede.server.DBObjectBaseField
-   * DBObjectBaseField}.</P>
+   * DBObjectBaseField}.
    */
 
   public static String matrixEntry(short baseID, short fieldID)
@@ -1339,9 +1374,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>Method to generate a key for use in our internal
+   * Method to generate a key for use in our internal
    * Hashtable, used to encode the option for a given {@link
-   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.</P>
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.
    */
   
   public static String matrixEntry(short baseID)
@@ -1350,11 +1385,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>This method is used to basically dump state out of this field
+   * This method is used to basically dump state out of this field
    * so that the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
    * {@link arlut.csd.ganymede.server.DBEditSet#checkpoint(java.lang.String) checkpoint()}
    * code can restore it later
-   * if need be.</P>
+   * if need be.
    */
 
   public synchronized Object checkpoint()
@@ -1370,11 +1405,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <P>This method is used to basically force state into this field.</P>
+   * This method is used to basically force state into this field.
    *
-   * <P>It is used to place a value or set of values that were known to
+   * It is used to place a value or set of values that were known to
    * be good during the current transaction back into this field,
-   * without creating or changing this DBField's object identity.</P>
+   * without creating or changing this DBField's object identity.
    */
 
   public synchronized void rollback(Object oldval)
@@ -1421,12 +1456,12 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Helper class used to handle checkpointing of a 
+ * Helper class used to handle checkpointing of a 
  * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}'s
  * state.
  *
- * <P>See {@link arlut.csd.ganymede.server.FieldOptionDBField#checkpoint() 
- * FieldOptionDBField.checkpoint()} for more detail.</P>
+ * See {@link arlut.csd.ganymede.server.FieldOptionDBField#checkpoint() 
+ * FieldOptionDBField.checkpoint()} for more detail.
  */
 
 class FieldOptionMatrixCkPoint {
