@@ -192,6 +192,7 @@ class fieldoption_editor extends JDialog
     try
       {
         rowRootNode = initRowTree();
+
 	if (rowRootNode == null)
 	  {
 	    this.dispose();
@@ -212,10 +213,10 @@ class fieldoption_editor extends JDialog
     /* Set the correct initial states of all the object base nodes in the tree */
     fixObjectBaseNodes(rowRootNode, (FieldOptionModel)model);
 
-    treeTable.setDefaultRenderer(Integer.class, 
-        new DelegateRenderer((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
-    treeTable.setDefaultEditor(Integer.class, 
-        new DelegateEditor((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
+    treeTable.setDefaultRenderer(Integer.class,
+				 new DelegateRenderer((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
+    treeTable.setDefaultEditor(Integer.class,
+			       new DelegateEditor((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
 
     /* Expand only nodes with non-default values */
     collapseAllNodes();
@@ -279,7 +280,6 @@ class fieldoption_editor extends JDialog
     myshow(true);
     gc.setNormalCursor();
   }
-  
 
   /**
    * This method will create a tree of row info that will be used
@@ -377,13 +377,14 @@ class fieldoption_editor extends JDialog
 	    baseNode.add(fieldNode);
 
             if (debug)
-              System.err.println("Reading " + name + "." + template.getName() + " from db, value of " + basevalue);
+	      {
+		System.err.println("Reading " + name + "." + template.getName() + " from db, value of " + basevalue);
+	      }
 	  }
       }
     
     return rootNode;
   }
-
 
 
   /**
@@ -396,8 +397,11 @@ class fieldoption_editor extends JDialog
     {
       DefaultMutableTreeNode child = (DefaultMutableTreeNode) e.nextElement();
       FieldOptionRow myRow = (FieldOptionRow)child.getUserObject(); 
+
       if (myRow.isBase())
-        model.fixObjectBaseNode(child);
+	{
+	  model.fixObjectBaseNode(child);
+	}
     }
   }
 
@@ -435,16 +439,16 @@ class fieldoption_editor extends JDialog
    */
   private void expandAllNodes()
   {
-    for (Enumeration e = (rowRootNode.children()); e.hasMoreElements();) {
-      DefaultMutableTreeNode node = (DefaultMutableTreeNode)e.nextElement();
-      FieldOptionRow myRow = (FieldOptionRow)node.getUserObject();
-      TreePath path = new TreePath(node.getPath());
-      tree.expandPath(path);
-    }
+    for (Enumeration e = (rowRootNode.children()); e.hasMoreElements();)
+      {
+	DefaultMutableTreeNode node = (DefaultMutableTreeNode)e.nextElement();
+	FieldOptionRow myRow = (FieldOptionRow)node.getUserObject();
+	TreePath path = new TreePath(node.getPath());
+	tree.expandPath(path);
+      }
   }
 
 
-  
   /**
    * Collapses all of the nodes in the JTree
    */
@@ -459,7 +463,6 @@ class fieldoption_editor extends JDialog
   }
 
 
-
   /**
    * Expands the nodes for object bases that contain fields with non-default
    * options.
@@ -472,13 +475,12 @@ class fieldoption_editor extends JDialog
         FieldOptionRow row = (FieldOptionRow)node.getUserObject();
 
         if (row.isBase() && (row.getOptionValue() != 0))
-        {
-          TreePath path = new TreePath(node.getPath());
-          tree.expandPath(path);
-        }
-      } 
+	  {
+	    TreePath path = new TreePath(node.getPath());
+	    tree.expandPath(path);
+	  }
+      }
   }
-
 
 
   /**
@@ -508,15 +510,18 @@ class fieldoption_editor extends JDialog
         if (ref.isChanged()) 
           {
             gc.somethingChanged();
-        
-            if (ref.isBase()) 
+
+            if (ref.isBase())
               {
                 bd = (BaseDump) ref.getReference();
                 value = ref.getOptionValue();
+
                 try
                   {
                     if (debug)
-                      System.err.println("Setting " + bd.getName() + " to " + value);
+		      {
+			System.err.println("Setting " + bd.getName() + " to " + value);
+		      }
 
                     gc.handleReturnVal(opField.setOption(bd.getTypeID(), String.valueOf(value)));
                   }
@@ -524,17 +529,19 @@ class fieldoption_editor extends JDialog
                   {
 		    gc.processExceptionRethrow(ex);
                   }
-              } 
-            else 
+              }
+            else
               {
                 template = (FieldTemplate) ref.getReference();
                 templateName = template.getName();
-          
+
                 value = ref.getOptionValue();
-          
+
                 if (debug)
-                  System.err.println("Setting " + templateName + " to " + value);
-          
+		  {
+		    System.err.println("Setting " + templateName + " to " + value);
+		  }
+
                 try
                   {
                     gc.handleReturnVal(opField.setOption(template.getBaseID(), template.getID(), String.valueOf(value)));
@@ -545,12 +552,11 @@ class fieldoption_editor extends JDialog
                   }
               }
           }
-      }	      
-    
+      }
+
     myshow(false);
     return;
   }
-
 
 
   /**
@@ -676,7 +682,6 @@ class FieldOptionRow {
 	return false;
       }
   }
-
 }
 
 
@@ -769,24 +774,30 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
 
     if (fieldoption_editor.debug)
-      System.err.println("SETVALUE: " + myRow.toString() + " :: " + value.toString());
+      {
+	System.err.println("SETVALUE: " + myRow.toString() + " :: " + value.toString());
+      }
 
     int newVal;
 
     if (((String)value).equals(fieldoption_editor.labels[0])) // "Never"
-    {
-      newVal = 0;
-    }
+      {
+	newVal = 0;
+      }
     else if (((String)value).equals(fieldoption_editor.labels[1])) // "When Changed"
-    {
-      newVal = 1;
-    }
+      {
+	newVal = 1;
+      }
     else
-      newVal = 2;
+      {
+	newVal = 2;
+      }
 
     /* If we're not changing anything, then bail out */
     if (myRow.getOptionValue() == newVal)
-      return;
+      {
+	return;
+      }
     
     switch(col) 
       {
@@ -812,9 +823,9 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
 	      }
 	  }
         else
-        {
-          fixObjectBaseNode((DefaultMutableTreeNode)((DefaultMutableTreeNode)node).getParent());
-        }
+	  {
+	    fixObjectBaseNode((DefaultMutableTreeNode)((DefaultMutableTreeNode)node).getParent());
+	  }
 	break;
       }
     
@@ -833,9 +844,13 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     /* Is this node checked or not? */
     boolean checked;
     if (((Integer) getValueAt(node, 1)).intValue() == 0)
-      checked = false;
+      {
+	checked = false;
+      }
     else
-      checked = true;
+      {
+	checked = true;
+      }
 
     /* How many nodes have values other than 0? */
     int numNonZeroNodes = 0;
@@ -843,23 +858,23 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     for (Enumeration e = ((DefaultMutableTreeNode)node).children(); e.hasMoreElements();) 
       {
         if (((Integer) getValueAt(e.nextElement(), 1)).intValue() > 0)
-        {
-          numNonZeroNodes++;
-        }
+	  {
+	    numNonZeroNodes++;
+	  }
       }
-
+    
     if (checked && (numNonZeroNodes == 0))
-    {
-      FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
-      myRow.setOptionValue(0);
-      myRow.setChanged(true);
-    }
+      {
+	FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
+	myRow.setOptionValue(0);
+	myRow.setChanged(true);
+      }
     else if (!checked && (numNonZeroNodes > 0))
-    {
-      FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
-      myRow.setOptionValue(1);
-      myRow.setChanged(true);
-    }
+      {
+	FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
+	myRow.setOptionValue(1);
+	myRow.setChanged(true);
+      }
 
     /* Update table to reflect these changes */
     TreeNode[] path = ((DefaultMutableTreeNode)node).getPath();
@@ -922,19 +937,21 @@ class DelegateRenderer implements TableCellRenderer
 
     /* ObjectBases are rendered as checkboxes */
     if (qrow.isBase())
-    {
-      return new CheckBoxRenderer(editable, this.treetable, opvalue);
-    }
-    /* Fields are rendered as combo boxes */
-    else
-    {
-      /* If we're in edit mode, show a combo box */
-      if (this.editable)
-        return new ComboRenderer(editable, this.treetable, opvalue);
-      /* If we're read-only, then use a simple JLabel */
-      else
-        return new JLabel(fieldoption_editor.labels[opvalue]);
-    }
+      {
+	return new CheckBoxRenderer(editable, this.treetable, opvalue);
+      }
+    else    /* Fields are rendered as combo boxes */
+      {
+	/* If we're in edit mode, show a combo box */
+	if (this.editable)
+	  {
+	    return new ComboRenderer(editable, this.treetable, opvalue);
+	  }
+	else	/* If we're read-only, then use a simple JLabel */
+	  {
+	    return new JLabel(fieldoption_editor.labels[opvalue]);
+	  }
+      }
   }
 }
 
