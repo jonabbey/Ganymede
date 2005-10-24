@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryAndNode;
@@ -75,11 +76,11 @@ import arlut.csd.ganymede.common.SchemaConstants;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a Ganymede server task, for use with the {@link
- * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
+ * This is a Ganymede server task, for use with the {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.
  * 
- * <p>The standard GanymedeWarningTask class scans through all objects
- * in the database and mails out warnings for those objects that are
+ * The standard GanymedeWarningTask class scans through all objects in
+ * the database and mails out warnings for those objects that are
  * going to expire on this day one, two, or three weeks in the future,
  * as well as those objects that are going to expire within the
  * following 24 hours.  The email messages sent are based on the
@@ -87,18 +88,27 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * sent to the list of email addresses returned by the {@link
  * arlut.csd.ganymede.server.DBEditObject#getEmailTargets(arlut.csd.ganymede.server.DBObject)
  * getEmailTargets()} customization method in each object's {@link
- * arlut.csd.ganymede.server.DBEditObject DBEditObject} customization class,
- * if any such is defined.</p>
+ * arlut.csd.ganymede.server.DBEditObject DBEditObject} customization
+ * class, if any such is defined.
  *
- * <p>GanymedeWarningTask must not be run more than once a day by the
- * GanymedeScheduler, or else users and admins may receive redundant warnings.</p>
+ * GanymedeWarningTask must not be run more than once a day by the
+ * GanymedeScheduler, or else users and admins may receive redundant
+ * warnings.
  *
- * <p>The GanymedeWarningTask is paired with the
- * standard {@link arlut.csd.ganymede.server.GanymedeExpirationTask GanymedeExpirationTask} task,
- * which handles the actual expiration and removal of database objects.</p>
+ * The GanymedeWarningTask is paired with the standard {@link
+ * arlut.csd.ganymede.server.GanymedeExpirationTask
+ * GanymedeExpirationTask} task, which handles the actual expiration
+ * and removal of database objects.
  */
 
 public class GanymedeWarningTask implements Runnable {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeWarningTask");
 
   public GanymedeWarningTask()
   {
@@ -172,7 +182,6 @@ public class GanymedeWarningTask implements Runnable {
 	StringBuffer tempString = new StringBuffer();
 	Vector objects = new Vector();
 	DBObject obj;
-	Date actionDate;
 
 	// --
 
@@ -235,26 +244,22 @@ public class GanymedeWarningTask implements Runnable {
 
 		    invid = result.getInvid();
 
-		    tempString.setLength(0);
-		    tempString.append(base.getName());
-		    tempString.append(" ");
-		    tempString.append(mySession.viewObjectLabel(invid));
-		    tempString.append(" expires in " + (i+1));
-
 		    if (i == 0)
 		      {
-			tempString.append(" week");
+			// "{0} {1} expires in one week"
+			title = ts.l("run.expire_one_week_email_subj",
+				     base.getName(), mySession.viewObjectLabel(invid));
 		      }
 		    else
 		      {
-			tempString.append(" weeks");
+			// "{0} {1} expires in {2,num,#} weeks"
+			title = ts.l("run.expire_multi_week_email_subj",
+				     base.getName(), mySession.viewObjectLabel(invid), new Integer(i+1));
 		      }
 
-		    title = tempString.toString();
+		    tempString.append(title);
 
 		    obj = mySession.session.viewDBObject(invid);
-
-		    actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.ExpirationField);
 
 		    tempString.append(getExpirationWarningMesg(obj));
 		    
@@ -307,28 +312,26 @@ public class GanymedeWarningTask implements Runnable {
 
 		    invid = result.getInvid();
 
-		    tempString.setLength(0);
-		    tempString.append(base.getName());
-		    tempString.append(" ");
-		    tempString.append(mySession.viewObjectLabel(invid));
-		    tempString.append(" will be removed in " + (i+1));
-
 		    if (i == 0)
 		      {
-			tempString.append(" week");
+			// "{0} {1} will be removed in one week"
+			title = ts.l("run.remove_one_week_email_subj",
+				     base.getName(), mySession.viewObjectLabel(invid));
 		      }
 		    else
 		      {
-			tempString.append(" weeks");
+			// "{0} {1} will be removed in {2,num,#} weeks"
+			title = ts.l("run.remove_multi_week_email_subj",
+				     base.getName(), mySession.viewObjectLabel(invid), new Integer(i+1));
 		      }
 
-		    title = tempString.toString();
-
 		    obj = mySession.session.viewDBObject(invid);
+		    Date actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
 
-		    actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
-
-		    tempString.append("\n\nRemoval scheduled to take place on or after " + actionDate.toString()); 
+		    tempString.setLength(0);
+		    tempString.append(title);
+		    // "\n\nRemoval scheduled to take place on or after {0,date}."
+		    tempString.append(ts.l("run.removal_scheduled", actionDate));
 		    
 		    objects.setSize(0);
 		    objects.addElement(invid);
@@ -386,19 +389,14 @@ public class GanymedeWarningTask implements Runnable {
 		result = (Result) en.nextElement();
 		
 		invid = result.getInvid();
-		
+
+		// "** {0} {1} expires within 24 hours **"
+		title = ts.l("run.expire_real_soon_now", base.getName(), mySession.viewObjectLabel(invid));
+
 		tempString.setLength(0);
-		tempString.append("** ");
-		tempString.append(base.getName());
-		tempString.append(" ");
-		tempString.append(mySession.viewObjectLabel(invid));
-		tempString.append(" expires within 24 hours **");
-
-		title = tempString.toString();
-
+		tempString.append(title);
+		
 		obj = mySession.session.viewDBObject(invid);
-
-		actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.ExpirationField);
 
 		tempString.append(getExpirationWarningMesg(obj));
 		    
@@ -451,20 +449,17 @@ public class GanymedeWarningTask implements Runnable {
 
 		invid = result.getInvid();
 
-		tempString.setLength(0);
-		tempString.append("** ");
-		tempString.append(base.getName());
-		tempString.append(" ");
-		tempString.append(mySession.viewObjectLabel(invid));
-		tempString.append(" will be removed within the next 24 hours! **");
-
-		title = tempString.toString();
+		// "** {0} {1} will be removed within the next 24 hours! **"
+		title = ts.l("run.remove_real_soon_now", base.getName(), mySession.viewObjectLabel(invid));
 
 		obj = mySession.session.viewDBObject(invid);
+		Date actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
 
-		actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
+		tempString.setLength(0);
+		tempString.append(title);
 
-		tempString.append("\n\nRemoval scheduled to take place on or after " + actionDate.toString()); 
+		// "\n\nRemoval scheduled to take place on or after {0,date}."
+		tempString.append(ts.l("run.removal_scheduled", actionDate));
 		    
 		objects.setSize(0);
 		objects.addElement(invid);
@@ -519,31 +514,28 @@ public class GanymedeWarningTask implements Runnable {
 
   public String getExpirationWarningMesg(DBObject object)
   {
-    StringBuffer tempString = new StringBuffer();
     Date actionDate = (Date) object.getFieldValueLocal(SchemaConstants.ExpirationField);
     String typeName = object.getTypeName();
     String label = object.getLabel();
 
-    tempString.append("\n\n");
-    tempString.append(typeName.toUpperCase().charAt(0));
-    tempString.append(typeName.substring(1));
-    tempString.append(" ");
-    tempString.append(label);
-    tempString.append(" is scheduled to expire after " + actionDate.toString() + ".");
+    /*
+      \n\
+      \n\
+      {0} {1} is scheduled to expire after {2,date}.  In order to prevent this {2} from \
+      expiring, this object''s Expiration Date field must be cleared or changed in Ganymede.\n \
+      \n\
+      Object expiration typically means that the object in question is to be rendered unusable, \
+      but the object will not be immediately removed from the Ganymede database.  Objects that \
+      have expired will typically be scheduled for removal from the \
+      Ganymede database after a delay period.\n\
+      \n\
+      Depending on the type of object, the object may be made usable again by a Ganymede administrator \
+      taking the appropriate action prior to the object''s formal removal.\n\
+      \n\
+      As with all Ganymede messages, if you have questions about this action, please contact \
+      your Ganymede management team.
+    */
 
-    tempString.append("  In order to prevent this " + typeName + " from expiring, this object's Expiration Date Field must ");
-    tempString.append("be cleared or changed in Ganymede.");
-
-    tempString.append("\n\nObject expiration typically means that the object in question is ");
-    tempString.append("to be rendered unusable, but the object will not be immediately removed from ");
-    tempString.append("the Ganymede database.  Objects that have expired will typically be scheduled for removal from the ");
-    tempString.append("Ganymede database after a delay period.\n\n");
-    tempString.append("Depending on the type of object, the object may be made usable again by ");
-    tempString.append("a Ganymede administrator taking the appropriate action prior to the object's ");
-    tempString.append("formal removal.\n\n");
-    tempString.append("As with all Ganymede messages, if you have questions about this action, please ");
-    tempString.append("contact your Ganymede management team.");
-
-    return tempString.toString();
+    return ts.l("getExpirationWarningMesg.message", typeName, label, actionDate);
   }
 }
