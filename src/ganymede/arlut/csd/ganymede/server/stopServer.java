@@ -65,6 +65,7 @@ import java.rmi.RemoteException;
 import java.util.Properties;
 
 import arlut.csd.Util.ParseArgs;
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.Server;
 import arlut.csd.ganymede.rmi.adminSession;
@@ -83,6 +84,15 @@ import arlut.csd.ganymede.rmi.adminSession;
 public class stopServer {
 
   public static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.stopServer");
+
+
   public static String serverHostProperty = null;
   public static String rootname = null;
   public static String defaultrootpassProperty = null;
@@ -106,15 +116,15 @@ public class stopServer {
 
     if (propFilename == null)
       {
-	System.err.println("Ganymede stopServer: Error, invalid command line parameters");
- 	System.err.println("Usage: java stopServer [-delay] properties=<property file>");
+	// "Ganymede stopServer: Error, invalid command line parameters.\nUsage: java stopServer -delay properties=<property file>"
+	System.err.println(ts.l("main.usage"));
 	return;
       }
 
     if (!loadProperties(propFilename))
       {
-	System.out.println("Ganymede stopServer: Error, couldn't successfully load properties from file " + 
-			   propFilename + ".");
+	// "Ganymede stopServer: Error, couldn''t successfully load properties from file "{0}"."
+	System.err.println(ts.l("main.no_props", propFilename));
 	return;
       }
 
@@ -131,23 +141,26 @@ public class stopServer {
       }
     catch (NotBoundException ex)
       {
-	System.err.println("Ganymede stopServer: server url " + 
-			   server_url + " not running, or could not connect\n" + ex );
+	// "Ganymede stopServer: No server found running at URL "{0}".  This may possibly be due to a connection problem.\n{1}"
+	System.err.println(ts.l("main.not_bound", server_url, ex.getMessage()));
 	System.exit(1);
       }
     catch (java.rmi.UnknownHostException ex)
       {
-	System.err.println("Ganymede stopServer: bad server URL " + server_url);
+	// "Ganymede stopServer: Unknown host exception encountered when looking up URL "{0}"."
+	System.err.println(ts.l("main.host", server_url));
 	System.exit(1);
       }
     catch (RemoteException ex)
       {
-	System.err.println("Ganymede stopServer: couldn't connect to server object " + server_url);
+	// "Ganymede stopServer: Remote exception caught trying to connect to server object "{0}".\n\n{1}"
+	System.err.println(ts.l("main.remote_exception", server_url, ex.getMessage()));
 	System.exit(1);
       }
     catch (java.net.MalformedURLException ex)
       {
-	System.err.println("Ganymede stopServer: malformed server url " + server_url);
+	// "Ganymede stopServer: Error, malformed URL for server: "{0}"."
+	System.err.println(ts.l("main.malformed", server_url));
 	System.exit(1);
       }
 
@@ -155,7 +168,8 @@ public class stopServer {
       {
 	java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
-	System.out.print("Ganymede server admin password:");
+	// "Ganymede server admin password:\ "
+	System.out.print(ts.l("main.pass_prompt"));
 
 	try
 	  {
@@ -170,7 +184,8 @@ public class stopServer {
 	System.out.println();
       }
 
-    System.out.println("Ganymede stopServer: Shutting down Ganymede server");
+    // "Ganymede stopServer: Shutting down Ganymede server at "{0}"."
+    System.out.println(ts.l("main.working", server_url));
 
     try
       {
@@ -178,7 +193,8 @@ public class stopServer {
       }
     catch (RemoteException rx)
       {
-	System.err.println("Ganymede stopServer: Error, server not up (?) " + rx);
+	// "Ganymede stopServer: Remote exception caught trying to order shutdown for server object "{0}".\n\n{1}"
+	System.err.println(ts.l("main.remote_exception2", server_url, rx));
 	System.exit(1);
       }
 
@@ -193,12 +209,15 @@ public class stopServer {
 
     if (!waitForUsers)
       {
-	System.out.println("Ganymede stopServer: Ganymede server shutdown");
+	// "Ganymede stopServer: Ganymede server "{0}" shut down."
+	System.out.println(ts.l("main.shut_down", server_url));
       }
     else
       {
-	System.out.println("Ganymede stopServer: Ganymede server shutdown initiated\nServer will "
-			   + "shut down when all users are logged out.");
+	/* "Ganymede stopServer: Ganymede server shutdown initiated for Ganymede server "{0}".\n\
+	   Server will shut down as soon as all current users are logged out."*/
+
+	System.out.println(ts.l("main.waiting_to_shut_down", server_url));
       }
 
     System.exit(0);
@@ -240,13 +259,15 @@ public class stopServer {
 
     if (serverHostProperty == null)
       {
-	System.err.println("Couldn't get the server host property");
+	// "Couldn''t find a ganymede.serverhost property to load."
+	System.err.println(ts.l("loadProperties.no_server_host"));
 	success = false;
       }
 
     if (rootname == null)
       {
-	System.err.println("Couldn't get the root name property");
+	// "Couldn''t find a ganymede.rootname property to load.  Defaulting to "supergash"."
+	System.err.println(ts.l("loadProperties.no_root_prop"));
 	rootname = "supergash";
       }
 
@@ -267,8 +288,8 @@ public class stopServer {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-			       registryPort);
+	    // "Couldn''t get a valid Integer registry port number from the Ganymede properties file.  Couldn''t parse "{0}"."
+	    System.err.println(ts.l("loadProperties.number_format", registryPort));
 	  }
       }
 
@@ -288,6 +309,13 @@ public class stopServer {
  */
 
 class stopServerAdmin {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.stopServerAdmin");
 
   private Server server = null;
   private adminSession aSession = null;
@@ -312,7 +340,8 @@ class stopServerAdmin {
 	  }
 	else
 	  {
-	    System.err.println("Ganymede.stopServer: Error, couldn't log into server with admin privs.");
+	    // "Ganymede.stopServer: Error, couldn''t log into server with admin privileges."
+	    System.err.println(ts.l("init.login_failure"));
 	    
 	    String error = retVal.getDialogText();
 	    
@@ -326,13 +355,15 @@ class stopServerAdmin {
       }
     catch (NullPointerException ex)
       {
-	System.err.println("Ganymede stopServer: Error, couldn't log into server with admin privs.");
+	// "Ganymede.stopServer: Error, couldn''t log into server with admin privileges."
+	System.err.println(ts.l("init.login_failure"));
 	System.exit(1);
       }
 
     if (aSession == null)
       {
-	System.err.println("Ganymede stopServer: Error, couldn't log into server with admin privs.. bad password?");
+	// "Ganymede stopServer: Error, couldn''t log into server with admin privileges.. bad password?"
+	System.err.println(ts.l("init.no_session"));
 	System.exit(1);
       }
   }
