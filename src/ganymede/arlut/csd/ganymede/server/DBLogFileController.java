@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -65,6 +65,7 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.WordWrap;
 import arlut.csd.ganymede.common.Invid;
 
@@ -75,16 +76,16 @@ import arlut.csd.ganymede.common.Invid;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This controller class manages the recording and retrieval of
- * {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvents} for the {@link
- * arlut.csd.ganymede.server.DBLog DBLog} class, using an on-disk text file for
- * the storage format.</p>
+ * This controller class manages the recording and retrieval of {@link
+ * arlut.csd.ganymede.server.DBLogEvent DBLogEvents} for the {@link
+ * arlut.csd.ganymede.server.DBLog DBLog} class, using an on-disk text
+ * file for the storage format.
  *
- * <p>The file format used by this controller is the classic Ganymede log
+ * The file format used by this controller is the classic Ganymede log
  * style, in which each event is stored on a line, with parameters
- * separated by pipe characters.  This file format is documented in the
- * server doc directory at doc/logDesign.html, or on the web at
- * http://www.arlut.utexas.edu/gash2/design/logDesign.html</p>
+ * separated by pipe characters.  This file format is documented in
+ * the server doc directory at doc/logDesign.html, or on the web at
+ * http://www.arlut.utexas.edu/gash2/design/logDesign.html
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
@@ -92,14 +93,21 @@ import arlut.csd.ganymede.common.Invid;
 
 public class DBLogFileController implements DBLogController {
 
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBLogFileController");
+
   String logFileName = null;
   PrintWriter logWriter = null;
 
   /* -- */
 
   /**
-   * <p>This constructor should be used for normal purposes in order to have
-   * full log file functionality.</p>
+   * This constructor should be used for normal purposes in order to have
+   * full log file functionality.
    */
 
   public DBLogFileController(String filename) throws IOException
@@ -116,14 +124,14 @@ public class DBLogFileController implements DBLogController {
   }
 
   /**
-   * <p>This constructor is used to connect a DBLogFileController to an already
+   * This constructor is used to connect a DBLogFileController to an already
    * existing PrintWriter.  Unlike with the filename constructor, this version
    * does not emit a newline to terminate any incomplete entry in the PrintWriter's
-   * stream.  This constructor is thus suitable for use with StringWriters.</p>
+   * stream.  This constructor is thus suitable for use with StringWriters.
    *
-   * <p>Note that if this constructor is used, the retrieveHistory() method will
+   * Note that if this constructor is used, the retrieveHistory() method will
    * throw an IllegalArgumentException, as there will be no file available to read
-   * from.</p>
+   * from.
    */
 
   public DBLogFileController(PrintWriter logWriter)
@@ -133,8 +141,8 @@ public class DBLogFileController implements DBLogController {
   }
 
   /**
-   * <p>This method writes the given event to the persistent storage
-   * managed by this controller.</p>
+   * This method writes the given event to the persistent storage
+   * managed by this controller.
    *
    * @param event The DBLogEvent to be recorded
    */
@@ -195,9 +203,9 @@ public class DBLogFileController implements DBLogController {
   }
 
   /**
-   * <P>This method is used to scan the persistent log storage for log
+   * This method is used to scan the persistent log storage for log
    * events that match invid and that have occurred since
-   * sinceTime.</P>
+   * sinceTime.
    *
    * @param invid If not null, retrieveHistory() will only return
    * events involving this object invid.
@@ -372,42 +380,27 @@ public class DBLogFileController implements DBLogController {
 		  {
 		    transactionID = event.transactionID;
 
-		    String tmp2 = "---------- Transaction " + 
-		      event.time.toString() +
-		      ": " + 
-		      event.adminName + 
-		      " ----------\n";
-		    
-		    buffer.append(tmp2);
+		    // "---------- Transaction {0}: {1} ----------\n"
+		    buffer.append(ts.l("retrieveHistory.start_trans", event.time, event.adminName));
 		  }
 		else if (event.eventClassToken.equals("finishtransaction"))
 		  {
-		    String tmp2 = "---------- End Transaction " + 
-		      event.time.toString() +
-		      ": " + 
-		      event.adminName + 
-		      " ----------\n\n";
-		    
-		    buffer.append(tmp2);
 		    transactionID = null;
+
+		    // "---------- End Transaction {0}: {1} ----------\n\n"
+		    buffer.append(ts.l("retrieveHistory.end_trans", event.time, event.adminName));
 		  }
 		else if (transactionID != null)
 		  {
-		    String tmp = event.eventClassToken + "\n" +
-		      WordWrap.wrap(event.description, 78, "\t") + "\n";
-		
-		    buffer.append(tmp);
+		    // "{0}\n{1}\n"
+		    buffer.append(ts.l("retrieveHistory.entry",
+				       event.eventClassToken, WordWrap.wrap(event.description, 78, "\t")));
 		  }
 		else
 		  {
-		    String tmp = event.time.toString() +
-		      ": " + 
-		      event.adminName +
-		      "  " + 
-		      event.eventClassToken +
-		      WordWrap.wrap(event.description, 78, "\t") + "\n";
-
-		    buffer.append(tmp);
+		    // "{0,date}: {1} {2}{3}\n"
+		    buffer.append(ts.l("retrieveHistory.standalone_entry",
+				       event.time, event.adminName, event.eventClassToken, WordWrap.wrap(event.description,78, "\t")));
 		  }
 	      }
 	  }
@@ -444,8 +437,8 @@ public class DBLogFileController implements DBLogController {
   }
 
   /**
-   * <p>This method sets the fields for this DBLogEvent from a logfile
-   * line.</p>
+   * This method sets the fields for this DBLogEvent from a logfile
+   * line.
    */
 
   public DBLogEvent parseEvent(String line) throws IOException
@@ -783,8 +776,8 @@ public class DBLogFileController implements DBLogController {
   }
 
   /**
-   * <p>This method shuts down this controller, freeing up any resources used by this
-   * controller.</p>
+   * This method shuts down this controller, freeing up any resources used by this
+   * controller.
    */
   
   public synchronized void close()
