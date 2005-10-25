@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -55,6 +55,7 @@ package arlut.csd.ganymede.server;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -67,6 +68,13 @@ import arlut.csd.ganymede.common.SchemaConstants;
 ------------------------------------------------------------------------------*/
 
 public class ownerCustom extends DBEditObject implements SchemaConstants {
+
+  /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.ownerCustom");
 
   /**
    * <P>This method takes an {@link arlut.csd.ganymede.common.Invid Invid} for
@@ -346,8 +354,10 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
 	if (testInvid != null && testInvid.equals(field.getOwner().getInvid()))
 	  {
-	    return Ganymede.createErrorDialog("Owner Object Error",
-					      "Can't make an owner group own itself.. this is implicitly true");
+	    // "Owner Object Error"
+	    // "Can''t make an owner group own itself.  All owner groups implicitly own themselves, anyway."
+	    return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+					      ts.l("verifyNewValue.self_ownership"));
 	  }
       }
 
