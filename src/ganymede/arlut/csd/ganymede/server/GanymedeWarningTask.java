@@ -521,7 +521,7 @@ public class GanymedeWarningTask implements Runnable {
     /*
       \n\
       \n\
-      {0} {1} is scheduled to expire after {2,date}.  In order to prevent this {2} from \
+      {0} {1} is scheduled to expire after {2,date}.  In order to prevent this {0} from \
       expiring, this object''s Expiration Date field must be cleared or changed in Ganymede.\n \
       \n\
       Object expiration typically means that the object in question is to be rendered unusable, \
