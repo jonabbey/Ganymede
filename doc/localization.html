@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="stylesheets/ganymede.css"/>
+    <title>Ganymede Localization Guide</title>
+  </head>
+
+  <body>
+    <div id="header">
+      <IMG SRC="gifs/ganymede_title.gif" alt="Ganymede Logo"/>
+
+      <div id="title">
+        <h1>Ganymede 2.0 Localization Guide</h1>
+        <p>Release 2.0 dev - ? ? 2005<br/>$Rev$</p>
+      </div>
+
+      <div id="abstract">
+        <p>This document describes the support that Ganymede 2.0 has
+        for Internationalization and Localization, and how to go about
+        translating the Ganymede server, client, and admin console for
+        use in your language.</p>
+      </div>
+
+      <p>by <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a>.</p>
+    </div>
+
+   <h2>Introduction</h2>
+
+   <p>Ganymede 2.0 is intended to give as much flexibility as possible
+   to adopters who want to put it into operation.  A crucial part of
+   this flexibility, for an international audience, is to support
+   translation of buttons, menus, and server messages into languages
+   other than English.</p>
+
+   <p>Obviously, it would be a terrible burden to have to search
+   through all of the Ganymede .java source files, looking for text
+   strings to translate.  No one would want to translate the Ganymede
+   software if it meant that they were then obliged to maintain their
+   own translated version of Ganymede.</p>
+
+   <p>To solve this problem, Ganymede takes advantage of the
+   localization support built into the Java platform.  All message
+   strings are read from Java property files, and all Strings, Dates,
+   and Numbers are formatted with the Java MessageFormat Class.</p>
+
+   <p>Translators can translate Ganymede to languages other than
+   English by creating language-specific versions of these property
+   files.  If the Ganymede software is run on a Java Runtime
+   Environment that is configured to use a non-English language, the
+   Java environment will automatically look for and use the
+   appropriate versions of these property files.  If no appropriate
+   translation exists, Ganymede reverts to using the default English
+   message strings.</p>
+
+   <p>In this document, we will discuss how you go about translating
+   Ganymede to new languages, as well as how to take advantage of the
+   support code in the Ganymede system to ensure that new code that
+   you write in the Ganymede system will be easily translatable by
+   someone else.</p>
+
+  </body>
+</html>
