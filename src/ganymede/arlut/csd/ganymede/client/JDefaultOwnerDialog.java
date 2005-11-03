@@ -85,6 +85,8 @@ import arlut.csd.ganymede.common.ReturnVal;
 
 public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener, JsetValueCallback{
 
+  private final static boolean debug = false;
+
   /**
    * TranslationService object for handling string localization in the
    * Ganymede client.
@@ -92,12 +94,26 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.JDefaultOwnerDialog");
 
-  private final boolean debug = false;
+  /**
+   * We'll remember our list of chosen owner groups in a static
+   * fashion, so that we can re-present the list if the user brings
+   * the dialog back up.
+   */
+
+  private static Vector last_chosen;
+
+  /**
+   * We'll create ourselves a static monitor object to use to
+   * synchronize manipulations of the global static last_chosen
+   * Vector.
+   */
+
+  private static Object last_chosen_lock = new Object();
 
   JButton done;
 
   Vector
-    chosen = new Vector(),
+    chosen,
     available;
 
   gclient gc;
@@ -135,6 +151,16 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
     p.setBorder(gc.raisedBorder);
     
     getContentPane().add("South", p);
+
+    chosen = new Vector();
+
+    synchronized(JDefaultOwnerDialog.last_chosen_lock)
+      {
+	if (JDefaultOwnerDialog.last_chosen != null)
+	  {
+	    chosen.addAll(JDefaultOwnerDialog.last_chosen);
+	  }
+      }
     
     setBounds(50,50,50,50);
     pack();
@@ -201,6 +227,20 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
 	    if (retVal == null || retVal.didSucceed())
 	      {
 		this.group_chosen = true;
+
+		synchronized (JDefaultOwnerDialog.last_chosen_lock)
+		  {
+		    if (JDefaultOwnerDialog.last_chosen == null)
+		      {
+			JDefaultOwnerDialog.last_chosen = new Vector();
+		      }
+		    else
+		      {
+			JDefaultOwnerDialog.last_chosen.clear();
+		      }
+
+		    JDefaultOwnerDialog.last_chosen.addAll(chosen);
+		  }
 	      }
 
 	    this.setVisible(false);
@@ -213,7 +253,10 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
   }
 
   /**
-   * Shows the dialog, and returns the ReturnVal/
+   * Shows the dialog, and returns the ReturnVal after we make our
+   * call to the server to set the default owner list.  If the dialog
+   * was closed manually (by clicking the 'close window' button), this
+   * method will a failure result.
    *
    * Use this instead of setVisible().
    */
@@ -237,5 +280,20 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
       }
 
     return retVal;
+  }
+
+  /**
+   * This method makes the JDefaultOwnerDialog forget the last set of
+   * default owner invids chosen.  The next time a JDefaultOwnerDialog
+   * instance is created, it will not pre-select the previous list of
+   * owners.
+   */
+
+  public static void clear()
+  {
+    synchronized (JDefaultOwnerDialog.last_chosen_lock)
+      {
+	JDefaultOwnerDialog.last_chosen = null;
+      }
   }
 }

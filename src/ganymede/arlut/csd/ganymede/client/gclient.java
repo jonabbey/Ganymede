@@ -674,6 +674,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	processExceptionRethrow(rx);
       }
 
+    JDefaultOwnerDialog.clear();
+
     mainPanel = new JPanel(true);
     mainPanel.setLayout(new BorderLayout());
 
@@ -6211,6 +6213,7 @@ class PersonaListener implements ActionListener {
 	  {
 	    gc.setWaitCursor();
 	    gc.createDialog = null;
+	    JDefaultOwnerDialog.clear(); // forget our default owner groups selection
 
 	    // "Changing Persona"
 	    gc.setStatus(ts.l("setPersona.changing_status"));
