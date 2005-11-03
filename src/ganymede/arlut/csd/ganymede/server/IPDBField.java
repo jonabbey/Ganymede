@@ -1102,7 +1102,7 @@ public class IPDBField extends DBField implements ip_field {
 	  {
 	    newRetVal.setDialog(new JDialogBuff("Warning",
 						errorBuf.toString(),
-						"Ok",
+						Ganymede.OK,
 						null,
 						"ok.gif"));
 	  }

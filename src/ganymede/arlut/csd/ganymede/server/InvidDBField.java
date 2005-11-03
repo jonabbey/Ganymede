@@ -64,7 +64,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
-import arlut.csd.JDialog.StringDialog; // for localized "Ok" and "Cancel"
+
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
@@ -3293,7 +3293,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    newRetVal.setDialog(new JDialogBuff("Warning",
 						errorBuf.toString(),
-						StringDialog.getDefaultOk(),
+						Ganymede.OK, // localized ok
 						null,
 						"ok.gif"));
 	  }

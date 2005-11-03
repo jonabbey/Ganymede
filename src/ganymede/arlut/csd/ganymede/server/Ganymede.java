@@ -365,7 +365,21 @@ public class Ganymede {
    * server.</p>
    */
 
-  public static TranslationService ts = null;
+  public static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.Ganymede");
+
+  /**
+   * Default localized "Ok" string, usable by server-side Ganymede code which prepares
+   * dialogs.
+   */
+
+  public final static String OK = ts.l("global.ok");
+
+  /**
+   * Default localized "Cancel" string, usable by server-side Ganymede code which prepares
+   * dialogs.
+   */
+
+  public final static String CANCEL = ts.l("global.cancel");
 
   /**
    * <p>This upgradeClassMap is used to rewrite the standard task
@@ -391,8 +405,6 @@ public class Ganymede {
 
     /* -- */
 
-    ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.Ganymede");
-        
     /* If the "usedirectory" option is set, then use the supplied directory name 
      * as the base path to the properties file (which is assumed to be 
      * "ganymede.properties" and the debug log (assumed to be debug.log).
@@ -945,7 +957,7 @@ public class Ganymede {
     ReturnVal retVal = new ReturnVal(true,true); // success ok, doNormalProcessing ok
     retVal.setDialog(new JDialogBuff(title,
 				     body,
-				     ts.l("createInfoDialog.ok"),
+				     Ganymede.OK,
 				     null,
 				     "ok.gif"));
 
@@ -967,7 +979,7 @@ public class Ganymede {
     ReturnVal retVal = new ReturnVal(false);
     retVal.setDialog(new JDialogBuff(title,
 				     body,
-				     ts.l("createErrorDialog.ok"),
+				     Ganymede.OK,
 				     null,
 				     "error.gif"));
 
@@ -993,7 +1005,7 @@ public class Ganymede {
     ReturnVal retVal = new ReturnVal(false);
     retVal.setDialog(new JDialogBuff(ts.l("createErrorDialog.default_title"),
 				     body,
-				     ts.l("createErrorDialog.ok"),
+				     Ganymede.OK,
 				     null,
 				     "error.gif"));
 

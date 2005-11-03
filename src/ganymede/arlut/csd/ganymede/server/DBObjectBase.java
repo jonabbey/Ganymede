@@ -2327,7 +2327,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					     // "Couldn't find class {0} in the server's CLASSPATH.  This probably means
 					     // that you have not yet rebuilt the custom.jar file with this class added."
 					     ts.l("setClassInfo.noclass", classname),
-					     "Ok",
+					     Ganymede.OK,
 					     null,
 					     "error.gif"));
 	  }
@@ -2338,7 +2338,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					     // {1}'.\n\nThis may mean that you have not yet rebuilt the custom jar file with the {0} class added, or that \
 					     // the resource specified in the option string can not be found by {0}'s factory methods."
 					     ts.l("setClassInfo.noclassoption", classname, classOptionString),
-					     "Ok",
+					     Ganymede.OK,
 					     null,
 					     "error.gif"));
 	  }

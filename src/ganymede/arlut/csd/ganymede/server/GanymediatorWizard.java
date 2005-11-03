@@ -28,7 +28,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -73,7 +73,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import arlut.csd.JDialog.JDialogBuff;
-import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.Ganymediator;
@@ -318,7 +317,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
     // "Operation Canceled"
     return fail(ts.l("cancel.canceled"),
 		ts.l("cancel.canceled"),
-		StringDialog.getDefaultOk(), // localized ok
+		Ganymede.OK,	// localized ok
 		null, "ok.gif");
   }
 

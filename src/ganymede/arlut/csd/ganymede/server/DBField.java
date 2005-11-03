@@ -62,7 +62,6 @@ import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
-import arlut.csd.JDialog.StringDialog; // for the global "Ok" string
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
@@ -2161,7 +2160,7 @@ public abstract class DBField implements Remote, db_field {
 	    // "Warning"
 	    newRetVal.setDialog(new JDialogBuff(ts.l("addElements.warning"),
 						errorBuf.toString(),
-						StringDialog.getDefaultOk(), // localized
+						Ganymede.OK, // localized
 						null,
 						"ok.gif"));
 	  }
