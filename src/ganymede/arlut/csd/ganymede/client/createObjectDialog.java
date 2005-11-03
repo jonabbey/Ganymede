@@ -266,10 +266,6 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 	  {
 	    gc.createObject(type.shortValue());
 	  }
-	else
-	  {
-	    System.err.println("No type chosen");
-	  }
 	
 	setVisible(false);
       }

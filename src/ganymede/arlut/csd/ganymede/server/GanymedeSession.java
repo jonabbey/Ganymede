@@ -4372,13 +4372,16 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (base == null)
 	  {
+	    // "Permission to create object of *invalid* type {0} denied."
 	    error = ts.l("create_db_object.invalid_type", new Integer(type));
 	  }
 	else
 	  {
+	    // "Permission to create object of type {0} denied."
 	    error = ts.l("create_db_object.type_no_perm", base.getName());
 	  }
 
+	// "Can''t Create Object"
 	return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"), error);
       }
 
@@ -4396,7 +4399,7 @@ final public class GanymedeSession implements Session, Unreferenced {
           }
         catch (GanymedeManagementException ex)
           {
-	    // "Can't create"
+	    // "Can''t Create Object"
 	    // "Error loading custom class for this object."
             return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
                                               ts.l("create_db_object.custom_class_load_error_text"));
@@ -4404,7 +4407,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (retVal == null)
 	  {
-	    // "Can't create"
+	    // "Can''t Create Object"
 	    // "Can't create new object, the operation was refused"
 	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
 					      ts.l("create_db_object.operation_refused"));
@@ -4451,8 +4454,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 		
 		if (ownerList.size() == 0)
 		  {
-		    // "Can't create"
-		    // "Can't create new object, no owner group to put it in."
+		    // "Can''t Create Object"
+		    // "Can''t create new object, no owner group to put it in."
 		    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
 						      ts.l("create_db_object.no_owner_group"));
 		  }
@@ -4463,8 +4466,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 		
 		if (enableWizards)
 		  {
-		    // "Can't create"
-		    // "Can't create new object, no way of knowing which owner groups to place it in."
+		    // "Can''t Create Object"
+		    // "You must choose one or more default owner groups before creating new objects."
 		    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
 						      ts.l("create_db_object.which_groups"));
 		  }
@@ -4490,7 +4493,7 @@ final public class GanymedeSession implements Session, Unreferenced {
           }
         catch (GanymedeManagementException ex)
           {
-	    // "Can't create"
+	    // "Can''t Create Object"
 	    // "Error loading custom class for this object."
             return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
                                               ts.l("create_db_object.custom_class_load_error_text"));
@@ -4498,7 +4501,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (retVal == null)
 	  {
-	    // "Can't create"
+	    // "Can''t Create Object"
 	    // "Can't create new object, the operation was refused"
 	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
 					      ts.l("create_db_object.operation_refused"));
@@ -4514,10 +4517,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (randomOwner)
 	  {
-	    // "Can't create"
-	    // "Warning: created {0} in owner group {1}"
+	    // "Warning, picked an Owner Group at random"
+	    // "Warning: randomly selected owner group {1} to place new {0} object in."
 	    retVal = Ganymede.createInfoDialog(ts.l("create_db_object.random"),
-					       ts.l("create_db_object.random_text", newObj.getTypeName(), viewObjectLabel(ownerList.getInvid(0))));
+					       ts.l("create_db_object.random_text",
+						    newObj.getTypeName(),
+						    viewObjectLabel(ownerList.getInvid(0))));
 	  }
 	else
 	  {

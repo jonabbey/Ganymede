@@ -3501,9 +3501,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if (!defaultOwnerChosen)
       {
-	chooseDefaultOwner(false);
+	if (!chooseDefaultOwner(false))
+	  {
+	    // They manually closed the default object dialog chooser, so
+	    // we won't proceed with the object cloning.
+
+	    return;
+	  }
       }
-    
+
     setWaitCursor();
 
     try
@@ -3614,7 +3620,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if (!defaultOwnerChosen)
       {
-	chooseDefaultOwner(false);
+	if (!chooseDefaultOwner(false))
+	  {
+	    // They manually closed the default object dialog chooser, so
+	    // we won't proceed with object creation.
+
+	    return null;
+	  }
       }
     
     setWaitCursor();
@@ -4482,7 +4494,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * This must be called before Session.create_db_object is called.
    */
 
-  public void chooseDefaultOwner(boolean forcePopup)
+  public boolean chooseDefaultOwner(boolean forcePopup)
   {
     ReturnVal retVal = null;
     
@@ -4514,7 +4526,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	// "Your account doesn''t have permission to access any owner groups on the server.\n\nYou cannot create new objects with this account."
 	showErrorMessage(ts.l("chooseDefaultOwner.permissions_subj"),
 			 ts.l("chooseDefaultOwner.permissions_txt"));
-	return;
+	return false;
       }
     else if (!forcePopup && (ownerGroups.size() == 1))
       {
@@ -4541,7 +4553,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    processExceptionRethrow(rx, ts.l("chooseDefaultOwner.exception2_txt"));
 	  }
 
-	return;
+	return true;
       }
     
     defaultOwnerDialog = new JDefaultOwnerDialog(this, ownerGroups);
@@ -4552,12 +4564,25 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     if ((retVal == null) || (retVal.didSucceed()))
       {
-	defaultOwnerChosen =  true;
+	defaultOwnerChosen = true;
       }
     else
       {
-	defaultOwnerChosen = false;
+	// if the user voluntarily popped up the choose default owner
+	// dialog (i.e., by using the menu) and then forcibly closed
+	// the dialog window rather than clicking 'Ok', we'll get a
+	// negative return value from the chooseOwner() method, but we
+	// shouldn't take that as meaning that the defaultOwnerChosen
+	// flag should be set false, as it might previously have been
+	// appropriately set.
+
+	if (!forcePopup)
+	  {
+	    defaultOwnerChosen = false;
+	  }
       }
+
+    return defaultOwnerChosen;
   }
 
   /**
