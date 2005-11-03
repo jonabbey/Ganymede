@@ -76,6 +76,7 @@ import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
+import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
@@ -146,23 +147,27 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
     // selected?
 
     chosen = new Vector();
+    Vector handleVector = null;
 
     synchronized(JDefaultOwnerDialog.last_chosen_lock)
       {
 	if (JDefaultOwnerDialog.last_chosen != null)
 	  {
+	    handleVector = new Vector();
+
 	    for (int i = 0; i < JDefaultOwnerDialog.last_chosen.size(); i++)
 	      {
 		listHandle lh = (listHandle) JDefaultOwnerDialog.last_chosen.elementAt(i);
+		Invid element_invid = (Invid) lh.getObject();
 
-		chosen.add(lh.getObject());
+		handleVector.add(lh);
+		chosen.add(element_invid);
 	      }
 	  }
       }
 
-    // Maybe I should use null instead of chosen?
     ss = new StringSelector(this, true, true, true);
-    ss.update(available, true, null, chosen, true, null);
+    ss.update(available, true, null, handleVector, true, null);
     ss.setCallback(this);
     getContentPane().add("Center", ss);
     
