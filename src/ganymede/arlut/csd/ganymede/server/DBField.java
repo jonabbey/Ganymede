@@ -400,6 +400,8 @@ public abstract class DBField implements Remote, db_field {
       {
 	if (!verifyReadPermission())
 	  {
+	    // "Copy field error"
+	    // "Can''t copy from field {0} in object {1}, due to a lack of read privileges."
 	    return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
 					      ts.l("copyFieldTo.no_read", getName(), owner.getLabel()));
 	  }
@@ -407,6 +409,8 @@ public abstract class DBField implements Remote, db_field {
 	
     if (!target.isEditable(local))
       {
+	// "Copy field error"
+	// "Can''t copy to field {0} in object {1}, due to a lack of write privileges."
 	return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
 					  ts.l("copyFieldTo.no_write",
 					       target.getName(), target.owner.getLabel()));
@@ -2028,6 +2032,8 @@ public abstract class DBField implements Remote, db_field {
       {
 	Object submittedValue = submittedValues.elementAt(i);
 
+	// intern our strings and invids
+
 	if (submittedValue instanceof String)
 	  {
 	    submittedValues.set(i, ((String) submittedValue).intern());
@@ -2090,8 +2096,8 @@ public abstract class DBField implements Remote, db_field {
 	  }
       }
 
-    // check to see if the all of the values being added are
-    // acceptable to a namespace constraint
+    // check to see if all of the values being added are acceptable to
+    // a namespace constraint
 
     ns = getNameSpace();
 

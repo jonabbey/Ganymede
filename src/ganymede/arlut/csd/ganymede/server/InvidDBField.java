@@ -64,6 +64,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.JDialog.StringDialog; // for localized "Ok" and "Cancel"
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
@@ -2995,6 +2996,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
+	    // we use difference because we know that Ganymede vector
+	    // fields are not allowed to contain duplications
+
 	    submittedValues = VectorUtils.difference(submittedValues, getVectVal());
 	  }
       }
@@ -3038,7 +3042,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (approvedValues.size() == 0)
       {
-	return Ganymede.createErrorDialog("AddElements Error",
+	// "AddElements Error"
+	return Ganymede.createErrorDialog(ts.l("addElements.subject"),
 					  errorBuf.toString());
       }
 
@@ -3097,6 +3102,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	    System.err.println("InvidDBField.addElements(): binding");
 	  }
 
+	boolean any_success = false;
+	Vector failed_bindings = null;
+
 	for (int i = 0; i < approvedValues.size(); i++)
 	  {
 	    Invid remote = (Invid) approvedValues.elementAt(i);
@@ -3105,7 +3113,33 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (newRetVal != null && !newRetVal.didSucceed())
 	      {
-		return newRetVal;
+		if (!partialSuccessOk)
+		  {
+		    return newRetVal;
+		  }
+		else
+		  {
+		    if (retVal.getDialog() != null)
+		      {
+			if (errorBuf.length() != 0)
+			  {
+			    errorBuf.append("\n\n");
+			  }
+			
+			errorBuf.append(retVal.getDialog().getText());
+		      }
+
+		    if (failed_bindings == null)
+		      {
+			failed_bindings = new Vector();
+		      }
+
+		    failed_bindings.addElement(remote);
+		  }
+	      }
+	    else
+	      {
+		any_success = true;
 	      }
 
 	    if (retVal != null)
@@ -3117,66 +3151,120 @@ public final class InvidDBField extends DBField implements invid_field {
 		retVal = newRetVal;
 	      }
 	  }
+	
+	if (!any_success)
+	  {
+	    // "AddElements Error"
+	    return Ganymede.createErrorDialog(ts.l("addElements.subject"),
+					      errorBuf.toString());
+	  }
+	
+	if (failed_bindings != null)
+	  {
+	    // we use difference because we know that Ganymede vector
+	    // fields are not allowed to contain duplications
+
+	    approvedValues = VectorUtils.difference(approvedValues, failed_bindings);
+	  }
 
 	if (debug)
 	  {
 	    System.err.println("InvidDBField.addElements(): all new elements bound");
 	  }
 
-	// okay, see if the DBEditObject is willing to allow all of these
-	// elements to be added
-
-	newRetVal = eObj.finalizeAddElements(this, approvedValues);
-
-	if (newRetVal == null || newRetVal.didSucceed()) 
+	// Okay, see if the DBEditObject is willing to allow all of
+	// these elements to be added.  If we're allowing
+	// partialSuccessOk (for cloning), we'll want to query the
+	// DBEditObject about each item to be added, one at a time
+	
+	if (partialSuccessOk)
 	  {
-	    if (debug)
-	      {
-		System.err.println("InvidDBField.addElements(): finalize approved");
-	      }
+	    any_success = false;
 
 	    for (int i = 0; i < approvedValues.size(); i++)
 	      {
-		values.addElement(approvedValues.elementAt(i));
+		newRetVal = eObj.finalizeAddElement(this, approvedValues.elementAt(i));
+
+		if (newRetVal == null || newRetVal.didSucceed())
+		  {
+		    values.addElement(approvedValues.elementAt(i));
+		    any_success = true;
+		  }
+		else
+		  {
+		    if (newRetVal.getDialog() != null)
+		      {
+			if (errorBuf.length() != 0)
+			  {
+			    errorBuf.append("\n\n");
+			  }
+			
+			errorBuf.append(newRetVal.getDialog().getText());
+		      }
+		  }
 	      }
 
-	    qr = null;
-	    success = true;
-
-	    // if retVal is not null, we may have some rescan
-	    // information from our previous activity which we'll want
-	    // to return, otherwise we'll want to return the results
-	    // from newRetVal.
-
-	    if (retVal != null)
+	    if (!any_success)
 	      {
-		newRetVal = retVal.unionRescan(newRetVal);
+		// "AddElements Error"
+		return Ganymede.createErrorDialog(ts.l("addElements.subject"),
+						  errorBuf.toString());
 	      }
-
-	    if (newRetVal == null)
-	      {
-		newRetVal = new ReturnVal(true, true);
-	      }
-
-	    // if we were not able to copy some of the values (and we
-	    // had partialSuccessOk set), encode a description of what
-	    // happened along with the success code
-
-	    if (errorBuf.length() != 0)
-	      {
-		newRetVal.setDialog(new JDialogBuff("Warning",
-						    errorBuf.toString(),
-						    "Ok",
-						    null,
-						    "ok.gif"));
-	      }
-
-	    return newRetVal;
 	  }
 	else
 	  {
-	    return newRetVal;	// failure code
+	    newRetVal = eObj.finalizeAddElements(this, approvedValues);
+
+	    if (newRetVal == null || newRetVal.didSucceed()) 
+	      {
+		if (debug)
+		  {
+		    System.err.println("InvidDBField.addElements(): finalize approved");
+		  }
+
+		for (int i = 0; i < approvedValues.size(); i++)
+		  {
+		    values.addElement(approvedValues.elementAt(i));
+		  }
+	      }
+	    else
+	      {
+		return newRetVal;
+	      }
 	  }
+
+	qr = null;
+	success = true;
+
+	// if retVal is not null, we may have some rescan
+	// information from our previous activity which we'll want
+	// to return, otherwise we'll want to return the results
+	// from newRetVal.
+	
+	if (retVal != null)
+	  {
+	    newRetVal = retVal.unionRescan(newRetVal);
+	  }
+
+	if (newRetVal == null)
+	  {
+	    newRetVal = new ReturnVal(true, true);
+	  }
+
+	// if we were not able to copy some of the values (and we
+	// had partialSuccessOk set), encode a description of what
+	// happened along with the success code
+
+	if (errorBuf.length() != 0)
+	  {
+	    newRetVal.setDialog(new JDialogBuff("Warning",
+						errorBuf.toString(),
+						StringDialog.getDefaultOk(),
+						null,
+						"ok.gif"));
+	  }
+	
+	return newRetVal;
       }
     finally
       {
