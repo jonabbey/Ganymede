@@ -58,6 +58,7 @@ import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -116,7 +117,9 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
     getContentPane().setLayout(new BorderLayout());
 
     // "Select default owner for newly created objects"
-    getContentPane().add("North", new JLabel(ts.l("init.label")));
+    JLabel dialog_banner = new JLabel(ts.l("init.label"));
+    dialog_banner.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
+    getContentPane().add("North", dialog_banner);
 
     // Maybe I should use null instead of chosen?
     StringSelector ss = new StringSelector(this, true, true, true);
