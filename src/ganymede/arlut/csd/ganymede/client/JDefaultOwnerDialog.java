@@ -102,6 +102,8 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
 
   ReturnVal retVal = null;
 
+  private boolean group_chosen = false;
+
   public JDefaultOwnerDialog(gclient gc, Vector groups)
   {
     // "Select Default Owner"
@@ -190,7 +192,12 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
 	  {
 	    retVal = gc.getSession().setDefaultOwner(chosen);
 	    
-	    gc.handleReturnVal(retVal);
+	    retVal = gc.handleReturnVal(retVal);
+
+	    if (retVal == null || retVal.didSucceed())
+	      {
+		this.group_chosen = true;
+	      }
 
 	    this.setVisible(false);
 	  }
@@ -208,7 +215,22 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
    */
   public ReturnVal chooseOwner()
   {
+    this.group_chosen = false;
+
+    // we're a modal dialog, so we'll block here until our visibility
+    // is closed.
+
     setVisible(true);
+
+    // Our modal dialog has been made non-visible, either through the
+    // user clicking on the done button or through the user manually
+    // closing the dialog window.  If we haven't set the chosen flag
+    // to true, we'll need to encode a failure result.
+
+    if (!this.group_chosen && (retVal == null || retVal.didSucceed()))
+      {
+	retVal = new ReturnVal(false);
+      }
 
     return retVal;
   }
