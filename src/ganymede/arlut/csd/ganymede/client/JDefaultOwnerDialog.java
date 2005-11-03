@@ -244,7 +244,12 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
 			JDefaultOwnerDialog.last_chosen.clear();
 		      }
 
-		    JDefaultOwnerDialog.last_chosen.addAll(chosen);
+		    QueryResult qr = gc.getSession().queryInvids(chosen);
+
+		    if (qr != null)
+		      {
+			JDefaultOwnerDialog.last_chosen.addAll(qr.getListHandles());
+		      }
 		  }
 	      }
 

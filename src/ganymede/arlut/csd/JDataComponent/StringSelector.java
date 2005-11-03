@@ -543,6 +543,20 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   /**
    * Update the StringSelector.
+   *
+   * @param available A Vector of {@link java.lang.String} or {@link
+   * arlut.csd.JDataComponent.listHandle} objects that may be chosen by the user.
+   * @param sortAvailable If true, the available strings or handles should be sorted
+   * for presentation.
+   * @param availComparator The {@link java.util.Comparator} object for evaluating
+   * the sort order for items in the available Vector.
+   * @param chosen A Vector of {@link java.lang.String} or {@link
+   * arlut.csd.JDataComponent.listHandle} objects that have previously
+   * been chosen for membership.
+   * @param sortChosen If true, the previously chosen strings or handles should be sorted
+   * for presentation.
+   * @param chosenComparator The {@link java.util.Comparator} object for evaluating
+   * the sort order for items in the previously chosen Vector.
    */
 
   public void update(Vector available, boolean sortAvailable, Comparator availComparator,
