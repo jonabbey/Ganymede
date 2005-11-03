@@ -2941,6 +2941,7 @@ public final class InvidDBField extends DBField implements invid_field {
     DBEditObject eObj;
     Vector values;
     Vector approvedValues = new Vector();
+    Vector failed_bindings = null;
 
     /* -- */
 
@@ -3047,7 +3048,8 @@ public final class InvidDBField extends DBField implements invid_field {
 					  errorBuf.toString());
       }
 
-    // see if our container wants to intercede in the adding operation
+    // see if our container wants to preemptively intercede in the
+    // adding operation
 
     eObj = (DBEditObject) owner;
 
@@ -3069,6 +3071,8 @@ public final class InvidDBField extends DBField implements invid_field {
     // reference that we can't safely link to without breaking a
     // symmetric relationship.
 
+    failed_bindings = null;
+
     for (int i = 0; i < approvedValues.size(); i++)
       {
 	Invid remote = (Invid) approvedValues.elementAt(i);
@@ -3077,8 +3081,38 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (newRetVal != null)
 	  {
-	    return newRetVal;
+	    if (!partialSuccessOk)
+	      {
+		return newRetVal;
+	      }
+	    else
+	      {
+		if (newRetVal.getDialog() != null)
+		  {
+		    if (errorBuf.length() != 0)
+		      {
+			errorBuf.append("\n\n");
+		      }
+
+		    errorBuf.append(newRetVal.getDialog().getText());
+		  }
+
+		if (failed_bindings == null)
+		  {
+		    failed_bindings = new Vector();
+		  }
+
+		failed_bindings.addElement(remote);
+	      }
 	  }
+      }
+
+    if (failed_bindings != null)
+      {
+	// we use difference because we know that Ganymede vector
+	// fields are not allowed to contain duplications
+
+	approvedValues = VectorUtils.difference(approvedValues, failed_bindings);
       }
 
     checkkey = "addElements" + getName() + owner.getLabel();
@@ -3103,7 +3137,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 
 	boolean any_success = false;
-	Vector failed_bindings = null;
+	failed_bindings = null;
 
 	for (int i = 0; i < approvedValues.size(); i++)
 	  {
@@ -3119,14 +3153,14 @@ public final class InvidDBField extends DBField implements invid_field {
 		  }
 		else
 		  {
-		    if (retVal.getDialog() != null)
+		    if (newRetVal.getDialog() != null)
 		      {
 			if (errorBuf.length() != 0)
 			  {
 			    errorBuf.append("\n\n");
 			  }
 			
-			errorBuf.append(retVal.getDialog().getText());
+			errorBuf.append(newRetVal.getDialog().getText());
 		      }
 
 		    if (failed_bindings == null)
