@@ -120,6 +120,8 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
 
   gclient gc;
 
+  private StringSelector ss;
+
   ReturnVal retVal = null;
 
   private boolean group_chosen = false;
@@ -153,7 +155,7 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
       }
 
     // Maybe I should use null instead of chosen?
-    StringSelector ss = new StringSelector(this, true, true, true);
+    ss = new StringSelector(this, true, true, true);
     ss.update(available, true, null, chosen, true, null);
     ss.setCallback(this);
     getContentPane().add("Center", ss);
@@ -244,12 +246,7 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
 			JDefaultOwnerDialog.last_chosen.clear();
 		      }
 
-		    QueryResult qr = gc.getSession().queryInvids(chosen);
-
-		    if (qr != null)
-		      {
-			JDefaultOwnerDialog.last_chosen.addAll(qr.getListHandles());
-		      }
+		    JDefaultOwnerDialog.last_chosen.addAll(ss.getChosenHandles());
 		  }
 	      }
 
