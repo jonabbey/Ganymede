@@ -836,7 +836,19 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (f != null && f.isDefined())
       {
-	return f.getValueString();
+	String result = f.getValueString();
+
+	// the label must be unique, but if we're a newly created
+	// object, we won't have any label value yet.  Go ahead and
+	// synthesize one for the time being.
+
+	if (result.length() == 0)
+	  {
+	    // "New {0}: {1,number,#}"
+	    result = ts.l("getLabel.null_label", getTypeName(), new Integer(getID()));
+	  }
+
+	return result;
       }
     else
       {
