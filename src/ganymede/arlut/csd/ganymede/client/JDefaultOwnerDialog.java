@@ -110,6 +110,8 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
 
   private static Object last_chosen_lock = new Object();
 
+  // ---
+
   JButton done;
 
   Vector
@@ -137,6 +139,19 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
     dialog_banner.setBorder(BorderFactory.createEmptyBorder(3,3,3,3));
     getContentPane().add("North", dialog_banner);
 
+    // did we previously have a list of chosen owner group invid's
+    // selected?
+
+    chosen = new Vector();
+
+    synchronized(JDefaultOwnerDialog.last_chosen_lock)
+      {
+	if (JDefaultOwnerDialog.last_chosen != null)
+	  {
+	    chosen.addAll(JDefaultOwnerDialog.last_chosen);
+	  }
+      }
+
     // Maybe I should use null instead of chosen?
     StringSelector ss = new StringSelector(this, true, true, true);
     ss.update(available, true, null, chosen, true, null);
@@ -152,16 +167,6 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
     
     getContentPane().add("South", p);
 
-    chosen = new Vector();
-
-    synchronized(JDefaultOwnerDialog.last_chosen_lock)
-      {
-	if (JDefaultOwnerDialog.last_chosen != null)
-	  {
-	    chosen.addAll(JDefaultOwnerDialog.last_chosen);
-	  }
-      }
-    
     setBounds(50,50,50,50);
     pack();
   }
