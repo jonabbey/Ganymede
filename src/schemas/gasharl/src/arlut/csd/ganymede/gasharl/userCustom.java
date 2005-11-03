@@ -722,7 +722,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (problem)
 	  {
-	    retVal.setDialog(new JDialogBuff("Possible Clone Problem", resultBuf.toString(),
+	    retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
 					     "Ok", null, "ok.gif"));
 	  }
     

@@ -440,7 +440,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	if (problem)
 	  {
-	    retVal.setDialog(new JDialogBuff("Possible Clone Problem", resultBuf.toString(),
+	    retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
 					     "Ok", null, "ok.gif"));
 	  }
     
