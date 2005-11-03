@@ -150,7 +150,12 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
       {
 	if (JDefaultOwnerDialog.last_chosen != null)
 	  {
-	    chosen.addAll(JDefaultOwnerDialog.last_chosen);
+	    for (int i = 0; i < JDefaultOwnerDialog.last_chosen.size(); i++)
+	      {
+		listHandle lh = (listHandle) JDefaultOwnerDialog.last_chosen.elementAt(i);
+
+		chosen.add(lh.getObject());
+	      }
 	  }
       }
 
