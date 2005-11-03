@@ -842,7 +842,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// object, we won't have any label value yet.  Go ahead and
 	// synthesize one for the time being.
 
-	if (result.length() == 0)
+	if (result == null || result.length() == 0)
 	  {
 	    // "New {0}: {1,number,#}"
 	    result = ts.l("getLabel.null_label", getTypeName(), new Integer(getID()));
@@ -852,6 +852,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
     else
       {
+	// we should never get here.. objects shouldn't be in the
+	// database without their label field.
+
 	return "";
       }
   }
