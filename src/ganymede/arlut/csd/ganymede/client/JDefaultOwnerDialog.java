@@ -70,6 +70,7 @@ import arlut.csd.JDataComponent.JDeleteValueObject;
 import arlut.csd.JDataComponent.JDeleteVectorValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
+import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.JErrorDialog;
