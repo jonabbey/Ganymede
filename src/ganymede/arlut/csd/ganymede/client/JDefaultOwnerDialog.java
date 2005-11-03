@@ -117,8 +117,7 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
   JButton done;
 
   Vector
-    chosen,
-    available;
+    chosen;
 
   gclient gc;
 
@@ -134,7 +133,6 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
     super(gc, ts.l("init.title"), true);
 
     this.gc = gc;
-    this.available = groups;
 
     getContentPane().setLayout(new BorderLayout());
 
@@ -167,7 +165,7 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
       }
 
     ss = new StringSelector(this, true, true, true);
-    ss.update(available, true, null, handleVector, true, null);
+    ss.update(groups, true, null, handleVector, true, null);
     ss.setCallback(this);
     getContentPane().add("Center", ss);
     

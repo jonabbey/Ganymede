@@ -83,6 +83,7 @@ import javax.swing.event.DocumentListener;
 
 import arlut.csd.Util.Compare;
 import arlut.csd.Util.TranslationService;
+import arlut.csd.Util.VectorUtils;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -574,27 +575,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out != null)
       {
-	if ((chosen != null) && (available != null)) // If's it null, nothing is chosen.
-	  {
-	    for (int i = 0; i < chosen.size(); i++)
-	      {
-		// What will this do if it is not in available?  I don't know.
-
-		try
-		  {
-		    available.removeElement(chosen.elementAt(i));
-		  }
-		catch (Exception e)
-		  {
-		    System.out.println("Could not remove Element: " + 
-				       chosen.elementAt(i) + ", not in available vector?");
-		  }
-	      }
-	  }
-
 	try
 	  {
-	    out.load(available, -1, sortAvailable, availComparator);
+	    out.load(VectorUtils.difference(available,chosen), -1, sortAvailable, availComparator);
 	  }
 	catch (Exception e)
 	  {
