@@ -440,13 +440,8 @@ public abstract class DBField implements Remote, db_field {
 	// it in an over-all advisory (non-fatal) warning back to the
 	// client
 	
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    return retVal;
-	  }
+	return retVal;
       }
-
-    return null;
   }
 
   /**

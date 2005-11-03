@@ -3286,8 +3286,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 
 	// if we were not able to copy some of the values (and we
-	// had partialSuccessOk set), encode a description of what
-	// happened along with the success code
+	// therefore have partialSuccessOk set), encode a description
+	// of what happened to go along with the success code.
 
 	if (errorBuf.length() != 0)
 	  {
