@@ -855,7 +855,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// we should never get here.. objects shouldn't be in the
 	// database without their label field.
 
-	return "";
+	// "New {0}: {1,number,#}"
+	return ts.l("getLabel.null_label", getTypeName(), new Integer(getID()));
       }
   }
 
