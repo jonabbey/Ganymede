@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.JDialog.StringDialog; // for the global "Ok" string
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
@@ -260,6 +261,7 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!isVector())
       {
+	// "Vector method called on a scalar field: {0} in object {1}"
 	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
@@ -422,25 +424,18 @@ public abstract class DBField implements Remote, db_field {
 
 	valuesToCopy = getValuesLocal();
 
-	// we want to inhibit wizards and allow partial failure
+	// We want to inhibit wizards and allow partial failure.
+	//
+	// We'll use addElementsLocal() here because we've already
+	// verified read permission and write permission, above.
 
 	retVal = target.addElementsLocal(valuesToCopy, true, true);
 
 	// the above operation could fail if we don't have write
-	// privileges for the target field, so we'll return an
-	// error code back to the cloneFromObject() method.
-
-	// this isn't exactly the right thing to do if the failure
-	// pertains to a single value that we attempted to add,
-	// but if a value was legal in the source object, it
-	// should generally be legal in the target object, so
-	// undoing the total copy here isn't too horribly
-	// inappropriate.
-
-	// if this turns out to be unacceptable, i'll have to add
-	// code here to build up a dialog describing the values
-	// that could not be copied, which would be a bit of a
-	// pain.
+	// privileges for the target field, so we'll return an error
+	// code back to the cloneFromObject() method, which will pass
+	// it in an over-all advisory (non-fatal) warning back to the
+	// client
 	
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -758,6 +753,7 @@ public abstract class DBField implements Remote, db_field {
       {
 	if (!isEditable(local))	// *sync* GanymedeSession possible
 	  {
+	    // "DBField.setUndefined(): couldn''t clear vector elements from field {0} in object {1}, due to a lack of write permissions."
 	    throw new GanyPermissionsException(ts.l("setUndefined.no_perm_vect", getName(), owner.getLabel()));
 	  }
 
@@ -975,12 +971,14 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!verifyReadPermission())
       {
+	// "Don''t have permission to read field {0} in object {1}"
 	throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (isVector())
       {
-	throw new GanyPermissionsException(ts.l("global.oops_vector", getName(), owner.getLabel()));
+	// "Scalar method called on a vector field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     return value;
@@ -1107,11 +1105,13 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* possible
       {
+	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
 	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (isVector())
       {
+	// "Scalar method called on a vector field: {0} in object {1}"
 	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
@@ -1242,14 +1242,14 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!verifyReadPermission())
       {
-	throw new GanyPermissionsException("permission denied to read this field " + 
-					 getName());
+	// "Don''t have permission to read field {0} in object {1}"
+	throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + 
-					   getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     return getVectVal();
@@ -1268,17 +1268,23 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!verifyReadPermission())
       {
-	throw new GanyPermissionsException("permission denied to read this field " + getName());
+	// "Don''t have permission to read field {0} in object {1}"
+	throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (index < 0)
       {
-	throw new ArrayIndexOutOfBoundsException("invalid index " + index + " on field " + getName());
+	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
+	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
+						      new Integer(index),
+						      getName(),
+						      owner.getLabel()));
       }
 
     return getVectVal().elementAt(index);
@@ -1293,12 +1299,17 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (index < 0)
       {
-	throw new ArrayIndexOutOfBoundsException("invalid index " + index + " on field " + getName());
+	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
+	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
+						      new Integer(index),
+						      getName(),
+						      owner.getLabel()));
       }
 
     return getVectVal().elementAt(index);
@@ -1336,7 +1347,11 @@ public abstract class DBField implements Remote, db_field {
 
     if ((index < 0) || (index > getVectVal().size()))
       {
-	throw new ArrayIndexOutOfBoundsException("invalid index " + index);
+	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
+	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
+						      new Integer(index),
+						      getName(),
+						      owner.getLabel()));
       }
 
     return rescanThisField(setElement(index, value, false, false));
@@ -1363,19 +1378,23 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (value == null)
       {
-	return Ganymede.createErrorDialog("Error, bad value",
-					  "Null value passed to " + owner.getLabel() + ":" + 
-					  getName() + ".setElement()");
+	// "Null value passed to setElement() on field {0} in object {1}."
+	return Ganymede.createErrorDialog(ts.l("setElementLocal.bad_null", getName(), owner.getLabel()));
       }
 
     if ((index < 0) || (index > getVectVal().size()))
       {
-	throw new ArrayIndexOutOfBoundsException("invalid index " + index);
+	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
+	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
+						      new Integer(index),
+						      getName(),
+						      owner.getLabel()));
       }
 
     try
@@ -1432,13 +1451,14 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible.
       {
-	throw new GanyPermissionsException("don't have permission to change field /  non-editable object, field " +
-					 getName());
+	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
@@ -1646,19 +1666,20 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " + 
-					 getName());
+	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + 
-					   getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (submittedValue == null)
       {
-	throw new IllegalArgumentException("null value passed to addElement.");
+	// "Null value passed to addElement() on field {0} in object {1}."
+	throw new IllegalArgumentException(ts.l("addElement.bad_null", getName(), owner.getLabel()));
       }
 
     if (submittedValue instanceof String)
@@ -1688,9 +1709,8 @@ public abstract class DBField implements Remote, db_field {
 
     if (size() >= getMaxArraySize())
       {
-	return Ganymede.createErrorDialog("Server: Error in DBField.addElement()",
-					  "Field " + getName() + 
-					  " already at or beyond array size limit");
+	// "addElement() Error: Field {0} in object {1} is already at or beyond its maximum allowed size."
+	return Ganymede.createErrorDialog(ts.l("addElement.overflow", getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
@@ -1814,7 +1834,6 @@ public abstract class DBField implements Remote, db_field {
 	throw new RuntimeException(ex);	// should never happen
       }
   }
-
 
   /**
    * <p>Adds a set of elements to the end of this field, if a
@@ -1949,25 +1968,26 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " + 
-					 getName());
+	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + 
-					   getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (submittedValues == null || submittedValues.size() == 0)
       {
-	return Ganymede.createErrorDialog("Server: Error in DBField.addElements()",
-					  "Field " + getName() + " can't add a null/empty vector");
+	// "Null or empty Vector passed to addElements() on field {0} in object {1}."
+	return Ganymede.createErrorDialog(ts.l("addElements.bad_null", getName(), owner.getLabel()));
       }
 
     if (submittedValues == getVectVal())
       {
-	throw new IllegalArgumentException("can't add field values to itself");
+	// "Error, attempt to add self elements to field {0} in object {1}."
+	throw new IllegalArgumentException(ts.l("addElements.self_add", getName(), owner.getLabel()));
       }
 
     Vector duplicateValues = VectorUtils.intersection(getVectVal(), submittedValues);
@@ -1988,10 +2008,14 @@ public abstract class DBField implements Remote, db_field {
 
     if (size() + submittedValues.size() > getMaxArraySize())
       {
-	return Ganymede.createErrorDialog("Server: Error in DBField.addElements()",
-					  "Field " + getName() + 
-					  " can't take " + submittedValues.size() + " new values..\n" +
-					  "size():" + size() + ", getMaxArraySize():" + getMaxArraySize());
+	// "addElements() Error: Field {0} in object {1} can''t take {2,number,#} new values..\n
+	// It already has {3,number,#} elements, and may not have more than {4,number,#} total."
+	return Ganymede.createErrorDialog(ts.l("addElements.overflow",
+					       getName(),
+					       owner.getLabel(),
+					       new Integer(submittedValues.size()),
+					       new Integer(size()),
+					       new Integer(getMaxArraySize())));
       }
 
     // check to see if all of the submitted values are acceptable in
@@ -2042,7 +2066,8 @@ public abstract class DBField implements Remote, db_field {
 
     if (approvedValues.size() == 0)
       {
-	return Ganymede.createErrorDialog("AddElements Error",
+	// "addElements() Error"
+	return Ganymede.createErrorDialog(ts.l("addElements.unapproved_title"),
 					  errorBuf.toString());
       }
 
@@ -2127,9 +2152,10 @@ public abstract class DBField implements Remote, db_field {
 	
 	if (errorBuf.length() != 0)
 	  {
-	    newRetVal.setDialog(new JDialogBuff("Warning",
+	    // "Warning"
+	    newRetVal.setDialog(new JDialogBuff(ts.l("addElements.warning"),
 						errorBuf.toString(),
-						"Ok",
+						StringDialog.getDefaultOk(), // localized
 						null,
 						"ok.gif"));
 	  }
@@ -2248,21 +2274,22 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* GanymedeSession possible
       {
-	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " + 
-					 getName());
+	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
 
     if ((index < 0) || (index >= values.size()))
       {
-	throw new ArrayIndexOutOfBoundsException("invalid index " + index + 
-						 " in deleting element in field " + getName());
+	// "Invalid index {0,number,#} for array access on field {0} in object {1}."
+	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range", new Integer(index), getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
@@ -2382,29 +2409,28 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!isEditable(local))	// *sync* GanymedeSession possible
       {
-	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " +
-					 getName());
+	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + 
-					   getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (value == null)
       {
-	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
-					  "Could not delete null value from field " + getName());
+	// "deleteElement() Error: Can''t delete null value from field {0} in object {1}."
+	return Ganymede.createErrorDialog(ts.l("deleteElement.bad_null", getName(), owner.getLabel()));
       }
 
     int index = indexOfValue(value);
 
     if (index == -1)
       {
-	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElement()",
-					  "Could not delete value " + value +
-					  ", not present in field " + getName());
+	// "deleteElement() Error: Value ''{0}'' not present to be deleted from field {1} in object {2}."
+	return Ganymede.createErrorDialog(ts.l("deleteElement.missing_element", value, getName(), owner.getLabel()));
       }
 
     return deleteElement(index, local, noWizards);	// *sync* DBNameSpace possible
@@ -2528,20 +2554,20 @@ public abstract class DBField implements Remote, db_field {
 
     if (!isEditable(local))	// *sync* on GanymedeSession possible
       {
-	throw new GanyPermissionsException("don't have permission to change field /  non-editable object " + 
-					 getName());
+	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + 
-					   getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (valuesToDelete == null || valuesToDelete.size() == 0)
       {
-	return Ganymede.createErrorDialog("Server: Error in DBField.addElements()",
-					  "Field " + getName() + " can't remove a null/empty vector");
+	// "Null or empty Vector passed to deleteElements() on field {0} in object {1}."
+	return Ganymede.createErrorDialog(ts.l("deleteElements.bad_null", getName(), owner.getLabel()));
       }
 
     // get access to our value vector.
@@ -2553,7 +2579,8 @@ public abstract class DBField implements Remote, db_field {
 
     if (valuesToDelete == currentValues)
       {
-	throw new IllegalArgumentException("can't remove field values from itself");
+	// "Error, attempt to delete self elements from field {0} in object {1}."
+	throw new IllegalArgumentException(ts.l("deleteElements.self_delete", getName(), owner.getLabel()));
       }
 
     // see if we are being asked to remove items not in our vector
@@ -2562,9 +2589,10 @@ public abstract class DBField implements Remote, db_field {
 
     if (notPresent.size() != 0)
       {
-	return Ganymede.createErrorDialog("Server: Error in DBField.deleteElements()",
-					  "Field " + getName() + " can't remove non-present items: " +
-					  VectorUtils.vectorString(notPresent));
+	// "deleteElements() Error: Values ''{0}'' not present to be deleted from field {1} in object {2}."
+	return Ganymede.createErrorDialog(ts.l("deleteElements.missing_elements",
+					       VectorUtils.vectorString(notPresent),
+					       getName(), owner.getLabel()));
       }
 
     // see if our container wants to intercede in the removing operation
@@ -2626,6 +2654,16 @@ public abstract class DBField implements Remote, db_field {
 		  {
 		    if (!ns.unmark(editset, valuesToDelete.elementAt(i), this))
 		      {
+			// "Error encountered attempting to dissociate
+			// reserved value {0} from field {1}.  This
+			// may be due to a server error, or it may be
+			// due to a non-interactive transaction
+			// currently at work trying to shuffle
+			// namespace values between multiple objects.
+			// In the latter case, you may be able to
+			// succeed at this operation after the
+			// non-interactive transaction gives up."
+
 			throw new RuntimeException(ts.l("global.bad_unmark", valuesToDelete.elementAt(i), this));
 		      }
 		  }
@@ -2699,13 +2737,14 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!local && !verifyReadPermission())
       {
-	throw new GanyPermissionsException("permission denied to read this field " + getName());
+	// "Don''t have permission to read field {0} in object {1}"
+	throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + 
-					   getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     return (indexOfValue(value) != -1);
@@ -2721,18 +2760,21 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (oldField == null)
       {
-	throw new IllegalArgumentException("can't compare fields.. oldField is null");
+	// "Bad call to getVectorDiff() on field {0} in object {1}.  oldField is null."
+	throw new IllegalArgumentException(ts.l("getVectorDiff.null_old", getName(), owner.getLabel()));
       }
 
     if ((oldField.getID() != getID()) ||
 	(oldField.getObjTypeID() != getObjTypeID()))
       {
-	throw new IllegalArgumentException("can't compare fields.. incompatible fields");
+	// "Bad call to getVectorDiff() on field {0} in object {1}.  Incompatible fields."
+	throw new IllegalArgumentException(ts.l("getVectorDiff.bad_type", getName(), owner.getLabel()));
       }
 
     /* - */
@@ -3150,8 +3192,8 @@ public abstract class DBField implements Remote, db_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + 
-					   getName());
+	// "Vector method called on a scalar field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     return getVectVal();
@@ -3168,8 +3210,8 @@ public abstract class DBField implements Remote, db_field {
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector field " + 
-					   getName());
+	// "Scalar method called on a vector field: {0} in object {1}"
+	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     return value;
@@ -3399,8 +3441,11 @@ public abstract class DBField implements Remote, db_field {
 
   public ReturnVal getDuplicateValueDialog(String methodName, Object conflictValue)
   {
-    return Ganymede.createErrorDialog("Server: Error in " + methodName,
-				      "This action could not be duplicated because \"" + String.valueOf(conflictValue) + "\" is already contained in field " + getName());
+    // "Server: Error in {0}"
+    // "This action could not be performed because "{0}" is already contained in field {1} in object {2}."
+    return Ganymede.createErrorDialog(ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
+				      ts.l("getDuplicateValueDialog.error_body",
+					   String.valueOf(conflictValue), getName(), owner.getLabel()));
   }
 
   /**
@@ -3410,8 +3455,11 @@ public abstract class DBField implements Remote, db_field {
 
   public ReturnVal getDuplicateValuesDialog(String methodName, String conflictValues)
   {
-    return Ganymede.createErrorDialog("Server: Error in " + methodName,
-				      "This action could not be duplicated because \"" + conflictValues + "\" are already contained in field " + getName());
+    // "Server: Error in {0}"
+    // "This action could not be performed because "{0}" are already contained in field {1} in object {2}."
+    return Ganymede.createErrorDialog(ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
+				      ts.l("getDuplicateValuesDialog.error_body",
+					   conflictValues, getName(), owner.getLabel()));
   }
 
   /**

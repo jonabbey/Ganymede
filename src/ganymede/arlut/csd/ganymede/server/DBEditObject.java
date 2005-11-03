@@ -1773,7 +1773,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
     if (problem)
       {
-	// "Possible Clone Problem"
+	// "Possible Clone Problems"
 	retVal.setDialog(new JDialogBuff(ts.l("cloneFromObject.possibleError"),
 					 resultBuf.toString(),
 					 ts.l("global.buttonOK"), null, "ok.gif"));
