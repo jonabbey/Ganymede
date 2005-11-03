@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -70,6 +70,7 @@ import arlut.csd.JDataComponent.JDeleteVectorValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.StringSelector;
+import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
@@ -81,7 +82,7 @@ import arlut.csd.ganymede.common.ReturnVal;
 
 ------------------------------------------------------------------------------*/
 
-public class JDefaultOwnerDialog extends JDialog implements ActionListener, JsetValueCallback{
+public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener, JsetValueCallback{
 
   /**
    * TranslationService object for handling string localization in the
