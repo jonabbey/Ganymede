@@ -502,8 +502,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  }
 
 	setSelectedWindow(w);
-	
-	updateWindowMenu();
       }
     catch (Throwable ex)
       {
@@ -851,7 +849,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (frame == null)
       {
-	System.err.println("Couldn't find window to remove.");
+	if (debug)
+	  {
+	    System.err.println("Couldn't find window to remove.");
+	  }
+
 	return;
       }
 
@@ -1108,6 +1110,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	    if (enWindow == frame)
 	      {
 		windowList.remove(enTitle);
+		break;		// we've killed the enumeration, stop looping
 	      }
 	  }
 
@@ -1119,6 +1122,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  }
 	
 	windowList.put(title, frame);
+
+	updateWindowMenu();
       }
 
     frame.setTitle(title);
@@ -1201,9 +1206,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       {
 	setSelectedWindow((gResultTable)obj);
       }
-    else 
+    else if (debug)
       {
-	System.err.println("Hmm, don't know what kind of window this is.");
+	System.err.println("Hmm, don't know what kind of window this is:" + obj);
       }
   }
 
