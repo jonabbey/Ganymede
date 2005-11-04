@@ -137,6 +137,16 @@ public class listHandle {
     return object;
   }
 
+  public int hashCode()
+  {
+    if (object != null)
+      {
+	return object.hashCode();
+      }
+
+    return super.hashCode();
+  }
+
   public boolean equals(Object val)
   {
     if (!(val instanceof listHandle))

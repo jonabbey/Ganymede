@@ -582,7 +582,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	catch (Exception e)
 	  {
 	    e.printStackTrace();
-	    throw new RuntimeException("Got an exception in out.reload: " + e);
+	    throw new RuntimeException(e);
 	  }
       }
 
@@ -593,7 +593,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     catch (Exception e)
       {
 	e.printStackTrace();
-	throw new RuntimeException("Got an exception in in.reload: " + e);
+	throw new RuntimeException(e);
       }
 
     updateTitles();
