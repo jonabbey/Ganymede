@@ -65,11 +65,8 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>QuickSort implementation for Vector.  Uses the Comparator
- * interface for item comparisons.</P>
- *
- * <P>Based on code by Eric van Bezooijen (eric@logrus.berkeley.edu)
- * and Roedy Green (roedy@bix.com).</P>
+ * QuickSort implementation for Vector.  Uses the Comparator
+ * interface for item comparisons.
  *
  * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
@@ -107,7 +104,7 @@ public class VecQuickSort implements Comparator {
   }
 
   /**
-   * <P>Sort the elements</P>
+   * Sort the elements
    */
 
   public void sort()
@@ -126,8 +123,8 @@ public class VecQuickSort implements Comparator {
   }
 
   /**
-   * <p>Default comparator, does a string comparison on the
-   * toString() output of the objects for ordering.</p>
+   * Default comparator, does a string comparison on the
+   * toString() output of the objects for ordering.
    */
 
   public int compare(Object a, Object b)
