@@ -143,6 +143,10 @@ public class listHandle {
       {
 	return object.hashCode();
       }
+    else if (label != null)
+      {
+	return label.hashCode();
+      }
 
     return super.hashCode();
   }
