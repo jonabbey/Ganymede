@@ -1555,13 +1555,21 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * If this object window contains any editable containerPanels, this
    * method will examine all Invid fields contained within and change
    * the label of the Invid parameter to the newLabel.
+   *
+   * This method will also relabel the object window to reflect the
+   * new title, if we're open for editing.
    */
 
   public synchronized void relabelObject(Invid invid, String newLabel)
   {
     if (this.invid == invid)
       {
-	return;	// don't bother trying to relabel things in self
+	if (editable)
+	  {
+	    setTitle(wp.getWindowTitle(editable, isCreating, gc.getObjectType(invid), newLabel));
+	  }
+
+	return;	// don't bother trying to relabel fields in self, though
       }
 
     if (containerPanels == null)

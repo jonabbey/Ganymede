@@ -403,23 +403,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	    if (isNewlyCreated)
 	      {
-		// "Create: {0} - New Object"
-		title = ts.l("addWindow.create_object_title", objectType);
+		title = getWindowTitle(editable, isNewlyCreated, objectType, null);
 	      }
 	    else
 	      {
-		if (editable)
-		  {
-		    // "Edit: {0} - {1}"
-		    title = ts.l("addWindow.edit_object_title",
-				 objectType, object.getLabel());
-		  }
-		else
-		  {
-		    // "View: {0} - {1}"
-		    title = ts.l("addWindow.view_object_title",
-				 objectType, object.getLabel());
-		  }
+		title = getWindowTitle(editable, isNewlyCreated, objectType, object.getLabel());
 	      }
 	  }
 	catch (Exception rx)
@@ -527,6 +515,44 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	// the cursor frozen in wait
 
 	gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+      }
+  }
+
+  /**
+   * This method returns a localized string for a framePanel title,
+   * according to the operation being performed on the object and its
+   * type.
+   *
+   * It is used in addWindow() to set a window's initial title, and by
+   * framePanel to handle relabeling an object whose label field has been
+   * altered.
+   */
+
+  public String getWindowTitle(boolean editable, boolean newlyCreated, String objectType, String object_label)
+  {
+    if (newlyCreated)
+      {
+	if (object_label == null)
+	  {
+	    // "Create: {0} - New Object"
+	    return ts.l("getWindowTitle.create_object_title", objectType);
+	  }
+	else
+	  {
+	    // "Create: {0} - {1}"
+	    return ts.l("getWindowTitle.create_object_title2", objectType, object_label);
+	  }
+      }
+
+    if (editable)
+      {
+	// "Edit: {0} - {1}"
+	return ts.l("getWindowTitle.edit_object_title", objectType, object_label);
+      }
+    else
+      {
+	// "View: {0} - {1}"
+	return ts.l("getWindowTitle.view_object_title", objectType, object_label);
       }
   }
 
