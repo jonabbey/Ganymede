@@ -1562,14 +1562,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   public synchronized void relabelObject(Invid invid, String newLabel)
   {
-    if (this.invid == invid)
+    if (this.invid.equals(invid))
       {
 	if (editable)
 	  {
 	    String newTitle = wp.getWindowTitle(editable, isCreating, gc.getObjectType(invid), newLabel);
-
-	    System.err.println("Relabeling window to " + newTitle);
-
 	    wp.setWindowTitle(this, newTitle);
 	  }
 
