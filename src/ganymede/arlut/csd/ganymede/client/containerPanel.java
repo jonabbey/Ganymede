@@ -1007,7 +1007,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
     else if (element instanceof JButton)
       {
-	System.err.println("Calling repaint on a button on invid " + invid + ", trying to set label to " + newLabel);
 	((JButton) element).setText(newLabel);
 	element.repaint();
       }
@@ -3412,6 +3411,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	      {
 		b.setToolTipText(comment);
 	      }
+
+	    // add the button to our objectHash so that we can change
+	    // the label if the user edits the label field of the
+	    // object we point to.
+
+	    objectHash.put(b, field);
 
 	    contentsPanel.addRow(fieldTemplate.getName(), b);
 	    contentsPanel.setRowVisible(b, fieldInfo.isVisible());
