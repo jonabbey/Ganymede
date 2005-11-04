@@ -1123,10 +1123,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	
 	windowList.put(title, frame);
 
+	frame.setTitle(title);
+
 	updateWindowMenu();
       }
-
-    frame.setTitle(title);
 
     return title;		// in case the caller cares about what unique title we wound up with
   }
