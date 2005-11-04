@@ -876,6 +876,17 @@ server until such time as their label field is set.  The confusion
 about these temporary labels is what led to making the client react
 visibly to object renaming.
 
+51. [CLIENT, JDATACOMPONENT] Fixed listHandle
+
+One of the primary data structures used in the client, the
+arlut.csd.JDataComponent.listHandle, turned out to be not fully
+defined.  It was lacking a hashCode() method, and certain revisions I
+made in #50, above, needed it to be reliably hashable based on content
+rather than object identity.
+
+By fixing this, it ensures that the optimized VectorUtils class
+methods can properly manipulate listHandle vectors.
+
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
