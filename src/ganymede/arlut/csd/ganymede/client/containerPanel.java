@@ -1007,13 +1007,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
     else if (element instanceof JButton)
       {
-	System.err.println("Woop, trying to relabel button");
 	((JButton) element).setText(newLabel);
-	element.repaint();
-      }
-    else
-      {
-	System.err.println("Wah, unrecognized element type: " + element);
+	//	element.repaint();
       }
   }
 
