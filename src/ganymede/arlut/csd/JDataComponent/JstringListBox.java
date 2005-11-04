@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -68,6 +68,7 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -236,7 +237,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * is null, the sort will be performed using a normal string ordering sort.
    */
 
-  public void load(Vector items, int width, boolean sort, Comparator comparator)
+  public synchronized void load(Vector items, int width, boolean sort, Comparator comparator)
   {
     this.maxWidthString = "this is the minimum!";
 
@@ -313,6 +314,35 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	setModel(model);
 	repaint();
       }
+  }
+
+  /**
+   * This method is used to change the dynamically label of an object in this
+   * StringSelector.
+   */
+
+  public synchronized void relabelObject(Object object, String newLabel)
+  {
+    // only bother if we have _objects_
+
+    ListModel model = getModel();
+
+    if ((model.getSize() == 0) || !(model.getElementAt(0) instanceof listHandle))
+      {
+	return;
+      }
+
+    for (int i = 0; i < model.getSize(); i++)
+      {
+	listHandle handle = (listHandle) model.getElementAt(i);
+	
+	if (handle.getObject() != null && handle.getObject().equals(object))
+	  {
+	    handle.setLabel(newLabel);
+	  }
+      }
+
+    repaint();
   }
 
   /**

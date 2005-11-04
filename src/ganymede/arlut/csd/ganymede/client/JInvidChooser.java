@@ -69,6 +69,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.MutableComboBoxModel;
 
 import arlut.csd.JDataComponent.JPanelCombo;
 import arlut.csd.JDataComponent.listHandle;
@@ -297,6 +298,32 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   public boolean isAllowNone()
   {
     return allowNone;
+  }
+
+  /**
+   * This method is used to change the dynamically label of an object in this
+   * JInvidChooser.
+   */
+
+  public void relabelObject(Invid invid, String newLabel)
+  {
+    MutableComboBoxModel model = (MutableComboBoxModel) getModel();
+
+    synchronized (model)
+      {
+	for (int i = 0; i < model.getSize(); i++)
+	  {
+	    listHandle lh = (listHandle) model.getElementAt(i);
+
+	    if (lh != null && lh.getObject().equals(invid))
+	      {
+		model.removeElementAt(i);
+		lh.setLabel(newLabel);
+		model.insertElementAt(lh, i);
+		break;
+	      }
+	  }
+      }
   }
 
   public void setSelectedItem(Object o) 

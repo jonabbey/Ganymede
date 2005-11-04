@@ -3359,6 +3359,11 @@ public abstract class DBField implements Remote, db_field {
 	original = new ReturnVal(true);
       }
 
+    if (this.getID() == owner.getLabelFieldID())
+      {
+	original.setObjectLabelChanged(owner.getInvid(), this.getValueString());
+      }
+      
     original.addRescanField(getOwner().getInvid(), getID());
 
     return original;

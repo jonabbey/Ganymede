@@ -2471,11 +2471,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     // Check for objects that need to be rescanned
 
+    if (retVal != null && retVal.objectLabelChanged())
+      {
+	wp.relabelObject(retVal.getInvid(), retVal.getNewLabel());
+      }
+
     if (retVal == null || !retVal.doRescan())
       {
 	return retVal;
       }
-
+	
     if (debug)
       {
 	System.err.println("gclient.handleReturnVal(): rescan dump: " + retVal.dumpRescanInfo());
@@ -2492,7 +2497,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	return retVal;
       }
-    
+
     if (debug)
       {
 	System.err.println("gclient.handleReturnVal(): Rescanning " + objects.size() + " objects.");
@@ -2506,7 +2511,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     while (invids.hasMoreElements())
       {
 	Invid invid = (Invid) invids.nextElement();
-		
+
 	if (debug)
 	  {
 	    System.err.println("gclient.handleReturnVal(): updating invid: " + invid);

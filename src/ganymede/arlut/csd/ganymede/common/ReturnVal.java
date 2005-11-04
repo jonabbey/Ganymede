@@ -121,7 +121,7 @@ public class ReturnVal implements java.io.Serializable {
 
   static final boolean debug = false;
 
-  static final long serialVersionUID = -3207496023172951056L;
+  static final long serialVersionUID = 5358187112973957394L;
 
   public static final byte NONE = 0;
   public static final byte EXPIRATIONSET = 1;
@@ -180,6 +180,19 @@ public class ReturnVal implements java.io.Serializable {
    */
 
   private transient Hashtable rescanHash = null;
+
+  /**
+   * This variable will be non-null if the operation being reported on
+   * changed the object's label.  The GUI client will look for this
+   * variable in order to trigger a fix-up of all pointers to the
+   * object that was modified by the action that resulted in this
+   * ReturnVal.
+   *
+   * If newLabel is not null, newObjectInvid must be set to point to
+   * the Invid which is being relabeled.
+   */
+
+  private String newLabel = null;
 
   /**
    * <p>This boolean variable is used on the server side only,
@@ -392,6 +405,28 @@ public class ReturnVal implements java.io.Serializable {
       }
     
     return result;
+  }
+
+  /**
+   * If this method returns true, the object that was modified by the
+   * operation resulting in this ReturnVal changed the object's label
+   * field.  The client will use this as a signal to refresh displayed
+   * links to the object's Invid.
+   */
+
+  public boolean objectLabelChanged()
+  {
+    return (this.newLabel != null);
+  }
+
+  /**
+   * Returns a non-null String if the object pointed to by getInvid()
+   * has had its label changed.  The returned String is the new label.
+   */
+
+  public String getNewLabel()
+  {
+    return this.newLabel;
   }
 
   /**
@@ -781,6 +816,22 @@ public class ReturnVal implements java.io.Serializable {
   public void setSuccess(boolean didSucceed)
   {
     this.success = didSucceed;
+  }
+
+  /**
+   * This method controls whether or not this ReturnVal will return a
+   * 'my label changed!' message to the client.
+   */
+
+  public void setObjectLabelChanged(Invid objInvid, String newLabel)
+  {
+    if (newObjectInvid != null)
+      {
+	throw new RuntimeException();
+      }
+
+    this.newObjectInvid = objInvid;
+    this.newLabel = newLabel;
   }
 
   /**

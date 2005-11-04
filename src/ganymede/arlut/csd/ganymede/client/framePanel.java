@@ -1551,6 +1551,50 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
   }
 
+  /**
+   * If this object window contains any editable containerPanels, this
+   * method will examine all Invid fields contained within and change
+   * the label of the Invid parameter to the newLabel.
+   */
+
+  public synchronized void relabelObject(Invid invid, String newLabel)
+  {
+    if (this.invid == invid)
+      {
+	return;	// don't bother trying to relabel things in self
+      }
+
+    if (containerPanels == null)
+      {
+	return;
+      }
+
+    // Loop over each containerPanel in the framePanel window.. there
+    // may be more than one due to embedded objects and multiple
+    // server tabs
+    
+    // we count down here so that we can handle things if the
+    // cp.update*() call causes the count of containerPanels in this
+    // frame to decrement (as if an embedded object panel's field is
+    // made invisible) we'll be able to handle it.
+    
+    // if the count of containerPanels increments during this
+    // loop, we'll just not see the new panel(s), which is of
+    // course just fine.
+
+    for (int i = containerPanels.size() - 1; i >= 0; i--)
+      {
+	if (i > containerPanels.size() - 1)
+	  {
+	    i = containerPanels.size() - 1;
+	  }
+
+	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+
+	cp.updateInvidLabels(invid, newLabel);
+      }
+  }
+
   // InternalFrameListener methods
 
   public void internalFrameActivated(InternalFrameEvent event)

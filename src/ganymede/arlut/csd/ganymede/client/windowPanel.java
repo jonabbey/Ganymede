@@ -1246,6 +1246,31 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
   }
 
+  /**
+   * This method seeks through all open windows and relabels all
+   * references to the given Invid.
+   */
+
+  public void relabelObject(Invid invid, String newLabel)
+  {
+    Object ary[];
+
+    /* -- */
+
+    synchronized (windowList)
+      {
+	ary = windowList.values().toArray();
+      }
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	if (ary[i] instanceof framePanel)
+	  {
+	    ((framePanel) ary[i]).relabelObject(invid, newLabel);
+	  }
+      }
+  }
+
   // Event handlers
 
   public void actionPerformed(ActionEvent e)

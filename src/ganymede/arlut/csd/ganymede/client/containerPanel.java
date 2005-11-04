@@ -942,6 +942,75 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
   }
 
+  /** 
+   * Goes through all the components and checks to see if any of them
+   * are Invid fields that contain a reference to invid.
+   *
+   * If so, we'll refresh the label for invid.
+   */
+
+  public void updateInvidLabels(Invid invid, String newLabel)
+  {
+    Enumeration en;
+
+    /* -- */
+
+    if (debug)
+      {
+	println("Updating container panel");
+      }
+
+    gc.setWaitCursor();
+
+    try
+      {
+	en = objectHash.keys();
+
+	while (en.hasMoreElements())
+	  {
+	    Component element = (Component) en.nextElement();
+
+	    db_field field = (db_field) objectHash.get(element);
+
+	    if (field instanceof invid_field)
+	      {
+		relabelInvidComponent(element, invid, newLabel);
+	      }
+	  }
+
+	/*	if (changed_any)
+	  {
+	    invalidate();
+	    frame.validate();
+	    }*/
+      }
+    finally
+      {
+	if (debug)
+	  {
+	    println("Done updating container panel");
+	  }
+	
+	gc.setNormalCursor();
+      }
+  }
+
+  private void relabelInvidComponent(Component element, Invid invid, String newLabel)
+  {
+    if (element instanceof StringSelector)
+      {
+	((StringSelector) element).relabelObject(invid, newLabel);
+      }
+    else if (element instanceof JInvidChooser)
+      {
+	((JInvidChooser) element).relabelObject(invid, newLabel);
+      }
+    else if (element instanceof JButton)
+      {
+	((JButton) element).setText(newLabel);
+      }
+  }
+
   /**
    * Updates a subset of the fields in this containerPanel.
    *

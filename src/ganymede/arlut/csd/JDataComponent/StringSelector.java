@@ -560,8 +560,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * the sort order for items in the previously chosen Vector.
    */
 
-  public void update(Vector available, boolean sortAvailable, Comparator availComparator,
-		     Vector chosen, boolean sortChosen, Comparator chosenComparator)
+  public synchronized void update(Vector available, boolean sortAvailable, Comparator availComparator,
+				  Vector chosen, boolean sortChosen, Comparator chosenComparator)
   {
     if (available == null)
       {
@@ -597,6 +597,21 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     updateTitles();
+  }
+
+  /**
+   * This method is used to change the dynamically label of an object in this
+   * StringSelector.
+   */
+
+  public synchronized void relabelObject(Object object, String newLabel)
+  {
+    in.relabelObject(object, newLabel);
+
+    if (out != null)
+      {
+	out.relabelObject(object, newLabel);
+      }
   }
 
   /**
