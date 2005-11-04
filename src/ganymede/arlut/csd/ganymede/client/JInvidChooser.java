@@ -315,11 +315,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	  {
 	    listHandle lh = (listHandle) model.getElementAt(i);
 
-	    if (lh != null && lh.getObject().equals(invid))
+	    if (lh != null && lh.getObject() != null && lh.getObject().equals(invid))
 	      {
 		model.removeElementAt(i);
 		lh.setLabel(newLabel);
 		model.insertElementAt(lh, i);
+		repaint();
 		break;
 	      }
 	  }
