@@ -1566,7 +1566,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	if (editable)
 	  {
-	    setTitle(wp.getWindowTitle(editable, isCreating, gc.getObjectType(invid), newLabel));
+	    wp.setWindowTitle(this, wp.getWindowTitle(editable, isCreating, gc.getObjectType(invid), newLabel));
 	  }
 
 	return;	// don't bother trying to relabel fields in self, though
