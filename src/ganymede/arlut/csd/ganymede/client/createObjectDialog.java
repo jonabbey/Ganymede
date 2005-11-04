@@ -89,6 +89,9 @@ import arlut.csd.ganymede.rmi.Base;
  * put up a window for the user to edit the new object with if we
  * succeed.
  *
+ * This dialog is modal, and will block on the GUI thread until it is
+ * closed.
+ *
  * @version $Id$
  * @author Mike Mulvaney
  */
@@ -262,12 +265,12 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 
 	Short type = (Short)choice.getObject();
 
+	setVisible(false);
+
 	if (type.shortValue() >= 0)
 	  {
 	    gc.createObject(type.shortValue());
 	  }
-	
-	setVisible(false);
       }
     else if (e.getSource() == cancel) 
       {
