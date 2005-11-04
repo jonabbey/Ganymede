@@ -339,10 +339,46 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	if (handle.getObject() != null && handle.getObject().equals(object))
 	  {
 	    handle.setLabel(newLabel);
+	    break;
 	  }
       }
 
+    if (doSort)
+      {
+	resort();
+      }
+
     repaint();
+  }
+
+  /**
+   * This method resorts the elements in this JstringListBox.
+   */
+
+  public void resort()
+  {
+    ListModel model = getModel();
+
+    if (model.getSize() < 2)
+      {
+	return;
+      }
+
+    Vector sortedList = new Vector();
+
+    for (int i = 0; i < model.getSize(); i++)
+      {
+	sortedList.addElement(model.getElementAt(i));
+      }
+
+    if (this.comparator == null)
+      {
+	this.comparator = this;
+      }
+
+    new VecQuickSort(sortedList, this.comparator).sort();
+
+    setListData(sortedList);
   }
 
   /**
