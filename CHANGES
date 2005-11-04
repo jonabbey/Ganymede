@@ -843,6 +843,39 @@ that Deepak developed.
 See doc/xml/xmlclient.html and doc/querylanguage/index.html for full
 details.
 
+49. [SERVER] Fixed invid vector cloning
+
+Previously, if you cloned an object that contained an Invid vector,
+any failure in the vector cloning would cause no items at all to be
+cloned, and the cloned object would have that field empty.
+
+Now, the InvidDBField.addElements() method is cognizant of the
+partialSuccess intention for object cloning, and will clone partial
+objects.
+
+50. [SERVER, CLIENT] Miscellaneous fixes to client operations
+
+I fixed up the logic for the 'default owner' dialog in the client, so
+that you can close it without making a selection to no ill effect.  It
+will also remember your previous owner group settings, so that you can
+revisit the dialog and see what defaults you have in effect.
+
+I tweaked the server and client so that the client is informed when an
+object being edited has its label field changed.  All objects that
+point to the edited object through an invid link will be refreshed in
+the client to reflect the object's new name.
+
+This is even true for view-only object windows.  The logic here is
+that changing the label for a linked object doesn't truly change the
+object being viewed, so having the link label reflect the new name is
+actually no change at all.  It is a bit at odds with the fact that an
+object view window is a flash-frozen view of an object, though.
+
+Newly created objects are now given default object labels on the
+server until such time as their label field is set.  The confusion
+about these temporary labels is what led to making the client react
+visibly to object renaming.
+
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
