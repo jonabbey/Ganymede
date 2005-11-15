@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -67,7 +67,25 @@ import javax.swing.JTextArea;
 
 ------------------------------------------------------------------------------*/
 
-public class JstringArea extends JTextArea implements FocusListener {
+/**
+ * This is a multi-line, scrollable text component with support for
+ * the {@link arlut.csd.JDataComponent.JsetValueCallback} listener
+ * interface used for the arlut.csd.JDataComponent graphical
+ * components.
+ *
+ * This component consists of a JScrollPane with an embedded {@link
+ * arlut.csd.JDataComponent.myTextArea}.  The myTextArea object
+ * handles keystroke filtering to prevent input of characters that do
+ * not meet the acceptable characters constraints.
+ *
+ * You can control how arlut.csd.JDataComponent.JstringArea handles
+ * scrolling by calling the {@link
+ * javax.swing.JScrollPane.setHorizontalScrollBarPolicy(int)} and
+ * {@link javax.swing.JScrollPane.setVerticalScrollBarPolicy(int)}
+ * methods on JScrollPane, which we inherit from.
+ */
+
+public class JstringArea extends JScrollPane implements FocusListener {
 
   final static boolean debug = false;
 
@@ -81,6 +99,8 @@ public class JstringArea extends JTextArea implements FocusListener {
 
   private boolean processingCallback = false;
 
+  private myTextArea textArea = null;
+
   String
     value = null,		// last known value, used in comparisons to see if we need to do full callback
     allowedChars = null,
@@ -90,26 +110,27 @@ public class JstringArea extends JTextArea implements FocusListener {
 
   public JstringArea() 
   {
-    setEditable(true);
-
-    addFocusListener(this);
-
-    setBorder(BorderFactory.createLineBorder(Color.black));
-
-    enableEvents(AWTEvent.KEY_EVENT_MASK); 
+    this(0,0);  // Call to main contructor function
   }
 
   public JstringArea(int rows, int columns) 
   {
-    super(rows, columns);
-    setEditable(true);
-
-    setBorder(BorderFactory.createLineBorder(Color.black));
-
     addFocusListener(this);
 
-    enableEvents(AWTEvent.KEY_EVENT_MASK); 
-  }
+    // create myTextArea to put inside the JScrollPane, JScrollPane
+    // fits to area size
+
+    textArea = new myTextArea(this,rows,columns);
+
+    if (debug)
+      {
+	System.out.println("Constructing pane with textarea, adding to JScrollPane: ");
+      }
+
+    // Add textArea to scrollPane viewport
+    setViewportView(textArea);
+    textArea.setVisible(true);
+  } // JstringArea
 
   ///////////////////
   // Class Methods //
@@ -128,7 +149,12 @@ public class JstringArea extends JTextArea implements FocusListener {
   public void setText(String s)
   {
     value = s;
-    super.setText(s);
+    textArea.setText(s);
+  }
+
+  public String getText()
+  {
+    return textArea.getText();
   }
 
   public void setAllowedChars(String s)
@@ -143,13 +169,12 @@ public class JstringArea extends JTextArea implements FocusListener {
 
   public void setEditable(boolean val)
   {
-    if (!val)
+    if (my_parent != null)
       {
-	allowCallback = false;
-	my_parent = null;
+	allowCallback = val;
       }
 
-    super.setEditable(val);
+    textArea.setEditable(val);
   }
 
   /**
@@ -166,7 +191,7 @@ public class JstringArea extends JTextArea implements FocusListener {
     
     my_parent = parent;
 
-    allowCallback = true;
+    allowCallback = textArea.isEditable();
   }
 
   /**
@@ -236,6 +261,9 @@ public class JstringArea extends JTextArea implements FocusListener {
 	
 	    return;
 	  }
+
+	// if we don't need to handle callbacks, just accept the new
+	// string value from the user and return
     
 	if (!allowCallback) 
 	  {
@@ -286,11 +314,11 @@ public class JstringArea extends JTextArea implements FocusListener {
 	    
 	    if (value == null)
 	      {
-		super.setText("");
+		textArea.setText("");
 	      }
 	    else
 	      {
-		super.setText(value);
+		textArea.setText(value);
 	      }
 	    
 	    changed = false;
@@ -325,7 +353,7 @@ public class JstringArea extends JTextArea implements FocusListener {
    *
    */
 
-  private boolean isAllowed(char ch)
+  boolean isAllowed(char ch)
   {
     if (disallowedChars != null)
       {
@@ -356,53 +384,6 @@ public class JstringArea extends JTextArea implements FocusListener {
     return true;
   }
   
-  /**
-   *
-   * We only want certain keystrokes to be registered by the field.
-   *
-   * This method overrides the processKeyEvent() method in JComponent and
-   * gives us a way of intercepting characters that we don't want in our
-   * string field.
-   *
-   */
-
-  protected void processKeyEvent(KeyEvent e)
-  {
-    // always pass through useful editing keystrokes.. this seems to be
-    // necessary because backspace and delete apparently have defined
-    // Unicode representations, so they don't match CHAR_UNDEFINED below
-
-    if ((e.getKeyCode() == KeyEvent.VK_BACK_SPACE) ||
-	(e.getKeyCode() == KeyEvent.VK_DELETE) ||
-	(e.getKeyCode() == KeyEvent.VK_END) ||
-	(e.getKeyCode() == KeyEvent.VK_HOME))
-      {
-	super.processKeyEvent(e);
-	return;
-      }
-
-    // We check against KeyEvent.CHAR_UNDEFINED so that we pass
-    // through things like backspace, arrow keys, etc.
-
-    if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
-      {
-	super.processKeyEvent(e);
-	return;
-      }
-    else if (isAllowed(e.getKeyChar()))
-      {
-	super.processKeyEvent(e);
-	return;
-      }
-
-    // otherwise, we ignore it
-
-    if (debug)
-      {
-	System.err.println("JstringArea: skipping key event " + e);
-      }
-  }
-
   public void focusLost(FocusEvent e)
   {
     if (debug)
@@ -431,9 +412,11 @@ public class JstringArea extends JTextArea implements FocusListener {
   {
     JFrame frame = new JFrame();
 
-    JstringArea area = new JstringArea();
-    //    area.setDisallowedChars("asdf");
-    frame.getContentPane().add(new JScrollPane(area));
+    JstringArea area = new JstringArea(5, 10);
+    area.setText("Hello world");
+
+    area.setDisallowedChars("asdf");
+    frame.getContentPane().add(area);
 
     area.setCallback(new JsetValueCallback() {
       public boolean setValuePerformed(JValueObject o) {
@@ -447,3 +430,86 @@ public class JstringArea extends JTextArea implements FocusListener {
     frame.setVisible(true);
   }
 }
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                      myTextArea
+
+------------------------------------------------------------------------------*/
+
+/**
+ * This is a custom subclass of {@link javax.swing.JTextArea} that
+ * provides the inner gui component substrate for the optionally
+ * scrollable {@link arlut.csd.JDataComponent.JstringArea}.
+ *
+ * By embedding this subclass in JstringArea, we can intercept event
+ * processing from our superclass while still allowing JstringArea to
+ * be an all-in-one component suitable for use in the Ganymede {@link
+ * arlut.csd.ganymede.client.containerPanel}.
+ */
+
+class myTextArea extends JTextArea
+{
+  private JstringArea my_parent;
+
+  /* -- */
+
+  public myTextArea(JstringArea x, int rows, int cols)
+  {
+    super(rows,cols);
+    this.my_parent = x;
+    enableEvents(AWTEvent.KEY_EVENT_MASK); 
+  }
+  
+  /**
+   * We only want certain keystrokes to be registered by the field.
+   *
+   * This method overrides the processKeyEvent() method in JComponent and
+   * gives us a way of intercepting characters that we don't want in our
+   * string field.
+   */
+
+  protected void processKeyEvent(KeyEvent e)
+  {
+    // always pass through useful editing keystrokes.. this seems to be
+    // necessary because backspace and delete apparently have defined
+    // Unicode representations, so they don't match CHAR_UNDEFINED below
+
+    switch (e.getKeyCode())
+      {
+      case KeyEvent.VK_BACK_SPACE:
+      case KeyEvent.VK_DELETE:
+      case KeyEvent.VK_END:
+      case KeyEvent.VK_HOME:
+	super.processKeyEvent(e);
+	return;	
+      }
+
+    // We check against KeyEvent.CHAR_UNDEFINED so that we pass
+    // through things like arrow keys, etc. that don't result in
+    // character insertion
+
+    if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
+      {
+	super.processKeyEvent(e);
+	return;
+      }
+
+    // now check with the JstringArea to adjudicate this character
+    // insertion
+
+    if (my_parent.isAllowed(e.getKeyChar()))
+      {
+	super.processKeyEvent(e);
+	return;
+      }
+
+    // otherwise, we ignore it
+
+    if (JstringArea.debug)
+      {
+	System.err.println("JstringArea: skipping key event " + e);
+      }
+  } // processKeyEvent
+
+} // mytextarea
