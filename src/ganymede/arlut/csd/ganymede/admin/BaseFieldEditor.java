@@ -216,7 +216,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     classS.setCallback(this);
 
     commentT = new JstringArea(4, 20);
-    JScrollPane commentScroll = new JScrollPane(commentT);
     commentT.setCallback(this);
 
     // This one is different:
@@ -308,7 +307,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel.addFillRow("Field ID:", idN);
     editPanel.addFillRow("Field Name:", nameS);
     editPanel.addFillRow("Class name:", classS);
-    editPanel.addFillRow("Comment:", commentScroll);
+    editPanel.addFillRow("Comment:", commentT);
     editPanel.addFillRow("Vector:", vectorCF);
     editPanel.addFillRow("Max Array Size:", maxArrayN);
     editPanel.addFillRow("Field Type:", typeC);
