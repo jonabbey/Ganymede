@@ -479,7 +479,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     // initialize layout
 
-    contentsPanel = new JLabelPanel();
+    contentsPanel = new LabelPanel();
     contentsPanel.setInsets(4,4,4,4);
     contentsPanel.setFixedSizeLabelCells(true);
 
@@ -2927,13 +2927,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     else if (fieldTemplate.isMultiLine())
       {
 	JstringArea sa = new JstringArea(6, FIELDWIDTH);
-	sa.setEditable(editable && fieldInfo.isEditable());
+	objectHash.put(sa, field);
+
 	sa.setAllowedChars(fieldTemplate.getOKChars());
 	sa.setDisallowedChars(fieldTemplate.getBadChars());
-	sa.setCallback(this);
-	
-	objectHash.put(sa, field);
-			      
 	sa.setText((String)fieldInfo.getValue());
 	    			
 	if (editable && fieldInfo.isEditable())
