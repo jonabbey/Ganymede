@@ -81,6 +81,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.JSetValueObject;
@@ -419,7 +421,9 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	daysPanel.add(_datebuttonArray[i]);
       }
 
-    daysPanel.setBackground(new Color(200,200,255));  // light blue
+    /*    daysPanel.setBackground(new Color(200,200,255));  // light blue*/
+
+    daysPanel.setBorder(new LineBorder(UIManager.getColor("TitledBorder.titleColor")));
 
     // and we'll wrap the daysPanel in a FlowLayout-managed
     // centerPanel so that it centers itself in the mainPanel
