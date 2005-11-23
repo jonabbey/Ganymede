@@ -431,7 +431,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     JPanel centerPanel = new JPanel(false);
     centerPanel.setLayout(new FlowLayout()); //borderlayout
     centerPanel.add(daysPanel);
-    centerPanel.setBackground(new Color(200,200,255));  // light blue
+    //    centerPanel.setBackground(new Color(200,200,255));  // light blue
     mainPanel.add(centerPanel, "Center"); 
 
 
@@ -1025,7 +1025,7 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
     setText("  ");
     setBorderPainted(false);
     super.setForeground(getBackground());
-    super.setBackground(new Color(200,200,255));  // light blue to match panel background
+    //    super.setBackground(new Color(200,200,255));  // light blue to match panel background
     super.setEnabled(false);
     this.active = false;
   }
