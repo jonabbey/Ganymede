@@ -156,7 +156,6 @@ public interface AttributeList {
     * <p>If the attribute name has a namespace prefix in the document,
     * the application must include the prefix here.</p>
     *
-    * @param i The index of the attribute in the list.
     * @return The attribute value as a string, or null if
     *         no such attribute exists.
     * @see #getValue(int)

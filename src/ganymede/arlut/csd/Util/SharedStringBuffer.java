@@ -420,7 +420,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
    * The argument is appended to the contents of this string buffer. 
    * The length of this string buffer increases by <code>1</code>. 
    *
-   * @param   ch   a <code>char</code>.
+   * @param   c   a <code>char</code>.
    * @return  this string buffer.
    */
 
@@ -527,7 +527,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
    * string buffer. 
    *
    * @param      offset   the offset.
-   * @param      b        an <code>Object</code>.
+   * @param      obj        an <code>Object</code>.
    * @return     this string buffer.
    * @exception  StringIndexOutOfBoundsException  if the offset is invalid.
    * @see        java.lang.String#valueOf(java.lang.Object)
@@ -589,7 +589,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
    * the length of the argument. 
    *
    * @param      offset   the offset.
-   * @param      ch       a character array.
+   * @param      str       a character array.
    * @return     this string buffer.
    * @exception  StringIndexOutOfBoundsException  if the offset is invalid.
    */
@@ -655,7 +655,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
    * string buffer. 
    *
    * @param      offset   the offset.
-   * @param      ch       a <code>char</code>.
+   * @param      c       a <code>char</code>.
    * @return     this string buffer.
    * @exception  StringIndexOutOfBoundsException  if the offset is invalid.
    * @see        arlut.csd.Util.SharedStringBuffer#length()
@@ -690,7 +690,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
    * string buffer. 
    *
    * @param      offset   the offset.
-   * @param      b        an <code>int</code>.
+   * @param      i        an <code>int</code>.
    * @return     this string buffer.
    * @exception  StringIndexOutOfBoundsException  if the offset is invalid.
    * @see        java.lang.String#valueOf(int)
@@ -717,7 +717,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
    * string buffer. 
    *
    * @param      offset   the offset.
-   * @param      b        a <code>long</code>.
+   * @param      l        a <code>long</code>.
    * @return     this string buffer.
    * @exception  StringIndexOutOfBoundsException  if the offset is invalid.
    * @see        java.lang.String#valueOf(long)
@@ -744,7 +744,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
    * string buffer. 
    *
    * @param      offset   the offset.
-   * @param      b        a <code>float</code>.
+   * @param      f        a <code>float</code>.
    * @return     this string buffer.
    * @exception  StringIndexOutOfBoundsException  if the offset is invalid.
    * @see        java.lang.String#valueOf(float)
@@ -771,7 +771,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
    * string buffer. 
    *
    * @param      offset   the offset.
-   * @param      b        a <code>double</code>.
+   * @param      d        a <code>double</code>.
    * @return     this string buffer.
    * @exception  StringIndexOutOfBoundsException  if the offset is invalid.
    * @see        java.lang.String#valueOf(double)

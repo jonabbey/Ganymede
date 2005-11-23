@@ -108,7 +108,7 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * are then updated in the DBStore, and a summary of changes is recorded to the
  * DBStore {@link arlut.csd.ganymede.server.DBJournal DBJournal}.  The database as
  * a whole will not be dumped to disk unless and until the
- * {@link arlut.csd.ganymede.dumpTask dumpTask} is run, or until the server
+ * {@link arlut.csd.ganymede.server.dumpTask dumpTask} is run, or until the server
  * undergoes a formal shutdown.</p>
  *
  * <p>Typically, the {@link arlut.csd.ganymede.server.DBEditSet#commit() commit()}
@@ -542,7 +542,7 @@ public class DBEditSet {
    * <p>This method is used to record a message to be sent out when
    * the transaction is committed.</p>
    *
-   * @param addressList Vector of Strings, the address list
+   * @param addresses Vector of Strings, the address list
    * @param subject The subject line of the message
    * @param message The body of the message
    * @param admin The invid of the admin whose action resulted in the mail
@@ -560,7 +560,7 @@ public class DBEditSet {
    * <p>This method is used to record a message to be sent out when
    * the transaction is committed.</p>
    *
-   * @param addressList Vector of Strings, the address list
+   * @param addresses Vector of Strings, the address list
    * @param subject The subject line of the message
    * @param message The body of the message
    */
@@ -614,7 +614,7 @@ public class DBEditSet {
   /**
    * <p>This method is used to transmit a message during transaction commit.</p>
    *
-   * @param addressList Vector of Strings, the address list
+   * @param addresses Vector of Strings, the address list
    * @param subject The subject line of the message
    * @param message The body of the message
    * @param admin The invid of the admin whose action resulted in the mail
@@ -631,7 +631,7 @@ public class DBEditSet {
   /**
    * <p>This method is used to transmit a message during transaction commit.</p>
    *
-   * @param addressList Vector of Strings, the address list
+   * @param addresses Vector of Strings, the address list
    * @param subject The subject line of the message
    * @param message The body of the message
    */
@@ -2533,7 +2533,7 @@ public class DBEditSet {
    * builder task completes and updates its lastRunTime field after we
    * have touched the timestamps on the changed bases.<
    *
-   * @param baseSet Vector of DBObjectBases that contain objects
+   * @param fieldsTouched hash of DBObjectBases that contain objects
    * created, changed, or deleted during this transaction
    */
 

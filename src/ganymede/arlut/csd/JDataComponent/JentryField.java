@@ -146,7 +146,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
    * sendCallback is called when focus is lost, or when we are otherwise
    * triggered.
    *
-   * @returns -1 on change rejected, 0 on no change required, 1 on change approved
+   * @return -1 on change rejected, 0 on no change required, 1 on change approved
    */
 
   public abstract int sendCallback();

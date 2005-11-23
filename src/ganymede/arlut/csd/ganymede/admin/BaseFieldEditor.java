@@ -581,10 +581,10 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   /**
    *
    * This method regenerates the list of valid target field choices
-   * in the BaseFieldEditor when the targetBase is not "<any>".  
+   * in the BaseFieldEditor when the targetBase is not "&lt;any&gt;".  
    *
    * This method doesn't make a selection, so upon exit of this
-   * method, "<none>" will be selected in the fieldC widget.
+   * method, "&lt;none&gt;" will be selected in the fieldC widget.
    *
    */
 

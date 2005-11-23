@@ -136,7 +136,7 @@ public class DBLog {
    * We keep a table of the system event codes to speed the logging process.
    * This hash maps system event classTokens to instances of systemEventType.
    *
-   * @see arlut.csd.ganymede.systemEventType
+   * @see arlut.csd.ganymede.server.systemEventType
    *
    */
 
@@ -158,7 +158,7 @@ public class DBLog {
    * We keep a table of the system event codes to speed the logging process.
    * This hash maps object event classTokens to instances of objectEventType.
    *
-   * @see arlut.csd.ganymede.objectEventType
+   * @see arlut.csd.ganymede.server.objectEventType
    *
    */
 
@@ -243,9 +243,8 @@ public class DBLog {
   /**
    * <p>Constructor for a Ganymede log object.</p>
    *
-   * @param filename Filename for an on-disk log file.  Must point to a valid file
-   * @param mailFilename Filename for an optional mail events log file.  May be null or empty if
-   * no disk-logging of advisory email events is desired.
+   * @param logController
+   * @param mailController
    * @param gSession GanymedeSession reference used to allow DBLog code to do queries
    * on the Ganymede database
    * @param suppressEmail A boolean that indicates whether we should switch off the sending of
@@ -589,8 +588,6 @@ public class DBLog {
    * @param adminName Human readable string identifying the admin responsible for this transaction
    * @param admin Invid representing the user or admin responsible for this transaction
    * @param transaction The {@link arlut.csd.ganymede.server.DBEditSet} representing the transaction to be logged
-   *
-   * @return The transaction token for this transaction, used to terminate the transaction log
    */
 
   public synchronized void startTransactionLog(Vector invids, String adminName, Invid admin, DBEditSet transaction)
@@ -1566,7 +1563,7 @@ public class DBLog {
    * <P>This method takes a DBLogEvent object, scans it to determine
    * what mailing lists should be notified of the event in the
    * context of a transaction, and adds a description of the
-   * passed in event to each {@link arlut.csd.ganymede.MailOut MailOut}
+   * passed in event to each {@link arlut.csd.ganymede.server.MailOut MailOut}
    * object held in map.</P>
    *
    * <P>That is, the map passed in maps each discrete recipient

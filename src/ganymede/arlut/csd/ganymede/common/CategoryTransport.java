@@ -98,8 +98,8 @@ public class CategoryTransport implements java.io.Serializable {
   /**
    * <p>This method is provided so that server-side code can add chunks of data for serialization.
    * In the CategoryTransport case, the
-   * {@link arlut.csd.ganymede.server.DBBaseCategory#addCategoryToTransport(arlut.csd.ganymede.common.CategoryTransport,
-   * arlut.csd.ganymede.server.GanymedeSession, boolean) method is responsible for calling addChunk to build
+   * {@link arlut.csd.ganymede.server.DBBaseCategory#addCategoryToTransport(arlut.csd.ganymede.common.CategoryTransport,arlut.csd.ganymede.server.GanymedeSession, boolean)} 
+   * method is responsible for calling addChunk to build
    * 'this' up for serialization.</p>
    */
 

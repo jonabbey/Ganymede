@@ -61,7 +61,7 @@ package arlut.csd.ganymede.common;
 /**
  * <p>The adminAsyncMessage class is used by the Ganymede server to pass
  * asynchronous messages to the Ganymede admin console.  The Ganymede console repeatedly
- * calls {@link arlut.csd.ganymede.server.serverClientAsyncResponder#getNextMsgs()} to
+ * calls {@link arlut.csd.ganymede.server.serverClientAsyncResponder#getNextMsg() arlut.csd.ganymede.server.serverClientAsyncResponder#getNextMsgs() } to
  * receive asynchonous notifications from the server.</p>
  *
  * @version $Id$

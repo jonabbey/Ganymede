@@ -259,7 +259,7 @@ public class DialogRsrc {
    *
    * Adds a labeled text field
    *
-   * @param string String to use as the label
+   * @param label String to use as the label
    */
 
   public void addString(String label)
@@ -284,7 +284,7 @@ public class DialogRsrc {
    *
    * Adds a labeled multi-line text field
    *
-   * @param string String to use as the label
+   * @param label String to use as the label
    */
 
   public void addMultiString(String label)
@@ -296,7 +296,7 @@ public class DialogRsrc {
    *
    * Adds a labeled date field
    *
-   * @param string String to use as the label
+   * @param label String to use as the label
    * @param currentDate What should the date be set to initially?
    * @param maxDate What is the latest the date can be set to?
    *
@@ -312,7 +312,7 @@ public class DialogRsrc {
    *
    * Adds a labeled date field
    *
-   * @param string String to use as the label
+   * @param label String to use as the label
    */
 
   public void addDate(String label)
@@ -324,7 +324,7 @@ public class DialogRsrc {
    * 
    * Adds a labeled check box field
    *
-   * @param string String to use as the label
+   * @param label String to use as the label
    */
   
   public void addBoolean(String label)
@@ -336,7 +336,7 @@ public class DialogRsrc {
    * 
    * Adds a labeled check box field
    *
-   * @param string String to use as the label
+   * @param label String to use as the label
    * @param value Initial value of field
    */
   

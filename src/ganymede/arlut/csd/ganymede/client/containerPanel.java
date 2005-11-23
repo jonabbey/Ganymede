@@ -339,7 +339,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
-   * @param parent   Parent gclient of this container
+   * @param gc   Parent gclient of this container
    * @param window   windowPanel containing this containerPanel
    * @param frame    framePanel holding this containerPanel(although this cp is not necessarily in the "General" tab)
    * @param context An object that can be provided to identify the context in
@@ -369,7 +369,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
-   * @param parent   Parent gclient of this container
+   * @param gc       Parent gclient of this container
    * @param window   windowPanel containing this containerPanel
    * @param frame    framePanel holding this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
@@ -399,7 +399,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
-   * @param parent   Parent gclient of this container
+   * @param gc       Parent gclient of this container
    * @param window   windowPanel containing this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
    * @param loadNow  If true, container panel will be loaded immediately
@@ -431,7 +431,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    *
    * @param object   The object to be displayed
    * @param editable If true, the fields presented will be enabled for editing
-   * @param parent   Parent gclient of this container
+   * @param gc       Parent gclient of this container
    * @param window   windowPanel containing this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
    * @param loadNow  If true, container panel will be loaded immediately
@@ -3252,7 +3252,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     associateFieldId(fieldInfo, cb);
 
-    contentsPanel.addFillRow(fieldTemplate.getName(), cb, 1);
+    contentsPanel.addRow(fieldTemplate.getName(), cb);
     contentsPanel.setRowVisible(cb, fieldInfo.isVisible());
   }
 

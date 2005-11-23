@@ -656,7 +656,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * This method is used by subclasses of GanymedeBuilderTask to
    * obtain the label for an object.
    *
-   * @param baseid The object id of the object label to be retrieved
+   * @param invid The object id of the object label to be retrieved
    */
 
   protected final String getLabel(Invid invid)

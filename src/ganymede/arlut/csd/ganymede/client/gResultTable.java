@@ -102,8 +102,7 @@ import arlut.csd.ganymede.rmi.Session;
  * in a table form.
  *
  * This window is created when {@link arlut.csd.ganymede.client.windowPanel windowPanel}'s
- * {@link arlut.csd.ganymede.client.windowPanel#addTableWindow(arlut.csd.ganymede.rmi.Session,
- * arlut.csd.ganymede.common.Query, arlut.csd.ganymede.common.DumpResult, java.lang.String) addTableWindow}
+ * {@link arlut.csd.ganymede.client.windowPanel#addTableWindow(arlut.csd.ganymede.rmi.Session,arlut.csd.ganymede.common.Query,arlut.csd.ganymede.common.DumpResult) addTableWindow}
  * method is called.
  * 
  * Note that windowPanel's addTableWindow method is called from 

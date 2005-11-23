@@ -186,19 +186,19 @@ public class JpasswordField extends JPasswordField implements KeyListener{
     * that knows about its parent.
     *
     * @param cols number of colums in the JpasswordField
-    * @param parent the container within which this JpasswordField is contained
-    *        (This container will implement an interface that will utilize the
-    *         data contained within this JpasswordField.)
+    * @param callback An interface for the container within which this
+    * JpasswordField is typically contained.  The JpasswordField will
+    * call this interface to pass password change notifications.
     *
     */
 
   public JpasswordField(int cols,
-		      int maxstrlen,
-		      boolean is_editable,
-		      boolean invisible,
-		      String allowed,
-		      String disallowed,
-		      JsetValueCallback callback)
+			int maxstrlen,
+			boolean is_editable,
+			boolean invisible,
+			String allowed,
+			String disallowed,
+			JsetValueCallback callback)
   {
     this(cols,maxstrlen,is_editable,invisible,allowed,disallowed);
 

@@ -103,7 +103,7 @@ public interface adminSession extends Remote {
   /**
    * <P>This method lets the admin console explicitly request
    * a refresh.  Upon being called, the server will call several
-   * methods on the admin console's {@link arlut.csd.ganymede.Admin Admin}
+   * methods on the admin console's {@link arlut.csd.ganymede.admin Admin}
    * interface to pass current status information to the console.</P>
    */
 

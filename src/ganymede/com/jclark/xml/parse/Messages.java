@@ -9,8 +9,10 @@ import com.jclark.util.Hashtable;
  * A <code>ResourceBundle</code> for the text of messages used
  * in <code>NotWellFormedException</code>.
  *
- * @see NotWellFormedException
- * @see Parser
+ * @see com.jclark.xml.parse.NotWellFormedException
+ * @see com.jclark.xml.parse.awt.Parser
+ * @see com.jclark.xml.parse.base.Parser
+ * @see com.jclark.xml.parse.io.Parser
  * @version $Revision: 1.1 $ $Date: 2000/01/26 04:32:00 $
  */
 public class Messages extends ListResourceBundle {

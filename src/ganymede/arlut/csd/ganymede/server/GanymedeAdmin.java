@@ -672,7 +672,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * form of a callback.
    *
    * This constructor is called from
-   * {@link arlut.csd.ganymede.server.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin()},
+   * {@link arlut.csd.ganymede.rmi.Server#admin(java.lang.String username, java.lang.String password) admin()},
    * which is responsible for authenticating the name and password before
    * calling this constructor.
    */

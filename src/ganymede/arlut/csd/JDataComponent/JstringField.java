@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2005
    The University of Texas at Austin
 
    Contact information
@@ -98,7 +98,6 @@ public class JstringField extends JentryField {
    * Base constructor for JstringField
    * 
    * @param columns number of colums in the JstringField
-   * @param valueAttr used to determine the foregoudn/background/font for this JstringField
    * @param is_editable true if this JstringField is editable
    */
 
@@ -166,10 +165,9 @@ public class JstringField extends JentryField {
     * that knows about its parent.
     *
     * @param cols number of colums in the JstringField
-    * @param valueAttr used to determine the foregoudn/background/font for this JstringField
-    * @param parent the container within which this JstringField is contained
-    *        (This container will implement an interface that will utilize the
-    *         data contained within this JstringField.)
+    * @param callback An interface for the container within which this
+    * JstringField is typically contained.  The JstringField will
+    * call this interface to pass change notifications.
     *
     */
 
@@ -406,7 +404,7 @@ public class JstringField extends JentryField {
    * approved and performed, or false if not.  If the value did not change,
    * this method will also return false.
    *
-   * @returns -1 on change rejected, 0 on no change required, 1 on change approved
+   * @return -1 on change rejected, 0 on no change required, 1 on change approved
    */
 
   public int sendCallback()

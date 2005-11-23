@@ -351,7 +351,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * to determine whether a particular build sequence is necessary.</P>
    *
    * <p>See also
-   * {@arlut.csd.ganymede.server.DBObjectBaseField#lastChange} for a
+   * {@link arlut.csd.ganymede.server.DBObjectBaseField#lastChange} for a
    * timestamp for the last time that a given field was changed in any
    * object in the containing object base.  Both the per-DBObjectBase
    * and per-DBObjectBaseField lastChange variables only track the
@@ -2208,11 +2208,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>Returns the option string for the class definition.. see {@link
-   * arlut.csd.ganymede.DBObjectBase#classOptionString} for more
+   * <p>Returns the option string for the class definition.. see 
+   * {@link arlut.csd.ganymede.server.DBObjectBase#classOptionString classOptionString} for more
    * details.</p>
    *
-   * @see arlut.csd.ganymede.Base
    */
   
   public String getClassOptionString()
@@ -2224,16 +2223,17 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>This method is used to associate a management class with this
    * object base.</p>
    *
+
    * <p>The newClassName argument must be fully qualified, and must
    * refer to one of two kinds of classes.  The first is a {@link
-   * arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass that
-   * implements the requisite three constructors, a la the traditional
-   * Ganymede customization hook.  The second is any class
-   * implementing the {@link arlut.csd.ganymede.common.DDPluginFactory
-   * DDPluginFactory} interface, which provides a set of factory
-   * methods which return DBEditObject instances.</p>
+   * arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass
+   * that implements the requisite three constructors, a la the
+   * traditional Ganymede customization hook.  The second is a {@link
+   * arlut.csd.ganymede.server.JythonEditObjectFactory} subclass,
+   * which provides a set of factory methods which return DBEditObject
+   * instances.</p>
    *
-   * <p>If newClassName implements DDPluginFactory, the
+   * <p>If newClassName is a JythonEditObjectFactory, the
    * newOptionString argument will be available to the factory methods
    * so that the constructed objects can be dynamically customized.
    * This is intended to support the use of DBEditObject subclasses

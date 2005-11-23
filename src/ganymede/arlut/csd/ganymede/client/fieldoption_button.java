@@ -93,7 +93,6 @@ class fieldoption_button extends JButton implements ActionListener {
    *
    * @param field What field are we going to edit field options for?
    * @param enabled If true, will allow editing of the field options matrix
-   * @param basehash Map of Bases to field vectors
    *
    */
 

@@ -74,7 +74,7 @@ import arlut.csd.ganymede.server.taskMonitor;
  * to being used by the server's task scheduler to organize and track
  * registered tasks, vectors of serialized scheduleHandle objects are passed to the
  * Ganymede admin console's 
- * {@link arlut.csd.ganymede.Admin#changeTasks(java.util.Vector) changeTasks} 
+ * {@link arlut.csd.ganymede.admin#changeTasks(java.util.Vector) changeTasks} 
  * method.</P>
  * 
  * <P>Within the Ganymede server, scheduleHandle objects are held within the 

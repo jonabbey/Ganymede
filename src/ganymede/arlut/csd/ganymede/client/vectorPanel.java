@@ -114,7 +114,7 @@ import arlut.csd.Util.TranslationService;
  * vectorPanel handles communications with the server to manage the server-side
  * db_field.
  *
- * @see elementWrapper
+ * @see arlut.csd.ganymede.client.elementWrapper
  * @see containerPanel
  * @see arlut.csd.ganymede.rmi.invid_field
  * @see arlut.csd.ganymede.rmi.ip_field

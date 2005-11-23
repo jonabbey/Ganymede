@@ -635,8 +635,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * client.
    *
    * This constructor is called by the
-   * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}
-   * {@link arlut.csd.ganymede.server.GanymedeServer#login(arlut.csd.ganymede.Client) login()}
+   * {@link arlut.csd.ganymede.server server}
+   * {@link arlut.csd.ganymede.rmi.Server#login(java.lang.String username, java.lang.String password) login()}
    * method.
    *
    * A Client can log in either as an end-user or as a admin persona.  Typically,
@@ -655,7 +655,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * {@link arlut.csd.ganymede.server.serverClientAsyncResponder serverClientAsyncResponder},
    * AKA an asyncPort, for the remote client to poll for async notifications.
    *
-   * @see arlut.csd.ganymede.server.GanymedeServer#login(java.lang.String, java.lang.String)
+   * @see arlut.csd.ganymede.server#login(java.lang.String, java.lang.String)
    */
   
   public GanymedeSession(String loginName, DBObject userObject, 
@@ -4257,7 +4257,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * to any other sessions until this session calls 
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.
    *
-   * @param type The kind of object to create.
+   * @param objectType The kind of object to create.
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
    *
@@ -6437,7 +6437,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * depth first search up the owner tree for the owner Invid to
    * see if personaInvid is a member of any of the containing owner groups.
    *
-   * @param owners An Invid pointing to an OwnerBase object
+   * @param owner An Invid pointing to an OwnerBase object
    * @param alreadySeen A vector of owner group Invid's that have
    * already been checked.  (For infinite loop avoidance).
    *

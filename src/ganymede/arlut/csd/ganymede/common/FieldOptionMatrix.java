@@ -69,7 +69,7 @@ import arlut.csd.ganymede.server.FieldOptionDBField;
 
 /**
  * <P>Serializable field option matrix object, used to handle
- * field options for a GanymedeBuilderQueue.</P>
+ * field options for a SyncRunner.</P>
  *
  * <P>This class stores a read-only Hashtable of Strings, organized by
  * object type and field id's.</P>
@@ -91,7 +91,7 @@ import arlut.csd.ganymede.server.FieldOptionDBField;
  * <P>FieldOptionMatrix is used on the client in the Field Option dialog,
  * and on the server in both
  * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}
- * and {@link arlut.csd.ganymede.server.GanymedeBuilderQueue GanymedeBuilderQueue}.</P> */
+ * and {@link arlut.csd.ganymede.server.SyncRunner SyncRunner}.</P> */
 
 public class FieldOptionMatrix implements java.io.Serializable {
 

@@ -430,15 +430,15 @@ class querybox extends JDialog implements ActionListener, ItemListener {
    *
    * @param parent The frame that this querybox is to be connected to.
    *
-   * @param DialogTitle The title for this dialog.
+   * @param dialogTitle The title for this dialog.
    *
    */
 
   public querybox (gclient gc,
                    Frame parent,
-		   String myTitle) 
+		   String dialogTitle) 
   {
-    this(null, gc, parent, myTitle);
+    this(null, gc, parent, dialogTitle);
   } 
 
   ///////////////////////

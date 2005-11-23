@@ -197,8 +197,8 @@ public class zipIt {
    * without capturing any path information in the file names held in the
    * zip file.
    *
-   * @param outputFile Name of the zip file to be created
-   * @param files Vector of Strings naming files to be added to the
+   * @param outputFileName Name of the zip file to be created
+   * @param fileNames Vector of Strings naming files to be added to the
    * zip file.
    *
    */

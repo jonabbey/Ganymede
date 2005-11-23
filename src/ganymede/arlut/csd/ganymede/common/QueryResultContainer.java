@@ -277,7 +277,7 @@ public class QueryResultContainer implements List, Serializable {
    * result set.
    * 
    * @param row
-   * @return
+   * @return handle to the object
    */
 
   public synchronized Invid getInvid(int row)
@@ -290,7 +290,7 @@ public class QueryResultContainer implements List, Serializable {
    * The invids returned are in the same order that they were added
    * to this result set.
    * 
-   * @return
+   * @return list of Invids
    */
 
   public synchronized Vector getInvids()
@@ -308,7 +308,7 @@ public class QueryResultContainer implements List, Serializable {
    * The labels returned are in the same order their corresponding objects were 
    * added to this result set.
    * 
-   * @return
+   * @return list of Invids
    */
 
   public synchronized Vector getLabels()
@@ -326,7 +326,7 @@ public class QueryResultContainer implements List, Serializable {
    * set.
    * 
    * @param row
-   * @return
+   * @return handle to the label
    */
   
   public synchronized String getLabel(int row)
@@ -499,7 +499,7 @@ public class QueryResultContainer implements List, Serializable {
    * converts it to one that matches the row type MAPROWS.
    * 
    * @param row
-   * @return
+   * @return newRow
    */
 
   private Map convertArrayRowToMapRow(Object[] row)
@@ -519,7 +519,7 @@ public class QueryResultContainer implements List, Serializable {
    * converts it to one that matches the row type ARRAYROWS.
    * 
    * @param row
-   * @return
+   * @return newRow
    */
 
   private Object[] convertMapRowToArrayRow(Map row)

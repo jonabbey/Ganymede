@@ -130,7 +130,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   /**
    * <p>If true, the JstringListBox will sort items.  This variable is set
    * by the value of the sort parameter in the most recent 
-   * {@link arlut.csd.JDataComponent.JstringListBox#load(java.util.Vector,int,boolean,arlut.csd.Util.Compare) load()}
+   * {@link arlut.csd.JDataComponent.JstringListBox#load(java.util.Vector items, int width, boolean sort, java.util.Comparator comparator) load()}
    * call.</p>
    */
 

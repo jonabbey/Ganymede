@@ -61,7 +61,7 @@ package arlut.csd.Util;
 
 /**
  * <P>This interface provides a common comparator operator that can be implemented
- * for use with {@link arlut.csd.Util.QuickSort QuickSort}, 
+ * for use with  
  * {@link arlut.csd.Util.VecQuickSort VecQuickSort}, and
  * {@link arlut.csd.Util.VecSortInsert VecSortInsert}.
  *

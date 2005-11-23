@@ -1634,7 +1634,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method is called on a newly created object, in order
    * to clone the state of origObj into it.  This method does not actually
    * create a new object.. that is handled by
-   * {@link arlut.csd.ganymede.server.GanymedeSession#clone_db_object(arlut.csd.ganymede.common.Invid)
+   * {@link arlut.csd.ganymede.server.GanymedeSession#clone_db_object(arlut.csd.ganymede.common.Invid) clone_db_object()}
    * before this method is called on the newly created object.
    *
    * The default (DBEditObject) implementation of this method will only clone

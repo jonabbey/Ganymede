@@ -1,55 +1,56 @@
 /*
 
-JythonEditObjectFactory.java
+  JythonEditObjectFactory.java
 
-This class acts as a factory for Jython-based DBEditObjects that are
-loaded from an external location (disk, HTTP, FTP, etc).
+  This class acts as a factory for Jython-based DBEditObjects that are
+  loaded from an external location (disk, HTTP, FTP, etc).
 
-Created: 5 August 2004
-Last Mod Date: $Date$
-Last Revision Changed: $Rev$
-Last Changed By: $Author$
-SVN URL: $HeadURL$
+   Created: 5 August 2004
+   Last Mod Date: $Date$
+   Last Revision Changed: $Rev$
+   Last Changed By: $Author$
+   SVN URL: $HeadURL$
 
-Module By: Deepak Giridharagopal <deepak@arlut.utexas.edu>
+   Module By: Deepak Giridharagopal <deepak@arlut.utexas.edu>
 
------------------------------------------------------------------------
+   -----------------------------------------------------------------------
       
-Ganymede Directory Management System
+   Ganymede Directory Management System
 
-Copyright (C) 1996-2004
-The University of Texas at Austin
+   Copyright (C) 1996-2005
+   The University of Texas at Austin
 
-Contact information
+   Contact information
 
-Author Email: ganymede_author@arlut.utexas.edu
-Email mailing list: ganymede@arlut.utexas.edu
+   Author Email: ganymede_author@arlut.utexas.edu
+   Email mailing list: ganymede@arlut.utexas.edu
 
-US Mail:
+   US Mail:
 
-Computer Science Division
-Applied Research Laboratories
-The University of Texas at Austin
-PO Box 8029, Austin TX 78713-8029
+   Computer Science Division
+   Applied Research Laboratories
+   The University of Texas at Austin
+   PO Box 8029, Austin TX 78713-8029
 
-Telephone: (512) 835-3200
+   Telephone: (512) 835-3200
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
+
 package arlut.csd.ganymede.server;
 
 import org.python.core.PyException;
@@ -87,7 +88,6 @@ public class JythonEditObjectFactory {
    * </p>
    * 
    * @param base the object base the newly created DBEditObject should be attached to
-   * @return
    */
   
   public static DBEditObject factory(DBObjectBase base)
@@ -104,7 +104,6 @@ public class JythonEditObjectFactory {
    * @param base the object base the newly created DBEditObject should be attached to
    * @param invid the Invid to associate with this object
    * @param editset the transaction to associate the object with
-   * @return
    */
   
   public static DBEditObject factory(DBObjectBase base, Invid invid, DBEditSet editset)
@@ -120,7 +119,6 @@ public class JythonEditObjectFactory {
    * 
    * @param original the object to be "checked out"
    * @param editset the transaction to associate the object with
-   * @return
    */
   
   public static DBEditObject factory(DBObject original, DBEditSet editset)
@@ -266,7 +264,7 @@ public class JythonEditObjectFactory {
 
   /**
    * <p>
-   * Similar to {@link arlut.csd.ganymede.server.JythonEditObjectFactory.unloadURI unloadURI},
+   * Similar to {@link arlut.csd.ganymede.server.JythonEditObjectFactory#unloadURI(java.lang.String) unloadURI},
    * except this method will unload <b>ALL</b> of the class definitions
    * in the cache.
    * </p>

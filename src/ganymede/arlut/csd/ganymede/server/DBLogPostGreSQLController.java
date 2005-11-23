@@ -139,10 +139,9 @@ public class DBLogPostGreSQLController implements DBLogController {
 
   /**
    * <p>Private constructor for DBLogPostGreSQLController.  Use the
-   * static {@link
-   * arlut.csd.DBLogPostGreSQLController#createController(java.lang.String,
-   * java.lang.String, java.lang.String, java.lang.String)
-   * createController} method to create instances of this class.</p>
+   * static {@link arlut.csd.ganymede.server.DBLogPostGreSQLController#createController(java.lang.String,
+   * java.lang.String, java.lang.String, java.lang.String) createController} 
+   * method to create instances of this class.</p>
    *
    * <p>This constructor should only be called by a synchronized
    * static method so that the hash of database urls opened is
@@ -209,7 +208,7 @@ public class DBLogPostGreSQLController implements DBLogController {
   /**
    * <p>Private constructor for DBLogPostGreSQLController.  Use the
    * static {@link
-   * arlut.csd.DBLogPostGreSQLController#createController(java.lang.String,
+   * arlut.csd.ganymede.server.DBLogPostGreSQLController#createController(java.lang.String,
    * java.lang.String, int, java.lang.String, java.lang.String)
    * createController} method to create instances of this class.</p>
    *

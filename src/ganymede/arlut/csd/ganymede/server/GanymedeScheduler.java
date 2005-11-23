@@ -100,7 +100,7 @@ import arlut.csd.ganymede.common.scheduleHandle;
  * three classes form a robust and flexible task scheduling system.</P>
  *
  * <P>The GanymedeScheduler supports updating the Ganymede admin console's
- * task monitor display by way of the {@link arlut.csd.ganymede.Admin Admin} 
+ * task monitor display by way of the {@link arlut.csd.ganymede.rmi.AdminAsyncResponder} 
  * interface.  Likewise, the Ganymede server's admin console interface,
  * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} supports several
  * remote methods that the admin console can call to affect GanymedeScheduler.</P>

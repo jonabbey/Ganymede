@@ -1067,7 +1067,7 @@ public abstract class DBField implements Remote, db_field {
    * The ReturnVal object returned encodes success or failure, and may
    * optionally pass back a dialog.
    *
-   * @param value Value to set this field to
+   * @param submittedValue Value to set this field to
    * @param local If true, permissions checking will be skipped
    */
 
@@ -1079,7 +1079,7 @@ public abstract class DBField implements Remote, db_field {
   /**
    * Sets the value of this field, if a scalar.
    *
-   * <B>This method is server-side only.</B>
+   * <b>This method is server-side only.</b>
    *
    * The ReturnVal object returned encodes success or failure, and may
    * optionally pass back a dialog.
@@ -1087,7 +1087,7 @@ public abstract class DBField implements Remote, db_field {
    * This method will be overridden by DBField subclasses with special
    * needs.
    *
-   * @param value Value to set this field to
+   * @param submittedValue Value to set this field to
    * @param local If true, permissions checking will be skipped
    * @param noWizards If true, wizards will be skipped
    */
@@ -1860,11 +1860,11 @@ public abstract class DBField implements Remote, db_field {
    * and skip the rest.
    */
 
-  public final ReturnVal addElementsLocal(Vector values, boolean noWizards, boolean copyFieldMode)
+  public final ReturnVal addElementsLocal(Vector submittedValues, boolean noWizards, boolean copyFieldMode)
   {
     try
       {
-	return addElements(values, true, noWizards, copyFieldMode);
+	return addElements(submittedValues, true, noWizards, copyFieldMode);
       }
     catch (GanyPermissionsException ex)
       {
@@ -3054,14 +3054,13 @@ public abstract class DBField implements Remote, db_field {
    * by whatever means (vector add, vector replacement, scalar
    * replacement).
    *
-   * This method is expected to call the {@link
-   * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
-   * java.lang.Object)} method on {@link
-   * arlut.csd.ganymede.server.DBEditObject} in order to allow custom
+   * This method is expected to call the 
+   * {@link arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,java.lang.Object)} 
+   * method on {@link arlut.csd.ganymede.server.DBEditObject} in order to allow custom
    * plugin classes to deny any given value that the plugin might not
    * care for, for whatever reason.  Otherwise, the go/no-go decision
-   * will be made based on the checks performed by {@link
-   * arlut.csd.ganymede.DBField#verifyBasicConstraints(java.lang.Object)}.
+   * will be made based on the checks performed by 
+   * {@link arlut.csd.ganymede.server.DBField#verifyBasicConstraints(java.lang.Object) verifyBasicConstraints}.
    */
 
   abstract public ReturnVal verifyNewValue(Object o);
@@ -3472,9 +3471,9 @@ public abstract class DBField implements Remote, db_field {
    * This method is for use primarily within a Jython context and accessed by
    * calling ".val" on a {@link arlut.csd.ganymede.server.DBField DBField} object,
    * but it can theoretically be used in Java code in lieu of calling
-   * {@link arlut.csd.ganymede.server.DBField.getValue getValue} or
-   * {@link arlut.csd.ganymede.server.DBField.getValues getValues} (but <b>there
-   * are some subtle differences </b>!).
+   * {@link arlut.csd.ganymede.server.DBField#getValue getValue} or
+   * {@link arlut.csd.ganymede.server.DBField#getValues getValues} (but <b>there
+   * are some subtle differences! </b>).
    * 
    * 
    * This method will return this field's value, be it vector or scalar.

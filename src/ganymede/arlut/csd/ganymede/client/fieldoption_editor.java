@@ -78,7 +78,7 @@ import arlut.csd.ganymede.rmi.*;
  * field options for a particular builder task. It's modeled loosely after
  * the permissions editor widget, and uses the same TreeTable component.
  **/
-class fieldoption_editor extends JDialog 
+class fieldoption_editor extends JFrame 
 {
   /**
    * TranslationService object for handling string localization in
@@ -133,7 +133,7 @@ class fieldoption_editor extends JDialog
   Frame parent = null;
 
   /**
-   * @param Should the widget be read only?
+   * @param opField The server-side field_option_field RMI reference this fieldoption_editor is to manipulate.
    * @param gc The gclient that connects us to the client-side schema caches
    * @param parent The frame we are attaching this dialog to
    * @param DialogTitle The title for this dialog box
@@ -141,7 +141,7 @@ class fieldoption_editor extends JDialog
   public fieldoption_editor (field_option_field opField, boolean editable, gclient gc,
 		             Frame parent, String DialogTitle)
   {
-    super(parent, DialogTitle, false); // the boolean value is to make the dialog nonmodal
+    super(DialogTitle);
 
     this.parent = parent;
     this.opField = opField;
@@ -1050,9 +1050,13 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
 
     /* Set the inital state of the checkbox */
     if (onOrOff == 0)
-      setSelected(false);
+      {
+	setSelected(false);
+      }
     else
-      setSelected(true);
+      {
+	setSelected(true);
+      }
 
     this.setBackground(fieldoption_editor.treeBG);
     this.addActionListener(this);
@@ -1065,10 +1069,15 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
   public boolean convertValueToBoolean(Object value)
   {
     int i = ((Integer)value).intValue();
+
     if (i == 0)
-      return false;
+      {
+	return false;
+      }
     else
-      return true;
+      {
+	return true;
+      }
   }
 
   public Component getTableCellRendererComponent(JTable table, 

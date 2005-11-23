@@ -97,8 +97,7 @@ public class JpopUpCalendar extends JFrame implements JsetValueCallback {
     parent = callback;
     
     panelCal = new JpanelCalendar(this,parentCalendar,this, editable);
-    
-    getContentPane().setLayout(new FlowLayout());
+
     getContentPane().add(panelCal);
     pack();
   }

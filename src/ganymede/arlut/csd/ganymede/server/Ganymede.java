@@ -125,7 +125,7 @@ import arlut.csd.ganymede.rmi.Server;
  * <p>Clients and admin consoles may then connect to the published GanymedeServer
  * object via RMI to establish a connection to the server.</p>
  *
- * <p>The GanymedeServer's {@link arlut.csd.ganymede.server.GanymedeServer#login(arlut.csd.ganymede.Client) login}
+ * <p>The GanymedeServer's {@link arlut.csd.ganymede.rmi.Server#login(java.lang.String username, java.lang.String password) login}
  * method is used to create a {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
  * object to manage permissions and communications with an individual client.  The
  * client communicates with the GanymedeSession object through the 
@@ -133,7 +133,7 @@ import arlut.csd.ganymede.rmi.Server;
  *
  * <p>While the GanymedeServer's login method is used to handle client connections,
  * the GanymedeServer's
- * {@link arlut.csd.ganymede.server.GanymedeServer#admin(arlut.csd.ganymede.Admin) admin}
+ * {@link arlut.csd.ganymede.rmi.Server#admin(java.lang.String username, java.lang.String password) admin}
  * method is used to create a {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object
  * to handle the admin console's communications with the server.  The admin
  * console communicates with the GanymedeAdmin object through the  

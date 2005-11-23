@@ -295,7 +295,10 @@ public class JDialogBuff implements java.io.Serializable {
    * <p>Adds a text-hidden password string field to the dialog</p>
    *
    * @param label String to use as label
-   * @param value Initial value
+   * @param isNew If true, the password field added to this dialog
+   * definition will be doubled to prompt the user to enter the
+   * password twice for initial validation.  If false, the user will
+   * only have to enter his password once.
    */
 
   public void addPassword(String label, boolean isNew)

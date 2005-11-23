@@ -82,7 +82,7 @@ public interface DTDHandler {
     *        was given.
     * @param systemId The entity's system identifier (it must always
     *        have one).
-    * @param notation name The name of the associated notation.
+    * @param notationName The name of the associated notation.
     * @see #notationDecl
     * @see org.xml.sax.AttributeList
     */

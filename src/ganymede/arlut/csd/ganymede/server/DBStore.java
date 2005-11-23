@@ -1016,10 +1016,6 @@ public final class DBStore implements JythonMap {
    *
    * @param filename Name of the database file to emit
    *
-   * @param outStream Stream to write the XML to @param
-   * dumpDataObjects if false, only the schema definition will be
-   * written
-   *
    * @param dumpDataObjects If true, the emitted file will include
    * the objects in the Ganymede database.
    *
@@ -1038,7 +1034,8 @@ public final class DBStore implements JythonMap {
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema, String syncChannel, boolean includeHistory, boolean includeOid) throws IOException
+  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema, 
+		      String syncChannel, boolean includeHistory, boolean includeOid) throws IOException
   {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
@@ -3123,8 +3120,7 @@ public final class DBStore implements JythonMap {
   
   /**
    * Implements key/value pairs for use in a 
-   * {@link java.util.Map Map}'s {@link java.util.map.entrySet entrySet}
-   * method.
+   * {@link java.util.Map}'s {@link java.util.Map#entrySet()} method.
    */
   static class Entry implements Map.Entry
   {

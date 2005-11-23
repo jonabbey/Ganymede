@@ -80,8 +80,8 @@ import javax.swing.JTextArea;
  *
  * You can control how arlut.csd.JDataComponent.JstringArea handles
  * scrolling by calling the {@link
- * javax.swing.JScrollPane.setHorizontalScrollBarPolicy(int)} and
- * {@link javax.swing.JScrollPane.setVerticalScrollBarPolicy(int)}
+ * javax.swing.JScrollPane#setHorizontalScrollBarPolicy(int)} and
+ * {@link javax.swing.JScrollPane#setVerticalScrollBarPolicy(int)}
  * methods on JScrollPane, which we inherit from.
  */
 

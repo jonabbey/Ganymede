@@ -395,9 +395,9 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 					       QueryDataNode.CONTAINS, 
 					       parent.parent.getObjectInvid());
 
-	qResult = gc.getSession().query(new Query(type, node));	// no filtering
+	qResult = gc.getSession().query(new Query(type, node, false));	// no filtering, allow non-editables
 
-	owned = new objectList(qResult).getListHandles(false);
+	owned = new objectList(qResult).getListHandles(false, true); // include non-editables
       }
     catch (RemoteException rx)
       {

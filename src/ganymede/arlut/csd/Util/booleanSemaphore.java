@@ -132,7 +132,7 @@ public class booleanSemaphore {
    * If the semaphore is already cleared at the time this method is
    * called, this method will return immediately.</p>
    *
-   * @returns the state of the semaphore at the time the method
+   * @return the state of the semaphore at the time the method
    * returns.. this will be false if the semaphore was cleared, or
    * true if the wait timed out before the semaphore was cleared
    */
@@ -201,7 +201,7 @@ public class booleanSemaphore {
    * passed. If the semaphore is already set at the time this method
    * is called, this method will return immediately.</p>
    *
-   * @returns the state of the semaphore at the time the method
+   * @return the state of the semaphore at the time the method
    * returns.. this will be true if the semaphore was set, or
    * false if the wait timed out before the semaphore was set
    */

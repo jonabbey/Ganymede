@@ -187,7 +187,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    * @param vHeadLineColor color of vertical lines in the column headers, if any
    * @param vRowLineColor  color of vertical lines in the table body, if any
    * @param hHeadLineColor color of horizontal lines in the column headers, if any
-   * @param vRowLineColor  color of vertical lines in the table body, if any
+   * @param hRowLineColor  color of horizontal lines in the table body, if any
    * @param headers array of column header titles, must be same size as colWidths
    * @param horizLines  true if horizontal lines should be shown between rows in report table
    * @param vertLines   true if vertical lines should be shown between columns in report table
@@ -662,7 +662,6 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    * table defaults for this column.
    *
    * @param x the column of the table to change color, in the range [0..# of columns-1]
-   * @param color the Color to assign to column x
    * @param repaint true if the table should be redrawn after changing column x
    *
    */

@@ -101,7 +101,7 @@ public class DBLogEvent {
    *
    * @param addresses A vector of Strings listing email addresses to send notification
    * of this event to.
-   * @param eventClassToken a short string specifying a DBObject
+   * @param subject a short string specifying a DBObject
    * record describing the general category for the event
    * @param description Descriptive text to be entered in the record of the event
    * @param admin Invid pointing to the adminPersona that fired the event, if any

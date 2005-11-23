@@ -154,9 +154,12 @@ public class JMultiLineLabel extends JTextArea {
   }
 
   /**
-   * Insert new lines in the string
+   * Local convenience method to wrap the String provided to the
+   * number of columns last set by {@link
+   * arlut.csd.JDataComponent#setWrapLength(int)}.
    *
-   * @lineLength Number of characters to wrap the line at.
+   * If no call to setWrapLength() has been made, the wrap length
+   * defaults to 128 characters.
    */
 
   public String wrap(String text)

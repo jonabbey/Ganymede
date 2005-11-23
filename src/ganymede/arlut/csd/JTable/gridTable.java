@@ -74,14 +74,13 @@ public class gridTable extends baseTable {
    * @param vHeadLineColor color of vertical lines in the column headers, if any
    * @param vRowLineColor  color of vertical lines in the table body, if any
    * @param hHeadLineColor color of horizontal lines in the column headers, if any
-   * @param vRowLineColor  color of vertical lines in the table body, if any
+   * @param hRowLineColor  color of vertical lines in the table body, if any
    * @param headers array of column header titles, must be same size as colWidths
    * @param horizLines  true if horizontal lines should be shown between rows in report table
    * @param vertLines   true if vertical lines should be shown between columns in report table
    * @param vertFill    true if table should expand vertically to fill size of baseTable
    * @param hVertFill   true if horizontal lines should be drawn in the vertical fill region
    * 			(only applies if vertFill and horizLines are true)
-   * @param allow_select true if rows should be selectable by the user
    *
    */
 

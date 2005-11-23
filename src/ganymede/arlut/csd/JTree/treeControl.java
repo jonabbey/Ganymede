@@ -160,7 +160,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    *
    * @param font Font for text in the Tree Canvas
    * @param fgColor Foreground color for text in the treeCanvas
-   * @param bg Background color for text in the treeCanvas
+   * @param bgColor Background color for text in the treeCanvas
    * @param callback Object to receive notification of events
    * @param images Array of images to be used in the canvas;  nodes refer to images by index
    * @param menu Popup menu to attach to the treeControl
@@ -212,7 +212,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    *
    * @param font Font for text in the Tree Canvas
    * @param fgColor Foreground color for text in the treeCanvas
-   * @param bg Background color for text in the treeCanvas
+   * @param bgColor Background color for text in the treeCanvas
    * @param callback Object to receive notification of events
    * @param images Array of images to be used in the canvas;  nodes refer to images by index
    *
@@ -1575,7 +1575,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
    *
    * @param font Font for text in the Tree Canvas
    * @param fgColor Foreground color for text in the treeCanvas
-   * @param bg Background color for text in the treeCanvas
+   * @param bgColor Background color for text in the treeCanvas
    * @param images Array of images to be used in the canvas;  nodes refer to images by index
    *
    */

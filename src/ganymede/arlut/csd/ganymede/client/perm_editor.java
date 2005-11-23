@@ -168,8 +168,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
    * @param gc The gclient that connects us to the client-side schema caches
    * @param parent The frame we are attaching this dialog to
    * @param DialogTitle The title for this dialog box
-   * @param justShowUser If true, this permissions editor will only show the user object.
-   * This is used when editing the 'self permissions' object in the database.
    *
    */
 

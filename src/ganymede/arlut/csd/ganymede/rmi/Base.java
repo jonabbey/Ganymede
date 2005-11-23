@@ -122,9 +122,10 @@ public interface Base extends CategoryNode, Remote {
   public String getClassName() throws RemoteException;
 
   /**
-   * Returns the option string for the class definition.. see {@link
-   * arlut.csd.ganymede.DBObjectBase#classOptionString} for more
-   * details.
+   * Returns the option string for the class definition.  This option
+   * string would be used if the className for this Base refers to a
+   * {@link arlut.csd.ganymede.server.JythonEditObjectFactory}
+   * subclass.
    */
 
   public String getClassOptionString() throws RemoteException;
@@ -224,7 +225,7 @@ public interface Base extends CategoryNode, Remote {
    * arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass that
    * implements the requisite three constructors, a la the traditional
    * Ganymede customization hook.  The second is any class
-   * implementing the {@link arlut.csd.ganymede.common.DDPluginFactory
+   * implementing the {link arlut.csd.ganymede.common.DDPluginFactory
    * DDPluginFactory} interface, which provides a set of factory
    * methods which return DBEditObject instances.</p>
    *
@@ -267,11 +268,7 @@ public interface Base extends CategoryNode, Remote {
   public ReturnVal moveFieldBefore(String fieldName, String nextFieldName) throws RemoteException;
 
   /**
-   * <p>Choose what field will serve as this objectBase's label.  A fieldName
-   * parameter of null will cause the object's label field to be undefined,
-   * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
-   * method.</p>
+   * <p>Sets the required label field for this Base by field name.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
    * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
@@ -281,11 +278,7 @@ public interface Base extends CategoryNode, Remote {
   public ReturnVal setLabelField(String fieldName) throws RemoteException;
 
   /**
-   * <p>Choose what field will serve as this objectBase's label.  A fieldID
-   * parameter of -1 will cause the object's label field to be undefined,
-   * in which case the object will have to generate its own label using the
-   * {@link arlut.csd.ganymede.server.DBEditObject#getLabelHook(arlut.csd.ganymede.server.DBObject) getLabelHook()}
-   * method.</p>
+   * <p>Sets the required label field for this Base by numeric field id.</p>
    *
    * <p>This method is only valid when the Base reference is obtained
    * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference

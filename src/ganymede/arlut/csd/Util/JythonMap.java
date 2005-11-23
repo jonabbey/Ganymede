@@ -66,7 +66,7 @@ public interface JythonMap extends Map {
   /**
    * <p>
    * This is the python analogue to Java's
-   * {@link java.util.Map.contains contains} method.
+   * {@link java.util.Map#containsKey(java.lang.Object) containsKey} method.
    * </p>
    * 
    * @param key
@@ -77,8 +77,8 @@ public interface JythonMap extends Map {
   /**
    * <p>
    * This is the python analogue to Java's
-   * {@link java.util.Map.entrySet entrySet} method. Instead of returning a
-   * {@link java.util.Set Set} of {@link java.util.Map.Entry Entry} objects,
+   * {@link java.util.Map#entrySet()} method. Instead of returning a
+   * {@link java.util.Set Set} of {@link java.util.Map.Entry} objects,
    * this instead should return a List of Object[] arrays of size 2. The first
    * element in the array is the key, the second is the value.
    * </p>
@@ -90,17 +90,17 @@ public interface JythonMap extends Map {
   /**
    * <p>
    * This is the python analogue to Java's
-   * {@link java.util.Map.keySet keySet} method.
+   * {@link java.util.Map#keySet()} method.
    * </p>
    * @return A {@link java.util.Set Set} containing all keys for this
-   * {@link java.util.Map Map}
+   * java.util.Map Map
    */
   Set keys();
   
   /**
    * This method should not be relied upon to generate a friendly, general-purpose
    * string representation of this object. For use in a Jython context, this method
-   * should display some information about the {@link java.util.Map Map} keys it
+   * should display some information about the java.util.Map Map keys it
    * contains.
    */ 
   String toString();

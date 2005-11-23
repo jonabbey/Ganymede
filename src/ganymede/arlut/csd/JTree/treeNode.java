@@ -88,8 +88,8 @@ public class treeNode implements Cloneable {
    * @param text Content of this node
    * @param insertAfter sibling to insert this node after, null if this is the root node
    * @param expandable this node is a folder node, and should always have a +/- box
-   * @param openImage Index of treeCanvas image used to display this node if it is not expanded
    * @param openImage Index of treeCanvas image used to display this node if it is expanded
+   * @param closedImage Index of treeCanvas image used to display this node if it is not expanded
    * @param menu Popup menu to attach to this node
    *
    */
@@ -121,8 +121,8 @@ public class treeNode implements Cloneable {
    * @param text Content of this node
    * @param insertAfter sibling to insert this node after, null if this is the root node
    * @param expandable this node is a folder node, and should always have a +/- box
-   * @param openImage Index of treeCanvas image used to display this node if it is not expanded
    * @param openImage Index of treeCanvas image used to display this node if it is expanded
+   * @param closedImage Index of treeCanvas image used to display this node if it is not expanded
    *
    */
   

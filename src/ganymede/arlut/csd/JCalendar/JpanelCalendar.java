@@ -325,112 +325,119 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     previousDate = selectedDate_calendar.getTime();
     dateIsSet = true;
 
+    setLayout(new FlowLayout());
+
+    // Everything is in the main Panel here
+    JPanel mainPanel = new JPanel(false);
+    mainPanel.setLayout(new BorderLayout());
+
     // we start off with our visible calendar page the same as our
     // selected date calendar
 
     visibleDate_calendar = (GregorianCalendar) selectedDate_calendar.clone();
 
-    setLayout(new BorderLayout());
+    // North Panel
+    monthYearPanel = new JMonthYearPanel(this);
+    mainPanel.add(monthYearPanel, "North");
 
-    // The centerPanel will actually contain everything
 
-    JPanel centerPanel = new JPanel(false);
+    JPanel daysPanel = new JPanel(false);
 
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
-    centerPanel.setLayout(gbl);
+    daysPanel.setLayout(gbl);
     
-    monthYearPanel = new JMonthYearPanel(this);
-
     gbc.gridy = 0;
     gbc.gridx = 0;
     gbc.anchor = GridBagConstraints.CENTER;
     gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbl.setConstraints(monthYearPanel, gbc);
-    centerPanel.add(monthYearPanel);
+    gbc.gridwidth = 8; // seven colums for the days of the week
 
     gbc.ipadx = 5;
-    gbc.insets = new Insets(0,2,0,2);
+    gbc.insets = new Insets(10,2,0,2);
 
-    gbc.gridy = 1;
     JLabel sun = new JLabel(symbolTable.getShortWeekdays()[Calendar.SUNDAY]);
     sun.setFont(todayFont);
     sun.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 0;
     gbc.gridwidth = 1;
     gbl.setConstraints(sun, gbc);
-    centerPanel.add(sun);
+    daysPanel.add(sun);
 
     JLabel mon = new JLabel(symbolTable.getShortWeekdays()[Calendar.MONDAY]);
     mon.setFont(todayFont);
     mon.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 1;
     gbl.setConstraints(mon, gbc);
-    centerPanel.add(mon);
+    daysPanel.add(mon);
 
     JLabel tue = new JLabel(symbolTable.getShortWeekdays()[Calendar.TUESDAY]);
     tue.setFont(todayFont);
     tue.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 2;
     gbl.setConstraints(tue, gbc);
-    centerPanel.add(tue);
+    daysPanel.add(tue);
 
     JLabel wed = new JLabel(symbolTable.getShortWeekdays()[Calendar.WEDNESDAY]);
     wed.setFont(todayFont);
     wed.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 3;
     gbl.setConstraints(wed, gbc);
-    centerPanel.add(wed);
+    daysPanel.add(wed);
 
     JLabel thu = new JLabel(symbolTable.getShortWeekdays()[Calendar.THURSDAY]);
     thu.setFont(todayFont);
     thu.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 4;
     gbl.setConstraints(thu, gbc);
-    centerPanel.add(thu);
+    daysPanel.add(thu);
 
     JLabel fri = new JLabel(symbolTable.getShortWeekdays()[Calendar.FRIDAY]);
     fri.setFont(todayFont);
     fri.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 5;
     gbl.setConstraints(fri, gbc);
-    centerPanel.add(fri);
+    daysPanel.add(fri);
 
     JLabel sat = new JLabel(symbolTable.getShortWeekdays()[Calendar.SATURDAY]);
     sat.setFont(todayFont);
     sat.setHorizontalAlignment(JLabel.CENTER);
     gbc.gridx = 6;
     gbl.setConstraints(sat, gbc);
-    centerPanel.add(sat);
+    daysPanel.add(sat);
 
+    gbc.insets = new Insets(0,2,0,2); 
     gbc.ipadx = 0;
 
     for (int i=0;i<37;i++) 
       {
 	gbc.gridx = i % 7;
-	gbc.gridy = (i / 7) + 2;
+	gbc.gridy = (i / 7) + 1;
 
 	_datebuttonArray[i] = new JdateButton(this, compact);
 	gbl.setConstraints(_datebuttonArray[i], gbc);
-	centerPanel.add(_datebuttonArray[i]);
+	daysPanel.add(_datebuttonArray[i]);
       }
 
-    JPanel testPanel = new JPanel();
-    testPanel.add(centerPanel);
-    add(testPanel,"Center");
+    daysPanel.setBackground(new Color(200,200,255));  // light blue
 
-    // Next, the south ( this part will contain only a label for now)
+    // and we'll wrap the daysPanel in a FlowLayout-managed
+    // centerPanel so that it centers itself in the mainPanel
 
-    //    add(new Label("Please Choose a Date",SwingConstants.CENTER),"South");
+    JPanel centerPanel = new JPanel(false);
+    centerPanel.setLayout(new FlowLayout()); //borderlayout
+    centerPanel.add(daysPanel);
+    centerPanel.setBackground(new Color(200,200,255));  // light blue
+    mainPanel.add(centerPanel, "Center"); 
+
 
     JPanel southPanel = new JPanel();
     southPanel.setLayout(new BorderLayout());
 
     buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
-
-    southPanel.add(buttonPanel,"North");
+    // Adds close button to popup - in upper constructor
+    southPanel.add(buttonPanel,"South"); 
 
     if (showTime)
       {
@@ -450,20 +457,16 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	southPanel.add(timePanel,"Center");
       }
 
-    gbc.gridy++;
-    gbc.gridx = 0;
-    gbc.ipadx = 0;
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbl.setConstraints(southPanel, gbc);
-
-    centerPanel.add(southPanel);
+    mainPanel.add(southPanel,"South"); //# James new
 
     writeDates();
 
     setAllowMonthChange(editable);
+
+    add(mainPanel);
   }
+
+
 
   /**
    * <p>This is the main programmatic entry point for setting the date selected
@@ -887,17 +890,17 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	throw new IllegalArgumentException("_field is null");
       }
 
-    if (_field.equals(ts.l("timeChanged.hour")) )
+    if (_field.equals("hour"))
       {
 	visibleDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
 	selectedDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
       }
-    else if (_field.equals(ts.l("timeChanged.min"))) 
+    else if (_field.equals("min")) 
       {
 	visibleDate_calendar.set(Calendar.MINUTE,_value);
 	selectedDate_calendar.set(Calendar.MINUTE,_value);
       }
-    else if (_field.equals(ts.l("timeChanged.sec"))) 
+    else if (_field.equals("sec")) 
       {
 	visibleDate_calendar.set(Calendar.SECOND,_value);
 	selectedDate_calendar.set(Calendar.SECOND,_value);
@@ -1001,12 +1004,14 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
     addMouseListener(this);
 
     bg = getBackground();
+
   }
 
   public void showYourself()
   {
     setBorderPainted(true);
     super.setForeground(normalFG);
+    super.setBackground(bg); // reset background
     super.setEnabled(true);
     this.active = true;
   }
@@ -1016,6 +1021,7 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
     setText("  ");
     setBorderPainted(false);
     super.setForeground(getBackground());
+    super.setBackground(new Color(200,200,255));  // light blue to match panel background
     super.setEnabled(false);
     this.active = false;
   }
@@ -1116,11 +1122,12 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 	_sec.setEditable(false);
       }
 
+  
     GridLayout g = new GridLayout(1,1);
     g.setHgap(0);
     g.setVgap(0);
-
     setLayout(g);
+  
 
     JPanel p = new JPanel();
 
@@ -1195,15 +1202,15 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 
     if (comp == _hour)
       {
-	container.timeChanged(ts.l("setValuePerformed.hour"),val); // "hour"
+	container.timeChanged("hour",val); // "hour"
       }
     else if (comp == _min)
       {
-	container.timeChanged(ts.l("setValuePerformed.min"),val); // "min"
+	container.timeChanged("min",val); // "min"
       }
-    else 
+    else
       {
-	container.timeChanged(ts.l("setValuePerformed.sec"),val); // "sec"
+	container.timeChanged("sec",val); // "sec"
       }
 
     return true;
@@ -1267,8 +1274,8 @@ class JYearChooser extends JPanel implements ActionListener {
     buttonP.add(down);
     
     setLayout(new BorderLayout());
-    add("Center", year_field);
-    add("East", buttonP);
+    add(year_field,"West");
+    add(buttonP,"Center");
   }
 
   public void actionPerformed(ActionEvent e)
@@ -1326,6 +1333,13 @@ class JYearChooser extends JPanel implements ActionListener {
 class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
 
   static final boolean debug = false;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede system.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JCalendar.JMonthYearPanel");
 
   // ---
 
@@ -1464,11 +1478,10 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
     setLayout(new BorderLayout());
 
     _prevdate = new JButton("<<");
-    _prevdate.setToolTipText("Previous Month");
-    _nextdate = new JButton(">>");
-    _nextdate.setToolTipText("Next Month");
-
+    _prevdate.setToolTipText(ts.l("initializeEditable.prev_tooltip")); // "Previous Month"
     _prevdate.addActionListener(this);
+    _nextdate = new JButton(">>");
+    _nextdate.setToolTipText(ts.l("initializeEditable.next_tooltip")); // "Next Month"
     _nextdate.addActionListener(this);
 
     month = new JComboBox();
@@ -1485,9 +1498,9 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
 	    // empty month string at the end of our array, which we'll
 	    // need to skip.
 
+            // NOTICE: The month buttons actions do not support this 13th month, add that in
 	    continue;
 	  }
-
 	month.addItem(JpanelCalendar.month_names[i]);
       }
 
@@ -1495,15 +1508,14 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
     month.addItemListener(this);
 
     year = new JYearChooser(currentYear, this);
-
+       
     JPanel middlePanel = new JPanel(new BorderLayout());
-    middlePanel.add("Center", month);
-    middlePanel.add("East", year);
-
     add(_prevdate, "West");
-    add(_nextdate, "East");
+    middlePanel.add("Center", month);
+    middlePanel.add("East", _nextdate);
     add(middlePanel, "Center");
-
+    add(year, "East");
+   
     validate();
   }
 

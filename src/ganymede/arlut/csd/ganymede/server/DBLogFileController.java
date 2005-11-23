@@ -676,7 +676,7 @@ public class DBLogFileController implements DBLogController {
    *
    * @param line The character array containing the Invid's to be extracted
    * @param startIndex Where to start scanning the Invid's from in the line
-   * @param result The vector to place the results in, or null if this
+   * @return  The vector to place the results in, or null if this
    * method should create its own result vector.
    *
    */
@@ -736,7 +736,7 @@ public class DBLogFileController implements DBLogController {
    *
    * @param line The character array containing the addresses's to be extracted
    * @param startIndex Where to start scanning the addresses's from in the line
-   * @param result The vector to place the results in, or null if this
+   * @return The vector to place the results in, or null if this
    * method should create its own result vector.
    *
    */

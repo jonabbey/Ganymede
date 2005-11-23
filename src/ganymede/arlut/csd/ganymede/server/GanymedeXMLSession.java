@@ -100,8 +100,8 @@ import arlut.csd.ganymede.rmi.XMLSession;
 /**
  * This class handles all XML loading operations for the Ganymede
  * server.  GanymedeXMLSession's are created by the {@link
- * arlut.csd.ganymede.server.GanymedeServer GanymedeServer}'s {@link
- * arlut.csd.ganymede.server.GanymedeServer#xmlLogin(arlut.csd.ganymede.Client)
+ * arlut.csd.ganymede.rmi.Server Server}'s {@link
+ * arlut.csd.ganymede.rmi.Server#xmlLogin(java.lang.String username, java.lang.String password)
  * xmlLogin()} method.  A GanymedeXMLSession is created on top of a
  * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} and
  * interacts with the database through that session.  A
@@ -1991,7 +1991,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * from the server, they are printed and processData aborts.  Otherwise,
    * success!
    *
-   * @returns true if the &lt;ganydata&gt; element was successfully
+   * @return true if the &lt;ganydata&gt; element was successfully
    * processed, or false if a fatal error in the XML stream was
    * encountered during processing */
 
@@ -2657,7 +2657,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * This method actually does the work of integrating our data into the
    * DBStore.
    *
-   * @returns true if the data was successfully integrated to the server and
+   * @return true if the data was successfully integrated to the server and
    * the transaction committed successfully, false if the transaction
    * had problems and was abandoned.
    */

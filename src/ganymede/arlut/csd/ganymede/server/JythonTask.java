@@ -83,9 +83,9 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * The "real" task, written in Jython, is ideally a subclass of
  * {@link arlut.csd.ganymede.server.GanymedeBuilderTask GanymedeBuilderTask}
  * (though it can simply be any class that implements the
- * {@link java.lang.Runnable Runnable}interface). This class will bootstrap a
+ * {@link java.lang.Runnable Runnable} interface). This class will bootstrap a
  * new Jython interpreter, load the class defined at the specified URI, and then
- * execute that task's {@link java.lang.Runnable.run run}method.
+ * execute that task's {@link java.lang.Runnable#run()} method.
  * </p>
  * <p>
  * It's important to mention that <b>no state is stored in-between runs of a

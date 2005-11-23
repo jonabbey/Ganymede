@@ -88,7 +88,7 @@ public class JfloatField extends JentryField {
    * Base constructor for JfloatField
    * 
    * @param columns number of columns in the JfloatField
-   * @param is_editable true if this JfloatField is editable
+   * @param iseditable true if this JfloatField is editable
    * @param islimited true if there is a restriction on the range of values
    * @param minsize the minimum limit on the range of values
    * @param maxsize the maximum limit on the range of values
@@ -139,7 +139,7 @@ public class JfloatField extends JentryField {
    * that knows about its parent and can invoke a callback method.
    *  
    * @param columns number of columns in the JfloatField
-   * @param is_editable true if this JfloatField is editable
+   * @param iseditable true if this JfloatField is editable
    * @param islimited true if there is a restriction on the range of values
    * @param minsize the minimum limit on the range of values
    * @param maxsize the maximum limit on the range of values
@@ -150,12 +150,12 @@ public class JfloatField extends JentryField {
    */ 
   public JfloatField(int columns,
 		     boolean iseditable,
-		     boolean limited,
+		     boolean islimited,
 		     double minsize,
 		     double maxsize,
 		     JsetValueCallback parent)
   {
-    this(columns,iseditable,limited,minsize,maxsize);
+    this(columns,iseditable,islimited,minsize,maxsize);
     
     setCallback(parent);
   }
@@ -336,7 +336,7 @@ public class JfloatField extends JentryField {
    * sendCallback is called when focus is lost, or when we are otherwise
    * triggered.
    *
-   * @returns -1 on change rejected, 0 on no change required, 1 on change approved
+   * @return -1 on change rejected, 0 on no change required, 1 on change approved
    */
 
   public int sendCallback()

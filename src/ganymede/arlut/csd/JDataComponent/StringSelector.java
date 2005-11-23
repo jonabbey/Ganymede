@@ -459,13 +459,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * StringSelector will auto-size the columns
    */
 
-  public void setCellWidth(int rowWidth)
+  public void setCellWidth(int width)
   {
-    in.setCellWidth(rowWidth);
+    in.setCellWidth(width);
 
     if (out != null)
       {
-	out.setCellWidth(rowWidth);
+	out.setCellWidth(width);
       }
 
     invalidate();

@@ -4948,7 +4948,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * they will not be kept in plaintext on disk, unless isPlainText()
    * returns true.</p>
    *
-   * @see arlut.csd.ganymede.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public boolean isSSHAHashed()
@@ -4966,7 +4966,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ganymede.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public ReturnVal setSSHAHashed(boolean b)

@@ -92,7 +92,7 @@ import arlut.csd.ganymede.rmi.adminSession;
 
 /**
  * <p>The GanymedeServer object is created by the
- * {@link arlut.csd.ganymede.Ganymede Ganymede class} at start-up time
+ * {@link arlut.csd.ganymede.server.Ganymede Ganymede class} at start-up time
  * and published to the net for client logins via RMI.  As such,
  * the GanymedeServer object is the first Ganymede code that a client
  * will directly interact with.</p>
@@ -699,7 +699,7 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * This method is called by the {@link arlut.csd.ganymede.timeOutTask timeOutTask}
+   * This method is called by the {@link arlut.csd.ganymede.server.timeOutTask timeOutTask}
    * scheduled task, and forces an idle time check on any users logged in.
    */
 

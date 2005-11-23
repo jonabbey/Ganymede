@@ -130,8 +130,8 @@ public class BaseListTransport implements java.io.Serializable {
   /**
    * <p>This method is provided so that server-side code can add chunks of data for serialization.
    * In the BaseListTransport case, the
-   * {@link arlut.csd.ganymede.server.DBObjectBase#addBaseToTransport(arlut.csd.ganymede.common.BaseListTransport,
-   * arlut.csd.ganymede.server.GanymedeSession) method is responsible for calling addChunk to build
+   * {@link arlut.csd.ganymede.server.DBObjectBase#addBaseToTransport(arlut.csd.ganymede.common.BaseListTransport,arlut.csd.ganymede.server.GanymedeSession)} 
+   * method is responsible for calling addChunk to build
    * 'this' up for serialization.</p>
    */
 

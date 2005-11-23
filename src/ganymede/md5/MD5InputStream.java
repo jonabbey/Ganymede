@@ -96,7 +96,7 @@ public class MD5InputStream extends FilterInputStream {
   /**
    * Reads into an array of bytes.
    *
-   * @see java.lang.FilterInputStream
+   * @see java.io.FilterInputStream
    */
   public int read (byte bytes[], int offset, int length) throws IOException {
     int	r;
@@ -112,7 +112,7 @@ public class MD5InputStream extends FilterInputStream {
   /**
    * Returns array of bytes representing hash of the stream as
    * finalized for the current state. 
-   * @see MD5.Final()
+   * @see md5.MD5#Final()
    */
 
   public byte [] hash () {

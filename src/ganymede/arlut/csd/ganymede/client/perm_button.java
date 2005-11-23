@@ -96,7 +96,6 @@ class perm_button extends JButton implements ActionListener {
    *
    * @param field What field are we going to edit permissions for?
    * @param enabled If true, will allow editing of the permission matrix
-   * @param basehash Map of Bases to field vectors
    * @param justShowUser Should be false when editing the self-permissions object
    *
    */

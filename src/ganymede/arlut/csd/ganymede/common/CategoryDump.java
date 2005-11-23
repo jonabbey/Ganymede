@@ -347,7 +347,7 @@ public class CategoryDump implements Category, CategoryNode {
    * This method can be used to move a Category from another Category to this Category,
    * or to move a Category around within this Category.
    *
-   * @param node Node to place under this category
+   * @param catPath category path
    * @param prevNodeName the name of the node that the new node is to be added after
    *
    */

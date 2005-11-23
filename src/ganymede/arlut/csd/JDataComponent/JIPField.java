@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2005
    The University of Texas at Austin
 
    Contact information
@@ -95,8 +95,8 @@ public class JIPField extends JentryField {
  /**
    * Base constructor for JIPField
    * 
-   * @param columns number of colums in the JIPField
    * @param is_editable true if this JIPField is editable
+   * @param allowV6 true is IPv6 format is allowed
    */
 
   public JIPField(boolean is_editable,
@@ -127,10 +127,9 @@ public class JIPField extends JentryField {
     * Constructor that allows for the creation of a JIPField
     * that knows about its parent.
     *
-    * @param cols number of colums in the JIPField
-    * @param parent the container within which this JIPField is contained
-    *        (This container will implement an interface that will utilize the
-    *         data contained within this JIPField.)
+    * @param callback An interface for the container within which this
+    * JIPField is typically contained.  The JIPField will call this
+    * interface to pass change notifications.
     *
     */
 
@@ -230,7 +229,7 @@ public class JIPField extends JentryField {
    * sendCallback is called when focus is lost, or when we are otherwise
    * triggered.
    *
-   * @returns -1 on change rejected, 0 on no change required, 1 on change approved
+   * @return -1 on change rejected, 0 on no change required, 1 on change approved
    */
 
   public int sendCallback()

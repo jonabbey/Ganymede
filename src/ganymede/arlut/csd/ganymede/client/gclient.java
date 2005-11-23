@@ -167,7 +167,7 @@ import foxtrot.Worker;
 
 public class gclient extends JFrame implements treeCallback, ActionListener, JsetValueCallback {
 
-  public static boolean debug = false;
+  public static boolean debug = false;  
 
   /**
    * TranslationService object for handling string localization in the
@@ -3483,11 +3483,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /** 
-   * Creates a new object on the server and opens a new
+   * Clones an object based on origInvid on the server and opens a new
    * client {@link arlut.csd.ganymede.client.framePanel framePanel}
    * window to allow the user to edit the new object.
    *
-   * @param type Type of object to be created
+   * @param origInvid ID of object to be cloned
    */
 
   public void cloneObject(Invid origInvid)
@@ -5435,11 +5435,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
-   * Called when an item in the tree is unselected
+   * Called when an item in the tree is selected
    *
    * @param node The node selected in the tree.
-   * @param someNodeSelected If true, this node is being unselected by the selection
-   *                         of another node.
    *
    * @see arlut.csd.JTree.treeCanvas
    */
@@ -5458,6 +5456,15 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
   }
 
+  /**
+   * Called when an item in the tree is unselected
+   *
+   * @param node The node selected in the tree.
+   * @param otherNode If true, this node is being unselected by the selection
+   *                         of another node.
+   *
+   * @see arlut.csd.JTree.treeCanvas
+   */
   public void treeNodeUnSelected(treeNode node, boolean otherNode)
   {
   }

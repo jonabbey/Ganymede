@@ -75,7 +75,7 @@ public class MD5OutputStream extends FilterOutputStream {
     /**
      * Writes a byte. 
      *
-     * @see java.lang.FilterOutputStream
+     * @see java.io.FilterOutputStream
      */
 
     public void write (int b) throws IOException {
@@ -86,7 +86,7 @@ public class MD5OutputStream extends FilterOutputStream {
     /**
      * Writes a sub array of bytes.
      *
-     * @see java.lang.FilterOutputStream
+     * @see java.io.FilterOutputStream
      */
 
     public void write (byte b[], int off, int len) throws IOException {
@@ -97,7 +97,7 @@ public class MD5OutputStream extends FilterOutputStream {
     /**
      * Returns array of bytes representing hash of the stream as finalized
      * for the current state.
-     * @see MD5.Final()
+     * @see md5.MD5#Final()
      */
 
     public byte[] hash () {

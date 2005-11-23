@@ -81,7 +81,7 @@ import arlut.csd.ganymede.common.ReturnVal;
  * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class.  The Session
  * interface is provided to the client by the
  * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}'s 
- * {@link arlut.csd.ganymede.server.GanymedeServer#login(arlut.csd.ganymede.Client) login()}
+ * {@link arlut.csd.ganymede.rmi.Server#login(java.lang.String username, java.lang.String password) login()}
  * method, and provides the client with an RMI reference that can be used
  * to communicate with the Ganymede server.</P>
  *

@@ -331,6 +331,7 @@ refresh the jar files.
              author="true"
              version="true"
 	     verbose="false"
+	     private="true"
 	     additionalparam="-breakiterator"
              use="true">
              <classpath refid="classpath"/>

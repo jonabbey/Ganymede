@@ -130,7 +130,7 @@ public interface Category extends Remote {
    * is not null, or at the beginning of the category if it is.</p>
    *
    * @param node Node to place under this category
-   * @param prevNodeName the name of the node that the new node is to be added before,
+   * @param nextNodeName the name of the node that the new node is to be added before,
    * must not be path-qualified
    */
 

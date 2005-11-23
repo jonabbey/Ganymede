@@ -968,7 +968,7 @@ public class StringDBField extends DBField implements string_field {
    * plugin classes to deny any given value that the plugin might not
    * care for, for whatever reason.  Otherwise, the go/no-go decision
    * will be made based on the checks performed by {@link
-   * arlut.csd.ganymede.DBField#verifyBasicConstraints(java.lang.Object)}.
+   * arlut.csd.ganymede.server.DBField#verifyBasicConstraints(java.lang.Object)}.
    */
 
   public ReturnVal verifyNewValue(Object o)

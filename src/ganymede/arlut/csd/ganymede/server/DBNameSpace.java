@@ -84,7 +84,7 @@ import arlut.csd.ganymede.rmi.NameSpace;
  * invidivual objects, and through the atomic acquisition of values
  * for unique value constrained DBFields.  Once a transaction allocates
  * a unique value using either the {@link arlut.csd.ganymede.server.DBNameSpace#mark(arlut.csd.ganymede.server.DBEditSet,java.lang.Object,arlut.csd.ganymede.server.DBField) mark()},
- * {@link arlut.csd.ganymede.server.DBNameSpace#unmark(arlut.csd.ganymede.server.DBEditSet,java.lang.Object) unmark()},
+ * {@link arlut.csd.ganymede.server.DBNameSpace#unmark(arlut.csd.ganymede.server.DBEditSet,java.lang.Object,arlut.csd.ganymede.server.DBField oldField) unmark()},
  * or {@link arlut.csd.ganymede.server.DBNameSpace#reserve(arlut.csd.ganymede.server.DBEditSet,java.lang.Object) reserve()}
  * methods, no other transaction can allocate that value, until the first transaction
  * calls the {@link arlut.csd.ganymede.server.DBNameSpace#commit(arlut.csd.ganymede.server.DBEditSet) commit()},
@@ -162,7 +162,7 @@ public final class DBNameSpace implements NameSpace {
   /**
    * <p>Hashtable mapping {@link arlut.csd.ganymede.server.DBEditSet
    * DBEditSet's} currently active modifying values in this namespace
-   * to {@link arlut.csd.ganymede.DBNameSpaceTransaction
+   * to {@link arlut.csd.ganymede.server.DBNameSpaceTransaction
    * DBNameSpaceTransaction} objects.</p>
    */
 
@@ -315,7 +315,7 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * <p>This method returns the {@link arlut.csd.ganymede.DBNameSpaceTransaction DBNameSpaceTransaction}
+   * <p>This method returns the {@link arlut.csd.ganymede.server.DBNameSpaceTransaction DBNameSpaceTransaction}
    * associated with the given transaction, creating one if one was not previously
    * so associated.</p>
    *
@@ -677,7 +677,7 @@ public final class DBNameSpace implements NameSpace {
    * to do direct hash lookups without getting confused by any shuffling
    * being performed by a current thread.</p>
    *
-   * @param editset The transaction claiming the unique value <value>
+   * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
    * @param field The DBField which will take the unique value.  Used to provide an index.
    *  
@@ -834,7 +834,7 @@ public final class DBNameSpace implements NameSpace {
    * reserve() will return true, even though a subsequent mark()
    * attempt would fail.</p>
    *
-   * @param editset The transaction claiming the unique value <value>
+   * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
    *
    * @return true if the value could be reserved in the given editSet.  
@@ -860,7 +860,7 @@ public final class DBNameSpace implements NameSpace {
    * reserve() will return true, even though a subsequent mark()
    * attempt would fail.</p>
    *
-   * @param editset The transaction claiming the unique value <value>
+   * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
    * @param onlyUnused If true, reserve() will return false if the value is already
    * attached to a field connected to this namespace, even if in an object attached

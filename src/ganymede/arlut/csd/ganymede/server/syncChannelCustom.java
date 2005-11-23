@@ -72,7 +72,7 @@ import arlut.csd.Util.TranslationService;
  * <p>This class is a {@link arlut.csd.ganymede.server.DBEditObject}
  * subclass for handling fields in the Ganymede server's sync channel
  * object type.  It contains special logic for handling the set up and
- * configuration of {@link arlut.csd.ganymede.server.SyncRunners} in
+ * configuration of {@link arlut.csd.ganymede.server.SyncRunner} in
  * the Ganymede server.</p>
  */
 

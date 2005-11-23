@@ -117,7 +117,7 @@ public class rowTable extends baseTable implements ActionListener {
    * @param vHeadLineColor color of vertical lines in the column headers, if any
    * @param vRowLineColor  color of vertical lines in the table body, if any
    * @param hHeadLineColor color of horizontal lines in the column headers, if any
-   * @param vRowLineColor  color of vertical lines in the table body, if any
+   * @param hRowLineColor  color of vertical lines in the table body, if any
    * @param headers array of column header titles, must be same size as colWidths
    * @param horizLines  true if horizontal lines should be shown between rows in report table
    * @param vertLines   true if vertical lines should be shown between columns in report table
@@ -126,7 +126,7 @@ public class rowTable extends baseTable implements ActionListener {
    * 			(only applies if vertFill and horizLines are true)
    * @param callback    reference to an object that implements the rowSelectCallback interface
    * @param menu  reference to a popup menu to be associated with rows in this table
-   * @parma allowDeleteColumn if true, a 'Delete This Column' menu item will be added
+   * @param allowDeleteColumn if true, a 'Delete This Column' menu item will be added
    * to the per-column popup menu
    *
    */
