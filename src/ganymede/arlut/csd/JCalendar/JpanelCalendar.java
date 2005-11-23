@@ -423,7 +423,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     /*    daysPanel.setBackground(new Color(200,200,255));  // light blue*/
 
-    daysPanel.setBorder(new LineBorder(UIManager.getColor("TitledBorder.titleColor")));
+    daysPanel.setBorder(UIManager.getBorder("TitledBorder.border"));
 
     // and we'll wrap the daysPanel in a FlowLayout-managed
     // centerPanel so that it centers itself in the mainPanel
