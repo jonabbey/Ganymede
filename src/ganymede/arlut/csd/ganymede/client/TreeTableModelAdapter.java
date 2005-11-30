@@ -60,12 +60,10 @@ public class TreeTableModelAdapter extends AbstractTableModel
     tree.addTreeExpansionListener(new TreeExpansionListener() {
 	// Don't use fireTableRowsInserted() here; the selection model
 	// would get updated twice. 
-	public void treeExpanded(TreeExpansionEvent event) {
-	  System.err.println("treeExpanded(): " + event);
+	public void treeExpanded(TreeExpansionEvent event) {  
 	  fireTableDataChanged(); 
 	}
 	public void treeCollapsed(TreeExpansionEvent event) {  
-	  System.err.println("treeCollapsed(): " + event);
 	  fireTableDataChanged(); 
 	}
       });
@@ -76,23 +74,19 @@ public class TreeTableModelAdapter extends AbstractTableModel
     // the event before us.
     treeTableModel.addTreeModelListener(new TreeModelListener() {
 	public void treeNodesChanged(TreeModelEvent e) {
-	  System.err.println("treeNodesChanged(): " + e);
 	  delayedFireTableDataChanged();
 	  //fireTableDataChanged();
 	}
 
 	public void treeNodesInserted(TreeModelEvent e) {
-	  System.err.println("treeNodesInserted(): " + e);
 	  delayedFireTableDataChanged();
 	}
 
 	public void treeNodesRemoved(TreeModelEvent e) {
-	  System.err.println("treeNodesRemoved(): " + e);
 	  delayedFireTableDataChanged();
 	}
 
 	public void treeStructureChanged(TreeModelEvent e) {
-	  System.err.println("treeStructureChanged(): " + e);
 	  delayedFireTableDataChanged();
 	}
       });
@@ -123,10 +117,7 @@ public class TreeTableModelAdapter extends AbstractTableModel
   protected Object nodeForRow(int row)
   {
     TreePath treePath = tree.getPathForRow(row);
-    Object result = treePath.getLastPathComponent();
-
-    System.err.println("TreeTableModelAdapter.nodeForRow(" + row + "): returning " + result);
-    return result;
+    return treePath.getLastPathComponent();         
   }
 
   public Object getValueAt(int row, int column)

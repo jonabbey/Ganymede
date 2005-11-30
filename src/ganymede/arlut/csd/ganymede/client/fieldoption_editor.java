@@ -73,12 +73,6 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.*;
 import arlut.csd.ganymede.rmi.*;
 
-import org.jdesktop.swing.JXTreeTable;
-import org.jdesktop.swing.treetable.AbstractTreeTableModel;
-import org.jdesktop.swing.treetable.DefaultTreeTableModel;
-import org.jdesktop.swing.treetable.TreeTableCellEditor;
-import org.jdesktop.swing.treetable.TreeTableModel;
-
 /**
  * This class displays the client "widget" that allows a user to edit the
  * field options for a particular builder task. It's modeled loosely after
@@ -127,7 +121,8 @@ class fieldoption_editor extends JFrame
   JButton ExpandButton = new JButton (ts.l("global.expandButton")); // "Expand All"
   JButton CollapseButton = new JButton(ts.l("global.collapseButton")); // "Collapse All"
   JScrollPane edit_pane;
-  JXTreeTable treeTable;
+  JTreeTable treeTable;
+  JTree tree;
   JPanel 
     Base_Panel,
     Bordered_Panel,
@@ -210,23 +205,24 @@ class fieldoption_editor extends JFrame
       }
     
     TreeTableModel model = new FieldOptionModel(rowRootNode, this);
-    treeTable = new JXTreeTable(model);
+    treeTable = new JTreeTable(model);
 
-    treeTable.putClientProperty("JTree.lineStyle", "Angled");
-
-    treeTable.setCellRenderer(new FieldOptionTreeRenderer(this));
+    tree = treeTable.getTree();
+    tree.setCellRenderer(new FieldOptionTreeRenderer(this));
 
     /* Set the correct initial states of all the object base nodes in the tree */
     fixObjectBaseNodes(rowRootNode, (FieldOptionModel)model);
 
-    treeTable.setDefaultRenderer(Integer.class, new DelegateRenderer(treeTable.getModel(), editable, treeTable));
-    treeTable.setDefaultEditor(Integer.class, new DelegateEditor(treeTable.getModel(), editable, treeTable));
+    treeTable.setDefaultRenderer(Integer.class,
+				 new DelegateRenderer((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
+    treeTable.setDefaultEditor(Integer.class,
+			       new DelegateEditor((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
 
     /* Expand only nodes with non-default values */
     collapseAllNodes();
     smartExpandNodes();
 
-    //    treeBG = tree.getBackground();
+    treeBG = tree.getBackground();
     
     edit_pane = new JScrollPane(treeTable);
     edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -443,7 +439,13 @@ class fieldoption_editor extends JFrame
    */
   private void expandAllNodes()
   {
-    treeTable.expandAll();
+    for (Enumeration e = (rowRootNode.children()); e.hasMoreElements();)
+      {
+	DefaultMutableTreeNode node = (DefaultMutableTreeNode)e.nextElement();
+	FieldOptionRow myRow = (FieldOptionRow)node.getUserObject();
+	TreePath path = new TreePath(node.getPath());
+	tree.expandPath(path);
+      }
   }
 
 
@@ -452,7 +454,12 @@ class fieldoption_editor extends JFrame
    */
   private void collapseAllNodes()
   {
-    treeTable.collapseAll();
+    for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
+      {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
+        TreePath path = new TreePath(node.getPath());
+        tree.collapsePath(path);
+      } 
   }
 
 
@@ -470,7 +477,7 @@ class fieldoption_editor extends JFrame
         if (row.isBase() && (row.getOptionValue() != 0))
 	  {
 	    TreePath path = new TreePath(node.getPath());
-	    treeTable.expandPath(path);
+	    tree.expandPath(path);
 	  }
       }
   }
@@ -685,7 +692,7 @@ class FieldOptionRow {
  * field options editor dialog.
  */
 
-class FieldOptionModel extends org.jdesktop.swing.treetable.AbstractTreeTableModel implements TreeTableModel {
+class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel {
 
   /**
    * TranslationService object for handling string localization in
@@ -759,7 +766,7 @@ class FieldOptionModel extends org.jdesktop.swing.treetable.AbstractTreeTableMod
   
   public boolean isCellEditable(Object node, int col) 
   {
-    return foe.editable && col != 0;
+    return true;
   }
   
   public void setValueAt(Object value, Object node, int col) 
@@ -807,12 +814,12 @@ class FieldOptionModel extends org.jdesktop.swing.treetable.AbstractTreeTableMod
 	    if (newVal == 1)
 	      {
 		TreePath path = new TreePath(((DefaultMutableTreeNode)node).getPath());
-		foe.treeTable.expandPath(path);
+		foe.tree.expandPath(path);
 	      }
 	    else
 	      {
 		TreePath path = new TreePath(((DefaultMutableTreeNode)node).getPath());
-		foe.treeTable.collapsePath(path);
+		foe.tree.collapsePath(path);
 	      }
 	  }
         else
@@ -903,12 +910,12 @@ class DelegateRenderer implements TableCellRenderer
 
   /* Hook for the backing store of the JTree. This gives us a way to access
    * our FieldOptionRow objects attached to various nodes in the tree. */
-  TableModel model;
+  TreeTableModelAdapter model;
 
   /* Reference to the main treetable */
-  JXTreeTable treetable;
+  JTreeTable treetable;
 
-  public DelegateRenderer(TableModel model, boolean editable, JXTreeTable treetable)
+  public DelegateRenderer(TreeTableModelAdapter model, boolean editable, JTreeTable treetable)
   {
     this.editable = editable;
     this.model = model;
@@ -924,35 +931,17 @@ class DelegateRenderer implements TableCellRenderer
                                                  int row,
                                                  int column)
   {
-    TreePath tp = treetable.getPathForLocation(0, row * treetable.getRowHeight());
-
-    if (fieldoption_editor.debug)
-      {
-	System.err.println("getTableCellRendererComponent: tree ( " + column + ", " + row + ") path = " + tp);
-      }
-
-    DefaultMutableTreeNode node = (DefaultMutableTreeNode) tp.getLastPathComponent();
-
+    DefaultMutableTreeNode node = (DefaultMutableTreeNode) (model.nodeForRow(row));
     FieldOptionRow qrow = (FieldOptionRow) (node.getUserObject());
     int opvalue = qrow.getOptionValue();
 
     /* ObjectBases are rendered as checkboxes */
     if (qrow.isBase())
       {
-	if (fieldoption_editor.debug)
-	  {
-	    System.err.println("Creating non-editable CheckBoxRenderer for (" + row + ", " + column + "): item = " + qrow + ", opvalue = " + opvalue);
-	  }
-
 	return new CheckBoxRenderer(editable, this.treetable, opvalue);
       }
     else    /* Fields are rendered as combo boxes */
       {
-	if (fieldoption_editor.debug)
-	  {
-	    System.err.println("Creating non-editable ComboRenderer for (" + row + ", " + column + "): item = " + qrow + ", opvalue = " + opvalue);
-	  }
-
 	/* If we're in edit mode, show a combo box */
 	if (this.editable)
 	  {
@@ -980,15 +969,15 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
 
   /* Hook for the backing store of the JTree. This gives us a way to access
    * our FieldOptionRow objects attached to various nodes in the tree. */
-  TableModel model;
+  TreeTableModelAdapter model;
 
-  /* The component that actually represents the edited cell */
+  /* The component that's actually represents the edited cell */
   Component delegate;
 
-  /* Quick-access reference to our main JXTreeTable */
-  JXTreeTable treetable;
+  /* Quick-access reference to our main JTreeTable */
+  JTreeTable treetable;
 
-  public DelegateEditor(TableModel model, boolean editable, JXTreeTable treetable)
+  public DelegateEditor(TreeTableModelAdapter model, boolean editable, JTreeTable treetable)
   {
     this.editable = editable;
     this.model = model;
@@ -1002,22 +991,17 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
   public Object getCellEditorValue()
   {
     if (this.delegate instanceof JCheckBox)
-      {
-	boolean selected = ((JCheckBox)this.delegate).isSelected();
-	
-	if (selected)
-	  {
-	    return fieldoption_editor.labels[1]; // "When Changed"
-	  }
-	else
-	  {
-	    return fieldoption_editor.labels[0]; // "Never"
-	  }
-      }
+    {
+      boolean selected = ((JCheckBox)this.delegate).isSelected();
+      if (selected)
+        return fieldoption_editor.labels[1]; // "When Changed"
+      else
+        return fieldoption_editor.labels[0]; // "Never"
+    }
     else
-      {
-	return ((JComboBox)this.delegate).getSelectedItem();
-      }
+    {
+      return ((JComboBox)this.delegate).getSelectedItem();
+    }
   }
 
 
@@ -1027,44 +1011,24 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
                                                int row,
                                                int column)
   {
-    TreePath tp = treetable.getPathForLocation(0, row * treetable.getRowHeight());
-
-    if (fieldoption_editor.debug)
-      {
-	System.err.println("getTableCellEditorComponent: tree ( " + column + ", " + row + ") path = " + tp);
-      }
-
-    DefaultMutableTreeNode node = (DefaultMutableTreeNode) tp.getLastPathComponent();
-
+    DefaultMutableTreeNode node = (DefaultMutableTreeNode) (model.nodeForRow(row));
     FieldOptionRow qrow = (FieldOptionRow) (node.getUserObject());
     int opvalue = qrow.getOptionValue();
-    
+
     /* Object bases are rendered as checkboxes */
     if (qrow.isBase())
-      {
-	if (fieldoption_editor.debug)
-	  {
-	    System.err.println("Creating editable CheckBoxRenderer for (" + row + ", " + column + "): item = " + qrow + ", opvalue = " + opvalue);
-	  }
-
-	CheckBoxRenderer cb = new CheckBoxRenderer(editable, this.treetable, opvalue);
-	this.delegate = cb;
-	return cb;
-      }
+    {
+      CheckBoxRenderer cb = new CheckBoxRenderer(editable, this.treetable, opvalue);
+      this.delegate = cb;
+      return cb;
+    }
     /* Fields are rendered as combo boxes */
     else
-      {
-	if (fieldoption_editor.debug)
-	  {
-	    System.err.println("Creating editable ComboRenderer for (" + row + ", " + column + "): item = " + qrow + ", opvalue = " + opvalue);
-
-	    System.err.println("Creating ComboRenderer for " + qrow + ", opvalue = " + opvalue);
-	  }
-
-	ComboRenderer cr = new ComboRenderer(editable, this.treetable, opvalue);
-	this.delegate = cr;
-	return cr;
-      }
+    {
+      ComboRenderer cr = new ComboRenderer(editable, this.treetable, opvalue);
+      this.delegate = cr;
+      return cr;
+    }
   }
 }
 
@@ -1075,17 +1039,16 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
  */
 class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionListener
 {
-  /* Reference to the main JXTreeTable */
-  JXTreeTable treetable;
+  /* Reference to the main JTreeTable */
+  JTreeTable treetable;
 
-  public CheckBoxRenderer(boolean editable, JXTreeTable treetable, int onOrOff)
+  public CheckBoxRenderer(boolean editable, JTreeTable treetable, int onOrOff)
   {
     this.treetable = treetable;
 
     setEnabled(editable);
 
     /* Set the inital state of the checkbox */
-
     if (onOrOff == 0)
       {
 	setSelected(false);
@@ -1095,7 +1058,7 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
 	setSelected(true);
       }
 
-    this.setBackground(Color.white);
+    this.setBackground(fieldoption_editor.treeBG);
     this.addActionListener(this);
   }
 
@@ -1142,13 +1105,13 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
  */
 class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
 {
-  /* Reference to the main JXTreeTable */
-  JXTreeTable treetable;
+  /* Reference to the main JTreeTable */
+  JTable treetable;
 
   /* Sort of a hack; used to hold onto the previous selection index */
   int selindex;
   
-  public ComboRenderer(boolean editable, JXTreeTable treetable, int selectionIndex)
+  public ComboRenderer(boolean editable, JTreeTable treetable, int selectionIndex)
   {
     /* Pass in the list of Strings to display in the combo box */
     super(fieldoption_editor.labels);
@@ -1158,7 +1121,7 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
     setEnabled(editable);
     setEditable(false);
     addItemListener(this);
-    setBackground(Color.white);
+    setBackground(fieldoption_editor.treeBG);
     setSelectedIndex(selectionIndex);
   }
   
