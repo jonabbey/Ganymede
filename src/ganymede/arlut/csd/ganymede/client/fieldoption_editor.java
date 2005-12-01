@@ -996,17 +996,20 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
   public Object getCellEditorValue()
   {
     if (this.delegate instanceof JCheckBox)
-    {
-      boolean selected = ((JCheckBox)this.delegate).isSelected();
-      if (selected)
-        return fieldoption_editor.labels[1]; // "When Changed"
-      else
-        return fieldoption_editor.labels[0]; // "Never"
-    }
+      {
+	if (((JCheckBox)this.delegate).isSelected())
+	  {
+	    return fieldoption_editor.labels[1]; // "When Changed"
+	  }
+	else
+	  {
+	    return fieldoption_editor.labels[0]; // "Never"
+	  }
+      }
     else
-    {
-      return ((JComboBox)this.delegate).getSelectedItem();
-    }
+      {
+	return ((JComboBox)this.delegate).getSelectedItem();
+      }
   }
 
 
@@ -1022,18 +1025,18 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
 
     /* Object bases are rendered as checkboxes */
     if (qrow.isBase())
-    {
-      CheckBoxRenderer cb = new CheckBoxRenderer(editable, this.treetable, opvalue);
-      this.delegate = cb;
-      return cb;
-    }
+      {
+	CheckBoxRenderer cb = new CheckBoxRenderer(editable, this.treetable, opvalue);
+	this.delegate = cb;
+	return cb;
+      }
     /* Fields are rendered as combo boxes */
     else
-    {
-      ComboRenderer cr = new ComboRenderer(editable, this.treetable, opvalue);
-      this.delegate = cr;
-      return cr;
-    }
+      {
+	ComboRenderer cr = new ComboRenderer(editable, this.treetable, opvalue);
+	this.delegate = cr;
+	return cr;
+      }
   }
 }
 
@@ -1146,17 +1149,17 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
   public void itemStateChanged(ItemEvent e)
   {
     if (e.getStateChange() == ItemEvent.SELECTED)
-    {
-      /* Tell the tree table to call "setValueAt", since we've been edited.
-       * Now, we'll only do this if the new item we've selected is different
-       * from the originally selected item. Swing fires this even either way,
-       * but we need to be more discriminating. */
-      if (this.selindex != getSelectedIndex())
       {
-        this.treetable.editingStopped(new ChangeEvent(this));
-        this.selindex = getSelectedIndex();
+	/* Tell the tree table to call "setValueAt", since we've been edited.
+	 * Now, we'll only do this if the new item we've selected is different
+	 * from the originally selected item. Swing fires this even either way,
+	 * but we need to be more discriminating. */
+	if (this.selindex != getSelectedIndex())
+	  {
+	    this.treetable.editingStopped(new ChangeEvent(this));
+	    this.selindex = getSelectedIndex();
+	  }
       }
-    }
   }
 }
 
