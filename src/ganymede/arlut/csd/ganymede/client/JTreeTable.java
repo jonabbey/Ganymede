@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
@@ -115,6 +116,95 @@ public class JTreeTable extends JTable {
 				     "Tree.foreground", "Tree.font");
   }
 
+  /**
+   * Determines if the specified column contains hierarchical nodes.
+   *
+   * @param column zero-based index of the column
+   * @return true if the class of objects in the specified column implement
+   * the {@link javax.swing.tree.TreeNode} interface; false otherwise.
+   */
+  public boolean isHierarchical(int column)
+  {
+    return TreeTableModel.class.isAssignableFrom(getColumnClass(column));
+  }
+
+  /**
+   * Overriden to invoke repaint for the particular location if
+   * the column contains the tree. This is done as the tree editor does
+   * not fill the bounds of the cell, we need the renderer to paint
+   * the tree in the background, and then draw the editor over it.
+   * You should not need to call this method directly.
+   *
+   * {@inheritDoc}
+   */
+  public boolean editCellAt(int row, int column, EventObject e)
+  {
+    expandOrCollapseNode(e);    // RG: Fix Issue 49!
+
+    boolean canEdit = super.editCellAt(row, column, e);
+
+    // we assume that column zero is the tree column
+
+    if (canEdit && column == 0)
+      {
+	repaint(getCellRect(row, column, false));
+      }
+    return canEdit;
+  }
+
+  private void expandOrCollapseNode(EventObject e)
+  {
+    if (e instanceof MouseEvent)
+      {
+	MouseEvent me = (MouseEvent) e;
+	// If the modifiers are not 0 (or the left mouse button),
+	// tree may try and toggle the selection, and table
+	// will then try and toggle, resulting in the
+	// selection remaining the same. To avoid this, we
+	// only dispatch when the modifiers are 0 (or the left mouse
+	// button).
+
+	if (me.getModifiers() == 0 || me.getModifiers() == InputEvent.BUTTON1_MASK)
+	  {
+	    final int count = getColumnCount();
+
+	    for (int i = count - 1; i >= 0; i--)
+	      {
+		if (isHierarchical(i))
+		  {
+		    int savedHeight = tree.getRowHeight();
+		    tree.setRowHeight(getRowHeight());
+		    MouseEvent pressed = new MouseEvent
+		      (tree,
+		       me.getID(),
+		       me.getWhen(),
+		       me.getModifiers(),
+		       me.getX() - getCellRect(0, i, false).x,
+		       me.getY(),
+		       me.getClickCount(),
+		       me.isPopupTrigger());
+
+		    tree.dispatchEvent(pressed);
+		    // For Mac OS X, we need to dispatch a MOUSE_RELEASED as well
+		    MouseEvent released = new MouseEvent
+		      (tree,
+		       java.awt.event.MouseEvent.MOUSE_RELEASED,
+		       pressed.getWhen(),
+		       pressed.getModifiers(),
+		       pressed.getX(),
+		       pressed.getY(),
+		       pressed.getClickCount(),
+		       pressed.isPopupTrigger());
+
+		    tree.dispatchEvent(released);
+		    tree.setRowHeight(savedHeight);
+		    break;
+		  }
+	      }
+	  }
+      }
+  }
+  
   /* Workaround for BasicTableUI anomaly. Make sure the UI never tries to 
    * paint the editor. The UI currently uses different techniques to 
    * paint the renderers and editors and overriding setBounds() below 

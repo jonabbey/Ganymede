@@ -1271,11 +1271,13 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
   {
     PermRow myRow = (PermRow)((DefaultMutableTreeNode)node).getUserObject(); 
     
-    // tree column is always editable (expansion and contraction)
+    // tree column is never editable.  we'll depend on the JTreeTable
+    // editCellAt method being overridden to handle expansion and
+    // contraction.
 
     if (getColumnClass(col) == TreeTableModel.class)
       {
-	return true;
+	return false;
       }
     
     // If we entered from gclient "View Permissions" button, then can't edit

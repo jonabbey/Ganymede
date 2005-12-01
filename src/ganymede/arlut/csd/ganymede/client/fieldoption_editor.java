@@ -766,7 +766,12 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
   
   public boolean isCellEditable(Object node, int col) 
   {
-    return true;
+    // the tree column must not be editable, since the tree can't edit
+    // into the table properly.  We'll depend on the JTreeTable's
+    // editCellAt() method to handle the tree's expansion and collapse
+    // as necessary without doing any 'editing'.
+
+    return !foe.treeTable.isHierarchical(col);
   }
   
   public void setValueAt(Object value, Object node, int col) 
