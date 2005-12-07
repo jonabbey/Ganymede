@@ -572,6 +572,11 @@ public final class DBNameSpace implements NameSpace {
 
     /* -- */
 
+    if (value == null)
+      {
+	return null;
+      }
+
     _handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
     if (_handle == null)
