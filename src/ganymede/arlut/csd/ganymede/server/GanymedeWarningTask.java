@@ -257,6 +257,7 @@ public class GanymedeWarningTask implements Runnable {
 				     base.getName(), mySession.viewObjectLabel(invid), new Integer(i+1));
 		      }
 
+		    tempString.setLength(0);
 		    tempString.append(title);
 
 		    obj = mySession.session.viewDBObject(invid);
