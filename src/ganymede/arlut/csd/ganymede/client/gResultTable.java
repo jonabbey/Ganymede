@@ -338,6 +338,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	    // "Warning, file {0} already exists.  Are you sure you want to replace this file?"
 	    // "Yes, Overwrite"
 	    StringDialog d = new StringDialog(wp.gc,
+					      ts.l("sendReport.file_exists_title"),
 					      ts.l("sendReport.file_exists", file.getName()),
 					      ts.l("sendReport.overwrite"),
 					      StringDialog.getDefaultCancel(),
