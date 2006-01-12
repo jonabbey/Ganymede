@@ -1359,6 +1359,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // what fields we're going to need to delete.. go ahead and scan
     // ahead and actually create and/or edit fields as needed
 
+    // first, let's set the default tab name, in case we don't see
+    // specific tab names specified in this object's xml definition
+
     String currentTabName = ts.l("global.default_tab"); // "General"
 
     for (int i = 0; i < fieldDefV.size(); i++)

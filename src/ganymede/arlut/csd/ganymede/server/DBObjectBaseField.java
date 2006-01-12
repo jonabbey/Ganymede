@@ -2814,6 +2814,15 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
+
+    if (s == null || s.equals(""))
+      {
+	// "Schema Editing Error"
+	// "Can''t have a null or empty tab name."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setTabName.null_name"));
+      }
+
     this.tabName = s;
     
     return null;
@@ -2843,7 +2852,14 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
-    comment = s;
+    if (s == null || s.equals(""))
+      {
+	comment = null;
+      }
+    else
+      {
+	comment = s;
+      }
     
     return null;
   }      
@@ -3664,7 +3680,14 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
-    okChars = s;
+    if (s != null && s.equals(""))
+      {
+	okChars = null;
+      }
+    else
+      {
+	okChars = s;
+      }
 
     if (isInUse())
       {
@@ -3725,7 +3748,14 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
-    badChars = s;
+    if (s != null && s.equals(""))
+      {
+	badChars = null;
+      }
+    else
+      {
+	badChars = s;
+      }
 
     if (isInUse())
       {

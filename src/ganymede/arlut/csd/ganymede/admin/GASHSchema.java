@@ -749,7 +749,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    tabString = field.getTabName();
 
-	    if (tabString == null)
+	    if (tabString == null || tabString.equals(""))
 	      {
 		tabString = ts.l("global.defaultTabName"); // "General"
 	      }
