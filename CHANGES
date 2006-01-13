@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATA: ?? ?, 2005
+RELEASE DATA: ?? ?, 2006
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -886,6 +886,30 @@ rather than object identity.
 
 By fixing this, it ensures that the optimized VectorUtils class
 methods can properly manipulate listHandle vectors.
+
+52. [SERVER, CLIENT, JDATACOMPONENT] Added support for server-side reformatting of input
+
+The Ganymede system now has the ability to respond to string input
+from the client by approving a canonicalized version of the input.
+
+Previously, the server could accept a given string, reject it
+outright, or engage the user in a wizard sequence.
+
+Now, the verifyNewValue() method in the DBEditObject subclass can use
+the new setTranformedValueObject() method in the ReturnVal to signify
+to the Ganymede server and client that the submitted value was
+accepted but that it was transformed in some fashion and that the
+client should refresh the GUI widget.
+
+We use this with the GASHARL schema kit to auto-format MAC address
+entry in the Embedded System Interface object's "Ethernet Info"
+field.. if the user enters "AB-CD-EF-11-22-3", the server will
+automatically reformat this string to "ab:cd:ef:11:22:03", in keeping
+with our policy, and the user will get immediate visual feedback that
+the data was massaged by the server.
+
+Good stuff, although it doesn't make the code on the client and server
+any simpler. ;-/
 
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
