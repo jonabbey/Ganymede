@@ -824,7 +824,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	      }
 	  }
 
-	return result.toLowerCase();
+	return result.toString().toLowerCase();
       }
 
     // we'll try to deal with missing leading zeros on hex bytes, but
@@ -841,7 +841,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // need to have some separators.  we'll accept seperators of
     // spaces, dashes, colons, and periods.
 
-    String[] pieces = input.split(":|\.|\-|\s");
+    String[] pieces = input.split(":|\\.|\\-|\\s");
 
     if (pieces.length != 6)
       {
@@ -852,12 +852,12 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     for (int i = 0; i < pieces.length; i++)
       {
-	if (pieces[i].length > 2)
+	if (pieces[i].length() > 2)
 	  {
 	    throw new MACAddressException();
 	  }
 
-	if (pieces[i].length == 1 && Character.digit(pieces.charAt[0], 16) != -1)
+	if (pieces[i].length() == 1 && Character.digit(pieces[i].charAt(0), 16) != -1)
 	  {
 	    if (result.length() != 0)
 	      {
@@ -865,11 +865,11 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	      }
 
 	    result.append("0");
-	    result.append(pieces.charAt[0]);
+	    result.append(pieces[i].charAt(0));
 	    continue;
 	  }
 
-	if (pieces[i].length == 2 && Character.digit(pieces.charAt[0], 16) != -1 && Character.digit(pieces.charAt[1], 16) != -1)
+	if (pieces[i].length() == 2 && Character.digit(pieces[i].charAt(0), 16) != -1 && Character.digit(pieces[i].charAt(1), 16) != -1)
 	  {
 	    if (result.length() != 0)
 	      {
