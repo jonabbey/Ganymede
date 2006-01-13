@@ -1140,7 +1140,7 @@ public abstract class DBField implements Remote, db_field {
 
     /* check to see if verifyNewValue canonicalized the submittedValue */
 
-    if (retVal.hasTransformedValue())
+    if (retVal != null && retVal.hasTransformedValue())
       {
 	submittedValue = retVal.getTransformedValueObject();
       }
@@ -1500,7 +1500,7 @@ public abstract class DBField implements Remote, db_field {
 
     /* check to see if verifyNewValue canonicalized the submittedValue */
 
-    if (retVal.hasTransformedValue())
+    if (retVal != null && retVal.hasTransformedValue())
       {
 	submittedValue = retVal.getTransformedValueObject();
       }
@@ -1733,7 +1733,7 @@ public abstract class DBField implements Remote, db_field {
 
     /* check to see if verifyNewValue canonicalized the submittedValue */
 
-    if (retVal.hasTransformedValue())
+    if (retVal != null && retVal.hasTransformedValue())
       {
 	submittedValue = retVal.getTransformedValueObject();
       }
@@ -2077,7 +2077,7 @@ public abstract class DBField implements Remote, db_field {
 	
 	retVal = verifyNewValue(submittedValue);
 
-	if (retVal.hasTransformedValue())
+	if (retVal != null && retVal.hasTransformedValue())
 	  {
 	    submittedValue = retVal.getTransformedValueObject();
 	    transformed = true;

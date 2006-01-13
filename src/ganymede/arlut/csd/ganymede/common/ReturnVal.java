@@ -1129,7 +1129,9 @@ public class ReturnVal implements java.io.Serializable {
     ReturnVal tempRetVal = new ReturnVal(true);
 
     Hashtable rescanInfo = new Hashtable(1);
-    rescanInfo.put(invid, new Short(fieldId));
+    Vector fields = new Vector(1);
+    fields.addElement(new Short(fieldId));
+    rescanInfo.put(invid, fields);
 
     tempRetVal.encodeRescanList(rescanInfo);
     this.unionRescan(tempRetVal);
