@@ -876,7 +876,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 		result.append(":");
 	      }
 
-	    result.append(pieces);
+	    result.append(pieces[i]);
 	    continue;
 	  }
 
