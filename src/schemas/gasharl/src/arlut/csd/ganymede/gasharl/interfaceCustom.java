@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -210,7 +210,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	if (openIP)
 	  {
-	    result.append(" - ");
+	    result.append("- ");
 	  }
 	else
 	  {
@@ -707,7 +707,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    * DBEditObject should override this method, implementing basically
    * a large switch statement to check for any given field whether the
    * submitted value is acceptable given the current state of the
-   * object.<br><br>
+   * object.
    *
    * Question: what synchronization issues are going to be needed
    * between DBEditObject and DBField to insure that we can have
@@ -723,50 +723,167 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// equality and assignment are both atomic operators
 
 	String etherString = (String) value;
+	String transformedString;
 
 	if ((etherString == null) || (etherString.equals("")))
 	  {
-	    return null;
+	    return null; // okay by us!
 	  }
 
-	if (regexp == null)
+	try
 	  {
-	    try
-	      {
-		String hexdigit = "[abcdef0123456789]";
-		String separator = ":";
-
-		regexp = new gnu.regexp.RE("^" + hexdigit + hexdigit + "?" + separator +
-					   hexdigit + hexdigit + "?" + separator +
-					   hexdigit + hexdigit + "?" + separator +
-					   hexdigit + hexdigit + "?" + separator +
-					   hexdigit + hexdigit + "?" + separator +
-					   hexdigit + hexdigit + "?$",
-					   gnu.regexp.RE.REG_ICASE);
-	      }
-	    catch (gnu.regexp.REException ex)
-	      {
-		throw new RuntimeException("Error, interface custom code can't initialize regular expression" + 
-					   ex.getMessage());
-	      }
+	    transformedString = verifyAndTransformEthernetInfo(etherString);
 	  }
-
-	gnu.regexp.REMatch match = regexp.getMatch(etherString);
-
-	if (match == null)
+	catch (MACAddressException ex)
 	  {
 	    return Ganymede.createErrorDialog("Bad Ethernet Address",
 					      "You entered an invalid ethernet address (" + etherString +
-					      ")\n\nEthernet addresses should be in the form of 6 :" +
-					      " separated hex bytes.\n\nExample:\n01:a2:cc:04:12:2d\n");
+					      ")\n\nEthernet addresses should be in the form of 6 colon-separated" +
+					      " hexadecimal numbers.\n\nExample:\n01:a2:cc:04:12:2d\n");
 	  }
-	else
+
+	if (transformedString.equals(etherString))
 	  {
-	    return null;
+	    return super.verifyNewValue(field, value); // no change, so no problem
 	  }
+
+	// tell the client that we'd like it to take the string that
+	// they gave us and replace it with the reformatted one we
+	// crafted.
+
+	ReturnVal result = new ReturnVal(true);	// success!
+
+	result.setTransformedValueObject(transformedString, this.getInvid(), field.getID());
+
+	return result;
       }
 
     return super.verifyNewValue(field, value);
+  }
+
+  /**
+   * This method verifies and canonicalizes an ethernet info input
+   * from the client.  If the input is a valid MAC address, or can be
+   * turned into a valid MAC address, the MAC address is returned.  If
+   * the input cannot be made into a properly formatted MAC address, a
+   * MACAddressException will be thrown instead.
+   */
+
+  private String verifyAndTransformEthernetInfo(String input) throws MACAddressException
+  {
+    String transform1;
+
+    /* -- */
+
+    if (input == null)
+      {
+	return null;
+      }
+
+    input = input.trim();
+
+    if (input.equals("0"))
+      {
+	return "00:00:00:00:00:00";
+      }
+
+    char [] ary = input.toCharArray();
+
+    int digit_count = 0;
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	if (Character.digit(ary[i], 16) != -1)
+	  {
+	    digit_count++;
+	  }
+      }
+
+    if (digit_count == 12)
+      {
+	// yay, we've got precisely enough hex digits for an ethernet
+	// address, whatever the separators may or may not be. Go
+	// through and extract them and generate a new string.
+
+	StringBuffer result = new StringBuffer();
+
+	digit_count = 0;
+
+	for (int i = 0; i < ary.length; i++)
+	  {
+	    if (Character.digit(ary[i], 16) != -1)
+	      {
+		if (digit_count > 0 && digit_count % 2 == 0)
+		  {
+		    result.append(":");
+		  }
+
+		result.append(ary[i]);
+
+		digit_count++;
+	      }
+	  }
+
+	return result.toLowerCase();
+      }
+
+    // we'll try to deal with missing leading zeros on hex bytes, but
+    // we still need to have between 6 and 12 hex digits
+
+    if (digit_count < 6 || digit_count > 12)
+      {
+	throw new MACAddressException();
+      }
+
+    // now, even though we have less than 12 hex digits, we may still have
+    // a valid input, as the user may have skipped leading zeros on
+    // bytes.  in order for us to make sense of such a state, we'll
+    // need to have some separators.  we'll accept seperators of
+    // spaces, dashes, colons, and periods.
+
+    String[] pieces = input.split(":|\.|\-|\s");
+
+    if (pieces.length != 6)
+      {
+	throw new MACAddressException();
+      }
+
+    StringBuffer result = new StringBuffer();
+
+    for (int i = 0; i < pieces.length; i++)
+      {
+	if (pieces[i].length > 2)
+	  {
+	    throw new MACAddressException();
+	  }
+
+	if (pieces[i].length == 1 && Character.digit(pieces.charAt[0], 16) != -1)
+	  {
+	    if (result.length() != 0)
+	      {
+		result.append(":");
+	      }
+
+	    result.append("0");
+	    result.append(pieces.charAt[0]);
+	    continue;
+	  }
+
+	if (pieces[i].length == 2 && Character.digit(pieces.charAt[0], 16) != -1 && Character.digit(pieces.charAt[1], 16) != -1)
+	  {
+	    if (result.length() != 0)
+	      {
+		result.append(":");
+	      }
+
+	    result.append(pieces);
+	    continue;
+	  }
+
+	throw new MACAddressException();
+      }
+    
+    return result.toString().toLowerCase();
   }
 
   /**
@@ -830,5 +947,17 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   public final static short s2u(byte b)
   {
     return (short) (b + 128);
+  }
+}
+
+/**
+ * Context-specific exception for handling parse errors for submitted
+ * Ethernet Info values.
+ */
+
+class MACAddressException extends RuntimeException {
+  
+  public MACAddressException()
+  {
   }
 }

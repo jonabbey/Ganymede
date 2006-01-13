@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -1105,16 +1105,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	      }
 	    else 
 	      {
-		// to avoid refreshing an arlut.csd.JDataComponent
-		// field while that field is waiting for its
-		// setValuePerformed() call to be answered, we won't
-		// force an update of a component that is still trying
-		// to react to a user's manipulation.
-
-		if (!c.equals(currentlyChangingComponent))
-		  {
-		    updateComponent(c);
-		  }
+		updateComponent(c);
 	      }
 	  }
 
@@ -1150,8 +1141,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       {
 	db_field field = (db_field) objectHash.get(comp);
 
-	// by getting a FieldInfo, we'll save a call to the
-	// server
+	// by getting a FieldInfo, we'll save a call to the server by
+	// not having to repeatedly probe the field for elements of
+	// its state
 
 	FieldInfo currentInfo = field.getFieldInfo();
 
@@ -1159,7 +1151,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    println("Updating " + field.getName() + " " + comp); 
 	  }
-	
+
 	// if the field is not visible, just hide it and 
 	// return.. otherwise, set it visible and update
 	// the value and choices for the field
@@ -1174,21 +1166,34 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	
 	if (comp instanceof JstringField)
 	  {
-	    // we don't need to worry about turning off callbacks
-	    // here because JstringField only sends callbacks on
-	    // focus loss
+	    if (comp.equals(currentlyChangingComponent))
+	      {
+		// the server apparently triggered a refresh of the
+		// field that we are processing a callback from.  the
+		// JstringField has specific support for this, to
+		// allow the server to canonicalize strings entered by
+		// the user.  We'll call the appropriate method on the
+		// JstringField so that it will redraw itself with the
+		// canonicalized value when our callstack unwinds to
+		// the callback origination in this JstringField.
 
-	    ((JstringField)comp).setText((String)currentInfo.getValue());
+		((JstringField)comp).substituteValueByCallBack(this, (String)currentInfo.getValue());
+	      }
+	    else
+	      {
+		((JstringField)comp).setText((String)currentInfo.getValue());
+	      }
 	  }
 	else if (comp instanceof JstringArea)
 	  {
+	    // JstringArea handles re-entrant refresh okay, no need to
+	    // worry about self-refresh
+
 	    ((JstringArea)comp).setText((String)currentInfo.getValue());
 	  }
 	else if (comp instanceof JdateField)
 	  {
-	    // we don't need to worry about turning off callbacks
-	    // here because JdateField only sends callbacks on
-	    // focus loss
+	    // JdateField handles re-entrant refresh okay as well
 
 	    ((JdateField)comp).setDate((Date)currentInfo.getValue());
 	  }
@@ -1196,21 +1201,35 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    Integer value = (Integer)currentInfo.getValue();
 
-	    // we don't need to worry about turning off callbacks
-	    // here because JnumberField only sends callbacks on
-	    // focus loss
+	    if (comp.equals(currentlyChangingComponent))
+	      {
+		// the server apparently triggered a refresh of the field
+		// that we are processing a callback from.  the
+		// JnumberField has specific support for this, etc.
 
-	    ((JnumberField)comp).setValue(value);
+		((JnumberField)comp).substituteValueByCallBack(this, value);
+	      }
+	    else
+	      {
+		((JnumberField)comp).setValue(value);
+	      }
 	  }
  	else if (comp instanceof JfloatField)
  	  {
  	    Double value = (Double)currentInfo.getValue();
+
+	    if (comp.equals(currentlyChangingComponent))
+	      {
+		// the server apparently triggered a refresh of the field
+		// that we are processing a callback from.  the
+		// JfloatField has specific support for this, etc.
  
- 	    // we don't need to worry about turning off callbacks
- 	    // here because JfloatField only sends callbacks on
- 	    // focus loss
- 
- 	    ((JfloatField)comp).setValue(value);
+		((JfloatField)comp).substituteValueByCallBack(this, value);
+	      }
+	    else
+	      {
+		((JfloatField)comp).setValue(value);
+	      }
  	  }
 	else if (comp instanceof JCheckBox)
 	  {
@@ -1546,6 +1565,15 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		updateStringStringSelector((StringSelector)comp, (string_field)field,
 					   currentInfo);
 	      }
+
+	    // In the case of self-refresh on server command, prevent
+	    // the StringSelector from trying to finish up its
+	    // graphical state changing with the old data.
+
+	    if (comp.equals(currentlyChangingComponent))
+	      {
+		((StringSelector) comp).substituteValueByCallBack(this);
+	      }
 	  }
 	else if (comp instanceof vectorPanel)
 	  {
@@ -1558,7 +1586,20 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		println("Updating JIPField.");
 	      }
 
-	    ((JIPField)comp).setValue((Byte[]) currentInfo.getValue());
+	    Byte[] bytes = (Byte[]) currentInfo.getValue();
+
+	    if (comp.equals(currentlyChangingComponent))
+	      {
+		// the server apparently triggered a refresh of the field
+		// that we are processing a callback from.  the
+		// JIPField has specific support for this, etc.
+
+		((JIPField)comp).substituteValueByCallBack(this, bytes);
+	      }
+	    else
+	      {
+		((JIPField)comp).setValue(bytes);
+	      }
 	  }
 	else 
 	  {
@@ -1982,7 +2023,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    println("Value performed from unknown source");
 	  }
 
-	// Handle any wizards or error dialogs
+	// Handle any wizards, error dialogs, or rescan commands
 
 	returnValue = gc.handleReturnVal(returnValue);
 

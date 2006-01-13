@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -182,6 +182,20 @@ public class ReturnVal implements java.io.Serializable {
   private transient Hashtable rescanHash = null;
 
   /**
+   * This field is set if the verifyNewValue() method transforms a
+   * value during the input.
+   */
+
+  private transient Object transformedValue = null;
+
+  /**
+   * This field is set if the verifyNewValue() method transforms a
+   * value during the input.
+   */
+
+  private transient boolean transformedSet = false;
+
+  /**
    * This variable will be non-null if the operation being reported on
    * changed the object's label.  The GUI client will look for this
    * variable in order to trigger a fix-up of all pointers to the
@@ -195,11 +209,14 @@ public class ReturnVal implements java.io.Serializable {
   private String newLabel = null;
 
   /**
-   * <p>This boolean variable is used on the server side only,
-   * to determine whether the field code that invoked 
-   * wizardHook on a DBEditObject subclass should continue
-   * with its normal process or whether it should immediately
-   * return this ReturnVal to the (client-side) caller.</p>
+   * <p>This boolean variable is used to convey a context-specific
+   * flag indicating whether the attempted operation requires
+   * exceptional handling.  Some examples of this include the
+   * determination whether the field code that invoked wizardHook on a
+   * DBEditObject subclass should continue with its normal process or
+   * whether it should immediately return this ReturnVal to the
+   * (client-side) caller.  It is also used to decide whether a
+   * failure to commit a transaction is retryable or not.</p>
    */
 
   public boolean doNormalProcessing;
@@ -1047,4 +1064,75 @@ public class ReturnVal implements java.io.Serializable {
   {
     this.remoteObjectRef = session;
   }
+
+  /**
+   * This method is intended to be used by {@link
+   * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
+   * java.lang.Object)}, when the verifyNewValue() method wants to
+   * take the submitted input and canonicalize it.
+   *
+   * Code in the Ganymede server (mostly the base logic in DBField)
+   * which calls the verifyNewValue() method should respond to a
+   * transformed value by substituting the transformed value for the
+   * originally submitted value.
+   *
+   * If a value is transformed, setTranformedValueObject() will also
+   * set the ReturnVal so that it encodes a rescan of the field in
+   * question so the client will refresh it.
+   */
+
+  public void setTransformedValueObject(Object obj, Invid invid, short fieldId)
+  {
+    this.transformedSet = true;
+    this.transformedValue = obj;
+
+    requestRefresh(invid, fieldId);
+  }
+
+  /**
+   * This method returns true if the code returning this ReturnVal
+   * wants to substitute a canonicalized value for the value submitted
+   * to verifyNewValue().
+   *
+   * Code in the Ganymede server (mostly the base logic in DBField)
+   * which calls the verifyNewValue() method should respond if this
+   * method returns true by substituting the transformed value for the
+   * originally submitted value.
+   */
+
+  public boolean hasTransformedValue()
+  {
+    return this.transformedSet;
+  }
+
+  /**
+   * Code in the Ganymede server (mostly the base logic in DBField)
+   * which calls the verifyNewValue() method should respond to a
+   * transformed value by substituting the transformed value for the
+   * originally submitted value.
+   */
+
+  public Object getTransformedValueObject()
+  {
+    return this.transformedValue;
+  }
+
+  /**
+   * This method causes this ReturnVal to request that the field we're
+   * manipulating will be refreshed by the client.
+   */
+
+  public void requestRefresh(Invid invid, short fieldId)
+  {
+    // create a temporary ReturnVal so that we can union it in
+
+    ReturnVal tempRetVal = new ReturnVal(true);
+
+    Hashtable rescanInfo = new Hashtable(1);
+    rescanInfo.put(invid, new Short(fieldId));
+
+    tempRetVal.encodeRescanList(rescanInfo);
+    this.unionRescan(tempRetVal);
+  }
+
 }

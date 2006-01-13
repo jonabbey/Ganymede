@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2006
    The University of Texas at Austin
 
    Contact information
@@ -86,6 +86,9 @@ public class JnumberField extends JentryField {
 
   private int maxSize;
   private int minSize;
+
+  private boolean replacingValue = false;
+  private Integer replacementValue = null;
 
   ///////////////////
   //  Constructors //
@@ -451,7 +454,15 @@ public class JnumberField extends JentryField {
 		// field, the user did that for us.  Remember the value of
 		// it, so we can revert if we need to later.
 
-		oldvalue = currentValue;
+		if (replacingValue)
+		  {
+		    setValue(replacementValue);
+		  }
+		else
+		  {
+		    oldvalue = currentValue;
+		  }
+
 		return 1;
 	      }
 	  }
@@ -467,6 +478,8 @@ public class JnumberField extends JentryField {
     finally
       {
 	processingCallback = false;
+	replacingValue = false;
+	replacementValue = null;
       }
   }
 
@@ -491,5 +504,26 @@ public class JnumberField extends JentryField {
 	      }
 	  }
       }
+  }
+
+  /**
+   * This method is intended to be called if the setValuePerformed()
+   * callback that we call out to decides that it wants to substitute
+   * a replacement value for the value that we asked to have
+   * validated.
+   *
+   * This is used to allow the server to reformat/canonicalize data
+   * that we passed to it.
+   */
+
+  public void substituteValueByCallBack(JsetValueCallback callback, Integer replacementValue)
+  {
+    if (callback != this.my_parent)
+      {
+	throw new IllegalStateException();
+      }
+
+    this.replacingValue = true;
+    this.replacementValue = replacementValue;
   }
 }

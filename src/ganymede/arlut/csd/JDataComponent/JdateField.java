@@ -5,14 +5,11 @@
    This class defines a date input field object.
 
    Created: 31 Jul 1996
-   Version: $Revision$
-   Last Mod Date: $Date$
 
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
    SVN URL: $HeadURL$
-
 
    Module By: Navin Manohar
 
@@ -20,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -616,7 +613,10 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 				 ts.l("global.error_text", e.getMessage()));
 	      }
 
-	    // if setValuePerformed() didn't work, revert the date
+	    // if setValuePerformed() didn't work, revert the date,
+	    // otherwise do nothing and we'll let ourselves show a
+	    // refreshed value if the server requested us to refresh
+	    // ourselves during the processing of setValuePerformed().
 
 	    if (!retval)
 	      {
@@ -676,6 +676,11 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 				 ts.l("global.error_subj"),
 				 ts.l("global.error_text", re.getMessage()));
 	      }
+
+	    // if setValuePerformed() didn't work, revert the date,
+	    // otherwise do nothing and we'll let ourselves show a
+	    // refreshed value if the server requested us to refresh
+	    // ourselves during the processing of setValuePerformed().
 
 	    if (!retval)
 	      {

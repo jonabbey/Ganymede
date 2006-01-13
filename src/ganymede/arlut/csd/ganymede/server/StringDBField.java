@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -969,6 +969,12 @@ public class StringDBField extends DBField implements string_field {
    * care for, for whatever reason.  Otherwise, the go/no-go decision
    * will be made based on the checks performed by {@link
    * arlut.csd.ganymede.server.DBField#verifyBasicConstraints(java.lang.Object)}.
+   *
+   * The ReturnVal that is returned may have transformedValue set, in
+   * which case the code that calls this verifyNewValue() method
+   * should consider transformedValue as replacing the 'o' parameter
+   * as the value that verifyNewValue wants to be put into this field.
+   * This usage of transformedValue is for canonicalizing input data.
    */
 
   public ReturnVal verifyNewValue(Object o)

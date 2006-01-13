@@ -167,6 +167,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     parent;
 
   private boolean
+    replacingValue = false,
     editable,
     canChoose,
     mustChoose;
@@ -966,6 +967,17 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (ok)
 	  {
+	    // if replacingValue was set, we'll have been refreshed by
+	    // a callback from the setValuePerformed() call, above,
+	    // before we get to here, so don't do anything to further
+	    // mess with our state.
+
+	    if (replacingValue)
+	      {
+		replacingValue = false;
+		return;
+	      }
+
 	    for (int i = 0; i < handles.size(); i++)
 	      {
 		putItemIn((listHandle)handles.elementAt(i));
@@ -1002,6 +1014,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (ok)
 	  {
+	    if (replacingValue)
+	      {
+		replacingValue = false;
+		return;
+	      }
+
 	    putItemIn((listHandle)handles.elementAt(0));
 	  }
 	else
@@ -1066,6 +1084,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (ok)
 	  {
+	    if (replacingValue)
+	      {
+		replacingValue = false;
+		return;
+	      }
+
 	    for (int i = 0; i < handles.size(); i++)
 	      {
 		takeItemOut((listHandle)handles.elementAt(i));
@@ -1102,6 +1126,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (ok)
 	  {
+	    if (replacingValue)
+	      {
+		replacingValue = false;
+		return;
+	      }
+
 	    takeItemOut((listHandle)handles.elementAt(0));
 	  }
 	else
@@ -1278,6 +1308,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    
 	    if (ok)
 	      {
+		if (replacingValue)
+		  {
+		    custom.setText("");
+		    replacingValue = false;
+		    return;
+		  }
+
 		putItemIn(handle);
 		custom.setText("");
 	      }
@@ -1335,6 +1372,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	    if (ok)
 	      {
+		if (replacingValue)
+		  {
+		    custom.setText("");
+		    replacingValue = false;
+		    return;
+		  }
+
 		putItemIn(handle);
 		custom.setText("");
 	      }	
@@ -1365,6 +1409,13 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		
 	    if (ok)
 	      {
+		if (replacingValue)
+		  {
+		    custom.setText("");
+		    replacingValue = false;
+		    return;
+		  }
+
 		in.addItem(new listHandle(inputText, inputText));
 		custom.setText("");
 	      }
@@ -1397,6 +1448,28 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
       }
+  }
+
+  /**
+   * This method is intended to be called if the setValuePerformed()
+   * callback that we call out to decides that it wants to ignore what
+   * we requested and alter the value of the server field in some
+   * other way.
+   *
+   * If this method is called during the time that we are calling an
+   * external setValuePerformed(), we'll make a note of it so that the
+   * appropriate code above won't try to do a graphical update with
+   * bad data.
+   */
+
+  public void substituteValueByCallBack(JsetValueCallback callback)
+  {
+    if (callback != this.my_callback)
+      {
+	throw new IllegalStateException();
+      }
+
+    this.replacingValue = true;
   }
 
   /**

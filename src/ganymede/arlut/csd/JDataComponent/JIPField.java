@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -89,6 +89,10 @@ public class JIPField extends JentryField {
   private String storedValue;
   private boolean allowV6;
   private boolean processingCallback = false;
+
+  private boolean replacingValue = false;
+  private Byte[] replacementValue = null;
+
 
   /**  Constructors ***/
 
@@ -295,6 +299,15 @@ public class JIPField extends JentryField {
 	    
 	    if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this, bytes)))
 	      {
+		// handle modifications that were applied to us if
+		// setValuePerformed() canonicalized otherwise
+		// approved-but-modified the bytes that we suggested
+
+		if (replacingValue)
+		  {
+		    bytes = replacementValue;
+		  }
+
 		if (bytes == null)
 		  {
 		    storedValue = "";
@@ -339,6 +352,8 @@ public class JIPField extends JentryField {
     finally
       {
 	processingCallback = false;
+	replacingValue = false;
+	replacementValue = null;
       }
   }
 
@@ -1019,6 +1034,27 @@ public class JIPField extends JentryField {
       }
     
     return result.toString().toUpperCase();
+  }
+
+  /**
+   * This method is intended to be called if the setValuePerformed()
+   * callback that we call out to decides that it wants to substitute
+   * a replacement value for the value that we asked to have
+   * validated.
+   *
+   * This is used to allow the server to reformat/canonicalize data
+   * that we passed to it.
+   */
+
+  public void substituteValueByCallBack(JsetValueCallback callback, Byte[] replacementValue)
+  {
+    if (callback != this.my_parent)
+      {
+	throw new IllegalStateException();
+      }
+
+    this.replacingValue = true;
+    this.replacementValue = replacementValue;
   }
 
   /**

@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2006
    The University of Texas at Austin
 
    Contact information
@@ -89,6 +89,9 @@ public class JstringField extends JentryField {
   private String disallowedChars = null;
 
   private boolean processingCallback = false;
+
+  private boolean replacingValue = false;
+  private String replacementValue = null;
 
   /* -- */
 
@@ -188,7 +191,8 @@ public class JstringField extends JentryField {
  // JstringField methods
 
   /**
-   *  sets the JstringField to a specific value
+   * sets the JstringField to a specific value, without performing any
+   * of the checks that are enforced on interactive text entry.
    *
    * @param str value to which the JstringField is set
    */
@@ -216,7 +220,7 @@ public class JstringField extends JentryField {
       }
     else 
       {
-	verifyValue(str);
+	// XXX  verifyValue(str);
 
 	if (debug)
 	  {
@@ -442,11 +446,33 @@ public class JstringField extends JentryField {
 	  {
 	    if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this, str)))
 	      {
-		value = str;
+		// check to see whether the setValuePerformed()
+		// callback asked us to do a canonicalization of the
+		// str we submitted during its processing.
+		//
+		// If so, we need to be sure that we don't overwrite
+		// the persistent value with the string that we
+		// originally started with, but that we instead accept
+		// and refresh with the replacement value that was set
+		// by a call to substituteValueByCallBack() during the
+		// execution of setValuePerformed().
+
+		if (replacingValue)
+		  {
+		    value = replacementValue;
+		    super.setText(value == null ? "":value);
+		  }
+		else
+		  {
+		    value = str;
+		  }
+
 		return 1;
 	      }
 	    else
 	      {
+		// revert
+
 		super.setText(value == null ? "":value);
 		return -1;
 	      }
@@ -459,6 +485,29 @@ public class JstringField extends JentryField {
     finally
       {
 	processingCallback = false;
+	replacementValue = null;
+	replacingValue = false;
       }
+  }
+
+  /**
+   * This method is intended to be called if the setValuePerformed()
+   * callback that we call out to decides that it wants to substitute
+   * a replacement value for the value that we asked to have
+   * validated.
+   *
+   * This is used to allow the server to reformat/canonicalize data
+   * that we passed to it.
+   */
+
+  public void substituteValueByCallBack(JsetValueCallback callback, String replacementValue)
+  {
+    if (callback != this.my_parent)
+      {
+	throw new IllegalStateException();
+      }
+
+    this.replacingValue = true;
+    this.replacementValue = replacementValue;
   }
 }

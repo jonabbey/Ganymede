@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -79,6 +79,10 @@ public class JfloatField extends JentryField {
 
   private double maxSize;
   private double minSize;
+
+  private boolean replacingValue = false;
+  private Double replacementValue = null;
+
 
   ///////////////////
   //  Constructors //
@@ -406,8 +410,16 @@ public class JfloatField extends JentryField {
 		// good to go.  We've already got the text set in the text
 		// field, the user did that for us.  Remember the value of
 		// it, so we can revert if we need to later.
-		
-		storedValue = currentValue;
+
+		if (replacingValue)
+		  {
+		    setValue(replacementValue);
+		  }
+		else
+		  {
+		    storedValue = currentValue;
+		  }
+
 		return 1;
 	      }
 	    else
@@ -424,6 +436,8 @@ public class JfloatField extends JentryField {
     finally
       {
 	processingCallback = false;
+	replacingValue = false;
+	replacementValue = null;
       }
   }
 
@@ -445,5 +459,26 @@ public class JfloatField extends JentryField {
 	    System.out.println("Could not send an error callback.");
 	  }
       }
+  }
+
+  /**
+   * This method is intended to be called if the setValuePerformed()
+   * callback that we call out to decides that it wants to substitute
+   * a replacement value for the value that we asked to have
+   * validated.
+   *
+   * This is used to allow the server to reformat/canonicalize data
+   * that we passed to it.
+   */
+
+  public void substituteValueByCallBack(JsetValueCallback callback, Double replacementValue)
+  {
+    if (callback != this.my_parent)
+      {
+	throw new IllegalStateException();
+      }
+
+    this.replacingValue = true;
+    this.replacementValue = replacementValue;
   }
 }

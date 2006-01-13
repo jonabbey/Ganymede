@@ -6,15 +6,19 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Revision$
+
    Last Mod Date: $Date$
+   Last Revision Changed: $Rev$
+   Last Changed By: $Author$
+   SVN URL: $HeadURL$
+
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -1134,19 +1138,30 @@ public abstract class DBField implements Remote, db_field {
 	return retVal;
       }
 
+    /* check to see if verifyNewValue canonicalized the submittedValue */
+
+    if (retVal.hasTransformedValue())
+      {
+	submittedValue = retVal.getTransformedValueObject();
+      }
+
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
 	
-	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, submittedValue, null);
+	newRetVal = eObj.wizardHook(this, DBEditObject.SETVAL, submittedValue, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
-	
-	if (retVal != null && !retVal.doNormalProcessing)
+	// if a wizard intercedes, we are going to let it take the
+	// ball.  we'll lose any transformation/rescan from the
+	// verifyNewValue() call above, but the fact that the wizard
+	// is taking over means that we're not directly accepting
+	// whatever the user gave us, anyway.
+
+	if (newRetVal != null && !newRetVal.doNormalProcessing)
 	  {
-	    return retVal;
+	    return newRetVal;
 	  }
       }
 
@@ -1483,6 +1498,13 @@ public abstract class DBField implements Remote, db_field {
 	return retVal;
       }
 
+    /* check to see if verifyNewValue canonicalized the submittedValue */
+
+    if (retVal.hasTransformedValue())
+      {
+	submittedValue = retVal.getTransformedValueObject();
+      }
+
     // allow the plugin class to review the operation
 
     eObj = (DBEditObject) owner;
@@ -1491,13 +1513,17 @@ public abstract class DBField implements Remote, db_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), submittedValue);
+	newRetVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), submittedValue);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+	// if a wizard intercedes, we are going to let it take the
+	// ball.  we'll lose any transformation/rescan from the
+	// verifyNewValue() call above, but the fact that the wizard
+	// is taking over means that we're not directly accepting
+	// whatever the user gave us, anyway.
 
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (newRetVal != null && !newRetVal.doNormalProcessing)
 	  {
-	    return retVal;
+	    return newRetVal;
 	  }
       }
 
@@ -1705,6 +1731,13 @@ public abstract class DBField implements Remote, db_field {
 	return retVal;
       }
 
+    /* check to see if verifyNewValue canonicalized the submittedValue */
+
+    if (retVal.hasTransformedValue())
+      {
+	submittedValue = retVal.getTransformedValueObject();
+      }
+
     if (size() >= getMaxArraySize())
       {
 	// "addElement() Error: Field {0} in object {1} is already at or beyond its maximum allowed size."
@@ -1717,13 +1750,17 @@ public abstract class DBField implements Remote, db_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, submittedValue, null);
+	newRetVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, submittedValue, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+	// if a wizard intercedes, we are going to let it take the
+	// ball.  we'll lose any transformation/rescan from the
+	// verifyNewValue() call above, but the fact that the wizard
+	// is taking over means that we're not directly accepting
+	// whatever the user gave us, anyway.
 
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (newRetVal != null && !newRetVal.doNormalProcessing)
 	  {
-	    return retVal;
+	    return newRetVal;
 	  }
       }
 
@@ -1961,6 +1998,7 @@ public abstract class DBField implements Remote, db_field {
     DBEditObject eObj;
     DBEditSet editset;
     Vector approvedValues = new Vector();
+    boolean transformed = false;
 
     /* -- */
 
@@ -2039,6 +2077,12 @@ public abstract class DBField implements Remote, db_field {
 	
 	retVal = verifyNewValue(submittedValue);
 
+	if (retVal.hasTransformedValue())
+	  {
+	    submittedValue = retVal.getTransformedValueObject();
+	    transformed = true;
+	  }
+
 	if (retVal != null && !retVal.didSucceed())
 	  {
 	    if (!copyFieldMode)
@@ -2060,7 +2104,7 @@ public abstract class DBField implements Remote, db_field {
 	  }
 	else
 	  {
-	    approvedValues.addElement(submittedValues.elementAt(i));
+	    approvedValues.addElement(submittedValue);
 	  }
       }
 
@@ -2158,6 +2202,16 @@ public abstract class DBField implements Remote, db_field {
 						Ganymede.OK, // localized
 						null,
 						"ok.gif"));
+	  }
+
+	if (transformed)
+	  {
+	    // one or more of the values we were given to add was
+	    // canonicalized or otherwise transformed.  let the client
+	    // know it will need to ask us for the final state of the
+	    // field.
+
+	    newRetVal.requestRefresh(owner.getInvid(), this.getID());
 	  }
 
 	return newRetVal;
@@ -3045,9 +3099,8 @@ public abstract class DBField implements Remote, db_field {
   }
 
   /**
-   * Overridable method to verify that an object
-   * submitted to this field has an appropriate
-   * value.
+   * Overridable method to verify that an object submitted to this
+   * field has an appropriate value.
    *
    * This method is intended to make the final go/no go decision about
    * whether a given value is appropriate to be placed in this field,
@@ -3061,6 +3114,12 @@ public abstract class DBField implements Remote, db_field {
    * care for, for whatever reason.  Otherwise, the go/no-go decision
    * will be made based on the checks performed by 
    * {@link arlut.csd.ganymede.server.DBField#verifyBasicConstraints(java.lang.Object) verifyBasicConstraints}.
+   *
+   * The ReturnVal that is returned may have transformedValue set, in
+   * which case the code that calls this verifyNewValue() method
+   * should consider transformedValue as replacing the 'o' parameter
+   * as the value that verifyNewValue wants to be put into this field.
+   * This usage of transformedValue is for canonicalizing input data.
    */
 
   abstract public ReturnVal verifyNewValue(Object o);
