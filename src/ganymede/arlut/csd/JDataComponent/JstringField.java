@@ -227,7 +227,16 @@ public class JstringField extends JentryField {
 	    System.out.println("JstringField: Calling super.setText(" + str + ")");
 	  }
 
-	super.setText(str); 
+	try
+	  {
+	    super.loadingText = true;
+
+	    super.setText(str);
+	  }
+	finally
+	  {
+	    super.loadingText = false;
+	  }
 
 	value = str;
       }

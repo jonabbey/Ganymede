@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2006
    The University of Texas at Austin
 
    Contact information
@@ -92,6 +92,23 @@ abstract public class JentryField extends JTextField implements FocusListener, A
 
   public boolean allowCallback = false;
 
+  /**
+   * True if this JentryField is in the process of programmatically
+   * loading text.  If it is, our {@link
+   * arlut.csd.util.JDataComponent.JentryDocument} will not bother
+   * validating input characters against our filters.  Normally, of
+   * course, the JentryDocument automatically filters out any
+   * character-inserting keystrokes that the server has requested we
+   * filter.
+   *
+   * Any JentryField subclasses that provide programmatic data setting
+   * methods should set this variable to true during the course of the
+   * data setting, preferably in a try.. finally block so that
+   * loadingText is guaranteed to be set false when it is done.
+   */
+
+  protected boolean loadingText = false;
+
   protected JsetValueCallback my_parent = null;
   protected ActionListener notifier = null;
 
@@ -150,6 +167,23 @@ abstract public class JentryField extends JTextField implements FocusListener, A
    */
 
   public abstract int sendCallback();
+
+  /**
+   * Returns true if this JentryField is in the process of
+   * programmatically setting the text.  While isLoading() returns
+   * true, the JentryDocument that filters input into this field will
+   * let all characters be set.
+   *
+   * The purpose of this is so that this GUI field will not reject
+   * data that was previously loaded into the matching Ganymede
+   * database field, even if it was in violation of the current
+   * constraints.
+   */
+
+  public boolean isLoading()
+  {
+    return this.loadingText;
+  }
 
   /**
    * Stub function that is overriden in subclasses of JentryField.  The
@@ -268,24 +302,31 @@ class JentryDocument extends PlainDocument {
 	System.err.println("JentryDocument.insertString(" + str +")");
       }
 
-    for (int i = 0; i < str.length(); i++)
+    if (field.isLoading())
       {
-	char c = str.charAt(i);
-
-	if (!field.isAllowed(c) ||
-	     (field.getMaxStringSize() != -1 && 
-	      field.getMaxStringSize() - field.getLength() <= 0))
+	buffer.append(str);
+      }
+    else
+      {
+	for (int i = 0; i < str.length(); i++)
 	  {
-	    if (debug)
+	    char c = str.charAt(i);
+
+	    if (!field.isAllowed(c) ||
+		(field.getMaxStringSize() != -1 && 
+		 field.getMaxStringSize() - field.getLength() <= 0))
 	      {
-		System.err.println("Trying to reject character " + c);
-	      }
+		if (debug)
+		  {
+		    System.err.println("Trying to reject character " + c);
+		  }
 
-	    Toolkit.getDefaultToolkit().beep();
-	  }
-	else
-	  {
-	    buffer.append(c);
+		Toolkit.getDefaultToolkit().beep();
+	      }
+	    else
+	      {
+		buffer.append(c);
+	      }
 	  }
       }
 
