@@ -469,7 +469,17 @@ public class JstringField extends JentryField {
 		if (replacingValue)
 		  {
 		    value = replacementValue;
-		    super.setText(value == null ? "":value);
+
+		    try
+		      {
+			super.loadingText = true;
+
+			super.setText(value == null ? "":value);
+		      }
+		    finally
+		      {
+			super.loadingText = false;
+		      }
 		  }
 		else
 		  {
@@ -482,7 +492,18 @@ public class JstringField extends JentryField {
 	      {
 		// revert
 
-		super.setText(value == null ? "":value);
+		try
+		  {
+		    // inhibit character filtering
+		    super.loadingText = true;
+
+		    super.setText(value == null ? "":value);
+		  }
+		finally
+		  {
+		    super.loadingText = false;
+		  }
+
 		return -1;
 	      }
 	  }
