@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -74,6 +74,8 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import java.util.prefs.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -175,6 +177,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.gclient");
+
+  /**
+   * Preferences object for the Ganymede client.  Using this object,
+   * we can save and retrieve preferences data from a system-dependent
+   * backing-store.. the Registry on Windows, a XML file under
+   * ~/.java/user-prefs/ on Linux/Unix/Mac, and who-knows-what on
+   * other platforms.
+   */
+
+  public static final Preferences prefs = Preferences.userNodeForPackage(gclient.class);
 
   /**
    * we're only going to have one gclient at a time per running client (singleton pattern).
@@ -794,8 +806,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     loader.start();
 
     pack();
-    setSize(800, 600);
-    this.setLocationRelativeTo(null); // center gclient frame
+
+    if (!windowSizer.restoreSize(this))
+      {
+	setSize(800, 600);
+	this.setLocationRelativeTo(null); // center gclient frame
+	windowSizer.saveSize(this);
+      }
+
     this.setVisible(true);
 
     // Adjust size of toolbar buttons to that of largest button
@@ -4433,6 +4451,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // glogin's logout method will call our cleanUp() method on the
     // GUI thread.
 
+    windowSizer.saveSize(this);
+
     _myglogin.logout();
   }
 
@@ -5344,6 +5364,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	      }
 
 	    logout();
+
+	    windowSizer.saveSize(this);
+
 	    super.processWindowEvent(e);
 	  }
 	else if (debug)

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2006
    The University of Texas at Austin
 
    Contact information
@@ -104,6 +104,8 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.createObjectDialog");
+
+  static final String DEFAULT_CREATE = "creation_default_type";
 
   private boolean debug = false;
 
@@ -203,6 +205,23 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 
     listHandles = gc.sortListHandleVector(listHandles);
     types = new JComboBox(listHandles);
+
+    // see if we remember a type of object to create
+    
+    String defaultType = gclient.prefs.get(DEFAULT_CREATE, null);
+
+    if (defaultType != null)
+      {
+	for (int i = 0; i < listHandles.size(); i++)
+	  {
+	    if (defaultType.equals(((listHandle) listHandles.elementAt(i)).getLabel()))
+	      {
+		types.setSelectedItem(listHandles.elementAt(i));
+		break;
+	      }
+	  }
+      }
+
     types.setKeySelectionManager(new TimedKeySelectionManager());
 
     // Ideally, we'd really like for our JComboBox's pop-ups to be
@@ -262,6 +281,8 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     if (e.getSource() == ok) 
       {
 	listHandle choice = (listHandle)types.getSelectedItem();
+
+	gclient.prefs.put(DEFAULT_CREATE, choice.getLabel());
 
 	Short type = (Short)choice.getObject();
 

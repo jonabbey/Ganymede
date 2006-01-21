@@ -24,7 +24,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -151,13 +151,16 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.querybox");
 
+  static final String OBJECT_CHOICE = "default_object_type_for_query";
+
+
   // ---
 
   JTabbedPane
     tabPane;
 
-  OptionsPanel optionsPanel = null;	// to hold the frame that we popup to get a list of
-				// desired fields in the query's results
+  queryFieldsPanel fieldsPanel = null;
+
   gclient gc = null;
 
   // the following hashes are accessed through a set of private accessor
@@ -341,16 +344,33 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     // set the selected base in the baseChoice before we add the item
     // listener
 
-    if (defaultBase != null)
+    if (defaultBase == null)
       {
-	baseChoice.setSelectedItem(defaultBase.getName());
-      }
-    else 
-      { 
-	// no default given. take whatever the choice control picked
+	String defaultBaseName = gclient.prefs.get(OBJECT_CHOICE, null);
+
+	if (defaultBaseName != null)
+	  {
+	    // we had a default object query choice, make sure it's still valid
+
+	    for (int i = 0; i < baseNames.size(); i++)
+	      {
+		if (defaultBaseName.equals(baseNames.elementAt(i)))
+		  {
+		    defaultBase = getBaseFromName(defaultBaseName);
+		    break;
+		  }
+	      }
+	  }
+
+	if (defaultBase == null)
+	  {
+	    // no default given. take whatever the choice control picked
 	
-	defaultBase = getBaseFromName((String) baseChoice.getSelectedItem());
+	    defaultBase = getBaseFromName((String) baseChoice.getSelectedItem());
+	  }
       }
+
+    baseChoice.setSelectedItem(defaultBase.getName());
 
     baseChoice.addItemListener(this);
 
@@ -412,10 +432,10 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     selectBase(defaultBase);
 
-    optionsPanel = new OptionsPanel(this);
+    fieldsPanel = new queryFieldsPanel(this);
 
     // "Fields Returned"
-    tabPane.addTab(ts.l("init.fields_returned_tab"), null, optionsPanel);
+    tabPane.addTab(ts.l("init.fields_returned_tab"), null, fieldsPanel);
 
     this.pack();
     setSize(800,400);
@@ -561,9 +581,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	// and reset the options panel checkboxes.
 
-	if (optionsPanel != null)
+	if (fieldsPanel != null)
 	  {
-	    optionsPanel.resetBoxes();
+	    fieldsPanel.resetBoxes();
 	  }
       }
   }
@@ -727,9 +747,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     /* -- */
 
-    if (optionsPanel != null)
+    if (fieldsPanel != null)
       {
-	fieldsToReturn = optionsPanel.getReturnFields();
+	fieldsToReturn = fieldsPanel.getReturnFields();
       }
     
     if (fieldsToReturn == null)
@@ -977,7 +997,11 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	    System.out.println("Base selected");
 	  }
 
-	selectBase(getBaseFromName((String) baseChoice.getSelectedItem()));
+	String selectedBaseName = (String) baseChoice.getSelectedItem();
+
+	gclient.prefs.put(OBJECT_CHOICE, selectedBaseName);
+
+	selectBase(getBaseFromName(selectedBaseName));
       }
   }
 
@@ -2137,11 +2161,17 @@ class QueryRow implements ItemListener {
 
 /*------------------------------------------------------------------------------
                                                                            class 
-                                                                    OptionsFrame
+                                                                queryFieldsPanel
 
 ------------------------------------------------------------------------------*/
 
-class OptionsPanel extends JPanel {
+/**
+ * This panel forms part of the Ganymede client's query dialog.  It
+ * allows the user to choose what fields should be returned in an
+ * interactive query.
+ */
+
+class queryFieldsPanel extends JPanel {
 
   static final boolean debug = false;
 
@@ -2150,7 +2180,7 @@ class OptionsPanel extends JPanel {
    * Ganymede client.
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.OptionsPanel");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.queryFieldsPanel");
 
 
   // ---
@@ -2178,7 +2208,7 @@ class OptionsPanel extends JPanel {
    *
    */
 
-  OptionsPanel(querybox parent)
+  queryFieldsPanel(querybox parent)
   {
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints(); 
