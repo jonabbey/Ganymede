@@ -438,8 +438,12 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     tabPane.addTab(ts.l("init.fields_returned_tab"), null, fieldsPanel);
 
     this.pack();
-    setSize(800,400);
-    setLocationRelativeTo(parent);
+
+    if (!windowSizer.restoreSize(this))
+      {
+	setSize(800,400);
+	setLocationRelativeTo(parent);
+      }
   }
 
   /**
@@ -786,6 +790,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	query.setFiltered(true); // filter against the owner list filters
 
 	unregister();
+
+	windowSizer.saveSize(this);
+
 	setVisible(false);	// close down
 	doQuery();
       } 
@@ -799,6 +806,9 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	query = null;
 	unregister();
+
+	windowSizer.saveSize(this);
+
 	setVisible(false);
       } 
 

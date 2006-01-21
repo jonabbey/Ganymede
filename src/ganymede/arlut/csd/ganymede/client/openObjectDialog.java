@@ -113,6 +113,11 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.openObjectDialog");
 
+  static final String DEFAULT_OPEN = "open_default_type";
+
+  static final private String OPEN_OBJ = "Go";
+  static final private String CANCEL = "Cancel";
+
   boolean 
     editableOnly = false;
 
@@ -204,6 +209,10 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
 	selectedObjectName = selectedNode.getHandle().getLabel();
       }
+    else
+      {
+	selectedBaseName = gclient.prefs.get(DEFAULT_OPEN, null);
+      }
 
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
@@ -281,39 +290,22 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
     listHandles = client.sortListHandleVector(listHandles);
 
+    for (int i = 0; i < listHandles.size(); i++)
+      {
+	type.addItem(listHandles.elementAt(i));
+      }
+
     if (selectedBaseName != null)
       {
-	// the first thing we add will start off selected.. add
-	// the currently selected object type first,
-
 	for (int i = 0; i < listHandles.size(); i++)
 	  {
 	    listHandle lh = (listHandle) listHandles.elementAt(i);
 
 	    if (lh.getLabel().equals(selectedBaseName))
 	      {
-		type.addItem(lh);
-		selectedFound = true;
+		type.setSelectedItem(lh);
+		break;
 	      }
-	  }
-
-	// and now add the rest, in case they change their mind.
-
-	for (int i = 0; i < listHandles.size(); i++)
-	  {
-	    listHandle lh = (listHandle) listHandles.elementAt(i);
-
-	    if (!lh.getLabel().equals(selectedBaseName))
-	      {
-		type.addItem(lh);
-	      }
-	  }
-      }
-    else
-      {
-	for (int i = 0; i < listHandles.size(); i++)
-	  {
-	    type.addItem(listHandles.elementAt(i));
 	  }
       }
 
@@ -362,12 +354,12 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     JPanel buttonP = new JPanel();
     
     ok = new JButton(StringDialog.getDefaultOk());
-    ok.setActionCommand("Find Object with this name");
+    ok.setActionCommand(OPEN_OBJ);
     ok.addActionListener(this);
     buttonP.add(ok);
 
     JButton neverMind = new JButton(StringDialog.getDefaultCancel());
-    neverMind.setActionCommand("Nevermind finding this object");
+    neverMind.setActionCommand(CANCEL);
     neverMind.addActionListener(this);
     buttonP.add(neverMind);
 	
@@ -416,6 +408,8 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	invid = null;
       }
 
+    gclient.prefs.put(DEFAULT_OPEN, getTypeString());
+
     setVisible(false);
     
     text.setText("");
@@ -458,7 +452,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
       {
 	ok.doClick();
       }
-    else if (e.getActionCommand().equals("Find Object with this name"))
+    else if (e.getActionCommand().equals(OPEN_OBJ))
       {
 	String string = text.getText();
 
@@ -498,11 +492,6 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		pane.setBorder(new TitledBorder(ts.l("actionPerformed.matching_border")));
 	      }
 
-	    if (type == null)
-	      {
-		System.out.println("edit object type = null");
-	      }
-	    
 	    listHandle lh = (listHandle) type.getSelectedItem();
 	    Short baseID = (Short) lh.getObject();
 	    
@@ -636,7 +625,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	      }
 	  }
       }
-    else if (e.getActionCommand().equals("Nevermind finding this object"))
+    else if (e.getActionCommand().equals(CANCEL))
       {
 	close(false);
       }

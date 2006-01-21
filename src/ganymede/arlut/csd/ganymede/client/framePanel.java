@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -132,6 +132,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.framePanel");
+
+  static final String OBJECT_SAVE = "object_save_default_dir";
 
   // ---
 
@@ -836,6 +838,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     chooser.setDialogType(JFileChooser.SAVE_DIALOG);
     chooser.setDialogTitle(ts.l("save.file_dialog_title")); // "Save window as"
+    
+    String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
+
+    if (defaultPath != null)
+      {
+	chooser.setCurrentDirectory(new File(defaultPath));
+      }
 
     returnValue = chooser.showDialog(gc, null);
 
@@ -845,6 +854,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
 
     file = chooser.getSelectedFile();
+
+    File directory = chooser.getCurrentDirectory();
+
+    try
+      {
+	gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
+      }
+    catch (java.io.IOException ex)
+      {
+	// we don't really care if we can't save the directory
+	// path in our preferences all that much.
+      }
     
     if (file.exists())
       {

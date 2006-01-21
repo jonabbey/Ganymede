@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2006
    The University of Texas at Austin
 
    Contact information
@@ -141,6 +141,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     tab_option = ts.l("global.tab_option"), // "Tab separated ASCII"
     csv_option = ts.l("global.csv_option"), // "Comma separated ASCII"
     html_option = ts.l("global.html_option"); // "HTML"
+
+  static final String TABLE_SAVE = "query_table_default_dir";
 
   // ---
 
@@ -324,6 +326,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	// "Save Report As"
 	chooser.setDialogTitle(ts.l("sendReport.dialog_title"));
 
+	String defaultPath = gclient.prefs.get(TABLE_SAVE, null);
+
+	if (defaultPath != null)
+	  {
+	    chooser.setCurrentDirectory(new File(defaultPath));
+	  }
+
 	int returnValue = chooser.showDialog(wp.gc, null);
 
 	if (!(returnValue == JFileChooser.APPROVE_OPTION))
@@ -332,6 +341,17 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  }
 
 	file = chooser.getSelectedFile();
+	File directory = chooser.getCurrentDirectory();
+
+	try
+	  {
+	    gclient.prefs.put(TABLE_SAVE, directory.getCanonicalPath());
+	  }
+	catch (java.io.IOException ex)
+	  {
+	    // we don't really care if we can't save the directory
+	    // path in our preferences all that much.
+	  }
     
 	if (file.exists())
 	  {
