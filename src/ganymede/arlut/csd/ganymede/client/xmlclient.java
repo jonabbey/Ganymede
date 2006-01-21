@@ -671,6 +671,10 @@ public final class xmlclient implements ClientListener, Runnable {
     return true;
   }
 
+  /**
+   * Process a GanyGL query contained in a file.
+   */
+
   public boolean doQueryFile(String queryFilename) throws IOException, NotBoundException, RemoteException
   {
     StringBuffer buffer = new StringBuffer();

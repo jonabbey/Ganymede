@@ -939,7 +939,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    if (!processData())
 	      {
-		// don't both processing rest of XML doc.. just jump
+		// don't bother processing rest of XML doc.. just jump
 		// down to finally clause
 
 		return;
