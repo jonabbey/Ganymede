@@ -911,11 +911,11 @@ the data was massaged by the server.
 Good stuff, although it doesn't make the code on the client and server
 any simpler. ;-/
 
-53. [CLIENT] Use of Java 1.4 Preferences API to remember window position, etc.
+53. [CLIENT, ADMIN] Use of Java 1.4 Preferences API to remember window position, etc.
 
-The Ganymede client now uses the Java 1.4 Preferences API to remember
-window positions and various default selections from invocation to
-invocation on a given client system.
+The Ganymede client and admin console now use the Java 1.4 Preferences
+API to remember window positions and various default selections from
+invocation to invocation on a given client system.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
