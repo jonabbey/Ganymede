@@ -75,6 +75,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.rmi.RemoteException;
 import java.util.Calendar;
 import java.util.Date;
@@ -121,6 +123,7 @@ import arlut.csd.ganymede.common.QueryNode;
 import arlut.csd.ganymede.common.QueryNotNode;
 import arlut.csd.ganymede.common.RegexpException;
 import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.common.windowSizer;
 import arlut.csd.ganymede.rmi.Base;
 
 /*------------------------------------------------------------------------------
@@ -140,7 +143,7 @@ import arlut.csd.ganymede.rmi.Base;
  * window displayed as an internal frame in the client display area.
  */
 
-class querybox extends JDialog implements ActionListener, ItemListener {
+class querybox extends JDialog implements ActionListener, ItemListener, WindowListener {
   
   static final boolean debug = false;
 
@@ -242,6 +245,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
     super(parent, DialogTitle, false); // the boolean value is to make the dialog non-modal
 
     this.parent = parent;
+
+    this.addWindowListener(this);
 
     // ---
     JPanel Choice_Buttons = new JPanel();
@@ -439,7 +444,7 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
     this.pack();
 
-    if (!windowSizer.restoreSize(this))
+    if (!gc.sizer.restoreSize(this))
       {
 	setSize(800,400);
 	setLocationRelativeTo(parent);
@@ -791,10 +796,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	unregister();
 
-	gclient.prefs.put(OBJECT_CHOICE, (String) baseChoice.getSelectedItem());
-
-	windowSizer.saveSize(this);
-
 	setVisible(false);	// close down
 	doQuery();
       } 
@@ -808,10 +809,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	query = null;
 	unregister();
-
-	gclient.prefs.put(OBJECT_CHOICE, (String) baseChoice.getSelectedItem());
-
-	windowSizer.saveSize(this);
 
 	setVisible(false);
       } 
@@ -1176,6 +1173,39 @@ class querybox extends JDialog implements ActionListener, ItemListener {
   BaseDump getBaseFromShort(short id)
   {
     return (BaseDump) gc.getBaseMap().get(new Short(id));
+  }
+
+  // WindowListener methods
+
+  public void windowActivated(WindowEvent event)
+  {
+  }
+
+  public void windowClosed(WindowEvent event)
+  {
+    gclient.prefs.put(OBJECT_CHOICE, (String) baseChoice.getSelectedItem());
+    gc.sizer.saveSize(this);
+  }
+
+  public synchronized void windowClosing(WindowEvent event)
+  {
+  }
+
+  public void windowDeactivated(WindowEvent event)
+  {
+  }
+
+  public void windowDeiconified(WindowEvent event)
+  {
+  }
+
+  public void windowIconified(WindowEvent event)
+  {
+  }
+
+  public void windowOpened(WindowEvent event)
+  {
+    baseChoice.requestFocus();
   }
 }
 

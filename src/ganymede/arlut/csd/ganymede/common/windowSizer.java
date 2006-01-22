@@ -51,9 +51,10 @@
 
 */
 
-package arlut.csd.ganymede.client;
+package arlut.csd.ganymede.common;
 
 import java.awt.Frame;
+import java.util.prefs.Preferences;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
@@ -78,6 +79,13 @@ public class windowSizer {
   static final String WIDTH = "window_width";
   static final String HEIGHT = "window_height";
 
+  Preferences prefEngine = null;
+
+  public windowSizer(Preferences prefs)
+  {
+    this.prefEngine = prefs;
+  }
+
   /**
    * This method saves the given window's size and position in the 
    * system-dependent Java preferences store.
@@ -86,23 +94,23 @@ public class windowSizer {
    * preferences store is available.
    */
 
-  public static void saveSize(JFrame window)
+  public void saveSize(JFrame window)
   {
     int status = window.getExtendedState();
 
-    gclient.prefs.putBoolean(key(window, SIZESAVED), true);
+    prefEngine.putBoolean(key(window, SIZESAVED), true);
 
     if ((status & Frame.MAXIMIZED_BOTH) != 0)
       {
-	gclient.prefs.putBoolean(key(window, MAXIMIZED), true);
+	prefEngine.putBoolean(key(window, MAXIMIZED), true);
       }
     else
       {
-	gclient.prefs.putBoolean(key(window, MAXIMIZED), false);
-	gclient.prefs.putInt(key(window, XPOS), window.getX());
-	gclient.prefs.putInt(key(window, YPOS), window.getY());
-	gclient.prefs.putInt(key(window, WIDTH), window.getWidth());
-	gclient.prefs.putInt(key(window, HEIGHT), window.getHeight());
+	prefEngine.putBoolean(key(window, MAXIMIZED), false);
+	prefEngine.putInt(key(window, XPOS), window.getX());
+	prefEngine.putInt(key(window, YPOS), window.getY());
+	prefEngine.putInt(key(window, WIDTH), window.getWidth());
+	prefEngine.putInt(key(window, HEIGHT), window.getHeight());
       }
   }
 
@@ -117,17 +125,17 @@ public class windowSizer {
    * that saved in the preferences.
    */
 
-  public static boolean restoreSize(JFrame window)
+  public boolean restoreSize(JFrame window)
   {
-    if (!gclient.prefs.getBoolean(key(window, SIZESAVED), false))
+    if (!prefEngine.getBoolean(key(window, SIZESAVED), false))
       {
 	return false;
       }
 
-    int xpos = gclient.prefs.getInt(key(window, XPOS), -1);
-    int ypos = gclient.prefs.getInt(key(window, YPOS), -1);
-    int width = gclient.prefs.getInt(key(window, WIDTH), -1);
-    int height = gclient.prefs.getInt(key(window, HEIGHT), -1);
+    int xpos = prefEngine.getInt(key(window, XPOS), -1);
+    int ypos = prefEngine.getInt(key(window, YPOS), -1);
+    int width = prefEngine.getInt(key(window, WIDTH), -1);
+    int height = prefEngine.getInt(key(window, HEIGHT), -1);
 
     boolean locationSet = false;
 
@@ -141,7 +149,7 @@ public class windowSizer {
 	locationSet = true;
       }
 
-    if (gclient.prefs.getBoolean(key(window, MAXIMIZED), false))
+    if (prefEngine.getBoolean(key(window, MAXIMIZED), false))
       {
 	window.setExtendedState(Frame.MAXIMIZED_BOTH);
       }
@@ -164,14 +172,14 @@ public class windowSizer {
    * preferences store is available.
    */
 
-  public static void saveSize(JDialog dialog)
+  public void saveSize(JDialog dialog)
   {
-    gclient.prefs.putBoolean(key(dialog, SIZESAVED), true);
+    prefEngine.putBoolean(key(dialog, SIZESAVED), true);
 
-    gclient.prefs.putInt(key(dialog, XPOS), dialog.getX());
-    gclient.prefs.putInt(key(dialog, YPOS), dialog.getY());
-    gclient.prefs.putInt(key(dialog, WIDTH), dialog.getWidth());
-    gclient.prefs.putInt(key(dialog, HEIGHT), dialog.getHeight());
+    prefEngine.putInt(key(dialog, XPOS), dialog.getX());
+    prefEngine.putInt(key(dialog, YPOS), dialog.getY());
+    prefEngine.putInt(key(dialog, WIDTH), dialog.getWidth());
+    prefEngine.putInt(key(dialog, HEIGHT), dialog.getHeight());
   }
 
   /**
@@ -185,17 +193,17 @@ public class windowSizer {
    * that saved in the preferences.
    */
 
-  public static boolean restoreSize(JDialog dialog)
+  public boolean restoreSize(JDialog dialog)
   {
-    if (!gclient.prefs.getBoolean(key(dialog, SIZESAVED), false))
+    if (!prefEngine.getBoolean(key(dialog, SIZESAVED), false))
       {
 	return false;
       }
 
-    int xpos = gclient.prefs.getInt(key(dialog, XPOS), -1);
-    int ypos = gclient.prefs.getInt(key(dialog, YPOS), -1);
-    int width = gclient.prefs.getInt(key(dialog, WIDTH), -1);
-    int height = gclient.prefs.getInt(key(dialog, HEIGHT), -1);
+    int xpos = prefEngine.getInt(key(dialog, XPOS), -1);
+    int ypos = prefEngine.getInt(key(dialog, YPOS), -1);
+    int width = prefEngine.getInt(key(dialog, WIDTH), -1);
+    int height = prefEngine.getInt(key(dialog, HEIGHT), -1);
 
     boolean locationSet = false;
 
@@ -212,12 +220,12 @@ public class windowSizer {
     return false;
   }
 
-  private static String key(JFrame window, String keyName)
+  private String key(JFrame window, String keyName)
   {
     return window.getClass().getName() + ":" + keyName;
   }
 
-  private static String key(JDialog dialog, String keyName)
+  private String key(JDialog dialog, String keyName)
   {
     return dialog.getClass().getName() + ":" + keyName;
   }

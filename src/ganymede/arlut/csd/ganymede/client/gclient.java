@@ -131,6 +131,7 @@ import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.RegexpException;
 import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.windowSizer;
 import arlut.csd.ganymede.rmi.Base;
 import arlut.csd.ganymede.rmi.Category;
 import arlut.csd.ganymede.rmi.CategoryNode;
@@ -187,6 +188,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    */
 
   public static final Preferences prefs = Preferences.userNodeForPackage(gclient.class);
+  public static final windowSizer sizer = new windowSizer(prefs);
 
   /**
    * we're only going to have one gclient at a time per running client (singleton pattern).
@@ -809,11 +811,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     pack();
 
-    if (!windowSizer.restoreSize(this))
+    if (!sizer.restoreSize(this))
       {
 	setSize(800, 600);
 	this.setLocationRelativeTo(null); // center gclient frame
-	windowSizer.saveSize(this);
+	sizer.saveSize(this);
       }
 
     this.setVisible(true);
@@ -4453,7 +4455,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // glogin's logout method will call our cleanUp() method on the
     // GUI thread.
 
-    windowSizer.saveSize(this);
+    sizer.saveSize(this);
 
     _myglogin.logout();
   }
@@ -5367,7 +5369,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    logout();
 
-	    windowSizer.saveSize(this);
+	    sizer.saveSize(this);
 
 	    super.processWindowEvent(e);
 	  }

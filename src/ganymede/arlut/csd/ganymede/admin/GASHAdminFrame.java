@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -70,6 +70,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteServer;
+import java.util.prefs.Preferences;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -93,6 +94,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+import arlut.csd.ganymede.common.windowSizer;
 import arlut.csd.JDataComponent.JFocusRootPanel;
 import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDialog.DialogRsrc;
@@ -127,6 +129,19 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdminFrame");
+
+  /**
+   * Preferences object for the Ganymede admin console.  Using this
+   * object, we can save and retrieve preferences data from a
+   * system-dependent backing-store.. the Registry on Windows, a XML
+   * file under ~/.java/user-prefs/ on Linux/Unix/Mac, and
+   * who-knows-what on other platforms.
+   */
+
+  public static final Preferences prefs = Preferences.userNodeForPackage(GASHAdminFrame.class);
+  public static final windowSizer sizer = new windowSizer(prefs);
+
+  static final String SPLITTER_POS = "admin_splitter_pos";
 
   static GASHAdminDispatch adminDispatch = null;
   static GASHSchema schemaEditor = null;
@@ -241,8 +256,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   JMenuItem stopTaskMI = null;
   JMenuItem disableTaskMI = null;
   JMenuItem enableTaskMI = null;
+  JSplitPane splitterPane = null;
   
-  GASHAdmin adminPanel;
+  GASHAdmin loginPanel;
 
   String
     aboutMessage = null;
@@ -257,11 +273,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
    *
    */
 
-  public GASHAdminFrame(String title, GASHAdmin adminPanel)
+  public GASHAdminFrame(String title, GASHAdmin loginPanel)
   {
     super(title);
 
-    this.adminPanel = adminPanel;
+    this.loginPanel = loginPanel;
 
     mbar = new JMenuBar();
 
@@ -462,7 +478,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     hostLabel = new JLabel(ts.l("init.hostlabel"));
 
-    if (adminPanel.isSSL())
+    if (loginPanel.isSSL())
       {
 	// "{0}  [SSL]"
 	hostField = new JTextField(ts.l("init.urlssl", GASHAdmin.url), 60);
@@ -814,7 +830,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     //    topGBL.setConstraints(tabPane, topGBC);
     //    getContentPane().add(tabPane);
 
-    JSplitPane splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
+    splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
     splitterPane.setOneTouchExpandable(true);
 
     splitterPane.setDividerLocation(0.75);
@@ -828,7 +844,20 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     getContentPane().add(splitterPane);
 
     pack();
-    this.setLocationRelativeTo(null); // center frame
+
+    if (!sizer.restoreSize(this))
+      {
+	this.setLocationRelativeTo(null); // center frame
+	sizer.saveSize(this);	// save an initial size before the user might maximize
+      }
+
+    int splitterPos = prefs.getInt(SPLITTER_POS, -1);
+
+    if (splitterPos != -1)
+      {
+	splitterPane.setDividerLocation(splitterPos);
+      }
+				  
     this.setVisible(true);
 
     // along with processWindowEvent(), this method allows us
@@ -870,12 +899,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     finally
       {
-	if (adminPanel.quitButton != null)
+	if (loginPanel.quitButton != null)
 	  {
-	    adminPanel.quitButton.setEnabled(true);
+	    loginPanel.quitButton.setEnabled(true);
 	  }
 
-	adminPanel.loginButton.setEnabled(true);
+	loginPanel.loginButton.setEnabled(true);
+	saveWindowPrefs();
 	setVisible(false);
 
 	// This shouldn't kill everything off, but it does for now.  Need to fix this later.
@@ -1085,12 +1115,14 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
 	if (!waitForUsers && success)
 	  {
-	    if (adminPanel.quitButton != null)
+	    if (loginPanel.quitButton != null)
 	      {
-		adminPanel.quitButton.setEnabled(true);
+		loginPanel.quitButton.setEnabled(true);
 	      }
 
-	    adminPanel.loginButton.setEnabled(true);
+	    loginPanel.loginButton.setEnabled(true);
+
+	    saveWindowPrefs();
 	    setVisible(false);
 		
 	    if (!GASHAdmin.WeAreApplet)
@@ -1158,6 +1190,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       {
 	statusArea.setText("");
       }
+  }
+
+  private void saveWindowPrefs()
+  {
+    sizer.saveSize(this);
+    prefs.putInt(SPLITTER_POS, splitterPane.getDividerLocation());
   }
 
   /**
@@ -1322,8 +1360,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	  }
 
 	disconnect();
+	saveWindowPrefs();
       }
-	
+
     super.processWindowEvent(e);
   }
 
