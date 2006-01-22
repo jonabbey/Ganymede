@@ -791,6 +791,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	unregister();
 
+	gclient.prefs.put(OBJECT_CHOICE, (String) baseChoice.getSelectedItem());
+
 	windowSizer.saveSize(this);
 
 	setVisible(false);	// close down
@@ -806,6 +808,8 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 
 	query = null;
 	unregister();
+
+	gclient.prefs.put(OBJECT_CHOICE, (String) baseChoice.getSelectedItem());
 
 	windowSizer.saveSize(this);
 
@@ -1008,8 +1012,6 @@ class querybox extends JDialog implements ActionListener, ItemListener {
 	  }
 
 	String selectedBaseName = (String) baseChoice.getSelectedItem();
-
-	gclient.prefs.put(OBJECT_CHOICE, selectedBaseName);
 
 	selectBase(getBaseFromName(selectedBaseName));
       }

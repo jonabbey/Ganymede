@@ -450,8 +450,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     commit,
     cancel;
 
-  JPanel
+  private JPanel
     statusPanel = new JPanel(new BorderLayout());
+
+  private JSplitPane sPane = null;
 
   /**
    * Status field at the bottom of the client.
@@ -764,7 +766,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     // Create the pane splitter
 
-    JSplitPane sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftP, rightP);
+    sPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftP, rightP);
     sPane.setOneTouchExpandable(true);
    
     mainPanel.add("Center",sPane);
