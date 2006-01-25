@@ -91,7 +91,7 @@ import javax.swing.JScrollBar;
  * @see arlut.csd.JTree.treeNode
  */
 
-public class treeControl extends JPanel implements AdjustmentListener, ActionListener {
+public class treeControl extends JPanel implements AdjustmentListener, ActionListener, MouseWheelListener {
 
   static final boolean debug = false;
 
@@ -208,6 +208,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
 
     rows = new Vector();
+
+    addMouseWheelListener(this);
   }  
 
   /**
@@ -1507,6 +1509,18 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     canvas.repaint();
     repaint();
   }
+
+  public void mouseWheelMoved(MouseWheelEvent e)
+  {
+    if (vbar_visible)
+      {
+        int adj = vbar.getBlockIncrement();
+
+        int totalScrollAmount = e.getWheelRotation() * adj;
+
+        vbar.setValue(vbar.getValue() + totalScrollAmount);
+      }
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -1520,7 +1534,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
  * arlut.csd.JTree.treeControl treeControl} class.</p>
  */
 
-class treeCanvas extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener {
+class treeCanvas extends JComponent implements MouseListener, MouseMotionListener {
 
   static final boolean debug = false;
   static final boolean debug2 = false;
@@ -1621,7 +1635,6 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     addMouseListener(this);
     addMouseMotionListener(this);
-    addMouseWheelListener(this);
 
     ctrl.maxWidth = ctrl.minWidth;
   }
@@ -2704,18 +2717,6 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
   public void mouseMoved(MouseEvent e)
   {
-  }
-
-  public void mouseWheelMoved(MouseWheelEvent e)
-  {
-    if (ctrl.vbar_visible)
-      {
-        int adj = ctrl.vbar.getBlockIncrement();
-
-        int totalScrollAmount = e.getWheelRotation() * adj;
-
-        ctrl.vbar.setValue(ctrl.vbar.getValue() + totalScrollAmount);
-      }
   }
 
   // popup dispatcher

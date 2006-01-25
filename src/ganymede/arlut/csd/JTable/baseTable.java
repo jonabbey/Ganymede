@@ -46,6 +46,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.Vector;
 
 import javax.swing.JComponent;
@@ -92,7 +94,7 @@ import javax.swing.JScrollBar;
  * @version $Id$
  */
 
-public class baseTable extends JComponent implements AdjustmentListener, ActionListener {
+public class baseTable extends JComponent implements AdjustmentListener, ActionListener, MouseWheelListener {
   
   static final boolean debug = false;
 
@@ -338,6 +340,8 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
 	canvas.add(menu);
       }
+
+    addMouseWheelListener(this);
   }
 
   /**
@@ -2404,6 +2408,18 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       }
 
     vbar.setValue(newval);
+  }
+
+  public void mouseWheelMoved(MouseWheelEvent e)
+  {
+    if (vbar_visible)
+      {
+        int adj = vbar.getBlockIncrement();
+
+        int totalScrollAmount = e.getWheelRotation() * adj;
+
+        vbar.setValue(vbar.getValue() + totalScrollAmount);
+      }
   }
 }
 
