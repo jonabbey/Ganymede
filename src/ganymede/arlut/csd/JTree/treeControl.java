@@ -61,6 +61,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -1518,7 +1520,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
  * arlut.csd.JTree.treeControl treeControl} class.</p>
  */
 
-class treeCanvas extends JComponent implements MouseListener, MouseMotionListener {
+class treeCanvas extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener {
 
   static final boolean debug = false;
   static final boolean debug2 = false;
@@ -1619,6 +1621,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     addMouseListener(this);
     addMouseMotionListener(this);
+    addMouseWheelListener(this);
 
     ctrl.maxWidth = ctrl.minWidth;
   }
@@ -2701,6 +2704,18 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
   public void mouseMoved(MouseEvent e)
   {
+  }
+
+  public void mouseWheelMoved(MouseWheelEvent e)
+  {
+    if (ctrl.vbar_visible)
+      {
+        int adj = ctrl.vbar.getBlockIncrement();
+
+        int totalScrollAmount = e.getWheelRotation() * adj;
+
+        ctrl.vbar.setValue(ctrl.vbar.getValue() + totalScrollAmount);
+      }
   }
 
   // popup dispatcher

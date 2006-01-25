@@ -44,6 +44,8 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JComponent;
 
@@ -60,7 +62,7 @@ import javax.swing.JComponent;
  *
  */
 
-class tableCanvas extends JComponent implements MouseListener, MouseMotionListener {
+class tableCanvas extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener {
 
   static final boolean debug = false;
   static final int colgrab = 4;
@@ -99,6 +101,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
     this.rt = rt;
     addMouseListener(this);
     addMouseMotionListener(this);
+    addMouseWheelListener(this);
 
     setDoubleBuffered(false);		// we do the buffering ourselves currently.
   }
@@ -1556,6 +1559,18 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
 	    update(this.getGraphics());
 	  }
+      }
+  }
+
+  public void mouseWheelMoved(MouseWheelEvent e)
+  {
+    if (rt.vbar_visible)
+      {
+        int adj = rt.vbar.getBlockIncrement();
+
+        int totalScrollAmount = e.getWheelRotation() * adj;
+
+        rt.vbar.setValue(rt.vbar.getValue() + totalScrollAmount);
       }
   }
 

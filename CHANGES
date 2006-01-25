@@ -917,6 +917,11 @@ The Ganymede client and admin console now use the Java 1.4 Preferences
 API to remember window positions and various default selections from
 invocation to invocation on a given client system.
 
+54. [CLIENT, ADMIN] Added support for the scroll wheel
+
+The Ganymede client and admin console now properly support the scroll
+wheel in the custom tree and table components.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
