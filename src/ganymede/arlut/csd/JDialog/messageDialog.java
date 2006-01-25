@@ -195,6 +195,7 @@ public class messageDialog extends JCenterDialog implements ActionListener {
 
     if (state)
       {
+        scrollpane.getViewport().setViewPosition(new Point(0,0));
 	ok.requestFocus();
       }
   }
