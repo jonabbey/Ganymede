@@ -646,12 +646,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	if (base.isEmbedded())
 	  {
 	    newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-				   false, EMBEDDEDBASEICON, EMBEDDEDBASEICON, baseMenu);
+				   true, EMBEDDEDBASEICON, EMBEDDEDBASEICON, baseMenu);
 	  }
 	else
 	  {
 	    newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-				   false, BASEICON, BASEICON, baseMenu);
+				   true, BASEICON, BASEICON, baseMenu);
 	  }
       }
     else if (node instanceof Category)
@@ -1225,7 +1225,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    Base newBase = editor.createNewBase(category, false, false);
 	    
 	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
-					    null, false, BASEICON, BASEICON, baseMenu);
+					    null, true, BASEICON, BASEICON, baseMenu);
 
 	    tree.insertNode(newNode, false);
 	    tree.expandNode(node, false);
@@ -1253,7 +1253,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    Base newBase = editor.createNewBase(category, true, false);
 	    
 	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
-					    null, false, EMBEDDEDBASEICON, EMBEDDEDBASEICON, embeddedBaseMenu);
+					    null, true, EMBEDDEDBASEICON, EMBEDDEDBASEICON, embeddedBaseMenu);
 
 	    tree.insertNode(newNode, false);
 	    tree.expandNode(node, false);
