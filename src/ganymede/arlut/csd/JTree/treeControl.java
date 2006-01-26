@@ -58,6 +58,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -91,7 +93,7 @@ import javax.swing.JScrollBar;
  * @see arlut.csd.JTree.treeNode
  */
 
-public class treeControl extends JPanel implements AdjustmentListener, ActionListener, MouseWheelListener {
+public class treeControl extends JPanel implements AdjustmentListener, ActionListener, MouseWheelListener, KeyListener {
 
   static final boolean debug = false;
 
@@ -210,6 +212,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     rows = new Vector();
 
     addMouseWheelListener(this);
+    addKeyListener(this);
   }  
 
   /**
@@ -226,6 +229,11 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 		     Image[] images)
   {
     this(font, fgColor, bgColor, callback, images, null);
+  }
+
+  public boolean isFocusable()
+  {
+    return true;
   }
 
   /**
@@ -1510,6 +1518,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     repaint();
   }
 
+  // MouseWheelListener
+
   public void mouseWheelMoved(MouseWheelEvent e)
   {
     if (vbar_visible)
@@ -1520,6 +1530,78 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
         vbar.setValue(vbar.getValue() + totalScrollAmount);
       }
+  }
+
+  // KeyListener
+
+  public void keyPressed(KeyEvent e)
+  {
+    System.err.println("Pressed: " + e);
+
+    int adj, maxValue, presentValue = 0;
+
+    if (e.isActionKey() && vbar_visible)
+      {
+        switch (e.getKeyCode())
+          {
+          case KeyEvent.VK_PAGE_DOWN:
+
+            adj = vbar.getBlockIncrement();
+            presentValue = vbar.getValue();
+
+            maxValue = rows.size() * row_height - canvas.getBounds().height;
+
+            if (presentValue + adj > maxValue)
+              {
+                presentValue = maxValue;
+              }
+            else
+              {
+                presentValue = presentValue + adj;
+              }
+
+            vbar.setValue(presentValue);
+
+            break;
+
+          case KeyEvent.VK_PAGE_UP:
+
+            adj = vbar.getBlockIncrement();
+            presentValue = vbar.getValue();
+
+            if (presentValue - adj < 0)
+              {
+                presentValue = 0;
+              }
+            else
+              {
+                presentValue = presentValue - adj;
+              }
+
+            vbar.setValue(presentValue);
+
+            break;
+
+          case KeyEvent.VK_HOME:
+            vbar.setValue(0);
+            break;
+
+          case KeyEvent.VK_END:
+            maxValue = rows.size() * row_height - canvas.getBounds().height;
+            vbar.setValue(maxValue);
+            break;
+          }
+      }
+  }
+
+  public void keyReleased(KeyEvent e)
+  {
+    System.err.println("Released: " + e);
+  }
+
+  public void keyTyped(KeyEvent e)
+  {
+    System.err.println("Typed: " + e);
   }
 }
 
@@ -1635,6 +1717,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     addMouseListener(this);
     addMouseMotionListener(this);
+    addKeyListener(ctrl);
 
     ctrl.maxWidth = ctrl.minWidth;
   }
