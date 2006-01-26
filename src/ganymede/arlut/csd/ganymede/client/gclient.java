@@ -5095,6 +5095,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 	
 	tree.refresh();
+        tree.requestFocus();
       }
     catch (Exception rx)
       {

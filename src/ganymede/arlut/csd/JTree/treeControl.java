@@ -1141,7 +1141,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
   }
 
-  public void moveSelection(treeNode node)
+  /**
+   *
+   * This method deselects the currently selected node (if any) and
+   * selects the paramater node.
+   *
+   */
+
+  void moveSelection(treeNode node)
   {
     if (node.selected)
       {
@@ -1234,7 +1241,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
   /**
    *
-   * Handle notification from popupmenus
+   * Handle notification from popupmenus and from key board navigation
+   * actions
    *
    */
 
