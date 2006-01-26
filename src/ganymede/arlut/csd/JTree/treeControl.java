@@ -999,7 +999,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
 	    if (n.selected)
 	      {
-		unselectNode(n, false);
+                moveSelection(node);
 	      }
 
 	    rows.removeElementAt(range.low);
@@ -1422,11 +1422,15 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       {
 	if (selectedNode != null && selectedNode.expandable && selectedNode.isOpen())
 	  {
-	    contractNode(selectedNode, true);
+	    contractNode(selectedNode, false);
+            scrollToSelectedRow();
+	    canvas.render();
+	    canvas.repaint();
 	  }
 	else if (selectedNode.getParent() != null)
 	  {
 	    moveSelection(selectedNode.getParent());
+            scrollToSelectedRow();
 	    canvas.render();
 	    canvas.repaint();
 	  }
