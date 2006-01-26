@@ -11,8 +11,33 @@
    and can have a pop-up menu attached.  Nodes can be dragged, with
    both 'drag-tween' and 'drag on' drag supported.
 
+   Created: 3 March 1997
+   Last Mod Date: $Date$
+   Last Revision Changed: $Rev$
+   Last Changed By: $Author$
+   SVN URL: $HeadURL$
+
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+
+   -----------------------------------------------------------------------
+
    Copyright (C) 1996-2006
    The University of Texas at Austin
+
+   Contact information
+
+   Web site: http://www.arlut.utexas.edu/gash2
+   Author Email: ganymede_author@arlut.utexas.edu
+   Email mailing list: ganymede@arlut.utexas.edu
+
+   US Mail:
+
+   Computer Science Division
+   Applied Research Laboratories
+   The University of Texas at Austin
+   PO Box 8029, Austin TX 78713-8029
+
+   Telephone: (512) 835-3200
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,16 +53,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA
-  
-   Created: 3 March 1997
-
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
-   Module By: Jonathan Abbey	         jonabbey@arlut.utexas.edu
-   Applied Research Laboratories, The University of Texas at Austin
 
 */
 
