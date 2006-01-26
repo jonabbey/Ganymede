@@ -1449,6 +1449,24 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	      }
 	  }
       }
+    else if (actionCommand.equals("context"))
+      {
+        if (selectedNode != null)
+          {
+            int x = 50;
+            int y = selectedNode.row * row_height + canvas.v_offset + (row_height / 2);
+            treeNode tempNode = selectedNode;
+
+            while (tempNode != null)
+              {
+                x = x + canvas.tabStep;
+                tempNode = tempNode.getParent();
+              }
+
+            MouseEvent me = new MouseEvent(this, 0, System.currentTimeMillis(), 0, x, y, 1, true);
+            canvas.popupHandler(me, selectedNode);
+          }
+      }
   }
 
   /**
@@ -1802,6 +1820,13 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0), "left");
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter");
 
+    // NB: Starting in Java 1.5, there is support for
+    // KeyEvent.VK_CONTEXT_MENU, which has value 0x020D.  We're not
+    // using the named constant here because we need to support
+    // compilation under 1.4.
+
+    inputMap.put(KeyStroke.getKeyStroke(0x020D, 0), "context");
+
     ActionMap actionMap = getActionMap();
 
     actionMap.put("unitdown", new treeControlAction("unitdown", this));
@@ -1813,6 +1838,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     actionMap.put("right", new treeControlAction("right", this));
     actionMap.put("left", new treeControlAction("left", this));
     actionMap.put("enter", new treeControlAction("enter", this));
+    actionMap.put("context", new treeControlAction("context", this));
   }
 
   private class treeControlAction extends javax.swing.AbstractAction {
@@ -1871,7 +1897,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   private int maxImageHeight;
 
   private int leftSpacing = 5;
-  private int tabStep = 20;
+  protected int tabStep = 20;
   private int iconTextSpacing = 3;
 
   private Image plusBox = null;
