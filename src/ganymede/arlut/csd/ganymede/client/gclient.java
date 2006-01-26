@@ -818,6 +818,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	sizer.saveSize(this);
       }
 
+    tree.requestFocus();
+
     this.setVisible(true);
 
     // Adjust size of toolbar buttons to that of largest button
@@ -5758,7 +5760,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    deleteObject(invid, true);
 	  }
       }
-    else if(event.getActionCommand().equals(inactivate_pop_action))
+    else if (event.getActionCommand().equals(inactivate_pop_action))
       {
 	if (treeMenuDebug)
 	  {

@@ -2,7 +2,7 @@
 
    treeControl.java
 
-   A hierarchical tree panel for JDK 1.1.
+   A hierarchical tree panel for Java
 
    This component allows the display of a tree structured
    graph of nodes, each node being a small image and a line of text.
@@ -11,7 +11,7 @@
    and can have a pop-up menu attached.  Nodes can be dragged, with
    both 'drag-tween' and 'drag on' drag supported.
 
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,6 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -68,9 +67,14 @@ import java.awt.event.MouseWheelListener;
 import java.util.Stack;
 import java.util.Vector;
 
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.KeyStroke;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -79,12 +83,12 @@ import javax.swing.JScrollBar;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This component allows the display of a tree structured
- * graph of nodes, each node being a small image and a line of text.
- * Nodes with children can be opened or closed, allowing the child
- * nodes to be made visible or hidden.  Each node can be selected
- * and can have a pop-up menu attached.  Nodes can be dragged, with
- * both 'drag-tween' and 'drag on' drag supported.</p>
+ * This component allows the display of a tree structured graph of
+ * nodes, each node being a small image and a line of text.  Nodes
+ * with children can be opened or closed, allowing the child nodes to
+ * be made visible or hidden.  Each node can be selected and can have
+ * a pop-up menu attached.  Nodes can be dragged, with both
+ * 'drag-tween' and 'drag on' drag supported.
  *
  * @author Jonathan Abbey
  * @version $Id$
@@ -93,7 +97,7 @@ import javax.swing.JScrollBar;
  * @see arlut.csd.JTree.treeNode
  */
 
-public class treeControl extends JPanel implements AdjustmentListener, ActionListener, MouseWheelListener, KeyListener {
+public class treeControl extends JPanel implements AdjustmentListener, ActionListener, MouseWheelListener {
 
   static final boolean debug = false;
 
@@ -112,6 +116,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   treeNode root;
   treeCallback callback;
   treeCanvas canvas;
+
+  treeNode selectedNode = null;
 
   // drag and drop support
 
@@ -212,7 +218,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     rows = new Vector();
 
     addMouseWheelListener(this);
-    addKeyListener(this);
+    initializeKeyboardActions();
   }  
 
   /**
@@ -229,11 +235,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 		     Image[] images)
   {
     this(font, fgColor, bgColor, callback, images, null);
-  }
-
-  public boolean isFocusable()
-  {
-    return true;
   }
 
   /**
@@ -355,6 +356,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
 
     rows.addElement(root);
+
+    selectNode(root);
 
     reShape();
     refreshTree();
@@ -541,6 +544,11 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     // if we're visible and have children visible, contract to
     // hide those
+
+    if (node.selected)
+      {
+	unselectNode(node, false);
+      }
 
     if (node.row != -1)
       {
@@ -1095,6 +1103,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
 
     node.selected = true;
+
+    selectedNode = node;
   }
 
   void doubleClickNode(treeNode node)
@@ -1123,10 +1133,27 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     node.selected = true;
 
+    selectedNode = node;
+
     if (callback != null)
       {
 	callback.treeNodeSelected(node);
       }
+  }
+
+  public void moveSelection(treeNode node)
+  {
+    if (node.selected)
+      {
+	return;
+      }
+
+    if (selectedNode != null)
+      {
+	unselectNode(selectedNode, true);
+      }
+
+    selectNode(node);
   }
 
   /**
@@ -1145,6 +1172,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
 
     node.selected = false;
+
+    selectedNode = null;
   }
 
   /**
@@ -1166,6 +1195,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
 
     node.selected = false;
+
+    selectedNode = null;
 
     if (callback != null)
       {
@@ -1209,19 +1240,228 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
   public void actionPerformed(ActionEvent e)
   {
-    if (callback == null)
+    if (e.getSource() instanceof JMenuItem)
+      {
+	if (callback == null)
+	  {
+	    return;
+	  }
+
+	if (menuedNode == null)
+	  {
+	    return;
+	  }
+
+	callback.treeNodeMenuPerformed(menuedNode, e);
+
+	menuedNode = null;
+	return;
+      }
+
+    String actionCommand = e.getActionCommand();
+
+    if (actionCommand == null)
+      {
+	System.err.println("Null action command from " + e);
+
+	return;
+      }
+
+    if (actionCommand.equals("unitdown"))
+      {
+	if (selectedNode != null)
+	  {
+	    int rowIndex = selectedNode.row;
+
+	    if (rowIndex + 1 < rows.size())
+	      {
+		treeNode newNode = (treeNode) rows.elementAt(rowIndex + 1);
+		moveSelection(newNode);
+
+		scrollToSelectedRow();
+
+		canvas.render();
+		canvas.repaint();
+	      }
+	  }
+      }
+    else if (actionCommand.equals("unitup"))
+      {
+	if (selectedNode != null)
+	  {
+	    int rowIndex = selectedNode.row;
+
+	    if (rowIndex > 0)
+	      {
+		treeNode newNode = (treeNode) rows.elementAt(rowIndex - 1);
+		moveSelection(newNode);
+
+		scrollToSelectedRow();
+
+		canvas.render();
+		canvas.repaint();
+	      }
+	  }
+      }
+    else if (actionCommand.equals("scrolldown"))
+      {
+	if (selectedNode != null)
+	  {
+	    // move our selection down, scrolling if necessary
+
+	    int rowIndex = selectedNode.row;
+
+	    int jumpIncrement = (canvas.getBottomRow() - canvas.getTopRow()) - 1;
+
+	    int newSelectionIndex = rowIndex + jumpIncrement;
+
+	    if (newSelectionIndex >= rows.size())
+	      {
+		newSelectionIndex = rows.size() - 1;
+	      }
+
+	    moveSelection((treeNode) rows.elementAt(newSelectionIndex));
+
+	    scrollToSelectedRow();
+	    canvas.render();
+	    canvas.repaint();
+	  }
+	else if (vbar_visible)
+	  {
+	    // no selected unit, just scroll
+
+            int adj = vbar.getBlockIncrement();
+            int presentValue = vbar.getValue();
+
+            int maxValue = rows.size() * row_height - canvas.getBounds().height;
+
+            if (presentValue + adj > maxValue)
+              {
+                presentValue = maxValue;
+              }
+            else
+              {
+                presentValue = presentValue + adj;
+              }
+
+            vbar.setValue(presentValue);
+	  }
+      }
+    else if (actionCommand.equals("scrollup"))
+      {
+	if (selectedNode != null)
+	  {
+	    // move our selection down, scrolling if necessary
+
+	    int rowIndex = selectedNode.row;
+
+	    int jumpIncrement = (canvas.getBottomRow() - canvas.getTopRow()) - 1;
+
+	    int newSelectionIndex = rowIndex - jumpIncrement;
+
+	    if (newSelectionIndex <= 0)
+	      {
+		newSelectionIndex = 0;
+	      }
+
+	    moveSelection((treeNode) rows.elementAt(newSelectionIndex));
+
+	    scrollToSelectedRow();
+	    canvas.render();
+	    canvas.repaint();
+	  }
+	else if (vbar_visible)
+	  {
+	    // no selected unit, just scroll
+
+            int adj = vbar.getBlockIncrement();
+            int presentValue = vbar.getValue();
+
+            if (presentValue - adj < 0)
+              {
+                presentValue = 0;
+              }
+            else
+              {
+                presentValue = presentValue - adj;
+              }
+
+            vbar.setValue(presentValue);
+	  }
+      }
+    else if (actionCommand.equals("scrolltop"))
+      {
+	moveSelection((treeNode) rows.elementAt(0));
+	scrollToSelectedRow();
+	canvas.render();
+	canvas.repaint();
+      }
+    else if (actionCommand.equals("scrollbottom"))
+      {
+	moveSelection((treeNode) rows.elementAt(rows.size() - 1));
+	scrollToSelectedRow();
+	canvas.render();
+	canvas.repaint();
+      }
+    else if (actionCommand.equals("right"))
+      {
+	if (selectedNode != null && selectedNode.expandable && !selectedNode.isOpen())
+	  {
+	    expandNode(selectedNode, true);
+	  }
+      }
+    else if (actionCommand.equals("left"))
+      {
+	if (selectedNode != null && selectedNode.expandable && selectedNode.isOpen())
+	  {
+	    contractNode(selectedNode, true);
+	  }
+	else if (selectedNode.getParent() != null)
+	  {
+	    moveSelection(selectedNode.getParent());
+	    canvas.render();
+	    canvas.repaint();
+	  }
+      }
+    else if (actionCommand.equals("enter"))
+      {
+	if (selectedNode != null)
+	  {
+	    if (selectedNode.expandable)
+	      {
+		expandNode(selectedNode, true);
+	      }
+	    else
+	      {
+		doubleClickNode(selectedNode);
+	      }
+	  }
+      }
+  }
+
+  /**
+   * This method scrolls the treeCanvas so that the selected row is
+   * visible.
+   *
+   * This method returns true if a scroll (and redraw) was performed,
+   * false otherwise.
+   */
+
+  private void scrollToSelectedRow()
+  {
+    if (!vbar_visible)
       {
 	return;
       }
 
-    if (menuedNode == null)
+    if (selectedNode.row <= canvas.getTopRow())
       {
-	return;
+	vbar.setValue(row_height * selectedNode.row);
       }
-
-    callback.treeNodeMenuPerformed(menuedNode, e);
-
-    menuedNode = null;
+    else if (selectedNode.row + 1 >= canvas.getBottomRow())
+      {
+	vbar.setValue(row_height * (selectedNode.row + 1) - canvas.getBounds().height);
+      }
   }
 
   /**
@@ -1532,76 +1772,53 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
   }
 
-  // KeyListener
-
-  public void keyPressed(KeyEvent e)
+  private void initializeKeyboardActions()
   {
-    System.err.println("Pressed: " + e);
+    InputMap inputMap = getInputMap(JComponent.WHEN_FOCUSED);
 
-    int adj, maxValue, presentValue = 0;
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0), "unitdown");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), "unitdown");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), "unitup");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), "unitup");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0), "scrolldown");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0), "scrollup");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), "scrolltop");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0), "scrollbottom");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "right");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, 0), "right");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "left");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0), "left");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter");
 
-    if (e.isActionKey() && vbar_visible)
-      {
-        switch (e.getKeyCode())
-          {
-          case KeyEvent.VK_PAGE_DOWN:
+    ActionMap actionMap = getActionMap();
 
-            adj = vbar.getBlockIncrement();
-            presentValue = vbar.getValue();
-
-            maxValue = rows.size() * row_height - canvas.getBounds().height;
-
-            if (presentValue + adj > maxValue)
-              {
-                presentValue = maxValue;
-              }
-            else
-              {
-                presentValue = presentValue + adj;
-              }
-
-            vbar.setValue(presentValue);
-
-            break;
-
-          case KeyEvent.VK_PAGE_UP:
-
-            adj = vbar.getBlockIncrement();
-            presentValue = vbar.getValue();
-
-            if (presentValue - adj < 0)
-              {
-                presentValue = 0;
-              }
-            else
-              {
-                presentValue = presentValue - adj;
-              }
-
-            vbar.setValue(presentValue);
-
-            break;
-
-          case KeyEvent.VK_HOME:
-            vbar.setValue(0);
-            break;
-
-          case KeyEvent.VK_END:
-            maxValue = rows.size() * row_height - canvas.getBounds().height;
-            vbar.setValue(maxValue);
-            break;
-          }
-      }
+    actionMap.put("unitdown", new treeControlAction("unitdown", this));
+    actionMap.put("unitup", new treeControlAction("unitup", this));
+    actionMap.put("scrolldown", new treeControlAction("scrolldown", this));
+    actionMap.put("scrollup", new treeControlAction("scrollup", this));
+    actionMap.put("scrolltop", new treeControlAction("scrolltop", this));
+    actionMap.put("scrollbottom", new treeControlAction("scrollbottom", this));
+    actionMap.put("right", new treeControlAction("right", this));
+    actionMap.put("left", new treeControlAction("left", this));
+    actionMap.put("enter", new treeControlAction("enter", this));
   }
 
-  public void keyReleased(KeyEvent e)
-  {
-    System.err.println("Released: " + e);
-  }
+  private class treeControlAction extends javax.swing.AbstractAction {
 
-  public void keyTyped(KeyEvent e)
-  {
-    System.err.println("Typed: " + e);
+    private treeControl tree;
+
+    public treeControlAction(String name, treeControl tree)
+    {
+      super(name);
+
+      this.tree = tree;
+    }
+
+    public void actionPerformed(ActionEvent e)
+    {
+      ActionEvent ae = new ActionEvent(tree, 0, (String) getValue(NAME));
+      tree.actionPerformed(ae);
+    }
   }
 }
 
@@ -1717,7 +1934,6 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     addMouseListener(this);
     addMouseMotionListener(this);
-    addKeyListener(ctrl);
 
     ctrl.maxWidth = ctrl.minWidth;
   }
@@ -1807,6 +2023,44 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   public void update(Graphics g)
   {
     paint(g);
+  }
+
+  /**
+   * This method returns the index of the top-most visible row in the
+   * table.
+   */
+
+  int getTopRow()
+  {
+    int v_offset;
+
+    if (ctrl.vbar_visible)
+      {
+	v_offset = ctrl.vbar.getValue();
+      }
+    else
+      {
+	v_offset = 0;
+      }
+
+    return v_offset / ctrl.row_height;
+  }
+
+  /**
+   * This method returns the index of the bottom-most visible row in the
+   * table.
+   */
+
+  int getBottomRow()
+  {
+    int result = getTopRow() + (getBounds().height / ctrl.row_height) + 1;
+
+    if (result > ctrl.rows.size())
+      {
+	result = ctrl.rows.size();
+      }
+
+    return result;
   }
 
   /* ----------------------------------------------------------------------
@@ -2244,6 +2498,8 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
     int x, y;
 
     /* -- */
+
+    ctrl.requestFocus();
 
     x = e.getX();
     y = e.getY();
