@@ -1424,8 +1424,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	  {
 	    contractNode(selectedNode, false);
             scrollToSelectedRow();
-	    canvas.render();
-	    canvas.repaint();
+            refresh();
 	  }
 	else if (selectedNode.getParent() != null)
 	  {
