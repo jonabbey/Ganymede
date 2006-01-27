@@ -1468,7 +1468,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
         if (selectedNode != null)
           {
             int x = 50;
-            int y = selectedNode.row * row_height + canvas.v_offset + (row_height / 2);
+            int y = selectedNode.row * row_height - canvas.v_offset + (row_height / 2);
             treeNode tempNode = selectedNode;
 
             while (tempNode != null)
