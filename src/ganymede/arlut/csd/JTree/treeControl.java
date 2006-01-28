@@ -1914,14 +1914,14 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   protected int tabStep = 20;
   private int iconTextSpacing = 3;
 
+  private int boxSize = 10;
+
   private Image plusBox = null;
   private Image minusBox = null;
 
   private Image backing;
   private Rectangle backing_rect;
   private Graphics bg;
-
-  private int lastMaxWidth;
 
   private Rectangle boundingBox = null;
   private Point spriteLoc = null;
@@ -2226,9 +2226,6 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	bottom_row = ctrl.rows.size() - 1;
       }
 
-    lastMaxWidth = ctrl.maxWidth;
-    //    ctrl.maxWidth = ctrl.minWidth;
-
     for (int i = top_row; i <= bottom_row; i ++)
       {
 	node = (treeNode) ctrl.rows.elementAt(i);
@@ -2250,15 +2247,6 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
 	drawRow(node, i, drawVector);
       }
-
-    if (lastMaxWidth != ctrl.maxWidth)
-      {
-	ctrl.reShape();
-	render();
-	ctrl.invalidate();
-      }
-
-    //    ctrl.dumpRows();
   }
 
   /*-------------------------------
@@ -2498,9 +2486,8 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
       {
 	if (debug)
 	  {
-	    System.err.println("Setting maxWidth to " + x2);
+	    System.err.println("Width overrun in drawRow for node " + node);
 	  }
-	ctrl.maxWidth = x2;
       }
   }
 
@@ -2518,15 +2505,13 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
     treeNode node;
     Vector drawVector;
 
-    Image temp;
-
     /* -- */
 
     ctrl.maxWidth = ctrl.minWidth;
 
     synchronized (ctrl.rows)
       {
-        for (int i = 0; i <= ctrl.rows.size(); i ++)
+        for (int i = 0; i < ctrl.rows.size(); i ++)
           {
             node = (treeNode) ctrl.rows.elementAt(i);
 
@@ -2545,7 +2530,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
                 drawVector = node.parent.childStack;
               }
 
-            x = leftSpacing + (minusBox.getWidth(this) / 2) - h_offset;
+            x = leftSpacing + (boxSize / 2) + tabStep;
 
             if (drawVector != null)
               {
@@ -2554,9 +2539,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
             imageIndex = node.expanded ? node.openImage : node.closedImage;
 
-            temp = images[imageIndex];
-
-            x = x + temp.getWidth(this)/2 + iconTextSpacing + fontMetric.stringWidth(node.text);
+            x = x + images[imageIndex].getWidth(this)/2 + iconTextSpacing + fontMetric.stringWidth(node.text);
 
             if (x > ctrl.maxWidth)
               {
@@ -2578,15 +2561,14 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   boolean buildBoxes()
   {
     Graphics g;
-    int size = 9;  // the size of our box inside our image
 
     /* -- */
 
-    int midpoint = (size+1)/2;
+    int midpoint = boxSize/2;
     int p1 = 1;
-    int p2 = size;
+    int p2 = boxSize - 1;
 
-    plusBox = this.createImage(size+1,size+1);
+    plusBox = this.createImage(boxSize,boxSize);
 
     // it's possible we're being called before our peer is really
     // ready for us to create images.. if so, we'll just return
@@ -2602,7 +2584,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
     // how do we know what color we're going to clear this to?
 
     g.setColor(bgColor);
-    g.fillRect(0,0, size+1, size+1);
+    g.fillRect(0,0, boxSize, boxSize);
 
     g.setColor(Color.black);
     g.drawRect(p1, p1, p2-1, p2-1);
@@ -2612,11 +2594,11 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     g.drawLine(midpoint, p1 + 2, midpoint, p2 - 2);
 
-    minusBox = createImage(size+1,size+1);    
+    minusBox = createImage(boxSize, boxSize);
     g = minusBox.getGraphics();
 
     g.setColor(bgColor);
-    g.fillRect(0,0, size+1, size+1);
+    g.fillRect(0,0, boxSize, boxSize);
 
     g.setColor(Color.black);
     g.drawRect(p1, p1, p2 - 1, p2 - 1);
