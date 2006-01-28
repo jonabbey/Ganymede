@@ -1437,9 +1437,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       {
 	if (selectedNode != null && selectedNode.expandable && selectedNode.isOpen())
 	  {
-	    contractNode(selectedNode, false);
-            scrollToSelectedRow();
-            refresh();
+	    contractNode(selectedNode, true);
 	  }
 	else if (selectedNode.getParent() != null)
 	  {
@@ -1622,6 +1620,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     // calculate whether we need scrollbars
 
     // check to see if we need a horizontal scrollbar
+
+    canvas.calcWidth();
 
     if (canvas.getBounds().width < maxWidth)
       {
@@ -2302,6 +2302,17 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
   -------------------------------*/ 
 
+  /**
+   * drawRow() is the internal rendering method for each row of the
+   * treeControl.
+   *
+   * @param node The treeNode corresponding to the row to be drawn
+   * @param row The row's number in the overall tree's list of rows
+   * @param s A Stack containing LINE and SPACE objects that need to
+   * precede the icon and text for this node.  We use this draw Stack
+   * to properly render the containment graphics for this row.
+   */
+
   void drawRow(treeNode node, int row, Vector s)
   {
     int 
@@ -2333,6 +2344,17 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     horizLine = (ctrl.row_height * row) +
       rowLeading + (int) (rowAscent*.75) - v_offset;
+
+    if (plusBox == null || minusBox == null)
+      {
+	// buildBoxes will return false if our peer isn't
+	// ready for us to create images
+
+	if (!buildBoxes())
+	  {
+	    return;
+	  }
+      }
 
     x1 = x2 = leftSpacing + (minusBox.getWidth(this) / 2) - h_offset;
 
@@ -2480,6 +2502,70 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	  }
 	ctrl.maxWidth = x2;
       }
+  }
+
+  /**
+   * This method calculates the maximum width required for the tree in
+   * its current state.
+   */
+
+  int calcWidth()
+  {
+    int 
+      x,
+      imageIndex;		
+
+    treeNode node;
+    Vector drawVector;
+
+    Image temp;
+
+    /* -- */
+
+    ctrl.maxWidth = ctrl.minWidth;
+
+    synchronized (ctrl.rows)
+      {
+        for (int i = 0; i <= ctrl.rows.size(); i ++)
+          {
+            node = (treeNode) ctrl.rows.elementAt(i);
+
+            if (node.parent == null)
+              {
+                drawVector = null;
+              }
+            else if (node.parent.childStack == null)
+              {
+                node.parent.childStack = new Stack();
+                recursiveGenStack(node.parent, node.parent.childStack);
+                drawVector = node.parent.childStack;
+              }
+            else
+              {
+                drawVector = node.parent.childStack;
+              }
+
+            x = leftSpacing + (minusBox.getWidth(this) / 2) - h_offset;
+
+            if (drawVector != null)
+              {
+                x = x + tabStep * drawVector.size();
+              }
+
+            imageIndex = node.expanded ? node.openImage : node.closedImage;
+
+            temp = images[imageIndex];
+
+            x = x + temp.getWidth(this)/2 + iconTextSpacing + fontMetric.stringWidth(node.text);
+
+            if (x > ctrl.maxWidth)
+              {
+                ctrl.maxWidth = x;
+              }
+	  }
+      }
+
+    return ctrl.maxWidth;
   }
 
   /*----------------------------------------------------------
