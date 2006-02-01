@@ -847,7 +847,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     for (int i = 0; i < rows.size(); i++)
       {
 	p = (treeNode) rows.elementAt(i);
+
 	System.err.print("row " + i + ": " + p.text + ", ");
+
 	if (p.parent != null)
 	  {
 	    System.err.println(p.parent.childStack.size() + "levels in");
@@ -1544,7 +1546,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	bounding_rect.height = height;
 
 	reShape();
-
       }
 
     if (width > rect.width || height > rect.height) 
@@ -2507,6 +2508,11 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     /* -- */
 
+    if (debug)
+      {
+        System.err.println("entering calcWidth()");
+      }
+
     ctrl.maxWidth = ctrl.minWidth;
 
     synchronized (ctrl.rows)
@@ -2514,6 +2520,11 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
         for (int i = 0; i < ctrl.rows.size(); i ++)
           {
             node = (treeNode) ctrl.rows.elementAt(i);
+
+            if (debug && node.row != i)
+              {
+                System.err.println("ASSERT! node's row is " + node.row + ", not " + i);
+              }
 
             if (node.parent == null)
               {
@@ -2543,6 +2554,14 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
             if (x > ctrl.maxWidth)
               {
+                if (debug)
+                  {
+                    System.err.println("\nmax row width found at " + node.text);
+                    System.err.println("old width = " + ctrl.maxWidth);
+                    System.err.println("new width = " + x);
+                    System.err.println("----------");
+                  }
+
                 ctrl.maxWidth = x;
               }
 	  }
