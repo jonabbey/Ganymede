@@ -206,7 +206,7 @@ public class PackageResources {
     
     return stream;
   }
-  
+
   /**
    * <p>Loads an image by its filename from either CLASSPATH or a jar file,
    * depending on how the code calling this method was run.</p>
@@ -225,6 +225,21 @@ public class PackageResources {
     /* -- */
 
     url = getPackageResource(imageName, refClass);
+    return getImageResource(comp, url);
+  }
+
+  /**
+   * <p>Loads an image by its filename from either CLASSPATH or a jar file,
+   * depending on how the code calling this method was run.</p>
+   *
+   * @param comp Parent component, used for Util.waitforimage
+   * @param url URL of the image to load
+   */
+
+  public static Image getImageResource(Component comp, URL url) 
+  {
+    Image image = null;
+    Component ptr;
 
     if (context == null && !nevertryagain)
       {
@@ -267,7 +282,7 @@ public class PackageResources {
       }
     catch (NullPointerException ex)
       {
-	throw new RuntimeException("caught nullptr trying to load image " + imageName + ", url = " + url);
+	throw new RuntimeException("caught nullptr trying to load image, url = " + url);
       }
 
     if (debug)
