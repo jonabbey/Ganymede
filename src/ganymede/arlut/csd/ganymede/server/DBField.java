@@ -1163,6 +1163,18 @@ public abstract class DBField implements Remote, db_field {
 	  {
 	    return newRetVal;
 	  }
+
+        if (newRetVal != null)
+          {
+            if (retVal != null)
+              {
+                retVal.unionRescan(newRetVal);
+              }
+            else
+              {
+                retVal = newRetVal;
+              }
+          }
       }
 
     // check to see if we can do the namespace manipulations implied by this
@@ -1525,6 +1537,18 @@ public abstract class DBField implements Remote, db_field {
 	  {
 	    return newRetVal;
 	  }
+
+	if (newRetVal != null)
+	  {
+            if (retVal != null)
+              {
+                retVal.unionRescan(newRetVal);
+              }
+            else
+              {
+                retVal = newRetVal;
+              }
+	  }
       }
 
     // okay, we're going to proceed.. unless there's a namespace
@@ -1762,6 +1786,18 @@ public abstract class DBField implements Remote, db_field {
 	  {
 	    return newRetVal;
 	  }
+
+        if (newRetVal != null)
+          {
+            if (retVal != null)
+              {
+                retVal.unionRescan(newRetVal);
+              }
+            else
+              {
+                retVal = newRetVal;
+              }
+          }
       }
 
     ns = getNameSpace();
