@@ -208,6 +208,8 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	// objects.
 
 	selectedObjectName = selectedNode.getHandle().getLabel();
+
+        selectedFound = true;
       }
     else
       {
