@@ -285,6 +285,14 @@ public class SyncRunner implements Runnable {
 
   private booleanSemaphore needBuild = new booleanSemaphore(true);
 
+  /**
+   * This semaphore controls whether or not this SyncRunner will
+   * attempt to write out transactions.  This semaphore is disabled
+   * when this Sync Channel is disabled in the admin console.
+   */
+
+  private booleanSemaphore active = new booleanSemaphore(true);
+
   /* -- */
 
   public SyncRunner(DBObject syncChannel)
@@ -360,6 +368,18 @@ public class SyncRunner implements Runnable {
     return this.transactionNumber;
   }
 
+  /**
+   * This method is used to enable or disable this sync channel's
+   * writing of transactions to disk.  Turning this channel's output
+   * off may be useful when the sync channel is manually disabled in
+   * the admin console.
+   */
+
+  public void setActive(boolean state)
+  {
+    this.active.set(state);
+  }
+
   public String getName()
   {
     return name;
@@ -424,6 +444,11 @@ public class SyncRunner implements Runnable {
   public void writeSync(DBJournalTransaction transRecord, DBEditObject[] objectList,
 			DBEditSet transaction) throws IOException
   {
+    if (!this.active.isSet())
+      {
+        return;
+      }
+
     XMLDumpContext xmlOut = null;
 
     /* -- */

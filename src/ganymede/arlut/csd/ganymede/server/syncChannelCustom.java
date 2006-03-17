@@ -483,8 +483,8 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
   public void commitPhase2()
   {
-    String origName = null, channelName = null;
-    int origType = 0, type = 0;
+    String origName = null;
+    int origType = 0;
 
     /* -- */
 
@@ -493,9 +493,6 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	origName = (String) original.getFieldValueLocal(SchemaConstants.SyncChannelName);
 	origType = ((Integer) original.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
       }
-
-    channelName = (String) getFieldValueLocal(SchemaConstants.SyncChannelName);
-    type = ((Integer) getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
 
     switch (getStatus())
       {
