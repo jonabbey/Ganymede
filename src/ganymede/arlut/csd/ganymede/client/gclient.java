@@ -5759,7 +5759,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    InvidNode invidN = (InvidNode)node;
 	    Invid invid = invidN.getInvid();
 
-	    deleteObject(invid, true);
+            if ((event.getModifiers() & java.awt.event.ActionEvent.SHIFT_MASK) != 0)
+              {
+                deleteObject(invid, false); // don't prompt for confirmation
+              }
+            else
+              {
+                deleteObject(invid, true);
+              }
 	  }
       }
     else if (event.getActionCommand().equals(inactivate_pop_action))
