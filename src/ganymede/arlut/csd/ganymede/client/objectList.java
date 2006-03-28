@@ -132,7 +132,15 @@ public class objectList {
     /* -- */
 
     invids = new Hashtable();
-    handles = result.getHandles(); // pre-sorted
+
+    if (result == null)
+      {
+        handles = new Vector();
+      }
+    else
+      {
+        handles = result.getHandles(); // pre-sorted
+      }
 
     sorted = true;
 
@@ -203,6 +211,11 @@ public class objectList {
     if (containsNonEditable)
       {
 	throw new IllegalArgumentException("already contains non-editables");
+      }
+
+    if (result == null)
+      {
+        return;
       }
 
     localhandles = result.getHandles();
