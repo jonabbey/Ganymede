@@ -115,8 +115,6 @@ public class JstringArea extends JScrollPane implements FocusListener {
 
   public JstringArea(int rows, int columns) 
   {
-    addFocusListener(this);
-
     // create myTextArea to put inside the JScrollPane, JScrollPane
     // fits to area size
 
@@ -216,7 +214,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
 
     try
       {
-	// if nothing in the JstringField has changed,
+	// if nothing in the JstringArea has changed,
 	// we don't need to worry about this event.
     
 	str = getText();
@@ -458,7 +456,8 @@ class myTextArea extends JTextArea
   {
     super(rows,cols);
     this.my_parent = x;
-    enableEvents(AWTEvent.KEY_EVENT_MASK); 
+    enableEvents(AWTEvent.KEY_EVENT_MASK);
+    addFocusListener(x);
   }
   
   /**
