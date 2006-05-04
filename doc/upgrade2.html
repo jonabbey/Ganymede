@@ -11,7 +11,7 @@
 
       <div id="title">
         <h1>Ganymede 2.0 Upgrade Guide</h1>
-        <p>Release 2.0 dev - ? ? 2005<br/>$Rev$</FONT></p>
+        <p>Release 2.0 dev - May 31, 2006<br/>$Rev$</FONT></p>
       </div>
 
       <div id="abstract">
@@ -23,9 +23,67 @@
       <p>By <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></p>
     </div>
 
-    <h2>Introducing Ganymede 2.0</h2>
+    <h2>Welcome to Ganymede 2.0</h2>
 
-    <h2>New Features</h2>
+    <p>While Ganymede 2.0 is more similar to Ganymede 1.0 than it is
+    different, the 2.0 series is the product of nearly ten years of
+    development and refinement, and essentially every facet of the
+    product has been polished to a high shine, relative to the
+    Ganymede 1.0 releases.</p>
+
+    <p>The major functional differences between the Ganymede 1.0
+    series and Ganymede 2.0 are as follows:</p>
+
+    <ul>
+      <li>All RMI client/server communications are now SSL encrypted.</li>
+
+      <li>Ganymede 2.0 supports a new <a
+      href="synchronization/index.html">incremental XML build
+      system</a> that can enqueue directory changes for transmission
+      to external directory services that support discrete change
+      commands.</li>
+
+      <li>Ganymede 2.0 has an <a
+      href="querylanguage/index.html">SQL-like textual query
+      language</a> which is available for programming in the Ganymede
+      framework, as well as for doing direct queries with the <a
+      href="xml/xmlclient.html">xmlclient</a>.</li>
+      
+      <li>Scalability and performance is now very significantly
+      improved, particularly in XML processing.  Memory usage of the
+      server has been reduced by at least 15%.</li>
+
+      <li>A number of changes have been made to the Ganymede data
+      model and APIs to ensure correct and predictable behavior,
+      including a new requirement that all objects have guaranteed
+      unique labels.  There were some minor changes to the XML schema
+      used for data dumping and loading as well.</li>
+
+      <li>A significant number of fit, polish, and reliability
+      improvements have been made to every part of the Ganymede
+      product.</li>
+
+      <li>The entire source code tree has been refactored for clarity,
+      and the build system is now based on Ant.</li>
+
+      <li>The Ganymede client, server, and admin console are
+      internationalized, and all user-facing message strings have been
+      pulled into language-specific resource files to support easy
+      translation.</li>
+
+      <li>Ganymede now requires Java 1.4 or later, and can be built
+      and deployed properly with Sun's Java 1.4, 5.x, or 6.x.</li>
+
+      <li>Ganymede is now a U.S. registered trademark of The
+      University of Texas at Austin.</li>
+    </ul>
+
+    <p>For a comprehensive list of changes in the 2.0 release, please
+    see the <a href="../CHANGES">CHANGES</a> file.  You should be
+    especially sure to consult this file if you have any previous
+    programming experience with the Ganymede framework, as a good
+    number of minor changes have accumulated over the last few
+    years.</p>
 
     <h2>Schema Changes</h2>
 
