@@ -1,5 +1,5 @@
-Ganymede Release 2.0 dev
-?? ?, 2005
+Ganymede Release 2.0
+May 31, 2006
 README.source
 
 Last Revision Changed: $Rev$
@@ -10,33 +10,49 @@ SVN URL: $HeadURL$
 ---------------------------------------------
 
 This release of Ganymede includes full sources for everything, with
-the exception of certain classes provided from the ANTLR and GNU
-regexp projects.
+the exception of certain classes provided from the ANTLR, GNU regexp,
+and Jython projects.
 
-By default, the Ganymede distribution comes without any of the Ganymede
-code compiled into classes and Jar files.  The first time you run configure,
-the Ganymede tree will be built for you and turned into Jar files.
+By default, the Ganymede distribution comes without any of the actual
+Ganymede code compiled into classes and Jar files.  The first time you
+run configure, the Ganymede tree will be built for you and turned into
+Jar files.
 
 Thereafter, if you want to mess with the source and rebuild, here's
 what you do:
 
 1. cd src
 
-3. Run 'ant'.  This will compile the classes for all of the
-   source code in the source tree.  Once this completes, you
-   can set your CLASSPATH to <install>/src/build/classes and run
-   the Ganymede tools.
+2. Run 'ant'.  This will compile the classes for all of the
+   source code in the source tree.  Once this completes, any
+   source files that have been changed since the initial configure
+   will be recompiled, and their class files placed under
+   src/build/classes.
 
    You shouldn't see any errors or warnings during the build.
 
-4. Run 'ant jars'.  This will recreate the 4 jar files used by
+3. Run 'ant jars'.  This will recreate the 4 jar files used by
    the installation scripts.
 
-5. Copy your new jar files into your server and client jars
-   directories.
+4. Copy your new jar files into your pre-existing server and client
+   jars directories.
 
-Note that the Ant build file has a lot of possible operations.  To
-find out more about what you can do to the Ganymede source tree with
-Ant, run 'ant help' in the src directory, or read the build.xml file
-in src for more details.
+Keep in mind that Ganymede 2.0 includes cryptographic material in the
+jar files it generates, and the client and server jar files must be
+cryptographically mated.  Upon the first build of your jar files,
+these unique cryptographic materials will be created and stored in
+src/build/crypto, and all jar files created from this tree thereafter
+will re-use this material as needed.  You can't just take a client.jar
+file built from an arbitrary Ganymede src tree and expect it to work
+with a server.jar file produced from a different copy of the src tree.
 
+The Ant build file has a lot of possible options and operations,
+including some that deal specifically with the production of the
+cryptographic materials.  
+
+To find out more about what you can do to the Ganymede source tree
+with Ant, run 'ant help' in the src directory, or read the build.xml
+file in src for more details.
+
+Jonathan Abbey
+jonabbey@arlut.utexas.edu

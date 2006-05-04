@@ -1,5 +1,5 @@
-Ganymede Release 2.0 dev
-?? ?, 2005
+Ganymede Release 2.0
+May 31, 2006
 README.first
 
 Last Revision Changed: $Rev$
@@ -9,7 +9,7 @@ SVN URL: $HeadURL$
 
 ---------------------------------------------
 
-Welcome.  This thing that you just downloaded is version 2.0 (dev) of
+Welcome.  This thing that you just downloaded is version 2.0 of
 the Ganymede network directory management system.
 
 This archive contains the Ganymede server, clients, and documentation.

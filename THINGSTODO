@@ -1,5 +1,5 @@
-Ganymede Release 2.0 dev
-?? ?, 2004
+Ganymede Release 2.0
+May 31, 2006
 THINGSTODO
 
 Last Revision Changed: $Rev$
@@ -11,21 +11,24 @@ SVN URL: $HeadURL$
 
 0) Scalability issues
 
-Right now, the Ganymede server loads all data managed into
-memory.  This is reasonably efficient with a good generational garbage
+Right now, the Ganymede server loads all data managed into memory.
+This is reasonably efficient with a good generational garbage
 collector, but it's possible that using a random access binary file
 for the database, when combined with an in-memory cache system using
-the JDK 1.2 weak references API could give better scalability.  Memory
-is cheap these days, so the Ganymede design isn't too bad for
-our purposes and size, but it might be good to experiment with the
-basic engine to see whether things can be made more scalable with 1.2.
+the Java weak references API could give better scalability.  Memory is
+cheap these days, so the Ganymede design isn't too bad for our
+purposes and size, but it might be good to experiment with the basic
+engine to see whether things can be made more scalable, particularly
+with the new, and highly efficient Ganymede 2.0 sync channel
+mechanisms.
 
-In addition, the client has some scalability issues.  In particular,
-there are places where the client will generate pop-up choice lists
-with hundreds if not thousands of choices in them.  This is not
-workable from a user interface perspective, and may be a real burden
-on the client's memory.  For real scalability it might be better to
-require the user to manually type in items when the lists get too big.
+Of course, the client has some important scalability issues.  In
+particular, there are places where the client will generate pop-up
+choice lists with hundreds if not thousands of choices in them.  This
+is not workable from a user interface perspective, and may be a real
+burden on the client's memory.  For real scalability it might be
+better to require the user to manually type in items when the lists
+get too big.
 
 1) Documentation/Help
 
