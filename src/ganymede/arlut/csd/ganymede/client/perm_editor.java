@@ -280,16 +280,28 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
       }
 
     // OK/Cancel buttons
-    
-    OkButton.addActionListener(this);
-    CancelButton.addActionListener(this);
- 
-    Choice_Buttons = new JPanel(); 
-    Choice_Buttons.setLayout(new GridLayout(1,2));
-    Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
-    Choice_Buttons.add(OkButton);
-    Choice_Buttons.add(CancelButton);
 
+    if (enabled)
+      {
+        OkButton.addActionListener(this);
+        CancelButton.addActionListener(this);
+ 
+        Choice_Buttons = new JPanel(); 
+        Choice_Buttons.setLayout(new GridLayout(1,2));
+        Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
+        Choice_Buttons.add(OkButton);
+        Choice_Buttons.add(CancelButton);
+      }
+    else
+      {
+        OkButton.setText(ts.l("global.closeButton"));
+        OkButton.addActionListener(this);
+ 
+        Choice_Buttons = new JPanel(); 
+        Choice_Buttons.setLayout(new GridLayout(1,1));
+        Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
+        Choice_Buttons.add(OkButton);
+      }
 
     // Expand/Collapse Buttons
 

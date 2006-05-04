@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -77,8 +77,9 @@ import arlut.csd.ganymede.rmi.*;
  * This class displays the client "widget" that allows a user to edit the
  * field options for a particular builder task. It's modeled loosely after
  * the permissions editor widget, and uses the same TreeTable component.
- **/
-class fieldoption_editor extends JFrame 
+ */
+
+public class fieldoption_editor extends JFrame 
 {
   /**
    * TranslationService object for handling string localization in
@@ -138,8 +139,8 @@ class fieldoption_editor extends JFrame
    * @param parent The frame we are attaching this dialog to
    * @param DialogTitle The title for this dialog box
    */
-  public fieldoption_editor (field_option_field opField, boolean editable, gclient gc,
-		             Frame parent, String DialogTitle)
+  public fieldoption_editor(field_option_field opField, boolean editable, gclient gc,
+                            Frame parent, String DialogTitle)
   {
     super(DialogTitle);
 
@@ -170,10 +171,21 @@ class fieldoption_editor extends JFrame
     
     /* Group the OK and Cancel buttons together */
     Choice_Buttons = new JPanel(); 
-    Choice_Buttons.setLayout(new GridLayout(1,2));
-    Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
-    Choice_Buttons.add(OkButton);
-    Choice_Buttons.add(CancelButton);
+
+    if (editable)
+      {
+        Choice_Buttons.setLayout(new GridLayout(1,2));
+        Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
+        Choice_Buttons.add(OkButton);
+        Choice_Buttons.add(CancelButton);
+      }
+    else
+      {
+        Choice_Buttons.setLayout(new GridLayout(1,1));
+        Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
+        OkButton.setText(ts.l("global.closeButton")); // "Close"
+        Choice_Buttons.add(OkButton);
+      }
 
     /* Group the Expand and Collapse buttons together */
     Expansion_Buttons = new JPanel(); 
@@ -242,13 +254,27 @@ class fieldoption_editor extends JFrame
     getContentPane().add("Center", Bordered_Panel);
 
     /* Register event handlers */
-    OkButton.addActionListener(new ActionListener()
-                               {
-                                 public void actionPerformed(ActionEvent e)
-                                   {
-                                     commitChanges();
-                                   }
-                               });
+    
+    if (editable)
+      {
+        OkButton.addActionListener(new ActionListener()
+          {
+            public void actionPerformed(ActionEvent e)
+            {
+              commitChanges();
+            }
+          });
+      }
+    else
+      {
+        OkButton.addActionListener(new ActionListener()
+          {
+            public void actionPerformed(ActionEvent e)
+            {
+              myshow(false);
+            }
+          });
+      }
 
     CancelButton.addActionListener(new ActionListener()
                                    {
