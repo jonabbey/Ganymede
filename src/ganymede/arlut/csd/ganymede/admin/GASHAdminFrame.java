@@ -1167,16 +1167,23 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    return;
 	  }
 
-	schemaMI.setEnabled(false);
-
 	try
 	  {
+            schemaMI.setEnabled(false);
+
 	    GASHAdminFrame.schemaEditor = adminDispatch.pullSchema();
 	  }
 	catch (RemoteException ex)
 	  {
 	    exceptionHandler(ex);
 	  }
+        finally
+          {
+            if (GASHAdminFrame.schemaEditor == null)
+              {
+                schemaMI.setEnabled(true);
+              }
+          }
       }
     else if (event.getSource() == showAboutMI)
       {
