@@ -974,15 +974,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    if (field instanceof invid_field)
 	      {
-		relabelInvidComponent(element, invid, newLabel);
+		relabelInvidComponent((invid_field)field, element, invid, newLabel);
 	      }
 	  }
-
-	/*	if (changed_any)
-	  {
-	    invalidate();
-	    frame.validate();
-	    }*/
       }
     finally
       {
@@ -995,7 +989,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
   }
 
-  private void relabelInvidComponent(Component element, Invid invid, String newLabel)
+  private void relabelInvidComponent(invid_field field, Component element, Invid invid, String newLabel)
   {
     if (element instanceof StringSelector)
       {
@@ -1007,8 +1001,17 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
     else if (element instanceof JButton)
       {
-	((JButton) element).setText(newLabel);
-	//	element.repaint();
+        try
+          {
+            if (field.getValue().equals(invid))
+              {
+                ((JButton) element).setText(newLabel);
+              }
+          }
+        catch (RemoteException ex)
+          {
+            gc.processExceptionRethrow(ex);
+          }
       }
   }
 
