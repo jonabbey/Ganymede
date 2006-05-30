@@ -1600,6 +1600,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Invid userInvid;
     String target;
 
+    int lengthlimit_remaining;
+    int subgroup = 1;
+    String subname;
+
     /* -- */
 
     result.setLength(0);
@@ -1612,6 +1616,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(groupname);
     result.append(":");
 
+    // NIS forces us to a 1024 character limit per key and value, we
+    // need to truncate and extend to match, here.  We'll cut it down
+    // to 900 to give ourselves some slack so we can write out our
+    // chain link at the end of the line
+
+    lengthlimit_remaining = 900 - result.length();
+
     if (group_targets != null)
       {
 	for (int i = 0; i < group_targets.size(); i++)
@@ -1620,10 +1631,39 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
 		result.append(", ");
 	      }
-	    
+
 	    userInvid = (Invid) group_targets.elementAt(i);
-	    
-	    result.append(getLabel(userInvid));
+
+            target = getLabel(userInvid);
+
+            if (2 + target.length() > lengthlimit_remaining)
+              {
+		if (subgroup > 1)
+		  {
+		    subname = groupname + "-gext" + subgroup;
+		  }
+		else
+		  {
+		    subname = groupname + "-gext";
+		  }
+
+                // point to the linked sublist, terminate this entry
+                // line
+
+                result.append(subname);
+                result.append("\n");
+
+                // and initialize the next line, containing the linked
+                // sublist
+
+                result.append(":xxx:");
+                result.append(subname);
+                result.append(":");
+                lengthlimit_remaining = 900 - subname.length() - 6;
+              }
+
+	    result.append(target);
+            lengthlimit_remaining -= target.length();
 	  }
       }
 
@@ -1638,7 +1678,34 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    target = (String) external_targets.elementAt(i);
 
+            if (2 + target.length() > lengthlimit_remaining)
+              {
+		if (subgroup > 1)
+		  {
+		    subname = groupname + "-gext" + subgroup;
+		  }
+		else
+		  {
+		    subname = groupname + "-gext";
+		  }
+
+                // point to the linked sublist, terminate this entry
+                // line
+
+                result.append(subname);
+                result.append("\n");
+
+                // and initialize the next line, containing the linked
+                // sublist
+
+                result.append(":xxx:");
+                result.append(subname);
+                result.append(":");
+                lengthlimit_remaining = 900 - subname.length() - 6;
+              }
+
 	    result.append(target);
+            lengthlimit_remaining -= target.length();
 	  }
       }
 
