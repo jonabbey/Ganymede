@@ -1663,7 +1663,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
 
 	    result.append(target);
-            lengthlimit_remaining -= target.length();
+            lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
 	  }
       }
 
@@ -1705,7 +1705,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
 
 	    result.append(target);
-            lengthlimit_remaining -= target.length();
+            lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
 	  }
       }
 
