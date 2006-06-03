@@ -202,7 +202,6 @@ refresh the jar files.
     </rmic>
   </target>
 
-
   <target name ="validate">
     <echo>Validating default localization resources
     </echo>
@@ -214,6 +213,9 @@ refresh the jar files.
     </exec>
   </target>
 
+  <!-- I'm always thinking validate is verify, so let's add a verify target, too. -->
+
+  <target name="verify" depends="validate"/>
 
   <target name="jars" depends="main, genkeys">
     <!-- Copy over any jars used in the build -->
