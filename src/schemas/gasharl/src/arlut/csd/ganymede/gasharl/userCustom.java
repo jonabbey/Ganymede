@@ -1010,43 +1010,30 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     // now let's make sure the signature alias is valid
 
-    String signature = (String) getFieldValueLocal(SIGNATURE);
+    String signature = (String) object.getFieldValueLocal(SIGNATURE);
+    String myUsername = (String) object.getLabel();
+    Vector aliases = object.getFieldValuesLocal(ALIASES);
 
-    try
+    if (!StringUtils.stringEquals(signature, myUsername) &&
+        (aliases == null || !aliases.contains(myUsername)))
       {
-        QueryResult aliasesChoices = obtainChoiceList(SIGNATURE);
-
-        if (!aliasesChoices.containsLabel(signature))
-          {
-            return Ganymede.createErrorDialog("Bad Signature Alias",
-                                              "Ganymede server configuration error.  The signature alias (" + signature + ") for this user is " +
-                                              "not a valid choice.");
-          }
-      }
-    catch (NotLoggedInException ex)
-      {
-        throw new RuntimeException(ex); // shouldn't happen
+        return Ganymede.createErrorDialog("Bad Signature Alias",
+                                          "Ganymede server configuration error.  The signature alias (" + signature + ") for this user is " +
+                                          "not a valid choice.");
       }
 
     // and the home group as well
 
-    Invid homeGroupInvid = (Invid) getFieldValueLocal(HOMEGROUP);
-    DBObject homeGroupObj = lookupInvid(homeGroupInvid, false);
+    Invid homeGroupInvid = (Invid) object.getFieldValueLocal(HOMEGROUP);
+    Vector myGroups = object.getFieldValuesLocal(GROUPLIST);
 
-    try
+    if (!myGroups.contains(homeGroupInvid))
       {
-        QueryResult myGroupChoices = obtainChoiceList(HOMEGROUP);
+        DBObject homeGroupObj = object.lookupInvid(homeGroupInvid, false);
 
-        if (!myGroupChoices.containsInvid(homeGroupInvid))
-          {
-            return Ganymede.createErrorDialog("Bad Home Group",
-                                              "Ganymede server configuration error.  The home group (" + homeGroupObj.getLabel() + ") for this user is " +
-                                              "not a valid choice.");
-          }
-      }
-    catch (NotLoggedInException ex)
-      {
-        throw new RuntimeException(ex); // shouldn't happen
+        return Ganymede.createErrorDialog("Bad Home Group",
+                                          "Ganymede server configuration error.  The home group (" + homeGroupObj.getLabel() + ") for this user is " +
+                                          "not a valid choice.");
       }
 
     return null;
