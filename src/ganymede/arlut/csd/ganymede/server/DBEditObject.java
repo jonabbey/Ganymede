@@ -2220,6 +2220,46 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * deadlocks.
    */
 
+  public QueryResult obtainChoiceList(String fieldName) throws NotLoggedInException
+  {
+    return obtainChoiceList((DBField) getField(fieldName));
+  }
+
+  /**
+   * This method provides a hook that can be used to generate
+   * choice lists for invid and string fields that provide
+   * such.  String and Invid DBFields will call their owner's
+   * obtainChoiceList() method to get a list of valid choices.
+   *
+   * This method will provide a reasonable default for targetted
+   * invid fields, filtered by the GanymedeSession's
+   * visibilityFilterInvids list.
+   *
+   * NOTE: This method does not need to be synchronized.  Making this
+   * synchronized can lead to DBEditObject/DBSession nested monitor
+   * deadlocks.
+   */
+
+  public QueryResult obtainChoiceList(short fieldID) throws NotLoggedInException
+  {
+    return obtainChoiceList((DBField) getField(fieldID));
+  }
+
+  /**
+   * This method provides a hook that can be used to generate
+   * choice lists for invid and string fields that provide
+   * such.  String and Invid DBFields will call their owner's
+   * obtainChoiceList() method to get a list of valid choices.
+   *
+   * This method will provide a reasonable default for targetted
+   * invid fields, filtered by the GanymedeSession's
+   * visibilityFilterInvids list.
+   *
+   * NOTE: This method does not need to be synchronized.  Making this
+   * synchronized can lead to DBEditObject/DBSession nested monitor
+   * deadlocks.
+   */
+
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.isEditable() && (field instanceof InvidDBField) && 
