@@ -1015,7 +1015,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Vector aliases = object.getFieldValuesLocal(ALIASES);
 
     if (!StringUtils.stringEquals(signature, myUsername) &&
-        (aliases == null || !aliases.contains(myUsername)))
+        (aliases == null || !aliases.contains(signature)))
       {
         return Ganymede.createErrorDialog("Bad Signature Alias",
                                           "Ganymede server configuration error.  The signature alias (" + signature + ") for this user is " +
