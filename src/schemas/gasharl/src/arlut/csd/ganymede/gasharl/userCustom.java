@@ -72,6 +72,7 @@ import org.doomdark.uuid.UUIDGenerator;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
+import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
@@ -1005,6 +1006,47 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 					      "User objects belonging to the " + categoryName +
 					      " category require an expiration date to be set.");
 	  }
+      }
+
+    // now let's make sure the signature alias is valid
+
+    String signature = (String) getFieldValueLocal(SIGNATURE);
+
+    try
+      {
+        QueryResult aliasesChoices = obtainChoiceList(SIGNATURE);
+
+        if (!aliasesChoices.containsLabel(signature))
+          {
+            return Ganymede.createErrorDialog("Bad Signature Alias",
+                                              "Ganymede server configuration error.  The signature alias (" + signature + ") for this user is " +
+                                              "not a valid choice.");
+          }
+      }
+    catch (NotLoggedInException ex)
+      {
+        throw new RuntimeException(ex); // shouldn't happen
+      }
+
+    // and the home group as well
+
+    Invid homeGroupInvid = (Invid) getFieldValueLocal(HOMEGROUP);
+    DBObject homeGroupObj = lookupInvid(homeGroupInvid, false);
+
+    try
+      {
+        QueryResult myGroupChoices = obtainChoiceList(HOMEGROUP);
+
+        if (!myGroupChoices.containsInvid(homeGroupInvid))
+          {
+            return Ganymede.createErrorDialog("Bad Home Group",
+                                              "Ganymede server configuration error.  The home group (" + homeGroupObj.getLabel() + ") for this user is " +
+                                              "not a valid choice.");
+          }
+      }
+    catch (NotLoggedInException ex)
+      {
+        throw new RuntimeException(ex); // shouldn't happen
       }
 
     return null;
@@ -2074,6 +2116,54 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     return null;		// success by default
+  }
+
+  /**
+   * This method allows the DBEditObject to have executive approval of
+   * any vector delete operation, and to take any special actions in
+   * reaction to the delete.. if this method returns null or a success
+   * code in its ReturnVal, the {@link arlut.csd.ganymede.server.DBField DBField}
+   * that called us is guaranteed to proceed to
+   * make the change to its vector.  If this method returns a
+   * non-success code in its ReturnVal, the DBField that called us
+   * will not make the change, and the field will be left
+   * unchanged.
+   *
+   * The &lt;field&gt; parameter identifies the field that is requesting
+   * approval for item deletion, and the &lt;index&gt; parameter identifies
+   * the element number that is to be deleted.
+   *
+   * The DBField that called us will take care of all standard
+   * checks on the operation (including vector bounds, etc.) before
+   * calling this method.  Under normal circumstances, we won't need
+   * to do anything here.
+   */
+
+  public ReturnVal finalizeDeleteElement(DBField field, int index)
+  {
+    if (field.getID() == ALIASES)
+      {
+        String goneAlias = (String) getFieldElementLocal(field, index);
+
+        String signatureAlias = (String) getFieldValueLocal(SIGNATURE);
+
+        if (!StringUtils.stringEquals(goneAlias, signatureAlias))
+          {
+            return null;        // no worries
+          }
+
+        // okay, they're removing their signature alias from the
+        // aliases field.  Let's force the signature alias back to
+        // their username.
+
+        String username = (String) getFieldValueLocal(USERNAME);
+
+        ReturnVal retVal = setFieldValueLocal(SIGNATURE, username);
+
+        return retVal;
+      }
+
+    return null;
   }
 
   /**
