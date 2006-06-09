@@ -2544,6 +2544,103 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Shortcut method to retrieve a indexed value from a named vector
+   * field in this object.
+   *
+   * Will throw IllegalArgumentException if called on a scalar field.
+   *
+   * This method checks access permissions, and will throw GanyPermissionsException
+   * on an access violation.
+   */
+
+  public Object getFieldElement(String fieldName, int index) throws GanyPermissionsException
+  {
+    return getFieldElement((DBField) getField(fieldName), index);
+  }
+
+  /**
+   * Shortcut method to retrieve a indexed value from a vector
+   * field in this object.
+   *
+   * Will throw IllegalArgumentException if called on a scalar field.
+   *
+   * This method checks access permissions, and will throw GanyPermissionsException
+   * on an access violation.
+   */
+
+  public Object getFieldElement(short fieldID, int index) throws GanyPermissionsException
+  {
+    return getFieldElement((DBField) getField(fieldID), index);
+  }
+
+  /**
+   * Shortcut method to retrieve a indexed value from a named vector
+   * field in this object.
+   *
+   * Will throw IllegalArgumentException if called on a scalar field.
+   *
+   * This method checks access permissions, and will throw GanyPermissionsException
+   * on an access violation.
+   */
+
+  public Object getFieldElement(DBField f, int index) throws GanyPermissionsException
+  {
+    if (f == null)
+      {
+        return null;
+      }
+
+    return f.getElement(index);
+  }
+
+  /**
+   * Shortcut method to retrieve a indexed value from a named vector
+   * field in this object.
+   *
+   * Will throw IllegalArgumentException if called on a scalar field.
+   *
+   * This method does not check access permissions.
+   */
+
+  public Object getFieldElementLocal(String fieldName, int index)
+  {
+    return getFieldElementLocal((DBField) getField(fieldName), index);
+  }
+
+  /**
+   * Shortcut method to retrieve a indexed value from a vector
+   * field in this object.
+   *
+   * Will throw IllegalArgumentException if called on a scalar field.
+   *
+   * This method does not check access permissions.
+   */
+
+  public Object getFieldElementLocal(short fieldID, int index)
+  {
+    return getFieldElementLocal((DBField) getField(fieldID), index);
+  }
+
+  /**
+   * Shortcut method to retrieve a indexed value from a vector
+   * field in this object.
+   *
+   * Will throw IllegalArgumentException if called on a scalar field.
+   *
+   * This method does not check access permissions.
+   */
+
+  public Object getFieldElementLocal(DBField f, int index)
+  {
+    if (f == null)
+      {
+        return null;
+      }
+
+    return f.getElementLocal(index);
+  }
+
+  /**
    * <p>This method is used to provide a hook to allow different
    * objects to generate different labels for a given object
    * based on their perspective.  This is used to sort
