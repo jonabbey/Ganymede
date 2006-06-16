@@ -305,6 +305,19 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
 	backing.flush();	// free old image resources
 	backing = createImage(width, height);
+
+        if (backing == null)
+          {
+            // looks like the graphics context has been pulled from
+            // us.. this can happen if we are embedded in an iconified
+            // internal frame.
+            //
+            // Not much we can do there except return out and wait for
+            // something else to get us to update.
+
+            return;
+          }
+
 	bg = backing.getGraphics();
       }
     else if ((hbar_old != rt.hbar.getValue()) ||
