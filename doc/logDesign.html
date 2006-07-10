@@ -115,7 +115,8 @@ addresses that the event was mailed to.</TD>
 <LI>
  Any human readable string contained within the log file will have
  any embedded | character backslashed.  Any newlines contained within
- a field will be represented in Java style as '\n'.  For instance
+ a field will be represented in Java style as '\n'.  Any actual '\' characters
+ will be rendered as '\\'.  For instance:
 
 <pre>
 879791893|Mon Nov 17 12:38:13 1997|shutdown|||||The server was shutdown for:\nadmin console restart by admin supergash|gomod@arlut.utexas.edu
