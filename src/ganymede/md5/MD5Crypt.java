@@ -258,11 +258,13 @@ public final class MD5Crypt {
    *
    * <p>The resulting string will be in the form '&lt;magic&gt;&lt;salt&gt;$&lt;hashed mess&gt;</p>
    *
-   * @param password Plaintext password @param salt A short string to
-   * use to randomize md5.  May start with the magic string, which
-   * will be ignored.  It is explicitly permitted to pass a
-   * pre-existing MD5Crypt'ed password entry as the salt.  crypt()
-   * will strip the salt chars out properly.
+   * @param password Plaintext password
+   * @param salt A short string to use to randomize md5.  May start
+   * with the magic string, which will be ignored.  It is explicitly
+   * permitted to pass a pre-existing MD5Crypt'ed password entry as
+   * the salt.  crypt() will strip the salt chars out properly.
+   * @param magic Either "$apr1$" or "$1$", which controls whether we
+   * are doing Apache-style or FreeBSD-style md5Crypt.
    * 
    * @return An md5-hashed password string. 
    */
@@ -413,5 +415,33 @@ public final class MD5Crypt {
     clearbits(finalState);
 
     return result.toString();
+  }
+
+  /**
+   * This method tests a plaintext password against a md5Crypt'ed hash and returns
+   * true if the password matches the hash.
+   *
+   * This method will work properly whether the hashtext was crypted
+   * using the default FreeBSD md5Crypt algorithm or the Apache
+   * md5Crypt variant.
+   *
+   * @param plaintextPass The plaintext password text to test.
+   * @param md5CryptText The Apache or FreeBSD-md5Crypted hash used to authenticate the plaintextPass.
+   */
+
+  static public final boolean verifyPassword(String plaintextPass, String md5CryptText)
+  {
+    if (md5CryptText.startsWith("$1$"))
+      {
+        return md5CryptText.equals(MD5Crypt.crypt(plaintextPass, md5CryptText));
+      }
+    else if (md5CryptText.startsWith("$apr1$"))
+      {
+        return md5CryptText.equals(MD5Crypt.apacheCrypt(plaintextPass, md5CryptText));
+      }
+    else
+      {
+        throw new RuntimeException("Bad md5CryptText");
+      }
   }
 }
