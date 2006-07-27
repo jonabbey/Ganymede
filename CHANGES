@@ -534,7 +534,7 @@ of synchronization services.
 
 Previously, all builds were done through the use of the
 GanymedeBuilderTask and its subclasses, using a two phase process.  In
-phase one, portions of Ganymede's internal datastore was locked
+phase one, portions of Ganymede's internal datastore were locked
 against changes while the builder task scanned the database and wrote
 data (usually text files) out to a specified directory.  In phase two,
 the database was unlocked, and the builder task ran an external
