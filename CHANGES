@@ -539,7 +539,7 @@ against changes while the builder task scanned the database and wrote
 data (usually text files) out to a specified directory.  In phase two,
 the database was unlocked, and the builder task ran an external
 synchronization process that used the data files written out by phase
-1.  When external build system finished, the task's execution was
+1.  When the external build system finished, the task's execution was
 complete, and a new build could be scheduled and issued for that same
 task.
 
