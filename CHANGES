@@ -1,5 +1,3 @@
-Test
-
 Ganymede Release 2.0
 July 31, 2006
 CHANGES
@@ -11,11 +9,9 @@ SVN URL: $HeadURL$
 
 ---------------------------------------------
 
-Test
-
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATA: May 31, 2006
+RELEASE DATA: July 31, 2006
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -133,7 +129,7 @@ matched a stored hash format, particularly the 8-character-significant
 traditional UNIX 'crypt' hash function..
 
 Now, passive password capture is back, but it is smart enough not to
-capture plaintext on login if the password is not know from a hash
+capture plaintext on login if the password is not known from a hash
 with adequate specifity.  The whole point of having passive password
 capture is that it enables Ganymede to learn about plaintext from
 interacting with a user, while still allowing us to forego saving
@@ -152,7 +148,7 @@ fixed).
 9. [SERVER, CLIENT] Added SSL support, 1.4 requirement, Firewall friendliness
 
 Added the arlut.csd.ganymede.server.GanymedeRMIManager class to handle
-all RMI exports, which support for SSL encryption of client/server
+all RMI exports, with support for SSL encryption of client/server
 communications through the
 arlut.csd.ganymede.common.RMISSLClientSocketFactory and
 arlut.csd.ganymede.common.RMISSLServerSocketFactory classes.
