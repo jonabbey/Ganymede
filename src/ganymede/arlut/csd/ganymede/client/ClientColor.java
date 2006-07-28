@@ -90,7 +90,7 @@ public class ClientColor {
   public final static Color ButtonPanelBG = Khaki;
   public final static Color ComponentBG = Color.lightGray.brighter();
 
-  public final static Color background = Color.white;
+  public final static Color background = Color.lightGray;
 
   public final static Color desktop = SystemColor.desktop;
   public final static Color menu = SystemColor.menu;
