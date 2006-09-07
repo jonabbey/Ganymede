@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -218,6 +218,11 @@ public class DBEditSet {
    * its checkpoint.  This is to prevent problems resulting from
    * interleaved checkpoint/popCheckpoint/rollback activities across
    * multiple threads.</p>
+   *
+   * <p>Note: This interleave check logic is currently inactivated in
+   * the code.  See the {@link
+   * arlut.csd.ganymede.server.DBEditObject.checkpoint(java.lang.String)}
+   * method source code, below, for details.</p>
    */
 
   private Thread currentCheckpointThread = null;
@@ -1200,7 +1205,9 @@ public class DBEditSet {
     committedObjects = new Vector();
 
     // make a copy of the object references currently in the
-    // transaction.  right now, if an object's preCommitHook() causes
+    // transaction.
+    //
+    // XXX right now, if an object's preCommitHook() causes
     // another object to be pulled into the transaction (as by doing
     // invid linkage operations or discrete remote object editing),
     // those new objects will not have their preCommitHook() run.
@@ -1611,6 +1618,8 @@ public class DBEditSet {
     HashMap fieldsTouched = new HashMap();
 
     /* -- */
+
+    // we serialize transaction commits here
 
     synchronized (dbStore.journal)
       {
