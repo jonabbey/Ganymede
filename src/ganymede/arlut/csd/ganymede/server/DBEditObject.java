@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -127,7 +127,7 @@ import arlut.csd.Util.TranslationService;
  * true static methods, every place in the server where such methods
  * are called would have to use the relatively cumbersome Java
  * Reflection API rather than being able to call methods on a
- * DBEditObject instance.
+ * instance of the appropriate DBEditObject subclass.
  *
  * See the DBEditObject subclassing guide for more information generally on
  * DBEditObject customization.
@@ -178,10 +178,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   /* --------------------- Instance fields and methods --------------------- */
 
   /**
-   * Unless this DBEditObject was newly created, we'll have a reference
-   * to the original DBObject which is currently registered in the DBStore.
-   * Only one DBEditObject can be connected to a DBObject at a time, giving
-   * us object-level locking.
+   * Unless this DBEditObject represents a newly created Ganymede
+   * object, we'll have a reference to the original DBObject which is
+   * currently registered in the DBStore.  Only one DBEditObject can
+   * be connected to a DBObject at a time, giving us object-level
+   * locking.
    */
 
   protected DBObject original;
@@ -197,10 +198,10 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   private booleanSemaphore commitSemaphore = new booleanSemaphore(false);
 
   /**
-   * true if the object is in the middle of carrying
-   * out deletion logic.. consulted by subclasses
-   * to determine whether they should object to fields
-   * being set to null
+   * true if the object is in the middle of carrying out deletion
+   * logic.. consulted by subclasses by way of the {@link
+   * arlut.csd.ganymede.server.DBEditObject#isDeleting()} method to
+   * determine whether they should object to fields being set to null
    */
 
   private boolean deleting = false;	
@@ -254,7 +255,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} instantiated
    * but undefined.
    *
-   * This constructor is not really intended to be overriden in subclasses.
+   * This constructor is not really intended to be overridden in subclasses.
    * Creation time field value initialization is to be handled by
    * initializeNewObject().
    *
@@ -1029,7 +1030,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * This method should be used very sparingly.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1060,7 +1061,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * method for an answer, but will grant additional permissions as
    * appropriate.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1088,7 +1089,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * This method should be used very sparingly.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b> 
    */
@@ -1117,7 +1118,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * method for an answer, but will grant additional permissions as
    * appropriate.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b> 
    */
@@ -1139,7 +1140,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * that session reference may be used by the verifying code if
    * the code needs to access the database.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    *
@@ -1157,7 +1158,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Customization method to control whether a specified field
    * is required to be defined at commit time for a given object.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * Note that this method will not be called if the controlling
    * GanymedeSession's enableOversight is turned off, as in
@@ -1183,7 +1184,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * sensitive check to see if this object feels like being
    * available for viewing to the client.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1207,7 +1208,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * If field is not from an object of the same base as this DBEditObject,
    * an exception will be thrown.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1233,7 +1234,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * sensitive check to see if this object feels like being
    * available for editing by the client.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1247,7 +1248,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Customization method to verify whether this object type has an inactivation
    * mechanism.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1276,7 +1277,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * Use canBeInactivated() to test for the presence of an inactivation
    * protocol outside of an edit context if needed.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1293,7 +1294,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * sensitive check to see if this object feels like being
    * available for removal by the client.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1338,7 +1339,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * this object feels like being available for cloning by the
    * client.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1353,7 +1354,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * in object should be cloned using the basic field-clone
    * logic.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1375,7 +1376,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} for this object type
    * to determine whether creation is allowed to the user.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1408,6 +1409,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * whatever permissions apply to objects owned by the persona active
    * in gSession.
    *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
    * <b>*PSEUDOSTATIC*</b>
    */
 
@@ -1421,6 +1424,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * indicate that the given object is interested in receiving notification
    * when changes involving it occur, and can provide one or more addresses for
    * such notification to go to.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1439,6 +1444,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    *
    * If no email targets are present in this object, either a null value
    * or an empty Vector may be returned.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -1469,6 +1476,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * the set pre-defined for use with the &lt;invid&gt; XML element.
    * This includes <code>type</code>, <code>num</code>, <code>id</code>,
    * and <code>oid</code>.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    *
@@ -1522,6 +1531,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * the set pre-defined for use with the &lt;invid&gt; XML element.
    * This includes <code>type</code>, <code>num</code>, <code>id</code>,
    * and <code>oid</code>.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
    *
@@ -1595,7 +1606,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * should be newly instantiated in this particular object.
    *
    * This method does not affect those fields which are actually present
-   * in the object's record in the
+   * in a previously existing object's record in the
    * {@link arlut.csd.ganymede.server.DBStore DBStore}.  What this method allows
    * you to do is have a subclass decide whether it wants to instantiate
    * a potential field (one that is declared in the field dictionary for
@@ -1618,6 +1629,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * object's ID is that of one of these special objects.  As a result,
    * when the objects are viewed by an administrator, the admin personae
    * list will not be seen.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
    */
 
   public boolean instantiateNewField(short fieldID)
@@ -1649,6 +1663,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * a lack of read permissions in a dialog in the ReturnVal.  Such a problem will
    * not result in a failure code being returned, however.. the clone will succeed,
    * but an informative dialog will be provided to the user.
+   *
+   * To be overridden on necessity in DBEditObject subclasses, but
+   * this method's default logic will probably do what you need it to
+   * do.  If you need to make changes, try to chain your subclassed
+   * method to this one via super.cloneFromObject().
    *
    * @param session The DBSession that the new object is to be created in
    * @param origObj The object we are cloning
@@ -1861,6 +1880,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * will be the password in SSHA form, or null if the password is
    * being cleared.  param2 will be null.</dd>
    * </dl>
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * @return a ReturnVal object indicated success or failure, objects and
    * fields to be rescanned by the client, and a doNormalProcessing flag
@@ -2159,7 +2180,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * The purpose of this method is to allow mutual exclusion between
    * a pair of fields with mandatory choices.
    *
-   * To be overridden in DBEditObject subclasses.
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public boolean excludeSelected(db_field field1, db_field field2)
@@ -2173,6 +2194,20 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
    * calling choices() on this object again.
+   *
+   * The default logic in this method is designed to cause the client
+   * to cache choice lists for invid fields in the 'all objects of
+   * invid target type' cache bucket.  If your InvidDBField needs to
+   * provide a restricted subset of objects of the targeted type as
+   * the choice list, you'll need to override this method to either
+   * return null (to turn off choice list caching), or generate some
+   * kind of unique key that won't collide with the Short objects used
+   * to represent the default object list caches.
+   *
+   * See also the {@link
+   * arlut.csd.ganymede.server.choiceListHasExceptions(arlut.csd.ganymede.server.DBField)}
+   * hook, which controls whether or not the default logic will
+   * encourage the client to cache a given InvidDBField's choice list.
    *
    * If there is no caching key, this method will return null.
    */
@@ -2323,6 +2358,9 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s 
    * {@link arlut.csd.ganymede.server.InvidDBField#choicesKey() choicesKey()}'s
    * method should disallow client-side caching for the field's choice list.
+   *
+   * To be overridden on necessity in DBEditObject subclasses, though the default
+   * logic here tries to be smart about the typical cases.
    */
 
   public boolean choiceListHasExceptions(DBField field)
@@ -2365,6 +2403,11 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
    * choose from a choice provided by obtainChoiceList()
+   *
+   * To be overridden on necessity in DBEditObject subclasses,
+   * particularly if you have a StringDBField that you want to force
+   * to pick from the list of choices provided by your DBEditObject
+   * subclass' obtainChoiceList() method.
    */
 
   public boolean mustChoose(DBField field)
@@ -2381,9 +2424,12 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   }
 
   /**
-   * This method provides a hook that a DBEditObject subclass
-   * can use to determine whether it is permissible to enter
-   * IPv6 address in a particular (IP) DBField.
+   * This method provides a hook that a DBEditObject subclass can use
+   * to determine whether it is permissible to enter IPv6 address in a
+   * particular (IP) DBField.  The default assumption is that IPv6
+   * addresses are not accepted.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public boolean isIPv6OK(DBField field)
@@ -2396,6 +2442,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * can use to indicate that a given 
    * {@link arlut.csd.ganymede.server.DateDBField DateDBField} has a restricted
    * range of possibilities.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public boolean isDateLimited(DBField field)
@@ -2413,6 +2461,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   /**
    * This method is used to specify the earliest acceptable date
    * for the specified {@link arlut.csd.ganymede.server.DateDBField DateDBField}.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public Date minDate(DBField field)
@@ -2430,6 +2480,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
   /**
    * This method is used to specify the latest acceptable date
    * for the specified {@link arlut.csd.ganymede.server.DateDBField DateDBField}.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public Date maxDate(DBField field)
@@ -2442,6 +2494,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * can use to indicate that a given
    * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}
    * has a restricted range of possibilities.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public boolean isIntLimited(DBField field)
@@ -2453,6 +2507,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method is used to specify the minimum acceptable value
    * for the specified
    * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public int minInt(DBField field)
@@ -2464,6 +2520,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method is used to specify the maximum acceptable value
    * for the specified    
    * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public int maxInt(DBField field)
@@ -2476,6 +2534,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * can use to indicate that a given
    * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}
    * has a restricted range of possibilities.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
   
   public boolean isFloatLimited(DBField field)
@@ -2487,6 +2547,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method is used to specify the minimum acceptable value
    * for the specified
    * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
   
   public double minFloat(DBField field)
@@ -2498,6 +2560,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * This method is used to specify the maximum acceptable value
    * for the specified    
    * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
   
   public double maxFloat(DBField field)
@@ -2648,6 +2712,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * any external actions related to object reactivation when
    * the transaction is committed..
    *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
    * @see #commitPhase1()
    * @see #commitPhase2() 
    */
@@ -2725,6 +2791,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * responsible for calling finalizeRemove() on the object when
    * it is determined that the object really should be removed,
    * with a boolean indicating whether success was had.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public ReturnVal remove()
@@ -3342,6 +3410,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * in any operation, you should return a ReturnVal with a failure
    * dialog encoded, and the transaction's commit will be blocked and
    * a dialog explaining the problem will be presented to the user.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public ReturnVal preCommitHook()
@@ -3501,6 +3571,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * in the server.. at this point in the game, the server has fixed the
    * transaction working set and is depending on commitPhase2() not trying
    * to make changes internal to the server.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    */
 
   public void commitPhase2()
@@ -3567,6 +3639,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
    * queries on embedded object types, where you seek an object based
    * on a field in an embedded object and in the object itself, using
    * the GanymedeSession query calls, or else you will lock the server.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
    *
    * @param finalAbort If true, this object is being dropped, either due to an
    * aborted transaction or a checkpoint rollback.  
