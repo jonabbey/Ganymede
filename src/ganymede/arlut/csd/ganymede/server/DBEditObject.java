@@ -3863,7 +3863,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 	DBField myField = (DBField) this.getField(fieldDef.getID());
 	DBField origField = (DBField) original.getField(fieldDef.getID());
 
-	if (!myField.isDefined())
+	if (myField == null || !myField.isDefined())
 	  {
 	    // not present in the after state, don't write anything for it
 
