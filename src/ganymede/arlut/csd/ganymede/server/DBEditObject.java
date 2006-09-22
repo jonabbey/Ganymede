@@ -3823,7 +3823,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 
 	    continue;
 	  }
-	else
+	else if (myField != null)
 	  {
 	    // we had this field in the before state, let's see if we
 	    // need to write it out, either because this field was
