@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-July 31, 2006
+September 31, 2006
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: July 31, 2006
+RELEASE DATE: September 31, 2006
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -921,6 +921,18 @@ invocation to invocation on a given client system.
 
 The Ganymede client and admin console now properly support the scroll
 wheel in the custom tree and table components.
+
+55. [SERVER] Fixed a bug relating to limited privilege users in the incremental sync channel logic
+
+Came across an interesting bug when dealing with a user who was set up
+with extremely limited privileges in Ganymede.  The emitXMLDelta()
+method was assuming that all fields defined on an object would be
+present (not null), and would fail if an administrator with limited
+privileges edited an object (explicitly or implicitly) in which he did
+not have permission to edit or see all fields.
+
+The bug caused a NullPointerException to be thrown, and a transaction
+involving this scenario could not successfully proceed to commit.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
