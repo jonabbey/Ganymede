@@ -256,7 +256,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   static DBField copyField(DBObject object, DBField orig)
   {
-    Class[] constructor_classes = {DBObject.class, object.getClass()};
+    Class[] constructor_classes = {DBObject.class, orig.getClass()};
     Object[] constructor_params = {object, orig};
 
     try
