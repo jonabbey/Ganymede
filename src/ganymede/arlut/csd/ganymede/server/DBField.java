@@ -190,46 +190,39 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   static Class getFieldClass(short field_type)
   {
-    try
+    switch (field_type)
       {
-        switch (field_type)
-          {
-          case BOOLEAN:
-            return Class.forName("arlut.csd.ganymede.server.BooleanDBField");
-        
-          case NUMERIC:
-            return Class.forName("arlut.csd.ganymede.server.NumericDBField");
+      case BOOLEAN:
+        return BooleanDBField.class;
 
-          case FLOAT:
-            return Class.forName("arlut.csd.ganymede.server.FloatDBField");
+      case NUMERIC:
+        return NumericDBField.class;
 
-          case FIELDOPTIONS:
-            return Class.forName("arlut.csd.ganymede.server.FieldOptionDBField");
+      case FLOAT:
+        return FloatDBField.class;
 
-          case DATE:
-            return Class.forName("arlut.csd.ganymede.server.DateDBField");
+      case FIELDOPTIONS:
+        return FieldOptionDBField.class;
 
-          case STRING:
-            return Class.forName("arlut.csd.ganymede.server.StringDBField");
+      case DATE:
+        return DateDBField.class;
 
-          case INVID:
-            return Class.forName("arlut.csd.ganymede.server.InvidDBField");
+      case STRING:
+        return StringDBField.class;
 
-          case PERMISSIONMATRIX:
-            return Class.forName("arlut.csd.ganymede.server.PermissionMatrixDBField");
+      case INVID:
+        return InvidDBField.class;
 
-          case PASSWORD:
-            return Class.forName("arlut.csd.ganymede.server.PasswordDBField");
+      case PERMISSIONMATRIX:
+        return PermissionMatrixDBField.class;
 
-          case IP:
-            return Class.forName("arlut.csd.ganymede.server.IPDBField");
+      case PASSWORD:
+        return PasswordDBField.class;
 
-          default:
-            return null;
-          }
-      }
-    catch (ClassNotFoundException ex)
-      {
+      case IP:
+        return IPDBField.class;
+
+      default:
         return null;
       }
   }
