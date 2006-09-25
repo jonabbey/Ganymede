@@ -200,16 +200,6 @@ public class StringDBField extends DBField implements string_field {
       }
   }
 
-  /**
-   * <p>This method is used to return a copy of this field, with the field's owner
-   * set to newOwner.</p>
-   */
-
-  public DBField getCopy(DBObject newOwner)
-  {
-    return new StringDBField(newOwner, this);
-  }
-
   public Object clone()
   {
     return new StringDBField(owner, this);

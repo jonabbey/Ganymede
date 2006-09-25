@@ -300,118 +300,14 @@ public final class DBObjectDeltaRec implements FieldType {
 	      {
 		fieldDeltaRec f_r = null;
 
-		// ok, need to identify the type and read in a field
+                status = "Reading field (" + fieldName + ":" + fieldcode +") for field " + i;
 
-		switch (typecode)
-		  {
-		  case BOOLEAN:
-		    status = "Reading boolean field (" + fieldName + ":" + fieldcode + ") for field " + i;
+                if (debug)
+                  {
+                    System.err.println(status);
+                  }
 
-		    if (debug)
-		      {
-			System.err.println(status);
-		      }
-
-		    f_r = new fieldDeltaRec(fieldcode, new BooleanDBField(null, in, fieldDef));
-
-		    break;
-
-		  case NUMERIC:
-		    status = "Reading numeric field (" + fieldName + ":" + fieldcode + ") for field " + i;
-
-		    if (debug)
-		      {
-			System.err.println(status);
-		      }
-
-		    f_r = new fieldDeltaRec(fieldcode, new NumericDBField(null, in, fieldDef));
-
-		    break;
-
- 		  case FLOAT:
- 		    status = "Reading float field (" + fieldName + ":" + fieldcode + ") for field " + i;
- 
- 		    if (debug)
- 		      {
- 			System.err.println(status);
- 		      }
-		    
-		    f_r = new fieldDeltaRec(fieldcode, new FloatDBField(null, in, fieldDef));
-
- 		    break;
-
-		  case DATE:
-		    status = "Reading date field (" + fieldName + ":" + fieldcode + ") for field " + i;
-
-		    if (debug)
-		      {
-			System.err.println(status);
-		      }
-
-		    f_r = new fieldDeltaRec(fieldcode, new DateDBField(null, in, fieldDef));
-
-		    break;
-
-		  case STRING:
-		    status = "Reading string field (" + fieldName + ":" + fieldcode + ") for field " + i;
-
-		    if (debug)
-		      {
-			System.err.println(status);
-		      }
-
-		    f_r = new fieldDeltaRec(fieldcode, new StringDBField(null, in, fieldDef));
-
-		    break;
-
-		  case INVID:
-		    status = "Reading invid field (" + fieldName + ":" + fieldcode + ") for field " + i;
-
-		    if (debug)
-		      {
-			System.err.println(status);
-		      }
-
-		    f_r = new fieldDeltaRec(fieldcode, new InvidDBField(null, in, fieldDef));
-
-		    break;
-
-		  case PERMISSIONMATRIX:
-		    status = "Reading perm field (" + fieldName + ":" + fieldcode + ") for field " + i;
-
-		    if (debug)
-		      {
-			System.err.println(status);
-		      }
-
-		    f_r = new fieldDeltaRec(fieldcode, new PermissionMatrixDBField(null, in, fieldDef));
-
-		    break;
-
-		  case PASSWORD:
-		    status = "Reading password field (" + fieldName + ":" + fieldcode + ") for field " + i;
-
-		    if (debug)
-		      {
-			System.err.println(status);
-		      }
-
-		    f_r = new fieldDeltaRec(fieldcode, new PasswordDBField(null, in, fieldDef));
-
-		    break;
-
-		  case IP:
-		    status = "Reading IP field (" + fieldName + ":" + fieldcode + ") for field " + i;
-
-		    if (debug)
-		      {
-			System.err.println(status);
-		      }
-
-		    f_r = new fieldDeltaRec(fieldcode, new IPDBField(null, in, fieldDef));
-
-		    break;
-		  }
+                f_r = new fieldDeltaRec(fieldcode, DBField.readField(null, in, fieldDef));
 
 		fieldRecs.addElement(f_r);
 

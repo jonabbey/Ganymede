@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -400,7 +400,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		field.cleanup();
 		
 		// Create a new copy and save it in the new DBObject.  We
-		// *must not* save the field from the DBEditObject,
+		// *must not* directly save the field from the DBEditObject,
 		// because that field has likely been RMI exported to a
 		// remote client, and if we keep the exported field in
 		// local use, all of the extra bulk of the RMI mechanism
@@ -467,59 +467,15 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	      {
 		continue;
 	      }
-	    
-	    switch (field.getType())
-	      {
-	      case BOOLEAN:
-		fieldAry[i] = new BooleanDBField(this, (BooleanDBField) field);
-		
-		break;
-		
-	      case NUMERIC:
-		fieldAry[i] = new NumericDBField(this, (NumericDBField) field);
-		
-		break;
-		
-	      case FLOAT:
-		fieldAry[i] = new FloatDBField(this, (FloatDBField) field);
-		
-		break;
-		
-	      case FIELDOPTIONS:
-		fieldAry[i] = new FieldOptionDBField(this, (FieldOptionDBField) field);
-		
-		break;
 
-	      case DATE:
-		fieldAry[i] = new DateDBField(this, (DateDBField) field);
-		
-		break;
-		
-	      case STRING:
-		fieldAry[i] = new StringDBField(this, (StringDBField) field);
-		
-		break;
-		
-	      case INVID:
-		fieldAry[i] = new InvidDBField(this, (InvidDBField) field);
-		
-		break;
-		
-	      case PERMISSIONMATRIX:
-		fieldAry[i] = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
-		
-		break;
-		
-	      case PASSWORD:
-		fieldAry[i] = new PasswordDBField(this, (PasswordDBField) field);
-		
-		break;
-		
-	      case IP:
-		fieldAry[i] = new IPDBField(this, (IPDBField) field);
-		
-		break;
-	      }
+            DBField tmp = DBField.copyField(this, field);
+
+            if (tmp == null)
+              {
+                throw new NullPointerException("Null result from DBField.copyField()");
+              }
+
+            fieldAry[i] = tmp;
 	  }
       }
 
@@ -1070,60 +1026,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    System.err.println(ts.l("receive.nulldef", this.getTypeName(), new Integer(fieldcode), new Integer(i)));
 	  }
 
-	type = definition.getType();
+        tmp = DBField.readField(this, in, definition);
 
-	switch (type)
-	  {
-	  case BOOLEAN:
-	    tmp = new BooleanDBField(this, in, definition);
-	    break;
-
-	  case NUMERIC:
-	    tmp = new NumericDBField(this, in, definition);
-	    break;
-
-	  case FLOAT:
-	    tmp = new FloatDBField(this, in, definition);
-	    break;
-
-	  case FIELDOPTIONS:
-	    tmp = new FieldOptionDBField(this, in, definition);
-	    break;
-
-	  case DATE:
-	    tmp = new DateDBField(this, in, definition);
-	    break;
-
-	  case STRING:
-	    tmp = new StringDBField(this, in, definition);
-	    break;
-
-	  case INVID:
-	    tmp = new InvidDBField(this, in, definition);
-
+        if (definition.getType() == INVID && fieldcode == SchemaConstants.BackLinksField)
+          {
 	    // at 1.17 we started ignoring back links field, so we
 	    // don't want to actually retain such in memory if we find
 	    // one.
 
-	    if (fieldcode == SchemaConstants.BackLinksField)
-	      {
-		continue;	// don't actually put this field in the object
-	      }
-
-	    break;
-
-	  case PERMISSIONMATRIX:
-	    tmp = new PermissionMatrixDBField(this, in, definition);
-	    break;
-
-	  case PASSWORD:
-	    tmp = new PasswordDBField(this, in, definition);
-	    break;
-
-	  case IP:
-	    tmp = new IPDBField(this, in, definition);
-	    break;
-	  }
+            continue;	// don't actually put this field in the object
+          }
 
 	if (tmp == null)
 	  {

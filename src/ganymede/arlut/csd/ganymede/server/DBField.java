@@ -58,6 +58,7 @@ package arlut.csd.ganymede.server;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.*;
 import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -71,6 +72,7 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -169,7 +171,7 @@ import arlut.csd.ganymede.rmi.db_field;
  * other objects should themselves be synchronized in any fashion.
  */
 
-public abstract class DBField implements Remote, db_field {
+public abstract class DBField implements Remote, db_field, FieldType {
 
   /**
    * TranslationService object for handling string localization in
@@ -177,6 +179,128 @@ public abstract class DBField implements Remote, db_field {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBField");
+
+  /**
+   * Returns the class name for the DBField subclass corresponding to
+   * the field type passed in.
+   *
+   * See {@link arlut.csd.ganymede.common.FieldType} for the
+   * definition of these constants.
+   */
+
+  static Class getFieldClass(short field_type)
+  {
+    try
+      {
+        switch (field_type)
+          {
+          case BOOLEAN:
+            return Class.forName("arlut.csd.ganymede.server.BooleanDBField");
+        
+          case NUMERIC:
+            return Class.forName("arlut.csd.ganymede.server.NumericDBField");
+
+          case FLOAT:
+            return Class.forName("arlut.csd.ganymede.server.FloatDBField");
+
+          case FIELDOPTIONS:
+            return Class.forName("arlut.csd.ganymede.server.FieldOptionDBField");
+
+          case DATE:
+            return Class.forName("arlut.csd.ganymede.server.DateDBField");
+
+          case STRING:
+            return Class.forName("arlut.csd.ganymede.server.StringDBField");
+
+          case INVID:
+            return Class.forName("arlut.csd.ganymede.server.InvidDBField");
+
+          case PERMISSIONMATRIX:
+            return Class.forName("arlut.csd.ganymede.server.PermissionMatrixDBField");
+
+          case PASSWORD:
+            return Class.forName("arlut.csd.ganymede.server.PasswordDBField");
+
+          case IP:
+            return Class.forName("arlut.csd.ganymede.server.IPDBField");
+
+          default:
+            return null;
+          }
+      }
+    catch (ClassNotFoundException ex)
+      {
+        return null;
+      }
+  }
+
+  /**
+   * This method acts as a factory class to create a typed DBField
+   * subclass and attach it to a DBObject.
+   */
+
+  static DBField createTypedField(DBObject object, DBObjectBaseField fieldDef)
+  {
+    Class[] constructor_classes = {DBObject.class, DBObjectBaseField.class};
+    Object[] constructor_params = {object, fieldDef};
+
+    try
+      {
+        Class fieldClass = getFieldClass(fieldDef.getType());
+        Constructor fieldConstructor = fieldClass.getConstructor(constructor_classes);
+        return (DBField) fieldConstructor.newInstance(constructor_params);
+      }
+    catch (Exception ex)
+      {
+        return null;
+      }
+  }
+
+  /**
+   * This method acts as a factory class to create a typed DBField
+   * subclass and attach it to a DBObject.
+   */
+
+  static DBField copyField(DBObject object, DBField orig)
+  {
+    Class[] constructor_classes = {DBObject.class, object.getClass()};
+    Object[] constructor_params = {object, orig};
+
+    try
+      {
+        Class fieldClass = getFieldClass(orig.getType());
+        Constructor fieldConstructor = fieldClass.getConstructor(constructor_classes);
+        return (DBField) fieldConstructor.newInstance(constructor_params);
+      }
+    catch (Exception ex)
+      {
+        return null;
+      }
+  }
+
+  /**
+   * This method is used to handle creating new objects from the
+   * ganymede.db input stream when we are loading the database.
+   *
+   * Again, effectively used to map type constants to classes.
+   */
+
+  static DBField readField(DBObject object, DataInput in, DBObjectBaseField definition) throws IOException
+  {
+    Class[] constructor_classes = {DBObject.class, DataInput.class, DBObjectBaseField.class};
+    Object[] constructor_params = {object, in, definition};
+
+    try
+      {
+        Class fieldClass = getFieldClass(definition.getType());
+        Constructor fieldConstructor = fieldClass.getConstructor(constructor_classes);
+        return (DBField) fieldConstructor.newInstance(constructor_params);
+      }
+    catch (Exception ex)
+      {
+        return null;
+      }
+  }
 
   // ---
 
@@ -212,7 +336,10 @@ public abstract class DBField implements Remote, db_field {
    * set to newOwner.
    */
 
-  abstract public DBField getCopy(DBObject newOwner);
+  public DBField getCopy(DBObject newOwner)
+  {
+    return DBField.copyField(newOwner, this);
+  }
 
   /**
    * This method is designed to handle casting this field's value into

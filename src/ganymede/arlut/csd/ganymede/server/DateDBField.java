@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -171,16 +171,6 @@ public class DateDBField extends DBField implements date_field {
   public DateDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
     throw new IllegalArgumentException("vector constructor called on scalar field");
-  }
-
-  /**
-   * <p>This method is used to return a copy of this field, with the field's owner
-   * set to newOwner.</p>
-   */
-
-  public DBField getCopy(DBObject newOwner)
-  {
-    return new DateDBField(newOwner, this);
   }
 
   public Object clone()

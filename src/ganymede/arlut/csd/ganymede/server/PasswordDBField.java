@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -427,16 +427,6 @@ public class PasswordDBField extends DBField implements pass_field {
   public Object key()
   {
     throw new IllegalArgumentException("PasswordDBFields may not be tracked in namespaces");
-  }
-
-  /**
-   * This method is used to return a copy of this field, with the field's owner
-   * set to newOwner.
-   */
-
-  public DBField getCopy(DBObject newOwner)
-  {
-    return new PasswordDBField(newOwner, this);
   }
 
   public Object clone()

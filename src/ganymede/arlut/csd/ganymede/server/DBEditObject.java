@@ -66,7 +66,6 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
-import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectStatus;
@@ -141,7 +140,7 @@ import arlut.csd.Util.TranslationService;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 
-public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
+public class DBEditObject extends DBObject implements ObjectStatus {
 
   static boolean debug = false;
 
@@ -309,48 +308,7 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		continue;
 	      }
 
-	    switch (fieldDef.getType())
-	      {
-	      case BOOLEAN:
-		tmp = new BooleanDBField(this, fieldDef);
-		break;
-		    
-	      case NUMERIC:
-		tmp = new NumericDBField(this, fieldDef);
-		break;
-
-	      case FLOAT:
-		tmp = new FloatDBField(this, fieldDef);
-		break;
-
-	      case FIELDOPTIONS:
-		tmp = new FieldOptionDBField(this, fieldDef);
-		break;
-		
-	      case DATE:
-		tmp = new DateDBField(this, fieldDef);
-		break;
-
-	      case STRING:
-		tmp = new StringDBField(this, fieldDef);
-		break;
-		    
-	      case INVID:
-		tmp = new InvidDBField(this, fieldDef);
-		break;
-
-	      case PERMISSIONMATRIX:
-		tmp = new PermissionMatrixDBField(this, fieldDef);
-		break;
-
-	      case PASSWORD:
-		tmp = new PasswordDBField(this, fieldDef);
-		break;
-
-	      case IP:
-		tmp = new IPDBField(this, fieldDef);
-		break;
-	      }
+            tmp = DBField.createTypedField(this, fieldDef);
 
 	    if (tmp != null)
 	      {
@@ -405,49 +363,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
     for (int i = 0; i < fieldVect.size(); i++)
       {
 	field = (DBField) fieldVect.elementAt(i);
-	
-	switch (field.getType())
-	  {
-	  case BOOLEAN:
-	    tmp = new BooleanDBField(this, (BooleanDBField) field);
-	    break;
-		    
-	  case NUMERIC:
-	    tmp = new NumericDBField(this, (NumericDBField) field);
-	    break;
 
-	  case FLOAT:
-	    tmp = new FloatDBField(this, (FloatDBField) field);
-	    break;
-
-	  case FIELDOPTIONS:
-	    tmp = new FieldOptionDBField(this, (FieldOptionDBField) field);
-	    break;
-
-	  case DATE:
-	    tmp = new DateDBField(this, (DateDBField) field);
-	    break;
-
-	  case STRING:
-	    tmp = new StringDBField(this, (StringDBField) field);
-	    break;
-		    
-	  case INVID:
-	    tmp = new InvidDBField(this, (InvidDBField) field);
-	    break;
-
-	  case PERMISSIONMATRIX:
-	    tmp = new PermissionMatrixDBField(this, (PermissionMatrixDBField) field);
-	    break;
-
-	  case PASSWORD:
-	    tmp = new PasswordDBField(this, (PasswordDBField) field);
-	    break;
-
-	  case IP:
-	    tmp = new IPDBField(this, (IPDBField) field);
-	    break;
-	  }
+        tmp = DBField.copyField(this, field);
 
 	if (tmp != null)
 	  {
@@ -475,50 +392,8 @@ public class DBEditObject extends DBObject implements ObjectStatus, FieldType {
 		  {
 		    continue;
 		  }
-		
-		switch (fieldDef.getType())
-		  {
-		  case BOOLEAN:
-		    tmp = new BooleanDBField(this, fieldDef);
-		    break;
-		    
-		  case NUMERIC:
-		    tmp = new NumericDBField(this, fieldDef);
-		    break;
 
-		  case FLOAT:
-		    tmp = new FloatDBField(this, fieldDef);
-		    break;
-
-		  case FIELDOPTIONS:
-		    tmp = new FieldOptionDBField(this, fieldDef);
-		    break;
-		
-		  case DATE:
-		    tmp = new DateDBField(this, fieldDef);
-		    break;
-
-		  case STRING:
-		    tmp = new StringDBField(this, fieldDef);
-		    break;
-		    
-		  case INVID:
-		    tmp = new InvidDBField(this, fieldDef);
-		    break;
-
-		  case PERMISSIONMATRIX:
-		    tmp = new PermissionMatrixDBField(this, fieldDef);
-		    break;
-
-		  case PASSWORD:
-		    tmp = new PasswordDBField(this, fieldDef);
-		    break;
-
-		  case IP:
-		    tmp = new IPDBField(this, fieldDef);
-		    break;
-
-		  }
+                tmp = DBField.createTypedField(this, fieldDef);
 
 		saveField(tmp);	// safe, we know we didn't already have a field with the same id
 	      }

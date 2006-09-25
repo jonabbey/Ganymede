@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -248,16 +248,6 @@ public final class InvidDBField extends DBField implements invid_field {
       }
   }
 
-  /**
-   * This method is used to return a copy of this field, with the field's owner
-   * set to newOwner.
-   */
-
-  public DBField getCopy(DBObject newOwner)
-  {
-    return new InvidDBField(newOwner, this);
-  }
-  
   public Object clone()
   {
     return new InvidDBField(owner, this);
