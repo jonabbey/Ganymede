@@ -1100,32 +1100,16 @@ public final class InvidDBField extends DBField implements invid_field {
 	return null;		// success
       }
 
-    // find out whether there is a symmetric field pointing back to
-    // us, or whether we will need to use the backPointers hashing
-    // structure.
+    // If we're the container field in an embedded object, do nothing.
+    // We'll let createNewEmbedded() take care of the linkages.
 
-    if (getFieldDef().isSymmetric())
+    if (owner.objectBase.isEmbedded() && getID() == SchemaConstants.ContainerField)
       {
-	// find out what field in remote we might need to update
-
-	targetField = getFieldDef().getTargetField();
+        return null;	// done!
       }
-    else
+
+    if (!getFieldDef().isSymmetric())
       {
-	// the containerField in an embedded object is a special case.
-	// the containerField is generic across all embedded objects
-	// and doesn't contain the data we need to connect this field
-	// with the embedded object field in our container object.
-
-	// because of this, we won't attempt to try to do a bind here.
-	// instead, this binding will get done by the InvidDBField
-	// createNewEmbedded() method, which handles all the details
-
-	if (owner.objectBase.isEmbedded() && getID() == SchemaConstants.ContainerField)
-	  {
-	    return null;	// done!
-	  }
-
 	// With an asymmetric field, we don't actually ever touch the
 	// target object(s).  Instead, we depend on the DBEditSet
 	// commit logic doing an update of the DBStore backPointers
@@ -1158,174 +1142,179 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
+    // we're symmetric, so find out what field in remote we need to
+    // update
+
+    targetField = getFieldDef().getTargetField();
+
     // check out the old object and the new object
     // remove the reference from the old object
     // add the reference to the new object
 
     if (oldRemote != null)
       {
-	// check to see if we have permission to anonymously unlink
-	// this field from the target field, else go through the
-	// GanymedeSession layer to have our permissions checked.
+        // check to see if we have permission to anonymously unlink
+        // this field from the target field, else go through the
+        // GanymedeSession layer to have our permissions checked.
 
-	// note that if the GanymedeSession layer has already checked out the
-	// object, session.editDBObject() will return a reference to that
-	// version, and we'll lose our security bypass.. for that reason,
-	// we also use the anonymous variable to instruct dissolve to disregard
-	// write permissions if we have gotten the anonymous OK
+        // note that if the GanymedeSession layer has already checked out the
+        // object, session.editDBObject() will return a reference to that
+        // version, and we'll lose our security bypass.. for that reason,
+        // we also use the anonymous variable to instruct dissolve to disregard
+        // write permissions if we have gotten the anonymous OK
 
-	remobj = session.viewDBObject(oldRemote);
+        remobj = session.viewDBObject(oldRemote);
 
-	if (remobj == null)
-	  {
-	    // "InvidDBField.bind(): Couldn''t find old reference"
-	    // "Your operation could not succeed because field {0} was linked to a remote reference {1} that could not be found \
-	    //  for unlinking.\n\nThis is a serious logic error in the server."
-	    return Ganymede.createErrorDialog(ts.l("bind.no_oldref"),
-					      ts.l("bind.no_oldref_text", getName(), oldRef.toString()));
-	  }
+        if (remobj == null)
+          {
+            // "InvidDBField.bind(): Couldn''t find old reference"
+            // "Your operation could not succeed because field {0} was linked to a remote reference {1} that could not be found \
+            //  for unlinking.\n\nThis is a serious logic error in the server."
+            return Ganymede.createErrorDialog(ts.l("bind.no_oldref"),
+                                              ts.l("bind.no_oldref_text", getName(), oldRef.toString()));
+          }
 
-	// see if we are allowed to unlink the remote object without
-	// having permission to edit it generally.
+        // see if we are allowed to unlink the remote object without
+        // having permission to edit it generally.
 
-	anonymous = session.getObjectHook(oldRemote).anonymousUnlinkOK(remobj,
-								       targetField,
-								       this.getOwner(),
-								       this.getID(),
-								       session.getGSession());
+        anonymous = session.getObjectHook(oldRemote).anonymousUnlinkOK(remobj,
+                                                                       targetField,
+                                                                       this.getOwner(),
+                                                                       this.getID(),
+                                                                       session.getGSession());
 
-	// if we're already editing it, just go with that.
+        // if we're already editing it, just go with that.
 
-	if (remobj instanceof DBEditObject)
-	  {
-	    oldRef = (DBEditObject) remobj;
-	  }
-	else
-	  {
-	    if (anonymous || session.getGSession().getPerm(remobj).isEditable())
-	      {
-		oldRef = (DBEditObject) session.editDBObject(oldRemote);
-	      }
-	    else
-	      {
-		// "InvidDBField.bind(): Couldn''t unlink from old reference"
-		// "Your operation could not succeed because you don''t have permission to dissolve the link to the old object \
-		// held in field {0} in object {1}"
-		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						  ts.l("bind.no_perms_old", getName(), owner.getLabel()));
-	      }
-	  }
+        if (remobj instanceof DBEditObject)
+          {
+            oldRef = (DBEditObject) remobj;
+          }
+        else
+          {
+            if (anonymous || session.getGSession().getPerm(remobj).isEditable())
+              {
+                oldRef = (DBEditObject) session.editDBObject(oldRemote);
+              }
+            else
+              {
+                // "InvidDBField.bind(): Couldn''t unlink from old reference"
+                // "Your operation could not succeed because you don''t have permission to dissolve the link to the old object \
+                // held in field {0} in object {1}"
+                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                                                  ts.l("bind.no_perms_old", getName(), owner.getLabel()));
+              }
+          }
 
-	// if we couldn't check edit the old object, we need to see why.
+        // if we couldn't check out the old object for editing, we need to see why.
 
-	if (oldRef == null)
-	  {
-	    // this check is not truly thread safe, as the
-	    // shadowObject might be cleared by another thread while
-	    // we're working..  this isn't a grave risk, but we'll
-	    // wrap all of this in a NullPointerException catch just
-	    // in case.  this check is just for informative purposes,
-	    // so we don't mind throwing a null pointer exception in
-	    // here, it's not worth doing all of the careful sync work
-	    // to lock down this stuff without risk of deadlock
+        if (oldRef == null)
+          {
+            // this check is not truly thread safe, as the
+            // shadowObject might be cleared by another thread while
+            // we're working..  this isn't a grave risk, but we'll
+            // wrap all of this in a NullPointerException catch just
+            // in case.  this check is just for informative purposes,
+            // so we don't mind throwing a null pointer exception in
+            // here, it's not worth doing all of the careful sync work
+            // to lock down this stuff without risk of deadlock
 
-	    try
-	      {
-		String edit_username, edit_hostname;
-		DBEditObject editing = remobj.shadowObject;
+            try
+              {
+                String edit_username, edit_hostname;
+                DBEditObject editing = remobj.shadowObject;
 
-		if (editing != null)
-		  {
-		    if (editing.gSession != null)
-		      {
-			edit_username = editing.gSession.getMyUserName();
-			edit_hostname = editing.gSession.clienthost;
+                if (editing != null)
+                  {
+                    if (editing.gSession != null)
+                      {
+                        edit_username = editing.gSession.getMyUserName();
+                        edit_hostname = editing.gSession.clienthost;
 
-			// "InvidDBField.bind(): Couldn''t unlink from old reference"
-			// "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}"
-			return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-							  ts.l("bind.busy_old",
-							       this.getName(), remobj.getLabel(), remobj.getTypeName(),
-							       edit_username, edit_hostname));
-		      }
+                        // "InvidDBField.bind(): Couldn''t unlink from old reference"
+                        // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}"
+                        return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                                                          ts.l("bind.busy_old",
+                                                               this.getName(), remobj.getLabel(), remobj.getTypeName(),
+                                                               edit_username, edit_hostname));
+                      }
 		
-		    // "InvidDBField.bind(): Couldn''t unlink from old reference"
-		    // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by another user."
-		    return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						      ts.l("bind.busy_old2",
-							   this.getName(), remobj.getLabel(), remobj.getTypeName()));
-		  }
-		else
-		  {
-		    // "InvidDBField.bind(): Couldn''t unlink from old reference"
-		    // "Field {0} could not be unlinked from the {1} {2} object. 
-		    // This is probably a temporary condition due to other user activity on the Ganymede server."
-		    return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						      ts.l("bind.busy_old_temp",
-							   this.getName(), remobj.getLabel(), remobj.getTypeName()));
-		  }
-	      }
-	    catch (NullPointerException ex)
-	      {
-		// "InvidDBField.bind(): Couldn''t unlink from old reference"
-		// "Field {0} could not be unlinked from the {1} {2} object. 
-		// This is probably a temporary condition due to other user activity on the Ganymede server."
-		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						  ts.l("bind.busy_old_temp",
-						       this.getName(), remobj.getLabel(), remobj.getTypeName()));
-	      }
-	  }
+                    // "InvidDBField.bind(): Couldn''t unlink from old reference"
+                    // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by another user."
+                    return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                                                      ts.l("bind.busy_old2",
+                                                           this.getName(), remobj.getLabel(), remobj.getTypeName()));
+                  }
+                else
+                  {
+                    // "InvidDBField.bind(): Couldn''t unlink from old reference"
+                    // "Field {0} could not be unlinked from the {1} {2} object. 
+                    // This is probably a temporary condition due to other user activity on the Ganymede server."
+                    return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                                                      ts.l("bind.busy_old_temp",
+                                                           this.getName(), remobj.getLabel(), remobj.getTypeName()));
+                  }
+              }
+            catch (NullPointerException ex)
+              {
+                // "InvidDBField.bind(): Couldn''t unlink from old reference"
+                // "Field {0} could not be unlinked from the {1} {2} object. 
+                // This is probably a temporary condition due to other user activity on the Ganymede server."
+                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                                                  ts.l("bind.busy_old_temp",
+                                                       this.getName(), remobj.getLabel(), remobj.getTypeName()));
+              }
+          }
 
-	try
-	  {
-	    oldRefField = (InvidDBField) oldRef.getField(targetField);
-	  }
-	catch (ClassCastException ex)
-	  {
-	    try
-	      {
-		// "InvidDBField.bind(): Couldn''t unlink from old reference"
-		// "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						  ts.l("bind.schema_error",
-						       oldRef.getField(targetField).getName(),
-						       oldRef.getLabel()));
-	      }
-	    catch (RemoteException rx)
-	      {
-		// "InvidDBField.bind(): Couldn''t unlink from old reference"
-		// "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						  ts.l("bind.schema_error",
-						       Integer.toString(targetField), oldRef.getLabel()));
-	      }
-	  }
-	
-	if (oldRefField == null)
-	  {
-	    // editDBObject() will create undefined fields for all
-	    // fields defined in the DBObjectBase as long as the user
-	    // had permission to create those fields, so if we got a
-	    // null result we either have a schema corruption problem
-	    // or a permission to create field problem
+        try
+          {
+            oldRefField = (InvidDBField) oldRef.getField(targetField);
+          }
+        catch (ClassCastException ex)
+          {
+            try
+              {
+                // "InvidDBField.bind(): Couldn''t unlink from old reference"
+                // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
+                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                                                  ts.l("bind.schema_error",
+                                                       oldRef.getField(targetField).getName(),
+                                                       oldRef.getLabel()));
+              }
+            catch (RemoteException rx)
+              {
+                // "InvidDBField.bind(): Couldn''t unlink from old reference"
+                // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
+                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                                                  ts.l("bind.schema_error",
+                                                       Integer.toString(targetField), oldRef.getLabel()));
+              }
+          }
 
-	    DBObjectBaseField fieldDef = oldRef.getFieldDef(targetField);
+        if (oldRefField == null)
+          {
+            // editDBObject() will create undefined fields for all
+            // fields defined in the DBObjectBase as long as the user
+            // had permission to create those fields, so if we got a
+            // null result we either have a schema corruption problem
+            // or a permission to create field problem
 
-	    if (fieldDef == null)
-	      {
-		// "InvidDBField.bind(): Couldn''t unlink from old reference"
-		// "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
-		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						  ts.l("bind.inconsistency", Integer.toString(targetField), oldRef.getLabel()));
-	      }
-	    else
-	      {
-		// "InvidDBField.bind(): Couldn''t unlink from old reference"
-		// "Your operation could not succeed due to a possible inconsistency in the server database.  Target field {0} is undefined in object {1}."
-		return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
-						  ts.l("bind.inconsistency2", fieldDef.getName(), oldRef.getLabel()));
-	      }
-	  }
+            DBObjectBaseField fieldDef = oldRef.getFieldDef(targetField);
+
+            if (fieldDef == null)
+              {
+                // "InvidDBField.bind(): Couldn''t unlink from old reference"
+                // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
+                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                                                  ts.l("bind.inconsistency", Integer.toString(targetField), oldRef.getLabel()));
+              }
+            else
+              {
+                // "InvidDBField.bind(): Couldn''t unlink from old reference"
+                // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field {0} is undefined in object {1}."
+                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                                                  ts.l("bind.inconsistency2", fieldDef.getName(), oldRef.getLabel()));
+              }
+          }
       }
 
     // check to see if we have permission to anonymously link
@@ -1339,157 +1328,171 @@ public final class InvidDBField extends DBField implements invid_field {
     // write permissions if we have gotten the anonymous OK
 
     remobj = session.viewDBObject(newRemote);
-    
+
     if (remobj == null)
       {
-	// "InvidDBField.bind(): Couldn''t find new reference"
-	// "Your operation could not succeed because field {0} cannot link to non-existent invid {1}.\n\nThis is a serious logic error in the server."	
-	return Ganymede.createErrorDialog(ts.l("bind.no_newref_sub"),
-					  ts.l("bind.no_newref", getName(), newRemote.toString()));
+        // "InvidDBField.bind(): Couldn''t find new reference"
+        // "Your operation could not succeed because field {0} cannot link to non-existent invid {1}.\n\nThis is a serious logic error in the server."	
+        return Ganymede.createErrorDialog(ts.l("bind.no_newref_sub"),
+                                          ts.l("bind.no_newref", getName(), newRemote.toString()));
       }
 
     // see if we are allowed to link the remote object without having
     // permission to edit it generally.
     
-    anonymous = session.getObjectHook(newRemote).anonymousLinkOK(remobj,
-								 targetField, 
-								 this.getOwner(),
-								 this.getID(),
-								 session.getGSession());
+    anonymous2 = session.getObjectHook(newRemote).anonymousLinkOK(remobj,
+                                                                  targetField, 
+                                                                  this.getOwner(),
+                                                                  this.getID(),
+                                                                  session.getGSession());
     // if we're already editing it, just go with that.
 
     if (remobj instanceof DBEditObject)
       {
-	newRef = (DBEditObject) remobj;
+        newRef = (DBEditObject) remobj;
 
-	// if the object is being deleted or dropped, don't allow the link
+        // if the object is being deleted or dropped, don't allow the link
 
-	if (newRef.getStatus() == ObjectStatus.DELETING || newRef.getStatus() == ObjectStatus.DROPPING)
-	  {
-	    // "InvidDBField.bind(): Couldn''t link to remote object"
-	    // "Field {0} cannot be linked to remote object {1}.\n\nThe remote object has been deleted."
-	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-					      ts.l("bind.deleted_new", this.getName(), newRemote.toString()));
-	  }
+        if (newRef.getStatus() == ObjectStatus.DELETING || newRef.getStatus() == ObjectStatus.DROPPING)
+          {
+            // "InvidDBField.bind(): Couldn''t link to remote object"
+            // "Field {0} cannot be linked to remote object {1}.\n\nThe remote object has been deleted."
+            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                              ts.l("bind.deleted_new", this.getName(), newRemote.toString()));
+          }
       }
     else
       {
-	if (anonymous || session.getGSession().getPerm(remobj).isEditable())
-	  {
-	    newRef = (DBEditObject) session.editDBObject(newRemote);
-	  }
-	else
-	  {
-	    // "InvidDBField.bind(): Couldn''t link to remote object"
-	    // "Field {0} could not be linked to the {1} {2} object.  You do not have permission to edit the {1} {2} object."
-	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-					      ts.l("bind.no_newref_perm",
-						   this.getName(), remobj.getLabel(), remobj.getTypeName()));
-	  }
+        if (anonymous2 || session.getGSession().getPerm(remobj).isEditable())
+          {
+            newRef = (DBEditObject) session.editDBObject(newRemote);
+          }
+        else
+          {
+            // "InvidDBField.bind(): Couldn''t link to remote object"
+            // "Field {0} could not be linked to the {1} {2} object.  You do not have permission to edit the {1} {2} object."
+            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                              ts.l("bind.no_newref_perm",
+                                                   this.getName(), remobj.getLabel(), remobj.getTypeName()));
+          }
       }
-    
+        
     // if we couldn't check out the object, we need to see why.
 
     if (newRef == null)
       {
-	// this section is not truly thread safe, as the shadowObject
-	// might be cleared by another thread while we're working..
-	// this isn't a grave risk, but we'll wrap all of this in a
-	// NullPointerException catch just in case.  this clause is
-	// just for informative purposes, so we don't mind throwing a
-	// null pointer exception in here. It's not worth doing all of
-	// the careful sync work to lock down this stuff without risk
-	// of deadlock
-	
-	try
-	  {
-	    String edit_username, edit_hostname;
-	    DBEditObject editing = remobj.shadowObject;
+        // this section is not truly thread safe, as the shadowObject
+        // might be cleared by another thread while we're working..
+        // this isn't a grave risk, but we'll wrap all of this error
+        // message logic in a NullPointerException catch just in case.
 
-	    if (editing != null)
-	      {
-		if (editing.gSession != null)
-		  {
-		    edit_username = editing.gSession.getMyUserName();
-		    edit_hostname = editing.gSession.clienthost;
-		    
-		    // "InvidDBField.bind(): Couldn''t link to new reference"
-		    // "Field {0} could not be linked to the {1} {2} object, which is busy being edited by {3} on system {4}."
-		    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-						      ts.l("bind.busy_new", this.getName(), remobj.getLabel(), remobj.getTypeName(),
-							   edit_username, edit_hostname));
-		  }
-		
-		// "InvidDBField.bind(): Couldn''t link to new reference"
-		// "Field {0} could not be linked to the {1} {2} object, which is busy being edited by another user."
-		return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-						  ts.l("bind.busy_new2", this.getName(), remobj.getLabel(), remobj.getTypeName()));
-	      }
-	    else
-	      {
-		// "InvidDBField.bind(): Couldn''t link to new reference"
-		// "Field {0} could not be linked to the {1} {2} object.  
-		// This is probably a temporary condition due to other user activity on the Ganymede server."
-		return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-						  ts.l("bind.busy_new_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
-	      }
-	  }
-	catch (NullPointerException ex)
-	  {
-	    // "InvidDBField.bind(): Couldn''t link to new reference"
-	    // "Field {0} could not be linked to the {1} {2} object.  
-	    // This is probably a temporary condition due to other user activity on the Ganymede server."
-	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-					      ts.l("bind.busy_new_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
-	  }
+        try
+          {
+            String edit_username, edit_hostname;
+            DBEditObject editing = remobj.shadowObject;
+
+            if (editing != null)
+              {
+                if (editing.gSession != null)
+                  {
+                    edit_username = editing.gSession.getMyUserName();
+                    edit_hostname = editing.gSession.clienthost;
+
+                    // "InvidDBField.bind(): Couldn''t link to new reference"
+                    // "Field {0} could not be linked to the {1} {2} object, which is busy being edited by {3} on system {4}."
+                    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                                      ts.l("bind.busy_new", this.getName(), remobj.getLabel(), remobj.getTypeName(),
+                                                           edit_username, edit_hostname));
+                  }
+
+                // "InvidDBField.bind(): Couldn''t link to new reference"
+                // "Field {0} could not be linked to the {1} {2} object, which is busy being edited by another user."
+                return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                                  ts.l("bind.busy_new2", this.getName(), remobj.getLabel(), remobj.getTypeName()));
+              }
+            else
+              {
+                // "InvidDBField.bind(): Couldn''t link to new reference"
+                // "Field {0} could not be linked to the {1} {2} object.  
+                // This is probably a temporary condition due to other user activity on the Ganymede server."
+                return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                                  ts.l("bind.busy_new_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
+              }
+          }
+        catch (NullPointerException ex)
+          {
+            // "InvidDBField.bind(): Couldn''t link to new reference"
+            // "Field {0} could not be linked to the {1} {2} object.  
+            // This is probably a temporary condition due to other user activity on the Ganymede server."
+            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                              ts.l("bind.busy_new_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
+          }
       }
 
     try
       {
-	newRefField = (InvidDBField) newRef.getField(targetField);
+        newRefField = (InvidDBField) newRef.getField(targetField);
+
+        if (newRefField == null)
+          {
+            // editDBObject() will create undefined fields for all
+            // fields defined in the DBObjectBase as long as the user
+            // had permission to create those fields, so if we got a
+            // null field, we either have a schema corruption problem
+            // or a permission to create field problem.
+
+            DBObjectBaseField fieldDef = newRef.getFieldDef(targetField);
+
+            if (fieldDef == null)
+              {
+                // "InvidDBField.bind(): Couldn''t link to new reference"
+                // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
+                return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                                  ts.l("bind.inconsistency", Integer.toString(targetField), newRef.getLabel()));
+              }
+            else
+              {
+                if (anonymous2)
+                  {
+                    // the object was created at check-out time
+                    // without the invid target field, due to the
+                    // admin's default permissions.  But we know that
+                    // the object has allowed anonymous linking by way
+                    // of the anonymousLinkOK() method, so we'll go
+                    // ahead and create an empty InvidDBField in the
+                    // target object directly.  The accessor methods
+                    // on the field will enforce standard Ganymede
+                    // permissions hereafter.
+
+                    newRefField = (InvidDBField) DBField.createTypedField(newRef, fieldDef);
+                    newRef.saveField(newRefField);
+                  }
+                else
+                  {
+                    // "InvidDBField.bind(): Couldn''t link to new reference"
+                    // "Your operation could not succeed because you do not have permission to create the (previously undefined) {0} field in the {1} {2} object."
+                    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                                      ts.l("bind.no_create_perm", fieldDef.getName(), newRef.getLabel(), newRef.getTypeName()));
+                  }
+              }
+          }
       }
     catch (ClassCastException ex)
       {
-	try
-	  {
-	    // "InvidDBField.bind(): Couldn''t link to new reference"
-	    // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-					      ts.l("bind.schema_error", newRef.getField(targetField).getName(), newRef.getLabel()));
-	  }
-	catch (RemoteException rx)
-	  {
-	    // "InvidDBField.bind(): Couldn''t link to new reference"
-	    // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-					      ts.l("bind.schema_error", Integer.toString(targetField), newRef.getLabel()));
-	  }
-      }
-    
-    if (newRefField == null)
-      {
-	// editDBObject() will create undefined fields for all
-	// fields defined in the DBObjectBase as long as the user
-	// had permission to create those fields, so if we got a
-	// null result we either have a schema corruption problem
-	// or a permission to create field problem
-
-	DBObjectBaseField fieldDef = newRef.getFieldDef(targetField);
-
-	if (fieldDef == null)
-	  {
-	    // "InvidDBField.bind(): Couldn''t link to new reference"
-	    // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
-	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-					      ts.l("bind.inconsistency", Integer.toString(targetField), newRef.getLabel()));
-	  }
-	else
-	  {
-	    // "InvidDBField.bind(): Couldn''t link to new reference"
-	    // "Your operation could not succeed because you do not have permission to create the (previously undefined) {0} field in the {1} {2} object."
-	    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-					      ts.l("bind.no_create_perm", fieldDef.getName(), newRef.getLabel(), newRef.getTypeName()));
-	  }
+        try
+          {
+            // "InvidDBField.bind(): Couldn''t link to new reference"
+            // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
+            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                              ts.l("bind.schema_error", newRef.getField(targetField).getName(), newRef.getLabel()));
+          }
+        catch (RemoteException rx)
+          {
+            // "InvidDBField.bind(): Couldn''t link to new reference"
+            // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
+            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                              ts.l("bind.schema_error", Integer.toString(targetField), newRef.getLabel()));
+          }
       }
 
     // okay, at this point we should have oldRefField pointing to the
@@ -2074,7 +2077,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
-	    retVal = bind(null, tmp, local); // undo, should always work
+	    retVal = bind(null, tmp, local); // bind back to the original target, should always work
 
 	    if (retVal != null && !retVal.didSucceed())	
 	      {
