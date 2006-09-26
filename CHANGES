@@ -934,6 +934,36 @@ not have permission to edit or see all fields.
 The bug caused a NullPointerException to be thrown, and a transaction
 involving this scenario could not successfully proceed to commit.
 
+56. [SERVER] Liberalized anonymous linking behavior for non-privileged admins
+
+The DBEditObject class is meant to allow normal permissions to be
+overridden to allow linking to a symmetric field, even if the admin or
+user in question did not have permission to edit the target object
+and/or field.
+
+Unfortunately, this logic had a loop hole that caused anonymous object
+linking to break if the admin or user did not have permission to
+create the target field and the object, as persisted in the object
+base, did not contain an defined instance of the target field.
+
+This has been fixed by a change to the InvidDBField.bind() method.
+
+57. [SERVER] Various cleanups to avoid proliferation of switch statements on field type
+
+I created a handful of static factory methods on the DBField class,
+and modified a lot of classes to use these factory methods, rather
+than to repetitively have their own switch statements on the set of
+field types defined.  Now, adding a new DBField subtype is (almost!) 
+as easy as editing DBField.getFieldClass() to add the new switch case.
+
+In doing this work, I fixed a bug that made the DBJournal improperly
+fail to process FieldOptionDBField data in the journal if the server
+was abnormally terminated without consolidating its database.
+
+This might cause a vanishingly small performance hit, but at the
+benefit of leaving less room for this kind of mistake in the Ganymede
+server code.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
