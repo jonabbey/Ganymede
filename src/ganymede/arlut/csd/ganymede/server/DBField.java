@@ -245,6 +245,8 @@ public abstract class DBField implements Remote, db_field, FieldType {
       }
     catch (Exception ex)
       {
+        ex.printStackTrace();
+
         return null;
       }
   }
@@ -266,6 +268,8 @@ public abstract class DBField implements Remote, db_field, FieldType {
       }
     catch (Exception ex)
       {
+        ex.printStackTrace();
+
         return null;
       }
   }
@@ -290,6 +294,8 @@ public abstract class DBField implements Remote, db_field, FieldType {
       }
     catch (Exception ex)
       {
+        ex.printStackTrace();
+
         return null;
       }
   }
