@@ -956,13 +956,15 @@ than to repetitively have their own switch statements on the set of
 field types defined.  Now, adding a new DBField subtype is (almost!) 
 as easy as editing DBField.getFieldClass() to add the new switch case.
 
-In doing this work, I fixed a bug that made the DBJournal improperly
-fail to process FieldOptionDBField data in the journal if the server
-was abnormally terminated without consolidating its database.
-
 This might cause a vanishingly small performance hit, but at the
-benefit of leaving less room for this kind of mistake in the Ganymede
-server code.
+benefit of leaving less room for mistakes strewn through the Ganymede
+server code if/when the list of field types is enlarged.
+
+In fact, in doing this work, I fixed a bug that made the DBJournal
+improperly fail to process FieldOptionDBField data in the journal if
+the server was abnormally terminated without consolidating its
+database.  This is precisely the sort of bug that this change is
+intended to help prevent in the future.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
