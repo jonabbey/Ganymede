@@ -954,11 +954,9 @@ I created a handful of static factory methods on the DBField class,
 and modified a lot of classes to use these factory methods, rather
 than to repetitively have their own switch statements on the set of
 field types defined.  Now, adding a new DBField subtype is (almost!) 
-as easy as editing DBField.getFieldClass() to add the new switch case.
-
-This might cause a vanishingly small performance hit, but at the
-benefit of leaving less room for mistakes strewn through the Ganymede
-server code if/when the list of field types is enlarged.
+as easy as editing a few static factory methods at the top of DBField,
+rather than having to edit a scattered collection of internal Ganymede
+code modules.
 
 In fact, in doing this work, I fixed a bug that made the DBJournal
 improperly fail to process FieldOptionDBField data in the journal if
