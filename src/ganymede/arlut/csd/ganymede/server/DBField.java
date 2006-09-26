@@ -181,122 +181,142 @@ public abstract class DBField implements Remote, db_field, FieldType {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBField");
 
   /**
-   * Returns the class name for the DBField subclass corresponding to
-   * the field type passed in.
-   *
-   * See {@link arlut.csd.ganymede.common.FieldType} for the
-   * definition of these constants.
-   */
-
-  static Class getFieldClass(short field_type)
-  {
-    switch (field_type)
-      {
-      case BOOLEAN:
-        return BooleanDBField.class;
-
-      case NUMERIC:
-        return NumericDBField.class;
-
-      case FLOAT:
-        return FloatDBField.class;
-
-      case FIELDOPTIONS:
-        return FieldOptionDBField.class;
-
-      case DATE:
-        return DateDBField.class;
-
-      case STRING:
-        return StringDBField.class;
-
-      case INVID:
-        return InvidDBField.class;
-
-      case PERMISSIONMATRIX:
-        return PermissionMatrixDBField.class;
-
-      case PASSWORD:
-        return PasswordDBField.class;
-
-      case IP:
-        return IPDBField.class;
-
-      default:
-        return null;
-      }
-  }
-
-  /**
    * This method acts as a factory class to create a typed DBField
    * subclass and attach it to a DBObject.
+   *
+   * Used by the DBEditObject's create object and check-out constructors.
    */
 
   static DBField createTypedField(DBObject object, DBObjectBaseField fieldDef)
   {
-    Class[] constructor_classes = {DBObject.class, DBObjectBaseField.class};
-    Object[] constructor_params = {object, fieldDef};
-
-    try
+    switch (fieldDef.getType())
       {
-        Class fieldClass = getFieldClass(fieldDef.getType());
-        Constructor fieldConstructor = fieldClass.getDeclaredConstructor(constructor_classes);
-        return (DBField) fieldConstructor.newInstance(constructor_params);
-      }
-    catch (Exception ex)
-      {
-        ex.printStackTrace();
+      case BOOLEAN:
+        return new BooleanDBField(object, fieldDef);
 
-        return null;
+      case NUMERIC:
+        return new NumericDBField(object, fieldDef);
+
+      case FLOAT:
+        return new FloatDBField(object, fieldDef);
+
+      case FIELDOPTIONS:
+        return new FieldOptionDBField(object, fieldDef);
+
+      case DATE:
+        return new DateDBField(object, fieldDef);
+
+      case STRING:
+        return new StringDBField(object, fieldDef);
+
+      case INVID:
+        return new InvidDBField(object, fieldDef);
+
+      case PERMISSIONMATRIX:
+        return new PermissionMatrixDBField(object, fieldDef);
+
+      case PASSWORD:
+        return new PasswordDBField(object, fieldDef);
+
+      case IP:
+        return new IPDBField(object, fieldDef);
+
+      default:
+        throw new IllegalArgumentException("Bad field def type in DBField.createTypedField:" + fieldDef.getType());
       }
   }
 
   /**
-   * This method acts as a factory class to create a typed DBField
-   * subclass and attach it to a DBObject.
+   * This method acts as a factory class to copy a DBField subclass
+   * and attach it to a DBObject, using the appropriate DBField
+   * subclass' copy constructor.
+   *
+   * Used by the DBEditObject's check-out constructor.
    */
 
   static DBField copyField(DBObject object, DBField orig)
   {
-    Class[] constructor_classes = {DBObject.class, orig.getClass()};
-    Object[] constructor_params = {object, orig};
-
-    try
+    switch (orig.getType())
       {
-        Constructor fieldConstructor = orig.getClass().getDeclaredConstructor(constructor_classes);
-        return (DBField) fieldConstructor.newInstance(constructor_params);
-      }
-    catch (Exception ex)
-      {
-        ex.printStackTrace();
+      case BOOLEAN:
+        return new BooleanDBField(object, (BooleanDBField) orig);
 
-        return null;
+      case NUMERIC:
+        return new NumericDBField(object, (NumericDBField) orig);
+
+      case FLOAT:
+        return new FloatDBField(object, (FloatDBField) orig);
+
+      case FIELDOPTIONS:
+        return new FieldOptionDBField(object, (FieldOptionDBField) orig);
+
+      case DATE:
+        return new DateDBField(object, (DateDBField) orig);
+
+      case STRING:
+        return new StringDBField(object, (StringDBField) orig);
+
+      case INVID:
+        return new InvidDBField(object, (InvidDBField) orig);
+
+      case PERMISSIONMATRIX:
+        return new PermissionMatrixDBField(object, (PermissionMatrixDBField) orig);
+
+      case PASSWORD:
+        return new PasswordDBField(object, (PasswordDBField) orig);
+
+      case IP:
+        return new IPDBField(object, (IPDBField) orig);
+
+      default:
+        throw new IllegalArgumentException("Bad field def type in DBField.copyField:" + orig.getType());
       }
   }
 
   /**
    * This method is used to handle creating new objects from the
-   * ganymede.db input stream when we are loading the database.
+   * ganymede.db input stream when we are loading the database from
+   * disk.
    *
    * Again, effectively used to map type constants to classes.
    */
 
   static DBField readField(DBObject object, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    Class[] constructor_classes = {DBObject.class, DataInput.class, DBObjectBaseField.class};
-    Object[] constructor_params = {object, in, definition};
-
-    try
+    switch (definition.getType())
       {
-        Class fieldClass = getFieldClass(definition.getType());
-        Constructor fieldConstructor = fieldClass.getDeclaredConstructor(constructor_classes);
-        return (DBField) fieldConstructor.newInstance(constructor_params);
-      }
-    catch (Exception ex)
-      {
-        ex.printStackTrace();
+      case BOOLEAN:
+        return new BooleanDBField(object, in, definition);
 
-        return null;
+      case NUMERIC:
+        return new NumericDBField(object, in, definition);
+
+      case FLOAT:
+        return new FloatDBField(object, in, definition);
+
+      case FIELDOPTIONS:
+        return new FieldOptionDBField(object, in, definition);
+
+      case DATE:
+        return new DateDBField(object, in, definition);
+
+      case STRING:
+        return new StringDBField(object, in, definition);
+
+      case INVID:
+        return new InvidDBField(object, in, definition);
+
+      case PERMISSIONMATRIX:
+        return new PermissionMatrixDBField(object, in, definition);
+
+      case PASSWORD:
+        return new PasswordDBField(object, in, definition);
+
+      case IP:
+        return new IPDBField(object, in, definition);
+
+      default:
+        throw new IllegalArgumentException("Bad field def type in DBField.readField:" + definition.getType());
       }
   }
 
