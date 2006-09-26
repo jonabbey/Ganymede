@@ -766,9 +766,10 @@ public class DBEditSet {
 
   /**
    * <p>This method is used to pop a checkpoint off the checkpoint
-   * stack.  This method is equivalent to a rollback where the
-   * checkpoint information is taken off the stack, but this
-   * DBEditSet's state is not reverted.</p>
+   * stack without making any other changes to the edit set.  This
+   * method is equivalent to a rollback where the checkpoint
+   * information is taken off the stack, but this DBEditSet's state is
+   * not reverted.</p>
    *
    * <p>Any checkpoints that were placed on the stack after
    * the checkpoint matching &lt;name&gt; will also be
@@ -790,9 +791,10 @@ public class DBEditSet {
 
   /**
    * <p>This method is used to pop a checkpoint off the checkpoint
-   * stack.  This method is equivalent to a rollback where the
-   * checkpoint information is taken off the stack, but this
-   * DBEditSet's state is not reverted.</p>
+   * stack without making any other changes to the edit set.  This
+   * method is equivalent to a rollback where the checkpoint
+   * information is taken off the stack, but this DBEditSet's state is
+   * not reverted.</p>
    *
    * <p>Any checkpoints that were placed on the stack after
    * the checkpoint matching &lt;name&gt; will also be
