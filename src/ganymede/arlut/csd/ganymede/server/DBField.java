@@ -240,7 +240,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
     try
       {
         Class fieldClass = getFieldClass(fieldDef.getType());
-        Constructor fieldConstructor = fieldClass.getConstructor(constructor_classes);
+        Constructor fieldConstructor = fieldClass.getDeclaredConstructor(constructor_classes);
         return (DBField) fieldConstructor.newInstance(constructor_params);
       }
     catch (Exception ex)
@@ -263,7 +263,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
     try
       {
-        Constructor fieldConstructor = orig.getClass().getConstructor(constructor_classes);
+        Constructor fieldConstructor = orig.getClass().getDeclaredConstructor(constructor_classes);
         return (DBField) fieldConstructor.newInstance(constructor_params);
       }
     catch (Exception ex)
@@ -289,7 +289,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
     try
       {
         Class fieldClass = getFieldClass(definition.getType());
-        Constructor fieldConstructor = fieldClass.getConstructor(constructor_classes);
+        Constructor fieldConstructor = fieldClass.getDeclaredConstructor(constructor_classes);
         return (DBField) fieldConstructor.newInstance(constructor_params);
       }
     catch (Exception ex)
