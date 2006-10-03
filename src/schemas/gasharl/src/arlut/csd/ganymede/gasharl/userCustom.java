@@ -1038,13 +1038,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (categoryName.equals("normal"))
       {
-        int badge = ((Integer) object.getFieldValueLocal(BADGE)).intValue();
+        String badge = (String) object.getFieldValueLocal(BADGE);
 
         QueryResult qr = null;
 
         try
           {
-            qr = gSession.query("select object from 'User' where 'Badge' == " + badge + 
+            qr = gSession.query("select object from 'User' where 'Badge' == " + StringUtils.escape(badge) + 
                                 " and (not 'Username' == '" + StringUtils.escape(myUsername) +
                                 "') and ('Account Category' == 'normal') and (not 'Removal Date' defined)");
           }
