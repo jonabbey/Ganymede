@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -77,6 +77,7 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.Query;
@@ -960,7 +961,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public ReturnVal consistencyCheck(DBObject object)
   {
-    DBSession session = null;
+    GanymedeSession gSession = null;
     DBObject categoryObj = null;
     String categoryName = null;
 
@@ -975,19 +976,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (object instanceof DBEditObject)
       {
-	session = ((DBEditObject) object).getSession();
+	gSession = ((DBEditObject) object).getGSession();
       }
-
-    if (session != null)
-      {
-	categoryObj = session.viewDBObject(category);
-      } 
     else
       {
-	categoryObj = DBStore.viewDBObject(category);
+        gSession = Ganymede.internalSession;
       }
 
-    if (categoryObj == null) 
+    categoryObj = lookupInvid(category, false);
+
+    if (categoryObj == null)
       {
 	// shouldn't happen, but if it does we'll assume something
 	// else will catch this
@@ -1034,6 +1032,61 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         return Ganymede.createErrorDialog("Bad Home Group",
                                           "Ganymede server configuration error.  The home group (" + homeGroupObj.getLabel() + ") for this user is " +
                                           "not a valid choice.");
+      }
+
+    // and make sure that the badge number is unique, if we're a normal account
+
+    if (categoryName.equals("normal"))
+      {
+        int badge = ((Integer) object.getFieldValueLocal(BADGE)).intValue();
+
+        QueryResult qr = null;
+
+        try
+          {
+            qr = gSession.query("select object from 'User' where 'Badge' == " + badge + 
+                                " and (not 'Username' == '" + myUsername + "') and ('Account Category' == 'normal') and (not 'Removal Date' defined)");
+          }
+        catch (NotLoggedInException ex)
+          {
+            throw new RuntimeException("Error in userObject.consistencyCheck(): query threw a NotLoggedInException.", ex);
+          }
+        catch (GanyParseException ex)
+          {
+            throw new RuntimeException("Error in userObject.consistencyCheck(): query could not be parsed correctly.", ex);
+          }
+
+        if (qr != null && qr.size() != 0)
+          {
+            boolean badge_is_admin = false;
+            String conflict_name = null;
+
+            for (int i = 0; !badge_is_admin && i < qr.size(); i++)
+              {
+                Invid matchInvid = qr.getInvid(i);
+
+                DBObject conflictUserObject = lookupInvid(matchInvid, false);
+
+                Vector personae = conflictUserObject.getFieldValuesLocal(PERSONAE);
+
+                if (personae != null && personae.size() > 0)
+                  {
+                    badge_is_admin = true;
+                  }
+                else
+                  {
+                    conflict_name = conflictUserObject.getLabel();
+                  }
+              }
+
+            if (!badge_is_admin)
+              {
+                return Ganymede.createErrorDialog("Duplicate Badge Number",
+                                                  "This user object shares a badge number with the " + conflict_name + " user object.\n\n" +
+                                                  "Since both of these user accounts are 'normal' accounts, Ganymede can't tell which one should " +
+                                                  "be the account of record for information transfer to the HR database.");
+              }
+          }
       }
 
     return null;
