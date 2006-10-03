@@ -1039,7 +1039,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     Vector personaeList = object.getFieldValuesLocal(PERSONAE);
 
-    if (personaeList != null && personaeList.size() > 0 && categoryName.equals("normal"))
+    if ((personaeList == null || personaeList.size() == 0) && categoryName.equals("normal"))
       {
         String badge = (String) object.getFieldValueLocal(BADGE);
 
