@@ -1034,9 +1034,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                                           "not a valid choice.");
       }
 
-    // and make sure that the badge number is unique, if we're a normal account
+    // and make sure that the badge number is unique, if we're a
+    // normal account and we don't have any attached admin personae.
 
-    if (categoryName.equals("normal"))
+    Vector personaeList = object.getFieldValuesLocal(PERSONAE);
+
+    if (personaeList != null && personaeList.size() > 0 && categoryName.equals("normal"))
       {
         String badge = (String) object.getFieldValueLocal(BADGE);
 
