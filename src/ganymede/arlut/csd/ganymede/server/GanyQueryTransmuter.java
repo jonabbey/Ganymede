@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -581,7 +581,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	    return Double.valueOf(argument);
 
 	  case QueryParserTokenTypes.STRING_VALUE:
-	    return StringUtils.dequote(argument);
+	    return StringUtils.de_escape(StringUtils.dequote(argument));
 
 	  default:
 
@@ -627,6 +627,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	  {
 	  case FieldType.STRING:
 	  case FieldType.INVID:
+            return StringUtils.de_escape(StringUtils.dequote(argument));
 	  case FieldType.IP:
 	    return StringUtils.dequote(argument);
 	  case FieldType.DATE:
