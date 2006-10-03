@@ -1044,8 +1044,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         try
           {
-            qr = gSession.query("select object from 'User' where 'Badge' == " + StringUtils.escape(badge) + 
-                                " and (not 'Username' == '" + StringUtils.escape(myUsername) +
+            qr = gSession.query("select object from 'User' where 'Badge' == '" + StringUtils.escape(badge) + 
+                                "' and (not 'Username' == '" + StringUtils.escape(myUsername) +
                                 "') and ('Account Category' == 'normal') and (not 'Removal Date' defined)");
           }
         catch (NotLoggedInException ex)
