@@ -160,6 +160,63 @@ public class StringUtils {
   }
 
   /**
+   * This method takes an input string and handles back-slash escaping of single quotes,
+   * double quotes, newline sequence (\n), and \ itself.
+   */
+
+  public static String de_escape(String inputString)
+  {
+    boolean escaping = false;
+    char[] inAry = inputString.toCharArray();
+    char[] resultAry = new char[inputString.length()];
+    int index = 0;
+
+    /* -- */
+
+    for (int i = 0; i < inAry.length; i++)
+      {
+        char c = inAry[i];
+
+        if (!escaping)
+          {
+            if (c == '\\')
+              {
+                escaping = true;
+                continue;
+              }
+            
+            resultAry[index++] = c;
+          }
+        else
+          {
+            switch (c)
+              {
+              case 'n':
+                resultAry[index++] = '\n';
+                break;
+
+              case '\\':
+                resultAry[index++] = '\\';
+                break;
+
+              case '\'':
+                resultAry[index++] = '\'';
+                break;
+
+              case '\"':
+                resultAry[index++] = '\"';
+                break;
+
+              default:
+                resultAry[index++] = c;
+              }
+          }
+      }
+
+    return new String(resultAry, 0, index);
+  }
+
+  /**
    * <p>This method takes a string and, if the string starts and
    * ends with either " or ', returns the contained string.</p>
    *
@@ -175,7 +232,7 @@ public class StringUtils {
     if ((inputString.charAt(0) == '"' && inputString.charAt(last) == '"') ||
 	(inputString.charAt(0) == '\'' && inputString.charAt(last) == '\''))
       {
-	return inputString.substring(1, last);
+        return inputString.substring(1, last);
       }
 
     return inputString;
