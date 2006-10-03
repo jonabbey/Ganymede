@@ -3076,11 +3076,19 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   * MyDBObject.get("field_x") will return the DBField with the label
   * of "field_x".
   */
+
+  /**
+   * Part of the JythonMap interface.
+   */
   
   public boolean has_key(Object key)
   {
-    return keys().contains(key);
+    return (retrieveField((String) key) != null);
   }
+
+  /**
+   * Part of the JythonMap interface.
+   */
 
   public List items()
   {
@@ -3100,6 +3108,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     return list;    
   }
 
+  /**
+   * Part of the JythonMap interface.
+   */
+
   public Set keys()
   {
     Set keys = new HashSet();
@@ -3111,16 +3123,31 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
     return keys;
   }
+
+  /**
+   * Part of the JythonMap interface.
+   */
   
   public boolean containsKey(Object key)
   {
     return has_key(key);
   }
 
+  /**
+   * This method only returns true if a DBField is passed in which
+   * is contained in this object, by object identity.
+   *
+   * Part of the JythonMap interface.
+   */
+
   public boolean containsValue(Object value)
   {
     return getFieldVect().contains(value);
   }
+
+  /**
+   * Part of the JythonMap interface.
+   */
 
   public Set entrySet()
   {
@@ -3133,6 +3160,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
     return entrySet;
   }
+
+  /**
+   * Part of the JythonMap interface.
+   */
 
   public Object get(Object key)
   {
@@ -3156,25 +3187,49 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     return null;
   }
 
+  /**
+   * Part of the JythonMap interface.
+   */
+
   public boolean isEmpty()
   {
     return getFieldVect().isEmpty();
   }
+
+  /**
+   * Part of the JythonMap interface.
+   */
 
   public Set keySet()
   {
     return keys();
   }
 
+  /**
+   * Part of the JythonMap interface.
+   */
+
   public int size()
   {
     return getFieldVect().size();
   }
 
+  /**
+   * Part of the JythonMap interface.
+   */
+
   public Collection values()
   {
     return getFieldVect();
   }
+
+  /**
+   * This is an embedded inner class within the
+   * arlut.csd.ganymede.server.DBObject class.  It is used in the
+   * context of the Jython/Map support that Deepak added to DBObject.
+   *
+   * Part of the JythonMap interface.
+   */
 
   static class Entry implements Map.Entry
   {
@@ -3206,21 +3261,37 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * These methods are are no-ops since we don't want this object
    * messed with via the Map interface.
    */
+
+  /**
+   * Part of the JythonMap interface.
+   */
    
   public void clear()
   {
     return;
   }
 
+  /**
+   * Part of the JythonMap interface.
+   */
+
   public Object put(Object key, Object value)
   {
     return null;
   }
 
+  /**
+   * Part of the JythonMap interface.
+   */
+
   public void putAll(Map t)
   {
     return;
   }
+
+  /**
+   * Part of the JythonMap interface.
+   */
 
   public Object remove(Object key)
   {
