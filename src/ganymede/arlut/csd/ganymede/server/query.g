@@ -115,17 +115,12 @@ options {
 
 BACKSLASH: '\\';
 
-protected ESC : BACKSLASH {options {caseSensitive=true;}:
+protected ESC : BACKSLASH 
   ( 'n'  { $setText("\n"); }
-  | 'r'  { $setText("\r"); }
-  | 't'  { $setText("\t"); }
-  | 'b'  { $setText("\b"); }
-  | 'f'  { $setText("\f"); }
   | '"'  { $setText("\""); }
   | '\'' { $setText("'");  }
-  | '\'' { $setText("\'"); }
   | BACKSLASH
-  )
+  );
 
 LPAREN : '(' ;
 RPAREN : ')' ;
@@ -142,7 +137,7 @@ EDITABLE : "editable";
 
 STRING_VALUE :
         '"' (options {greedy=false;}: (ESC)=> ESC | BACKSLASH | ~'"' )* '"'  |
-        "'" (options {greedy=false;}: (ESC)=> ESC | BACKSLASH | ~"'" )* "'"
+        '\'' (options {greedy=false;}: (ESC)=> ESC | BACKSLASH | ~'\'' )* '\''
         ;
 
 BOOLEAN_VALUE :

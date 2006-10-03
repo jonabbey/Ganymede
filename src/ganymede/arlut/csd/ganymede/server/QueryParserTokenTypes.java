@@ -23,7 +23,9 @@ public interface QueryParserTokenTypes {
 	int INT_VALUE = 19;
 	int DECIMAL_VALUE = 20;
 	int BOOLEAN_VALUE = 21;
-	int DIGIT = 22;
-	int NUMERIC_ARG = 23;
-	int WS = 24;
+	int BACKSLASH = 22;
+	int ESC = 23;
+	int DIGIT = 24;
+	int NUMERIC_ARG = 25;
+	int WS = 26;
 }

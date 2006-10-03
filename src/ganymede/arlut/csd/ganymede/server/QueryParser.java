@@ -578,6 +578,8 @@ public QueryParser(ParserSharedInputState state) {
 		"INT_VALUE",
 		"DECIMAL_VALUE",
 		"BOOLEAN_VALUE",
+		"BACKSLASH",
+		"ESC",
 		"DIGIT",
 		"NUMERIC_ARG",
 		"WS"
