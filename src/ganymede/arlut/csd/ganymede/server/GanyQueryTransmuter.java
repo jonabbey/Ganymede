@@ -581,7 +581,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	    return Double.valueOf(argument);
 
 	  case QueryParserTokenTypes.STRING_VALUE:
-	    return StringUtils.de_escape(StringUtils.dequote(argument));
+	    return StringUtils.dequote(argument);
 
 	  default:
 
@@ -627,7 +627,6 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	  {
 	  case FieldType.STRING:
 	  case FieldType.INVID:
-            return StringUtils.de_escape(StringUtils.dequote(argument));
 	  case FieldType.IP:
 	    return StringUtils.dequote(argument);
 	  case FieldType.DATE:

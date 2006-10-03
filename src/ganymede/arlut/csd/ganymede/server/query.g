@@ -113,6 +113,20 @@ options {
   charVocabulary='\u0000'..'\u007F';  // allow ascii
 }
 
+BACKSLASH: '\\';
+
+protected ESC : BACKSLASH {options {caseSensitive=true;}:
+  ( 'n'  { $setText("\n"); }
+  | 'r'  { $setText("\r"); }
+  | 't'  { $setText("\t"); }
+  | 'b'  { $setText("\b"); }
+  | 'f'  { $setText("\f"); }
+  | '"'  { $setText("\""); }
+  | '\'' { $setText("'");  }
+  | '\'' { $setText("\'"); }
+  | BACKSLASH
+  )
+
 LPAREN : '(' ;
 RPAREN : ')' ;
 COMMA  : ',' ;
@@ -126,11 +140,10 @@ DEREF  : "->" ;
 OBJECT : "object";
 EDITABLE : "editable";
 
-
-STRING_VALUE : 
-         '"' (options {greedy=false;}:.)* '"' 
-         | "'" (options {greedy=false;}:.)* "'" 
-         ;
+STRING_VALUE :
+        '"' (options {greedy=false;}: (ESC)=> ESC | BACKSLASH | ~'"' )* '"'  |
+        "'" (options {greedy=false;}: (ESC)=> ESC | BACKSLASH | ~"'" )* "'"
+        ;
 
 BOOLEAN_VALUE :
          "true"
