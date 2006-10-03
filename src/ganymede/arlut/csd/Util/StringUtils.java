@@ -160,6 +160,52 @@ public class StringUtils {
   }
 
   /**
+   * This method takes an input string and inserts back-slash escapes
+   * to protect single quote, double quote, newlines, and back-slash
+   * characters.
+   *
+   * This breaks horribly if the input string is already escaped, of
+   * course.
+   */
+
+  public static String escape(String inputString)
+  {
+    StringBuffer result = new StringBuffer();
+    char[] inAry = inputString.toCharArray();
+
+    /* -- */
+
+    for (int i = 0; i < inAry.length; i++)
+      {
+        char c = inAry[i];
+
+        switch (c)
+          {
+          case '\\':
+            result.append("\\\\");
+            break;
+
+          case '\n':
+            result.append("\\n");
+            break;
+
+          case '\'':
+            result.append("\\'");
+            break;
+
+          case '"':
+            result.append("\\\"");
+            break;
+
+          default:
+            result.append(c);
+          }
+      }
+
+    return result.toString();
+  }
+
+  /**
    * This method takes an input string and handles back-slash escaping of single quotes,
    * double quotes, newline sequence (\n), and \ itself.
    */
