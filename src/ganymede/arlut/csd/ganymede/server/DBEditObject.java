@@ -3351,7 +3351,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // this object is currently consistent.  If it is not, and it was
     // before this transaction started, report the problem.
 
-    // If this object is an inconsistent state and was before the
+    // If this object is in an inconsistent state, and was before the
     // transaction started, don't block the commit
 
     if (getGSession().enableOversight)
