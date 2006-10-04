@@ -449,15 +449,18 @@
     <p>First, by using the opposite style of quotation for the string
     value:</p>
 
-    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span> "<i>Full Name</i>" == '<i>"Jon"</i>'</div>
+    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span>
+    "<i>Full Name</i>" <span class="keyword">==</span> '<i>"Jon"</i>'</div>
 
     <p>Second, by using backslash escaping:</p>
 
-    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span> "<i>Full Name</i>" == "<i>\"Jon\"</i>"</div>
+    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span>
+    "<i>Full Name</i>" <span class="keyword">==</span> "<i>\"Jon\"</i>"</div>
 
     <p>We can also use the escaping rules to embed newlines into the query string:</p>
 
-    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span> "<i>Notes</i>" == "<i>This user was created recently.\n\nCreated by Jonathan Abbey\n4 October 2006</i>"</div>
+    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span>
+    "<i>Notes</i>" <span class="keyword">==</span> "<i>This user was created recently.\n\nCreated by Jonathan Abbey\n4 October 2006</i>"</div>
 
     <p>Remember that these character escaping rules are in addition to
     the standard rules for regular expression syntax, so if you are
@@ -466,7 +469,8 @@
     the regular expression parser) you'd need to do something like
     this:</p>
 
-    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span> "<i>Full Name</i>" =~ "<i>Wu\\\\Tang</i>"</div>
+    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span>
+    "<i>Full Name</i>" <span class="keyword">=~</span> "<i>Wu\\\\Tang</i>"</div>
 
     <p>In this case, we're really looking for any user whose full name
     includes the substring <i>Wu\Tang</i>.  We need to add one
