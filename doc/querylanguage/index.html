@@ -417,6 +417,66 @@
     doing whatever work is required to get the job done for stuff like
     this.</p>
 
+    <h3>String Encoding Rules</h3>
+
+    <p>Anywhere where you provide a string delimited by single or
+    double quote characters, you are dealing with a <b>string
+    value</b>.  All string values handled by the GanyQL parser support
+    a simple backslash escape encoding to handle inclusion of the
+    quotation characters within the string.</p>
+
+    <p>Here are the encoding rules:</p>
+
+    <table><caption>Backslash Escaping Rules</caption>
+      <tr><th>Character</th><th>Encoding</th></tr>
+      <tr>
+        <td>'</td><td>\'</td>
+      </tr>
+      <tr>
+        <td>"</td><td>\"</td>
+      </tr>
+      <tr>
+        <td>\</td><td>\\</td>
+      </tr>
+      <tr>
+        <td>&lt;newline&gt;</td><td>\n</td>
+      </tr>
+    </table>
+
+    <p>So if we wanted to look for a user whose name includes a single
+    quote character, we could do it in one of two ways:</p>
+
+    <p>First, by using the opposite style of quotation for the string
+    value:</p>
+
+    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span> "<i>Full Name</i>" == '<i>"Jon"</i>'</div>
+
+    <p>Second, by using backslash escaping:</p>
+
+    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span> "<i>Full Name</i>" == "<i>\"Jon\"</i>"</div>
+
+    <p>We can also use the escaping rules to embed newlines into the query string:</p>
+
+    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span> "<i>Notes</i>" == "<i>This user was created recently.\n\nCreated by Jonathan Abbey\n4 October 2006</i>"</div>
+
+    <p>Remember that these character escaping rules are in addition to
+    the standard rules for regular expression syntax, so if you are
+    wanting to use a regular expression match to search for a string
+    that contains a backslash character (which has special meaning to
+    the regular expression parser) you'd need to do something like
+    this:</p>
+
+    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span> "<i>Full Name</i>" =~ "<i>Wu\\\\Tang</i>"</div>
+
+    <p>In this case, we're really looking for any user whose full name
+    includes the substring <i>Wu\Tang</i>.  We need to add one
+    backslash to get past the initial GanyQL parser, so we'd have
+    <i>Wu\\Tang</i>, to get <i>Wu\Tang</i> to the regular expression
+    parser.  The regular expression parser, however, requires a
+    backslash escape itself.  Thus we need to provide
+    <i>Wu\\\\Tang</i> to get the proper encoding all the way down to
+    the regular expression parser.</p>
+
     <h3>GanyQL Examples</h3>
 
     <h2>Using GanyQL</h2>
