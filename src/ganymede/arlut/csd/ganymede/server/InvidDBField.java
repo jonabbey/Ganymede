@@ -1818,6 +1818,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * field is not linked to the invid specified, nothing will happen.
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   synchronized final ReturnVal dissolve(Invid oldInvid, boolean local)
@@ -1941,6 +1945,9 @@ public final class InvidDBField extends DBField implements invid_field {
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
    *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   private synchronized final ReturnVal establish(DBObject newObject, boolean local)
@@ -2408,7 +2415,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * @param noWizards If true, wizards will be skipped
    *
    * @see arlut.csd.ganymede.server.DBSession
-   * 
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal setValue(Object value, boolean local, boolean noWizards)
@@ -2584,6 +2594,9 @@ public final class InvidDBField extends DBField implements invid_field {
    *
    * @see arlut.csd.ganymede.server.DBSession
    *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
   
   public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards)
@@ -2750,7 +2763,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * @param submittedValue The value to put into this vector.
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
-   * 
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
@@ -2921,6 +2937,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * it can, even if some values are refused by the server logic.  Any
    * values that are skipped will be reported in a dialog passed back
    * in the returned ReturnVal
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
@@ -3333,6 +3353,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * methods..
    *
    * @see arlut.csd.ganymede.rmi.invid_field
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal createNewEmbedded() throws NotLoggedInException, GanyPermissionsException
@@ -3354,7 +3378,11 @@ public final class InvidDBField extends DBField implements invid_field {
    * methods..
    *
    * @param local If true, we don't check permission to edit this
-   * field before creating the new object.  
+   * field before creating the new object.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal createNewEmbedded(boolean local) throws NotLoggedInException, GanyPermissionsException
@@ -3825,6 +3853,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * may optionally pass back a dialog.
    *
    * Server-side method only
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
@@ -4264,6 +4296,34 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     return ((o == null) || (o instanceof Invid));
   }
+
+  /**
+   * Overridable method to verify that an object submitted to this
+   * field has an appropriate value.
+   *
+   * This method is intended to make the final go/no go decision about
+   * whether a given value is appropriate to be placed in this field,
+   * by whatever means (vector add, vector replacement, scalar
+   * replacement).
+   *
+   * This method is expected to call the 
+   * {@link arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,java.lang.Object)} 
+   * method on {@link arlut.csd.ganymede.server.DBEditObject} in order to allow custom
+   * plugin classes to deny any given value that the plugin might not
+   * care for, for whatever reason.  Otherwise, the go/no-go decision
+   * will be made based on the checks performed by 
+   * {@link arlut.csd.ganymede.server.DBField#verifyBasicConstraints(java.lang.Object) verifyBasicConstraints}.
+   *
+   * The ReturnVal that is returned may have transformedValue set, in
+   * which case the code that calls this verifyNewValue() method
+   * should consider transformedValue as replacing the 'o' parameter
+   * as the value that verifyNewValue wants to be put into this field.
+   * This usage of transformedValue is for canonicalizing input data.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
 
   public ReturnVal verifyNewValue(Object o)
   {
