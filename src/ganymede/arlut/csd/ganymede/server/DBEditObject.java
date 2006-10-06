@@ -1172,6 +1172,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal canRemove(DBSession session, DBObject object)
@@ -1468,6 +1472,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * needed.
    *
    * This method should be overridden in subclasses. 
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal initializeNewObject()
@@ -1758,16 +1766,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    *
    * To be overridden on necessity in DBEditObject subclasses.
    *
-   * @return a ReturnVal object indicated success or failure, objects and
-   * fields to be rescanned by the client, and a doNormalProcessing flag
-   * that will indicate to the field code whether or not the operation
-   * should continue to completion using the field's standard logic.
-   * <b>It is very important that wizardHook return a new ReturnVal(true, true)
-   * if the wizardHook wishes to simply specify rescan information while
-   * having the field perform its standard operation.</b>  wizardHook() may
-   * return new ReturnVal(true, false) if the wizardHook performs the operation
-   * (or a logically related operation) itself.  The same holds true for the
-   * respond() method in GanymediatorWizard subclasses.
+   * @return null if the operation is approved without comment, or a
+   * ReturnVal object indicating success or failure, objects and
+   * fields to be rescanned by the client, and a doNormalProcessing
+   * flag that will indicate to the field code whether or not the
+   * operation should continue to completion using the field's
+   * standard logic.  <b>It is very important that wizardHook return a
+   * new ReturnVal(true, true) if the wizardHook wishes to simply
+   * specify rescan information while having the field perform its
+   * standard operation.</b> wizardHook() may return new
+   * ReturnVal(true, false) if the wizardHook performs the operation
+   * (or a logically related operation) itself.  The same holds true
+   * for the respond() method in GanymediatorWizard subclasses.
    */
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
@@ -1788,6 +1798,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * and to export the created embedded object for the client's use, if
    * necessary, whatever other customizations a subclass might choose to
    * do.  We may want to make this method final.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal createNewEmbeddedObject(InvidDBField field) throws NotLoggedInException
@@ -1858,6 +1872,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * Question: what synchronization issues are going to be needed
    * between DBEditObject and DBField to insure that we can have
    * a reliable verifyNewValue method here?
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal verifyNewValue(DBField field, Object value)
@@ -1894,6 +1912,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under normal circumstances, we won't need
    * to do anything here.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal finalizeDeleteElement(DBField field, int index)
@@ -1920,6 +1942,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under standard circumstances, we won't need
    * to do anything here.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal finalizeDeleteElements(DBField field, Vector valuesToDelete)
@@ -1945,6 +1971,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under normal circumstances, we won't need
    * to do anything here.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal finalizeAddElement(DBField field, Object value)
@@ -1970,6 +2000,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under normal circumstances, we won't need
    * to do anything here.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal finalizeAddElements(DBField field, Vector submittedValues)
@@ -1997,6 +2031,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under normal circumstances, we won't need
    * to do anything here.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal finalizeSetElement(DBField field, int index, Object value)
@@ -2040,6 +2078,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * involved checks, and for when you want a chance to trigger other
    * changes in response to a particular field's value being
    * changed.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
@@ -2486,6 +2528,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    *
    * @see #commitPhase1()
    * @see #commitPhase2() 
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal inactivate()
@@ -2591,6 +2637,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    *
    * @see #commitPhase1()
    * @see #commitPhase2() 
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal reactivate()
@@ -2668,6 +2718,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * with a boolean indicating whether success was had.
    *
    * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal remove()
@@ -2702,6 +2756,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    *
    * @see #commitPhase1()
    * @see #commitPhase2() 
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final synchronized ReturnVal finalizeRemove(boolean success)
@@ -3062,6 +3120,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @param remote An Invid for an object that we have asymmetric back links to.
    * @param local If true, we won't do a permissions check before trying to edit the
    * remote object.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   private ReturnVal clearBackLink(Invid remote, boolean local)
@@ -3287,6 +3349,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * a dialog explaining the problem will be presented to the user.
    *
    * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal preCommitHook()
@@ -3331,6 +3397,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * to make changes.
    *
    * @see arlut.csd.ganymede.server.DBEditSet 
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal commitPhase1()

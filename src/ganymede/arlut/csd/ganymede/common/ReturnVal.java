@@ -86,8 +86,10 @@ import arlut.csd.Util.TranslationService;
  * be presented to the user, and an optional callback that the client
  * can call with the results of the dialog box if necessary.</p>
  *
- * <p>Note that operations that succeed without needing any further information
- * or action on the part of the client will simply return null.</p>
+ * <p>Note that server operations that succeed without needing any
+ * further information or action on the part of the client may simply
+ * return null to indicate success, rather than returning a ReturnVal
+ * object.</p>
  *
  * <p>If a non-null ReturnVal object is passed back, one of two things
  * may be true.  {@link arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()}

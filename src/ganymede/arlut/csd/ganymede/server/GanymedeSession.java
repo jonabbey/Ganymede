@@ -1833,6 +1833,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @param ownerInvids a Vector of Invid objects pointing to
    * ownergroup objects.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal setDefaultOwner(Vector ownerInvids) throws NotLoggedInException
@@ -1913,6 +1917,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * Calling this method with ownerInvids set to null will turn off the filtering.
    *
    * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal filterQueries(Vector ownerInvids) throws NotLoggedInException
@@ -2218,6 +2226,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * transaction.
    * 
    * @see arlut.csd.ganymede.rmi.Session
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal openTransaction(String describe) throws NotLoggedInException
@@ -2239,6 +2251,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * transaction.
    * 
    * @see arlut.csd.ganymede.rmi.Session
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal openTransaction(String describe, boolean interactive) throws NotLoggedInException
@@ -2400,10 +2416,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * attempt to fix the reported problem and try another call to
    * commitTransaction().
    *
-   * @return a ReturnVal object if the transaction could not be committed,
-   *         or null if there were no problems.  If the transaction was
-   *         forcibly terminated due to a major error, the 
-   *         doNormalProcessing flag in the returned ReturnVal will be
+   * @return null if the transaction could be committed without comment, or
+   *         a ReturnVal object if there were problems or a need for comment.
+   *         If the transaction was forcibly terminated due to a major error,
+   *         the doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
    * 
    * @see arlut.csd.ganymede.rmi.Session 
@@ -4720,6 +4736,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.
    *
    * @see arlut.csd.ganymede.rmi.Session
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal reactivate_db_object(Invid invid) throws NotLoggedInException

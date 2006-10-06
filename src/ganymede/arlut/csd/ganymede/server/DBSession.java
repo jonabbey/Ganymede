@@ -827,6 +827,10 @@ final public class DBSession {
    *
    * @param baseID id of the object base containing the object to be deleted
    * @param objectID id of the object to be deleted
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal deleteDBObject(short baseID, int objectID)
@@ -884,7 +888,10 @@ final public class DBSession {
    * method.</P>
    *
    * @param eObj An object checked out in the current transaction to be deleted
-   *   
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal deleteDBObject(DBEditObject eObj)
@@ -1006,6 +1013,10 @@ final public class DBSession {
    * GanymedeSession.inactivate_db_object()}.</p>
    *
    * @param eObj An object checked out in the current transaction to be inactivated
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal inactivateDBObject(DBEditObject eObj)
@@ -1101,6 +1112,10 @@ final public class DBSession {
    * GanymedeSession.reactivate_db_object()}.</p>
    *
    * @param eObj An object checked out in the current transaction to be reactivated
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal reactivateDBObject(DBEditObject eObj)

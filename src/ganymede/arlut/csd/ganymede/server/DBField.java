@@ -536,6 +536,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * @param target The DBField to copy this field's contents to.
    * @param local If true, permissions checking is skipped.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
@@ -892,6 +896,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * FieldOptionDBField, or PasswordDBField, the plugin code is not
    * currently given the opportunity to review and refuse that
    * operation.  Caveat Coder.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal setUndefined(boolean local) throws GanyPermissionsException
@@ -1145,6 +1153,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * @see arlut.csd.ganymede.server.DBSession
    * @see arlut.csd.ganymede.rmi.db_field
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal setValue(Object value) throws GanyPermissionsException
@@ -1169,6 +1181,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * The ReturnVal object returned encodes
    * success or failure, and may optionally
    * pass back a dialog.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal setValueLocal(Object value)
@@ -1194,6 +1210,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * @param value Value to set this field to
    * @param noWizards If true, wizards will be skipped
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal setValueLocal(Object value, boolean noWizards)
@@ -1218,6 +1238,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * @param submittedValue Value to set this field to
    * @param local If true, permissions checking will be skipped
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal setValue(Object submittedValue, boolean local) throws GanyPermissionsException
@@ -1239,6 +1263,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * @param submittedValue Value to set this field to
    * @param local If true, permissions checking will be skipped
    * @param noWizards If true, wizards will be skipped
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal setValue(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -1499,6 +1527,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * @see arlut.csd.ganymede.server.DBSession
    * @see arlut.csd.ganymede.rmi.db_field
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
   
   public final ReturnVal setElement(int index, Object value) throws GanyPermissionsException
@@ -1542,6 +1574,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * @see arlut.csd.ganymede.server.DBSession
    *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
   
   public final ReturnVal setElementLocal(int index, Object value)
@@ -1778,6 +1813,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * duplicate values.
    *
    * @see arlut.csd.ganymede.rmi.db_field
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal addElement(Object value) throws GanyPermissionsException
@@ -1796,6 +1835,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal addElementLocal(Object value)
@@ -1824,6 +1867,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * @param submittedValue Value to be added
    * @param local If true, permissions checking will be skipped
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal addElement(Object submittedValue, boolean local) throws GanyPermissionsException
@@ -1846,6 +1893,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * @param submittedValue Value to be added
    * @param local If true, permissions checking will be skipped
    * @param noWizards If true, wizards will be skipped
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -2014,6 +2065,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * duplicate values.
    *
    * @see arlut.csd.ganymede.rmi.db_field
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal addElements(Vector values) throws GanyPermissionsException
@@ -2037,6 +2092,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal addElementsLocal(Vector values)
@@ -2076,6 +2135,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * back in the returned ReturnVal.  This is intended to support
    * vector field cloning, in which we add what values may be cloned,
    * and skip the rest.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal addElementsLocal(Vector submittedValues, boolean noWizards, boolean copyFieldMode)
@@ -2109,6 +2172,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * @param submittedValues Values to be added
    * @param local If true, permissions checking will be skipped
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal addElements(Vector submittedValues, boolean local) throws GanyPermissionsException
@@ -2136,6 +2203,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * @param submittedValues Values to be added
    * @param local If true, permissions checking will be skipped
    * @param noWizards If true, wizards will be skipped
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal addElements(Vector submittedValues, boolean local,
@@ -2168,6 +2239,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * it can, even if some values are refused by the server logic.  Any
    * values that are skipped will be reported in a dialog passed back
    * in the returned ReturnVal
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
@@ -2448,6 +2523,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * encode an order to rescan this field.
    *
    * @see arlut.csd.ganymede.rmi.db_field
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal deleteElement(int index) throws GanyPermissionsException
@@ -2462,6 +2541,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal deleteElementLocal(int index)
@@ -2483,6 +2566,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal deleteElement(int index, boolean local) throws GanyPermissionsException
@@ -2497,6 +2584,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -2589,6 +2680,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * encode an order to rescan this field.
    *
    * @see arlut.csd.ganymede.rmi.db_field
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal deleteElement(Object value) throws GanyPermissionsException
@@ -2603,6 +2698,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal deleteElementLocal(Object value)
@@ -2624,6 +2723,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal deleteElement(Object value, boolean local) throws GanyPermissionsException
@@ -2638,6 +2741,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    *
    * The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -2684,6 +2791,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * encode an order to rescan this field. 
    *
    * @see arlut.csd.ganymede.rmi.db_field
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal deleteAllElements() throws GanyPermissionsException
@@ -2707,6 +2818,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * encode an order to rescan this field. 
    *
    * @see arlut.csd.ganymede.rmi.db_field
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal deleteElements(Vector values) throws GanyPermissionsException
@@ -2727,6 +2842,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * failure code is returned, no elements in values were removed.
    *
    * Server-side method only
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal deleteElementsLocal(Vector values)
@@ -2754,6 +2873,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * failure code is returned, no elements in values were removed.
    *
    * Server-side method only
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public final ReturnVal deleteElements(Vector valuesToDelete, boolean local) throws GanyPermissionsException
@@ -2774,6 +2897,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * failure code is returned, no elements in values were removed.
    *
    * Server-side method only
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -3272,6 +3399,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * verifyBasicConstraints() is used to double check for values that
    * are already in fields, in addition to being used as a likely
    * component of verifyNewValue() to verify new values.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal verifyBasicConstraints(Object o)
@@ -3301,6 +3432,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * should consider transformedValue as replacing the 'o' parameter
    * as the value that verifyNewValue wants to be put into this field.
    * This usage of transformedValue is for canonicalizing input data.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   abstract public ReturnVal verifyNewValue(Object o);
