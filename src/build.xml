@@ -314,7 +314,9 @@ refresh the jar files.
     
     <!-- Copy over the newly created jars -->
     <copy todir="${dist.jars}">
-      <fileset dir="${build.lib}" includes="*.jar"/>
+      <fileset dir="${build.lib}" includes="ganymede.jar"/>
+      <fileset dir="${build.lib}" includes="ganymedeAdmin.jar"/>
+      <fileset dir="${build.lib}" includes="ganymedeServer.jar"/>
     </copy>
   </target>
 
