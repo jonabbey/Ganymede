@@ -954,6 +954,48 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  }
       }
   }
+
+  /**
+   * Closes all windows that show a view onto the given Invid
+   *
+   * This should be called by the parent when the transaction is
+   * canceled, to get rid of windows viewing deleted objects.
+   */
+
+  public void closeInvidWindows(Invid invid)
+  {
+    Object ary[];
+
+    /* -- */
+
+    synchronized (windowList)
+      {
+	ary = windowList.values().toArray();
+      }
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	Object o  = ary[i];
+	
+	if (o instanceof framePanel)
+	  {
+	    framePanel w = (framePanel)o;
+
+            if (w.getObjectInvid().equals(invid))
+              {
+		try
+		  {
+		    w.closingApproved = true;
+		    w.setClosed(true);
+		  }
+		catch (java.beans.PropertyVetoException ex)
+		  {
+		    // shouldn't happen here
+		  }
+              }
+	  }
+      }
+  }
   
   /**
    * Closes all internal frames, editable or no.

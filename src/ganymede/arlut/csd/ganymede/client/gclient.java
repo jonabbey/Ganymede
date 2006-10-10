@@ -3058,6 +3058,11 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		tree.deleteNode(node, false);
 		invidNodeHash.remove(invid);
 	      }
+
+            // and be sure we close any view windows held open that
+            // show the deleted object
+
+            wp.closeInvidWindows(invid);
 	  }
     
 	deleteHash.clear();
@@ -4835,7 +4840,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    openNewTransaction();
 
 	    //
-	    // This fixes all the icons in the tree
+	    // This fixes all the icons in the tree, and closes any
+	    // view windows on objects that we have deleted
 	    //
 
 	    refreshTreeAfterCommit();

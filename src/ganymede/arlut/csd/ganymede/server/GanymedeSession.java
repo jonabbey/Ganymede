@@ -3946,30 +3946,44 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (invid == null)
       {
+        // "Null invid passed into viewObjectHistory"
 	setLastError(ts.l("viewObjectHistory.null_invid"));
 	return null;
       }
 
-    // we do our own permissions checking, so we can use
-    // session.viewDBObject().
+    // If we're not supergash, we'll need to get a reference to the
+    // object so that we can check for view permission before
+    // returning the history
 
-    obj = session.viewDBObject(invid);
+    // Note that this means that in the case where the client has kept
+    // a reference to an invid that has been deleted, we won't be able
+    // to verify the user's permissions to view the history, so we'll
+    // have to return null
 
-    if (obj == null)
+    if (!isSuperGash())
       {
-	throw new NullPointerException(ts.l("viewObjectHistory.null_pointer", String.valueOf(invid)));
-      }
+        obj = session.viewDBObject(invid);
 
-    if (!getPerm(obj).isVisible())
-      {
-	setLastError(ts.l("viewObjectHistory.permissions"));
-	return null;
+        if (obj == null)
+          {
+            // "Can''t return history for an object that has been deleted or does not exist ({0})"
+            setLastError(ts.l("viewObjectHistory.null_pointer", String.valueOf(invid)));
+            return null;
+          }
+
+        if (!getPerm(obj).isVisible())
+          {
+            // "Permissions denied to view the history for this invid."
+            setLastError(ts.l("viewObjectHistory.permissions"));
+            return null;
+          }
       }
 
     if (Ganymede.log == null)
       {
-	setLastError(ts.l("viewObjectHistory.no_log"));
-	return null;
+        // "Log not active, can''t view invid history"
+        setLastError(ts.l("viewObjectHistory.no_log"));
+        return null;
       }
 
     return Ganymede.log.retrieveHistory(invid, since, false, fullTransactions); // *sync* DBLog 

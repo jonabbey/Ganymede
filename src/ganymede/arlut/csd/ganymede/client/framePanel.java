@@ -133,6 +133,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.framePanel");
 
+  /**
+   * Java 1.4 preferences API key to save the default location to save
+   * object summary.
+   */
+
   static final String OBJECT_SAVE = "object_save_default_dir";
 
   // ---
