@@ -54,6 +54,7 @@ package arlut.csd.ganymede.admin;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -856,9 +857,97 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (splitterPos != -1)
       {
+        Dimension preferred = statusBox.getPreferredSize();
+
+        if (preferred == null)
+          {
+            System.err.println("statusBox preferred size is null");
+          }
+        else
+          {
+            System.err.println("statusBox preferred size is " + preferred.toString());
+          }
+
+        Dimension realSize = statusBox.getSize();
+
+        if (realSize == null)
+          {
+            System.err.println("statusBox size is null");
+          }
+        else
+          {
+            System.err.println("statusBox size is " + realSize.toString());
+          }
+
+        preferred = tabPane.getPreferredSize();
+
+        if (preferred == null)
+          {
+            System.err.println("tabPane preferred size is null");
+          }
+        else
+          {
+            System.err.println("tabPane preferred size is " + preferred.toString());
+          }
+
+        realSize = tabPane.getSize();
+
+        if (realSize == null)
+          {
+            System.err.println("tabPane size is null");
+          }
+        else
+          {
+            System.err.println("tabPane size is " + realSize.toString());
+          }
+
 	splitterPane.setDividerLocation(splitterPos);
 
         System.err.println("Setting divider location to " + splitterPos);
+
+        preferred = statusBox.getPreferredSize();
+
+        if (preferred == null)
+          {
+            System.err.println("statusBox preferred size is null");
+          }
+        else
+          {
+            System.err.println("statusBox preferred size is " + preferred.toString());
+          }
+
+        realSize = statusBox.getSize();
+
+        if (realSize == null)
+          {
+            System.err.println("statusBox size is null");
+          }
+        else
+          {
+            System.err.println("statusBox size is " + realSize.toString());
+          }
+
+        preferred = tabPane.getPreferredSize();
+
+        if (preferred == null)
+          {
+            System.err.println("tabPane preferred size is null");
+          }
+        else
+          {
+            System.err.println("tabPane preferred size is " + preferred.toString());
+          }
+
+        realSize = tabPane.getSize();
+
+        if (realSize == null)
+          {
+            System.err.println("tabPane size is null");
+          }
+        else
+          {
+            System.err.println("tabPane size is " + realSize.toString());
+          }
       }
     else
       {
