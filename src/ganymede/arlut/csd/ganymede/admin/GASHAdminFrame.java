@@ -837,7 +837,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     // we want the top component, our log panel, to get almost all of
     // the extra size when we are resized
 
-    splitterPane.setResizeWeight(0.85); 
+    //    splitterPane.setResizeWeight(0.85); 
 
     topGBL.setConstraints(splitterPane, topGBC);
     getContentPane().add(splitterPane);
