@@ -853,12 +853,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     int splitterPos = prefs.getInt(SPLITTER_POS, -1);
 
+    this.setVisible(true);
+
     if (splitterPos != -1)
       {
 	splitterPane.setDividerLocation(splitterPos);
       }
-				  
-    this.setVisible(true);
 
     // along with processWindowEvent(), this method allows us
     // to properly handle window system close events.
