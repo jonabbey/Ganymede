@@ -838,6 +838,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (splitterPos != -1)
       {
+        System.err.println("Setting position to " + splitterPos);
 	splitterPane.setDividerLocation(splitterPos);
       }
     else
