@@ -823,117 +823,26 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     getContentPane().add(splitterPane, BorderLayout.CENTER);
 
-    pack();
-
     if (!sizer.restoreSize(this))
       {
 	this.setLocationRelativeTo(null); // center frame
 	sizer.saveSize(this);	// save an initial size before the user might maximize
       }
 
-    int splitterPos = prefs.getInt(SPLITTER_POS, -1);
+    pack();
 
-    this.setVisible(true);
-    this.validate();
+    int splitterPos = prefs.getInt(SPLITTER_POS, -1);
 
     if (splitterPos != -1)
       {
-        Dimension preferred = statusBox.getPreferredSize();
-
-        if (preferred == null)
-          {
-            System.err.println("statusBox preferred size is null");
-          }
-        else
-          {
-            System.err.println("statusBox preferred size is " + preferred.toString());
-          }
-
-        Dimension realSize = statusBox.getSize();
-
-        if (realSize == null)
-          {
-            System.err.println("statusBox size is null");
-          }
-        else
-          {
-            System.err.println("statusBox size is " + realSize.toString());
-          }
-
-        preferred = tabPane.getPreferredSize();
-
-        if (preferred == null)
-          {
-            System.err.println("tabPane preferred size is null");
-          }
-        else
-          {
-            System.err.println("tabPane preferred size is " + preferred.toString());
-          }
-
-        realSize = tabPane.getSize();
-
-        if (realSize == null)
-          {
-            System.err.println("tabPane size is null");
-          }
-        else
-          {
-            System.err.println("tabPane size is " + realSize.toString());
-          }
-
 	splitterPane.setDividerLocation(splitterPos);
-
-        System.err.println("Setting divider location to " + splitterPos);
-
-        preferred = statusBox.getPreferredSize();
-
-        if (preferred == null)
-          {
-            System.err.println("statusBox preferred size is null");
-          }
-        else
-          {
-            System.err.println("statusBox preferred size is " + preferred.toString());
-          }
-
-        realSize = statusBox.getSize();
-
-        if (realSize == null)
-          {
-            System.err.println("statusBox size is null");
-          }
-        else
-          {
-            System.err.println("statusBox size is " + realSize.toString());
-          }
-
-        preferred = tabPane.getPreferredSize();
-
-        if (preferred == null)
-          {
-            System.err.println("tabPane preferred size is null");
-          }
-        else
-          {
-            System.err.println("tabPane preferred size is " + preferred.toString());
-          }
-
-        realSize = tabPane.getSize();
-
-        if (realSize == null)
-          {
-            System.err.println("tabPane size is null");
-          }
-        else
-          {
-            System.err.println("tabPane size is " + realSize.toString());
-          }
       }
     else
       {
         splitterPane.setDividerLocation(0.75);
       }
+
+    this.setVisible(true);
 
     // along with processWindowEvent(), this method allows us
     // to properly handle window system close events.
