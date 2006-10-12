@@ -464,10 +464,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     question = PackageResources.getImageResource(this, "question.gif", getClass());
 
-    java.awt.GridBagLayout topGBL = new java.awt.GridBagLayout();
-    java.awt.GridBagConstraints topGBC = new java.awt.GridBagConstraints();
-
-    getContentPane().setLayout(topGBL);
+    getContentPane().setLayout(new BorderLayout());
 
     // set up our top panel, containing a labeled
     // text field showing the server we're connected
@@ -718,23 +715,14 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     gbl.setConstraints(locksField, gbc);
     topPanel.add(locksField);
 
-    topGBC.fill = GridBagConstraints.HORIZONTAL;
-    topGBC.gridwidth = GridBagConstraints.REMAINDER;
-    topGBC.gridheight = 1;
-    topGBC.gridx = 0;
-    topGBC.weightx = 1.0;
-    
     JPanel topBox = new JPanel(new BorderLayout());
     topBox.add("Center",topPanel);
     // "Ganymede Server"
     topBox.setBorder(new TitledBorder(ts.l("init.title")));
-    topGBL.setConstraints(topBox, topGBC);
-    getContentPane().add(topBox);
+
+    getContentPane().add(topBox, BorderLayout.NORTH);
 
     // set up our middle text area
-
-    topGBC.fill = GridBagConstraints.BOTH;
-    topGBC.weighty = 1.0;
 
     // "Ganymede Admin Console\n"
     statusArea = new JTextArea(ts.l("init.start_log_msg"), 6, 50);
@@ -746,9 +734,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Server Log"
     statusBox.setBorder(new TitledBorder(ts.l("init.server_log_title")));
-
-    //    topGBL.setConstraints(statusBox, topGBC);
-    //    getContentPane().add(statusBox);
 
     // bottom area, a tab pane with tables for things
 
@@ -828,9 +813,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     // and put the tab pane into our frame with the
     // same constraints that the text area had
 
-    //    topGBL.setConstraints(tabPane, topGBC);
-    //    getContentPane().add(tabPane);
-
     splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
     splitterPane.setOneTouchExpandable(true);
 
@@ -839,8 +821,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     //    splitterPane.setResizeWeight(0.85); 
 
-    topGBL.setConstraints(splitterPane, topGBC);
-    getContentPane().add(splitterPane);
+    getContentPane().add(splitterPane, BorderLayout.CENTER);
 
     pack();
 
