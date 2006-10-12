@@ -823,13 +823,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     getContentPane().add(splitterPane, BorderLayout.CENTER);
 
+    pack();
+
     if (!sizer.restoreSize(this))
       {
 	this.setLocationRelativeTo(null); // center frame
 	sizer.saveSize(this);	// save an initial size before the user might maximize
       }
-
-    pack();
 
     int splitterPos = prefs.getInt(SPLITTER_POS, -1);
 
