@@ -833,8 +833,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     int splitterPos = prefs.getInt(SPLITTER_POS, -1);
 
-    this.validate();
     this.setVisible(true);
+    this.validate();
 
     if (splitterPos != -1)
       {
