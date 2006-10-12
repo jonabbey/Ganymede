@@ -833,8 +833,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
     splitterPane.setOneTouchExpandable(true);
 
-    splitterPane.setDividerLocation(0.75);
-
     // we want the top component, our log panel, to get almost all of
     // the extra size when we are resized
 
@@ -861,6 +859,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	splitterPane.setDividerLocation(splitterPos);
 
         System.err.println("Setting divider location to " + splitterPos);
+      }
+    else
+      {
+        splitterPane.setDividerLocation(0.75);
       }
 
     // along with processWindowEvent(), this method allows us
