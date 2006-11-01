@@ -273,7 +273,7 @@ public final class Invid implements java.io.Serializable {
    * The intern method is to provide for the latter case, so that
    * Ganymede code which receives Invids from serialization streams
    * can look up a pooled reference pointing to the content of the
-   * Invid and use that for in-heap storage, rather than as a possibly
+   * Invid and use that for in-heap storage, rather than a possibly
    * redundant copy.
    */
 
