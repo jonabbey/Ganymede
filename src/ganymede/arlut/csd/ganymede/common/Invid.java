@@ -20,8 +20,8 @@
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2005
+
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -68,17 +68,17 @@ import java.io.IOException;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>An Invid is an immutable object id (an INVariant ID) in the
+ * An Invid is an immutable object id (an INVariant ID) in the
  * Ganymede system.  All objects created in the database have a unique
- * and permanent Invid that identify the object's type and identity.  Because
- * of these properties, the Invid can be used as a persistent object pointer
- * type.</P>
+ * and permanent Invid that identify the object's type and identity.
+ * Because of these properties, the Invid can be used as a persistent
+ * object pointer type.
  *
- * <P>Invid's are used extensively in the server to track pointer
- * relationships between objects.  Invid's are also used by the client to identify
- * objects to be viewed, edited, deleted, etc.  Basically whenever any code
- * in Ganymede deals with a reference to an object, it is done through the use
- * of Invid's.</P>
+ * Invid's are used extensively in the server to track pointer
+ * relationships between objects.  Invid's are also used by the client
+ * to identify objects to be viewed, edited, deleted, etc.  Basically
+ * whenever any code in Ganymede deals with a reference to an object,
+ * it is done through the use of Invid's.
  *
  * @see arlut.csd.ganymede.server.InvidDBField
  * @see arlut.csd.ganymede.rmi.Session
@@ -102,15 +102,15 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   * <p>This method can be used to prep the Invid class with an {@link
+   * This method can be used to prep the Invid class with an {@link
    * arlut.csd.ganymede.common.InvidAllocator} that will return a
    * possibly pre-existing Invid object, given a short/int
-   * combination.</p>
+   * combination.
    *
-   * <p>The purpose of this allocator is to allow the Ganymede server to
+   * The purpose of this allocator is to allow the Ganymede server to
    * re-use previously created Invids in the server to minimize memory
-   * usage, in a fashion similar to the Java language's java.lang.String.intern()
-   * scheme.</p>
+   * usage, in a fashion similar to the Java language's
+   * java.lang.String.intern() scheme.
    */
 
   static final public void setAllocator(InvidAllocator newAllocator)
@@ -119,8 +119,8 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   * <p>Receive Factory method for Invid's.  Can do caching/object reuse if
-   * an {@link arlut.csd.ganymede.common.InvidAllocator} has been set.</p>
+   * Receive Factory method for Invid's.  Can do caching/object reuse if
+   * an {@link arlut.csd.ganymede.common.InvidAllocator} has been set.
    */
 
   static final public Invid createInvid(short type, int num)
@@ -149,8 +149,9 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   * <p>Receive Factory method for Invid's.  Can do caching/object reuse if
-   * an {@link arlut.csd.ganymede.common.InvidAllocator} has been set.</p>
+   * Receive Factory method for Invid's.  Can do caching/object reuse
+   * if an {@link arlut.csd.ganymede.common.InvidAllocator} has been
+   * set.
    */
 
   static final public Invid createInvid(DataInput in) throws IOException
@@ -159,11 +160,11 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   * <p>Factory method for Invid's.  String should be a pair of colon
+   * Factory method for Invid's.  String should be a pair of colon
    * separated numbers, in the form 5:134 where the first number is
    * the short type and the second is the int object number. Can do
    * efficient memory re-use if an {@link
-   * arlut.csd.ganymede.common.InvidAllocator} has been set.</p>
+   * arlut.csd.ganymede.common.InvidAllocator} has been set.
    */
 
   static final public Invid createInvid(String string)
@@ -192,8 +193,8 @@ public final class Invid implements java.io.Serializable {
   // constructor
 
   /**
-   * <p>Private constructor.  Use the static createInvid methods to
-   * create Invids, please.</p>
+   * Private constructor.  Use the static createInvid methods to
+   * create Invids, please.
    */
 
   private Invid(short type, int num) 
@@ -253,22 +254,27 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   * <p>As with java.lang.String, Invids are immutable objects that we
+   * As with java.lang.String, Invids are immutable objects that we
    * may be able to usefully pool for object re-use.  The result of an
-   * intern method is a single immutable Invid that will be reused
-   * by all other Invid's that point to the same object in the Ganymede
-   * server (if you're calling intern() on the server, that is.)</p>
+   * intern method is a single immutable Invid that will be reused by
+   * all other Invid's that point to the same object in the Ganymede
+   * server (if you're calling intern() on the server, that is.)
    *
-   * <p>If an Invid Allocator has not been set with setAllocator(), intern()
-   * will do nothing, and will return this.</p>
+   * If an Invid Allocator has not been set with setAllocator(),
+   * intern() will do nothing, and will return this.
    *
-   * <p>Note that there only two ways to create an Invid.. to use the
+   * Note that there only two ways to create an Invid.. to use the
    * public static createInvid factory methods, in which case the
    * Invids you get will already be interned, or through
-   * deserialization, in which case the JVM creates the Invid from
-   * the serialized representation without going through the Invid
-   * class constructors or factory methods.  Intern is to provide for
-   * the latter case.</p>
+   * deserialization, in which case the JVM creates the Invid from the
+   * serialized representation without going through the Invid class
+   * constructors or factory methods.
+   *
+   * The intern method is to provide for the latter case, so that
+   * Ganymede code which receives Invids from serialization streams
+   * can look up a pooled reference pointing to the content of the
+   * Invid and use that for in-heap storage, rather than as a possibly
+   * redundant copy.
    */
 
   public Invid intern()
@@ -277,7 +283,7 @@ public final class Invid implements java.io.Serializable {
       {
 	return this;
       }
-    else			// we're interning a deserialized Invid
+    else
       {
 	Invid result = allocator.findInvid(this);
 

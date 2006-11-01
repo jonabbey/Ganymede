@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -64,16 +64,20 @@ import java.lang.ref.ReferenceQueue;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This interface is used by the Invid class to provide an Invid when
- * given a short type number and an int object number.  By using an
- * InvidPool, the server will be able to reuse previously created
- * Invid's, much as the JVM can reuse interned strings.</p>
+ * This InvidPool class is used by the Invid class to provide an
+ * Invid when given a short type number and an int object number.  By
+ * using an InvidPool, the server will be able to reuse previously
+ * created Invid's, much as the JVM can reuse interned strings.
+ *
+ * InvidPool uses SoftReferences to permit automatic clean-up of the
+ * pool when pooled Invids fall out of usage in the rest of the
+ * Ganymede heap.
  */
 
 public class InvidPool implements InvidAllocator {
 
   /**
-   * The load fast used when none specified in constructor.
+   * The load factor used when none specified in constructor.
    */
   private static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
@@ -83,6 +87,13 @@ public class InvidPool implements InvidAllocator {
   private int size;
   private int threshold;
   private final float loadFactor;
+
+  /**
+   * InvidSlot items are added to this queue when the garbage
+   * collector detects that the InvidSlot is no longer referenced by
+   * hard references in the Ganymede heap.
+   */
+
   private final ReferenceQueue queue = new ReferenceQueue();
 
   public InvidPool(int initialCapacity, float loadFactor)
@@ -117,10 +128,11 @@ public class InvidPool implements InvidAllocator {
   }
 
   /**
-   * <p>This method takes the identifying elements of an Invid to be found, and searches
-   * to find a suitable Invid object to return.  If one cannot found, null should be
-   * returned, in which case {@link arlut.csd.ganymede.common.Invid#createInvid(short,int) createInvid}
-   * will synthesize and return a new one.
+   * This method takes the identifying elements of an Invid to be
+   * found, and searches to find a suitable Invid object to return.
+   * If one cannot found, null should be returned, in which case
+   * {@link arlut.csd.ganymede.common.Invid#createInvid(short,int)
+   * createInvid} will synthesize and return a new one.
    */
 
   public synchronized Invid findInvid(Invid newInvid)
@@ -144,9 +156,9 @@ public class InvidPool implements InvidAllocator {
   }
 
   /**
-   * <p>This method takes the invid given and places in whatever
-   * storage mechanism is appropriate, if any, for findInvid() to
-   * later draw upon.</p>
+   * This method takes the invid given and places in whatever storage
+   * mechanism is appropriate, if any, for findInvid() to later draw
+   * upon.
    */
 
   public synchronized void storeInvid(Invid newInvid)
@@ -187,8 +199,12 @@ public class InvidPool implements InvidAllocator {
   }
 
   /**
-   * Expunge stale entries from the table.
+   * This method iterates polls through the ReferenceQueue,
+   * identifying InvidSlots that reference Invids which are no longer
+   * hard-referenced in the Ganymede heap and removing them from the
+   * hash table, thus freeing space in our pool.
    */
+
   private void expungeStaleEntries()
   {
     InvidSlot s;
@@ -258,23 +274,23 @@ public class InvidPool implements InvidAllocator {
 }
 
 /**
- * <p>This (non-public) class is used in the {@link
+ * This (non-public) class is used in the {@link
  * arlut.csd.ganymede.common.InvidPool} to softly reference Invids
- * that we are storing for purposes of interning.</p>
+ * that we are storing for purposes of interning.
  */
 
 class InvidSlot extends SoftReference {
 
   /**
-   * <p>For linking collision buckets.</p>
+   * For linking collision buckets.
    */
 
   InvidSlot next;
 
   /**
-   * <p>We have to remember the hash code for the referent Invid so
-   * that we can properly find the hash slot this InvidSlot would have
-   * been contained in before the reference was released.</p>
+   * We have to remember the hash code for the referent Invid so that
+   * we can properly find the hash slot this InvidSlot would have been
+   * contained in before the reference was released.
    */
 
   int save_hash;
