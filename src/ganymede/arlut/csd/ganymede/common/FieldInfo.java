@@ -196,6 +196,45 @@ public class FieldInfo implements java.io.Serializable {
 
   public Object getValue()
   {
+    if (value instanceof Invid)
+      {
+        value = ((Invid) value).intern();
+      }
+    else if (value instanceof Vector)
+      {
+        Vector myVect = (Vector) value;
+
+        synchronized (myVect)
+          {
+            for (int i = 0; i < myVect.size(); i++)
+              {
+                Object elem = myVect.elementAt(i);
+
+                if (!elem instanceof Invid)
+                  {
+                    break;      // we've got a non invid vector, abort
+                  }
+                else
+                  {
+                    Invid myInvid = (Invid) elem;
+
+                    if (myInvid.isInterned())
+                      {
+                        // this is designed as a fast-fail, since we
+                        // know that a vector of Invids fresh from
+                        // de-serialization won't be interned at all
+
+                        break;  
+                      }
+                    else
+                      {
+                        myVect.setElementAt(myInvid.intern(), i);
+                      }
+                  }
+              }
+          }
+      }
+
     return value;
   }
 }

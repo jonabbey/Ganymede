@@ -314,6 +314,11 @@ public final class Invid implements java.io.Serializable {
     return num;
   }
 
+  public boolean isInterned()
+  {
+    return this.interned;
+  }
+
   /**
    *
    * Method to write this Invid out to a stream. 
