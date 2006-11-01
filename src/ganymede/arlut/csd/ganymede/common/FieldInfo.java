@@ -55,6 +55,7 @@
 package arlut.csd.ganymede.common;
 
 import java.rmi.RemoteException;
+import java.util.Vector;
 
 import arlut.csd.ganymede.rmi.db_field;
 import arlut.csd.ganymede.server.PasswordDBField;
@@ -210,7 +211,7 @@ public class FieldInfo implements java.io.Serializable {
               {
                 Object elem = myVect.elementAt(i);
 
-                if (!elem instanceof Invid)
+                if (!(elem instanceof Invid))
                   {
                     break;      // we've got a non invid vector, abort
                   }
