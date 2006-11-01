@@ -316,7 +316,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   public framePanel(Invid invid, db_object object, boolean editable, windowPanel winP, boolean isCreating)
   {
-    this.invid = invid;
+    this.invid = invid.intern();
     this.wp = winP;
     this.server_object = object;
     this.editable = editable;
@@ -651,7 +651,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	try
 	  {
-	    invid = getObject().getInvid();
+	    invid = getObject().getInvid().intern();
 	  }
 	catch (Exception rx)
 	  {

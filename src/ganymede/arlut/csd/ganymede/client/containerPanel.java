@@ -859,7 +859,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       {
 	try
 	  {
-	    invid = object.getInvid();
+	    invid = object.getInvid().intern();
 	  }
 	catch (Exception rx)
 	  {

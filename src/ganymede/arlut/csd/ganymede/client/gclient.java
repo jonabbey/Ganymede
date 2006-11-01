@@ -125,6 +125,7 @@ import arlut.csd.ganymede.common.CategoryTransport;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.InvidPool;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectHandle;
 import arlut.csd.ganymede.common.Query;
@@ -194,7 +195,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * we're only going to have one gclient at a time per running client (singleton pattern).
    */
 
-  public static gclient client;
+  public static gclient client = null;
 
   // Image numbers
 
@@ -646,7 +647,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     /* -- */
 
+    if (gclient.client != null)
+      {
+        throw new IllegalStateException("Singleton gclient already created.");
+      }
+
     client = this;
+
+    Invid.setAllocator(new InvidPool(3257)); // modest sized prime, should be adequate for the client
 
     if (!debug)
       {
