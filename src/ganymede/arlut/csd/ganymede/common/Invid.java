@@ -183,6 +183,15 @@ public final class Invid implements java.io.Serializable {
       }
   }
 
+  /**
+   * Returns true if the Invid class is configured to use a pooled
+   * allocator.
+   */
+
+  static final public boolean hasAllocator()
+  {
+    return allocator != null;
+  }
 
   // ---
 

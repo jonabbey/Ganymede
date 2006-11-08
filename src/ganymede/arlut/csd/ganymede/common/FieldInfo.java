@@ -197,39 +197,42 @@ public class FieldInfo implements java.io.Serializable {
 
   public Object getValue()
   {
-    if (value instanceof Invid)
+    if (Invid.hasAllocator())
       {
-        value = ((Invid) value).intern();
-      }
-    else if (value instanceof Vector)
-      {
-        Vector myVect = (Vector) value;
-
-        synchronized (myVect)
+        if (value instanceof Invid)
           {
-            for (int i = 0; i < myVect.size(); i++)
+            value = ((Invid) value).intern();
+          }
+        else if (value instanceof Vector)
+          {
+            Vector myVect = (Vector) value;
+
+            synchronized (myVect)
               {
-                Object elem = myVect.elementAt(i);
-
-                if (!(elem instanceof Invid))
+                for (int i = 0; i < myVect.size(); i++)
                   {
-                    break;      // we've got a non invid vector, abort
-                  }
-                else
-                  {
-                    Invid myInvid = (Invid) elem;
+                    Object elem = myVect.elementAt(i);
 
-                    if (myInvid.isInterned())
+                    if (!(elem instanceof Invid))
                       {
-                        // this is designed as a fast-fail, since we
-                        // know that a vector of Invids fresh from
-                        // de-serialization won't be interned at all
-
-                        break;  
+                        break;      // we've got a non invid vector, abort
                       }
                     else
                       {
-                        myVect.setElementAt(myInvid.intern(), i);
+                        Invid myInvid = (Invid) elem;
+
+                        if (myInvid.isInterned())
+                          {
+                            // this is designed as a fast-fail, since we
+                            // know that a vector of Invids fresh from
+                            // de-serialization won't be interned at all
+
+                            break;
+                          }
+                        else
+                          {
+                            myVect.setElementAt(myInvid.intern(), i);
+                          }
                       }
                   }
               }
