@@ -222,7 +222,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   static final int OBJECTNOWRITE = 16;
 
-  /* our fixed action command strings for node-attached popup menus. */
+  /* our fixed (no localization needed) action command strings for
+   * node-attached popup menus. */
 
   private static String 
     hide_pop_action = "Hide Non-Editables",
@@ -238,7 +239,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     inactivate_pop_action = "Inactivate Object",
     reactivate_pop_action = "Reactivate Object";
 
-  /* our fixed action command strings for menus and toolbar items. */
+  /* our fixed (no localization needed) action command strings for
+   * menus and toolbar items. */
 
   private static String
     persona_action = "change persona",
@@ -2931,7 +2933,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	if ((fNode == null) ||
 	    ((invid != null) && 
-	     ((label.compareTo(fNode.getText())) < 0)))
+	     ((label.compareToIgnoreCase(fNode.getText())) < 0)))
 	  {
 	    // If we have an invid/label in the object list that's not
 	    // in the tree, we need to insert it
@@ -2979,7 +2981,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    i++;
 	  }
 	else if ((invid == null) ||
-		 ((label.compareTo(fNode.getText())) > 0))
+		 ((label.compareToIgnoreCase(fNode.getText())) > 0))
 	  {
 	    // We've found a node in the tree without a matching
 	    // node in the object list.  Delete it!
