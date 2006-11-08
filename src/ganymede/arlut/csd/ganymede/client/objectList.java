@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2006
    The University of Texas at Austin
 
    Contact information
@@ -97,7 +97,7 @@ public class objectList {
 	  b = (ObjectHandle) o_b;
 	  int comp = 0;
 	  
-	  comp = a.getLabel().compareTo(b.getLabel());
+	  comp = a.getLabel().compareToIgnoreCase(b.getLabel());
 	  
 	  if (comp < 0)
 	    {
