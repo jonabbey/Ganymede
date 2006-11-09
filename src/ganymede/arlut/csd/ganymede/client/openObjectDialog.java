@@ -586,7 +586,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 			      bF = (listHandle) b;
 			      int comp = 0;
 			      
-			      comp =  aF.toString().compareTo(bF.toString());
+			      comp =  aF.toString().compareToIgnoreCase(bF.toString());
 			      
 			      if (comp < 0)
 				{

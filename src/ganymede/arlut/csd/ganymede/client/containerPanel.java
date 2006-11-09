@@ -1480,7 +1480,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 								 b = (listHandle) o_b;
 								 int compResult = 0;
 	  
-								 compResult = a.toString().compareTo(b.toString());
+								 compResult = a.toString().compareToIgnoreCase(b.toString());
 	  
 								 if (compResult < 0)
 								   {
