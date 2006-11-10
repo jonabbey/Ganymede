@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -58,6 +58,7 @@ package arlut.csd.JDialog;
 import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -170,7 +171,7 @@ public class messageDialog extends JCenterDialog implements ActionListener {
     text.setContentType("text/html");
     text.setText(s);
     layout(550,400);
-    scrollpane.getViewport().setViewPosition(new Point(0,0));
+    scrollpane.scrollRectToVisible(new Rectangle(0,0,1,1));
   }
 
   /**
@@ -186,7 +187,7 @@ public class messageDialog extends JCenterDialog implements ActionListener {
     text.setContentType("text/plain");
     text.setText(s);
     layout(550,400);
-    scrollpane.getViewport().setViewPosition(new Point(0,0));
+    scrollpane.scrollRectToVisible(new Rectangle(0,0,1,1));
   }
 
   public void setVisible(boolean state)
@@ -195,7 +196,7 @@ public class messageDialog extends JCenterDialog implements ActionListener {
 
     if (state)
       {
-        scrollpane.getViewport().setViewPosition(new Point(0,0));
+        scrollpane.scrollRectToVisible(new Rectangle(0,0,1,1));
 	ok.requestFocus();
       }
   }
