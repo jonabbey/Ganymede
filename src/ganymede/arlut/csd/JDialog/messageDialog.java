@@ -171,7 +171,7 @@ public class messageDialog extends JCenterDialog implements ActionListener {
     text.setContentType("text/html");
     text.setText(s);
     layout(550,400);
-    scrollpane.scrollRectToVisible(new Rectangle(0,0,1,1));
+    text.setCaretPosition(0);
   }
 
   /**
@@ -187,7 +187,7 @@ public class messageDialog extends JCenterDialog implements ActionListener {
     text.setContentType("text/plain");
     text.setText(s);
     layout(550,400);
-    scrollpane.scrollRectToVisible(new Rectangle(0,0,1,1));
+    text.setCaretPosition(0);
   }
 
   public void setVisible(boolean state)
@@ -196,8 +196,8 @@ public class messageDialog extends JCenterDialog implements ActionListener {
 
     if (state)
       {
-        scrollpane.scrollRectToVisible(new Rectangle(0,0,1,1));
 	ok.requestFocus();
+        text.setCaretPosition(0);
       }
   }
 
