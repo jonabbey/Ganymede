@@ -486,7 +486,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	w.setOpaque(true);
     
-	w.setBounds(0, 0, 500,400);
+	w.setBounds(0, 0, 575,400);
 	placeWindow(w);
 	
 	w.setLayer(new Integer(topLayer));
