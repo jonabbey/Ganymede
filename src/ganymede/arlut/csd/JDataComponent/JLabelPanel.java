@@ -91,7 +91,18 @@ public class JLabelPanel extends JPanel {
   private Font font = null;
   private float size = 0.0F;
   private int style = 0;
-  private Insets insets = new java.awt.Insets(0,0,0,0);
+
+  /**
+   * Insets for the left column in our JLabelPanel
+   */
+
+  private Insets leftInsets = new java.awt.Insets(0,0,0,0);
+
+  /**
+   * Insets for the right column in our JLabelPanel
+   */
+
+  private Insets rightInsets = new java.awt.Insets(0,0,0,0);
 
   /**
    * If true, we'll put in a JSpacer to keep the label cells
@@ -177,32 +188,91 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * Sets standardized insets around each label and component
-   * to be added to this JLabelPanel.
+   * Sets standardized insets around each label and component to be
+   * added to this JLabelPanel.
    */
 
   public synchronized void setInsets(int top, int left, int bottom, int right)
   {
-    this.insets = new java.awt.Insets(top,left,bottom,right);
+    this.leftInsets = new java.awt.Insets(top,left,bottom,right);
+    this.rightInsets = this.leftInsets;
   }
 
 
   /**
-   * Sets standardized insets around each label and component
-   * to be added to this JLabelPanel.
+   * Sets standardized insets around each label and component to be
+   * added to this JLabelPanel.
    */
 
   public synchronized void setInsets(java.awt.Insets insets)
   {
     if (insets == null)
       {
-	this.insets = new java.awt.Insets(0,0,0,0);
+	this.leftInsets = new java.awt.Insets(0,0,0,0);
       }
     else
       {
-	this.insets = insets;
+	this.leftInsets = insets;
+      }
+
+    this.rightInsets = this.leftInsets;
+  }
+
+  /**
+   * Sets standardized insets around each label to be added to this
+   * JLabelPanel.
+   */
+
+  public synchronized void setLeftInsets(int top, int left, int bottom, int right)
+  {
+    this.leftInsets = new java.awt.Insets(top,left,bottom,right);
+  }
+
+
+  /**
+   * Sets standardized insets around each label to be added to this
+   * JLabelPanel.
+   */
+
+  public synchronized void setLeftInsets(java.awt.Insets insets)
+  {
+    if (insets == null)
+      {
+	this.leftInsets = new java.awt.Insets(0,0,0,0);
+      }
+    else
+      {
+	this.leftInsets = insets;
       }
   }
+
+  /**
+   * Sets standardized insets around each component to be added to
+   * this JLabelPanel.
+   */
+
+  public synchronized void setRightInsets(int top, int left, int bottom, int right)
+  {
+    this.rightInsets = new java.awt.Insets(top,left,bottom,right);
+  }
+
+  /**
+   * Sets standardized insets around each component to be added to
+   * this JLabelPanel.
+   */
+
+  public synchronized void setRightInsets(java.awt.Insets insets)
+  {
+    if (insets == null)
+      {
+	this.rightInsets = new java.awt.Insets(0,0,0,0);
+      }
+    else
+      {
+	this.rightInsets = insets;
+      }
+  }
+
 
   /**
    * This method sets the style of all the labels in this label
@@ -433,7 +503,7 @@ public class JLabelPanel extends JPanel {
       }
 
     gbc.gridy = row;
-    gbc.insets = this.insets;
+    gbc.insets = this.leftInsets;
 
     if (label != null)
       {
@@ -485,6 +555,7 @@ public class JLabelPanel extends JPanel {
 	gbc.gridx = 1;
       }
 
+    gbc.insets = this.rightInsets;
     gbc.weightx = 0.0;
     gbc.gridwidth = colsWidth;
 
