@@ -112,7 +112,7 @@ public class serverTab extends clientTab {
     cp.setTabName(tabName);
     cp.setInfoVector(infoVector);
     cp.load();
-    cp.setBorder(parent.getWindowPanel().emptyBorder10);
+    cp.setBorder(parent.getWindowPanel().emptyBorder10Right);
 
     this.infoVector = null;
 

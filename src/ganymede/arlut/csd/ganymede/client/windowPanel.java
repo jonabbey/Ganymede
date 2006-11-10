@@ -195,6 +195,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     emptyBorder3 = (EmptyBorder)BorderFactory.createEmptyBorder(3,3,3,3),
     emptyBorder5 = (EmptyBorder)BorderFactory.createEmptyBorder(5,5,5,5),
     emptyBorder10 = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10),
+    emptyBorder10Right = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,0),
     emptyBorder15 = (EmptyBorder)BorderFactory.createEmptyBorder(15,15,15,15);
   
   CompoundBorder
