@@ -129,6 +129,6 @@ public class VecQuickSort implements Comparator {
 
   public int compare(Object a, Object b)
   {
-    return a.toString().compareTo(b.toString());
+    return a.toString().compareToIgnoreCase(b.toString());
   }
 }
