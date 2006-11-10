@@ -76,10 +76,39 @@ import java.util.Vector;
 
 public class VecSortInsert implements Comparator {
 
-  Comparator comparator;
   static final boolean debug = false;
 
+  /**
+   * The Comparator we're using to handle object insertion into a
+   * given Vector.
+   */
+
+  Comparator comparator;
+
   /* -- */
+
+  public static final Comparator defaultComparator = new Comparator() 
+    {
+      public int compare(Object a, Object b) 
+	{
+	  int comp = 0;
+	  
+	  comp = a.toString().compareToIgnoreCase(b.toString());
+	  
+	  if (comp < 0)
+	    {
+	      return -1;
+	    }
+	  else if (comp > 0)
+	    { 
+	      return 1;
+	    } 
+	  else
+	    { 
+	      return 0;
+	    }
+	}
+    };
 
   // debug rig
   
@@ -98,32 +127,7 @@ public class VecSortInsert implements Comparator {
     test.addElement("X");
     test.addElement("Y");
 
-    VecSortInsert inserter = new VecSortInsert(new Comparator()
-					       {
-						 public int compare(Object o_a, Object o_b) 
-						   {
-						     String a, b;
-						     
-						     a = (String) o_a;
-						     b = (String) o_b;
-						     int comp = 0;
-						     
-						     comp = a.compareToIgnoreCase(b);
-						     
-						     if (comp < 0)
-						       {
-							 return -1;
-						       }
-						     else if (comp > 0)
-						       { 
-							 return 1;
-						       } 
-						     else
-						       { 
-							 return 0;
-						       }
-						   }
-					       });
+    VecSortInsert inserter = new VecSortInsert();
 
     System.out.println("Start: ");
     printTest(test);
@@ -232,8 +236,9 @@ public class VecSortInsert implements Comparator {
    * This static method does the work.
    */
 
-  public static void insert(Vector objects, Object element, Comparator comparator)
+  public static void insert(Vector objects, Object element, Comparator comparatorParam)
   {
+    Comparator myComparator;
     int low, high, mid;
 
     /* -- */
@@ -249,9 +254,13 @@ public class VecSortInsert implements Comparator {
 	return;
       }
 
-    if (comparator == null)
+    if (comparatorParam == null)
       {
-	comparator = new VecSortInsert();
+	myComparator = defaultComparator;
+      }
+    else
+      {
+        myComparator = comparatorParam;
       }
 
     // java integer division rounds towards zero
@@ -268,7 +277,7 @@ public class VecSortInsert implements Comparator {
 	    printTest(objects.size(), low, mid, high);
 	  }
 
-	if (comparator.compare(element,objects.elementAt(mid)) < 0)
+	if (myComparator.compare(element,objects.elementAt(mid)) < 0)
 	  {
 	    high = mid;
 	  }
@@ -285,7 +294,7 @@ public class VecSortInsert implements Comparator {
 	printTest(objects.size(), low, mid, high);
       }
 
-    if ((mid == objects.size()-1) && comparator.compare(element, objects.elementAt(objects.size()-1)) > 0)
+    if ((mid == objects.size()-1) && myComparator.compare(element, objects.elementAt(objects.size()-1)) > 0)
       {
 	if (debug)
 	  {
@@ -329,7 +338,7 @@ public class VecSortInsert implements Comparator {
 
   public VecSortInsert()
   {
-    this.comparator = this;
+    this.comparator = defaultComparator;
   }
 
   /**
@@ -337,15 +346,15 @@ public class VecSortInsert implements Comparator {
    * comparison will be performed on elements inserted.</p>
    */
 
-  public VecSortInsert(Comparator newComparator)
+  public VecSortInsert(Comparator comparatorParam)
   {
-    if (newComparator == null)
+    if (comparatorParam == null)
       {
-        this.comparator = this;
+        this.comparator = defaultComparator;
       }
     else
       {
-        this.comparator = newComparator;
+        this.comparator = comparatorParam;
       }
   }
 
