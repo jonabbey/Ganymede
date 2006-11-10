@@ -108,7 +108,7 @@ public class VecSortInsert implements Comparator {
 						     b = (String) o_b;
 						     int comp = 0;
 						     
-						     comp = a.compareTo(b);
+						     comp = a.compareToIgnoreCase(b);
 						     
 						     if (comp < 0)
 						       {
@@ -142,9 +142,9 @@ public class VecSortInsert implements Comparator {
     System.out.println("Result: ");
     printTest(test);
 
-    System.out.println("\nInserting G");
+    System.out.println("\nInserting b");
 
-    inserter.insert(test, "G");
+    inserter.insert(test, "b");
 
     System.out.println("Result: ");
     printTest(test);
@@ -166,6 +166,14 @@ public class VecSortInsert implements Comparator {
     System.out.println("\nInserting K");
 
     inserter.insert(test, "K");
+
+    System.out.println("\nInserting 5");
+
+    inserter.insert(test, "5");
+
+    System.out.println("\nInserting i");
+
+    inserter.insert(test, "i");
 
     System.out.println("Result: ");
     printTest(test);
