@@ -328,11 +328,13 @@ public class VecSortInsert implements Comparator {
 
   public VecSortInsert(Comparator comparator)
   {
-    this.comparator = comparator;
-
-    if (this.comparator == null)
+    if (comparator == null)
       {
-	this.comparator = this;
+        this.comparator = this;
+      }
+    else
+      {
+        this.comparator = comparator;
       }
   }
 
