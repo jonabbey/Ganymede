@@ -166,14 +166,17 @@ public class VecSortInsert implements Comparator {
     System.out.println("\nInserting k");
 
     inserter.insert(test, "k");
+    printTest(test);
 
     System.out.println("\nInserting 5");
 
     inserter.insert(test, "5");
+    printTest(test);
 
     System.out.println("\nInserting i");
 
     inserter.insert(test, "i");
+    printTest(test);
 
     System.out.println("Result: ");
     printTest(test);
