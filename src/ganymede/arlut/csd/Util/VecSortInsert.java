@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2006
    The University of Texas at Austin
 
    Contact information
@@ -326,15 +326,15 @@ public class VecSortInsert implements Comparator {
    * comparison will be performed on elements inserted.</p>
    */
 
-  public VecSortInsert(Comparator comparator)
+  public VecSortInsert(Comparator newComparator)
   {
-    if (comparator == null)
+    if (newComparator == null)
       {
         this.comparator = this;
       }
     else
       {
-        this.comparator = comparator;
+        this.comparator = newComparator;
       }
   }
 
