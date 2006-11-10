@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -70,11 +70,9 @@ import arlut.csd.Util.VecSortInsert;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- *  This class is a serializable object-list result object, which
- *  conveys results from a query/list operation along with methods that
- *  can be used to extract the results out of the query/list.
- *
+ * This class is a serializable object-list result object, which
+ * conveys results from a query/list operation along with methods that
+ * can be used to extract the results out of the query/list.
  */
 
 public class QueryResult implements java.io.Serializable {
@@ -83,7 +81,7 @@ public class QueryResult implements java.io.Serializable {
 
   static final boolean debug = false;
 
-  public static Comparator comparator = new Comparator() 
+  public static final Comparator comparator = new Comparator() 
     {
       public int compare(Object o_a, Object o_b) 
 	{
@@ -143,12 +141,10 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
-   *
    * Constructor.
    *
    * @param forTransport If true, this QueryResult will prepare information
    * fed into it for transport by maintaining a StringBuffer.
-   *
    */
 
   public QueryResult(boolean forTransport)
@@ -329,7 +325,8 @@ public class QueryResult implements java.io.Serializable {
   /**
    *
    * This method is used by arlut.csd.ganymede.client.objectList to
-   * get access to the raw and sorted vector of ObjectHandle's post-serialization.<br><br>
+   * get access to the raw and sorted vector of ObjectHandle's
+   * post-serialization.
    *
    * Note that this method does not clone our handles vector, we'll just
    * assume that whatever the objectList class on the client does to this
@@ -626,9 +623,9 @@ public class QueryResult implements java.io.Serializable {
 
   /**
    *
-   * Private method to handle building up our datastructure
-   * on the post-serialization side.  Sorts the handles vector
-   * as it is extracted.
+   * Private method to handle building up our datastructure on the
+   * post-serialization side.  Sorts the handles vector by label as it
+   * is extracted.
    *
    */
 
@@ -657,8 +654,8 @@ public class QueryResult implements java.io.Serializable {
     
     inserter = new VecSortInsert(comparator);
 
-    // turn our serialized buffer into an array of chars
-    // for fast processor
+    // turn our serialized buffer into an array of chars for fast
+    // processing
 
     chars = results.toCharArray();
 
