@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -486,7 +486,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	w.setOpaque(true);
     
-	w.setBounds(0, 0, 550,400);
+	w.setBounds(0, 0, 526, 400);
 	placeWindow(w);
 	
 	w.setLayer(new Integer(topLayer));

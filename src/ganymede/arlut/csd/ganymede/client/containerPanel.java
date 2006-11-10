@@ -480,7 +480,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     // initialize layout
 
     contentsPanel = new JLabelPanel();
-    contentsPanel.setInsets(4,4,4,4);
+    contentsPanel.setLeftInsets(4,4,4,4);
+    contentsPanel.setRightInsets(4,4,4,0);  // no right margin
     contentsPanel.setFixedSizeLabelCells(true);
 
     setComponent(contentsPanel);
