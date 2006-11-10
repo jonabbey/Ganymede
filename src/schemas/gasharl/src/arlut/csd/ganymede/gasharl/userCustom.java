@@ -543,15 +543,51 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case PASSWORDCHANGETIME:
 	return false;
       }
-    
+
+    // by default, all custom fields are cloneable, so this call will
+    // return true for all but the built-in fields.
+
     return super.canCloneField(session, object, field);
   }
 
   /**
-   * <p>Hook to allow the cloning of an object.  If this object type
+   * Hook to allow the cloning of an object.  If this object type
    * supports cloning (which should be very much customized for this
    * object type.. creation of the ancillary objects, which fields to
-   * clone, etc.), this customization method will actually do the work.</p>
+   * clone, etc.), this customization method will actually do the work.
+   *
+   * This method is called on a newly created object, in order
+   * to clone the state of origObj into it.  This method does not actually
+   * create a new object.. that is handled by
+   * {@link arlut.csd.ganymede.server.GanymedeSession#clone_db_object(arlut.csd.ganymede.common.Invid) clone_db_object()}
+   * before this method is called on the newly created object.
+   *
+   * The default (DBEditObject) implementation of this method will only clone
+   * fields for which
+   * {@link arlut.csd.ganymede.server.DBEditObject#canCloneField(arlut.csd.ganymede.server.DBSession,
+   * arlut.csd.ganymede.server.DBObject, arlut.csd.ganymede.server.DBField) canCloneField()}
+   * returns true, and which are not connected to a namespace (and thus could not
+   * possibly be cloned).
+   *
+   * If one or more fields in the original object are unreadable by the cloning
+   * session, we will provide a list of fields that could not be cloned due to
+   * a lack of read permissions in a dialog in the ReturnVal.  Such a problem will
+   * not result in a failure code being returned, however.. the clone will succeed,
+   * but an informative dialog will be provided to the user.
+   *
+   * To be overridden on necessity in DBEditObject subclasses, but
+   * this method's default logic will probably do what you need it to
+   * do.  If you need to make changes, try to chain your subclassed
+   * method to this one via super.cloneFromObject().
+   *
+   * @param session The DBSession that the new object is to be created in
+   * @param origObj The object we are cloning
+   * @param local If true, fields that have choice lists will not be checked against
+   * those choice lists and read permissions for each field will not be consulted.
+   * The canCloneField() method will still be consulted, however.
+   *
+   * @return A standard ReturnVal status object.  May be null on success, or
+   * else may carry a dialog with information on problems and a success flag.
    */
 
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
@@ -566,6 +602,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	boolean problem = false;
 	ReturnVal tmpVal;
 	StringBuffer resultBuf = new StringBuffer();
+
+        // clone all of the fields that we don't inhibit in canCloneField().
+
 	ReturnVal retVal = super.cloneFromObject(session, origObj, local);
 
 	if (retVal != null && retVal.getDialog() != null)

@@ -139,9 +139,9 @@ public class PasswordAgingTask implements Runnable {
 	mySession.enableWizards(false);
 
 	// and we don't want forced required fields oversight..  this
-	// can leave us with some invalid objects, but we can do a
-	// query to scan for them, and if someone edits the objects
-	// later, they'll be requested to fix the problem.
+	// can leave us with some objects which fail a high level
+	// consistency check, but we can do a query to scan for them
+	// later
 
 	mySession.enableOversight(false);
 	
