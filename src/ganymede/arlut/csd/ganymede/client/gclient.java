@@ -2018,8 +2018,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	motd = new messageDialog(client, ts.l("showMOTD.dialog_title"), null);
       }
 
-    motd.setVisible(true);
-    
     if (html)
       {
 	motd.setHtmlText(message);
@@ -2028,6 +2026,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	motd.setPlainText(message);
       }
+
+    motd.setVisible(true);
   }
 
   /**
