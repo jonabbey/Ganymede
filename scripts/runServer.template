@@ -185,11 +185,11 @@ RMISECURITY='-Djava.rmi.server.randomIDs=true'
 #
 # The optional telnet=<portnumber> parameter, if provided, causes the
 # Ganymede server to open a Jython interpreter service on port
-# <portnumber> which a Ganymede administrator with adequate
-# privileges can telnet to.  The Jython interpreter only allows
-# local logins, made from the local machine that is running the
-# Ganymede server, to avoid allowing Ganymede account
-# and password names from going over unprotected telnet.
+# <portnumber> which a Ganymede administrator with adequate privileges
+# can telnet to.  The Jython interpreter only allows local logins,
+# i.e., made from the local machine that is running the Ganymede
+# server, in order to avoid allowing Ganymede account and password
+# names to transit unprotected telnet.
 #
 # The -resetadmin, -forcelocalhost, -suppressEmail, -nossl, telnet,
 # and -logrmi or logrmi=XXX parameters should be placed on the
