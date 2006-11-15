@@ -132,7 +132,7 @@
    certificate material is placed into the client's ganymede.jar and the
    admin console's ganymedeAdmin.jar files. In this way, your Ganymede client
    and admin console will be tied to your Ganymede server. By generating
-   unique key and certificates for each installation, you can be assured that
+   unique keys and certificates for each installation, you can be assured that
    the clients you distribute are talking to your Ganymede server.
 
    After building the Ganymede software, configure will copy a few
