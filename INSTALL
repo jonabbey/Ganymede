@@ -120,7 +120,7 @@
    In order to get everything compiled and ready for you to install, you will
    need to run the configure script in the distribution directory. The
    configure script is a custom-written Bourne shell script which searches
-   around on your system to find Perl, Java, and the Apache Ant build tol,
+   around on your system to find Perl, Java, and the Apache Ant build tool,
    and then uses that information to bootstrap the rest of the configuration
    process.
 
