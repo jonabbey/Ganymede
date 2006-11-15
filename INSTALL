@@ -674,6 +674,10 @@
    to disturb the applet frame while you are using the client or
    console.
 
+   In general, we recommend the 'Java Web Start' launch method above
+   all others, but you do need to do a bit more configuration work to
+   support this option.
+
    +------------------------------------------------------------------------+
    |9. Configure your web server to support Java Web Start                  |
    +------------------------------------------------------------------------+
