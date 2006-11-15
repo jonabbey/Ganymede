@@ -257,12 +257,16 @@
    What name do you want the Ganymede superuser account to have?
 
            The default 'supergash' name is probably okay here, but you can
-           change it if you want.
+           change it if you want.  Note that you will be able to
+           create additional admin accounts with superuser privileges
+           later if you like, but you need to have this initial,
+           generic superuser account to bootstrap the system.
 
    What password do you want the superuser account to have?
 
            This password provides complete access to the Ganymede server's
-           database, and is necessary for a variety of system operations.
+           database, and is necessary for a variety of system
+           operations.  
 
    What name do you want the Ganymede monitor account to have?
 
