@@ -628,19 +628,16 @@
    files are customized during installation to point to the proper location
    for your Ganymede server.
 
-   With Java RMI-using applets, it is generally necessary to download the
-   applets from a web server running on the same machine as the RMI server,
-   so that the default restrictions on an unprivileged applet suffice to
-   allow a network connection to be made back to the RMI server. The Ganymede
-   2.0 applets are signed, however so you are not absolutely required to run
-   a web server on the same machine as your Ganymede server, as you were for
-   the Ganymede 1.0 series. If you want, you can provision your client files
-   from some other web server, but if you do this you will have to grant the
-   Ganymede clients extended privileges when your Java execution environment
-   asks you. If you don't trust the Ganymede clients not to mess with your
-   local disk or random hosts on the network, you may be best off running a
-   web server on the machine running your Ganymede server and just running
-   the applets in their default sandbox.
+   With Java RMI-using applets, it is typically necessary to download
+   the applets from a web server running on the same machine as the
+   RMI server, so that the default restrictions on an unprivileged
+   applet suffice to allow a network connection to be made back to the
+   RMI server. The Ganymede 2.0 applets are signed, however, so you
+   are not required to run a web server on the same machine as
+   your Ganymede server, as you were for the Ganymede 1.0 series.
+   Running a web server on your Ganymede server may make it easier to
+   redeploy the client jar files and etc., if you need to upgrade
+   things later.
 
    Wherever you decided to serve the Ganymede clients from, you'll probably
    want to set up an appropriate path or alias. If you are using Apache, you
@@ -666,14 +663,16 @@
    either with support for running Java 1.4 applets directly, or for passing
    a JNLP file to Java Web Start.
 
-   IMPORTANT NOTE: whenever you run applets using the Native or Java Plug In
-   mode, the applets can only run as long as the log-in applet is still
-   displayed in the web browser. If you close the main browser window or
-   click to a different page (either by following a link or by clicking back
-   on the browser), the applet will be shut down. Both the Ganymede client
-   and admin console have been written so that this shut-down is handled in
-   an orderly fashion, but the shut-down is unavoidable, so be sure not to
-   disturb the applet frame while you are using the client or console.
+   IMPORTANT NOTE: whenever you run applets from the launch page using
+   the 'Native' or 'Java Plug In' modes, the applets can only run as
+   long as the log-in applet is still displayed in the web browser. If
+   you close the main browser window or click to a different page
+   (either by following a link or by clicking back on the browser),
+   the applet will be shut down. Both the Ganymede client and admin
+   console have been written so that this shut-down is handled in an
+   orderly fashion, but the shut-down is unavoidable, so be sure not
+   to disturb the applet frame while you are using the client or
+   console.
 
    +------------------------------------------------------------------------+
    |9. Configure your web server to support Java Web Start                  |
