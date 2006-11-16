@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -107,6 +107,13 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
   JPanel
     historyTextPanel;
 
+  /**
+   * We use a CardLayout so that we can display a 'man at work'
+   * animated icon during history retrieval, then switch over to a
+   * JScrollPane containing the retrieved history text once the
+   * history retrieval operation is complete.
+   */
+
   CardLayout
     historyTextCard = new CardLayout();
 
@@ -176,14 +183,11 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     // "History"
     historyTextPanel.setBorder(new TitledBorder(ts.l("init.history_border")));
 
-    JPanel p = new JPanel(new BorderLayout());
     historyText = new JTextArea();
     historyText.setBackground(Color.white);
     historyText.setEditable(false);
     
-    p.add("Center", new JScrollPane(historyText));
-    
-    historyTextPanel.add("text", p);
+    historyTextPanel.add("text", new JScrollPane(historyText));
 
     // create our wait-display panel, add it to our card layout
 
