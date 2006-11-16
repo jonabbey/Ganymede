@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2006
    The University of Texas at Austin
 
    Contact information
@@ -53,12 +53,11 @@
 
 package arlut.csd.ganymede.client;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
-import javax.swing.JScrollPane;
-
-import arlut.csd.ganymede.rmi.date_field;
-import arlut.csd.ganymede.rmi.string_field;
+import javax.swing.JPanel;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -73,7 +72,7 @@ import arlut.csd.ganymede.rmi.string_field;
 
 public class adminHistoryTab extends clientTab {
 
-  private JScrollPane contentPane;
+  private JPanel contentPane;
   private adminHistoryPanel admin_history_panel;
 
   public adminHistoryTab(framePanel parent, JTabbedPane pane, String tabName)
@@ -85,7 +84,7 @@ public class adminHistoryTab extends clientTab {
   {
     if (contentPane == null)
       {
-	contentPane = new JScrollPane();
+	contentPane = new JPanel(new BorderLayout());
       }
 
     return contentPane;
@@ -94,9 +93,7 @@ public class adminHistoryTab extends clientTab {
   public void initialize()
   {
     admin_history_panel = new adminHistoryPanel(parent.getObjectInvid(), parent.getgclient());
-
-    contentPane.getVerticalScrollBar().setUnitIncrement(15);
-    contentPane.setViewportView(admin_history_panel);
+    contentPane.add("Center", admin_history_panel);
   }
 
   public void update()
