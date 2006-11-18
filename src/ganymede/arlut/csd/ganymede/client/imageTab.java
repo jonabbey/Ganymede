@@ -54,6 +54,7 @@
 package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.rmi.RemoteException;
 
 import java.awt.Image;
@@ -106,7 +107,7 @@ public class imageTab extends clientTab {
     if (contentPane == null)
       {
 	contentPane = new JPanel(false);
-        contentPane.setLayout(new BorderLayout());
+        contentPane.setLayout(new FlowLayout());
 
         loadImage();
 
@@ -114,7 +115,7 @@ public class imageTab extends clientTab {
         image.setOpaque(true);
         image.setBorder(BorderFactory.createEtchedBorder());
 
-        contentPane.add("West", image);
+        contentPane.add(image);
       }
 
     return contentPane;
