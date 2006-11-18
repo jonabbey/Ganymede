@@ -137,11 +137,9 @@ public class imageTab extends clientTab {
 
     try
       {
-        URL url = new URL(url_string);
+        icon = PackageResources.getImageResource(contentPane, new URL(url_string));
 
-        icon = PackageResources.getImageResource(contentPane, url);
-
-        if (icon == null || icon.getWidth(null) == 0)
+        if (icon == null || icon.getWidth(null) <= 0)
           {
             icon = PackageResources.getImageResource(contentPane, "unknown.png", getClass());
           }
