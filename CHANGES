@@ -964,6 +964,28 @@ the server was abnormally terminated without consolidating its
 database.  This is precisely the sort of bug that this change is
 intended to help prevent in the future.
 
+58. [CLIENT] Misc fixes.. case insensitive sort, window size, motd window
+
+The client now uses a case insensitive sort throughout.  The default
+window size for object view windows is now big enough not to require
+a horizontal scrollbar.
+
+The 'Message of the day' window now appears with the top of the
+message visible in the dialog, rather than the bottom.
+
+59. [SERVER, CLIENT] Added support for user photos
+
+By redefining the getImageURLForObject() method in a custom user
+DBEditObject subclass, it is now possible to display user photographs
+in the client.
+
+The getImageURLForObject() method is designed to return a URL to a
+photograph for the user located on a web server accessible by the
+Ganymede client.
+
+There is no support for user photographs in the Ganymede server,
+itself.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
