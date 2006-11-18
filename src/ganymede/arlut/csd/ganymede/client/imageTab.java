@@ -108,14 +108,6 @@ public class imageTab extends clientTab {
       {
 	contentPane = new JPanel(false);
         contentPane.setLayout(new FlowLayout());
-
-        loadImage();
-
-        JLabel image = new JLabel(new ImageIcon(icon), SwingConstants.TRAILING);
-        image.setOpaque(true);
-        image.setBorder(BorderFactory.createEtchedBorder());
-
-        contentPane.add(image);
       }
 
     return contentPane;
@@ -123,6 +115,13 @@ public class imageTab extends clientTab {
 
   public void initialize()
   {
+    loadImage();
+
+    JLabel image = new JLabel(new ImageIcon(icon), SwingConstants.TRAILING);
+    image.setOpaque(true);
+    image.setBorder(BorderFactory.createEtchedBorder());
+
+    contentPane.add(image);
   }
 
   public void update()
@@ -142,7 +141,7 @@ public class imageTab extends clientTab {
 
         icon = PackageResources.getImageResource(contentPane, url);
 
-        if (icon == null)
+        if (icon == null || icon.getWidth(null) == 0)
           {
             icon = PackageResources.getImageResource(contentPane, "unknown.png", getClass());
           }
