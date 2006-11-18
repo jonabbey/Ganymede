@@ -61,6 +61,7 @@ import java.awt.Image;
 import java.net.URL;
 import java.io.IOException;
 
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -111,8 +112,9 @@ public class imageTab extends clientTab {
 
         JLabel image = new JLabel(new ImageIcon(icon), SwingConstants.TRAILING);
         image.setOpaque(true);
+        image.setBorder(BorderFactory.createEtchedBorder());
 
-        contentPane.add("Center", image);
+        contentPane.add("West", image);
       }
 
     return contentPane;
