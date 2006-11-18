@@ -140,24 +140,15 @@ public class imageTab extends clientTab {
       {
         URL url = new URL(url_string);
 
-        try
+        icon = PackageResources.getImageResource(contentPane, url);
+
+        if (icon == null)
           {
-            Object content = url.getContent();
-
-            icon = PackageResources.getImageResource(contentPane, url);
-
-            if (icon == null)
-              {
-                icon = PackageResources.getImageResource(contentPane, "unknown.png", getClass());
-              }
-            else
-              {
-                icon = icon.getScaledInstance(200, -1, Image.SCALE_SMOOTH);
-              }
+            icon = PackageResources.getImageResource(contentPane, "unknown.png", getClass());
           }
-        catch (IOException ex)
+        else
           {
-            icon = null;
+            icon = icon.getScaledInstance(200, -1, Image.SCALE_SMOOTH);
           }
       }
     catch (Exception ex)
