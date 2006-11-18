@@ -233,6 +233,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   private Vector tabList = new Vector();
 
+  private imageTab image_tab;
   private personaeTab personae_tab;
   private ownerTab owner_tab;
   private objectsOwnedTab objects_owned_tab;
@@ -521,6 +522,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		    personae_tab = new personaeTab(this, pane, ts.l("load.personae_tab")); // "Personae"
 		    personae_tab.addToPane(tabList);
 		  }
+
+                String image_url = getObject().getImageURL();
+
+                if (image_url != null)
+                  {
+                    image_tab = new imageTab(this, pane, ts.l("load.image_tab"), image_url);  // "Photo"
+                    image_tab.addToPane(tabList);
+                  }
 	      }
 	  }
 	catch (Exception rx)

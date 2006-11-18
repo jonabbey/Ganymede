@@ -1335,6 +1335,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
+   * This method provides a hook to allow custom DBEditObject
+   * subclasses to return a String containing a URL for an image to
+   * represent this object.  Intended to be used for users, primarily.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public String getImageURLForObject(DBObject object)
+  {
+    return null;                // no image
+  }
+
+  /**
    * This method provides a hook that can be used by subclasses of
    * DBEditObject to return a list of attribute names and attribute
    * values to include when writing out &lt;invid&gt; elements to a

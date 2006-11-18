@@ -827,6 +827,28 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
+   * This method provides a hook to allow custom DBEditObject
+   * subclasses to return a String containing a URL for an image to
+   * represent this object.  Intended to be used for users, primarily.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public String getImageURLForObject(DBObject object)
+  {
+    String badge = (String) object.getFieldValueLocal(userSchema.BADGE);
+
+    if (badge == null || badge.trim().equals(""))
+      {
+        return null;
+      }
+
+    return "http://csdsun9.arlut.utexas.edu/pictures/" + badge + ".jpg";
+  }
+
+  /**
    * <p>This method is used to control whether or not it is acceptable to
    * make a link to the given field in this 
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the

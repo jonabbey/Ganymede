@@ -226,6 +226,15 @@ public interface db_object extends java.rmi.Remote {
   public Date getExpirationDate() throws RemoteException;
 
   /**
+   * <p>Returns a String containing a URL that can be used by the
+   * client to retrieve a picture representating this object.</p>
+   *
+   * <p>Intended to be used for users, primarily.</p>
+   */
+
+  public String getImageURL() throws RemoteException;
+
+  /**
    * <p>Shortcut method to set a field's value.  Using this
    * method saves a roundtrip to the server, which is
    * particularly useful in database loading.</p>
