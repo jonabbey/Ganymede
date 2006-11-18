@@ -143,7 +143,17 @@ public class imageTab extends clientTab {
         try
           {
             Object content = url.getContent();
-            icon = PackageResources.getImageResource(contentPane, url).getScaledInstance(200, -1, Image.SCALE_SMOOTH);
+
+            icon = PackageResources.getImageResource(contentPane, url);
+
+            if (icon == null)
+              {
+                icon = PackageResources.getImageResource(contentPane, "unknown.png", getClass());
+              }
+            else
+              {
+                icon = icon.getScaledInstance(200, -1, Image.SCALE_SMOOTH);
+              }
           }
         catch (IOException ex)
           {

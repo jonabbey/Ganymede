@@ -470,6 +470,26 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	      }
 	  }
 
+        // for user objects, see if we have an image to display
+
+        try
+          {
+            if (id == SchemaConstants.UserBase)
+              {
+                String image_url = getObject().getImageURL();
+
+                if (image_url != null)
+                  {
+                    image_tab = new imageTab(this, pane, ts.l("load.image_tab"), image_url);  // "Photo"
+                    image_tab.addToPane(tabList);
+                  }
+              }
+          }
+        catch (RemoteException ex)
+          {
+	    gc.processExceptionRethrow(ex, "Could not check for user image: ");
+          }
+
 	// okay, now we we've added the server--side tabs are.  time
 	// to start in on the predefined tabs.
 
@@ -522,19 +542,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		    personae_tab = new personaeTab(this, pane, ts.l("load.personae_tab")); // "Personae"
 		    personae_tab.addToPane(tabList);
 		  }
-
-                String image_url = getObject().getImageURL();
-
-                if (image_url != null)
-                  {
-                    image_tab = new imageTab(this, pane, ts.l("load.image_tab"), image_url);  // "Photo"
-                    image_tab.addToPane(tabList);
-                  }
 	      }
 	  }
 	catch (Exception rx)
 	  {
-	    gc.processExceptionRethrow(rx, "Could not check if this is ownerbase: ");
+	    gc.processExceptionRethrow(rx, "Could not process object-specific tab: ");
 	  }
     
 	// Add the notes panel
