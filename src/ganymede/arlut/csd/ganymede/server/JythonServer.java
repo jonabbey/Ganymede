@@ -7,10 +7,10 @@
    a Python (Jython) console.
    
    Created: 19 July 2004
-   Last Mod Date: $Date: 2005-11-22 23:08:20 -0600 (Tue, 22 Nov 2005) $
-   Last Revision Changed: $Rev: 7256 $
-   Last Changed By: $Author: broccol $
-   SVN URL: $HeadURL: https://tools.arlut.utexas.edu/svn/ganymede/trunk/ganymede/src/ganymede/arlut/csd/ganymede/server/GanymedeServer.java $
+   Last Mod Date: $Date$
+   Last Revision Changed: $Rev$
+   Last Changed By: $Author$
+   SVN URL: $HeadURL$
 
    Module By: Deepak Giridharagopal, deepak@brownman.org
 
