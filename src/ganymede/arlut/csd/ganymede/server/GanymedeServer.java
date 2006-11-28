@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -333,28 +333,20 @@ public class GanymedeServer implements Server {
 
     /* -- */
 
-    try
-      {
-	String error = GanymedeServer.lSemaphore.increment(0);
+    String error = GanymedeServer.lSemaphore.increment();
 
-	if (error != null)
-	  {
-	    if (error.equals("shutdown"))
-	      {
-		return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
-						  ts.l("processLogin.nologins_shutdown"));
-	      }
-	    else
-	      {
-		return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
-						  ts.l("processLogin.nologins_semaphore", error));
-	      }
-	  }
-      }
-    catch (InterruptedException ex)
+    if (error != null)
       {
-	ex.printStackTrace();
-	throw new RuntimeException(ex.getMessage());
+        if (error.equals("shutdown"))
+          {
+            return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
+                                              ts.l("processLogin.nologins_shutdown"));
+          }
+        else
+          {
+            return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
+                                              ts.l("processLogin.nologins_semaphore", error));
+          }
       }
 
     // massive try so we decrement our loginSemaphore if the login

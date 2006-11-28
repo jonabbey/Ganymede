@@ -1051,22 +1051,14 @@ public class SyncRunner implements Runnable {
 
 	    // tell the server not to shut down while we are running our external build
 
-	    try
-	      {
-		shutdownState = GanymedeServer.shutdownSemaphore.increment(0);
+            shutdownState = GanymedeServer.shutdownSemaphore.increment();
 
-		if (shutdownState != null)
-		  {
-		    // "Aborting full state sync channel {0} for shutdown condition: {1}"
-		    Ganymede.debug(ts.l("runFullState.shutting_down", this.getClass().getName(), shutdownState));
-		    return;
-		  }
-	      }
-	    catch (InterruptedException ex)
-	      {
-		// will never happen, since we are giving 0 to
-		// increment
-	      }
+            if (shutdownState != null)
+              {
+                // "Aborting full state sync channel {0} for shutdown condition: {1}"
+                Ganymede.debug(ts.l("runFullState.shutting_down", this.getClass().getName(), shutdownState));
+                return;
+              }
 		
 	    try
 	      {
@@ -1211,32 +1203,23 @@ public class SyncRunner implements Runnable {
 	needBuild.set(false);
       }
 
-    // increment the shutdownSemaphore so that the system knows we are
-    // in the middle of running a critical task
+    // increment the shutdownSemaphore so that the system knows we
+    // are in the middle of running a critical task, and that it
+    // should not allow shutdown until the build completes
 
-    try
+    shutdownState = GanymedeServer.shutdownSemaphore.increment();
+
+    if (shutdownState != null)
       {
-	// tell the Ganymede server not to shut down while we are
-	// running our external build
-
-	shutdownState = GanymedeServer.shutdownSemaphore.increment(0);
-	GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
-
-	if (shutdownState != null)
-	  {
-	    // "Refusing to run Sync Channel {0}, due to shutdown condition: {1}"
-	    Ganymede.debug(ts.l("runIncremental.shutting_down", this.getName(), shutdownState));
-	    return;
-	  }
-      }
-    catch (InterruptedException ex)
-      {
-	// will never happen, since we are giving 0 to
-	// increment
+        // "Refusing to run Sync Channel {0}, due to shutdown condition: {1}"
+        Ganymede.debug(ts.l("runIncremental.shutting_down", this.getName(), shutdownState));
+        return;
       }
 
     try
       {
+        GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
+
 	// "SyncRunner {0} running"
 	Ganymede.debug(ts.l("runIncremental.running", myName));
 
@@ -1275,8 +1258,11 @@ public class SyncRunner implements Runnable {
       }
     finally
       {
+        // decrement first, so that we won't lose if
+        // GanymedeBuilderTask.decPhase2() throws an exception
+
 	GanymedeServer.shutdownSemaphore.decrement();
-	GanymedeBuilderTask.decPhase2(true); // so that the client no longer sees the phase 2 icon rolling
+	GanymedeBuilderTask.decPhase2(true);
       }
 
     // "SyncRunner {0} finished"

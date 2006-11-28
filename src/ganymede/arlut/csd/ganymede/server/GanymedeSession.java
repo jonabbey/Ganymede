@@ -592,26 +592,18 @@ final public class GanymedeSession implements Session, Unreferenced {
     else if ((!sessionLabel.equals("internal") && !sessionLabel.startsWith("builder:")) || 
 	     (sessionLabel.startsWith("builder:") && disabledMessage == null))
       {
-	try
-	  {
-	    String error = GanymedeServer.lSemaphore.increment(0);
+        String error = GanymedeServer.lSemaphore.increment();
 
-	    if (error != null)
-	      {
-		Ganymede.debug(ts.l("init.no_semaphore", sessionLabel, error));
+        if (error != null)
+          {
+            Ganymede.debug(ts.l("init.no_semaphore", sessionLabel, error));
 
-		throw new RuntimeException(ts.l("init.semaphore_error", error));	    
-	      }
-	    else
-	      {
-		semaphoreLocked = true;
-	      }
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	    throw new RuntimeException(ex.getMessage());
-	  }
+            throw new RuntimeException(ts.l("init.semaphore_error", error));	    
+          }
+        else
+          {
+            semaphoreLocked = true;
+          }
       }
 
     // construct our DBSession

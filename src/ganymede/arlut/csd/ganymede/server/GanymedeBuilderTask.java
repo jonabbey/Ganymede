@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -436,22 +436,14 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	    if (success1)
 	      {
-		try
-		  {
-		    shutdownState = GanymedeServer.shutdownSemaphore.increment(0);
+                shutdownState = GanymedeServer.shutdownSemaphore.increment();
 
-		    if (shutdownState != null)
-		      {
-			// "Aborting builder task {0} for shutdown condition: {1}"
-			Ganymede.debug(ts.l("run.shutting_down", this.getClass().getName(), shutdownState));
-			return;
-		      }
-		  }
-		catch (InterruptedException ex)
-		  {
-		    // will never happen, since we are giving 0 to
-		    // increment
-		  }
+                if (shutdownState != null)
+                  {
+                    // "Aborting builder task {0} for shutdown condition: {1}"
+                    Ganymede.debug(ts.l("run.shutting_down", this.getClass().getName(), shutdownState));
+                    return;
+                  }
 		
 		try
 		  {

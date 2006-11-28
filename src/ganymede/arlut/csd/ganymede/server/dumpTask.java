@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -93,25 +93,17 @@ class dumpTask implements Runnable {
 	    return;
 	  }
 
-	try
-	  {
-	    String error = GanymedeServer.lSemaphore.increment(0);
+        String error = GanymedeServer.lSemaphore.increment();
 	
-	    if (error != null)
-	      {
-		Ganymede.debug(ts.l("semaphore_disabled", error));
-		return;
-	      }
-	    else
-	      {
-		gotSemaphore = true;
-	      }
-	  }
-	catch (InterruptedException ex)
-	  {
-	    ex.printStackTrace();
-	    throw new RuntimeException(ex.getMessage());
-	  }
+        if (error != null)
+          {
+            Ganymede.debug(ts.l("semaphore_disabled", error));
+            return;
+          }
+        else
+          {
+            gotSemaphore = true;
+          }
 
 	started = true;
 	Ganymede.debug(ts.l("running", new Integer(Ganymede.db.journal.transactionsInJournal)));

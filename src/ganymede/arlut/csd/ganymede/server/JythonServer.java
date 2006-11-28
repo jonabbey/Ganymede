@@ -1,9 +1,58 @@
 /*
- * Created on Jul 19, 2004
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
+
+   JythonServer.java
+
+   The JythonServer class is used to provide a tcp port on the
+   Ganymede server which can be telnetted to in order to interact with
+   a Python (Jython) console.
+   
+   Created: 19 July 2004
+   Last Mod Date: $Date: 2005-11-22 23:08:20 -0600 (Tue, 22 Nov 2005) $
+   Last Revision Changed: $Rev: 7256 $
+   Last Changed By: $Author: broccol $
+   SVN URL: $HeadURL: https://tools.arlut.utexas.edu/svn/ganymede/trunk/ganymede/src/ganymede/arlut/csd/ganymede/server/GanymedeServer.java $
+
+   Module By: Deepak Giridharagopal, deepak@brownman.org
+
+   -----------------------------------------------------------------------
+	    
+   Ganymede Directory Management System
+ 
+   Copyright (C) 1996-2006
+   The University of Texas at Austin
+
+   Contact information
+
+   Web site: http://www.arlut.utexas.edu/gash2
+   Author Email: ganymede_author@arlut.utexas.edu
+   Email mailing list: ganymede@arlut.utexas.edu
+
+   US Mail:
+
+   Computer Science Division
+   Applied Research Laboratories
+   The University of Texas at Austin
+   PO Box 8029, Austin TX 78713-8029
+
+   Telephone: (512) 835-3200
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
+
+*/
+
 package arlut.csd.ganymede.server;
 
 import java.io.BufferedReader;
@@ -25,10 +74,20 @@ import org.python.util.InteractiveConsole;
 
 import arlut.csd.Util.TranslationService;
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                    JythonServer
+
+------------------------------------------------------------------------------*/
+
 /**
- * @author Deepak Giridharagopal <deepak@arlut.utexas.edu>
+ * The JythonServer class is used to provide a tcp port on the
+ * Ganymede server which can be telnetted to in order to interact with
+ * a Python (Jython) console.
  *
+ * @author Deepak Giridharagopal <deepak@brownman.org>
  */
+
 public class JythonServer extends Thread {
 
   /* The server's listener socket */ 
@@ -112,13 +171,20 @@ public class JythonServer extends Thread {
       }
   }
 }
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                            JythonServerProtocol
+
+------------------------------------------------------------------------------*/
   
 /**
- * @author Deepak Giridharagopal <deepak@arlut.utexas.edu>
- *
  * Implementation of the server I/O protocol. Principally, it reads in lines
  * of input from the client and execs them inside a Jython interpreter.
+ *
+ * @author Deepak Giridharagopal <deepak@brownman.org>
  */
+
 class JythonServerProtocol {
 
   /**
@@ -228,11 +294,18 @@ class JythonServerProtocol {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                              JythonServerWorker
+
+------------------------------------------------------------------------------*/
+  
 /**
- * @author deepak
- *
  * Handles passing input and output to the above Protocol class.
+ *
+ * @author Deepak Giridharagopal <deepak@brownman.org>
  */
+
 class JythonServerWorker extends Thread {
 
   /**
@@ -276,32 +349,26 @@ class JythonServerWorker extends Thread {
           }
 
         /* Check to see if logins are allowed */
-        try
+
+        String error = Ganymede.server.lSemaphore.increment();
+
+        if (error != null)
           {
-            String error = Ganymede.server.lSemaphore.increment(0);
-            if (error != null)
+            if (error.equals("shutdown"))
               {
-                if (error.equals("shutdown"))
-                  {
-		    // "ERROR: The server is currently waiting to shut down.  No logins will be accepted until the server has restarted"
-                    out.print(ts.l("run.nologins_shutdown"));
-                  }
-                else
-                  {
-		    // "ERROR: Can't log in to the Ganymede server.. semaphore disabled: {0}"
-                    out.print(ts.l("run.nologins_semaphore", error));
-                  }
-		out.print("\n");
-                out.flush();
-                socket.close();
-                return;
+                // "ERROR: The server is currently waiting to shut down.  No logins will be accepted until the server has restarted"
+                out.print(ts.l("run.nologins_shutdown"));
               }
-          }
-        catch (InterruptedException ex)
-          {
-            ex.printStackTrace(out);
+            else
+              {
+                // "ERROR: Can't log in to the Ganymede server.. semaphore disabled: {0}"
+                out.print(ts.l("run.nologins_semaphore", error));
+              }
+
+            out.print("\n");
             out.flush();
             socket.close();
+
             return;
           }
 	
@@ -407,15 +474,17 @@ class JythonServerWorker extends Thread {
           }
         finally
           {
+            Ganymede.server.lSemaphore.decrement();
+
             /* Make sure to register the logout */
+
             try
               {
                 protocol.session.logout();
               }
             catch (Exception e)
               {
-                /* Move along */
-                Ganymede.stackTrace(e);
+                e.printStackTrace(); // Move along
               }
           }
       }

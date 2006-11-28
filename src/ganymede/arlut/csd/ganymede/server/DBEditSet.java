@@ -1793,9 +1793,10 @@ public class DBEditSet {
   }
 
   /**
-   * <p>This private helper method for commit() writes a finalized token
-   * to the on-disk transactions journal, so that we'll know upon restart that
-   * we don't need to reply the transaction to the sync channels.</p>
+   * <p>This private helper method for commit() writes a finalized
+   * token to the on-disk transactions journal, so that we'll know
+   * upon restart that we don't need to scrub the transaction from the
+   * sync channels.</p>
    *
    * <p>Will throw a CommitException if a failure was detected.</p>
    */

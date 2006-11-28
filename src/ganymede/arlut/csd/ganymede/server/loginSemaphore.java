@@ -254,6 +254,26 @@ public final class loginSemaphore {
   }
 
   /**
+   * <p>Attempt to increment the login count without blocking/waiting
+   * on failure.</p>
+   * 
+   * @return An explanation of why the increment could not be carried
+   * out, or null if the increment was successful.
+   */
+
+  public synchronized String increment()
+  {
+    try
+      {
+        return this.increment(0);
+      }
+    catch (InterruptedException ex)
+      {
+        return "noway"; // will never happen, since we incremented with 0
+      }
+  }
+
+  /**
    * <p>Attempt to increment the login count</p>
    *
    * @param millis Controls blocking behavior on this call.. if millis &lt; 0,

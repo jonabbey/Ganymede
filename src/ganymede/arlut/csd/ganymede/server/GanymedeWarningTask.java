@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2006
    The University of Texas at Austin
 
    Contact information
@@ -135,26 +135,18 @@ public class GanymedeWarningTask implements Runnable {
     // we have to increment the GanymedeServer loginSemaphore, because
     // we are using a non-semaphored local GanymedeSession
 
-    try
-      {
-	semaphoreCondition = GanymedeServer.lSemaphore.increment(0);
-	
-	if (semaphoreCondition != null)
-	  {
-	    Ganymede.debug("Deferring warning task - semaphore disabled: " + semaphoreCondition);
-	    return;
-	  }
-      }
-    catch (InterruptedException ex)
-      {
-	ex.printStackTrace();
-	throw new RuntimeException(ex.getMessage());
-      }
+    semaphoreCondition = GanymedeServer.lSemaphore.increment();
 
-    Ganymede.debug("Warning Task: Starting");
+    if (semaphoreCondition != null)
+      {
+        Ganymede.debug("Deferring warning task - semaphore disabled: " + semaphoreCondition);
+        return;
+      }
 
     try
       {
+        Ganymede.debug("Warning Task: Starting");
+
 	try
 	  {
 	    mySession = new GanymedeSession("warning");	// supergash
