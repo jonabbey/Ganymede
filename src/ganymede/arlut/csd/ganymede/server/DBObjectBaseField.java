@@ -4129,40 +4129,48 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 		// field
 		
 		boolean success = true;
+                DBField lastFieldTried = null;
 		Enumeration en = base.objectTable.elements();
 		
 		while (success && en.hasMoreElements())
 		  {
 		    DBObject obj = (DBObject) en.nextElement();
+
+		    lastFieldTried = (DBField) obj.getField(getID());
 		    
-		    DBField field = (DBField) obj.getField(getID());
-		    
-		    if (field == null)
+		    if (lastFieldTried == null)
 		      {
 			continue;
 		      }
 		    
 		    if (!this.isArray())
 		      {
-			success = namespace.schemaEditRegister(field.key(), field);
+			success = namespace.schemaEditRegister(lastFieldTried.key(), lastFieldTried);
 		      }
 		    else
 		      {
-			for (int i = 0; success && i < field.size(); i++)
+			for (int i = 0; success && i < lastFieldTried.size(); i++)
 			  {
-			    success = namespace.schemaEditRegister(field.key(i), field);
+			    success = namespace.schemaEditRegister(lastFieldTried.key(i), lastFieldTried);
 			  }
 		      }
 		  }
 		
 		if (!success)
 		  {
+                    String fieldDesc = lastFieldTried.toString();
+                    String content = lastFieldTried.getValueString();
+
 		    namespace.schemaEditUnregister(base.getTypeID(), getID());
 		    namespace = oldNamespace;
 
-		    // "Can''t set namespace constraint {0} on field {1} without violating namespace uniqueness constraint on previously registered values."
+                    // "Can''t set namespace constraint {0} on field
+                    // {1} without violating namespace uniqueness
+                    // constraint on previously registered
+                    // values.\nField {2} had a conflict.\Value(s) in
+                    // conflict:{3}"
 		    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-						      ts.l("setNameSpace.can_not_apply", nameSpaceId, this.toString()));
+						      ts.l("setNameSpace.can_not_apply", nameSpaceId, this.toString(), fieldDesc, content));
 		  }
 	      }
 	  }
@@ -4222,40 +4230,49 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    // field
 	    
 	    boolean success = true;
+            DBField lastFieldTried = null;
 	    Enumeration en = base.objectTable.elements();
 	    
 	    while (success && en.hasMoreElements())
 	      {
 		DBObject obj = (DBObject) en.nextElement();
 		
-		DBField field = (DBField) obj.getField(getID());
+		lastFieldTried = (DBField) obj.getField(getID());
 		
-		if (field == null)
+		if (lastFieldTried == null)
 		  {
 		    continue;
 		  }
 		
 		if (!this.isArray())
 		  {
-		    success = newNamespace.schemaEditRegister(field.key(), field);
+		    success = newNamespace.schemaEditRegister(lastFieldTried.key(), lastFieldTried);
 		  }
 		else
 		  {
-		    for (int i = 0; success && i < field.size(); i++)
+		    for (int i = 0; success && i < lastFieldTried.size(); i++)
 		      {
-			success = newNamespace.schemaEditRegister(field.key(i), field);
+			success = newNamespace.schemaEditRegister(lastFieldTried.key(i), lastFieldTried);
 		      }
 		  }
 	      }
 	    
 	    if (!success)
 	      {
+                String fieldDesc = lastFieldTried.toString();
+                String content = lastFieldTried.getValueString();
+
 		newNamespace.schemaEditUnregister(base.getTypeID(), getID());
 
 		// "Schema Editing Error"
-		// "Can''t set namespace constraint {0} on field {1} without violating namespace uniqueness constraint on previously registered values."
+                // "Can''t set namespace constraint {0} on field
+                // {1} without violating namespace uniqueness
+                // constraint on previously registered
+                // values.\nField {2} had a conflict.\Value(s) in
+                // conflict:{3}"
 		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-						  ts.l("setNameSpace.can_not_apply", newNamespace.toString(), this.toString()));
+						  ts.l("setNameSpace.can_not_apply", newNamespace.toString(), this.toString(),
+                                                       fieldDesc, content));
 	      }
 	  }
       }
