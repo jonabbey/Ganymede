@@ -1258,7 +1258,7 @@ public class SyncRunner implements Runnable {
       }
     finally
       {
-        // decrement first, so that we won't lose if
+        // decrement first, so that we won't lose if the less critical
         // GanymedeBuilderTask.decPhase2() throws an exception
 
 	GanymedeServer.shutdownSemaphore.decrement();
