@@ -566,6 +566,8 @@ public class GanymedeServer implements Server {
 							       recipients));
 		  }
 
+                // "Bad login attempt"
+                // "Bad username or password, login rejected."
 		return Ganymede.createErrorDialog(ts.l("processLogin.badlogin"),
 						  ts.l("processLogin.badlogintext"));
 	      }
