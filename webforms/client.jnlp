@@ -9,6 +9,12 @@
 
      http://java.sun.com/products/javawebstart/developers.html
 
+     Created: 19 July 2001
+     Last Mod Date: $Date$
+     Last Revision Changed: $Rev$
+     Last Changed By: $Author$
+     SVN URL: $HeadURL$     
+
 -->
 
 <jnlp spec="1.0+" codebase="#WEBROOT" href="client.jnlp">
