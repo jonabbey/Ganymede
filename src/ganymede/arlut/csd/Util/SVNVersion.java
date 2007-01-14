@@ -73,7 +73,8 @@ public class SVNVersion {
 
   static String SVN_release_name = "$HeadURL$";
   static String SVN_release_date = "$Date$";
-  static String release_string = SVNVersion.parseRelease("--------> ganymede_002000000", SVN_release_date);
+  static String release_identifier = "2.0.0";
+  static String release_string = null;
 
   // ---
 
@@ -106,60 +107,60 @@ public class SVNVersion {
 	return "version unknown" + " - " + SVN_release_date; 
       }
 
-    String release_name = null;
-    String release_number = "version unknown";
-    String release_date;
-
-    // cut off leading '$HeadURL: ', clean up whitespace
-	
-    release_name = SVN_release_name.substring(9, SVN_release_name.length()-1);
-    release_name = release_name.trim();
+    String release_number = release_identifier;
 
     // cut off leading '$Date: ', clean up whitespace
 
-    release_date = SVN_release_date.substring(6, SVN_release_date.length()-1);
-    release_date = release_date.trim();
+    String release_date = SVN_release_date.substring(6, SVN_release_date.length()-1).trim();
+
+    /*
+      XXX this logic was used to automatically identify the version number from
+      a CVS branch tag.  This stopped working since I went to Subversion, and I never
+      really bothered to fix it, so for now it's just vestigial.  -- jon
+
+      // we use ganymede_XXXYYYZZZ for our SVN release tags/branches, so
+      // we'll see if we can find "ganymede_" in our HeadURL path
+
+      String release_name = SVN_release_name;
+
+      int branch_match = release_name.indexOf("ganymede_");
+
+      if (branch_match != -1)
+        {
+          try
+	    {
+	      release_number = release_name.substring(branch_match + 1, branch_match+10);
+
+	      // convert XXXYYYZZZ style version number to x.y.z
 	
-    // we use ganymede_XXXYYYZZZ for our SVN release tags/branches, so
-    // we'll see if we can find "ganymede_" in our HeadURL path
-
-    int branch_match = release_name.indexOf("ganymede_");
-
-    if (branch_match != -1)
-      {
-	try
-	  {
-	    release_number = release_name.substring(branch_match + 1, branch_match+10);
-
-	    // convert XXXYYYZZZ style version number to x.y.z
+	      // i.e., 001000008 to 1.0.8
 	
-	    // i.e., 001000008 to 1.0.8
-	
-	    String a = release_number.substring(0, 3);
-	    String b = release_number.substring(3, 6);
-	    String c = release_number.substring(6, 9);
+	      String a = release_number.substring(0, 3);
+	      String b = release_number.substring(3, 6);
+	      String c = release_number.substring(6, 9);
 
-	    int ia, ib, ic;
+	      int ia, ib, ic;
 
-	    ia = Integer.parseInt(a);
-	    ib = Integer.parseInt(b);
-	    ic = Integer.parseInt(c);
+	      ia = Integer.parseInt(a);
+	      ib = Integer.parseInt(b);
+	      ic = Integer.parseInt(c);
 
-	    release_number = ia + "." + ib + "." + ic;
-	  }
-	catch (IndexOutOfBoundsException ex)
-	  {
-	    // we've got a format error, no worries, leave
-	    // release_number set to "version unknown".
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    // we weren't able to parse the numeric string, probably
-	    // we had a malformed ganymede path element in our SVN
-	    // HeadURL.. so we'll also leave our release_number set to
-	    // "version unknown".
-	  }
-      }
+	      release_number = ia + "." + ib + "." + ic;
+	    }
+	  catch (IndexOutOfBoundsException ex)
+	    {
+	      // we've got a format error, no worries, leave
+	      // release_number set to "version unknown".
+	    }
+	  catch (NumberFormatException ex)
+	    {
+	      // we weren't able to parse the numeric string, probably
+	      // we had a malformed ganymede path element in our SVN
+	      // HeadURL.. so we'll also leave our release_number set to
+	      // "version unknown".
+	    }
+        }
+    */
 
     return release_number + "\n" + release_date;
   }
