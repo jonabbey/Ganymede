@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -55,6 +55,7 @@ package arlut.csd.ganymede.common;
 
 import java.util.Date;
 
+import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeBuilderTask;
@@ -92,6 +93,10 @@ import arlut.csd.ganymede.server.taskMonitor;
  * <P>The various scheduling methods in scheduleHandle will throw an
  * IllegalArgumentException if called post-serialization on the
  * Ganymede client.</P>
+ *
+ * <P>In order to avoid nested monitor deadlock, all calls from
+ * scheduleHandle to synchronized methods on the GanymedeScheduler
+ * must be made from locally unsynchronized code blocks.</P>
  */
 
 public class scheduleHandle implements java.io.Serializable {
@@ -109,8 +114,27 @@ public class scheduleHandle implements java.io.Serializable {
 
   // we pass these attributes along to the admin console for it to display
 
-  public boolean isRunning;
-  public boolean suspend;
+  /**
+   * This booleanSemaphore will be set to true if the task associated
+   * with this scheduleHandle is currently running.
+   *
+   * It is a booleanSemaphore so that we can have an appropriate
+   * memory barrier for multiprocessor access without having to
+   * synchronize on the scheduleHandle upon calls to isRunning().
+   */
+
+  private booleanSemaphore isRunning = new booleanSemaphore(false);
+
+  /**
+   * This booleanSemaphore will be set to true if the task associated
+   * with this scheduleHandle is currently suspended.
+   *
+   * It is a booleanSemaphore so that we can have an appropriate
+   * memory barrier for multiprocessor access without having to
+   * synchronize on the scheduleHandle upon calls to isSuspended().
+   */
+
+  private booleanSemaphore suspend = new booleanSemaphore(false);
 
   /**
    * isSyncTask will be true if the task in question is instanceof
@@ -121,11 +145,17 @@ public class scheduleHandle implements java.io.Serializable {
   public boolean isSyncTask;
 
   /**
-   * if we are doing a on-demand and we get a request while running it,
-   * we'll want to immediately re-run it on completion
+   * This booleanSemaphore will be set to true if we are doing a
+   * on-demand and we get a request while running it, which signifies
+   * that we'll want to immediately re-run it on completion.
+   *
+   * It is a booleanSemaphore so that we can have an appropriate
+   * memory barrier for multiprocessor access without having to
+   * synchronize on the scheduleHandle upon calls to
+   * runAgain().
    */
 
-  public boolean rerun;
+  private booleanSemaphore rerun = new booleanSemaphore(false);
 
   /**
    * When was this task last issued?
@@ -228,7 +258,6 @@ public class scheduleHandle implements java.io.Serializable {
     this.startTime = time;
     this.task = task;
     this.name = name;
-    this.rerun = false;
 
     if (task instanceof arlut.csd.ganymede.server.GanymedeBuilderTask ||
 	task instanceof arlut.csd.ganymede.server.SyncRunner)
@@ -254,7 +283,7 @@ public class scheduleHandle implements java.io.Serializable {
    * only affects the next launching of the task.</p>
    */
 
-  synchronized public void setOptions(Object _options[])
+  public void setOptions(Object _options[])
   {
     this.options = _options;
   }
@@ -267,7 +296,7 @@ public class scheduleHandle implements java.io.Serializable {
    * <P>This method is invalid on the client.</P>
    */
 
-  synchronized public void runTask()
+  public void runTask()
   {
     // start our task
 
@@ -281,48 +310,56 @@ public class scheduleHandle implements java.io.Serializable {
 	System.err.println("Ganymede Scheduler: Starting task " + name + " at " + new Date());
       }
 
-    if (suspend)
+    if (suspend.isSet())
       {
 	Ganymede.debug("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
-	scheduler.notifyCompletion(this);
+
+	// XXX must not be synchronized on this scheduleHandle here,
+	// else possible nested monitor deadlock
+
+	scheduler.notifyCompletion(this); 
+
 	return;
       }
 
-    rerun = false;
-
-    // grab options for this run
-
-    if (options == null || (!(task instanceof GanymedeBuilderTask)))
+    synchronized (this)
       {
-	thread = new Thread(task, name);
-	thread.start();
-      }
-    else
-      {
-	// we're running a GanymedeBuilderTask with options set
+	rerun.set(false);
 
-	final Object _options[] = options;
-	final GanymedeBuilderTask _task = (GanymedeBuilderTask) task;
+	// grab options for this run
 
-	thread = new Thread(new Runnable() {
-	  public void run() {
-	    _task.run(_options);
+	if (options == null || (!(task instanceof GanymedeBuilderTask)))
+	  {
+	    thread = new Thread(task, name);
+	    thread.start();
 	  }
-	}, name);
+	else
+	  {
+	    // we're running a GanymedeBuilderTask with options set
 
-	thread.start();
+	    final Object _options[] = options;
+	    final GanymedeBuilderTask _task = (GanymedeBuilderTask) task;
+
+	    thread = new Thread(new Runnable() {
+		public void run() {
+		  _task.run(_options);
+		}
+	      }, name);
+
+	    thread.start();
 	
-	// clear options
+	    // clear options
 	
-	this.options = null;
-      }
+	    this.options = null;
+	  }
 
-    isRunning = true;
+	isRunning.set(true);
 
-    // and have our monitor watch for it
+	// and have our monitor watch for it
     
-    monitor = new Thread(new taskMonitor(thread, this), name);
-    monitor.start();
+	monitor = new Thread(new taskMonitor(thread, this), name);
+	monitor.start();
+      }
   }
 
   /** 
@@ -333,18 +370,25 @@ public class scheduleHandle implements java.io.Serializable {
    * from any other code.</P> 
    */
 
-  synchronized public void notifyCompletion()
+  public void notifyCompletion()
   {
-    if (scheduler == null)
+    synchronized (this)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+	if (scheduler == null)
+	  {
+	    throw new IllegalArgumentException("can't run this method on the client");
+	  }
+
+	monitor = null;
+	thread = null;
+
+	isRunning.set(false);
+	lastTime = new Date();
       }
 
-    monitor = null;
-    thread = null;
+    // XXX must not be synchronized on this scheduleHandle here,
+    // else possible nested monitor deadlock
 
-    isRunning = false;
-    lastTime = new Date();
     scheduler.notifyCompletion(this);
   }
 
@@ -354,7 +398,7 @@ public class scheduleHandle implements java.io.Serializable {
    * executed task.</P>
    */
 
-  synchronized public boolean reschedule()
+  public synchronized boolean reschedule()
   {
     if (scheduler == null)
       {
@@ -377,16 +421,16 @@ public class scheduleHandle implements java.io.Serializable {
    * should be re-run when it terminates</P>
    */
 
-  synchronized public boolean runAgain()
+  public boolean runAgain()
   {
-    return rerun;
+    return rerun.isSet();
   }
 
   /**
    * <P>Returns true if this task is not scheduled for periodic execution</P>
    */
 
-  synchronized public boolean isOnDemand()
+  public boolean isOnDemand()
   {
     if (scheduler == null)
       {
@@ -394,6 +438,24 @@ public class scheduleHandle implements java.io.Serializable {
       }
 
     return interval == 0;
+  }
+
+  /**
+   * Returns true if the task is currently running.
+   */
+
+  public boolean isRunning()
+  {
+    return isRunning.isSet();
+  }
+
+  /**
+   * Returns true if the task is suspended.
+   */
+
+  public boolean isSuspended()
+  {
+    return suspend.isSet();
   }
 
   /**
@@ -415,7 +477,7 @@ public class scheduleHandle implements java.io.Serializable {
    * GanymedeScheduler} while they are already running.</P>
    */
 
-  synchronized public void runOnCompletion(Object _options[])
+  public synchronized void runOnCompletion(Object _options[])
   {
     if (scheduler == null)
       {
@@ -424,7 +486,7 @@ public class scheduleHandle implements java.io.Serializable {
 
     this.options = _options;
 
-    rerun = true;
+    rerun.set(true);
   }
 
   /**
@@ -432,14 +494,14 @@ public class scheduleHandle implements java.io.Serializable {
    * current completion.  Used to remove a task from the Ganymede scheduler.</P>
    */
 
-  synchronized public void unregister()
+  public synchronized void unregister()
   {
     if (scheduler == null)
       {
 	throw new IllegalArgumentException("can't run this method on the client");
       }
 
-    rerun = false;
+    rerun.set(false);
   }
 
   /**
@@ -447,7 +509,7 @@ public class scheduleHandle implements java.io.Serializable {
    * written to properly respond to an interruption.</P>
    */
 
-  synchronized public void stop()
+  public synchronized void stop()
   {
     if (scheduler == null)
       {
@@ -465,28 +527,28 @@ public class scheduleHandle implements java.io.Serializable {
    * <P>Server-side method to disable future invocations of this task</P>
    */
 
-  synchronized public void disable()
+  public synchronized void disable()
   {
     if (scheduler == null)
       {
 	throw new IllegalArgumentException("can't run this method on the client");
       }
 
-    suspend = true;
+    suspend.set(true);
   }
 
   /**
    * <P>Server-side method to enable future invocations of this task</P>
    */
 
-  synchronized public void enable()
+  public synchronized void enable()
   {
     if (scheduler == null)
       {
 	throw new IllegalArgumentException("can't run this method on the client");
       }
 
-    suspend = false;
+    suspend.set(false);
   }
 
   /**
@@ -495,7 +557,7 @@ public class scheduleHandle implements java.io.Serializable {
    * @param interval Number of seconds between runs of this task
    */
 
-  synchronized public void setInterval(int interval)
+  public synchronized void setInterval(int interval)
   {
     if (scheduler == null)
       {

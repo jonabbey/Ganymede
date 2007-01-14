@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -1057,7 +1057,7 @@ public class GanymedeScheduler extends Thread {
    * the task if it is a periodic task.
    */
 
-  synchronized public void notifyCompletion(scheduleHandle handle)
+  public synchronized void notifyCompletion(scheduleHandle handle)
   {
     if (currentlyRunning.remove(handle.name) != null)
       {

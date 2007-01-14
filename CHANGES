@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-September 31, 2006
+February 1, 2007
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: September 31, 2006
+RELEASE DATE: February 1, 2007
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -985,6 +985,20 @@ Ganymede client.
 
 There is no support for user photographs in the Ganymede server,
 itself.
+
+60. [SERVER] Fixed nested monitor deadlock in GanymedeScheduler, scheduleHandle
+
+The GanymedeScheduler and scheduleHandle classes had a big opportunity
+for a nested monitor deadlock.  We haven't previously hit the deadlock
+in the many years we've been running Ganymede as far as I know, but
+there it is regardless.
+
+scheduleHandle now drops all synchronization before calling
+notifyCompletion() on the GanymedeScheduler.
+
+This fixes a bug that caused things to seize up a bit if a user sent a
+disableTask command to a task while the task was running in the
+scheduler.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 

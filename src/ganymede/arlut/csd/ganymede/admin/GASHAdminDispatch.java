@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -737,14 +737,14 @@ class GASHAdminDispatch implements Runnable {
 
 	table.setCellText(handle.name, 0, handle.name, false); // task name
 
-	if (handle.isRunning)
+	if (handle.isRunning())
 	  {
 	    // "Running"
 	    table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
 	    table.setCellColor(handle.name, 1, Color.blue, false);
 	    table.setCellBackColor(handle.name, 1, Color.white, false);
 	  }
-	else if (handle.suspend)
+	else if (handle.isSuspended())
 	  {
 	    // "Suspended"
 	    table.setCellText(handle.name, 1, ts.l("changeTasks.suspendedState"), false);
