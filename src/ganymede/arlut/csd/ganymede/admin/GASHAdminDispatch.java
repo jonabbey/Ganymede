@@ -737,7 +737,14 @@ class GASHAdminDispatch implements Runnable {
 
 	table.setCellText(handle.name, 0, handle.name, false); // task name
 
-	if (handle.isRunning())
+	if (handle.isRunning() && handle.isSuspended())
+	  {
+	    // "Suspended upon completion"
+	    table.setCellText(handle.name, 1, ts.l("changeTasks.runningSuspendedState"), false);
+	    table.setCellColor(handle.name, 1, Color.red, false);
+	    table.setCellBackColor(handle.name, 1, Color.white, false);
+	  }
+	else if (handle.isRunning())
 	  {
 	    // "Running"
 	    table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
