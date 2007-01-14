@@ -73,7 +73,7 @@ public class SVNVersion {
 
   static String SVN_release_name = "$HeadURL$";
   static String SVN_release_date = "$Date$";
-  static String release_string = SVNVersion.parseRelease("ganymede_002000000", SVN_release_date);
+  static String release_string = SVNVersion.parseRelease("--------> ganymede_002000000", SVN_release_date);
 
   // ---
 
