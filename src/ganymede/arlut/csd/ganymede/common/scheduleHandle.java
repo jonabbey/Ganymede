@@ -310,55 +310,62 @@ public class scheduleHandle implements java.io.Serializable {
 	System.err.println("Ganymede Scheduler: Starting task " + name + " at " + new Date());
       }
 
-    if (suspend.isSet())
+    try
       {
-	Ganymede.debug("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
+	synchronized (this)
+	  {
+	    rerun.set(false);
 
-	// XXX must not be synchronized on this scheduleHandle here,
-	// else possible nested monitor deadlock
+	    if (suspend.isSet())
+	      {
+		Ganymede.debug("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
+
+		throw new suspendedTaskException(); // goto a-go-go
+	      }
+
+	    // grab options for this run
+
+	    if (options == null || (!(task instanceof GanymedeBuilderTask)))
+	      {
+		thread = new Thread(task, name);
+		thread.start();
+	      }
+	    else
+	      {
+		// we're running a GanymedeBuilderTask with options set
+
+		final Object _options[] = options;
+		final GanymedeBuilderTask _task = (GanymedeBuilderTask) task;
+
+		thread = new Thread(new Runnable() {
+		    public void run() {
+		      _task.run(_options);
+		    }
+		  }, name);
+
+		thread.start();
+
+		// clear options
+
+		this.options = null;
+	      }
+
+	    isRunning.set(true);
+
+	    // and have our monitor watch for it
+
+	    monitor = new Thread(new taskMonitor(thread, this), name);
+	    monitor.start();
+	  }
+      }
+    catch (suspendedTaskException ex)
+      {
+	// XXX must not be locally synchronized here, else possible
+	// nested monitor deadlock
 
 	scheduler.notifyCompletion(this); 
 
 	return;
-      }
-
-    synchronized (this)
-      {
-	rerun.set(false);
-
-	// grab options for this run
-
-	if (options == null || (!(task instanceof GanymedeBuilderTask)))
-	  {
-	    thread = new Thread(task, name);
-	    thread.start();
-	  }
-	else
-	  {
-	    // we're running a GanymedeBuilderTask with options set
-
-	    final Object _options[] = options;
-	    final GanymedeBuilderTask _task = (GanymedeBuilderTask) task;
-
-	    thread = new Thread(new Runnable() {
-		public void run() {
-		  _task.run(_options);
-		}
-	      }, name);
-
-	    thread.start();
-	
-	    // clear options
-	
-	    this.options = null;
-	  }
-
-	isRunning.set(true);
-
-	// and have our monitor watch for it
-    
-	monitor = new Thread(new taskMonitor(thread, this), name);
-	monitor.start();
       }
   }
 
@@ -668,3 +675,27 @@ public class scheduleHandle implements java.io.Serializable {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                          suspendedTaskException
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Locally defined exception, used to throw control out of a
+ * synchronized block in scheduleHandle.runTask if the task is
+ * suspended.
+ */
+
+class suspendedTaskException extends RuntimeException {
+
+  public suspendedTaskException()
+  {
+    super();
+  }
+
+  public suspendedTaskException(String s)
+  {
+    super(s);
+  }
+}
