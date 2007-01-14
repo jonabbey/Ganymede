@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2007
    The University of Texas at Austin
 
    Contact information
@@ -65,9 +65,15 @@ package arlut.csd.Util;
  * <p>This class is useful for providing a reliable boolean flag that can
  * be examined by separate threads without worry over funky memory model behavior
  * on multiprocessor systems, etc.</p>
+ *
+ * <p>This class is serializable only because the Ganymede
+ * scheduleHandle class includes a booleanSempahore for server-side
+ * use, and scheduleHandle objects are themselves serializable.
+ * Obviously, we don't really care too much about fancy multithreaded
+ * semantics when we are being serialized.</p>
  */
 
-public class booleanSemaphore {
+public class booleanSemaphore implements java.io.Serializable {
 
   private boolean state;
 
