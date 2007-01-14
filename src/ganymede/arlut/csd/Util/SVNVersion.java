@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2007
    The University of Texas at Austin
 
    Contact information
@@ -73,7 +73,7 @@ public class SVNVersion {
 
   static String SVN_release_name = "$HeadURL$";
   static String SVN_release_date = "$Date$";
-  static String release_string = null;
+  static String release_string = SVNVersion.parseRelease("ganymede_002000000", SVN_release_date);
 
   // ---
 
