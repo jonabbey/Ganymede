@@ -73,6 +73,8 @@ import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.rmi.db_field;
+import arlut.csd.ganymede.rmi.invid_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -105,6 +107,7 @@ public class phoneClient implements ClientListener {
   String roomName;
   String macAddress;
   String manufacturer;
+  String os;
   String model;
   String primaryUser;
 
@@ -269,17 +272,17 @@ public class phoneClient implements ClientListener {
             return false;
           }
 
-        // set the owner
+        // set the owner first off
 
-        invid_field owners = (invid_field) phone.getField(0);  // field 0 is the owner list
+        invid_field owners = (invid_field) phone.getField((short)0);  // field 0 is the owner list
 
-        if (bad(phone.deleteAllElements()))
+        if (bad(owners.deleteAllElements()))
           {
             client.disconnect();
             return false;
           }
 
-        if (bad(phone.addElement(ownerInvid)))
+        if (bad(owners.addElement(ownerInvid)))
           {
             client.disconnect();
             return false;
@@ -299,7 +302,7 @@ public class phoneClient implements ClientListener {
             return false;
           }
 
-        if (bad(phone.setFieldValue("O.S.", "Phone")))
+        if (bad(phone.setFieldValue("O.S.", os)))
           {
             client.disconnect();
             return false;
@@ -358,12 +361,12 @@ public class phoneClient implements ClientListener {
             return true;
           }
       }
-    catch (RemoteException ex)
+    catch (Throwable ex)
       {
-	error("Caught remote exception in authenticate: " + ex);
+        error("Caught exception processing phone creation:");
+        ex.printStackTrace();
+        return false;
       }
-    
-    return false;
   }
 
   /**
@@ -386,11 +389,7 @@ public class phoneClient implements ClientListener {
   }
   
   /**
-   *
-   * Send output to this.  
-   *
-   * This just prints out the message, but could be directed to a
-   * dialog or something later.
+   * Our error handling routine.
    */
 
   public void error(String message)
@@ -470,12 +469,6 @@ public class phoneClient implements ClientListener {
 
     loadProperties(argv[0]);
 
-    /* RMI initialization stuff. */
-      
-    /* This causes problems in Java 1.2.
-
-       System.setSecurityManager(new RMISecurityManager());*/
-
     // Create the client
 
     try
@@ -484,72 +477,44 @@ public class phoneClient implements ClientListener {
       }
     catch (Exception ex)
       {
+        System.err.println("Couldn't connect to server.");
 	ex.printStackTrace();
-	throw new RuntimeException("Couldn't connect to authentication server.. " + 
-				   ex.getMessage());
+        System.exit(1);
       }
 
     // Get the passwords from standard in
 
-    java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
-
-    // get old password, new password
-
-    String oldPassword = null, newPassword = null;
-
     try
       {
-	// WARNING - This client won't hide the user's text.  When we
-	// use this client, we wrap it in a shell script that calls
-	// "stty -echo" before starting the client.
+        java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
-	// Get the old password
-
-	System.out.print("Old password:");
-	oldPassword = in.readLine();
-	System.out.println();
-
-	String verify = null;
-
-	// Get the new password.  Loop until the password is entered
-	// correctly twice.
-	do
-	  {
-	    System.out.print("New password:");
-	    newPassword = in.readLine();
-	    System.out.println();
-
-	    System.out.print("Verify:");
-	    verify = in.readLine();
-	    System.out.println();
-	    
-	    if (verify.equals(newPassword))
-	      {
-		break;
-	      }
-	    
-	    System.out.println("Passwords do not match.  Try again.");
-	  } while (true);
+        client.ganymedeAccount = in.readLine();
+        client.ganymedePassword = in.readLine();
+        client.systemName = in.readLine();
+        client.networkName = in.readLine();
+        client.macAddress = in.readLine();
+        client.manufacturer = in.readLine();
+        client.os = in.readLine();
+        client.model = in.readLine();
+        client.roomName = in.readLine();
+        client.primaryUser = in.readLine();
       }
     catch (java.io.IOException ex)
       {
-	throw new RuntimeException("Exception getting input: " + ex);
+        System.err.println("Exception getting data from stdin:");
+        ex.printStackTrace();
+        System.exit(1);
       }
 
-    // Now change the password with the passwordClient.
-
-    boolean success = client.changePassword(argv[1], oldPassword, newPassword);
-
-    if (success)
+    if (client.createPhone())
       {
-	System.out.println("Successfully changed password.");
+        System.exit(0);
       }
     else
       {
-	System.out.println("Password change failed.");
+	System.out.println("Phone creation failed.");
+        System.exit(1);
       }
-
-    System.exit(0);
   }
 
   private static boolean loadProperties(String filename)
