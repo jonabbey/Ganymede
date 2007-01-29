@@ -459,10 +459,10 @@ public class phoneClient implements ClientListener {
 
     /* -- */
 
-    if (argv.length != 2)
+    if (argv.length != 1)
       {
-	System.err.println("Wrong number of params: required params is <properties> <user>");
-	System.exit(0);
+	System.err.println("Wrong number of params: required param is <properties>");
+	System.exit(1);
       }
 
     // Get the server URL
