@@ -189,9 +189,9 @@ public class phoneClient implements ClientListener {
             return false;
           }
 
-        // find the room
-
         networkInvid = results.getInvid(0);
+
+        // find the room
 
         results = sess.query(new Query("Rooms",
                                        new QueryDataNode("Room Number",
@@ -206,27 +206,24 @@ public class phoneClient implements ClientListener {
             return false;
           }
 
-        // find the user
-
         roomInvid = results.getInvid(0);
 
-        if (primaryUser != null && !primaryUser.equals(""))
+        // find the user
+
+        results = sess.query(new Query("User",
+                                       new QueryDataNode("Username",
+                                                         QueryDataNode.EQUALS,
+                                                         primaryUser),
+                                       false));
+
+        if (results == null || results.size() != 1)
           {
-            results = sess.query(new Query("User",
-                                           new QueryDataNode("Username",
-                                                             QueryDataNode.EQUALS,
-                                                             primaryUser),
-                                           false));
-
-            if (results == null || results.size() != 1)
-              {
-                error("Couldn't find a primary user named " + primaryUser);
-                client.disconnect();
-                return false;
-              }
-
-            primaryUserInvid = results.getInvid(0);
+            error("Couldn't find a primary user named " + primaryUser);
+            client.disconnect();
+            return false;
           }
+        
+        primaryUserInvid = results.getInvid(0);
 
         // find the system type
 
