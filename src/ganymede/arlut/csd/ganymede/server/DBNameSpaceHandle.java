@@ -133,7 +133,7 @@ class DBNameSpaceHandle implements Cloneable {
    * transaction, shadowField will be equal to null.
    */
 
-  DBField shadowField;
+  private DBField shadowField;
 
   /**
    * <P>Non-interactive transactions need to be able to shuffle
@@ -154,7 +154,7 @@ class DBNameSpaceHandle implements Cloneable {
    * and shadowFieldB will be cleared.</P>
    */
 
-  DBField shadowFieldB;
+  private DBField shadowFieldB;
 
   /* -- */
 
@@ -291,6 +291,18 @@ class DBNameSpaceHandle implements Cloneable {
 
   public void setShadowField(DBField newShadow)
   {
+    if (newShadow == null && getShadowField() != null)
+      {
+        try
+          {
+            throw new RuntimeException("Local ASSERT: shadowField being cleared with shadowFieldB not null");
+          }
+        catch (RuntimeException ex)
+          {
+            ex.printStackTrace();
+          }
+      }
+
     shadowField = newShadow;
   }
 
@@ -322,6 +334,18 @@ class DBNameSpaceHandle implements Cloneable {
 
   public void setShadowFieldB(DBField newShadow)
   {
+    if (newShadow != null && getShadowField() == null)
+      {
+        try
+          {
+            throw new RuntimeException("Local ASSERT: shadowFieldB being set with shadowField null");
+          }
+        catch (RuntimeException ex)
+          {
+            ex.printStackTrace();
+          }
+      }
+
     shadowFieldB = newShadow;
   }
 
@@ -443,6 +467,7 @@ class DBNameSpaceHandle implements Cloneable {
   public String getConflictString()
   {
     // "Conflict: {0} and {1}"
-    return ts.l("getConflictString.template", String.valueOf(shadowField), String.valueOf(shadowFieldB));
+    return ts.l("getConflictString.template",
+                String.valueOf(shadowField), String.valueOf(shadowFieldB));
   }
 }

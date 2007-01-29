@@ -1112,8 +1112,8 @@ public final class DBNameSpace implements NameSpace {
         handle.owner = editSet;
         handle.original = true;
         handle.inuse = false;
-        handle.setShadowField(null);
         handle.setShadowFieldB(null);
+        handle.setShadowField(null);
 
         remember(editSet, value);
       }
@@ -1327,8 +1327,8 @@ public final class DBNameSpace implements NameSpace {
 		// query mechanism in GanymedeSession can track down
 		// the field bound to the namespace value.
 
-		handle.setShadowField(null);
 		handle.setShadowFieldB(null);
+		handle.setShadowField(null);
 		handle.owner = null;
 		handle.inuse = true;
 	      }
@@ -1480,8 +1480,8 @@ public final class DBNameSpace implements NameSpace {
 	if (handle.original)
 	  {
 	    handle.owner = null;
-	    handle.setShadowField(null);
 	    handle.setShadowFieldB(null);
+	    handle.setShadowField(null);
 	    handle.inuse = true;
 	  }
 	else
@@ -1667,7 +1667,7 @@ public final class DBNameSpace implements NameSpace {
 					    key));
 	  }
 
-	if (handleCopy.shadowField != null)
+	if (handleCopy.getShadowField() != null)
 	  {
 	    // "Error, non-null handle shadowField found during copy of namespace {0} for key {1}."
 	    throw new RuntimeException(ts.l("schemaEditCheckout.non_null_shadowField",
