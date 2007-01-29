@@ -3893,8 +3893,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (notPresent.size() != 0)
       {
+        // "Field {0} can''t remove non-present items: {1}."
 	return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
-					  ts.l("deleteElements.not_found", getName(), VectorUtils.vectorString(notPresent)));
+					  ts.l("deleteElements.not_found",
+                                               getName(),
+                                               VectorUtils.vectorString(notPresent)));
       }
 
     // see if our container wants to intercede in the removing operation
