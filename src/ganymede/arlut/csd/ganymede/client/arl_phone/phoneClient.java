@@ -134,6 +134,7 @@ public class phoneClient implements ClientListener {
   public boolean createPhone()
   {
     arlut.csd.ganymede.rmi.Session sess;
+    QueryResult results;
 
     /* -- */
 
@@ -175,11 +176,11 @@ public class phoneClient implements ClientListener {
 	
         // first order of business is to find the network.
         
-	QueryResult results = sess.query(new Query("I.P. Network",
-                                                   new QueryDataNode("Network Name",
-                                                                     QueryDataNode.EQUALS,
-                                                                     networkName),
-                                                   false));
+        results = sess.query(new Query("I.P. Network",
+                                       new QueryDataNode("Network Name",
+                                                         QueryDataNode.EQUALS,
+                                                         networkName),
+                                       false));
 
         if (results == null || results.size() != 1)
           {
@@ -188,7 +189,7 @@ public class phoneClient implements ClientListener {
             return false;
           }
 
-        // find the network
+        // find the room
 
         networkInvid = results.getInvid(0);
 
@@ -205,7 +206,7 @@ public class phoneClient implements ClientListener {
             return false;
           }
 
-        // find the room
+        // find the user
 
         roomInvid = results.getInvid(0);
 
