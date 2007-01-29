@@ -133,7 +133,7 @@ public class phoneClient implements ClientListener {
 
   public boolean createPhone()
   {
-    arlut.csd.ganymede.rmi.Session session;
+    arlut.csd.ganymede.rmi.Session sess;
 
     /* -- */
 
@@ -154,32 +154,32 @@ public class phoneClient implements ClientListener {
 
     try
       {
-	session = client.login(ganymedeAccount, ganymedePassword);
+	sess = client.login(ganymedeAccount, ganymedePassword);
 
 	// If the username/password combination doesn't match, then
 	// the session object will be null.  For the purposes of this
 	// client, it is suficient to just return false and require
-	// the user to rerun the password client if the session is null.
+	// the user to rerun the phone client if the session is null.
 
-	if (session == null)
+	if (sess == null)
 	  {
 	    error("Bad username/password.");
 	    return false;
 	  }
 
-	// Now that we have a session object, we need to open a
+	// Now that we have a sess object, we need to open a
 	// transaction.  All changes must be made with an open
 	// tranaction.
 
-	session.openTransaction("phoneClient");
+	sess.openTransaction("phoneClient");
 	
         // first order of business is to find the network.
-
-	QueryResult results = session.query(new Query("I.P. Network",
-						      new QueryDataNode("Network Name",
-									QueryDataNode.EQUALS,
-                                                                        networkName),
-                                                      false));
+        
+	QueryResult results = sess.query(new Query("I.P. Network",
+                                                   new QueryDataNode("Network Name",
+                                                                     QueryDataNode.EQUALS,
+                                                                     networkName),
+                                                   false));
 
         if (results == null || results.size() != 1)
           {
@@ -192,11 +192,11 @@ public class phoneClient implements ClientListener {
 
         networkInvid = results.getInvid(0);
 
-        results = session.query(new Query("Rooms",
-                                          new QueryDataNode("Room Number",
-                                                            QueryDataNode.EQUALS,
-                                                            roomName),
-                                          false));
+        results = sess.query(new Query("Rooms",
+                                       new QueryDataNode("Room Number",
+                                                         QueryDataNode.EQUALS,
+                                                         roomName),
+                                       false));
 
         if (results == null || results.size() != 1)
           {
@@ -211,11 +211,11 @@ public class phoneClient implements ClientListener {
 
         if (primaryUser != null && !primaryUser.equals(""))
           {
-            results = session.query(new Query("User",
-                                              new QueryDataNode("Username",
-                                                                QueryDataNode.EQUALS,
-                                                                primaryUser),
-                                              false));
+            results = sess.query(new Query("User",
+                                           new QueryDataNode("Username",
+                                                             QueryDataNode.EQUALS,
+                                                             primaryUser),
+                                           false));
 
             if (results == null || results.size() != 1)
               {
@@ -229,12 +229,12 @@ public class phoneClient implements ClientListener {
 
         // find the system type
 
-        results = session.query(new Query("System Types",
-                                          new QueryDataNode("System Type",
-                                                            QueryDataNode.EQUALS,
-                                                            "IP Telephone"),
-                                          false));
-        
+        results = sess.query(new Query("System Types",
+                                       new QueryDataNode("System Type",
+                                                         QueryDataNode.EQUALS,
+                                                         "IP Telephone"),
+                                       false));
+
         if (results == null || results.size() != 1)
           {
             error("Couldn't find the IP Telephone system type");
@@ -246,11 +246,11 @@ public class phoneClient implements ClientListener {
 
         // find the owner group
 
-        results = session.query(new Query("Owner Group",
-                                          new QueryDataNode("Name",
-                                                            QueryDataNode.EQUALS,
-                                                            "TeleCom"),
-                                          false));
+        results = sess.query(new Query("Owner Group",
+                                       new QueryDataNode("Name",
+                                                         QueryDataNode.EQUALS,
+                                                         "TeleCom"),
+                                       false));
         
         if (results == null || results.size() != 1)
           {
@@ -263,7 +263,7 @@ public class phoneClient implements ClientListener {
 
         // and let's go to town
 
-        ReturnVal retVal = session.create_db_object("System");
+        ReturnVal retVal = sess.create_db_object("System");
         db_object phone = (db_object) retVal.getObject(); 
 
         // If create_db_object returns a null object, it usually
@@ -343,7 +343,7 @@ public class phoneClient implements ClientListener {
         invid_field interfaces = (invid_field) phone.getField("Interface");
         Invid interfaceInvid = (Invid) interfaces.getElement(0);
 
-        ReturnVal retVal2 = session.edit_db_object(interfaceInvid);
+        ReturnVal retVal2 = sess.edit_db_object(interfaceInvid);
 
         if (bad(retVal2))
           {
@@ -365,16 +365,15 @@ public class phoneClient implements ClientListener {
             return false;
           }
 
-        if (bad(session.commitTransaction()))
+        if (bad(sess.commitTransaction()))
           {
             client.disconnect();
             return false;
           }
-        else
-          {
-            error("Phone created successfully");
-            return true;
-          }
+
+        error("Phone created successfully");
+        client.disconnect();
+        return true;
       }
     catch (Throwable ex)
       {
@@ -462,10 +461,8 @@ public class phoneClient implements ClientListener {
   }
 
   /**
-   *
    * If this class is run from the command line, it will act as a
-   * text-mode password client.
-   *
+   * text-mode phone client.
    */
   
   public static void main(String argv[])
@@ -497,7 +494,7 @@ public class phoneClient implements ClientListener {
         System.exit(1);
       }
 
-    // Get the passwords from standard in
+    // Get the phone information from stdin
 
     try
       {
