@@ -1412,8 +1412,23 @@ public final class DBNameSpace implements NameSpace {
 		results = new Vector();
 	      }
 
+            String valueStr;
+
+            // most of the values we track are printable, but the byte
+            // arrays we use to encode IP addresses are not
+
+            if (value instanceof Byte[])
+              {
+                valueStr = IPDBField.genIPString((Byte[]) value);
+              }
+            else
+              {
+                valueStr = String.valueOf(value);
+              }
+
 	    // "{0}, value in conflict = {1}"
-	    results.addElement(ts.l("verify_noninteractive.template", handle.getConflictString(), String.valueOf(value)));
+	    results.addElement(ts.l("verify_noninteractive.template",
+                                    handle.getConflictString(), valueStr));
 	  }
       }
 
