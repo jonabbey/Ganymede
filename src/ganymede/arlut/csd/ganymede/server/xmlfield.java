@@ -1567,6 +1567,11 @@ public class xmlfield implements FieldType {
 	throw new RuntimeException(ts.l("dereferenceInvids.bad_type"));
       }
 
+    if (fieldDef.isEditInPlace())
+      {
+        throw new RuntimeException("ASSERT: dereferenceInvids() called on an embedded object field.");
+      }
+
     try
       {
         if (!isArray())

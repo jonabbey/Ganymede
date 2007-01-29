@@ -3265,7 +3265,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		  {
 		    xmlfield field = (xmlfield) fieldEnum.nextElement();
 
-		    if (field.getType() == FieldType.INVID)
+		    if (field.getType() == FieldType.INVID && !field.fieldDef.isEditInPlace())
 		      {
 			field.dereferenceInvids();
 		      }
