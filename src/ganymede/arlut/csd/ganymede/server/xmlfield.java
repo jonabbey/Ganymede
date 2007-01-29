@@ -1567,52 +1567,60 @@ public class xmlfield implements FieldType {
 	throw new RuntimeException(ts.l("dereferenceInvids.bad_type"));
       }
 
-    if (!isArray())
+    try
       {
-	if (value != null)
-	  {
-	    ((xInvid) value).getInvid(false); // try to resolve
-	  }
+        if (!isArray())
+          {
+            if (value != null)
+              {
+                ((xInvid) value).getInvid(false); // try to resolve
+              }
+          }
+        else
+          {
+            if (setValues != null)
+              {
+                for (int i = 0; i < setValues.size(); i++)
+                  {
+                    xInvid xi = (xInvid) setValues.elementAt(i);
+                    xi.getInvid(false);	// try to resolve
+                  }
+              }
+
+            if (delValues != null)
+              {
+                for (int i = 0; i < delValues.size(); i++)
+                  {
+                    xInvid xi = (xInvid) delValues.elementAt(i);
+                    xi.getInvid(false);	// try to resolve
+                  }
+              }
+
+            if (addValues != null)
+              {
+                for (int i = 0; i < addValues.size(); i++)
+                  {
+                    xInvid xi = (xInvid) addValues.elementAt(i);
+                    xi.getInvid(false);	// try to resolve
+                  }
+              }
+            
+            if (addIfNotPresentValues != null)
+              {
+                for (int i = 0; i < addIfNotPresentValues.size(); i++)
+                  {
+                    xInvid xi = (xInvid) addIfNotPresentValues.elementAt(i);
+                    xi.getInvid(false);	// try to resolve
+                  }
+              }
+          }
       }
-    else
+    catch (ClassCastException ex)
       {
-	if (setValues != null)
-	  {
-	    for (int i = 0; i < setValues.size(); i++)
-	      {
-		xInvid xi = (xInvid) setValues.elementAt(i);
-		xi.getInvid(false);	// try to resolve
-	      }
-          }
-
-        if (delValues != null)
-          {
-	    for (int i = 0; i < delValues.size(); i++)
-	      {
-		xInvid xi = (xInvid) delValues.elementAt(i);
-		xi.getInvid(false);	// try to resolve
-	      }
-          }
-
-        if (addValues != null)
-          {
-	    for (int i = 0; i < addValues.size(); i++)
-	      {
-		xInvid xi = (xInvid) addValues.elementAt(i);
-		xi.getInvid(false);	// try to resolve
-	      }
-          }
-
-        if (addIfNotPresentValues != null)
-          {
-	    for (int i = 0; i < addIfNotPresentValues.size(); i++)
-	      {
-		xInvid xi = (xInvid) addIfNotPresentValues.elementAt(i);
-		xi.getInvid(false);	// try to resolve
-	      }
-	  }
+        Ganymede.debug("Error processing xmlfield dereferenceInvids().");
+        Ganymede.debug("xmlfield is " + this.toString());
+        ex.printStackTrace();
       }
-
   }
 
   /**
