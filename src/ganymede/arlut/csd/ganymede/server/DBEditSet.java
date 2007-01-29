@@ -1911,7 +1911,7 @@ public class DBEditSet {
 	    // failure and move on
 
 	    // "Error!  Problem occured while writing log entry, continuing with transaction commit.\n{0}"
-	    Ganymede.debug(ts.l("commit_log_events.log_failure", ex));
+	    Ganymede.debug(ts.l("commit_log_events.log_failure", Ganymede.stackTrace(ex)));
 	  }
       }
   }
