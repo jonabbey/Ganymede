@@ -100,7 +100,7 @@ class DBNameSpaceHandle implements Cloneable {
    * is the value currently in use?
    */
 
-  boolean inuse;
+  private boolean inuse;
 
   /**
    * <P>So that the namespace hash can be used as an index,
@@ -258,6 +258,38 @@ class DBNameSpaceHandle implements Cloneable {
 
 	return (DBField) _obj.getField(persistentFieldId);
       }
+  }
+
+  /**
+   * Returns true if this DBNameSpaceHandle is referring to a value
+   * that is in use, either in the persistent datastore, or in the
+   * transaction referred to by the owner field.
+   *
+   * This method will return false if a transaction has checked out an
+   * object for editing and then cleared this value from a field.  If
+   * this transaction is aborted, then inuse will be set to true again
+   * as part of the abort process.  If the transaction is committed,
+   * all namespace handles owned by the owner transaction whose inuse
+   * flags are false will be removed from the namespace.
+   *
+   * This method may also return false if a transaction has reserved
+   * this value without setting it into a field.
+   */
+
+  public boolean isInUse()
+  {
+    return this.inuse;
+  }
+
+  /**
+   * Changes the value of the inuse flag.  See {@link
+   * arlut.csd.ganymede.server.DBNameSpaceHandle#isInUse()} for
+   * interpretation.
+   */
+
+  public void setInUse(boolean val)
+  {
+    this.inuse = val;
   }
 
   /**

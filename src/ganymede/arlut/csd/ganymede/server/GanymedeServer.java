@@ -1524,18 +1524,13 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <P>This method is used for testing.  This method sweeps 
-   * through all invid's listed in the (loaded) database, and
-   * checks to make sure that they all have valid back pointers.</P>
+   * <P>This method is used for testing.  This method sweeps through
+   * all invid's listed in the (loaded) database, and checks to make
+   * sure that they all point to valid objects in the datastore.
+   * Invid fields that are in symmetric relationships are tested to
+   * make sure both ends of the symmetry properly hold.</P>
    *
-   * <P>Since the backlinks field (SchemaConstants.BackLinksField)
-   * is a general sink for invid's with no homes, we won't explicitly
-   * check to see if an invid in a backlink field has a field pointing
-   * to it in the target object.. we'll just verify the existence of
-   * the object listed.</P>
-   *
-   * @return true if there were any invids without back-pointers in
-   * the database
+   * @return true if there were any broken invids in the database
    */
 
   public boolean checkInvids()
@@ -1629,6 +1624,10 @@ public class GanymedeServer implements Server {
 		  }
 	      }
 	  }
+
+        // validate the backPointers structure that we use to quickly
+        // find objects pointing to other objects with non-symmetric
+        // links
 
 	synchronized (Ganymede.db.backPointers)
 	  {

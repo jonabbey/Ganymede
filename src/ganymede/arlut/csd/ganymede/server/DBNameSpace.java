@@ -648,11 +648,11 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    if (editSet.isInteractive())
 	      {
-		return !handle.inuse;
+		return !handle.isInUse();
 	      }
 	    else
 	      {
-		if (!handle.inuse || handle.getShadowFieldB() == null)
+		if (!handle.isInUse() || handle.getShadowFieldB() == null)
 		  {
 		    return true;
 		  }
@@ -734,7 +734,7 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    // not checked out by another active transaction
 
-	    if (handle.inuse)
+	    if (handle.isInUse())
 	      {
 		if (editSet.isInteractive())
 		  {
@@ -754,7 +754,8 @@ public final class DBNameSpace implements NameSpace {
 		// association, we'll promote the shadowFieldB
 		// association to shadowField 'A'.
 		
-		if (handle.getShadowFieldB() != null && handle.getShadowFieldB() != field)
+		if (handle.getShadowFieldB() != null &&
+                    handle.getShadowFieldB() != field)
 		  {
 		    // we've already speculatively associated
 		    // ourselves with this value with another
@@ -782,7 +783,7 @@ public final class DBNameSpace implements NameSpace {
 	      }
 	    else
 	      {
-		handle.inuse = true;
+		handle.setInUse(true);
 		handle.setShadowField(field);
 
 		if (handle.getShadowFieldB() != null)
@@ -809,7 +810,7 @@ public final class DBNameSpace implements NameSpace {
 	// is false
 
 	handle = new DBNameSpaceHandle(editSet, false, null);
-	handle.inuse = true;
+	handle.setInUse(true);
 	handle.setShadowField(field);
 	
 	uniqueHash.put(value, handle);
@@ -931,7 +932,7 @@ public final class DBNameSpace implements NameSpace {
 	    // we own it.. it may or may not be in use in an object
 	    // already, but it's ours, at least
 
-	    if (onlyUnused && handle.inuse)
+	    if (onlyUnused && handle.isInUse())
 	      {
 		return false;
 	      }
@@ -959,8 +960,9 @@ public final class DBNameSpace implements NameSpace {
 
 	// we're reserving it now, but it's not actually in use yet.
 
-	handle.inuse = false;
+	handle.setInUse(false);
 	handle.setShadowField(null);
+        handle.setShadowFieldB(null);
 	
 	uniqueHash.put(value, handle);
 
@@ -1028,13 +1030,16 @@ public final class DBNameSpace implements NameSpace {
 	      {
 		return false;	// somebody else owns it
 	      }
-	    else if (!handle.matches(oldField) && handle.getShadowField() != oldField && handle.getShadowFieldB() != oldField)
+	    else if (!handle.matches(oldField) &&
+                     handle.getShadowField() != oldField &&
+                     handle.getShadowFieldB() != oldField)
 	      {
-		return false;	// we don't think that value should be associated with that field
+		return false;	// we don't think that value should be
+                                // associated with that field
 	      }
 	    else
 	      {
-		return handle.inuse;
+		return handle.isInUse();
 	      }
 	  }
       }
@@ -1113,7 +1118,7 @@ public final class DBNameSpace implements NameSpace {
 
         handle.owner = editSet;
         handle.original = true;
-        handle.inuse = false;
+        handle.setInUse(false);
         handle.setShadowFieldB(null);
         handle.setShadowField(null);
 
@@ -1141,7 +1146,7 @@ public final class DBNameSpace implements NameSpace {
 
             if (editSet.isInteractive())
               {
-                handle.inuse = false;
+                handle.setInUse(false);
                 handle.setShadowField(null);
               }
             else
@@ -1169,7 +1174,7 @@ public final class DBNameSpace implements NameSpace {
                   }
                 else if (handle.getShadowFieldB() != null)
                   {
-                    if (!handle.inuse)
+                    if (!handle.isInUse())
                       {
                         throw new RuntimeException("ASSERT: surprise false inuse in shadowFieldB promotion.");
                       }
@@ -1179,7 +1184,7 @@ public final class DBNameSpace implements NameSpace {
                   }
                 else
                   {
-                    handle.inuse = false;
+                    handle.setInUse(false);
                     handle.setShadowField(null);
                   }
               }
@@ -1321,18 +1326,19 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    if (handle.original)
 	      {
-		// remember, shadowField is just for our use while
-		// we're manipulating a namespace allocation within a
-		// transaction.  we're not screwing with
-		// handle.fieldInvid or handle.fieldId here, which are
-		// still left standing so that the namespace-optimized
-		// query mechanism in GanymedeSession can track down
-		// the field bound to the namespace value.
+		// remember, shadowField and shadowFieldB are just for
+		// our use while we're manipulating a namespace
+		// allocation within a transaction.  we're not
+		// screwing with handle.persistentFieldInvid or
+		// handle.persistentFieldId here, which are still left
+		// standing so that the namespace-optimized query
+		// mechanism in GanymedeSession can track down the
+		// field bound to the namespace value.
 
 		handle.setShadowFieldB(null);
 		handle.setShadowField(null);
 		handle.owner = null;
-		handle.inuse = true;
+		handle.setInUse(true);
 	      }
 	    else
 	      {
@@ -1506,7 +1512,7 @@ public final class DBNameSpace implements NameSpace {
 	    handle.owner = null;
 	    handle.setShadowFieldB(null);
 	    handle.setShadowField(null);
-	    handle.inuse = true;
+	    handle.setInUse(true);
 	  }
 	else
 	  {
@@ -1568,7 +1574,7 @@ public final class DBNameSpace implements NameSpace {
 	value = en.nextElement();
 	handle = getHandle(value);
 
-	if (handle.inuse)
+	if (handle.isInUse())
 	  {
 	    // note that the DBEditSet commit logic should have
 	    // rejected the transaction if any of our handles still
@@ -1577,7 +1583,8 @@ public final class DBNameSpace implements NameSpace {
 
 	    if (handle.getShadowFieldB() != null)
 	      {
-		throw new RuntimeException("ASSERT: " + editSet.session.key + ": DBNameSpace.commit().. lingering shadowFieldB!");
+		throw new RuntimeException("ASSERT: " + editSet.session.key +
+                                           ": DBNameSpace.commit().. lingering shadowFieldB!");
 	      }
 
 	    handle.owner = null;
