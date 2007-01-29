@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -695,6 +695,11 @@ public final class DBNameSpace implements NameSpace {
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
+    if (field == null)
+      {
+        throw new NullPointerException("ASSERT: Improper null field value passed to mark");
+      }
+
     DBNameSpaceHandle handle;
     
     /* -- */
@@ -1072,117 +1077,114 @@ public final class DBNameSpace implements NameSpace {
     
     /* -- */
 
-    if (uniqueHash.containsKey(value))
+    if (!uniqueHash.containsKey(value))
       {
-	handle = (DBNameSpaceHandle) uniqueHash.get(value);
-
-	// let's make sure this is a proper unbinding.
-	//
-	// if we're non-interactive (as in the xmlclient), we should
-	// only be unsetting field associations that pre-dated this
-	// transaction.  We don't expect the xmlclient to set an
-	// association and then break it.  Nonetheless, I'll go ahead
-	// and check oldField against both shadowFields held in the
-	// handle, just in case some non-interactive transaction does
-	// try to make and then break a namespace mark
-
-	if (!handle.matches(oldField) && handle.getShadowField() != oldField && handle.getShadowFieldB() != oldField)
-	  {
-	    throw new RuntimeException("Error, unmarking a value from a field that shouldn't have had it!");
-	  }
-
-	if (handle.owner == null)
-	  {
-	    // no one has claimed this for transactional lock-out,
-	    // give it to this editSet.
-
-	    // note that since this handle currently has no owner, we
-	    // know that the original (persisted) state should be
-	    // true, else it wouldn't have been in the hash to begin
-	    // with
-
-	    handle.owner = editSet;
-	    handle.original = true;
-	    handle.inuse = false;
-	    handle.setShadowField(null);
-
-	    remember(editSet, value);
-	  }
-	else
-	  {
-	    if (handle.owner != editSet)
-	      {
-		// somebody else owns it.. that somebody may be a
-		// non-interactive session speculatively marking the
-		// value, but if so, the non-interactive session will
-		// learn soon enough that its transaction has to fail,
-		// since it can't edit our exclusively checked out
-		// object containing oldField, which would be
-		// necessary to complete the speculative namespace
-		// shuffle.
-
-		throw new RuntimeException("ASSERT unmarking another transaction's value");
-
-		//		return false;
-	      }
-	    else
-	      {
-		// we own it, but we don't want to change the original
-		// value, which we will need if we abort this editset
-
-		if (editSet.isInteractive())
-		  {
-		    handle.inuse = false;
-		    handle.setShadowField(null);
-		  }
-		else
-		  {
-		    // I really don't expect getShadowFieldB() to be
-		    // equal to the oldField, but I'll let it handle
-		    // that case in the event we do have some very
-		    // weird non-interactive client talking to us
-		    // which decided to set a prospective mark and
-		    // then clear it
-
-		    // What we're really wanting to do here, however,
-		    // is to handle the case where we are unmarking a
-		    // previously persistent association, in which
-		    // case we will let the shadowFieldB become the
-		    // primary association
-
-		    // otherwise if we have no shadowFieldB waiting on
-		    // deck, we do what we normally do to clear the
-		    // handle from being used
-
-		    if (handle.getShadowFieldB() == oldField)
-		      {
-			handle.setShadowFieldB(null);
-		      }
-		    else if (handle.getShadowFieldB() != null)
-		      {
-			if (!handle.inuse)
-			  {
-			    throw new RuntimeException("ASSERT: surprise false inuse in shadowFieldB promotion.");
-			  }
-
-			handle.setShadowField(handle.getShadowFieldB());
-			handle.setShadowFieldB(null);
-		      }
-		    else
-		      {
-			handle.inuse = false;
-			handle.setShadowField(null);
-		      }
-		  }
-	      }
-	  }
-
-	return true;
+        throw new RuntimeException("ASSERT unmarking an unmarked value!");
       }
 
-    throw new RuntimeException("ASSERT unmarking an unmarked value!");
+    handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-    //    return false;
+    // let's make sure this is a proper unbinding.
+    //
+    // if we're non-interactive (as in the xmlclient), we should
+    // only be unsetting field associations that pre-dated this
+    // transaction.  We don't expect the xmlclient to set an
+    // association and then break it.  Nonetheless, I'll go ahead
+    // and check oldField against both shadowFields held in the
+    // handle, just in case some non-interactive transaction does
+    // try to make and then break a namespace mark
+
+    if (!handle.matches(oldField) && handle.getShadowField() != oldField && handle.getShadowFieldB() != oldField)
+      {
+        throw new RuntimeException("Error, unmarking a value from a field that shouldn't have had it!");
+      }
+
+    if (handle.owner == null)
+      {
+        // no one has claimed this for transactional lock-out,
+        // give it to this editSet.
+
+        // note that since this handle currently has no owner, we
+        // know that the original (persisted) state should be
+        // true, else it wouldn't have been in the hash to begin
+        // with
+
+        handle.owner = editSet;
+        handle.original = true;
+        handle.inuse = false;
+        handle.setShadowField(null);
+        handle.setShadowFieldB(null);
+
+        remember(editSet, value);
+      }
+    else
+      {
+        if (handle.owner != editSet)
+          {
+            // somebody else owns it.. that somebody may be a
+            // non-interactive session speculatively marking the
+            // value, but if so, the non-interactive session will
+            // learn soon enough that its transaction has to fail,
+            // since it can't edit our exclusively checked out
+            // object containing oldField, which would be
+            // necessary to complete the speculative namespace
+            // shuffle.
+
+            throw new RuntimeException("ASSERT unmarking another transaction's value");
+          }
+        else
+          {
+            // we own it, but we don't want to change the original
+            // value, which we will need if we abort this editset
+
+            if (editSet.isInteractive())
+              {
+                handle.inuse = false;
+                handle.setShadowField(null);
+              }
+            else
+              {
+                // I really don't expect getShadowFieldB() to be
+                // equal to the oldField, but I'll let it handle
+                // that case in the event we do have some very
+                // weird non-interactive client talking to us
+                // which decided to set a prospective mark and
+                // then clear it
+
+                // What we're really wanting to do here, however,
+                // is to handle the case where we are unmarking a
+                // previously persistent association, in which
+                // case we will let the shadowFieldB become the
+                // primary association
+
+                // otherwise if we have no shadowFieldB waiting on
+                // deck, we do what we normally do to clear the
+                // handle from being used
+
+                if (handle.getShadowFieldB() == oldField)
+                  {
+                    handle.setShadowFieldB(null);
+                  }
+                else if (handle.getShadowFieldB() != null)
+                  {
+                    if (!handle.inuse)
+                      {
+                        throw new RuntimeException("ASSERT: surprise false inuse in shadowFieldB promotion.");
+                      }
+
+                    handle.setShadowField(handle.getShadowFieldB());
+                    handle.setShadowFieldB(null);
+                  }
+                else
+                  {
+                    handle.inuse = false;
+                    handle.setShadowField(null);
+                  }
+              }
+          }
+      }
+
+    return true;
   }
 
   /*----------------------------------------------------------------------------

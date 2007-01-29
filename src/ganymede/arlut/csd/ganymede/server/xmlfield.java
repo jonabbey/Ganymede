@@ -14,14 +14,13 @@
    Last Changed By: $Author$
    SVN URL: $HeadURL$
 
-
-   Module By: Jonathan Abbey
+   Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -1584,19 +1583,28 @@ public class xmlfield implements FieldType {
 		xInvid xi = (xInvid) setValues.elementAt(i);
 		xi.getInvid(false);	// try to resolve
 	      }
+          }
 
+        if (delValues != null)
+          {
 	    for (int i = 0; i < delValues.size(); i++)
 	      {
 		xInvid xi = (xInvid) delValues.elementAt(i);
 		xi.getInvid(false);	// try to resolve
 	      }
+          }
 
+        if (addValues != null)
+          {
 	    for (int i = 0; i < addValues.size(); i++)
 	      {
 		xInvid xi = (xInvid) addValues.elementAt(i);
 		xi.getInvid(false);	// try to resolve
 	      }
+          }
 
+        if (addIfNotPresentValues != null)
+          {
 	    for (int i = 0; i < addIfNotPresentValues.size(); i++)
 	      {
 		xInvid xi = (xInvid) addIfNotPresentValues.elementAt(i);

@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -103,22 +103,23 @@ class DBNameSpaceHandle implements Cloneable {
   boolean inuse;
 
   /**
-   * <P>so the namespace hash can be used as an index fieldInvid always
-   * points to the object that contained the field that contained this
-   * value at the time this field was last committed in a transaction.</P>
+   * <P>So that the namespace hash can be used as an index,
+   * persistentFieldInvid always points to the object that contained
+   * the field that contained this value at the time this field was
+   * last committed in a transaction.</P>
    *
-   * <P>fieldInvid will be null if the value pointing to this handle
-   * has not been committed into the database outside of an active
-   * transaction.</P>
+   * <P>persistentFieldInvid will be null if the value pointing to
+   * this handle has not been committed into the database outside of
+   * an active transaction.</P>
    */
 
   private Invid persistentFieldInvid;
 
   /**
    * <P>If this handle is associated with a value that has been
-   * checked into the database, fieldId will be the field number for
-   * the field that holds that value in the database, within the
-   * object referenced by fieldInvid.</P>
+   * checked into the database, persistentFieldId will be the field
+   * number for the field that holds that value in the database,
+   * within the object referenced by persistentFieldInvid.</P>
    */
 
   private short persistentFieldId;
@@ -127,9 +128,9 @@ class DBNameSpaceHandle implements Cloneable {
    * if this handle is currently being edited by an editset,
    * shadowField points to the field in the transaction that contains
    * this value.  If the transaction is committed, the DBField pointer
-   * in shadowField will be transferred to field.  If this value is
-   * not being manipulated by a transaction, shadowField will be equal
-   * to null.
+   * in shadowField will be transferred to persistentFieldInvid and
+   * persistentFieldId.  If this value is not being manipulated by a
+   * transaction, shadowField will be equal to null.
    */
 
   DBField shadowField;
@@ -236,6 +237,11 @@ class DBNameSpaceHandle implements Cloneable {
     if (session != null)
       {
 	DBObject _obj = session.session.viewDBObject(persistentFieldInvid);
+
+	if (_obj == null)
+	  {
+	    return null;
+	  }
 	
 	return (DBField) _obj.getField(persistentFieldId);
       }
@@ -377,11 +383,16 @@ class DBNameSpaceHandle implements Cloneable {
       (this.persistentFieldId == persistentFieldId);
   }
 
+  /**
+   * Affirmative dissolution for gc.
+   */
+
   public void cleanup()
   {
     owner = null;
     persistentFieldInvid = null;
     shadowField = null;
+    shadowFieldB = null;
   }
 
   public String toString()
@@ -432,6 +443,6 @@ class DBNameSpaceHandle implements Cloneable {
   public String getConflictString()
   {
     // "Conflict: {0} and {1}"
-    return ts.l("getConflictString.template", shadowField.toString(), shadowFieldB.toString());
+    return ts.l("getConflictString.template", String.valueOf(shadowField), String.valueOf(shadowFieldB));
   }
 }
