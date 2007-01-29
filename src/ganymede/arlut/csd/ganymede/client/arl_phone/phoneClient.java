@@ -178,7 +178,8 @@ public class phoneClient implements ClientListener {
 	QueryResult results = session.query(new Query("I.P. Network",
 						      new QueryDataNode("Network Name",
 									QueryDataNode.EQUALS,
-                                                                        networkName)));
+                                                                        networkName),
+                                                      false));
 
         if (results == null || results.size() != 1)
           {
@@ -194,7 +195,8 @@ public class phoneClient implements ClientListener {
         results = session.query(new Query("Rooms",
                                           new QueryDataNode("Room Number",
                                                             QueryDataNode.EQUALS,
-                                                            roomName)));
+                                                            roomName),
+                                          false));
 
         if (results == null || results.size() != 1)
           {
@@ -212,7 +214,8 @@ public class phoneClient implements ClientListener {
             results = session.query(new Query("User",
                                               new QueryDataNode("Username",
                                                                 QueryDataNode.EQUALS,
-                                                                primaryUser)));
+                                                                primaryUser),
+                                              false));
 
             if (results == null || results.size() != 1)
               {
@@ -229,7 +232,8 @@ public class phoneClient implements ClientListener {
         results = session.query(new Query("System Types",
                                           new QueryDataNode("System Type",
                                                             QueryDataNode.EQUALS,
-                                                            "IP Telephone")));
+                                                            "IP Telephone"),
+                                          false));
         
         if (results == null || results.size() != 1)
           {
@@ -245,7 +249,8 @@ public class phoneClient implements ClientListener {
         results = session.query(new Query("Owner Group",
                                           new QueryDataNode("Name",
                                                             QueryDataNode.EQUALS,
-                                                            "TeleCom")));
+                                                            "TeleCom"),
+                                          false));
         
         if (results == null || results.size() != 1)
           {
@@ -336,9 +341,19 @@ public class phoneClient implements ClientListener {
         // for us by default
 
         invid_field interfaces = (invid_field) phone.getField("Interface");
-        db_object interfaceObj = (db_object) interfaces.getElement(0);
+        Invid interfaceInvid = (Invid) interfaces.getElement(0);
 
-        if (bad(interfaceObj.setFieldValue("I.P. Network", networkInvid)))
+        ReturnVal retVal2 = session.edit_db_object(interfaceInvid);
+
+        if (bad(retVal2))
+          {
+            client.disconnect();
+            return false;
+          }
+
+        db_object interfaceObj = retVal2.getObject();
+
+        if (interfaceObj == null || bad(interfaceObj.setFieldValue("I.P. Network", networkInvid)))
           {
             client.disconnect();
             return false;
