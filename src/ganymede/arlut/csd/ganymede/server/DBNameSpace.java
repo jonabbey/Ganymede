@@ -720,7 +720,7 @@ public final class DBNameSpace implements NameSpace {
 
 	if (handle.owner != null && handle.owner != editSet)
 	  {
-	    // this handle hasn't been checked out by a different
+	    // this handle has been checked out by a different
 	    // transaction, we can't mess with it
 		
 	    if (debug)
@@ -732,25 +732,27 @@ public final class DBNameSpace implements NameSpace {
 	  }
 	else
 	  {
-	    // we own it, or can own it
+	    // not checked out by another active transaction
 
 	    if (handle.inuse)
 	      {
 		if (editSet.isInteractive())
 		  {
-		    // If we are an interactive transaction, we can't mark
-		    // this value if this namespace value is still being used
-		    // in the namespace.  they need to unmark the value in one
-		    // place before they can mark it in another.
+		    // If we are an interactive transaction, we can't
+		    // mark this value, since the namespace value is
+		    // still being used in an object in the database.
+		    // they need to unmark the value in one place
+		    // before they can mark it in another.
 
 		    return false;
 		  }
 
-		// if we're not interactive, we'll remember the proposed
-		// new field association in our handle's shadowFieldB
-		// variable.. if we later unmark the original association,
-		// we'll promote the shadowFieldB association to
-		// shadowField 'A'.
+		// if we're an xml session rather than an interactive
+		// one, we'll remember the proposed new field
+		// association in our handle's shadowFieldB
+		// variable.. if we later unmark the original
+		// association, we'll promote the shadowFieldB
+		// association to shadowField 'A'.
 		
 		if (handle.getShadowFieldB() != null && handle.getShadowFieldB() != field)
 		  {
@@ -1375,18 +1377,18 @@ public final class DBNameSpace implements NameSpace {
   ----------------------------------------------------------------------------*/
 
   /**
-   * <p>This method returns null if the given transaction doesn't have
+   * This method returns null if the given transaction doesn't have
    * any shadowFieldB's outstanding.  This is the desired case.  If
    * the given transaction has some values with shadowFieldB's set,
    * that means that those unique values are left "bound" to more than
    * one field, which is an error that non-interactive clients can run
-   * into.</p>
+   * into.
    *
-   * <p>In the latter case, we return a vector of namespace values
-   * that are in conflict at transaction commit time.</p>
+   * In the latter case, we return a vector of namespace values that
+   * are in conflict at transaction commit time.
    */
 
-  public Vector verify_noninteractive(DBEditSet editSet)
+  public synchronized Vector verify_noninteractive(DBEditSet editSet)
   {
     DBNameSpaceTransaction tRecord;
     Enumeration en;
@@ -1426,9 +1428,31 @@ public final class DBNameSpace implements NameSpace {
                 valueStr = String.valueOf(value);
               }
 
-	    // "{0}, value in conflict = {1}"
-	    results.addElement(ts.l("verify_noninteractive.template",
-                                    handle.getConflictString(), valueStr));
+            if (handle.getShadowField() != null)
+              {
+                // "{0}, value in conflict = {1}"
+                results.addElement(ts.l("verify_noninteractive.template",
+                                        handle.getConflictString(), valueStr));
+              }
+            else
+              {
+                // we've got a conflict between a checked-in object in
+                // the datastore and an object we're creating or
+                // editing in the xml session.  shadowFieldB() points
+                // to the in-xml session object.
+
+                String editingRefStr = String.valueOf(handle.getShadowFieldB());
+                DBField conflictField = handle.getPersistentField(editSet.getGSession());
+
+                // "{0} conflicts with checked-in {1}"
+                String checkedInConflictStr = ts.l("verify_noninteractive.persistent_conflict",
+                                                   String.valueOf(handle.getShadowFieldB()),
+                                                   String.valueOf(conflictField));
+
+                // "{0}, value in conflict = {1}"
+                results.addElement(ts.l("verify_noninteractive.template",
+                                        checkedInConflictStr, valueStr));
+              }
 	  }
       }
 

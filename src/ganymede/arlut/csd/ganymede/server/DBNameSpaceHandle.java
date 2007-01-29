@@ -291,18 +291,6 @@ class DBNameSpaceHandle implements Cloneable {
 
   public void setShadowField(DBField newShadow)
   {
-    if (newShadow == null && getShadowField() != null)
-      {
-        try
-          {
-            throw new RuntimeException("Local ASSERT: shadowField being cleared with shadowFieldB not null");
-          }
-        catch (RuntimeException ex)
-          {
-            ex.printStackTrace();
-          }
-      }
-
     shadowField = newShadow;
   }
 
@@ -334,18 +322,6 @@ class DBNameSpaceHandle implements Cloneable {
 
   public void setShadowFieldB(DBField newShadow)
   {
-    if (newShadow != null && getShadowField() == null)
-      {
-        try
-          {
-            throw new RuntimeException("Local ASSERT: shadowFieldB being set with shadowField null");
-          }
-        catch (RuntimeException ex)
-          {
-            ex.printStackTrace();
-          }
-      }
-
     shadowFieldB = newShadow;
   }
 
@@ -463,6 +439,12 @@ class DBNameSpaceHandle implements Cloneable {
 
     return result.toString();
   }
+
+  /**
+   * This helper method is intended to report when a non-interactive
+   * xml session has two objects checked out for editing with a
+   * conflicting value at transaction commit time.
+   */
 
   public String getConflictString()
   {
