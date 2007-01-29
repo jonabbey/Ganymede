@@ -262,6 +262,7 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/rmi/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/server/*_Stub.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/password/*.class"/>
+      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/arl_phone/*.class"/>
       <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
       <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
