@@ -455,7 +455,6 @@ public class phoneClient implements ClientListener {
 
   public void messageReceived(ClientEvent e)
   {
-    error("ClientBase says: " + e.getMessage());
   }
 
   /**
