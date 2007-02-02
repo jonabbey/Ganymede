@@ -4482,12 +4482,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 						      ts.l("create_db_object.no_owner_group"));
 		  }
 		
-		// if we're interactive, the client really should have
+		// If we're interactive, the client really should have
 		// helped us out by prompting the user for their
 		// preferred default owner list, but if we are talking
 		// to a custom client, this might not be the case, in
 		// which case we'll just pick the first owner group we
 		// can put it into and put it there.
+                //
+                // The client can always manually set the owner group
+                // in a created object after we return it, of course.
 		    
                 ownerInvids.addElement(ownerList.getInvid(0));
 		    
