@@ -4483,28 +4483,18 @@ final public class GanymedeSession implements Session, Unreferenced {
 		  }
 		
 		// if we're interactive, the client really should have
-		// helped us out by prompting the user for their preferred
-		// default owner list.  So we'll bitch.
-		
-		if (enableWizards)
-		  {
-		    // "Can''t Create Object"
-		    // "You must choose one or more default owner groups before creating new objects."
-		    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-						      ts.l("create_db_object.which_groups"));
-		  }
-		else
-		  {
-		    // if we weren't told who to make own the object, we'll just
-		    // pick the first owner group we can put it into and put it there.
+		// helped us out by prompting the user for their
+		// preferred default owner list, but if we are talking
+		// to a custom client, this might not be the case, in
+		// which case we'll just pick the first owner group we
+		// can put it into and put it there.
 		    
-		    ownerInvids.addElement(ownerList.getInvid(0));
+                ownerInvids.addElement(ownerList.getInvid(0));
 		    
-		    if (ownerList.size() > 1)
-		      {
-			randomOwner = true;
-		      }
-		  }
+                if (ownerList.size() > 1)
+                  {
+                    randomOwner = true;
+                  }
 	      }
 	  }
 
