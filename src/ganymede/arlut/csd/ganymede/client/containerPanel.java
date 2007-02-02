@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -3421,133 +3421,92 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (!editable || !fieldInfo.isEditable())
       {
-	if (fieldInfo.getValue() != null)
-	  {
-	    final Invid thisInvid = (Invid) fieldInfo.getValue();
-	    
-	    String label = (String) gc.getSession().viewObjectLabel(thisInvid);
-
-	    if (label == null)
-	      {
-		if (debug)
-		  {
-		    println("-you don't have permission to view this object.");
-		  }
-
-		// "Can''t Show Target"
-		label = ts.l("addInvidField.no_view_perm");
-	      }
-
-	    JButton b = new JButton(label);
-
-	    b.addActionListener(new ActionListener() {
-	      public void actionPerformed(ActionEvent e)
-		{
-		  getgclient().viewObject(thisInvid);
-		}
-	    });
-
-	    String comment = fieldTemplate.getComment();
-	    
-	    if (comment != null && !comment.equals(""))
-	      {
-		b.setToolTipText(comment);
-	      }
-
-	    // add the button to our objectHash so that we can change
-	    // the label if the user edits the label field of the
-	    // object we point to.
-
-	    objectHash.put(b, field);
-
-	    contentsPanel.addRow(fieldTemplate.getName(), b);
-	    contentsPanel.setRowVisible(b, fieldInfo.isVisible());
-	  }
-	else
+	if (fieldInfo.getValue() == null)
 	  {
 	    // "Null Pointer"
 	    JLabel errorLabel = new JLabel(ts.l("addInvidField.null_invid"));
 
 	    contentsPanel.addFillRow(fieldTemplate.getName(), errorLabel);
 	    contentsPanel.setRowVisible(errorLabel, fieldInfo.isVisible());
-	  }
+
+            return;
+          }
+
+        final Invid thisInvid = (Invid) fieldInfo.getValue();
+	    
+        String label = (String) gc.getSession().viewObjectLabel(thisInvid);
+
+        if (label == null)
+          {
+            if (debug)
+              {
+                println("-you don't have permission to view this object.");
+              }
+
+            // "Can''t Show Target"
+            label = ts.l("addInvidField.no_view_perm");
+          }
+
+        JButton b = new JButton(label);
+
+        b.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e)
+            {
+              getgclient().viewObject(thisInvid);
+            }
+          });
+
+        String comment = fieldTemplate.getComment();
+
+        if (comment != null && !comment.equals(""))
+          {
+            b.setToolTipText(comment);
+          }
+
+        // add the button to our objectHash so that we can change
+        // the label if the user edits the label field of the
+        // object we point to.
+
+        objectHash.put(b, field);
+
+        contentsPanel.addRow(fieldTemplate.getName(), b);
+        contentsPanel.setRowVisible(b, fieldInfo.isVisible());
 
 	return;
+      }
+
+    if (!keepLoading())
+      {
+        return;		// we were told to cancel
       }
 
     // okay, we've got an editable field, we need to construct and install
     // a JInvidChooser.
 
+    // get the list of choices for this invid field
+
     Object key = field.choicesKey();
-	
-    Vector choices = null;
 
-    if (key == null)
+    if (key != null)
       {
-	if (debug)
+	if (!gc.cachedLists.containsList(key))
 	  {
-	    println("key is null, not using cache.  Downloading choice list.");
+	    gc.cachedLists.putList(key, field.choices());
 	  }
 
-	if (!keepLoading())
-	  {
-	    return;		// we were told to cancel
-	  }
-
-	list = new objectList(field.choices());
-
-	if (debug)
-	  {
-	    println("Choice list downloaded.");
-	  }
-
-	// we have to include non-editables, because the server will
-	// include some that are non-editable, but for which
-	// DBEditObject.anonymousLinkOK() nonetheless give us rights
-	// to link.
-
-	choices = list.getListHandles(false, true);
+        list = gc.cachedLists.getList(key);
       }
     else
       {
-	if (debug)
-	  {
-	    println("key = " + key);
-	  }
-
-	if (gc.cachedLists.containsList(key))
-	  {
-	    if (debug)
-	      {
-		println("Got it from the cachedLists");
-	      }
-
-	    list = gc.cachedLists.getList(key);
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		println("Choice list for addInvidField not cached, downloading a new one.");
-	      }
-
-	    gc.cachedLists.putList(key, field.choices());
-
-	    if (debug)
-	      {
-		println("Choice list downloaded.");
-	      }
-
-	    list = gc.cachedLists.getList(key);
-	  }
-
-	// we have to include non-editables, because the server will
-	// include some that are non-editable, but for which
-	// DBEditObject.anonymousLinkOK() nonetheless give us rights
-	// to link.
-
-	choices = list.getListHandles(false, true);
+	list = new objectList(field.choices());
       }
+
+    // we have to include non-editables, because the server will
+    // include some that are non-editable, but for which
+    // DBEditObject.anonymousLinkOK() nonetheless give us rights
+    // to link.
+
+    Vector choices = list.getListHandles(false, true);
 
     Invid currentChoice = (Invid) fieldInfo.getValue();
     String currentChoiceLabel = gc.getSession().viewObjectLabel(currentChoice);
