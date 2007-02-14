@@ -14,9 +14,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2006
    The University of Texas at Austin
 
@@ -188,7 +188,7 @@ public class DBEditSet {
 
   DBSession session;
 
-  /** 
+  /**
    * A brief description of the client associated with this
    * transaction, used in logging to identify what was done by the
    * main client, what by a password-changing utility, etc.
@@ -405,16 +405,16 @@ public class DBEditSet {
     synchronized (objects)
       {
 	int size = objects.size();
-	
+
 	DBEditObject[] results = new DBEditObject[size];
-	
+
 	Iterator iter = objects.values().iterator();
-	
+
 	for (int i = 0; i < size; i++)
 	  {
 	    results[i] = (DBEditObject) iter.next();
 	  }
-	
+
 	return results;
       }
   }
@@ -555,7 +555,7 @@ public class DBEditSet {
    * @param objects A vector of invids of objects involved in the mail
    */
 
-  public void logMail(Vector addresses, String subject, String message, 
+  public void logMail(Vector addresses, String subject, String message,
 		      Invid admin, String adminName, Vector objects)
   {
     logEvents.addElement(new DBLogEvent(addresses, subject, message, admin, adminName, objects));
@@ -627,7 +627,7 @@ public class DBEditSet {
    * @param objects A vector of invids of objects involved in the mail
    */
 
-  private void streamLogMail(Vector addresses, String subject, String message, 
+  private void streamLogMail(Vector addresses, String subject, String message,
 			     Invid admin, String adminName, Vector objects)
   {
     Ganymede.log.streamEvent(new DBLogEvent(addresses, subject, message, admin, adminName, objects), this);
@@ -696,7 +696,7 @@ public class DBEditSet {
 	Thread thisThread = java.lang.Thread.currentThread();
 
 	int waitcount = 0;
-	
+
 	while (currentCheckpointThread != null && currentCheckpointThread != thisThread)
 	  {
 	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") on thread " + thisThread.toString() +
@@ -712,27 +712,27 @@ public class DBEditSet {
 		ex.printStackTrace();
 		throw new RuntimeException(ex.getMessage());
 	      }
-	    
+
 	    waitcount++;
-	    
+
 	    if (waitcount > 60)
 	      {
 		System.err.println("DBEditSet.checkpoint(\"" + name + "\") has waited to checkpoint for 60 seconds");
 		System.err.println("DBEditSet.checkpoint(\"" + name + "\") giving up to avoid deadlock");
-		
+
 		System.err.println("DBEditSet.checkpoint(\"" + name + "\") stack trace:");
 		thisThread.dumpStack();
-		
+
 		if (currentCheckpointThread.isAlive())
 		  {
 		    System.err.println("DBEditSet.checkpoint(\"" + name + "\") printing blocking thread stack trace:");
 		    currentCheckpointThread.dumpStack();
 		  }
-		
+
 		throw new RuntimeException("DBEditSet.checkpoint(\"" + name + "\") timed out");
 	      }
 	  }
-	
+
 	if (waitcount > 0)
 	  {
 	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") proceeding");
@@ -744,7 +744,7 @@ public class DBEditSet {
 	  {
 	    throw new RuntimeException("DBEditSet.checkpoint(" + name + ") slept until transaction committed/cleared");
 	  }
-	
+
 	currentCheckpointThread = thisThread;
       }
 
@@ -757,7 +757,7 @@ public class DBEditSet {
     // we don't synchronize on dbStore, the odds are zip that a
     // namespace will be created or deleted while we are in the middle
     // of a transaction, since that is only done during schema editing
-    
+
     for (int i = 0; i < dbStore.nameSpaces.size(); i++)
       {
 	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).checkpoint(this, name);
@@ -853,7 +853,7 @@ public class DBEditSet {
 	// we don't synchronize on dbStore, the odds are zip that a
 	// namespace will be created or deleted while we are in the middle
 	// of a transaction.  Go ahead and clear out the namespace checkpoint.
-	
+
 	for (int i = 0; i < dbStore.nameSpaces.size(); i++)
 	  {
 	    ((DBNameSpace) dbStore.nameSpaces.elementAt(i)).popCheckpoint(this, name);
@@ -949,7 +949,7 @@ public class DBEditSet {
 
 	    System.err.println("Looking for object " + objck.invid.toString() + " in database");
 	  }
-	
+
 	obj = findObject(objck.invid);
 
 	if (obj != null)
@@ -1024,7 +1024,7 @@ public class DBEditSet {
 	DBEditObject eobjRef = (DBEditObject) iter.next();
 
 	Invid tmpvid = eobjRef.getInvid();
-	
+
 	if (!oldvalues.containsKey(tmpvid))
 	  {
 	    drop.addElement(eobjRef);
@@ -1040,7 +1040,7 @@ public class DBEditSet {
 	obj = (DBEditObject) drop.elementAt(i);
 
 	obj.release(true);
-	
+
 	switch (obj.getStatus())
 	  {
 	  case ObjectStatus.CREATING:
@@ -1050,12 +1050,12 @@ public class DBEditSet {
 	    session.GSession.checkIn();	// XXX *synchronized* on GanymedeSession
 	    obj.getBase().store.checkIn(); // update checked out count
 	    break;
-		
+
 	  case ObjectStatus.EDITING:
 	  case ObjectStatus.DELETING:
-		
+
 	    // note that clearShadow updates the checked out count for us.
-		
+
 	    if (!obj.original.clearShadow(this))
 	      {
 		throw new RuntimeException("editset ownership synchronization error");
@@ -1381,7 +1381,7 @@ public class DBEditSet {
     committedObjects = new Vector();
 
     iter = this.objects.values().iterator();
-    
+
     while (iter.hasNext())
       {
 	eObj = (DBEditObject) iter.next();
@@ -1495,7 +1495,7 @@ public class DBEditSet {
       {
 	missingFields = VectorUtils.union(missingFields, eObj.checkRequiredFields());
       }
-		    
+
     if (missingFields != null && missingFields.size() > 0)
       {
 	StringBuffer errorBuf = new StringBuffer();
@@ -1503,18 +1503,18 @@ public class DBEditSet {
 	errorBuf.append(ts.l("commit_checkObjectMissingFields.missing_fields_text",
 			     eObj.getTypeName(),
 			     eObj.getLabel()));
-	    
+
 	for (int j = 0; j < missingFields.size(); j++)
 	  {
 	    errorBuf.append((String) missingFields.elementAt(j));
 	    errorBuf.append("\n");
 	  }
-	    
+
 	retVal = Ganymede.createErrorDialog(ts.l("commit_checkObjectMissingFields.missing_fields"),
 					    errorBuf.toString());
-	    
+
 	// let DBSession/the client know they can retry things.
-	    
+
 	throw new CommitNonFatalException(retVal);
       }
   }
@@ -1537,7 +1537,7 @@ public class DBEditSet {
 
     // intern the result string so that we don't have multiple
     // copies of common strings in our heap
-    
+
     result = result.intern();
 
     Iterator iter = objects.values().iterator();
@@ -1545,18 +1545,18 @@ public class DBEditSet {
     while (iter.hasNext())
       {
 	eObj = (DBEditObject) iter.next();
-	
+
 	// force a change of date and modifier information
 	// into the object without using the normal field
 	// modification methods.. this lets us set field
 	// values at a time when the object would reject
 	// changes from the user because the committing flag
 	// is set.
-	
+
 	switch (eObj.getStatus())
 	  {
 	  case ObjectStatus.CREATING:
-	    
+
 	    if (!eObj.isEmbedded())
 	      {
 		df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
@@ -1578,7 +1578,7 @@ public class DBEditSet {
 		  }
 
 		// ditto for the creator info field.
-		
+
 		sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
 
 		if (!allowXMLHistoryOverride || !sf.isDefined())
@@ -1586,11 +1586,11 @@ public class DBEditSet {
 		    sf.value = result;
 		  }
 	      }
-	    
+
 	    // * fall-through *
-	    
+
 	  case ObjectStatus.EDITING:
-		    
+
 	    if (!eObj.isEmbedded())
 	      {
 		df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
@@ -1733,7 +1733,7 @@ public class DBEditSet {
 		// ***
 		// *** The journal may not be completely recoverable!
 		// ***
-		// 
+		//
 		// {0}
 
 		Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", Ganymede.stackTrace(ex)));
@@ -1825,7 +1825,7 @@ public class DBEditSet {
 	    // ***
 	    // *** The journal may not be completely recoverable!
 	    // ***
-	    // 
+	    //
 	    // {0}
 
 	    Ganymede.debug(ts.l("commit_finalizeTransaction.badundo", Ganymede.stackTrace(ex)));
@@ -1861,7 +1861,7 @@ public class DBEditSet {
     while (iter.hasNext())
       {
 	eObj = (DBEditObject) iter.next();
-	
+
 	// tell the object to go ahead and do any external
 	// commit actions.
 
@@ -1942,11 +1942,11 @@ public class DBEditSet {
     String responsibleName = null;
 
     /* -- */
-    
+
     if (getGSession() != null)
       {
 	responsibleInvid = getGSession().personaInvid;
-	
+
 	if (responsibleInvid == null)
 	  {
 	    responsibleInvid = getGSession().userInvid;
@@ -1976,18 +1976,18 @@ public class DBEditSet {
 	if (eObj.isEmbedded())
 	  {
 	    DBObject container = session.getContainingObj(eObj);
-			    
+
 	    if (container != null)
 	      {
 		invids.addElement(container.getInvid());
 	      }
 	  }
-		   
+
 	if (debug)
 	  {
 	    System.err.println("Logging event for " + eObj.getLabel());
 	  }
-		    
+
 	diff = eObj.diff(fieldsTouched);
 
 	if (diff != null)
@@ -2044,7 +2044,7 @@ public class DBEditSet {
 			       invids, eObj.getEmailTargets());
 	      }
 	  }
-		    
+
 	break;
 
       case ObjectStatus.CREATING:
@@ -2061,13 +2061,13 @@ public class DBEditSet {
 	if (eObj.isEmbedded())
 	  {
 	    DBObject container = session.getContainingObj(eObj);
-			    
+
 	    if (container != null)
 	      {
 		invids.addElement(container.getInvid());
 	      }
 	  }
-   
+
 	if (debug)
 	  {
 	    System.err.println("Logging event for " + eObj.getLabel());
@@ -2093,7 +2093,7 @@ public class DBEditSet {
 		System.err.println("**** DIFF (" + eObj.getLabel() +
 				   "):" + diff + " : ENDDIFF****");
 	      }
-			
+
 	    boolean logNormal = true;
 
 	    if (eObj.isEmbedded())
@@ -2157,13 +2157,13 @@ public class DBEditSet {
 	if (eObj.isEmbedded())
 	  {
 	    DBObject container = session.getContainingObj(eObj);
-			    
+
 	    if (container != null)
 	      {
 		invids.addElement(container.getInvid());
 	      }
 	  }
-		   
+
 	if (debug)
 	  {
 	    System.err.println("Logging event for " + eObj.getLabel());
@@ -2200,7 +2200,7 @@ public class DBEditSet {
 					oldVals),
 				   responsibleInvid, responsibleName,
 				   invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
-		    
+
 		    logNormal = false;
 		  }
 		catch (IntegrityConstraintException ex)
@@ -2340,7 +2340,7 @@ public class DBEditSet {
       {
 	responsibleName = getGSession().getMyUserName();
 	responsibleInvid = getGSession().personaInvid;
-	
+
 	if (responsibleInvid == null)
 	  {
 	    responsibleInvid = getGSession().userInvid;
@@ -2382,7 +2382,7 @@ public class DBEditSet {
 	      }
 
 	    // for garbage collection
-    
+
 	    logEvents.removeAllElements();
 
 	    // then create and stream log events describing the
@@ -2480,7 +2480,7 @@ public class DBEditSet {
 	syncObjBackPointers(eObj);
 
 	// Deleted objects had their deletion finalization done before
-	// we ever got to this point.  
+	// we ever got to this point.
 
 	// Note that we don't try to release the id for previously
 	// registered objects.. the base.releaseId() method really
@@ -2504,7 +2504,7 @@ public class DBEditSet {
 	// created and destroyed within this transaction
 
 	// dropped objects had their deletion finalization done before
-	// we ever got to this point.. 
+	// we ever got to this point..
 
 	base.releaseId(eObj.getID()); // relinquish the unused invid
 
@@ -2529,7 +2529,7 @@ public class DBEditSet {
     // vector should never have elements added or deleted while we are
     // in the middle of a transaction, since that is only done during
     // schema editing
-    
+
     for (int i = 0; i < dbStore.nameSpaces.size(); i++)
       {
 	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).commit(this);
@@ -2556,13 +2556,13 @@ public class DBEditSet {
     while (iter.hasNext())
       {
 	DBObjectBase base = (DBObjectBase) iter.next();
-	
+
 	base.updateTimeStamp();
-	
+
 	// and, very important, update the base's snapshot vector
 	// so that any new queries that are issued will proceed
 	// against the new state of objects in this base
-	
+
 	base.updateIterationSet();
       }
 
@@ -2624,7 +2624,7 @@ public class DBEditSet {
 
 	removedBackPointers = VectorUtils.difference(oldBackPointers, newBackPointers);
 	addedBackPointers = VectorUtils.difference(newBackPointers, oldBackPointers);
-	
+
 	for (int i = 0; i < removedBackPointers.size(); i++)
 	  {
 	    target = (Invid) removedBackPointers.elementAt(i);
@@ -2692,7 +2692,7 @@ public class DBEditSet {
     // wLock.inEstablish check to be sync'ed so that we don't force an
     // abort after we have gotten our lock established and are busy
     // mucking with the server's DBObjectTables.
-    
+
     synchronized (Ganymede.db.lockSync)
       {
 	if (wLock != null)
@@ -2705,7 +2705,7 @@ public class DBEditSet {
 	    wLock.abort();
 	  }
       }
-    
+
     release();
 
     return true;
@@ -2746,7 +2746,7 @@ public class DBEditSet {
       {
 	eObj = (DBEditObject) iter.next();
 	eObj.release(true);
-	
+
 	switch (eObj.getStatus())
 	  {
 	  case ObjectStatus.CREATING:
@@ -2860,7 +2860,7 @@ public class DBEditSet {
       {
 	session.releaseLock(wLock);
 	wLock = null;
-	
+
 	if (debug)
 	  {
 	    System.err.println(session.key + ": DBEditSet.commit(): released write lock");
