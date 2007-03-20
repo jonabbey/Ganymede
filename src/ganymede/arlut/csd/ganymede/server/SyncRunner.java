@@ -1195,8 +1195,11 @@ public class SyncRunner implements Runnable {
             path = this.serviceProgram;
           }
 
-        String message = "Error encountered running sync script \"" + path + "\" for the \"" + this.getName() + "\" Sync Channel." +
-          "\n\nI got a result code of " + resultCode + " when I tried to run it.";
+        // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
+        //
+        // I got a result code of {2} when I tried to run it.
+
+        String message = ts.l("runFullStateService.externalerror", path, this.getName(), new Integer(resultCode));
 
         DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
@@ -1288,8 +1291,11 @@ public class SyncRunner implements Runnable {
                     path = getServiceProgram();
                   }
 
-                String message = "Error encountered running sync script \"" + path + "\" for the \"" + this.getName() + "\" Sync Channel." +
-                  "\n\nI got a result code of " + resultCode + " when I tried to run it.";
+                // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
+                //
+                // I got a result code of {2} when I tried to run it.
+
+                String message = ts.l("runIncremental.externalerror", path, this.getName(), new Integer(resultCode));
 
                 DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
