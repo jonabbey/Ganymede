@@ -1150,13 +1150,15 @@ public class SyncRunner implements Runnable {
     // "Full State Sync Channel {0} external build running."
     Ganymede.debug(ts.l("runFullStateService.running", this.name));
 
+    int resultCode = -999;  // a resultCode of 0 is success
+
     File file = new File(this.serviceProgram);
 
     if (file.exists())
       {
 	try
 	  {
-	    FileOps.runProcess(this.serviceProgram);
+	    resultCode = FileOps.runProcess(this.serviceProgram);
 	  }
 	catch (IOException ex)
 	  {
@@ -1178,6 +1180,27 @@ public class SyncRunner implements Runnable {
       {
 	// "Full State Sync Channel {1} error: external build script {0} does not exist."
 	Ganymede.debug(ts.l("runFullStateService.whaa", this.serviceProgram, this.name));
+      }
+
+    if (resultCode != 0)
+      {
+        String path = "";
+
+        try
+          {
+            path = file.getCanonicalPath();
+          }
+        catch (IOException ex)
+          {
+            path = this.serviceProgram;
+          }
+
+        String message = "Error encountered running sync script \"" + path + "\" for the \"" + this.getName() + "\" Sync Channel." +
+          "\n\nI got a result code of " + resultCode + " when I tried to run it.";
+
+        DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
+
+        Ganymede.log.logSystemEvent(event);
       }
   }
 
@@ -1262,6 +1285,7 @@ public class SyncRunner implements Runnable {
                   }
                 catch (IOException ex)
                   {
+                    path = getServiceProgram();
                   }
 
                 String message = "Error encountered running sync script \"" + path + "\" for the \"" + this.getName() + "\" Sync Channel." +
