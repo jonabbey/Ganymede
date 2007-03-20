@@ -1264,10 +1264,8 @@ public class SyncRunner implements Runnable {
                   {
                   }
 
-                String message = "Error encountered running sync script " + path + " for the " + this.getName() + " Sync Channel." +
+                String message = "Error encountered running sync script \"" + path + "\" for the \"" + this.getName() + "\" Sync Channel." +
                   "\n\nI got a result code of " + resultCode + " when I tried to run it.";
-
-                message = arlut.csd.Util.WordWrap.wrap(message, 70, null);
 
                 DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
