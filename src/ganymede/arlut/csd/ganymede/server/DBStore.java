@@ -2757,6 +2757,10 @@ public final class DBStore implements JythonMap {
 	createSysEventObj(session, "expirenotify", "Expiration Notification", 
 			  "This object has been expired.", false);
 
+        createSysEventObj(session, "externalerror", "Error Running External Process",
+                          "The Ganymede Server encountered an error when attempting to run an external process.",
+                          false);
+
 	createSysEventObj(session, "finishtransaction", "transaction end", null, false);
 
 	createSysEventObj(session, "goodlogin", "Successful login", null, false);

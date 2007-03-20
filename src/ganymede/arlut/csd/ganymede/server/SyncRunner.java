@@ -20,7 +20,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -1225,13 +1225,15 @@ public class SyncRunner implements Runnable {
 
 	if (getServiceProgram() != null)
 	  {
+            int resultCode = -999;  // a resultCode of 0 is success
+
 	    file = new File(getServiceProgram());
-	    
+
 	    if (file.exists())
 	      {
 		try
 		  {
-		    FileOps.runProcess(invocation);
+		    resultCode = FileOps.runProcess(invocation);
 		  }
 		catch (IOException ex)
 		  {
@@ -1249,6 +1251,28 @@ public class SyncRunner implements Runnable {
 		// ""{0}" doesn''t exist, not running external service program for SyncRunner {1}"
 		Ganymede.debug(ts.l("runIncremental.nonesuch", myServiceProgram, myName));
 	      }
+
+            if (resultCode != 0)
+              {
+                String path = "";
+
+                try
+                  {
+                    path = file.getCanonicalPath();
+                  }
+                catch (IOException ex)
+                  {
+                  }
+
+                String message = "Error encountered running sync script " + path + " for the " + this.getName() + " Sync Channel." +
+                  "\n\nI got a result code of " + resultCode + " when I tried to run it.";
+
+                message = arlut.csd.Util.WordWrap.wrap(message, 70, null);
+
+                DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
+
+                Ganymede.log.logSystemEvent(event);
+              }
 	  }
 	else
 	  {
