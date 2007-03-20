@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -69,6 +69,7 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.DBLogEvent;
 import arlut.csd.ganymede.server.DBObject;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeBuilderTask;
@@ -363,13 +364,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	buildScript = buildScript + "gashbuilder";
       }
 
+    int resultCode = -999;      // a resultCode of 0 is success
+
     file = new File(buildScript);
 
     if (file.exists())
       {
 	try
 	  {
-	    FileOps.runProcess(buildScript);
+	    resultCode = FileOps.runProcess(buildScript);
 	  }
 	catch (IOException ex)
 	  {
@@ -384,6 +387,27 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     else
       {
 	Ganymede.debug(buildScript + " doesn't exist, not running external GASH build script");
+      }
+
+    if (resultCode != 0)
+      {
+        String path = "";
+
+        try
+          {
+            path = file.getCanonicalPath();
+          }
+        catch (IOException ex)
+          {
+            path = buildScript;
+          }
+
+        String message = "Error encountered running sync script \"" + path + "\" for the GASHBuilderTask." +
+          "\n\nI got a result code of " + resultCode + " when I tried to run it.";
+
+        DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
+
+        Ganymede.log.logSystemEvent(event);
       }
 
     Ganymede.debug("GASHBuilderTask builderPhase2 completed");
