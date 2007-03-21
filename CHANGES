@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-February 1, 2007
+April 1, 2007
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: February 1, 2007
+RELEASE DATE: April 1, 2007
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -999,6 +999,27 @@ notifyCompletion() on the GanymedeScheduler.
 This fixes a bug that caused things to seize up a bit if a user sent a
 disableTask command to a task while the task was running in the
 scheduler.
+
+61. [SERVER] Added Event Reporting When External Build Processes Fail
+
+I've added an 'externalerror' event to the System Events predefined in
+the Ganymede Server.  An 'externalerror' event is generated (and,
+optionally, email is sent, according to the definition of the
+externalerror System Event object in the Ganymede datastore) when the
+Ganymede server receives an non-zero result code upon executing an
+external process to service a Sync Channel.
+
+I've added similar code to the GASHBuilderTask and the IRISBuilderTask
+classes defined in the gasharl schema kit, but the launching of
+external builder scripts in response to builder task build phase 2
+execution is not handled in the GanymedeBuilderTask base class, so
+I've not added 'externalerror' support for all conceivable Builder
+Tasks.
+
+See the runFullStateService() and runIncremental() methods in the
+src/ganymede/arlut/csd/ganymede/server/SyncRunner to see how to add
+event logging for errors encountered when running external build
+scripts.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
