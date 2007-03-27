@@ -628,47 +628,46 @@ public final class xmlclient implements ClientListener, Runnable {
 	return false;
       }
 
-    // now do what we came for
-
-    ReturnVal retVal = session.runXMLQuery(queryString);
-
-    if (retVal != null && !retVal.didSucceed())
-      {
-	String errorMessage = retVal.getDialogText();
-
-	if (errorMessage != null)
-	  {
-	    System.err.println(errorMessage);
-	  }
-
-	return false;
-      }
-
-    FileTransmitter transmitter = retVal.getFileTransmitter();
-
-    byte[] bytes = transmitter.getNextChunk();
-
     try
       {
-	while (bytes != null)
-	  {
-	    System.out.write(bytes);
-	    
-	    bytes = transmitter.getNextChunk();
-	  }
+        // now do what we came for
+
+        ReturnVal retVal = session.runXMLQuery(queryString);
+
+        if (retVal != null && !retVal.didSucceed())
+          {
+            String errorMessage = retVal.getDialogText();
+
+            if (errorMessage != null)
+              {
+                System.err.println(errorMessage);
+              }
+
+            return false;
+          }
+
+        FileTransmitter transmitter = retVal.getFileTransmitter();
+
+        byte[] bytes = transmitter.getNextChunk();
+
+        while (bytes != null)
+          {
+            System.out.write(bytes);
+
+            bytes = transmitter.getNextChunk();
+          }
+
+        return true;
       }
     catch (Exception ex)
       {
-	ex.printStackTrace();
+        ex.printStackTrace();
+        return false;
       }
     finally
       {
-	// and say goodbye
-
-	session.logout();
+        session.logout();       // and say goodbye
       }
-
-    return true;
   }
 
   /**
