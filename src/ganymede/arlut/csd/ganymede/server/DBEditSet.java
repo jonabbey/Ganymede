@@ -1221,25 +1221,36 @@ public class DBEditSet {
 
     checkpoint(checkpointKey);
 
-    for (int i = 0; i < myObjects.length; i++)
+    try
       {
-	eObj = myObjects[i];
+        for (int i = 0; i < myObjects.length; i++)
+          {
+            eObj = myObjects[i];
 
-	try
-	  {
-	    retVal = eObj.preCommitHook();
+            try
+              {
+                retVal = eObj.preCommitHook();
 
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		rollback(checkpointKey);
-		throw new CommitNonFatalException(retVal);
-	      }
-	  }
-	catch (Throwable ex)
-	  {
-	    retVal = Ganymede.createErrorDialog(Ganymede.stackTrace(ex));
-	    throw new CommitNonFatalException(retVal);
-	  }
+                if (retVal != null && !retVal.didSucceed())
+                  {
+                    throw new CommitNonFatalException(retVal);
+                  }
+              }
+            catch (CommitNonFatalException ex)
+              {
+                throw ex;
+              }
+            catch (Throwable ex)
+              {
+                retVal = Ganymede.createErrorDialog(Ganymede.stackTrace(ex));
+                throw new CommitNonFatalException(retVal);
+              }
+          }
+      }
+    catch (CommitNonFatalException ex)
+      {
+        rollback(checkpointKey);
+        throw ex;
       }
 
     popCheckpoint(checkpointKey);
