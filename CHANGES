@@ -1021,6 +1021,16 @@ src/ganymede/arlut/csd/ganymede/server/SyncRunner to see how to add
 event logging for errors encountered when running external build
 scripts.
 
+62 [XMLCLIENT] The xmlclient will no longer leave itself logged in on query exceptions
+
+The xmlclient had an error, in which any exception thrown on the
+server during query processing would cause the xmlclient to terminate
+without properly logging out.
+
+Now, if a GanyQL query submitted to xmlclient causes an exception on
+the server (a parse exception, say), the xmlclient will report the
+exception (once!) and before doing a clean logout from the server.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
