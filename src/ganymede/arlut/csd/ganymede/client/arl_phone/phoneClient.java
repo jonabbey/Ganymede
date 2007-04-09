@@ -193,7 +193,7 @@ public class phoneClient implements ClientListener {
 
         // find the room
 
-        results = sess.query(new Query("Rooms",
+        results = sess.query(new Query("Room",
                                        new QueryDataNode("Room Number",
                                                          QueryDataNode.EQUALS,
                                                          roomName),
