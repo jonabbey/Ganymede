@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -107,6 +107,7 @@ import arlut.csd.ganymede.rmi.db_field;
  * <LI>{@link arlut.csd.ganymede.server.StringDBField StringDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.server.BooleanDBField BooleanDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.server.NumericDBField NumericDBField}</LI>
+ * <LI>{@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.server.FloatDBField FloatDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.server.DateDBField DateDBField}</LI>
  * <LI>{@link arlut.csd.ganymede.server.InvidDBField InvidDBField}</LI>
