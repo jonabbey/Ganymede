@@ -9,7 +9,6 @@
    Created: 2 May 2000
    Version: $Revision$
    Last Mod Date: $Date$
-   Last Mod Date: $Date$
    Last Revision Changed: $Rev$
    Last Changed By: $Author$
    SVN URL: $HeadURL$
@@ -21,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information

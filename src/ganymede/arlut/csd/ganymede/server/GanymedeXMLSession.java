@@ -3256,21 +3256,27 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	      {
 		xmlobject storedObject = (xmlobject) thing;
 
-		// now go through the stored object and do lookups for
-		// any invid fields contained thereunder.
+                // an xmlobject to be deleted may not actually have
+                // any fields stored in it
 
-		Enumeration fieldEnum = storedObject.fields.elements();
+                if (storedObject.fields != null)
+                  {
+                    // now go through the stored object and do lookups for
+                    // any invid fields contained thereunder.
 
-		while (fieldEnum.hasMoreElements())
-		  {
-		    xmlfield field = (xmlfield) fieldEnum.nextElement();
+                    Enumeration fieldEnum = storedObject.fields.elements();
 
-		    if (field.getType() == FieldType.INVID && !field.fieldDef.isEditInPlace())
-		      {
-			field.dereferenceInvids();
-		      }
-		  }
-	      }
+                    while (fieldEnum.hasMoreElements())
+                      {
+                        xmlfield field = (xmlfield) fieldEnum.nextElement();
+
+                        if (field.getType() == FieldType.INVID && !field.fieldDef.isEditInPlace())
+                          {
+                            field.dereferenceInvids();
+                          }
+                      }
+                  }
+              }
 	  }
       }
   }
