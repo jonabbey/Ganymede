@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-April 1, 2007
+June 7, 2007
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: April 1, 2007
+RELEASE DATE: June 7, 2007
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1021,7 +1021,7 @@ src/ganymede/arlut/csd/ganymede/server/SyncRunner to see how to add
 event logging for errors encountered when running external build
 scripts.
 
-62 [XMLCLIENT] The xmlclient will no longer leave itself logged in on query exceptions
+62. [XMLCLIENT] The xmlclient will no longer leave itself logged in on query exceptions
 
 The xmlclient had an error, in which any exception thrown on the
 server during query processing would cause the xmlclient to terminate
@@ -1030,6 +1030,19 @@ without properly logging out.
 Now, if a GanyQL query submitted to xmlclient causes an exception on
 the server (a parse exception, say), the xmlclient will report the
 exception (once!) before doing a clean logout from the server.
+
+63. [XMLCLIENT] The xmlclient no longer fails on object deletion
+
+Brian Worden and his team at fg-networking.de provided a patch to fix
+a NullPointerException bug that occurred when deleting objects using
+the xmlclient.
+
+64. [XMLCLIENT] The xmlclient can now import files dumped by Ganymede
+
+Another bug reported and fixed by Brian Worden and the guys at
+fg-networking.de.  Ganymede was using different minor version numbers
+for its dump format between the code that generated XML dumps and the
+code that handled reading those dumps.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
