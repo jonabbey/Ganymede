@@ -1565,6 +1565,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	result.addRescanField(this.getInvid(), SchemaConstants.RemovalField);
 	result.addRescanField(this.getInvid(), userSchema.LOGINSHELL);
 	result.addRescanField(this.getInvid(), userSchema.EMAILTARGET);
+	result.addRescanField(this.getInvid(), userSchema.PASSWORDCHANGETIME);
 
 	return result;
       }
