@@ -164,7 +164,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * are too high. 
    */
 
-  public static final int minorVersion = 0;
+  public static final int minorVersion = 1;
 
   /**
    * The working GanymedeSession underlying this XML session.

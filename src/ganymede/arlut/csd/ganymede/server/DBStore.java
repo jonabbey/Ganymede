@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -169,18 +169,6 @@ public final class DBStore implements JythonMap {
    */
 
   static final byte minor_version = 12;
-
-  /**
-   * XML version major id
-   */
-
-  static final byte major_xml_version = 1;
-
-  /**
-   * XML version minor id
-   */
-
-  static final byte minor_xml_version = 1;
 
   /**
    * Enable/disable debug in the DBStore methods
@@ -1165,8 +1153,8 @@ public final class DBStore implements JythonMap {
 	if (dumpDataObjects)
 	  {
 	    xmlOut.startElement("ganymede");
-	    xmlOut.attribute("major", Byte.toString(major_xml_version));
-	    xmlOut.attribute("minor", Byte.toString(minor_xml_version));
+	    xmlOut.attribute("major", Byte.toString(GanymedeXMLSession.majorVersion));
+	    xmlOut.attribute("minor", Byte.toString(GanymedeXMLSession.minorVersion));
 	  }
 	    
 	if (dumpSchema)
