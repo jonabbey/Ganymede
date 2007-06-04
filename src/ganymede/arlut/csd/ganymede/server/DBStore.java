@@ -1153,8 +1153,8 @@ public final class DBStore implements JythonMap {
 	if (dumpDataObjects)
 	  {
 	    xmlOut.startElement("ganymede");
-	    xmlOut.attribute("major", Byte.toString(GanymedeXMLSession.majorVersion));
-	    xmlOut.attribute("minor", Byte.toString(GanymedeXMLSession.minorVersion));
+	    xmlOut.attribute("major", Integer.toString(GanymedeXMLSession.majorVersion));
+	    xmlOut.attribute("minor", Integer.toString(GanymedeXMLSession.minorVersion));
 	  }
 	    
 	if (dumpSchema)
