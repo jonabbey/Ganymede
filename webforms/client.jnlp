@@ -36,7 +36,7 @@
   <!-- If you want to force a language on the client, set and
        uncomment the following:
 
-       <property name="user.langage" value="de"/>
+       <property name="user.language" value="de"/>
   -->
 
   </resources>
