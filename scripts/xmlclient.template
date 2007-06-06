@@ -26,6 +26,22 @@ PROPERTIES=/opt/depot/ganymede/etc/ganymede.properties
 
 ###############################################
 
+# If you want to force the use of a specific language in the client,
+# without respect to the native locale of the Java installation, you
+# can modify this variable to specify a specific language, such as
+#
+# German:
+# $LANGUAGE="-Duser.language=de";
+#
+# English:
+# $LANGUAGE="-Duser.language=en";
+#
+# Leaving LANGUAGE blank will result in the default language for the
+# Java installation being used, which is probably what you usually
+# want.
+
+$LANGUAGE="";
+
 $ENV{'CLASSPATH'} = $CLASSPATH;
 
 #
@@ -53,7 +69,7 @@ foreach $arg (@my_args) {
 # Thank you as well, java, for not having any way to turn off
 # character echo.
 
-system("stty -echo; $JAVA arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES @my_args;SAVE=\$?;stty echo;exit \$SAVE");
+system("stty -echo; $JAVA $LANGUAGE arlut.csd.ganymede.client.xmlclient properties=$PROPERTIES @my_args;SAVE=\$?;stty echo;exit \$SAVE");
 
 $exit_value = $? >> 8;
 exit $exit_value;
