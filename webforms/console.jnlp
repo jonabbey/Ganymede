@@ -31,6 +31,13 @@
     <jar href="ganymedeAdmin.jar"/>
     <property name="ganymede.serverhost" value="#SERVERHOST"/>
     <property name="ganymede.registryPort" value="#REGISTRYPORT"/>
+
+  <!-- If you want to force a language on the client, set and
+       uncomment the following:
+
+       <property name="user.language" value="de"/>
+  -->
+
   </resources>
 
   <!-- We need to set all-permissions so that the client can connect
