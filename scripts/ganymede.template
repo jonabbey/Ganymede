@@ -54,6 +54,22 @@ MINHEAP=32m
 
 MAXHEAP=72m
 
+# If you want to force the use of a specific language in the client,
+# without respect to the native locale of the Java installation, you
+# can modify this variable to specify a specific language, such as
+#
+# German:
+# LANGUAGE=-Duser.language=de
+#
+# English:
+# LANGUAGE=-Duser.language=en
+#
+# Leaving LANGUAGE blank will result in the default language for the
+# Java installation being used, which is probably what you usually
+# want.
+
+LANGUAGE=
+
 # ------------------------------------------------------------------ #
 
 trap "echo Aborted" 2
@@ -62,4 +78,4 @@ echo "Running Ganymede Client"
 
 export CLASSPATH
 
-$JAVA $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP arlut.csd.ganymede.client.glogin properties=$PROPERTIES
+$JAVA $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP $LANGUAGE arlut.csd.ganymede.client.glogin properties=$PROPERTIES
