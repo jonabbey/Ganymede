@@ -241,7 +241,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 			     10,
 			     iseditable,
 			     false,
-			     "1234567890/",
+			     "1234567890/.",
 			     null,
 			     this);
 
