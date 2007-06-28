@@ -269,13 +269,13 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
 
   public synchronized byte[] getNextChunk() throws RemoteException
   {
+    if (eof)
+      {
+        return null;
+      }
+
     try
       {
-	if (eof)
-	  {
-	    return null;
-	  }
-
 	// see how much input is ready to be read from the pipe..  if
 	// avail is 0, that means there's nothing to read right now,
 	// but there may be, after we call and block on inpipe.read().
