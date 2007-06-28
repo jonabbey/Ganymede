@@ -577,6 +577,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	result.append("0");
       }
 
+    // Back in the GASH days, we appended the name of the admin who
+    // last modified this record.  nowadays we completely ignore this
+    // field, but it's here for compatibility with external scripts
+    // that we've carried over from the GASH world.
+
     result.append(":ganymede");
 
     if (result.length() > 1024)
