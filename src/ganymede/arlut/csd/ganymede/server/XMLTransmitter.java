@@ -263,8 +263,7 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
    * FileTransmitter.  This method will block if necessary until the
    * data is ready to be transmitted.
    *
-   * This method returns null on end of file, and will throw an
-   * exception if it is called again after null is returned.
+   * This method returns null on end of file.
    */
 
   public synchronized byte[] getNextChunk() throws RemoteException
