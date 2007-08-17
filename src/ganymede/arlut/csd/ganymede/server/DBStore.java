@@ -2617,7 +2617,7 @@ public final class DBStore implements JythonMap {
         
 	    if (Ganymede.resetadmin)
 	      {
-		p = (PasswordDBField) eObj.getField("Password");
+		p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
 		p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
 	      }
 	

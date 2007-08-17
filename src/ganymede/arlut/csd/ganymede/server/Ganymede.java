@@ -1067,7 +1067,7 @@ public class Ganymede {
 	// properties file
 
 	v_object = DBStore.viewDBObject(supergashinvid);
-	p = (PasswordDBField) v_object.getField("Password");
+	p = (PasswordDBField) v_object.getField(SchemaConstants.PersonaPasswordField);
 
 	if (p == null || !p.matchPlainText(Ganymede.defaultrootpassProperty))
 	  {
@@ -1082,7 +1082,7 @@ public class Ganymede {
 		throw new RuntimeException(ts.l("startupHook.no_supergash", rootname));
 	      }
 
-	    p = (PasswordDBField) e_object.getField("Password");
+	    p = (PasswordDBField) e_object.getField(SchemaConstants.PersonaPasswordField);
 	    ReturnVal retval = p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
 	    
 	    if (retval != null && !retval.didSucceed())
