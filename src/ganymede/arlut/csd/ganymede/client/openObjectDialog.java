@@ -3,7 +3,7 @@
    createObjectDialog.java
 
    A Dialog to open an object from the database for a variety of operations.
-   
+
    Created: 31 October 1997
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
@@ -15,8 +15,8 @@
    -----------------------------------------------------------------------
 
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2005
+
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -118,25 +118,25 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
   static final private String OPEN_OBJ = "Go";
   static final private String CANCEL = "Cancel";
 
-  boolean 
+  boolean
     editableOnly = false;
 
   long
     lastClick = 0;
 
-  Invid 
+  Invid
     invid = null;
 
   GridBagLayout
     gbl;
-  
+
   GridBagConstraints
     gbc;
 
   gclient
     client;
 
-  JPanel 
+  JPanel
     middle;
 
   JList
@@ -151,7 +151,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
   JButton
     ok;
 
-  JTextField 
+  JTextField
     text;
 
   listHandle
@@ -162,7 +162,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     titleL,
     iconL;
 
-  ImageIcon 
+  ImageIcon
     icon;
 
   String lastValue = null;
@@ -218,14 +218,14 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
-    
+
     getContentPane().setLayout(new BorderLayout());
     middle = new JPanel(gbl);
     getContentPane().add(middle, BorderLayout.CENTER);
     gbc.insets = new Insets(4,4,4,4);
 
     // Set up the dialog's icon (by default, no icon).
-    // gclient actually specifies the image 
+    // gclient actually specifies the image
     // by calling openObjectDialog's setIcon method.
 
     this.icon = new ImageIcon();
@@ -244,18 +244,18 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     titleL.setFont(new Font("Helvetica", Font.BOLD, 14));
     titleL.setOpaque(true);
     titleL.setBorder(client.emptyBorder5);
-    
+
     gbc.gridx = 1;
     gbc.gridy = 0;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;    
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(titleL, gbc);
 
     middle.add(titleL);
-    
+
     gbc.fill = GridBagConstraints.NONE;
-    gbc.gridwidth = 1;    
-    
+    gbc.gridwidth = 1;
+
     type = new JComboBox();
     type.setKeySelectionManager(new TimedKeySelectionManager());
 
@@ -282,7 +282,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
       {
 	thisBase = (BaseDump)bases.elementAt(i);
 	String name = (String) baseNames.get(thisBase);
-	
+
 	if (!thisBase.isEmbedded())
 	  {
 	    listHandle lh = new listHandle(name, (Short) baseToShort.get(thisBase));
@@ -327,7 +327,17 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     gbc.gridx = 2;
     gbl.setConstraints(type, gbc);
     middle.add(type);
-	
+
+    // "Object Name:"
+    JLabel editTextL = new JLabel(ts.l("init.name_label"));
+
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 2;
+    gbc.gridx = 0;
+    gbc.gridy = 2;
+    gbl.setConstraints(editTextL, gbc);
+    middle.add(editTextL);
+
     text = new JTextField(20);
 
     if (selectedFound && selectedObjectName != null)
@@ -337,24 +347,14 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
     text.addActionListener(this);
 
-    // "Object Name:"
-    JLabel editTextL = new JLabel(ts.l("init.name_label"));
-    
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.gridwidth = 2;
-    gbc.gridx = 0;
-    gbc.gridy = 2;
-    gbl.setConstraints(editTextL, gbc);
-    middle.add(editTextL);
-
     gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;    
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 2;
     gbl.setConstraints(text, gbc);
     middle.add(text);
-    
+
     JPanel buttonP = new JPanel();
-    
+
     ok = new JButton(StringDialog.getDefaultOk());
     ok.setActionCommand(OPEN_OBJ);
     ok.addActionListener(this);
@@ -364,9 +364,9 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     neverMind.setActionCommand(CANCEL);
     neverMind.addActionListener(this);
     buttonP.add(neverMind);
-	
-    getContentPane().add(buttonP, BorderLayout.SOUTH);	
-        
+
+    getContentPane().add(buttonP, BorderLayout.SOUTH);
+
     setBounds(150,100, 200,100);
   }
 
@@ -385,7 +385,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     titleL.setText(text);
   }
 
-  public void setIcon(ImageIcon icon) 
+  public void setIcon(ImageIcon icon)
   {
     iconL.setIcon(icon);
   }
@@ -413,7 +413,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     gclient.prefs.put(DEFAULT_OPEN, getTypeString());
 
     setVisible(false);
-    
+
     text.setText("");
 
     if (list != null)
@@ -468,7 +468,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	if ((currentObject != null) && (string.equals(currentObject.getLabel())))
 	  {
 	    // This was set from the listbox, and hasn't been changed.
-	    
+
 	    invid = (Invid)currentObject.getObject();
 	    close(true);
 	  }
@@ -496,21 +496,21 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
 	    listHandle lh = (listHandle) type.getSelectedItem();
 	    Short baseID = (Short) lh.getObject();
-	    
+
 	    if (debug)
 	      {
 		System.out.println("BaseID = " + baseID + ", string = " + string);
 	      }
-	    
+
 	    // First see if this exactly matches something, then do the STARTSWITH stuff
 
-	    QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, string);  
+	    QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, string);
 	    QueryResult edit_query = null;
 	    Vector edit_invids = null;
 
 	    try
 	      {
-		if (debug) 
+		if (debug)
 		  {
 		    System.out.println("Trying exact match...");
 		  }
@@ -524,12 +524,12 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		  {
 		    edit_invids = edit_query.getListHandles();
 
-		    if (debug) 
+		    if (debug)
 		      {
 			System.out.println("edit_invids: " + edit_invids.size());
 		      }
 		  }
-		
+
 		if ((edit_invids != null ) && (edit_invids.size() == 1))
 		  {
 		    if (debug)
@@ -539,11 +539,11 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
 		    invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
 		    close(true);
-	    
+
 		  }
 		else
 		  {
-		    if (debug) 
+		    if (debug)
 		      {
 			System.out.println("Looking for Startswith...");
 		      }
@@ -551,13 +551,13 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		    // "Searching for objects whose names begin with {0}."
 		    client.setStatus(ts.l("actionPerformed.searching_prefix_status", string));
 
-		    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);  
+		    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);
 		    edit_query = null;
-		    
+
 		    edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
-		    
+
 		    edit_invids = edit_query.getListHandles();
-		    
+
 		    if (edit_invids.size() == 1)
 		      {
 			invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
@@ -576,46 +576,46 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 		      }
 		    else
 		      {
-			(new VecQuickSort(edit_invids, 
+			(new VecQuickSort(edit_invids,
 					  new Comparator() {
-			  public int compare(Object a, Object b) 
+			  public int compare(Object a, Object b)
 			    {
 			      listHandle aF, bF;
-			      
+
 			      aF = (listHandle) a;
 			      bF = (listHandle) b;
 			      int comp = 0;
-			      
+
 			      comp =  aF.toString().compareToIgnoreCase(bF.toString());
-			      
+
 			      if (comp < 0)
 				{
 				  return -1;
 				}
 			      else if (comp > 0)
-				{ 
+				{
 				  return 1;
-				} 
+				}
 			      else
-				{ 
+				{
 				  return 0;
 				}
 			    }
 			})).sort();
-			
+
 			DefaultListModel model = (DefaultListModel)list.getModel();
 
 			for (int i = 0; i < edit_invids.size(); i++)
 			  {
 			    model.addElement(edit_invids.elementAt(i));
 			  }
-			
+
 			gbc.gridx = 0;
 			gbc.gridy = 3;
 			gbc.gridwidth = GridBagConstraints.REMAINDER;
 			gbc.fill = GridBagConstraints.HORIZONTAL;
 			gbl.setConstraints(pane, gbc);
-			
+
 			middle.add(pane);
 			pack();
 		      }
@@ -636,7 +636,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
   public void mouseClicked(MouseEvent e)
   {
     currentObject = (listHandle) list.getSelectedValue();
-    
+
     if ((e.getWhen() - lastClick < 500)  && (currentObject == lastObject))
       {
 	invid = (Invid)((listHandle)currentObject).getObject();
