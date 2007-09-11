@@ -632,7 +632,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     return null;
   }
 
-  private systemCustom getParentObj()
+  public systemCustom getParentObj()
   {
     if (sysObj == null)
       {    
