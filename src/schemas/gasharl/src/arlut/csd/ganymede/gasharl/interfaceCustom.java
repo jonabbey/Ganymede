@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -319,6 +319,24 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       }
     
     return super.mustChoose(field);
+  }
+
+  /**
+   * If this DBEditObject is managing an embedded object, the
+   * getEmbeddedObjectLabel() can be overridden to display a synthetic
+   * label in the context of viewing or editing the containing object,
+   * and when doing queries on the containing type.
+   *
+   * The getLabel() method will not consult this hook, however, and
+   * embedded objects will be represented with their unique label
+   * field when processed in an XML context.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public String getEmbeddedObjectDisplayLabelHook(DBObject object)
+  {
+    return object.getLabel() + "\t(" + getParentObj().getLabel() + ")";
   }
 
   /**
