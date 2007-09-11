@@ -336,8 +336,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   public String getEmbeddedObjectDisplayLabelHook(DBObject object)
   {
-    
-    return object.getLabel() + "\t(" + object.getParentObj().getLabel() + ")";
+    return object.getLabel() + " (" + object.getParentObj().getLabel() + ")";
   }
 
   /**
