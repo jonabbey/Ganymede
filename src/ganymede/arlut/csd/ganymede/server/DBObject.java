@@ -2260,7 +2260,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * Otherwise, returns null.
    */
 
-  private DBObject getParentObj()
+  public DBObject getParentObj()
   {
     if (!this.isEmbedded())
       {
