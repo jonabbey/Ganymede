@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -2251,6 +2251,25 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	return Ganymede.db.getObject(target);
       }
+  }
+
+  /**
+   * For an embedded object, returns a reference to the object which
+   * contains this embedded object.
+   *
+   * Otherwise, returns null.
+   */
+
+  private DBObject getParentObj()
+  {
+    if (!this.isEmbedded())
+      {
+        return null;
+      }
+
+    Invid parentInvid = (Invid) this.getFieldValueLocal(SchemaConstants.ContainerField);
+
+    return lookupInvid(parentInvid, false);
   }
 
   /**
