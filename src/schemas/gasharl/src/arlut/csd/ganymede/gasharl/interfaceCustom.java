@@ -276,7 +276,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // get the vector of currently available nets from our containing
     // System
 
-    Vector ipNetVec = getParentObj().getAvailableNets();
+    Vector ipNetVec = getParentSysObj().getAvailableNets();
 
     if (ipNetVec != null)
       {
@@ -515,7 +515,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	if (field.getValueLocal() != null)
 	  {
-	    getParentObj().saveAddress(address);
+	    getParentSysObj().saveAddress(address);
 	  }
 
 	if (value == null)
@@ -535,7 +535,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// now find a new address for this object based on the network we
 	// are being asked to change to.
 
-	address = getParentObj().getAddress((Invid) value);
+	address = getParentSysObj().getAddress((Invid) value);
 
 	if (address == null)
 	  {
@@ -590,7 +590,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// we need to find a new network to match, and to set that
 	// into our network field
 
-	netInvid = getParentObj().findMatchingNet(address);
+	netInvid = getParentSysObj().findMatchingNet(address);
 
 	if (netInvid == null)
 	  {
@@ -632,7 +632,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     return null;
   }
 
-  public systemCustom getParentObj()
+  private systemCustom getParentSysObj()
   {
     if (sysObj == null)
       {    
@@ -676,26 +676,16 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   {
     Vector result;
     DBObject parentObj;
-    Invid sysInvid;
 
     /* -- */
 
-    // we can't use getParentObj() because that only works in an editing
+    // we can't use getParentSysObj() because that only works in an editing
     // context.  The checkRequiredFields() call may be called from a task
     // that wants to just sweep through the database looking for incomplete
     // objects, so we arrange to find a DBObject reference to parentObj
     // so that we can get access to the list of our siblings.
 
-    sysInvid = (Invid) object.getFieldValueLocal(SchemaConstants.ContainerField);
-
-    if (object instanceof DBEditObject)
-      {
-	parentObj = ((DBEditObject) object).getSession().viewDBObject(sysInvid);
-      }
-    else
-      {
-	parentObj = Ganymede.internalSession.getSession().viewDBObject(sysInvid);
-      }
+    parentObj = object.getParentObj();
 
     try
       {
