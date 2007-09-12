@@ -3,7 +3,7 @@
    interfaceCustom.java
 
    This file is a management class for interface objects in Ganymede.
-   
+
    Created: 15 October 1997
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
@@ -13,9 +13,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2007
    The University of Texas at Austin
 
@@ -78,7 +78,7 @@ import arlut.csd.ganymede.server.IPDBField;
 ------------------------------------------------------------------------------*/
 
 public class interfaceCustom extends DBEditObject implements SchemaConstants {
-  
+
   static final boolean debug = false;
 
   static gnu.regexp.RE regexp = null;
@@ -248,7 +248,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       {
 	return null;		// no caching net choices, thankyouverymuch
       }
-    
+
     return super.obtainChoicesKey(field);
   }
 
@@ -261,7 +261,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    *
    * This method will provide a reasonable default for targetted
    * invid fields.
-   * 
+   *
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
@@ -291,7 +291,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	System.err.println("interfaceCustom: net choice for invid " + getInvid() + ":\n" +
 			   result.getBuffer());
       }
-    
+
     return result;
   }
 
@@ -317,7 +317,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       {
 	return false;
       }
-    
+
     return super.mustChoose(field);
   }
 
@@ -336,7 +336,24 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   public String getEmbeddedObjectDisplayLabelHook(DBObject object)
   {
-    return object.getLabel() + " (" + object.getParentObj().getLabel() + ")";
+    DBObject parent = object.getParentObj();
+
+    try
+      {
+        DBObject typeObj = object.lookupInvid((Invid)parent.getFieldValueLocal(systemSchema.SYSTEMTYPE), false);
+
+        if (typeObj.getFieldValueLocal(systemTypeSchema.SYSTEMTYPE).equals("IP Telephone"))
+          {
+            DBObject userObj = object.lookupInvid((Invid)parent.getFieldValueLocal(systemSchema.PRIMARYUSER), false);
+
+            return String.valueOf(object.getLabel()) + " (" + String.valueOf(parent.getLabel()) + " - " + String.valueOf(userObj.getLabel()) + ")";
+          }
+      }
+    catch (NullPointerException ex)
+      {
+      }
+
+    return String.valueOf(object.getLabel()) + " (" + String.valueOf(parent.getLabel()) + ")";
   }
 
   /**
@@ -354,7 +371,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    * an exception will be thrown.<br><br>
    *
    * To be overridden in DBEditObject subclasses.
-   * 
+   *
    * <b>*PSEUDOSTATIC*</b>
    *
    */
@@ -429,9 +446,9 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	// the name is required if and only if the parent
 	// object has more than one interface
-	
+
 	Vector siblings = getSiblingInvids(object);
-	
+
 	if (siblings.size() == 0)
 	  {
 	    return false;
@@ -478,7 +495,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     // we don't want to mess with the available-network
     // management code if we are doing bulk-loading.
-    
+
     if (!gSession.enableOversight || !gSession.enableWizards)
       {
 	return null;
@@ -488,7 +505,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       {
 	// if this net change was initiated by an approved ADDRESS change,
 	// we're not going to try to second-guess their address choice.
-	
+
 	if (inFinalizeAddrChange)
 	  {
 	    return null;
@@ -496,7 +513,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	// if the net is being set to a net that matches what's already
 	// in the address field for some reason, we'll go ahead and ok it
-	
+
 	Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
 
 	if (address != null && systemCustom.checkMatchingNet(getSession(), (Invid) value, address))
@@ -505,10 +522,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	      {
 		System.err.println("interfaceCustom.finalizeSetValue(): approving ipnet change");
 	      }
-	    
+
 	    return null;
 	  }
-	
+
 	// okay, we didn't match, tell the system object to remember the
 	// address that was formerly associated with the old network value
 
@@ -527,7 +544,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	    ReturnVal retVal = new ReturnVal(true, true);
 	    retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
-	    
+
 	    return retVal;
 	  }
 
@@ -604,13 +621,13 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// finalizeSetValue() spawned by setFieldValue() know not to
 	// try and choose a new IP address before we get a chance to
 	// return and okay the IP address change we are processing.
-	
+
 	try
 	  {
 	    inFinalizeAddrChange = true;
 	    ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, netInvid);
 	    inFinalizeAddrChange = false;
-	    
+
 	    if (retVal != null && !retVal.didSucceed())
 	      {
 		return Ganymede.createErrorDialog("schema error",
@@ -619,7 +636,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	    retVal = new ReturnVal(true, true);
 	    retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
-	    
+
 	    return retVal;
 	  }
 	catch (GanyPermissionsException ex)
@@ -634,7 +651,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   private systemCustom getParentSysObj()
   {
     if (sysObj == null)
-      {    
+      {
 	Invid sysInvid = (Invid) getFieldValueLocal(SchemaConstants.ContainerField);
 
 	// we *have* to use editDBObject() here because we need access to the custom
@@ -654,7 +671,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    *
    * This private method returns a vector of invids, being a list of
    * other interfaces defined in the system we are defined in.
-   * 
+   *
    */
 
   private Vector getSiblingInvids()
@@ -668,7 +685,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    * other interfaces defined in the system we are defined in.
    *
    * <b>*PSEUDOSTATIC*</b>
-   * 
+   *
    */
 
   private Vector getSiblingInvids(DBObject object)
@@ -694,7 +711,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       {
 	return new Vector();
       }
-    
+
     // we are not our own sibling.
 
     result.removeElement(object.getInvid());
@@ -720,7 +737,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    * Question: what synchronization issues are going to be needed
    * between DBEditObject and DBField to insure that we can have
    * a reliable verifyNewValue method here?
-   * 
+   *
    */
 
   public ReturnVal verifyNewValue(DBField field, Object value)
@@ -890,7 +907,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	throw new MACAddressException();
       }
-    
+
     return result.toString().toLowerCase();
   }
 
@@ -964,7 +981,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
  */
 
 class MACAddressException extends RuntimeException {
-  
+
   public MACAddressException()
   {
   }
