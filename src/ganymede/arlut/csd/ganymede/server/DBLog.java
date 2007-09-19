@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -303,6 +303,23 @@ public class DBLog {
       }
 
     closed = true;
+  }
+
+  /**
+   * This method sends out a generic mail message that will not be logged.
+   *
+   * @param recipients a Vector of email addresses to send this
+   * message to.  Should never be null or empty.
+   *
+   * @param title The email subject for this message, will have the
+   * Ganymede.subjectPrefixProperty prepended to it.
+   *
+   * @param description The message itself
+   */
+
+  public void sendMail(Vector recipients, String title, String description)
+  {
+    this.sendMail(recipients, title, description, false, false, null);
   }
 
   /**

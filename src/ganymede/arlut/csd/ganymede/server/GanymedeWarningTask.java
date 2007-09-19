@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -174,6 +174,7 @@ public class GanymedeWarningTask implements Runnable {
 	StringBuffer tempString = new StringBuffer();
 	Vector objects = new Vector();
 	DBObject obj;
+        DBEditObject objectHook;
 
 	// --
 
@@ -213,6 +214,8 @@ public class GanymedeWarningTask implements Runnable {
 		  {
 		    continue;
 		  }
+
+                objectHook = base.getObjectHook();
 	    
 		if (currentThread.isInterrupted())
 		  {
@@ -249,17 +252,20 @@ public class GanymedeWarningTask implements Runnable {
 				     base.getName(), mySession.viewObjectLabel(invid), new Integer(i+1));
 		      }
 
-		    tempString.setLength(0);
-		    tempString.append(title);
-
 		    obj = mySession.session.viewDBObject(invid);
 
-		    tempString.append(getExpirationWarningMesg(obj));
-		    
-		    objects.setSize(0);
-		    objects.addElement(invid);
+                    if (!objectHook.reactToExpirationWarning(obj, 7 * i))
+                      {
+                        tempString.setLength(0);
+                        tempString.append(title);
 
-		    sendMail("expirationwarn", title, tempString.toString(), objects);
+                        tempString.append(getExpirationWarningMesg(obj));
+		    
+                        objects.setSize(0);
+                        objects.addElement(invid);
+
+                        sendMail("expirationwarn", title, tempString.toString(), objects);
+                      }
 		  }
 	      }
 
@@ -287,6 +293,8 @@ public class GanymedeWarningTask implements Runnable {
 		  {
 		    continue;
 		  }
+
+                objectHook = base.getObjectHook();
 	    
 		q = new Query(base.getTypeID(), removeNode, false);
 
@@ -318,18 +326,22 @@ public class GanymedeWarningTask implements Runnable {
 				     base.getName(), mySession.viewObjectLabel(invid), new Integer(i+1));
 		      }
 
-		    obj = mySession.session.viewDBObject(invid);
-		    Date actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
+                    obj = mySession.session.viewDBObject(invid);
 
-		    tempString.setLength(0);
-		    tempString.append(title);
-		    // "\n\nRemoval scheduled to take place on or after {0,date}."
-		    tempString.append(ts.l("run.removal_scheduled", actionDate));
+                    if (!objectHook.reactToRemovalWarning(obj, 7 * i))
+                      {
+                        Date actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
+
+                        tempString.setLength(0);
+                        tempString.append(title);
+                        // "\n\nRemoval scheduled to take place on or after {0,date}."
+                        tempString.append(ts.l("run.removal_scheduled", actionDate));
 		    
-		    objects.setSize(0);
-		    objects.addElement(invid);
+                        objects.setSize(0);
+                        objects.addElement(invid);
 
-		    sendMail("removalwarn", title, tempString.toString(), objects);
+                        sendMail("removalwarn", title, tempString.toString(), objects);
+                      }
 		  }
 	      }
 	  }

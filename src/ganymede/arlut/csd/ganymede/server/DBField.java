@@ -1115,12 +1115,14 @@ public abstract class DBField implements Remote, db_field, FieldType {
   }
 
   /**
-   *
    * Returns the value of this field, if a scalar.  An IllegalArgumentException
    * will be thrown if this field is a vector.
    *
-   * @see arlut.csd.ganymede.rmi.db_field
+   * This method will throw a GanyPermissionsException if this
+   * DBObject is being viewed by a GanymedeSession, and that
+   * GanymedeSession lacks appropriate permission to see the value.
    *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public Object getValue() throws GanyPermissionsException

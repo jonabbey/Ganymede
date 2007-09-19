@@ -17,7 +17,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -572,6 +572,24 @@ public class DBEditSet {
 
   public void logMail(Vector addresses, String subject, String message)
   {
+    logEvents.addElement(new DBLogEvent(addresses, subject, message, null, null, null));
+  }
+
+  /**
+   * This method is used to record a message to be sent out when
+   * the transaction is committed.
+   *
+   * @param toAddress The email address to send this message to.
+   * @param subject The subject line of the message
+   * @param message The body of the message
+   */
+
+  public void logMail(String toAddress, String subject, String message)
+  {
+    Vector addresses = new Vector();
+
+    addresses.addElement(toAddress);
+
     logEvents.addElement(new DBLogEvent(addresses, subject, message, null, null, null));
   }
 

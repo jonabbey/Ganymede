@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -1347,6 +1347,51 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public String getImageURLForObject(DBObject object)
   {
     return null;                // no image
+  }
+
+  /**
+   * This method provides a hook to allow custom DBEditObject
+   * subclasses to react to forthcoming object expiration, during the
+   * execution of the GanymedeWarningTask.
+   *
+   * This method will be called without benefit of an open DBEditSet,
+   * so any email generated will need to make use of the
+   * non-transactional mail methods in the Ganymede.log object.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   * @return true if the DBEditObject subclass wishes to completely
+   * handle the warning, or false if the default warning transmisssion
+   * logic should also be sent.
+   */
+
+  public boolean reactToExpirationWarning(DBObject object, int days)
+  {
+    return false;
+  }
+
+  /**
+   * This method provides a hook to allow custom DBEditObject
+   * subclasses to react to forthcoming object removal.
+   *
+   * This method will be called without benefit of an open DBEditSet,
+   * so any email generated will need to make use of the
+   * non-transactional mail methods in the Ganymede.log object.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   * @return true if the DBEditObject subclass wishes to completely
+   * handle the warning, or false if the default warning transmisssion
+   * logic should also be sent.
+   */
+
+  public boolean reactToRemovalWarning(DBObject object, int days)
+  {
+    return false;
   }
 
   /**

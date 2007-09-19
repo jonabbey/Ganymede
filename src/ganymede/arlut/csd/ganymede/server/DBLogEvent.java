@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -96,8 +96,10 @@ public class DBLogEvent {
   }
 
   /**
-   *
-   * Constructor to be used for a mailout event.
+   * Constructor to be used for a mailout event.  This constructor is
+   * used when an email message should be synthesized during the
+   * course of a transaction, and transmitted if and only if the
+   * transaction is successfully committed.
    *
    * @param addresses A vector of Strings listing email addresses to send notification
    * of this event to.
