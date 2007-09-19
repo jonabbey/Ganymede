@@ -1061,6 +1061,17 @@ $JAVA $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP -Duser.language=de arlut.csd.ganymede.cli
 
 Thanks Stefan!
 
+66. [SERVER] Added Support for Custom Inactivation and Removal Notifications
+
+I've modified the DBEditObject class to define a pair of new hooks,
+reactToExpirationWarning() and reactToRemovalWarning(), and modified
+the GanymedeWarningTask to take advantage of them.
+
+These new DBEditObject hooks are designed to allow custom DBEditObject
+subclasses to do custom notification when a given object needs to have
+inactivation or removal warnings sent out, as determined by the basic
+logic in the GanymedeWarningTask.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
