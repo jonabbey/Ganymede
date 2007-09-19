@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -111,14 +111,13 @@ import arlut.csd.ganymede.server.adminPersonaCustom;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * This class is the custom plug-in to handle the user object type in the
  * Ganymede server.  It does special validations of operations on the user,
  * handles inactivation and reactivation logic, and generates Wizards as
- * needed.<br>
+ * needed.
  *
- * <br>See the userSchema.java file for a list of field definitions that this
- * module expects to work with.<br>
+ * See the userSchema.java file for a list of field definitions that this
+ * module expects to work with.
  *
  * @see arlut.csd.ganymede.gasharl.userSchema
  * @see arlut.csd.ganymede.server.DBEditObject
@@ -849,6 +848,53 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
+   * This method provides a hook to allow custom DBEditObject
+   * subclasses to react to forthcoming object removal.
+   *
+   * This method will be called without benefit of an open DBEditSet,
+   * so any email generated will need to make use of the
+   * non-transactional mail methods in the Ganymede.log object.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   *
+   * @return true if the DBEditObject subclass wishes to completely
+   * handle the warning, or false if the default warning transmisssion
+   * logic should also be sent.
+   */
+
+  public boolean reactToRemovalWarning(DBObject object, int days)
+  {
+    StringDBField deliveryAddresses = null;
+    Vector values = null;
+
+    deliveryAddresses = (StringDBField) object.getField(userSchema.EMAILTARGET);
+    values = deliveryAddresses.getValuesLocal();
+
+    for (int i = 0; i < values.size(); i++)
+      {
+        String x = (String) values.elementAt(i);
+
+        if (x.endsWith("@arlex.arlut.utexas.edu"))
+          {
+            Vector toAddresses = new Vector();
+            toAddresses.addElement("pcshelp@arlut.utexas.edu");
+            toAddresses.addElement("broccol@arlut.utexas.edu");
+
+            Ganymede.log.sendMail(toAddresses,
+                                  "Exchange User " + this.getLabel() + " Scheduled for Deletion",
+                                  "User " + this.getLabel() +
+                                  " is scheduled to be deleted from Ganymede in " + days +
+                                  " days.\n\nPCS will need to be prepared for clearing the account out of the Exchange server.\n");
+            return false;
+          }
+      }
+
+    return false;
+  }
+
+  /**
    * <p>This method is used to control whether or not it is acceptable to
    * make a link to the given field in this 
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
@@ -1460,7 +1506,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * the user in this method.
    * 
    * @see arlut.csd.ganymede.gasharl.userReactivateWizard
-   *
    */
 
   public ReturnVal reactivate(userReactivateWizard reactivateWizard)
@@ -1579,7 +1624,63 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
+   * This method handles removal logic for this object type.  This method
+   * will be called immediately from DBSession.deleteDBObject().
    *
+   * The remove() method can cause other objects to be deleted, can cause
+   * strings to be removed from fields in other objects, whatever.
+   *
+   * If remove() returns a ReturnVal that has its success flag set to false
+   * and does not include a JDialogBuff for further interaction with the
+   * user, the DBSession.deleteDBObject() method will roll back any changes
+   * made by this method.
+   *
+   * remove() is intended for subclassing, whereas finalizeRemove() is
+   * not.  finalizeRemove() provides the standard logic for wiping out
+   * fields and what not to cause the object to be unlinked from
+   * other objects.
+   *
+   * IMPORTANT NOTE: If a custom object's remove() logic decides to
+   * enter into a wizard interaction with the user, that logic is
+   * responsible for calling finalizeRemove() on the object when
+   * it is determined that the object really should be removed,
+   * with a boolean indicating whether success was had.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal remove()
+  {
+    StringDBField deliveryAddresses = (StringDBField) this.getField(userSchema.EMAILTARGET);
+    Vector values = deliveryAddresses.getValuesLocal();
+
+    for (int i = 0; i < values.size(); i++)
+      {
+        String x = (String) values.elementAt(i);
+
+        if (x.endsWith("@arlex.arlut.utexas.edu"))
+          {
+            Vector toAddresses = new Vector();
+            toAddresses.addElement("pcshelp@arlut.utexas.edu");
+            toAddresses.addElement("broccol@arlut.utexas.edu");
+
+            this.getEditSet().logMail(toAddresses,
+                                      "Exchange User " + this.getLabel() + " Deleted",
+                                      "User " + this.getLabel() +
+                                      " has been deleted from Ganymede, and will need to be cleared out of the Exchange server.\n");
+
+            return null;
+          }
+      }
+
+    return null;
+  }
+
+  /**
    * This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
@@ -1591,7 +1692,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * We don't want the HOMEGROUP field's choice list to be cached on
    * the client because it is dynamically generated for this
    * context, and doesn't make sense in other contexts.
-   * 
    */
 
   public Object obtainChoicesKey(DBField field)
@@ -1607,11 +1707,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   *
    * This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given string field can only
    * choose from a choice provided by obtainChoiceList()
-   *
    */
 
   public boolean mustChoose(DBField field)
@@ -1627,7 +1725,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   *
    * This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
@@ -1637,7 +1734,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * do not have their choice lists cached on the client, because
    * they are custom generated without any kind of accompanying
    * cache key.
-   * 
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
@@ -1706,10 +1802,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   *
    * We update the groupChoices list to contain all of the groups
    * the user is currently in.
-   *
    */
 
   void updateGroupChoiceList()
@@ -1783,7 +1877,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   *
    * Customization method to allow this Ganymede object type to
    * override the default permissions mechanism for special
    * purposes.<br><br>
@@ -1800,7 +1893,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * To be overridden in DBEditObject subclasses.<br><br>
    *
    * <b>*PSEUDOSTATIC*</b>
-   *
    */
 
   public PermEntry permOverride(GanymedeSession session, DBObject object, short fieldid)
@@ -1932,10 +2024,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   *
    * This method is called after the set value operation has been ok'ed
    * by any appropriate wizard code.
-   *
    */
 
   public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
@@ -2299,8 +2389,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   * <p>This method calculates what the maximum time the password
-   * expiration field may be set to by a ganymede admin.</p> */
+   * This method calculates what the maximum time the password
+   * expiration field may be set to by a ganymede admin.
+   */
 
   private Date getMaxPasswordExtension()
   {
@@ -2324,10 +2415,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   *
    * This is the hook that DBEditObject subclasses use to interpose wizards whenever
    * a sensitive field is being changed.
-   *
    */
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
@@ -2693,11 +2782,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   * <p>This method checks the given plaintext password against an
+   * This method checks the given plaintext password against an
    * external password validator library.  validatePasswordChoice
    * specifies a file name to write the evaluation results to, runs
    * the validator, and then reads from the file to see if the
-   * operation succeeded.</p>
+   * operation succeeded.
    */
 
   public ReturnVal validatePasswordChoice(String password, boolean asRoot)
@@ -2808,13 +2897,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   * <p>This method is used to save the chosen password to npasswd's
+   * This method is used to save the chosen password to npasswd's
    * on-disk non-reuse history so that npasswd can reject a too-soon
-   * recurrence of this password later.</p>
+   * recurrence of this password later.
    *
-   * <p>If supergash is editing this account, the password might not
+   * If supergash is editing this account, the password might not
    * be to npasswd's liking, in which case the password save operation
-   * will fail, but we won't worry about that it if it happens.</p>
+   * will fail, but we won't worry about that it if it happens.
    */
 
   public ReturnVal savePasswordChoice(String password)
