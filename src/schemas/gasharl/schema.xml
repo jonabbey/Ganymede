@@ -1,3 +1,4 @@
+
 <ganyschema>
   <namespaces>
     <namespace name="ownerbase"/>
@@ -27,6 +28,7 @@
     <namespace name="shellspace" case-sensitive="true"/>
     <namespace name="nisserver" case-sensitive="true"/>
     <namespace name="interfacelabel" case-sensitive="true"/>
+    <namespace name="mailman"/>
   </namespaces>
 
   <object_type_definitions>
@@ -39,85 +41,89 @@
           <objectdef name="System_Events" id="4">
             <classdef name="arlut.csd.ganymede.server.eventCustom" optionString=""/>
             <label fieldid="100"/>
-            <fielddef name="Event_Token" id="100">
-              <comment>Single-word token for this event class</comment>
-              <typedef type="string">
-                <maxlength val="32"/>
-                <badchars val=" |"/>
-                <namespace val="eventtoken"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Event_Name" id="101">
-              <comment>Short name for this event class, suitable for an email message title</comment>
-              <typedef type="string">
-                <maxlength val="64"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Event_Description" id="102">
-              <comment>Fuller description of this event class, suitable for an email body</comment>
-              <typedef type="string">
-              </typedef>
-            </fielddef>
-            <fielddef name="Event_Mail" id="103">
-              <comment>If true, events of this type should be mailed</comment>
-              <typedef type="boolean"/>
-            </fielddef>
-            <fielddef name="Cc_Admin" id="105">
-              <comment>If true, mail for this event will always be cc'ed to the admin performing the action</comment>
-              <typedef type="boolean"/>
-            </fielddef>
-            <fielddef name="Cc_Owner_Groups" id="106">
-              <typedef type="boolean"/>
-            </fielddef>
-            <fielddef name="Mail_List" id="107">
-              <typedef type="string">
-                <vector/>
-              </typedef>
-            </fielddef>
+            <tab name="General">
+              <fielddef name="Event_Token" id="100">
+                <comment>Single-word token for this event class</comment>
+                <typedef type="string">
+                  <maxlength val="32"/>
+                  <badchars val=" |"/>
+                  <namespace val="eventtoken"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Event_Name" id="101">
+                <comment>Short name for this event class, suitable for an email message title</comment>
+                <typedef type="string">
+                  <maxlength val="64"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Event_Description" id="102">
+                <comment>Fuller description of this event class, suitable for an email body</comment>
+                <typedef type="string">
+                </typedef>
+              </fielddef>
+              <fielddef name="Event_Mail" id="103">
+                <comment>If true, events of this type should be mailed</comment>
+                <typedef type="boolean"/>
+              </fielddef>
+              <fielddef name="Cc_Admin" id="105">
+                <comment>If true, mail for this event will always be cc'ed to the admin performing the action</comment>
+                <typedef type="boolean"/>
+              </fielddef>
+              <fielddef name="Cc_Owner_Groups" id="106">
+                <typedef type="boolean"/>
+              </fielddef>
+              <fielddef name="Mail_List" id="107">
+                <typedef type="string">
+                  <vector/>
+                </typedef>
+              </fielddef>
+            </tab>
           </objectdef>
           <objectdef name="Object_Events" id="6">
             <classdef name="arlut.csd.ganymede.server.objectEventCustom" optionString=""/>
             <label fieldid="110"/>
-            <fielddef name="Hidden_Label" id="110">
-              <comment>Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.</comment>
-              <invisible/>
-              <typedef type="string">
-                <namespace val="eventtoken"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Event_Token" id="100">
-              <typedef type="string">
-                <maxlength val="32"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Object_Type" id="106">
-              <typedef type="string">
-              </typedef>
-            </fielddef>
-            <fielddef name="Event_Name" id="101">
-              <typedef type="string">
-                <maxlength val="64"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Event_Description" id="102">
-              <typedef type="string">
-              </typedef>
-            </fielddef>
-            <fielddef name="Cc_Admin" id="105">
-              <typedef type="boolean"/>
-            </fielddef>
-            <fielddef name="Cc_Owner_Groups" id="107">
-              <typedef type="boolean"/>
-            </fielddef>
-            <fielddef name="Mail_List" id="109">
-              <typedef type="string">
-                <vector/>
-                <badchars val="|`'&quot;"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Object_Type_ID" id="108">
-              <typedef type="numeric"/>
-            </fielddef>
+            <tab name="General">
+              <fielddef name="Hidden_Label" id="110">
+                <comment>Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.</comment>
+                <invisible/>
+                <typedef type="string">
+                  <namespace val="eventtoken"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Event_Token" id="100">
+                <typedef type="string">
+                  <maxlength val="32"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Object_Type" id="106">
+                <typedef type="string">
+                </typedef>
+              </fielddef>
+              <fielddef name="Event_Name" id="101">
+                <typedef type="string">
+                  <maxlength val="64"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Event_Description" id="102">
+                <typedef type="string">
+                </typedef>
+              </fielddef>
+              <fielddef name="Cc_Admin" id="105">
+                <typedef type="boolean"/>
+              </fielddef>
+              <fielddef name="Cc_Owner_Groups" id="107">
+                <typedef type="boolean"/>
+              </fielddef>
+              <fielddef name="Mail_List" id="109">
+                <typedef type="string">
+                  <vector/>
+                  <badchars val="|`'&quot;"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Object_Type_ID" id="108">
+                <typedef type="numeric"/>
+              </fielddef>
+            </tab>
           </objectdef>
         </category>
 
@@ -126,205 +132,215 @@
           <objectdef name="Owner_Group" id="0">
             <classdef name="arlut.csd.ganymede.server.ownerCustom" optionString=""/>
             <label fieldid="100"/>
-            <fielddef name="Name" id="100">
-              <comment>The name of this ownership group</comment>
-              <typedef type="string">
-                <namespace val="ownerbase"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="UIDGID_Start" id="256">
-              <typedef type="numeric"/>
-            </fielddef>
-            <fielddef name="Members" id="101">
-              <comment>List of admin personae that are members of this owner set</comment>
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="Admin_Persona"/>
-                <targetfield name="Owner_Sets"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Cc_All_Admins" id="104">
-              <typedef type="boolean"/>
-            </fielddef>
-            <fielddef name="Mail_List" id="105">
-              <typedef type="string">
-                <vector/>
-                <badchars val="&quot;|'"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Approval_List" id="257">
-              <typedef type="string">
-                <vector/>
-                <badchars val="|&quot;';`"/>
-              </typedef>
-            </fielddef>
+            <tab name="General">
+              <fielddef name="Name" id="100">
+                <comment>The name of this ownership group</comment>
+                <typedef type="string">
+                  <namespace val="ownerbase"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="UIDGID_Start" id="256">
+                <typedef type="numeric"/>
+              </fielddef>
+              <fielddef name="Members" id="101">
+                <comment>List of admin personae that are members of this owner set</comment>
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="Admin_Persona"/>
+                  <targetfield name="Owner_Sets"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Cc_All_Admins" id="104">
+                <typedef type="boolean"/>
+              </fielddef>
+              <fielddef name="Mail_List" id="105">
+                <typedef type="string">
+                  <vector/>
+                  <badchars val="&quot;|'"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Approval_List" id="257">
+                <typedef type="string">
+                  <vector/>
+                  <badchars val="|&quot;';`"/>
+                </typedef>
+              </fielddef>
+            </tab>
           </objectdef>
           <objectdef name="Admin_Persona" id="1">
             <classdef name="arlut.csd.ganymede.server.adminPersonaCustom" optionString=""/>
             <label fieldid="108"/>
-            <fielddef name="User" id="103">
-              <comment>What user is this admin persona associated with?</comment>
-              <typedef type="invid">
-                <targetobject name="User"/>
-                <targetfield name="Admin_Personae"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Persona_Name" id="100">
-              <comment>The unique name for this admin persona</comment>
-              <typedef type="string">
-                <badchars val=":"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Password" id="101">
-              <comment>Persona password</comment>
-              <typedef type="password">
-                <maxlength val="32"/>
-                <crypted/>
-              </typedef>
-            </fielddef>
-            <fielddef name="GASH_Prefix" id="256">
-              <typedef type="string">
-                <maxlength val="3"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Owner_Sets" id="102">
-              <comment>What owner sets are this persona members of?</comment>
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="Owner_Group"/>
-                <targetfield name="Members"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Roles" id="104">
-              <comment>What permission matrices are this admin persona associated with?</comment>
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="Role"/>
-                <targetfield name="Persona_entities"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Admin_Console" id="105">
-              <comment>If true, this persona can be used to access the admin console</comment>
-              <typedef type="boolean"/>
-            </fielddef>
-            <fielddef name="Full_Console" id="106">
-              <comment>If true, this persona can kill users and edit the schema</comment>
-              <typedef type="boolean"/>
-            </fielddef>
-            <fielddef name="Label" id="108">
-              <typedef type="string">
-                <namespace val="persona"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Email_Address" id="107">
-              <typedef type="string">
-                <badchars val="|&quot;'"/>
-              </typedef>
-            </fielddef>
+            <tab name="General">
+              <fielddef name="User" id="103">
+                <comment>What user is this admin persona associated with?</comment>
+                <typedef type="invid">
+                  <targetobject name="User"/>
+                  <targetfield name="Admin_Personae"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Persona_Name" id="100">
+                <comment>The unique name for this admin persona</comment>
+                <typedef type="string">
+                  <badchars val=":"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Password" id="101">
+                <comment>Persona password</comment>
+                <typedef type="password">
+                  <maxlength val="32"/>
+                  <crypted/>
+                </typedef>
+              </fielddef>
+              <fielddef name="GASH_Prefix" id="256">
+                <typedef type="string">
+                  <maxlength val="3"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Owner_Sets" id="102">
+                <comment>What owner sets are this persona members of?</comment>
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="Owner_Group"/>
+                  <targetfield name="Members"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Roles" id="104">
+                <comment>What permission matrices are this admin persona associated with?</comment>
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="Role"/>
+                  <targetfield name="Persona_entities"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Admin_Console" id="105">
+                <comment>If true, this persona can be used to access the admin console</comment>
+                <typedef type="boolean"/>
+              </fielddef>
+              <fielddef name="Full_Console" id="106">
+                <comment>If true, this persona can kill users and edit the schema</comment>
+                <typedef type="boolean"/>
+              </fielddef>
+              <fielddef name="Label" id="108">
+                <typedef type="string">
+                  <namespace val="persona"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Email_Address" id="107">
+                <typedef type="string">
+                  <badchars val="|&quot;'"/>
+                </typedef>
+              </fielddef>
+            </tab>
           </objectdef>
           <objectdef name="Role" id="2">
             <classdef name="arlut.csd.ganymede.server.permCustom" optionString=""/>
             <label fieldid="100"/>
-            <fielddef name="Name" id="100">
-              <comment>The name of this permission matrix</comment>
-              <typedef type="string">
-                <namespace val="access"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Delegatable_Role" id="104">
-              <typedef type="boolean"/>
-            </fielddef>
-            <fielddef name="Owned_Object_Bits" id="101">
-              <comment>Access bits, by object type</comment>
-              <typedef type="permmatrix"/>
-            </fielddef>
-            <fielddef name="Default_Bits" id="103">
-              <typedef type="permmatrix"/>
-            </fielddef>
-            <fielddef name="Persona_entities" id="102">
-              <comment>What personae are using this permission matrix?</comment>
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="Admin_Persona"/>
-                <targetfield name="Roles"/>
-              </typedef>
-            </fielddef>
+            <tab name="General">
+              <fielddef name="Name" id="100">
+                <comment>The name of this permission matrix</comment>
+                <typedef type="string">
+                  <namespace val="access"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Delegatable_Role" id="104">
+                <typedef type="boolean"/>
+              </fielddef>
+              <fielddef name="Owned_Object_Bits" id="101">
+                <comment>Access bits, by object type</comment>
+                <typedef type="permmatrix"/>
+              </fielddef>
+              <fielddef name="Default_Bits" id="103">
+                <typedef type="permmatrix"/>
+              </fielddef>
+              <fielddef name="Persona_entities" id="102">
+                <comment>What personae are using this permission matrix?</comment>
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="Admin_Persona"/>
+                  <targetfield name="Roles"/>
+                </typedef>
+              </fielddef>
+            </tab>
           </objectdef>
         </category>
 
         <objectdef name="Task" id="5">
           <classdef name="arlut.csd.ganymede.server.taskCustom" optionString=""/>
           <label fieldid="100"/>
-          <fielddef name="Task_Name" id="100">
-            <typedef type="string">
-              <namespace val="buildertask"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Task_Class" id="101">
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Run_On_Transaction_Commit" id="102">
-            <typedef type="boolean"/>
-          </fielddef>
-          <fielddef name="Run_Periodically" id="103">
-            <typedef type="boolean"/>
-          </fielddef>
-          <fielddef name="Period_Unit" id="104">
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Period_Count" id="105">
-            <typedef type="numeric"/>
-          </fielddef>
-          <fielddef name="Period_Anchor" id="106">
-            <typedef type="date"/>
-          </fielddef>
-          <fielddef name="Option_Strings" id="107">
-            <comment>Optional task parameters, interpreted by specific tasks if needed</comment>
-            <typedef type="string">
-              <vector/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Task_Name" id="100">
+              <typedef type="string">
+                <namespace val="buildertask"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Task_Class" id="101">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Run_On_Transaction_Commit" id="102">
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Run_Periodically" id="103">
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Period_Unit" id="104">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Period_Count" id="105">
+              <typedef type="numeric"/>
+            </fielddef>
+            <fielddef name="Period_Anchor" id="106">
+              <typedef type="date"/>
+            </fielddef>
+            <fielddef name="Option_Strings" id="107">
+              <comment>Optional task parameters, interpreted by specific tasks if needed</comment>
+              <typedef type="string">
+                <vector/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="Sync_Channel" id="7">
           <classdef name="arlut.csd.ganymede.server.syncChannelCustom" optionString=""/>
           <label fieldid="100"/>
-          <fielddef name="Name" id="100">
-            <typedef type="string">
-              <namespace val="buildertask"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Sync_Channel_Type" id="105">
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Queue_Directory" id="101">
-            <comment>Location of the sync channel directory on disk</comment>
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Full_State_File" id="106">
-            <comment>Path to the file to use for full-state XML dumps</comment>
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Service_Program" id="102">
-            <comment>The location of the program to service this sync channel</comment>
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Sync_Data" id="103">
-            <comment>The definitions for what object and fields we want to include in this sync channel</comment>
-            <typedef type="options"/>
-          </fielddef>
-          <fielddef name="Allow_Plaintext_Passwords" id="104">
-            <comment>Allow Plaintext Passwords to be written to this Sync Channel</comment>
-            <typedef type="boolean"/>
-          </fielddef>
-          <fielddef name="Channel_Type_Index" id="107">
-            <typedef type="numeric"/>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Name" id="100">
+              <typedef type="string">
+                <namespace val="buildertask"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Sync_Channel_Type" id="105">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Queue_Directory" id="101">
+              <comment>Location of the sync channel directory on disk</comment>
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Full_State_File" id="106">
+              <comment>Path to the file to use for full-state XML dumps</comment>
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Service_Program" id="102">
+              <comment>The location of the program to service this sync channel</comment>
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Sync_Data" id="103">
+              <comment>The definitions for what object and fields we want to include in this sync channel</comment>
+              <typedef type="options"/>
+            </fielddef>
+            <fielddef name="Allow_Plaintext_Passwords" id="104">
+              <comment>Allow Plaintext Passwords to be written to this Sync Channel</comment>
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Channel_Type_Index" id="107">
+              <typedef type="numeric"/>
+            </fielddef>
+          </tab>
         </objectdef>
       </category>
 
@@ -334,502 +350,529 @@
           <classdef name="arlut.csd.ganymede.gasharl.mapEntryCustom" optionString=""/>
           <embedded/>
           <label fieldid="258"/>
-          <fielddef name="XML_Label" id="258">
-            <comment>This label is for use with the Ganymede
+          <tab name="General">
+            <fielddef name="XML_Label" id="258">
+              <comment>This label is for use with the Ganymede
 xmlclient.</comment>
-            <typedef type="string">
-              <namespace val="usermap"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Automounter_Map" id="256">
-            <typedef type="invid">
-              <targetobject name="Automounter_Map"/>
-              <targetfield name="Map_Entries"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="NFS_Volume" id="257">
-            <typedef type="invid">
-              <targetobject name="NFS_Volume"/>
-              <targetfield name="Map_Entries"/>
-            </typedef>
-          </fielddef>
+              <typedef type="string">
+                <namespace val="usermap"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Automounter_Map" id="256">
+              <typedef type="invid">
+                <targetobject name="Automounter_Map"/>
+                <targetfield name="Map_Entries"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="NFS_Volume" id="257">
+              <typedef type="invid">
+                <targetobject name="NFS_Volume"/>
+                <targetfield name="Map_Entries"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="Email_Redirect" id="275">
           <classdef name="arlut.csd.ganymede.gasharl.emailRedirectCustom" optionString=""/>
           <label fieldid="256"/>
-          <fielddef name="Name" id="256">
-            <typedef type="string">
-              <maxlength val="32"/>
-              <badchars val="@"/>
-              <namespace val="username"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Targets" id="257">
-            <typedef type="string">
-              <vector/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Aliases" id="258">
-            <typedef type="string">
-              <vector/>
-              <badchars val="@"/>
-              <namespace val="username"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Name" id="256">
+              <typedef type="string">
+                <maxlength val="32"/>
+                <badchars val="@ "/>
+                <namespace val="username"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Targets" id="257">
+              <typedef type="string">
+                <vector/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Aliases" id="258">
+              <typedef type="string">
+                <vector/>
+                <badchars val="@"/>
+                <namespace val="username"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="Email_List" id="274">
           <classdef name="arlut.csd.ganymede.gasharl.emailListCustom" optionString=""/>
           <label fieldid="256"/>
-          <fielddef name="List_Name" id="256">
-            <typedef type="string">
-              <badchars val="@"/>
-              <namespace val="username"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Internal_Members" id="257">
-            <typedef type="invid">
-              <vector/>
-            </typedef>
-          </fielddef>
-          <fielddef name="External_Targets" id="258">
-            <typedef type="string">
-              <vector/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="List_Name" id="256">
+              <typedef type="string">
+                <badchars val="@ "/>
+                <namespace val="username"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Internal_Members" id="257">
+              <typedef type="invid">
+                <vector/>
+              </typedef>
+            </fielddef>
+            <fielddef name="External_Targets" id="258">
+              <typedef type="string">
+                <vector/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="User" id="3">
           <classdef name="arlut.csd.ganymede.gasharl.userCustom" optionString=""/>
           <label fieldid="100"/>
-          <fielddef name="Username" id="100">
-            <comment>User name for an individual privileged to log into Ganymede and/or the network</comment>
-            <typedef type="string">
-              <maxlength val="8"/>
-              <badchars val=" :"/>
-              <namespace val="username"/>
-              <regexp val="^[a-z]+[a-z|\d|-]*$" desc="Usernames must start with a letter followed by letters, digits, or dashes"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="UID" id="256">
-            <typedef type="numeric">
-              <namespace val="uid"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Global_UID" id="277">
-            <comment>Globally unique ID, for LDAP applications</comment>
-            <typedef type="string">
-              <maxlength val="64"/>
-              <namespace val="GUIDspace"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Password" id="101">
-            <comment>Password for an individual privileged to log into Ganymede and/or the network</comment>
-            <typedef type="password">
-              <maxlength val="14"/>
-              <badchars val=":;,'&quot;"/>
-              <crypted/>
-              <md5crypted/>
-              <winHashed/>
-              <sshaHashed/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Account_Category" id="273">
-            <typedef type="invid">
-              <targetobject name="User_Category"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Full_Name" id="257">
-            <typedef type="string">
-              <maxlength val="64"/>
-              <badchars val=":,"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Badge" id="276">
-            <typedef type="string">
-              <maxlength val="8"/>
-              <regexp val="^\d*$" desc="The badge must be a numeric string"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Division" id="258">
-            <typedef type="string">
-              <maxlength val="32"/>
-              <badchars val=":,"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Room" id="259">
-            <typedef type="string">
-              <maxlength val="32"/>
-              <badchars val=": ,"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Office_Phone" id="260">
-            <typedef type="string">
-              <maxlength val="16"/>
-              <badchars val=":"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Home_Phone" id="261">
-            <typedef type="string">
-              <maxlength val="16"/>
-              <badchars val=":, "/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Groups" id="264">
-            <comment>List of non-primary groups the user is a member of.  
+          <tab name="General">
+            <fielddef name="Username" id="100">
+              <comment>User name for an individual privileged to log into Ganymede and/or the network</comment>
+              <typedef type="string">
+                <maxlength val="8"/>
+                <badchars val=" :"/>
+                <namespace val="username"/>
+                <regexp val="^[a-z]+[a-z|\d|-]*$" desc="Usernames must start with a letter followed by letters, digits, or dashes"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="UID" id="256">
+              <typedef type="numeric">
+                <namespace val="uid"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Global_UID" id="277">
+              <comment>Globally unique ID, for LDAP applications</comment>
+              <typedef type="string">
+                <maxlength val="64"/>
+                <namespace val="GUIDspace"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Password" id="101">
+              <comment>Password for an individual privileged to log into Ganymede and/or the network</comment>
+              <typedef type="password">
+                <maxlength val="14"/>
+                <badchars val=":;,'&quot;"/>
+                <crypted/>
+                <md5crypted/>
+                <winHashed/>
+                <sshaHashed/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Account_Category" id="273">
+              <typedef type="invid">
+                <targetobject name="User_Category"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Full_Name" id="257">
+              <typedef type="string">
+                <maxlength val="64"/>
+                <badchars val=":,"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Badge" id="276">
+              <typedef type="string">
+                <maxlength val="8"/>
+                <regexp val="^\d*$" desc="The badge must be a numeric string"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Division" id="258">
+              <typedef type="string">
+                <maxlength val="32"/>
+                <badchars val=":,"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Room" id="259">
+              <typedef type="string">
+                <maxlength val="32"/>
+                <badchars val=": ,"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Office_Phone" id="260">
+              <typedef type="string">
+                <maxlength val="16"/>
+                <badchars val=":"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Home_Phone" id="261">
+              <typedef type="string">
+                <maxlength val="16"/>
+                <badchars val=":, "/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Groups" id="264">
+              <comment>List of non-primary groups the user is a member of.  
 Limited to 16 for NFS.</comment>
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="Group"/>
-              <targetfield name="Users"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Home_Group" id="265">
-            <typedef type="invid">
-              <targetobject name="Group"/>
-              <targetfield name="Home_Users"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Login_Shell" id="263">
-            <typedef type="string">
-              <maxlength val="128"/>
-              <badchars val=" :"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Home_Directory" id="262">
-            <comment>UNIX default directory, normally assigned by Ganymede</comment>
-            <typedef type="string">
-              <maxlength val="128"/>
-              <badchars val=" :"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Admin_Personae" id="102">
-            <comment>A list of admin personae this user can assume</comment>
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="Admin_Persona"/>
-              <targetfield name="User"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Netgroups" id="266">
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="User_Netgroup"/>
-              <targetfield name="Users"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Directory_Volume" id="271">
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="Embedded_Automounter_Map_Entry"/>
-              <targetfield name="Containing_Object"/>
-              <embedded/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Email_Aliases" id="267">
-            <typedef type="string">
-              <vector/>
-              <maxlength val="32"/>
-              <badchars val="@"/>
-              <namespace val="username"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Signature_Alias" id="268">
-            <typedef type="string">
-              <maxlength val="32"/>
-              <badchars val="@"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Email_target" id="269">
-            <typedef type="string">
-              <vector/>
-              <badchars val=":"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Password_Expiration" id="275">
-            <typedef type="date"/>
-          </fielddef>
+              <typedef type="invid">
+                <vector maxSize="32"/>
+                <targetobject name="Group"/>
+                <targetfield name="Users"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Home_Group" id="265">
+              <typedef type="invid">
+                <targetobject name="Group"/>
+                <targetfield name="Home_Users"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Login_Shell" id="263">
+              <typedef type="string">
+                <maxlength val="128"/>
+                <badchars val=" :"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Home_Directory" id="262">
+              <comment>UNIX default directory, normally assigned by Ganymede</comment>
+              <typedef type="string">
+                <maxlength val="128"/>
+                <badchars val=" :"/>
+                <regexp val="^/"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Admin_Personae" id="102">
+              <comment>A list of admin personae this user can assume</comment>
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="Admin_Persona"/>
+                <targetfield name="User"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Netgroups" id="266">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="User_Netgroup"/>
+                <targetfield name="Users"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Directory_Volume" id="271">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="Embedded_Automounter_Map_Entry"/>
+                <targetfield name="Containing_Object"/>
+                <embedded/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Email_Aliases" id="267">
+              <typedef type="string">
+                <vector/>
+                <maxlength val="32"/>
+                <badchars val="@ "/>
+                <namespace val="username"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Signature_Alias" id="268">
+              <typedef type="string">
+                <maxlength val="32"/>
+                <badchars val="@ "/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Email_target" id="269">
+              <typedef type="string">
+                <vector/>
+                <badchars val=": "/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Password_Expiration" id="275">
+              <typedef type="date"/>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="Group" id="257">
           <classdef name="arlut.csd.ganymede.gasharl.groupCustom" optionString=""/>
           <label fieldid="256"/>
-          <fielddef name="GroupName" id="256">
-            <typedef type="string">
-              <minlength val="2"/>
-              <maxlength val="8"/>
-              <badchars val=" :"/>
-              <namespace val="groupname"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Password" id="257">
-            <typedef type="string">
-              <maxlength val="32"/>
-              <badchars val=" :"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="GID" id="258">
-            <typedef type="numeric">
-              <namespace val="gid"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Home_Users" id="262">
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="User"/>
-              <targetfield name="Home_Group"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Users" id="261">
-            <typedef type="invid">
-              <vector maxSize="120"/>
-              <targetobject name="User"/>
-              <targetfield name="Groups"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Description" id="259">
-            <typedef type="string">
-              <maxlength val="128"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Contract" id="260">
-            <typedef type="string">
-              <maxlength val="64"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Contract_Link" id="263">
-            <typedef type="invid">
-              <targetobject name="ARL_Contract"/>
-              <targetfield name="Groups"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="GroupName" id="256">
+              <typedef type="string">
+                <minlength val="2"/>
+                <maxlength val="8"/>
+                <badchars val=" :"/>
+                <namespace val="groupname"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Password" id="257">
+              <typedef type="string">
+                <maxlength val="32"/>
+                <badchars val=" :"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="GID" id="258">
+              <typedef type="numeric">
+                <namespace val="gid"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Home_Users" id="262">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="User"/>
+                <targetfield name="Home_Group"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Users" id="261">
+              <typedef type="invid">
+                <vector maxSize="120"/>
+                <targetobject name="User"/>
+                <targetfield name="Groups"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Description" id="259">
+              <typedef type="string">
+                <maxlength val="128"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Contract" id="260">
+              <typedef type="string">
+                <maxlength val="64"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Contract_Link" id="263">
+              <typedef type="invid">
+                <targetobject name="ARL_Contract"/>
+                <targetfield name="Groups"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="System" id="263">
           <classdef name="arlut.csd.ganymede.gasharl.systemCustom" optionString=""/>
           <label fieldid="261"/>
-          <fielddef name="System_Name" id="261">
-            <comment>Name of this system, not including DNS domain information</comment>
-            <typedef type="string">
-              <maxlength val="64"/>
-              <badchars val=" ,"/>
-              <namespace val="systems"/>
-              <regexp val="^[a-zA-Z\d]+[a-zA-Z\d\-]*$" desc="System Names may contain letters, numbers, and dashes.  System names must start with a letter or a number."/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Aliases" id="262">
-            <typedef type="string">
-              <vector maxSize="32"/>
-              <maxlength val="64"/>
-              <badchars val=" ,"/>
-              <namespace val="systems"/>
-              <regexp val="^[a-zA-Z\d]+[a-zA-Z\d\-]*$" desc="System names must consist of letters, numbers, and dashes.  System names must begin with a letter or a number."/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Manufacturer" id="257">
-            <typedef type="string">
-              <badchars val=":&quot;"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="O.S." id="256">
-            <comment>What kind of O.S. is this system running?</comment>
-            <typedef type="string">
-              <badchars val="&quot;:"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Model" id="258">
-            <typedef type="string">
-              <badchars val=":&quot;"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="System_Type" id="266">
-            <typedef type="invid">
-              <targetobject name="System_Types"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Room" id="264">
-            <typedef type="invid">
-              <targetobject name="Rooms"/>
-              <targetfield name="Systems"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Interface" id="260">
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="Embedded_System_Interface"/>
-              <targetfield name="Containing_Object"/>
-              <embedded/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Netgroups" id="265">
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="System_Netgroups"/>
-              <targetfield name="Systems"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Volumes" id="268">
-            <comment>What volumes are defined on this system?</comment>
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="NFS_Volume"/>
-              <targetfield name="Host"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Primary_User" id="267">
-            <typedef type="invid">
-              <targetobject name="User"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="System_Name" id="261">
+              <comment>Name of this system, not including DNS domain information</comment>
+              <typedef type="string">
+                <maxlength val="64"/>
+                <badchars val=" ,"/>
+                <namespace val="systems"/>
+                <regexp val="^[a-zA-Z\d]+[a-zA-Z\d\-]*$" desc="System Names may contain letters, numbers, and dashes.  System names must start with a letter or a number."/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Aliases" id="262">
+              <typedef type="string">
+                <vector maxSize="32"/>
+                <maxlength val="64"/>
+                <badchars val=" ,"/>
+                <namespace val="systems"/>
+                <regexp val="^[a-zA-Z\d]+[a-zA-Z\d\-]*$" desc="System names must consist of letters, numbers, and dashes.  System names must begin with a letter or a number."/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Manufacturer" id="257">
+              <typedef type="string">
+                <badchars val=":&quot;"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="O.S." id="256">
+              <comment>What kind of O.S. is this system running?</comment>
+              <typedef type="string">
+                <badchars val="&quot;:"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Model" id="258">
+              <typedef type="string">
+                <badchars val=":&quot;"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="System_Type" id="266">
+              <typedef type="invid">
+                <targetobject name="System_Types"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Room" id="264">
+              <typedef type="invid">
+                <targetobject name="Room"/>
+                <targetfield name="Systems"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Virtual" id="269">
+              <comment>If this is checked, the system will be recorded as  a
+virtual overlay on another host.</comment>
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Interface" id="260">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="Embedded_System_Interface"/>
+                <targetfield name="Containing_Object"/>
+                <embedded/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Netgroups" id="265">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="System_Netgroup"/>
+                <targetfield name="Systems"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Volumes" id="268">
+              <comment>What volumes are defined on this system?</comment>
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="NFS_Volume"/>
+                <targetfield name="Host"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Primary_User" id="267">
+              <typedef type="invid">
+                <targetobject name="User"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="I.P._Network" id="267">
           <classdef name="arlut.csd.ganymede.gasharl.networkCustom" optionString=""/>
           <label fieldid="261"/>
-          <fielddef name="Network_Name" id="261">
-            <comment>A descriptive name for this network</comment>
-            <typedef type="string">
-              <namespace val="networkname"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Public_Network" id="266">
-            <typedef type="boolean"/>
-          </fielddef>
-          <fielddef name="Allocation_Range" id="265">
-            <typedef type="string">
-              <multiline/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Net_Number" id="256">
-            <typedef type="ip"/>
-          </fielddef>
-          <fielddef name="Netmask" id="258">
-            <typedef type="ip"/>
-          </fielddef>
-          <fielddef name="Broadcast" id="257">
-            <typedef type="ip"/>
-          </fielddef>
-          <fielddef name="Nameserver" id="259">
-            <typedef type="invid">
-              <targetobject name="System"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Default_Router" id="260">
-            <typedef type="ip"/>
-          </fielddef>
-          <fielddef name="Records" id="263">
-            <comment>What I.P. interfaces are on this net?</comment>
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="Embedded_System_Interface"/>
-              <targetfield name="I.P._Network"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Network_Name" id="261">
+              <comment>A descriptive name for this network</comment>
+              <typedef type="string">
+                <namespace val="networkname"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Public_Network" id="266">
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Allocation_Range" id="265">
+              <typedef type="string">
+                <multiline/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Net_Number" id="256">
+              <typedef type="ip"/>
+            </fielddef>
+            <fielddef name="Netmask" id="258">
+              <typedef type="ip"/>
+            </fielddef>
+            <fielddef name="Broadcast" id="257">
+              <typedef type="ip"/>
+            </fielddef>
+            <fielddef name="Nameserver" id="259">
+              <typedef type="invid">
+                <targetobject name="System"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Default_Router" id="260">
+              <typedef type="ip"/>
+            </fielddef>
+            <fielddef name="Records" id="263">
+              <comment>What I.P. interfaces are on this net?</comment>
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="Embedded_System_Interface"/>
+                <targetfield name="I.P._Network"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="Embedded_System_Interface" id="265">
           <classdef name="arlut.csd.ganymede.gasharl.interfaceCustom" optionString=""/>
           <embedded/>
           <label fieldid="262"/>
-          <fielddef name="Label" id="262">
-            <typedef type="string">
-              <namespace val="interfacelabel"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Name" id="259">
-            <typedef type="string">
-              <maxlength val="64"/>
-              <badchars val=" ,"/>
-              <namespace val="systems"/>
-              <regexp val="^[a-zA-Z\d]+[a-zA-Z\d\-]*$"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Aliases" id="260">
-            <typedef type="string">
-              <vector maxSize="32"/>
-              <maxlength val="64"/>
-              <badchars val=" ,"/>
-              <namespace val="systems"/>
-              <regexp val="^[a-zA-Z\d]+[a-zA-Z\d\-]*$" desc="Interface names may consist of letters, numbers, and dashes.  Interface names must begin with a letter or a number."/>
-            </typedef>
-          </fielddef>
-          <fielddef name="I.P._Network" id="261">
-            <typedef type="invid">
-              <targetobject name="I.P._Network"/>
-              <targetfield name="Records"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="I.P._Address" id="258">
-            <typedef type="ip">
-              <namespace val="IPspace"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Ethernet_Info" id="256">
-            <typedef type="string">
-              <maxlength val="128"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Label" id="262">
+              <typedef type="string">
+                <namespace val="interfacelabel"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Name" id="259">
+              <typedef type="string">
+                <maxlength val="64"/>
+                <badchars val=" ,"/>
+                <namespace val="systems"/>
+                <regexp val="^[a-zA-Z\d]+[a-zA-Z\d\-]*$"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Aliases" id="260">
+              <typedef type="string">
+                <vector maxSize="32"/>
+                <maxlength val="64"/>
+                <badchars val=" ,"/>
+                <namespace val="systems"/>
+                <regexp val="^[a-zA-Z\d]+[a-zA-Z\d\-]*$" desc="Interface names may consist of letters, numbers, and dashes.  Interface names must begin with a letter or a number."/>
+              </typedef>
+            </fielddef>
+            <fielddef name="I.P._Network" id="261">
+              <typedef type="invid">
+                <targetobject name="I.P._Network"/>
+                <targetfield name="Records"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="I.P._Address" id="258">
+              <typedef type="ip">
+                <namespace val="IPspace"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Ethernet_Info" id="256">
+              <typedef type="string">
+                <maxlength val="128"/>
+                <okchars val="abcdef0123456789: -ABCDEF."/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <category name="Netgroups">
 
-          <objectdef name="System_Netgroups" id="271">
+          <objectdef name="System_Netgroup" id="271">
             <label fieldid="256"/>
-            <fielddef name="Netgroup_Name" id="256">
-              <typedef type="string">
-                <maxlength val="24"/>
-                <badchars val=" :,"/>
-                <namespace val="groupname"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Systems" id="257">
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="System"/>
-                <targetfield name="Netgroups"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Member_Netgroups" id="258">
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="System_Netgroups"/>
-                <targetfield name="Owner_Netgroups"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Owner_Netgroups" id="259">
-              <comment>What netgroups is this netgroup contained in?</comment>
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="System_Netgroups"/>
-                <targetfield name="Member_Netgroups"/>
-              </typedef>
-            </fielddef>
+            <tab name="General">
+              <fielddef name="Netgroup_Name" id="256">
+                <typedef type="string">
+                  <maxlength val="24"/>
+                  <badchars val=" :,"/>
+                  <namespace val="groupname"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Systems" id="257">
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="System"/>
+                  <targetfield name="Netgroups"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Member_Netgroups" id="258">
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="System_Netgroup"/>
+                  <targetfield name="Owner_Netgroups"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Owner_Netgroups" id="259">
+                <comment>What netgroups is this netgroup contained in?</comment>
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="System_Netgroup"/>
+                  <targetfield name="Member_Netgroups"/>
+                </typedef>
+              </fielddef>
+            </tab>
           </objectdef>
           <objectdef name="User_Netgroup" id="270">
             <classdef name="arlut.csd.ganymede.gasharl.userNetgroupCustom" optionString=""/>
             <label fieldid="256"/>
-            <fielddef name="Netgroup_Name" id="256">
-              <typedef type="string">
-                <maxlength val="24"/>
-                <badchars val=" ,:"/>
-                <namespace val="groupname"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Users" id="257">
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="User"/>
-                <targetfield name="Netgroups"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Member_Netgroups" id="258">
-              <comment>What netgroups are nested within us?</comment>
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="User_Netgroup"/>
-                <targetfield name="Owner_Netgroups"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Owner_Netgroups" id="259">
-              <typedef type="invid">
-                <vector/>
-                <targetobject name="User_Netgroup"/>
-                <targetfield name="Member_Netgroups"/>
-              </typedef>
-            </fielddef>
+            <tab name="General">
+              <fielddef name="Netgroup_Name" id="256">
+                <typedef type="string">
+                  <maxlength val="24"/>
+                  <badchars val=" ,:"/>
+                  <namespace val="groupname"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Users" id="257">
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="User"/>
+                  <targetfield name="Netgroups"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Member_Netgroups" id="258">
+                <comment>What netgroups are nested within us?</comment>
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="User_Netgroup"/>
+                  <targetfield name="Owner_Netgroups"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Owner_Netgroups" id="259">
+                <typedef type="invid">
+                  <vector/>
+                  <targetobject name="User_Netgroup"/>
+                  <targetfield name="Member_Netgroups"/>
+                </typedef>
+              </fielddef>
+            </tab>
           </objectdef>
         </category>
 
@@ -838,55 +881,59 @@ Limited to 16 for NFS.</comment>
           <objectdef name="Automounter_Map" id="277">
             <classdef name="arlut.csd.ganymede.gasharl.mapCustom" optionString=""/>
             <label fieldid="256"/>
-            <fielddef name="Map_Entries" id="257">
-              <typedef type="invid">
-                <vector maxSize="32765"/>
-                <targetobject name="Embedded_Automounter_Map_Entry"/>
-                <targetfield name="Automounter_Map"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Map_Name" id="256">
-              <typedef type="string">
-                <maxlength val="64"/>
-                <badchars val="/"/>
-                <namespace val="automap"/>
-              </typedef>
-            </fielddef>
+            <tab name="General">
+              <fielddef name="Map_Entries" id="257">
+                <typedef type="invid">
+                  <vector maxSize="32765"/>
+                  <targetobject name="Embedded_Automounter_Map_Entry"/>
+                  <targetfield name="Automounter_Map"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Map_Name" id="256">
+                <typedef type="string">
+                  <maxlength val="64"/>
+                  <badchars val="/"/>
+                  <namespace val="automap"/>
+                </typedef>
+              </fielddef>
+            </tab>
           </objectdef>
           <objectdef name="NFS_Volume" id="276">
             <classdef name="arlut.csd.ganymede.gasharl.volumeCustom" optionString=""/>
             <label fieldid="256"/>
-            <fielddef name="Volume_Label" id="256">
-              <typedef type="string">
-                <maxlength val="32"/>
-                <badchars val="/:"/>
-                <namespace val="VolumeSpace"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Host" id="257">
-              <typedef type="invid">
-                <targetobject name="System"/>
-                <targetfield name="Volumes"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Path" id="258">
-              <typedef type="string">
-                <maxlength val="255"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Map_Entries" id="259">
-              <typedef type="invid">
-                <vector maxSize="32765"/>
-                <targetobject name="Embedded_Automounter_Map_Entry"/>
-                <targetfield name="NFS_Volume"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Mount_Options" id="260">
-              <typedef type="string">
-                <maxlength val="255"/>
-                <badchars val=":"/>
-              </typedef>
-            </fielddef>
+            <tab name="General">
+              <fielddef name="Volume_Label" id="256">
+                <typedef type="string">
+                  <maxlength val="32"/>
+                  <badchars val="/:"/>
+                  <namespace val="VolumeSpace"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Host" id="257">
+                <typedef type="invid">
+                  <targetobject name="System"/>
+                  <targetfield name="Volumes"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Path" id="258">
+                <typedef type="string">
+                  <maxlength val="255"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Map_Entries" id="259">
+                <typedef type="invid">
+                  <vector maxSize="32765"/>
+                  <targetobject name="Embedded_Automounter_Map_Entry"/>
+                  <targetfield name="NFS_Volume"/>
+                </typedef>
+              </fielddef>
+              <fielddef name="Mount_Options" id="260">
+                <typedef type="string">
+                  <maxlength val="255"/>
+                  <badchars val=":"/>
+                </typedef>
+              </fielddef>
+            </tab>
           </objectdef>
         </category>
 
@@ -896,164 +943,253 @@ Limited to 16 for NFS.</comment>
 
         <objectdef name="ARL_Contract" id="280">
           <label fieldid="256"/>
-          <fielddef name="Contract_Name" id="256">
-            <typedef type="string">
-              <badchars val=";"/>
-              <namespace val="contractname"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Contract_Number" id="257">
-            <typedef type="string">
-              <badchars val=";"/>
-              <namespace val="contractnumber"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Status" id="262">
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Description" id="260">
-            <typedef type="string">
-              <badchars val=";"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="GroupLaboratory" id="263">
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Research_Unit" id="264">
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="UT_account_number" id="265">
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Start_Date" id="258">
-            <typedef type="date"/>
-          </fielddef>
-          <fielddef name="Stop_Date" id="259">
-            <typedef type="date"/>
-          </fielddef>
-          <fielddef name="Groups" id="261">
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="Group"/>
-              <targetfield name="Contract_Link"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Contract_Name" id="256">
+              <typedef type="string">
+                <badchars val=";"/>
+                <namespace val="contractname"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Contract_Number" id="257">
+              <typedef type="string">
+                <badchars val=";"/>
+                <namespace val="contractnumber"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Status" id="262">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Description" id="260">
+              <typedef type="string">
+                <badchars val=";"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="GroupLaboratory" id="263">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Research_Unit" id="264">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="UT_account_number" id="265">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Start_Date" id="258">
+              <typedef type="date"/>
+            </fielddef>
+            <fielddef name="Stop_Date" id="259">
+              <typedef type="date"/>
+            </fielddef>
+            <fielddef name="Groups" id="261">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="Group"/>
+                <targetfield name="Contract_Link"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="User_Category" id="279">
           <classdef name="arlut.csd.ganymede.gasharl.userCategoryCustom" optionString=""/>
           <label fieldid="256"/>
-          <fielddef name="Category_Title" id="256">
-            <typedef type="string">
-              <namespace val="UserCategory"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Category_Summary" id="263">
-            <typedef type="string">
-            </typedef>
-          </fielddef>
-          <fielddef name="Category_Description" id="261">
-            <typedef type="string">
-              <multiline/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Approval_Required" id="259">
-            <typedef type="boolean"/>
-          </fielddef>
-          <fielddef name="Approval_List" id="260">
-            <typedef type="string">
-              <vector maxSize="1"/>
-              <badchars val="|`&quot;;"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Must_Expire" id="257">
-            <typedef type="boolean"/>
-          </fielddef>
-          <fielddef name="Time_Limit" id="258">
-            <typedef type="numeric"/>
-          </fielddef>
-          <fielddef name="Requires_Badge" id="262">
-            <typedef type="boolean"/>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Category_Title" id="256">
+              <typedef type="string">
+                <namespace val="UserCategory"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Category_Summary" id="263">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Category_Description" id="261">
+              <typedef type="string">
+                <multiline/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Approval_Required" id="259">
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Approval_List" id="260">
+              <typedef type="string">
+                <vector maxSize="1"/>
+                <badchars val="|`&quot;;"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Must_Expire" id="257">
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Time_Limit" id="258">
+              <typedef type="numeric"/>
+            </fielddef>
+            <fielddef name="Requires_Badge" id="262">
+              <typedef type="boolean"/>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="System_Types" id="272">
           <label fieldid="256"/>
-          <fielddef name="System_Type" id="256">
-            <typedef type="string">
-              <namespace val="systemtype"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Assoc._User_Required" id="259">
-            <typedef type="boolean"/>
-          </fielddef>
-          <fielddef name="Use_Range" id="260">
-            <typedef type="boolean"/>
-          </fielddef>
-          <fielddef name="Start_IP_Range" id="257">
-            <typedef type="numeric"/>
-          </fielddef>
-          <fielddef name="Stop_IP_Range" id="258">
-            <typedef type="numeric"/>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="System_Type" id="256">
+              <typedef type="string">
+                <namespace val="systemtype"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Assoc._User_Required" id="259">
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Use_Range" id="260">
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Start_IP_Range" id="257">
+              <typedef type="numeric"/>
+            </fielddef>
+            <fielddef name="Stop_IP_Range" id="258">
+              <typedef type="numeric"/>
+            </fielddef>
+          </tab>
         </objectdef>
-        <objectdef name="Rooms" id="269">
+        <objectdef name="Room" id="269">
           <classdef name="arlut.csd.ganymede.gasharl.roomCustom" optionString=""/>
           <label fieldid="256"/>
-          <fielddef name="Room_Number" id="256">
-            <typedef type="string">
-              <badchars val="|"/>
-              <namespace val="roomspace"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Systems" id="257">
-            <typedef type="invid">
-              <vector/>
-              <targetobject name="System"/>
-              <targetfield name="Room"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Room_Number" id="256">
+              <typedef type="string">
+                <badchars val="|"/>
+                <namespace val="roomspace"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Systems" id="257">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="System"/>
+                <targetfield name="Room"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="Shell_Choice" id="258">
           <label fieldid="256"/>
-          <fielddef name="Shell" id="256">
-            <typedef type="string">
-              <maxlength val="255"/>
-              <badchars val=":"/>
-              <namespace val="shellspace"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Shell" id="256">
+              <typedef type="string">
+                <maxlength val="255"/>
+                <badchars val=":"/>
+                <namespace val="shellspace"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="NIS_Slave_Server" id="281">
           <label fieldid="257"/>
-          <fielddef name="Name" id="257">
-            <typedef type="string">
-              <namespace val="nisserver"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="System" id="256">
-            <typedef type="invid">
-              <targetobject name="System"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Name" id="257">
+              <typedef type="string">
+                <namespace val="nisserver"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="System" id="256">
+              <typedef type="invid">
+                <targetobject name="System"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="DNS_Reserve" id="256">
           <label fieldid="257"/>
-          <fielddef name="Reservation_Name" id="257">
-            <comment>A label for this reservation</comment>
-            <typedef type="string">
-              <namespace val="reservations"/>
-            </typedef>
-          </fielddef>
-          <fielddef name="Names" id="256">
-            <comment>System/Alias name to reserve</comment>
-            <typedef type="string">
-              <vector/>
-              <namespace val="systems"/>
-            </typedef>
-          </fielddef>
+          <tab name="General">
+            <fielddef name="Reservation_Name" id="257">
+              <comment>A label for this reservation</comment>
+              <typedef type="string">
+                <namespace val="reservations"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Names" id="256">
+              <comment>System/Alias name to reserve</comment>
+              <typedef type="string">
+                <vector/>
+                <namespace val="systems"/>
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
+        <objectdef name="User_Reserve" id="259">
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="Username" id="256">
+              <comment>Entering a string in this field will prevent
+anyone from later creating a user, group,
+user netgroup, email list or alias from
+later being created in Ganymede that
+conflicts with this name.</comment>
+              <typedef type="string">
+                <namespace val="username"/>
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
+        <objectdef name="Mailman_Server" id="261">
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="Mailman_Server" id="256">
+              <typedef type="string">
+                <namespace val="mailman"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Mailman_Host" id="257">
+              <typedef type="invid">
+                <targetobject name="System"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Mailman_Lists" id="258">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="Mailman_List"/>
+                <targetfield name="Mailman_Server"/>
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
+        <objectdef name="Mailman_List" id="260">
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="Name" id="256">
+              <typedef type="string">
+                <maxlength val="64"/>
+                <namespace val="username"/>
+                <regexp val="^[a-z|A-Z]+[a-z|A-Z|\d|-]*$" desc="Mailman list names must start with a letter followed by letters, digits, or dashes"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Mailman_Server" id="259">
+              <comment>Which Mailman Server will this list be created on?</comment>
+              <typedef type="invid">
+                <targetobject name="Mailman_Server"/>
+                <targetfield name="Mailman_Lists"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="List_Administrator_Email" id="257">
+              <comment>Email address for the person who will be administering this mailing list.</comment>
+              <typedef type="string">
+                <maxlength val="256"/>
+                <regexp val="[^\t]*" desc="No tab characters are allowed."/>
+              </typedef>
+            </fielddef>
+            <fielddef name="List_Password" id="258">
+              <comment>Password used to administrate this list on mailman.</comment>
+              <typedef type="password">
+                <plaintext/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Aliases" id="260">
+              <typedef type="string">
+                <vector/>
+                <namespace val="username"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
       </category>
 
