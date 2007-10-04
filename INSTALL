@@ -1,5 +1,7 @@
+   Ganymede Logo
+
                           Ganymede Installation Guide
-                           Release 2.0 dev - ? ? 2006
+                           Release 2.0 dev - ? ? 2007
                                   $Rev$
 
    --------------------------------------------------------------------------
@@ -24,8 +26,8 @@
     3. Configure your web server to recognize the
        application/x-java-jnlp-file MIME type if you want to support a JNLP
        launcher such as Sun's Java Web Start (at
-       http://java.sun.com/products/javawebstart/) application launch
-       manager as a convenience for your users.
+       http://java.sun.com/products/javawebstart/) application launch manager
+       as a convenience for your users.
     4. Install a schema kit on top of the server using the schema kit's
        installKit script.
     5. Run the server by running <server-dir>/bin/runServer
@@ -70,10 +72,9 @@
 
    The Ganymede distribution that you downloaded includes everything you need
    to install the server and client suite, but does not include a schema kit.
-   You will need to visit ftp://ftp.arlut.utexas.edu/pub/ganymede/ or one
-   of the mirrors listed at
-   http://www.arlut.utexas.edu/gash2/Download.html in order to download a
-   schema kit.
+   You will need to visit ftp://ftp.arlut.utexas.edu/pub/ganymede/ or one of
+   the mirrors listed at http://www.arlut.utexas.edu/gash2/Download.html in
+   order to download a schema kit.
 
    This document will cover the installation of Ganymede from start to
    finish, using the 1.0 version of our newly developed userKit as an
@@ -99,10 +100,10 @@
    inside Netscape, Internet Explorer, Mozilla, and Firefox.
 
    You can download any current version of the Java platform for Solaris,
-   Linux, and Windows at http://java.sun.com/j2se/. The Ganymede server
-   has primarily been developed and tested on Solaris and Linux, but the
-   Ganymede clients have been successfully run on Solaris, Linux, Windows,
-   Mac OS X Jaguar and later, FreeBSD, AIX, HP/UX, and others.
+   Linux, and Windows at http://java.sun.com/j2se/. The Ganymede server has
+   primarily been developed and tested on Solaris and Linux, but the Ganymede
+   clients have been successfully run on Solaris, Linux, Windows, Mac OS X
+   Jaguar and later, FreeBSD, AIX, HP/UX, and others.
 
    As well as Java, you will need /bin/sh, Perl 5.003 (or later), and Apache
    Ant to build and install the Ganymede software. The Ganymede distribution,
@@ -126,23 +127,22 @@
 
    One of the first things configure will do is to build the Ganymede
    software for you, and create the jar files that you will use to deploy
-   Ganymede. When configure compiles Ganymede for you, it will create SSL
-   key and certificate material that is unique to your installation. The SSL
-   key is placed into the server's ganymedeServer.jar file, and the matching
+   Ganymede. When configure compiles Ganymede for you, it will create SSL key
+   and certificate material that is unique to your installation. The SSL key
+   is placed into the server's ganymedeServer.jar file, and the matching
    certificate material is placed into the client's ganymede.jar and the
    admin console's ganymedeAdmin.jar files. In this way, your Ganymede client
    and admin console will be tied to your Ganymede server. By generating
-   unique keys and certificates for each installation, you can be assured that
-   the clients you distribute are talking to your Ganymede server.
+   unique keys and certificates for each installation, you can be assured
+   that the clients you distribute are talking to your Ganymede server.
 
-   After building the Ganymede software, configure will copy a few
-   scripts from the scripts/ directory into the top-level distribution
-   directory, editing them to set the proper location for the Perl
-   interpreter on your system, and otherwise setting everything up for you to
-   proceed with installation. These scripts are installClient,
-   installWeb and installServer. You will use these scripts to
-   install the command-line UNIX clients, the web applet clients, and the
-   server itself, respectively.
+   After building the Ganymede software, configure will copy a few scripts
+   from the scripts/ directory into the top-level distribution directory,
+   editing them to set the proper location for the Perl interpreter on your
+   system, and otherwise setting everything up for you to proceed with
+   installation. These scripts are installClient, installWeb and
+   installServer. You will use these scripts to install the command-line UNIX
+   clients, the web applet clients, and the server itself, respectively.
 
    +------------------------------------------------------------------------+
    |3. Installing the Server                                                |
@@ -179,19 +179,19 @@
            pick a location. You can use either absolute or relative directory
            names here.
 
-           Note that when you install the server, the installServer
-           script customizes the server installation with the paths where you
-           have installed the server. If you ever decide to move the server
-           in your filesystem, you will need to create a symlink at the old
+           Note that when you install the server, the installServer script
+           customizes the server installation with the paths where you have
+           installed the server. If you ever decide to move the server in
+           your filesystem, you will need to create a symlink at the old
            location to allow the old paths to resolve properly, or you will
            need to go through the various scripts and files and make sure
            that any reference to the old path has been updated.
 
    What is the name of the system that the server will run on?
 
-           This information is used by the stopServer and xmlclient
-           clients that are installed into the server tree. This may be an
-           I.P. address or a fully qualified DNS host name. The installServer
+           This information is used by the stopServer and xmlclient clients
+           that are installed into the server tree. This may be an I.P.
+           address or a fully qualified DNS host name. The installServer
            script will provide the name of the system you are on as a
            default.
 
@@ -257,16 +257,15 @@
    What name do you want the Ganymede superuser account to have?
 
            The default 'supergash' name is probably okay here, but you can
-           change it if you want.  Note that you will be able to
-           create additional admin accounts with superuser privileges
-           later if you like, but you need to have this initial,
-           generic superuser account to bootstrap the system.
+           change it if you want. Note that you will be able to create
+           additional admin accounts with superuser privileges later if you
+           like, but you need to have this initial, generic superuser account
+           to bootstrap the system.
 
    What password do you want the superuser account to have?
 
            This password provides complete access to the Ganymede server's
-           database, and is necessary for a variety of system
-           operations.  
+           database, and is necessary for a variety of system operations.
 
    What name do you want the Ganymede monitor account to have?
 
@@ -284,18 +283,17 @@
    to install the Ganymede server in the location specified.
 
    Once installed, you will have a server directory that contains a number of
-   directories, some documentation files, and a ganymede.properties file
-   that the Ganymede server executables use as a configuration resource.
+   directories, some documentation files, and a ganymede.properties file that
+   the Ganymede server executables use as a configuration resource.
 
    The bin/ directory contains:
 
      * runServer, which actually runs the server
-     * stopServer, a script that can be used to cleanly shut the server
-       down.
-     * xmlclient, a script that is used to load XML-formatted data into
-       the Ganymede server.
-     * logscan.pl, a script that is used by the server to accelerate
-       searches through the Ganymede log file.
+     * stopServer, a script that can be used to cleanly shut the server down.
+     * xmlclient, a script that is used to load XML-formatted data into the
+       Ganymede server.
+     * logscan.pl, a script that is used by the server to accelerate searches
+       through the Ganymede log file.
 
    The db/ directory contains:
 
@@ -308,8 +306,8 @@
        database.
 
    The jars/ directory contains the compiled java classes that actually
-   comprise the Ganymede server and the Java-based stopServer and
-   xmlclient clients.
+   comprise the Ganymede server and the Java-based stopServer and xmlclient
+   clients.
 
    The doc/ directory contains copies of all of the Ganymede documentation.
 
@@ -348,12 +346,12 @@
        well as the scripts that are run to handle external actions when those
        transactions are committed.
      * and finally, you will probably see some kind of loader script that can
-       import data from your existing environment and generate an XML
-       file for use with the xmlclient.
+       import data from your existing environment and generate an XML file
+       for use with the xmlclient.
 
    The most important of these as far as the server is concerned is the
-   custom.jar file. Once that file is in place, you can proceed to run
-   the Ganymede server, which will then start up and find the extra classes
+   custom.jar file. Once that file is in place, you can proceed to run the
+   Ganymede server, which will then start up and find the extra classes
    needed to run the server with your schema kit.
 
    The schema kit that you install should include a README that will talk in
@@ -372,8 +370,8 @@
    +------------------------------------------------------------------------+
 
    Once you have installed your schema kit, you can go ahead and run the
-   server. You do this by running the runServer script in the server's
-   bin/ directory.
+   server. You do this by running the runServer script in the server's bin/
+   directory.
 
    The Ganymede server is a pure Java application, so when you run it, you
    are really running your platform's java execution environment (which may
@@ -414,17 +412,17 @@
    runServer script to tweak the Ganymede server's behavior.
 
    Of particular interest in this regard are the -resetadmin and the -logrmi
-   parameters. These are both documented in the runServer script itself,
-   but it is worth discussing them here. The -resetadmin parameter causes the
+   parameters. These are both documented in the runServer script itself, but
+   it is worth discussing them here. The -resetadmin parameter causes the
    Ganymede server to reset the administrative 'supergash' password in the
-   system to the value defined in the server's ganymede.properties file.
-   It is reasonable to remove the 'ganymede.defaultrootpass' property from
-   the ganymede.properties file if you don't want to leave your Ganymede
-   'root' password lying around in plaintext, but if you ever forget the
-   password, you'll want to keep the -resetadmin parameter option in mind.
-   You should not remove the ganymede.defaultrootpass property until the
-   server has successfully started up and created its ganymede.db file at
-   least once, however.
+   system to the value defined in the server's ganymede.properties file. It
+   is reasonable to remove the 'ganymede.defaultrootpass' property from the
+   ganymede.properties file if you don't want to leave your Ganymede 'root'
+   password lying around in plaintext, but if you ever forget the password,
+   you'll want to keep the -resetadmin parameter option in mind. You should
+   not remove the ganymede.defaultrootpass property until the server has
+   successfully started up and created its ganymede.db file at least once,
+   however.
 
    If the -logrmi parameter is used, the Ganymede server will log all network
    calls made by clients to a file titled debug.log.. This may degrade
@@ -448,13 +446,13 @@
 
    When you want to shut the server down, you'll just need to order it to
    shut down from the Ganymede admin console (which we'll talk about below),
-   or by using the stopServer script in the server's bin/ directory.
-   Either one will transmit to the server a shutdown message, which will
-   result in the server kicking any active users off the system,
-   consolidating its database to disk, and finally shutting down. The
-   Ganymede server is designed to recover smoothly on restart if it is killed
-   or if the system crashes or is rebooted at any point during its execution,
-   but if the server is not shut down cleanly, it might spend a bit of time
+   or by using the stopServer script in the server's bin/ directory. Either
+   one will transmit to the server a shutdown message, which will result in
+   the server kicking any active users off the system, consolidating its
+   database to disk, and finally shutting down. The Ganymede server is
+   designed to recover smoothly on restart if it is killed or if the system
+   crashes or is rebooted at any point during its execution, but if the
+   server is not shut down cleanly, it might spend a bit of time
    consolidating data from its journal when it starts up again.
 
    +------------------------------------------------------------------------+
@@ -500,19 +498,19 @@
    integrating Ganymede and that schema kit into your environment.
 
    For now, we'll just assume that loader.pl has produced a data.xml file
-   that is formatted according to the Ganymede XML File Format Guide. Now
-   all you need to do is cd to your server's top-level directory and run
+   that is formatted according to the Ganymede XML File Format Guide. Now all
+   you need to do is cd to your server's top-level directory and run
 
        server% bin/xmlclient schema/data.xml
 
-   This will cause the xmlclient to log into the server and upload both
-   the schema kit's schema definition and your data to the server.
-   xmlclient will produce some output while it runs, but it is designed
-   for speed over interactivity, and so it may go quiet for long periods of
-   time while it waits for the server to chew through the XML that it has
-   submitted. If you like, you can run the Ganymede admin console before
-   starting xmlclient and actually watch as the xmlclient talks to
-   the server and creates all your objects in the database.
+   This will cause the xmlclient to log into the server and upload both the
+   schema kit's schema definition and your data to the server. xmlclient will
+   produce some output while it runs, but it is designed for speed over
+   interactivity, and so it may go quiet for long periods of time while it
+   waits for the server to chew through the XML that it has submitted. If you
+   like, you can run the Ganymede admin console before starting xmlclient and
+   actually watch as the xmlclient talks to the server and creates all your
+   objects in the database.
 
    If all goes well, you should expect to see a bunch of messages about it
    editing the server's schema and then creating a bunch of objects from your
@@ -541,10 +539,10 @@
    support for Java 1.4 or better.
 
    We have provided an install script for installing the Ganymede clients on
-   a UNIX system. installClient will prompt you for the name of the
-   machine that will be running your Ganymede server, and the directory which
-   will contain the bin, html, and jars directories. The install script will
-   then customize and install scripts for you so that the end-user client and
+   a UNIX system. installClient will prompt you for the name of the machine
+   that will be running your Ganymede server, and the directory which will
+   contain the bin, html, and jars directories. The install script will then
+   customize and install scripts for you so that the end-user client and
    admin console can easily be run.
 
    Don't try to install the client files and the server into the same
@@ -555,26 +553,26 @@
 
    Note that we don't provide any kind of script to install the Ganymede
    clients on a Windows or Macintosh system directly, but you can use a JNLP
-   launcher to achieve this. See the Web Server Configuration section of
-   this document, below, for details on supporting JNLP launch.
+   launcher to achieve this. See the Web Server Configuration section of this
+   document, below, for details on supporting JNLP launch.
 
    In general, you should be able to run the Ganymede clients on any platform
    that supports Java 1.4 or better, as the clients are written in pure Java.
    The Ganymede clients are dual-mode, and will work both as an applet and as
    a command line application. If you are trying to run the clients on a
    platform that supports Java 1.4 but which doesn't have a JNLP launcher
-   available, you may want to examine the ganymede and ganymedeAdmin
-   launch scripts installed by the installClient script and create
-   appropriate translations of the launch scripts for your platform.
+   available, you may want to examine the ganymede and ganymedeAdmin launch
+   scripts installed by the installClient script and create appropriate
+   translations of the launch scripts for your platform.
 
    +------------------------------------------------------------------------+
    |8. Prepare web access clients                                           |
    +------------------------------------------------------------------------+
 
-   The installWeb script is used to install, on your UNIX system, the
-   html, cgi, JNLP and java files needed to support client access to Ganymede
-   from a web browser. When you run installWeb, it will ask you a small
-   number of questions, including the following:
+   The installWeb script is used to install, on your UNIX system, the html,
+   cgi, JNLP and java files needed to support client access to Ganymede from
+   a web browser. When you run installWeb, it will ask you a small number of
+   questions, including the following:
 
    What is the name of the system that the server will run on?
 
@@ -616,28 +614,26 @@
            This is asking for the directory that contains (or will contain)
            the Ganymede text mode clients, in particular xmlclient. The
            directory containing xmlclient must be accessible by the user
-           account that your web server runs under, so that the
-           ganypass.pl CGI script can properly communicate with the
-           Ganymede server.
+           account that your web server runs under, so that the ganypass.pl
+           CGI script can properly communicate with the Ganymede server.
 
-   installWeb will configure and install a bunch of files into a
-   designated directory, including an index.html file, a couple of jar files
-   containing the classes for the Ganymede gui client and admin console, a
-   CGI script that will allow your users to change their passwords through
-   their web browser using an HTML file, and various support files. These
-   files are customized during installation to point to the proper location
-   for your Ganymede server.
+   installWeb will configure and install a bunch of files into a designated
+   directory, including an index.html file, a couple of jar files containing
+   the classes for the Ganymede gui client and admin console, a CGI script
+   that will allow your users to change their passwords through their web
+   browser using an HTML file, and various support files. These files are
+   customized during installation to point to the proper location for your
+   Ganymede server.
 
-   With Java RMI-using applets, it is typically necessary to download
-   the applets from a web server running on the same machine as the
-   RMI server, so that the default restrictions on an unprivileged
-   applet suffice to allow a network connection to be made back to the
-   RMI server. The Ganymede 2.0 applets are signed, however, so you
-   are not required to run a web server on the same machine as
-   your Ganymede server, as you were for the Ganymede 1.0 series.
-   Running a web server on your Ganymede server may make it easier to
-   redeploy the client jar files and etc., if you need to upgrade
-   things later, though.
+   With Java RMI-using applets, it is typically necessary to download the
+   applets from a web server running on the same machine as the RMI server,
+   so that the default restrictions on an unprivileged applet suffice to
+   allow a network connection to be made back to the RMI server. The Ganymede
+   2.0 applets are signed, however, so you are not required to run a web
+   server on the same machine as your Ganymede server, as you were for the
+   Ganymede 1.0 series. Running a web server on your Ganymede server may make
+   it easier to redeploy the client jar files and etc., if you need to
+   upgrade things later, though.
 
    Wherever you decided to serve the Ganymede clients from, you'll probably
    want to set up an appropriate path or alias. If you are using Apache, you
@@ -653,30 +649,29 @@
    Once the web server has been configured and the web clients installed,
    your users will be able to access your web client directory to run the
    Ganymede applet launcher (through the index.html file), or to run the
-   Ganymede password change CGI script, ganypass.pl. The ganypass.pl
-   script is useful because it allows any web browser that supports HTML
-   forms to be used to change a user's password, whereas the full Ganymede
-   client launcher requires both JavaScript and Java support.
+   Ganymede password change CGI script, ganypass.pl. The ganypass.pl script
+   is useful because it allows any web browser that supports HTML forms to be
+   used to change a user's password, whereas the full Ganymede client
+   launcher requires both JavaScript and Java support.
 
    If you do want your users to be able to run the full Ganymede client, you
    will need to be sure that their web browsers are configured properly,
    either with support for running Java 1.4 applets directly, or for passing
    a JNLP file to Java Web Start.
 
-   IMPORTANT NOTE: whenever you run applets from the launch page using
-   the 'Native' or 'Java Plug In' modes, the applets can only run as
-   long as the log-in applet is still displayed in the web browser. If
-   you close the main browser window or click to a different page
-   (either by following a link or by clicking back on the browser),
-   the applet will be shut down. Both the Ganymede client and admin
-   console have been written so that this shut-down is handled in an
-   orderly fashion, but the shut-down is unavoidable, so be sure not
-   to disturb the applet frame while you are using the client or
+   IMPORTANT NOTE: whenever you run applets from the launch page using the
+   'Native' or 'Java Plug In' modes, the applets can only run as long as the
+   log-in applet is still displayed in the web browser. If you close the main
+   browser window or click to a different page (either by following a link or
+   by clicking back on the browser), the applet will be shut down. Both the
+   Ganymede client and admin console have been written so that this shut-down
+   is handled in an orderly fashion, but the shut-down is unavoidable, so be
+   sure not to disturb the applet frame while you are using the client or
    console.
 
-   In general, we recommend the 'Java Web Start' launch method above
-   all others, but you do need to do a bit more configuration work to
-   support this option.
+   In general, we recommend the 'Java Web Start' launch method above all
+   others, but you do need to do a bit more configuration work to support
+   this option.
 
    +------------------------------------------------------------------------+
    |9. Configure your web server to support Java Web Start                  |
@@ -729,7 +724,7 @@
 
    --------------------------------------------------------------------------
 
-   Jonathan Abbey
+    Jonathan Abbey
 
    $Date$, $Rev$,
    $Author$
