@@ -2073,7 +2073,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	if (debug)
 	  {
 	    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
-			       "over " + targetNode.getText() + " because node is open.");
+			       " over " + targetNode.getText() + " because node is open.");
 	  }
 
 	return false;
@@ -2094,7 +2094,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	if (debug)
 	  {
 	    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
-			       "over " + targetNode.getText() + " because can't drag over field nodes");
+			       " over " + targetNode.getText() + " because can't drag over field nodes");
 	  }
 
 	return false;
@@ -2133,7 +2133,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    if (debug)
 	      {
 		System.err.println("iconDragOver(): failing " + dragNode.getText() + 
-				   "over " + targetNode.getText() + " because can't drag category over non-category");
+				   " over " + targetNode.getText() + " because can't drag category over non-category");
 	      }
 
 	    return false;
@@ -2173,7 +2173,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       }
 
     System.err.println("iconDragOver(): failing " + dragNode.getText() + 
-		       "over " + targetNode.getText() + ", don't recognize the drag node type");
+		       " over " + targetNode.getText() + ", don't recognize the drag node type");
     
     return false;
   }
