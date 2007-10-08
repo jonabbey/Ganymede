@@ -5,7 +5,7 @@
    This class is a serializable object-list result object, which
    conveys results from a query/list operation along with methods that
    can be used to extract the results out of the query/list.
-   
+
    Created: 1 October 1997
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
@@ -15,9 +15,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2006
    The University of Texas at Austin
 
@@ -81,28 +81,28 @@ public class QueryResult implements java.io.Serializable {
 
   static final boolean debug = false;
 
-  public static final Comparator comparator = new Comparator() 
+  public static final Comparator comparator = new Comparator()
     {
-      public int compare(Object o_a, Object o_b) 
+      public int compare(Object o_a, Object o_b)
 	{
 	  ObjectHandle a, b;
-	  
+
 	  a = (ObjectHandle) o_a;
 	  b = (ObjectHandle) o_b;
 	  int comp = 0;
-	  
+
 	  comp = a.getLabel().compareToIgnoreCase(b.getLabel());
-	  
+
 	  if (comp < 0)
 	    {
 	      return -1;
 	    }
 	  else if (comp > 0)
-	    { 
+	    {
 	      return 1;
-	    } 
+	    }
 	  else
-	    { 
+	    {
 	      return 0;
 	    }
 	}
@@ -115,6 +115,7 @@ public class QueryResult implements java.io.Serializable {
   transient Hashtable invidHash = null;
   transient Hashtable labelHash = null;
   private boolean forTransport = true;
+  private transient boolean nonEditable = false;
 
   // for transport
 
@@ -195,6 +196,18 @@ public class QueryResult implements java.io.Serializable {
   }
 
   /**
+   * This method is used to lock this QueryResult so that it cannot be
+   * changed.  This will be used in circumstances where the Ganymede
+   * server is caching a singleton QueryResult for some static list of
+   * values.
+   */
+
+  public void setNonEditable()
+  {
+    this.nonEditable = true;
+  }
+
+  /**
    *
    * This method is used to add an object's information to
    * the QueryResult's serializable buffer.  It is intended
@@ -214,6 +227,11 @@ public class QueryResult implements java.io.Serializable {
 	System.err.println("QueryResult: addRow(" + invid + "," + label + ")");
       }
 
+    if (nonEditable)
+      {
+        throw new RuntimeException("QueryResult.addRow(): non-editable QueryResult");
+      }
+
     if (label == null)
       {
 	throw new NullPointerException("QueryResult.addRow(): null label passed in");
@@ -230,8 +248,8 @@ public class QueryResult implements java.io.Serializable {
 	return;
       }
 
-    handles.addElement(new ObjectHandle(label, invid, 
-					inactive, expirationSet, 
+    handles.addElement(new ObjectHandle(label, invid,
+					inactive, expirationSet,
 					removalSet, editable));
 
     if (forTransport)
@@ -262,12 +280,12 @@ public class QueryResult implements java.io.Serializable {
 
 	if (invid != null)
 	  {
-	    buffer.append(invid.toString());       
+	    buffer.append(invid.toString());
 	  }
-	
+
 	buffer.append("|");
 	char[] chars = label.toCharArray();
-	
+
 	for (int j = 0; j < chars.length; j++)
 	  {
 	    if (chars[j] == '|')
@@ -287,7 +305,7 @@ public class QueryResult implements java.io.Serializable {
 		buffer.append(chars[j]);
 	      }
 	  }
-	
+
 	buffer.append("\n");
       }
 
@@ -331,7 +349,7 @@ public class QueryResult implements java.io.Serializable {
    * Note that this method does not clone our handles vector, we'll just
    * assume that whatever the objectList class on the client does to this
    * vector, we're not going to disturb anyone else who will be looking
-   * at the handle list on this query result object. 
+   * at the handle list on this query result object.
    *
    */
 
@@ -342,7 +360,17 @@ public class QueryResult implements java.io.Serializable {
 	unpackBuffer();
       }
 
-    return handles;
+    if (nonEditable)
+      {
+        Vector result = new Vector();
+        result.addAll(handles);
+
+        return result;
+      }
+    else
+      {
+        return handles;
+      }
   }
 
   public Invid getInvid(int row)
@@ -362,17 +390,31 @@ public class QueryResult implements java.io.Serializable {
 	unpackBuffer();
       }
 
-    if (invidList == null)
+    if (nonEditable)
       {
-	invidList = new Vector();
+        Vector myInvidList = new Vector();
 
-	for (int i = 0; i < handles.size(); i++)
-	  {
-	    invidList.addElement(((ObjectHandle) handles.elementAt(i)).getInvid());
-	  }
+        for (int i = 0; i < handles.size(); i++)
+          {
+            myInvidList.addElement(((ObjectHandle) handles.elementAt(i)).getInvid());
+          }
+
+        return myInvidList;
       }
+    else
+      {
+        if (this.invidList == null)
+          {
+            this.invidList = new Vector();
 
-    return invidList;
+            for (int i = 0; i < handles.size(); i++)
+              {
+                this.invidList.addElement(((ObjectHandle) handles.elementAt(i)).getInvid());
+              }
+          }
+
+        return this.invidList;
+      }
   }
 
   public Vector getLabels()
@@ -382,19 +424,33 @@ public class QueryResult implements java.io.Serializable {
 	unpackBuffer();
       }
 
-    if (labelList == null)
+    if (nonEditable)
       {
-	labelList = new Vector();
+        Vector myLabelList = new Vector();
+            
+        for (int i = 0; i < handles.size(); i++)
+          {
+            myLabelList.addElement(((ObjectHandle) handles.elementAt(i)).getLabel());
+          }
 
-	for (int i = 0; i < handles.size(); i++)
-	  {
-	    labelList.addElement(((ObjectHandle) handles.elementAt(i)).getLabel());
-	  }
+        return myLabelList;
       }
+    else
+      {
+        if (labelList == null)
+          {
+            labelList = new Vector();
+            
+            for (int i = 0; i < handles.size(); i++)
+              {
+                labelList.addElement(((ObjectHandle) handles.elementAt(i)).getLabel());
+              }
+          }
 
-    return labelList;
+        return labelList;
+      }
   }
-  
+
   public String getLabel(int row)
   {
     if (forTransport && !unpacked)
@@ -452,7 +508,7 @@ public class QueryResult implements java.io.Serializable {
       {
 	unpackBuffer();
       }
-    
+
     for (int i = 0; i < handles.size(); i++)
       {
 	handle = (ObjectHandle) handles.elementAt(i);
@@ -463,7 +519,7 @@ public class QueryResult implements java.io.Serializable {
 	    valueHandles.addElement(handle.getListHandle());
 	  }
       }
-    
+
     return valueHandles;
   }
 
@@ -545,9 +601,14 @@ public class QueryResult implements java.io.Serializable {
    * another (for transport) QueryResult to ourself.
    *
    */
-  
+
   public void append(QueryResult result)
   {
+    if (nonEditable)
+      {
+        throw new RuntimeException("Can't append to a non-editable QueryResult");
+      }
+
     buffer.append(result.buffer.toString());
     unpacked = false;
 
@@ -582,6 +643,11 @@ public class QueryResult implements java.io.Serializable {
 
   public synchronized QueryResult intersection(QueryResult operand)
   {
+    if (nonEditable)
+      {
+        throw new RuntimeException("Can't intersect a non-editable QueryResult");
+      }
+
     QueryResult result = new QueryResult(forTransport);
     ObjectHandle handle;
 
@@ -651,7 +717,7 @@ public class QueryResult implements java.io.Serializable {
     // prepare our handle vector
 
     handles = new Vector();
-    
+
     inserter = new VecSortInsert(comparator);
 
     // turn our serialized buffer into an array of chars for fast
@@ -709,7 +775,7 @@ public class QueryResult implements java.io.Serializable {
 	      {
 		throw new RuntimeException("parse error in row" + rows);
 	      }
-	    
+
 	    tempString.append(chars[index++]);
 	  }
 
@@ -732,12 +798,12 @@ public class QueryResult implements java.io.Serializable {
 	  {
 	    // if we have a backslashed character, take the backslashed char
 	    // as a literal
-	    
+
 	    if (chars[index] == '\\')
 	      {
 		index++;
 	      }
-	    
+
 	    tempString.append(chars[index++]);
 	  }
 
@@ -757,7 +823,7 @@ public class QueryResult implements java.io.Serializable {
   /**
    *
    * For debug.
-   * 
+   *
    */
 
   public String getBuffer()
