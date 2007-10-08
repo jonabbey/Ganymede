@@ -646,7 +646,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	if (base.isEmbedded())
 	  {
 	    newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-				   true, EMBEDDEDBASEICON, EMBEDDEDBASEICON, baseMenu);
+				   true, EMBEDDEDBASEICON, EMBEDDEDBASEICON, embeddedBaseMenu);
 	  }
 	else
 	  {
@@ -2059,7 +2059,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   }
 
   /**
-   *
    * This method provides intelligence to the tree, determining which
    * nodes the dragNode may be dropped on.
    *
