@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -66,8 +66,8 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Runnable class to do a journal sync.  Issued by the 
- * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
+ * Runnable class to do a journal sync.  Issued by the 
+ * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.
  */
 
 class dumpAndArchiveTask implements Runnable {
@@ -99,37 +99,42 @@ class dumpAndArchiveTask implements Runnable {
             return;
           }
 
-	started = true;
-	Ganymede.debug(ts.l("running"));
+        try
+          {
+            started = true;
+            Ganymede.debug(ts.l("running"));
 
-	try
-	  {
-	    Ganymede.db.dump(Ganymede.dbFilename, true, true);
-	  }
-	catch (IOException ex)
-	  {
-	    Ganymede.debug(ts.l("dump_error", ex.getMessage()));
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug(ts.l("dump_interrupted_error", ex.getMessage()));
-	  }
+            try
+              {
+                Ganymede.db.dump(Ganymede.dbFilename, true, true);
+              }
+            catch (IOException ex)
+              {
+                Ganymede.debug(ts.l("dump_error", ex.getMessage()));
+              }
+            catch (InterruptedException ex)
+              {
+                Ganymede.debug(ts.l("dump_interrupted_error", ex.getMessage()));
+              }
 
-	completed = true;
+            completed = true;
+          }
+        finally
+          {
+            // we'll go through here if our task was stopped
+            // note that the DBStore dump code will handle
+            // thread death ok.
+
+            if (started && !completed)
+              {
+                Ganymede.debug(ts.l("forced_stop"));
+              }
+
+            GanymedeServer.lSemaphore.decrement();
+          }
       }
     finally
       {
-	// we'll go through here if our task was stopped
-	// note that the DBStore dump code will handle
-	// thread death ok.
-
-	if (started && !completed)
-	  {
-	    Ganymede.debug(ts.l("forced_stop"));
-	  }
-
-	GanymedeServer.lSemaphore.decrement();
-
 	Ganymede.debug(ts.l("completed"));
       }
   }
