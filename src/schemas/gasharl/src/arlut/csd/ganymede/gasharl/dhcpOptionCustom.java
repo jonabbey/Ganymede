@@ -84,8 +84,11 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   {
     result.addRow("flag");
     result.addRow("uint8");
+    result.addRow("int8");
     result.addRow("uint16");
+    result.addRow("int16");
     result.addRow("uint32");
+    result.addRow("int32");
     result.addRow("string");
     result.addRow("text");
     result.addRow("ip-address");
@@ -142,6 +145,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       {
       case dhcpOptionSchema.OPTIONNAME:
       case dhcpOptionSchema.OPTIONTYPE:
+        return true;
+
       case dhcpOptionSchema.CUSTOMCODE:
 	return object.isSet(dhcpOptionSchema.CUSTOMOPTION);
       }
@@ -344,7 +349,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   {
     if (field.getID() == dhcpOptionSchema.CUSTOMOPTION)
       {
-        ReturnVal result = new ReturnVal(true);
+        ReturnVal result = new ReturnVal(true, true);
         result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.CUSTOMCODE);
 
         return result;
