@@ -3227,7 +3227,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		      }
 		    else
 		      {
-			// "Error, could not look up {0} object with label {1}."
+                        // "Error, could not look up pre-existing {0} object with label {1}.  Did you mean to use the create action?"
 			throw new RuntimeException(ts.l("knitInvidReferences.no_such_object",
 							getTypeName(type.shortValue()), key));
 		      }
