@@ -205,6 +205,13 @@ public class xmlfield implements FieldType {
 	  }
 	else
 	  {
+            if (nextItem.matches(ADD) || nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(DELETE))
+              {
+                // "Error, can''t use vector operator {0} in scalar field: {1}."
+
+                throw new RuntimeException(ts.l("constructor.scalar_error", nextItem.toString(), fieldDef.getName()));
+              }
+
 	    Boolean bValue = parseBoolean(nextItem);
 
 	    if (bValue != null)
@@ -226,6 +233,13 @@ public class xmlfield implements FieldType {
 	  }
 	else
 	  {
+            if (nextItem.matches(ADD) || nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(DELETE))
+              {
+                // "Error, can''t use vector operator {0} in scalar field: {1}."
+
+                throw new RuntimeException(ts.l("constructor.scalar_error", nextItem.toString(), fieldDef.getName()));
+              }
+
 	    Integer iValue = parseNumeric(nextItem);
 
 	    if (iValue != null)
@@ -250,6 +264,13 @@ public class xmlfield implements FieldType {
 	else
 	  {
 	    // owner.xSession.err.println("Parsing date for item " + nextItem);
+
+            if (nextItem.matches(ADD) || nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(DELETE))
+              {
+                // "Error, can''t use vector operator {0} in scalar field: {1}."
+
+                throw new RuntimeException(ts.l("constructor.scalar_error", nextItem.toString(), fieldDef.getName()));
+              }
 
 	    Date dValue = parseDate(nextItem);
 
@@ -288,7 +309,13 @@ public class xmlfield implements FieldType {
 
 		// fall through to skipToEndField() below
 	      }
-	    else
+	    else if (nextItem.matches(ADD) || nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(DELETE))
+              {
+                // "Error, can''t use vector operator {0} in scalar field: {1}."
+
+                throw new RuntimeException(ts.l("constructor.scalar_error", nextItem.toString(), fieldDef.getName()));
+              }
+            else
 	      {
 		value = owner.xSession.reader.getFollowingString(openElement, false);
 
@@ -329,6 +356,12 @@ public class xmlfield implements FieldType {
 		// scalar invid fields are never embedded/edit in
 		// place, so we know that any value we found should be
 		// an <invid>
+
+                if (nextItem.matches(ADD) || nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(DELETE))
+                  {
+                    // "Error, can''t use vector operator {0} in scalar field: {1}."
+                    throw new RuntimeException(ts.l("constructor.scalar_error", nextItem.toString(), fieldDef.getName()));
+                  }
 
 		value = new xInvid(nextItem);
 
@@ -394,6 +427,12 @@ public class xmlfield implements FieldType {
 	  }
 	else
 	  {
+            if (nextItem.matches(ADD) || nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(DELETE))
+              {
+                // "Error, can''t use vector operator {0} in scalar field: {1}."
+                throw new RuntimeException(ts.l("constructor.scalar_error", nextItem.toString(), fieldDef.getName()));
+              }
+
 	    try
 	      {
 		value = new xPassword(nextItem);
@@ -419,6 +458,12 @@ public class xmlfield implements FieldType {
 	      }
 	    else
 	      {
+                if (nextItem.matches(ADD) || nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(DELETE))
+                  {
+                    // "Error, can''t use vector operator {0} in scalar field: {1}."
+                    throw new RuntimeException(ts.l("constructor.scalar_error", nextItem.toString(), fieldDef.getName()));
+                  }
+
 		value = parseIP(nextItem);
 
 		// fall through to skipToEndField()
@@ -445,6 +490,12 @@ public class xmlfield implements FieldType {
 	  }
 	else
 	  {
+            if (nextItem.matches(ADD) || nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(DELETE))
+              {
+                // "Error, can''t use vector operator {0} in scalar field: {1}."
+                throw new RuntimeException(ts.l("constructor.scalar_error", nextItem.toString(), fieldDef.getName()));
+              }
+
 	    Double fValue = parseFloat(nextItem);
 
 	    if (fValue != null)
