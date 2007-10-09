@@ -22,7 +22,7 @@
 #
 # If these assumptions hold, then resource_validator.pl will check all
 # source files under this directory against the appropriate
-# localization property definitions to insure that all localization keys
+# localization property definitions to ensure that all localization keys
 # exist, and that the ts.l() call provides the proper number of parameters
 # to match the resource definition in the property file.
 #
@@ -422,7 +422,7 @@ sub examine_java {
         print "Processing $key\n";
       }
 
-      $backup_point = tell(IN) - (length($')-1);
+      $backup_point = tell(IN) - length($') + 1;
       $backup_line_number = $line_number;
 
       $seen{$key} = 1;
