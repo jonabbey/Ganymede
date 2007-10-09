@@ -139,7 +139,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (path == null)
       {
 	path = System.getProperty("ganymede.builder.output");
-
+ 
 	if (path == null)
 	  {
 	    throw new RuntimeException("GASHBuilder not able to determine output directory.");
@@ -280,11 +280,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (baseChanged(SchemaConstants.UserBase) || // users
 	baseChanged((short) 274) || // mail lists
-	baseChanged((short) 275)) // external mail addresses
+	baseChanged((short) 275) || // external mail addresses
+	baseChanged((short) 260)) // mailman lists  
       {
 	Ganymede.debug("Need to build aliases map");
 
 	if (writeAliasesFile())
+	  {
+	    success = true;
+	  }
+      }
+
+    if (baseChanged((short) 260)) // mailman lists  
+      {
+	Ganymede.debug("Need to call mailman ns8 sync script");
+
+	if (writeMailmanListsFile())
 	  {
 	    success = true;
 	  }
@@ -360,14 +371,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (buildScript == null)
       {
 	buildScript = System.getProperty("ganymede.builder.scriptlocation");
-
-        if (buildScript == null)
-          {
-            Ganymede.debug("No GASHBuilderTask external build script defined, not running external GASH build script");
-            Ganymede.debug("The ganymede.builder.scriptlocation property needs to be set in order for GASHBuilderTask to run an external script after writing build files.");
-            return false;
-          }
-
 	buildScript = PathComplete.completePath(buildScript);
 	buildScript = buildScript + "gashbuilder";
       }
@@ -1443,6 +1446,104 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     return true;
   }
 
+
+  /**
+   *
+   * This method generates a file with the Mailman lists info.  This method must be run during
+   * builderPhase1 so that it has access to the enumerateObjects() method
+   * from our superclass. To be passed to Mailman server.
+   *
+   */
+
+  private boolean writeMailmanListsFile()
+  {
+    PrintWriter mailman_sync_file = null;
+    DBObject mailmanList;
+    Enumeration mailmanLists;
+
+    /* -- */
+
+    try
+      {
+	mailman_sync_file = openOutFile(path + "ganymede_mailman_lists", "gasharl"); 
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeMailmanListsFile(): couldn't open mailman_sync_file file: " + ex);
+      }
+
+    try
+      {
+	// and the mailman mail lists
+    
+	mailmanLists = enumerateObjects((short) 260);  
+
+	while (mailmanLists.hasMoreElements())
+	  {
+	    mailmanList = (DBObject) mailmanLists.nextElement();	
+	    writeMailmanList(mailmanList, mailman_sync_file);
+	  }
+      }
+    finally
+      {
+	mailman_sync_file.close();
+      }
+
+    return true;
+  }
+
+  
+
+  /**
+   *
+   * This Method writes out a mailman list target line to the mailman lists file.<br><br>
+   *
+   * The mail list lines in this file look like the following:<br><br>
+   *
+   * <pre>
+   *
+   * listname\towneremail\tpassword
+   *
+   * </pre>
+   *
+   * Where listname is the name of the mailman list, owneremail is the 
+   * email of the owner, and password is the password for the mailing list.
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this alias line
+   * 
+   */
+
+  private void writeMailmanList(DBObject object, PrintWriter writer)
+  {
+    result.setLength(0);
+
+    String name = (String) object.getFieldValueLocal(MailmanListSchema.NAME);
+    String ownerEmail = (String) object.getFieldValueLocal(MailmanListSchema.OWNEREMAIL);
+    PasswordDBField passField = (PasswordDBField) object.getField(MailmanListSchema.PASSWORD);
+    String password = (String) passField.getPlainText();
+
+    Invid serverInvid = (Invid) object.getFieldValueLocal(MailmanListSchema.SERVER);
+    DBObject server = getObject(serverInvid);    
+    String hostname = getLabel((Invid) server.getFieldValueLocal(MailmanServerSchema.HOST));    
+
+    result.append(hostname);
+    result.append("\t");
+    result.append(name);
+    result.append("\t");
+    result.append(ownerEmail);
+    result.append("\t");
+    result.append(password);
+	
+    writer.println(result.toString());
+  }
+
+
+
+
+
+
+
   // ***
   //
   // The following private methods are used to support the DNS builder logic.
@@ -1460,8 +1561,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private boolean writeAliasesFile()
   {
     PrintWriter aliases_info = null;
-    DBObject user, group, external;
-    Enumeration users, mailgroups, externals;
+    DBObject user, group, external, MailmanList;
+    Enumeration users, mailgroups, externals, MailmanLists;
 
     /* -- */
 
@@ -1509,6 +1610,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	
 	    writeExternalAlias(external, aliases_info);
 	  }
+
+	// add in Mailman Lists now.
+    
+	MailmanLists = enumerateObjects((short) 260);
+
+	while (MailmanLists.hasMoreElements())
+	  {
+	    MailmanList = (DBObject) MailmanLists.nextElement();
+	
+	    writeMailmanListAlias(MailmanList, aliases_info);
+	  }
+
       }
     finally
       {
@@ -1518,6 +1631,76 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     return true;
   }
   
+
+  /**
+   * This method writes out a mailman alias line to the aliases_info GASH source file.<br><br>
+   *
+   * The mailman alias lines in this file look like the following:<br><br>
+   *
+   * <pre>
+   *
+   * test:test@arlut.utexas.edu
+   *
+   * </pre>
+   *
+   * Where listname is the name of the mailman list, owneremail is the 
+   * email of the owner, and password is the password for the mailing list.
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this alias line
+   * 
+   */
+
+  private void writeMailmanListAlias(DBObject object, PrintWriter writer)
+  {
+    String name = (String) object.getFieldValueLocal(MailmanListSchema.NAME);
+    Invid serverInvid = (Invid) object.getFieldValueLocal(MailmanListSchema.SERVER);
+    DBObject server = getObject(serverInvid);    
+    String hostname = getLabel((Invid) server.getFieldValueLocal(MailmanServerSchema.HOST));    
+
+    result.setLength(0);
+    result.append("<xxx>");
+    result.append(name);
+    result.append(":");
+    result.append(name);
+    result.append("@");
+    result.append(hostname);
+    result.append(".arlut.utexas.edu");
+    writer.println(result.toString());
+
+
+    // Loop over aliases target.    
+    Vector aliases = object.getFieldValuesLocal(MailmanListSchema.ALIASES);
+
+    if (aliases == null)
+      {
+	System.err.println("GASHBuilder.writeMailmanAliases(): null alias list for mailman list name " + name);
+      }
+    else
+      {
+	for (int i = 0; i < aliases.size(); i++)
+	  {
+	    String aliasName = (String) aliases.elementAt(i);	    
+
+	    if (aliasName != null)
+	      {
+	        result.setLength(0);
+	        result.append("<xxx>");
+	        result.append(aliasName);
+	        result.append(":");
+	        result.append(aliasName);
+		result.append("@");
+	        result.append(hostname);
+		result.append(".arlut.utexas.edu");
+	        writer.println(result.toString());
+	      }
+	  }
+      }
+  }
+
+
+
+
   /**
    * This method writes out a user alias line to the aliases_info GASH source file.<br><br>
    *
@@ -2547,7 +2730,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * <code>129.116.224.12|01:02:03:04:05:06|sysname|room|username</code>
    *
-   */
+   */ 
 
   private void writeSysDataLine(DBObject object, PrintWriter writer)
   {
