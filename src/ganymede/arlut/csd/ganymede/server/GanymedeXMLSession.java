@@ -633,8 +633,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    synchronized (errBuffer)
 	      {
-		progress = progress + errBuffer.toString();
+                String finalBit = errBuffer.toString();
 		errBuffer.setLength(0);
+
+		progress = progress + finalBit;
+                System.err.print(finalBit);
 	      }
 	  }
 	else
@@ -937,18 +940,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (nextElement.matches("ganydata"))
 	  {
-	    if (!processData())
-	      {
-		// don't bother processing rest of XML doc.. just jump
-		// down to finally clause
+            if (!processData())
+              {
+                // don't bother processing rest of XML doc.. just jump
+                // down to finally clause
 
-		return;
-	      }
+                return;
+              }
 
 	    nextElement = getNextItem();
 	  }
 
-	while (!nextElement.matchesClose("ganymede") && !(nextElement instanceof XMLCloseElement))
+	while ((!nextElement.matchesClose("ganymede") && !(nextElement instanceof XMLCloseElement)) && !(nextElement instanceof XMLEndDocument))
 	  {
 	    // "Skipping unrecognized element: {0}"
 	    err.println(ts.l("run.skipping", nextElement));
@@ -1997,7 +2000,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public boolean processData() throws SAXException
   {
-    XMLItem item;
+    XMLItem item = null;
     boolean committedTransaction = false;
     int modCount = 0;
     int totalCount = 0;
@@ -2153,6 +2156,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     finally
       {
+        reader.pushbackItem(item);  // let the run() method see what we ran into at the end
+
 	if (!committedTransaction)
 	  {
 	    // "Aborted XML data transaction, logging out."
