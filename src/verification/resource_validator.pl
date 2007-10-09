@@ -348,11 +348,15 @@ sub examine_java {
   my ($properties, $sourcename, $mode, $package, $propname, $proppath, $working, $key);
   my ($value, $prop_param_count, $rest, $arg_count);
   my (%seen, $hashref, $prop);
+  my ($backup_point, $backup_line_number);
 
   my $result = 0;
   my $prop_loaded = 0;
 
   my $line_number = 0;
+
+  my $seek_debug = 0;
+  my $debug = 0;
 
   $jfile =~ /\/([^\/]*)\.java$/;
 
@@ -367,6 +371,11 @@ sub examine_java {
 
   open (IN, "<$jfile") || die "Couldn't open $jfile";
   while (<IN>) {
+
+    if ($debug) {
+      print $_;
+    }
+
     $line_number = $line_number + 1;
 
     if (/^\s*package\s*([^;]*);/) {
@@ -404,6 +413,17 @@ sub examine_java {
     if (/ts\.l\(\"([^\"]*)\"/) {
       $working = $_;
       $key = $1;
+
+      if ($seek_debug && $key eq "global.parse_exception") {
+        $debug = 1;
+      }
+
+      if ($debug) {
+        print "Processing $key\n";
+      }
+
+      $backup_point = tell(IN) - (length($'));
+      $backup_line_number = $line_number;
 
       $seen{$key} = 1;
 
@@ -454,16 +474,22 @@ sub examine_java {
 	} elsif ($arg_count > $prop_param_count) {
 	  print "Warning, ts.l($key) call has more parameters ($arg_count) than are needed for the property ($prop_param_count).  Line number $line_number\n";
 	}
-
-	if (defined $new_string) {
-	  $_ = $new_string;
-	  $line_number = $line_number - 1; # since we're redoing this line in the loop
-	  redo;
-	}
       }
+
+      # move back up to look for any ts.l() calls inside the ts.l()
+      # call we just processed
+
+      if ($debug) {
+        print "Backing up to search for sub expressions\n";
+      }
+
+      $line_number = $backup_line_number;
+      seek(IN, $backup_point, 0);
     }
   }
   close(IN);
+
+  $debug = 0;
 
   # we've finished scanning this java file.. now, did we get any
   # properties in the property file that weren't used in the source
