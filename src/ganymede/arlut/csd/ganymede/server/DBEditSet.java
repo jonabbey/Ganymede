@@ -1733,14 +1733,29 @@ public class DBEditSet {
 	      {
 		SyncRunner sync = Ganymede.getSyncChannel((String)Ganymede.syncRunners.elementAt(i));
 
-		if (sync.isIncremental())
-		  {
-		    sync.writeSync(persistedTransaction, objectList, this);
-		  }
-		else if (sync.isFullState())
-		  {
-		    sync.checkBuildNeeded(persistedTransaction, objectList, this);
-		  }
+                try
+                  {
+                    if (sync.isIncremental())
+                      {
+                        sync.writeSync(persistedTransaction, objectList, this);
+                      }
+                    else if (sync.isFullState())
+                      {
+                        sync.checkBuildNeeded(persistedTransaction, objectList, this);
+                      }
+                  }
+                catch (java.io.FileNotFoundException in_ex)
+                  {
+                    // "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
+                    // "Couldn''t write transaction to sync channel {0} due to a FileNotFoundException.
+                    //
+                    // This sync channel is configured to write to {1}, but this directory does not exist or is not writable.
+                    //
+                    // Transaction Cancelled."
+
+                    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+                                                                              ts.l("commit_writeSyncChannels.no_sync_found", sync.getName(), sync.getDirectory())));
+                  }
 	      }
 	  }
 	catch (Throwable ex)
@@ -1768,7 +1783,7 @@ public class DBEditSet {
 		Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", Ganymede.stackTrace(ex)));
 	      }
 
-	    if (ex instanceof IOException)
+            if (ex instanceof IOException)
 	      {
 		// "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
 		// "Couldn''t write transaction to sync channels due to an IOException.   The server may have run out of disk space.\n\n{0}"
