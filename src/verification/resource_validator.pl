@@ -422,7 +422,7 @@ sub examine_java {
         print "Processing $key\n";
       }
 
-      $backup_point = tell(IN) - (length($'));
+      $backup_point = tell(IN) - (length($')-1);
       $backup_line_number = $line_number;
 
       $seen{$key} = 1;
@@ -483,7 +483,7 @@ sub examine_java {
         print "Backing up to search for sub expressions\n";
       }
 
-      $line_number = $backup_line_number;
+      $line_number = $backup_line_number-1;
       seek(IN, $backup_point, 0);
     }
   }
