@@ -1212,7 +1212,7 @@ public class DBEditSet {
    * indicating the problem.
    */
 
-  private final void commit_run_precommit_hooks() throws CommitException
+  private final void commit_run_precommit_hooks() throws CommitNonFatalException
   {
     Vector committedObjects;
     Iterator iter;
