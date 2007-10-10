@@ -2263,6 +2263,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * exist in the session or the persistent store.</P>
    *
    * @param target The Invid whose label we want to retrieve.
+   */
+
+  public String lookupInvidLabel(Invid target)
+  {
+    return lookupInvidLabel(target, false);
+  }
+
+  /**
+   * <P>This helper method is for use on the server, so that custom
+   * code subclasses can call a simple method to look up an Invid and
+   * get the appropriate label, taking into account whether the lookup
+   * is being done within a transaction or no.</P>
+   *
+   * <P>This method will return null if the Invid provided does not
+   * exist in the session or the persistent store.</P>
+   *
+   * @param target The Invid whose label we want to retrieve.
    * @param forceOriginal If true and the lookup is being done in the
    * middle of an editing session, we'll return the label of the
    * original read-only DBObject from the persistent datastore, rather
