@@ -1783,7 +1783,11 @@ public class DBEditSet {
 		Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", Ganymede.stackTrace(ex)));
 	      }
 
-            if (ex instanceof IOException)
+            if (ex instanceof CommitFatalException)
+              {
+                throw (CommitFatalException) ex;
+              }
+            else if (ex instanceof IOException)
 	      {
 		// "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
 		// "Couldn''t write transaction to sync channels due to an IOException.   The server may have run out of disk space.\n\n{0}"
