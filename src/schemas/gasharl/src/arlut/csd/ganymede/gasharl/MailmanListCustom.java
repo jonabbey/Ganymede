@@ -227,6 +227,7 @@ public class MailmanListCustom extends DBEditObject implements SchemaConstants, 
 	for (int i = 0; i < aliases.length; i++)
 	  {
 	    retVal = stringfield.addElementLocal(aliases[i]);
+
 	    if (retVal != null && !retVal.didSucceed())
 	      {
 		return retVal;
@@ -240,17 +241,21 @@ public class MailmanListCustom extends DBEditObject implements SchemaConstants, 
 	if (succeed)
 	  {
 	    dbSession.popCheckpoint(checkPointKey);
-	    
+
 	    // tell client to refresh to see the reactivation results
 	    retVal = new ReturnVal(true, true);
 	    retVal.addRescanField(this.getInvid(), MailmanListSchema.ALIASES);
-	    
+
 	    return retVal;
 	  }
 	else
 	  {
-	    if (!dbSession.rollback(checkPointKey))
+	    if (dbSession.rollback(checkPointKey))
 	      {
+                return retVal;
+              }
+            else
+              {
 		return Ganymede.createErrorDialog("MailmanListCustom: Error",
 						  "Ran into a problem during alias creation, and rollback failed");
 	      }
