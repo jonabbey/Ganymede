@@ -273,7 +273,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     original = null;
     this.editset = editset;
-    this.gSession = editset.getSession().getGSession();
+    this.gSession = getSession().getGSession();
     commitSemaphore.set(false);
     stored = false;
     status = CREATING;
@@ -2315,7 +2315,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	myQuery.setFiltered(false); // be sure not to filter the query
 
-	return editset.getSession().getGSession().query(myQuery, this);
+	return getSession().getGSession().query(myQuery, this);
       }
     
     //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());

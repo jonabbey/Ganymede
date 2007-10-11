@@ -2300,6 +2300,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * For an embedded object, returns the Invid of the parent object
+   * which contains contains this embedded object.
+   *
+   * Otherwise, returns null.
+   */
+
+  public final Invid getParentInvid()
+  {
+    if (!this.isEmbedded())
+      {
+        return null;
+      }
+
+    return (Invid) this.getFieldValueLocal(SchemaConstants.ContainerField);
+  }
+
+  /**
    * For an embedded object, returns a reference to the object which
    * contains this embedded object.
    *
@@ -2313,9 +2330,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         return null;
       }
 
-    Invid parentInvid = (Invid) this.getFieldValueLocal(SchemaConstants.ContainerField);
-
-    return lookupInvid(parentInvid, false);
+    return lookupInvid(getParentInvid(), false);
   }
 
   /**
