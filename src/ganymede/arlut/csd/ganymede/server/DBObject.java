@@ -2226,6 +2226,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject lookupInvid(Invid target, boolean forceOriginal)
   {
+    if (target == null)
+      {
+        return null;
+      }
+
     if (this.gSession != null)
       {
 	DBObject retObj = this.gSession.getSession().viewDBObject(target);
@@ -2289,6 +2294,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public String lookupInvidLabel(Invid target, boolean forceOriginal)
   {
+    if (target == null)
+      {
+        return null;
+      }
+
     DBObject temp = lookupInvid(target, forceOriginal);
 
     if (temp == null)
