@@ -195,5 +195,4 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
 	return Ganymede.loginError(ex);
       }
   }
-
 }

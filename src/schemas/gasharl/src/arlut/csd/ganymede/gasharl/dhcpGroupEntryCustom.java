@@ -201,17 +201,14 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
     // that we already have an entry for.
 
     Vector typesToSkip = new Vector();
-    DBObject type;
+
+    Vector siblings = getSiblingInvids();
     Invid typeInvid;
 
-    Vector types = getSiblingInvids();
-
-    for (int i = 0; i < types.size(); i++)
+    for (int i = 0; i < siblings.size(); i++)
       {
-	type = lookupInvid((Invid) types.elementAt(i), false);
-
-	typeInvid = (Invid) type.getFieldValueLocal(dhcpGroupEntrySchema.TYPE);
-
+	DBObject entry = lookupInvid((Invid) siblings.elementAt(i), false);
+	typeInvid = (Invid) entry.getFieldValueLocal(dhcpGroupEntrySchema.TYPE);
 	typesToSkip.addElement(typeInvid);
       }
     
@@ -235,7 +232,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
 
   private Vector getSiblingInvids()
   {
-    Vector result = (Vector) getParentObj().getFieldValuesLocal(dhcpGroupSchema.MEMBERS).clone();
+    Vector result = (Vector) getParentObj().getFieldValuesLocal(dhcpGroupSchema.OPTIONS).clone();
     
     // we are not our own sibling.
 
@@ -268,9 +265,21 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
       }
 
     String parentName = lookupInvidLabel((Invid) getFieldValueLocal(SchemaConstants.ContainerField));
+
+    return setHiddenLabel(parentName);
+  }
+
+  /**
+   * This method is used to update the hidden label field (which we
+   * have to have for xml address-ability reasons) to match the name
+   * of the parent object and the option type that we're pointing to.
+   */
+
+  public ReturnVal setHiddenLabel(String parentName)
+  {
     Invid typeInvid = (Invid) getFieldValueLocal(dhcpGroupEntrySchema.TYPE);
 
-    return setFieldValueLocal(dhcpGroupEntrySchema.LABEL, parentName + ":" + lookupInvidLabel(typeInvid));
+    return setFieldValueLocal(dhcpGroupEntrySchema.LABEL, parentName + ":" + String.valueOf(lookupInvidLabel(typeInvid)));
   }
 
   /**
@@ -302,24 +311,101 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
     typeField = (InvidDBField) object.getField(TYPE);
     valueField = (StringDBField) object.getField(VALUE);
 
-    try
+    if (typeField != null)
       {
-	if (typeField != null)
-	  {
-	    buff.append(typeField.getValueString() + ":");
-	  }
-
-	if (valueField != null)
-	  {
-	    buff.append(valueField.getValueString());
-	  }
+        if (typeField.getValueLocal() != null)
+          {
+            buff.append(typeField.getValueString() + " : ");
+          }
       }
-    catch (IllegalArgumentException ex)
+
+    if (valueField != null)
       {
-	buff.append("<?:?>");
+        if (valueField.getValueLocal() != null)
+          {
+            buff.append(valueField.getValueString());
+          }
       }
 
     return buff.toString();
+  }
+
+  /**
+   * This method allows the DBEditObject to have executive approval
+   * of any scalar set operation, and to take any special actions in
+   * reaction to the set.  When a scalar field has its value set, it
+   * will call its owners finalizeSetValue() method, passing itself as
+   * the &lt;field&gt; parameter, and passing the new value to be
+   * approved as the &lt;value&gt; parameter.  A Ganymede customizer
+   * who creates custom subclasses of the DBEditObject class can
+   * override the finalizeSetValue() method and write his own logic
+   * to examine any change and either approve or reject the change.
+   *
+   * A custom finalizeSetValue() method will typically need to
+   * examine the field parameter to see which field is being changed,
+   * and then do the appropriate checking based on the value
+   * parameter.  The finalizeSetValue() method can call the normal
+   * this.getFieldValueLocal() type calls to examine the current state
+   * of the object, if such information is necessary to make
+   * appropriate decisions.
+   *
+   * If finalizeSetValue() returns null or a ReturnVal object with
+   * a positive success value, the DBField that called us is
+   * guaranteed to proceed to make the change to its value.  If this
+   * method returns a non-success code in its ReturnVal, as with the
+   * result of a call to Ganymede.createErrorDialog(), the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.  Any error dialog returned from finalizeSetValue()
+   * will be passed to the user.
+   *
+   * The DBField that called us will take care of all standard
+   * checks on the operation (including a call to our own
+   * verifyNewValue() method before calling this method.  Under normal
+   * circumstances, we won't need to do anything here.
+   * finalizeSetValue() is useful when you need to do unusually
+   * involved checks, and for when you want a chance to trigger other
+   * changes in response to a particular field's value being
+   * changed.
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
+  {
+    // when we rename a group, we have lots to do.. a number of other
+    // fields in this object and others need to be updated to match.
+
+    if (field.getID() == TYPE || field.getID() == VALUE)
+      {
+        ReturnVal retVal = new ReturnVal(true, true);
+
+        Invid parentInvid = getParentInvid();
+
+        if (parentInvid == null)
+          {
+            return null;        // we're being deleted
+          }
+
+        retVal.addRescanField(parentInvid, dhcpGroupSchema.OPTIONS);
+
+        if (field.getID() == TYPE)
+          {
+            // force the client to requery legal (and non-taken) types
+
+            Vector siblings = getSiblingInvids();
+
+            for (int i = 0; i < siblings.size(); i++)
+              {
+                retVal.addRescanField((Invid) siblings.elementAt(i), dhcpGroupEntrySchema.TYPE);
+              }
+          }
+
+        return retVal;
+      }
+
+    return null;		// success by default
   }
 
   /**
