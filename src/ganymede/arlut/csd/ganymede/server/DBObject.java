@@ -2344,6 +2344,36 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Returns true if this object has a field named fieldName and if
+   * that object has a defined (i.e., non-empty) value set.
+   */
+
+  public boolean isDefined(String fieldName)
+  {
+    return this.isDefined((DBField) getField(fieldName));
+  }
+
+  /**
+   * Returns true if this object has a field with a field id of
+   * fieldID and if that object has a defined (i.e., non-empty) value
+   * set.
+   */
+
+  public boolean isDefined(short fieldID)
+  {
+    return this.isDefined((DBField) getField(fieldID));
+  }
+
+  /**
+   * Returns true if the given field is defined.
+   */
+
+  public boolean isDefined(DBField f)
+  {
+    return (f != null) && f.isDefined();
+  }
+
+  /**
    * <P>This method is for use on the server, so that custom code can call a simple
    * method to test to see if a boolean field is defined and has a true value.</P>
    *
