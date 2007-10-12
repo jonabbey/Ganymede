@@ -1072,7 +1072,13 @@ subclasses to do custom notification when a given object needs to have
 inactivation or removal warnings sent out, as determined by the basic
 logic in the GanymedeWarningTask.
 
-67. [SCHEMA EDITOR] Fixed the right-click menu on embedded object types.
+67. [SERVER] Fixed dumpAndArchiveTask so it won't throw an exception if it is scheduled while the schema is being edited
+
+The dumpAndArchiveTask consolidates the Ganymede journal into the
+ganymede.db file on a periodic basis.  It had a bug that would result
+in a semaphore exception if it was scheduled during schema editing.
+
+68. [SCHEMA EDITOR] Fixed the right-click menu on embedded object types.
 
 The schema editor was popping up the wrong right-click menu on
 embedded object types in the tree control.  This bug made it
@@ -1080,21 +1086,21 @@ impossible to create new fields in embedded objects other than during
 the same schema editing session in which the embedded object type was
 created.
 
-68. [SERVER] Improved error handling reporting for XML Sync Channels
+69. [SERVER] Improved error handling reporting for XML Sync Channels
 
 Improved the transactional Sync Channel processing so that the
 non-existence (or non-writability) of the registered queue directory
 results in a specific error message explaining that, rather than
 speculation that the disk might be full.
 
-69. [XMLCLIENT] Improved error handling reporting for xml data uploads.
+70. [XMLCLIENT] Improved error handling reporting for xml data uploads.
 
 The xmlclient (actually the code in the server which interacts with
 the xmlclient) has had its error handling improved.  Certain classes
 of document errors are now handled more gracefully, with more explicit
 error messages.
 
-70. [SERVER] Added lookupInvid and lookupInvidLabel methods to DBObject
+71. [SERVER] Added lookupInvid and lookupInvidLabel methods to DBObject
 
 These new methods are designed to provide a fast, convenient way for
 creators of DBEditObject subclasses to dereference Invids to the
