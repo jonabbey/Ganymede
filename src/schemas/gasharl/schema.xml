@@ -29,6 +29,9 @@
     <namespace name="nisserver" case-sensitive="true"/>
     <namespace name="interfacelabel" case-sensitive="true"/>
     <namespace name="mailman"/>
+    <namespace name="dhcp_group"/>
+    <namespace name="dhcp_option_entry"/>
+    <namespace name="dhcp_option_type"/>
   </namespaces>
 
   <object_type_definitions>
@@ -711,6 +714,26 @@ virtual overlay on another host.</comment>
               </typedef>
             </fielddef>
           </tab>
+          <tab name="DHCP">
+            <fielddef name="Custom_DHCP_Options" id="271">
+              <typedef type="invid">
+                <vector maxSize="16"/>
+                <targetobject name="DHCP_Option_Value"/>
+                <embedded/>
+              </typedef>
+            </fielddef>
+            <fielddef name="DHCP_Groups" id="270">
+              <comment>A list of custom DHCP declarations that this system
+shares in.  The DHCP configuration for this system
+will include the values defined in the DHCP groups linked
+in this field.</comment>
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="DHCP_Group"/>
+                <targetfield name="Member_Systems"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="I.P._Network" id="267">
           <classdef name="arlut.csd.ganymede.gasharl.networkCustom" optionString=""/>
@@ -937,6 +960,54 @@ virtual overlay on another host.</comment>
           </objectdef>
         </category>
 
+        <objectdef name="DHCP_Group" id="262">
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpGroupCustom" optionString=""/>
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="Name" id="256">
+              <typedef type="string">
+                <maxlength val="128"/>
+                <namespace val="dhcp_group"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Options" id="258">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="DHCP_Option_Value"/>
+                <embedded/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Member_Systems" id="257">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="System"/>
+                <targetfield name="DHCP_Groups"/>
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
+        <objectdef name="DHCP_Option_Value" id="264">
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpGroupEntryCustom" optionString=""/>
+          <embedded/>
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="Label" id="256">
+              <typedef type="string">
+                <maxlength val="255"/>
+                <namespace val="dhcp_option_entry"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Option_Type" id="257">
+              <typedef type="invid">
+                <targetobject name="DHCP_Option"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Option_Value" id="258">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
       </category>
 
       <category name="Configuration">
@@ -1153,7 +1224,6 @@ conflicts with this name.</comment>
             </fielddef>
           </tab>
         </objectdef>
-
         <objectdef name="Mailman_List" id="260">
           <label fieldid="256"/>
           <tab name="General">
@@ -1192,7 +1262,30 @@ conflicts with this name.</comment>
             </fielddef>
           </tab>
         </objectdef>
-
+        <objectdef name="DHCP_Option" id="266">
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpOptionCustom" optionString=""/>
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="Option_Name" id="256">
+              <typedef type="string">
+                <namespace val="dhcp_option_type"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Option_Type" id="258">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Custom_Option" id="259">
+              <comment>If true, this option is a site-local custom option,
+whose name is not defined in IETF RFCs.  A specific
+numeric code must be provided for custom options.</comment>
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Option_Code" id="257">
+              <typedef type="numeric"/>
+            </fielddef>
+          </tab>
+        </objectdef>
       </category>
 
     </category>

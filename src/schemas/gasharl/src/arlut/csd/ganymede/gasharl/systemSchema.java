@@ -85,4 +85,7 @@ public interface systemSchema {
   final static short SYSTEMTYPE=266;
   final static short PRIMARYUSER=267;
   final static short VOLUMES=268;
+  final static short VIRTUAL=269;
+  final static short DHCPGROUPS=270;
+  final static short DHCPOPTIONS=271;
 }

@@ -230,9 +230,38 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
     return result;
   }
 
+  private boolean ownedBySystem()
+  {
+    return this.ownedBySystem(this);
+  }
+
+  private boolean ownedBySystem(DBObject object)
+  {
+    return object.getParentInvid().getType() == (short) 263;
+  }
+
+  private boolean ownedByDHCPGroup()
+  {
+    return this.ownedByDHCPGroup(this);
+  }
+
+  private boolean ownedByDHCPGroup(DBObject object)
+  {
+    return object.getParentInvid().getType() == (short) 262;
+  }
+
   private Vector getSiblingInvids()
   {
-    Vector result = (Vector) getParentObj().getFieldValuesLocal(dhcpGroupSchema.OPTIONS).clone();
+    Vector result = null;
+
+    if (ownedByDHCPGroup())
+      {
+        result = (Vector) getParentObj().getFieldValuesLocal(dhcpGroupSchema.OPTIONS).clone();
+      }
+    else if (ownedBySystem())
+      {
+        result = (Vector) getParentObj().getFieldValuesLocal(systemSchema.DHCPOPTIONS).clone();
+      }
     
     // we are not our own sibling.
 
@@ -388,7 +417,14 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
             return null;        // we're being deleted
           }
 
-        retVal.addRescanField(parentInvid, dhcpGroupSchema.OPTIONS);
+        if (ownedByDHCPGroup())
+          {
+            retVal.addRescanField(parentInvid, dhcpGroupSchema.OPTIONS);
+          }
+        else if (ownedBySystem())
+          {
+            retVal.addRescanField(parentInvid, systemSchema.DHCPOPTIONS);
+          }
 
         if (field.getID() == TYPE)
           {
