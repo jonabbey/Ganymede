@@ -1112,6 +1112,9 @@ Also added getParentInvid() to DBObject, which is applicable to
 embedded objects.  It returns the Invid of the object which contains
 the embedded object.
 
+Also added isDefined() methods to DBObject. which can be used to test
+to see if a named or numbered field is present and non-empty.
+
 These new methods should make a lot of typical DBEditObject subclass
 logic a bit easier to implement.
 
