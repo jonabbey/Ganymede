@@ -70,6 +70,11 @@ public class PathComplete {
 
   public static String completePath(String path)
   {
+    if (path == null)
+      {
+        return null;
+      }
+
     if (separator == null)
       {
 	separator = System.getProperty("file.separator");
