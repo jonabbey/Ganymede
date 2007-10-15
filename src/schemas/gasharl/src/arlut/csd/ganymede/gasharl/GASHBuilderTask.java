@@ -371,6 +371,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (buildScript == null)
       {
 	buildScript = System.getProperty("ganymede.builder.scriptlocation");
+
+        if (buildScript == null)
+          {
+            Ganymede.debug("GASHBuilderTask couldn't find any property definition for ganymede.builder.scriptlocation.");
+            Ganymede.debug("\nNot executing external build for GASHBuilderTask.");
+            return false;
+          }
+
 	buildScript = PathComplete.completePath(buildScript);
 	buildScript = buildScript + "gashbuilder";
       }
