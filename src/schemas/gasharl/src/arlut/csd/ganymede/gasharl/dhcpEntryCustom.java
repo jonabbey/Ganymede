@@ -83,7 +83,7 @@ import arlut.csd.ganymede.server.StringDBField;
 /**
  *
  * This class represents the option value objects that are embedded in
- * the options field in the DHCP Group object.
+ * the options field in the DHCP Entry object.
  *
  */
 
@@ -442,6 +442,70 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
       }
 
     return null;		// success by default
+  }
+
+  /**
+   * This method provides a hook that can be used to check any values
+   * to be set in any field in this object.  Subclasses of
+   * DBEditObject should override this method, implementing basically
+   * a large switch statement to check for any given field whether the
+   * submitted value is acceptable given the current state of the
+   * object.
+   *
+   * Question: what synchronization issues are going to be needed
+   * between DBEditObject and DBField to insure that we can have
+   * a reliable verifyNewValue method here?
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal verifyNewValue(DBField field, Object value)
+  {
+    if (field.getID() == dhcpEntrySchema.VALUE)
+      {
+        Ganymede.debug("attempting to verify: " + String.valueOf(value));
+
+	String inString = (String) value;
+	String transformedString;
+
+	if ((inString == null) || (inString.equals("")))
+	  {
+	    return null; // okay by us!
+	  }
+
+        Invid dhcpType = (Invid) getFieldValueLocal(dhcpEntrySchema.TYPE);
+        DBObject verifyObject = lookupInvid(dhcpType);
+
+        transformedString = dhcpOptionCustom.verifyAcceptableValue(verifyObject, inString);
+
+        if (transformedString == null)
+          {
+            return Ganymede.createErrorDialog("Bad dhcp value", "Bad dhcp value");
+          }
+
+	if (transformedString.equals(inString))
+	  {
+            Ganymede.debug("verifying as is: " + String.valueOf(value));
+
+	    return super.verifyNewValue(field, value); // no change, so no problem
+	  }
+
+        Ganymede.debug("verifying as transformed: " + transformedString);
+
+	// tell the client that we'd like it to take the string that
+	// they gave us and replace it with the reformatted one we
+	// crafted.
+
+	ReturnVal result = new ReturnVal(true);	// success!
+
+	result.setTransformedValueObject(transformedString, this.getInvid(), field.getID());
+
+	return result;
+      }
+
+    return super.verifyNewValue(field, value);
   }
 
   /**

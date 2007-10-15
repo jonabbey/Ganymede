@@ -54,8 +54,12 @@ package arlut.csd.ganymede.gasharl;
 
 import java.util.Vector;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -63,6 +67,7 @@ import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.server.DBEditObject;
 import arlut.csd.ganymede.server.DBEditSet;
 import arlut.csd.ganymede.server.DBField;
+import arlut.csd.ganymede.server.IPDBField;
 import arlut.csd.ganymede.server.DBObject;
 import arlut.csd.ganymede.server.DBObjectBase;
 import arlut.csd.ganymede.server.DBSession;
@@ -95,6 +100,14 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
     result.addRow("array of ip-address");
     result.setNonEditable();
   }
+
+  private static Pattern flagRegex = Pattern.compile("^true|false$", Pattern.CASE_INSENSITIVE);
+  private static Pattern hostNameRegex = Pattern.compile("^[a-z][a-z0-9]*$", Pattern.CASE_INSENSITIVE);
+  private static Pattern arlDomainNameRegex = Pattern.compile("^([a-z][a-z0-9]*)\\.arlut\\.utexas\\.edu$", Pattern.CASE_INSENSITIVE);
+
+  private static long maxUByte = 255;
+  private static long maxUShort = 65535;
+  private static long maxUInt = 4294967295L;
 
   /**
    *
@@ -356,5 +369,167 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       }
 
     return super.wizardHook(field, operation, param1, param2);
+  }
+
+  /**
+   * This method is used to verify the value being set on a
+   * dhcpEntryCustom object that points to this dhcpOptionCustom
+   * object.
+   *
+   * We'll validate the value against the type restriction set in this
+   * dhcpOptionCustom object.
+   *
+   * Returns null if the value wasn't acceptable, or a canonicalized
+   * version of the input if the input was acceptable.
+   */
+
+  public static String verifyAcceptableValue(DBObject object, String value)
+  {
+    if (value == null)
+      {
+        return null;
+      }
+
+    String currentType = (String) object.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
+
+    if (currentType == null)
+      {
+        return value;           // we have no type, go ahead and pass it through for now
+      }
+
+    if (currentType.equals("flag"))
+      {
+        if (!flagRegex.matcher(value).matches())
+          {
+            return null;
+          }
+        else
+          {
+            return value.toLowerCase();  // canonicalize
+          }
+      }
+    else if (currentType.equals("uint8") ||
+             currentType.equals("int8") ||
+             currentType.equals("uint16") ||
+             currentType.equals("int16") ||
+             currentType.equals("uint32") ||
+             currentType.equals("int32"))
+      {
+        long longValue = -1;
+
+        try
+          {
+            longValue = Long.parseLong(value);
+          }
+        catch (NumberFormatException ex)
+          {
+            return null;
+          }
+
+        if ((currentType.equals("uint8") && (longValue < 0 || longValue > maxUByte)) ||
+            (currentType.equals("int8") && (longValue < Byte.MIN_VALUE || longValue > Byte.MAX_VALUE)) ||
+            (currentType.equals("uint16") && (longValue < 0 || longValue > maxUShort)) ||
+            (currentType.equals("int16") && (longValue < Short.MIN_VALUE || longValue > Short.MAX_VALUE)) ||
+            (currentType.equals("uint32") && (longValue < 0 || longValue > maxUInt)) ||
+            (currentType.equals("int32") && (longValue < Integer.MIN_VALUE || longValue > Integer.MAX_VALUE)))
+          {
+            return null;
+          }
+
+        return Long.toString(longValue);
+      }
+    else if (currentType.equals("string"))
+      {
+      }
+    else if (currentType.equals("text"))
+      {
+      }
+    else if (currentType.equals("ip-address"))
+      {
+        Ganymede.debug("trying to verify ip-address");
+
+        Byte[] parsedAddress = null;
+
+        try
+          {
+            parsedAddress = IPDBField.genIPV4bytes(value);
+          }
+        catch (IllegalArgumentException ex)
+          {
+            String hostname = null;
+
+            if (hostNameRegex.matcher(value).matches())
+              {
+                hostname = value;
+              }
+            else
+              {
+                Matcher m = arlDomainNameRegex.matcher(value);
+
+                if (m.matches())
+                  {
+                    hostname = m.group(1);
+                  }
+              }
+
+            if (hostname == null)
+              {
+                return null;
+              }
+            else
+              {
+                String query = "select object from 'System' where 'System Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "'";
+
+                QueryResult results = null;
+
+                try
+                  {
+                    results = Ganymede.internalSession.query(query);
+                  }
+                catch (NotLoggedInException exa)
+                  {
+                    Ganymede.debug(exa.toString());
+
+                    return null;
+                  }
+                catch (GanyParseException exb)
+                  {
+                    Ganymede.debug(exb.toString());
+
+                    return null;
+                  }
+
+                if (results.size() != 1)
+                  {
+                    return null;
+                  }
+
+                try
+                  {
+                    Invid selectedInvid = results.getInvid(0);
+                    DBObject systemObject = object.lookupInvid(selectedInvid);
+                    Invid firstInterface = (Invid) systemObject.getFieldElementLocal(systemSchema.INTERFACES, 0);
+                    DBObject interfaceObject = object.lookupInvid(firstInterface);
+                    DBField ipField = (DBField) interfaceObject.getField(interfaceSchema.ADDRESS);
+
+                    return ipField.getEncodingString();
+                  }
+                catch (NullPointerException ex2)
+                  {
+                    return null;
+                  }
+              }
+          }
+
+        return IPDBField.genIPV4string(parsedAddress);
+      }
+    else if (currentType.equals("array of ip-address"))
+      {
+      }
+    else
+      {
+      }
+
+    return value;
   }
 }

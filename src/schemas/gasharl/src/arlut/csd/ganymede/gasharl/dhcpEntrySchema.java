@@ -74,4 +74,8 @@ public interface dhcpEntrySchema {
   final static short LABEL=256;
   final static short TYPE=257;
   final static short VALUE=258;
+
+  // suggestion.. add a hidden vector of system links, to represent a
+  // hidden relationship to a system in the ganymede database, so that
+  // we can deal with it being removed automatically.. ?
 }
