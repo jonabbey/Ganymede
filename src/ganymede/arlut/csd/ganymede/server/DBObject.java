@@ -2198,6 +2198,33 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     return f.getValueLocal();
   }
 
+
+  /**
+   * <P>This helper method is for use on the server, so that custom
+   * code subclasses can call a simple method to look up an Invid and
+   * get the appropriate DBObject, taking into account whether the
+   * lookup is being done within a transaction or no.</P>
+   *
+   * <P>Note that unless the object has been checked out by the current session,
+   * this method will return access to the object as it is stored directly
+   * in the main datastore hashes.  This means that the object will be
+   * read-only and will grant all accesses, as it will have no notion of
+   * what session or transaction owns it.  If you need to have access to the
+   * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
+   * view_db_object()} method to get the object.</P>
+   *
+   * <P>This method will return null if the Invid provided does not
+   * exist in the session or the persistent store.</P>
+   *
+   * @param target The Invid to retrieve.
+   */
+
+  public DBObject lookupInvid(Invid target)
+  {
+    return this.lookupInvid(target, false);
+  }
+
   /**
    * <P>This helper method is for use on the server, so that custom
    * code subclasses can call a simple method to look up an Invid and

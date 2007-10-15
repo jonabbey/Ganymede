@@ -336,4 +336,3 @@ public class Query implements java.io.Serializable {
     return result.toString();
   }
 }
-
