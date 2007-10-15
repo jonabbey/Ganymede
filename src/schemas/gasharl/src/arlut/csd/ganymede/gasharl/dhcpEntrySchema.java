@@ -1,8 +1,8 @@
 /*
 
-   dhcpGroupEntrySchema.java
+   dhcpEntrySchema.java
 
-   An interface defining constants to be used by the automounter map code.
+   An interface defining constants to be used by the dhcp entry code.
    
    Created: 10 October 2007
    Last Mod Date: $Date$
@@ -54,7 +54,7 @@ package arlut.csd.ganymede.gasharl;
 
 /*------------------------------------------------------------------------------
                                                                        interface
-                                                            dhcpGroupEntrySchema
+                                                                 dhcpEntrySchema
 
 ------------------------------------------------------------------------------*/
 
@@ -64,12 +64,12 @@ package arlut.csd.ganymede.gasharl;
  *
  */
 
-public interface dhcpGroupEntrySchema {
+public interface dhcpEntrySchema {
 
-  // field id's for an option entry in the DHCP Group object.  These
-  // should match the current specs in the Ganymede schema file
-  // precisely.  If you change the schema for the DHCP Group object,
-  // you'll want to change this file to match.
+  // field id's for an option entry in the DHCP Group or system
+  // objects.  These should match the current specs in the Ganymede
+  // schema file precisely.  If you change the schema for the DHCP
+  // Entry object, you'll want to change this file to match.
 
   final static short LABEL=256;
   final static short TYPE=257;

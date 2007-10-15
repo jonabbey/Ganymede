@@ -1,6 +1,6 @@
 /*
 
-   dhcpGroupEntryCustom.java
+   dhcpEntryCustom.java
 
    This file is a management class for Automounter map entry objects in Ganymede.
    
@@ -76,7 +76,7 @@ import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                            dhcpGroupEntryCustom
+                                                                 dhcpEntryCustom
 
 ------------------------------------------------------------------------------*/
 
@@ -87,7 +87,7 @@ import arlut.csd.ganymede.server.StringDBField;
  *
  */
 
-public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstants, dhcpGroupEntrySchema {
+public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dhcpEntrySchema {
 
   /**
    *
@@ -95,7 +95,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
    *
    */
 
-  public dhcpGroupEntryCustom(DBObjectBase objectBase)
+  public dhcpEntryCustom(DBObjectBase objectBase)
   {
     super(objectBase);
   }
@@ -106,7 +106,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
    *
    */
 
-  public dhcpGroupEntryCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
+  public dhcpEntryCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
   }
@@ -118,7 +118,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
    *
    */
 
-  public dhcpGroupEntryCustom(DBObject original, DBEditSet editset)
+  public dhcpEntryCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
   }
@@ -136,9 +136,9 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
   {
     switch (fieldid)
       {
-      case dhcpGroupEntrySchema.LABEL:
-      case dhcpGroupEntrySchema.TYPE:
-      case dhcpGroupEntrySchema.VALUE:
+      case dhcpEntrySchema.LABEL:
+      case dhcpEntrySchema.TYPE:
+      case dhcpEntrySchema.VALUE:
 	return true;
       }
 
@@ -164,7 +164,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
     // out in order to prevent multiple entries with identical type
     // selections.
 
-    if (field.getID() == dhcpGroupEntrySchema.TYPE)
+    if (field.getID() == dhcpEntrySchema.TYPE)
       {
 	return null;
       }
@@ -186,7 +186,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
-    if (field.getID() != dhcpGroupEntrySchema.TYPE)
+    if (field.getID() != dhcpEntrySchema.TYPE)
       {
 	return super.obtainChoiceList(field);
       }
@@ -194,7 +194,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
     // Dynamically construct our custom filtered list of available
     // types for this entry
 
-    InvidDBField invf = (InvidDBField) getField(dhcpGroupEntrySchema.TYPE);
+    InvidDBField invf = (InvidDBField) getField(dhcpEntrySchema.TYPE);
 
     // ok, we are returning the list of choices for what type this
     // entry should belong to.  We don't want it to include any types
@@ -208,7 +208,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
     for (int i = 0; i < siblings.size(); i++)
       {
 	DBObject entry = lookupInvid((Invid) siblings.elementAt(i), false);
-	typeInvid = (Invid) entry.getFieldValueLocal(dhcpGroupEntrySchema.TYPE);
+	typeInvid = (Invid) entry.getFieldValueLocal(dhcpEntrySchema.TYPE);
 	typesToSkip.addElement(typeInvid);
       }
     
@@ -306,9 +306,9 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
 
   public ReturnVal setHiddenLabel(String parentName)
   {
-    Invid typeInvid = (Invid) getFieldValueLocal(dhcpGroupEntrySchema.TYPE);
+    Invid typeInvid = (Invid) getFieldValueLocal(dhcpEntrySchema.TYPE);
 
-    return setFieldValueLocal(dhcpGroupEntrySchema.LABEL, parentName + ":" + String.valueOf(lookupInvidLabel(typeInvid)));
+    return setFieldValueLocal(dhcpEntrySchema.LABEL, parentName + ":" + String.valueOf(lookupInvidLabel(typeInvid)));
   }
 
   /**
@@ -434,7 +434,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
 
             for (int i = 0; i < siblings.size(); i++)
               {
-                retVal.addRescanField((Invid) siblings.elementAt(i), dhcpGroupEntrySchema.TYPE);
+                retVal.addRescanField((Invid) siblings.elementAt(i), dhcpEntrySchema.TYPE);
               }
           }
 
@@ -468,7 +468,7 @@ public class dhcpGroupEntryCustom extends DBEditObject implements SchemaConstant
   {
     // don't show off our hidden label for direct editing or viewing
 
-    if (field.getID() == dhcpGroupEntrySchema.LABEL)
+    if (field.getID() == dhcpEntrySchema.LABEL)
       {
 	return false;
       }
