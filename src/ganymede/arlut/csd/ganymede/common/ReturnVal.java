@@ -1078,6 +1078,29 @@ public class ReturnVal implements java.io.Serializable {
    * transformed value by substituting the transformed value for the
    * originally submitted value.
    *
+   * This version of setTransformedValueObject() only sets the
+   * transformed value to be returned, but an additional call will
+   * need to be made on this ReturnVal to set a refresh order for the
+   * field which triggered this ReturnVal.
+   */
+
+  public void setTransformedValueObject(Object obj)
+  {
+    this.transformedSet = true;
+    this.transformedValue = obj;
+  }
+
+  /**
+   * This method is intended to be used by {@link
+   * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
+   * java.lang.Object)}, when the verifyNewValue() method wants to
+   * take the submitted input and canonicalize it.
+   *
+   * Code in the Ganymede server (mostly the base logic in DBField)
+   * which calls the verifyNewValue() method should respond to a
+   * transformed value by substituting the transformed value for the
+   * originally submitted value.
+   *
    * If a value is transformed, setTranformedValueObject() will also
    * set the ReturnVal so that it encodes a rescan of the field in
    * question so the client will refresh it.
@@ -1138,5 +1161,4 @@ public class ReturnVal implements java.io.Serializable {
     tempRetVal.encodeRescanList(rescanInfo);
     this.unionRescan(tempRetVal);
   }
-
 }
