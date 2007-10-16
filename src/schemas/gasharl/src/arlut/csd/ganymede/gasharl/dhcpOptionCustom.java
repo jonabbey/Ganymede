@@ -379,11 +379,18 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * We'll validate the value against the type restriction set in this
    * dhcpOptionCustom object.
    *
-   * Returns null if the value wasn't acceptable, or a canonicalized
-   * version of the input if the input was acceptable.
+   * @param object A reference to the DBObject representing the DHCP
+   * option type that this value is being verified as suitable for.
+   * @param value The value that is being set in the dhcp entry's
+   * value field.
+   *
+   * Returns null on approved value without modification, a ReturnVal
+   * with an encoded error if the value wasn't acceptable and could
+   * not be canonicalized, or a ReturnVal encoding success with a
+   * transformed value if the input could be canonicalized.
    */
 
-  public static String verifyAcceptableValue(DBObject object, String value)
+  public static ReturnVal verifyAcceptableValue(DBObject object, String value)
   {
     if (value == null)
       {
@@ -394,18 +401,27 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
     if (currentType == null)
       {
-        return value;           // we have no type, go ahead and pass it through for now
+        return null;           // we have no type, go ahead and pass it through for now
       }
 
     if (currentType.equals("flag"))
       {
         if (!flagRegex.matcher(value).matches())
           {
-            return null;
+            return Ganymede.createErrorDialog("Unacceptable value",
+                                              "The only acceptable values for this field are 'true' and 'false'.");
           }
         else
           {
-            return value.toLowerCase();  // canonicalize
+            if (value.equals(value.toLowerCase()))
+              {
+                return null;
+              }
+
+            ReturnVal retVal = new ReturnVal(true, true);
+            retVal.setTransformedValueObject(value.toLowerCase());
+
+            return retVal;
           }
       }
     else if (currentType.equals("uint8") ||
@@ -423,7 +439,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
           }
         catch (NumberFormatException ex)
           {
-            return null;
+            return Ganymede.createErrorDialog("Unacceptable value",
+                                              "This dhcp option requires a numeric parameter.");
           }
 
         if ((currentType.equals("uint8") && (longValue < 0 || longValue > maxUByte)) ||
@@ -433,10 +450,21 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
             (currentType.equals("uint32") && (longValue < 0 || longValue > maxUInt)) ||
             (currentType.equals("int32") && (longValue < Integer.MIN_VALUE || longValue > Integer.MAX_VALUE)))
           {
-            return null;
+            return Ganymede.createErrorDialog("Unacceptable value",
+                                              "This value is out of range for this dhcp option.");
           }
 
-        return Long.toString(longValue);
+        String canonicalizedValue = Long.toString(longValue);
+
+        if (!canonicalizedValue.equals(value))
+          {
+            ReturnVal retVal = new ReturnVal(true, true);
+            retVal.setTransformedValueObject(canonicalizedValue);
+
+            return retVal;
+          }
+
+        return null;
       }
     else if (currentType.equals("string"))
       {
@@ -474,7 +502,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
             if (hostname == null)
               {
-                return null;
+                return Ganymede.createErrorDialog("Unacceptable value",
+                                                  "This dhcp option type requires an IP address");
               }
             else
               {
@@ -488,20 +517,20 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
                   }
                 catch (NotLoggedInException exa)
                   {
-                    Ganymede.debug(exa.toString());
-
-                    return null;
+                    return Ganymede.createErrorDialog("Internal error",
+                                                      exa.getMessage());
                   }
                 catch (GanyParseException exb)
                   {
-                    Ganymede.debug(exb.toString());
-
-                    return null;
+                    return Ganymede.createErrorDialog("Internal error",
+                                                      exb.getMessage());
                   }
 
                 if (results.size() != 1)
                   {
-                    return null;
+                    return Ganymede.createErrorDialog("Unacceptable error",
+                                                      "This dhcp option type requires an IP address.\n\n" +
+                                                      "Couldn't recognize hostname " + value);
                   }
 
                 try
@@ -512,16 +541,23 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
                     DBObject interfaceObject = object.lookupInvid(firstInterface);
                     DBField ipField = (DBField) interfaceObject.getField(interfaceSchema.ADDRESS);
 
-                    return ipField.getEncodingString();
+                    ReturnVal retVal = new ReturnVal(true, true);
+                    retVal.setTransformedValueObject(ipField.getEncodingString());
+
+                    return retVal;
                   }
                 catch (NullPointerException ex2)
                   {
-                    return null;
+                    return Ganymede.createErrorDialog("Internal error",
+                                                      ex2.getMessage());
                   }
               }
           }
 
-        return IPDBField.genIPV4string(parsedAddress);
+        ReturnVal retVal = new ReturnVal(true, true);
+        retVal.setTransformedValueObject(IPDBField.genIPV4string(parsedAddress));
+
+        return retVal;
       }
     else if (currentType.equals("array of ip-address"))
       {
@@ -530,6 +566,6 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       {
       }
 
-    return value;
+    return null;
   }
 }

@@ -478,31 +478,20 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
         Invid dhcpType = (Invid) getFieldValueLocal(dhcpEntrySchema.TYPE);
         DBObject verifyObject = lookupInvid(dhcpType);
 
-        transformedString = dhcpOptionCustom.verifyAcceptableValue(verifyObject, inString);
+        ReturnVal retVal = dhcpOptionCustom.verifyAcceptableValue(verifyObject, inString);
 
-        if (transformedString == null)
+        if (retVal == null)
           {
-            return Ganymede.createErrorDialog("Bad dhcp value", "Bad dhcp value");
-          }
-
-	if (transformedString.equals(inString))
-	  {
             Ganymede.debug("verifying as is: " + String.valueOf(value));
 
 	    return super.verifyNewValue(field, value); // no change, so no problem
-	  }
+          }
+        else if (retVal.didSucceed() && retVal.hasTransformedValue())
+          {
+            retVal.requestRefresh(this.getInvid(), dhcpEntrySchema.VALUE);
+          }
 
-        Ganymede.debug("verifying as transformed: " + transformedString);
-
-	// tell the client that we'd like it to take the string that
-	// they gave us and replace it with the reformatted one we
-	// crafted.
-
-	ReturnVal result = new ReturnVal(true);	// success!
-
-	result.setTransformedValueObject(transformedString, this.getInvid(), field.getID());
-
-	return result;
+        return retVal;
       }
 
     return super.verifyNewValue(field, value);
