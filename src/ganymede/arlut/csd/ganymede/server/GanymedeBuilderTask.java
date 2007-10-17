@@ -515,6 +515,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
     else
       {
 	DBObjectBase base = Ganymede.db.getObjectBase(baseid);
+
+        if (base == null)
+          {
+            Ganymede.debug("GanymedeBuilderTask.baseChanged(): attempted to lookup non-existent object base " + baseid);
+
+            return false;
+          }
 	
 	if (base.lastChange == null)
 	  {
@@ -563,6 +570,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
       }
 
     DBObjectBase base = Ganymede.db.getObjectBase(baseid);
+
+    if (base == null)
+      {
+        Ganymede.debug("GanymedeBuilderTask.baseChanged(): attempted to lookup non-existent object base " + baseid);
+
+        return false;
+      }
 	
     // if the base in question hasn't changed at all since our last
     // build, we don't need to worry about looking at the individual
@@ -590,7 +604,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	Short idObj = (Short) iterator.next();
 	fieldDef = (DBObjectBaseField) base.getField(idObj);
 
-	if (fieldDef.lastChange.after(oldLastRunTime))
+	if (fieldDef != null && fieldDef.lastChange.after(oldLastRunTime))
 	  {
 	    return true;
 	  }
