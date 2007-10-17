@@ -403,27 +403,67 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
   public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
   {
+    ReturnVal result = null;
+    Invid parentInvid = getParentInvid();
+
+    if (parentInvid == null)
+      {
+        return null;        // we're being deleted
+      }
+
     // when we rename a group, we have lots to do.. a number of other
     // fields in this object and others need to be updated to match.
 
+    if (field.getID() == TYPE && value != null)
+      {
+        Invid oldInvid = (Invid) field.getValueLocal();
+
+        if (oldInvid != null)
+          {
+            DBObject oldOptionObject = lookupInvid(oldInvid);
+            String oldOptionType = (String) oldOptionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
+
+            DBObject newOptionObject = lookupInvid((Invid) value);
+            String newOptionType = (String) newOptionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
+
+            if (!newOptionType.equals(oldOptionType))
+              {
+                // we've changed to an incompatible option, clear the
+                // value field.
+
+                StringDBField valueField = (StringDBField) getField(dhcpEntrySchema.VALUE);
+
+                result = valueField.setValueLocal("");
+
+                if (result != null && !result.didSucceed())
+                  {
+                    return result;
+                  }
+            
+                if (result == null)
+                  {
+                    result = new ReturnVal(true, true);
+                  }
+
+                result.addRescanField(getInvid(), dhcpEntrySchema.VALUE);
+              }
+          }
+      }
+
     if (field.getID() == TYPE || field.getID() == VALUE)
       {
-        ReturnVal retVal = new ReturnVal(true, true);
-
-        Invid parentInvid = getParentInvid();
-
-        if (parentInvid == null)
+        if (result == null)
           {
-            return null;        // we're being deleted
+            result = new ReturnVal(true, true);
           }
 
         if (ownedByDHCPGroup())
           {
-            retVal.addRescanField(parentInvid, dhcpGroupSchema.OPTIONS);
+            result.addRescanField(parentInvid, dhcpGroupSchema.OPTIONS);
           }
         else if (ownedBySystem())
           {
-            retVal.addRescanField(parentInvid, systemSchema.DHCPOPTIONS);
+            result.addRescanField(parentInvid, systemSchema.DHCPOPTIONS);
           }
 
         if (field.getID() == TYPE)
@@ -434,14 +474,14 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
             for (int i = 0; i < siblings.size(); i++)
               {
-                retVal.addRescanField((Invid) siblings.elementAt(i), dhcpEntrySchema.TYPE);
+                result.addRescanField((Invid) siblings.elementAt(i), dhcpEntrySchema.TYPE);
               }
           }
 
-        return retVal;
+        return result;
       }
 
-    return null;		// success by default
+    return result;		// success by default
   }
 
   /**
