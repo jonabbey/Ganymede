@@ -59,7 +59,12 @@ import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.Util.FileOps;
@@ -76,6 +81,7 @@ import arlut.csd.ganymede.server.GanymedeBuilderTask;
 import arlut.csd.ganymede.server.IPDBField;
 import arlut.csd.ganymede.server.InvidDBField;
 import arlut.csd.ganymede.server.PasswordDBField;
+import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -104,6 +110,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private SharedStringBuffer result = new SharedStringBuffer();
 
   private Invid normalCategory = null;
+
+  /**
+   * customOptions is a Set of Invids for custom type definitions that
+   * we encountered during a cycle of writing out DHCP information.
+   *
+   * We'll use this Set to keep track of custom options that we find
+   * during the generation of our dhcp output.  At all other times,
+   * this Map will be null.
+   */
+
+  private Set customOptions = null;
 
   /* -- */
 
@@ -340,6 +357,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	Ganymede.debug("Need to build DNS tables");
 	writeSysFile();
 	writeSysDataFile();
+	success = true;
+      }
+
+    if (baseChanged((short) 263) || // system base
+	baseChanged((short) 267) || // I.P. Network base
+	baseChanged((short) 265) || // system interface base
+        baseChanged((short) 262) || // DHCP Group
+        baseChanged((short) 264) || // Embedded DHCP Option Value
+        baseChanged((short) 266))  // DHCP Option definition
+      {
+	Ganymede.debug("Need to build DHCP configuration file");
+        writeDHCPFile();
 	success = true;
       }
 
@@ -3214,4 +3243,272 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     return (String) object.getFieldValueLocal(interfaceSchema.NAME);
   }
 
+  /**
+   * This method writes out an excerpt of ISC DHCP server
+   * configuration file from the data in the Ganymede data store.
+   *
+   * This file will need to be elaborated by an external script to
+   * create the complete dhcpd.conf file.
+   */
+
+  private boolean writeDHCPFile()
+  {
+    PrintWriter dhcp_dataFile = null;
+    DBObject system;
+    Enumeration systems;
+
+    /* -- */
+
+    this.customOptions = new HashSet();
+
+    try
+      {
+        try
+          {
+            dhcp_dataFile = openOutFile(path + "dhcpd_info", "gasharl");
+          }
+        catch (IOException ex)
+          {
+            Ganymede.debug("GASHBuilderTask.writeDHCPFile(): couldn't open dhcpd_info file: " + ex);
+
+            return false;
+          }
+
+        try
+          {
+            systems = enumerateObjects((short) 263);
+
+            while (systems.hasMoreElements())
+              {
+                system = (DBObject) systems.nextElement();
+
+                writeDHCPInfo(system, dhcp_dataFile);
+              }
+          }
+        finally
+          {
+            dhcp_dataFile.close();
+          }
+
+        /*
+          We need to write out declarations for each custom type that
+          we've found a need for during writing out the dhcp_info file.
+
+          The declarations look like this:
+
+          # For Cisco IP phones
+          #
+          option local-cisco-tftp-server code 150 = ip-address;
+        */
+
+        if (this.customOptions.size() > 0)
+          {
+            try
+              {
+                dhcp_dataFile = openOutFile(path + "dhcpd_custom", "gasharl");
+              }
+            catch (IOException ex)
+              {
+                Ganymede.debug("GASHBuilderTask.writeDHCPFile(): couldn't open dhcpd_custom file: " + ex);
+
+                return false;
+              }
+
+            try
+              {
+                Iterator it = this.customOptions.iterator();
+
+                while (it.hasNext())
+                  {
+                    Invid optionInvid = (Invid) it.next();
+                    DBObject obj = getObject(optionInvid);
+
+                    if (obj != null)
+                      {
+                        String name = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
+                        String type = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
+                        Integer code = (Integer) obj.getFieldValueLocal(dhcpOptionSchema.CUSTOMCODE);
+
+                        dhcp_dataFile.println("option " + name +
+                                              " code " + code +
+                                              " = " + type + ";");
+                      }
+                  }
+              }
+            finally
+              {
+                dhcp_dataFile.close();
+              }
+          }
+      }
+    finally
+      {
+        this.customOptions = null;
+      }
+
+    return true;
+  }
+
+  /**
+   * This method writes out DHCP info for a single system to the dhcp_info file.
+   *
+   * @param object An object from the Ganymede system object base
+   * @param writer The destination for this system line
+   */
+
+  private void writeDHCPInfo(DBObject object, PrintWriter writer)
+  {
+    String sysname = null;
+    Vector interfaceInvids = null;
+    DBObject interfaceObj = null;
+    IPDBField ipField = null;
+    String ipAddress = null;
+    StringDBField macField = null;
+    String macAddress = null;
+
+    HashMap options = new HashMap(); 
+
+    /* -- */
+
+    result.setLength(0);
+
+    interfaceInvids = object.getFieldValuesLocal(systemSchema.INTERFACES);
+
+    if (interfaceInvids == null || interfaceInvids.size() > 1)
+      {
+        return;                 // we don't write out DHCP for systems
+                                // with more than one interface
+      }
+
+    interfaceObj = getObject((Invid) interfaceInvids.elementAt(0));
+
+    ipField = (IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS);
+    macField = (StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO);
+
+    ipAddress = ipField.getEncodingString();
+    macAddress = macField.getEncodingString();
+
+    sysname = (String) object.getFieldValueLocal(systemSchema.SYSTEMNAME);
+
+    // now let's see if we have any custom dhcp options for this
+    // system.  we'll look up options from dhcp group membership
+    // first, then from locally defined options.  In this way the
+    // locally defined options will overwrite any group-derived
+    // options.
+
+    if (object.isDefined(systemSchema.DHCPGROUPS))
+      {
+        Vector dhcpGroupInvids = object.getFieldValuesLocal(systemSchema.DHCPGROUPS);
+
+        for (int i = 0; dhcpGroupInvids != null && i < dhcpGroupInvids.size(); i++)
+          {
+            DBObject dhcpGroup = getObject((Invid) dhcpGroupInvids.elementAt(i));
+
+            findDHCPOptions(options, dhcpGroup.getFieldValuesLocal(dhcpGroupSchema.OPTIONS));
+          }
+      }
+
+    if (object.isDefined(systemSchema.DHCPOPTIONS))
+      {
+        findDHCPOptions(options, object.getFieldValuesLocal(systemSchema.DHCPOPTIONS));
+      }
+
+    // now build our output stanza
+
+    result.append("host ");
+    result.append(sysname);
+    result.append("\n\t{\n");
+
+    result.append("\thardware ethernet\t\t");
+    result.append(macAddress);
+    result.append(" ;\n");
+
+    result.append("\tfixed-address\t\t\t");
+    result.append(ipAddress);
+    result.append(" ;\n");
+
+    result.append("\toption host-name\t\t");
+    result.append(quote(sysname));
+    result.append(";\n");
+
+    Iterator values = options.values().iterator();
+
+    while (values.hasNext())
+      {
+        dhcp_entry entry = (dhcp_entry) values.next();
+
+        result.append("\toption ");
+        result.append(entry.name);
+        result.append("\t\t");
+        
+        if (entry.type.equals("string") || entry.type.equals("text"))
+          {
+            result.append(quote(entry.value));
+            result.append(" ;\n");
+          }
+        else
+          {
+            result.append(entry.value);
+            result.append(" ;\n");
+          }
+      }
+
+    result.append("\t} # END host");
+
+    writer.println(result.toString());
+  }
+
+  private String quote(String in)
+  {
+    return "\"" + in + "\"";
+  }
+
+  private void findDHCPOptions(HashMap resultMap, Vector entryInvids)
+  {
+    if (entryInvids == null)
+      {
+        return;
+      }
+
+    for (int i = 0; i < entryInvids.size(); i++)
+      {
+        Invid entryInvid = (Invid) entryInvids.elementAt(i);
+
+        DBObject entryObject = getObject(entryInvid);
+
+        Invid optionInvid = (Invid) entryObject.getFieldValueLocal(dhcpEntrySchema.TYPE);
+        String value = (String) entryObject.getFieldValueLocal(dhcpEntrySchema.VALUE);
+
+        DBObject optionObject = getObject(optionInvid);
+
+        String typeName = (String) optionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
+        String typeString = (String) optionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
+
+        resultMap.put(typeName, new dhcp_entry(typeName, typeString, value));
+
+        if (optionObject.isSet(dhcpOptionSchema.CUSTOMOPTION))
+          {
+            customOptions.add(optionInvid);
+          }
+      }
+  }
+}
+
+/**
+ * Non-public data carrying "struct" class used to make things easier
+ * for us as we assemble our DHCP output in the GASHBuilderTask.
+ */
+
+class dhcp_entry {
+
+  public String name;
+  public String type;
+  public String value;
+
+  public dhcp_entry(String name, String type, String value)
+  {
+    this.name = name;
+    this.type = type;
+    this.value = value;
+  }
 }

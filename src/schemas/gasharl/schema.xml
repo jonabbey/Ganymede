@@ -723,10 +723,10 @@ virtual overlay on another host.</comment>
               </typedef>
             </fielddef>
             <fielddef name="DHCP_Groups" id="270">
-              <comment>A list of custom DHCP declarations that this system
-shares in.  The DHCP configuration for this system
+              <comment>&lt;html&gt;&lt;p&gt;A list of custom DHCP declarations that this system
+shares in.&lt;br/&gt; The DHCP configuration for this system
 will include the values defined in the DHCP groups linked
-in this field.</comment>
+in this field.&lt;/p&gt;&lt;/html&gt;</comment>
               <typedef type="invid">
                 <vector/>
                 <targetobject name="DHCP_Group"/>
@@ -987,7 +987,7 @@ in this field.</comment>
           </tab>
         </objectdef>
         <objectdef name="DHCP_Option_Value" id="264">
-          <classdef name="arlut.csd.ganymede.gasharl.dhcpGroupEntryCustom" optionString=""/>
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpEntryCustom" optionString=""/>
           <embedded/>
           <label fieldid="256"/>
           <tab name="General">
