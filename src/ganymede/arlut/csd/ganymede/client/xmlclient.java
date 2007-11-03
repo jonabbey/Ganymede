@@ -795,8 +795,14 @@ public final class xmlclient implements ClientListener, Runnable {
 	return false;		// malformed in some way
       }
 
-    username = g_client._myglogin.active_username;
-    password = g_client._myglogin.active_passwd;
+    if (username == null || password == null)
+      {
+        username = g_client._myglogin.active_username;
+        password = g_client._myglogin.active_passwd;
+      }
+
+    err.println(ts.l("doSendChanges_GUI.connecting_as", username));
+
     server_url = g_client._myglogin.server_url;
 
     // find the server
