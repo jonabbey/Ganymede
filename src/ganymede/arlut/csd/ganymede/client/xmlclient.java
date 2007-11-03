@@ -1040,8 +1040,10 @@ public final class xmlclient implements ClientListener, Runnable {
 	  {
 	    // Password for "{0}":
 	    err.print(ts.l("global.passPrompt", username));
+            err.flush();
 	    password = in.readLine();
 	    err.println();
+            err.flush();
 	  }
 	catch (java.io.IOException ex)
 	  {
