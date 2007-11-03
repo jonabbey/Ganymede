@@ -887,7 +887,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	if (majorI == null || majorI.intValue() > majorVersion)
 	  {
-	    // "Error, the Ganymede document element {0} does not contain a compatible major version number."u
+	    // "Error, the Ganymede document element {0} does not contain a compatible major version number."
 	    err.println(ts.l("run.bad_major_version", docElement));
 
 	    return;

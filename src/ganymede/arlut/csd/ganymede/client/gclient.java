@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -67,6 +67,8 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
@@ -79,6 +81,7 @@ import java.util.prefs.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JFileChooser;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -543,7 +546,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     filterQueryMI,
     defaultOwnerMI,
     showHelpMI,
-    toggleToolBarMI;
+    toggleToolBarMI,
+    submitXMLMI;
 
   JCheckBoxMenuItem
     hideNonEditablesMI;
@@ -924,6 +928,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     setMenuMnemonic(hideNonEditablesMI, ts.l("createMenuBar.file_menu_3_key_optional"));
     hideNonEditablesMI.addActionListener(this);
 
+    // "Submit XML data"
+    submitXMLMI = new JCheckBoxMenuItem(ts.l("createMenuBar.file_menu_5"), true);
+    setMenuMnemonic(submitXMLMI, ts.l("createMenuBar.file_menu_5_key_optional"));
+    submitXMLMI.setActionCommand("Submit XML"); 
+    submitXMLMI.addActionListener(this);
+
     // "Logout"
     logoutMI = new JMenuItem(ts.l("createMenuBar.file_menu_4"));
     setMenuMnemonic(logoutMI, ts.l("createMenuBar.file_menu_4_key_optional"));    
@@ -933,6 +943,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     fileMenu.add(filterQueryMI);
     fileMenu.add(defaultOwnerMI);
     fileMenu.add(hideNonEditablesMI);
+    fileMenu.addSeparator();
+    fileMenu.add(submitXMLMI);
     fileMenu.addSeparator();
     fileMenu.add(logoutMI);
 
@@ -3395,6 +3407,69 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
   }
 
+  /**
+   * This method is called to prompt the user for an XML file to be
+   * submitted to the server, which it will proceed to do.
+   */
+
+  public void processXMLSubmission()
+  {
+    File file = null;
+    JFileChooser chooser = new JFileChooser();
+
+    /* -- */
+
+    chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+    chooser.setDialogTitle(ts.l("processXMLSubmission.file_dialog_title")); // "Ganymede XML File"
+
+    String defaultPath = this.prefs.get("file_load_default_dir", null);
+
+    if (defaultPath != null)
+      {
+	chooser.setCurrentDirectory(new File(defaultPath));
+      }
+
+    int returnValue = chooser.showDialog(this, null);
+
+    if (!(returnValue == JFileChooser.APPROVE_OPTION))
+      {
+	return;
+      }
+
+    file = chooser.getSelectedFile();
+
+    File directory = chooser.getCurrentDirectory();
+
+    setWaitCursor();
+
+    try
+      {
+        try
+          {
+            this.prefs.put("file_load_default_dir", directory.getCanonicalPath());
+          }
+        catch (java.io.IOException ex)
+          {
+            // we don't really care if we can't save the directory
+            // path in our preferences all that much.
+          }
+    
+        String result = xmlclient.submitXML(this, file);
+
+        StringDialog resultDialog = new StringDialog(this,
+                                                     ts.l("processXMLSubmission.results_title"),
+                                                     result,
+                                                     false);
+
+        resultDialog.DialogShow();
+      }
+    finally
+      {
+        setNormalCursor();
+      }
+  }
+
+
   /********************************************************************************
    *
    * actions on objects.
@@ -5197,6 +5272,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     else if (source == clearTreeMI)
       {
 	clearTree();
+      }
+    else if (source == submitXMLMI)
+      {
+        processXMLSubmission();
       }
     else if (source == hideNonEditablesMI)
       {
