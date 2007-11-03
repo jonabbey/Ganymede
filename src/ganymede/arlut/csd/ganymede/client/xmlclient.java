@@ -314,8 +314,18 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     finally
       {
-        xc.err.close();
+        while (!xc.finishedErrStream)
+          {
+            try
+              {
+                xc.wait();
+              }
+            catch (InterruptedException ex)
+              {
+              }
+          }
 
+        xc.err.close();
         return xc.errBuf.toString();
       }
   }
@@ -778,8 +788,8 @@ public final class xmlclient implements ClientListener, Runnable {
 	return false;		// malformed in some way
       }
 
-    username = g_client._myglogin.my_username;
-    password = g_client._myglogin.my_passwd;
+    username = g_client._myglogin.active_username;
+    password = g_client._myglogin.active_passwd;
     server_url = g_client._myglogin.server_url;
 
     // find the server
@@ -1344,6 +1354,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	    else
 	      {
 		this.finishedErrStream = true;
+                this.notifyAll();
 	      }
 	  }
 	catch (Exception ex)
