@@ -363,6 +363,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
     /* -- */
 
+    this.err = new PrintWriter(System.err);
+
     this.commandLine = hasCommandLine;
 
     // find the properties command line argument

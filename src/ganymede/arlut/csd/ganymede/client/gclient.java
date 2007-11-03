@@ -3457,7 +3457,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
         String result = xmlclient.submitXML(this, file);
 
         StringDialog resultDialog = new StringDialog(this,
-                                                     ts.l("processXMLSubmission.results_title"),
+                                                     ts.l("processXMLSubmission.results_title"),  // "XML Submission Results"
                                                      result,
                                                      false);
 
