@@ -375,6 +375,7 @@ public final class xmlclient implements ClientListener, Runnable {
       {
 	// "Ganymede xmlclient: Error, must specify properties on Java invocation line"
 	err.println(ts.l("init.noprops"));
+        err.flush();
 	System.exit(1);
       }
     else
@@ -483,6 +484,7 @@ public final class xmlclient implements ClientListener, Runnable {
     if (!ok)
       {
 	printUsage();
+        err.flush();
 	System.exit(1);
       }
   }
@@ -1330,6 +1332,7 @@ public final class xmlclient implements ClientListener, Runnable {
   public void disconnected(ClientEvent e)
   {
     err.println(e.getMessage());
+    err.flush();
     System.exit(1);
   }
 
@@ -1391,6 +1394,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
   private synchronized void terminate(int resultCode)
   {
+    err.flush();
     System.exit(resultCode);
   }
 }
