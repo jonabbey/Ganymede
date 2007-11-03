@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -192,6 +192,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   protected static Session my_session;
   protected static String my_username, my_passwd;
+
+  protected static String active_username, active_passwd;
 
   /**
    * We're a singleton pattern.. this is a static reference to our actual login
@@ -899,6 +901,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    String pword = new String(passwd.getPassword());
 
 	    my_passwd = pword;
+            active_passwd = pword;
 	    my_session = null;
 	
 	    try
@@ -924,6 +927,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		try
 		  {
 		    my_username = my_session.getMyUserName();
+                    active_username = my_username;
 		  }
 		catch (Exception ex)
 		  {

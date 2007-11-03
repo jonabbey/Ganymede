@@ -929,7 +929,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     hideNonEditablesMI.addActionListener(this);
 
     // "Submit XML data"
-    submitXMLMI = new JCheckBoxMenuItem(ts.l("createMenuBar.file_menu_5"), true);
+    submitXMLMI = new JMenuItem(ts.l("createMenuBar.file_menu_5"));
     setMenuMnemonic(submitXMLMI, ts.l("createMenuBar.file_menu_5_key_optional"));
     submitXMLMI.setActionCommand("Submit XML"); 
     submitXMLMI.addActionListener(this);
@@ -6357,6 +6357,10 @@ class PersonaListener implements ActionListener {
 	if (personaChangeSuccessful)
 	  {
 	    gc.setWaitCursor();
+
+            glogin.active_username = newPersona;
+            glogin.active_passwd = password;
+
 	    gc.createDialog = null;
 	    JDefaultOwnerDialog.clear(); // forget our default owner groups selection
 
