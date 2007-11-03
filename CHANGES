@@ -1118,6 +1118,17 @@ to see if a named or numbered field is present and non-empty.
 These new methods should make a lot of typical DBEditObject subclass
 logic a bit easier to implement.
 
+72. [CLIENT] Added XML submission capability to the GUI client
+
+The Ganymede GUI client now has the ability to submit XML change
+requests to the server, in addition to the command line xmlclient
+program.
+
+Note that you can't change the schema with the Ganymede GUI client,
+because the schema can't be changed when a user is logged in.  If you
+want to change the schema, you'll have to be sure all users are logged
+out and that you use the standalone xmlclient.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
