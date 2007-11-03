@@ -1360,6 +1360,9 @@ public final class xmlclient implements ClientListener, Runnable {
 	    if (result != null)
 	      {
 		err.print(result);
+                err.flush();    // the server will keep things
+                                // efficient by the sleeping it does
+                                // in getNextErrChunk
 	      }
 	    else
 	      {
