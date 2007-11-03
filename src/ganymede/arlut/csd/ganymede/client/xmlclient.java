@@ -577,7 +577,7 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     catch (Exception ex)
       {
-	ex.printStackTrace();
+	ex.printStackTrace(err);
       }
     finally
       {
@@ -623,7 +623,7 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     catch (Exception ex)
       {
-	ex.printStackTrace();
+	ex.printStackTrace(err);
 
 	return;
       }
@@ -722,7 +722,7 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        ex.printStackTrace(err);
         return false;
       }
     finally
@@ -995,7 +995,7 @@ public final class xmlclient implements ClientListener, Runnable {
     catch (Exception ex)
       {
 	// for remote and other
-	ex.printStackTrace();
+	ex.printStackTrace(err);
 
 	return false;
       }
@@ -1084,7 +1084,7 @@ public final class xmlclient implements ClientListener, Runnable {
     catch (Exception ex)
       {
 	// for remote and other
-	ex.printStackTrace();
+	ex.printStackTrace(err);
 	return false;
       }
   }
@@ -1155,7 +1155,7 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     catch (Exception ex)
       {
-	ex.printStackTrace();
+	ex.printStackTrace(err);
 
 	return false;
       }
@@ -1343,7 +1343,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	  {
 	    // for remote and other
 
-	    ex.printStackTrace();
+	    ex.printStackTrace(err);
 
 	    // we won't exit our err stream thread on one or two
 	    // errors, but if we get a bunch, assume we've lost the
