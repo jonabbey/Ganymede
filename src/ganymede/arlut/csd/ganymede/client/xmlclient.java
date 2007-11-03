@@ -314,19 +314,22 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     finally
       {
-        while (!xc.finishedErrStream)
+        synchronized (xc)
           {
-            try
+            while (!xc.finishedErrStream)
               {
-                xc.wait();
+                try
+                  {
+                    xc.wait();
+                  }
+                catch (InterruptedException ex)
+                  {
+                  }
               }
-            catch (InterruptedException ex)
-              {
-              }
-          }
 
-        xc.err.close();
-        return xc.errBuf.toString();
+            xc.err.close();
+            return xc.errBuf.toString();
+          }
       }
   }
 
