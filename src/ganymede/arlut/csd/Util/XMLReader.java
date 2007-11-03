@@ -56,6 +56,7 @@
 package arlut.csd.Util;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PipedOutputStream;
@@ -144,6 +145,36 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
   }
 
   /**
+   * @param xmlFile A File object to read
+   * @param bufferSize How many items the XMLReader will buffer in its
+   * data structures at one time
+   * @param skipWhiteSpace If true, the no-param getNextItem() and peekNextItem()
+   * methods will jump over any all-whitespace character data between other
+   * elements.
+   */
+
+  public XMLReader(File xmlFile, int bufferSize, boolean skipWhiteSpace) throws IOException
+  {
+    this(xmlFile, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
+  }
+
+
+  /**
+   * @param xmlFile A File object to read
+   * @param bufferSize How many items the XMLReader will buffer in its
+   * data structures at one time
+   * @param skipWhiteSpace If true, the no-param getNextItem() and peekNextItem()
+   * methods will jump over any all-whitespace character data between other
+   * elements.
+   * @param err A PrintWriter object to send debugging/error output to
+   */
+
+  public XMLReader(File xmlFile, int bufferSize, boolean skipWhiteSpace, PrintWriter err) throws IOException
+  {
+    this(new FileInputStream(xmlFile), bufferSize, skipWhiteSpace, err);
+  }
+
+  /**
    * @param xmlFilename Name of the file to read
    * @param bufferSize How many items the XMLReader will buffer in its
    * data structures at one time
@@ -155,10 +186,25 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   public XMLReader(String xmlFilename, int bufferSize, boolean skipWhiteSpace, PrintWriter err) throws IOException
   {
+    this(new FileInputStream(xmlFilename), bufferSize, skipWhiteSpace, err);
+  }
+
+  /**
+   * @param fileStream A FileInputStream opened on a file for us to read.
+   * @param bufferSize How many items the XMLReader will buffer in its
+   * data structures at one time
+   * @param skipWhiteSpace If true, the no-param getNextItem() and peekNextItem()
+   * methods will jump over any all-whitespace character data between other
+   * elements.
+   * @param err A PrintWriter object to send debugging/error output to
+   */
+
+  public XMLReader(FileInputStream fileStream, int bufferSize, boolean skipWhiteSpace, PrintWriter err) throws IOException
+  {
     parser = new com.jclark.xml.sax.Driver();
     parser.setDocumentHandler(this);
 
-    BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(xmlFilename));
+    BufferedInputStream inStream = new BufferedInputStream(fileStream);
     inputSource = new InputSource(inStream);
 
     if (bufferSize < 20)

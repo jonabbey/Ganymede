@@ -770,7 +770,7 @@ public final class xmlclient implements ClientListener, Runnable {
     // first, check the basic integrity of the xml file and attempt to
     // find the username and password out of it
 
-    if (!scanXML())
+    if (!scanXML(inFile))
       {
 	// "Bad XML integrity"
 	err.println(ts.l("doSendChanges.badScan"));
@@ -838,7 +838,7 @@ public final class xmlclient implements ClientListener, Runnable {
     // first, check the basic integrity of the xml file and attempt to
     // find the username and password out of it
 
-    if (!scanXML())
+    if (!scanXML(null))
       {
 	// "Bad XML integrity"
 	err.println(ts.l("doSendChanges.badScan"));
@@ -1095,11 +1095,18 @@ public final class xmlclient implements ClientListener, Runnable {
    * username and password information specified therein, as well.
    */
 
-  public boolean scanXML()
+  public boolean scanXML(File inFile)
   {
     try
       {
-	reader = new arlut.csd.Util.XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
+        if (inFile == null)
+          {
+            reader = new arlut.csd.Util.XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
+          }
+        else
+          {
+            reader = new arlut.csd.Util.XMLReader(inFile, bufferSize, true); // skip meaningless whitespace
+          }
 
 	XMLItem startDocument = getNextItem();
 
