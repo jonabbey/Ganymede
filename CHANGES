@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-June 7, 2007
+December 1, 2007
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: June 7, 2007
+RELEASE DATE: December 1, 2007
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1118,11 +1118,22 @@ to see if a named or numbered field is present and non-empty.
 These new methods should make a lot of typical DBEditObject subclass
 logic a bit easier to implement.
 
-72. [CLIENT] Added XML submission capability to the GUI client
+72. [CLIENT] Added XML support capability to the GUI client
 
-The Ganymede GUI client now has the ability to submit XML change
-requests to the server, in addition to the command line xmlclient
-program.
+The Ganymede GUI client now has the ability to transmit and receive
+Ganymede XML data files to and from the server, in addition to the
+command line xmlclient program.
+
+There is now a 'Submit XML Data' menu item under the File menu that
+supports transmitting XML to the server, and it is now possible to
+save or email query results from the query table in 'Ganymede XML
+Format'.
+
+With these two features, it is now possible to compose a query with
+the GUI query builder, get the results, save them in XML format, do
+some quick editing with the text editor of your choice, and then
+transmit the changes to the server, all without leaving the Ganymede
+GUI client.
 
 Note that you can't change the schema with the Ganymede GUI client,
 because the schema can't be changed when a user is logged in.  If you
