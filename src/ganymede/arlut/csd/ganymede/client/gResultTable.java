@@ -61,6 +61,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -794,18 +795,18 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     if (transmitter != null)
       {
-        StringBuffer result = new StringBuffer();
+        ByteArrayOutputStream outstream = new ByteArrayOutputStream();
         byte[] chunk = transmitter.getNextChunk();
 
         while (chunk != null)
           {
-            result.append(chunk);
+            outstream.write(chunk, 0, chunk.length);
             chunk = transmitter.getNextChunk();
           }
 
         transmitter.end();
 
-        return result;
+        return new StringBuffer(outstream.toString());
       }
 
     return null;
