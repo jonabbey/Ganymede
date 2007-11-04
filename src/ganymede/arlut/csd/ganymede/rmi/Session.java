@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -796,6 +796,17 @@ public interface Session extends Remote {
    */
 
   public ReturnVal runXMLQuery(String queryString) throws RemoteException;
+
+  /**
+   * This method is called by the XML client to initiate a dump of
+   * Ganymede objects in XML format matching the search criteria
+   * specified in the query object.  The ReturnVal returned will, if
+   * the operation is approved, contain a reference to an RMI
+   * FileTransmitter interface, which can be iteratively called by the
+   * XML client to pull pieces of the transmission down in sequence.
+   */
+
+  public ReturnVal runXMLQuery(Query query) throws RemoteException;
 
   /**
    * <p>This method is called by the XML client to initiate a dump of

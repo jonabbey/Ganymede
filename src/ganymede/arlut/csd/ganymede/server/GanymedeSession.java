@@ -4950,6 +4950,41 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * This method is called by the XML client to initiate a dump of
+   * Ganymede objects in XML format matching the search criteria
+   * specified in the query object.  The ReturnVal returned will, if
+   * the operation is approved, contain a reference to an RMI
+   * FileTransmitter interface, which can be iteratively called by the
+   * XML client to pull pieces of the transmission down in sequence.
+   */
+
+  public ReturnVal runXMLQuery(Query query) throws NotLoggedInException, GanyParseException
+  {
+    checklogin();
+
+    // get a simple list of matching invids without bothering to do
+    // transport setup.
+
+    QueryResult rows = this.queryDispatch(query, false, false, null, null);
+
+    XMLTransmitter transmitter = null;
+
+    try
+      {
+	transmitter = new XMLTransmitter(this, query, rows);
+      }
+    catch (IOException ex)
+      {
+	return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
+					  ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
+      }
+
+    ReturnVal retVal = new ReturnVal(true);
+    retVal.setFileTransmitter(transmitter);
+    return retVal;
+  }
+
+  /**
+   * This method is called by the XML client to initiate a dump of
    * the server's schema definition in XML format.  The ReturnVal
    * returned will, if the operation is approved, contain a reference
    * to an RMI FileTransmitter interface, which can be iteratively

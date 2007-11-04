@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2006
+   Copyright (C) 1996 - 2007
    The University of Texas at Austin
 
    Contact information
@@ -88,7 +88,10 @@ import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.RegexpException;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.rmi.FileTransmitter;
 import arlut.csd.ganymede.rmi.Session;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -140,7 +143,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   static final String
     tab_option = ts.l("global.tab_option"), // "Tab separated ASCII"
     csv_option = ts.l("global.csv_option"), // "Comma separated ASCII"
-    html_option = ts.l("global.html_option"); // "HTML"
+    html_option = ts.l("global.html_option"), // "HTML"
+    xml_option = ts.l("global.xml_option");  // "Ganymede XML File"
 
   static final String TABLE_SAVE = "query_table_default_dir";
 
@@ -266,6 +270,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     formatChoices.addElement(tab_option);
     formatChoices.addElement(csv_option);
     formatChoices.addElement(html_option);
+    formatChoices.addElement(xml_option);
 
     dialog.setFormatChoices(formatChoices);
     
@@ -287,6 +292,17 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     else if (format.equals(tab_option))
       {
 	report = generateTextRep('\t');
+      }
+    else if (format.equals(xml_option))
+      {
+        try
+          {
+            report = generateXMLReport();
+          }
+        catch (RemoteException ex)
+          {
+            this.wp.getgclient().processException(ex);
+          }
       }
     else
       {
@@ -714,10 +730,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   }
 
   /**
-   *
    * This method generates a sepChar-separated dump of the table's
    * contents, one line per row of the table.
-   *
    */
 
   StringBuffer generateTextRep(char sepChar)
@@ -759,6 +773,42 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       }
 
     return result;
+  }
+
+  /**
+   * This method generates a Ganymede XML data file containing the
+   * table's contents.
+   */
+
+  StringBuffer generateXMLReport() throws RemoteException
+  {
+    ReturnVal retVal = session.runXMLQuery(query);
+
+    if (!retVal.didSucceed())
+      {
+        this.wp.getgclient().handleReturnVal(retVal);
+        return null;
+      }
+
+    FileTransmitter transmitter = retVal.getFileTransmitter();
+
+    if (transmitter != null)
+      {
+        StringBuffer result = new StringBuffer();
+        byte[] chunk = transmitter.getNextChunk();
+
+        while (chunk != null)
+          {
+            result.append(chunk);
+            chunk = transmitter.getNextChunk();
+          }
+
+        transmitter.end();
+
+        return result;
+      }
+
+    return null;
   }
 
   /**
