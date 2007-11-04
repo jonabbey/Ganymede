@@ -26,7 +26,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -4935,7 +4935,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     try
       {
-	transmitter = new XMLTransmitter(this, queryString, query, rows);
+	transmitter = new XMLTransmitter(this, query, rows);
       }
     catch (IOException ex)
       {

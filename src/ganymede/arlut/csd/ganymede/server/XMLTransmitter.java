@@ -168,7 +168,7 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
    * xmlclient can continually poll to download chunks of XML.
    */
 
-  public XMLTransmitter(GanymedeSession session, String queryString, Query query, QueryResult rows) throws IOException, RemoteException
+  public XMLTransmitter(GanymedeSession session, Query query, QueryResult rows) throws IOException, RemoteException
   {
     super();			// UnicastRemoteObject initialization
 
@@ -184,7 +184,6 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
     // background to our pipe
 
     final GanymedeSession mySession = session;
-    final String myQueryString = queryString;
     final Query myQuery = query;
     final QueryResult myRows = rows;
 
