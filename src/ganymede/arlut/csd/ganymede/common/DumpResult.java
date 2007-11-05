@@ -94,13 +94,22 @@ import java.util.Vector;
  * And Strings for everything else.
  *
  * The GUI client uses this object to generate its query result tables..
+ *
+ * Later Note:
+ *
+ *  Yes, I know how utterly horrifying this is.  It's something I did
+ *  very early on during development, and it worked well for high
+ *  speed data dumping, so I just kept it.  Mea culpa, mea maxima
+ *  culpa.
+ *
+ *  Yet, it works.
  */
 
 public class DumpResult implements java.io.Serializable, List {
 
   static final boolean debug = false;
 
-  /* XXX  static final long serialVersionUID = 2515833829305301719L; */
+  static final long serialVersionUID = 8688161796723967714L;
 
   // --
 
