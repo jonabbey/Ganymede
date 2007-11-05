@@ -208,7 +208,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     if (selectFields == null)
       {
-	query.resetPermitList(); // return the default list of fields
+	query.resetPermitSet(); // return the default list of fields
       }
     else
       {

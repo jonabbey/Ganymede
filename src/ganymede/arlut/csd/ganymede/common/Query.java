@@ -56,8 +56,9 @@
 package arlut.csd.ganymede.common;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -136,12 +137,12 @@ public class Query implements java.io.Serializable {
   public boolean filtered = false;
 
   /**
-   * A list of field id's in Short form that the server will take into
-   * account when returning a data dump.  If null, the default fields
-   * will be returned.
+   * A Set of field id's in Short form that the server will take into
+   * account when returning a data dump.  If null, all default fields
+   * should be returned.
    */
 
-  public List permitList = null;
+  private Set permitSet = null;
 
   /* -- */
 
@@ -261,13 +262,23 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * This method resets the permitList, allowing
+   * This method resets the permitSet, allowing
    * all fields to be returned by default.
    */
 
-  public void resetPermitList()
+  public synchronized void resetPermitSet()
   {
-    permitList = null;
+    permitSet = null;
+  }
+
+  /**
+   * This method returns true if this Query is requesting a restricted
+   * set of fields.
+   */
+
+  public boolean hasPermitSet()
+  {
+    return this.permitSet != null;
   }
 
   /**
@@ -276,18 +287,38 @@ public class Query implements java.io.Serializable {
    * is called with a field identifier, the query will
    * only return fields that have been explicitly added.
    *
-   * resetPermitList() may be called to reset the
+   * resetPermitSet() may be called to reset the
    * list to the initial allow-all state.
    */
 
-  public void addField(short id)
+  public synchronized void addField(short id)
   {
-    if (permitList == null)
+    if (permitSet == null)
       {
-	permitList = new ArrayList();
+	permitSet = new HashSet();
       }
 
-    permitList.add(new Short(id));
+    permitSet.add(new Short(id));
+  }
+
+  /**
+   * This method adds a field identifier to the list of
+   * fields that may be returned.  Once this method
+   * is called with a field identifier, the query will
+   * only return fields that have been explicitly added.
+   *
+   * resetPermitSet() may be called to reset the
+   * list to the initial allow-all state.
+   */
+
+  public synchronized void removeField(short id)
+  {
+    if (permitSet == null)
+      {
+        return;
+      }
+
+    permitSet.remove(new Short(id));
   }
 
   /**
@@ -295,16 +326,46 @@ public class Query implements java.io.Serializable {
    * should be returned.
    */
 
-  public boolean returnField(short id)
+  public synchronized boolean returnField(short id)
   {
-    if (permitList == null)
+    if (permitSet == null)
       {
 	return true;
       }
 
-    Short key = new Short(id);
+    return permitSet.contains(new Short(id));
+  }
 
-    return permitList.contains(key);
+  /**
+   * This method returns true if the field with the given id number
+   * should be returned.
+   */
+
+  public synchronized boolean returnField(Short value)
+  {
+    if (permitSet == null)
+      {
+	return true;
+      }
+
+    return permitSet.contains(value);
+  }
+
+  /**
+   * Returns a copy of the restricted list of fields that this Query
+   * wants to have returned.
+   */
+
+  public synchronized Set getFieldSet()
+  {
+    if (permitSet == null)
+      {
+        return new HashSet();
+      }
+    else
+      {
+        return new HashSet(permitSet);
+      }
   }
 
   public String toString()

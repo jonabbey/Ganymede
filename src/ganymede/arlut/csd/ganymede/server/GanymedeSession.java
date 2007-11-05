@@ -79,6 +79,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -2956,7 +2957,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (debug)
       {
-	if (query.permitList == null)
+	if (!query.hasPermitSet())
 	  {
 	    Ganymede.debug("Returning default fields");
 	  }
@@ -2990,7 +2991,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	field = (DBObjectBaseField) baseFields.elementAt(i);
 	
-	if (query.permitList == null)
+	if (!query.hasPermitSet())
 	  {
 	    // If they haven't specified the list of fields they want
 	    // back, make sure we don't show them built in fields and
@@ -3017,7 +3018,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		  }
 	      }
 	  }
-	else if (query.permitList.contains(field.getKey()))
+	else if (query.returnField(field.getKey()))
 	  {
 	    if (supergashMode)
 	      {
@@ -3190,7 +3191,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     QueryResultContainer qrc = new QueryResultContainer(rowType);
 
     /* Get the list of fields the user wants returned */
-    List fieldIDs = q.permitList;
+    Set fieldIDs = q.getFieldSet();
     
     /* Now add them to the result container */
     String fieldName;
@@ -3238,9 +3239,10 @@ final public class GanymedeSession implements Session, Unreferenced {
         Short key;
         Object value;
 	row = new Object[fieldIDs.size()];
-        for (int i=0; i < fieldIDs.size(); i++)
+        int i = 0;
+        for (Iterator iter2 = fieldIDs.iterator(); iter2.hasNext(); i++)
           {
-            key = (Short) fieldIDs.get(i);
+            key = (Short) iter2.next();
             value = object.getFieldValueLocal(key.shortValue());
             row[i] = value;
           }
