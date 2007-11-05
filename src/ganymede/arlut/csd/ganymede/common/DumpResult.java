@@ -116,6 +116,7 @@ public class DumpResult implements java.io.Serializable, List {
   transient private boolean unpacked = false;
 
   transient Vector headers = null;
+  transient Vector ids = null;
   transient Vector types = null;
   transient Vector invids = null;
   transient Vector rows = null;
@@ -141,6 +142,23 @@ public class DumpResult implements java.io.Serializable, List {
       }
 
     return headers;
+  }
+
+  /**
+   * This method can be called on the client to obtain a {@link
+   * java.util.Vector Vector} of field type {@link java.lang.Short
+   * Shorts} identifying the id codes for each column in the
+   * DumpResult.
+   */
+
+  public Vector getIds()
+  {
+    if (!unpacked)
+      {
+	unpackBuffer();
+      }
+
+    return ids;
   }
 
   /**
@@ -291,6 +309,7 @@ public class DumpResult implements java.io.Serializable, List {
     /* -- */
 
     headers = new Vector();
+    ids = new Vector();
     types = new Vector();
     invids = new Vector();
     rows = new Vector();
@@ -334,6 +353,54 @@ public class DumpResult implements java.io.Serializable, List {
 	  }
 
 	headers.addElement(tempString.toString());
+      }
+
+    index++;			// skip past \n
+
+    // read in the field ids
+
+    if (debug)
+      {
+	System.err.println("*** unpacking field ids line");
+      }
+    
+    while (chars[index] != '\n')
+      {
+	tempString.setLength(0); // truncate the buffer
+
+	while (chars[index] != '|')
+	  {
+	    if (chars[index] == '\n')
+	      {
+		throw new RuntimeException("parse error in header list");
+	      }
+
+	    // if we have a backslashed character, take the backslashed char
+	    // as a literal
+
+	    if (chars[index] == '\\')
+	      {
+		index++;
+	      }
+
+	    tempString.append(chars[index++]);
+	  }
+
+	index++;		// skip past |
+	
+	if (debug)
+	  {
+	    System.err.println("Type[" + types.size() + "]: " + tempString.toString());
+	  }
+
+	try
+	  {
+	    ids.addElement(Short.valueOf(tempString.toString()));
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    throw new RuntimeException("Ay Carumba!  Number Parse Error! " + ex);
+	  }
       }
 
     index++;			// skip past \n
@@ -544,6 +611,12 @@ public class DumpResult implements java.io.Serializable, List {
       {
 	headers.removeAllElements();
 	headers = null;
+      }
+
+    if (ids != null)
+      {
+	ids.removeAllElements();
+	ids = null;
       }
     
     if (types != null)
