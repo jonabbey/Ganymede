@@ -402,7 +402,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	    return;
 	  }
 
-	writer.println(report.toString());
+	writer.print(report.toString());
 	writer.close();
       }
   }
