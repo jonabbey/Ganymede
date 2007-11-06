@@ -330,8 +330,7 @@ public class DumpResult implements java.io.Serializable, List {
         return;
       }
 
-    char[] chars;
-    String results = buffer.toString();
+    char[] chars = buffer.toString().toCharArray();;
     arlut.csd.Util.SharedStringBuffer tempString = new arlut.csd.Util.SharedStringBuffer();
     int index = 0;
     Map rowMap;
@@ -344,8 +343,6 @@ public class DumpResult implements java.io.Serializable, List {
     headers = new Vector();
     invids = new Vector();
     rows = new Vector();
-
-    chars = results.toCharArray();
 
     // read in the header definition line
 
@@ -425,6 +422,8 @@ public class DumpResult implements java.io.Serializable, List {
 
 	    tempString.append(chars[index++]);
 	  }
+
+        index++;                // skip trailing | marker
 
         fieldType = Short.valueOf(tempString.toString()).shortValue();
 
