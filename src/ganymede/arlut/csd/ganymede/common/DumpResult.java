@@ -492,8 +492,8 @@ public class DumpResult implements java.io.Serializable, List {
 
 	    index++;		// skip |
 
-	    currentFieldType = getFieldType(rowMap.size());
-	    currentHeader = getFieldName(rowMap.size());
+	    currentFieldType = ((DumpResultCol) headerObjects.elementAt(rowMap.size())).getFieldType();
+	    currentHeader = ((DumpResultCol) headerObjects.elementAt(rowMap.size())).getName();
 
 	    switch (currentFieldType)
 	      {
