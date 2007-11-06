@@ -477,7 +477,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // "Loading table"
     setStatus(ts.l("loadResults.loading_status"), 0);
 
-    headerObjects = results.getHeaderObjects();
+    headerObjects = new Vector(results.getHeaderObjects());
     rows = results.resultSize();
     headers = new String[headerObjects.size()];
     used = new boolean[headerObjects.size()];
