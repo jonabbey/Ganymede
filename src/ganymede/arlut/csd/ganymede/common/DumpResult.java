@@ -401,6 +401,8 @@ public class DumpResult implements java.io.Serializable, List {
 	    tempString.append(chars[index++]);
 	  }
 
+        index++;                // skip trailing | marker
+
         fieldId = Short.valueOf(tempString.toString()).shortValue();
 
         tempString.setLength(0);  // truncate the buffer again
