@@ -145,9 +145,19 @@ public class DumpResult implements java.io.Serializable, List {
    * by the caller, at the risk of surprising behavior.
    */
 
-  public Vector getHeaders()
+  public synchronized Vector getHeaders()
   {
     checkBuffer();
+
+    if (headers == null)
+      {
+        headers = new Vector(headerObjects.size());
+
+        for (int i = 0; i < headerObjects.size(); i++)
+          {
+            headers.addElement(((DumpResultCol) headerObjects.elementAt(i)).getName());
+          }
+      }
 
     return headers;
   }
@@ -277,13 +287,13 @@ public class DumpResult implements java.io.Serializable, List {
     checkBuffer();
 
     Map rowMap = (Map) rows.get(rowNumber);
-    Vector row = new Vector(headers.size());
+    Vector row = new Vector(headerObjects.size());
     Iterator iter;
     String currentHeader;
     
-    for (iter = headers.iterator(); iter.hasNext();)
+    for (iter = headerObjects.iterator(); iter.hasNext();)
       {
-      	currentHeader = (String) iter.next();
+      	currentHeader = ((DumpResultCol) iter.next()).getName();
       	row.add(rowMap.get(currentHeader));
       }
 
@@ -466,7 +476,7 @@ public class DumpResult implements java.io.Serializable, List {
 
 	// now read in the fields for this invid
 
-	rowMap = new HashMap(headers.size());
+	rowMap = new HashMap(headerObjects.size());
 
 	while (chars[index] != '\n')
 	  {
