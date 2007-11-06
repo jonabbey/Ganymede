@@ -5,7 +5,7 @@
   An interface that objects can implement to allow arlut.csd.JTable tables
   to report when a row is selected.
 
-  Copyright (C) 1996 - 2004
+  Copyright (C) 1996 - 2007
   The University of Texas at Austin
 
   This program is free software; you can redistribute it and/or modify
@@ -82,4 +82,13 @@ public interface rowSelectCallback {
    */
 
   public void rowMenuPerformed(Object key, java.awt.event.ActionEvent event);
+
+  /**
+   * Called when a pop-up menu is fired on a column header.
+   *
+   * @param menuCol The index for the column that the pop-up was fired on.
+   * @param event the original ActionEvent from the column menu.
+   */
+
+  public void colMenuPerformed(int menuCol, java.awt.event.ActionEvent event);
 }

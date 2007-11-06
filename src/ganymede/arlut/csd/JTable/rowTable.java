@@ -159,14 +159,24 @@ public class rowTable extends baseTable implements ActionListener {
     if (colWidths.length > 1)
       {
 	SortByMI = new JMenuItem(sortByStr);
+        SortByMI.setActionCommand(sortByStr);
+
 	RevSortByMI = new JMenuItem(revSortByStr);
+        RevSortByMI.setActionCommand(revSortByStr);
+
 	DeleteColMI = new JMenuItem(delColStr);
+        DeleteColMI.setActionCommand(delColStr);
+
 	OptimizeMI = new JMenuItem(optColWidStr);
+        OptimizeMI.setActionCommand(optColWidStr);
       }
     else
       {
 	SortByMI = new JMenuItem(sortByStr);
+        SortByMI.setActionCommand(sortByStr);
+
 	RevSortByMI = new JMenuItem(revSortByStr);
+        RevSortByMI.setActionCommand(revSortByStr);
       }
 
     rowMenu.add(SortByMI);
@@ -797,6 +807,7 @@ public class rowTable extends baseTable implements ActionListener {
       {
 	if (e.getSource() == DeleteColMI)
 	  {
+            callback.colMenuPerformed(menuCol, e);
 	    this.deleteColumn(menuCol, true);
 	    refreshTable();
 	    return;
@@ -804,16 +815,19 @@ public class rowTable extends baseTable implements ActionListener {
 
 	if (e.getSource() == SortByMI)
 	  {
+            callback.colMenuPerformed(menuCol, e);
 	    sortForward = true;
 	    resort(menuCol, true);
 	  }
 	else if (e.getSource() == RevSortByMI)
 	  {
+            callback.colMenuPerformed(menuCol, e);
 	    sortForward = false;
 	    resort(menuCol, true);
 	  }
 	else if (e.getSource() == OptimizeMI)
 	  {
+            callback.colMenuPerformed(menuCol, e);
 	    optimizeCols();
 	    refreshTable();
 	  }

@@ -86,6 +86,7 @@ import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.DumpResultCol;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.RegexpException;
@@ -177,6 +178,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
    */
 
   rowTable table = null;
+
+  /**
+   * A cache of header definitions that we can use to manage column
+   * deletion.
+   */
+
+  Vector headerObjects = null;
 
   /**
    * The contentPane for this internal window.  We place the rowTable in this
@@ -455,7 +463,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     boolean firstTime = true;
     boolean[] used;
-    Vector headerVect = new Vector();
     String[] headers;
     int [] colWidths;
     Invid invid;
@@ -470,23 +477,23 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // "Loading table"
     setStatus(ts.l("loadResults.loading_status"), 0);
 
-    headerVect = results.getHeaders();
+    headerObjects = results.getHeaderObjects();
     rows = results.resultSize();
-    headers = new String[headerVect.size()];
-    used = new boolean[headerVect.size()];
+    headers = new String[headerObjects.size()];
+    used = new boolean[headerObjects.size()];
 
     if (debug)
       {
-	System.err.println("gResultTable: " + headerVect.size() + " headers returned by query");
+	System.err.println("gResultTable: " + headerObjects.size() + " headers returned by query");
       }
     
-    for (int i = 0; i < headerVect.size(); i++)
+    for (int i = 0; i < headerObjects.size(); i++)
       {
-	headers[i] = (String) headerVect.elementAt(i);
+	headers[i] = ((DumpResultCol) headerObjects.elementAt(i)).getName();
 	used[i] = false;
       }
 
-    colWidths = new int[headerVect.size()];
+    colWidths = new int[headerObjects.size()];
 
     for (int i = 0; i < colWidths.length; i++)
       {
@@ -652,6 +659,18 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     else if (event.getSource() == cloneMI)
       {
 	wp.getgclient().cloneObject((Invid)key);
+      }
+  }
+
+  public void colMenuPerformed(int menuCol, java.awt.event.ActionEvent event)
+  {
+    if (event.getActionCommand().equals(rowTable.delColStr))
+      {
+        DumpResultCol colHeader = (DumpResultCol) headerObjects.elementAt(menuCol);
+
+        headerObjects.removeElementAt(menuCol);
+
+        query.removeField(colHeader.getFieldId());
       }
   }
 

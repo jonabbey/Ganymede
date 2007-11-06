@@ -1332,6 +1332,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
   }
 
+  public void colMenuPerformed(int menuCol, ActionEvent e)
+  {
+  }
+
   /**
    * Method to handle properly logging out if the main admin
    * frame is closed by the window system.
