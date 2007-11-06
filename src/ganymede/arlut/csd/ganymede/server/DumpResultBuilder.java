@@ -102,7 +102,9 @@ public class DumpResultBuilder {
 
     buffer = transport.buffer;
 
-    // first write out a line that defines the field names
+    // first write out a line that defines the field information, in
+    // bar-separated triples:
+    // fieldName|fieldId|fieldType|fieldName|fieldId|fieldType|, etc.
 
     for (int i = 0; i < fieldDefs.size(); i++)
       {
@@ -134,30 +136,12 @@ public class DumpResultBuilder {
 	  }
 	
 	buffer.append("|");
-      }
-
-    buffer.append("\n");
-
-    // then a line that defines the field id numbers
-
-    for (int i = 0; i < fieldDefs.size(); i++)
-      {
-	field = (DBObjectBaseField) fieldDefs.elementAt(i);
 
         buffer.append(field.getID());
         buffer.append("|");
-      }
 
-    buffer.append("\n");
-
-    // then a line that defines the numeric type codes of the fields
-    // (see arlut.csd.ganymede.common.FieldType for interpretation)
-
-    for (int i = 0; i < fieldDefs.size(); i++)
-      {
-	field = (DBObjectBaseField) fieldDefs.elementAt(i);
 	buffer.append(field.getType());
-	buffer.append("|");
+        buffer.append("|");
       }
 
     buffer.append("\n");

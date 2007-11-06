@@ -124,9 +124,8 @@ public class DumpResult implements java.io.Serializable, List {
 
   transient private boolean unpacked = false;
 
+  transient Vector headerObjects = null;
   transient Vector headers = null;
-  transient Vector ids = null;
-  transient Vector types = null;
   transient Vector invids = null;
   transient Vector rows = null;
 
@@ -141,52 +140,78 @@ public class DumpResult implements java.io.Serializable, List {
    * This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of field names, used to generate the
    * list of column headers in the GUI client.
+   *
+   * Note: The Vector returned is "live", and should not be modified
+   * by the caller, at the risk of surprising behavior.
    */
 
   public Vector getHeaders()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
 
     return headers;
   }
 
   /**
-   * This method can be called on the client to obtain a {@link
-   * java.util.Vector Vector} of field type {@link java.lang.Short
-   * Shorts} identifying the id codes for each column in the
-   * DumpResult.
+   * This method can be called on the client to obtain an independent
+   * Vector of {@link arlut.csd.ganymede.common.DumpResultCol
+   * DumpResultCol} objects, which define the field name, field id,
+   * and field type for each column in this DumpResult.
+   *
+   * Note: The Vector returned is "live", and should not be modified
+   * by the caller, at the risk of surprising behavior.
    */
 
-  public Vector getIds()
+  public Vector getHeaderObjects()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
 
-    return ids;
+    return headerObjects;
   }
 
   /**
-   * This method can be called on the client to obtain a {@link
-   * java.util.Vector Vector} of field type {@link java.lang.Short
-   * Shorts} (enumerated in the {@link
-   * arlut.csd.ganymede.common.FieldType FieldType} static constants),
-   * identifying the types of fields for each column in the
+   * Returns the name of the field encoded in column col of the DumpResult.
+   */
+
+  public String getFieldName(int col)
+  {
+    checkBuffer();
+
+    DumpResultCol headerObj = (DumpResultCol) headerObjects.elementAt(col);
+
+    return headerObj.getName();
+  }
+
+  /**
+   * Returns the field code for the field encoded in column col of the
    * DumpResult.
    */
 
-  public Vector getTypes()
+  public short getFieldId(int col)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
 
-    return types;
+    DumpResultCol headerObj = (DumpResultCol) headerObjects.elementAt(col);
+
+    return headerObj.getFieldId();
+  }
+
+  /**
+   * Returns the field type for the field encoded in column col of the
+   * DumpResult.
+   *
+   * The field type returned is to be interpreted according to the
+   * values enumerated in the {@link
+   * arlut.csd.ganymede.common.FieldType FieldType} interface.
+   */
+
+  public short getFieldType(int col)
+  {
+    checkBuffer();
+
+    DumpResultCol headerObj = (DumpResultCol) headerObjects.elementAt(col);
+
+    return headerObj.getFieldType();
   }
 
   /**
@@ -194,14 +219,14 @@ public class DumpResult implements java.io.Serializable, List {
    * java.util.Vector Vector} of {@link arlut.csd.ganymede.common.Invid
    * Invids}, identifying the objects that are being returned in the
    * DumpResult.
+   *
+   * Note: The Vector returned is "live", and should not be modified
+   * by the caller, at the risk of surprising behavior.
    */
 
   public Vector getInvids()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
 
     return invids;
   }
@@ -214,10 +239,7 @@ public class DumpResult implements java.io.Serializable, List {
 
   public Invid getInvid(int row)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
 
     return (Invid) invids.elementAt(row);
   }
@@ -228,18 +250,17 @@ public class DumpResult implements java.io.Serializable, List {
    * the data values returned for each object, in field order matching
    * the field names and types returned by {@link arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()}
    * and {@link arlut.csd.ganymede.common.DumpResult#getTypes getTypes()}.
+   *
+   * Note: The Vector returned is "live", and should not be modified
+   * by the caller, at the risk of surprising behavior.
    */
 
   public Vector getRows()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
 
     return rows;
   }
-
 
   /**
    * This method can be called on the client to obtain a {@link
@@ -253,10 +274,7 @@ public class DumpResult implements java.io.Serializable, List {
   
   public Vector getFieldRow(int rowNumber)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
 
     Map rowMap = (Map) rows.get(rowNumber);
     Vector row = new Vector(headers.size());
@@ -268,6 +286,7 @@ public class DumpResult implements java.io.Serializable, List {
       	currentHeader = (String) iter.next();
       	row.add(rowMap.get(currentHeader));
       }
+
     return row;
   }
 
@@ -282,10 +301,7 @@ public class DumpResult implements java.io.Serializable, List {
 
   public Object getResult(int row, int col)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
 
     return (getFieldRow(row)).elementAt(col);
   }
@@ -297,16 +313,23 @@ public class DumpResult implements java.io.Serializable, List {
 
   public int resultSize()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
 
     return rows.size();
   }
 
-  private synchronized void unpackBuffer()
+  /**
+   * This method takes care of deserializing the StringBuffer we
+   * contain, to crack out the data we are interested in conveying.
+   */
+
+  private synchronized void checkBuffer()
   {
+    if (unpacked)
+      {
+        return;
+      }
+
     char[] chars;
     String results = buffer.toString();
     arlut.csd.Util.SharedStringBuffer tempString = new arlut.csd.Util.SharedStringBuffer();
@@ -317,9 +340,8 @@ public class DumpResult implements java.io.Serializable, List {
 
     /* -- */
 
+    headerObjects = new Vector();
     headers = new Vector();
-    ids = new Vector();
-    types = new Vector();
     invids = new Vector();
     rows = new Vector();
 
@@ -334,6 +356,10 @@ public class DumpResult implements java.io.Serializable, List {
     
     while (chars[index] != '\n')
       {
+        String fieldName;
+        short fieldId;
+        short fieldType;
+
 	tempString.setLength(0); // truncate the buffer
 
 	while (chars[index] != '|')
@@ -356,26 +382,9 @@ public class DumpResult implements java.io.Serializable, List {
 
 	index++;		// skip past |
 
-	if (debug)
-	  {
-	    System.err.println("Header[" + headers.size() + "]: " + tempString.toString());
-	  }
+        fieldName = tempString.toString();
 
-	headers.addElement(tempString.toString());
-      }
-
-    index++;			// skip past \n
-
-    // read in the field ids
-
-    if (debug)
-      {
-	System.err.println("*** unpacking field ids line");
-      }
-    
-    while (chars[index] != '\n')
-      {
-	tempString.setLength(0); // truncate the buffer
+        tempString.setLength(0);  // truncate the buffer again
 
 	while (chars[index] != '|')
 	  {
@@ -395,35 +404,9 @@ public class DumpResult implements java.io.Serializable, List {
 	    tempString.append(chars[index++]);
 	  }
 
-	index++;		// skip past |
-	
-	if (debug)
-	  {
-	    System.err.println("Type[" + types.size() + "]: " + tempString.toString());
-	  }
+        fieldId = Short.valueOf(tempString.toString()).shortValue();
 
-	try
-	  {
-	    ids.addElement(Short.valueOf(tempString.toString()));
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    throw new RuntimeException("Ay Carumba!  Number Parse Error! " + ex);
-	  }
-      }
-
-    index++;			// skip past \n
-
-    // read in the types line
-
-    if (debug)
-      {
-	System.err.println("*** unpacking types line");
-      }
-    
-    while (chars[index] != '\n')
-      {
-	tempString.setLength(0); // truncate the buffer
+        tempString.setLength(0);  // truncate the buffer again
 
 	while (chars[index] != '|')
 	  {
@@ -443,22 +426,9 @@ public class DumpResult implements java.io.Serializable, List {
 	    tempString.append(chars[index++]);
 	  }
 
-	index++;		// skip past |
-	
-	if (debug)
-	  {
-	    System.err.println("Type[" + types.size() + "]: " + tempString.toString());
-	  }
+        fieldType = Short.valueOf(tempString.toString()).shortValue();
 
-	try
-	  {
-	    types.addElement(Short.valueOf(tempString.toString()));
-	    //	    currentFieldType = ((Short) types.lastElement()).shortValue();
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    throw new RuntimeException("Ay Carumba!  Number Parse Error! " + ex);
-	  }
+        headerObjects.addElement(new DumpResultCol(fieldName, fieldId, fieldType));
       }
 
     index++;			// skip past \n
@@ -521,8 +491,8 @@ public class DumpResult implements java.io.Serializable, List {
 
 	    index++;		// skip |
 
-	    currentFieldType = ((Short) types.elementAt(rowMap.size())).shortValue();
-	    currentHeader = (String) headers.elementAt(rowMap.size());
+	    currentFieldType = getFieldType(rowMap.size());
+	    currentHeader = getFieldName(rowMap.size());
 
 	    switch (currentFieldType)
 	      {
@@ -616,22 +586,16 @@ public class DumpResult implements java.io.Serializable, List {
 
   public void dissociate()
   {
+    if (headerObjects != null)
+      {
+	headerObjects.removeAllElements();
+	headerObjects = null;
+      }
+
     if (headers != null)
       {
 	headers.removeAllElements();
 	headers = null;
-      }
-
-    if (ids != null)
-      {
-	ids.removeAllElements();
-	ids = null;
-      }
-    
-    if (types != null)
-      {
-	types.removeAllElements();
-	types = null;
       }
 
     if (invids != null)
@@ -702,10 +666,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public boolean contains(Object o)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.contains(o);
   }
   
@@ -714,10 +676,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public boolean containsAll(Collection c)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.containsAll(c);
   }
   
@@ -726,10 +686,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public Object get(int index)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.get(index);
   }
   
@@ -738,10 +696,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public int indexOf(Object o)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.indexOf(o);
   }
   
@@ -750,10 +706,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public boolean isEmpty()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.isEmpty();
   }
   
@@ -762,10 +716,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public Iterator iterator()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.iterator();
   }
   
@@ -774,10 +726,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public int lastIndexOf(Object o)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.lastIndexOf(o);
   }
   
@@ -786,10 +736,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public ListIterator listIterator()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.listIterator();
   }
   
@@ -798,10 +746,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public ListIterator listIterator(int index)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.listIterator(index);
   }
   
@@ -855,10 +801,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public int size()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.size();
   }
   
@@ -867,10 +811,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public List subList(int fromIndex, int toIndex)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.subList(fromIndex, toIndex);
   }
   
@@ -879,10 +821,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public Object[] toArray()
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.toArray();
   }
   
@@ -891,10 +831,8 @@ public class DumpResult implements java.io.Serializable, List {
    */
   public Object[] toArray(Object[] a)
   {
-    if (!unpacked)
-      {
-	unpackBuffer();
-      }
+    checkBuffer();
+
     return rows.toArray(a);
   }
 }

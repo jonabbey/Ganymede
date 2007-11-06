@@ -121,7 +121,7 @@ public class DumpResultCol {
    * arlut.csd.ganymede.common.FieldType FieldType} interface.
    */
 
-  public short getType()
+  public short getFieldType()
   {
     return this.fieldType;
   }
