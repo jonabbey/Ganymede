@@ -1140,6 +1140,17 @@ because the schema can't be changed when a user is logged in.  If you
 want to change the schema, you'll have to be sure all users are logged
 out and that you use the standalone xmlclient.
 
+73. [CLIENT] Fixed some threading issues that appeared in OpenJDK 7
+
+The Ganymede client had some threading issues that appeared in the
+OpenJDK 7 packages that Red Hat ships with Fedora 8.  I've slightly
+reworked a bit of the threading to try and avoid the issues.
+
+74. [CLIENT] No longer prompt for persona if the user selected one in the login box
+
+The Ganymede client will no longer pop up the persona select dialog if
+the user specified a persona at login time.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
