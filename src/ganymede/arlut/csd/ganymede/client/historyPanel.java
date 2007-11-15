@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -85,6 +85,9 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.rmi.date_field;
 import arlut.csd.ganymede.rmi.string_field;
+
+import foxtrot.Task;
+import foxtrot.Worker;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -263,45 +266,27 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     /* -- */
 
-    Thread historyThread = new Thread(new Runnable() {
-      public void run() {
-	try
-	  {
-	    try
-	      {
-		EventQueue.invokeAndWait(new Runnable() {
-		  public void run() {
-		    me.showWait();
-		  }
-		});
-	      }
-	    catch (InvocationTargetException ite)
-	      {
-		ite.printStackTrace();
-	      }
-	    catch (InterruptedException ie)
-	      {
-		ie.printStackTrace();
-	      }
+    showWait();
 
-	    historyBuffer = gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx, "Could not get object history.");
-	  }
-	finally
-	  {
-	    EventQueue.invokeLater(new Runnable() {
-	      public void run() {
-		me.showText(historyBuffer.toString());
-	      }
-	    });
-	  }
-      }}, "History loader thread");
-
-    historyThread.setPriority(Thread.NORM_PRIORITY);
-    historyThread.start();
+    try
+      {
+        historyBuffer = (StringBuffer) foxtrot.Worker.post(new foxtrot.Task()
+          {
+            public Object run() throws Exception
+            {
+              return gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
+            }
+          }
+                                                           );
+      }
+    catch (Exception rx)
+      {
+        gc.processExceptionRethrow(rx, "Could not get object history.");
+      }
+    finally
+      {
+        showText(historyBuffer.toString());
+      }
   }
 
   public boolean setValuePerformed(JValueObject e)
