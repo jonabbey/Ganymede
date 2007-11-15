@@ -1295,9 +1295,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	processExceptionRethrow(rx, ts.l("start.transaction_open_failure"));
       }
 
-    // If user has multiple personas, ask which to start with.
+    // If user has multiple personae and he has logged in without
+    // specifying an admin persona, ask which to start with.
 
-    if ((personae != null)  && personae.size() > 1)
+    if ((personae != null)  && personae.size() > 1 && currentPersonaString.indexOf(':') == -1)
       {
 	// changePersona will block until the user does something
 	// with the persona selection dialog
