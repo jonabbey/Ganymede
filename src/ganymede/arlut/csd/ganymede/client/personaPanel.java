@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2007
    The University of Texas at Austin
 
    Contact information
@@ -62,6 +62,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -74,6 +75,7 @@ import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.rmi.db_object;
 import arlut.csd.ganymede.rmi.invid_field;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -268,9 +270,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	// "Persona {0,number,#}"
 	middle.addTab(ts.l("init.default_tab_title", new Integer(i)), pc);
 
-	Thread t = new Thread(pc);
-	t.setPriority(Thread.NORM_PRIORITY);
-	t.start();
+        SwingUtilities.invokeLater(pc);
       }
 
     // Show the first one(will just be a progress bar for now)
