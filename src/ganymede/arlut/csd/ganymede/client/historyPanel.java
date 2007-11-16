@@ -76,7 +76,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.JValueObject;
@@ -86,6 +85,9 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.rmi.date_field;
 import arlut.csd.ganymede.rmi.string_field;
+
+import foxtrot.Task;
+import foxtrot.Worker;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -266,36 +268,25 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     showWait();
 
-    Thread historyThread = new Thread(new Runnable() {
-      public void run() {
-	try
-	  {
-	    historyBuffer = gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
-	  }
-	catch (Exception rx)
-	  {
-            final Exception myRx = rx;
-
-            SwingUtilities.invokeLater(new Runnable()
-              {
-                public void run() {
-                  gc.processExceptionRethrow(myRx, "Could not get object history.");
-                }
-              });
-	  }
-	finally
-	  {
-            SwingUtilities.invokeLater(new Runnable()
-              {
-                public void run() {
-                  me.showText(historyBuffer.toString());
-                }
-              });
-	  }
-      }}, "History loader thread");
-
-    historyThread.setPriority(Thread.NORM_PRIORITY);
-    historyThread.start();
+    try
+      {
+        historyBuffer = (StringBuffer) foxtrot.Worker.post(new foxtrot.Task()
+          {
+            public Object run() throws Exception
+            {
+              return gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
+            }
+          }
+                                                           );
+      }
+    catch (Exception rx)
+      {
+        gc.processExceptionRethrow(rx, "Could not get object history.");
+      }
+    finally
+      {
+        showText(historyBuffer.toString());
+      }
   }
 
   public boolean setValuePerformed(JValueObject e)
