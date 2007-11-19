@@ -86,6 +86,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
@@ -278,21 +279,28 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	loadProperties();
       }
 
-    my_glogin = new glogin();
+    // make sure that we start the Ganymede client on the GUI thread
 
-    my_frame = new gloginFrame(ts.l("main.frame_name"),	// "Ganymede Client"
-			       my_glogin);
+    SwingUtilities.invokeLater(new Runnable() {
+        public void run()
+        {
+          my_glogin = new glogin();
 
-    my_frame.getContentPane().setLayout(new BorderLayout());
-    my_frame.getContentPane().add("Center", my_glogin);
+          my_frame = new gloginFrame(ts.l("main.frame_name"),	// "Ganymede Client"
+                                     my_glogin);
 
-    my_glogin.init();		// init before we setVisible(), so startup is smoother
+          my_frame.getContentPane().setLayout(new BorderLayout());
+          my_frame.getContentPane().add("Center", my_glogin);
 
-    my_frame.pack();		// pack so that we fit everything properly
+          my_glogin.init();		// init before we setVisible(), so startup is smoother
 
-    my_frame.setLocationRelativeTo(null); // center on the screen, please
+          my_frame.pack();		// pack so that we fit everything properly
 
-    my_frame.setVisible(true);
+          my_frame.setLocationRelativeTo(null); // center on the screen, please
+
+          my_frame.setVisible(true);
+        }
+      });
   }
 
   /**
