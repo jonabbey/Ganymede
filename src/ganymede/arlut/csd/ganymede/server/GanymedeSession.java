@@ -2642,6 +2642,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	asciiContent.append("\n\n");
       }
 
+    // "This message was sent by {0}, who is running the Ganymede client on {1}."
     signature.append(ts.l("sendMail.signature", username, clienthost));
 
     asciiContent.append("\n--------------------------------------------------------------------------------\n");
@@ -3817,7 +3818,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  {
 	    if (debug)
 	      {
-		    Ganymede.debug("not using perspective object");
+                Ganymede.debug("not using perspective object");
 	      }
 
 	    if (obj.isEmbedded())
