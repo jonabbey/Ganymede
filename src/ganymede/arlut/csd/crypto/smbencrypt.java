@@ -38,10 +38,10 @@
    02111-1307, USA
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2004
+
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -71,11 +71,14 @@
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA
 
 */
 
 package arlut.csd.crypto;
+
+import java.security.MessageDigest;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -237,7 +240,7 @@ public class smbencrypt {
      {1, 15, 13,  8, 10,  3,  7,  4, 12,  5,  6, 11,  0, 14,  9,  2},
      {7, 11,  4,  1,  9, 12, 14,  2,  0,  6, 10, 13, 15,  3,  5,  8},
      {2,  1, 14,  7,  4, 10,  8, 13, 15, 12,  9,  0,  3,  5,  6, 11}}};
-  
+
   /**
    * convert an encoded unsigned byte value into a int
    * with the unsigned value.
@@ -761,7 +764,7 @@ public class smbencrypt {
 
     m.calc();
 
-    return m.toString().toUpperCase();
+    return m.toString();
   }
 
   /**
