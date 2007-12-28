@@ -1,5 +1,5 @@
 /*
- * Class for implementing md4 hash algorithm.
+ * Class for implementing the (notoriously weak) md4 hash algorithm.
  *
  * There are constructors for prepping the hash algorithm (doing the
  * padding, mainly) for a String or a byte[], and an mdcalc() method 
@@ -15,7 +15,6 @@
  * Included in Ganymede
  *
  * Created: 15 March 2001
- * Release: $Name:  $
  * Version: $Revision$
  * Last Mod Date: $Date$
  */
@@ -29,9 +28,9 @@ package arlut.csd.crypto;
 ------------------------------------------------------------------------------*/
 
 public class md4 {
-  int A,B,C,D;
-  int d[];
-  int numwords;
+  private int A,B,C,D;
+  private int d[];
+  private int numwords;
 
   /* -- */
 
@@ -79,10 +78,9 @@ public class md4 {
 
   static String tohex(int i)
   {
-    int b;
     StringBuffer buf = new StringBuffer();
 
-    for (b = 0; b < 4; b++)
+    for (int b = 0; b < 4; b++)
       {
 	buf.append(Integer.toString((i >> 4) & 0xf, 16));
 	buf.append(Integer.toString(i & 0xf, 16));
