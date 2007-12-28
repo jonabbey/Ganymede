@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -59,8 +59,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import jcrypt.jcrypt;
 import arlut.csd.Util.TranslationService;
+import arlut.csd.crypto.jcrypt;
 import arlut.csd.crypto.MD5Crypt;
 import arlut.csd.crypto.SSHA;
 import arlut.csd.crypto.smbencrypt;
