@@ -25,7 +25,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2007
    The University of Texas at Austin
 
    Contact information
@@ -62,6 +62,8 @@
 
 package arlut.csd.crypto;
 
+import java.security.MessageDigest;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                             SSHA
@@ -86,6 +88,18 @@ public final class SSHA {
 
   // ---
 
+  static private MessageDigest getSHA1()
+  {
+    try
+      {
+	return MessageDigest.getInstance("SHA-1");
+      }
+    catch (java.security.NoSuchAlgorithmException ex)
+      {
+	throw new RuntimeException(ex);
+      }
+  }
+
   /**
    * <p>This method takes a plaintext string and generates an SSHA
    * hash out of it.  If &lt;salt&gt; is not null, it will be
@@ -99,7 +113,7 @@ public final class SSHA {
   static public String getSSHAHash(String plaintext, String salt)
   {
     byte saltBytes[];
-    SHA1 hasher = new SHA1();
+    MessageDigest hasher = getSHA1();
 
     /* -- */
 
@@ -112,22 +126,16 @@ public final class SSHA {
 	saltBytes = salt.getBytes();
       }
 
-    hasher.init();
-    hasher.updateASCII(plaintext);
+    hasher.reset();
+    hasher.update(plaintext.getBytes());
     hasher.update(saltBytes);
-    hasher.finish();
-
+    byte digestBytes[] = hasher.digest();
     byte outBytes[] = new byte[saltBytes.length + 20]; // SHA1 hash is 20 bytes long
 
-    for (int i = 0; i < hasher.digestBits.length; i++)
-      {
-	outBytes[i] = hasher.digestBits[i];
-      }
+    assert(digestBytes.length == 20);
 
-    for (int i = 0; i < saltBytes.length; i++)
-      {
-	outBytes[i+20] = saltBytes[i];
-      }
+    System.arraycopy(digestBytes, 0, outBytes, 0, digestBytes.length);
+    System.arraycopy(saltBytes, 0, outBytes, digestBytes.length, saltBytes.length);
 
     return Base64.encodeBytes(outBytes);
   }
@@ -157,10 +165,9 @@ public final class SSHA {
   static public boolean matchSHAHash(String hashText, String plaintext)
   {
     byte[] hashBytes;
-    byte[] matchBytes;
     byte[] plainBytes;
     byte[] saltBytes = null;
-    SHA1 hasher = new SHA1();
+    MessageDigest hasher = getSHA1();
 
     /* -- */
 
@@ -224,11 +231,11 @@ public final class SSHA {
     // algorithm that would have been used to generate the hashText if
     // we indeed have a match.  Let's just check.
 
-    hasher.init();
+    hasher.reset();
     hasher.update(plainBytes);
-    hasher.finish();
+    byte matchBytes[] = hasher.digest();
 
-    matchBytes = hasher.digestBits;
+    assert(matchBytes.length == 20);
 
     for (int i = 0; i < matchBytes.length; i++)
       {
