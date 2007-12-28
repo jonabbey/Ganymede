@@ -60,8 +60,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import jcrypt.jcrypt;
-import md5.MD5Crypt;
 import arlut.csd.Util.TranslationService;
+import arlut.csd.crypto.MD5Crypt;
 import arlut.csd.crypto.SSHA;
 import arlut.csd.crypto.smbencrypt;
 import arlut.csd.ganymede.common.ReturnVal;
