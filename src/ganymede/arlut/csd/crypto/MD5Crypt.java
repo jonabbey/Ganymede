@@ -4,8 +4,8 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision: 1.12 $
-   Last Mod Date: $Date: 2002/03/29 06:02:34 $
+   Version: $Revision$
+   Last Mod Date: $Date$
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
    ----------------------------------------------------------------------------
@@ -16,11 +16,11 @@
    ----------------------------------------------------------------------------
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   The University of Texas at Austin.
+
+   Copyright (C) 1996-2008
+   The University of Texas at Austin
 
    Contact information
 
@@ -54,7 +54,9 @@
 
 */
 
-package md5;
+package arlut.csd.crypto;
+
+import java.security.MessageDigest;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -63,32 +65,24 @@ package md5;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class defines a method,
+ * This class defines a method,
  * {@link MD5Crypt#crypt(java.lang.String, java.lang.String) crypt()}, which
  * takes a password and a salt string and generates an OpenBSD/FreeBSD/Linux-compatible
- * md5-encoded password entry.</p>
+ * md5-encoded password entry.
  *
- * <p>Created: 3 November 1999</p>
- * <p>Release: $Name:  $</p>
- * <p>Version: $Revision: 1.12 $</p>
- * <p>Last Mod Date: $Date: 2002/03/29 06:02:34 $</p>
- * <p>Java Code By: Jonathan Abbey, jonabbey@arlut.utexas.edu</p>
- * <p>Original C Version:<pre>
+ * Original C Version:
  * ----------------------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
- * <phk@login.dknet.dk> wrote this file.  As long as you retain this notice you
+ * phk@login.dknet.dk wrote this file.  As long as you retain this notice you
  * can do whatever you want with this stuff. If we meet some day, and you think
  * this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
  * ----------------------------------------------------------------------------
- * </pre></p>
  */
 
 public final class MD5Crypt {
 
   /**
-   *
    * Command line test rig.
-   *
    */
 
   static public void main(String argv[])
@@ -116,7 +110,6 @@ public final class MD5Crypt {
   }
 
   static private final String SALTCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-
   static private final String itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
   static private final String to64(long v, int size)
@@ -148,6 +141,18 @@ public final class MD5Crypt {
   static private final int bytes2u(byte inp)
   {
     return (int) inp & 0xff;
+  }
+
+  static private MessageDigest getMD5()
+  {
+    try
+      {
+	return MessageDigest.getInstance("MD5");
+      }
+    catch (java.security.NoSuchAlgorithmException ex)
+      {
+	throw new RuntimeException(ex);
+      }
   }
 
   /**
@@ -275,7 +280,7 @@ public final class MD5Crypt {
      * we can get get better later on */
 
     byte finalState[];
-    MD5 ctx, ctx1;
+    MessageDigest ctx, ctx1;
     long l;
 
     /* -- */
@@ -301,23 +306,23 @@ public final class MD5Crypt {
 	salt = salt.substring(0, 8);
       }
 
-    ctx = new MD5();
+    ctx = getMD5();
 
-    ctx.Update(password);    // The password first, since that is what is most unknown
-    ctx.Update(magic);    // Then our magic string
-    ctx.Update(salt);    // Then the raw salt
+    ctx.update(password.getBytes());    // The password first, since that is what is most unknown
+    ctx.update(magic.getBytes());    // Then our magic string
+    ctx.update(salt.getBytes());    // Then the raw salt
 
     /* Then just as many characters of the MD5(pw,salt,pw) */
 
-    ctx1 = new MD5();
-    ctx1.Update(password);
-    ctx1.Update(salt);
-    ctx1.Update(password);
-    finalState = ctx1.Final();
+    ctx1 = getMD5();
+    ctx1.update(password.getBytes());
+    ctx1.update(salt.getBytes());
+    ctx1.update(password.getBytes());
+    finalState = ctx1.digest();
 
     for (int pl = password.length(); pl > 0; pl -= 16)
       {
-	ctx.Update(finalState, pl > 16? 16 : pl);
+	ctx.update(finalState, 0, pl > 16 ? 16 : pl);
       }
 
     /* the original code claimed that finalState was being cleared
@@ -332,15 +337,15 @@ public final class MD5Crypt {
       {
 	if ((i & 1) != 0)
 	  {
-	    ctx.Update(finalState, 1);
+	    ctx.update(finalState, 0, 1);
 	  }
 	else
 	  {
-	    ctx.Update(password.getBytes(), 1);
+	    ctx.update(password.getBytes(), 0, 1);
 	  }
       }
 
-    finalState = ctx.Final();
+    finalState = ctx.digest();
 
     /*
      * and now, just to make sure things don't run too fast
@@ -352,37 +357,37 @@ public final class MD5Crypt {
 
     for (int i = 0; i < 1000; i++)
       {
-	ctx1 = new MD5();
+	ctx1.reset();
 
 	if ((i & 1) != 0)
 	  {
-	    ctx1.Update(password);
+	    ctx1.update(password.getBytes());
 	  }
 	else
 	  {
-	    ctx1.Update(finalState, 16);
+	    ctx1.update(finalState, 0, 16);
 	  }
 
 	if ((i % 3) != 0)
 	  {
-	    ctx1.Update(salt);
+	    ctx1.update(salt.getBytes());
 	  }
 
 	if ((i % 7) != 0)
 	  {
-	    ctx1.Update(password);
+	    ctx1.update(password.getBytes());
 	  }
 
 	if ((i & 1) != 0)
 	  {
-	    ctx1.Update(finalState, 16);
+	    ctx1.update(finalState, 0, 16);
 	  }
 	else
 	  {
-	    ctx1.Update(password);
+	    ctx1.update(password.getBytes());
 	  }
 
-	finalState = ctx1.Final();
+	finalState = ctx1.digest();
       }
 
     /* Now make the output string */
