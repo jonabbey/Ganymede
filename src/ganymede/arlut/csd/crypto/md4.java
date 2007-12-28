@@ -119,7 +119,35 @@ public class md4 {
     mdinit(in);
   }
 
-  void mdinit(byte in[])
+  public int[] getregs()
+  {
+    int regs[] = {this.A, this.B, this.C, this.D};
+
+    return regs;
+  }
+
+  public void calc()
+  {
+    int AA, BB, CC, DD, i;
+
+    for (i=0; i < numwords/16; i++)
+      {
+	AA = A; BB = B; CC = C; DD = D;
+	round1(i);
+	round2(i);
+	round3(i);
+	A += AA; B+= BB; C+= CC; D+= DD;
+      }
+  }
+
+  public String toString()
+  {
+    String s;
+
+    return (tohex(A) + tohex(B) + tohex(C) + tohex(D));
+  }
+
+  private void mdinit(byte in[])
   {
     int newlen, endblklen, pad, i;
     long datalenbits;
@@ -172,36 +200,8 @@ public class md4 {
 	  ((b[i+2] & 0xff) << 16) + ((b[i+3] & 0xff) << 24);
       }
    }
-	
-  public String toString()
-  {
-    String s;
 
-    return (tohex(A) + tohex(B) + tohex(C) + tohex(D));
-  }
-
-  public int[] getregs()
-  {
-    int regs[] = {this.A, this.B, this.C, this.D};
-
-    return regs;
-  }
-
-  public void calc()
-  {
-    int AA, BB, CC, DD, i;
-
-    for (i=0; i < numwords/16; i++)
-      {
-	AA = A; BB = B; CC = C; DD = D;
-	round1(i);
-	round2(i);
-	round3(i);
-	A += AA; B+= BB; C+= CC; D+= DD;
-      }
-  }
-
-  void round1(int blk)
+  private void round1(int blk)
   {
     A = rotintlft((A + F(B, C, D) + d[0 + 16 * blk]), 3);
     D = rotintlft((D + F(A, B, C) + d[1 + 16 * blk]), 7);
@@ -224,7 +224,7 @@ public class md4 {
     B = rotintlft((B + F(C, D, A) + d[15 + 16 * blk]), 19);
   }
 
-  void round2(int blk)
+  private void round2(int blk)
   {
     A = rotintlft((A + G(B, C, D) + d[0 + 16 * blk] + 0x5a827999), 3);
     D = rotintlft((D + G(A, B, C) + d[4 + 16 * blk] + 0x5a827999), 5);
@@ -247,7 +247,7 @@ public class md4 {
     B = rotintlft((B + G(C, D, A) + d[15 + 16 * blk] + 0x5a827999), 13);
   }
 
-  void round3(int blk)
+  private void round3(int blk)
   {
     A = rotintlft((A + H(B, C, D) + d[0 + 16 * blk] + 0x6ed9eba1), 3);
     D = rotintlft((D + H(A, B, C) + d[8 + 16 * blk] + 0x6ed9eba1), 9);
