@@ -3,8 +3,8 @@
 
    Created: 18 December 2007
    Release: $Name:  $
-   Version: $Revision: 1.00 $
-   Last Mod Date: $Date: 2007/12/18 06:02:34 $
+   Version: $Revision$
+   Last Mod Date: $Date$
 
    Java Port By: James Ratcliff, falazar@arlut.utexas.edu
 
