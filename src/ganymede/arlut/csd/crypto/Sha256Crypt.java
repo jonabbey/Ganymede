@@ -2,16 +2,29 @@
    Sha256Crypt.java
 
    Created: 18 December 2007
-   Release: $Name:  $
+   Last Changed By: $Author$
    Version: $Revision$
    Last Mod Date: $Date$
 
    Java Port By: James Ratcliff, falazar@arlut.utexas.edu
 
-   Algorithm taken from:
-     SHA256-based Unix crypt implementation.
-     Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.
-     http://people.redhat.com/drepper/SHA-crypt.txt
+   This class implements the new generation, scalable, SHA256-based
+   Unix 'crypt' algorithm developed by a group of engineers from Red
+   Hat, Sun, IBM, and HP for common use in the Unix and Linux
+   /etc/shadow files.
+
+   The Linux glibc library (starting at version 2.7) includes support
+   for validating passwords hashed using this algorithm.
+
+   The algorithm itself was released into the Public Domain by Ulrich
+   Drepper <drepper@redhat.com>.  A discussion of the rationale and
+   development of this algorithm is at
+
+   http://people.redhat.com/drepper/sha-crypt.html
+
+   and the specification and a sample C language implementation is at
+
+   http://people.redhat.com/drepper/SHA-crypt.txt
 
    -----------------------------------------------------------------------
 
@@ -68,10 +81,23 @@ import java.security.MessageDigest;
  * Sha256_crypt()}, which takes a password and a salt string and
  * generates a Sha256 encrypted password entry.
  *
- * Algorithm taken from:
- *   SHA256-based Unix crypt implementation.
- *   Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.
- *   http://people.redhat.com/drepper/SHA-crypt.txt
+ * This class implements the new generation, scalable, SHA256-based
+ * Unix 'crypt' algorithm developed by a group of engineers from Red
+ * Hat, Sun, IBM, and HP for common use in the Unix and Linux
+ * /etc/shadow files.
+ *
+ * The Linux glibc library (starting at version 2.7) includes support
+ * for validating passwords hashed using this algorithm.
+ *
+ * The algorithm itself was released into the Public Domain by Ulrich
+ * Drepper &lt;drepper@redhat.com&gt;.  A discussion of the rationale and
+ * development of this algorithm is at
+ *
+ * http://people.redhat.com/drepper/sha-crypt.html
+ *
+ * and the specification and a sample C language implementation is at
+ *
+ * http://people.redhat.com/drepper/SHA-crypt.txt
  */
 
 public final class Sha256Crypt
