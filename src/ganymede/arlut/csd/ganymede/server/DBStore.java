@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -168,7 +168,7 @@ public final class DBStore implements JythonMap {
    * after id_string
    */
 
-  static final byte minor_version = 12;
+  static final byte minor_version = 13;
 
   /**
    * Enable/disable debug in the DBStore methods

@@ -108,6 +108,7 @@ public final class Sha256Crypt
   static private final int ROUNDS_DEFAULT = 5000;
   static private final int ROUNDS_MIN = 1000;
   static private final int ROUNDS_MAX = 999999999;
+  static private final String SALTCHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
   static private final String itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
   static private MessageDigest getSHA256()
@@ -123,18 +124,23 @@ public final class Sha256Crypt
   }
 
   /**
-   * This method actually generates an
-   * Sha256 crypted password hash from a plaintext password and a
-   * salt.
+   * This method actually generates an Sha256 crypted password hash
+   * from a plaintext password and a salt.
    *
-   * The resulting string will be in the form '$5$&lt;salt&gt;$&lt;hashed mess&gt;
+   * The resulting string will be in the form '$5$&lt;rounds=n&gt;&&lt;salt&gt;$&lt;hashed mess&gt;
    *
-   * @param password Plaintext password
+   * @param keyStr Plaintext password
    *
-   * @return A Sha256 Unix Crypt encrypted password field.
+   * @param saltStr An encoded salt/roundes which will be consulted to determine the salt
+   * and round count, if not null
+   *
+   * @param roundsCount If this value is not 0, this many rounds will
+   * used to generate the hash text.
+   *
+   * @return The Sha256 Unix Crypt hash text for the keyStr
    */
 
-  public static final String Sha256_crypt(String keyStr, String saltStr)
+  public static final String Sha256_crypt(String keyStr, String saltStr, int roundsCount)
   {
     MessageDigest ctx = getSHA256();
     MessageDigest alt_ctx = getSHA256();
@@ -144,28 +150,47 @@ public final class Sha256Crypt
     byte[] s_bytes = null;
     int cnt, cnt2;
     int rounds = ROUNDS_DEFAULT;  // Default number of rounds.
-    boolean rounds_custom = false;
     StringBuffer buffer;
 
     /* -- */
 
-    if (saltStr.startsWith(sha256_salt_prefix))
+    if (saltStr != null)
       {
-	saltStr = saltStr.substring(sha256_salt_prefix.length());
+	if (saltStr.startsWith(sha256_salt_prefix))
+	  {
+	    saltStr = saltStr.substring(sha256_salt_prefix.length());
+	  }
+
+	if (saltStr.startsWith(sha256_rounds_prefix))
+	  {
+	    String num = saltStr.substring(sha256_rounds_prefix.length(), saltStr.indexOf('$'));
+	    int srounds = Integer.valueOf(num).intValue();
+	    saltStr = saltStr.substring(saltStr.indexOf('$')+1);
+	    rounds = Math.max(ROUNDS_MIN, Math.min(srounds, ROUNDS_MAX));
+	  }
+
+	if (saltStr.length() > SALT_LEN_MAX)
+	  {
+	    saltStr = saltStr.substring(0, SALT_LEN_MAX);
+	  }
+      }
+    else
+      {
+	java.util.Random randgen = new java.util.Random();
+	StringBuffer saltBuf = new StringBuffer();
+
+	while (saltBuf.length() < 16)
+	  {
+	    int index = (int) (randgen.nextFloat() * SALTCHARS.length());
+	    saltBuf.append(SALTCHARS.substring(index, index+1));
+	  }
+
+	saltStr = saltBuf.toString();
       }
 
-    if (saltStr.startsWith(sha256_rounds_prefix))
+    if (roundsCount != 0)
       {
-	String num = saltStr.substring(sha256_rounds_prefix.length(), saltStr.indexOf('$'));
-	int srounds = Integer.valueOf(num).intValue();
-	saltStr = saltStr.substring(saltStr.indexOf('$')+1);
-	rounds = Math.max(ROUNDS_MIN, Math.min(srounds, ROUNDS_MAX));
-	rounds_custom = true;
-      }
-
-    if (saltStr.length() > SALT_LEN_MAX)
-      {
-	saltStr = saltStr.substring(0, SALT_LEN_MAX);
+	rounds = Math.max(ROUNDS_MIN, Math.min(roundsCount, ROUNDS_MAX));
       }
 
     byte[] key = keyStr.getBytes();
@@ -281,7 +306,7 @@ public final class Sha256Crypt
 
     buffer = new StringBuffer(sha256_salt_prefix);
 
-    if (rounds_custom)
+    if (rounds != 5000)
       {
 	buffer.append(sha256_rounds_prefix);
 	buffer.append(rounds);
@@ -328,27 +353,67 @@ public final class Sha256Crypt
   }
 
   /**
-   * This method tests a plaintext password against a md5Crypt'ed hash and returns
-   * true if the password matches the hash.
-   *
-   * This method will work properly whether the hashtext was crypted
-   * using the default FreeBSD md5Crypt algorithm or the Apache
-   * md5Crypt variant.
+   * This method tests a plaintext password against a SHA256 Unix
+   * Crypt'ed hash and returns true if the password matches the hash.
    *
    * @param plaintextPass The plaintext password text to test.
-   * @param md5CryptText The Apache or FreeBSD-md5Crypted hash used to authenticate the plaintextPass.
+   * @param sha256CryptText The hash text we're testing against.
+   * We'll extract the salt and the round count from this String.
    */
 
-  static public final boolean verifyPassword(String plaintextPass, String salt, String sha256CryptText)
+  public static final boolean verifyPassword(String plaintextPass, String sha256CryptText)
   {
     if (sha256CryptText.startsWith("$5$"))
       {
-        return sha256CryptText.equals(Sha256_crypt(plaintextPass, salt));
+        return sha256CryptText.equals(Sha256_crypt(plaintextPass, sha256CryptText, 0));
       }
     else
       {
         throw new RuntimeException("Bad sha256CryptText");
       }
+  }
+
+  public static final boolean verifyHashTextFormat(String sha256CryptText)
+  {
+    if (!sha256CryptText.startsWith(sha256_salt_prefix))
+      {
+	return false;
+      }
+
+    sha256CryptText = sha256CryptText.substring(sha256_salt_prefix.length());
+
+    if (sha256CryptText.startsWith(sha256_rounds_prefix))
+      {
+	String num = sha256CryptText.substring(sha256_rounds_prefix.length(), sha256CryptText.indexOf('$'));
+
+	try
+	  {
+	    int srounds = Integer.valueOf(num).intValue();
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    return false;
+	  }
+
+	sha256CryptText = sha256CryptText.substring(sha256CryptText.indexOf('$')+1);
+      }
+
+    if (sha256CryptText.indexOf('$') > (SALT_LEN_MAX + 1))
+      {
+	return false;
+      }
+
+    sha256CryptText = sha256CryptText.substring(sha256CryptText.indexOf('$') + 1);
+
+    for (int i = 0; i < sha256CryptText.length(); i++)
+      {
+	if (itoa64.indexOf(sha256CryptText.charAt(i)) == -1)
+	  {
+	    return false;
+	  }
+      }
+
+    return true;
   }
 
   /**
@@ -376,7 +441,7 @@ public final class Sha256Crypt
     String msg = "Hello world!";
     String res = "$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5";
 
-    result = Sha256_crypt(msg, salt);
+    result = Sha256_crypt(msg, salt, 0);
 
     System.out.println("result is:"+result);
     System.out.println("should be:"+res);
@@ -392,7 +457,7 @@ public final class Sha256Crypt
 
     for (int t=0; t<7; t++)
       {
-	result = Sha256_crypt(msgs[t*3+1], msgs[t*3]);
+	result = Sha256_crypt(msgs[t*3+1], msgs[t*3], 0);
 
 	System.out.println("test " + t + " result is:" + result);
 	System.out.println("test " + t + " should be:" + msgs[t*3+2]);

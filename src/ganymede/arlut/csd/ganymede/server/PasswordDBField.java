@@ -60,10 +60,14 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import arlut.csd.Util.TranslationService;
+
 import arlut.csd.crypto.jcrypt;
 import arlut.csd.crypto.MD5Crypt;
-import arlut.csd.crypto.SSHA;
+import arlut.csd.crypto.Sha256Crypt;
+import arlut.csd.crypto.Sha512Crypt;
 import arlut.csd.crypto.smbencrypt;
+import arlut.csd.crypto.SSHA;
+
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.pass_field;
 
@@ -86,39 +90,53 @@ import arlut.csd.ganymede.rmi.pass_field;
  * arlut.csd.ganymede.server.DBField DBField} in that the normal
  * setValue()/getValue() methods are non-functional.  Instead, there
  * are special methods used to set or access password information in
- * crypted and non-crypted forms.
+ * hashed and non-hashed forms.
  *
- * Crypted passwords are stored in the UNIX crypt() format.  See the
- * {@link jcrypt jcrypt} class for details on the crypt hashing.
+ * PasswordDBField supports a significant variety of password hash
+ * formats, to allow Ganymede to (optionally) avoid storing passwords
+ * in plain text, while still retaining the ability to emit password
+ * information to a variety of information systems.
+ *
+ * Here are the hash algorithms supported by PasswordDBField:
+ *
+ * <ul>
+ * <li>Traditional Unix Crypt()</li>
+ * <li>OpenBSD-style md5Crypt</li>
+ * <li>OpenBSD-style md5Crypt, as modified for use with Apache</li>
+ * <li>Traditional LAN Manager hash</li>
+ * <li>Windows NT Unicode Hash algorithm</li>
+ * <li>SSHA, Salted SHA-1 hash, as used in OpenLDAP</li>
+ * <li>Sha Unix Crypt, SHA256 and SHA512 based scalable hash
+ * algorithm, supported in Linux starting with glibc version 2.7.</li>
+ * </ul>
  *
  * There are no methods provided to allow remote access to password
- * information..  server-side code must locally access the {@link
- * arlut.csd.ganymede.server.PasswordDBField#getUNIXCryptText()
- * getUNIXCryptText()} and {@link
- * arlut.csd.ganymede.server.PasswordDBField#getPlainText()
- * getPlainText()} methods to get access to the password information.
- * Generally, even in that case, only crypted password information
- * will be available.  If this password field was configured to store
- * encrypted passwords by way of its {@link
- * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField},
- * this password field will never emit() the plaintext to disk.
- * Instead, the crypt()'ed password information will be retained on
- * disk for user authentication.  The plaintext of the password
- * <b>may</b> be retained in memory for the purpose of replicating to
- * systems that do not use the UNIX crypt() format for password
- * hashing, but only on a temporary basis, for those passwords whose
- * plaintext was provided to the server during its operation.
- * Basically, it's for custom builder tasks that need to be able to
- * provide the plaintext of a stored password for replication to a
- * system with an incompatible hash format.
+ * information..  server-side code must locally access call methods to
+ * get access to stored password information.  Generally, even in that
+ * case, only hashed password information will be available.  If this
+ * password field was configured to store only hashed passwords by way
+ * of its {@link arlut.csd.ganymede.server.DBObjectBaseField
+ * DBObjectBaseField}, this password field will never emit() the
+ * plaintext to disk.
  *
- * The new {@link arlut.csd.ganymede.server.SyncRunner} and {@link
- * arlut.csd.ganymede.server.XMLDumpContext} classes are also capable
- * of conspiring to dump plain text passwords into properly configured
- * sync channels.
+ * In such cases, only the hash text password information will be
+ * retained on disk for user authentication.  The plaintext of the
+ * password can be retained in memory for the duration of a run of the
+ * Ganymede server process, but as the plaintext is not stored in the
+ * Ganymede server's ganymede.db file, the plaintext is lost when the
+ * server is stopped.
  *
- * @see arlut.csd.ganymede.rmi.BaseField#setCrypted(boolean)
- * @see arlut.csd.ganymede.rmi.BaseField#setPlainText(boolean)
+ * This transient retention of plaintext password information can
+ * still be useful in the context of the Ganymede 2.0 {@link
+ * arlut.csd.ganymede.server.SyncRunner Sync Channel} mechanism,
+ * however.  If a user changes his password, a Sync Channel can be
+ * configured to write the plaintext password change information out,
+ * even though the server is prone to forget the plaintext if it is
+ * stopped and restarted.
+ *
+ * At ARL, we use this transient plaintext retention to allow us to
+ * synchronize passwords to Active Directory without having the risk
+ * of long term plaintext storage in the ganymede.db file.
  */
 
 public class PasswordDBField extends DBField implements pass_field {
@@ -193,11 +211,11 @@ public class PasswordDBField extends DBField implements pass_field {
   private String ntHash;
 
   /**
-   * SSHA hash, for LDAP.  Good for validating up to 2^64 bits of
-   * plaintext.. effectively indefinite in extent.  Probably the
-   * strongest hash here in terms of difficulty of finding collisions,
-   * but it's very quick to evaluate, so a dictionary attack against
-   * this hash can proceed rapidly.
+   * Salted SHA-1 hash, for OpenLDAP.  Good for validating up to 2^64
+   * bits of plaintext.. effectively indefinite in extent.  A very
+   * strong hash format in terms of the difficulty of finding
+   * collisions in the hash range, but it's very quick to evaluate, so
+   * a dictionary attack against this hash can proceed rapidly.
    *
    * Note that we keep the sshaHash string here in the same form
    * as would be used in an LDAP store.
@@ -209,6 +227,23 @@ public class PasswordDBField extends DBField implements pass_field {
    */
 
   private String sshaHash;
+
+  /**
+   * Password hashed using the SHA Unix Crypt algorithm published by
+   * Ulrich Drepper at
+   *
+   * http://people.redhat.com/drepper/sha-crypt.html
+   *
+   * The hash text in shaUnixCrypt can be generated using either the
+   * Sha256Crypt or Sha512Crypt variants of the SHA Unix Crypt
+   * algorithm described at the above URL.
+   *
+   * This hash format can have a very large digest size, a large salt,
+   * and a very significant computational cost, which makes this hash
+   * the most resistant to brute force attacks.
+   */
+
+  private String shaUnixCrypt;
 
   /* -- */
 
@@ -261,6 +296,7 @@ public class PasswordDBField extends DBField implements pass_field {
     lanHash = field.lanHash;
     ntHash = field.ntHash;
     sshaHash = field.sshaHash;
+    shaUnixCrypt = field.shaUnixCrypt;
   }
 
   /**
@@ -274,7 +310,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     return (cryptedPass != null || md5CryptPass != null ||
 	    apacheMd5CryptPass != null || uncryptedPass != null || lanHash != null
-	    || ntHash != null || sshaHash != null);
+	    || ntHash != null || sshaHash != null || shaUnixCrypt != null);
   }
 
   /**
@@ -325,6 +361,7 @@ public class PasswordDBField extends DBField implements pass_field {
     ntHash = null;
     lanHash = null;
     sshaHash = null;
+    shaUnixCrypt = null;
   }
 
   /**
@@ -350,7 +387,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	    streq(uncryptedPass, origP.uncryptedPass) && 
 	    streq(lanHash, origP.lanHash) && 
 	    streq(ntHash, origP.ntHash) &&
-	    streq(sshaHash, origP.sshaHash));
+	    streq(sshaHash, origP.sshaHash) &&
+	    streq(shaUnixCrypt, origP.shaUnixCrypt));
   }
 
   /**
@@ -415,6 +453,7 @@ public class PasswordDBField extends DBField implements pass_field {
     target.ntHash = ntHash;
     target.uncryptedPass = uncryptedPass;
     target.sshaHash = sshaHash;
+    target.shaUnixCrypt = shaUnixCrypt;
 
     return null;		// simple success value
   }
@@ -447,16 +486,7 @@ public class PasswordDBField extends DBField implements pass_field {
     if (getFieldDef().isCrypted())
       {
 	cryptedPass = getUNIXCryptText();
-
-	if (cryptedPass == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(cryptedPass);
-	    wrote_hash = true;
-	  }
+	wrote_hash = emitHelper(out, cryptedPass, wrote_hash);
       }
     else
       {
@@ -466,16 +496,7 @@ public class PasswordDBField extends DBField implements pass_field {
     if (getFieldDef().isMD5Crypted())
       {
 	md5CryptPass = getMD5CryptText();
-
-	if (md5CryptPass == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(md5CryptPass);
-	    wrote_hash = true;
-	  }
+	wrote_hash = emitHelper(out, md5CryptPass, wrote_hash);
       }
     else
       {
@@ -485,16 +506,7 @@ public class PasswordDBField extends DBField implements pass_field {
     if (getFieldDef().isApacheMD5Crypted())
       {
 	apacheMd5CryptPass = getApacheMD5CryptText();
-
-	if (apacheMd5CryptPass == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(apacheMd5CryptPass);
-	    wrote_hash = true;
-	  }
+	wrote_hash = emitHelper(out, apacheMd5CryptPass, wrote_hash);
       }
     else
       {
@@ -504,28 +516,10 @@ public class PasswordDBField extends DBField implements pass_field {
     if (getFieldDef().isWinHashed())
       {
 	lanHash = getLANMANCryptText();
-
-	if (lanHash == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(lanHash);
-	    wrote_hash = true;
-	  }
+	wrote_hash = emitHelper(out, lanHash, wrote_hash);
 
 	ntHash = getNTUNICODECryptText();
-
-	if (ntHash == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(ntHash);
-	    wrote_hash = true;
-	  }
+	wrote_hash = emitHelper(out, ntHash, wrote_hash);
       } 
     else
       {
@@ -536,16 +530,21 @@ public class PasswordDBField extends DBField implements pass_field {
     if (getFieldDef().isSSHAHashed())
       {
 	sshaHash = getSSHAHashText();
+	wrote_hash = emitHelper(out, sshaHash, wrote_hash);
+      }
+    else
+      {
+	out.writeUTF("");
+      }
 
-	if (sshaHash == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(sshaHash);
-	    wrote_hash = true;
-	  }
+    // starting at file version 2.13
+    //
+    // (see DBStore.major_version and DBStore.minor_version)
+
+    if (getFieldDef().isShaUnixCrypted())
+      {
+	shaUnixCrypt = getShaUnixCryptText();
+	wrote_hash = emitHelper(out, shaUnixCrypt, wrote_hash);
       }
     else
       {
@@ -558,14 +557,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (getFieldDef().isPlainText() || !wrote_hash)
       {
-	if (uncryptedPass == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(uncryptedPass);
-	  }
+	emitHelper(out, uncryptedPass, true);
       }
     else
       {
@@ -573,71 +565,61 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
+  /**
+   * Helper method for the emit() method, which takes care of encoding
+   * null strings as empty strings on disk.
+   *
+   * @param out The DataOutput that we are emitting to
+   * @param val The String to write out
+   * @param wrote_hash If we write out a non-null value, we'll return
+   * true.  Otherwise, we'll just return the value of this boolean.
+   */
+
+  private boolean emitHelper(DataOutput out, String val, boolean wrote_hash) throws IOException
+  {
+    if (val == null)
+      {
+	out.writeUTF("");
+	return wrote_hash;
+      }
+    else
+      {
+	out.writeUTF(val);
+	return true;
+      }
+  }
+
   void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
+    clear_stored();
+
     // we radically simplified PasswordDBField's on-disk format at
     // file version 2.1
 
     if (Ganymede.db.isAtLeast(2,1))
       {
-	cryptedPass = in.readUTF();
-
-	if (cryptedPass.equals(""))
-	  {
-	    cryptedPass = null;
-	  }
-
-	md5CryptPass = in.readUTF();
-
-	if (md5CryptPass.equals(""))
-	  {
-	    md5CryptPass = null;
-	  }
-
-	// at file format 2.4 we added the Apache-hashed password format
+	cryptedPass = readUTF(in);
+	md5CryptPass = readUTF(in);
 
 	if (Ganymede.db.isAtLeast(2,4))
 	  {
-	    apacheMd5CryptPass = in.readUTF();
-	    
-	    if (apacheMd5CryptPass.equals(""))
-	      {
-		apacheMd5CryptPass = null;
-	      }
+	    apacheMd5CryptPass = readUTF(in);
 	  }
 
-	lanHash = in.readUTF();
-
-	if (lanHash.equals(""))
-	  {
-	    lanHash = null;
-	  }
-
-	ntHash = in.readUTF();
-
-	if (ntHash.equals(""))
-	  {
-	    ntHash = null;
-	  }
-
-	// we added SSHA Hash at file format 2.5
+	lanHash = readUTF(in);
+	ntHash = readUTF(in);
 
 	if (Ganymede.db.isAtLeast(2,5))
 	  {
-	    sshaHash = in.readUTF();
-	    
-	    if (sshaHash.equals(""))
-	      {
-		sshaHash = null;
-	      }
+	    sshaHash = readUTF(in);
 	  }
 
-	uncryptedPass = in.readUTF();
-
-	if (uncryptedPass.equals(""))
+	if (Ganymede.db.isAtLeast(2,13))
 	  {
-	    uncryptedPass = null;
+	    shaUnixCrypt = readUTF(in);
 	  }
+
+	uncryptedPass = readUTF(in);
 
 	return;
       }
@@ -650,19 +632,8 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (Ganymede.db.isAtRev(1,10))
       {
-	cryptedPass = in.readUTF();
-
-	if (cryptedPass.equals(""))
-	  {
-	    cryptedPass = null;
-	  }
-	
-	uncryptedPass = in.readUTF();
-
-	if (uncryptedPass.equals(""))
-	  {
-	    uncryptedPass = null;
-	  }
+	cryptedPass = readUTF(in);
+	uncryptedPass = readUTF(in);
 
 	return;
       }
@@ -673,12 +644,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (definition.isCrypted())
       {
-	cryptedPass = in.readUTF();
-
-	if (cryptedPass.equals(""))
-	  {
-	    cryptedPass = null;
-	  }
+	cryptedPass = readUTF(in);
 
 	if (Ganymede.db.isBetweenRevs(1,13,1,16))
 	  {
@@ -695,34 +661,32 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	if (definition.isMD5Crypted())
 	  {
-	    md5CryptPass = in.readUTF();
-		
-	    if (md5CryptPass.equals(""))
-	      {
-		md5CryptPass = null;
-	      }
-	  }
-	else
-	  {
-	    md5CryptPass = null;
+	    md5CryptPass = readUTF(in);
 	  }
       }
 
-    if (definition.isCrypted() || definition.isMD5Crypted())
+    if (!definition.isCrypted() && !definition.isMD5Crypted())
       {
-	uncryptedPass = null;
+	uncryptedPass = readUTF(in);
+      }
+  }
+
+  /**
+   * This helper method reads a UTF string from in, decoding an empty
+   * String as null.
+   */
+
+  private String readUTF(DataInput in) throws IOException
+  {
+    String val = in.readUTF();
+    
+    if (val.equals(""))
+      {
+	return null;
       }
     else
       {
-	uncryptedPass = in.readUTF();
-	
-	if (uncryptedPass.equals(""))
-	  {
-	    uncryptedPass = null;
-	  }
-	
-	cryptedPass = null;
-	md5CryptPass = null;
+	return val;
       }
   }
 
@@ -785,6 +749,11 @@ public class PasswordDBField extends DBField implements pass_field {
     if (sshaHash != null)
       {
 	dump.attribute("ssha", sshaHash);
+      }
+
+    if (shaUnixCrypt != null)
+      {
+	dump.attribute("shaUnixCrypt", shaUnixCrypt);
       }
 
     dump.endElement("password");
@@ -883,6 +852,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (sshaHash != null)
 	  {
 	    result.append("ssha ");
+	  }
+
+	if (shaUnixCrypt != null)
+	  {
+	    result.append("shaUnixCrypt ");
 	  }
 
 	if (uncryptedPass != null)
@@ -1068,6 +1042,17 @@ public class PasswordDBField extends DBField implements pass_field {
     else if (sshaHash != null)	// 2^64 bits, but fast
       {
 	success = SSHA.matchSHAHash(sshaHash, plaintext);
+      }
+    else if (shaUnixCrypt != null) // large precision, but potentially quite slow
+      {
+	if (shaUnixCrypt.startsWith("$5$"))
+	  {
+	    success = Sha256Crypt.verifyPassword(plaintext, shaUnixCrypt);
+	  }
+	else if (shaUnixCrypt.startsWith("$6$"))
+	  {
+	    success = Sha512Crypt.verifyPassword(plaintext, shaUnixCrypt);
+	  }
       }
     else if (md5CryptPass != null) // indefinite
       {
@@ -1264,6 +1249,39 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    return null;
 	  }
+      }
+  }
+
+  /** 
+   * This server-side only method returns the Netscape SSHA (salted
+   * SHA) LDAP hash of the password data held in this field.
+   *
+   * This method is never meant to be available remotely.
+   */
+
+  public String getShaUnixCryptText()
+  {
+    if (shaUnixCrypt != null)
+      {
+	return shaUnixCrypt;
+      }
+    else
+      {
+	if (uncryptedPass == null)
+	  {
+	    return null;
+	  }
+
+	if (getFieldDef().isShaUnixCrypted512())
+	  {
+	    shaUnixCrypt = Sha512Crypt.Sha512_crypt(uncryptedPass, null, getFieldDef().getShaUnixCryptRounds());
+	  }
+	else
+	  {
+	    shaUnixCrypt = Sha256Crypt.Sha256_crypt(uncryptedPass, null, getFieldDef().getShaUnixCryptRounds());
+	  }
+
+	return shaUnixCrypt;
       }
   }
 
@@ -1944,6 +1962,129 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
+   * This method is used to set a pre-crypted Sha256Crypt or
+   * Sha512Crypt password for this field.  This method will return an
+   * error code if this password field does not allow storage in
+   * ShaCrypt format.
+   *
+   * The hashText submitted to this method must match one of the
+   * following four forms:
+   *
+   * $5$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   * $5$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   *
+   * $6$&lt;saltstring&gt;$&lt;64 bytes of hash text, base 64 encoded&gt;
+   * $6$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   *
+   * If the round count is specified using the '$rounds=n' syntax, the
+   * higher the round count, the more computational work will be
+   * required to verify passwords against this hash text.
+   *
+   * See http://people.redhat.com/drepper/sha-crypt.html for full
+   * details of the hash format this method is expecting.
+   */
+
+  public ReturnVal setShaUnixCryptPass(String hashText)
+  {
+    return this.setShaUnixCryptPass(hashText, false, false);
+  }
+
+  /**
+   * This method is used to set a pre-crypted Sha256Crypt or
+   * Sha512Crypt password for this field.  This method will return an
+   * error code if this password field does not allow storage in
+   * ShaCrypt format.
+   *
+   * The hashText submitted to this method must match one of the
+   * following four forms:
+   *
+   * $5$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   * $5$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   *
+   * $6$&lt;saltstring&gt;$&lt;64 bytes of hash text, base 64 encoded&gt;
+   * $6$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   *
+   * If the round count is specified using the '$rounds=n' syntax, the
+   * higher the round count, the more computational work will be
+   * required to verify passwords against this hash text.
+   *
+   * See http://people.redhat.com/drepper/sha-crypt.html for full
+   * details of the hash format this method is expecting.
+   */
+
+  public ReturnVal setShaUnixCryptPass(String hashText, boolean local, boolean noWizards)
+  {
+    ReturnVal retVal;
+    DBEditObject eObj;
+
+    /* -- */
+
+    if (!isEditable(local))
+      {
+	// "Password Field Error"
+	// "Don''t have permission to edit field {0} in object {1}."
+	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+      }
+
+    if (!getFieldDef().isShaUnixCrypted())
+      {
+	// "Server: Error in PasswordDBField.setShaUnixCryptPass()"
+	// "Password field not configured to accept SHA Unix Crypt hashed password strings."
+	return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
+					  ts.l("setShaUnixCryptPass.error_text"));
+      }
+
+    if (!Sha256Crypt.verifyHashTextFormat(hashText) && !Sha512Crypt.verifyHashTextFormat(hashText))
+      {
+	// "Server: Error in PasswordDBField.setShaUnixCryptPass()"
+	// "The hash text passed to setShaUnixCryptPass(), "{0}", is
+	// not a well-formed, SHA Unix Crypt hash text"
+	return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
+					  ts.l("setShaUnixCryptPass.format_error", this.getName()));
+      }
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+	
+	retVal = eObj.wizardHook(this, DBEditObject.SETPASS_SHAUNIXCRYPT, hashText, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+	
+	if (retVal != null && !retVal.doNormalProcessing)
+	  {
+	    return retVal;
+	  }
+      }
+
+    // call finalizeSetValue to allow for chained reactions
+
+    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+
+    if (retVal == null || retVal.didSucceed())
+      {
+	// whenever the ShaUnixCrypt password is directly set, we lose
+	// plaintext and alternate hashes
+
+	clear_stored();
+
+	if ((hashText == null) || (hashText.equals("")))
+	  {
+	    shaUnixCrypt = null;
+	  }
+	else
+	  {
+	    shaUnixCrypt = hashText;
+	  }
+      }
+
+    return retVal;
+  }
+
+  /**
    * This method is used to force all known hashes into this password
    * field.  Ganymede does no verifications to insure that all of these
    * hashes really match the same password, so caveat emptor.  If any of
@@ -1962,12 +2103,13 @@ public class PasswordDBField extends DBField implements pass_field {
 				String LANMAN,
 				String NTUnicodeMD4,
 				String SSHAText,
+				String ShaUnixCryptText,
 				boolean local, 
 				boolean noWizards)
   {
     ReturnVal retVal;
     DBEditObject eObj;
-    boolean settingCrypt, settingMD5, settingApacheMD5, settingWin, settingSSHA;
+    boolean settingCrypt, settingMD5, settingApacheMD5, settingWin, settingSSHA, settingShaUnixCrypt;
 
     /* -- */
 
@@ -1984,8 +2126,9 @@ public class PasswordDBField extends DBField implements pass_field {
     settingApacheMD5 = (apacheMd5Crypt != null && !apacheMd5Crypt.equals(""));
     settingWin = (LANMAN != null && !LANMAN.equals("")) || (NTUnicodeMD4 != null && !NTUnicodeMD4.equals(""));
     settingSSHA = (SSHAText != null && !SSHAText.equals(""));
+    settingShaUnixCrypt = (ShaUnixCryptText != null && !ShaUnixCryptText.equals(""));
 
-    if (!settingCrypt && !settingWin && !settingMD5 && !settingApacheMD5 && !settingSSHA)
+    if (!settingCrypt && !settingWin && !settingMD5 && !settingApacheMD5 && !settingSSHA && !settingShaUnixCrypt)
       {
 	// clear it!
 
@@ -2010,6 +2153,25 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // "The SSHA hash text passed to setAllHashes() is not a well-formed, OpenLDAP-encoded SSHA-1 hash text."
 	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
 					      ts.l("setAllHashes.ssha_format_error"));
+	  }
+      }
+
+    if (settingShaUnixCrypt)
+      {
+	if (!getFieldDef().isSSHAHashed())
+	  {
+	    // "Server: Error in PasswordDBField.setAllHashes()"
+	    // "Password field not configured to accept SHA Unix Crypt hashed password strings."
+	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+					      ts.l("setShaUnixCryptPass.error_text"));
+	  }
+
+	if (!SSHAText.startsWith("{SSHA}"))
+	  {
+	    // "Server: Error in PasswordDBField.setAllHashes()"
+	    // "The hash text passed to setShaUnixCryptPass(), "{0}", is not a well-formed, SHA Unix Crypt hash text"
+	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+					      ts.l("setShaUnixCryptPass.format_error"));
 	  }
       }
 
@@ -2183,6 +2345,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    sshaHash = SSHAText;
 	  }
+
+	if (settingShaUnixCrypt)
+	  {
+	    shaUnixCrypt = ShaUnixCryptText;
+	  }
       }
 
     return retVal;    
@@ -2309,7 +2476,8 @@ public class PasswordDBField extends DBField implements pass_field {
   private int getHashPrecision()
   {
     if (uncryptedPass != null || md5CryptPass != null ||
-	apacheMd5CryptPass != null || sshaHash != null || ntHash != null)
+	apacheMd5CryptPass != null || sshaHash != null || ntHash != null ||
+	shaUnixCrypt != null)
       {
 	return -1;		// full precision
       }

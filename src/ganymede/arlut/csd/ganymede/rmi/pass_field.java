@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -172,6 +172,31 @@ public interface pass_field extends db_field {
   ReturnVal setSSHAPass(String text) throws RemoteException;
 
   /**
+   * This method is used to set a pre-crypted Sha256Crypt or
+   * Sha512Crypt password for this field.  This method will return an
+   * error code if this password field does not allow storage in
+   * ShaCrypt format.
+   *
+   * The hashText submitted to this method must match one of the
+   * following four forms:
+   *
+   * $5$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   * $5$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   *
+   * $6$&lt;saltstring&gt;$&lt;64 bytes of hash text, base 64 encoded&gt;
+   * $6$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   *
+   * If the round count is specified using the '$rounds=n' syntax, the
+   * higher the round count, the more computational work will be
+   * required to verify passwords against this hash text.
+   *
+   * See http://people.redhat.com/drepper/sha-crypt.html for full
+   * details of the hash format this method is expecting.
+   */
+
+  ReturnVal setShaUnixCryptPass(String hashText) throws RemoteException;
+
+  /**
    * <p>This method is used to force all known hashes into this password
    * field.  Ganymede does no verifications to insure that all of these
    * hashes really match the same password, so caveat emptor.  If any of
@@ -185,7 +210,7 @@ public interface pass_field extends db_field {
    */
 
   public ReturnVal setAllHashes(String crypt, String md5crypt, String apacheMd5crypt,
-				String LANMAN, String NTUnicodeMD4, String sshaCrypt,
+				String LANMAN, String NTUnicodeMD4, String sshaCrypt, String shaUnixCrypt,
 				boolean local, boolean noWizards) throws RemoteException;
 
 }

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -270,7 +270,23 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   boolean apachemd5crypted = false;	// Apache style md5crypt() is not
   boolean winHashed = false;	// Windows NT/Samba hashes are not
   boolean sshaHashed = false;	// SSHA hash is not either
+  boolean shaUnixCrypted = false;	// SHA Unix Crypt is not either
   boolean storePlaintext = false; // nor is plaintext
+
+  /**
+   * If the password field is to use the shaUnixCrypt algorithm, which
+   * variant shall we use?  If useShaUnixCrypted512 is true, we'll use
+   * the SHA512 version, if it is false, we'll use the SHA256 version.
+   */
+
+  boolean useShaUnixCrypted512 = false;
+
+  /**
+   * If the password field is to use the shaUnixCrypt algorithm, how
+   * many rounds shall we specify?
+   */
+
+  int shaUnixCryptRounds = 5000;
 
   // schema editing
 
@@ -420,6 +436,9 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     apachemd5crypted = original.apachemd5crypted;
     winHashed = original.winHashed;
     sshaHashed = original.sshaHashed;
+    shaUnixCrypted = original.shaUnixCrypted;
+    useShaUnixCrypted512 = original.useShaUnixCrypted512;
+    shaUnixCryptRounds = original.shaUnixCryptRounds;
     storePlaintext = original.storePlaintext;
 
     inUseCache = null;
@@ -619,6 +638,13 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	out.writeBoolean(apachemd5crypted);
 	out.writeBoolean(winHashed);
 	out.writeBoolean(sshaHashed);
+
+	// at 2.13 we introduce shaUnixCrypt support
+
+	out.writeBoolean(shaUnixCrypted);
+	out.writeBoolean(useShaUnixCrypted512);
+	out.writeInt(shaUnixCryptRounds);
+
 	out.writeBoolean(storePlaintext);
       }
   }
@@ -896,6 +922,21 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	else
 	  {
 	    sshaHashed = false;
+	  }
+
+	// at 2.13 we introduce shaUnixCrypted
+
+	if (base.store.isAtLeast(2,13))
+	  {
+	    shaUnixCrypted = in.readBoolean();
+	    useShaUnixCrypted512 = in.readBoolean();
+	    shaUnixCryptRounds = in.readInt();
+	  }
+	else
+	  {
+	    shaUnixCrypted = false;
+	    useShaUnixCrypted512 = false;
+	    shaUnixCryptRounds = 5000;
 	  }
 
 	// at 1.10 we introduced storePlaintext
@@ -1227,6 +1268,14 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    xmlOut.startElementIndent("sshaHashed");
 	    xmlOut.endElement("sshaHashed");
+	  }
+
+	if (shaUnixCrypted)
+	  {
+	    xmlOut.startElementIndent("shaUnixCrypted");
+	    xmlOut.attribute("type", useShaUnixCrypted512 ? "512" : "256");
+	    xmlOut.attribute("rounds", java.lang.Integer.toString(shaUnixCryptRounds));
+	    xmlOut.endElement("shaUnixCrypted");
 	  }
 
 	if (storePlaintext)
@@ -1862,6 +1911,9 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     boolean _apachemd5crypted = false;
     boolean _winHashed = false;
     boolean _sshaHashed = false;
+    boolean _shaUnixCrypted = false;
+    boolean _shaUnixCrypt512 = false;
+    int _shaUnixCryptRounds = 5000;
     ReturnVal retVal;
 
     /* -- */
@@ -1935,6 +1987,41 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    else if (child.matches("sshaHashed"))
 	      {
 		_sshaHashed = true;
+	      }
+	    else if (child.matches("shaUnixCrypted"))
+	      {
+		_shaUnixCrypted = true;
+
+		String typeVal = child.getAttrStr("type");
+
+		if (typeVal == null || typeVal.equals("256"))
+		  {
+		    _shaUnixCrypt512 = false;
+		  }
+		else if (typeVal.equals("512"))
+		  {
+		    _shaUnixCrypt512 = true;
+		  }
+		else
+		  {
+		    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+						      ts.l("doPasswordXML.bad_sha_unix_type",
+							   child, root.getTreeString()));
+		  }
+
+		Integer roundCount = child.getAttrInt("rounds");
+
+		if (roundCount != null)
+		  {
+		    _shaUnixCryptRounds = roundCount.intValue();
+
+		    if (_shaUnixCryptRounds < 1000 || _shaUnixCryptRounds > 999999999)
+		      {
+			return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+							  ts.l("doPasswordXML.bad_sha_unix_rounds",
+							       child, root.getTreeString()));
+		      }
+		  }
 	      }
 	    else if (child.matches("plaintext"))
 	      {
@@ -2050,6 +2137,42 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  ts.l("doPasswordXML.bad_ssha_hashed", new Boolean(_sshaHashed),
 					       root.getTreeString(), retVal.getDialogText()));
+      }
+
+    retVal = setShaUnixCrypted(_shaUnixCrypted);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	// "XML"
+	// "fielddef could not set SHA Unix Crypt hashing flag: {0}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doPasswordXML.bad_sha_unix_crypted",
+					       new Boolean(_shaUnixCrypted),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
+      }
+
+    if (_shaUnixCrypted)
+      {
+	retVal = setShaUnixCrypted512(_shaUnixCrypt512);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    // we should already have caught any XML error above,
+	    // here, so I'm not going to bother wrapping the error
+
+	    return retVal;
+	  }
+	
+	retVal = setShaUnixCryptRounds(_shaUnixCryptRounds);
+
+	if (retVal != null && !retVal.didSucceed())
+	  {
+	    // we should already have caught any XML error above,
+	    // here, so I'm not going to bother wrapping the error
+
+	    return retVal;
+	  }
       }
 
     retVal = setPlainText(_plaintext);
@@ -5029,6 +5152,161 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       }
 
     sshaHashed = b;
+
+    return null;
+  }
+
+  /** 
+   * This method returns true if this is a password field that will
+   * store passwords in the SHA Unix Crypt format, specified by Ulrich
+   * Drepper at http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * If passwords are stored in the SHA Unix Crypt format, they will
+   * not be kept in plaintext on disk, unless isPlainText() returns
+   * true.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public boolean isShaUnixCrypted()
+  {
+    return shaUnixCrypted;
+  }
+
+  /**
+   * This method is used to specify that this password field should
+   * store passwords in the SHA Unix Crypt format, specified by Ulrich
+   * Drepper at http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * setShaUnixCrypted() is not mutually exclusive with any other
+   * encryption or plaintext options.
+   *
+   * This method will throw an IllegalArgumentException if this field
+   * definition is not a password type.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public ReturnVal setShaUnixCrypted(boolean b)
+  {    
+    if (!base.store.loading && editor == null)
+      {
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+      }
+
+    if (!isPassword())
+      {
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+      }
+
+    shaUnixCrypted = b;
+
+    return null;
+  }
+
+  /** 
+   * This method returns true if this is a shaUnixCrypted password
+   * field that will store passwords using the SHA512 variant of the
+   * SHA Unix Crypt format, specified by Ulrich Drepper at
+   * http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public boolean isShaUnixCrypted512()
+  {
+    return useShaUnixCrypted512;
+  }
+
+  /**
+   * This method is used to specify that this password field should
+   * store passwords in the SHA512 variant of the SHA Unix Crypt
+   * format, specified by Ulrich Drepper at
+   * http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * This method will throw an IllegalArgumentException if this field
+   * definition is not a ShaUnixCrypt using password type.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public ReturnVal setShaUnixCrypted512(boolean b)
+  {    
+    if (!base.store.loading && editor == null)
+      {
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+      }
+
+    if (!isPassword())
+      {
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+      }
+
+    if (!shaUnixCrypted)
+      {
+	throw new IllegalStateException(ts.l("global.not_shacrypt", this.toString()));
+      }
+
+    useShaUnixCrypted512 = b;
+
+    return null;
+  }
+
+  /** 
+   * This method returns the complexity factor (in number of rounds)
+   * to be applied to password hash text generated in this password
+   * field definition by the SHA Unix Crypt format, specified by
+   * Ulrich Drepper at
+   * http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public int getShaUnixCryptRounds()
+  {
+    return shaUnixCryptRounds;
+  }
+
+  /**
+   * This method is used to specify the complexity factor (in number
+   * of rounds) to be applied to password hash text generated in this
+   * password field definition by the SHA Unix Crypt format, specified
+   * by Ulrich Drepper at
+   * http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * This method will throw an IllegalArgumentException if this field
+   * definition is not a ShaUnixCrypt using password type.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public ReturnVal setShaUnixCryptRounds(int n)
+  {    
+    if (!base.store.loading && editor == null)
+      {
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+      }
+
+    if (!isPassword())
+      {
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+      }
+
+    if (!shaUnixCrypted)
+      {
+	throw new IllegalStateException(ts.l("global.not_shacrypt", this.toString()));
+      }
+
+    if (n < 1000)
+      {
+	n = 1000;
+      }
+    else if (n > 999999999)
+      {
+	n = 999999999;
+      }
+
+    shaUnixCryptRounds = n;
 
     return null;
   }
