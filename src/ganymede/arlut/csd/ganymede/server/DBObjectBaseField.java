@@ -352,6 +352,8 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     field_name = "";
     classname = "";
     comment = "";
+
+    tabName = ts.l("receive.default_tab_name");	 // "General"
     
     field_code = -1;
     field_type = -1;
