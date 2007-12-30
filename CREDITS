@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-July 31, 2006
+January 1, 2007
 CREDITS
 
 Last Revision Changed: $Rev$
@@ -9,10 +9,11 @@ SVN URL: $HeadURL$
 
 ---------------------------------------------
 
-Ganymede has been under development for 10 years now, in both planning
-and execution.  The work has primarily been performed in the Computer
-Science Division of The Applied Research Laboratories, The University
-of Texas at Austin, with support from CSD and ARL management.
+Ganymede has been under development for over 10 years now, in both
+planning and execution.  The work has primarily been performed in the
+Information Technology Services Division of the Applied Research
+Laboratories at the University of Texas at Austin, with support from
+division and laboratory management.
 
 The development of Ganymede has benefited from the direct
 development contributions of the following individuals:
@@ -94,7 +95,7 @@ for data entry, back in the Java 1.0 days.
 
 --
 
- Erik Grostic, butcher@auschron.com
+ Erik Grostic, butcher@mail.utexas.edu
 
 Erik worked on Ganymede from mid 1997 through his departure
 from the lab in December of 1997.  Erik developed the GUI code for the
@@ -104,12 +105,12 @@ client into fruition.
 ------
 
 Within ARL, Gil Kloepfer provided design assistance on the networking
-issues that Ganymede is going to need to address as the lab moves into
-the 21st century.  Jay Scott contributed work on a new version of the
-GASH schema's build kit (which is not yet included with the Ganymede
-distribution).  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
-Gramann, Andrew Helyer, Richard Mach, and others made helpful reports
-on gaps and problems with Ganymede.
+issues that Ganymede was designed to address as the lab moved into the
+21st century.  Jay Scott contributed work on the build script
+environment used to propagate data from Ganymede into the laboratory's
+information systems.  GASH admins Glen Kronschnabl, Carrie Woodworth,
+Rich Gramann, Andrew Helyer, Richard Mach, Randy Zagar, and many
+others made helpful reports on gaps and problems with Ganymede.
 
 John Knutson has provided bug reports and code contributions in the
 course of evaluating the Ganymede code for use on an SGL
@@ -153,7 +154,7 @@ Gaurav Bhargava, gaurav.bhargava@villanova.edu - Bug reports, schema development
 Martin Vogt <vogt@itwm.uni-kl.de> - bug reports
 Steve Lemons, steve.lemons@arrisi.com - bug reports
 Fredrik.A.Bergman@ericsson.com - many excellect bug reports for Ganymede 2.0
-Stefan Bier <bier@fg-networking.de> - bug reports
+Stefan Bier <bier@fg-networking.de> - bug reports, patches, German localization
 
 --
 
@@ -177,14 +178,10 @@ been significantly modified, to provide more convenient use in a
 threaded context, and to provide rudimentary MIME file attachment
 support.
 
-Some of the MD5 classes used in the server were written by Santeri
-Paavolainen, and are included in Ganymede under the terms of
-the GNU General Public License.  See
-http://www.cs.hut.fi/~santtu/java/ for more information.  The MD5Crypt
-class used to support FreeBSD-style md5 passwords was originally
-written by Poul-Henning Kamp (phk@login.dknet.dk) in C, and was
-translated into Java by Jonathan Abbey.. the following license
-information was placed on this code:
+The MD5Crypt class used to support FreeBSD-style md5 passwords was
+originally written by Poul-Henning Kamp (phk@login.dknet.dk) in C, and
+was translated into Java by Jonathan Abbey.. the following license
+information was placed on the original code:
 
    ----------------------------------------------------------------------------
    "THE BEER-WARE LICENSE" (Revision 42):
@@ -193,14 +190,20 @@ information was placed on this code:
    this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
    ----------------------------------------------------------------------------
 
-The MD4 classes used to support Windows NT-compatible cryptographic
-hashes were written by Harry Mantakos, harry@meretrix.com.  The MD4
-classes came from Harry's JOTP project, which you can link to at
-http://www.cs.umd.edu/users/harry/jotp/. The actual "LANMAN" and "NT
-MD4 Unicode" hash support code was written by Andrew Tridgell and
-released under the GPL as part of the Samba source code, and was
-ported to Java by Jonathan Abbey, using Harry's MD4 code to perform
-the fundamental cryptographic hash function.
+The MD4 class used to support Windows NT-compatible cryptographic
+hashes was derived from MD classes written by Harry Mantakos,
+harry@meretrix.com.  The MD classes came from Harry's JOTP project,
+which you can link to at http://www.cs.umd.edu/users/harry/jotp/. The
+actual "LANMAN" and "NT MD4 Unicode" hash support code was written by
+Andrew Tridgell and released under the GPL as part of the Samba source
+code, and was ported to Java by Jonathan Abbey, using Harry's MD4 code
+to perform the fundamental cryptographic hash function.
+
+The Unix SHA Crypt algorithms embodied in the
+arlut.csd.crypto.Sha256Crypt and arlut.csd.crypto.Sha512Crypt classes
+come from Ulrich Drepper, who released the algorithms into the public
+domain.  See http://people.redhat.com/drepper/SHA-crypt.html for a
+discussion of details.
 
 The XML SAX reference classes and interfaces used by the Ganymede
 server's XML parsing routines were written and released into the
@@ -220,10 +223,6 @@ and DCE-compliant globally unique identifiers for our Macintosh LDAP
 synchronization was written by Tatu Saloranta, tatu.saloranta@iki.fi,
 and is included in Ganymede under the Lesser General Public License.
 See http://www.doomdark.org/doomdark/proj/jug/ for more information.
-
-The Java implementation of the SHA-1 hashing algorithm (here
-arlut.csd.crypto.SHA1) was written by Chuck McManis
-(cmcmanis@netcom.com) and placed into the public domain.
 
 The Java Base 64 encoder/decoder (here arlut.csd.crypto.Base64) was
 written by Robert Harder (rob@iharder.net) and placed into the public
