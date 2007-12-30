@@ -448,7 +448,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		  }
 	      }
 
-	    if (field_present && !template.isBuiltIn() && !(id == SchemaConstants.UserBase && fieldID == SchemaConstants.UserAdminPersonae))
+	    if (field_present && !template.isBuiltIn() &&
+		(id != SchemaConstants.UserBase || fieldID != SchemaConstants.UserAdminPersonae))
 	      {
 		if (oldTab == null)
 		  {
