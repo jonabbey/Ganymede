@@ -321,7 +321,7 @@ refresh the jar files.
 
 
   <target name="signjars" if="do.signjars">
-    <signjar alias="${priv_key.alias}" storepass="${priv_key.storepass}" keystore="${priv_key.keystore}">
+    <signjar alias="${priv_key.alias}" storepass="${priv_key.storepass}" keystore="${priv_key.keystore}" keypass="${priv_key.storepass}">
      <fileset dir="." includes="${build.lib}/ganymede.jar, ${build.lib}/ganymedeAdmin.jar"/>
     </signjar>
   </target>
