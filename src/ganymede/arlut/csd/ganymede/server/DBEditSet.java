@@ -221,7 +221,7 @@ public class DBEditSet {
    *
    * <p>Note: This interleave check logic is currently inactivated in
    * the code.  See the {@link
-   * arlut.csd.ganymede.server.DBEditObject.checkpoint(java.lang.String)}
+   * arlut.csd.ganymede.server.DBEditSet#checkpoint(java.lang.String)}
    * method source code, below, for details.</p>
    */
 

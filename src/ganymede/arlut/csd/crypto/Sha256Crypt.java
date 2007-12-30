@@ -77,7 +77,7 @@ import java.security.MessageDigest;
 
 /**
  * This class defines a method, {@link
- * Sha256Crypt#Sha256_crypt(java.lang.String, java.lang.String)
+ * Sha256Crypt#Sha256_crypt(java.lang.String, java.lang.String, int)
  * Sha256_crypt()}, which takes a password and a salt string and
  * generates a Sha256 encrypted password entry.
  *

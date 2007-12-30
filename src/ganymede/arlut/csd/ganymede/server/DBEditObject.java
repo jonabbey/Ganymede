@@ -2183,7 +2183,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * to represent the default object list caches.
    *
    * See also the {@link
-   * arlut.csd.ganymede.server.choiceListHasExceptions(arlut.csd.ganymede.server.DBField)}
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)}
    * hook, which controls whether or not the default logic will
    * encourage the client to cache a given InvidDBField's choice list.
    *

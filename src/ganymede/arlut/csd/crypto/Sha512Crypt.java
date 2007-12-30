@@ -77,7 +77,7 @@ import java.security.MessageDigest;
 
 /**
  * This class defines a method, {@link
- * Sha512Crypt#Sha512_crypt(java.lang.String, java.lang.String, integer)
+ * Sha512Crypt#Sha512_crypt(java.lang.String, java.lang.String, int)
  * Sha512_crypt()}, which takes a password and a salt string and
  * generates a Sha512 encrypted password entry.
  *

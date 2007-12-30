@@ -399,17 +399,16 @@ public class QueryResultContainer implements List, Serializable {
 
   /**
    * <p>This method can be called on the client to obtain a {@link
-   * java.util.Vector Vector} of Vectors, each of which contains
+   * java.util.List List} of Vectors, each of which contains
    * the data values returned for each object, in field order matching
    * the field names and types returned by {@link arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()}
-   * and {@link arlut.csd.ganymede.common.DumpResult#getTypes getTypes()}.</p>
+   * and {@link arlut.csd.ganymede.common.DumpResult#getHeaderObjects getHeaderObjects()}.</p>
    */
 
   public synchronized List getRows()
   {
     return rows;
   }
-
 
   /**
    * <p>This method can be called on the client to obtain a {@link

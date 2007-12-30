@@ -71,15 +71,16 @@ import javax.swing.text.PlainDocument;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>JentryField serves as an abstract base class for all GUI fields in the
- * client that use textfields.  All text entry fields in the Ganymede client
- * are done using JentryField.  Among other responsibilities, JentryField is
- * responsible for dispatching a callback event when the user tabs out of
- * a field he has been entering text into.</p>
+ * <p>JentryField serves as an abstract base class for all GUI fields
+ * in the client that use textfields.  All text entry fields in the
+ * Ganymede client are done using JentryField.  Among other
+ * responsibilities, JentryField is responsible for dispatching a
+ * callback event when the user tabs out of a field he has been
+ * entering text into.</p>
  *
- * <p>In combination with the {@link arlut.csd.JDataComponent.JentryDocument JentryDocument}
- * class, JentryField makes sure that the user can't type invalid characters,
- * nor too many characters, providing immediate feedback if he tries.</p>
+ * <p>JentryField includes logic to make sure that the user can't type
+ * invalid characters, nor too many characters, providing immediate
+ * feedback if he tries.</p>
  *
  * <p>See this subclasses of this class for actual usable classes.</p>
  */
@@ -94,12 +95,10 @@ abstract public class JentryField extends JTextField implements FocusListener, A
 
   /**
    * True if this JentryField is in the process of programmatically
-   * loading text.  If it is, our {@link
-   * arlut.csd.util.JDataComponent.JentryDocument} will not bother
-   * validating input characters against our filters.  Normally, of
-   * course, the JentryDocument automatically filters out any
-   * character-inserting keystrokes that the server has requested we
-   * filter.
+   * loading text.  If it is, we will not bother validating input
+   * characters against our filters.  Normally, of course, the
+   * JentryDocument automatically filters out any character-inserting
+   * keystrokes that the server has requested we filter.
    *
    * Any JentryField subclasses that provide programmatic data setting
    * methods should set this variable to true during the course of the

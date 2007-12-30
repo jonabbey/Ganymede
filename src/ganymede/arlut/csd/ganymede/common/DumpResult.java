@@ -259,7 +259,7 @@ public class DumpResult implements java.io.Serializable, List {
    * java.util.Vector Vector} of Vectors, each of which contains
    * the data values returned for each object, in field order matching
    * the field names and types returned by {@link arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()}
-   * and {@link arlut.csd.ganymede.common.DumpResult#getTypes getTypes()}.
+   * and {@link arlut.csd.ganymede.common.DumpResult#getHeaderObjects getHeaderObjects()}.
    *
    * Note: The Vector returned is "live", and should not be modified
    * by the caller, at the risk of surprising behavior.
@@ -278,8 +278,8 @@ public class DumpResult implements java.io.Serializable, List {
    * the object at row <i>row</i>, in field order matching the field
    * names and types returned by {@link
    * arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()} and
-   * {@link arlut.csd.ganymede.common.DumpResult#getTypes
-   * getTypes()}.
+   * {@link arlut.csd.ganymede.common.DumpResult#getHeaderObjects
+   * getHeaderObjects()}.
    */
   
   public Vector getFieldRow(int rowNumber)
