@@ -1166,7 +1166,8 @@ public class xmlfield implements FieldType {
 
 	    result = field.setAllHashes(xp.crypttext, xp.md5text,
 					xp.apachemd5text, xp.lanman,
-					xp.ntmd4, xp.sshatext, false, false);
+					xp.ntmd4, xp.sshatext, xp.shaunixcrypt,
+					false, false);
 
 	    return result;
 	  }
@@ -2204,6 +2205,7 @@ class xPassword {
   String lanman;
   String ntmd4;
   String sshatext;
+  String shaunixcrypt;
 
   /* -- */
 
@@ -2227,9 +2229,10 @@ class xPassword {
     lanman = item.getAttrStr("lanman");
     ntmd4 = item.getAttrStr("ntmd4");
     sshatext = item.getAttrStr("ssha");
+    shaunixcrypt = item.getAttrStr("shaUnixCrypt");
   }
 
-  public xPassword(String plaintext, String crypttext, String md5text, String apachemd5text, String lanman, String ntmd4, String sshatext)
+  public xPassword(String plaintext, String crypttext, String md5text, String apachemd5text, String lanman, String ntmd4, String sshatext, String shaunixcrypt)
   {
     this.plaintext = plaintext;
     this.crypttext = crypttext;
@@ -2238,6 +2241,7 @@ class xPassword {
     this.lanman = lanman;
     this.ntmd4 = ntmd4;
     this.sshatext = sshatext;
+    this.shaunixcrypt = shaunixcrypt;
   }
 
   public String toString()
@@ -2294,6 +2298,13 @@ class xPassword {
       {
 	result.append(" ssha=\"");
 	result.append(sshatext);
+	result.append("\"");
+      }
+
+    if (shaunixcrypt != null)
+      {
+	result.append(" shaUnixCrypt=\"");
+	result.append(shaunixcrypt);
 	result.append("\"");
       }
 
