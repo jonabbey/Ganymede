@@ -30,21 +30,21 @@ Subversion and build script work.  Answers e-mail.
 
 --
 
- Deepak Giridharagopal, deepak@arlut.utexas.edu
+ Deepak Giridharagopal
 
-Deepak has made extensive contributions to the development of Ganymede
-2.0, including transitioning Ganymede's build system from old Perl
-scripts to using Ant.  Deepak also developed the Jython integration,
-and worked on the new Sync Channel software, both in the Ganymede
-client and especially in the wonder Python Sync Channel servicing
-code.
+While working at ARL, Deepak made extensive contributions to the
+development of Ganymede 2.0, including transitioning Ganymede's build
+system from old Perl scripts to using Ant.  Deepak also developed the
+Jython integration, and worked on the new Sync Channel software, both
+in the Ganymede client and especially in the wonder Python Sync
+Channel servicing code.
 
 Deepak designed and implemented the Ganymede 2.0 Query Language, using
 Terrance Parr's splendiferously good ANTLR tool.
 
 --
 
- Dan Scott, dscott@arlut.utexas.edu
+ Dan Scott
 
 Dan originated the GASH project, providing strategic vision and
 architectural design to solve the essential problem of shared group
@@ -56,7 +56,7 @@ without his support.
 
 --
 
- Mike Mulvaney, mike@mulvaney.com
+ Mike Mulvaney
 
 Mike worked on Ganymede during his year and a half at the lab, from
 February of 1997 through September of 1998, before moving to the
@@ -68,7 +68,7 @@ not for Mike.
 
 --
 
- Brian O'Mara, bom@alumni.utexas.net
+ Brian O'Mara
 
 Brian worked on Ganymede during his tenure as a student employee at
 ARL from February 1998 through August of 2000.  Brian created custom
@@ -82,20 +82,20 @@ convert BIND files into an XML representation and back again.
 
 --
 
- Navin Manohar, navin.manohar@ac.com
+ Navin Manohar
 
-Navin worked on Ganymede from its inception in late 1995
-through his departure from the lab in April of 1997.  Navin
-contributed to initial architecture design decisions during this time,
-as well as the initial development of the client, including the basic
-framework within which the client was developed.  He developed the
-excellent calendar GUI component that is used in the client, as well
-as the more unobtrusive but vital GUI components that the client uses
-for data entry, back in the Java 1.0 days.
+Navin worked on Ganymede from its inception in late 1995 through his
+departure from the lab in April of 1997.  Navin contributed to initial
+architecture design decisions during this time, as well as the initial
+development of the client, including the basic framework within which
+the client was developed.  He developed the excellent calendar GUI
+component that is used in the client, as well as the more unobtrusive
+but vital GUI components that the client used for data entry, way back
+in the Java 1.0 days.
 
 --
 
- Erik Grostic, butcher@mail.utexas.edu
+ Erik Grostic
 
 Erik worked on Ganymede from mid 1997 through his departure
 from the lab in December of 1997.  Erik developed the GUI code for the
@@ -127,34 +127,34 @@ Ganymede into NIS and DNS.
 Outside ARL, we have gotten very helpful bug reports and feedback
 from:
 
-Pug Bainter, pug@pug.net - lots of really good early bug reports
-Martin Schneider, martin@ira.uka.de - server customization bug reports
-Michael McEniry, mmceniry@itsc.uah.edu - linux localhost patch
-Christoph Litauer, litauer@uni-koblenz.de - xmlclient testing
-Curtis King, curtis.king@cul.ca - detailed bug reports
-Doug Floyd, dfloyd@io.com - bug reports and AIX testing
-Matt Knopp, mhat@vorlon.com - FreeBSD testing, Sesame Chicken
-Mike Clay, mclay@weareb.org - FreeBSD testing
-Stephen L. Johnson, sjohnson@godzilla.monsters.org - bug reports
-Matt Bush, xomox@netlag.com - beta testing, bug reports
-Jher, jher@fnord.com - beta testing
-Sheilagh O'Hare, martini@fc.net - design brilliance
-Frederick Dickey, frederick.j.dickey@boeing.com - packaging bug report
-Lewis Muhlenkamp, lewism@tt.comm.mot.com - packaging, client bug reports
-Nikola Nedeljkovic, nikola@carbonix.iam.tu-clausthal.de - packaging reports
-Andy Johnson, andyjohnson@engineer.com - build script bug reports
-Charles Adams, charles.adams@central.sun.com - bug reports, debugging
-Darrell Tippe, Darrell.Tippe@atcoitek.com - bug reports
-Glen Joseph, gjoseph@us.ibm.com - installServer bug report
-Chris McCraw, fool@dfw.net - bugzilla testing
-Ido Dubrawsky, ido@globeset.com - testing
-Michael Houle, michael.houle@atcoitek.com - many bug reports
-Miklos Muller, mmuller@lbcons.net - many wonderful bug reports for Ganymede 1.0
-Gaurav Bhargava, gaurav.bhargava@villanova.edu - Bug reports, schema development
-Martin Vogt <vogt@itwm.uni-kl.de> - bug reports
-Steve Lemons, steve.lemons@arrisi.com - bug reports
+Pug Bainter - lots of really good early bug reports
+Martin Schneider - server customization bug reports
+Michael McEniry - linux localhost patch
+Christoph Litauer - xmlclient testing
+Curtis King - detailed bug reports
+Doug Floyd - bug reports and AIX testing
+Matt Knopp - Early FreeBSD testing, Sesame Chicken
+Mike Clay - Early FreeBSD testing
+Stephen L. Johnson - bug reports
+Matt Bush - beta testing, bug reports
+Dan "Jher" Harris - beta testing
+Sheilagh O'Hare - design brilliance
+Frederick Dickey - packaging bug report
+Lewis Muhlenkamp - packaging, client bug reports
+Nikola Nedeljkovic - packaging reports
+Andy Johnson - build script bug reports
+Charles Adams - bug reports, debugging
+Darrell Tippe - bug reports
+Glen Joseph - installServer bug report
+Chris McCraw - bugzilla testing
+Ido Dubrawsky - testing
+Michael Houle - many bug reports
+Miklos Muller - many wonderful bug reports for Ganymede 1.0
+Gaurav Bhargava - Bug reports, schema development
+Martin Vogt - bug reports
+Steve Lemons - bug reports
 Fredrik.A.Bergman@ericsson.com - many excellect bug reports for Ganymede 2.0
-Stefan Bier <bier@fg-networking.de> - bug reports, patches, German localization
+Stefan Bier - Ganymede 2.0 bug reports, patches, German localization
 
 --
 
