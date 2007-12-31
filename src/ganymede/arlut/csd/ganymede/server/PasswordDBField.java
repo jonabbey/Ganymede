@@ -716,7 +716,14 @@ public class PasswordDBField extends DBField implements pass_field {
     dump.startElement("password");
     
     if (uncryptedPass != null && 
-	(dump.doDumpPlaintext() || (md5CryptPass == null && cryptedPass == null)))
+	(dump.doDumpPlaintext() ||
+	 (cryptedPass == null &&
+	  md5CryptPass == null &&
+	  apacheMd5CryptPass == null &&
+	  lanHash == null &&
+	  ntHash == null &&
+	  sshaHash == null &&
+	  shaUnixCrypt == null)))
       {
 	dump.attribute("plaintext", uncryptedPass);
       }
