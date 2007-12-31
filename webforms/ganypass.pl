@@ -30,9 +30,9 @@ if (!-f $xmlclient) {
 
 $tmpdir = "/tmp";
 
-#If this script is run from a different location from where the
-#image files for the HTML result pages are located, the variable
-#$web_loc must be changed to an HTTP path to the image files
+# If this script is run from a different location from where the
+# image files for the HTML result pages are located, the variable
+# $web_loc must be changed to an HTTP path to the image files
 
 $web_loc = ".";
 
@@ -64,10 +64,8 @@ if ($query->param) {
     &print_tail;
 
     print $query->end_html;
-}
 
-else
-{
+} else {
 
   print $query->header;
   &print_default;
@@ -110,12 +108,10 @@ sub make_xml
   <ganymede major="1" minor="0" persona="$user" password="$old_pass">
     <ganydata>
       <object type="User" id="$user">
-	<Password><password plaintext="$new_pass"/>
-	  </Password>
+	<Password><password plaintext="$new_pass"/></Password>
       </object>
    </ganydata>
   </ganymede>
-
 WRITEXML
 
   close(XMLF);
@@ -133,43 +129,66 @@ WRITEXML
 sub print_default {
 
   print <<ENDDEFAULT;
-<HTML>
-  <HEAD>
-    <TITLE>Ganymede Password Changer</TITLE>
-  </HEAD>
-  <BODY BGCOLOR="#FFFFFF">
-    <table border=0>
+<html>
+  <head>
+    <title>Ganymede Password Changer</title>
+  </head>
+  <body bgcolor="#FFFFFF">
+    <table border="0">
       <tr>
-	<td align=left>
-	  <A HREF="http://www.arlut.utexas.edu/gash2/"><img src="$web_loc/ganymede_title2_sm.gif" border=0></a>
+	<td align="left">
+	  <a href="http://www.arlut.utexas.edu/gash2/"><img src="$web_loc/ganymede_title2_sm.gif" border="0"></a>
 	</td>
-	<td width="100%" align=center>
+	<td width="100%" align="center">
 	  <h1>Ganymede Password Changing Utility</h1>
 	</td>
-	<td align=right>
-	  <a href="/"><img src="$web_loc/arlbw.jpg" border=0></a>
+<!--
+
+If you want a link to your home page, uncomment this and tweak
+accordingly.
+
+	<td align="right">
+	  <a href="/"><img src="$web_loc/arlbw.jpg" border="0"></a>
 	</td>
+-->
+
       </tr>
 
       <tr>
-	<td align=center>
-	  <A HREF="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></A>
+	<td align="center">
+	  <a href="http://www.arlut.utexas.edu/gash2/"><small>[Ganymede Home]</small></a>
 	</td>
-	<td width="100%" align=center>
-	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a> to go directly to the Ganymede login page]</small>
+	<td width="100%" align="center">
+	  <small>[Click <a href="$web_loc/index.html" target="_top">here</a>
+                 to go directly to the Ganymede login page]</small>
 	</td>
-	<td align=center>
+
+<!--
+
+If you want a link to your home page, uncomment this and tweak
+accordingly.
+
+	<td align="center">
 	  <a href="http://www.arlut.utexas.edu/"><small>[ARL:UT Home]</small></a>
 	</td>
+-->
+
       </tr>
 </table>
 
-    <hr noshade>
+    <hr noshade />
 <center>
-    <table border=0 width="60%">
+    <table border="0" width="60%">
 <tr>
 
 <td align="center">
+
+<!--
+
+You need to change this as well, of course
+
+-->
+
 <p>This form changes your user password for Ganymede and all network
 services managed by Ganymede at ARL:UT.</p>
 
@@ -181,44 +200,44 @@ notifying you of the success of your password change request.</p>
     </center>
 
     <center>
-      <FORM METHOD="POST" ACTION="ganypass.pl">
+      <form method="post" action="ganypass.pl">
 	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
 	  <tr bgcolor="#663366">
-	    <td colspan=2 align=center>
-	      <big><font color=ffffcc>Ganymede Password Changer</font></big>
+	    <td colspan="2" align="center">
+	      <big><font color="#ffffcc">Ganymede Password Changer</font></big>
 	    </td>
 	  </tr>
 
-	  <tr>	
-	    <td align=right><b>Username?</b></td>
-	    <td><INPUT TYPE="text" NAME="user"></td>
+	  <tr>
+	    <td align="right"><b>Username?</b></td>
+	    <td><input type="text" name="user"></td>
 	  </tr>
 
 	  <tr>
-	    <td align=right><b>Old Password?</b></td>
-	    <td><INPUT TYPE="password" NAME="old_pass"></td>
+	    <td align="right"><b>Old Password?</b></td>
+	    <td><input type="password" name="old_pass"></td>
 	  </tr>
 
 	  <tr>
-	    <td align=right><b>New Password?</b></td>
-	    <td><INPUT TYPE="password" NAME="new_pass"></td>
+	    <td align="right"><b>New Password?</b></td>
+	    <td><input type="password" name="new_pass"></td>
 	  </tr>
 
 	  <tr>
-	    <td align=right><b>Verify New Password</b></td>
-	    <td><INPUT TYPE="password" NAME="verify"></td>
+	    <td align="right"><b>Verify New Password</b></td>
+	    <td><input type="password" name="verify"></td>
 	  </tr>
 
 	  <tr>
-	    <td colspan=2 align=center><INPUT TYPE=submit VALUE=SUBMIT></td>
+	    <td colspan="2" align="center"><input type="submit" value="submit"></td>
 	  </tr>
 
-	  <tr bgcolor=663366>
-	    <td colspan=2>&nbsp;</td>
+	  <tr bgcolor="#663366">
+	    <td colspan="2">&nbsp;</td>
 	  </tr>
 
 	</table>
-      </FORM>
+      </form>
     </center>
 
 ENDDEFAULT
@@ -388,7 +407,7 @@ make a change in Ganymede on your behalf.</p></tr>
 	    </td>
 	  </tr>
 
-	  <tr>	
+	  <tr>
 	    <td align=right><b>Username?</b></td>
 	    <td><INPUT TYPE="text" NAME="user" VALUE="$user"></td>
 	  </tr>
@@ -483,7 +502,7 @@ consistently.  Please try again.</tr>
 	    </td>
 	  </tr>
 
-	  <tr>	
+	  <tr>
 	    <td align=right><b>Username?</b></td>
 	    <td><INPUT TYPE="text" NAME="user" VALUE="$user"></td>
 	  </tr>
