@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -752,6 +752,76 @@ public interface BaseField extends Remote {
    */
 
   public ReturnVal setSSHAHashed(boolean b) throws RemoteException;
+
+  /** 
+   * This method returns true if this is a password field that will
+   * store passwords in the SHA Unix Crypt format, specified by Ulrich
+   * Drepper at http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * If passwords are stored in the SHA Unix Crypt format, they will
+   * not be kept in plaintext on disk, unless isPlainText() returns
+   * true.
+   */
+
+  public boolean isShaUnixCrypted() throws RemoteException;
+
+  /**
+   * This method is used to specify that this password field should
+   * store passwords in the SHA Unix Crypt format, specified by Ulrich
+   * Drepper at http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * setShaUnixCrypted() is not mutually exclusive with any other
+   * encryption or plaintext options.
+   *
+   * This method will throw an IllegalArgumentException if this field
+   * definition is not a password type.
+   */
+
+  public ReturnVal setShaUnixCrypted(boolean b) throws RemoteException;
+
+  /** 
+   * This method returns true if this is a shaUnixCrypted password
+   * field that will store passwords using the SHA512 variant of the
+   * SHA Unix Crypt format, specified by Ulrich Drepper at
+   * http://people.redhat.com/drepper/sha-crypt.html.
+   */
+
+  public boolean isShaUnixCrypted512() throws RemoteException;
+
+  /**
+   * This method is used to specify that this password field should
+   * store passwords in the SHA512 variant of the SHA Unix Crypt
+   * format, specified by Ulrich Drepper at
+   * http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * This method will throw an IllegalArgumentException if this field
+   * definition is not a ShaUnixCrypt using password type.
+   */
+
+  public ReturnVal setShaUnixCrypted512(boolean b) throws RemoteException;
+
+  /** 
+   * This method returns the complexity factor (in number of rounds)
+   * to be applied to password hash text generated in this password
+   * field definition by the SHA Unix Crypt format, specified by
+   * Ulrich Drepper at
+   * http://people.redhat.com/drepper/sha-crypt.html.
+   */
+
+  public int getShaUnixCryptRounds() throws RemoteException;
+
+  /**
+   * This method is used to specify the complexity factor (in number
+   * of rounds) to be applied to password hash text generated in this
+   * password field definition by the SHA Unix Crypt format, specified
+   * by Ulrich Drepper at
+   * http://people.redhat.com/drepper/sha-crypt.html.
+   *
+   * This method will throw an IllegalArgumentException if this field
+   * definition is not a ShaUnixCrypt using password type.
+   */
+
+  public ReturnVal setShaUnixCryptRounds(int n) throws RemoteException;
 
   /**
    * <p>This method returns true if this is a password field that

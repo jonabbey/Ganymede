@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -139,7 +139,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     idN,			// all
     maxArrayN,			// all
     minLengthN,			// string
-    maxLengthN;			// string
+    maxLengthN,			// string
+    shaUnixCryptRoundsN;	// password
 
   JcheckboxField
     vectorCF,			// invid, string, ip
@@ -150,11 +151,13 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     apachemd5cryptedCF,		// password
     winHashcryptedCF,		// password
     sshaHashcryptedCF,		// password
+    shaUnixCryptedCF,		// password
     plainTextCF,		// password
     multiLineCF;		// string
 
   JComboBox
     typeC,			// all
+    shaUnixCryptTypeC,		// password
     namespaceC,			// string, numeric, ip
     targetC,			// invid
     fieldC;			// invid
@@ -254,6 +257,17 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     sshaHashcryptedCF = new JcheckboxField(null, false, true);
     sshaHashcryptedCF.setCallback(this);
 
+    shaUnixCryptedCF = new JcheckboxField(null, false, true);
+    shaUnixCryptedCF.setCallback(this);
+
+    shaUnixCryptTypeC = new JComboBox();
+    shaUnixCryptTypeC.addItem("SHA256");
+    shaUnixCryptTypeC.addItem("SHA512");
+    shaUnixCryptTypeC.addItemListener(this);
+
+    shaUnixCryptRoundsN = new JnumberField(20, true, false, 1000, 999999999);
+    shaUnixCryptRoundsN.setCallback(this);
+
     plainTextCF = new JcheckboxField(null, false, true);
     plainTextCF.setCallback(this);
 
@@ -316,6 +330,9 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel.addFillRow("Apache-style MD5 Crypted:", apachemd5cryptedCF);
     editPanel.addFillRow("Windows/Samba Crypted:", winHashcryptedCF);
     editPanel.addFillRow("SSHA Crypted:", sshaHashcryptedCF);
+    editPanel.addFillRow("SHA Unix Crypted:", shaUnixCryptedCF);
+    editPanel.addFillRow("SHA Unix Crypt Variant:", shaUnixCryptTypeC);
+    editPanel.addFillRow("SHA Unix Crypt Rounds:", shaUnixCryptRoundsN);
     editPanel.addFillRow("Store PlainText:", plainTextCF);
     editPanel.addFillRow("MultiLine Field:", multiLineCF);
     editPanel.addFillRow("Minimum String Size:", minLengthN);
@@ -392,6 +409,9 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	editPanel.setRowVisible(apachemd5cryptedCF, true);
 	editPanel.setRowVisible(winHashcryptedCF, true);
 	editPanel.setRowVisible(sshaHashcryptedCF, true);
+	editPanel.setRowVisible(shaUnixCryptedCF, true);
+	editPanel.setRowVisible(shaUnixCryptTypeC, true);
+	editPanel.setRowVisible(shaUnixCryptRoundsN, true);
 	editPanel.setRowVisible(plainTextCF, true);
       }
     else
@@ -401,6 +421,9 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	editPanel.setRowVisible(apachemd5cryptedCF, false);
 	editPanel.setRowVisible(winHashcryptedCF, false);
 	editPanel.setRowVisible(sshaHashcryptedCF, false);
+	editPanel.setRowVisible(shaUnixCryptedCF, false);
+	editPanel.setRowVisible(shaUnixCryptTypeC, false);
+	editPanel.setRowVisible(shaUnixCryptRoundsN, false);
 	editPanel.setRowVisible(plainTextCF, false);
       }
 
@@ -425,6 +448,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel.setRowVisible(minLengthN, stringShowing || passwordShowing);
     editPanel.setRowVisible(maxLengthN, stringShowing || passwordShowing);
     editPanel.setRowVisible(namespaceC, stringShowing || numericShowing || ipShowing);
+    editPanel.setRowVisible(shaUnixCryptTypeC, passwordShowing && shaUnixCryptedCF.isSelected());
+    editPanel.setRowVisible(shaUnixCryptRoundsN, passwordShowing && shaUnixCryptedCF.isSelected());
 
     if (referenceShowing)
       {
@@ -1044,6 +1069,22 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    apachemd5cryptedCF.setValue(fieldDef.isApacheMD5Crypted());
 	    winHashcryptedCF.setValue(fieldDef.isWinHashed());
 	    sshaHashcryptedCF.setValue(fieldDef.isSSHAHashed());
+	    shaUnixCryptedCF.setValue(fieldDef.isShaUnixCrypted());
+
+	    if (shaUnixCryptedCF.isSelected())
+	      {
+		if (fieldDef.isShaUnixCrypted512())
+		  {
+		    shaUnixCryptTypeC.getModel().setSelectedItem("SHA512");
+		  }
+		else
+		  {
+		    shaUnixCryptTypeC.getModel().setSelectedItem("SHA256");
+		  }
+
+		shaUnixCryptRoundsN.setValue(fieldDef.getShaUnixCryptRounds());
+	      }
+
 	    plainTextCF.setValue(fieldDef.isPlainText());
 
 	    // if a password is not crypted, it *must* keep
@@ -1367,6 +1408,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	apachemd5cryptedCF.setEnabled(true);
 	winHashcryptedCF.setEnabled(true);
 	sshaHashcryptedCF.setEnabled(true);
+	shaUnixCryptedCF.setEnabled(true);
 
 	if (passwordShowing)
 	  {
@@ -1375,7 +1417,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
 		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		  sshaHashcryptedCF.isSelected())
+		  sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected())
 		&& plainTextCF.isSelected())
 	      {
 		plainTextCF.setEnabled(false);
@@ -1673,7 +1715,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		
 		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
 		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
-		    !sshaHashcryptedCF.isSelected()
+		    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
 		    && !plainTextCF.isSelected())
 		  {
 		    plainTextCF.setValue(true);
@@ -1681,7 +1723,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
 		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		      sshaHashcryptedCF.isSelected()))
+		      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
 		  {
 		    plainTextCF.setEnabled(false);
 		  }
@@ -1709,13 +1751,14 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
 		    && !sshaHashcryptedCF.isSelected()
+		    && !shaUnixCryptedCF.isSelected()
 		    && !plainTextCF.isSelected())
 		  {
 		    plainTextCF.setValue(true);
 		  }
 
 		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		      sshaHashcryptedCF.isSelected()))
+		      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
 		  {
 		    plainTextCF.setEnabled(false);
 		  }
@@ -1743,7 +1786,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		
 		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
 		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
-		    !sshaHashcryptedCF.isSelected()
+		    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
 		    && !plainTextCF.isSelected())
 		  {
 		    plainTextCF.setValue(true);
@@ -1751,7 +1794,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		
 		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
 		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		      sshaHashcryptedCF.isSelected()))
+		      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
 		  {
 		    plainTextCF.setEnabled(false);
 		  }
@@ -1834,6 +1877,51 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	      {
 		refreshFieldEdit(false);
 	      }
+	  }
+	else if (comp == shaUnixCryptedCF)
+	  {
+	    if (debug)
+	      {
+		System.out.println("shaUnixCryptedCF");
+	      }
+
+	    if (handleReturnVal(fieldDef.setShaUnixCrypted((shaUnixCryptedCF.isSelected()))))
+	      {
+		// a password field has to have plaintext stored if it
+		// is not to store the password in crypted form.
+		
+		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
+		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
+		    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
+		    && !plainTextCF.isSelected())
+		  {
+		    plainTextCF.setValue(true);
+		  }
+		
+		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+		      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
+		  {
+		    plainTextCF.setEnabled(false);
+		  }
+		else
+		  {
+		    plainTextCF.setEnabled(true);
+		  }
+	      }
+	    else
+	      {
+		refreshFieldEdit(false);
+	      }
+	  }
+	else if (comp == shaUnixCryptRoundsN)
+	  {
+	    if (debug)
+	      {
+		System.out.println("shaUnixCryptRoundsN");
+	      }
+
+	    handleReturnVal(fieldDef.setShaUnixCryptRounds(((Integer)v.getValue()).shortValue()));
 	  }
 	else if (comp == plainTextCF)
 	  {
@@ -2151,6 +2239,31 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    throw new IllegalArgumentException ("Exception setting TargetField: " + rx);
 	  }
       }
+    else if (e.getItemSelectable() == shaUnixCryptTypeC)
+      {
+	item = (String)shaUnixCryptTypeC.getSelectedItem();
+
+	if (debug)
+	  {
+	    System.out.println("Setting sha unix crypt type to " + item);
+	  }
+
+	try
+	  {
+	    if (item.equals("SHA512"))
+	      {
+		handleReturnVal(fieldDef.setShaUnixCrypted512(true));
+	      }
+	    else
+	      {
+		handleReturnVal(fieldDef.setShaUnixCrypted512(false));
+	      }
+	  }
+	catch (RemoteException rx)
+	  {
+	    throw new IllegalArgumentException ("Exception setting sha unix crypt variant: " + rx);
+	  }
+      }
   }
 
   /**
@@ -2186,6 +2299,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     this.apachemd5cryptedCF = null;
     this.winHashcryptedCF = null;
     this.sshaHashcryptedCF = null;
+    this.shaUnixCryptedCF = null;
     this.plainTextCF = null;
     this.multiLineCF = null;
 
