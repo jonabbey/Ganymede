@@ -2,7 +2,7 @@
   <HEAD>
     <TITLE>GANYMEDE: Ganymede and XML</TITLE>
   </HEAD>
-  
+
   <BODY BGCOLOR="#FFFFFF">
 
     <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede">
@@ -25,12 +25,12 @@
       in general that software needs to know about in order to
       properly communicate with Ganymede via XML.
     </p>
-    
+
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
 	<td colspan="1"><h2><b>A Brief Introduction to XML</b></h2></td>
       </tr>
-    </table> 
+    </table>
 
     <p>
       Facts about XML:
@@ -42,12 +42,12 @@
       <li><p>All tags must come in pairs.  HTML browsers can tolerate tags that stand alone,
 	  like &lt;br&gt; and &lt;p&gt;, but XML is more strict, and all elements must
 	  have an open tag (&lt;element&gt;) and a close tag (&lt;/element&gt;).</p></li>
-      
+
       <li><p>The structure of
 	  XML files must be strictly tree-like.  That is, XML structural elements can contain
 	  other XML structural elements, but one XML structural element may not be partially
 	  contained by another.</p>
-	
+
 	<p>In other words,</p>
 
 	<pre>
@@ -56,22 +56,22 @@
         &lt;/element1&gt;
       &lt;/element2&gt;
 	</pre>
-	
+
 	<p>is an invalid XML sequence, as the element2 and element1 structural elements are intermingled.</p>
-	
+
 	<p>In contrast,</p>
-	
+
 	<pre>
         &lt;element1&gt;
           &lt;element2&gt;&lt;/element2&gt;
         &lt;/element1&gt;
 	</pre>
-	
+
 	<p>is perfectly valid, because the entirety of element2 is contained
 	  within element1.</p>
       </li>
-      
-      <li><p>In cases like the above, where the element2 element's open and close tag are 
+
+      <li><p>In cases like the above, where the element2 element's open and close tag are
 	  immediately adjacent, XML supports a special syntax for an <b>Empty Element</b>, that
 	  is, an element which does not contain anything between the open tag and close tag.  The
 	  same legal XML structure shown above could be written as:</p>
@@ -80,7 +80,7 @@
           &lt;element2/&gt;
         &lt;/element1&gt;
 	</pre>
-	
+
 	<p>where the trailing slash in the element2 element indicates that there will be no
 	  matching close tag to come along.  At any other time an element open tag (&lt;element&gt;) is seen,
 	  a compliant XML parser will expect and demand to see the matching close tag (&lt;/element&gt;)
@@ -127,7 +127,7 @@
 	<pre>
           &lt;sentence text="He said &amp;quot;hi&amp;quot; &amp;amp; I waved back."/&gt;
         </pre>
-	
+
 	<p>
 	  Newlines and other whitespace are explicitly acceptable
 	  within the quoted value of an attribute.
@@ -146,14 +146,14 @@
 	    href="http://www.unicode.org/">Unicode</a>,
 	  with the <b>UTF-8</b> encoding, typically.  American 7-bit ASCII
 	  is a proper subset of Unicode and require no special
-	  handling in <b>UTF-8</b> encoding.  International characters 
+	  handling in <b>UTF-8</b> encoding.  International characters
 	  may be used in XML files, but you must do so in a manner
 	  compliant with <b>UTF-8</b>.  Ganymede will always emit XML files
 	  using the standard UNIX end-of-line character, but as with any
 	  XML parser, Ganymede can also handle DOS/Windows style line
 	  termination when reading XML files.</p>
       </li>
-	  
+
       <li><p>There are limitations on what characters you can
 	  use for tag and attribute names.  The rules on this are
 	  somewhat complex, but for the purpose of XML use with
@@ -164,7 +164,7 @@
            abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_
 	</pre>
 
-	<p>Eventually, Ganymede may be elaborated so that it knows all 
+	<p>Eventually, Ganymede may be elaborated so that it knows all
 	  of the rules for XML character limitations in the full
 	  Unicode character range, but for now, only the above
 	  characters will ever appear or be used in XML tag and
@@ -192,8 +192,8 @@
       <tr BGCOLOR="#CCFFCC">
 	<td colspan="1"><h2><b>On Ganymede and XML</b></h2></td>
       </tr>
-    </table> 
-    
+    </table>
+
     <p>Ganymede exports and imports object and schema data using a
     simple XML format, in which the schema definition section and the
     object data sections comprise two separate elements.  The basic
@@ -243,7 +243,7 @@
       <tr BGCOLOR="#CCFFCC">
 	<td colspan="1"><h2><b>Ganymede Schema Definition in XML</b></h2></td>
       </tr>
-    </table> 
+    </table>
 
     <p>The <b>&lt;ganyschema&gt;</b> element defines the structure of
       the Ganymede database, what types of objects are defined, what
@@ -280,7 +280,7 @@
     <p>The <b>&lt;namespaces&gt;</b> element contains definition
       elements for all unique namespace structures in the server.  A
       namespace is essentially a unique value index that the server
-      uses to assure that, across all fields in the database connected 
+      uses to assure that, across all fields in the database connected
       to the namespace, no value is repeated.  Namespaces are used to
       keep user, group, and system names unique, among other
       things.</p>
@@ -464,7 +464,7 @@
     <pre>
        &lt;embedded/&gt;
     </pre>
-    
+
     <p>The optional <b>label</b> element has a <b>fieldid</b>
     attribute which gives the numeric field id of the field within the
     object which is to serve as the label field.  Objects do not need
@@ -719,7 +719,7 @@
 	    to the user in an error dialog if they enter a string in the client which
 	    does not match the regexp.  If no <b>desc</b> attribute is present,
 	    the user will be shown the regexp itself in the error message.</p>
-	  
+
 	  <p><b>regexp</b> is an optional element in the string <b>typedef</b>
 	    element.  If a <b>regexp</b> element is present, all strings entered
 	    into fields of this type will be checked against the regexp.  The
@@ -743,7 +743,7 @@
 	    The <b>namespace</b> element is an empty element with a single attribute, <b>val</b>,
 	    which contains a string naming a namespace defined in the
 	    <b>namespaces</b> element contained in the top-level <b>ganyschema</b> element.
-	    If this optional element is defined in a string <b>typedef</b> element, 
+	    If this optional element is defined in a string <b>typedef</b> element,
 	    all fields associated with the specified namespace
 	    will be constrained to contain unique values across the specified namespace.</p></td>
 	<td>&lt;namespace val="username"/&gt;</td>
@@ -757,7 +757,7 @@
 	    The <b>namespace</b> element is an empty element with a single attribute, <b>val</b>,
 	    which contains a string naming a namespace defined in the
 	    <b>namespaces</b> element contained in the top-level <b>ganyschema</b> element.
-	    If this optional element is defined in an ip <b>typedef</b> element, 
+	    If this optional element is defined in an ip <b>typedef</b> element,
 	    all fields associated with the specified namespace
 	    will be constrained to contain unique values across the specified namespace.</p></td>
 	<td>&lt;namespace val="IPSpace"/&gt;</td>
@@ -780,7 +780,7 @@
 	  specified, in which case the Ganymede server will verify
 	  that both the id number and the object name are consistent,
 	  or either one alone may be used.</p>
-	  
+
 	  <p>If this invid field is intended to be able to point to
 	  any kind of object, this is specified by using the
 	  <b>name</b> attribute alone, with a value of <b>"*any*"</b>.
@@ -832,7 +832,7 @@
 	    boolean field as a pair of radio buttons rather than a single check-box.  This
 	    can be useful when you've got a pair of choices that don't fit naturally
 	    into a yes/no dichotomy.</p>
-	  
+
 	  <p>In general, support for this option has not really been
 	  tested, and may not work well.</p>
 	</td>
@@ -981,23 +981,76 @@
 	  format used by OpenLDAP.  This is Netscape's salted variant
 	  of the FIPS SHA-1 standard.  SHA-1 is described at <a
 	  href="http://en.wikipedia.org/wiki/SHA-1">http://en.wikipedia.org/wiki/SHA-1</a>,
-	  while SSHA is described at 
+	  while SSHA is described at
 	  <a href="http://www.openldap.org/faq/data/cache/347.html">http://www.openldap.org/faq/data/cache/347.html</a>.</p>
 	</td>
 	<td>&lt;sshaHashed/&gt;</td>
       </tr>
+      <tr>
+	<td></td><td>shaUnixCrypted</td>
+	<td>
+	  <p>The <b>shaUnixCrypted</b> element is an optional, empty
+	  element with two optional attributes: <b>type</b> and
+	  <b>rounds</b>.  If this element is present, the Ganymede
+	  server will store the contents of this password in the
+	  scalable SHA256/SHA512 Unix Crypt algorithm recently adopted
+	  by Red Hat, Sun, IBM, and HP.</p>
+
+          <p>See
+          <a href="http://people.redhat.com/drepper/SHA-crypt.html">http://people.redhat.com/drepper/SHA-crypt.html</a>
+          for complete details on this algorithm.</p>
+
+          <p>Note that this algorithm is only starting to be supported.  It works properly
+          on Linux distributions running glibc versions 2.7 and later, such as Fedora 8.</p>
+
+	  <p><b>Attributes:</b></p>
+
+          <dl>
+            <dt>type</dt>
+
+            <dd><p>This attribute can accept two legal values: "256" and
+            "512".  Depending on which value is set for type, the
+            shaUnixCrypt password hashes generated in this field will
+            use the SHA256 or SHA512 variant of the Sha Unix Crypt
+            algorithm.  The "512" value involves a greater amount of
+            cryptographic operations to calculate the hash, which may
+            provide some greater measure of security.</p></dd>
+
+	    <dt>rounds</dt>
+
+            <dd><p>This attribute can take an integer value between 1000
+            and 999999999, and controls the number of cryptographic
+            hash rounds performed to generate the final password hash.</p>
+
+            <p>If the rounds attribute is not provided, Ganymede will
+            perform 5000 rounds of SHA hashing will be performed to
+            generate the final result.</p>
+
+            <p>By specifying a higher number of SHA rounds with this
+            attribute, you can appropriately scale your defenses
+            against password cracking, no matter how cheap
+            computational power gets.</p>
+
+            <p>The higher the number of rounds, the more computing
+            power your attackers will require in order to do a
+            time-efficient password guessing attack against your
+            stored password hash.</p>
+	</td>
+	<td>&lt;shaUnixCrypted type="512" rounds="7500"/&gt;</td>
+      </tr>
 
       <tr>
-	<td></td><td>plaintext</td> 
+	<td></td><td>plaintext</td>
 	<td>
 	  <p>The <b>plaintext</b> element is an optional, empty
 	  element.  If this element is present, the Ganymede server
 	  will store the plaintext of passwords stored in this field
 	  to disk.  Normally, if the Ganymede server has any of
 	  <b>crypted</b>, <b>md5crypted</b>, <b>apacheMd5crypted</b>,
-	  <b>winHashed</b>, or <b>sshaHashed</b> set, the server will
-	  never dump the plaintext of passwords in this field to disk,
-	  as it is capable of authenticating logins against any of the
+	  <b>winHashed</b>, <b>sshaHashed</b>, or
+	  <b>shaUnixCrypted</b> set, the server will never dump the
+	  plaintext of passwords in this field to disk, as it is
+	  capable of authenticating logins against any of the
 	  supported hash formats.  If the <b>plaintext</b> element is
 	  present, the password will be preserved in plaintext form in
 	  the ganymede.db file, regardless of whether or not the
@@ -1054,7 +1107,7 @@
                 &lt;typedef type="password"&gt;
                   &lt;minlength val="3"/&gt;
                   &lt;maxlength val="32"/&gt;
-                  &lt;crypted/&gt;
+                  &lt;shaUnixCrypted type="512" rounds="5000"/&gt;
                   &lt;plaintext/&gt;
                 &lt;/typedef&gt;
               &lt;/fielddef&gt;
@@ -1099,7 +1152,7 @@
                 &lt;/typedef&gt;
               &lt;/fielddef&gt;
               &lt;fielddef name="Groups" id="264"&gt;
-                &lt;comment&gt;List of non-primary groups the user is a member of.  
+                &lt;comment&gt;List of non-primary groups the user is a member of.
 Limited to 16 for NFS.&lt;/comment&gt;
                 &lt;typedef type="invid"&gt;
                   &lt;vector maxSize="16"/&gt;
@@ -1378,7 +1431,7 @@ set of elements that correspond to fields in the object to be created
 or edited on the server.  The elements for these fields have no fixed
 tag name.  Instead, each field element will start with an open tag
 that is named according to the name of the field, with spaces
-transformed into underscores.</p>  
+transformed into underscores.</p>
 
 <p>For instance, a record to change the values of the "Room",
 "Groups", "Home Group" and "Email Aliases" fields in a pre-existing
@@ -1781,7 +1834,7 @@ IPv6.</dd>
 
 <tr>
 <td COLSPAN="2">
-The <b>&lt;date&gt;</b> element contains a Java date value, which is effectively a 64 bit 
+The <b>&lt;date&gt;</b> element contains a Java date value, which is effectively a 64 bit
 time stamp with millisecond resolution centered at Midnight, January 1, 1970, UTC.
 As date fields are scalar in Ganymede, only
 one <b>&lt;date&gt;</b> element at a time may be contained in a field
@@ -1938,6 +1991,17 @@ in the Salted SHA-1 format used by OpenLDAP.  The client will transmit
 this password to the server, and will clear any pre-existing plain
 text information stored in this field in the server.</dd>
 
+<dt><b>shaUnixCrypt</b></dt>
+
+<dd><p>This attribute, if present, contains a password string pre-hashed
+in Ulrich Drepper's Sha Unix Crypt format.  See <a
+href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
+for a discussion and a link to the specification for this format.</p>
+
+<p>As with the other hash attributes, the client will transmit this
+password to the server, and will clear any pre-existing plain text
+information stored in this field in the server.</p></dd>
+
 </dl>
 </td>
 </tr>
@@ -1946,7 +2010,7 @@ text information stored in this field in the server.</dd>
 <td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2"><code>&lt;password crypt="nxGots4NO.BJY" md5crypt="$1$o8/.....$f398vnq51gnzf"/&gt;</code></td></tr>
+<tr><td COLSPAN="2"><code>&lt;password md5crypt="$1$o8/.....$f398vnq51gnzf" shaUnixCrypt="$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5"/&gt;</code></td></tr>
 
 </table></center>
 
@@ -2243,6 +2307,6 @@ write about this in exhaustive detail.</p>
     <FONT FACE="Arial,Helvetica">
       <i>Last modified: $Date$, Subversion Revision: $Rev$, Author: $Author$</i>
     </FONT>
-    
+
   </BODY>
 </HTML>

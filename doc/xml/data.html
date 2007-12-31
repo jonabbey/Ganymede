@@ -211,7 +211,7 @@ set of elements that correspond to fields in the object to be created
 or edited on the server.  The elements for these fields have no fixed
 tag name.  Instead, each field element will start with an open tag
 that is named according to the name of the field, with spaces
-transformed into underscores.</p>  
+transformed into underscores.</p>
 
 <p>For instance, a record to change the values of the "Room",
 "Groups", "Home Group" and "Email Aliases" fields in a pre-existing
@@ -614,7 +614,7 @@ IPv6.</dd>
 
 <tr>
 <td COLSPAN="2">
-The <b>&lt;date&gt;</b> element contains a Java date value, which is effectively a 64 bit 
+The <b>&lt;date&gt;</b> element contains a Java date value, which is effectively a 64 bit
 time stamp with millisecond resolution centered at Midnight, January 1, 1970, UTC.
 As date fields are scalar in Ganymede, only
 one <b>&lt;date&gt;</b> element at a time may be contained in a field
@@ -688,10 +688,10 @@ The <b>&lt;password&gt;</b> element contains a Java password value.
 As password fields are scalar in Ganymede, only one
 <b>&lt;password&gt;</b> element at a time may be contained in a field
 element.  The <b>&lt;password&gt;</b> element must be empty.  The
-<b>&lt;password&gt;</b> element may contain any or all of the six
+<b>&lt;password&gt;</b> element may contain any or all of the seven
 optional attributes, <b>plaintext</b>, <b>crypt</b>, <b>md5crypt</b>,
 <b>apachemd5crypt</b>,
-<b>lanman</b>, <b>ntmd4</b>, and <b>ssha</b>.  If the <b>plaintext</b> attribute is
+<b>lanman</b>, <b>ntmd4</b>, <b>ssha</b>, and <b>shaUnixCrypt</b>.  If the <b>plaintext</b> attribute is
 present, all other hashes will be ignored, and the Ganymede server
 will generate new hashes as needed from the plaintext given. If none of the optional
 attributes are present, the password field will be cleared. All of
@@ -771,6 +771,17 @@ in the Salted SHA-1 format used by OpenLDAP.  The client will transmit
 this password to the server, and will clear any pre-existing plain
 text information stored in this field in the server.</dd>
 
+<dt><b>shaUnixCrypt</b></dt>
+
+<dd><p>This attribute, if present, contains a password string pre-hashed
+in Ulrich Drepper's Sha Unix Crypt format.  See <a
+href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
+for a discussion and a link to the specification for this format.</p>
+
+<p>As with the other hash attributes, the client will transmit this
+password to the server, and will clear any pre-existing plain text
+information stored in this field in the server.</p></dd>
+
 </dl>
 </td>
 </tr>
@@ -779,7 +790,7 @@ text information stored in this field in the server.</dd>
 <td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2"><code>&lt;password crypt="nxGots4NO.BJY" md5crypt="$1$o8/.....$f398vnq51gnzf"/&gt;</code></td></tr>
+<tr><td COLSPAN="2"><code>&lt;password md5crypt="$1$o8/.....$f398vnq51gnzf" shaUnixCrypt="$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5"/&gt;</code></td></tr>
 
 </table></center>
 
