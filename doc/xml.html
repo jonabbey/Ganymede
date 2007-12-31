@@ -1905,19 +1905,34 @@ multiply a 32 bit timecode by 1,000.</dd>
 
 <tr>
 <td COLSPAN="2">
-The <b>&lt;password&gt;</b> element contains a Java password value.
+<p>The <b>&lt;password&gt;</b> element contains a Java password value.
 As password fields are scalar in Ganymede, only one
 <b>&lt;password&gt;</b> element at a time may be contained in a field
 element.  The <b>&lt;password&gt;</b> element must be empty.  The
 <b>&lt;password&gt;</b> element may contain any or all of the seven
 optional attributes: <b>plaintext</b>, <b>crypt</b>, <b>md5crypt</b>,
 <b>apachemd5crypt</b>, <b>lanman</b>, <b>ntmd4</b>, <b>ssha</b>, and
-<b>shaUnixCrypt</b>.  If the <b>plaintext</b> attribute is present,
+<b>shaUnixCrypt</b>.</p>
+
+<p>If the <b>plaintext</b> attribute is present,
 all other hashes will be ignored when the client submits a
 <b>&lt;password&gt;</b> element, and the Ganymede server will generate
 new hashes as needed from the plaintext given. If none of the optional
 attributes are present, the password field will be cleared. All of
-these options are explained below.
+these options are explained below.</p>
+
+<p>If the <b>plaintext</b> attribute is not present but one or more of
+the hash attributes are, Ganymede will replace any previous
+information held in this field with information for the hashes you
+specified.  If a Ganymede build process requires hash information that
+you did not provide when you submitted this <b>&lt;password&gt;</b>
+element, you may have problems.</p>
+
+<p>In general, it is best to pass plaintext information to Ganymede
+when you want to tell Ganymede about a password change, but you can
+provide pre-hashed password data to Ganymede if your a comfortable
+about the limitations you might run into.</p>
+
 </td>
 </tr>
 
@@ -1950,59 +1965,66 @@ other hash information in this element will be ignored.</dd>
 <dt><b>crypt</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
-in UNIX crypt() format.  The client will transmit this password to the
-server, and will clear any pre-existing plain text information stored
-in this field in the server.</dd>
+in UNIX crypt() format.  The client will transmit this hash text to
+the server, where it and any other hash text simultaneously provided
+will be retained.  This attribute has no effect if the
+<b>plaintext</b> attribute is specified.</dd>
 
 <dt><b>md5crypt</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
 in FreeBSD-style md5Crypt() format.  The client will transmit this
-password to the server, and will clear any pre-existing plain text
-information stored in this field in the server.</dd>
+hash text to the server, where it and any other hash text
+simultaneously provided will be retained.  This attribute has no
+effect if the <b>plaintext</b> attribute is specified.</dd>
 
 <dt><b>apachemd5crypt</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
-in Apache-style md5Crypt() format.  The client will transmit this
-password to the server, and will clear any pre-existing plain text
-information stored in this field in the server.</dd>
+in Apache-style md5Crypt() format.  The client will transmit this hash
+text to the server, where it and any other hash text simultaneously
+provided will be retained.  This attribute has no effect if the
+<b>plaintext</b> attribute is specified.</dd>
 
 <dt><b>lanman</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
 in the LANMAN encoding used by older versions of Windows networking.
 This hash format is one of the two password encryption formats used by
-the Samba password file.  The client will transmit this password to
-the server, and will clear any pre-existing plain text information
-stored in this field in the server.</dd>
+the Samba password file.  The client will transmit this hash text to
+the server, where it and any other hash text simultaneously provided
+will be retained.  This attribute has no effect if the
+<b>plaintext</b> attribute is specified.</dd>
 
 <dt><b>ntmd4</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
 in the Unicode-md4 encoding used by Windows NT and Windows 98 and
-later.  This hash format is one of the two password encryption formats
-used by the Samba password file.  The client will transmit this
-password to the server, and will clear any pre-existing plain text
-information stored in this field in the server.</dd>
+later. This hash format is one of the two password encryption formats
+used by the Samba password file.  The client will transmit this hash
+text to the server, where it and any other hash text simultaneously
+provided will be retained.  This attribute has no effect if the
+<b>plaintext</b> attribute is specified.</dd>
 
 <dt><b>ssha</b></dt>
 
 <dd>This attribute, if present, contains a password string pre-hashed
 in the Salted SHA-1 format used by OpenLDAP.  The client will transmit
-this password to the server, and will clear any pre-existing plain
-text information stored in this field in the server.</dd>
+this hash text to the server, where it and any other hash text
+simultaneously provided will be retained.  This attribute has no
+effect if the <b>plaintext</b> attribute is specified.</dd>
 
 <dt><b>shaUnixCrypt</b></dt>
 
-<dd><p>This attribute, if present, contains a password string pre-hashed
-in Ulrich Drepper's Sha Unix Crypt format.  See <a
+<dd><p>This attribute, if present, contains a password string
+pre-hashed in Ulrich Drepper's Sha Unix Crypt format.  See <a
 href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
 for a discussion and a link to the specification for this format.</p>
 
 <p>As with the other hash attributes, the client will transmit this
-password to the server, and will clear any pre-existing plain text
-information stored in this field in the server.</p></dd>
+hash text to the server, where it and any other hash text
+simultaneously provided will be retained.  This attribute has no
+effect if the <b>plaintext</b> attribute is specified.</p></dd>
 
 </dl>
 </td>
