@@ -11,7 +11,7 @@
 
       <div id="title">
         <h1>Ganymede 2.0 Upgrade Guide</h1>
-        <p>Release 2.0 dev - May 31, 2006<br/>$Rev$</FONT></p>
+        <p>Release 2.0 - January 1, 2008<br/>$Rev$</FONT></p>
       </div>
 
       <div id="abstract">
@@ -28,14 +28,24 @@
     <p>While Ganymede 2.0 is more similar to Ganymede 1.0 than it is
     different, the 2.0 series is the product of nearly ten years of
     development and refinement, and essentially every facet of the
-    product has been polished to a high shine, relative to the
-    Ganymede 1.0 releases.</p>
+    product has been refined, polished to a high shine, or at least
+    tweaked, relative to the Ganymede 1.0 releases.</p>
 
     <p>The major functional differences between the Ganymede 1.0
     series and Ganymede 2.0 are as follows:</p>
 
     <ul>
-      <li>All RMI client/server communications are now SSL encrypted.</li>
+      <li>The entire source code tree has been refactored for clarity,
+      and the build system is now based on Ant.</li>
+
+      <li>Ganymede now requires Java 1.4 or later, and can be built
+      and deployed properly with Sun's Java 1.4, 5.x, or 6.x.</li>
+
+      <li>All RMI client/server communications are now SSL encrypted,
+      and any RMI calls that were previously made from the server to
+      the client have been reversed so that clients will work properly
+      on systems with local firewalls.  In addition, Ganymede no
+      longer requires an external RMI registry process.</li>
 
       <li>Ganymede 2.0 supports a new <a
       href="synchronization/index.html">incremental XML build
@@ -48,31 +58,41 @@
       language</a> which is available for programming in the Ganymede
       framework, as well as for doing direct queries with the <a
       href="xml/xmlclient.html">xmlclient</a>.</li>
+
+      <li>The Ganymede client, server, and admin console are
+      internationalized, and all user-facing message strings have been
+      pulled into language-specific resource files to support easy
+      translation.  A German language translation is included.</li>
       
       <li>Scalability and performance is now very significantly
-      improved, particularly in XML processing.  Memory usage of the
-      server has been reduced by at least 15%.</li>
+      improved, particularly in XML processing.  Overall memory usage
+      of the server has been reduced by at least 15%.</li>
 
       <li>A number of changes have been made to the Ganymede data
       model and APIs to ensure correct and predictable behavior,
       including a new requirement that all objects have guaranteed
       unique labels.  There were some minor changes to the XML schema
-      used for data dumping and loading as well.</li>
+      used for data dumping and loading.  It is now possible to group
+      object fields in custom tabs to reduce clutter in the
+      client.</li>
 
       <li>A significant number of fit, polish, and reliability
       improvements have been made to every part of the Ganymede
-      product.</li>
+      product.  The client and admin console now use the Java 1.4
+      Preferences API to remember window position and other
+      miscellaneous details.  The Ganymede client can now receive and
+      transmit Ganymede XML data.</li>
 
-      <li>The entire source code tree has been refactored for clarity,
-      and the build system is now based on Ant.</li>
+      <li>The Ganymede server will now generate an 'externalerror'
+      system event if an external build returns a non-zero result
+      code.  You can take advantage of this feature to properly
+      monitor your builds.</li>
 
-      <li>The Ganymede client, server, and admin console are
-      internationalized, and all user-facing message strings have been
-      pulled into language-specific resource files to support easy
-      translation.</li>
-
-      <li>Ganymede now requires Java 1.4 or later, and can be built
-      and deployed properly with Sun's Java 1.4, 5.x, or 6.x.</li>
+      <li>Ganymede now knows how to generate hash text for passwords
+      in OpenLDAP/Netscape's Salted SHA password hash format, as well
+      as Ulrich Drepper's <a
+      href="http://people.redhat.com/drepper/sha-crypt.html">Unix
+      Crypt with Sha</a> algorithm.</li>
 
       <li>Ganymede is now a U.S. registered trademark of The
       University of Texas at Austin.</li>
@@ -87,10 +107,11 @@
 
     <h2>Schema Changes</h2>
 
-    <p>A number of fields have been renamed since Ganymede 1.0.  These
-    renames will be handled automatically for you if you try to load a
-    Ganymede 1.0 series database file with a Ganymede 2.0 server, but
-    if you are doing XML loading, you'll need to be aware of the
+    <ul>
+    <li><p>A number of fields have been renamed since Ganymede 1.0.  These
+    renames should be handled automatically for you if you try to load
+    a Ganymede 1.0 series database file with a Ganymede 2.0 server,
+    but if you are doing XML loading, you may need to be aware of the
     following name changes:</p>
 
     <table border="1">
@@ -100,18 +121,72 @@
     <tr><td>Owner Group</td><td>105</td><td>string</td><td>Mail List</td><td>External Mail List</td></tr>
     <tr><td>Role</td><td>101</td><td>permission matrix</td><td>Owned Object Bits</td><td>Objects Owned Access Bits</td></tr>
     <tr><td>Role</td><td>103</td><td>permission matrix</td><td>Default Bits</td><td>Default Access Bits</td></tr>
-    </table>
+    </table></li>
 
-    <p>In addition, the <b>Objects Owned</b> Invid field in the
-    <b>Owner Group</b> object has been removed.  (It has been made
-    redundant.  It is now enough for the Ganymede server to know what
-    each object thinks are its owners.. the Owner Groups themselves
-    don't need to know anymore.)  This will again be handled for you
-    automatically if you load a Ganymede 1.0 db file, but if you are
-    working with XML, you may need be aware of this, particularly when
-    loading Permission Matrix dumps.</p>
+    <li><p>If you have a Ganymede 1.x schema that does not force unique
+    labels on all object types, Ganymede 2.0 will give you a warning
+    when you go to load your old ganymede.db file.  If you bring up
+    the Ganymede schema editor or use the xmlclient to tweak the
+    schema, no changes will accepted to your schema until you resolve
+    the unique label issue.</p></li>
 
-    <h2>Miscellaneous Incompatibilities</h2>
+    <li><p>The <b>Objects Owned</b> Invid field in the <b>Owner Group</b>
+    object has been removed.  This change makes it possible for
+    multiple administrators to create objects in a common <b>Owner
+    Group</b> without experiencing lock-out.  This will again be
+    handled for you automatically if you load a Ganymede 1.0 db file,
+    but if you are working with XML, you may need be aware of this,
+    particularly when loading Permission Matrix dumps.</p></li>
+
+    <li><p>If you have custom plugin classes written against Ganymede
+    1.0, you will absolutely need to make some changes in order to get
+    your classes working properly in Ganymede 2.0.</p>
+
+    <p>The most elementary change is that classes in the Ganymede
+    server have been shuffled around to different packages for clarity
+    in the source tree and build process.  You will need to make sure
+    you use <b>arlut.csd.ganymede.common</b> for classes that are used
+    on the server and on the client, <b>arlut.csd.ganymede.rmi</b> for
+    RMI interfaces, and <b>arlut.csd.ganymede.server</b> for the
+    classes that uniquely comprise the Ganymede server.</p>
+
+    <p>A wide variety of methods in several classes in the Ganymede
+    server now throw an
+    arlut.csd.ganymede.common.GanyPermissionException when permission
+    problems are encountered.  This is a checked exception, so you may
+    need to modify your code to handle this exception
+    intelligently.</p>
+
+    <p>The DBEditObject 'deleting' boolean has been made private.
+    You'll need to use the DBEditObject.isDeleting() method to test
+    the deleting status of an editable object.</p>
+
+    <p>Otherwise, I believe the classes you'll use in writing your own
+    plugin subclasses for DBEditObject and GanymedeBuilder shouldn't
+    need a great deal of changes.  Most of the other method changes
+    have been done in a backwards compatible fashion.</p>
+
+    <p>If you're writing a new set of plugin classes, you may find
+    that there are some more convenient methods to use when writing
+    your custom logic than were available in the 1.x time frame.  For
+    instance, many methods that deal with fields allow you to look up
+    or address fields by their display name, rather than having to use
+    numeric codes.  Be aware that if you use the name-based methods,
+    you will make it difficult for yourself if you want to produce a
+    version of your schema kit in other languages, however.</li>
+
+    <li><p>Vector fields can no longer hold duplicates.  This was
+    implicit in some of the code before, it is now explicit.  If you
+    attempt to load an old ganymede.db file that includes duplicate
+    values in a Vector field, the system will allow the duplication,
+    and this can surprise some code.</p>
+
+    <p>So, beware.  When in doubt, use xmlclient in your Ganymede 1.x
+    installation to dump your data to disk, examine for duplicates,
+    and reload into your 2.x installation using the
+    xmlclient.</p></li>
+
+    </ul>
       
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
