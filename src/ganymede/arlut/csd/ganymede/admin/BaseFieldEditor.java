@@ -1474,7 +1474,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     this.editField(fieldNode, true, updateTargetC);
   }
 
-
   /*
    * This method is called when we switch away from editing this
    * field.. this gives us a chance to process the stringArea
@@ -1909,10 +1908,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		    plainTextCF.setEnabled(true);
 		  }
 	      }
-	    else
-	      {
-		refreshFieldEdit(false);
-	      }
+
+	    refreshFieldEdit(false);
 	  }
 	else if (comp == shaUnixCryptRoundsN)
 	  {
