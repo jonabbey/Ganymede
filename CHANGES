@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-December 1, 2007
+January 1, 2008
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: December 1, 2007
+RELEASE DATE: January 1, 2008
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -695,7 +695,7 @@ This bug was reported by Fredrik.A.Bergman@ericsson.com.
 
 Made sure to read/set the regular expression description attribute
 when processing xml input.
-                                                                                                                                                             
+
 This bug was reported by Fredrik.A.Bergman@ericsson.com.
 
 40. [SERVER] Properly clear qr cache in InvidDBField
@@ -1138,9 +1138,9 @@ GUI client.
 Note that you can't change the schema with the Ganymede GUI client,
 because the schema can't be changed when a user is logged in.  If you
 want to change the schema, you'll have to be sure all users are logged
-out and that you use the standalone xmlclient.
+out and use the standalone xmlclient.
 
-73. [CLIENT] Fixed some threading issues that appeared in OpenJDK 7
+73. [CLIENT] Fixed some threading issues that appeared in Iced Tea OpenJDK 7
 
 The Ganymede client had some threading issues that appeared in the
 OpenJDK 7 packages that Red Hat ships with Fedora 8.  I've slightly
@@ -1149,7 +1149,24 @@ reworked a bit of the threading to try and avoid the issues.
 74. [CLIENT] No longer prompt for persona if the user selected one in the login box
 
 The Ganymede client will no longer pop up the persona select dialog if
-the user specified a persona at login time.
+the user specified a persona at login time, by logging in as
+'username:persona name'.
+
+This is a nice little optimization that stream lines the login process
+a bit.
+
+75. [SERVER] Added support for Sha Unix Crypt password hashing in DBPasswordField
+
+We have added support for the new SHA256 and SHA512-based 'Unix Crypt'
+hash algorithms introduced by Red Hat, Sun, IBM, and HP.  A discussion
+and link to the specification for this algorithm can be found at
+
+http://people.redhat.com/drepper/SHA-crypt.html
+
+These new hash algorithms are intended for widespread adoption in a
+way that OpenBSD's bcrypt hash algorithm never achieved, while
+supporting scalable computational requirements to 'future-proof' the
+hash algorithm.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
