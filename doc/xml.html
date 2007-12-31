@@ -1908,12 +1908,13 @@ The <b>&lt;password&gt;</b> element contains a Java password value.
 As password fields are scalar in Ganymede, only one
 <b>&lt;password&gt;</b> element at a time may be contained in a field
 element.  The <b>&lt;password&gt;</b> element must be empty.  The
-<b>&lt;password&gt;</b> element may contain any or all of the six
+<b>&lt;password&gt;</b> element may contain any or all of the seven
 optional attributes, <b>plaintext</b>, <b>crypt</b>, <b>md5crypt</b>,
-<b>apachemd5crypt</b>,
-<b>lanman</b>, <b>ntmd4</b>, and <b>ssha</b>.  If the <b>plaintext</b> attribute is
-present, all other hashes will be ignored, and the Ganymede server
-will generate new hashes as needed from the plaintext given. If none of the optional
+<b>apachemd5crypt</b>, <b>lanman</b>, <b>ntmd4</b>, <b>ssha</b>, and
+<b>shaUnixCrypt</b>.  If the <b>plaintext</b> attribute is present,
+all other hashes will be ignored when the client submits a
+<b>&lt;password&gt;</b>element, and the Ganymede server will generate
+new hashes as needed from the plaintext given. If none of the optional
 attributes are present, the password field will be cleared. All of
 these options are explained below.
 </td>
