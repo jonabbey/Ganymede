@@ -1956,63 +1956,63 @@ about the limitations you might run into.</p>
 
 <dt><b>plaintext</b></dt>
 
-<dd>This attribute, if present, contains a password string in plain
+<dd><p>This attribute, if present, contains a password string in plain
 text.  The client will transmit this password to the server, which
 will generate any needed hash formats according to the schema
 configuration for this field. If <b>plaintext</b> is specified, all
-other hash information in this element will be ignored.</dd>
+other hash information in this element will be ignored.</p></dd>
 
 <dt><b>crypt</b></dt>
 
-<dd>This attribute, if present, contains a password string pre-hashed
+<dd><p>This attribute, if present, contains a password string pre-hashed
 in UNIX crypt() format.  The client will transmit this hash text to
 the server, where it and any other hash text simultaneously provided
 will be retained.  This attribute has no effect if the
-<b>plaintext</b> attribute is specified.</dd>
+<b>plaintext</b> attribute is specified.</p></dd>
 
 <dt><b>md5crypt</b></dt>
 
-<dd>This attribute, if present, contains a password string pre-hashed
+<dd><p>This attribute, if present, contains a password string pre-hashed
 in FreeBSD-style md5Crypt() format.  The client will transmit this
 hash text to the server, where it and any other hash text
 simultaneously provided will be retained.  This attribute has no
-effect if the <b>plaintext</b> attribute is specified.</dd>
+effect if the <b>plaintext</b> attribute is specified.</p></dd>
 
 <dt><b>apachemd5crypt</b></dt>
 
-<dd>This attribute, if present, contains a password string pre-hashed
+<dd><p>This attribute, if present, contains a password string pre-hashed
 in Apache-style md5Crypt() format.  The client will transmit this hash
 text to the server, where it and any other hash text simultaneously
 provided will be retained.  This attribute has no effect if the
-<b>plaintext</b> attribute is specified.</dd>
+<b>plaintext</b> attribute is specified.</p></dd>
 
 <dt><b>lanman</b></dt>
 
-<dd>This attribute, if present, contains a password string pre-hashed
+<dd><p>This attribute, if present, contains a password string pre-hashed
 in the LANMAN encoding used by older versions of Windows networking.
 This hash format is one of the two password encryption formats used by
 the Samba password file.  The client will transmit this hash text to
 the server, where it and any other hash text simultaneously provided
 will be retained.  This attribute has no effect if the
-<b>plaintext</b> attribute is specified.</dd>
+<b>plaintext</b> attribute is specified.</p></dd>
 
 <dt><b>ntmd4</b></dt>
 
-<dd>This attribute, if present, contains a password string pre-hashed
+<dd><p>This attribute, if present, contains a password string pre-hashed
 in the Unicode-md4 encoding used by Windows NT and Windows 98 and
 later. This hash format is one of the two password encryption formats
 used by the Samba password file.  The client will transmit this hash
 text to the server, where it and any other hash text simultaneously
 provided will be retained.  This attribute has no effect if the
-<b>plaintext</b> attribute is specified.</dd>
+<b>plaintext</b> attribute is specified.</p></dd>
 
 <dt><b>ssha</b></dt>
 
-<dd>This attribute, if present, contains a password string pre-hashed
+<dd><p>This attribute, if present, contains a password string pre-hashed
 in the Salted SHA-1 format used by OpenLDAP.  The client will transmit
 this hash text to the server, where it and any other hash text
 simultaneously provided will be retained.  This attribute has no
-effect if the <b>plaintext</b> attribute is specified.</dd>
+effect if the <b>plaintext</b> attribute is specified.</p></dd>
 
 <dt><b>shaUnixCrypt</b></dt>
 
