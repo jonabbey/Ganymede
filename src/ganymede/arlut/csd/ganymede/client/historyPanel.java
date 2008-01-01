@@ -95,6 +95,11 @@ import foxtrot.Worker;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * historyPanel is the the panel class that implements the contents of
+ * the history tab in the client's framePanel windows.
+ */
+
 public class historyPanel extends JPanel implements ActionListener, JsetValueCallback {
 
   /**
