@@ -69,6 +69,11 @@ import java.util.Properties;
 
 public class SysInfo {
 
+  /**
+   * Returns a string containing all system properties defined in the
+   * Java environment.
+   */
+
   public static String getSysInfo()
   {
     Properties sysProps = java.lang.System.getProperties();
@@ -82,6 +87,10 @@ public class SysInfo {
 
     return stringTarget.toString();
   }
+
+  /**
+   * Helpful command line system properties dump rig.
+   */
 
   public static void main(String argv[])
   {
