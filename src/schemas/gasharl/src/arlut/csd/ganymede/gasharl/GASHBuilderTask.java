@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -3395,6 +3395,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     ipAddress = ipField.getEncodingString();
     macAddress = macField.getEncodingString();
+
+    if (macAddress.equals("00:00:00:00:00:00"))
+      {
+        return;                 // don't write out DHCP for systems
+                                // with unspecified mac addresses
+      }
 
     sysname = (String) object.getFieldValueLocal(systemSchema.SYSTEMNAME);
 
