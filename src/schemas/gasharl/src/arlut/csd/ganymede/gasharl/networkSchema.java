@@ -77,4 +77,5 @@ public interface networkSchema {
   final static short ROOMS=264;
   final static short ALLOCRANGE=265;
   final static short PUBLICNETWORK=266;
+  final static short DHCP=257;
 }

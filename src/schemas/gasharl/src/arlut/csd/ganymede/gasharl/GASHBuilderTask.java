@@ -3402,6 +3402,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                                 // with unspecified mac addresses
       }
 
+    Invid networkInvid = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
+
+    DBObject networkObj = getObject(networkInvid);
+
+    if (!networkObj.isSet(networkSchema.DHCP))
+      {
+        return;                 // no DHCP for this network
+      }
+
     sysname = (String) object.getFieldValueLocal(systemSchema.SYSTEMNAME);
 
     // now let's see if we have any custom dhcp options for this
