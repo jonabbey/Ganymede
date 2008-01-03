@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -122,7 +122,7 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
   private Thread inputThread;
   private boolean done = false;
-  private XMLItem pushback;
+  private XMLItem pushback = null;
   private XMLElement halfElement;
   private boolean skipWhiteSpace;
   private PrintWriter err;
@@ -323,6 +323,14 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 		  {
 		    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
 		  }
+	      }
+
+	    if (debug && done)
+	      {
+		err.println("XMLReader.getNextItem(): pushback == " + String.valueOf(pushback));
+		err.println("XMLReader.getNextItem(): bufferContents == " + bufferContents);
+		err.flush();
+		return null;
 	      }
 
 	    if (done && pushback == null && bufferContents == 0)
@@ -804,13 +812,20 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
       {
 	if (!done)
 	  {
-	    ex.printStackTrace();
+	    // we don't want to bother printing out any content if
+	    // we've not got any content other than the
+	    // XMLStartDocument, so we'll gate on circleBuffer size >
+	    // 1
 
-	    err.println("XMLReader parse error: " + ex.getMessage());
-	    err.println("Leading context:");
-	    err.println(circleBuffer.getContents());
+	    if (circleBuffer.getSize() > 1)
+	      {
+		err.println("XMLReader parse error: " + ex.getMessage());
+		err.println("Leading context:");
+		err.println(circleBuffer.getContents());
+		err.flush();
+	      }
 	    
-	    throw new RuntimeException("XMLReader parse error: " + ex.getMessage());
+	    return;
 	  }
       }
     catch (IOException ex)
@@ -821,11 +836,10 @@ public class XMLReader implements org.xml.sax.DocumentHandler,
 
 	if (!done)
 	  {
-	    ex.printStackTrace();
-
 	    err.println("XMLReader io error: " + ex.getMessage());
 	    err.println("Leading context:");
 	    err.println(circleBuffer.getContents());
+	    err.flush();
 
 	    throw new RuntimeException("XMLReader io error: " + ex.getMessage());
 	  }

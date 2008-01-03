@@ -2178,7 +2178,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // "Server: Error in PasswordDBField.setAllHashes()"
 	    // "The hash text passed to setShaUnixCryptPass(), "{0}", is not a well-formed, SHA Unix Crypt hash text"
 	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setShaUnixCryptPass.format_error"));
+					      ts.l("setShaUnixCryptPass.format_error", SSHAText));
 	  }
       }
 

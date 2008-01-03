@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -71,6 +71,7 @@ public class CircleBuffer {
   private Object[] buf;
   private int firstSlot;
   private int nextSlot;
+  private int contents = 0;
 
   /* -- */
 
@@ -79,6 +80,15 @@ public class CircleBuffer {
     buf = new Object[size];
     firstSlot = 0;
     nextSlot = 0;
+  }
+
+  /**
+   * Returns the number of elements loaded into this CircleBuffer.
+   */
+
+  public synchronized int getSize()
+  {
+    return contents;
   }
 
   public synchronized void add(Object item)
@@ -99,6 +109,11 @@ public class CircleBuffer {
       }
 
     buf[nextSlot++] = item;
+
+    if (contents < buf.length)
+      {
+	contents++;
+      }
 
     if (nextSlot == buf.length)
       {

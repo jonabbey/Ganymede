@@ -22,7 +22,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -627,6 +627,12 @@ public final class xmlclient implements ClientListener, Runnable {
 
 	XMLItem docElement = reader.getNextTree();
 
+	if (docElement == null)
+	  {
+	    // "Error, {0} does not contain an XML file."
+	    err.println(ts.l("global.nullDocElement", xmlFilename));
+	  }
+
 	if (!docElement.matches("ganymede"))
 	  {
 	    // "Error, {0} does not contain a Ganymede XML file.\nUnrecognized XML element: {1}"
@@ -791,6 +797,8 @@ public final class xmlclient implements ClientListener, Runnable {
       {
 	// "Bad XML integrity"
 	err.println(ts.l("doSendChanges.badScan"));
+
+	finishedErrStream = true;
 
 	return false;		// malformed in some way
       }
@@ -1122,15 +1130,19 @@ public final class xmlclient implements ClientListener, Runnable {
 
   public boolean scanXML(File inFile)
   {
+    String myFilename = null;
+
     try
       {
         if (inFile == null)
           {
-            reader = new arlut.csd.Util.XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
+	    myFilename = xmlFilename;
+            reader = new arlut.csd.Util.XMLReader(xmlFilename, bufferSize, true, err); // skip meaningless whitespace
           }
         else
           {
-            reader = new arlut.csd.Util.XMLReader(inFile, bufferSize, true); // skip meaningless whitespace
+	    myFilename = inFile.getName();
+            reader = new arlut.csd.Util.XMLReader(inFile, bufferSize, true, err); // skip meaningless whitespace
           }
 
 	XMLItem startDocument = getNextItem();
@@ -1144,6 +1156,13 @@ public final class xmlclient implements ClientListener, Runnable {
 
 	XMLItem docElement = getNextItem();
 
+	if (docElement == null)
+	  {
+	    // "Error, {0} does not contain an XML file."
+	    err.println(ts.l("global.nullDocElement", myFilename));
+	    return false;
+	  }
+
 	if (docElement.matches("ganyschema"))
 	  {
 	    schemaOnly = true;
@@ -1152,7 +1171,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	else if (!docElement.matches("ganymede"))
 	  {
 	    // "Error, {0} does not contain a Ganymede XML file.\nUnrecognized XML element: {1}"
-	    err.println(ts.l("global.badDocElement", xmlFilename, docElement));
+	    err.println(ts.l("global.badDocElement", myFilename, docElement));
 	    return false;
 	  }
 
@@ -1279,6 +1298,11 @@ public final class xmlclient implements ClientListener, Runnable {
       {
 	item = reader.getNextItem();
 
+	if (item == null)
+	  {
+	    return null;
+	  }
+
 	if (item instanceof XMLError)
 	  {
 	    err.println(item);
@@ -1381,6 +1405,10 @@ public final class xmlclient implements ClientListener, Runnable {
 	    // for remote and other
 
 	    ex.printStackTrace(err);
+	    err.flush();
+
+	    this.finishedErrStream = true;
+	    this.notifyAll();
 
 	    // we won't exit our err stream thread on one or two
 	    // errors, but if we get a bunch, assume we've lost the
