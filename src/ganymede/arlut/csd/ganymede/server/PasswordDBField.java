@@ -475,6 +475,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   void emit(DataOutput out) throws IOException
   {
+    boolean need_to_write_all_hashes = writeOutAllStoredValues();
     boolean wrote_hash = false;
 
     /* -- */
@@ -483,7 +484,7 @@ public class PasswordDBField extends DBField implements pass_field {
     // plaintext if we are told to, or if we don't have any
     // hashed form of it to use
 
-    if (getFieldDef().isCrypted())
+    if (getFieldDef().isCrypted() || (cryptedPass != null && need_to_write_all_hashes))
       {
 	cryptedPass = getUNIXCryptText();
 	wrote_hash = emitHelper(out, cryptedPass, wrote_hash);
@@ -493,7 +494,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	out.writeUTF("");
       }
 
-    if (getFieldDef().isMD5Crypted())
+    if (getFieldDef().isMD5Crypted() || (md5CryptPass != null && need_to_write_all_hashes))
       {
 	md5CryptPass = getMD5CryptText();
 	wrote_hash = emitHelper(out, md5CryptPass, wrote_hash);
@@ -503,7 +504,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	out.writeUTF("");
       }
 
-    if (getFieldDef().isApacheMD5Crypted())
+    if (getFieldDef().isApacheMD5Crypted() || (apacheMd5CryptPass != null && need_to_write_all_hashes))
       {
 	apacheMd5CryptPass = getApacheMD5CryptText();
 	wrote_hash = emitHelper(out, apacheMd5CryptPass, wrote_hash);
@@ -513,7 +514,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	out.writeUTF("");
       }
 
-    if (getFieldDef().isWinHashed())
+    if (getFieldDef().isWinHashed() || ((lanHash != null || ntHash != null) && need_to_write_all_hashes))
       {
 	lanHash = getLANMANCryptText();
 	wrote_hash = emitHelper(out, lanHash, wrote_hash);
@@ -527,7 +528,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	out.writeUTF("");
       }
 
-    if (getFieldDef().isSSHAHashed())
+    if (getFieldDef().isSSHAHashed() || (sshaHash != null && need_to_write_all_hashes))
       {
 	sshaHash = getSSHAHashText();
 	wrote_hash = emitHelper(out, sshaHash, wrote_hash);
@@ -541,7 +542,7 @@ public class PasswordDBField extends DBField implements pass_field {
     //
     // (see DBStore.major_version and DBStore.minor_version)
 
-    if (getFieldDef().isShaUnixCrypted())
+    if (getFieldDef().isShaUnixCrypted() || (shaUnixCrypt != null && need_to_write_all_hashes))
       {
 	shaUnixCrypt = getShaUnixCryptText();
 	wrote_hash = emitHelper(out, shaUnixCrypt, wrote_hash);
@@ -587,6 +588,83 @@ public class PasswordDBField extends DBField implements pass_field {
 	out.writeUTF(val);
 	return true;
       }
+  }
+
+  /**
+   * This method helps calculate what we should do if the
+   * administrator has reconfigured the hash requirements for this
+   * field.
+   *
+   * Effectively, we're looking to see if we have any validly
+   * constructed hash text that suits any hash algorithms left enabled
+   * in the schema editor.  If we find anything that we have been told
+   * to use (i.e., getFieldDef().isCrypted(), etc.) and for which we
+   * have a non-null text available, we won't need to take any special
+   * action, and we'll return false here.
+   *
+   * If we get through the plaintext and all the supported hash forms,
+   * and we determine that we have no requested hash information for
+   * the user at all, we'll return true, which will cause the emit()
+   * routine above to write out any hash text which it still has
+   * possession of, even if this field is no longer configured to
+   * cause that hash to be generated for further usage.
+   *
+   * Thanks to our password capture logic, if a user validates his
+   * password against this password field, we'll generate the new hash
+   * format when the user validates, and from then on, we won't need
+   * to save the old type of hash text.
+   */
+
+  private boolean writeOutAllStoredValues()
+  {
+    DBObjectBaseField def = getFieldDef();
+
+    /* -- */
+
+    // If we know the plaintext, we're guaranteed to write out
+    // something we can use during emit, either through the tracking
+    // the wrote_hash variable in emit() does for us, or through
+    // generation of new hash text on demand at emit time.
+    //
+    // In either case, we don't need to make a point of writing out
+    // old hash text which we've kept around.
+
+    if (uncryptedPass != null)
+      {
+        return false;
+      }
+
+    if (def.isCrypted() && cryptedPass != null)
+      {
+        return false;
+      }
+
+    if (def.isMD5Crypted() && md5CryptPass != null)
+      {
+        return false;
+      }
+
+    if (def.isApacheMD5Crypted() && apacheMd5CryptPass != null)
+      {
+        return false;
+      }
+
+    if (def.isWinHashed() && (lanHash != null || ntHash != null))
+      {
+        return false;
+      }
+
+    if (def.isSSHAHashed() && sshaHash != null)
+      {
+        return false;
+      }
+
+    if (def.isShaUnixCrypted() && shaUnixCrypt != null)
+      {
+        return false;
+      }
+
+    return true;
   }
 
   void receive(DataInput in, DBObjectBaseField definition) throws IOException
@@ -1040,7 +1118,14 @@ public class PasswordDBField extends DBField implements pass_field {
 	return false;
       }
 
-    // test against our hashes in decreasing order of hashing fidelity
+    // Test against our hashes in decreasing order of hashing
+    // fidelity.  note that we check here to see if we are in
+    // possession of a piece of hash text, not whether we are
+    // currently configured to generate that form of hash.
+    //
+    // This is to allow us to transition from one requested hash text
+    // to the other.  See the emit() and the writeOutAllStoredValues()
+    // methods, above for more details.
 
     if (uncryptedPass != null)
       {
@@ -1314,7 +1399,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public String getSalt()
   {
-    if (getFieldDef().isCrypted() && cryptedPass != null)
+    if (cryptedPass != null)
       {
 	return cryptedPass.substring(0,2);
       }
