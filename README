@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-July 31, 2006
+January 7, 2008
 README
 
 Last Revision Changed: $Rev$
@@ -9,18 +9,18 @@ SVN URL: $HeadURL$
 
 ---------------------------------------------
 
-Greetings.  Ganymede is a Java-based directory management software
-system we at the Computer Science Division of ARL:UT have been
-developing since 1995.
+Greetings.  Ganymede is a Java-based network directory management
+software system we at the Computer Science Division of ARL:UT have
+been developing since 1995.
 
 This release includes:
 
-  The Ganymede server, an extendable database and application server
-  that supports custom plug-ins for object types held in the database
-  and for tasks that can be run in the server to do directory
-  propagation to NIS, DNS, and the like.
+  The Ganymede server, an extendable object database and application
+  server that supports custom Java plug-ins for object types held in
+  the database and for tasks that can be run in the server to do
+  directory propagation to NIS, DNS, and the like.
 
-  A full-featured Ganymede client, providing a convenient
+  A full-featured graphical Ganymede client, providing a convenient
   Explorer-like interface to all operations supported by the server.
 
   A GUI Administration Console, which can be used to monitor
@@ -30,7 +30,8 @@ This release includes:
   Comprehensive documentation on all classes and methods comprising
   the server and the primary client.
 
-  Source code for the core module of any Ganymede client.
+  Source code for the 'ClientBase', a class which can be used as the
+  core module of any custom Ganymede client.
 
   Templates for running the admin console and primary client off of
   a Java-enabled web browser.
@@ -64,9 +65,9 @@ latest trunk is at:
 
 --
 
-We are intensely interested in any feedback from you folks, and we are
-committed to making this software the best we can make it.  Please
-send comments to the mailing list at ganymede@arlut.utexas.edu.
+Ganymede's a big system with a big source base, but
+
+Please send comments to the mailing list at ganymede@arlut.utexas.edu.
 
 Thanks,
 
