@@ -1345,8 +1345,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * This server-side only method returns the Netscape SSHA (salted
-   * SHA) LDAP hash of the password data held in this field.
+   * This server-side only method returns the Sha Unix Crypt hash text
+   * of the password data held in this field, generating the hash text
+   * from scratch if it is not contained in the local shaUnixCrypt
+   * variable.
    *
    * This method is never meant to be available remotely.
    */
@@ -2633,6 +2635,13 @@ public class PasswordDBField extends DBField implements pass_field {
     if (getFieldDef().isSSHAHashed() && (forceChange || sshaHash == null))
       {
 	sshaHash = SSHA.getLDAPSSHAHash(plaintext, null);
+      }
+
+    if (getFieldDef().isShaUnixCrypted() && (forceChange || shaUnixCrypt == null))
+      {
+        shaUnixCrypt = null;    // force new hash
+
+        shaUnixCrypt = getShaUnixCryptText();
       }
   }
 }
