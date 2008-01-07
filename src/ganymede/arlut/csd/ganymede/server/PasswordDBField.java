@@ -2260,12 +2260,12 @@ public class PasswordDBField extends DBField implements pass_field {
 					      ts.l("setShaUnixCryptPass.error_text"));
 	  }
 
-	if (!SSHAText.startsWith("$5$") && !SSHAText.startsWith("$6$"))
+	if (!ShaUnixCryptText.startsWith("$5$") && !ShaUnixCryptText.startsWith("$6$"))
 	  {
 	    // "Server: Error in PasswordDBField.setAllHashes()"
 	    // "The hash text passed to setShaUnixCryptPass(), "{0}", is not a well-formed, SHA Unix Crypt hash text"
 	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setShaUnixCryptPass.format_error", SSHAText));
+					      ts.l("setShaUnixCryptPass.format_error", ShaUnixCryptText));
 	  }
       }
 
