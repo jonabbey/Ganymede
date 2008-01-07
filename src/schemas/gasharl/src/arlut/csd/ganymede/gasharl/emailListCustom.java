@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -346,18 +346,6 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
     
     newItemVect.addElement(value);
 
-    if (!fitsInNIS(newItemVect))
-      {
-	return Ganymede.createErrorDialog("Overflow error",
-					  "The item that you are attempting to add to the " + getTypeName() + 
-					  " email list cannot fit.  No NIS email list in the laboratory's " +
-					  "network can be longer than 1024 characters when converted to an " +
-					  "NIS email alias definition.\n\n" +
-					  "If you need this list to be expanded, you should create a new sublist " +
-					  "for the overflow items, move some items from this list to the new sublist, " +
-					  " and then add the new sublist to this list.");
-      }
-
     return null;
   }
 
@@ -388,69 +376,6 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 	return null;
       }
 
-    if (!fitsInNIS(submittedValues))
-      {
-	return Ganymede.createErrorDialog("Overflow error",
-					  "The " + submittedValues.size() + 
-					  " items that you are attempting to add to the " + getTypeName() + 
-					  " email list cannot all fit.  No NIS email list in the laboratory's " +
-					  "network can be longer than 1024 characters when converted to an " +
-					  "NIS email alias definition.\n\n" +
-					  "If you need this list to be expanded, you should create a new sublist " +
-					  "for the overflow items, and add the sublist to this list.");
-      }
-
     return null;
-  }
-
-  /**
-   * <p>This method takes a vector of new items and returns true if the new items should
-   * be able to fit in the NIS line built from this emailList object.</p>
-   */
-
-  private boolean fitsInNIS(Vector newItemVect)
-  {
-    StringDBField externalTargets = (StringDBField) getField(emailListSchema.EXTERNALTARGETS);
-    InvidDBField members = (InvidDBField) getField(emailListSchema.MEMBERS);
-
-    int totalLength = externalTargets.getValueString().length() + members.getValueString().length();
-
-    for (int i = 0; i < newItemVect.size(); i++)
-      {
-	Object value = newItemVect.elementAt(i);
-
-	if (value instanceof Invid)
-	  {
-	    Invid newInvid = (Invid) value;
-
-	    GanymedeSession gsession = getGSession();
-
-	    if (gsession != null)
-	      {
-		DBObject objectRef = gsession.getSession().viewDBObject(newInvid);
-
-		if (objectRef != null)
-		  {
-		    String label = objectRef.getLabel();
-
-		    if (label != null)
-		      {
-			totalLength += (label.length() + 2); // need a comma and space
-		      }
-		  }
-	      }
-	  }
-	else if (value instanceof String)
-	  {
-	    totalLength += (((String) value).length() + 2); // need a comma and space
-	  }
-
-	if (totalLength >= 1024)
-	  {
-	    return false;
-	  }
-      }
-
-    return true;
   }
 }
