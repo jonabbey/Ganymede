@@ -2252,7 +2252,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (settingShaUnixCrypt)
       {
-	if (!getFieldDef().isSSHAHashed())
+	if (!getFieldDef().isShaUnixCrypted())
 	  {
 	    // "Server: Error in PasswordDBField.setAllHashes()"
 	    // "Password field not configured to accept SHA Unix Crypt hashed password strings."
@@ -2260,7 +2260,7 @@ public class PasswordDBField extends DBField implements pass_field {
 					      ts.l("setShaUnixCryptPass.error_text"));
 	  }
 
-	if (!SSHAText.startsWith("{SSHA}"))
+	if (!SSHAText.startsWith("$5$") && !SSHAText.startsWith("$6$"))
 	  {
 	    // "Server: Error in PasswordDBField.setAllHashes()"
 	    // "The hash text passed to setShaUnixCryptPass(), "{0}", is not a well-formed, SHA Unix Crypt hash text"
@@ -2389,9 +2389,24 @@ public class PasswordDBField extends DBField implements pass_field {
 		return retVal;
 	      }
 	  }
+
+	if (settingShaUnixCrypt)
+	  {
+	    retVal = eObj.wizardHook(this, DBEditObject.SETPASS_SHAUNIXCRYPT, ShaUnixCryptText, null);
+
+	    // if a wizard intercedes, we are going to let it take the ball.
+	    
+	    if (retVal != null && !retVal.doNormalProcessing)
+	      {
+		return retVal;
+	      }
+	  }
       }
 
-    // call finalizeSetValue to allow for chained reactions
+    // call finalizeSetValue to allow for chained reactions.  note
+    // that we don't actually pass any password data to the
+    // finalizeSetValue method.. this is just to allow for a generic
+    // veto on all changes
 
     retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
 

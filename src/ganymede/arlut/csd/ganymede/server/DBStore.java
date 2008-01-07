@@ -157,14 +157,14 @@ public final class DBStore implements JythonMap {
   static final String id_string = "Gstore";
 
   /**
-   * Major file version id.. will be first byte in ganymede.db/ganymede.schema
+   * Major file version id.. will be first byte in ganymede.db file
    * after id_string
    */
 
   static final byte major_version = 2;
 
   /**
-   * Minor file version id.. will be second byte in ganymede.db/ganymede.schema
+   * Minor file version id.. will be second byte in ganymede.db file
    * after id_string
    */
 
