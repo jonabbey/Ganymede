@@ -238,7 +238,11 @@ public final class DBNameSpace implements NameSpace {
     xDump.startElementIndent("namespace");
     xDump.attribute("name", getName());
 
-    if (!caseInsensitive)
+    if (caseInsensitive)
+      {
+	xDump.attribute("case-sensitive", "false");
+      }
+    else
       {
 	xDump.attribute("case-sensitive", "true");
       }
