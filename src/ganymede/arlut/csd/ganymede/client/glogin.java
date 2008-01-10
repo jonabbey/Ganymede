@@ -909,6 +909,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    String pword = new String(passwd.getPassword());
 
             passwd.setText(""); // clear the password field
+            passwd.validate();
 
 	    my_passwd = pword;
             active_passwd = pword;
@@ -1042,6 +1043,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	if (!isApplet() && my_frame != null)
 	  {
 	    my_frame.setVisible(true);
+            passwd.setText(""); // clear the passwd field when we return
+            passwd.validate();
 	  }
       }
   }
