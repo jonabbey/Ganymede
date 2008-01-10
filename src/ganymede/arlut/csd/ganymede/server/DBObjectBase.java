@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -3593,7 +3593,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 
   /**
-   * <p>Returns a vector of field definition templates, in display order.</p>
+   * Returns a vector of field definition templates, in display order,
+   * with custom fields returned first, followed by the standard
+   * built-in fields.
    *
    * @see arlut.csd.ganymede.common.FieldTemplate
    * @see arlut.csd.ganymede.rmi.Session
@@ -3607,7 +3609,18 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	Enumeration en;
 	DBObjectBaseField fieldDef;
 
-	// first load our system fields
+	// first load our custom fields
+
+	en = customFields.elements();
+	
+	while (en.hasMoreElements())
+	  {
+	    fieldDef = (DBObjectBaseField) en.nextElement();
+	
+	    templateVector.addElement(fieldDef.getTemplate());
+	  }
+
+	// then load our system fields
 
 	en = fieldTable.elements();
 
@@ -3619,17 +3632,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	      {
 		continue;
 	      }
-	
-	    templateVector.addElement(fieldDef.getTemplate());
-	  }
-
-	// then load our custom fields
-    
-	en = customFields.elements();
-	
-	while (en.hasMoreElements())
-	  {
-	    fieldDef = (DBObjectBaseField) en.nextElement();
 	
 	    templateVector.addElement(fieldDef.getTemplate());
 	  }
