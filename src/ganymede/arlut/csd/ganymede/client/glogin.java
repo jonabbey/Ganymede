@@ -908,6 +908,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    String uname = username.getText().trim();
 	    String pword = new String(passwd.getPassword());
 
+            passwd.setText(""); // clear the password field
+
 	    my_passwd = pword;
             active_passwd = pword;
 	    my_session = null;
