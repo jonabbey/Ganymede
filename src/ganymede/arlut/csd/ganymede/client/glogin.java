@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -907,9 +907,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	    String uname = username.getText().trim();
 	    String pword = new String(passwd.getPassword());
-
-            passwd.setText(""); // clear the password field
-            passwd.paintImmediately(passwd.getVisibleRect());
 
 	    my_passwd = pword;
             active_passwd = pword;
