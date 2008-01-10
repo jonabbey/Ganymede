@@ -604,7 +604,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
 	// sort fieldChoices
 
-	gc.sortStringVector(fieldChoices);
+        //	gc.sortStringVector(fieldChoices);
 
 	// and reset the options panel checkboxes.
 
