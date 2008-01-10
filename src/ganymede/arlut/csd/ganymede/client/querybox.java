@@ -24,7 +24,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -170,8 +170,26 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   // methods to avoid confusion
   
   private Hashtable baseIDHash = new Hashtable();
+
+  /**
+   * Hashtable mapping field names to FieldTemplate objects.
+   */
+
   private Hashtable fieldHash = new Hashtable();
+
+  /**
+   * Hashtable mapping embedded field name path to the discrete name
+   * of the field targeted in the embedded base that contains the
+   * field.
+   */
+
   private Hashtable nameHash = new Hashtable();
+
+  /**
+   * Hashtable mapping from the name of an object Base to a BaseDump
+   * for that Base.
+   */
+
   private Hashtable myHash = new Hashtable();
 
   JButton 
@@ -1140,6 +1158,16 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
     return (FieldTemplate) fieldHash.get(name);
   }
 
+  /**
+   * This method returns the FieldTemplate corresponding to the label
+   * field set for the selectedBase.
+   */
+
+  FieldTemplate getLabelTemplate()
+  {
+    return gc.getFieldTemplate(selectedBase.getTypeID(), selectedBase.getLabelField());
+  }
+
   // we have a map from embedded fieldname (with slashes) to the name
   // template after the last slash
 
@@ -1328,10 +1356,8 @@ class QueryRow implements ItemListener {
   }
 
   /**
-   *
-   * Internal method to return a choice menu containing the fields for
-   * a particular base
-   *
+   * Internal method to set up the choice menu containing the fields
+   * for a particular base once we have selected that base.
    */
     
   private void resetFieldChoices() throws RemoteException
@@ -1368,12 +1394,13 @@ class QueryRow implements ItemListener {
 	fieldChoice.addItem(parent.fieldChoices.elementAt(i));
       }
 
-    // now, what field wound up being shown?
+    // We want to show the label field for the selected object base by
+    // default, let's look that up and select it.
 
-    String fieldName = (String) fieldChoice.getSelectedItem();
-    FieldTemplate field = parent.getTemplateFromName(fieldName);
+    FieldTemplate labelField = parent.getLabelTemplate();
+    fieldChoice.setSelectedItem(labelField.getName());
 
-    setField(field, fieldName);
+    setField(labelField, labelField.getName());
 
     fieldChoice.addItemListener(this);
   }
