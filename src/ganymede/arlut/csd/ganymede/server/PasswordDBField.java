@@ -2187,8 +2187,16 @@ public class PasswordDBField extends DBField implements pass_field {
    * Calling this method will clear the password's stored plaintext,
    * if any.
    *
-   * If this password field is not configured to support any of the
-   * various hash formats in the Ganymede schema, an error will be returned.
+   * This method is typically called from the xmlclient, and is
+   * specifically designed to allow all types of hash text to be
+   * loaded, without regard for which hash formats this password field
+   * is configured to generate.
+   *
+   * We're deliberately permissive in accepting hash text from the
+   * xmlclient so that we can take hash text in for the purpose of
+   * authenticating users logging to Ganymede itself, even if the
+   * adopter doesn't necessarily intend to use that hash text format
+   * going forward.
    */
 
   public ReturnVal setAllHashes(String crypt,
@@ -2233,14 +2241,6 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (settingSSHA)
       {
-	if (!getFieldDef().isSSHAHashed())
-	  {
-	    // "Server: Error in PasswordDBField.setAllHashes()"
-	    // "Password field not configured to accept SSHA-1 hashed password strings."
-	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setSSHAPass.error_text"));
-	  }
-
 	if (!SSHAText.startsWith("{SSHA}"))
 	  {
 	    // "Server: Error in PasswordDBField.setAllHashes()"
@@ -2252,14 +2252,6 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (settingShaUnixCrypt)
       {
-	if (!getFieldDef().isShaUnixCrypted())
-	  {
-	    // "Server: Error in PasswordDBField.setAllHashes()"
-	    // "Password field not configured to accept SHA Unix Crypt hashed password strings."
-	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setShaUnixCryptPass.error_text"));
-	  }
-
 	if (!ShaUnixCryptText.startsWith("$5$") && !ShaUnixCryptText.startsWith("$6$"))
 	  {
 	    // "Server: Error in PasswordDBField.setAllHashes()"
@@ -2269,24 +2261,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	  }
       }
 
-    if (settingWin && !getFieldDef().isWinHashed())
-      {
-	// "Server: Error in PasswordDBField.setAllHashes()"
-	// "Password field not configured to accept Samba hashed password strings."
-	return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					  ts.l("setWinCryptedPass.error_text"));
-      }
-
     if (settingMD5)
       {
-	if (!getFieldDef().isMD5Crypted())
-	  {
-	    // "Server: Error in PasswordDBField.setAllHashes()"
-	    // "Password field not configured to support MD5Crypt hashing."
-	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setMD5CryptPass.error_text"));
-	  }
-
 	if (!md5crypt.startsWith("$1$") || (md5crypt.indexOf('$', 3) == -1))
 	  {
 	    // "Server: Error in PasswordDBField.setAllHashes()"
@@ -2298,15 +2274,6 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (settingApacheMD5)
       {
-	if (!getFieldDef().isApacheMD5Crypted())
-	  {
-	    // "Server: Error in PasswordDBField.setAllHashes()"
-	    // "Password field not configured to support ApacheMD5Crypt hashing."
-	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setApacheMD5CryptPass.error_text"));
-
-	  }
-
 	if (!apacheMd5Crypt.startsWith("$apr1$") || (md5crypt.indexOf('$', 6) == -1))
 	  {
 	    // "Server: Error in PasswordDBField.setAllHashes()"
@@ -2314,14 +2281,6 @@ public class PasswordDBField extends DBField implements pass_field {
 	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
 					      ts.l("setAllHashes.apache_format_error", apacheMd5Crypt));
 	  }
-      }
-
-    if (settingCrypt && !getFieldDef().isCrypted())
-      {
-	// "Server: Error in PasswordDBField.setAllHashes()"
-	// "Password field not configured to support traditional Unix crypt hashing."
-	return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					  ts.l("setCryptPass.error_text"));
       }
 
     eObj = (DBEditObject) owner;

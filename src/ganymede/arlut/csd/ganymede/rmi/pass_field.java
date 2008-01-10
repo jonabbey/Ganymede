@@ -69,52 +69,45 @@ public interface pass_field extends db_field {
   int minSize() throws RemoteException;
 
   /**
-   *
    * Returns a string containing the list of acceptable characters.
    * If the string is null, it should be interpreted as meaning all
    * characters not listed in disallowedChars() are allowable by
    * default.
-   * 
    */
 
   String allowedChars() throws RemoteException;
 
   /**
-   *
    * Returns a string containing the list of forbidden
    * characters for this field.  If the string is null,
    * it should be interpreted as meaning that no characters
    * are specifically disallowed.
-   *
    */
 
   String disallowedChars() throws RemoteException;
 
   /**
-   *
    * Convenience method to identify if a particular
    * character is acceptable in this field.
-   *
    */
 
   boolean allowed(char c) throws RemoteException;
 
   /**
-   *
-   * Returns true if the password stored in this field is hash-crypted.
-   *
+   * Returns true if the password stored in this field is hash-crypted
+   * using the traditional Unix Crypt algorithm.
    */
 
   boolean crypted() throws RemoteException;
 
   /**
-   * <p>This method is used for authenticating a provided plaintext
+   * This method is used for authenticating a provided plaintext
    * password against the stored contents of this password field.  The
    * password field may have stored the password in plaintext, or in
    * any of a variety of cryptographic hash formats.  matchPlainText()
    * will perform whatever operation on the provided plaintext as is
    * required to determine whether or not it matches with the stored
-   * password data.</p>
+   * password data.
    *
    * @return true if the given plaintext matches the stored password
    */
@@ -122,60 +115,71 @@ public interface pass_field extends db_field {
   boolean matchPlainText(String text) throws RemoteException;
 
   /** 
-   * <p>This method is used to set the password for this field,
+   * This method is used to set the password for this field,
    * crypting it in various ways if this password field is stored
-   * crypted.</p> 
+   * crypted.
    */
 
   ReturnVal setPlainTextPass(String text) throws RemoteException;
 
   /**
-   * <p>This method is used to set a pre-crypted password for this
-   * field.  This method will return an error code if this password
-   * field is not stored crypted.</p>
+   * This method is used to set a pre-hashed password for this field,
+   * using the traditional (weak) Unix Crypt algorithm.
+   *
+   * This method will return an error code if this password field is
+   * not configured to store Crypt hashed password text.
    */
 
   ReturnVal setCryptPass(String text) throws RemoteException;
 
   /**
-   * <p>This method is used to set a pre-crypted FreeBSD-style
-   * MD5Crypt password for this field.  This method will return an
-   * error code if this password field is not stored crypted.</p>
+   * This method is used to set a pre-crypted FreeBSD-style MD5Crypt
+   * password for this field.
+   *
+   * This method will return an error code if this password field is
+   * not configured to store MD5Crypt hashed password text.
    */
 
   ReturnVal setMD5CryptedPass(String text) throws RemoteException;
 
   /**
-   * <p>This method is used to set a pre-crypted Apache-style MD5Crypt
-   * password for this field.  This method will return an error code
-   * if this password field is not stored crypted.</p>
+   * This method is used to set a pre-crypted Apache-style MD5Crypt
+   * password for this field.
+   *
+   * This method will return an error code if this password field is
+   * not configured to store Apache-style MD5Crypt hashed password
+   * text.
    */
 
   ReturnVal setApacheMD5CryptedPass(String text) throws RemoteException;
 
   /**
-   * <p>This method is used to set pre-crypted Windows-style password
-   * hashes for this field.  These strings are formatted as used in Samba's
-   * encrypted password files.  This method will return
-   * an error code if this password field is not configured to accept
-   * Windows-hashed password strings.</p> 
+   * This method is used to set pre-crypted Windows-style password
+   * hashes for this field.  These strings are formatted as used in
+   * Samba's encrypted password files.
+   *
+   * This method will return an error code if this password field is
+   * not configured to accept Windows-hashed password strings.
    */
 
   ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4) throws RemoteException;
 
   /**
-   * <p>This method is used to set a pre-crypted SSHA password for
-   * this field.  This method will return an error code if this
-   * password field is not stored in SSHA format.</p>
+   * This method is used to set a pre-crypted OpenLDAP/Netscape
+   * Directory Server Salted SHA (SSHA) password for this field.
+   *
+   * This method will return an error code if this password field is
+   * not configured to store SSHA hashed password text.
    */
 
   ReturnVal setSSHAPass(String text) throws RemoteException;
 
   /**
    * This method is used to set a pre-crypted Sha256Crypt or
-   * Sha512Crypt password for this field.  This method will return an
-   * error code if this password field does not allow storage in
-   * ShaCrypt format.
+   * Sha512Crypt password for this field.
+   *
+   * This method will return an error code if this password field is
+   * not configured to store ShaCrypt hashed password text.
    *
    * The hashText submitted to this method must match one of the
    * following four forms:
@@ -197,16 +201,24 @@ public interface pass_field extends db_field {
   ReturnVal setShaUnixCryptPass(String hashText) throws RemoteException;
 
   /**
-   * <p>This method is used to force all known hashes into this password
+   * This method is used to force all known hashes into this password
    * field.  Ganymede does no verifications to insure that all of these
    * hashes really match the same password, so caveat emptor.  If any of
-   * these hashes are null or empty string, those hashes will be cleared.</p>
+   * these hashes are null or empty string, those hashes will be cleared.
    *
-   * <p>Calling this method will clear the password's stored plaintext,
-   * if any.</p>
+   * Calling this method will clear the password's stored plaintext,
+   * if any.
    *
-   * <p>If this password field is not configured to support any of the
-   * various hash formats in the Ganymede schema, an error will be returned.</p>
+   * This method is typically called from the xmlclient, and is
+   * specifically designed to allow all types of hash text to be
+   * loaded, without regard for which hash formats this password field
+   * is configured to generate.
+   *
+   * We're deliberately permissive in accepting hash text from the
+   * xmlclient so that we can take hash text in for the purpose of
+   * authenticating users logging to Ganymede itself, even if the
+   * adopter doesn't necessarily intend to use that hash text format
+   * going forward.
    */
 
   public ReturnVal setAllHashes(String crypt, String md5crypt, String apacheMd5crypt,
