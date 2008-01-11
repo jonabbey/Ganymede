@@ -1787,8 +1787,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   {
     if (loginCount == 1)
       {
-        // "1 user logged in."
-        loginLabel.setText(ts.l("setLoginCount.single_login"));
+        loginLabel.setText(""); // we're the only users, we don't need a message
       }
     else
       {
