@@ -2480,7 +2480,13 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     unexportObjects(false);
-    return session.abortTransaction(); // *sync* DBSession 
+
+    ReturnVal retVal = session.abortTransaction(); // *sync* DBSession 
+
+    // "User {0} cancelled transaction."
+    GanymedeServer.sendMessageToRemoteSessions(ClientMessage.ABORTNOTIFY, ts.l("abortTransaction.user_aborted", getPersonaLabel()), this);
+
+    return retVal;
   }
 
   /**
