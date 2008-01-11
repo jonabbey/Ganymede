@@ -232,6 +232,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   protected Thread my_thread = new Thread(this);
 
+  /**
+   * The server will send us a login count message before we've got
+   * the client ready to receive and display it, so we'll need to
+   * retain the count for the client to consult on startup.
+   */
+
+  private int initialLoginCount;
+
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
 
@@ -1094,6 +1102,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    g_client.setLoginCount(Integer.valueOf(e.getMessage()).intValue());
 	  }
+        else
+          {
+            this.initialLoginCount = Integer.valueOf(e.getMessage()).intValue();
+          }
       }
     else if (e.getType() == ClientMessage.SOFTTIMEOUT)
       {
@@ -1102,6 +1114,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    g_client.softTimeout();
 	  }
       }
+  }
+
+  public int getInitialLoginCount()
+  {
+    return this.initialLoginCount;
   }
 
   /**

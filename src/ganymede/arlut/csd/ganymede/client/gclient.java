@@ -888,6 +888,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
       }
 
+    setLoginCount(g.getInitialLoginCount());
+
     getContentPane().validate();
   }
 
