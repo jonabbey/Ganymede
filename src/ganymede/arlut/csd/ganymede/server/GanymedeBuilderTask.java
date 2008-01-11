@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -74,6 +74,7 @@ import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.zipIt;
+import arlut.csd.ganymede.common.ClientMessage;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.SchemaConstants;
 
@@ -1523,15 +1524,15 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (phase1Count > 0)
       {
-	GanymedeServer.sendMessageToRemoteSessions(1, "building");
+	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building");
       }
     else if (phase2Count > 0)
       {
-	GanymedeServer.sendMessageToRemoteSessions(1, "building2");
+	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building2");
       }
     else
       {
-	GanymedeServer.sendMessageToRemoteSessions(1, "idle");
+	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "idle");
       }
   }
 }

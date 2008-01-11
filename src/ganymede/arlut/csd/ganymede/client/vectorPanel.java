@@ -715,65 +715,54 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	throw new IllegalArgumentException("vectorPanel.addElement(): Component parameter is null");
       }
 
-    // "adding new elementWrapper"
-    setStatus(ts.l("addElement.adding_status"));
+    compVector.addElement(c);
 
-    try
+    if (debug)
       {
-	compVector.addElement(c);
-
-	if (debug)
-	  {
-	    System.out.println("Index of element: " + compVector.indexOf(c));
-	  }
-
-	// Make sure the centerPanel has been added.
-
-	if (!centerPanelAdded)
-	  {
-	    add("Center", centerPanel);
-	    centerPanelAdded = true;
-	  }
-
-	elementWrapper ew = new elementWrapper(title, c, this, editable && isFieldEditable());
-
-	ew.setIndex(compVector.indexOf(c));
-
-	// Keep track of the elementWrappers in the ewHash.
-
-	ewHash.put(c, ew);
-    
-	// centerPanel uses a BoxLayout(Y_AXIS), so calling add() will
-	// just put the new component at the bottom(which is what we want)
-
-	centerPanel.add(ew);
-
-	// Only expand if it is a containerPanel.  If it is something else, there 
-	// isn't anything to expand (the GUI component will be shown inline with
-	// the elementWrapper's icons.  We'll pre-expand the element if we are
-	// editing a newly created object.  This check is done here in case the
-	// server responds to Session.create_db_object() with an object that
-	// already contains one or more embedded objects.
-
-	if ((c instanceof containerPanel) && (expand || isCreating))
-	  {
-	    ew.open();
-	  }
-
-	// tell the containerPanel about us so it can update its progress
-	// bar, if it is displaying one
-
-	container.vectorElementAdded();
-
-	if (invalidateNow)
-	  {
-	    invalidate();
-	  }
+        System.out.println("Index of element: " + compVector.indexOf(c));
       }
-    finally
+
+    // Make sure the centerPanel has been added.
+
+    if (!centerPanelAdded)
       {
-	// "Done adding elementWrapper"
-	setStatus(ts.l("addElement.done_status"));
+        add("Center", centerPanel);
+        centerPanelAdded = true;
+      }
+
+    elementWrapper ew = new elementWrapper(title, c, this, editable && isFieldEditable());
+
+    ew.setIndex(compVector.indexOf(c));
+
+    // Keep track of the elementWrappers in the ewHash.
+
+    ewHash.put(c, ew);
+    
+    // centerPanel uses a BoxLayout(Y_AXIS), so calling add() will
+    // just put the new component at the bottom(which is what we want)
+
+    centerPanel.add(ew);
+
+    // Only expand if it is a containerPanel.  If it is something else, there 
+    // isn't anything to expand (the GUI component will be shown inline with
+    // the elementWrapper's icons.  We'll pre-expand the element if we are
+    // editing a newly created object.  This check is done here in case the
+    // server responds to Session.create_db_object() with an object that
+    // already contains one or more embedded objects.
+
+    if ((c instanceof containerPanel) && (expand || isCreating))
+      {
+        ew.open();
+      }
+
+    // tell the containerPanel about us so it can update its progress
+    // bar, if it is displaying one
+
+    container.vectorElementAdded();
+
+    if (invalidateNow)
+      {
+        invalidate();
       }
   }
 

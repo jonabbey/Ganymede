@@ -94,6 +94,7 @@ import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.ParseArgs;
 import arlut.csd.Util.TranslationService;
+import arlut.csd.ganymede.common.ClientMessage;
 import arlut.csd.ganymede.rmi.Server;
 import arlut.csd.ganymede.rmi.Session;
 
@@ -1062,18 +1063,39 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     // constructing a JErrorDialog causes it to be shown.
 
-    if (e.getType() == e.ERROR)
+    if (e.getType() == ClientMessage.ERROR)
       {
 	new JErrorDialog(my_frame, e.getMessage(), getErrorImage());
       }
-    else if (e.getType() == e.BUILDSTATUS)
+    else if (e.getType() == ClientMessage.BUILDSTATUS)
       {
 	if (g_client != null)
 	  {
 	    g_client.setBuildStatus(e.getMessage());
 	  }
       }
-    else if (e.getType() == e.SOFTTIMEOUT)
+    else if (e.getType() == ClientMessage.LOGIN)
+      {
+	if (g_client != null)
+	  {
+	    g_client.setStatus(e.getMessage());
+	  }
+      }
+    else if (e.getType() == ClientMessage.LOGOUT)
+      {
+	if (g_client != null)
+	  {
+	    g_client.setStatus(e.getMessage());
+	  }
+      }
+    else if (e.getType() == ClientMessage.LOGINCOUNT)
+      {
+	if (g_client != null)
+	  {
+	    g_client.setLoginCount(Integer.valueOf(e.getMessage()).intValue());
+	  }
+      }
+    else if (e.getType() == ClientMessage.SOFTTIMEOUT)
       {
 	if (g_client != null)
 	  {

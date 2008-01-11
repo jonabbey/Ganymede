@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -70,6 +70,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
+import arlut.csd.ganymede.common.ClientMessage;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.Query;
@@ -626,7 +627,18 @@ public class GanymedeServer implements Server {
 
   public static void addRemoteUser(GanymedeSession session)
   {
-    sessions.addElement(session);
+    synchronized (sessions)
+      {
+        sendMessageToRemoteSessions(ClientMessage.LOGIN, ts.l("addRemoteUser.logged_in", session.getMyUserName()));
+
+        // we send the above message before adding the user to the
+        // sessions Vector so that the user doesn't get bothered with
+        // a 'you logged in' message
+
+        sessions.addElement(session);
+
+        sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
+      }
   }
 
   /**
@@ -641,7 +653,17 @@ public class GanymedeServer implements Server {
 
   public static void removeRemoteUser(GanymedeSession session)
   {
-    sessions.removeElement(session);
+    synchronized (sessions)
+      {
+        sessions.removeElement(session);
+
+        // we just removed the session of the user who logged out, so
+        // they won't receive the log out message that we'll send to
+        // the other clients
+
+        sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getMyUserName()));
+        sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
+      }
   }
 
   /**

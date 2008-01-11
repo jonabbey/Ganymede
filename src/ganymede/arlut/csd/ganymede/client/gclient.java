@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -1775,6 +1775,30 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   }
 
   /**
+   * This method is called to update the client's display of the
+   * number of users concurrently logged into the server.
+   *
+   * @param status The number of users logged into the Ganymede server
+   */
+
+  public final void setLoginCount(int loginCount)
+  {
+    setDefaultStatus(ts.l("setLoginCount.message", new Integer(loginCount)));
+  }
+
+  /**
+   * Sets the text that will appear in the status bar when no other
+   * status is being displayed.
+   *
+   * @param status The text to display
+   */
+
+  public final void setDefaultStatus(String status)
+  {
+    statusThread.setDefaultMessage(status);
+  }
+
+  /**
    * Sets text in the status bar, with a 5 second countdown before
    * the status bar is cleared.
    *
@@ -3164,12 +3188,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     /* -- */
 
-    if (afterCommit)
-      {
-	// "refreshing object handles after commit"
-	setStatus(ts.l("refreshChangedObjectHandles.post_commit"));
-      }
-
     try
       {
 	QueryResult result = session.queryInvids(paramVect);
@@ -3180,12 +3198,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    
 	// and update anything we've got in the tree
 	
-	if (afterCommit)
-	  {
-	    // "Updating object handles in tree"
-	    setStatus(ts.l("refreshChangedObjectHandles.updating"));
-	  }
-	    
 	for (int i = 0; i < handleList.size(); i++)
 	  {
 	    ObjectHandle newHandle = (ObjectHandle) handleList.elementAt(i);
@@ -3231,14 +3243,8 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     catch (Exception ex)
       {
-	// "Couldn''t get object handle vector refresh"
+        // "Couldn''t refresh object tree"
 	processExceptionRethrow(ex, ts.l("refreshChangedObjectHandles.exception"));
-      }
-
-    if (afterCommit)
-      {
-	// "Completed refresh of changed objects in the tree."
-	setStatus(ts.l("refreshChangedObjectHandles.completed"));
       }
   }
 
@@ -6543,6 +6549,8 @@ class StatusClearThread extends Thread {
   boolean done = false;
   boolean resetClock = false;
 
+  String defaultMessage = "";
+
   JTextField statusLabel;
 
   int sleepSecs = 0;
@@ -6602,13 +6610,28 @@ class StatusClearThread extends Thread {
 
 	    EventQueue.invokeLater(new Runnable() {
 	      public void run() {
-		statusLabel.setText("");
+		statusLabel.setText(defaultMessage);
 		statusLabel.paintImmediately(statusLabel.getVisibleRect());
 	      }
 	    });
 
 	    sleepSecs = 0;
 	  }
+      }
+  }
+
+  public synchronized void setDefaultMessage(String message)
+  {
+    this.defaultMessage = message;
+
+    if (sleepSecs == 0)
+      {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+              statusLabel.setText(defaultMessage);
+              statusLabel.paintImmediately(statusLabel.getVisibleRect());
+            }
+          });
       }
   }
 

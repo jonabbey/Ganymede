@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -54,7 +54,7 @@
 package arlut.csd.ganymede.common;
 
 /**
- * <P>Enumeration for server-to-client messages.</P>
+ * Old-skool 'enumeration' interface for server-to-client messages.
  */
 
 public interface ClientMessage {
@@ -62,5 +62,8 @@ public interface ClientMessage {
   static final int ERROR = 0;
   static final int BUILDSTATUS = 1;
   static final int SOFTTIMEOUT = 2;
-  static final int LAST = 2;
+  static final int LOGIN = 3;
+  static final int LOGOUT = 4;
+  static final int LOGINCOUNT = 5;
+  static final int LAST = 5;
 }
