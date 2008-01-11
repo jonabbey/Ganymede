@@ -1361,9 +1361,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
     motdThread.setPriority(Thread.NORM_PRIORITY);
     motdThread.start();
-
-    // "Ready."    
-    setStatus(ts.l("start.ready_msg"), 0);
   }
   
   /**
