@@ -1783,7 +1783,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
   public final void setLoginCount(int loginCount)
   {
-    setDefaultStatus(ts.l("setLoginCount.message", new Integer(loginCount)));
+    if (loginCount == 1)
+      {
+        // "1 user logged in."
+        setDefaultStatus(ts.l("setLoginCount.single_login"));
+      }
+    else
+      {
+        // "{0,number,#} users logged in."
+        setDefaultStatus(ts.l("setLoginCount.multi_login", new Integer(loginCount)));
+      }
   }
 
   /**
