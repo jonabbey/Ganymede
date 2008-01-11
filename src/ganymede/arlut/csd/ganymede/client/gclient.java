@@ -79,6 +79,7 @@ import java.util.Vector;
 
 import java.util.prefs.*;
 
+import javax.swing.SwingConstants;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JFileChooser;
@@ -464,18 +465,13 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
   private JSplitPane sPane = null;
 
   /**
-   * Status field at the bottom of the client.
-   */
-  
-  final JTextField
-    statusLabel = new JTextField();
-
-  /**
-   * Build status field at the bottom of the client.
+   * Status, build status, and login status labels at the bottom of the client.
    */
 
   JLabel
-    buildLabel = new JLabel();
+    statusLabel = new JLabel(),
+    buildLabel = new JLabel(),
+    loginLabel = new JLabel();
 
   /**
    * The client's GUI tree component.
@@ -612,7 +608,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * clear the status label if it is not reset by another call to setStatus.
    */
 
-  public StatusClearThread statusThread;
+  public StatusClearThread statusThread, loginStatusThread;
 
   /**
    * This thread is set up to launder RMI build status updates from the server.
@@ -792,9 +788,16 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     JPanel bottomBar = new JPanel(false);
     bottomBar.setLayout(new BorderLayout());
 
-    statusLabel.setEditable(false);
+    JPanel statusPanel = new JPanel(false);
+    statusPanel.setLayout(new BorderLayout());
+    statusPanel.setBorder(statusBorder);
+
     statusLabel.setOpaque(false);
-    statusLabel.setBorder(statusBorder);
+    loginLabel.setOpaque(false);
+    loginLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+
+    statusPanel.add("West", statusLabel);
+    statusPanel.add("East", loginLabel);
 
     statusThread = new StatusClearThread(statusLabel);
     statusThread.start();
@@ -809,7 +812,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     lP.add("Center", buildLabel);
 
     bottomBar.add("West", lP);
-    bottomBar.add("Center", statusLabel);
+    bottomBar.add("Center", statusPanel);
     bottomBar.add("East", bottomButtonP);
 
     mainPanel.add("South", bottomBar);
@@ -1783,12 +1786,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     if (loginCount == 1)
       {
         // "1 user logged in."
-        setDefaultStatus(ts.l("setLoginCount.single_login"));
+        loginLabel.setText(ts.l("setLoginCount.single_login"));
       }
     else
       {
         // "{0,number,#} users logged in."
-        setDefaultStatus(ts.l("setLoginCount.multi_login", new Integer(loginCount)));
+        loginLabel.setText(ts.l("setLoginCount.multi_login", new Integer(loginCount)));
       }
   }
 
@@ -6555,15 +6558,15 @@ class StatusClearThread extends Thread {
   boolean done = false;
   boolean resetClock = false;
 
-  String defaultMessage = "";
+  private String defaultMessage = "";
 
-  JTextField statusLabel;
+  JLabel statusLabel;
 
   int sleepSecs = 0;
 
   /* -- */
 
-  public StatusClearThread(JTextField statusLabel)
+  public StatusClearThread(JLabel statusLabel)
   {
     this.statusLabel = statusLabel;
   }
