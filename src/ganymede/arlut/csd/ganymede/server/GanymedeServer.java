@@ -699,18 +699,41 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <p>Used by the Ganymede server to transmit build status notifications
-   * to connected clients.</p>
+   * Used by the Ganymede server to transmit notifications to
+   * connected clients.
+   *
+   * @param type Should be a valid value from arlut.csd.common.ClientMessage
+   * @param message The message to send
    */
 
   public static void sendMessageToRemoteSessions(int type, String message)
+  {
+    sendMessageToRemoteSessions(type, message, null);
+  }
+
+
+  /**
+   * Used by the Ganymede server to transmit notifications to
+   * connected clients.
+   *
+   * @param type Should be a valid value from arlut.csd.common.ClientMessage
+   * @param message The message to send
+   * @param self If non-null, sendMessageToRemoteSessions will skip sending the
+   * message to self
+   */
+
+  public static void sendMessageToRemoteSessions(int type, String message, GanymedeSession self)
   {
     Vector sessionsCopy = (Vector) sessions.clone();
 
     for (int i = 0; i < sessionsCopy.size(); i++)
       {
 	GanymedeSession session = (GanymedeSession) sessionsCopy.elementAt(i);
-	session.sendMessage(type, message);
+
+        if (session != self)
+          {
+            session.sendMessage(type, message);
+          }
       }
   }
 

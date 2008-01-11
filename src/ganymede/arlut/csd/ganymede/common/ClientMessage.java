@@ -65,5 +65,6 @@ public interface ClientMessage {
   static final int LOGIN = 3;
   static final int LOGOUT = 4;
   static final int LOGINCOUNT = 5;
-  static final int LAST = 5;
+  static final int COMMITNOTIFY = 6;
+  static final int LAST = 6;
 }

@@ -1082,14 +1082,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    g_client.setBuildStatus(e.getMessage());
 	  }
       }
-    else if (e.getType() == ClientMessage.LOGIN)
-      {
-	if (g_client != null)
-	  {
-	    g_client.setStatus(e.getMessage());
-	  }
-      }
-    else if (e.getType() == ClientMessage.LOGOUT)
+    else if (e.getType() == ClientMessage.LOGIN ||
+             e.getType() == ClientMessage.LOGOUT ||
+             e.getType() == ClientMessage.COMMITNOTIFY)
       {
 	if (g_client != null)
 	  {

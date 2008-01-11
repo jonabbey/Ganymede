@@ -1511,6 +1511,23 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
+   * This method returns the name of the persona who is active, or the
+   * raw user name if no persona privileges have been assumed.
+   */
+
+  public String getPersonaLabel()
+  {
+    if (personaName == null || personaName.equals(""))
+      {
+        return username;
+      }
+    else
+      {
+        return personaName;
+      }
+  }
+
+  /**
    * This method returns the name of the system that the client
    * is connected from.
    */
@@ -2371,6 +2388,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      }
 	  }
 
+        // "User {0} committed transaction."
+        GanymedeServer.sendMessageToRemoteSessions(ClientMessage.COMMITNOTIFY, ts.l("commitTransaction.user_commited", getPersonaLabel()), this);
 	Ganymede.runBuilderTasks();
 	unexportObjects(false);
       }
