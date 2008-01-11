@@ -2389,7 +2389,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
 
         // "User {0} committed transaction."
-        GanymedeServer.sendMessageToRemoteSessions(ClientMessage.COMMITNOTIFY, ts.l("commitTransaction.user_commited", getPersonaLabel()), this);
+        GanymedeServer.sendMessageToRemoteSessions(ClientMessage.COMMITNOTIFY, ts.l("commitTransaction.user_committed", getPersonaLabel()), this);
 	Ganymede.runBuilderTasks();
 	unexportObjects(false);
       }
