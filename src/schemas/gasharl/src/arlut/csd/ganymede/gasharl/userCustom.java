@@ -1103,8 +1103,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     
     if (categoryObj.isSet(userCategorySchema.EXPIRE))
       {
-	if ((object.getFieldValueLocal(SchemaConstants.ExpirationField) == null) &&
-	    (object.getFieldValueLocal(SchemaConstants.RemovalField) == null))
+	if (!object.isDefined(SchemaConstants.ExpirationField) &&
+            !object.isDefined(SchemaConstants.RemovalField))
 	  {
 	    return Ganymede.createErrorDialog("Missing Expiration Field",
 					      "User objects belonging to the " + categoryName +
@@ -1907,7 +1907,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // we don't want to allow anyone other than supergash to change our
     // uid once it is set.
 
-    if (object.getFieldValueLocal(UID) != null)
+    if (object.isDefined(UID))
       {
 	return PermEntry.getPermEntry(true, false, true, false);
       }
