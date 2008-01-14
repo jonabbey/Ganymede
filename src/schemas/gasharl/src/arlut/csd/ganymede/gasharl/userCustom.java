@@ -1044,7 +1044,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     return false;
   }
 
-
   /**
    * <p>Customization method to verify overall consistency of
    * a DBObject.  This method is intended to be overridden
@@ -1144,58 +1143,61 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // and make sure that the badge number is unique, if we're a
     // normal account and we don't have any attached admin personae.
 
-    Vector personaeList = object.getFieldValuesLocal(PERSONAE);
-
-    if ((personaeList == null || personaeList.size() == 0) && categoryName.equals("normal"))
+    if (object.isDefined(BADGE))
       {
-        String badge = (String) object.getFieldValueLocal(BADGE);
+        Vector personaeList = object.getFieldValuesLocal(PERSONAE);
 
-        QueryResult qr = null;
+        if ((personaeList == null || personaeList.size() == 0) && categoryName.equals("normal"))
+          {
+            String badge = (String) object.getFieldValueLocal(BADGE);
 
-        try
-          {
-            qr = gSession.query("select object from 'User' where 'Badge' == '" + StringUtils.escape(badge) + 
-                                "' and (not 'Username' == '" + StringUtils.escape(myUsername) +
-                                "') and ('Account Category' == 'normal') and (not 'Removal Date' defined)");
-          }
-        catch (NotLoggedInException ex)
-          {
-            throw new RuntimeException("Error in userObject.consistencyCheck(): query threw a NotLoggedInException.", ex);
-          }
-        catch (GanyParseException ex)
-          {
-            throw new RuntimeException("Error in userObject.consistencyCheck(): query could not be parsed correctly.", ex);
-          }
+            QueryResult qr = null;
 
-        if (qr != null && qr.size() != 0)
-          {
-            boolean badge_is_admin = false;
-            String conflict_name = null;
-
-            for (int i = 0; !badge_is_admin && i < qr.size(); i++)
+            try
               {
-                Invid matchInvid = qr.getInvid(i);
-
-                DBObject conflictUserObject = lookupInvid(matchInvid, false);
-
-                Vector personae = conflictUserObject.getFieldValuesLocal(PERSONAE);
-
-                if (personae != null && personae.size() > 0)
-                  {
-                    badge_is_admin = true;
-                  }
-                else
-                  {
-                    conflict_name = conflictUserObject.getLabel();
-                  }
+                qr = gSession.query("select object from 'User' where 'Badge' == '" + StringUtils.escape(badge) + 
+                                    "' and (not 'Username' == '" + StringUtils.escape(myUsername) +
+                                    "') and ('Account Category' == 'normal') and (not 'Removal Date' defined)");
+              }
+            catch (NotLoggedInException ex)
+              {
+                throw new RuntimeException("Error in userObject.consistencyCheck(): query threw a NotLoggedInException.", ex);
+              }
+            catch (GanyParseException ex)
+              {
+                throw new RuntimeException("Error in userObject.consistencyCheck(): query could not be parsed correctly.", ex);
               }
 
-            if (!badge_is_admin)
+            if (qr != null && qr.size() != 0)
               {
-                return Ganymede.createErrorDialog("Duplicate Badge Number",
-                                                  "This user object shares a badge number with the " + conflict_name + " user object.\n\n" +
-                                                  "Since both of these user accounts are 'normal' accounts, Ganymede can't tell which one should " +
-                                                  "be the account of record for information transfer to the HR database.");
+                boolean badge_is_admin = false;
+                String conflict_name = null;
+
+                for (int i = 0; !badge_is_admin && i < qr.size(); i++)
+                  {
+                    Invid matchInvid = qr.getInvid(i);
+
+                    DBObject conflictUserObject = lookupInvid(matchInvid, false);
+
+                    Vector personae = conflictUserObject.getFieldValuesLocal(PERSONAE);
+
+                    if (personae != null && personae.size() > 0)
+                      {
+                        badge_is_admin = true;
+                      }
+                    else
+                      {
+                        conflict_name = conflictUserObject.getLabel();
+                      }
+                  }
+
+                if (!badge_is_admin)
+                  {
+                    return Ganymede.createErrorDialog("Duplicate Badge Number",
+                                                      "This user object shares a badge number with the " + conflict_name + " user object.\n\n" +
+                                                      "Since both of these user accounts are 'normal' accounts, Ganymede can't tell which one should " +
+                                                      "be the account of record for information transfer to the HR database.");
+                  }
               }
           }
       }
