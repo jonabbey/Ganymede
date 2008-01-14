@@ -1319,7 +1319,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	try
 	  {
 	    // "Checking MOTD"
-	    setStatus(ts.l("start.motd_msg"));
+	    setStatus(ts.l("start.motd_msg"), 1);
 
 	    StringBuffer m;
 	    boolean html = true;
@@ -4155,7 +4155,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     String designation = getObjectDesignation(invid);
 
     // "Inactivating {0}."
-    setStatus(ts.l("inactivateObject.inactivating", designation));
+    setStatus(ts.l("inactivateObject.inactivating", designation), 2);
     setWaitCursor();
 
     try
@@ -4194,7 +4194,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    tree.refresh();
 	    // "{0} inactivated."
-	    setStatus(ts.l("inactivateObject.success", designation));
+	    setStatus(ts.l("inactivateObject.success", designation), 2);
 	    somethingChanged();
 	  }
 	else
@@ -4269,7 +4269,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	somethingChanged();
 
 	// "{0} reactivated."
-	setStatus(ts.l("reactivateObject.success", getObjectDesignation(invid)));
+	setStatus(ts.l("reactivateObject.success", getObjectDesignation(invid)), 2);
 
 	// remember that this invid has been edited, and will need
 	// to be refreshed on commit
@@ -5018,7 +5018,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	if (retVal == null || retVal.didSucceed())
 	  {
 	    // "Transaction canceled."
-	    setStatus(ts.l("cancelTransaction.canceled"));
+	    setStatus(ts.l("cancelTransaction.canceled"), 3);
 
 	    if (debug)
 	      {
@@ -5546,7 +5546,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     if (node instanceof BaseNode && !((BaseNode) node).isLoaded())
       {
 	// "Loading objects for base {0}."
-	setStatus(ts.l("treeNodeExpanded.loading", node.getText()), 0);
+	setStatus(ts.l("treeNodeExpanded.loading", node.getText()), 1);
 	setWaitCursor();
 
 	try
@@ -5560,7 +5560,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  }
 
 	// "Done loading objects for base {0}."
-	setStatus(ts.l("treeNodeExpanded.loaded", node.getText()));
+	setStatus(ts.l("treeNodeExpanded.loaded", node.getText()), 1);
 
 	((BaseNode) node).markLoaded();
 	setNormalCursor();
@@ -5709,12 +5709,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		    if (buffer == null)
 		      {
 			// "No results found from query operation on base {0}."
-			setStatus(ts.l("treeNodeMenuPerformed.empty_results", tempText));
+			setStatus(ts.l("treeNodeMenuPerformed.empty_results", tempText),2);
 		      }
 		    else
 		      {
 			// "Results returned from server query on base {0} - building table widget."
-			setStatus(ts.l("treeNodeMenuPerformed.results", tempText));
+			setStatus(ts.l("treeNodeMenuPerformed.results", tempText), 1);
 		    
 			thisGclient.wp.addTableWindow(thisGclient.getSession(), q, buffer);
 		      }
