@@ -332,7 +332,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
 
     // "Building window."    
-    setStatus(ts.l("init.building_window_status"));
+    setStatus(ts.l("init.building_window_status"), 1);
     
     // Window properties
 
@@ -1445,6 +1445,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   final db_object getObject()
   {
     return this.server_object;
+  }
+
+  private final void setStatus(String status, int seconds)
+  {
+    wp.gc.setStatus(status,seconds);
   }
 
   private final void setStatus(String status)

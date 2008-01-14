@@ -385,12 +385,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	if (editable)
 	  {
 	    // "Opening object for editing"
-	    setStatus(ts.l("addWindow.editing_status"));
+	    setStatus(ts.l("addWindow.editing_status"), 1);
 	  }
 	else
 	  {
 	    // "Opening object for viewing"
-	    setStatus(ts.l("addWindow.viewing_status"));
+	    setStatus(ts.l("addWindow.viewing_status"), 1);
 	  }
 
 	// First figure out the title, and put it in the hash
@@ -704,6 +704,18 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   /**
    * Convenience method, calls
    * {@link arlut.csd.ganymede.client.gclient#setStatus(java.lang.String) gclient.setStatus}
+   * to set some text in the client's status bar, with a time-to-live of the specified number
+   * of seconds.
+   */
+
+  public final void setStatus(String s, int seconds)
+  {
+    gc.setStatus(s, seconds);
+  }
+
+  /**
+   * Convenience method, calls
+   * {@link arlut.csd.ganymede.client.gclient#setStatus(java.lang.String) gclient.setStatus}
    * to set some text in the client's status bar, with a time-to-live of the
    * default 5 seconds.
    */
@@ -759,7 +771,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
 
     // "Querying object types"
-    setStatus(ts.l("addTableWindow.querying_status"));
+    setStatus(ts.l("addTableWindow.querying_status"), 1);
     gc.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
     try
@@ -800,7 +812,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	updateWindowMenu();
 	gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	setStatus("Done.");
+	setStatus("Done.", 1);
 	rt.getToolBar().grabFocus();
       }
   }
@@ -1083,7 +1095,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     /* -- */
 
     // "Closing a window."
-    setStatus(ts.l("closeWindow.closing_status"));
+    setStatus(ts.l("closeWindow.closing_status"), 1);
     
     w = (JInternalFrame)windowList.get(title);
 
@@ -1109,7 +1121,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  }
 
 	// "Window closed."
-	setStatus(ts.l("closeWindow.yes_sir_status"));
+	setStatus(ts.l("closeWindow.yes_sir_status"), 1);
       }
     else
       {
