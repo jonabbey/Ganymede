@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -345,16 +345,11 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
 	if (!loaded)
 	  {
-	    // "Loading vector element."
-	    setStatus(ts.l("open.loading_status"));
-
 	    if (!myContainerPanel.isLoaded())
 	      {
 		myContainerPanel.load();
 	      }
 
-	    // "Finished loading vector element."
-	    setStatus(ts.l("open.finished_loading_status"));
 	    add("Center", my_component);
 	    loaded = true;
 	  }
@@ -462,9 +457,4 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   public void mouseExited(MouseEvent e) {}
   public void mousePressed(MouseEvent e) {}
   public void mouseReleased(MouseEvent e) {}
-
-  public final void setStatus(String status)
-  {
-    vp.wp.getgclient().setStatus(status);
-  }
 }
