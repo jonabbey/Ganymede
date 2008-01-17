@@ -3529,7 +3529,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         resultMap.put(typeName, new dhcp_entry(typeName, typeString, value, optionObject.isSet(dhcpOptionSchema.BUILTIN)));
 
-        if (optionObject.isSet(dhcpOptionSchema.CUSTOMOPTION))
+        if (!optionObject.isSet(dhcpOptionSchema.BUILTIN) && optionObject.isSet(dhcpOptionSchema.CUSTOMOPTION))
           {
             customOptions.add(optionInvid);
           }

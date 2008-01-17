@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -167,7 +167,6 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
     return false;
   }
 
-
   /**
    * Customization method to verify whether the user should be able to
    * see a specific field in a given object.  Instances of 
@@ -189,9 +188,15 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
   public boolean canSeeField(DBSession session, DBField field)
   {
+    if (field.getID() == dhcpOptionSchema.CUSTOMOPTION)
+      {
+        return !field.getOwner().isSet(dhcpOptionSchema.BUILTIN);
+      }
+
     if (field.getID() == dhcpOptionSchema.CUSTOMCODE)
       {
-        return field.getOwner().isSet(dhcpOptionSchema.CUSTOMOPTION);
+        return !field.getOwner().isSet(dhcpOptionSchema.BUILTIN) &&
+          field.getOwner().isSet(dhcpOptionSchema.CUSTOMOPTION);
       }
 
     return super.canSeeField(session, field);
@@ -400,12 +405,50 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    if (field.getID() == dhcpOptionSchema.CUSTOMOPTION)
-      {
-        ReturnVal result = new ReturnVal(true, true);
-        result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.CUSTOMCODE);
+    // if the BUILTIN check box is toggled, we'll need to refresh the
+    // visibility of the CUSTOMOPTION and CUSTOMCODE fields.
 
-        return result;
+    if (operation == DBEditObject.SETVAL)
+      {
+        if (field.getID() == dhcpOptionSchema.BUILTIN)
+          {
+            if (Boolean.TRUE.equals(param1))
+              {
+                ReturnVal innerRetVal = null;
+                DBEditObject parent = (DBEditObject) field.getOwner();
+
+                innerRetVal = parent.setFieldValueLocal(dhcpOptionSchema.CUSTOMOPTION, Boolean.FALSE);
+
+                if (!ReturnVal.didSucceed(innerRetVal))
+                  {
+                    return innerRetVal;
+                  }
+
+                innerRetVal = parent.setFieldValueLocal(dhcpOptionSchema.CUSTOMOPTION, null);
+
+                if (!ReturnVal.didSucceed(innerRetVal))
+                  {
+                    return innerRetVal;
+                  }
+              }
+
+            ReturnVal result = new ReturnVal(true, true);
+            result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.CUSTOMOPTION);
+            result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.CUSTOMCODE);
+
+            return result;
+          }
+
+        // if the CUSTOMOPTION check box is toggled, we'll need to refresh
+        // the visibility of the CUSTOMCODE field.
+
+        if (field.getID() == dhcpOptionSchema.CUSTOMOPTION)
+          {
+            ReturnVal result = new ReturnVal(true, true);
+            result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.CUSTOMCODE);
+
+            return result;
+          }
       }
 
     return super.wizardHook(field, operation, param1, param2);
