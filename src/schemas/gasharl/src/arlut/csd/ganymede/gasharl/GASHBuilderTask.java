@@ -3352,9 +3352,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                             if (!foundOptions.contains(optionSpace))
                               {
                                 dhcp_dataFile.println("option space " + optionSpace + ";");
-                              }
-                            else
-                              {
                                 foundOptions.add(optionSpace);
                               }
                           }
