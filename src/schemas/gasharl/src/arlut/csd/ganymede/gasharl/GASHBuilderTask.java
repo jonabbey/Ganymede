@@ -3460,22 +3460,26 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         dhcp_entry entry = (dhcp_entry) values.next();
 
+        int length = 0;
+
         if (!entry.builtin)
           {
             result.append("\toption ");
+            length = 8;
           }
         else
           {
-            result.append("\t\t");
+            result.append("\t");
+            length = 0;
           }
 
         result.append(entry.name);
 
-        if (entry.name.length() < 9)
+        if (length + entry.name.length() < 16)
           {
             result.append("\t\t\t");
           }
-        else if (entry.name.length() < 17)
+        else if (length + entry.name.length() < 24)
           {
             result.append("\t\t");
           }
