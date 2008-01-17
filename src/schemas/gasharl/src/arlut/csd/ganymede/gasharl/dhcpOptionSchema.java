@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2007
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -67,7 +67,8 @@ package arlut.csd.ganymede.gasharl;
 
 public interface dhcpOptionSchema {
   final static short OPTIONNAME=256;
-  final static short OPTIONTYPE=258;
+  final static short BUILTIN=260;
   final static short CUSTOMOPTION=259;
   final static short CUSTOMCODE=257;
+  final static short OPTIONTYPE=258;
 }

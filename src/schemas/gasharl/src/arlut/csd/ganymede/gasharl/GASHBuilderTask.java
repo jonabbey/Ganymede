@@ -3460,7 +3460,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         dhcp_entry entry = (dhcp_entry) values.next();
 
-        result.append("\toption ");
+        if (!entry.builtin)
+          {
+            result.append("\toption ");
+          }
+        else
+          {
+            result.append("\t\t");
+          }
+
         result.append(entry.name);
 
         if (entry.name.length() < 9)
@@ -3519,7 +3527,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         String typeName = (String) optionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
         String typeString = (String) optionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
 
-        resultMap.put(typeName, new dhcp_entry(typeName, typeString, value));
+        resultMap.put(typeName, new dhcp_entry(typeName, typeString, value, optionObject.isSet(dhcpOptionSchema.BUILTIN)));
 
         if (optionObject.isSet(dhcpOptionSchema.CUSTOMOPTION))
           {
@@ -3539,11 +3547,13 @@ class dhcp_entry {
   public String name;
   public String type;
   public String value;
+  public boolean builtin;
 
-  public dhcp_entry(String name, String type, String value)
+  public dhcp_entry(String name, String type, String value, boolean builtin)
   {
     this.name = name;
     this.type = type;
     this.value = value;
+    this.builtin = builtin;
   }
 }
