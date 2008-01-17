@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -136,6 +136,16 @@ public class ReturnVal implements java.io.Serializable {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.ReturnVal");
+
+  /**
+   * Simple static helper method that Ganymede code can use to verify
+   * that a ReturnVal-returning operation did succeed.
+   */
+
+  static public boolean didSucceed(ReturnVal retVal)
+  {
+    return retVal == null || retVal.didSucceed();
+  }
 
   // ---
 
