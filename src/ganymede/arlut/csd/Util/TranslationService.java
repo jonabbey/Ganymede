@@ -130,7 +130,6 @@ public class TranslationService {
   Locale ourLocale = null;
   MessageFormat formatter = null;
   String lastPattern = null;
-  Object[] singleArgs, doubleArgs, tripleArgs, quadArgs;
   String resourceName;
   int wordWrapCols=0;
 
@@ -163,11 +162,6 @@ public class TranslationService {
     this.resourceName = resourceName;
 
     bundle = ResourceBundle.getBundle(resourceName, ourLocale);
-
-    this.singleArgs = new Object[1];
-    this.doubleArgs = new Object[2];
-    this.tripleArgs = new Object[3];
-    this.quadArgs = new Object[4];
   }
 
   /**
