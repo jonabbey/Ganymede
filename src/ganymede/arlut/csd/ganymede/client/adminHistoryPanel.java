@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -278,49 +278,27 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
   public void loadHistory()
   {
-    final adminHistoryPanel me = this;
+    showWait();
 
-    /* -- */
-
-    Thread historyThread = new Thread(new Runnable() {
-      public void run() {
-	try
-	  {
-	    try
-	      {
-		EventQueue.invokeAndWait(new Runnable() {
-		  public void run() {
-		    me.showWait();
-		  }
-		});
-	      }
-	    catch (InvocationTargetException ite)
-	      {
-		ite.printStackTrace();
-	      }
-	    catch (InterruptedException ie)
-	      {
-		ie.printStackTrace();
-	      }
-
-	    historyBuffer = gc.getSession().viewAdminHistory(invid, selectedDate);
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
-	finally
-	  {
-	    EventQueue.invokeLater(new Runnable() {
-	      public void run() {
-		me.showText(historyBuffer.toString());
-	      }
-	    });
-	  }
-      }}, "History loader thread");
-
-    historyThread.setPriority(Thread.NORM_PRIORITY);
-    historyThread.start();
+    try
+      {
+        historyBuffer = (StringBuffer) foxtrot.Worker.post(new foxtrot.Task()
+          {
+            public Object run() throws Exception
+            {
+              return gc.getSession().viewAdminHistory(invid, selectedDate);
+            }
+          }
+                                                           );
+      }
+    catch (Exception rx)
+      {
+        gc.processExceptionRethrow(rx, "Could not get object history.");
+      }
+    finally
+      {
+        showText(historyBuffer.toString());
+      }
   }
 
   public void dispose()
