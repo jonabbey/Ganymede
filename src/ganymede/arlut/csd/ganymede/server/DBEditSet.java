@@ -17,7 +17,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -351,17 +351,7 @@ public class DBEditSet {
 	return null;
       }
 
-    if (gSession.personaName != null)
-      {
-	return gSession.personaName;
-      }
-
-    if (gSession.getMyUserName() != null)
-      {
-	return gSession.getMyUserName();
-      }
-
-    return null;
+    return gSession.getPersonaLabel();
   }
 
   /**
@@ -2000,7 +1990,7 @@ public class DBEditSet {
 	    responsibleInvid = getGSession().userInvid;
 	  }
 
-	responsibleName = getGSession().getMyUserName();
+	responsibleName = getGSession().getPersonaLabel();
       }
     else
       {
@@ -2386,12 +2376,12 @@ public class DBEditSet {
 
     if (getGSession() != null)
       {
-	responsibleName = getGSession().getMyUserName();
-	responsibleInvid = getGSession().personaInvid;
+	responsibleName = getGSession().getPersonaLabel();
+	responsibleInvid = getGSession().getPersonaInvid();
 
 	if (responsibleInvid == null)
 	  {
-	    responsibleInvid = getGSession().userInvid;
+	    responsibleInvid = getGSession().getUserInvid();
 	  }
       }
     else

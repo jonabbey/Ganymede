@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -869,7 +869,7 @@ public class DBLog {
 	  {
 	    MailOut mailout = (MailOut) iter.next();
 
-	    // "Transaction summary: User {0}:{1}\n\n{2}{3}"
+            // "Transaction summary: User {0} {1}\n\n{2}{3}"
 	    String description = ts.l("endTransactionLog.summary_template",
 				      adminName, this.transactionTimeStamp.toString(),
 				      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
@@ -1237,7 +1237,7 @@ public class DBLog {
 
 	    objectEventType type = (objectEventType) objEventCodes.get(key);
 
-	    // "{0} summary: User {1}:{2}\n\n{3}{4}"
+            // "{0} summary: User {1} {2}\n\n{3}{4}"
 
 	    String description = ts.l("sendObjectMail.template",
 				      type.name,
@@ -1557,7 +1557,7 @@ public class DBLog {
 	if (event.admin != null)
 	  {
 	    VectorUtils.unionAdd(notifyVect, 
-				 adminPersonaCustom.convertAdminInvidToString(event.admin, 
+				 adminPersonaCustom.convertAdminInvidToString(event.admin,
 									      session));
 	  }
       }
