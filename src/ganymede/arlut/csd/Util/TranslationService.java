@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -275,10 +275,10 @@ public class TranslationService {
    * Ganymede without concern.</p>
    */
 
-  public synchronized String l(String key, Object param)
+  public String l(String key, Object param)
   {
     String pattern = null;
-    String result;
+    Object[] singleArgs = new Object[1];
 
     /* -- */
 
@@ -291,13 +291,9 @@ public class TranslationService {
 	return null;
       }
 
-    this.singleArgs[0] = param;
+    singleArgs[0] = param;
 
-    result = this.format(pattern, singleArgs);
-
-    this.singleArgs[0] = null;
-
-    return result;
+    return this.format(pattern, singleArgs);
   }
 
   /**
@@ -309,10 +305,10 @@ public class TranslationService {
    * Ganymede without concern.</p>
    */
 
-  public synchronized String l(String key, Object param, Object param2)
+  public String l(String key, Object param, Object param2)
   {
     String pattern = null;
-    String result;
+    Object[] doubleArgs = new Object[2];
 
     /* -- */
 
@@ -325,15 +321,10 @@ public class TranslationService {
 	return null;
       }
 
-    this.doubleArgs[0] = param; 
-    this.doubleArgs[1] = param2; 
+    doubleArgs[0] = param; 
+    doubleArgs[1] = param2; 
 
-    result = this.format(pattern, doubleArgs);
-
-    this.doubleArgs[0] = null;
-    this.doubleArgs[1] = null;
-
-    return result;
+    return this.format(pattern, doubleArgs);
   }
 
   /**
@@ -345,10 +336,10 @@ public class TranslationService {
    * Ganymede without concern.</p>
    */
 
-  public synchronized String l(String key, Object param, Object param2, Object param3)
+  public String l(String key, Object param, Object param2, Object param3)
   {
     String pattern = null;
-    String result;
+    Object[] tripleArgs = new Object[3];
 
     /* -- */
 
@@ -361,17 +352,11 @@ public class TranslationService {
 	return null;
       }
 
-    this.tripleArgs[0] = param; 
-    this.tripleArgs[1] = param2; 
-    this.tripleArgs[2] = param3; 
+    tripleArgs[0] = param; 
+    tripleArgs[1] = param2; 
+    tripleArgs[2] = param3; 
 
-    result = this.format(pattern, tripleArgs);
-
-    this.tripleArgs[0] = null;
-    this.tripleArgs[1] = null; 
-    this.tripleArgs[2] = null; 
-
-    return result;
+    return this.format(pattern, tripleArgs);
   }
 
   /**
@@ -383,10 +368,10 @@ public class TranslationService {
    * Ganymede without concern.</p>
    */
 
-  public synchronized String l(String key, Object param, Object param2, Object param3, Object param4)
+  public String l(String key, Object param, Object param2, Object param3, Object param4)
   {
     String pattern = null;
-    String result;
+    Object[] quadArgs = new Object[4];
 
     /* -- */
 
@@ -399,19 +384,12 @@ public class TranslationService {
 	return null;
       }
     
-    this.quadArgs[0] = param; 
-    this.quadArgs[1] = param2; 
-    this.quadArgs[2] = param3;
-    this.quadArgs[3] = param4;
+    quadArgs[0] = param; 
+    quadArgs[1] = param2; 
+    quadArgs[2] = param3;
+    quadArgs[3] = param4;
 
-    result = this.format(pattern, quadArgs);
-
-    this.quadArgs[0] = null;
-    this.quadArgs[1] = null;
-    this.quadArgs[2] = null;
-    this.quadArgs[3] = null;
-
-    return result;
+    return this.format(pattern, quadArgs);
   }
 
   /**
@@ -423,7 +401,7 @@ public class TranslationService {
    * Ganymede without concern.</p>
    */
 
-  public synchronized String l(String key, Object param, Object param2, Object param3, Object param4, Object param5)
+  public String l(String key, Object param, Object param2, Object param3, Object param4, Object param5)
   {
     String pattern = null;
     String result;
@@ -446,9 +424,7 @@ public class TranslationService {
     quintArgs[3] = param4;
     quintArgs[4] = param5;
 
-    result = this.format(pattern, quintArgs);
-
-    return result;
+    return this.format(pattern, quintArgs);
   }
 
   /**
@@ -460,10 +436,9 @@ public class TranslationService {
    * Ganymede without concern.</p>
    */
 
-  public synchronized String l(String key, Object param, Object param2, Object param3, Object param4, Object param5, Object param6)
+  public String l(String key, Object param, Object param2, Object param3, Object param4, Object param5, Object param6)
   {
     String pattern = null;
-    String result;
     Object sextArgs[] = new Object[6];
 
     /* -- */
@@ -484,9 +459,7 @@ public class TranslationService {
     sextArgs[4] = param5;
     sextArgs[5] = param6;
 
-    result = this.format(pattern, sextArgs);
-
-    return result;
+    return this.format(pattern, sextArgs);
   }
 
   public String toString()
@@ -496,17 +469,24 @@ public class TranslationService {
 
   private String format(String pattern, Object params[])
   {
-    if (formatter == null)
-      {
-	formatter = new MessageFormat(pattern);
-      }
-    else if (pattern != this.lastPattern)
-      {
-	formatter.applyPattern(pattern);
-	lastPattern = pattern;
-      }
+    String result = null;
 
-    String result = formatter.format(pattern, params);
+    // we have to synchronize to protect the formatter object
+
+    synchronized (this)
+      {
+        if (formatter == null)
+          {
+            formatter = new MessageFormat(pattern);
+          }
+        else if (pattern != this.lastPattern)
+          {
+            formatter.applyPattern(pattern);
+            lastPattern = pattern;
+          }
+
+        result = formatter.format(pattern, params);
+      }
 
     if (wordWrapCols > 0 && result.length() > wordWrapCols)
       {
