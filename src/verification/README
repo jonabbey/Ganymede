@@ -19,15 +19,20 @@ non-default language translation files against the default
 localization property files.  It reports on translation coverage and
 does some elementary error checking.
 
+All of this works only because Ganymede follows a consistent set of
+conventions in its localization handling, particularly the use of the
+TranslationService class and the ts.l() method calls to handle string
+localization.
+
 The Modules subdirectory contains Perl support modules used by the
 resource_validator.pl and translation_validator.pl scripts.
 
 To use these localization checking scripts, run 'ant validate' in the
-../src directory.
+src directory.
 
 The launchers directory contains utility scripts to run the Ganymede
 software under the Emma code coverage tool.  These scripts are for use
 during development and debugging.
 
 Jonathan Abbey
-14 April 2005
+19 January 2008
