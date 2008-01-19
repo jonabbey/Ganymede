@@ -942,37 +942,61 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
       }
   }
 
-  //
-  //
-  //
-  // SAX interface implementation starts here
-  //
-  //
-  //
-
   /**
-   * SAX 2.0 ContentHandler method which we don't use
+   * private enqueue method.  Will block on the internal XMLItem
+   * buffer if the circular buffer is full.
    */
 
-  public void startPrefixMapping(String prefix, String uri) throws SAXException
+  private void enqueue(XMLItem item) throws InterruptedException
   {
+    synchronized (buffer)
+      {
+	while (bufferContents >= bufferSize)
+	  {
+	    buffer.wait();
+	  }
+
+	buffer[enqueuePtr] = item;
+
+	if (++enqueuePtr >= bufferSize)
+	  {
+	    enqueuePtr = 0;
+	  }
+
+	bufferContents++;
+      }
   }
 
   /**
-   * SAX 2.0 ContentHandler method which we don't use
+   * private dequeue method.  assumes that the calling code will check
+   * bounds.
    */
 
-  public void endPrefixMapping(String prefix) throws SAXException
+  private XMLItem dequeue()
   {
+    synchronized (buffer)
+      {
+	XMLItem result = buffer[dequeuePtr];
+	buffer[dequeuePtr] = null;
+
+	if (++dequeuePtr >= bufferSize)
+	  {
+	    dequeuePtr = 0;
+	  }
+
+	bufferContents--;
+	
+	return result;
+      }
   }
 
-  /**
-   * SAX 2.0 ContentHandler method which we don't use
-   */
-
-  public void skippedEntity(String name) throws SAXException
-  {
-  }
+  //
+  //
+  //
+  // SAX DefaultHandler overrides start here
+  //
+  //
+  //
 
   /**
    * <p>The locator allows the application to determine the end
@@ -1372,32 +1396,6 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
       }
   }
 
-  /**
-   * Receive notification of a processing instruction.
-   *
-   * <p>The Parser will invoke this method once for each processing
-   * instruction found: note that processing instructions may occur
-   * before or after the main document element.</p>
-   *
-   * <p>A SAX parser must never report an XML declaration (XML 1.0,
-   * section 2.8) or a text declaration (XML 1.0, section 4.3.1)
-   * using this method.</p>
-   *
-   * <p>Like {@link #characters characters()}, processing instruction
-   * data may have characters that need more than one <code>char</code>
-   * value. </p>
-   *
-   * @param target the processing instruction target
-   * @param data the processing instruction data, or null if
-   *        none was supplied.  The data does not include any
-   *        whitespace separating it from the target
-   * @throws org.xml.sax.SAXException any SAX exception, possibly
-   *            wrapping another exception
-   */
-
-  public void processingInstruction(String target, String data) throws SAXException
-  {
-  }
 
   /**
    * Receive notification of a warning.
@@ -1551,54 +1549,6 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 	done = true;
 	err.println(exception.getMessage());
 	pourIntoBuffer(new XMLError(exception, locator, true));
-      }
-  }
-
-  /**
-   * private enqueue method.  Will block on the internal XMLItem
-   * buffer if the circular buffer is full.
-   */
-
-  private void enqueue(XMLItem item) throws InterruptedException
-  {
-    synchronized (buffer)
-      {
-	while (bufferContents >= bufferSize)
-	  {
-	    buffer.wait();
-	  }
-
-	buffer[enqueuePtr] = item;
-
-	if (++enqueuePtr >= bufferSize)
-	  {
-	    enqueuePtr = 0;
-	  }
-
-	bufferContents++;
-      }
-  }
-
-  /**
-   * private dequeue method.  assumes that the calling code will check
-   * bounds.
-   */
-
-  private XMLItem dequeue()
-  {
-    synchronized (buffer)
-      {
-	XMLItem result = buffer[dequeuePtr];
-	buffer[dequeuePtr] = null;
-
-	if (++dequeuePtr >= bufferSize)
-	  {
-	    dequeuePtr = 0;
-	  }
-
-	bufferContents--;
-	
-	return result;
       }
   }
 }
