@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -76,6 +76,11 @@ public class XMLCharData extends XMLItem {
   XMLCharData(char ch[], int start, int length)
   {
     data = new String(ch, start, length);
+  }
+
+  XMLCharData(String value)
+  {
+    data = value;
   }
 
   /**

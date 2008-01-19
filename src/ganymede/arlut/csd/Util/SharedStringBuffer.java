@@ -28,6 +28,8 @@ package arlut.csd.Util;
  
 public final class SharedStringBuffer implements java.io.Serializable {
 
+  private static final int DEFAULTSIZE = 32;
+
   /** The value is used for character storage. */
   private char value[];
   
@@ -42,7 +44,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
   
   public SharedStringBuffer() 
   {
-    this(16);
+    this(DEFAULTSIZE);
   }
 
   /**
@@ -189,14 +191,25 @@ public final class SharedStringBuffer implements java.io.Serializable {
 	expandCapacity(newLength);
       }
 
-    if (count < newLength)
+    if (newLength > count)
       {
 	for (; count < newLength; count++) 
 	  {
 	    value[count] = '\0';
 	  }
       } 
-    else 
+    else if (newLength == 0)
+      {
+	// let's not keep a huge sized buffer around needlessly
+
+	if (value.length > 4096)
+	  {
+	    value = new char[DEFAULTSIZE];
+	  }
+
+	count = 0;
+      }
+    else
       {
 	count = newLength;
       }

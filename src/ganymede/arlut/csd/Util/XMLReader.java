@@ -128,6 +128,7 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
   private boolean done = false;
   private XMLItem pushback = null;
   private XMLElement halfElement;
+  private SharedStringBuffer charBuffer = new SharedStringBuffer();
   private boolean skipWhiteSpace;
   private PrintWriter err;
   private CircleBuffer circleBuffer = new CircleBuffer(30);
@@ -943,6 +944,30 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
   }
 
   /**
+   * <p>This is a private helper method used to finish processing
+   * continuous character data.  The Java SAX2 parser is perfectly
+   * capable of generating multiple characters() calls during the
+   * processing of a single continuous block of character data, but we
+   * (the XMLReader class) only want to generate a single XMLCharData
+   * object for our clients.</p>
+   *
+   * <p>When non-character data comes in, XMLReader makes sure to call
+   * this method to get any accumulated character data flushed into
+   * our XMLItem CircleBuffer.</p>
+   */
+
+  private final void completeCharData() throws SAXException
+  {
+    if (charBuffer.length() != 0)
+      {
+	XMLItem _item = new XMLCharData(charBuffer.toString());
+	charBuffer.setLength(0);
+
+	pourIntoBuffer(_item);
+      }
+  }
+
+  /**
    * private enqueue method.  Will block on the internal XMLItem
    * buffer if the circular buffer is full.
    */
@@ -1049,8 +1074,6 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 	      }
 	  }
 
-	completeElement();
-
 	if (done)
 	  {
 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
@@ -1095,6 +1118,7 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 	      }
 	  }
 
+	completeCharData();
 	completeElement();
 
 	if (done)
@@ -1193,6 +1217,7 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 	      }
 	  }
 
+	completeCharData();
 	completeElement();
 
 	if (done)
@@ -1246,6 +1271,8 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
 	      }
 	  }
+
+	completeCharData();
 
 	if (halfElement != null && halfElement.matches(qName))
 	  {
@@ -1335,8 +1362,8 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
  	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
 	    throw ex;
 	  }
-	
-	pourIntoBuffer(new XMLCharData(ch, start, length));
+
+	charBuffer.append(ch, start, length);
       }
   }
 
@@ -1384,6 +1411,7 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 	      }
 	  }
 
+	completeCharData();
 	completeElement();
 
 	if (done)
@@ -1395,7 +1423,6 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 	pourIntoBuffer(new XMLCharData(ch, start, length));
       }
   }
-
 
   /**
    * Receive notification of a warning.
@@ -1433,6 +1460,7 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 	      }
 	  }
 
+	completeCharData();
 	completeElement();
 
 	if (done)
@@ -1486,6 +1514,7 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 	      }
 	  }
 
+	completeCharData();
 	completeElement();
 
 	if (done)
@@ -1538,6 +1567,7 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 	      }
 	  }
 
+	completeCharData();
 	completeElement();
 
 	if (done)
