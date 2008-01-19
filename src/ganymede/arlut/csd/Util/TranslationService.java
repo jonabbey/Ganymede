@@ -473,7 +473,7 @@ public class TranslationService {
           {
             formatter = new MessageFormat(pattern);
           }
-        else if (pattern != this.lastPattern)
+        else if (!pattern.equals(this.lastPattern))
           {
             formatter.applyPattern(pattern);
             lastPattern = pattern;
