@@ -80,7 +80,7 @@ public class ParseArgs {
     
     for (int i = 0; i < args.length; i++)
       {
-	if (args[i].equals(argument))
+	if (args[i].toLowerCase().equals(argument.toLowerCase()))
 	  {
 	    return true;
 	  }
@@ -110,7 +110,7 @@ public class ParseArgs {
 
     for (int i = 0; i < args.length; i++)
       {
-	if (args[i].startsWith(argument))
+	if (args[i].toLowerCase().startsWith(argument.toLowerCase()))
 	  {
 	    int index = args[i].indexOf("=");
 
