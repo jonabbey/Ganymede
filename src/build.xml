@@ -230,8 +230,7 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/crypto/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/listHandle.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
-      <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
-      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
+      <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/> 
       <fileset dir="${build.classes}" includes="Qsmtp/**/*.class"/>
       <fileset dir="${build.classes}" includes="jcrypt/**/*.class"/>
       <fileset dir="${build.classes}" includes="md5/**/*.class"/>
@@ -263,7 +262,6 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/server/*_Stub.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/password/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/arl_phone/*.class"/>
-      <fileset dir="${build.classes}" includes="org/xml/sax/**/*.class"/>
       <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
 
