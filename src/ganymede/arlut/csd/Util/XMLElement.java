@@ -55,7 +55,7 @@
 
 package arlut.csd.Util;
 
-import org.xml.sax.AttributeList;
+import org.xml.sax.Attributes;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -78,7 +78,7 @@ public class XMLElement extends XMLItem {
 
   /* -- */
 
-  XMLElement(String name, AttributeList atts)
+  XMLElement(String name, Attributes atts)
   {
     int length;
 
@@ -95,7 +95,7 @@ public class XMLElement extends XMLItem {
 
 	for (int i = 0; i < atts.getLength(); i++)
 	  {
-	    attrKeys[i] = atts.getName(i);
+	    attrKeys[i] = atts.getLocalName(i);
 	    attrVals[i] = atts.getValue(i);
 	  }
       }
