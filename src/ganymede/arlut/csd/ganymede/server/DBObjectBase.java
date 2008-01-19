@@ -2226,7 +2226,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>This method is used to associate a management class with this
    * object base.</p>
    *
-
    * <p>The newClassName argument must be fully qualified, and must
    * refer to one of two kinds of classes.  The first is a {@link
    * arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass
