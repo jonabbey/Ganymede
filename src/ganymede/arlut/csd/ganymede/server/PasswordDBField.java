@@ -365,6 +365,45 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
+   * private helper to clear stored unnecessary stored password
+   * information in this field
+   */
+
+  private synchronized final void clear_unused_stored()
+  {
+    if (!getFieldDef().isCrypted())
+      {
+	cryptedPass = null;
+      }
+
+    if (!getFieldDef().isMD5Crypted())
+      {
+	md5CryptPass = null;
+      }
+
+    if (!getFieldDef().isApacheMD5Crypted())
+      {
+	apacheMd5CryptPass = null;
+      }
+
+    if (!getFieldDef().isWinHashed())
+      {
+	lanHash = null;
+	ntHash = null;
+      }
+
+    if (!getFieldDef().isSSHAHashed())
+      {
+	sshaHash = null;
+      }
+
+    if (!getFieldDef().isShaUnixCrypted())
+      {
+        shaUnixCrypt = null;    // force new hash
+      }
+  }
+
+  /**
    * Returns true if obj is a field with the same value(s) as
    * this one.
    *
@@ -1172,6 +1211,8 @@ public class PasswordDBField extends DBField implements pass_field {
     // least to the limits of chance collision), go ahead and take the
     // opportunity to capture the plaintext and set up any hashes that
     // we want to use but don't have initialized at this point.
+    //
+    // we call this 'passive password capture'.
 
     if (success && uncryptedPass == null)
       {
@@ -1181,6 +1222,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    (precision > 0 && precision >= plaintext.length()))
 	  {
 	    uncryptedPass = plaintext;
+	    clear_unused_stored();
 	    setHashes(plaintext, false);
 	  }
       }
