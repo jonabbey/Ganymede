@@ -869,7 +869,7 @@ public class DBLog {
 	  {
 	    MailOut mailout = (MailOut) iter.next();
 
-            // "Transaction summary: User {0} {1,date,"EEE MMM dd HH:mm:ss zzz yyyy"}\n\n{2}{3}"
+            // "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{2}{3}"
 	    String description = ts.l("endTransactionLog.summary_template",
 				      adminName, this.transactionTimeStamp,
 				      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
@@ -1237,7 +1237,7 @@ public class DBLog {
 
 	    objectEventType type = (objectEventType) objEventCodes.get(key);
 
-            // "{0} summary: User {1} {2,date,"EEE MMM dd HH:mm:ss zzz yyyy"}\n\n{3}{4}"
+            // "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{3}{4}"
 
 	    String description = ts.l("sendObjectMail.template",
 				      type.name,
