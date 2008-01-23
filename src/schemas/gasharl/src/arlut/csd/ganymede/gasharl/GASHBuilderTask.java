@@ -3379,6 +3379,34 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                         String type = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
                         Integer code = (Integer) obj.getFieldValueLocal(dhcpOptionSchema.CUSTOMCODE);
 
+                        // we need to use the expanded syntax for the
+                        // option types for the ISC DHCP server
+
+                        if (type.equals("uint8"))
+                          {
+                            type = "unsigned integer 8";
+                          }
+                        else if (type.equals("int8"))
+                          {
+                            type = "signed integer 8";
+                          }
+                        else if (type.equals("uint16"))
+                          {
+                            type = "unsigned integer 16";
+                          }
+                        else if (type.equals("int16"))
+                          {
+                            type = "signed integer 16";
+                          }
+                        else if (type.equals("uint32"))
+                          {
+                            type = "unsigned integer 16";
+                          }
+                        else if (type.equals("int32"))
+                          {
+                            type = "signed integer 16";
+                          }
+
                         dhcp_dataFile.println("option " + name +
                                               " code " + code +
                                               " = " + type + ";");
