@@ -455,6 +455,42 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
+   * This method provides a hook that can be used to check any values
+   * to be set in any field in this object.  Subclasses of
+   * DBEditObject should override this method, implementing basically
+   * a large switch statement to check for any given field whether the
+   * submitted value is acceptable given the current state of the
+   * object.
+   *
+   * Question: what synchronization issues are going to be needed
+   * between DBEditObject and DBField to insure that we can have
+   * a reliable verifyNewValue method here?
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal verifyNewValue(DBField field, Object value)
+  {
+    if (field.getID() == dhcpOptionSchema.OPTIONNAME)
+      {
+        String valueStr = (String) value;
+
+        if (valueStr.startsWith("dhcp.") ||
+            valueStr.startsWith("server.") ||
+            valueStr.startsWith("agent.") ||
+            valueStr.startsWith("nwip.") ||
+            valueStr.startsWith("fqdn."))
+          {
+            return Ganymede.createErrorDialog("We do not currently support the use of the built-in option spaces.");
+          }
+      }
+
+    return super.verifyNewValue(field,value);
+  }
+
+  /**
    * This method is used to verify the value being set on a
    * dhcpEntryCustom object that points to this dhcpOptionCustom
    * object.
