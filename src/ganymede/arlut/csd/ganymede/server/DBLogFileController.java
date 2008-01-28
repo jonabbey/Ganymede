@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -68,6 +68,7 @@ import java.util.Vector;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.WordWrap;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -265,16 +266,18 @@ public class DBLogFileController implements DBLogController {
 	  {
 	    java.lang.Process helperProcess;
 
+            String[] args = null;
+
 	    if (keyOnAdmin)
 	      {
-		helperProcess = runtime.exec(Ganymede.logHelperProperty +
-					     " -a " + invid.toString());
+                args = new String[] {Ganymede.logHelperProperty, "-a", invid.toString()};
 	      }
 	    else
 	      {
-		helperProcess = runtime.exec(Ganymede.logHelperProperty + 
-					     " " + invid.toString());
+                args = new String[] {Ganymede.logHelperProperty, invid.toString()};
 	      }
+
+            helperProcess = runtime.exec(args);
 
 	    in = new BufferedReader(new InputStreamReader(helperProcess.getInputStream()));
 	  }
@@ -342,6 +345,16 @@ public class DBLogFileController implements DBLogController {
 	      }
 
 	    event = parseEvent(line);
+
+            if (invid.getType() == SchemaConstants.UserBase)
+              {
+                if (event.eventClassToken.equals("normallogin") ||
+                    event.eventClassToken.equals("normallogout") ||
+                    event.eventClassToken.equals("abnormallogout"))
+                  {
+                    continue;       // we don't want to show login/logout activity here
+                  }
+              }
 
 	    boolean found = false;
 

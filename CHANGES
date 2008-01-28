@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-January 1, 2008
+February 1, 2008
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: January 1, 2008
+RELEASE DATE: February 1, 2008
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1167,6 +1167,17 @@ These new hash algorithms are intended for widespread adoption in a
 way that OpenBSD's bcrypt hash algorithm never achieved, while
 supporting scalable computational requirements to 'future-proof' the
 hash algorithm.
+
+76. [SERVER] Removed user login and logout events from user history panel
+
+Previously, when you viewed the history of changes to a user object,
+you'd see a ton of login/logout events if that user happened to be a
+Ganymede administrator, or even an end-user change his password
+through Ganymede.
+
+We're not filtering out this event spam from the retrieveHistory
+method on the DBLog, so that it will be easier to see actual changes
+committed against a user object.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 

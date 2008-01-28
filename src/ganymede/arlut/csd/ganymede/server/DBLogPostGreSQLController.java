@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -67,6 +67,7 @@ import java.util.Vector;
 
 import arlut.csd.Util.WordWrap;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -493,6 +494,16 @@ public class DBLogPostGreSQLController implements DBLogController {
 	    String adminName = rs.getString(3);
 	    String text = rs.getString(4);
 	    String transactionID = rs.getString(5);
+
+            if (invid.getType() == SchemaConstants.UserBase)
+              {
+                if (token.equals("normallogin") ||
+                    token.equals("normallogout") ||
+                    token.equals("abnormallogout"))
+                  {
+                    continue;       // we don't want to show login/logout activity here
+                  }
+              }
 
 	    if (prevTransID != null && !prevTransID.equals(transactionID))
 	      {
