@@ -3528,6 +3528,40 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     Iterator values = options.values().iterator();
 
+    HashSet spaces = new HashSet();
+
+    while (values.hasNext())
+      {
+        dhcp_entry entry = (dhcp_entry) values.next();
+
+        if (entry.builtin)
+          {
+            continue;
+          }
+
+        if (entry.name.indexOf('.') != -1)
+          {
+            String spaceName = entry.name.substring(0, entry.name.indexOf('.'));
+
+            if (spaces.size() == 0)
+              {
+                result.append("\tsite-option-space \"" + spaceName + "\"\n");
+                spaces.add(spaceName);
+              }
+            else
+              {
+                if (!spaces.contains(spaceName))
+                  {
+                    Ganymede.debug("GASHBuilderTask: writeDHCPInfo() ran into problems with " + object.getLabel() + " due to conflicting DHCP option spaces.");
+                  }
+              }
+          }
+      }
+
+    // and reset our Iterator.
+
+    values = options.values().iterator();
+
     while (values.hasNext())
       {
         dhcp_entry entry = (dhcp_entry) values.next();
