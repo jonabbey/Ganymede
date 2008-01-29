@@ -193,7 +193,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
         return !field.getOwner().isSet(dhcpOptionSchema.BUILTIN);
       }
 
-    if (field.getID() == dhcpOptionSchema.CUSTOMCODE)
+    if (field.getID() == dhcpOptionSchema.CUSTOMCODE || field.getID() == dhcpOptionSchema.FORCESEND)
       {
         return !field.getOwner().isSet(dhcpOptionSchema.BUILTIN) &&
           field.getOwner().isSet(dhcpOptionSchema.CUSTOMOPTION);
@@ -435,17 +435,19 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
             ReturnVal result = new ReturnVal(true, true);
             result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.CUSTOMOPTION);
             result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.CUSTOMCODE);
+            result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.FORCESEND);
 
             return result;
           }
 
         // if the CUSTOMOPTION check box is toggled, we'll need to refresh
-        // the visibility of the CUSTOMCODE field.
+        // the visibility of the CUSTOMCODE and FORCESEND fields.
 
         if (field.getID() == dhcpOptionSchema.CUSTOMOPTION)
           {
             ReturnVal result = new ReturnVal(true, true);
             result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.CUSTOMCODE);
+            result.addRescanField(field.getOwner().getInvid(), dhcpOptionSchema.FORCESEND);
 
             return result;
           }
