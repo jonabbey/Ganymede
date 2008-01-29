@@ -3547,7 +3547,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
             if (spaces.size() == 0)
               {
-                result.append("\tsite-option-space \"" + spaceName + "\";\n");
+                result.append("\tsite-option-space\t\t\"" + spaceName + "\";\n");
                 spaces.add(spaceName);
               }
             else
@@ -3637,7 +3637,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         if (!entry.builtin)
           {
             result.append("\toption ");
-            length = 8;
+            length = 7;
           }
         else
           {
