@@ -70,5 +70,6 @@ public interface dhcpOptionSchema {
   final static short BUILTIN=260;
   final static short CUSTOMOPTION=259;
   final static short CUSTOMCODE=257;
+  final static short FORCESEND=261;
   final static short OPTIONTYPE=258;
 }

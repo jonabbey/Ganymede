@@ -3528,6 +3528,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     Iterator values = options.values().iterator();
 
+    // first make sure we've declared any site-option-space that we'll need to use
+
     HashSet spaces = new HashSet();
 
     while (values.hasNext())
@@ -3558,7 +3560,48 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           }
       }
 
-    // and reset our Iterator.
+    // second make sure that we've forced any mandatory options
+
+    HashSet forcedOptions = new HashSet();
+
+    values = options.values().iterator();
+
+    while (values.hasNext())
+      {
+        dhcp_entry entry = (dhcp_entry) values.next();
+
+        if (entry.forced)
+          {
+            forcedOptions.add(entry);
+          }
+      }
+
+    if (forcedOptions.size() > 0)
+      {
+        StringBuffer hexOptionCodes = new StringBuffer();
+
+        values = forcedOptions.iterator();
+
+        while (values.hasNext())
+          {
+            dhcp_entry entry = (dhcp_entry) values.next();
+
+            if (entry.forced && entry.code != 0)
+              {
+                hexOptionCodes.append(",");
+                hexOptionCodes.append(java.lang.Integer.toHexString(entry.code));
+              }
+          }
+
+        result.append("\tif exists dhcp-parameter-request-list {\n");
+        result.append("\t\t# Ganymede forced dhcp options\n");
+        result.append("\t\toption dhcp-parameter-request-list = concat(option dhcp-parameter-request-list");
+        result.append(hexOptionCodes);
+        result.append(");\n");
+        result.append("\t}\n");
+      }
+
+    // third, let's write out the actual options for this host
 
     values = options.values().iterator();
 
@@ -3637,7 +3680,16 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         String typeName = (String) optionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
         String typeString = (String) optionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
 
-        resultMap.put(typeName, new dhcp_entry(typeName, typeString, value, optionObject.isSet(dhcpOptionSchema.BUILTIN)));
+        Integer typeCode = (Integer) optionObject.getFieldValueLocal(dhcpOptionSchema.CUSTOMCODE);
+
+        int typecode = 0;
+
+        if (typeCode != null)
+          {
+            typecode = typeCode.intValue();
+          }
+
+        resultMap.put(typeName, new dhcp_entry(typeName, typeString, value, optionObject.isSet(dhcpOptionSchema.BUILTIN), typecode, optionObject.isSet(dhcpOptionSchema.FORCESEND)));
 
         if (!optionObject.isSet(dhcpOptionSchema.BUILTIN) && optionObject.isSet(dhcpOptionSchema.CUSTOMOPTION))
           {
@@ -3658,12 +3710,16 @@ class dhcp_entry {
   public String type;
   public String value;
   public boolean builtin;
+  public int code;
+  public boolean forced;
 
-  public dhcp_entry(String name, String type, String value, boolean builtin)
+  public dhcp_entry(String name, String type, String value, boolean builtin, int code, boolean forced)
   {
     this.name = name;
     this.type = type;
     this.value = value;
     this.builtin = builtin;
+    this.code = code;
+    this.forced = forced;
   }
 }
