@@ -1,37 +1,37 @@
 
 <ganyschema>
   <namespaces>
-    <namespace name="ownerbase"/>
-    <namespace name="username"/>
-    <namespace name="access"/>
-    <namespace name="persona"/>
-    <namespace name="groupname"/>
-    <namespace name="IPspace"/>
-    <namespace name="DNS"/>
+    <namespace name="ownerbase" case-sensitive="false"/>
+    <namespace name="username" case-sensitive="false"/>
+    <namespace name="access" case-sensitive="false"/>
+    <namespace name="persona" case-sensitive="false"/>
+    <namespace name="groupname" case-sensitive="false"/>
+    <namespace name="IPspace" case-sensitive="false"/>
+    <namespace name="DNS" case-sensitive="false"/>
     <namespace name="roomspace" case-sensitive="true"/>
-    <namespace name="netgroup"/>
+    <namespace name="netgroup" case-sensitive="false"/>
     <namespace name="eventtoken" case-sensitive="true"/>
     <namespace name="automap" case-sensitive="true"/>
     <namespace name="uid" case-sensitive="true"/>
     <namespace name="gid" case-sensitive="true"/>
-    <namespace name="systems"/>
+    <namespace name="systems" case-sensitive="false"/>
     <namespace name="UserCategory" case-sensitive="true"/>
-    <namespace name="contractname"/>
-    <namespace name="contractnumber"/>
+    <namespace name="contractname" case-sensitive="false"/>
+    <namespace name="contractnumber" case-sensitive="false"/>
     <namespace name="systemtype" case-sensitive="true"/>
     <namespace name="networkname" case-sensitive="true"/>
     <namespace name="VolumeSpace" case-sensitive="true"/>
-    <namespace name="GUIDspace"/>
-    <namespace name="reservations"/>
-    <namespace name="buildertask"/>
+    <namespace name="GUIDspace" case-sensitive="false"/>
+    <namespace name="reservations" case-sensitive="false"/>
+    <namespace name="buildertask" case-sensitive="false"/>
     <namespace name="usermap" case-sensitive="true"/>
     <namespace name="shellspace" case-sensitive="true"/>
     <namespace name="nisserver" case-sensitive="true"/>
     <namespace name="interfacelabel" case-sensitive="true"/>
-    <namespace name="mailman"/>
-    <namespace name="dhcp_group"/>
-    <namespace name="dhcp_option_entry"/>
-    <namespace name="dhcp_option_type"/>
+    <namespace name="mailman" case-sensitive="false"/>
+    <namespace name="dhcp_group" case-sensitive="false"/>
+    <namespace name="dhcp_option_entry" case-sensitive="false"/>
+    <namespace name="dhcp_option_type" case-sensitive="false"/>
   </namespaces>
 
   <object_type_definitions>
@@ -191,7 +191,7 @@
                 <comment>Persona password</comment>
                 <typedef type="password">
                   <maxlength val="32"/>
-                  <crypted/>
+                  <shaUnixCrypted type="256" rounds="5000"/>
                 </typedef>
               </fielddef>
               <fielddef name="GASH_Prefix" id="256">
@@ -745,6 +745,11 @@ in this field.&lt;/p&gt;&lt;/html&gt;</comment>
                 <namespace val="networkname"/>
               </typedef>
             </fielddef>
+            <fielddef name="DHCP_Enabled" id="267">
+              <comment>If checked, we will generate DHCP records
+for this network.</comment>
+              <typedef type="boolean"/>
+            </fielddef>
             <fielddef name="Public_Network" id="266">
               <typedef type="boolean"/>
             </fielddef>
@@ -1271,9 +1276,13 @@ conflicts with this name.</comment>
                 <namespace val="dhcp_option_type"/>
               </typedef>
             </fielddef>
-            <fielddef name="Option_Type" id="258">
-              <typedef type="string">
-              </typedef>
+            <fielddef name="Built-in" id="260">
+              <comment>If selected, this will be used as a DHCP statement,
+not as an option.
+
+Should only be used for filename, next-server,
+etc.</comment>
+              <typedef type="boolean"/>
             </fielddef>
             <fielddef name="Custom_Option" id="259">
               <comment>If true, this option is a site-local custom option,
@@ -1281,8 +1290,18 @@ whose name is not defined in IETF RFCs.  A specific
 numeric code must be provided for custom options.</comment>
               <typedef type="boolean"/>
             </fielddef>
+            <fielddef name="Force_Send" id="261">
+              <comment>If this field is checked, Ganymede will cause
+this field to be forcibly sent to the client, even
+if the client does not explicitly request it.</comment>
+              <typedef type="boolean"/>
+            </fielddef>
             <fielddef name="Option_Code" id="257">
               <typedef type="numeric"/>
+            </fielddef>
+            <fielddef name="Option_Type" id="258">
+              <typedef type="string">
+              </typedef>
             </fielddef>
           </tab>
         </objectdef>
