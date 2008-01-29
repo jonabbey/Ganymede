@@ -3579,6 +3579,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (forcedOptions.size() > 0)
       {
         StringBuffer hexOptionCodes = new StringBuffer();
+        StringBuffer concatPrefix = new StringBuffer();
 
         values = forcedOptions.iterator();
 
@@ -3588,17 +3589,39 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
             if (entry.forced && entry.code != 0)
               {
-                hexOptionCodes.append(",");
+                if (hexOptionCodes.length() == 0)
+                  {
+                    hexOptionCodes.append(",");
+                  }
+                else
+                  {
+                    hexOptionCodes.append("),");
+                  }
+
+                if (concatPrefix.length () == 0)
+                  {
+                    concatPrefix.append("concat(option dhcp-parameter-request-list");
+                  }
+                else
+                  {
+                    concatPrefix.insert(0, "concat(");
+                  }
+                      
                 hexOptionCodes.append(java.lang.Integer.toHexString(entry.code));
               }
           }
 
-        result.append("\tif exists dhcp-parameter-request-list {\n");
-        result.append("\t\t# Ganymede forced dhcp options\n");
-        result.append("\t\toption dhcp-parameter-request-list = concat(option dhcp-parameter-request-list");
-        result.append(hexOptionCodes);
-        result.append(");\n");
-        result.append("\t}\n");
+        if (hexOptionCodes.length() != 0)
+          {
+            hexOptionCodes.append(");\n");
+
+            result.append("\tif exists dhcp-parameter-request-list {\n");
+            result.append("\t\t# Ganymede forced dhcp options\n");
+            result.append("\t\toption dhcp-parameter-request-list = ");
+            result.append(concatPrefix);
+            result.append(hexOptionCodes);
+            result.append("\t}\n");
+          }
       }
 
     // third, let's write out the actual options for this host
