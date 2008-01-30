@@ -1009,6 +1009,7 @@ for this network.</comment>
             </fielddef>
             <fielddef name="Option_Value" id="258">
               <typedef type="string">
+                <badchars val="&quot;"/>
               </typedef>
             </fielddef>
           </tab>
