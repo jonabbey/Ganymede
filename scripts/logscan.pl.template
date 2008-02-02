@@ -1,13 +1,14 @@
-#!/opt/bin/perl
+#!/usr/bin/perl
 #
-# This script is designed to assist the Ganymede server by
-# quickly scanning through the Ganymede log file and printing
-# out only those lines which relate to a specified object id.  The
-# Ganymede server is not very efficient at doing this, and by
-# using an external filtering program the Ganymede server can
-# provide object history from its log file much much more quickly than
-# if the server had to filter out all the irrelevant history details
-# itself with the current server code.
+# This script is designed to assist the Ganymede server by quickly
+# scanning through the Ganymede log file and printing out only those
+# lines which the Ganymede server is seeking to retrieve.
+#
+# The Ganymede server is not very efficient at doing this, and by
+# using an external filtering program the Ganymede server can provide
+# object history from its log file much much more quickly than if the
+# server had to filter out all the irrelevant history details itself
+# with the current server code.
 #
 # $Revision$
 # $Date$
@@ -21,53 +22,361 @@
 #
 ############################################################
 
+$| = 1;
+$debug = 0;
+
+##########################################################################
+#
+#                                                                 find_arg
+# input: $token, @args
+#
+# output: the string argument following the single character
+# $token.. for instance, if $token is 'f', find_arg will return the
+# string following -f in the @args list, if it can be found.
+#
+# if the token can't be found following a dash character, an empty string
+# will be returned.
+#
+#
+##########################################################################
+
+sub find_arg {
+  my ($token, @args) = @_;
+
+  my ($i, $word, $localword, $tokenregexp);
+
+  $i = 0;
+  $localword = "";
+
+  $tokenregexp = $token;
+  $tokenregexp =~ s/(\W)/\\$1/g;	# backslash escape any special chars
+
+  while ($i <= $#args && $args[$i] =~ /^-(.*)$/) {
+    $word=$1;
+    $i++;
+
+    if ($word =~ /^$tokenregexp/) {
+      if (length($word)==1) {
+	$localword = $args[$i];
+      } else {
+	$word =~ /^$tokenregexp(.*)$/;
+	$localword = $1;
+      }
+
+      last;
+    }
+  }
+
+  if ($localword eq "") {
+    $localword = undef;
+  }
+
+  return $localword;
+}
+
+##########################################################################
+#
+#                                                            read_switches
+# input: $switchlist, @args
+#
+# The $switchlist string should be a concatenation of the
+# permissible single-character command line flags.
+#
+# output: sets flags in the global %switches hash
+#
+##########################################################################
+
+sub read_switches {
+  my ($switchlist, @args) = @_;
+
+  my ($i, $word, @switches);
+
+  $i = 0;
+  $localword = "";
+
+  while ($i <= $#args && $args[$i] =~ /^-(.*)$/) {
+    $word=$1;
+    $i++;
+
+    # the switches in the following regexp can accept arguments, so
+    # we'll skip past the next token if we see one of them naked.
+
+    if ($word =~ /^[fdlb]/) {
+      if (length($word)==1) {
+	$i++;
+      }
+      next;
+    }
+
+    if ($word =~ /(^[$switchlist]+)$/) {
+      @switches= split (//, $1);
+      for $switch (@switches) {
+	$switches{$switch}="-$switch";
+      }
+    } else {
+      print "\"$word\" is an invalid command entry!\n\n";
+      print $usage_string;
+      exit 0;
+    }
+  }
+}
+
+##########################################################################
+#
+#                                                         is_start_of_line
+#
+# Returns true if FILE is pointing to the first character of a line
+#
+##########################################################################
+
+sub is_start_of_line {
+
+  my ($line);
+
+  seek(FILE, -1, 1);
+  read(FILE, $line, 1);
+
+  if ($line eq "\n") {
+    return 1;
+  }
+
+  return 0;
+}
+
+##########################################################################
+#
+#                                                       find_previous_line
+#
+# This subroutine finds the seek point for the start of the last line
+# prior to $newpos in FILE
+#
+##########################################################################
+
+sub find_previous_line {
+  my ($newpos) = @_;
+
+  $debug && print "find_previous_line($newpos)\n";
+
+  my ($backpos, $line, $lastfound, $jump);
+
+  $backpos = $newpos;
+  $jump = -1;
+  $lastfound = -1;
+
+  # step back 64 bytes at a time from $newpos until we find the
+  # last \n before $newpos
+
+  while ($lastfound == -1 && $backpos > 0) {
+    $backpos = $backpos - 64;
+
+    if ($backpos > 0) {
+      seek(FILE, $backpos, 0);
+    }
+
+    read(FILE, $line, 64);
+
+    $lastfound = 0;
+
+    $jump = -1;
+
+    do {
+      $lastfound = $jump;
+      $jump = index($line, "\n", $jump + 1);
+    } until ($jump == -1);
+  }
+
+  # and return the location we need to go to
+
+  return $backpos + $lastfound + 1;  # will be 0 on degenerate case
+}
+
+##########################################################################
+#
+#                                                         seek_start_point
+#
+# This subroutine does a binary search through FILE looking for the
+# first event after the specified start date.
+#
+##########################################################################
+
+sub seek_start_point {
+  my ($startdate, $lowpos, $highpos) = @_;
+
+  my ($newpos, $savepos1, $savepos2, $firstline, $secondline, $linedate1, $linedate2);
+  my ($repeating);
+
+  $debug && print "seek_start_point($startdate, $lowpos, $highpos)\n";
+
+  if ($global_last_lowpos == $lowpos && $global_last_highpos == $highpos) {
+    $debug && print "Detected repeat\n";
+    $repeating = 1;
+  } else {
+    $global_last_lowpos = $lowpos;
+    $global_last_highpos = $highpos;
+  }
+
+  if ($repeating) {
+    $newpos = $lowpos;
+  } else {
+    $newpos = ($lowpos + $highpos) / 2;
+  }
+
+  seek(FILE, $newpos, 0);
+
+  if (!is_start_of_line()) {
+    # read a junk line in to get ourselves to the start of the next line
+
+    my $junkline = <FILE>;
+  }
+
+  $savepos1 = tell FILE;
+
+  # and now read a real line, now that we've advanced to the start of
+  # a proper line
+
+  $firstline = <FILE>;
+
+  $savepos2 = tell FILE;
+
+  # and now read a second line to see if we've found the transition
+  # point
+
+  $secondline = <FILE>;
+
+  ($linedate1) = split /\|/, $firstline;
+  ($linedate2) = split /\|/, $secondline;
+
+  if ($repeating) {
+    $debug && print "repeating -- startdate $startdate, linedate1 $linedate1, linedate2 $linedate2\n";
+
+    if ($startdate == $linedate1) {
+      seek FILE, $savepos1, 0;
+      return;
+    }
+
+     if ($startdate == $linedate2) {
+       seek FILE, $savepos2, 0;
+       return;
+     }
+  }
+
+  if ($startdate == $linedate1) {
+    my $prevline = find_previous_line($newpos);
+
+    seek FILE, $prevline, 0;
+
+    my $testline = <FILE>;
+
+    my ($testdate) = split /\|/, $testline;
+
+    if ($startdate > $testdate) {
+      seek FILE, $newpos, 0;
+      return;
+    }
+  }
+
+  if ($startdate <= $linedate1) {
+    $debug && print "startdate $startdate <= linedate1 $linedate1\n";
+
+    seek_start_point($startdate, $lowpos, find_previous_line($savepos1));
+    return;
+  }
+
+  if ($startdate > $linedate2) {
+    $debug && print "startdate $startdate > linedate2 $linedate2\n";
+
+    seek_start_point($startdate, tell FILE, $highpos);
+    return;
+  }
+
+  # we've found it!
+
+  seek FILE, $savepos2, 0;
+  return;
+}
+
+##########################################################################
+#
+#                                                               oops_usage
+#
+##########################################################################
+
+sub oops_usage() {
+  print "Usage: logscan.pl [-a] [-l] [-i invid number] [-s start_date in java timecode] [-e end date in java timecode]\n";
+  print "\t-a: Search for admin invids rather than object invids\n";
+  print "\t-l: Only retrieve login/logout type events\n";
+  print "\t-s: Only retrieve events more recent than the start date, which is provided as a Java timecode\n";
+  print "\t-e: Only retrieve events that occur before recent the end date, which is provided as a Java timecode\n";
+  exit 1;
+}
+
+################################################################################
+
 $file = "<<LOGFILE>>";		# this will be replaced on install
 
 if (@ARGV == 0) {
-  die "Usage: logscan.pl (invid number) (-a for admin invid search)\n";
+  oops_usage();
 }
 
 # which field in the log lines are we going to look at for the invid
 # we're filtering on?
 
 $fieldindex = 6;
+$dologins = 0;
 
-# parse for command line options
+# let's figure out our command line options
 
-while ($_ = $ARGV[0]) {
-  shift;
+read_switches(@ARGV);
 
-  # param for admin invid search, else object invid search
+if (defined $switches{'a'}) {
+  # we're doing an admin invid search, not an object invid search
 
-  if ($_ eq "-a") {
-    $fieldindex = 3;
-  }
-
-  # Regexp for invid num search
-
-  if (/^[0-9]+:[0-9]+$/) {
-    $invid = $_;
-  }
+  $fieldindex = 3;
 }
 
-if (!defined $invid) {
-  die "Usage: logscan.pl (invid number) (-a for admin invid search)\n";
+if (defined $switches{'l'}) {
+  $dologins = 1;
+}
+
+$javastartdate = find_arg('s', @ARGV);
+$javaenddate = find_arg('e', @ARGV);
+
+$invid = find_arg('i', @ARGV);
+
+# Regexp for invid num search
+
+if (defined $invid && ($invid !~ /^[0-9]+:[0-9]+$/)) {
+  die "Bad invid: $invid";
 }
 
 #
-# Okay, we've got everything we need, now.. go ahead and scan through
-# the log file
+# Okay, we've got all of our arguments, now.
+#
+# If we've got a start date set, we'll want to do a binary
+# search through the file to find the start of the region we
+# want to process
 #
 
 open FILE, $file || die "Couldn't open $file.\n";
 
+if (defined $javastartdate) {
+  ($size) = (stat($file))[7];
+  seek_start_point($javastartdate, 0, $size);
+}
+
 while (<FILE>) {
 
-  # see if line has invid in it
+  # if we're looking for a specific invid, let's see if the line has
+  # invid in it
 
-  if (/$invid/) {
+  if (!defined $invid || /$invid/) {
 
     @fields = split(/\|/);
+
+    if (defined $javaenddate && $javaenddate < $fields[0]) {
+      close FILE;
+      exit 0;
+    }
 
     if (@fields[$fieldindex] =~ /$invid/) {
 
@@ -79,7 +388,7 @@ while (<FILE>) {
       # starttransaction, we just print out lines for as long
       # as we see the transaction id.
 
-      if (@fields[2] =~ /starttransaction/) {					
+      if (@fields[2] =~ /starttransaction/) {
 
 	$pid = @fields[0];
 
