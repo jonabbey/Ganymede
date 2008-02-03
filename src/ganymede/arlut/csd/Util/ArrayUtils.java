@@ -3,7 +3,7 @@
    ArrayUtils.java
 
    Convenience methods for working with Arrays
-   
+
    Created: 2 February 2008
 
    Last Revision Changed: $Rev$
@@ -14,9 +14,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Directory Directory Management System
- 
+
    Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
@@ -72,28 +72,73 @@ public class ArrayUtils {
 
   public static Object[] concat(Object[] ary1, Object[] ary2)
   {
-    Object[] results = new Object[ary1.length + ary2.length];
+    Object[] results = new Object[(ary1 != null ? ary1.length : 0) +
+                                  (ary2 != null ? ary2.length : 0)];
 
-    System.arraycopy(ary1, 0, results, 0, ary1.length);
-    System.arraycopy(ary2, 0, results, results.length, ary2.length);
+    if (ary1 != null)
+      {
+        System.arraycopy(ary1, 0, results, 0, ary1.length);
+      }
+
+    if (ary2 != null)
+      {
+        System.arraycopy(ary2, 0, results, results.length, ary2.length);
+      }
+
+    return results;
   }
 
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3)
   {
-    Object[] results = new Object[ary1.length + ary2.length + ary3.length];
+    Object[] results = new Object[(ary1 != null ? ary1.length : 0) +
+                                  (ary2 != null ? ary2.length : 0) +
+                                  (ary3 != null ? ary3.length : 0)];
 
-    System.arraycopy(ary1, 0, results, 0, ary1.length);
-    System.arraycopy(ary2, 0, results, results.length, ary2.length);
-    System.arraycopy(ary3, 0, results, results.length, ary3.length);
+    if (ary1 != null)
+      {
+        System.arraycopy(ary1, 0, results, 0, ary1.length);
+      }
+
+    if (ary2 != null)
+      {
+        System.arraycopy(ary2, 0, results, results.length, ary2.length);
+      }
+
+    if (ary3 != null)
+      {
+        System.arraycopy(ary3, 0, results, results.length, ary3.length);
+      }
+
+    return results;
   }
 
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3, Object[] ary4)
   {
-    Object[] results = new Object[ary1.length + ary2.length + ary3.length + ary4.length];
+    Object[] results = new Object[(ary1 != null ? ary1.length : 0) +
+                                  (ary2 != null ? ary2.length : 0) +
+                                  (ary3 != null ? ary3.length : 0) +
+                                  (ary4 != null ? ary4.length : 0)];
 
-    System.arraycopy(ary1, 0, results, 0, ary1.length);
-    System.arraycopy(ary2, 0, results, results.length, ary2.length);
-    System.arraycopy(ary3, 0, results, results.length, ary3.length);
-    System.arraycopy(ary4, 0, results, results.length, ary4.length);
+    if (ary1 != null)
+      {
+        System.arraycopy(ary1, 0, results, 0, ary1.length);
+      }
+
+    if (ary2 != null)
+      {
+        System.arraycopy(ary2, 0, results, results.length, ary2.length);
+      }
+
+    if (ary3 != null)
+      {
+        System.arraycopy(ary3, 0, results, results.length, ary3.length);
+      }
+
+    if (ary4 != null)
+      {
+        System.arraycopy(ary4, 0, results, results.length, ary4.length);
+      }
+
+    return results;
   }
 }
