@@ -343,10 +343,21 @@ $javaenddate = find_arg('e', @ARGV);
 
 $invid = find_arg('i', @ARGV);
 
-# Regexp for invid num search
+if (!defined $invid) {
 
-if (defined $invid && ($invid !~ /^[0-9]+:[0-9]+$/)) {
-  die "Bad invid: $invid";
+  # we didn't get asked for an invid, which may be okay, or it may
+  # mean that we are being called by an earlier version of the
+  # Ganymede server using the old calling sequence, with the invid
+  # being mandatory as the last parameter on our command line.
+  #
+  # check for that, using a regexp to recognize what an invid should
+  # look like.
+
+  $invid = $ARGV[$#ARGV];
+
+  if ($invid !~ /^[0-9]+:[0-9]+$/) {
+    $invid = undef;
+  }
 }
 
 #
