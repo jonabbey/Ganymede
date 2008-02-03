@@ -451,11 +451,17 @@ public class DBLogPostGreSQLController implements DBLogController {
    * transactions that involve the given invid.  if false, only those events in a transaction
    * directly affecting the given invid will be returned.
    *
+   * @param getLoginEvents if true, this method will return only login
+   * and logout events.  if false, this method will return no login
+   * and logout events.
+   *
    * @return A human-readable multiline string containing a list of history events
    */
 
-  public StringBuffer retrieveHistory(Invid invid, java.util.Date sinceTime, boolean keyOnAdmin,
-				      boolean fullTransactions)
+  public StringBuffer retrieveHistory(Invid invid, java.util.Date sinceTime,
+                                      boolean keyOnAdmin,
+				      boolean fullTransactions,
+                                      boolean getLoginEvents)
   {
     if (con == null)
       {
@@ -501,7 +507,14 @@ public class DBLogPostGreSQLController implements DBLogController {
                     token.equals("normallogout") ||
                     token.equals("abnormallogout"))
                   {
-                    continue;       // we don't want to show login/logout activity here
+                    if (!getLoginEvents)
+                      {
+                        continue;       // we don't want to show login/logout activity here
+                      }
+                  }
+                else if (getLoginEvents)
+                  {
+                    continue;   // we don't want to show non-login/logout activity here
                   }
               }
 

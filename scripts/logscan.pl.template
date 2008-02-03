@@ -389,6 +389,14 @@ while (<FILE>) {
       exit 0;
     }
 
+    my $token = $fields[2];
+
+    if ($dologins xor ($token eq "normallogin" ||
+                       $token eq "normallogout" ||
+                       $token eq "abnormallogout")) {
+      next;
+    }
+
     if (@fields[$fieldindex] =~ /$invid/) {
 
       print $_;

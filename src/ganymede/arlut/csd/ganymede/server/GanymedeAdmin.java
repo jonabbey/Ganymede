@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -1539,5 +1539,22 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	    return null;
 	  }
       }
+  }
+
+  /**
+   * <p>Retrieves a multi-line String containing information about
+   * user and administrator login and logout data from the server's
+   * log.</p>
+   *
+   * <p>If the provided startDate is null, the server will return all
+   * login and logout activity since the server was last started.</p>
+   *
+   * <p>Otherwise, the server will return information about all logins
+   * and logouts that occurred after startDate.</p>
+   */
+
+  public String getLoginHistory(Date startDate)
+  {
+    return Ganymede.log.retrieveHistory(null, startDate, false, false, true).toString();
   }
 }

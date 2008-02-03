@@ -65,6 +65,7 @@ import java.io.PrintWriter;
 import java.util.Date;
 import java.util.Vector;
 
+import arlut.csd.Util.ArrayUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.WordWrap;
 import arlut.csd.ganymede.common.Invid;
@@ -225,12 +226,18 @@ public class DBLogFileController implements DBLogController {
    * false, only those events in a transaction directly affecting the
    * given invid will be returned.
    *
+   * @param getLoginEvents if true, this method will return only login
+   * and logout events.  if false, this method will return no login
+   * and logout events.
+   *
    * @return A human-readable multiline string containing a list of
    * history events
    */
 
   public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, 
-						   boolean keyOnAdmin, boolean fullTransactions)
+						   boolean keyOnAdmin,
+                                                   boolean fullTransactions,
+                                                   boolean getLoginEvents)
   {
     if (logFileName == null)
       {
@@ -255,29 +262,75 @@ public class DBLogFileController implements DBLogController {
 	sinceLong = sinceTime.getTime();
       }
 
-    // if we don't have a log helper or we aren't looking for a
-    // specific invid, just read from the file directly
+    // Java can be pretty slow at doing String operations.  String is
+    // an immutable class, so doing a lot of String operations is more
+    // bulky and costly in Java than it is in Perl.
+    //
+    // So we have an external Perl accelerator for log data retrieval,
+    // known as logscan.pl.  It can efficiently filter out events
+    // based on matching Invid, as well as perform a binary search on
+    // the log file to find the appropriate starting point if a
+    // timecode is presented
+    //
+    // The calling sequence for logscan.pl has recently changed.
+    // Formerly, if only took -a to control whether it should be
+    // looking at administrator Invids or object Invids, along with
+    // the Invid to match as the last parameter on the command line.
+    //
+    // The new version of logscan.pl can be called in the same way for
+    // backwards compatibility, or it can be called with the following
+    // parameters, in any order:
+    //
+    // -a search for administrator invids rather than object invids
+    // -l only search for login/logout events (if -l is not given,
+    // login/logout events will always be skipped)
+    // -s <java time code> only return events on or after this time code
+    // -e <java time code> only return events on or before this time code
+    //
+    // That is, with the new accelerator, logscan.pl can help winnow
+    // out time codes (through the use of a binary search) rather than
+    // just matching on invids.
 
-    if (Ganymede.logHelperProperty != null && invid != null)
+    if (Ganymede.logHelperProperty != null)
       {
+        String[] invidArgs = null;
+        String[] adminArgs = null;
+        String[] startArgs = null;
+        String[] loginArg = null;
+
+        if (invid != null)
+          {
+            invidArgs = new String[] {"-i", invid.toString()};
+          }
+
+        if (keyOnAdmin)
+          {
+            adminArgs = new String[] {"-a"};
+          }
+
+        if (sinceLong != 0)
+          {
+            startArgs = new String[] {"-s", Long.toString(sinceLong)};
+          }
+
+        if (getLoginEvents)
+          {
+            loginArg = new String[] {"-l"};
+          }
+
+        String[] paramArgs = (String[]) ArrayUtils.concat(new String[] {Ganymede.logHelperProperty},
+                                                          adminArgs,
+                                                          startArgs,
+                                                          loginArg,
+                                                          invidArgs);  // invid must be last for back compat
+        
 	java.lang.Runtime runtime = java.lang.Runtime.getRuntime();
 
 	try
 	  {
 	    java.lang.Process helperProcess;
 
-            String[] args = null;
-
-	    if (keyOnAdmin)
-	      {
-                args = new String[] {Ganymede.logHelperProperty, "-a", invid.toString()};
-	      }
-	    else
-	      {
-                args = new String[] {Ganymede.logHelperProperty, invid.toString()};
-	      }
-
-            helperProcess = runtime.exec(args);
+            helperProcess = runtime.exec(paramArgs);
 
 	    in = new BufferedReader(new InputStreamReader(helperProcess.getInputStream()));
 	  }
@@ -352,7 +405,14 @@ public class DBLogFileController implements DBLogController {
                     event.eventClassToken.equals("normallogout") ||
                     event.eventClassToken.equals("abnormallogout"))
                   {
-                    continue;       // we don't want to show login/logout activity here
+                    if (!getLoginEvents)
+                      {
+                        continue;       // we don't want to show login/logout activity here
+                      }
+                  }
+                else if (getLoginEvents)
+                  {
+                    continue;   // we don't want to show non-login/logout activity here
                   }
               }
 

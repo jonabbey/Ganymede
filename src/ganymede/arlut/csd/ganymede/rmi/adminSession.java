@@ -16,10 +16,10 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2004
+
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -58,6 +58,8 @@ package arlut.csd.ganymede.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+import java.util.Date;
+
 import arlut.csd.ganymede.common.ReturnVal;
 
 /*------------------------------------------------------------------------------
@@ -87,9 +89,11 @@ public interface adminSession extends Remote {
   void        logout() throws RemoteException;
 
   /**
-   * <p>This method is used to allow the admin console to retrieve a remote reference to
-   * a {@link arlut.csd.ganymede.server.serverAdminAsyncResponder}, which will allow
-   * the admin console to poll the server for asynchronous messages from the server.</p>
+   * <p>This method is used to allow the admin console to retrieve a
+   * remote reference to a {@link
+   * arlut.csd.ganymede.server.serverAdminAsyncResponder}, which will
+   * allow the admin console to poll the server for asynchronous
+   * messages from the server.</p>
    *
    * <p>This is used to allow the server to send admin notifications
    * to the console, even if the console is behind a network or
@@ -134,8 +138,8 @@ public interface adminSession extends Remote {
   /**
    * <p>shutdown the server cleanly, on behalf of this admin console.</p>
    *
-   * @param waitForUsers if true, shutdown will be deferred until all users are logged
-   * out.  No new users will be allowed to login.
+   * @param waitForUsers if true, shutdown will be deferred until all
+   * users are logged out.  No new users will be allowed to login.
    */
 
   ReturnVal     shutdown(boolean waitForUsers) throws RemoteException;
@@ -154,8 +158,8 @@ public interface adminSession extends Remote {
   ReturnVal        runInvidTest() throws RemoteException;
 
   /**
-   * <p>run a long-running verification and repair operation on the Ganymede
-   * server's invid database links</p>
+   * <p>run a long-running verification and repair operation on the
+   * Ganymede server's invid database links</p>
    *
    * <p>Removes any invid pointers in the Ganymede database whose
    * targets are not properly defined.  This should not ever happen
@@ -203,9 +207,10 @@ public interface adminSession extends Remote {
 
   /**
    * <P>Causes a registered task to be made ineligible for execution
-   * until {@link arlut.csd.ganymede.rmi.adminSession#enableTask(java.lang.String) enableTask()}
-   * is called.  This method will not stop a task that is currently
-   * running.</P>
+   * until {@link
+   * arlut.csd.ganymede.rmi.adminSession#enableTask(java.lang.String)
+   * enableTask()} is called.  This method will not stop a task that
+   * is currently running.</P>
    *
    * @param name The name of the task to disable
    */
@@ -225,15 +230,29 @@ public interface adminSession extends Remote {
   /**
    * <p>Lock the server to prevent client logins and edit the server
    * schema.  This method will return a {@link
-   * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote reference to the
-   * admin console, which will present a graphical schema editor using
-   * this remote reference.  The server will remain locked until the
-   * admin console commits or cancels the schema editing session,
+   * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote reference to
+   * the admin console, which will present a graphical schema editor
+   * using this remote reference.  The server will remain locked until
+   * the admin console commits or cancels the schema editing session,
    * either through affirmative action or through the death of the
    * admin console or the network connection.  The {@link
-   * arlut.csd.ganymede.server.DBSchemaEdit DBSchemaEdit} class on the server
-   * coordinates everything.</p>
+   * arlut.csd.ganymede.server.DBSchemaEdit DBSchemaEdit} class on the
+   * server coordinates everything.</p>
    */
 
   SchemaEdit  editSchema() throws RemoteException;
+
+  /**
+   * <p>Retrieves a multi-line String containing information about
+   * user and administrator login and logout data from the server's
+   * log.</p>
+   *
+   * <p>If the provided startDate is null, the server will return all
+   * login and logout activity since the server was last started.</p>
+   *
+   * <p>Otherwise, the server will return information about all logins
+   * and logouts that occurred after startDate.</p>
+   */
+
+  String getLoginHistory(Date startDate) throws RemoteException;
 }

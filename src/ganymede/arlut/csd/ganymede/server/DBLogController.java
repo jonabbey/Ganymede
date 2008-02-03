@@ -102,10 +102,14 @@ public interface DBLogController {
    * transactions that involve the given invid.  if false, only those events in a transaction
    * directly affecting the given invid will be returned.
    *
+   * @param getLoginEvents if true, this method will return only login
+   * and logout events.  if false, this method will return no login
+   * and logout events.
+   *
    * @return A human-readable multiline string containing a list of history events
    */
 
-  public StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin, boolean fullTransactions);
+  public StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin, boolean fullTransactions, boolean getLoginEvents);
 
   /**
    * <p>This method shuts down this controller, freeing up any resources used by this

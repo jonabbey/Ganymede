@@ -26,7 +26,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -4006,7 +4006,7 @@ final public class GanymedeSession implements Session, Unreferenced {
         return null;
       }
 
-    return Ganymede.log.retrieveHistory(invid, since, false, fullTransactions); // *sync* DBLog 
+    return Ganymede.log.retrieveHistory(invid, since, false, fullTransactions, false); // *sync* DBLog 
   }
 
   /**
@@ -4063,7 +4063,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return null;
       }
 
-    return Ganymede.log.retrieveHistory(invid, since, true, true); // *sync* DBLog
+    return Ganymede.log.retrieveHistory(invid, since, true, true, false); // *sync* DBLog
   }
 
   /**

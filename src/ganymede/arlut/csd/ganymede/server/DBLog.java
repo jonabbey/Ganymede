@@ -279,7 +279,6 @@ public class DBLog {
 
       	mailer.goThreaded();
       }
-
   }
 
   /**
@@ -938,13 +937,19 @@ public class DBLog {
    * transactions that involve the given invid.  if false, only those events in a transaction
    * directly affecting the given invid will be returned.
    *
+   * @param getLoginEvents if true, this method will return only login
+   * and logout events.  if false, this method will return no login
+   * and logout events.
+   *
    * @return A human-readable multiline string containing a list of history events
    */
 
-  public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin,
-						   boolean fullTransactions)
+  public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime,
+                                                   boolean keyOnAdmin,
+						   boolean fullTransactions,
+                                                   boolean getLoginEvents)
   {
-    return logController.retrieveHistory(invid, sinceTime, keyOnAdmin, fullTransactions);
+    return logController.retrieveHistory(invid, sinceTime, keyOnAdmin, fullTransactions, getLoginEvents);
   }
 
   // -----
