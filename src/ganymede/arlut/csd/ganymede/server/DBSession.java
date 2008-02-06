@@ -1221,7 +1221,7 @@ final public class DBSession {
 	localObj = viewDBObject(inv);
       }
 
-    if (localObj == null)
+    if (localObj == null || localObj.isEmbedded())
       {
         // "getContainingObj() couldn''t find owner of embedded object {0}"
 	throw new IntegrityConstraintException(ts.l("getContainingObj.integrity", object.getLabel()));
