@@ -1200,129 +1200,30 @@ final public class DBSession {
 
   DBObject getContainingObj(DBObject object)
   {
-    DBObject localObj;
-    InvidDBField inf = null;
-    Invid inv = null;
-    int loopcount = 0;
-    boolean original;
-
-    /* -- */
-
-    // if we're looking at an embedded object, lets cascade up and
-    // find the top-level ancestor
-
-    if (false)
-      {
-	System.err.println("Trying to find top-level object for " + 
-			   object.getTypeName() + ":" + 
-			   object.getInvid().toString());
-      }
-
-    localObj = object;
+    DBObject localObj = object;
 
     while (localObj != null && localObj.isEmbedded())
       {
-	original = false;		// we haven't switched to check the original yet
-	inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
+        if (!localObj.isDefined(SchemaConstants.ContainerField) &&
+            (localObj instanceof DBEditObject) &&
+            ((DBEditObject) localObj).getStatus() == ObjectStatus.DELETING)
+          {
+            localObj = ((DBEditObject) localObj).getOriginal();
+          }
 
-	// if we need to find the top-level containing object for an
-	// embedded object that has been or is in the process of being
-	// deleted, we'll need to consult the original version of the
-	// object to find its containing parent.
+        Invid inv = (Invid) localObj.getFieldValueLocal(SchemaConstants.ContainerField);
 
-	if (inf == null)
-	  {
-	    if (true)
-	      {
-		Ganymede.debug("Couldn't initially get a container field for object " + localObj.toString());
-	      }
-
-	    if (localObj instanceof DBEditObject)
-	      {
-		if (false)
-		  {
-		    System.err.println("Object " + localObj.toString() + " is a DBEditObject.");
-		  }
-
-		DBEditObject localEditObj = (DBEditObject) localObj;
-
-		if (localEditObj.getStatus() == ObjectStatus.DELETING)
-		  {
-		    if (false)
-		      {
-			System.err.println("Object " + localObj.toString() + " has status DELETING.");
-		      }
-
-		    localObj = localEditObj.getOriginal();
-		  }
-
-		inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
-		original = true;
-	      }
-	  }
-
-	if (inf == null)
-	  {
-	    if (true)
-	      {
-		Ganymede.debug("getContainingObj(): Couldn't get a container field for object " + localObj.toString() + " at all.");
-	      }
-
-	    localObj = null;
-	    break;
-	  }
-
-	inv = (Invid) inf.getValueLocal();
-
-	if (inv == null && !original)
-	  {
-	    if (localObj instanceof DBEditObject)
-	      {
-		if (false)
-		  {
-		    System.err.println("Object " + localObj.toString() + " is a DBEditObject.");
-		  }
-
-		DBEditObject localEditObj = (DBEditObject) localObj;
-
-		if (localEditObj.getStatus() == ObjectStatus.DELETING)
-		  {
-		    if (false)
-		      {
-			System.err.println("Object " + localObj.toString() + " has status DELETING.");
-		      }
-
-		    localObj = localEditObj.getOriginal();
-		  }
-
-		inf = (InvidDBField) localObj.getField(SchemaConstants.ContainerField);
-		original = true;
-	      }
-
-	    inv = (Invid) inf.getValueLocal();
-	  }
-
-	if (inv == null)
-	  {
-	    if (true)
-	      {
-		Ganymede.debug("getContainingObj() error <2:" + loopcount +
-			       "> .. Couldn't get a container invid for object " + localObj.getLabel());
-	      }
-
-	    localObj = null;
-	    break;
-	  }
-
-	// remember, viewDBObject() will get an object even if it was
-	// created in the current transaction
+        if (inv == null)
+          {
+            break;
+          }
 
 	localObj = viewDBObject(inv);
-	loopcount++;
       }
 
     if (localObj == null)
       {
+        // "getContainingObj() couldn''t find owner of embedded object {0}"
 	throw new IntegrityConstraintException(ts.l("getContainingObj.integrity", object.getLabel()));
       }
 
