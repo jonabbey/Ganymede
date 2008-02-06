@@ -1599,8 +1599,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * fields for which
    * {@link arlut.csd.ganymede.server.DBEditObject#canCloneField(arlut.csd.ganymede.server.DBSession,
    * arlut.csd.ganymede.server.DBObject, arlut.csd.ganymede.server.DBField) canCloneField()}
-   * returns true, and which are not connected to a namespace (and thus could not
-   * possibly be cloned).
+   * returns true, and which are not connected to a namespace (and
+   * thus could not possibly be cloned, because the values are
+   * constrained to be unique and non-duplicated).
    *
    * If one or more fields in the original object are unreadable by the cloning
    * session, we will provide a list of fields that could not be cloned due to
@@ -1891,7 +1892,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	
 	    if (retVal == null)
 	      {
-		// "DBEditObject.createNewEmbeddedObject could not get a userful result from create_db_object"
+		// "DBEditObject.createNewEmbeddedObject could not get a useful result from create_db_object"
 		return Ganymede.createErrorDialog(ts.l("global.serverError"),
 						  ts.l("createNewEmbeddedObject.badCreate"));
 	      }

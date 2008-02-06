@@ -3402,8 +3402,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
-    Vector values = getVectVal();
-
     if (!isEditInPlace())
       {
 	// "Edit-in-place method called on a referential invid field {0} in object {1}"
@@ -3415,6 +3413,8 @@ public final class InvidDBField extends DBField implements invid_field {
 	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
 					  ts.l("addElement.overflow_text", getName()));
       }
+
+    Vector values = getVectVal();
 
     DBEditObject eObj = (DBEditObject) owner;
 
