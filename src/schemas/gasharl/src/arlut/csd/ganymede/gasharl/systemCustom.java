@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -314,37 +314,36 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	StringBuffer resultBuf = new StringBuffer();
 	ReturnVal retVal = super.cloneFromObject(session, origObj, local);
 
-	if (retVal != null && retVal.getDialog() != null)
-	  {
-	    resultBuf.append("\n\n");
-	    resultBuf.append(retVal.getDialog().getText());
+	if (retVal != null)
+          {
+            if (!retVal.didSucceed())
+              {
+                return retVal;
+              }
+            
+            if (retVal.getDialog() != null)
+              {
+                resultBuf.append("\n\n");
+                resultBuf.append(retVal.getDialog().getText());
 
-	    problem = true;
-	  }
+                problem = true;
+              }
+          }
 
-	// and clone the embedded objects.  Remember,
-	// systemCustom.initializeNewObject() will create a single
-	// embedded interface as part of the normal system creation
-	// process.  We need to handle cloning into the (single) embedded
-	// interface we'll have had created, then create any new embedded
-	// interfaces necessary when cloning a multiple interface system.
+	// and clone the embedded objects.
+        //
+        // Remember, systemCustom.initializeNewObject() will create a
+        // single embedded interface as part of the normal system
+        // creation process.  We'll put this (single) automatically
+        // created embedded object into the newOnes vector, then
+        // create any new embedded interfaces necessary when cloning a
+        // multiple interface system.
 
 	InvidDBField newInterfaces = (InvidDBField) getField(systemSchema.INTERFACES);
 	InvidDBField oldInterfaces = (InvidDBField) origObj.getField(systemSchema.INTERFACES);
 
-	Vector newOnes;
-	Vector oldOnes;
-
-	if (local)
-	  {
-	    newOnes = (Vector) newInterfaces.getValuesLocal().clone();
-	    oldOnes = (Vector) oldInterfaces.getValuesLocal().clone();
-	  }
-	else
-	  {
-	    newOnes = newInterfaces.getValuesLocal();
-	    oldOnes = oldInterfaces.getValuesLocal();
-	  }
+	Vector newOnes = (Vector) newInterfaces.getValuesLocal().clone();
+	Vector oldOnes = (Vector) oldInterfaces.getValuesLocal().clone();
 
 	DBObject origVolume;
 	DBEditObject workingVolume;
@@ -391,7 +390,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		  }
 		catch (GanyPermissionsException ex)
 		  {
-		    tmpVal = Ganymede.createErrorDialog("permissions", "permissions failure creating embedded interface " + ex);
+		    tmpVal = Ganymede.createErrorDialog("permissions",
+                                                        "permissions failure creating embedded interface " + ex);
 		  }
 
 		if (!tmpVal.didSucceed())
