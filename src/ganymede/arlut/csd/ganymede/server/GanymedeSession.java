@@ -4409,6 +4409,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     ReturnVal retVal = null;
     QueryResult ownerList = null;
     boolean randomOwner = false;
+    Vector ownerInvids = null;
 
     /* -- */
 
@@ -4435,59 +4436,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"), error);
       }
 
-    // i think this section of code is actually pretty unlikely to
-    // be executed, as the creation of embedded objects is pretty
-    // much universally performed by manipulating the container
-    // object, but until i verify that and/or make some kind of
-    // definitive decision on that, this code remains
+    // if embedded is true, this code was called from
+    // DBEditObject.createNewEmbeddedObject(), and we don't need to
+    // worry about setting ownership, etc.
     
-    if (embedded)
+    if (!embedded)
       {
-	try
-          {
-            retVal = session.createDBObject(type, preferredInvid, null); // *sync* DBSession
-          }
-        catch (GanymedeManagementException ex)
-          {
-	    // "Can''t Create Object"
-	    // "Error loading custom class for this object."
-            return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-                                              ts.l("create_db_object.custom_class_load_error_text"));
-          }
-
-	if (retVal == null)
-	  {
-	    // "Can''t Create Object"
-	    // "Can't create new object, the operation was refused"
-	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-					      ts.l("create_db_object.operation_refused"));
-	  }
-	else if (!retVal.didSucceed())
-	  {
-	    return retVal;
-	  }
-
-	newObj = (DBObject) retVal.getObject();
-
-	setLastEvent("create " + newObj.getTypeName());
-
-	retVal = new ReturnVal(true);
-
-	retVal.setInvid(newObj.getInvid());
-
-	if (this.exportObjects)
-	  {
-	    exportObject((DBObject) newObj);
-	  }
-
-	retVal.setObject(newObj);
-
-	return retVal;
-      }
-    else
-      {
-	Vector ownerInvids = null;
-
 	if (newObjectOwnerInvids != null)
 	  {
 	    ownerInvids = newObjectOwnerInvids;
@@ -4528,61 +4482,62 @@ final public class GanymedeSession implements Session, Unreferenced {
                   }
 	      }
 	  }
-
-	try
-          {
-            retVal = session.createDBObject(type, preferredInvid, ownerInvids); // *sync*
-                                                                                // DBSession
-          }
-        catch (GanymedeManagementException ex)
-          {
-	    // "Can''t Create Object"
-	    // "Error loading custom class for this object."
-            return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-                                              ts.l("create_db_object.custom_class_load_error_text"));
-          }
-
-	if (retVal == null)
-	  {
-	    // "Can''t Create Object"
-	    // "Can't create new object, the operation was refused"
-	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-					      ts.l("create_db_object.operation_refused"));
-	  }
-	else if (!retVal.didSucceed())
-	  {
-	    return retVal;
-	  }
-
-	newObj = (DBObject) retVal.getObject();
-
-	setLastEvent("create " + newObj.getTypeName());
-
-	if (randomOwner)
-	  {
-	    // "Warning, picked an Owner Group at random"
-	    // "Warning: randomly selected owner group {1} to place new {0} object in."
-	    retVal = Ganymede.createInfoDialog(ts.l("create_db_object.random"),
-					       ts.l("create_db_object.random_text",
-						    newObj.getTypeName(),
-						    viewObjectLabel(ownerList.getInvid(0))));
-	  }
-	else
-	  {
-	    retVal = new ReturnVal(true);
-	  }
-
-	retVal.setInvid(newObj.getInvid());
-
-	if (this.exportObjects)
-	  {
-	    exportObject((DBObject) newObj);
-	  }
-
-	retVal.setObject(newObj);
-	    
-	return retVal;
       }
+
+    // now create and process
+
+    try
+      {
+        retVal = session.createDBObject(type, preferredInvid, ownerInvids); // *sync* DBSession
+        
+      }
+    catch (GanymedeManagementException ex)
+      {
+        // "Can''t Create Object"
+        // "Error loading custom class for this object."
+        return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+                                          ts.l("create_db_object.custom_class_load_error_text"));
+      }
+
+    if (retVal == null)
+      {
+        // "Can''t Create Object"
+        // "Can't create new object, the operation was refused"
+        return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+                                          ts.l("create_db_object.operation_refused"));
+      }
+    else if (!retVal.didSucceed())
+      {
+        return retVal;
+      }
+
+    newObj = (DBObject) retVal.getObject();
+
+    setLastEvent("create " + newObj.getTypeName());
+
+    if (randomOwner)
+      {
+        // "Warning, picked an Owner Group at random"
+        // "Warning: randomly selected owner group {1} to place new {0} object in."
+        retVal = Ganymede.createInfoDialog(ts.l("create_db_object.random"),
+                                           ts.l("create_db_object.random_text",
+                                                newObj.getTypeName(),
+                                                viewObjectLabel(ownerList.getInvid(0))));
+      }
+    else
+      {
+        retVal = new ReturnVal(true);
+      }
+
+    if (this.exportObjects)
+      {
+        exportObject(newObj);
+      }
+
+    retVal.setInvid(newObj.getInvid());
+    retVal.setObject(newObj);
+	    
+    return retVal;
   }
 
   /**
