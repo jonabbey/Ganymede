@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -3486,57 +3486,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     ReturnVal newRetVal = eObj.finalizeAddElement(this, embeddedObj.getInvid());
 
-    if (ReturnVal.didSucceed(newRetVal))
-      {
-	values.addElement(embeddedObj.getInvid());  // do a live modification of this field's invid vector
-	qr = null;
-
-	// now we need to initialize the new embedded object, since we
-	// defer that activity for embedded objects until after we
-	// get the embedded object linked to the parent
-
-	DBSession session = eObj.getSession();
-	String ckp_label = eObj.getLabel() + "addEmbed";
-
-	session.checkpoint(ckp_label); // may block if another thread has checkpointed this transaction
-	boolean checkpointed = true;
-
-	try
-	  {
-	    retVal = embeddedObj.initializeNewObject();
-
-	    if (!ReturnVal.didSucceed(retVal))
-              {
-		return retVal;
-              }
-
-            // sweet, success, forget the checkpoint
-
-            session.popCheckpoint(ckp_label);
-            checkpointed = false;
-
-            if (retVal == null)
-              {
-                retVal = new ReturnVal(true);
-              }
-
-            retVal.setInvid(embeddedObj.getInvid());
-            retVal.setObject(embeddedObj);
-	    
-            return retVal.unionRescan(newRetVal);
-	  }
-	finally
-	  {
-	    // ups, something tanked.  rollback if it happened
-	    // before we popped
-
-	    if (checkpointed)
-	      {
-		session.rollback(ckp_label);
-	      }
-	  }
-      } 
-    else
+    if (!ReturnVal.didSucceed(newRetVal))
       {
         // finalizeAddElement vetoed the operation, what to do.. ?
 
@@ -3545,13 +3495,64 @@ public final class InvidDBField extends DBField implements invid_field {
 	if (newRetVal.getDialog() != null)
 	  {
 	    return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
-					      ts.l("createNewEmbedded.refused_creation", newRetVal.getDialog().getText()));
+					      ts.l("createNewEmbedded.refused_creation",
+                                                   newRetVal.getDialog().getText()));
 	  }
 	else
 	  {
 	    return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
 					      ts.l("createNewEmbedded.refused_creation_no_text"));
 	  }
+      }
+
+    // otherwise, all systems go
+
+    values.addElement(embeddedObj.getInvid());  // do a live modification of this field's invid vector
+    qr = null;
+
+    // now we need to initialize the new embedded object, since we
+    // defer that activity for embedded objects until after we
+    // get the embedded object linked to the parent
+
+    DBSession session = eObj.getSession();
+    String ckp_label = eObj.getLabel() + "addEmbed";
+
+    session.checkpoint(ckp_label); // may block if another thread has checkpointed this transaction
+    boolean checkpointed = true;
+
+    try
+      {
+        retVal = embeddedObj.initializeNewObject();
+
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;
+          }
+
+        // sweet, success, forget the checkpoint
+
+        session.popCheckpoint(ckp_label);
+        checkpointed = false;
+
+        if (retVal == null)
+          {
+            retVal = new ReturnVal(true);
+          }
+
+        retVal.setInvid(embeddedObj.getInvid());
+        retVal.setObject(embeddedObj);
+	    
+        return retVal.unionRescan(newRetVal);
+      }
+    finally
+      {
+        // ups, something tanked.  rollback if it happened
+        // before we popped
+
+        if (checkpointed)
+          {
+            session.rollback(ckp_label);
+          }
       }
   }
 
