@@ -1504,7 +1504,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         retVal = oldRefField.dissolve(owner.getInvid(), (anonymous||local));
 
- 	if (retVal != null && !retVal.didSucceed())
+ 	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;
 	  }
@@ -1512,7 +1512,7 @@ public final class InvidDBField extends DBField implements invid_field {
     
     newRetVal = newRefField.establish(owner, (anonymous2||local));
 
-    if (newRetVal != null && !newRetVal.didSucceed())
+    if (!ReturnVal.didSucceed(newRetVal))
       {
 	// oops!  try to undo what we did.. this probably isn't critical
 	// because something above us will do a rollback, but it's polite.
@@ -1768,7 +1768,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	retVal = oldRefField.dissolve(owner.getInvid(), anonymous||local);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;
 	  }
@@ -1852,7 +1852,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    ReturnVal retVal = eObj.finalizeDeleteElement(this, i);
 
-	    if (retVal == null || retVal.didSucceed())
+	    if (ReturnVal.didSucceed(retVal))
 	      {
 		// we got the okay, so we are going to take out this
 		// element and return.  note that if we didn't return
@@ -1900,7 +1900,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	ReturnVal retVal = eObj.finalizeSetValue(this, null);
 
-	if (retVal == null || retVal.didSucceed())
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    value = null;
 	    qr = null;
@@ -2008,7 +2008,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	retVal = eObj.finalizeAddElement(this, newInvid);
 
-	if (retVal == null || retVal.didSucceed())
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    values.addElement(newInvid);
 	    qr = null;
@@ -2060,7 +2060,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    retVal = unbind(tmp, local);
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		return retVal;
 	      }
@@ -2068,7 +2068,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	ReturnVal newRetVal = eObj.finalizeSetValue(this, newInvid);
 
-	if (newRetVal == null || newRetVal.didSucceed())
+	if (ReturnVal.didSucceed(newRetVal))
 	  {
 	    value = newInvid;
 	    qr = null;
@@ -2086,7 +2086,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    retVal = bind(null, tmp, local); // bind back to the original target, should always work
 
-	    if (retVal != null && !retVal.didSucceed())	
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		throw new RuntimeException("couldn't rebind a value " + tmp + " we just unbound.. sync error");
 	      }
@@ -2457,7 +2457,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     retVal = verifyNewValue(value, local);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -2497,7 +2497,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    newRetVal = bind(oldRemote, newRemote, local);
 	    
-	    if (newRetVal != null && !newRetVal.didSucceed())
+	    if (!ReturnVal.didSucceed(newRetVal))
 	      {
 		return newRetVal;
 	      }
@@ -2515,7 +2515,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    newRetVal = unbind(oldRemote, local);
 	    
-	    if (newRetVal != null && !newRetVal.didSucceed())
+	    if (!ReturnVal.didSucceed(newRetVal))
 	      {
 		return newRetVal;
 	      }
@@ -2536,7 +2536,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	
 	newRetVal = eObj.finalizeSetValue(this, value);
 	
-	if (newRetVal == null || newRetVal.didSucceed())
+	if (ReturnVal.didSucceed(newRetVal))
 	  {
 	    this.value = value;
 	    qr = null;
@@ -2654,7 +2654,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     retVal = verifyNewValue(submittedValue, local);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -2690,7 +2690,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	newRetVal = bind(oldRemote, newRemote, local);
 	
-	if (newRetVal != null && !newRetVal.didSucceed())
+	if (!ReturnVal.didSucceed(newRetVal))
 	  {
 	    return newRetVal;
 	  }
@@ -2710,7 +2710,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	
 	newRetVal = eObj.finalizeSetElement(this, index, submittedValue);
 	
-	if (newRetVal == null || newRetVal.didSucceed())
+	if (ReturnVal.didSucceed(newRetVal))
 	  {
 	    values.setElementAt(submittedValue, index);
 	    qr = null;
@@ -2807,7 +2807,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     retVal = verifyNewValue(submittedValue, local);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -2859,7 +2859,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	newRetVal = bind(null, remote, local);
 
-	if (newRetVal != null && !newRetVal.didSucceed())
+	if (!ReturnVal.didSucceed(newRetVal))
 	  {
 	    return newRetVal;
 	  }
@@ -2875,7 +2875,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	newRetVal = eObj.finalizeAddElement(this, submittedValue);
 
-	if (newRetVal == null || newRetVal.didSucceed())
+	if (ReturnVal.didSucceed(newRetVal))
 	  {
 	    values.addElement(submittedValue);
 	    qr = null;
@@ -3027,7 +3027,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	retVal = verifyNewValue(submittedValues.elementAt(i), local);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    if (!partialSuccessOk)
 	      {
@@ -3158,7 +3158,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    newRetVal = bind(null, remote, local); // bind us to the target field
 
-	    if (newRetVal != null && !newRetVal.didSucceed())
+	    if (!ReturnVal.didSucceed(newRetVal))
 	      {
 		if (!partialSuccessOk)
 		  {
@@ -3232,7 +3232,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		newRetVal = eObj.finalizeAddElement(this, approvedValues.elementAt(i));
 
-		if (newRetVal == null || newRetVal.didSucceed())
+		if (ReturnVal.didSucceed(newRetVal))
 		  {
 		    values.addElement(approvedValues.elementAt(i));
 		    any_success = true;
@@ -3262,7 +3262,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    newRetVal = eObj.finalizeAddElements(this, approvedValues);
 
-	    if (newRetVal == null || newRetVal.didSucceed()) 
+	    if (ReturnVal.didSucceed(newRetVal))
 	      {
 		if (debug)
 		  {
@@ -3410,6 +3410,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (size() >= getMaxArraySize())
       {
+        // "Field {0} is already at or beyond the specified array size limit."
 	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
 					  ts.l("addElement.overflow_text", getName()));
       }
@@ -3423,37 +3424,12 @@ public final class InvidDBField extends DBField implements invid_field {
 
     retVal = eObj.createNewEmbeddedObject(this);
 
-    if (retVal == null)
-      {
-	// "Couldn''t create new embedded object"
-	// "A null value was returned by the createNewEmbeddedObject() call in the {0} field.\n\nThis may be due to a customization problem."
-	return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
-					  ts.l("createNewEmbedded.failure_text", getName()));
-      }
-    else if (!retVal.didSucceed())
+    if (!retVal.didSucceed())
       {
 	return retVal;
       }
 
-    Invid newObj = retVal.getInvid();
-
-    if (newObj == null)
-      {
-	// "Couldn''t create new embedded object"
-	// "An error occurred in trying to create a new embedded object in the {0} field.\n\nThis may be due to a permissions problem."
-	return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
-					  ts.l("createNewEmbedded.null_embedded", getName()));
-      }
-
-    // now we need to do the binding as appropriate.
-
-    // Note that we are just taking it for granted that we can edit
-    // the newly created object.  This is the right thing to do.  The
-    // permissions system in GanymedeSession wouldn't know how to
-    // check this operation until we link the newly embedded object
-    // into its container anyway.
-
-    DBEditObject embeddedObj = ((DBEditObject) owner).getSession().editDBObject(newObj); // *sync* DBSession DBObject
+    DBEditObject embeddedObj = (DBEditObject) retVal.getObject();
 
     if (embeddedObj == null)
       {
@@ -3475,19 +3451,9 @@ public final class InvidDBField extends DBField implements invid_field {
     retVal = embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, // *sync* DBField
 					    owner.getInvid());
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
-      }
-    else if (debug)
-      {
-	InvidDBField invf = (InvidDBField)  embeddedObj.getField(SchemaConstants.ContainerField);
-
-	if (debug)
-	  {
-	    System.err.println("-- Created a new embedded object in " + owner.getLabel() + 
-			       ", set it's container pointer to " + invf.getValueString());
-	  }
       }
 
     // finish the binding.  Note that we are directly modifying values
@@ -3502,9 +3468,15 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, newObj, null);
+	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, embeddedObj.getInvid(), null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+	// if a wizard intercedes, we are going to let it take the
+	// ball.  note that the wizard had better finish the job it
+	// starts, since we've already done a one-way binding of the
+	// embedded object to its container
+        //
+        // in general, wizardHooks probably shouldn't try to take over
+        // this processing.
 	
 	if (retVal != null && !retVal.doNormalProcessing)
 	  {
@@ -3512,11 +3484,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    ReturnVal newRetVal = eObj.finalizeAddElement(this, newObj);
+    ReturnVal newRetVal = eObj.finalizeAddElement(this, embeddedObj.getInvid());
 
-    if (newRetVal == null || newRetVal.didSucceed())
+    if (ReturnVal.didSucceed(newRetVal))
       {
-	values.addElement(newObj);
+	values.addElement(embeddedObj.getInvid());  // do a live modification of this field's invid vector
 	qr = null;
 
 	// now we need to initialize the new embedded object, since we
@@ -3533,27 +3505,25 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    retVal = embeddedObj.initializeNewObject();
 
-	    if (retVal == null || retVal.didSucceed())
-	      {
-		// sweet, success, forget the checkpoint
-
-		session.popCheckpoint(ckp_label);
-		checkpointed = false;
-
-		if (retVal == null)
-		  {
-		    retVal = new ReturnVal(true);
-		  }
-
-		retVal.setInvid(newObj);
-		retVal.setObject(embeddedObj);
-	    
-		return retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
+	    if (!ReturnVal.didSucceed(retVal))
+              {
 		return retVal;
-	      }
+              }
+
+            // sweet, success, forget the checkpoint
+
+            session.popCheckpoint(ckp_label);
+            checkpointed = false;
+
+            if (retVal == null)
+              {
+                retVal = new ReturnVal(true);
+              }
+
+            retVal.setInvid(embeddedObj.getInvid());
+            retVal.setObject(embeddedObj);
+	    
+            return retVal.unionRescan(newRetVal);
 	  }
 	finally
 	  {
@@ -3568,7 +3538,9 @@ public final class InvidDBField extends DBField implements invid_field {
       } 
     else
       {
-	embeddedObj.setFieldValue(SchemaConstants.ContainerField, null); // *sync* DBField
+        // finalizeAddElement vetoed the operation, what to do.. ?
+
+	embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, null); // *sync* DBField
 
 	if (newRetVal.getDialog() != null)
 	  {
@@ -3749,7 +3721,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    newRetVal = unbind(remote, local);
 
-	    if (newRetVal != null && !newRetVal.didSucceed())
+	    if (!ReturnVal.didSucceed(newRetVal))
 	      {
 		return newRetVal;
 	      }
@@ -3769,7 +3741,7 @@ public final class InvidDBField extends DBField implements invid_field {
     
 	newRetVal = eObj.finalizeDeleteElement(this, index);
 
-	if (newRetVal == null || newRetVal.didSucceed())
+	if (ReturnVal.didSucceed(newRetVal))
 	  {
 	    values.removeElementAt(index);
 
@@ -3791,7 +3763,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		newRetVal = eObj.getSession().deleteDBObject(remote);
 
-		if (newRetVal != null && !newRetVal.didSucceed())
+		if (!ReturnVal.didSucceed(newRetVal))
 		  {
 		    return newRetVal;	// go ahead and return our error code
 		  }
@@ -3954,7 +3926,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		newRetVal = unbind(remote, local);
 
-		if (newRetVal != null && !newRetVal.didSucceed())
+		if (!ReturnVal.didSucceed(newRetVal))
 		  {
 		    return newRetVal; // abort.  the finally clause will uncheckpoint
 		  }
@@ -3974,7 +3946,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    newRetVal = eObj.finalizeDeleteElements(this, valuesToDelete);
 
-	    if (newRetVal == null || newRetVal.didSucceed())
+	    if (ReturnVal.didSucceed(newRetVal))
 	      {
 		// our container is okay, go ahead and remove
 
@@ -4030,7 +4002,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    retVal = eObj.finalizeDeleteElements(this, valuesToDelete);
 
-	    if (retVal == null || retVal.didSucceed())
+	    if (ReturnVal.didSucceed(retVal))
 	      {
 		for (int i = 0; i < valuesToDelete.size(); i++)
 		  {
@@ -4038,7 +4010,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		    newRetVal = eObj.getSession().deleteDBObject(remote);
 
-		    if (newRetVal != null && !newRetVal.didSucceed())
+		    if (!ReturnVal.didSucceed(newRetVal))
 		      {
 			return newRetVal;
 		      }
