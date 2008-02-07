@@ -1861,66 +1861,58 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * necessary, whatever other customizations a subclass might choose to
    * do.  We may want to make this method final.
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @return A ReturnVal indicating success or failure.  If the
+   * embedded object was created successfully, the getInvid() method
+   * on the returned ReturnVal will provide the Invid of the created
+   * object.
    */
 
   public ReturnVal createNewEmbeddedObject(InvidDBField field) throws NotLoggedInException
-  {    
-    DBEditObject newObject;
-    DBObjectBaseField fieldDef;
-    ReturnVal retVal;
+  {
+    if (getGSession() == null)
+      {
+        // "Error in custom code on server.  createNewEmbeddedObject() called without a valid GanymedeSession"
+        return Ganymede.createErrorDialog(ts.l("global.serverError"),
+                                          ts.l("createNewEmbeddedObject.badSession"));
+      }
 
-    /* -- */
-
-    fieldDef = field.getFieldDef();
+    DBObjectBaseField fieldDef = field.getFieldDef();
 
     if (!fieldDef.isEditInPlace())
       {
 	// "Error in server, DBEditObject.createNewEmbeddedObject() called on non-embedded object"
 	throw new RuntimeException(ts.l("createNewEmbeddedObject.embeddedError"));
       }
-	
-    if (fieldDef.getTargetBase() > -1)
-      {
-	if (getGSession() != null)
-	  {
-	    // we use GanymedeSession to check permissions to create the target.
 
-	    retVal = getGSession().create_db_object(fieldDef.getTargetBase(), true);
-	
-	    if (retVal == null)
-	      {
-		// "DBEditObject.createNewEmbeddedObject could not get a useful result from create_db_object"
-		return Ganymede.createErrorDialog(ts.l("global.serverError"),
-						  ts.l("createNewEmbeddedObject.badCreate"));
-	      }
-	
-	    if (!retVal.didSucceed())
-	      {
-		return retVal;
-	      }
+    // we can't create an embedded object unless we know what type to
+    // create
 
-	    newObject = (DBEditObject) retVal.getObject();
-
-	    retVal.setInvid(newObject.getInvid());
-
-	    return retVal;
-	  }
-	else
-	  {
-	    // "Error in custom code on server.  createNewEmbeddedObject() called without a valid GanymedeSession"
-	    return Ganymede.createErrorDialog(ts.l("global.serverError"),
-					      ts.l("createNewEmbeddedObject.badSession"));
-	  }
-      }
-    else
+    if (fieldDef.getTargetBase() == -1)
       {
 	// "Error in custom code on server.  createNewEmbeddedObject() called without a valid target"
 	return Ganymede.createErrorDialog(ts.l("global.serverError"),
 					  ts.l("createNewEmbeddedObject.badTarget"));
       }
+
+    // we use GanymedeSession to check permissions to create the target.
+
+    ReturnVal retVal = getGSession().create_db_object(fieldDef.getTargetBase(), true);
+	
+    if (retVal == null)
+      {
+        // "DBEditObject.createNewEmbeddedObject could not get a useful result from create_db_object"
+        return Ganymede.createErrorDialog(ts.l("global.serverError"),
+                                          ts.l("createNewEmbeddedObject.badCreate"));
+      }
+	
+    if (!retVal.didSucceed())
+      {
+        return retVal;
+      }
+
+    retVal.setInvid(((DBObject) retVal.getObject()).getInvid());
+
+    return retVal;
   }
 
   /**
