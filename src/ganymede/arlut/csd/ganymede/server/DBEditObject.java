@@ -1905,13 +1905,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                                           ts.l("createNewEmbeddedObject.badCreate"));
       }
 
-    if (!retVal.didSucceed())
-      {
-        return retVal;
-      }
-
-    retVal.setInvid(((DBObject) retVal.getObject()).getInvid());
-
     return retVal;
   }
 
