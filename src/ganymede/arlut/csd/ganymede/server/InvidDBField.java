@@ -3443,6 +3443,16 @@ public final class InvidDBField extends DBField implements invid_field {
     // object's binding recorded.  We'll have to do the bidirectional
     // binding ourselves, in two steps.
 
+    // first, let's do a basic sanity check.  i can't imagine this
+    // ever failing, but i've also seen a case of an embedded object
+    // having been set up with a null container value, which shouldn't
+    // be possible either
+
+    if (owner.getInvid() == null)
+      {
+        throw new RuntimeException("Error, can't createNewEmbedded with a null owner invid");
+      }
+
     // we have to use setFieldValueLocal() here because the
     // permissions system uses the ContainerField to determine rights
     // to modify the field.. since we are just now setting the
