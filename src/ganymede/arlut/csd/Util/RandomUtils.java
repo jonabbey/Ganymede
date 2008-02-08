@@ -74,8 +74,18 @@ public class RandomUtils {
    * string including it is random.
    */
 
-  public static String getRandomSalt()
+  public static String getRandomHex()
   {
-    return Long.toHexString(randomizer.nextLong());
+    return Integer.toHexString(randomizer.nextInt());
+  }
+
+  /**
+   * This method takes a string, adds a random salt to it, and returns
+   * it.
+   */
+
+  public static String getSaltedString(String in)
+  {
+    return in + getRandomHex();
   }
 }

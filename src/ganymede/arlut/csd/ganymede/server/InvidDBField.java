@@ -65,6 +65,7 @@ import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
 
+import arlut.csd.Util.RandomUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
@@ -2483,7 +2484,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
 
-    checkkey = "setValue" + getName() + owner.getLabel();
+    checkkey = RandomUtils.getSaltedString("setValue[" + getName() + ":" + owner.getLabel() + "]");
 
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
@@ -2678,7 +2679,7 @@ public final class InvidDBField extends DBField implements invid_field {
     oldRemote = (Invid) values.elementAt(index);
     newRemote = (Invid) submittedValue;
 
-    checkkey = "setElement" + getName() + owner.getLabel();
+    checkkey = RandomUtils.getSaltedString("setElement[" + getName() + ":" + owner.getLabel() + "]");
 
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpoint this transaction
 
@@ -2849,7 +2850,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	return newRetVal;
       }
 
-    checkkey = "addElement" + getName() + owner.getLabel();
+    checkkey = RandomUtils.getSaltedString("addElement[" + getName() + ":" + owner.getLabel() + "]");
 
     eObj.getSession().checkpoint(checkkey); // may block if another thread has already checkpointed this transaction
 
@@ -3128,7 +3129,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	approvedValues = VectorUtils.difference(approvedValues, failed_bindings);
       }
 
-    checkkey = "addElements" + getName() + owner.getLabel();
+    checkkey = RandomUtils.getSaltedString("addElements[" + getName() + ":" + owner.getLabel() + "]");
 
     if (debug)
       {
@@ -3515,7 +3516,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // get the embedded object linked to the parent
 
     DBSession session = eObj.getSession();
-    String ckp_label = eObj.getLabel() + "addEmbed";
+    String ckp_label = RandomUtils.getSaltedString(eObj.getLabel() + "addEmbed");
 
     session.checkpoint(ckp_label); // may block if another thread has checkpointed this transaction
     boolean checkpointed = true;
@@ -3676,7 +3677,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    checkkey = "delElement" + getName() + owner.getLabel();
+    checkkey = RandomUtils.getSaltedString("delElement[" + getName() + ":" + owner.getLabel() + "]");
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -3895,7 +3896,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // so we can easily undo any changes that we make
     // if we have to return failure.
 
-    checkkey = "delElements" + getName() + owner.getLabel();
+    checkkey = RandomUtils.getSaltedString("delElements[" + getName() + ":" + owner.getLabel() + "]");
 
     if (debug)
       {

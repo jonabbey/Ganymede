@@ -56,6 +56,7 @@ package arlut.csd.ganymede.server;
 import java.util.Date;
 import java.util.Vector;
 
+import arlut.csd.Util.RandomUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ObjectStatus;
@@ -287,6 +288,8 @@ final public class DBSession {
 	// failure?  Report it, but we don't have to do any clean up at this
 	// point.
 
+        // "Object Creation Failure"
+        // "Couldn''t create the new object in the database."
 	return Ganymede.createErrorDialog(ts.l("createDBObject.failure"),
 					  ts.l("createDBObject.failure_text"));
       }
@@ -295,7 +298,7 @@ final public class DBSession {
     // recover if we can't get the object into the owner groups
     // it needs to go into
 
-    String ckp_label = "createX" + base.getName();
+    String ckp_label = RandomUtils.getSaltedString("create[" + base.getName() + "]");
 
     checkpoint(ckp_label);
     boolean checkpointed = true;
@@ -906,7 +909,7 @@ final public class DBSession {
 	throw new RuntimeException(ts.l("global.notransaction", "deleteDBObject"));
       }
 
-    key = "del" + eObj.getLabel();
+    key = RandomUtils.getSaltedString("del[" + eObj.getLabel() + "]");
 
     switch (eObj.getStatus())
       {
@@ -1032,7 +1035,7 @@ final public class DBSession {
 	throw new RuntimeException(ts.l("global.notransaction", "inactivateDBObject"));
       }
 
-    key = "inactivate" + eObj.getLabel();
+    key = RandomUtils.getSaltedString("inactivate[" + eObj.getLabel() + "]");
 
     switch (eObj.getStatus())
       {
@@ -1131,7 +1134,7 @@ final public class DBSession {
 	throw new RuntimeException(ts.l("global.notransaction", "reactivateDBObject"));
       }
 
-    key = "reactivate" + eObj.getLabel();
+    key = RandomUtils.getSaltedString("reactivate[" + eObj.getLabel() + "]");
 
     switch (eObj.getStatus())
       {

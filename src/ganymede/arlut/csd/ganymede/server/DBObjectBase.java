@@ -1659,8 +1659,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    */
   
   protected DBEditObject invokeFactory(Class[] classParams,
-      Object[] methodParams) throws SecurityException,
-      InvocationTargetException, IllegalAccessException
+                                       Object[] methodParams) throws SecurityException,
+                                                                     InvocationTargetException,
+                                                                     IllegalAccessException
   {
     /*
      * Deepak sez: This is sort of a hack. Sun, in its wisdom, decided to make
@@ -1670,6 +1671,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
      * call Class.getMethod(), a NoSuchMethodException is thrown if that method
      * isn't defined.
      */
+
     try
       {
         Method factory = classdef.getMethod("factory", classParams);
@@ -1682,6 +1684,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
          * null in the end.
          */
       }
+
     return null;
   }
 
@@ -1842,7 +1845,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	if (debug2)
 	  {
-	    if (objectTable.containsKey(chosenSlot.getNum()))
+	    if (objectTable.containsKey(invid.getNum()))
 	      {
 		// "bad invid chosen in createNewObject: num already taken"
 		throw new IllegalArgumentException(ts.l("createNewObject.badinvid"));
@@ -1906,6 +1909,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	     * example), then use a default constructor. */
 
             e_object = invokeFactory(classArray, parameterArray);
+
             if (e_object == null)
               {
                 c = classdef.getDeclaredConstructor(classArray); 

@@ -190,9 +190,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   /**
    * true if this object has had its commitPhase1() method called, but
    * has not yet had its commitPhase2() or release() methods called.
-   * If commitSemaphore is true, the DBField.isEditable() method will
-   * always return false for fields in this object, and no editing
-   * will be allowed on this object.
+   * If commitSemaphore is set to true, the DBField.isEditable()
+   * method will always return false for fields in this object, and no
+   * editing will be allowed on this object.
    */
 
   private booleanSemaphore commitSemaphore = new booleanSemaphore(false);
