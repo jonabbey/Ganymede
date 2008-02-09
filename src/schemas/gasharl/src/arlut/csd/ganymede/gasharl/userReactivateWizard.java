@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -128,6 +128,8 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 
   userCustom userObject;
 
+  String ckp_label;
+
   // reactivation params
 
   // These variables are directly accessed by userCustom when this
@@ -145,12 +147,14 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
    */
 
   public userReactivateWizard(GanymedeSession session, 
-			      userCustom userObject) throws RemoteException
+			      userCustom userObject,
+                              String ckp_label) throws RemoteException
   {
     super(session);		// register ourselves
 
     this.session = session;
     this.userObject = userObject;
+    this.ckp_label = ckp_label;
   }
 
   /**
@@ -267,11 +271,11 @@ public class userReactivateWizard extends GanymediatorWizard implements userSche
 	return retVal;
       }
 
-    // and do the inactivation.. userObject will consult us for
+    // and do the reactivation.. userObject will consult us for
 
     // forward, shell, and password
 	    
-    retVal = userObject.reactivate(this);
+    retVal = userObject.reactivate(this, ckp_label);
 
     if (retVal == null || retVal.didSucceed())
       {

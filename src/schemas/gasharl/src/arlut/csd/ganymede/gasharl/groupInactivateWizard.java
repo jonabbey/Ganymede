@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -132,10 +132,14 @@ public class groupInactivateWizard extends GanymediatorWizard {
   Hashtable
     groupNameHash = new Hashtable();
 
+  String
+    ckp_label;
+
   /**
    * Vector field of all the home users for this group.  If there are no
    * home users, getStartDialog chooses a different path for the dialog.
    */
+
   InvidDBField 
     homeField;
 
@@ -149,17 +153,21 @@ public class groupInactivateWizard extends GanymediatorWizard {
    *
    * @param session The GanymedeSession object that this wizard will
    * use to interact with the Ganymede data store.
-   * @param userObject The group object that this wizard will work with.
+   * @param group The group object that this wizard will work with.
+   * @param ckp_label The checkpoint label used to finish up the
+   * inactivation
    *
    */
 
   public groupInactivateWizard(GanymedeSession session,
-			       groupCustom group) throws RemoteException
+			       groupCustom group,
+                               String ckp_label) throws RemoteException
   {
     super(session);
     
     this.session = session;
     this.groupObject = group;
+    this.ckp_label = ckp_label;
   }
 
   /**
@@ -298,7 +306,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 		System.err.println("groupInactivateWizard: edit_db_object failed, aborting");
 	      }
 
-	    groupObject.inactivate(false, true); // not sucessful, from wizard
+	    groupObject.inactivate(false, true, ckp_label); // not sucessful, from wizard
 	    return rv;
 	  }
 	
@@ -367,7 +375,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 	rejectedBuffer.append("\nYou must modify or inactivate these users before ");
 	rejectedBuffer.append("inactivating this group.");
 
-	groupObject.inactivate(false, true); // Not sucessful, from wizard
+	groupObject.inactivate(false, true, ckp_label); // Not sucessful, from wizard
 
 	return fail("Group Inactivate Failed",
 		    rejectedBuffer.toString(),
@@ -426,7 +434,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
 	    if ((retv != null) && (! retv.didSucceed()))
 	      {
-		groupObject.inactivate(false, true);
+		groupObject.inactivate(false, true, ckp_label);
 		return retv;
 	      }
 	    else
@@ -440,7 +448,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 	  }
       }
 
-    groupObject.inactivate(true, true);
+    groupObject.inactivate(true, true, ckp_label);
 
     if (debug)
       {
@@ -464,7 +472,8 @@ public class groupInactivateWizard extends GanymediatorWizard {
    */
   public ReturnVal processDialog50() throws NotLoggedInException
   {
-    groupObject.inactivate(true, true);
+    groupObject.inactivate(true, true, ckp_label);
+
     if (debug)
       {
 	System.err.println("groupInactivateWizard: all done, no home groups.");
@@ -473,6 +482,4 @@ public class groupInactivateWizard extends GanymediatorWizard {
     return success("Group Inactivation performed",
 		   "The group has been inactivated.", "OK", null, "ok.gif");
   }
-
-
 }

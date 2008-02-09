@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -272,12 +272,12 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    * Overides inactivate() in DBEditObject.
    */
 
-  public ReturnVal inactivate()
+  public ReturnVal inactivate(String ckp_label)
   {
-    return inactivate(false, false);
+    return inactivate(false, false, ckp_label);
   }
 
-  public ReturnVal inactivate(boolean suceeded, boolean fromWizard) 
+  public ReturnVal inactivate(boolean suceeded, boolean fromWizard, String ckp_label)
   {
     ReturnVal retVal = null;
     groupInactivateWizard wiz;
@@ -305,7 +305,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	    
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		super.finalizeInactivate(false);
+		super.finalizeInactivate(false, ckp_label);
 		return retVal;
 	      }
 	    
@@ -331,14 +331,14 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		    System.err.println("groupCustom.inactivate: retVal returns true, I am finalizing.");
 		  }
 
-		finalizeInactivate(true);
+		finalizeInactivate(true, ckp_label);
 	      }
 
 	    return retVal;
 	  }
 	else
 	  {
-	    finalizeInactivate(false);
+	    finalizeInactivate(false, ckp_label);
 	    return new ReturnVal(false);
 	  }
       }
@@ -353,7 +353,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		    System.err.println("groupCustom.inactivate: Starting new groupInactivateWizard");
 		  }
 		
-		wiz = new groupInactivateWizard(this.gSession, this);
+		wiz = new groupInactivateWizard(this.gSession, this, ckp_label);
 		
 		return wiz.respond(null);
 	      }
@@ -371,11 +371,11 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
 	    if (homeField.size() == 0)
 	      {
-		return this.inactivate(true, true);
+		return this.inactivate(true, true, ckp_label);
 	      }
 	    else
 	      {
-		return this.inactivate(false, true);
+		return this.inactivate(false, true, ckp_label);
 	      }
 	  }
       }

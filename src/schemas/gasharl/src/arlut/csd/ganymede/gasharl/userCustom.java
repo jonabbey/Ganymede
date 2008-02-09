@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -1277,12 +1277,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * @see #commitPhase2() 
    */
 
-  public ReturnVal inactivate()
+  public ReturnVal inactivate(String ckp_label)
   {
-    return inactivate(null, false);
+    return inactivate(null, false, ckp_label);
   }
 
-  public ReturnVal inactivate(String forward, boolean calledByWizard)
+  public ReturnVal inactivate(String forward, boolean calledByWizard, String ckp_label)
   {
     ReturnVal retVal;
     StringDBField stringfield;
@@ -1305,7 +1305,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    if (calledByWizard)
 	      {
-		finalizeInactivate(false);
+		finalizeInactivate(false, ckp_label);
 	      }
 
 	    return retVal;
@@ -1326,7 +1326,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		if (calledByWizard)
 		  {
-		    finalizeInactivate(false);
+		    finalizeInactivate(false, ckp_label);
 		  }
 		
 		return retVal;
@@ -1347,7 +1347,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		  {
 		    if (calledByWizard)
 		      {
-			finalizeInactivate(false);
+			finalizeInactivate(false, ckp_label);
 		      }
 
 		    return retVal;
@@ -1372,7 +1372,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    if (calledByWizard)
 	      {
-		finalizeInactivate(false);
+		finalizeInactivate(false, ckp_label);
 	      }
 
 	    return retVal;
@@ -1388,7 +1388,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    if (calledByWizard)
 	      {
-		finalizeInactivate(false);
+		finalizeInactivate(false, ckp_label);
 	      }
 
 	    return retVal;
@@ -1398,7 +1398,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (calledByWizard)
 	  {
-	    finalizeInactivate(true);
+	    finalizeInactivate(true, ckp_label);
 	  }
 
 	// ok, we succeeded, now we have to tell the client
@@ -1423,7 +1423,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		System.err.println("userCustom: creating inactivation wizard");
 	      }
 
-	    theWiz = new userInactivateWizard(this.gSession, this);
+	    theWiz = new userInactivateWizard(this.gSession, this, ckp_label);
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1473,7 +1473,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * @see arlut.csd.ganymede.server.DBEditObject#commitPhase2()
    */
 
-  public ReturnVal reactivate()
+  public ReturnVal reactivate(String ckp_label)
   {
     userReactivateWizard theWiz;
 
@@ -1486,7 +1486,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    System.err.println("userCustom: creating reactivation wizard");
 	  }
 	
-	theWiz = new userReactivateWizard(this.gSession, this);
+	theWiz = new userReactivateWizard(this.gSession, this, ckp_label);
       }
     catch (RemoteException ex)
       {
@@ -1510,7 +1510,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * @see arlut.csd.ganymede.gasharl.userReactivateWizard
    */
 
-  public ReturnVal reactivate(userReactivateWizard reactivateWizard)
+  public ReturnVal reactivate(userReactivateWizard reactivateWizard, String ckp_label)
   {
     ReturnVal retVal = null;
     StringDBField stringfield;
@@ -1601,7 +1601,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return retVal;
 	  }
 
-	finalizeReactivate(true);
+	finalizeReactivate(true, ckp_label);
 	success = true;
 
 	// ok, we succeeded, now we have to tell the client
@@ -1620,7 +1620,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	if (!success)
 	  {
-	    finalizeReactivate(false);
+	    finalizeReactivate(false, ckp_label);
 	  }
       }
   }

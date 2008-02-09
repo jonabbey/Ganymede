@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -118,6 +118,8 @@ public class userInactivateWizard extends GanymediatorWizard {
 
   userCustom userObject;
 
+  String ckp_label;
+
   /**
    *
    * This constructor registers the wizard as an active wizard
@@ -126,16 +128,20 @@ public class userInactivateWizard extends GanymediatorWizard {
    * @param session The GanymedeSession object that this wizard will
    * use to interact with the Ganymede data store.
    * @param userObject The user object that this wizard will work with.
+   * @param ckp_label The checkpoint label used to finish up the
+   * inactivation
    *
    */
 
   public userInactivateWizard(GanymedeSession session, 
-			      userCustom userObject) throws RemoteException
+			      userCustom userObject,
+                              String ckp_label) throws RemoteException
   {
     super(session);		// ** register ourselves **
 
     this.session = session;
     this.userObject = userObject;
+    this.ckp_label = ckp_label;
   }
 
   /**
@@ -153,7 +159,7 @@ public class userInactivateWizard extends GanymediatorWizard {
     // originally been done for us if we hadn't gone through
     // the wizard process.
 
-    userObject.finalizeInactivate(false);
+    userObject.finalizeInactivate(false, ckp_label);
 
     return fail("User Inactivation Canceled",
 		"User Inactivation Canceled",
@@ -220,7 +226,7 @@ public class userInactivateWizard extends GanymediatorWizard {
 
     // and do the inactivation
 	    
-    retVal = userObject.inactivate(forward, true);
+    retVal = userObject.inactivate(forward, true, ckp_label);
 
     if (retVal == null || retVal.didSucceed())
       {
@@ -242,7 +248,7 @@ public class userInactivateWizard extends GanymediatorWizard {
 	// originally been done for us if we hadn't gone through
 	// the wizard process.
 	
-	userObject.finalizeInactivate(false);
+	userObject.finalizeInactivate(false, ckp_label);
       }
     
     return retVal;

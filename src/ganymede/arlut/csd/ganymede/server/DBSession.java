@@ -1057,7 +1057,7 @@ final public class DBSession {
 
     try
       {
-	retVal = eObj.inactivate();
+	retVal = eObj.inactivate(ckp_label);
       }
     catch (Throwable ex)
       {
@@ -1156,7 +1156,7 @@ final public class DBSession {
 
     try
       {
-	retVal = eObj.reactivate();
+	retVal = eObj.reactivate(ckp_label);
       }
     catch (Throwable ex)
       {

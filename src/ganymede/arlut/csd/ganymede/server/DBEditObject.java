@@ -2576,12 +2576,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @see #commitPhase1()
    * @see #commitPhase2()
    *
+   * @param ckp_label The checkpoint label which should be popped or
+   * rolledback on necessity by the custom inactivate method.
+   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
 
-  public ReturnVal inactivate()
+  public ReturnVal inactivate(String ckp_label)
   {
     // "DBEditObject.inactivate() Error"
     // "This object type has not been configured to allow inactivation."
@@ -2690,7 +2693,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * be provided.
    */
 
-  public ReturnVal reactivate()
+  public ReturnVal reactivate(String ckp_label)
   {
     if (isInactivated())
       {
