@@ -411,6 +411,8 @@ while (<FILE>) {
         ($fields[$fieldindex] =~ /[,|\|]$invid[,|\|]/) ||
         ($fields[$fieldindex] =~ /^$invid$/)) {
 
+      print $_;
+
       # we want to show all events in a transaction block, even
       # the endtransaction events which don't include the object
       # invids that we are scanning for.  So, when we see a
