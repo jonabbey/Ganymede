@@ -54,6 +54,8 @@
 
 package arlut.csd.Util;
 
+import java.lang.reflect.Array;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -70,10 +72,24 @@ import java.util.Vector;
 
 public class ArrayUtils {
 
+  /**
+   * Returns an Array of whatever object type ary1 contains, with the
+   * contents of ary2 added to the end of the contents of ary1.
+   *
+   * An exception will be thrown if ary1 and ary2 are not arrays
+   * of compatible same classes.
+   */
+
   public static Object[] concat(Object[] ary1, Object[] ary2)
   {
-    Object[] results = new Object[(ary1 != null ? ary1.length : 0) +
-                                  (ary2 != null ? ary2.length : 0)];
+    int total_length = (ary1 != null ? ary1.length : 0) +
+      (ary2 != null ? ary2.length : 0);
+
+    Class arrayClass = ary1.getClass();
+    Class componentClass = arrayClass.getComponentType();
+
+    Object[] results = (Object[]) Array.newInstance(componentClass, total_length);
+
     int length = 0;
 
     if (ary1 != null)
@@ -90,11 +106,25 @@ public class ArrayUtils {
     return results;
   }
 
+  /**
+   * Returns an Array of whatever object type ary1 contains, with the
+   * contents of ary2 and ary3 added to the end of the contents of ary1.
+   *
+   * An exception will be thrown if ary1, ary2, and ary3 are not
+   * arrays of compatible same classes.
+   */
+
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3)
   {
-    Object[] results = new Object[(ary1 != null ? ary1.length : 0) +
-                                  (ary2 != null ? ary2.length : 0) +
-                                  (ary3 != null ? ary3.length : 0)];
+    int total_length = (ary1 != null ? ary1.length : 0) +
+      (ary2 != null ? ary2.length : 0) +
+      (ary3 != null ? ary3.length : 0);
+
+    Class arrayClass = ary1.getClass();
+    Class componentClass = arrayClass.getComponentType();
+
+    Object[] results = (Object[]) Array.newInstance(componentClass, total_length);
+
     int length = 0;
 
     if (ary1 != null)
@@ -117,12 +147,27 @@ public class ArrayUtils {
     return results;
   }
 
+  /**
+   * Returns an Array of whatever object type ary1 contains, with the
+   * contents of ary2, ary3, and ary4 added to the end of the contents
+   * of ary1.
+   *
+   * An exception will be thrown if ary1, ary2, ary3, and ary4 are not
+   * arrays of compatible same classes.
+   */
+
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3, Object[] ary4)
   {
-    Object[] results = new Object[(ary1 != null ? ary1.length : 0) +
-                                  (ary2 != null ? ary2.length : 0) +
-                                  (ary3 != null ? ary3.length : 0) +
-                                  (ary4 != null ? ary4.length : 0)];
+    int total_length = (ary1 != null ? ary1.length : 0) +
+      (ary2 != null ? ary2.length : 0) +
+      (ary3 != null ? ary3.length : 0) +
+      (ary4 != null ? ary4.length : 0);
+
+    Class arrayClass = ary1.getClass();
+    Class componentClass = arrayClass.getComponentType();
+
+    Object[] results = (Object[]) Array.newInstance(componentClass, total_length);
+
     int length = 0;
 
     if (ary1 != null)
@@ -151,13 +196,28 @@ public class ArrayUtils {
     return results;
   }
 
+  /**
+   * Returns an Array of whatever object type ary1 contains, with the
+   * contents of ary2, ary3, ary4, and ary5 added to the end of the
+   * contents of ary1.
+   *
+   * An exception will be thrown if ary1, ary2, ary3, ary4, and ary5
+   * are not arrays of compatible same classes.
+   */
+
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3, Object[] ary4, Object[] ary5)
   {
-    Object[] results = new Object[(ary1 != null ? ary1.length : 0) +
-                                  (ary2 != null ? ary2.length : 0) +
-                                  (ary3 != null ? ary3.length : 0) +
-                                  (ary4 != null ? ary4.length : 0) +
-                                  (ary5 != null ? ary5.length : 0)];
+    int total_length = (ary1 != null ? ary1.length : 0) +
+      (ary2 != null ? ary2.length : 0) +
+      (ary3 != null ? ary3.length : 0) +
+      (ary4 != null ? ary4.length : 0) +
+      (ary5 != null ? ary5.length : 0);
+
+    Class arrayClass = ary1.getClass();
+    Class componentClass = arrayClass.getComponentType();
+
+    Object[] results = (Object[]) Array.newInstance(componentClass, total_length);
+
     int length = 0;
 
     if (ary1 != null)
