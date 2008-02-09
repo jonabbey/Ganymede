@@ -74,15 +74,17 @@ public class ArrayUtils {
   {
     Object[] results = new Object[(ary1 != null ? ary1.length : 0) +
                                   (ary2 != null ? ary2.length : 0)];
+    int length = 0;
 
     if (ary1 != null)
       {
         System.arraycopy(ary1, 0, results, 0, ary1.length);
+        length += ary1.length;
       }
 
     if (ary2 != null)
       {
-        System.arraycopy(ary2, 0, results, results.length, ary2.length);
+        System.arraycopy(ary2, 0, results, length, ary2.length);
       }
 
     return results;
@@ -93,20 +95,23 @@ public class ArrayUtils {
     Object[] results = new Object[(ary1 != null ? ary1.length : 0) +
                                   (ary2 != null ? ary2.length : 0) +
                                   (ary3 != null ? ary3.length : 0)];
+    int length = 0;
 
     if (ary1 != null)
       {
         System.arraycopy(ary1, 0, results, 0, ary1.length);
+        length += ary1.length;
       }
 
     if (ary2 != null)
       {
-        System.arraycopy(ary2, 0, results, results.length, ary2.length);
+        System.arraycopy(ary2, 0, results, length, ary2.length);
+        length += ary2.length;
       }
 
     if (ary3 != null)
       {
-        System.arraycopy(ary3, 0, results, results.length, ary3.length);
+        System.arraycopy(ary3, 0, results, length, ary3.length);
       }
 
     return results;
@@ -118,25 +123,29 @@ public class ArrayUtils {
                                   (ary2 != null ? ary2.length : 0) +
                                   (ary3 != null ? ary3.length : 0) +
                                   (ary4 != null ? ary4.length : 0)];
+    int length = 0;
 
     if (ary1 != null)
       {
         System.arraycopy(ary1, 0, results, 0, ary1.length);
+        length += ary1.length;
       }
 
     if (ary2 != null)
       {
-        System.arraycopy(ary2, 0, results, results.length, ary2.length);
+        System.arraycopy(ary2, 0, results, length, ary2.length);
+        length += ary2.length;
       }
 
     if (ary3 != null)
       {
-        System.arraycopy(ary3, 0, results, results.length, ary3.length);
+        System.arraycopy(ary3, 0, results, length, ary3.length);
+        length += ary3.length;
       }
 
     if (ary4 != null)
       {
-        System.arraycopy(ary4, 0, results, results.length, ary4.length);
+        System.arraycopy(ary4, 0, results, length, ary4.length);
       }
 
     return results;
@@ -149,30 +158,35 @@ public class ArrayUtils {
                                   (ary3 != null ? ary3.length : 0) +
                                   (ary4 != null ? ary4.length : 0) +
                                   (ary5 != null ? ary5.length : 0)];
+    int length = 0;
 
     if (ary1 != null)
       {
         System.arraycopy(ary1, 0, results, 0, ary1.length);
+        length += ary1.length;
       }
 
     if (ary2 != null)
       {
-        System.arraycopy(ary2, 0, results, results.length, ary2.length);
+        System.arraycopy(ary2, 0, results, length, ary2.length);
+        length += ary2.length;
       }
 
     if (ary3 != null)
       {
-        System.arraycopy(ary3, 0, results, results.length, ary3.length);
+        System.arraycopy(ary3, 0, results, length, ary3.length);
+        length += ary3.length;
       }
 
     if (ary4 != null)
       {
-        System.arraycopy(ary4, 0, results, results.length, ary4.length);
+        System.arraycopy(ary4, 0, results, length, ary4.length);
+        length += ary4.length;
       }
 
     if (ary5 != null)
       {
-        System.arraycopy(ary5, 0, results, results.length, ary5.length);
+        System.arraycopy(ary5, 0, results, length, ary5.length);
       }
 
     return results;
