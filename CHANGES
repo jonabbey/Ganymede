@@ -1152,7 +1152,7 @@ The Ganymede client will no longer pop up the persona select dialog if
 the user specified a persona at login time, by logging in as
 'username:persona name'.
 
-This is a nice little optimization that stream lines the login process
+This is a nice little optimization that streamlines the login process
 a bit.
 
 75. [SERVER] Added support for Sha Unix Crypt password hashing in DBPasswordField

@@ -397,7 +397,7 @@ while (<FILE>) {
       next;
     }
 
-    if (@fields[$fieldindex] =~ /$invid/) {
+    if (@fields[$fieldindex] =~ /[,|\|]$invid[,|\|]/) {
 
       print $_;
 
