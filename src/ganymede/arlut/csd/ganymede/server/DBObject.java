@@ -225,7 +225,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * objectHook.</p>
    *
    * @see arlut.csd.ganymede.server.DBField
-   *
    */
 
   protected DBField[] fieldAry;
@@ -668,6 +667,15 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     return (DBObjectBaseField) objectBase.getField(fieldcode);
   }
 
+  /**
+   * Returns the permission that apply to the given fieldName in this
+   * object.
+   *
+   * If this object was not made in the context of a specific
+   * GanymedeSession, full permissions will be given for access to the
+   * field.
+   */
+
   public final PermEntry getFieldPerm(String fieldName)
   {
     DBField f = (DBField) getField(fieldName);
@@ -680,6 +688,15 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     
     return this.getFieldPerm(f.getID());
   }
+
+  /**
+   * Returns the permission that apply to the field with the given
+   * fieldcode in this object.
+   *
+   * If this object was not made in the context of a specific
+   * GanymedeSession, full permissions will be given for access to the
+   * field.
+   */
 
   public final synchronized PermEntry getFieldPerm(short fieldcode)
   {
