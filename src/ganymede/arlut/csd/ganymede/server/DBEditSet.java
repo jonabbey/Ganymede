@@ -688,15 +688,18 @@ public class DBEditSet {
       }
 
     /*
-      I had tried to put some check logic to make sure that multiple threads interacting
-      with the checkpoint system wouldn't interfere with each other, by trying to
-      track the last thread that did a checkpoint operation, but the way RMI works, two
-      subsequent client actions by the same client could be processed on separate server
-      threads, making this check overly restrictive.
+      I had tried to put some check logic to make sure that multiple
+      threads interacting with the checkpoint system wouldn't
+      interfere with each other, by trying to track the last thread
+      that did a checkpoint operation, but the way RMI works, two
+      subsequent client actions by the same client could be processed
+      on separate server threads, making this check overly
+      restrictive.
 
-      I've left this on for now, but I'm still uncertain as to whether
-      this should be necessary.  When I've seen this tripped before,
-      it was due to a coding problem elsewhere.
+      I've left this here (but disabled) for now, but I'm still
+      uncertain as to whether this should be necessary.  When I've
+      seen this tripped before, it was due to a coding problem
+      elsewhere.
     */
 
     if (false)

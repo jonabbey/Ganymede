@@ -2598,7 +2598,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * won't work as well as we'd really like.
    */
 
-  public final void finalizeInactivate(boolean success)
+  public final void finalizeInactivate(boolean success, String ckp_label)
   {
     if (success)
       {
@@ -2643,11 +2643,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 					    getEmailTargets(this)));
 	  }
 
-	editset.popCheckpoint("inactivate" + getLabel());
+	editset.popCheckpoint(ckp_label);
       }
     else
       {
-	editset.rollback("inactivate" + getLabel());
+	editset.rollback(ckp_label);
       }
   }
 
@@ -2713,7 +2713,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * done.
    */
 
-  final protected void finalizeReactivate(boolean success)
+  protected final void finalizeReactivate(boolean success, String ckp_label)
   {
     if (success)
       {
@@ -2734,10 +2734,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 					gSession.getMyUserName(),
 					invids,
 					getEmailTargets(this)));
+
+	editset.popCheckpoint(ckp_label);
       }
     else
       {
-	editset.rollback("reactivate" + getLabel()); // see DBSession.reactivateDBObject() for checkpoint
+	editset.rollback(ckp_label); // see DBSession.reactivateDBObject() for checkpoint
       }
   }
 
@@ -2809,7 +2811,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * be provided.
    */
 
-  public final synchronized ReturnVal finalizeRemove(boolean success)
+  public final synchronized ReturnVal finalizeRemove(boolean success, String ckp_label)
   {
     ReturnVal finalResult = new ReturnVal(true); // we use this to track rescan requests
     ReturnVal retVal = null;
@@ -2820,7 +2822,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (!success)
       {
-	editset.rollback("del" + label); // *sync*
+	editset.rollback(ckp_label); // *sync*
 
 	// "Object Removal Error"
 	// "Could not delete object {0}.  Custom code in the server rejected this operation."
@@ -2877,7 +2879,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
-	    editset.rollback("del" + label); // *sync*
+	    editset.rollback(ckp_label); // *sync*
 
 	    return retVal;
 	  }
@@ -2921,7 +2923,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 			if (retVal != null && !retVal.didSucceed())
 			  {
-			    editset.rollback("del" + label); // *sync*
+			    editset.rollback(ckp_label); // *sync*
 
 			    if (retVal.getDialog() != null)
 			      {
@@ -2940,7 +2942,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 		      }
 		    catch (GanyPermissionsException ex)
 		      {
-			editset.rollback("del" + label); // *sync*
+			editset.rollback(ckp_label); // *sync*
 
 			// "Server: Error in DBEditObject.finalizeRemove()"
 			// "Permissions violation during attempted deletion of element from field {0}."
@@ -2970,7 +2972,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		    if (retVal != null && !retVal.didSucceed())
 		      {
-			editset.rollback("del" + label); // *sync*
+			editset.rollback(ckp_label); // *sync*
 
 			if (retVal.getDialog() != null)
 			  {
@@ -3025,7 +3027,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		    if (retVal != null && !retVal.didSucceed())
 		      {
-			editset.rollback("del" + label); // *sync*
+			editset.rollback(ckp_label); // *sync*
 
 			// "Server: Error in DBEditObject.finalizeRemove()"
 			// "Custom code disapproved of deleting element from field {0}."
@@ -3051,7 +3053,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
-		    editset.rollback("del" + label); // *sync*
+		    editset.rollback(ckp_label);  // *sync*
 
 		    // "Server: Error in DBEditObject.finalizeRemove()"
 		    // "Custom code disapproved of clearing the value held in field {0}."
@@ -3061,7 +3063,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	  }
 
-	editset.popCheckpoint("del" + label);
+	editset.popCheckpoint(ckp_label);
 
 	return finalResult;
       }

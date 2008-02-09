@@ -84,6 +84,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import Qsmtp.Qsmtp;
+import arlut.csd.Util.RandomUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.WordWrap;
@@ -779,48 +780,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   public boolean isLoggedIn()
   {
     return loggedInSemaphore.isSet();
-  }
-
-  /**
-   * Pass-through method for schema kit code.  This method is not
-   * intended to be available to the client over RMI anymore, as
-   * {@link arlut.csd.ganymede.server.DBSession#checkpoint(java.lang.String)
-   * DBSession.checkpoint()} now does a thread comparison to make sure
-   * that nothing is attempting to do interleaved checkpoint
-   * operations, and RMI doesn't guarantee that successive remote
-   * method calls from a client will be issued from the same server
-   * thread.
-   */
-
-  public void checkpoint(String key)
-  {
-    if (session.editSet == null)
-      {
-	throw new RuntimeException(ts.l("checkpoint.exception"));
-      }
-
-    session.checkpoint(key);
-  }
-
-  /**
-   * Pass-through method for schema kit code.  This method is not
-   * intended to be available to the client over RMI anymore, as
-   * {@link arlut.csd.ganymede.server.DBSession#checkpoint(java.lang.String)
-   * DBSession.checkpoint()} now does a thread comparison to make sure
-   * that nothing is attempting to do interleaved checkpoint
-   * operations, and RMI doesn't guarantee that successive remote
-   * method calls from a client will be issued from the same server
-   * thread.
-   */
-
-  public boolean rollback(String key)
-  {
-    if (session.editSet == null)
-      {
-	throw new RuntimeException(ts.l("rollback.exception"));
-      }
-
-    return session.rollback(key);
   }
 
   /**
@@ -4563,6 +4522,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     DBObject vObj;
     DBEditObject newObj;
     ReturnVal retVal, retVal2;
+    boolean checkpointed = false;
 
     /* -- */
 
@@ -4593,30 +4553,48 @@ final public class GanymedeSession implements Session, Unreferenced {
 					  ts.l("clone_db_object.denied_msg", vObj.getTypeName(), vObj.getLabel()));
       }
 
-    retVal = create_db_object(invid.getType());
-    
-    if (!retVal.didSucceed())
-      {
-	return retVal;
-      }
+    String ckp = RandomUtils.getSaltedString("clone_db_object[" + invid.toString() + "]");
 
-    newObj = (DBEditObject) retVal.getObject();
+    session.checkpoint(ckp);
+    checkpointed = true;
 
-    retVal2 = newObj.cloneFromObject(session, vObj, false);
+    try
+      {
+        retVal = create_db_object(invid.getType());
     
-    if (retVal2 != null && !retVal2.didSucceed())
-      {
-	return retVal2;
-      }
-    else if (retVal2 == null)
-      {
-	retVal2 = new ReturnVal(true, true);
-      }
+        if (!retVal.didSucceed())
+          {
+            return retVal;
+          }
 
-    retVal2.setInvid(retVal.getInvid());
-    retVal2.setObject(retVal.getObject());
+        newObj = (DBEditObject) retVal.getObject();
+
+        retVal2 = newObj.cloneFromObject(session, vObj, false);
     
-    return retVal2;
+        if (retVal2 != null && !retVal2.didSucceed())
+          {
+            return retVal2;
+          }
+        else if (retVal2 == null)
+          {
+            retVal2 = new ReturnVal(true, true);
+          }
+
+        retVal2.setInvid(retVal.getInvid());
+        retVal2.setObject(retVal.getObject());
+
+        session.popCheckpoint(ckp);
+        checkpointed = false;
+
+        return retVal2;
+      }
+    finally
+      {
+        if (checkpointed)
+          {
+            session.rollback(ckp);
+          }
+      }
   }
 
   /**

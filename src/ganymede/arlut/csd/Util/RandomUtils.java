@@ -86,6 +86,6 @@ public class RandomUtils {
 
   public static String getSaltedString(String in)
   {
-    return in + getRandomHex();
+    return in + " " + getRandomHex();
   }
 }

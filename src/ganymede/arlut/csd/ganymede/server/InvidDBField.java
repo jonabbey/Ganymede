@@ -3419,120 +3419,107 @@ public final class InvidDBField extends DBField implements invid_field {
     Vector values = getVectVal();
 
     DBEditObject eObj = (DBEditObject) owner;
-
-    // have our owner create a new embedded object
-    // for us 
-
-    retVal = eObj.createNewEmbeddedObject(this);
-
-    if (!retVal.didSucceed())
-      {
-	return retVal;
-      }
-
-    DBEditObject embeddedObj = (DBEditObject) retVal.getObject();
-
-    if (embeddedObj == null)
-      {
-	throw new NullPointerException("gah, null embedded obj!");
-      }
-
-    // bind the object to its container.. note that ContainerField
-    // is a standard built-in field for embedded objects and as
-    // such it doesn't have the specific details as to the containing
-    // object's binding recorded.  We'll have to do the bidirectional
-    // binding ourselves, in two steps.
-
-    // first, let's do a basic sanity check.  i can't imagine this
-    // ever failing, but i've also seen a case of an embedded object
-    // having been set up with a null container value, which shouldn't
-    // be possible either
-
-    if (owner.getInvid() == null)
-      {
-        throw new RuntimeException("Error, can't createNewEmbedded with a null owner invid");
-      }
-
-    // we have to use setFieldValueLocal() here because the
-    // permissions system uses the ContainerField to determine rights
-    // to modify the field.. since we are just now setting the
-    // container, the permissions system will fail if we don't bypass
-    // it by using the local variant.
-
-    retVal = embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, // *sync* DBField
-					    owner.getInvid());
-
-    if (!ReturnVal.didSucceed(retVal))
-      {
-	return retVal;
-      }
-
-    // finish the binding.  Note that we are directly modifying values
-    // here rather than going to this.addElement().  If we did
-    // this.addElement(), we might get a redundant attempt to do the
-    // invid binding, as the containing field may indeed have the
-    // reverse pointer in the object's container field specified in
-    // the schema.  Doing it this way, we don't have to worry about
-    // whether the admins got this part of the schema right.
-
-    if (!local && eObj.getGSession().enableOversight)
-      {
-	// Wizard check
-
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, embeddedObj.getInvid(), null);
-
-	// if a wizard intercedes, we are going to let it take the
-	// ball.  note that the wizard had better finish the job it
-	// starts, since we've already done a one-way binding of the
-	// embedded object to its container
-        //
-        // in general, wizardHooks probably shouldn't try to take over
-        // this processing.
-	
-	if (retVal != null && !retVal.doNormalProcessing)
-	  {
-	    return retVal;
-	  }
-      }
-
-    ReturnVal newRetVal = eObj.finalizeAddElement(this, embeddedObj.getInvid());
-
-    if (!ReturnVal.didSucceed(newRetVal))
-      {
-        // finalizeAddElement vetoed the operation, what to do.. ?
-
-	embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, null); // *sync* DBField
-
-	if (newRetVal.getDialog() != null)
-	  {
-	    return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
-					      ts.l("createNewEmbedded.refused_creation",
-                                                   newRetVal.getDialog().getText()));
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog(ts.l("createNewEmbedded.failure_sub"),
-					      ts.l("createNewEmbedded.refused_creation_no_text"));
-	  }
-      }
-
-    // otherwise, all systems go
-
-    values.addElement(embeddedObj.getInvid());  // do a live modification of this field's invid vector
-    qr = null;
-
-    // now we need to initialize the new embedded object, since we
-    // defer that activity for embedded objects until after we
-    // get the embedded object linked to the parent
-
     DBSession session = eObj.getSession();
-    String ckp_label = RandomUtils.getSaltedString(eObj.getLabel() + "addEmbed");
+        
+    String ckp_label = RandomUtils.getSaltedString("addEmbed[" + eObj.getLabel() + "]");
 
-    session.checkpoint(ckp_label); // may block if another thread has checkpointed this transaction
+    session.checkpoint(ckp_label);
     boolean checkpointed = true;
 
     try
       {
+        // have our owner create a new embedded object
+        // for us 
+
+        retVal = eObj.createNewEmbeddedObject(this);
+
+        if (!retVal.didSucceed())
+          {
+            return retVal;
+          }
+
+        DBEditObject embeddedObj = (DBEditObject) retVal.getObject();
+
+        if (embeddedObj == null)
+          {
+            throw new NullPointerException("gah, null embedded obj!");
+          }
+
+        // bind the object to its container.. note that ContainerField
+        // is a standard built-in field for embedded objects and as
+        // such it doesn't have the specific details as to the containing
+        // object's binding recorded.  We'll have to do the bidirectional
+        // binding ourselves, in two steps.
+
+        // first, let's do a basic sanity check.  i can't imagine this
+        // ever failing, but i've also seen a case of an embedded object
+        // having been set up with a null container value, which shouldn't
+        // be possible either
+
+        if (owner.getInvid() == null)
+          {
+            throw new RuntimeException("Error, can't createNewEmbedded with a null owner invid");
+          }
+
+        // we have to use setFieldValueLocal() here because the
+        // permissions system uses the ContainerField to determine rights
+        // to modify the field.. since we are just now setting the
+        // container, the permissions system will fail if we don't bypass
+        // it by using the local variant.
+
+        retVal = embeddedObj.setFieldValueLocal(SchemaConstants.ContainerField, // *sync* DBField
+                                                owner.getInvid());
+
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;
+          }
+
+        // finish the binding.  Note that we are directly modifying values
+        // here rather than going to this.addElement().  If we did
+        // this.addElement(), we might get a redundant attempt to do the
+        // invid binding, as the containing field may indeed have the
+        // reverse pointer in the object's container field specified in
+        // the schema.  Doing it this way, we don't have to worry about
+        // whether the admins got this part of the schema right.
+
+        if (!local && eObj.getGSession().enableOversight)
+          {
+            // Wizard check
+
+            retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, embeddedObj.getInvid(), null);
+
+            // if a wizard intercedes, we are going to let it take the
+            // ball.  note that the wizard had better finish the job it
+            // starts, since we've already done a one-way binding of the
+            // embedded object to its container
+            //
+            // in general, wizardHooks probably shouldn't try to take over
+            // this processing.
+            
+            if (retVal != null && !retVal.doNormalProcessing)
+              {
+                session.popCheckpoint(ckp_label);
+                checkpointed = false;
+
+                return retVal;
+              }
+          }
+
+        ReturnVal newRetVal = eObj.finalizeAddElement(this, embeddedObj.getInvid());
+
+        if (!ReturnVal.didSucceed(newRetVal))
+          {
+            return newRetVal;
+          }
+
+        values.addElement(embeddedObj.getInvid());  // do a live modification of this field's invid vector
+        qr = null;
+
+        // now we need to initialize the new embedded object, since we
+        // defer that activity for embedded objects until after we
+        // get the embedded object linked to the parent
+
         retVal = embeddedObj.initializeNewObject();
 
         if (!ReturnVal.didSucceed(retVal))

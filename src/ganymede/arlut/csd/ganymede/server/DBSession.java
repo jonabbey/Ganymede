@@ -900,7 +900,7 @@ final public class DBSession {
   public synchronized ReturnVal deleteDBObject(DBEditObject eObj)
   {
     ReturnVal retVal, retVal2;
-    String key;
+    String ckp_label;
 
     /* -- */
 
@@ -909,7 +909,7 @@ final public class DBSession {
 	throw new RuntimeException(ts.l("global.notransaction", "deleteDBObject"));
       }
 
-    key = RandomUtils.getSaltedString("del[" + eObj.getLabel() + "]");
+    ckp_label = RandomUtils.getSaltedString("del[" + eObj.getLabel() + "]");
 
     switch (eObj.getStatus())
       {
@@ -920,7 +920,7 @@ final public class DBSession {
 	// or else a later rollback will still leave the object in
 	// must-delete status if the transaction is committed
 
-	checkpoint(key);
+	checkpoint(ckp_label);
 
 	// by calling the synchronized setDeleteStatus() method on the
 	// DBDeletionManager, we announce our intention to delete this
@@ -936,7 +936,7 @@ final public class DBSession {
 	    // if setDeleteStatus() fails, nothing will have been changed,
 	    // so we can just pop our checkpoint
 
-	    popCheckpoint(key);
+	    popCheckpoint(ckp_label);
 
 	    return Ganymede.createErrorDialog(ts.l("deleteDBObject.cant_delete", eObj.toString()),
 					      ts.l("deleteDBObject.cant_delete_text2", eObj.toString()));
@@ -960,7 +960,7 @@ final public class DBSession {
       {
 	ex.printStackTrace();
 
-	rollback(key);
+	rollback(ckp_label);
 
 	return Ganymede.createErrorDialog(ts.l("deleteDBObject.error"),
 					  ts.l("deleteDBObject.error_text", eObj.toString(), ex.getMessage()));
@@ -974,7 +974,7 @@ final public class DBSession {
 	  {
 	    // oops, irredeemable failure.  rollback.
 
-	    rollback(key);
+	    rollback(ckp_label);
 	    return retVal;
 	  }
 	else
@@ -994,7 +994,7 @@ final public class DBSession {
 	// it is essential that we do this call, or else we might
 	// leave namespace handles referencing this object
 
-	retVal2 = eObj.finalizeRemove(true);
+	retVal2 = eObj.finalizeRemove(true, ckp_label);
 
 	return retVal2;
       }
@@ -1026,7 +1026,7 @@ final public class DBSession {
   public synchronized ReturnVal inactivateDBObject(DBEditObject eObj)
   {
     ReturnVal retVal;
-    String key;
+    String ckp_label;
 
     /* -- */
 
@@ -1035,7 +1035,7 @@ final public class DBSession {
 	throw new RuntimeException(ts.l("global.notransaction", "inactivateDBObject"));
       }
 
-    key = RandomUtils.getSaltedString("inactivate[" + eObj.getLabel() + "]");
+    ckp_label = RandomUtils.getSaltedString("inactivate[" + eObj.getLabel() + "]");
 
     switch (eObj.getStatus())
       {
@@ -1048,7 +1048,7 @@ final public class DBSession {
 					  ts.l("inactivateDBObject.error_text"));
       }
 
-    checkpoint(key);
+    checkpoint(ckp_label);
 
     if (debug)
       {
@@ -1065,7 +1065,7 @@ final public class DBSession {
 
 	// oops, irredeemable failure.  rollback.
 
-	eObj.finalizeInactivate(false);
+	eObj.finalizeInactivate(false, ckp_label);
 
 	return Ganymede.createErrorDialog(ts.l("inactivateDBObject.error"),
 					  ts.l("inactivateDBObject.error_text2", eObj.toString(), ex.getMessage()));
@@ -1084,7 +1084,7 @@ final public class DBSession {
 
 	    System.err.println("DBSession.inactivateDBObject(): object refused inactivation, rolling back");
 
-	    eObj.finalizeInactivate(false);
+	    eObj.finalizeInactivate(false, ckp_label);
 	  }
 
 	// otherwise, we've got a wizard that the client will deal with.
@@ -1093,7 +1093,7 @@ final public class DBSession {
       {
 	// immediate success!
 
-	eObj.finalizeInactivate(true);
+	eObj.finalizeInactivate(true, ckp_label);
       }
 
     return retVal;
@@ -1125,7 +1125,7 @@ final public class DBSession {
   public synchronized ReturnVal reactivateDBObject(DBEditObject eObj)
   {
     ReturnVal retVal;
-    String key;
+    String ckp_label;
 
     /* -- */
 
@@ -1134,7 +1134,7 @@ final public class DBSession {
 	throw new RuntimeException(ts.l("global.notransaction", "reactivateDBObject"));
       }
 
-    key = RandomUtils.getSaltedString("reactivate[" + eObj.getLabel() + "]");
+    ckp_label = RandomUtils.getSaltedString("reactivate[" + eObj.getLabel() + "]");
 
     switch (eObj.getStatus())
       {
@@ -1150,7 +1150,7 @@ final public class DBSession {
 					  ts.l("reactivateDBObject.error_text2"));
       }
 
-    checkpoint(key);
+    checkpoint(ckp_label);
 
     System.err.println(ts.l("reactivateDBObject.debug1"));
 
@@ -1164,7 +1164,7 @@ final public class DBSession {
 
 	// oops, irredeemable failure.  rollback.
 
-	rollback(key);
+	rollback(ckp_label);
 
 	return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
 					  ts.l("reactivateDBObject.error_text3", eObj.toString(), ex.getMessage()));
@@ -1180,15 +1180,14 @@ final public class DBSession {
 
 	    System.err.println(ts.l("reactivateDBObject.debug3"));
 
-	    rollback(key);
+	    rollback(ckp_label);
 	  }
       }
     else
       {
 	// immediate success!
 
-	eObj.finalizeReactivate(true);
-	popCheckpoint(key);
+	eObj.finalizeReactivate(true, ckp_label);
       }
 
     return retVal;
