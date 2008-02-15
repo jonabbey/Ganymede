@@ -77,7 +77,7 @@ public class ArrayUtils {
    * contents of ary2 added to the end of the contents of ary1.
    *
    * An exception will be thrown if ary1 and ary2 are not arrays
-   * of compatible same classes.
+   * of compatible classes.
    */
 
   public static Object[] concat(Object[] ary1, Object[] ary2)
@@ -111,7 +111,7 @@ public class ArrayUtils {
    * contents of ary2 and ary3 added to the end of the contents of ary1.
    *
    * An exception will be thrown if ary1, ary2, and ary3 are not
-   * arrays of compatible same classes.
+   * arrays of compatible classes.
    */
 
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3)
@@ -153,7 +153,7 @@ public class ArrayUtils {
    * of ary1.
    *
    * An exception will be thrown if ary1, ary2, ary3, and ary4 are not
-   * arrays of compatible same classes.
+   * arrays of compatible classes.
    */
 
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3, Object[] ary4)
@@ -202,7 +202,7 @@ public class ArrayUtils {
    * contents of ary1.
    *
    * An exception will be thrown if ary1, ary2, ary3, ary4, and ary5
-   * are not arrays of compatible same classes.
+   * are not arrays of compatible classes.
    */
 
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3, Object[] ary4, Object[] ary5)
