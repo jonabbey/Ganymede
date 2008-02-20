@@ -78,4 +78,5 @@ public interface networkSchema {
   final static short ALLOCRANGE=265;
   final static short PUBLICNETWORK=266;
   final static short DHCP=267;
+  final static short MACREQUIRED=268;
 }

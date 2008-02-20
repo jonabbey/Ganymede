@@ -750,6 +750,9 @@ in this field.&lt;/p&gt;&lt;/html&gt;</comment>
 for this network.</comment>
               <typedef type="boolean"/>
             </fielddef>
+            <fielddef name="MAC_Address_Required" id="268">
+              <typedef type="boolean"/>
+            </fielddef>
             <fielddef name="Public_Network" id="266">
               <typedef type="boolean"/>
             </fielddef>
