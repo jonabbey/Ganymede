@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -149,6 +149,11 @@ public class networkCustom extends DBEditObject {
 	  {
 	    return true;
 	  }
+      }
+
+    if (fieldid == networkSchema.MACREQUIRED)
+      {
+        return object.isDefined(networkSchema.DHCP);  // we have to have MAC addresses if we are using DHCP
       }
 
     return false;

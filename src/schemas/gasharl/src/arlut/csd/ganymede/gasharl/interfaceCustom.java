@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -425,6 +425,17 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  }
       }
 
+    if (field.getID() == interfaceSchema.ETHERNETINFO)
+      {
+	DBObject owner = field.getOwner();
+        DBObject networkObj = owner.lookupInvid((Invid)owner.getFieldValueLocal(interfaceSchema.IPNET));
+
+        if (!networkObj.isSet(networkSchema.MACREQUIRED))
+          {
+            return false;       // we don't need to show the ethernet field if no MAC address is required
+          }
+      }
+
     return super.canSeeField(session, field);
   }
 
@@ -459,9 +470,13 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  }
 
       case interfaceSchema.ADDRESS:
-      case interfaceSchema.ETHERNETINFO:
       case interfaceSchema.IPNET:
 	return true;
+
+      case interfaceSchema.ETHERNETINFO:
+        DBObject networkObj = object.lookupInvid((Invid)object.getFieldValueLocal(interfaceSchema.IPNET));
+
+        return networkObj.isSet(networkSchema.MACREQUIRED);
       }
 
     return false;
@@ -579,6 +594,16 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	ReturnVal retVal = new ReturnVal(true, true);
 	retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
+
+        // and tell the client to rescan the ethernet info field as
+        // well, in case we don't need it any more
+
+        if (!fieldRequired(this, interfaceSchema.ETHERNETINFO))
+          {
+            this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
+          }
+
+	retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
 	return retVal;
       }

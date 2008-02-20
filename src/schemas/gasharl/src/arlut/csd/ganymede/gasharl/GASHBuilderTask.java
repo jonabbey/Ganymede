@@ -3149,11 +3149,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // we need to assemble the information that gash uses for our output
 
-    MAC = (String) object.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
+    if (object.isDefined(interfaceSchema.ETHERNETINFO))
+      {
+        MAC = (String) object.getFieldValueLocal(interfaceSchema.ETHERNETINFO);
 
-    // We want to use dashes to separate the hex bytes in our ethernet addr
+        // We want to use dashes to separate the hex bytes in our ethernet addr
 
-    MAC = MAC.replace(':','-');
+        MAC = MAC.replace(':','-');
+      }
+    else
+      {
+        MAC = "00:00:00:00:00:00";
+      }
 
     // an interface is contained in the associated system, so we check our
     // containing object for its name.. we assume that this interface *does*
