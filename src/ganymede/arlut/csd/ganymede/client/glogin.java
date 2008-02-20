@@ -941,10 +941,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		// server, since we might have been logged in using a
 		// composite username:persona string.
 
+                active_username = uname;
+
 		try
 		  {
 		    my_username = my_session.getMyUserName();
-                    active_username = my_username;
 		  }
 		catch (Exception ex)
 		  {
