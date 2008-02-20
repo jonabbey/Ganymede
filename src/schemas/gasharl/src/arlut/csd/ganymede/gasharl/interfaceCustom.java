@@ -147,6 +147,20 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	return null;
       }
 
+    // if we changed networks so as not to require a MAC address for
+    // this interface, go ahead and null it out as part of our
+    // pre-commit activities.
+
+    if (!fieldRequired(this, interfaceSchema.ETHERNETINFO))
+      {
+        ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
+
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;      // in case we failed for some reason
+          }
+      }
+
     return updateHiddenLabel();
   }
 
@@ -597,11 +611,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         // and tell the client to rescan the ethernet info field as
         // well, in case we don't need it any more
-
-        if (!fieldRequired(this, interfaceSchema.ETHERNETINFO))
-          {
-            this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
-          }
 
 	retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
