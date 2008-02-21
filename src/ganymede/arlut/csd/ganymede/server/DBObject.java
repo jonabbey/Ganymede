@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -1295,8 +1295,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		  }
 		catch (RuntimeException ex)
 		  {
-		    // we had a permissions failure reading this
-		    // field.. skip it.
+                    // scream a bit about this exception so someone
+                    // can take a look at it.
+
+                    Ganymede.debug("Error in getFieldInfoVector():\n" + Ganymede.stackTrace(ex));
 		  }
 	      }
 	  }
