@@ -436,6 +436,59 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	      }
 	  }
 
+        // and we also need to clone the DHCPOPTIONS field
+
+        if (origObj.isDefined(systemSchema.DHCPOPTIONS))
+          {
+            InvidDBField newOptions = (InvidDBField) getField(systemSchema.DHCPOPTIONS);
+            InvidDBField oldOptions = (InvidDBField) origObj.getField(systemSchema.DHCPOPTIONS);
+
+            oldOnes = (Vector) oldOptions.getValuesLocal().clone();
+
+            DBObject origOption;
+            DBEditObject workingOption;
+
+	    for (i = 0; i < oldOnes.size(); i++)
+	      {
+		try
+		  {
+		    tmpVal = newOptions.createNewEmbedded(local);
+		  }
+		catch (GanyPermissionsException ex)
+		  {
+		    tmpVal = Ganymede.createErrorDialog("permissions",
+                                                        "permissions failure creating embedded option " + ex);
+		  }
+
+		if (!tmpVal.didSucceed())
+		  {
+		    if (tmpVal != null && tmpVal.getDialog() != null)
+		      {
+			resultBuf.append("\n\n");
+			resultBuf.append(tmpVal.getDialog().getText());
+                        
+			problem = true;
+		      }
+
+		    continue;
+		  }
+
+		newInvid = tmpVal.getInvid();
+
+		workingOption = (DBEditObject) session.editDBObject(newInvid);
+		origOption = session.viewDBObject((Invid) oldOnes.elementAt(i));
+		tmpVal = workingOption.cloneFromObject(session, origOption, local);
+
+		if (tmpVal != null && tmpVal.getDialog() != null)
+		  {
+		    resultBuf.append("\n\n");
+		    resultBuf.append(tmpVal.getDialog().getText());
+
+		    problem = true;
+		  }
+	      }
+	  }
+
 	retVal = new ReturnVal(true, !problem);
 
 	if (problem)
