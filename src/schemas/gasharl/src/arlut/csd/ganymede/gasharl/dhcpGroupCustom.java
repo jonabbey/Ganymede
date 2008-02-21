@@ -247,8 +247,8 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
         // vector, then create any new embedded options necessary when
         // cloning a multiple option dhcp group.
 
-	InvidDBField newOptions = (InvidDBField) getField(dhcpGroupSchema.MEMBERS);
-	InvidDBField oldOptions = (InvidDBField) origObj.getField(dhcpGroupSchema.MEMBERS);
+	InvidDBField newOptions = (InvidDBField) getField(dhcpGroupSchema.OPTIONS);
+	InvidDBField oldOptions = (InvidDBField) origObj.getField(dhcpGroupSchema.OPTIONS);
 
 	Vector newOnes = (Vector) newOptions.getValuesLocal().clone();
 	Vector oldOnes = (Vector) oldOptions.getValuesLocal().clone();
