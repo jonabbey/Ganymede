@@ -513,7 +513,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	addSelectionInterval(i, i);
 
-        paintImmediately(getBounds());  // to placate Swing's internal delays
+        java.awt.Rectangle region = getBounds();
+        region.x = 0;
+        region.y = 0;
+        paintImmediately(region);  // to placate Swing's internal delays
 
 	ensureIndexIsVisible(i);
       }
@@ -524,7 +527,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	model.addElement(lh);
 	addSelectionInterval(topIndex, topIndex);
 
-        paintImmediately(getBounds());  // to placate Swing's internal delays
+        java.awt.Rectangle region = getBounds();
+        region.x = 0;
+        region.y = 0;
+        paintImmediately(region);  // to placate Swing's internal delays
 
 	ensureIndexIsVisible(topIndex);
       }
