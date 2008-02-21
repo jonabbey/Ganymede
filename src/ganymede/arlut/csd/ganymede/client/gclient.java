@@ -1175,6 +1175,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     pMenuEditableCreatable.add(createMenuItem(create, create_pop_action));
 
     objectViewPM.add(createMenuItem(view, view_pop_action));
+    objectViewPM.add(createMenuItem(clone, clone_pop_action));
 
     objectRemovePM.add(createMenuItem(view, view_pop_action));
     objectRemovePM.add(createMenuItem(edit, edit_pop_action));
@@ -4509,7 +4510,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     // "Choose object to be cloned"
     openDialog.setText(ts.l("cloneObjectDialog.dialog_txt"));
     openDialog.setIcon(new ImageIcon(cloneIcon));
-    openDialog.setReturnEditableOnly(true);
+    openDialog.setReturnEditableOnly(false);
 
     Invid invid = openDialog.chooseInvid();
 
@@ -5847,7 +5848,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       {
 	if (treeMenuDebug)
 	  {
-	    System.err.println("objEditMI");
+	    System.err.println("objCloneMI");
 	  }
 
 	if (node instanceof InvidNode)
