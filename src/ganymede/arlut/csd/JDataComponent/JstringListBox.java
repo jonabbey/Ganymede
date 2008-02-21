@@ -512,6 +512,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	insertHandleAt(lh, i);
 
 	addSelectionInterval(i, i);
+
+        paintImmediately(getBounds());  // to placate Swing's internal delays
+
 	ensureIndexIsVisible(i);
       }
     else
@@ -519,16 +522,15 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	int topIndex = model.getSize();
 
 	model.addElement(lh);
-
 	addSelectionInterval(topIndex, topIndex);
+
+        paintImmediately(getBounds());  // to placate Swing's internal delays
 
 	ensureIndexIsVisible(topIndex);
       }
 
     invalidate();
     getParent().validate();
-
-    //    repaint();
   }
 
   /**
@@ -553,8 +555,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     ensureIndexIsVisible(targetRow);
     invalidate();
     getParent().validate();
-
-    //    repaint();
   }
 
   /**
