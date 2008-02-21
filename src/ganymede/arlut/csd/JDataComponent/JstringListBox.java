@@ -486,6 +486,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
   public void addItem(Object o)
   {
+    if (debug)
+      {
+        System.err.println("JstringListBox.addItem(" + String.valueOf(o) + ")");
+      }
+
     listHandle lh = null;
 
     if (o instanceof String)
@@ -513,6 +518,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	addSelectionInterval(i, i);
 
+        if (debug)
+          {
+            System.err.println("Adding sorted");
+          }
+
         forceItemVisible(i);
       }
     else
@@ -521,6 +531,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	model.addElement(lh);
 	addSelectionInterval(topIndex, topIndex);
+
+        if (debug)
+          {
+            System.err.println("Adding non-sorted");
+          }
 
         forceItemVisible(topIndex);
       }

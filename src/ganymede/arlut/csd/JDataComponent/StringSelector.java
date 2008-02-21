@@ -195,7 +195,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (debug)
       {
-	System.out.println("-Adding new StringSelector-");
+	System.err.println("-Adding new StringSelector-");
       }
     
     setBorder(new javax.swing.border.EtchedBorder());
@@ -454,7 +454,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.out.println("Done creating ss");
+	System.err.println("Done creating ss");
       }
   }
 
@@ -860,7 +860,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      }
 	    catch (java.rmi.RemoteException rx)
 	      {
-		System.out.println("could not setValuePerformed from StringSelector: " + rx);
+		System.err.println("could not setValuePerformed from StringSelector: " + rx);
 	      }
 
 	    return true;
@@ -924,10 +924,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (debug)
 	  {
-	    System.out.println("set value in stringSelector");
+	    System.err.println("set value in stringSelector");
 	  }
 	
-	System.out.println("Unknown object generated setValuePerformed in stringSelector.");
+	System.err.println("Unknown object generated setValuePerformed in stringSelector.");
 	
 	return false;
       }
@@ -950,7 +950,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out == null)
       {
-	System.out.println("Can't figure out the handle.  No out box to get it from.");
+	System.err.println("Can't figure out the handle.  No out box to get it from.");
 	return;
       }
 
@@ -1186,7 +1186,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (debug)
       {
-	System.out.println("Add: " + item);
+	System.err.println("Add: " + item);
       }
 
     if (!editable)
@@ -1203,7 +1203,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (debug)
 	  {
-	    System.out.println("Adding handle");
+	    System.err.println("Adding handle");
 	  }
 
 	// We only want to put it in if it's not already there.
@@ -1221,7 +1221,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (debug)
 	  {
-	    System.out.println("Done Adding handle");
+	    System.err.println("Done Adding handle");
 	  }
       }
     else
@@ -1241,7 +1241,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (debug)
       {
-	System.out.println("Remove." + item);
+	System.err.println("Remove." + item);
       }
 
     if (!editable)
@@ -1294,10 +1294,15 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	if (debug)
 	  {
-	    System.out.println("That one's already in there.  No soup for you!");
+	    System.err.println("That one's already in there.  No soup for you!");
 	  }
 
 	return;
+      }
+
+    if (debug)
+      {
+        System.err.println("addNewString(\"" + inputText + "\")");
       }
 
     if (out != null && mustChoose) 
@@ -1306,7 +1311,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (debug)
 	  {
-	    System.out.println("Checking to see if this is a viable option");
+	    System.err.println("Checking to see if this is a viable option");
 	  }
 	    
 	if (out.containsLabel(inputText)) 
@@ -1414,6 +1419,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	else 
 	  {
 	    // Not in the out box, send up the String as-is, with no attached data
+
+            if (debug)
+              {
+                System.err.println("addNewString() -- stand alone");
+              }
 		
 	    boolean ok;
 
@@ -1441,8 +1451,19 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  {
 		    custom.setText("");
 		    replacingValue = false;
+
+                    if (debug)
+                      {
+                        System.err.println("addNewString() -- replacing");
+                      }
+
 		    return;
 		  }
+
+                if (debug)
+                  {
+                    System.err.println("addNewString() -- adding");
+                  }
 
 		in.addItem(new listHandle(inputText, inputText));
 		custom.setText("");
