@@ -444,7 +444,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	DBObject owner = field.getOwner();
         DBObject networkObj = owner.lookupInvid((Invid)owner.getFieldValueLocal(interfaceSchema.IPNET));
 
-        if (!networkObj.isSet(networkSchema.MACREQUIRED))
+        if (networkObj != null && !networkObj.isSet(networkSchema.MACREQUIRED))
           {
             return false;       // we don't need to show the ethernet field if no MAC address is required
           }
@@ -537,7 +537,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	if (inFinalizeAddrChange)
 	  {
-	    return null;
+            ReturnVal retVal = new ReturnVal(true, true);
+            retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
+            
+	    return retVal;
 	  }
 
 	// if the net is being set to a net that matches what's already
@@ -552,7 +555,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 		System.err.println("interfaceCustom.finalizeSetValue(): approving ipnet change");
 	      }
 
-	    return null;
+            ReturnVal retVal = new ReturnVal(true, true);
+            retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
+
+	    return retVal;
 	  }
 
 	// okay, we didn't match, tell the system object to remember the
@@ -573,6 +579,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	    ReturnVal retVal = new ReturnVal(true, true);
 	    retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
+            retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
 	    return retVal;
 	  }
