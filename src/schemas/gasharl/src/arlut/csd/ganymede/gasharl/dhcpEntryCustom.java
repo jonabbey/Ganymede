@@ -89,6 +89,8 @@ import arlut.csd.ganymede.server.StringDBField;
 
 public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dhcpEntrySchema {
 
+  private final static boolean debug = false;
+
   /**
    *
    * Customization Constructor
@@ -505,7 +507,10 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
   {
     if (field.getID() == dhcpEntrySchema.VALUE)
       {
-        Ganymede.debug("attempting to verify: " + String.valueOf(value));
+        if (debug)
+          {
+            Ganymede.debug("attempting to verify: " + String.valueOf(value));
+          }
 
 	String inString = (String) value;
 	String transformedString;
@@ -522,7 +527,10 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
         if (retVal == null)
           {
-            Ganymede.debug("verifying as is: " + String.valueOf(value));
+            if (debug)
+              {
+                Ganymede.debug("verifying as is: " + String.valueOf(value));
+              }
 
 	    return super.verifyNewValue(field, value); // no change, so no problem
           }
