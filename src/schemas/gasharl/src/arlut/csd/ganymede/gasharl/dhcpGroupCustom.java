@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -54,6 +54,7 @@ package arlut.csd.ganymede.gasharl;
 
 import java.util.Vector;
 
+import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
@@ -189,6 +190,141 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
           }
     
         return retVal;
+      }
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.loginError(ex);
+      }
+  }
+
+  /**
+   * <p>Hook to allow the cloning of an object.  If this object type
+   * supports cloning (which should be very much customized for this
+   * object type.. creation of the ancillary objects, which fields to
+   * clone, etc.), this customization method will actually do the work.</p>
+   *
+   * @param session The DBSession that the new object is to be created in
+   * @param origObj The object we are cloning
+   * @param local If true, fields that have choice lists will not be checked against
+   * those choice lists and read permissions for each field will not be consulted.
+   * The canCloneField() method will still be consulted, however.
+   *
+   * @return A standard ReturnVal status object.  May be null on success, or
+   * else may carry a dialog with information on problems and a success flag.
+   */
+
+  public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
+  {
+    try
+      {
+	boolean problem = false;
+	ReturnVal tmpVal;
+	StringBuffer resultBuf = new StringBuffer();
+	ReturnVal retVal = super.cloneFromObject(session, origObj, local);
+
+	if (retVal != null)
+          {
+            if (!retVal.didSucceed())
+              {
+                return retVal;
+              }
+            
+            if (retVal.getDialog() != null)
+              {
+                resultBuf.append("\n\n");
+                resultBuf.append(retVal.getDialog().getText());
+
+                problem = true;
+              }
+          }
+
+	// and clone the embedded objects.
+        //
+        // Remember, dhcpGroupCustom.initializeNewObject() will create
+        // a single embedded option object as part of the normal dhcp
+        // group creation process.  We'll put this (single)
+        // automatically created embedded object into the newOnes
+        // vector, then create any new embedded options necessary when
+        // cloning a multiple option dhcp group.
+
+	InvidDBField newOptions = (InvidDBField) getField(dhcpGroupSchema.MEMBERS);
+	InvidDBField oldOptions = (InvidDBField) origObj.getField(dhcpGroupSchema.MEMBERS);
+
+	Vector newOnes = (Vector) newOptions.getValuesLocal().clone();
+	Vector oldOnes = (Vector) oldOptions.getValuesLocal().clone();
+
+	DBObject origOption;
+	DBEditObject workingOption;
+	int i;
+
+	for (i = 0; i < newOnes.size(); i++)
+	  {
+	    workingOption = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
+	    origOption = session.viewDBObject((Invid) oldOnes.elementAt(i));
+	    tmpVal = workingOption.cloneFromObject(session, origOption, local);
+
+	    if (tmpVal != null && tmpVal.getDialog() != null)
+	      {
+		resultBuf.append("\n\n");
+		resultBuf.append(tmpVal.getDialog().getText());
+
+		problem = true;
+	      }
+	  }
+
+	Invid newInvid;
+
+	if (i < oldOnes.size())
+	  {
+	    for (; i < oldOnes.size(); i++)
+	      {
+		try
+		  {
+		    tmpVal = newOptions.createNewEmbedded(local);
+		  }
+		catch (GanyPermissionsException ex)
+		  {
+		    tmpVal = Ganymede.createErrorDialog("permissions",
+                                                        "permissions failure creating embedded option " + ex);
+		  }
+
+		if (!tmpVal.didSucceed())
+		  {
+		    if (tmpVal != null && tmpVal.getDialog() != null)
+		      {
+			resultBuf.append("\n\n");
+			resultBuf.append(tmpVal.getDialog().getText());
+
+			problem = true;
+		      }
+		    continue;
+		  }
+
+		newInvid = tmpVal.getInvid();
+
+		workingOption = (DBEditObject) session.editDBObject(newInvid);
+		origOption = session.viewDBObject((Invid) oldOnes.elementAt(i));
+		tmpVal = workingOption.cloneFromObject(session, origOption, local);
+
+		if (tmpVal != null && tmpVal.getDialog() != null)
+		  {
+		    resultBuf.append("\n\n");
+		    resultBuf.append(tmpVal.getDialog().getText());
+
+		    problem = true;
+		  }
+	      }
+	  }
+
+	retVal = new ReturnVal(true, !problem);
+
+	if (problem)
+	  {
+	    retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
+					     "Ok", null, "ok.gif"));
+	  }
+
+	return retVal;
       }
     catch (NotLoggedInException ex)
       {
