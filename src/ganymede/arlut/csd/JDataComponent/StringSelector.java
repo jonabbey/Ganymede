@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -172,6 +172,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     canChoose,
     mustChoose;
 
+  private int
+    minRows = -1,
+    maxRows = -1,
+    currentRows = -1;
+
   /* -- */
 
   /**
@@ -219,6 +224,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     in = new JstringListBox();
     in.setCallback(this);
+
+    this.currentRows = in.getVisibleRowCount();
 
     BevelBorder
       bborder = new BevelBorder(BevelBorder.RAISED);
@@ -630,53 +637,68 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     validate();
   }
 
-  public void setVisibleRowCount(int numRows)
+  /**
+   * This method sets the minimum number of rows this StringSelector
+   * should display.  When set, this StringSelector will automatically
+   * resize itself between the value of minRows and maxRows.
+   */
+
+  public void setMinimumRowCount(int numRows)
   {
-    in.setVisibleRowCount(numRows);
+    this.minRows = numRows;
 
-    if (out != null)
+    if (this.maxRows == -1)
       {
-        out.setVisibleRowCount(numRows);
+        setMaximumRowCount(8);  // default is 8
       }
-
-    invalidate();
-    parent.validate();
   }
 
   /**
-   * <p>Add a new item to the StringSelector.</p>
-   *
-   * <p>This is for adding an item that is not in either list, not selecting
-   * an item from the out list.</p>
-   *
-   * @param item Item to be added.  Can be listHandle or String
-   * @param ShouldBeIn If true, object will be placed in in list.  Otherwise, it goes in out list.
+   * This method sets the maximum number of rows this StringSelector
+   * should display.  When set, this StringSelector will automatically
+   * resize itself between the value of minRows and maxRows.
    */
 
-  public void addNewItem(Object item, boolean ShouldBeIn)
+  public void setMaximumRowCount(int numRows)
   {
-    listHandle lh = null;
+    this.maxRows = numRows;
 
-    if (item instanceof String)
+    if (this.minRows == -1)
       {
-	lh = new listHandle((String)item, item);
+        setMinimumRowCount(4);  // default is 4
       }
-    else if (item instanceof listHandle)
+  }
+
+  /**
+   * This method adjusts the number of rows shown in this StringSelector.
+   */
+
+  public void setVisibleRowCount(int numRows)
+  {
+    this.setVisibleRowCount(numRows, true);
+  }
+    
+  /**
+   * This method adjusts the number of rows shown in this
+   * StringSelector.  If refresh is true, the StringSelector will be
+   * immediately resized.
+   */
+
+  public void setVisibleRowCount(int numRows, boolean refresh)
+  {
+    this.currentRows = numRows;
+
+    in.setVisibleRowCount(this.currentRows);
+
+    if (out != null)
       {
-	lh = (listHandle)item;
-      }
-    else
-      {
-	return;
+        out.setVisibleRowCount(this.currentRows);
       }
 
-    if (ShouldBeIn)
+    if (refresh)
       {
-	in.addItem(lh);
-      }
-    else
-      {
-	out.addItem(lh);
+        invalidate();
+        parent.validate();
       }
   }
 
@@ -1033,6 +1055,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     updateTitles();
+    recalcSize();
     invalidate();
     parent.validate();
   }
@@ -1145,6 +1168,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     updateTitles();
+    recalcSize();
     invalidate();
     parent.validate();
   }
@@ -1234,6 +1258,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     remove.setEnabled(false);
+
+    recalcSize();
 
     in.invalidate();
 
@@ -1433,6 +1459,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     updateTitles();
+    recalcSize();
     invalidate();
     parent.validate();
   }
@@ -1448,6 +1475,40 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     if (out != null)
       {
 	outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
+      }
+  }
+
+  /**
+   * This method handles resizing the StringSelector if appropriate.
+   */
+
+  private void recalcSize()
+  {
+    if (minRows == -1 || maxRows == -1)
+      {
+        return;
+      }
+
+    int lowerBound = minRows;
+
+    if (in.getSizeOfList() > lowerBound)
+      {
+        lowerBound = in.getSizeOfList();
+      }
+
+    if ((out.getSizeOfList() / 2) > lowerBound)
+      {
+        lowerBound = (out.getSizeOfList() / 2);
+      }
+
+    if (lowerBound > maxRows)
+      {
+        lowerBound = maxRows;
+      }
+
+    if (currentRows != lowerBound)
+      {
+        setVisibleRowCount(lowerBound, false);
       }
   }
 
