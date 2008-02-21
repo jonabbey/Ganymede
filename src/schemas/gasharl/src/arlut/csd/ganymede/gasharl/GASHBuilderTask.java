@@ -3470,15 +3470,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     interfaceObj = getObject((Invid) interfaceInvids.elementAt(0));
 
     ipField = (IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS);
-    macField = (StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO);
-
     ipAddress = ipField.getEncodingString();
-    macAddress = macField.getEncodingString();
 
-    if (macAddress.equals("00:00:00:00:00:00"))
+    if (interfaceObj.isDefined(interfaceSchema.ETHERNETINFO))
       {
-        return;                 // don't write out DHCP for systems
+        macField = (StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO);
+        macAddress = macField.getEncodingString();
+
+        if (macAddress.equals("00:00:00:00:00:00"))
+          {
+            return;             // don't write out DHCP for systems
                                 // with unspecified mac addresses
+          }
+      }
+    else
+      {
+        return;                 // ditto
       }
 
     Invid networkInvid = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
