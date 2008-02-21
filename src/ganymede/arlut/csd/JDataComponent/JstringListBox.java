@@ -525,7 +525,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	ensureIndexIsVisible(topIndex);
       }
 
-    repaint();
+    invalidate();
+    getParent().validate();
+
+    //    repaint();
   }
 
   /**
@@ -547,8 +550,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
 
     model.insertElementAt(h, targetRow);
+    ensureIndexIsVisible(targetRow);
+    invalidate();
+    getParent().validate();
 
-    repaint();
+    //    repaint();
   }
 
   /**
