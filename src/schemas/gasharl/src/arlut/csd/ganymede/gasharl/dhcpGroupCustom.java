@@ -198,6 +198,26 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
   }
 
   /**
+   * Customization method to verify whether a specific field
+   * in object should be cloned using the basic field-clone
+   * logic.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public boolean canCloneField(DBSession session, DBObject object, DBField field)
+  {
+    if (field.getID() == dhcpGroupSchema.MEMBERS)
+      {
+        return false;           // let's not mess with the members field
+      }
+
+    return super.canCloneField(session, object, field);
+  }
+
+  /**
    * <p>Hook to allow the cloning of an object.  If this object type
    * supports cloning (which should be very much customized for this
    * object type.. creation of the ancillary objects, which fields to
