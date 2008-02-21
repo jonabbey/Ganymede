@@ -2507,6 +2507,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 						   false); // mustChoose
 
 	    ss.setCellWidth(300);
+            ss.setVisibleRowCount(4);
 	    ss.update(null, true, null, (Vector) fieldInfo.getValue(), true, null);
 
 	    objectHash.put(ss, field);

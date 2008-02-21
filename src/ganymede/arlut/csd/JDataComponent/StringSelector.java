@@ -630,16 +630,17 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     validate();
   }
 
-  /**
-   * @deprecated This doesn't work anymore.
-   */
-
   public void setVisibleRowCount(int numRows)
   {
-    if (debug)
+    in.setVisibleRowCount(numRows);
+
+    if (out != null)
       {
-	System.out.println("I don't know how to setVisibleRowCount yet.");
+        out.setVisibleRowCount(numRows);
       }
+
+    invalidate();
+    parent.validate();
   }
 
   /**
