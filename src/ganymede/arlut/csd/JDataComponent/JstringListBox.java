@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -109,7 +109,7 @@ import arlut.csd.Util.VecQuickSort;
 public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener, MouseMotionListener, 
 						     Comparator {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   // ---
 
@@ -541,6 +541,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     System.err.println("post: getFirstVisibleIndex() == " + this.getFirstVisibleIndex());
     System.err.println("post: getLastVisibleIndex() == " + this.getLastVisibleIndex());
     System.err.println("post: indexToLocation() == " + this.indexToLocation(index));
+
+    invalidate();
+    getParent().validate();
   }
 
   /**
@@ -562,9 +565,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
 
     model.insertElementAt(h, targetRow);
-    ensureIndexIsVisible(targetRow);
-    invalidate();
-    getParent().validate();
+
+    forceItemVisible(targetRow);
   }
 
   /**

@@ -123,7 +123,7 @@ import arlut.csd.Util.VectorUtils;
 
 public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   /**
    * TranslationService object for handling string localization in the
