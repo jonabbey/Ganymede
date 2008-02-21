@@ -605,6 +605,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     updateTitles();
+    recalcSize();
   }
 
   /**
@@ -1496,9 +1497,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         lowerBound = in.getSizeOfList();
       }
 
-    if ((out.getSizeOfList() / 2) > lowerBound)
+    if (out != null)
       {
-        lowerBound = (out.getSizeOfList() / 2);
+        if ((out.getSizeOfList() / 2) > lowerBound)
+          {
+            lowerBound = (out.getSizeOfList() / 2);
+          }
       }
 
     if (lowerBound > maxRows)
