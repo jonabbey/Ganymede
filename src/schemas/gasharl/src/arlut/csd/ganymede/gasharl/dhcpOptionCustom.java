@@ -83,6 +83,7 @@ import arlut.csd.ganymede.server.InvidDBField;
 
 public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, dhcpOptionSchema {
 
+  private final static boolean debug = false;
   private static QueryResult result = new QueryResult(true);
 
   static
@@ -595,7 +596,10 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       }
     else if (currentType.equals("ip-address"))
       {
-        Ganymede.debug("trying to verify ip-address");
+        if (debug)
+          {
+            Ganymede.debug("trying to verify ip-address");
+          }
 
         Byte[] parsedAddress = null;
 
