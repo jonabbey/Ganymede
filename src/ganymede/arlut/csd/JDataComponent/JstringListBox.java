@@ -513,12 +513,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
 	addSelectionInterval(i, i);
 
-        java.awt.Rectangle region = getBounds();
-        region.x = 0;
-        region.y = 0;
-        paintImmediately(region);  // to placate Swing's internal delays
-
-	ensureIndexIsVisible(i);
+        forceItemVisible(i);
       }
     else
       {
@@ -527,16 +522,25 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 	model.addElement(lh);
 	addSelectionInterval(topIndex, topIndex);
 
-        java.awt.Rectangle region = getBounds();
-        region.x = 0;
-        region.y = 0;
-        paintImmediately(region);  // to placate Swing's internal delays
-
-	ensureIndexIsVisible(topIndex);
+        forceItemVisible(topIndex);
       }
 
     invalidate();
     getParent().validate();
+  }
+
+  private void forceItemVisible(int index)
+  {
+    System.err.println("forceItemVisible(" + index + ")");
+    System.err.println("pre: getFirstVisibleIndex() == " + this.getFirstVisibleIndex());
+    System.err.println("pre: getLastVisibleIndex() == " + this.getLastVisibleIndex());
+    System.err.println("pre: indexToLocation() == " + this.indexToLocation(index));
+
+    ensureIndexIsVisible(index);
+
+    System.err.println("post: getFirstVisibleIndex() == " + this.getFirstVisibleIndex());
+    System.err.println("post: getLastVisibleIndex() == " + this.getLastVisibleIndex());
+    System.err.println("post: indexToLocation() == " + this.indexToLocation(index));
   }
 
   /**
