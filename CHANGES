@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-February 1, 2008
+March 1, 2008
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: February 1, 2008
+RELEASE DATE: March 1, 2008
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1178,6 +1178,130 @@ through Ganymede.
 We're not filtering out this event spam from the retrieveHistory
 method on the DBLog, so that it will be easier to see actual changes
 committed against a user object.
+
+77. [SERVER] Rewrote logscan.pl external log scan accelerator
+
+The external logscan.pl log scanning accelerator has been re-written
+to perform efficient date-bounded searches through the log file.  Our
+own log file is now up over 80 megabytes, which is starting to get a
+bit long to grep through, which is all that logscan.pl really did
+before.
+
+The logscan.pl script is now much smarter, and takes lower and upper
+time bounds on the command line.  If a lower time bound is provided,
+the logscan.pl script will actually perform a binary search through
+the Ganymede log file, seeking to find the first record that occurs
+after that point in time.
+
+The Ganymede DBLogFileController class has been amended slightly to
+interact properly with the new, smarter logscan.pl.  If you're
+upgrading to a version of the Ganymede server more recent than
+Subversion revision number 7820, you'll want to be sure to update the
+logscan.pl script.
+
+The Ganymede server and the logscan.pl script are designed such that a
+newer Ganymede server will continue to work properly with an older
+logscan.pl, but moving to the newer logscan.pl will improve log
+scanning efficiencies.
+
+78. [CLIENT] Cloning viewable objects now allowed in the graphical client
+
+The Ganymede graphical client previously did not allow the user to
+clone objects unless they had the right to edit those objects.  This
+was an unnecessary restriction that the client was imposing, and has
+been removed.
+
+Now, Ganymede will allow cloning any object so long as the user has
+the right to view the object to be cloned, and the right to create new
+objects of that type.
+
+79. [EVERYTHING] ReturnVal amended for ease of use
+
+The ReturnVal class has been altered to provide greater programmatic
+ease of use.  Most setter methods on ReturnVal now return 'this'
+rather than void, allowing Smalltalk-style method chaining..
+
+e.g., you can now do things like
+
+  retVal = field.setValue(null);
+  return retVal.addRescanField(objId, field.getID());
+
+when you want to modify and return a ReturnVal object, rather than
+
+  retVal = field.setValue(null);
+  retVal.addRescanField(objId, field.getID());
+  return retVal;
+
+Of course, the Ganymede system still maintains the convention that
+methods can return a null ReturnVal to indicate generic success, so
+that must be checked for before chaining calls in this way.
+
+Along those lines, the ReturnVal class has three new static methods
+which perform the proper null check as part of their operation,
+reducing the necessity for the constant
+
+  if (retVal == null || retVal.didSucceed())
+
+idiom.  Now, one can say
+
+  if (ReturnVal.didSucceed(retVal))
+
+to achieve the same effect.
+
+The three new static methods on ReturnVal are
+
+  static public boolean didSucceed(ReturnVal retVal);
+  static public boolean hasTransformedValue(ReturnVal retVal);
+  static public boolean isDoNormalProcessing(ReturnVal retVal);
+
+Note that because I have changed the signatures of most of the
+ReturnVal setter methods (to return 'this' rather than to be void),
+you'll need to recompile any custom schema code you've got if you
+upgrade the Ganymede server to Subversion repository version 7845 or
+later.
+
+80. [CLIENT] GUI improvements in the StringSelector object
+
+Gil Kloepfer asked if the StringSelector object (the GUI component
+used in the client for dealing with lists of Strings or Invids) could
+be made to take up less space when the field connected to it had no
+data in it.
+
+That is, rather than taking up the equivalent of 12 lines of text in
+height, Gil wanted an empty String or Invid vector field to only take
+up a few lines of text worth of height unless and until such time as
+more data was put into such fields.
+
+I have modified the StringSelector class to do this properly.  Now,
+the Ganymede client will only allocate a few lines of vertical space
+for empty StringSelector objects (enough to maintain the visual
+familiarity of the component), and will automatically grow as needed
+until it reaches the size we were previously using.
+
+81. [SERVER] Reduced automatic field rescanning
+
+Previously, the Ganymede server was ordering the Ganymede GUI client
+to rescan fields every time they were edited by the client.  This
+involved an unnecessary extra round-trip call to the server after
+every field modification performed by the user.
+
+Now, the Ganymede server is a bit more picky, and only orders a rescan
+if the server code performed a value transformation on the submitted
+value (see change 2.0 #52, above).
+
+This improves performance, and will allow the StringSelector to
+properly highlight newly entered strings when a choice list is not
+forced on the user.
+
+82. [SCHEMA] Gasharl schema DHCP support tweaked
+
+The Gasharl schema code shipped with Ganymede has been elaborated a
+good bit to support per-host and per-group custom DHCP boot options.
+
+The arlut.csd.ganymede.gasharl.systemCustom and
+arlut.csd.ganymede.gasharl.dhcpGroupCustom classes include useful code
+that you might want to look at if you find yourself wanting to support
+cloning of objects that themselves contain embedded objects.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
