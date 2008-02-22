@@ -1002,6 +1002,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		return;
 	      }
 
+	    in.clearSelection();
+
 	    for (int i = 0; i < handles.size(); i++)
 	      {
 		putItemIn((listHandle)handles.elementAt(i));
@@ -1043,6 +1045,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		replacingValue = false;
 		return;
 	      }
+
+	    in.clearSelection();
 
 	    putItemIn((listHandle)handles.elementAt(0));
 	  }
@@ -1348,6 +1352,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		    return;
 		  }
 
+		in.clearSelection();
+
 		putItemIn(handle);
 		custom.setText("");
 	      }
@@ -1412,6 +1418,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		    return;
 		  }
 
+		in.clearSelection();
+
 		putItemIn(handle);
 		custom.setText("");
 	      }	
@@ -1465,6 +1473,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
                     System.err.println("addNewString() -- adding");
                   }
 
+		in.clearSelection();
 		in.addItem(new listHandle(inputText, inputText));
 		custom.setText("");
 	      }
@@ -1520,9 +1529,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out != null)
       {
-        if ((out.getSizeOfList() / 2) > lowerBound)
+	int halfOptions = out.getSizeOfList() / 2;
+
+        if (halfOptions > lowerBound)
           {
-            lowerBound = (out.getSizeOfList() / 2);
+            lowerBound = halfOptions;
           }
       }
 
