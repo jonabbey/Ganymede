@@ -89,14 +89,17 @@ import arlut.csd.Util.TranslationService;
  * <p>Note that server operations that succeed without needing any
  * further information or action on the part of the client may simply
  * return null to indicate success, rather than returning a ReturnVal
- * object.</p>
+ * object.  I wish that I hadn't made that decision, as it complicates
+ * everything, but I did, and it's probably too late to change that
+ * now.</p>
  *
- * <p>If a non-null ReturnVal object is passed back, one of two things
- * may be true.  {@link arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()}
- * may return true, in which case the
- * operation was successful, but there may be an informational dialog
- * returned and/or a list of objects and fields that need to be
- * updated in response to the successful update.</p>
+ * <p>Anyway, if a non-null ReturnVal object is passed back, one of
+ * two things may be true.  {@link
+ * arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()} may
+ * return true, in which case the operation was successful, but there
+ * may be an informational dialog returned and/or a list of objects
+ * and fields that need to be updated in response to the successful
+ * update.</p>
  *
  * <p>Alternatively, {@link arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()}
  *  may return false, in which case the

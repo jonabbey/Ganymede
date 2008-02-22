@@ -1223,18 +1223,20 @@ rather than void, allowing Smalltalk-style method chaining..
 
 e.g., you can now do things like
 
-  retVal = field.setValue(null);
-  return retVal.addRescanField(objId, field.getID());
+  ReturnVal retVal = new ReturnVal(false);
+  return retVal.setErrorText("Oops, we failed").addRescanField(objId, field.getID());
 
 when you want to modify and return a ReturnVal object, rather than
 
-  retVal = field.setValue(null);
+  ReturnVal retVal = new ReturnVal(false);
+  retVal.setErrorText("Oops, we failed");
   retVal.addRescanField(objId, field.getID());
   return retVal;
 
 Of course, the Ganymede system still maintains the convention that
 methods can return a null ReturnVal to indicate generic success, so
-that must be checked for before chaining calls in this way.
+that must be checked for before chaining calls to the end of
+ReturnVal's returned from Ganymede data changing methods in this way.
 
 Along those lines, the ReturnVal class has three new static methods
 which perform the proper null check as part of their operation,
@@ -1259,6 +1261,11 @@ ReturnVal setter methods (to return 'this' rather than to be void),
 you'll need to recompile any custom schema code you've got if you
 upgrade the Ganymede server to Subversion repository version 7845 or
 later.
+
+Honestly, I wish I had never decided to go for the idiom of 'null'
+ReturnVal objects indicating success.  That was always a very C-like
+pattern, and having to test for null everywhere complicates everything
+unnecessarily.  Bleah.
 
 80. [CLIENT] GUI improvements in the StringSelector object
 
