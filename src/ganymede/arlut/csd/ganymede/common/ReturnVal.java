@@ -832,7 +832,7 @@ public class ReturnVal implements java.io.Serializable {
       }
   }
 
-  public void setStatus(byte status)
+  public ReturnVal setStatus(byte status)
   {
     if (status < NONE || status > LAST)
       {
@@ -840,11 +840,15 @@ public class ReturnVal implements java.io.Serializable {
       }
 
     this.status = status;
+
+    return this;
   }
 
-  public void setSuccess(boolean didSucceed)
+  public ReturnVal setSuccess(boolean didSucceed)
   {
     this.success = didSucceed;
+
+    return this;
   }
 
   /**
@@ -852,7 +856,7 @@ public class ReturnVal implements java.io.Serializable {
    * 'my label changed!' message to the client.
    */
 
-  public void setObjectLabelChanged(Invid objInvid, String newLabel)
+  public ReturnVal setObjectLabelChanged(Invid objInvid, String newLabel)
   {
     if (newObjectInvid != null)
       {
@@ -861,6 +865,8 @@ public class ReturnVal implements java.io.Serializable {
 
     this.newObjectInvid = objInvid;
     this.newLabel = newLabel;
+
+    return this;
   }
 
   /**
@@ -870,7 +876,7 @@ public class ReturnVal implements java.io.Serializable {
    * <p>For use on the server-side.</p>
    */
 
-  public synchronized void setRescanAll(Invid objID)
+  public synchronized ReturnVal setRescanAll(Invid objID)
   {
     if (debug)
       {
@@ -884,6 +890,8 @@ public class ReturnVal implements java.io.Serializable {
 
     rescanList.append(objID.toString());
     rescanList.append("|all|");
+
+    return this;
   }
 
   /**
@@ -893,7 +901,7 @@ public class ReturnVal implements java.io.Serializable {
    * <p>For use on the server-side.</p>
    */
 
-  public synchronized void addRescanField(Invid objID, short fieldID)
+  public synchronized ReturnVal addRescanField(Invid objID, short fieldID)
   {
     if (debug)
       {
@@ -909,6 +917,8 @@ public class ReturnVal implements java.io.Serializable {
     rescanList.append("|");
     rescanList.append(fieldID);
     rescanList.append("|");
+
+    return this;
   }
 
   /** 
@@ -916,11 +926,14 @@ public class ReturnVal implements java.io.Serializable {
    * {@link arlut.csd.ganymede.rmi.Ganymediator} 
    * wizard-handler to this ReturnVal for extraction by the client.</p>
    *
-   * <p>For use on the server-side.</p> */
+   * <p>For use on the server-side.</p>
+   */
 
-  public void setCallback(Ganymediator callback)
+  public ReturnVal setCallback(Ganymediator callback)
   {
     this.callback = callback;
+
+    return this;
   }
 
   /**
@@ -932,9 +945,11 @@ public class ReturnVal implements java.io.Serializable {
    * stderr.
    */
 
-  public void setErrorText(String body)
+  public ReturnVal setErrorText(String body)
   {
     this.setErrorText(ts.l("setErrorText.default_title"), body);
+
+    return this;
   }
 
   /**
@@ -946,12 +961,14 @@ public class ReturnVal implements java.io.Serializable {
    * stderr.
    */
 
-  public void setErrorText(String title, String body)
+  public ReturnVal setErrorText(String title, String body)
   {
     this.dialog = new JDialogBuff(title, body, 
 				  ts.l("setErrorText.ok"),
 				  null,
 				  "error.gif");
+
+    return this;
   }
 
   /**
@@ -963,9 +980,11 @@ public class ReturnVal implements java.io.Serializable {
    * stderr.
    */
 
-  public void setInfoText(String body)
+  public ReturnVal setInfoText(String body)
   {
     this.setInfoText(ts.l("setInfoText.default_title"), body);
+
+    return this;
   }
 
   /**
@@ -977,12 +996,14 @@ public class ReturnVal implements java.io.Serializable {
    * stderr.
    */
 
-  public void setInfoText(String title, String body)
+  public ReturnVal setInfoText(String title, String body)
   {
     this.dialog = new JDialogBuff(title, body, 
 				  ts.l("setInfoText.ok"),
 				  null,
 				  "ok.gif");
+
+    return this;
   }
 
   /**
@@ -992,9 +1013,11 @@ public class ReturnVal implements java.io.Serializable {
    * <p>For use on the server-side.</p>
    */
 
-  public void setDialog(JDialogBuff dialog)
+  public ReturnVal setDialog(JDialogBuff dialog)
   {
     this.dialog = dialog;
+
+    return this;
   }
 
   /**
@@ -1006,9 +1029,11 @@ public class ReturnVal implements java.io.Serializable {
    * <p>For use on the server-side.</p>
    */
 
-  public void setInvid(Invid invid)
+  public ReturnVal setInvid(Invid invid)
   {
     this.newObjectInvid = invid;
+
+    return this;
   }
 
   /** 
@@ -1020,9 +1045,11 @@ public class ReturnVal implements java.io.Serializable {
    * <p>For use on the server-side.</p> 
    */
 
-  public void setObject(db_object object)
+  public ReturnVal setObject(db_object object)
   {
     this.remoteObjectRef = object;
+
+    return this;
   }
 
   /** 
@@ -1033,9 +1060,11 @@ public class ReturnVal implements java.io.Serializable {
    * <p>For use on the server-side.</p> 
    */
 
-  public void setSession(Session session)
+  public ReturnVal setSession(Session session)
   {
     this.remoteObjectRef = session;
+
+    return this;
   }
 
   /** 
@@ -1046,9 +1075,11 @@ public class ReturnVal implements java.io.Serializable {
    * <p>For use on the server-side.</p> 
    */
 
-  public void setXMLSession(XMLSession session)
+  public ReturnVal setXMLSession(XMLSession session)
   {
     this.remoteObjectRef = session;
+
+    return this;
   }
 
   /** 
@@ -1059,9 +1090,11 @@ public class ReturnVal implements java.io.Serializable {
    * <p>For use on the server-side.</p> 
    */
 
-  public void setFileTransmitter(FileTransmitter transmitter)
+  public ReturnVal setFileTransmitter(FileTransmitter transmitter)
   {
     this.remoteObjectRef = transmitter;
+
+    return this;
   }
 
   /** 
@@ -1072,9 +1105,11 @@ public class ReturnVal implements java.io.Serializable {
    * <p>For use on the server-side.</p> 
    */
 
-  public void setAdminSession(adminSession session)
+  public ReturnVal setAdminSession(adminSession session)
   {
     this.remoteObjectRef = session;
+
+    return this;
   }
 
   /**
@@ -1094,10 +1129,12 @@ public class ReturnVal implements java.io.Serializable {
    * field which triggered this ReturnVal.
    */
 
-  public void setTransformedValueObject(Object obj)
+  public ReturnVal setTransformedValueObject(Object obj)
   {
     this.transformedSet = true;
     this.transformedValue = obj;
+
+    return this;
   }
 
   /**
@@ -1116,12 +1153,14 @@ public class ReturnVal implements java.io.Serializable {
    * question so the client will refresh it.
    */
 
-  public void setTransformedValueObject(Object obj, Invid invid, short fieldId)
+  public ReturnVal setTransformedValueObject(Object obj, Invid invid, short fieldId)
   {
     this.transformedSet = true;
     this.transformedValue = obj;
 
     requestRefresh(invid, fieldId);
+
+    return this;
   }
 
   /**
@@ -1157,7 +1196,7 @@ public class ReturnVal implements java.io.Serializable {
    * manipulating will be refreshed by the client.
    */
 
-  public void requestRefresh(Invid invid, short fieldId)
+  public ReturnVal requestRefresh(Invid invid, short fieldId)
   {
     // create a temporary ReturnVal so that we can union it in
 
@@ -1170,5 +1209,7 @@ public class ReturnVal implements java.io.Serializable {
 
     tempRetVal.encodeRescanList(rescanInfo);
     this.unionRescan(tempRetVal);
+
+    return this;
   }
 }
