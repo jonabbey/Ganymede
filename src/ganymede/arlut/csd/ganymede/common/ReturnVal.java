@@ -147,6 +147,17 @@ public class ReturnVal implements java.io.Serializable {
     return retVal == null || retVal.didSucceed();
   }
 
+  /**
+   * Simple static helper method that Ganymede code can use to verify
+   * that a ReturnVal-returning involved transforming a supplied
+   * value.
+   */
+
+  static public boolean hasTransformedValue(ReturnVal retVal)
+  {
+    return retVal != null && retVal.hasTransformedValue();
+  }
+
   // ---
 
   boolean success;
