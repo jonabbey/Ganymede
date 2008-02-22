@@ -149,13 +149,23 @@ public class ReturnVal implements java.io.Serializable {
 
   /**
    * Simple static helper method that Ganymede code can use to verify
-   * that a ReturnVal-returning involved transforming a supplied
-   * value.
+   * that a ReturnVal-returning method involved transforming a
+   * supplied value.
    */
 
   static public boolean hasTransformedValue(ReturnVal retVal)
   {
     return retVal != null && retVal.hasTransformedValue();
+  }
+
+  /**
+   * Simple static helper method that Ganymede code can use to verify
+   * that a ReturnVal is either null or has doNormalProcessing set.
+   */
+
+  static public boolean isDoNormalProcessing(ReturnVal retVal)
+  {
+    return retVal == null || retVal.doNormalProcessing;
   }
 
   // ---
