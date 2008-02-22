@@ -524,7 +524,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
             System.err.println("Adding sorted");
           }
 
-        forceItemVisible(i);
+        ensureIndexIsVisible(i);
       }
     else
       {
@@ -538,25 +538,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
             System.err.println("Adding non-sorted");
           }
 
-        forceItemVisible(topIndex);
+        ensureIndexIsVisible(topIndex);
       }
-
-    invalidate();
-    getParent().validate();
-  }
-
-  private void forceItemVisible(int index)
-  {
-    System.err.println("forceItemVisible(" + index + ")");
-    System.err.println("pre: getFirstVisibleIndex() == " + this.getFirstVisibleIndex());
-    System.err.println("pre: getLastVisibleIndex() == " + this.getLastVisibleIndex());
-    System.err.println("pre: indexToLocation() == " + this.indexToLocation(index));
-
-    ensureIndexIsVisible(index);
-
-    System.err.println("post: getFirstVisibleIndex() == " + this.getFirstVisibleIndex());
-    System.err.println("post: getLastVisibleIndex() == " + this.getLastVisibleIndex());
-    System.err.println("post: indexToLocation() == " + this.indexToLocation(index));
 
     invalidate();
     getParent().validate();
@@ -582,7 +565,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     model.insertElementAt(h, targetRow);
 
-    forceItemVisible(targetRow);
+    ensureIndexIsVisible(targetRow);
+
+    invalidate();
+    getParent().validate();
   }
 
   /**
