@@ -86,20 +86,13 @@ import arlut.csd.Util.TranslationService;
  * be presented to the user, and an optional callback that the client
  * can call with the results of the dialog box if necessary.</p>
  *
- * <p>Note that server operations that succeed without needing any
- * further information or action on the part of the client may simply
- * return null to indicate success, rather than returning a ReturnVal
- * object.  I wish that I hadn't made that decision, as it complicates
- * everything, but I did, and it's probably too late to change that
- * now.</p>
- *
- * <p>Anyway, if a non-null ReturnVal object is passed back, one of
- * two things may be true.  {@link
- * arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()} may
- * return true, in which case the operation was successful, but there
- * may be an informational dialog returned and/or a list of objects
- * and fields that need to be updated in response to the successful
- * update.</p>
+ * <p>When a ReturnVal is returned, the {@link
+ * arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()}
+ * determines whether the operation was considered to have been
+ * successful.  There may be a good bit of additional metadata passed
+ * back with the successful result, including an informational dialog
+ * returned and/or a list of objects and fields that need to be
+ * updated in response to the successful update.</p>
  *
  * <p>Alternatively, {@link arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()}
  *  may return false, in which case the
@@ -125,13 +118,7 @@ import arlut.csd.Util.TranslationService;
 public class ReturnVal implements java.io.Serializable {
 
   static final boolean debug = false;
-
   static final long serialVersionUID = 5358187112973957394L;
-
-  public static final byte NONE = 0;
-  public static final byte EXPIRATIONSET = 1;
-  public static final byte DELETED = 2;
-  public static final byte LAST = 2;
 
   /**
    * TranslationService object for handling string localization in
@@ -141,40 +128,23 @@ public class ReturnVal implements java.io.Serializable {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.ReturnVal");
 
   /**
-   * Simple static helper method that Ganymede code can use to verify
-   * that a ReturnVal-returning operation did succeed.
+   * static factory method for returning a ReturnVal indicating
+   * success.
    */
 
-  static public boolean didSucceed(ReturnVal retVal)
+  static public ReturnVal success()
   {
-    return retVal == null || retVal.didSucceed();
-  }
-
-  /**
-   * Simple static helper method that Ganymede code can use to verify
-   * that a ReturnVal-returning method involved transforming a
-   * supplied value.
-   */
-
-  static public boolean hasTransformedValue(ReturnVal retVal)
-  {
-    return retVal != null && retVal.hasTransformedValue();
-  }
-
-  /**
-   * Simple static helper method that Ganymede code can use to verify
-   * that a ReturnVal is either null or has doNormalProcessing set.
-   */
-
-  static public boolean isDoNormalProcessing(ReturnVal retVal)
-  {
-    return retVal == null || retVal.doNormalProcessing;
+    return new ReturnVal(true, true);
   }
 
   // ---
 
+  /**
+   * If true, the operation that this ReturnVal is reporting on
+   * succeeded.
+   */
+
   boolean success;
-  byte status;
 
   /**
    * <p>A Serializable Invid that can be returned in response to certain
@@ -196,19 +166,19 @@ public class ReturnVal implements java.io.Serializable {
    * that need to be rescanned.</p>
    */
 
-  private StringBuffer rescanList;
+  private StringBuffer rescanList = null;
 
   /**
    * <p>A Serializable Dialog Definition</p>
    */
 
-  private JDialogBuff dialog;
+  private JDialogBuff dialog = null;
 
   /**
    * <p>A Remote handle to a Wizard object on the server</p>
    */
 
-  private Ganymediator callback;
+  private Ganymediator callback = null;
 
   /**
    * <p>Maps Invid's to RescanBuf's.  Used on the client-side
@@ -220,6 +190,8 @@ public class ReturnVal implements java.io.Serializable {
   /**
    * This field is set if the verifyNewValue() method transforms a
    * value during the input.
+   *
+   * Server-side only.
    */
 
   private transient Object transformedValue = null;
@@ -227,6 +199,8 @@ public class ReturnVal implements java.io.Serializable {
   /**
    * This field is set if the verifyNewValue() method transforms a
    * value during the input.
+   *
+   * Server-side only.
    */
 
   private transient boolean transformedSet = false;
@@ -270,15 +244,6 @@ public class ReturnVal implements java.io.Serializable {
   public boolean didSucceed()
   {
     return success;
-  }
-
-  /**
-   * <p>Certain operations may set status codes.</p>
-   */
-
-  public byte getObjectStatus()
-  {
-    return status;
   }
 
   /**
@@ -748,10 +713,6 @@ public class ReturnVal implements java.io.Serializable {
   {
     this.success = success;
     this.doNormalProcessing = doNormalProcessing;
-    rescanList = null;
-    dialog = null;
-    callback = null;
-    status = NONE;
   }
 
   public void clear()
@@ -759,7 +720,6 @@ public class ReturnVal implements java.io.Serializable {
     rescanList = null;
     dialog = null;
     callback = null;
-    status = NONE;
     newObjectInvid = null;
     remoteObjectRef = null;
   }
@@ -854,18 +814,6 @@ public class ReturnVal implements java.io.Serializable {
 	      }
 	  }
       }
-  }
-
-  public ReturnVal setStatus(byte status)
-  {
-    if (status < NONE || status > LAST)
-      {
-	throw new IllegalArgumentException("invalid status code");
-      }
-
-    this.status = status;
-
-    return this;
   }
 
   public ReturnVal setSuccess(boolean didSucceed)
