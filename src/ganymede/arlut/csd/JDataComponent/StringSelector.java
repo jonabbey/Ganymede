@@ -1547,6 +1547,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         lowerBound = maxRows;
       }
 
+    if (debug)
+      {
+	System.err.println("StringSelector.recalcSize(): currentRows == " + currentRows);
+	System.err.println("StringSelector.recalcSize(): lowerBound == " + lowerBound);
+      }
+
     if (currentRows != lowerBound)
       {
         setVisibleRowCount(lowerBound, false);
