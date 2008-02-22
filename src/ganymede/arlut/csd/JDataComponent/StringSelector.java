@@ -1474,7 +1474,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
                   }
 
 		in.clearSelection();
-		in.addItem(new listHandle(inputText, inputText));
+		putItemIn(new listHandle(inputText, inputText));
 		custom.setText("");
 	      }
 	    else
@@ -1491,8 +1491,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     updateTitles();
     recalcSize();
+    in.invalidate();
     invalidate();
-    parent.validate();
+    validate();
   }
 
   /**
