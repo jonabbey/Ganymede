@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -1172,7 +1172,12 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
     result = setValue(value, false, false);
 
-    return rescanThisField(result);
+    if (ReturnVal.hasTransformedValue(result))
+      {
+	result = rescanThisField(result);
+      }
+
+    return result;
   }
 
   /**
@@ -1309,14 +1314,14 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
     retVal = verifyNewValue(submittedValue);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
 
     /* check to see if verifyNewValue canonicalized the submittedValue */
 
-    if (retVal != null && retVal.hasTransformedValue())
+    if (ReturnVal.hasTransformedValue(retVal))
       {
 	submittedValue = retVal.getTransformedValueObject();
       }
@@ -1335,7 +1340,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	// is taking over means that we're not directly accepting
 	// whatever the user gave us, anyway.
 
-	if (newRetVal != null && !newRetVal.doNormalProcessing)
+	if (!ReturnVal.isDoNormalProcessing(newRetVal))
 	  {
 	    return newRetVal;
 	  }
@@ -1385,7 +1390,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
     newRetVal = eObj.finalizeSetValue(this, submittedValue);
 
-    if (newRetVal == null || newRetVal.didSucceed())
+    if (ReturnVal.didSucceed(newRetVal))
       {
 	this.value = submittedValue;
 
@@ -1559,7 +1564,14 @@ public abstract class DBField implements Remote, db_field, FieldType {
 						      owner.getLabel()));
       }
 
-    return rescanThisField(setElement(index, value, false, false));
+    ReturnVal result = setElement(index, value, false, false);
+
+    if (ReturnVal.hasTransformedValue(result))
+      {
+	result = rescanThisField(result);
+      }
+
+    return result;
   }
 
   /**
@@ -1695,7 +1707,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
     /* check to see if verifyNewValue canonicalized the submittedValue */
 
-    if (retVal != null && retVal.hasTransformedValue())
+    if (ReturnVal.hasTransformedValue(retVal))
       {
 	submittedValue = retVal.getTransformedValueObject();
       }
@@ -1716,7 +1728,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	// is taking over means that we're not directly accepting
 	// whatever the user gave us, anyway.
 
-	if (newRetVal != null && !newRetVal.doNormalProcessing)
+	if (!ReturnVal.isDoNormalProcessing(newRetVal))
 	  {
 	    return newRetVal;
 	  }
@@ -1824,7 +1836,14 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public final ReturnVal addElement(Object value) throws GanyPermissionsException
   {
-    return rescanThisField(addElement(value, false, false));
+    ReturnVal result = addElement(value, false, false);
+
+    if (ReturnVal.hasTransformedValue(result))
+      {
+	result = rescanThisField(result);
+      }
+
+    return result;
   }
 
   /**
@@ -2076,7 +2095,11 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public final ReturnVal addElements(Vector values) throws GanyPermissionsException
   {
-    return rescanThisField(addElements(values, false, false));
+    // the interior addElements call will automatically call for a
+    // rescanThisField() for us if it encountered any transformed
+    // values while processing the objects in values
+
+    return addElements(values, false, false);
   }
 
   /**
@@ -2336,7 +2359,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	
 	retVal = verifyNewValue(submittedValue);
 
-	if (retVal != null && retVal.hasTransformedValue())
+	if (ReturnVal.hasTransformedValue(retVal))
 	  {
 	    submittedValue = retVal.getTransformedValueObject();
 	    transformed = true;
@@ -2534,7 +2557,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public final ReturnVal deleteElement(int index) throws GanyPermissionsException
   {
-    return rescanThisField(deleteElement(index, false, false));
+    return deleteElement(index, false, false);
   }
 
   /**
@@ -2691,7 +2714,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public final ReturnVal deleteElement(Object value) throws GanyPermissionsException
   {
-    return rescanThisField(deleteElement(value, false, false));
+    return deleteElement(value, false, false);
   }
 
   /**
@@ -2829,7 +2852,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public final ReturnVal deleteElements(Vector values) throws GanyPermissionsException
   {
-    return rescanThisField(deleteElements(values, false, false));
+    return deleteElements(values, false, false);
   }
 
   /**
