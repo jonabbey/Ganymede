@@ -1474,7 +1474,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
                   }
 
 		in.clearSelection();
-		putItemIn(new listHandle(inputText, inputText));
+		in.addItem(new listHandle(inputText, inputText));
 		custom.setText("");
 	      }
 	    else
