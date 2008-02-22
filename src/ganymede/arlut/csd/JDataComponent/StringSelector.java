@@ -1515,6 +1515,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   private void recalcSize()
   {
+    if (debug)
+      {
+	System.err.println("recalcSize()");
+      }
+
     if (minRows == -1 || maxRows == -1)
       {
         return;
