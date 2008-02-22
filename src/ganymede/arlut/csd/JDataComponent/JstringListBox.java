@@ -106,10 +106,11 @@ import arlut.csd.Util.VecQuickSort;
  *
  */
 
-public class JstringListBox extends JList implements ActionListener, ListSelectionListener, MouseListener, MouseMotionListener, 
+public class JstringListBox extends JList implements ActionListener, ListSelectionListener,
+						     MouseListener, MouseMotionListener, 
 						     Comparator {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   // ---
 
