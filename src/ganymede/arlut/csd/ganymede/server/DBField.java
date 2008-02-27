@@ -1914,7 +1914,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
     retVal = verifyNewValue(submittedValue);
 
-    if (ReturnVal.didSucceed(retVal))
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
