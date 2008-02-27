@@ -1938,8 +1938,6 @@ public abstract class DBField implements Remote, db_field, FieldType {
       {
 	// Wizard check
 
-        Ganymede.debug("DBField.addElement(" + submittedValue + "): pre-wizardHook retVal is " + String.valueOf(retVal));
-
 	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
                                                          DBEditObject.ADDELEMENT,
                                                          submittedValue,
@@ -1950,8 +1948,6 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	// verifyNewValue() call above, but the fact that the wizard
 	// is taking over means that we're not directly accepting
 	// whatever the user gave us, anyway.
-
-        Ganymede.debug("DBField.addElement(" + submittedValue + "): wizardHook returned " + String.valueOf(retVal));
 
 	if (ReturnVal.wizardHandled(retVal))
 	  {
