@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -452,7 +452,6 @@ public class IPDBField extends DBField implements ip_field {
     DBEditObject eObj;
     Byte[] bytes;
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
 
     /* -- */
 
@@ -479,7 +478,7 @@ public class IPDBField extends DBField implements ip_field {
 
     retVal = verifyNewValue(bytes);
       
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -490,11 +489,11 @@ public class IPDBField extends DBField implements ip_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, bytes, null);
+	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.SETVAL, bytes, null));
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -530,9 +529,9 @@ public class IPDBField extends DBField implements ip_field {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    newRetVal = eObj.finalizeSetValue(this, bytes);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, bytes));
 
-    if (newRetVal == null || newRetVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	if (bytes != null)
 	  {
@@ -541,20 +540,6 @@ public class IPDBField extends DBField implements ip_field {
 	else
 	  {
 	    this.value = null;
-	  }
-
-	// if the return value from the wizard was not null,
-	// it might have included rescan information, which
-	// we'll want to combine with that from our 
-	// finalizeSetValue() call.
-
-	if (retVal != null)
-	  {
-	    return retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    return newRetVal;		// success
 	  }
       }
     else
@@ -568,9 +553,9 @@ public class IPDBField extends DBField implements ip_field {
 	    unmark(bytes);
 	    mark(this.value);
 	  }
-
-	return newRetVal;
       }
+
+    return retVal;
   }
 
 
@@ -597,7 +582,6 @@ public class IPDBField extends DBField implements ip_field {
     DBEditObject eObj;
     Byte[] bytes;
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
 
     /* -- */
 
@@ -645,7 +629,7 @@ public class IPDBField extends DBField implements ip_field {
 
     retVal = verifyNewValue(bytes);
       
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -656,11 +640,15 @@ public class IPDBField extends DBField implements ip_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), value);
+	retVal = ReturnVal.merge(retVal,
+				 eObj.wizardHook(this,
+						 DBEditObject.SETELEMENT,
+						 new Integer(index),
+						 value));
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -693,25 +681,11 @@ public class IPDBField extends DBField implements ip_field {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    newRetVal = eObj.finalizeSetElement(this, index, bytes);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeSetElement(this, index, bytes));
 
-    if (newRetVal == null || newRetVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	values.setElementAt(bytes, index);
-
-	// if the return value from the wizard was not null,
-	// it might have included rescan information, which
-	// we'll want to combine with that from our 
-	// finalizeSetElement() call.
-
-	if (retVal != null)
-	  {
-	    return retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    return newRetVal;		// success
-	  }
       }
     else
       {
@@ -724,9 +698,9 @@ public class IPDBField extends DBField implements ip_field {
 	    unmark(bytes);
 	    mark(values.elementAt(index));
 	  }
-
-	return newRetVal;
       }
+
+    return retVal;
   }
 
   /**
@@ -752,7 +726,6 @@ public class IPDBField extends DBField implements ip_field {
     DBEditObject eObj;
     Byte[] bytes;
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
 
     /* -- */
 
@@ -778,7 +751,7 @@ public class IPDBField extends DBField implements ip_field {
 
     retVal = verifyNewValue(bytes);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -804,11 +777,11 @@ public class IPDBField extends DBField implements ip_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null);
+	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.ADDELEMENT, value, null));
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -827,25 +800,11 @@ public class IPDBField extends DBField implements ip_field {
 	  }
       }
 
-    newRetVal = eObj.finalizeAddElement(this, bytes);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeAddElement(this, bytes));
 
-    if (newRetVal == null || newRetVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	getVectVal().addElement(bytes);
-
-	// if the return value from the wizard was not null,
-	// it might have included rescan information, which
-	// we'll want to combine with that from our 
-	// finalizeAddElement() call.
-
-	if (retVal != null)
-	  {
-	    return retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    return newRetVal;		// success
-	  }
       } 
     else
       {
@@ -853,9 +812,9 @@ public class IPDBField extends DBField implements ip_field {
 	  {
 	    unmark(bytes);
 	  }
-
-	return newRetVal;
       }
+
+    return retVal;
   }
 
   /**
@@ -978,7 +937,7 @@ public class IPDBField extends DBField implements ip_field {
 	Byte[] bytes = genIPbytes(submittedValues.elementAt(i));
 	retVal = verifyNewValue(bytes);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    if (!copyFieldMode)
 	      {
@@ -1022,7 +981,7 @@ public class IPDBField extends DBField implements ip_field {
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -1058,9 +1017,9 @@ public class IPDBField extends DBField implements ip_field {
     // okay, see if the DBEditObject is willing to allow all of these
     // elements to be added
 
-    newRetVal = eObj.finalizeAddElements(this, approvedValues);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeAddElements(this, approvedValues));
 
-    if (newRetVal == null || newRetVal.didSucceed()) 
+    if (ReturnVal.didSucceed(retVal))
       {
 	// okay, we're allowed to do it, so go go go!
 
@@ -1069,20 +1028,7 @@ public class IPDBField extends DBField implements ip_field {
 	    getVectVal().addElement(approvedValues.elementAt(i));
 	  }
 
-	// if the return value from the wizard was not null,
-	// it might have included rescan information, which
-	// we'll want to combine with that from our 
-	// finalizeAddElement() call.
-
-	if (retVal != null)
-	  {
-	    newRetVal = retVal.unionRescan(newRetVal);
-	  }
-
-	if (newRetVal == null)
-	  {
-	    newRetVal = new ReturnVal(true, true);
-	  }
+	retVal = ReturnVal.merge(retVal, ReturnVal.success());  // force a non-null ReturnVal
 
 	// if we were not able to copy some of the values (and we
 	// had copyFieldMode set), encode a description of what
@@ -1090,14 +1036,12 @@ public class IPDBField extends DBField implements ip_field {
 	
 	if (errorBuf.length() != 0)
 	  {
-	    newRetVal.setDialog(new JDialogBuff("Warning",
-						errorBuf.toString(),
-						Ganymede.OK,
-						null,
-						"ok.gif"));
+	    retVal.setDialog(new JDialogBuff("Warning",
+					     errorBuf.toString(),
+					     Ganymede.OK,
+					     null,
+					     "ok.gif"));
 	  }
-
-	return newRetVal;
       } 
     else
       {
@@ -1129,11 +1073,9 @@ public class IPDBField extends DBField implements ip_field {
 		throw badBoy;
 	      }
 	  }
-
-	// return the error dialog created by finalizeAddElements
-
-	return newRetVal;
       }
+
+    return retVal;
   }
 
   public Byte[] value()

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -187,7 +187,7 @@ public class GanymedeValidationTask implements Runnable {
 		  {
 		    retVal = object.getBase().getObjectHook().consistencyCheck(object);
 
-		    if (retVal != null && !retVal.didSucceed())
+		    if (!ReturnVal.didSucceed(retVal))
 		      {
 			String dialogText = retVal.getDialogText();
 			
@@ -215,9 +215,9 @@ public class GanymedeValidationTask implements Runnable {
 
 		try
 		  {
-		    retVal = object.validateFieldIntegrity();
+		    retVal = object.validateFieldIntegrity();  // no merge since we don't return the retVal
 
-		    if (retVal != null && !retVal.didSucceed())
+		    if (!ReturnVal.didSucceed(retVal))
 		      {
 			String dialogText = retVal.getDialogText();
 			

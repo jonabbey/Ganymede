@@ -1242,7 +1242,7 @@ public class DBEditSet {
               {
                 retVal = eObj.preCommitHook();
 
-                if (retVal != null && !retVal.didSucceed())
+                if (!ReturnVal.didSucceed(retVal))
                   {
                     throw new CommitNonFatalException(retVal);
                   }
@@ -1436,7 +1436,7 @@ public class DBEditSet {
 	// the object has now been locked to commit mode, and will not
 	// allow further modifications from the client
 
-	if (retVal == null || retVal.didSucceed())
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    try
 	      {
@@ -1451,7 +1451,7 @@ public class DBEditSet {
 	// retVal could be set by either eObj.commitPhase1() or
 	// by commit_checkObjectMissingFields()
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    eObj.release(false);
 

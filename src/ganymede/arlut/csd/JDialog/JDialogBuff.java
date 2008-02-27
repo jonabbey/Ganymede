@@ -330,4 +330,14 @@ public class JDialogBuff implements java.io.Serializable {
 
     return text.toString();
   }
+
+  /**
+   * public accessor for our imageName, if we have one.  Used by
+   * ReturnVal.merge().
+   */
+
+  public String getImageName()
+  {
+    return this.imageName;
+  }
 }

@@ -1874,7 +1874,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	      {
 		ReturnVal retVal = field.validateContents();
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    if (resultBuffer.length() > 0)
 		      {

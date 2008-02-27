@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -994,7 +994,7 @@ public class StringDBField extends DBField implements string_field {
 
     retVal = verifyBasicConstraints(o);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }

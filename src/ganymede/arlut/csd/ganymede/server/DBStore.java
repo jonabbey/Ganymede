@@ -2548,7 +2548,7 @@ public final class DBStore implements JythonMap {
 
 	    retVal = session.createDBObject(SchemaConstants.OwnerBase, supergashOwner, null);
 
-	    if (retVal == null || !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		throw new RuntimeException("Couldn't create supergash owner group.");
 	      }
@@ -2567,7 +2567,7 @@ public final class DBStore implements JythonMap {
 	
 	    retVal = session.createDBObject(SchemaConstants.PersonaBase, supergash, null);
 	
-	    if (retVal == null || !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		throw new RuntimeException("Couldn't create supergash admin persona.");
 	      }
@@ -2649,7 +2649,7 @@ public final class DBStore implements JythonMap {
 	
 	    retVal = session.createDBObject(SchemaConstants.PersonaBase, monitor, null);
 
-	    if (retVal == null || !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		throw new RuntimeException("Couldn't create monitor admin persona.");
 	      }
@@ -2704,7 +2704,7 @@ public final class DBStore implements JythonMap {
 
 	    retVal = session.createDBObject(SchemaConstants.RoleBase, defaultRole, null);
 
-	    if (retVal == null || !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		throw new RuntimeException("Couldn't create permissions default object.");
 	      }
@@ -2810,7 +2810,7 @@ public final class DBStore implements JythonMap {
 	// if the DBSession commit failed, we won't get an automatic
 	// abort..  do that here.
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    try
 	      {
@@ -2881,7 +2881,7 @@ public final class DBStore implements JythonMap {
 
     retVal = session.createDBObject(SchemaConstants.EventBase, null);
 
-    if (retVal == null || !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	throw new RuntimeException("Error, could not create system event object " + token);
       }
@@ -2890,14 +2890,14 @@ public final class DBStore implements JythonMap {
 
     retVal = eO.setFieldValueLocal(SchemaConstants.EventToken, token);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	throw new RuntimeException("Error, could not set token for system event object " + token);
       }
 
     retVal = eO.setFieldValueLocal(SchemaConstants.EventName, name);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	throw new RuntimeException("Error, could not set name for system event object " + token);
       }
@@ -2906,7 +2906,7 @@ public final class DBStore implements JythonMap {
       {
 	retVal = eO.setFieldValueLocal(SchemaConstants.EventDescription, description);
 	
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    throw new RuntimeException("Error, could not set description system event object " + token);
 	  }

@@ -332,7 +332,7 @@ final public class DBSession {
 
 		retVal = inf.addElementLocal(owners.elementAt(i));
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    try
 		      {
@@ -397,7 +397,7 @@ final public class DBSession {
 
 	    retVal = e_object.initializeNewObject();
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		return retVal;
 	      }
@@ -968,7 +968,7 @@ final public class DBSession {
 
     // the remove logic can entirely bypass our normal finalize logic
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	if (retVal.getCallback() == null)
 	  {
@@ -1076,7 +1076,7 @@ final public class DBSession {
 	System.err.println("DBSession.inactivateDBObject(): Got back from eObj.inactivate()");
       }
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	if (retVal.getCallback() == null)
 	  {
@@ -1172,7 +1172,7 @@ final public class DBSession {
 
     System.err.println(ts.l("reactivateDBObject.debug2"));
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	if (retVal.getCallback() == null)
 	  {
@@ -1483,7 +1483,7 @@ final public class DBSession {
     
     retVal = editSet.commit(); // *synchronized*
     
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	if (description != null)
 	  {

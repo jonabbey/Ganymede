@@ -28,7 +28,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -271,10 +271,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
 					      ts.l("respond.exception", x.getMessage()));
 	  }
 
-	if (result == null || 
-	    (!result.didSucceed() &&
-	     result.getCallback() == null) ||
-	    result.didSucceed())
+	if (ReturnVal.didSucceed(result) || result.getCallback() == null)
 	  {
 	    this.unregister();
 	  }
@@ -291,10 +288,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
       {	
 	result = cancel();
 
-	if (result == null || 
-	    (!result.didSucceed() &&
-	     result.getCallback() == null) ||
-	    result.didSucceed())
+	if (ReturnVal.didSucceed(result) || result.getCallback() == null)
 	  {
 	    this.unregister();
 	  }

@@ -3,7 +3,7 @@
    objectEventCustom.java
 
    This file is a management class for object event-class records in Ganymede.
-   
+
    Created: 9 July 1998
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
@@ -13,10 +13,10 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2005
+
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -176,7 +176,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   {
     // by default, we assume that InvidDBField's are always
     // must choose.
-    
+
     if (field instanceof InvidDBField)
       {
 	return true;
@@ -283,15 +283,16 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
 	retVal = setFieldValueLocal(SchemaConstants.ObjectEventObjectType, new Integer(base.getTypeID()));
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;
 	  }
 
 	// the change was accepted and made sense so far.. update our hidden label field
 
-	return updateLabel((String) value,
-			   (String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventToken));
+	return ReturnVal.merge(retVal,
+			       updateLabel((String) value,
+					   (String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventToken)));
       }
 
     if (field.getID() == SchemaConstants.ObjectEventToken)
@@ -395,6 +396,6 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 	return false;
       }
 
-    return field.getFieldDef().isVisible(); 
+    return field.getFieldDef().isVisible();
   }
 }

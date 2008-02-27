@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -2670,7 +2670,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   private boolean integrateXMLTransaction() throws NotLoggedInException
   {
     boolean success = true;
-    ReturnVal attempt;
+    ReturnVal retVal;
     HashMap editCount = new HashMap();
     HashMap createCount = new HashMap();
     HashMap deleteCount = new HashMap();
@@ -2688,14 +2688,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     this.success = false;
 
-    attempt = session.openTransaction("xmlclient", false); // non-interactive
+    retVal = session.openTransaction("xmlclient", false); // non-interactive
 	    
-    if (attempt != null && !attempt.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
-	if (attempt.getDialog() != null)
+	if (retVal.getDialog() != null)
 	  {
 	    // "GanymedeXMLSession Error: couldn''t open transaction {0}: {1}"
-	    err.println(ts.l("integrateXMLTransaction.failed_open_msg", session.getMyUserName(), attempt.getDialog().getText()));
+	    err.println(ts.l("integrateXMLTransaction.failed_open_msg", session.getMyUserName(), retVal.getDialog().getText()));
 	  }
 	else
 	  {
@@ -2738,11 +2738,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	    newlyCreated = true;
 
-	    attempt = newObject.createOnServer(session);
+	    retVal = newObject.createOnServer(session);
 
-	    if (attempt != null && !attempt.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
-		String msg = attempt.getDialogText();
+		String msg = retVal.getDialogText();
 
 		if (msg != null)
 		  {
@@ -2768,11 +2768,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		System.err.println("Editing pre-existing " + newObject);
 	      }
 
-	    attempt = newObject.editOnServer(session);
+	    retVal = newObject.editOnServer(session);
 
-	    if (attempt != null && !attempt.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
-		String msg = attempt.getDialogText();
+		String msg = retVal.getDialogText();
 
 		if (msg != null)
 		  {
@@ -2794,11 +2794,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	// until all objects that we need to create are
 	// created.. for now, just register non-invid fields
 
-	attempt = newObject.registerFields(0); // everything but invids
+	retVal = newObject.registerFields(0); // everything but invids
 
-	if (attempt != null && !attempt.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    String msg = attempt.getDialogText();
+	    String msg = retVal.getDialogText();
 
 	    if (msg != null)
 	      {
@@ -2842,11 +2842,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	incCount(editCount, object.typeString);
 
-	attempt = object.editOnServer(session);
+	retVal = object.editOnServer(session);
 
-	if (attempt != null && !attempt.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    String msg = attempt.getDialogText();
+	    String msg = retVal.getDialogText();
 
 	    if (msg != null)
 	      {
@@ -2863,11 +2863,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    continue;
 	  }
 
-	attempt = object.registerFields(0); // everything but non-embedded invid fields
+	retVal = object.registerFields(0); // everything but non-embedded invid fields
 
-	if (attempt != null && !attempt.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    String msg = attempt.getDialogText();
+	    String msg = retVal.getDialogText();
 
 	    if (msg != null)
 	      {
@@ -2897,11 +2897,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	//	err.println("Resolving pointers for " + newObject);
 	
-	attempt = newObject.registerFields(1); // just invids
+	retVal = newObject.registerFields(1); // just invids
 
-	if (attempt != null && !attempt.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    String msg = attempt.getDialogText();
+	    String msg = retVal.getDialogText();
 
 	    if (msg != null)
 	      {
@@ -2925,11 +2925,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	xmlobject object = (xmlobject) editedObjects.elementAt(i);
 
-	attempt = object.registerFields(1); // just invids, everything else we already did
+	retVal = object.registerFields(1); // just invids, everything else we already did
 
-	if (attempt != null && !attempt.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    String msg = attempt.getDialogText();
+	    String msg = retVal.getDialogText();
 
 	    if (msg != null)
 	      {
@@ -2954,11 +2954,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
 	xmlobject object = (xmlobject) embeddedObjects.elementAt(i);
 	
-	attempt = object.registerFields(1); // only non-embedded invids
+	retVal = object.registerFields(1); // only non-embedded invids
 
-	if (attempt != null && !attempt.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    String msg = attempt.getDialogText();
+	    String msg = retVal.getDialogText();
 
 	    if (msg != null)
 	      {
@@ -2995,11 +2995,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    continue;
 	  }
 
-	attempt = session.inactivate_db_object(target);
+	retVal = session.inactivate_db_object(target);
 	
-	if (attempt != null && !attempt.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    String msg = attempt.getDialogText();
+	    String msg = retVal.getDialogText();
 
 	    if (msg != null)
 	      {
@@ -3035,11 +3035,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	incCount(deleteCount, object.typeString);
 
-	attempt = session.remove_db_object(target);
+	retVal = session.remove_db_object(target);
 
-	if (attempt != null && !attempt.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    String msg = attempt.getDialogText();
+	    String msg = retVal.getDialogText();
 
 	    if (msg != null)
 	      {
@@ -3065,11 +3065,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	err.println(ts.l("integrateXMLTransaction.committing"));
 	err.println();
 
-	attempt = session.commitTransaction(true);
+	retVal = session.commitTransaction(true);
 
-	if (attempt != null && !attempt.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    String msg = attempt.getDialogText();
+	    String msg = retVal.getDialogText();
 
 	    if (msg != null)
 	      {
@@ -3487,7 +3487,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	err.println(retval.getDialogText());
       }
 
-    if (retval == null || retval.didSucceed())
+    if (ReturnVal.didSucceed(retval))
       {
 	return true;
       }

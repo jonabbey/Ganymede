@@ -1084,24 +1084,24 @@ public class Ganymede {
 	      }
 
 	    p = (PasswordDBField) e_object.getField(SchemaConstants.PersonaPasswordField);
-	    ReturnVal retval = p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+	    ReturnVal retVal = p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
 	    
-	    if (retval != null && !retval.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		throw new RuntimeException(ts.l("startupHook.failed_reset", rootname));
 	      }
 
 	    System.out.println(ts.l("startupHook.password_reset", rootname));
 
-	    retval = internalSession.commitTransaction();
+	    retVal = internalSession.commitTransaction();
 
-	    if (retval != null && !retval.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		// if doNormalProcessing is true, the
 		// transaction was not cleared, but was
 		// left open for a re-try.  Abort it.
 		
-		if (retval.doNormalProcessing)
+		if (retVal.doNormalProcessing)
 		  {
 		    internalSession.abortTransaction();
 		  }
@@ -1138,7 +1138,7 @@ public class Ganymede {
 			    ReturnVal retVal = objectEventObj.updateLabel((String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
 									  (String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventToken));
 
-			    if (retVal != null && !retVal.didSucceed())
+			    if (!ReturnVal.didSucceed(retVal))
 			      {
 				success = false;
 			      }

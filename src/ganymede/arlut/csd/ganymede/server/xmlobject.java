@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -353,46 +353,36 @@ public class xmlobject {
    * return semantics.
    */
 
-  public ReturnVal createOnServer(GanymedeSession session)
+  public ReturnVal createOnServer(GanymedeSession session) throws NotLoggedInException
   {
     ReturnVal result;
 
     /* -- */
 
-    try
-      {
-	result = session.create_db_object(getType(), false, oidCreateInvid);
-      }
-    catch (RemoteException ex)
-      {
-	ex.printStackTrace();
-	throw new RuntimeException(ex.getMessage());
-      }
-    
-    if (result != null && !result.didSucceed())
+    result = session.create_db_object(getType(), false, oidCreateInvid);
+
+    if (!ReturnVal.didSucceed(result))
       {
 	return result;
       }
-    else
+
+    objref = result.getObject();
+
+    try
       {
-	objref = result.getObject();
+        Invid myInvid = objref.getInvid();
 
-	try
-	  {
-	    Invid myInvid = objref.getInvid();
+        setInvid(myInvid);
 
-	    setInvid(myInvid);
-	    
-	    xSession.rememberSeenInvid(myInvid);
-	  }
-	catch (RemoteException ex)
-	  {
-	    ex.printStackTrace();
-	    throw new RuntimeException(ex.getMessage());
-	  }
-
-	return null;
+        xSession.rememberSeenInvid(myInvid);
       }
+    catch (RemoteException ex)
+      {
+        ex.printStackTrace();
+        throw new RuntimeException(ex.getMessage());
+      }
+
+    return null;
   }
 
   /**
@@ -403,7 +393,7 @@ public class xmlobject {
    * return semantics.
    */
 
-  public ReturnVal editOnServer(Session session) throws NotLoggedInException
+  public ReturnVal editOnServer(GanymedeSession session) throws NotLoggedInException
   {
     ReturnVal result;
     Invid localInvid;
@@ -423,17 +413,9 @@ public class xmlobject {
 
     if (localInvid != null)
       {
-	try
-	  {
-	    result = session.edit_db_object(localInvid);
-	  }
-	catch (RemoteException ex)
-	  {
-	    ex.printStackTrace();
-	    throw new RuntimeException(ex.getMessage());
-	  }
+        result = session.edit_db_object(localInvid);
 
-	if (result.didSucceed())
+	if (ReturnVal.didSucceed(result))
 	  {
 	    objref = result.getObject();
 
@@ -452,13 +434,9 @@ public class xmlobject {
 	      }
 
 	    xSession.rememberSeenInvid(localInvid);
+          }
 
-	    return result;
-	  }
-	else
-	  {
-	    return result;
-	  }
+        return result;
       }
     else
       {
@@ -535,7 +513,7 @@ public class xmlobject {
 
 	result = field.registerOnServer();
 
-	if (result != null && !result.didSucceed())
+	if (!ReturnVal.didSucceed(result))
 	  {
 	    return result;
 	  }

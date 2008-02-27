@@ -1214,7 +1214,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     retVal = setTypeID(_idInt.shortValue());
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -1349,7 +1349,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	retVal = deleteField(_field.getName());
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;
 	  }
@@ -1431,14 +1431,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 		retVal = newField.setXML(item, resolveInvidLinks, err);
 		
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
 
 		retVal = newField.setTabName(currentTabName);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1452,14 +1452,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 		
 		retVal = newField.setXML(item, resolveInvidLinks, err);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
 
 		retVal = newField.setTabName(currentTabName);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1490,7 +1490,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	retVal = setLabelField(_labelInt.shortValue());
       }
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -1503,7 +1503,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     
     retVal = setClassInfo(_classStr, _classOptionStr);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -1521,7 +1521,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     
     retVal = setName(_objectName);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }

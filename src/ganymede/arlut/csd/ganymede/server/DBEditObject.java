@@ -2816,7 +2816,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public final synchronized ReturnVal finalizeRemove(boolean success, String ckp_label)
   {
-    ReturnVal finalResult = new ReturnVal(true); // we use this to track rescan requests
     ReturnVal retVal = null;
     DBField field;
     String label = getLabel();	// remember the label before we clear it
@@ -2880,15 +2879,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	retVal = attemptBackLinkClear(true);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    editset.rollback(ckp_label); // *sync*
 
 	    return retVal;
-	  }
-	else if (retVal != null)
-	  {
-	    finalResult.unionRescan(retVal);
 	  }
 
 	// get a sync'ed snapshot of this object's fields
@@ -2922,9 +2917,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		    try
 		      {
-			retVal = field.deleteElement(0); // *sync*
+			retVal = ReturnVal.merge(retVal, field.deleteElement(0)); // *sync*
 
-			if (retVal != null && !retVal.didSucceed())
+			if (!ReturnVal.didSucceed(retVal))
 			  {
 			    editset.rollback(ckp_label); // *sync*
 
@@ -2937,10 +2932,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 			    // "Custom code disapproved of deleting element from field {0}."
 			    return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
 							      ts.l("finalizeRemove.badDelete", field.getName()));
-			  }
-			else
-			  {
-			    finalResult.unionRescan(retVal);
 			  }
 		      }
 		    catch (GanyPermissionsException ex)
@@ -2971,9 +2962,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 		    field.getType() != PASSWORD &&
 		    field.getType() != FIELDOPTIONS)
 		  {
-		    retVal = field.setValueLocal(null); // *sync*
+		    retVal = ReturnVal.merge(retVal, field.setValueLocal(null)); // *sync*
 
-		    if (retVal != null && !retVal.didSucceed())
+		    if (!ReturnVal.didSucceed(retVal))
 		      {
 			editset.rollback(ckp_label); // *sync*
 
@@ -2986,10 +2977,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 			// "Custom code disapproved of clearing the value held in field {0}."
 			return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
 							  ts.l("finalizeRemove.badScalarClear", field.getName()));
-		      }
-		    else
-		      {
-			finalResult.unionRescan(retVal);
 		      }
 		  }
 		else
@@ -3026,9 +3013,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		while (field.size() > 0)
 		  {
-		    retVal = field.deleteElementLocal(0); // *sync*
+		    retVal = ReturnVal.merge(retVal, field.deleteElementLocal(0)); // *sync*
 
-		    if (retVal != null && !retVal.didSucceed())
+		    if (!ReturnVal.didSucceed(retVal))
 		      {
 			editset.rollback(ckp_label); // *sync*
 
@@ -3036,10 +3023,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 			// "Custom code disapproved of deleting element from field {0}."
 			return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
 							  ts.l("finalizeRemove.badDelete", field.getName()));
-		      }
-		    else
-		      {
-			finalResult.unionRescan(retVal);
 		      }
 		  }
 	      }
@@ -3052,9 +3035,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 		// (it has no symmetric relationship information
 		// contained in the invid field definition)
 
-		retVal = field.setValueLocal(null); // *sync*
+		retVal = ReturnVal.merge(retVal, field.setValueLocal(null)); // *sync*
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    editset.rollback(ckp_label);  // *sync*
 
@@ -3068,7 +3051,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	editset.popCheckpoint(ckp_label);
 
-	return finalResult;
+	return retVal;
       }
     finally
       {
@@ -3097,8 +3080,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   private final ReturnVal attemptBackLinkClear(boolean local)
   {
     ReturnVal
-      retVal = null,
-      newRetVal = new ReturnVal(true, true);
+      retVal = null;
 
     Vector
       targets;
@@ -3148,17 +3130,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     while (targetEnum.hasMoreElements())
       {
 	remote = (Invid) targetEnum.nextElement();
-	retVal = clearBackLink(remote, local);
+	retVal = ReturnVal.merge(retVal, clearBackLink(remote, local));
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;
 	  }
-
-	newRetVal = newRetVal.unionRescan(retVal);
       }
 
-    return newRetVal;		// success
+    return retVal;		// success
   }
 
   /**
@@ -3195,8 +3175,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       session = getSession();
 
     ReturnVal
-      retVal = null,
-      newRetVal;
+      retVal = ReturnVal.success();
 
     Vector
       fieldsToUnbind = new Vector();
@@ -3307,14 +3286,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     // initialize a ReturnVal to remember our rescan information.
 
-    newRetVal = new ReturnVal(true, true);
-
     for (int i = 0; i < fieldsToUnbind.size(); i++)
       {
 	Short remote_fieldid = (Short) fieldsToUnbind.elementAt(i);
 	targetField = remote_fieldid.shortValue();
 
-	newRetVal.addRescanField(remote, targetField);
+	retVal.addRescanField(remote, targetField);
 
 	// are we allowed to ignore permissions on this field?
 
@@ -3362,9 +3339,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 		System.err.println("DBEditObject.clearBackLink(): calling dissolve on " + oldRefField);
 	      }
 
-	    retVal = oldRefField.dissolve(getInvid(), local);
+	    retVal = ReturnVal.merge(retVal, oldRefField.dissolve(getInvid(), local));
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		return retVal;
 	      }
@@ -3381,9 +3358,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     // tell the client that it needs to rescan the old remote ends of this binding
 
-    newRetVal.unionRescan(retVal);
-
-    return newRetVal;
+    return retVal;
   }
 
   /**
@@ -3480,7 +3455,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
 	ReturnVal retVal = consistencyCheck(this);
 
-	if (retVal == null || retVal.didSucceed())
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;	// no problem
 	  }
@@ -3489,19 +3464,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    ReturnVal retVal2 = original.objectBase.getObjectHook().consistencyCheck(original);
 
-	    if (retVal2 != null && !retVal2.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal2))
 	      {
 		return null;	// we were already inconsistent, so don't complain
 	      }
-	    else
-	      {
-		return retVal;	// we were consistent before, so complain
-	      }
-	  }
-	else
-	  {
-	    return retVal;	// newly created inconsistent object, complain
-	  }
+          }
+
+        // we were consistent before (or newly created in an
+        // inconsistent state), so complain
+
+        return retVal;	
       }
     else
       {

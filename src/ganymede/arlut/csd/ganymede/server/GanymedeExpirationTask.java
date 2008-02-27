@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -151,7 +151,7 @@ public class GanymedeExpirationTask implements Runnable {
 	
 	ReturnVal retVal = mySession.openTransaction("expiration task", false); // non-interactive
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    Ganymede.debug("Expiration Task: Couldn't open transaction");
 	    return;
@@ -229,7 +229,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 		retVal = mySession.inactivate_db_object(invid);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    Ganymede.debug("Expiration task was not able to inactivate object " + 
 				   base.getName() + ":" + result.toString());
@@ -294,7 +294,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 		retVal = mySession.remove_db_object(invid);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    Ganymede.debug("Expiration task was not able to remove object " + 
 				   base.getName() + ":" + result.toString());
@@ -309,7 +309,7 @@ public class GanymedeExpirationTask implements Runnable {
 	
 	retVal = mySession.commitTransaction();
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    // if doNormalProcessing is true, the
 	    // transaction was not cleared, but was
@@ -327,7 +327,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 	finished = true;	// minimize chance of attempting to abort an open transaction in finally
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    Ganymede.debug("Expiration Task: Couldn't successfully commit transaction");
 	  }

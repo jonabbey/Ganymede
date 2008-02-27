@@ -1352,7 +1352,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setID(_fieldID);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not have its id set:\n{0}\n{1}"
@@ -1365,7 +1365,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setName(XMLUtils.XMLDecode(root.getAttrStr("name")), true);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not have its name set:\n{0}\n{1}"
@@ -1435,7 +1435,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 		retVal = setType(FieldType.FLOAT);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1447,7 +1447,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 		retVal = setType(FieldType.FIELDOPTIONS);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1459,7 +1459,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 		retVal = setType(FieldType.DATE);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1471,7 +1471,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 		retVal = setType(FieldType.PERMISSIONMATRIX);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1480,7 +1480,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      {
 		retVal = doStringXML(item);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1489,7 +1489,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      {
 		retVal = doInvidXML(item, doLinkResolve);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1498,7 +1498,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      {
 		retVal = doNumericXML(item);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1507,7 +1507,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      {
 		retVal = doPasswordXML(item);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1516,7 +1516,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      {		
 		retVal = doIPXML(item);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1525,7 +1525,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      {
 		retVal = doBooleanXML(item);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }
@@ -1553,7 +1553,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setClassName(_classname);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set class name:\n{0}\n{1}"
@@ -1563,7 +1563,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     
     retVal = setComment(_comment);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set comment:\n{0}\n{1}"
@@ -1609,7 +1609,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setType(FieldType.STRING);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -1689,7 +1689,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setArray(_vect);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
@@ -1701,7 +1701,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	retVal = setMaxArraySize(_maxSize);
 	
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    // "XML"
 	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
@@ -1713,7 +1713,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setMinLength(_minlength);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
@@ -1724,7 +1724,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setMaxLength(_maxlength);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
@@ -1735,7 +1735,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setOKChars(_okChars);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set ok chars: {0}\n{1}\n{2}"
@@ -1745,7 +1745,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     
     retVal = setBadChars(_badChars);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set bad chars: {0}\n{1}\n{2}"
@@ -1755,7 +1755,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setRegexpPat(_regexp);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set regular expression: {0}\n{1}\n{2}"
@@ -1765,7 +1765,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setRegexpDesc(_regexp_desc);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set regular expression description: {0}\n{1}\n{2}"
@@ -1775,7 +1775,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setMultiLine(_multiline);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set multiline: {0}\n{1}\n{2}"
@@ -1785,7 +1785,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setNameSpace(_namespace);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set namespace: {0}\n{1}\n{2}"
@@ -1822,7 +1822,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setType(FieldType.BOOLEAN);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -1858,7 +1858,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setLabeled(_labeled);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set labeled bit to {0}:\n{1}\n{2}"
@@ -1870,7 +1870,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	retVal = setTrueLabel(_trueLabel);
 	
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    // "XML"
 	    // "fielddef could not set true label to {0}\n{1}\n{2}"
@@ -1880,7 +1880,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 	retVal = setFalseLabel(_falseLabel);
 	
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    // "XML"
 	    // "fielddef could not set false label to {0}\n{1}\n{2}"
@@ -1928,7 +1928,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setType(FieldType.PASSWORD);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -2044,7 +2044,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setMinLength(_minlength);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
@@ -2055,7 +2055,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setMaxLength(_maxlength);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
@@ -2066,7 +2066,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setOKChars(_okChars);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set ok chars: {0}\n{1}\n{2}"
@@ -2077,7 +2077,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     
     retVal = setBadChars(_badChars);
     
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set bad chars: {0}\n{1}\n{2}"
@@ -2088,7 +2088,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setCrypted(_crypted);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set crypted flag: {0}\n{1}\n{2}"
@@ -2099,7 +2099,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setMD5Crypted(_md5crypted);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
@@ -2110,7 +2110,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setApacheMD5Crypted(_apachemd5crypted);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
@@ -2121,7 +2121,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setWinHashed(_winHashed);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set windows hashing flag: {0}\n{1}\n{2}"
@@ -2132,7 +2132,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setSSHAHashed(_sshaHashed);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set SSHA hashing flag: {0}\n{1}\n{2}"
@@ -2143,7 +2143,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setShaUnixCrypted(_shaUnixCrypted);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set SHA Unix Crypt hashing flag: {0}\n{1}\n{2}"
@@ -2158,7 +2158,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	retVal = setShaUnixCrypted512(_shaUnixCrypt512);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    // we should already have caught any XML error above,
 	    // here, so I'm not going to bother wrapping the error
@@ -2168,7 +2168,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	
 	retVal = setShaUnixCryptRounds(_shaUnixCryptRounds);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    // we should already have caught any XML error above,
 	    // here, so I'm not going to bother wrapping the error
@@ -2179,7 +2179,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setPlainText(_plaintext);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set plaintext flag: {0}\n{1}\n{2}"
@@ -2217,7 +2217,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setType(FieldType.IP);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -2263,7 +2263,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setArray(_vect);
   
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
@@ -2276,7 +2276,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	retVal = setMaxArraySize(_maxSize);
 	
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    // "XML"
 	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
@@ -2288,7 +2288,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setNameSpace(_namespace);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set namespace: {0}\n{1}\n{2}"
@@ -2324,7 +2324,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setType(FieldType.NUMERIC);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -2359,7 +2359,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setNameSpace(_namespace);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set namespace: {0}\n{1}\n{2}"
@@ -2401,7 +2401,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setType(FieldType.INVID);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -2475,7 +2475,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setArray(_vect);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
@@ -2488,7 +2488,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	retVal = setMaxArraySize(_maxSize);
 	
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    // "XML"
 	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
@@ -2513,7 +2513,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 		retVal = setTargetBase(_targetobjectStr);
 	      }
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		// "XML"
 		// "fielddef could not set invid target base: {0}\n{1}\n{2}"
@@ -2528,7 +2528,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    retVal = setTargetBase(_targetobject.shortValue());
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		// "XML"
 		// "fielddef could not set invid target base: {0,number,#}\n{1}\n{2}"
@@ -2543,7 +2543,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    retVal = setTargetBase(null);
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		// "XML"
 		// "fielddef could not clear invid target base:\n{0}\n{1}"
@@ -2560,7 +2560,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    retVal = setTargetField(_targetfieldStr);
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		// "XML"
 		// "fielddef could not set invid target field: {0}\n{1}\n{2}"
@@ -2575,7 +2575,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    retVal = setTargetField(_targetfield.shortValue());
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		// "XML"
 		// "fielddef could not set invid target field: {0,number,#}\n{1}\n{2}"
@@ -2590,7 +2590,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    retVal = setTargetField(null);
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		// "XML"
 		// "fielddef could not clear invid target field:\n{0}\n{1}"
@@ -2604,7 +2604,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
     retVal = setEditInPlace(_embedded);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
 	// "fielddef could not set embedded status: {0}\n{1}\n{2}"
@@ -2824,7 +2824,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
 		retVal = otherField.setName(oldName);
 
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    return retVal;
 		  }

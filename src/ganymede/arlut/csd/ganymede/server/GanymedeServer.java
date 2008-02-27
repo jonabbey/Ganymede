@@ -273,7 +273,7 @@ public class GanymedeServer implements Server {
   {
     ReturnVal retVal = processLogin(username, password, false, true);
 
-    if (!retVal.didSucceed())
+    if (!retVal.didSucceed())   // XXX processLogin never returns null
       {
 	return retVal;
       }
@@ -527,7 +527,7 @@ public class GanymedeServer implements Server {
 
 		success = true;
 
-		ReturnVal retVal = new ReturnVal(true);
+		ReturnVal retVal = ReturnVal.success();
 		retVal.setSession(session);
 
 		return retVal;
@@ -1936,7 +1936,7 @@ public class GanymedeServer implements Server {
 
 	    ReturnVal retVal = session.deleteDBObject(objInvid);
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_failure", gSession.viewObjectLabel(objInvid)));
 	      }

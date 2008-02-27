@@ -1572,14 +1572,14 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public synchronized ReturnVal setPlainTextPass(String plaintext, boolean local, boolean noWizards)
   {
-    ReturnVal retVal, retVal2;
+    ReturnVal retVal;
     DBEditObject eObj;
 
     /* -- */
 
     retVal = verifyNewValue(plaintext);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -1590,11 +1590,14 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	// Wizard check
 	
-	retVal = eObj.wizardHook(this, DBEditObject.SETPASSPLAIN, plaintext, null);
+	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+							 DBEditObject.SETPASSPLAIN,
+							 plaintext,
+							 null));
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -1606,11 +1609,11 @@ public class PasswordDBField extends DBField implements pass_field {
     // advisory-only messages that the wizardHook generated, even if
     // the finalizeSetValue() doesn't generate any.
 
-    retVal2 = ((DBEditObject) owner).finalizeSetValue(this, null);
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) owner).finalizeSetValue(this, null));
 
-    if (retVal2 != null && !retVal2.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal2;
+	return retVal;
       }
 
     // reset all hashes to start things off
@@ -1663,7 +1666,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setCryptPass(String text, boolean local, boolean noWizards)
   {
-    ReturnVal retVal;
+    ReturnVal retVal = null;
     DBEditObject eObj;
 
     /* -- */
@@ -1694,7 +1697,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -1702,9 +1705,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+    retVal = ReturnVal.merge(retVal, ((DBEditObject)owner).finalizeSetValue(this, null));
 
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	// whenever the crypt password is directly set, we lose 
 	// plaintext and alternate hashes
@@ -1745,7 +1748,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setMD5CryptedPass(String text, boolean local, boolean noWizards)
   {
-    ReturnVal retVal;
+    ReturnVal retVal = null;
     DBEditObject eObj;
 
     /* -- */
@@ -1784,7 +1787,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -1792,9 +1795,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+    retVal = ReturnVal.merge(retVal, ((DBEditObject)owner).finalizeSetValue(this, null));
 
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	// whenever the md5CryptPass password is directly set, we lose 
 	// plaintext and alternate hashes
@@ -1835,7 +1838,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setApacheMD5CryptedPass(String text, boolean local, boolean noWizards)
   {
-    ReturnVal retVal;
+    ReturnVal retVal = null;
     DBEditObject eObj;
 
     /* -- */
@@ -1873,8 +1876,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	retVal = eObj.wizardHook(this, DBEditObject.SETPASSAPACHEMD5, text, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
-	
-	if (retVal != null && !retVal.doNormalProcessing)
+
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -1882,9 +1885,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+    retVal = ReturnVal.merge(retVal, ((DBEditObject)owner).finalizeSetValue(this, null));
 
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	// whenever the apacheMd5CryptPass password is directly set, we lose 
 	// plaintext and alternate hashes
@@ -1929,7 +1932,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4, boolean local, boolean noWizards)
   {
-    ReturnVal retVal;
+    ReturnVal retVal = null;
     DBEditObject eObj;
 
     /* -- */
@@ -1959,8 +1962,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	retVal = eObj.wizardHook(this, DBEditObject.SETPASSWINHASHES, LANMAN, NTUnicodeMD4);
 
 	// if a wizard intercedes, we are going to let it take the ball.
-	
-	if (retVal != null && !retVal.doNormalProcessing)
+
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -1968,9 +1971,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+    retVal = ReturnVal.merge(retVal, ((DBEditObject)owner).finalizeSetValue(this, null));
 
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	// whenever the windows hashes are set directly, we lose 
 	// plaintext and alternate hashes
@@ -2028,7 +2031,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setSSHAPass(String text, boolean local, boolean noWizards)
   {
-    ReturnVal retVal;
+    ReturnVal retVal = null;
     DBEditObject eObj;
 
     /* -- */
@@ -2066,8 +2069,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	retVal = eObj.wizardHook(this, DBEditObject.SETPASSSSHA, text, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
-	
-	if (retVal != null && !retVal.doNormalProcessing)
+
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -2075,9 +2078,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+    retVal = ReturnVal.merge(retVal, ((DBEditObject)owner).finalizeSetValue(this, null));
 
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	// whenever the SSHA password is directly set, we lose
 	// plaintext and alternate hashes
@@ -2150,7 +2153,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public ReturnVal setShaUnixCryptPass(String hashText, boolean local, boolean noWizards)
   {
-    ReturnVal retVal;
+    ReturnVal retVal = null;
     DBEditObject eObj;
 
     /* -- */
@@ -2189,8 +2192,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	retVal = eObj.wizardHook(this, DBEditObject.SETPASS_SHAUNIXCRYPT, hashText, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
-	
-	if (retVal != null && !retVal.doNormalProcessing)
+
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -2198,9 +2201,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+    retVal = ReturnVal.merge(retVal, ((DBEditObject)owner).finalizeSetValue(this, null));
 
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	// whenever the ShaUnixCrypt password is directly set, we lose
 	// plaintext and alternate hashes
@@ -2251,7 +2254,7 @@ public class PasswordDBField extends DBField implements pass_field {
 				boolean local, 
 				boolean noWizards)
   {
-    ReturnVal retVal;
+    ReturnVal retVal = null;
     DBEditObject eObj;
     boolean settingCrypt, settingMD5, settingApacheMD5, settingWin, settingSSHA, settingShaUnixCrypt;
 
@@ -2336,8 +2339,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSWINHASHES, LANMAN, NTUnicodeMD4);
 
 	    // if a wizard intercedes, we are going to let it take the ball.
-	    
-	    if (retVal != null && !retVal.doNormalProcessing)
+
+	    if (ReturnVal.wizardHandled(retVal))
 	      {
 		return retVal;
 	      }
@@ -2345,11 +2348,14 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if (settingMD5)
 	  {
-	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSMD5, md5crypt, null);
+	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+							     DBEditObject.SETPASSMD5,
+							     md5crypt,
+							     null));
 
 	    // if a wizard intercedes, we are going to let it take the ball.
-	    
-	    if (retVal != null && !retVal.doNormalProcessing)
+
+	    if (ReturnVal.wizardHandled(retVal))
 	      {
 		return retVal;
 	      }
@@ -2357,11 +2363,14 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if (settingApacheMD5)
 	  {
-	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSAPACHEMD5, apacheMd5Crypt, null);
+	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+							     DBEditObject.SETPASSAPACHEMD5,
+							     apacheMd5Crypt,
+							     null));
 
 	    // if a wizard intercedes, we are going to let it take the ball.
-	    
-	    if (retVal != null && !retVal.doNormalProcessing)
+
+	    if (ReturnVal.wizardHandled(retVal))
 	      {
 		return retVal;
 	      }
@@ -2369,11 +2378,14 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if (settingCrypt)
 	  {
-	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSCRYPT, crypt, null);
+	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+							     DBEditObject.SETPASSCRYPT,
+							     crypt,
+							     null));
 
 	    // if a wizard intercedes, we are going to let it take the ball.
-	    
-	    if (retVal != null && !retVal.doNormalProcessing)
+
+	    if (ReturnVal.wizardHandled(retVal))
 	      {
 		return retVal;
 	      }
@@ -2381,11 +2393,14 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if (settingSSHA)
 	  {
-	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSSSHA, sshaHash, null);
+	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+							     DBEditObject.SETPASSSSHA,
+							     sshaHash,
+							     null));
 
 	    // if a wizard intercedes, we are going to let it take the ball.
-	    
-	    if (retVal != null && !retVal.doNormalProcessing)
+
+	    if (ReturnVal.wizardHandled(retVal))
 	      {
 		return retVal;
 	      }
@@ -2393,11 +2408,14 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if (settingShaUnixCrypt)
 	  {
-	    retVal = eObj.wizardHook(this, DBEditObject.SETPASS_SHAUNIXCRYPT, ShaUnixCryptText, null);
+	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+							     DBEditObject.SETPASS_SHAUNIXCRYPT,
+							     ShaUnixCryptText,
+							     null));
 
 	    // if a wizard intercedes, we are going to let it take the ball.
-	    
-	    if (retVal != null && !retVal.doNormalProcessing)
+
+	    if (ReturnVal.wizardHandled(retVal))
 	      {
 		return retVal;
 	      }
@@ -2409,9 +2427,9 @@ public class PasswordDBField extends DBField implements pass_field {
     // finalizeSetValue method.. this is just to allow for a generic
     // veto on all changes
 
-    retVal = ((DBEditObject)owner).finalizeSetValue(this, null);
+    retVal = ReturnVal.merge(retVal, ((DBEditObject)owner).finalizeSetValue(this, null));
 
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	// whenever the hashes are set directly, we lose 
 	// plaintext and alternate hashes

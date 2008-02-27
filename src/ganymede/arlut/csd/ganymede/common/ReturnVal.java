@@ -115,7 +115,7 @@ import arlut.csd.Util.TranslationService;
  * @see arlut.csd.ganymede.rmi.Ganymediator
  * */
 
-public class ReturnVal implements java.io.Serializable {
+public final class ReturnVal implements java.io.Serializable {
 
   static final boolean debug = false;
   static final long serialVersionUID = 5358187112973957394L;
@@ -129,12 +129,246 @@ public class ReturnVal implements java.io.Serializable {
 
   /**
    * static factory method for returning a ReturnVal indicating
-   * success.
+   * success.  Because setter methods may be made on the ReturnVal
+   * that we return, we'll create a new one each time.
    */
 
-  static public ReturnVal success()
+  static final public ReturnVal success()
   {
     return new ReturnVal(true, true);
+  }
+
+  /**
+   * Simple static helper method that Ganymede code can use to verify
+   * that a ReturnVal-returning operation did succeed.
+   */
+
+  static public boolean didSucceed(ReturnVal retVal)
+  {
+    return retVal == null || retVal.didSucceed();
+  }
+
+  /**
+   * Simple static helper method that Ganymede code can use to verify
+   * that a ReturnVal-returning method involved transforming a
+   * supplied value.
+   */
+
+  static public boolean hasTransformedValue(ReturnVal retVal)
+  {
+    return retVal != null && retVal.hasTransformedValue();
+  }
+
+  /**
+   * Simple static helper method that Ganymede code can use to verify
+   * that a ReturnVal is either null (indicating unconditional
+   * success) or doNormalProcessing set.
+   */
+
+  static public boolean isDoNormalProcessing(ReturnVal retVal)
+  {
+    return retVal == null || retVal.doNormalProcessing;
+  }
+
+  /**
+   * Simple static helper method that checks both for failure and for
+   * wizard intercept.  Useful for server-side code that checks for
+   * wizard interaction.
+   */
+
+  static public boolean wizardHandled(ReturnVal retVal)
+  {
+    return !ReturnVal.didSucceed(retVal) || !ReturnVal.isDoNormalProcessing(retVal);
+  }
+
+  /**
+   * This static method is responsible for intelligently merging a
+   * pair of ReturnVal objects, ensuring that the appropriate
+   * information from each is propagated forward.
+   *
+   * The logic in this method is critical for the proper chaining of
+   * results in server-side code.
+   */
+
+  static final public ReturnVal merge(ReturnVal retVal, ReturnVal retVal2)
+  {
+    if (retVal2 == null)
+      {
+        return retVal;
+      }
+
+    if (retVal == null)
+      {
+        return retVal2;
+      }
+
+    if (retVal.isCompatible(retVal2))
+      {
+	return retVal;
+      }
+
+    // if one of the ReturnVals indicated a failure, pass the failure
+    // through, and we'll just forget the success result as immaterial
+
+    if (retVal.didSucceed() != retVal2.didSucceed())
+      {
+        if (!retVal.didSucceed())
+          {
+            return retVal;
+          }
+        else
+          {
+            return retVal2;
+          }
+      }
+
+    // okay, we've got compatible success results, let's create a
+    // result we can work with going forward
+
+    ReturnVal result = new ReturnVal(retVal.didSucceed());
+
+    if (retVal.didSucceed())
+      {
+	// we know that both of the ReturnVals that we're merging were
+	// successful, so we'll want to merge all rescan information from
+	// both.
+
+	result.unionRescan(retVal);
+	result.unionRescan(retVal2);
+      }
+
+    // doNormalProcessing is meant to be a signal that the normal
+    // course of action is not to be followed.  We'll want to preserve
+    // that signal going forward.
+    //
+    // Generally, we use doNormalProcessing for a few different
+    // semantic interpretations.. one is for DBEditObject.wizardHook()
+    // to signal to the field setting methods that an exception to the
+    // default behavior is desired, and that the field logic should
+    // let the wizard handle it.  The second is to indicate whether an
+    // attempted transaction commit should be considered as retryable
+    // by the client.  The third, most minor one, is when an object is
+    // cloned but certain fields could not be successfully or
+    // completely cloned during the process.
+    //
+    // A wizard can't really do anything useful if doNormalProcessing
+    // is set to false unless the retVal has a Ganymediator returned
+    // to be responsible for further processing, so we'll check for
+    // that first.  If we see a wizard active, we'll pass its dialog
+    // and ganymediator information through to our result.
+
+    if (retVal.callback != null)
+      {
+        result.callback = retVal.callback;
+        result.dialog = retVal.dialog;
+        result.doNormalProcessing = retVal.doNormalProcessing;
+      }
+    else if (retVal2.callback != null)
+      {
+        result.callback = retVal2.callback;
+        result.dialog = retVal2.dialog;
+        result.doNormalProcessing = retVal2.doNormalProcessing;
+      }
+    else
+      {
+	// if we're not involved in a wizard bit, we'll pass back a
+	// true doNormalProcessing only if both of our inputs had
+	// doNormalProcessing.
+
+	result.doNormalProcessing = retVal.doNormalProcessing && retVal2.doNormalProcessing;
+
+	// no wizard?  look to see if either or both of the ReturnVals
+	// that we are merging have any dialog information, and put
+	// either or both of them together in the result.
+
+	if (retVal.dialog != null && retVal2.dialog != null)
+	  {
+	    // ugh, we've got two dialogs that need to be merged, so we'll
+	    // have to do something about that.
+	    //
+	    // if either one was an error dialog, we'll prioritize that as
+	    // far as the title is concerned.  Otherwise, the first
+	    // ReturnVal we're merging will have priority for the title,
+	    // image, and text.
+
+	    if ("error.gif".equals(retVal2.dialog.getImageName()))
+	      {
+		result.dialog = retVal2.dialog;
+		result.dialog.appendText(retVal.dialog.getText());
+	      }
+	    else
+	      {
+		result.dialog = retVal.dialog;
+		result.dialog.appendText(retVal2.dialog.getText());
+	      }
+	  }
+      }
+
+    // if either provide a newObjectInvid, or remoteObjectRef, we'll
+    // want to include that.  if both try to provide either of those,
+    // we'll have to throw an exception and give up.
+
+    if (retVal.newObjectInvid != null || retVal2.newObjectInvid != null)
+      {
+        if (retVal.newObjectInvid != null && retVal2.newObjectInvid == null)
+          {
+            result.newObjectInvid = retVal.newObjectInvid;
+            result.newLabel = retVal.newLabel;
+          }
+        else if (retVal2.newObjectInvid != null && retVal.newObjectInvid == null)
+          {
+            result.newObjectInvid = retVal2.newObjectInvid;
+            result.newLabel = retVal2.newLabel;
+          }
+        else if (retVal2.newObjectInvid == retVal.newObjectInvid)  // remember we intern Invids
+          {
+            result.newObjectInvid = retVal.newObjectInvid;
+
+            // they both agree on the invid, but what about the label?
+            //
+            // we'll give priority to the first ReturnVal if it was
+            // not null.. otherwise we'll leave it null
+
+            if (retVal.newLabel == null)
+              {
+                result.newLabel = retVal2.newLabel;
+              }
+            else
+              {
+                result.newLabel = retVal.newLabel;
+              }
+          }
+        else
+          {
+            throw new RuntimeException("Couldn't merge ReturnVals with conflicting newObjectInvids.");
+          }
+      }
+
+    // and the same basic logic for the remoteObjectRef.
+
+    if (retVal.remoteObjectRef != null || retVal2.remoteObjectRef != null)
+      {
+        if (retVal.remoteObjectRef != null && retVal2.remoteObjectRef == null)
+          {
+            result.remoteObjectRef = retVal.remoteObjectRef;
+          }
+        else if (retVal2.remoteObjectRef != null && retVal.remoteObjectRef == null)
+          {
+            result.remoteObjectRef = retVal2.remoteObjectRef;
+          }
+        else if (retVal2.remoteObjectRef == retVal.remoteObjectRef)
+          {
+            // they both agree, who cares
+
+            result.remoteObjectRef = retVal.remoteObjectRef;
+          }
+        else
+          {
+            throw new RuntimeException("Couldn't merge ReturnVals with conflicting remoteObjectRefs.");
+          }
+      }
+
+    return result;
   }
 
   // ---
@@ -1183,5 +1417,38 @@ public class ReturnVal implements java.io.Serializable {
     this.unionRescan(tempRetVal);
 
     return this;
+  }
+
+  /**
+   * This private helper for the static merge() method is used to
+   * determine whether two ReturnVals are trivially identical, in
+   * which case the merge() method will not need to create a new
+   * result object.
+   *
+   * Useful especially in avoiding extra work when merging simple
+   * ReturnVal.success() objects.
+   */
+
+  private boolean isCompatible(ReturnVal retVal)
+  {
+    if ((success != retVal.success) ||
+	(doNormalProcessing != retVal.doNormalProcessing) ||
+	(newObjectInvid != null) || 
+	(newLabel != null) ||
+	(retVal.newObjectInvid != null) ||
+	(retVal.newLabel != null) ||
+	(remoteObjectRef != null) ||
+	(retVal.remoteObjectRef != null) ||
+	(rescanList != null) ||
+	(retVal.rescanList != null) ||
+	(dialog != null) ||
+	(retVal.dialog != null) ||
+	(callback != null) ||
+	(retVal.callback != null))
+      {
+	return false;
+      }
+
+    return true;
   }
 }

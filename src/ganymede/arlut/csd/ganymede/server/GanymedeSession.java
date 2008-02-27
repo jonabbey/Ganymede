@@ -2333,7 +2333,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // if we succeeded, we'll schedule our
     // builder tasks to run
 
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	if (isWizardActive())
 	  {
@@ -4458,16 +4458,13 @@ final public class GanymedeSession implements Session, Unreferenced {
                                           ts.l("create_db_object.custom_class_load_error_text"));
       }
 
-    if (retVal == null)
+    if (!ReturnVal.didSucceed(retVal))
       {
         // "Can''t Create Object"
         // "Can't create new object, the operation was refused"
-        return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-                                          ts.l("create_db_object.operation_refused"));
-      }
-    else if (!retVal.didSucceed())
-      {
-        return retVal;
+        return ReturnVal.merge(Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+                                                          ts.l("create_db_object.operation_refused")),
+                               retVal);
       }
 
     newObj = (DBObject) retVal.getObject();
@@ -4521,7 +4518,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     DBObject vObj;
     DBEditObject newObj;
-    ReturnVal retVal, retVal2;
+    ReturnVal retVal;
     boolean checkpointed = false;
 
     /* -- */
@@ -4536,7 +4533,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     retVal = view_db_object(invid); // get a copy customized for per-field visibility
 
-    if (!retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -4562,31 +4559,27 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         retVal = create_db_object(invid.getType());
     
-        if (!retVal.didSucceed())
+        if (!ReturnVal.didSucceed(retVal))
           {
             return retVal;
           }
 
         newObj = (DBEditObject) retVal.getObject();
 
-        retVal2 = newObj.cloneFromObject(session, vObj, false);
-    
-        if (retVal2 != null && !retVal2.didSucceed())
+        // the merge operation will do the right thing here and
+        // preserve the encoded object and invid in the retVal for our
+        // pass-through to the client, so long as the cloneFromObject
+        // method succeeds.
+
+        retVal = ReturnVal.merge(retVal, newObj.cloneFromObject(session, vObj, false));
+
+        if (ReturnVal.didSucceed(retVal))
           {
-            return retVal2;
-          }
-        else if (retVal2 == null)
-          {
-            retVal2 = new ReturnVal(true, true);
+            session.popCheckpoint(ckp);
+            checkpointed = false;
           }
 
-        retVal2.setInvid(retVal.getInvid());
-        retVal2.setObject(retVal.getObject());
-
-        session.popCheckpoint(ckp);
-        checkpointed = false;
-
-        return retVal2;
+        return retVal;
       }
     finally
       {

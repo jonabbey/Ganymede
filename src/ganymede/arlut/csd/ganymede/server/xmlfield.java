@@ -1082,7 +1082,7 @@ public class xmlfield implements FieldType {
 		  {
 		    result = field.deleteElements(removeValues);
 
-		    if (result != null && !result.didSucceed())
+		    if (!ReturnVal.didSucceed(result))
 		      {
 			return result;
 		      }
@@ -1090,7 +1090,7 @@ public class xmlfield implements FieldType {
 
 		if (newValues.size() > 0)
 		  {
-		    return field.addElements(newValues);
+		    return ReturnVal.merge(result, field.addElements(newValues));
 		  }
 		else
 		  {
@@ -1099,7 +1099,7 @@ public class xmlfield implements FieldType {
 		    // already synchronized the field by deleting
 		    // elements
 
-		    return null;
+		    return ReturnVal.merge(result, null);
 		  }
 	      }
 	    else
@@ -1108,7 +1108,7 @@ public class xmlfield implements FieldType {
 		  {
 		    result = field.addElements(addValues);
 		    
-		    if (result != null && !result.didSucceed())
+		    if (!ReturnVal.didSucceed(result))
 		      {
 			return result;
 		      }
@@ -1122,7 +1122,7 @@ public class xmlfield implements FieldType {
 		      {
 			result = field.addElements(newValues);
 			
-			if (result != null && !result.didSucceed())
+			if (!ReturnVal.didSucceed(result))
 			  {
 			    return result;
 			  }
@@ -1133,7 +1133,7 @@ public class xmlfield implements FieldType {
 		  {
 		    result = field.deleteElements(delValues);
 		    
-		    if (result != null && !result.didSucceed())
+		    if (!ReturnVal.didSucceed(result))
 		      {
 			return result;
 		      }
@@ -1152,24 +1152,20 @@ public class xmlfield implements FieldType {
 
 	    if (xp.plaintext != null)
 	      {
-		result = field.setPlainTextPass(xp.plaintext);
-
 		// setting plaintext will cause the server to generate
 		// all other hashes, so we will just return here
 
-		return result;
+		return field.setPlainTextPass(xp.plaintext);
 	      }
 
 	    // okay, set whatever hashes we were given.. note that if
 	    // we see something like <password/>, with no attributes
 	    // set, we'll wind up clearing the password field entirely
 
-	    result = field.setAllHashes(xp.crypttext, xp.md5text,
-					xp.apachemd5text, xp.lanman,
-					xp.ntmd4, xp.sshatext, xp.shaunixcrypt,
-					false, false);
-
-	    return result;
+	    return field.setAllHashes(xp.crypttext, xp.md5text,
+				      xp.apachemd5text, xp.lanman,
+				      xp.ntmd4, xp.sshatext, xp.shaunixcrypt,
+				      false, false);
 	  }
 	else if (fieldDef.isInvid())
 	  {
@@ -1202,7 +1198,7 @@ public class xmlfield implements FieldType {
 		      {
 			result = field.deleteElements(removeValues);
 			
-			if (result != null && !result.didSucceed())
+			if (!ReturnVal.didSucceed(result))
 			  {
 			    return result;
 			  }
@@ -1210,7 +1206,7 @@ public class xmlfield implements FieldType {
 
 		    if (newValues.size() > 0)
 		      {
-			return field.addElements(newValues);
+			return ReturnVal.merge(result, field.addElements(newValues));
 		      }
 		    else
 		      {
@@ -1219,7 +1215,7 @@ public class xmlfield implements FieldType {
 			// already synchronized the field by deleting
 			// elements
 			
-			return null;
+			return ReturnVal.merge(result, null);
 		      }
 		  }
 		else
@@ -1231,9 +1227,9 @@ public class xmlfield implements FieldType {
 			
 			if (newValues.size() != 0)
 			  {
-			    result = field.addElements(newValues);
+			    result = ReturnVal.merge(result, field.addElements(newValues));
 			    
-			    if (result != null && !result.didSucceed())
+			    if (!ReturnVal.didSucceed(result))
 			      {
 				return result;
 			      }
@@ -1242,9 +1238,9 @@ public class xmlfield implements FieldType {
 		    
 		    if (addValues != null)
 		      {
-			result = field.addElements(getExtantInvids(addValues));
+			result = ReturnVal.merge(result, field.addElements(getExtantInvids(addValues)));
 			
-			if (result != null && !result.didSucceed())
+			if (!ReturnVal.didSucceed(result))
 			  {
 			    return result;
 			  }
@@ -1252,9 +1248,9 @@ public class xmlfield implements FieldType {
 		    
 		    if (delValues != null)
 		      {
-			result = field.deleteElements(getExtantInvids(delValues));
+			result = ReturnVal.merge(result, field.deleteElements(getExtantInvids(delValues)));
 			
-			if (result != null && !result.didSucceed())
+			if (!ReturnVal.didSucceed(result))
 			  {
 			    return result;
 			  }
@@ -1319,9 +1315,9 @@ public class xmlfield implements FieldType {
 			    owner.xSession.err.println("Creating embedded object " + object);
 			  }
 
-			result = field.createNewEmbedded();
+			result = ReturnVal.merge(result, field.createNewEmbedded());
 
-			if (result != null && !result.didSucceed())
+			if (!ReturnVal.didSucceed(result))
 			  {
 			    String msg = result.getDialogText();
 				
@@ -1360,9 +1356,9 @@ public class xmlfield implements FieldType {
 			// any more embedded objects recursively if
 			// need be
 
-			result = object.registerFields(0);
+			result = ReturnVal.merge(result, object.registerFields(0));
 
-			if (result != null && !result.didSucceed())
+			if (!ReturnVal.didSucceed(result))
 			  {
 			    return result;
 			  }
@@ -1385,9 +1381,9 @@ public class xmlfield implements FieldType {
 			    owner.xSession.err.println("Editing embedded object " + object);
 			  }
 
-			result = object.editOnServer(owner.xSession.session);
+			result = ReturnVal.merge(result, object.editOnServer(owner.xSession.session));
 			
-			if (result != null && !result.didSucceed())
+			if (!ReturnVal.didSucceed(result))
 			  {
 			    String msg = result.getDialogText();
 			    
@@ -1414,9 +1410,9 @@ public class xmlfield implements FieldType {
 			// any more embedded objects recursively if
 			// need be
 
-			result = object.registerFields(0);
+			result = ReturnVal.merge(result, object.registerFields(0));
 
-			if (result != null && !result.didSucceed())
+			if (!ReturnVal.didSucceed(result))
 			  {
 			    return result;
 			  }
@@ -1434,9 +1430,9 @@ public class xmlfield implements FieldType {
 		      {
 			Invid invid = (Invid) needToBeRemoved.elementAt(i);
 
-			result = field.deleteElement(invid);
+			result = ReturnVal.merge(result, field.deleteElement(invid));
 
-			if (result != null && !result.didSucceed())
+			if (!ReturnVal.didSucceed(result))
 			  {
 			    String msg = result.getDialogText();
 			    
@@ -1450,8 +1446,12 @@ public class xmlfield implements FieldType {
 				owner.xSession.err.println("Error deleting previous embedded " + invid +
 						   ", no reason given.");
 			      }
+
+			    return result;
 			  }
 		      }
+
+		    return result;
 		  }
 	      }
 	  }
@@ -1473,9 +1473,9 @@ public class xmlfield implements FieldType {
 
 		    short baseId = owner.xSession.getTypeNum(option.getName());
 
-		    result = field.setOption(baseId, option.getOption());
+		    result = ReturnVal.merge(result, field.setOption(baseId, option.getOption()));
 
-		    if (result != null && !result.didSucceed())
+		    if (!ReturnVal.didSucceed(result))
 		      {
 			return result;
 		      }
@@ -1507,9 +1507,12 @@ public class xmlfield implements FieldType {
 				return new ReturnVal(false);
 			      }
 
-			    result = field.setOption(baseId, optionFieldDef.getID(), fieldOption.getOption());
-
-			    if (result != null && !result.didSucceed())
+			    result = ReturnVal.merge(result,
+						     field.setOption(baseId,
+								     optionFieldDef.getID(),
+								     fieldOption.getOption()));
+						     
+			    if (!ReturnVal.didSucceed(result))
 			      {
 				return result;
 			      }
@@ -1540,7 +1543,7 @@ public class xmlfield implements FieldType {
 
 		    result = field.setPerm(baseId, perm.getPermEntry());
 
-		    if (result != null && !result.didSucceed())
+		    if (!ReturnVal.didSucceed(result))
 		      {
 			return result;
 		      }
@@ -1574,7 +1577,7 @@ public class xmlfield implements FieldType {
 
 			    result = field.setPerm(baseId, permFieldDef.getID(), fieldPerm.getPermEntry());
 
-			    if (result != null && !result.didSucceed())
+			    if (!ReturnVal.didSucceed(result))
 			      {
 				return result;
 			      }

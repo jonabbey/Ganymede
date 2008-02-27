@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -334,7 +334,7 @@ class stopServerAdmin {
       {
 	retVal = server.admin(name, pass);
 
-	if (retVal.didSucceed())
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    aSession = retVal.getAdminSession();
 	  }

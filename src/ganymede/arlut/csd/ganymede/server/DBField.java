@@ -629,7 +629,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
 		    ReturnVal retVal = this.verifyBasicConstraints(element);
 
-		    if (retVal != null && !retVal.didSucceed())
+		    if (!ReturnVal.didSucceed(retVal))
 		      {
 			return retVal;
 		      }
@@ -1280,7 +1280,6 @@ public abstract class DBField implements Remote, db_field, FieldType {
   public synchronized ReturnVal setValue(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -1300,7 +1299,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
     if (this.value == submittedValue || (this.value != null && this.value.equals(submittedValue)))
       {
-	return retVal;		// no change (useful for null)
+	return null;		// no change (useful for null)
       }
 
     if (submittedValue instanceof String)
@@ -1332,7 +1331,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
       {
 	// Wizard check
 	
-	newRetVal = eObj.wizardHook(this, DBEditObject.SETVAL, submittedValue, null);
+	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.SETVAL, submittedValue, null));
 
 	// if a wizard intercedes, we are going to let it take the
 	// ball.  we'll lose any transformation/rescan from the
@@ -1340,22 +1339,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	// is taking over means that we're not directly accepting
 	// whatever the user gave us, anyway.
 
-	if (!ReturnVal.isDoNormalProcessing(newRetVal))
+	if (ReturnVal.wizardHandled(retVal))
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
-
-        if (newRetVal != null)
-          {
-            if (retVal != null)
-              {
-                retVal.unionRescan(newRetVal);
-              }
-            else
-              {
-                retVal = newRetVal;
-              }
-          }
       }
 
     // check to see if we can do the namespace manipulations implied by this
@@ -1388,25 +1375,11 @@ public abstract class DBField implements Remote, db_field, FieldType {
     // be the last thing we do.. if it returns true, nothing
     // should stop us from running the change to completion
 
-    newRetVal = eObj.finalizeSetValue(this, submittedValue);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, submittedValue));
 
-    if (ReturnVal.didSucceed(newRetVal))
+    if (ReturnVal.didSucceed(retVal))
       {
 	this.value = submittedValue;
-
-	// if the return value from the wizard was not null,
-	// it might have included rescan information, which
-	// we'll want to combine with that from our 
-	// finalizeSetValue() call.
-
-	if (retVal != null)
-	  {
-	    return retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    return newRetVal;		// success
-	  }
       }
     else
       {
@@ -1419,11 +1392,11 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	    unmark(submittedValue);
 	    mark(this.value);
 	  }
-
-	// go ahead and return the dialog that was set by finalizeSetValue().
-
-	return newRetVal;
       }
+
+    // go ahead and return the dialog that was set by finalizeSetValue().
+    
+    return retVal;
   }
 
   /** 
@@ -1663,7 +1636,6 @@ public abstract class DBField implements Remote, db_field, FieldType {
   public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -1700,7 +1672,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
     retVal = verifyNewValue(submittedValue);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
@@ -1720,7 +1692,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
       {
 	// Wizard check
 
-	newRetVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), submittedValue);
+	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                         DBEditObject.SETELEMENT,
+                                                         new Integer(index),
+                                                         submittedValue));
 
 	// if a wizard intercedes, we are going to let it take the
 	// ball.  we'll lose any transformation/rescan from the
@@ -1728,21 +1703,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	// is taking over means that we're not directly accepting
 	// whatever the user gave us, anyway.
 
-	if (!ReturnVal.isDoNormalProcessing(newRetVal))
+	if (ReturnVal.wizardHandled(retVal))
 	  {
-	    return newRetVal;
-	  }
-
-	if (newRetVal != null)
-	  {
-            if (retVal != null)
-              {
-                retVal.unionRescan(newRetVal);
-              }
-            else
-              {
-                retVal = newRetVal;
-              }
+	    return retVal;
 	  }
       }
 
@@ -1767,25 +1730,11 @@ public abstract class DBField implements Remote, db_field, FieldType {
     // thing we do.. if it returns true, nothing should stop us from
     // running the change to completion
 
-    newRetVal = eObj.finalizeSetElement(this, index, submittedValue);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeSetElement(this, index, submittedValue));
 
-    if (newRetVal == null || newRetVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	values.setElementAt(submittedValue, index);
-
-	// if the return value from the wizard was not null,
-	// it might have included rescan information, which
-	// we'll want to combine with that from our 
-	// finalizeSetElement() call.
-
-	if (retVal != null)
-	  {
-	    return retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    return newRetVal;		// success
-	  }
       }
     else
       {
@@ -1808,11 +1757,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
 	    mark(values.elementAt(index));
 	  }
-
-	// return the error dialog from finalizeSetElement().
-
-	return newRetVal;
       }
+
+    return retVal;
   }
 
   /**
@@ -1924,7 +1871,6 @@ public abstract class DBField implements Remote, db_field, FieldType {
   public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
 
@@ -1968,14 +1914,14 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
     retVal = verifyNewValue(submittedValue);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
 
     /* check to see if verifyNewValue canonicalized the submittedValue */
 
-    if (retVal != null && retVal.hasTransformedValue())
+    if (ReturnVal.hasTransformedValue(retVal))
       {
 	submittedValue = retVal.getTransformedValueObject();
       }
@@ -1992,7 +1938,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
       {
 	// Wizard check
 
-	newRetVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, submittedValue, null);
+	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                         DBEditObject.ADDELEMENT,
+                                                         submittedValue,
+                                                         null));
 
 	// if a wizard intercedes, we are going to let it take the
 	// ball.  we'll lose any transformation/rescan from the
@@ -2000,22 +1949,10 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	// is taking over means that we're not directly accepting
 	// whatever the user gave us, anyway.
 
-	if (newRetVal != null && !newRetVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
-
-        if (newRetVal != null)
-          {
-            if (retVal != null)
-              {
-                retVal.unionRescan(newRetVal);
-              }
-            else
-              {
-                retVal = newRetVal;
-              }
-          }
       }
 
     ns = getNameSpace();
@@ -2028,25 +1965,11 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	  }
       }
 
-    newRetVal = eObj.finalizeAddElement(this, submittedValue);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeAddElement(this, submittedValue));
 
-    if (newRetVal == null || newRetVal.didSucceed()) 
+    if (ReturnVal.didSucceed(retVal))
       {
 	getVectVal().addElement(submittedValue);
-
-	// if the return value from the wizard was not null,
-	// it might have included rescan information, which
-	// we'll want to combine with that from our 
-	// finalizeAddElement() call.
-
-	if (retVal != null)
-	  {
-	    return retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    return newRetVal;		// success
-	  }
       } 
     else
       {
@@ -2061,11 +1984,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
 		unmark(submittedValue);	// *sync* DBNameSpace
 	      }
 	  }
-
-	// return the error dialog created by finalizeAddElement
-
-	return newRetVal;
       }
+
+    return retVal;
   }
 
   /**
@@ -2275,7 +2196,6 @@ public abstract class DBField implements Remote, db_field, FieldType {
 					    boolean noWizards, boolean copyFieldMode) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
     DBEditSet editset;
@@ -2365,7 +2285,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	    transformed = true;
 	  }
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    if (!copyFieldMode)
 	      {
@@ -2410,7 +2330,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -2446,9 +2366,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
     // okay, see if the DBEditObject is willing to allow all of these
     // elements to be added
 
-    newRetVal = eObj.finalizeAddElements(this, approvedValues);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeAddElements(this, approvedValues));
 
-    if (newRetVal == null || newRetVal.didSucceed()) 
+    if (ReturnVal.didSucceed(retVal))
       {
 	// okay, we're allowed to do it, so we add them all
 
@@ -2457,19 +2377,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	    getVectVal().addElement(approvedValues.elementAt(i));
 	  }
 
-	// if the return value from the wizard was not null,
-	// it might have included rescan information, which
-	// we'll want to combine with that from our 
-	// finalizeAddElement() call.
-
-	if (retVal != null)
+	if (retVal == null)
 	  {
-	    newRetVal = retVal.unionRescan(newRetVal);
-	  }
-
-	if (newRetVal == null)
-	  {
-	    newRetVal = new ReturnVal(true, true);
+            retVal = ReturnVal.success();
 	  }
 
 	// if we were not able to copy some of the values (and we
@@ -2479,7 +2389,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	if (errorBuf.length() != 0)
 	  {
 	    // "Warning"
-	    newRetVal.setDialog(new JDialogBuff(ts.l("addElements.warning"),
+	    retVal.setDialog(new JDialogBuff(ts.l("addElements.warning"),
 						errorBuf.toString(),
 						Ganymede.OK, // localized
 						null,
@@ -2493,10 +2403,8 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	    // know it will need to ask us for the final state of the
 	    // field.
 
-	    newRetVal.requestRefresh(owner.getInvid(), this.getID());
+	    retVal.requestRefresh(owner.getInvid(), this.getID());
 	  }
-
-	return newRetVal;
       } 
     else
       {
@@ -2532,11 +2440,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
 		  }
 	      }
 	  }
-
-	// return the error dialog created by finalizeAddElements
-
-	return newRetVal;
       }
+
+    return retVal;
   }
 
   /**
@@ -2619,7 +2525,6 @@ public abstract class DBField implements Remote, db_field, FieldType {
   public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
     DBEditObject eObj;
 
     /* -- */
@@ -2654,15 +2559,15 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
       }
 
-    newRetVal = eObj.finalizeDeleteElement(this, index);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElement(this, index));
 
-    if (newRetVal == null || newRetVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	Object valueToDelete = values.elementAt(index);
 	values.removeElementAt(index);
@@ -2675,25 +2580,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	  {
 	    unmark(valueToDelete);
 	  }
-
-	// if the return value from the wizard was not null,
-	// it might have included rescan information, which
-	// we'll want to combine with that from our 
-	// finalizeDeleteElement() call.
-
-	if (retVal != null)
-	  {
-	    return retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    return newRetVal;		// success
-	  }
       }
-    else
-      {
-	return newRetVal;
-      }
+
+    return retVal;    
   }
 
   /**
@@ -2932,7 +2821,6 @@ public abstract class DBField implements Remote, db_field, FieldType {
   public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
     DBNameSpace ns;
     DBEditObject eObj;
     DBEditSet editset;
@@ -2996,7 +2884,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -3005,9 +2893,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
     // okay, see if the DBEditObject is willing to allow all of these
     // elements to be removed
 
-    newRetVal = eObj.finalizeDeleteElements(this, valuesToDelete);
+    retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
 
-    if (newRetVal == null || newRetVal.didSucceed()) 
+    if (ReturnVal.didSucceed(retVal))
       {
 	// okay, we're allowed to remove, so take the items out
 
@@ -3057,20 +2945,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
 		  }
 	      }
 	  }
-
-	if (retVal != null)
-	  {
-	    return retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    return newRetVal;		// success
-	  }
-      } 
-    else
-      {
-	return newRetVal;
       }
+
+    return retVal;
   }
 
   /**
@@ -3749,14 +3626,14 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public final ReturnVal rescanThisField(ReturnVal original)
   {
-    if (original != null && !original.didSucceed())
+    if (!ReturnVal.didSucceed(original))
       {
         return original;
       }
 
     if (original == null)
       {
-	original = new ReturnVal(true);
+	original = ReturnVal.success();
       }
 
     if (this.getID() == owner.getLabelFieldID())

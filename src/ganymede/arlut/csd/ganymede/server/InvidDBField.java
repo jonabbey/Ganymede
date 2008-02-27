@@ -1074,8 +1074,7 @@ public final class InvidDBField extends DBField implements invid_field {
       anonymous2 = false;
 
     ReturnVal 
-      retVal = null,
-      newRetVal;
+      retVal = null;
 
     DBObject remobj = null;
 
@@ -1511,9 +1510,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
       }
     
-    newRetVal = newRefField.establish(owner, (anonymous2||local));
+    retVal = ReturnVal.merge(retVal, newRefField.establish(owner, (anonymous2||local)));
 
-    if (!ReturnVal.didSucceed(newRetVal))
+    if (!ReturnVal.didSucceed(retVal))
       {
 	// oops!  try to undo what we did.. this probably isn't critical
 	// because something above us will do a rollback, but it's polite.
@@ -1523,32 +1522,22 @@ public final class InvidDBField extends DBField implements invid_field {
 	    oldRefField.establish(owner, (anonymous||local)); // hope this works
 	  }
 	
-	return newRetVal;
-      }
-
-    if (retVal != null)
-      {
-	retVal.unionRescan(newRetVal);
-      }
-    else
-      {
-	retVal = newRetVal;
+	return retVal;
       }
 
     // tell the client that it needs to rescan both the old and new
     // remote ends of this binding
 
-    newRetVal = new ReturnVal(true, true);
+    retVal = ReturnVal.merge(retVal, ReturnVal.success());  // force non-null ReturnVal
 
     if (oldRemote != null)
       {
-	newRetVal.addRescanField(oldRemote, targetField);
+	retVal.addRescanField(oldRemote, targetField);
       }
 
-    newRetVal.addRescanField(newRemote, targetField);
-    newRetVal.unionRescan(retVal);
+    retVal.addRescanField(newRemote, targetField);
 
-    return newRetVal;		// success
+    return retVal;		// success
   }
 
   /**
@@ -2067,39 +2056,30 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 	  }
 
-	ReturnVal newRetVal = eObj.finalizeSetValue(this, newInvid);
+	retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, newInvid));
 
-	if (ReturnVal.didSucceed(newRetVal))
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    value = newInvid;
 	    qr = null;
 
-	    if (retVal != null)
-	      {
-		return retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
-		return newRetVal;
-	      }
+            return retVal;
 	  }
 	else
 	  {
-	    retVal = bind(null, tmp, local); // bind back to the original target, should always work
-
-	    if (!ReturnVal.didSucceed(retVal))
+	    if (!ReturnVal.didSucceed(bind(null, tmp, local))) // bind back to the original target, should always work
 	      {
 		throw new RuntimeException("couldn't rebind a value " + tmp + " we just unbound.. sync error");
 	      }
 
-	    if (newRetVal.getDialog() != null)
+	    if (retVal.getDialog() != null)
 	      {
 		// "InvidDBField.establish(): finalizeSetValue refused"
 		// "Couldn''t establish a new linkage in field {0} in object {1} because the custom plug in code 
 		// for this object refused to approve the operation:\n\n{2}"
 		return Ganymede.createErrorDialog(ts.l("establish.no_set_sub"),
 						  ts.l("establish.no_set_text",
-						       getName(), getOwner().getLabel(), newRetVal.getDialog().getText()));
+						       getName(), getOwner().getLabel(), retVal.getDialog().getText()));
 	      }
 	    else
 	      {
@@ -2426,7 +2406,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
-    ReturnVal retVal = null, newRetVal;
+    ReturnVal retVal = null;
     String checkkey = null;
     boolean checkpointed = false;
 
@@ -2474,11 +2454,11 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 	
-	retVal = eObj.wizardHook(this, DBEditObject.SETVAL, value, null);
+	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.SETVAL, value, null));
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -2496,48 +2476,25 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (newRemote != null)
 	  {
-	    newRetVal = bind(oldRemote, newRemote, local);
-	    
-	    if (!ReturnVal.didSucceed(newRetVal))
-	      {
-		return newRetVal;
-	      }
-	    
-	    if (retVal != null)
-	      {
-		retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
-		retVal = newRetVal;
-	      }
+	    retVal = ReturnVal.merge(retVal, bind(oldRemote, newRemote, local));
 	  }
 	else if (oldRemote != null)
 	  {
-	    newRetVal = unbind(oldRemote, local);
-	    
-	    if (!ReturnVal.didSucceed(newRetVal))
-	      {
-		return newRetVal;
-	      }
-	    
-	    if (retVal != null)
-	      {
-		retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
-		retVal = newRetVal;
-	      }
-	  }
+            retVal = ReturnVal.merge(retVal, unbind(oldRemote, local));
+          }
+
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;
+          }
 
 	// check our owner, do it.  Checking our owner should
 	// be the last thing we do.. if it returns true, nothing
 	// should stop us from running the change to completion
 	
-	newRetVal = eObj.finalizeSetValue(this, value);
+	retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, value));
 	
-	if (ReturnVal.didSucceed(newRetVal))
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    this.value = value;
 	    qr = null;
@@ -2546,20 +2503,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    eObj.getSession().popCheckpoint(checkkey);
 	    checkpointed = false;
-	    
-	    if (retVal != null)
-	      {
-		return retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
-		return newRetVal;
-	      }
-	  }
-	else
-	  {
-	    return newRetVal;
-	  }
+          }
+
+        return retVal;
       }
     finally
       {
@@ -2604,7 +2550,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
-    ReturnVal retVal = null, newRetVal;
+    ReturnVal retVal = null;
     String checkkey = null;
     boolean checkpointed = false;
 
@@ -2666,11 +2612,14 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETELEMENT, new Integer(index), submittedValue);
+	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                         DBEditObject.SETELEMENT,
+                                                         new Integer(index),
+                                                         submittedValue));
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -2689,29 +2638,20 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// try to do the binding
 
-	newRetVal = bind(oldRemote, newRemote, local);
+	retVal = ReturnVal.merge(retVal, bind(oldRemote, newRemote, local));
 	
-	if (!ReturnVal.didSucceed(newRetVal))
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    return newRetVal;
-	  }
-	
-	if (retVal != null)
-	  {
-	    retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    retVal = newRetVal;
+	    return retVal;
 	  }
 	
 	// check our owner, do it.  Checking our owner should
 	// be the last thing we do.. if it returns true, nothing
 	// should stop us from running the change to completion
 	
-	newRetVal = eObj.finalizeSetElement(this, index, submittedValue);
+	retVal = ReturnVal.merge(retVal, eObj.finalizeSetElement(this, index, submittedValue));
 	
-	if (ReturnVal.didSucceed(newRetVal))
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    values.setElementAt(submittedValue, index);
 	    qr = null;
@@ -2720,20 +2660,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	    
 	    eObj.getSession().popCheckpoint(checkkey);
 	    checkpointed = false;
-	    
-	    if (retVal != null)
-	      {
-		return retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
-		return newRetVal;
-	      }
 	  }
-	else
-	  {
-	    return newRetVal;
-	  }
+
+        return retVal;
       }
     finally
       {
@@ -2774,7 +2703,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBEditObject eObj;
     Invid remote;
-    ReturnVal retVal = null, newRetVal;
+    ReturnVal retVal = null;
     String checkkey = null;
     boolean checkpointed = false;
 
@@ -2829,11 +2758,14 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENT, submittedValue, null);
+	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                         DBEditObject.ADDELEMENT,
+                                                         submittedValue,
+                                                         null));
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -2843,11 +2775,11 @@ public final class InvidDBField extends DBField implements invid_field {
     // reference that we can't safely link to without breaking a
     // symmetric relationship.
 
-    newRetVal = checkBindConflict(remote);
+    retVal = ReturnVal.merge(retVal, checkBindConflict(remote));
 
-    if (newRetVal != null)
+    if (!ReturnVal.didSucceed(retVal))
       {
-	return newRetVal;
+	return retVal;
       }
 
     checkkey = RandomUtils.getSaltedString("addElement[" + getName() + ":" + owner.getLabel() + "]");
@@ -2858,25 +2790,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-	newRetVal = bind(null, remote, local);
+	retVal = ReturnVal.merge(retVal, bind(null, remote, local));
 
-	if (!ReturnVal.didSucceed(newRetVal))
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    return newRetVal;
+	    return retVal;
 	  }
 
-	if (retVal != null)
-	  {
-	    retVal.unionRescan(newRetVal);
-	  }
-	else
-	  {
-	    retVal = newRetVal;
-	  }
+	retVal = ReturnVal.merge(retVal, eObj.finalizeAddElement(this, submittedValue));
 
-	newRetVal = eObj.finalizeAddElement(this, submittedValue);
-
-	if (ReturnVal.didSucceed(newRetVal))
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    values.addElement(submittedValue);
 	    qr = null;
@@ -2885,20 +2808,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    eObj.getSession().popCheckpoint(checkkey);
 	    checkpointed = false;
-
-	    if (retVal != null)
-	      {
-		return retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
-		return newRetVal;
-	      }
 	  } 
-	else
-	  {
-	    return newRetVal;
-	  }
+
+        return retVal;
       }
     finally
       {
@@ -2951,7 +2863,6 @@ public final class InvidDBField extends DBField implements invid_field {
     boolean success = false;
     String checkkey = null;
     ReturnVal retVal = null;
-    ReturnVal newRetVal = null;
     DBEditObject eObj;
     Vector values;
     Vector approvedValues = new Vector();
@@ -3075,7 +2986,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	// if a wizard intercedes, we are going to let it take the ball.
 
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -3091,9 +3002,9 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	Invid remote = (Invid) approvedValues.elementAt(i);
 
-	newRetVal = checkBindConflict(remote);
+	ReturnVal newRetVal = checkBindConflict(remote);
 
-	if (newRetVal != null)
+	if (!ReturnVal.didSucceed(newRetVal))
 	  {
 	    if (!partialSuccessOk)
 	      {
@@ -3157,7 +3068,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    Invid remote = (Invid) approvedValues.elementAt(i);
 
-	    newRetVal = bind(null, remote, local); // bind us to the target field
+	    ReturnVal newRetVal = bind(null, remote, local); // bind us to the target field
 
 	    if (!ReturnVal.didSucceed(newRetVal))
 	      {
@@ -3188,15 +3099,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	    else
 	      {
 		any_success = true;
-	      }
-
-	    if (retVal != null)
-	      {
-		retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
-		retVal = newRetVal;
 	      }
 	  }
 	
@@ -3231,7 +3133,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    for (int i = 0; i < approvedValues.size(); i++)
 	      {
-		newRetVal = eObj.finalizeAddElement(this, approvedValues.elementAt(i));
+		ReturnVal newRetVal = eObj.finalizeAddElement(this, approvedValues.elementAt(i));
 
 		if (ReturnVal.didSucceed(newRetVal))
 		  {
@@ -3261,9 +3163,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
-	    newRetVal = eObj.finalizeAddElements(this, approvedValues);
+	    retVal = ReturnVal.merge(retVal, eObj.finalizeAddElements(this, approvedValues));
 
-	    if (ReturnVal.didSucceed(newRetVal))
+	    if (ReturnVal.didSucceed(retVal))
 	      {
 		if (debug)
 		  {
@@ -3277,27 +3179,12 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 	    else
 	      {
-		return newRetVal;
+		return retVal;
 	      }
 	  }
 
 	qr = null;
 	success = true;
-
-	// if retVal is not null, we may have some rescan
-	// information from our previous activity which we'll want
-	// to return, otherwise we'll want to return the results
-	// from newRetVal.
-	
-	if (retVal != null)
-	  {
-	    newRetVal = retVal.unionRescan(newRetVal);
-	  }
-
-	if (newRetVal == null)
-	  {
-	    newRetVal = new ReturnVal(true, true);
-	  }
 
 	// if we were not able to copy some of the values (and we
 	// therefore have partialSuccessOk set), encode a description
@@ -3305,14 +3192,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (errorBuf.length() != 0)
 	  {
-	    newRetVal.setDialog(new JDialogBuff("Warning",
-						errorBuf.toString(),
-						Ganymede.OK, // localized ok
-						null,
-						"ok.gif"));
+            retVal = ReturnVal.merge(retVal, ReturnVal.success()); // force non-null retVal
+
+	    retVal.setDialog(new JDialogBuff("Warning",
+                                             errorBuf.toString(),
+                                             Ganymede.OK, // localized ok
+                                             null,
+                                             "ok.gif"));
 	  }
 	
-	return newRetVal;
+	return retVal;
       }
     finally
       {
@@ -3388,10 +3277,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public synchronized ReturnVal createNewEmbedded(boolean local) throws NotLoggedInException, GanyPermissionsException
   {
-    ReturnVal retVal = null;
-
-    /* -- */
-
     if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
@@ -3431,9 +3316,9 @@ public final class InvidDBField extends DBField implements invid_field {
         // have our owner create a new embedded object
         // for us 
 
-        retVal = eObj.createNewEmbeddedObject(this);
+        ReturnVal retVal = eObj.createNewEmbeddedObject(this);
 
-        if (!retVal.didSucceed())
+        if (!ReturnVal.didSucceed(retVal))
           {
             return retVal;
           }
@@ -3497,7 +3382,7 @@ public final class InvidDBField extends DBField implements invid_field {
             // in general, wizardHooks probably shouldn't try to take over
             // this processing.
             
-            if (retVal != null && !retVal.doNormalProcessing)
+            if (ReturnVal.wizardHandled(retVal))
               {
                 session.popCheckpoint(ckp_label);
                 checkpointed = false;
@@ -3506,11 +3391,11 @@ public final class InvidDBField extends DBField implements invid_field {
               }
           }
 
-        ReturnVal newRetVal = eObj.finalizeAddElement(this, embeddedObj.getInvid());
+        retVal = ReturnVal.merge(retVal, eObj.finalizeAddElement(this, embeddedObj.getInvid()));
 
-        if (!ReturnVal.didSucceed(newRetVal))
+        if (!ReturnVal.didSucceed(retVal))
           {
-            return newRetVal;
+            return retVal;
           }
 
         values.addElement(embeddedObj.getInvid());  // do a live modification of this field's invid vector
@@ -3520,7 +3405,7 @@ public final class InvidDBField extends DBField implements invid_field {
         // defer that activity for embedded objects until after we
         // get the embedded object linked to the parent
 
-        retVal = embeddedObj.initializeNewObject();
+        retVal = ReturnVal.merge(retVal, embeddedObj.initializeNewObject());
 
         if (!ReturnVal.didSucceed(retVal))
           {
@@ -3532,15 +3417,12 @@ public final class InvidDBField extends DBField implements invid_field {
         session.popCheckpoint(ckp_label);
         checkpointed = false;
 
-        if (retVal == null)
-          {
-            retVal = new ReturnVal(true);
-          }
+        retVal = ReturnVal.merge(retVal, ReturnVal.success());  // force non-null ReturnVal
 
         retVal.setInvid(embeddedObj.getInvid());
         retVal.setObject(embeddedObj);
 	    
-        return retVal.unionRescan(newRetVal);
+        return retVal;
       }
     finally
       {
@@ -3651,7 +3533,7 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     DBEditObject eObj;
     Invid remote;
-    ReturnVal retVal = null, newRetVal;
+    ReturnVal retVal = null;
     String checkkey = null;
     boolean checkpointed = false;
 
@@ -3684,7 +3566,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -3718,62 +3600,35 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (!getFieldDef().isEditInPlace())
 	  {
-	    newRetVal = unbind(remote, local);
+	    retVal = ReturnVal.merge(retVal, unbind(remote, local));
 
-	    if (!ReturnVal.didSucceed(newRetVal))
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
-		return newRetVal;
-	      }
-
-	    if (retVal != null)
-	      {
-		retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
-		retVal = newRetVal;
+		return retVal;
 	      }
 	  }
 
 	// finalizeDeleteElement() just gives the DBEditObject a chance to
 	// approve or disapprove deleting an element from this field
     
-	newRetVal = eObj.finalizeDeleteElement(this, index);
+	retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElement(this, index));
 
-	if (ReturnVal.didSucceed(newRetVal))
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    values.removeElementAt(index);
 
 	    qr = null;	// Clear the cache to force the choices to be read again
-
-	    if (retVal != null)
-	      {
-		retVal.unionRescan(newRetVal);
-	      }
-	    else
-	      {
-		retVal = newRetVal;
-	      }
 
 	    // if we are an editInPlace field, unlinking this object means
 	    // that we should go ahead and delete the object.
 
 	    if (getFieldDef().isEditInPlace())
 	      {
-		newRetVal = eObj.getSession().deleteDBObject(remote);
+		retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
 
-		if (!ReturnVal.didSucceed(newRetVal))
+		if (!ReturnVal.didSucceed(retVal))
 		  {
-		    return newRetVal;	// go ahead and return our error code
-		  }
-
-		if (retVal != null)
-		  {
-		    retVal.unionRescan(newRetVal);
-		  }
-		else
-		  {
-		    retVal = newRetVal;
+		    return retVal;	// go ahead and return our error code
 		  }
 	      }
 
@@ -3786,13 +3641,13 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
-	    if (newRetVal.getDialog() != null)
+	    if (retVal.getDialog() != null)
 	      {
 		// "InvidDBField.deleteElement() - custom code rejected element deletion"
 		// "Custom code refused deletion of element {0} from field {1} in object {2}.\n\n{3}"
 		return Ganymede.createErrorDialog(ts.l("deleteElement.rejected"),
 						  ts.l("deleteElement.no_finalize", Integer.toString(index), 
-						       getName(), owner.getLabel(), newRetVal.getDialog().getText()));
+						       getName(), owner.getLabel(), retVal.getDialog().getText()));
 	      }
 	    else
 	      {
@@ -3833,7 +3688,7 @@ public final class InvidDBField extends DBField implements invid_field {
   public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
-    ReturnVal retVal = null, newRetVal;
+    ReturnVal retVal = null;
     boolean success = false;
     String checkkey = null;
     Vector currentValues;
@@ -3883,7 +3738,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	
-	if (retVal != null && !retVal.doNormalProcessing)
+	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
 	  }
@@ -3923,29 +3778,20 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		Invid remote = (Invid) valuesToDelete.elementAt(i);
 
-		newRetVal = unbind(remote, local);
+		retVal = ReturnVal.merge(retVal, unbind(remote, local));
 
-		if (!ReturnVal.didSucceed(newRetVal))
+		if (!ReturnVal.didSucceed(retVal))
 		  {
-		    return newRetVal; // abort.  the finally clause will uncheckpoint
-		  }
-
-		if (retVal != null)
-		  {
-		    retVal.unionRescan(newRetVal);
-		  }
-		else
-		  {
-		    retVal = newRetVal;
+		    return retVal; // abort.  the finally clause will uncheckpoint
 		  }
 	      }
 
 	    // check to make sure our container is okay with us deleting
 	    // all of these values
 
-	    newRetVal = eObj.finalizeDeleteElements(this, valuesToDelete);
+	    retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
 
-	    if (ReturnVal.didSucceed(newRetVal))
+	    if (ReturnVal.didSucceed(retVal))
 	      {
 		// our container is okay, go ahead and remove
 
@@ -3956,25 +3802,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		qr = null;
 		success = true;
-
-		// if retVal is not null, we may have some rescan
-		// information from our previous activity which we'll want
-		// to return, otherwise we'll want to return the results
-		// from newRetVal.
-
-		if (retVal != null)
-		  {
-		    return retVal.unionRescan(newRetVal);
-		  }
-		else
-		  {
-		    return newRetVal;
-		  }
 	      }
-	    else
-	      {
-		return newRetVal;
-	      }
+
+            return retVal;
 	  }
 	finally
 	  {
@@ -4007,20 +3837,11 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    Invid remote = (Invid) valuesToDelete.elementAt(i);
 
-		    newRetVal = eObj.getSession().deleteDBObject(remote);
+		    retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
 
-		    if (!ReturnVal.didSucceed(newRetVal))
+		    if (!ReturnVal.didSucceed(retVal))
 		      {
-			return newRetVal;
-		      }
-
-		    if (retVal != null)
-		      {
-			retVal.unionRescan(newRetVal);
-		      }
-		    else
-		      {
-			retVal = newRetVal;
+			return retVal;
 		      }
 		  }
 
