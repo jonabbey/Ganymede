@@ -2536,6 +2536,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 						   true,   // canChoose
 						   false);  // mustChoose
 	    ss.setCellWidth(available != null ? 150 : 300);
+            ss.setMinimumRowCount(3);
+            ss.setMaximumRowCount(8);
 	    ss.update(available, true, null, (Vector) fieldInfo.getValue(), true, null);
 
 	    objectHash.put(ss, field);
@@ -2562,6 +2564,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 					       false,   // canChoose
 					       false);  // mustChoose
 	ss.setCellWidth(300);
+        ss.setMinimumRowCount(3);
+        ss.setMaximumRowCount(8);
+
 	ss.update(null, false, null, (Vector) fieldInfo.getValue(), true, null);
 
 	objectHash.put(ss, field);
