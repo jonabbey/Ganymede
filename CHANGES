@@ -1218,7 +1218,12 @@ objects of that type.
 79. [EVERYTHING] ReturnVal amended for ease of use
 
 The ReturnVal class has been altered to provide greater programmatic
-ease of use.  Most setter methods on ReturnVal now return 'this'
+ease of use, and to simplify internal logic in the Ganymede server.
+
+Most adopters of Ganymede will not need to concern themselves about
+the changes made to ReturnVal, save for the following:
+
+Most setter methods on ReturnVal now return 'this'
 rather than void, allowing Smalltalk-style method chaining..
 
 e.g., you can now do things like
@@ -1233,14 +1238,17 @@ when you want to modify and return a ReturnVal object, rather than
   retVal.addRescanField(objId, field.getID());
   return retVal;
 
-Of course, the Ganymede system still maintains the convention that
-methods can return a null ReturnVal to indicate generic success, so
-that must be checked for before chaining calls to the end of
-ReturnVal's returned from Ganymede data changing methods in this way.
+Because the setter methods on ReturnVal now return a ReturnVal object,
+rather than void, plug-in code that was previously compiled against
+the Ganymede libraries will need to be recompiled in order to be
+compatible with this change.  Otherwise, a 'NoSuchMethodException' may
+be thrown at run time when plug-in code is called which was compiled
+with versions of Ganymede prioer to Subversion repository version
+7845.
 
-Along those lines, the ReturnVal class has three new static methods
-which perform the proper null check as part of their operation,
-reducing the necessity for the constant
+For convenience's sake, the ReturnVal class has three new static
+methods which perform the proper null check as part of their
+operation, reducing the necessity for the constant
 
   if (retVal == null || retVal.didSucceed())
 
@@ -1254,18 +1262,48 @@ The three new static methods on ReturnVal are
 
   static public boolean didSucceed(ReturnVal retVal);
   static public boolean hasTransformedValue(ReturnVal retVal);
-  static public boolean isDoNormalProcessing(ReturnVal retVal);
+  static public boolean isDoNormalProcessing(ReturnVal retVal)
 
-Note that because I have changed the signatures of most of the
-ReturnVal setter methods (to return 'this' rather than to be void),
-you'll need to recompile any custom schema code you've got if you
-upgrade the Ganymede server to Subversion repository version 7845 or
-later.
+The biggest change to ReturnVal which assists in the internal logic of
+the Ganymede server is the addition of the static ReturnVal.merge()
+method, which can be used to intelligently combine the results from
+multiple ReturnVal-returning operations, preserving and/or combining
+the important bits of each as processing continues.  The Ganymede
+server has been converted to use this throughout, and benefits from
+simplified and more regular processing logic in the DBField subclasses.
 
-Honestly, I wish I had never decided to go for the idiom of 'null'
-ReturnVal objects indicating success.  That was always a very C-like
-pattern, and having to test for null everywhere complicates everything
-unnecessarily.  Bleah.
+Note that in conjunction with this new merge logic, the single
+parameter ReturnVal constructor behaves a bit differently than it did
+previously.
+
+Before, a ReturnVal object created by calling
+
+  result = new ReturnVal(true);
+
+would create a ReturnVal for which result.success is true, and for
+which the doNormalProcessing propery is _false_.
+
+Now, either of the following
+
+ result = new ReturnVal(true);
+
+-
+
+ result = ReturnVal.success();
+
+result in a ReturnVal that has both success and doNormalProcessing set
+to true, and
+
+ result = new ReturnVal(false);
+
+results in a ReturnVal that has success and doNormalProcessing set to
+false.
+
+This change will generally only affect you if you have written custom
+wizard code, but as the semantics of the single parameter ReturnVal
+constructor are different now, I recommend taking a look at your code
+to see whether something was previously depending on the
+doNormalProcessing flag being set to false on a 'new ReturnVal(true)'.
 
 80. [CLIENT] GUI improvements in the StringSelector object
 
