@@ -938,15 +938,23 @@ public final class ReturnVal implements java.io.Serializable {
   // server side operations
   // ---------------------------------------------------------------------------
 
-  public ReturnVal(boolean success)
-  {
-    this(success, false);
-  }
+  /**
+   * Base constructor
+   */
 
   public ReturnVal(boolean success, boolean doNormalProcessing)
   {
     this.success = success;
     this.doNormalProcessing = doNormalProcessing;
+  }
+
+  /**
+   * Short-cut constructor
+   */
+
+  public ReturnVal(boolean success)
+  {
+    this(success, success);     // we now have doNormalProcessing set to the same as success 28 Feb 2008
   }
 
   public void clear()
