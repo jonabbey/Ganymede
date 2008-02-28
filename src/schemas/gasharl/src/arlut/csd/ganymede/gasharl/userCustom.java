@@ -1404,7 +1404,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// ok, we succeeded, now we have to tell the client
 	// what to refresh to see the inactivation results
 
-	ReturnVal result = new ReturnVal(true);
+	ReturnVal result = ReturnVal.success();
 
 	result.addRescanField(this.getInvid(), SchemaConstants.RemovalField);
 	result.addRescanField(this.getInvid(), userSchema.LOGINSHELL);
@@ -1607,7 +1607,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// ok, we succeeded, now we have to tell the client
 	// what to refresh to see the reactivation results
 
-	ReturnVal result = new ReturnVal(true);
+	ReturnVal result = ReturnVal.success();
 
 	result.addRescanField(this.getInvid(), SchemaConstants.RemovalField);
 	result.addRescanField(this.getInvid(), userSchema.LOGINSHELL);
@@ -2121,7 +2121,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    System.err.println("UserCustom: can't find PASSWORDCHANGETIME field");
 	  }
 
-	ReturnVal result = new ReturnVal(true, true);	
+	ReturnVal result = ReturnVal.success();
 	    
 	result.addRescanField(this.getInvid(), userSchema.PASSWORDCHANGETIME);
 
@@ -2456,7 +2456,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // normally, just taking the rescan information as an
 	    // extra to pass back to the client.
 
-	    result = new ReturnVal(true, true);	
+	    result = ReturnVal.success();
 	    
 	    result.addRescanField(this.getInvid(), userSchema.SIGNATURE);
 
@@ -2473,7 +2473,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// ok, no big deal, but we will need to have the client
 		// rescan the choice list for the home group field
 
-		result = new ReturnVal(true, true);
+		result = ReturnVal.success();
 		result.addRescanField(this.getInvid(), HOMEGROUP);
 		groupChoices = null;
 		return result;
@@ -2513,7 +2513,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 					   " is the home group");
 		      }
 
-		    result = new ReturnVal(true, true);
+		    result = ReturnVal.success();
 		    result.addRescanField(this.getInvid(), HOMEGROUP);
 		    groupChoices = null;
 		    return result;
@@ -2590,7 +2590,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		if (!valuesToDelete.contains(getFieldValueLocal(HOMEGROUP)))
 		  {
-		    result = new ReturnVal(true, true);
+		    result = ReturnVal.success();
 		    result.addRescanField(this.getInvid(), HOMEGROUP); // rebuild choice list
 		    groupChoices = null;
 		    return result;
@@ -2656,7 +2656,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if ((field.getValueLocal() == null) || (getStatus() == ObjectStatus.CREATING))
 	  {
-	    result = new ReturnVal(true, true); // have setValue() do the right thing
+	    result = ReturnVal.success(); // have setValue() do the right thing
 
 	    result.addRescanField(this.getInvid(), userSchema.HOMEDIR);
 	    result.addRescanField(this.getInvid(), userSchema.ALIASES);

@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -406,14 +406,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 							 " from volume.");
 		  }
 
-		if (retVal != null && !retVal.didSucceed())
-		  {
-		    return retVal;
-		  }
-		else
-		  {
-		    return new ReturnVal(true);
-		  }
+                return retVal;
 	      }
 	  }
 

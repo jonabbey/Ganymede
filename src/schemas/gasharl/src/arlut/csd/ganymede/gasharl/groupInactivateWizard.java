@@ -399,7 +399,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
   public ReturnVal processDialog2() throws NotLoggedInException
   {
-    ReturnVal finalReturnVal = new ReturnVal(true);
+    ReturnVal finalReturnVal = ReturnVal.success();
 
     if (debug)
       {

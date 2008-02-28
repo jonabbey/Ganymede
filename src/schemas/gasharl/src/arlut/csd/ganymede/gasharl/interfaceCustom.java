@@ -817,7 +817,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// they gave us and replace it with the reformatted one we
 	// crafted.
 
-	ReturnVal result = new ReturnVal(true);	// success!
+	ReturnVal result = ReturnVal.success();
 
 	result.setTransformedValueObject(transformedString, this.getInvid(), field.getID());
 
