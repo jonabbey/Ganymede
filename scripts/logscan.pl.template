@@ -183,7 +183,7 @@ sub find_previous_line {
 
     do {
       $lastfound = $jump;
-      $jump = index($line, "\n", $jump);
+      $jump = index($line, "\n", $jump + 1);
     } until ($jump == -1);
   }
 
