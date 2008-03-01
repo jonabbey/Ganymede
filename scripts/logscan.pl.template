@@ -128,12 +128,19 @@ sub read_switches {
 #                                                         is_start_of_line
 #
 # Returns true if FILE is pointing to the first character of a line
+# (i.e., the character before us is a newline or the start of the file)
 #
 ##########################################################################
 
 sub is_start_of_line {
 
   my ($line);
+
+  my $pos = tell FILE;
+
+  if ($pos == 0) {
+    return 1;
+  }
 
   seek(FILE, -1, 1);
   read(FILE, $line, 1);
@@ -171,13 +178,13 @@ sub find_previous_line {
   while ($lastfound == -1 && $backpos > 0) {
     $backpos = $backpos - 64;
 
-    if ($backpos > 0) {
-      seek(FILE, $backpos, 0);
+    if ($backpos < 0) {
+      $backpos = 0;
     }
 
-    read(FILE, $line, 64);
+    seek(FILE, $backpos, 0);
 
-    $lastfound = 0;
+    read(FILE, $line, 64);
 
     $jump = -1;
 
@@ -204,101 +211,64 @@ sub find_previous_line {
 sub seek_start_point {
   my ($startdate, $lowpos, $highpos) = @_;
 
-  my ($newpos, $savepos1, $savepos2, $firstline, $secondline, $linedate1, $linedate2);
-  my ($repeating);
+  my ($pos, $line, $linedate);
 
-  $debug && print "seek_start_point($startdate, $lowpos, $highpos)\n";
-
-  if ($global_last_lowpos == $lowpos && $global_last_highpos == $highpos) {
-    $debug && print "Detected repeat\n";
-    $repeating = 1;
-  } else {
-    $global_last_lowpos = $lowpos;
-    $global_last_highpos = $highpos;
-  }
-
-  if ($repeating) {
-    $newpos = $lowpos;
-  } else {
-    $newpos = ($lowpos + $highpos) / 2;
-  }
-
-  seek(FILE, $newpos, 0);
-
-  if (!is_start_of_line()) {
-    # read a junk line in to get ourselves to the start of the next line
-
-    my $junkline = <FILE>;
-  }
-
-  $savepos1 = tell FILE;
-
-  # and now read a real line, now that we've advanced to the start of
-  # a proper line
-
-  $firstline = <FILE>;
-
-  $savepos2 = tell FILE;
-
-  # and now read a second line to see if we've found the transition
-  # point
-
-  $secondline = <FILE>;
-
-  ($linedate1) = split /\|/, $firstline;
-  ($linedate2) = split /\|/, $secondline;
-
-  if ($repeating) {
-    $debug && print "repeating -- startdate $startdate, linedate1 $linedate1, linedate2 $linedate2\n";
-
-    if ($startdate == $linedate1) {
-      seek FILE, $savepos1, 0;
-      return;
-    }
-
-     if ($startdate == $linedate2) {
-       seek FILE, $savepos2, 0;
-       return;
-     }
-  }
-
-  while ($startdate == $linedate1) {
-
-    my $prevline = find_previous_line($newpos - 1);
-
-    seek FILE, $prevline, 0;
-
-    my $testline = <FILE>;
-
-    $debug && print $testline;
-
-    ($linedate1) = split /\|/, $testline;
-
-    if ($startdate > $linedate1) {
-      return;
-    }
-
-    $newpos = $prevline;
-  }
-
-  if ($startdate <= $linedate1) {
-    $debug && print "startdate $startdate <= linedate1 $linedate1\n";
-
-    seek_start_point($startdate, $lowpos, find_previous_line($savepos1));
+  if ($lowpos == $highpos) {
+    $debug && print "Oops, got stuck";
     return;
   }
 
-  if ($startdate > $linedate2) {
-    $debug && print "startdate $startdate > linedate2 $linedate2\n";
+  $pos = int (($lowpos + $highpos) / 2);
+
+  seek(FILE, $pos, 0);
+
+  if (!is_start_of_line()) {
+    $pos = find_previous_line($pos);
+    seek(FILE, $pos, 0);
+  } else {
+    $pos = tell FILE;
+  }
+
+  # read a line for us to check against our target date
+
+  $line = <FILE>;
+
+  ($linedate) = split /\|/, $line;
+
+  # transactions share the same date and we can't use our recursive
+  # algorithm to find the beginning, since we can't differentiate
+  # between lines with the same date.  if we have hit on a line that
+  # occurs right on our start time (which is specified with
+  # millisecond accuracy), we'll need to scootch back until we find
+  # the first line that had that date.
+
+  while ($startdate == $linedate) {
+    $pos = find_previous_line($pos -1);
+
+    seek FILE, $pos, 0;
+
+    $line = <FILE>;
+
+    $debug && print $line;
+
+    ($linedate) = split /\|/, $line;
+
+    if (($startdate > $linedate) || ($pos == 0)) {
+      return;
+    }
+  }
+
+  if ($startdate < $linedate) {
+    $debug && print "startdate $startdate <= linedate $linedate\n";
+
+    seek_start_point($startdate, $lowpos, find_previous_line($pos));
+    return;
+  } else {
+    $debug && print "startdate $startdate > linedate $linedate\n";
 
     seek_start_point($startdate, tell FILE, $highpos);
     return;
   }
-
-  # we've found it!
-
-  seek FILE, $savepos2, 0;
-  return;
 }
 
 ##########################################################################
