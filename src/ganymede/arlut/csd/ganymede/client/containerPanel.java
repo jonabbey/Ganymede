@@ -251,6 +251,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   private Hashtable objectHash = new Hashtable();
 
   /**
+   * Hashtable mapping GUI components to their associated
+   * FieldTemplate objects.
+   */
+
+  private Hashtable objectTemplateHash = new Hashtable();
+
+  /**
    * Hashtable mapping Short Field ID numbers to their associated
    * GUI components.
    */
@@ -1144,6 +1151,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     try
       {
 	db_field field = (db_field) objectHash.get(comp);
+        FieldTemplate fieldTemplate = (FieldTemplate) objectTemplateHash.get(comp);
 
 	// by getting a FieldInfo, we'll save a call to the server by
 	// not having to repeatedly probe the field for elements of
@@ -1794,6 +1802,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   public boolean setValuePerformed(JValueObject v)
   {
     ReturnVal returnValue = null;
+    FieldTemplate fieldTemplate = null;
 
     /* -- */
 
@@ -1940,6 +1949,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 		try
 		  {
+                    fieldTemplate = (FieldTemplate) objectTemplateHash.get(v.getSource());
+
 		    if (v instanceof JAddValueObject)
 		      {
 			if (debug)
@@ -1966,6 +1977,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			  }
 
 			returnValue = field.deleteElement(v.getValue());
+
+                        if (ReturnVal.didSucceed(returnValue) && fieldTemplate.isEditInPlace())
+                          {
+                            ((vectorPanel) currentlyChangingComponent).refresh();
+                          }
 		      }
 		    else if (v instanceof JDeleteVectorValueObject)
 		      {
@@ -1976,7 +1992,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 			returnValue = field.deleteElements((Vector) v.getValue());
 
-                        if (ReturnVal.didSucceed(returnValue))
+                        if (ReturnVal.didSucceed(returnValue) && fieldTemplate.isEditInPlace())
                           {
                             ((vectorPanel) currentlyChangingComponent).refresh();
                           }
@@ -2100,6 +2116,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   {
     ReturnVal returnValue = null;
     db_field field = null;
+    FieldTemplate fieldTemplate = null;
     boolean newValue;
 
     // we are only acting as an action listener for checkboxes..
@@ -2111,6 +2128,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     /* -- */
 
     field = (db_field) objectHash.get(cb);
+    fieldTemplate = (FieldTemplate) objectTemplateHash.get(cb);
+
     if (field == null)
       {
 	throw new RuntimeException("Whoa, null field for a JCheckBox: " + e);
@@ -2517,7 +2536,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    ss.update(null, true, null, (Vector) fieldInfo.getValue(), true, null);
 
-	    objectHash.put(ss, field);
+            registerComponent(ss, field, fieldTemplate);
 
 	    ss.setCallback(this);
 
@@ -2545,7 +2564,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
             ss.setMaximumRowCount(8);
 	    ss.update(available, true, null, (Vector) fieldInfo.getValue(), true, null);
 
-	    objectHash.put(ss, field);
+            registerComponent(ss, field, fieldTemplate);
 
 	    ss.setCallback(this);
 
@@ -2574,7 +2593,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	ss.update(null, false, null, (Vector) fieldInfo.getValue(), true, null);
 
-	objectHash.put(ss, field);
+        registerComponent(ss, field, fieldTemplate);
 
 	String comment = fieldTemplate.getComment();
 	    
@@ -2767,7 +2786,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     ss.update(choiceHandles, true, null, valueHandles, true, null);
     ss.setPopups(invidTablePopup, invidTablePopup2);
 
-    objectHash.put(ss, field);
+    registerComponent(ss, field, fieldTemplate);
     
     ss.setCallback(this);
 
@@ -2812,7 +2831,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     vectorPanel vp = new vectorPanel(field, fieldTemplate, winP, editable && fieldInfo.isEditable(), 
 				     isEditInPlace, this, isCreating);
     vectorPanelList.addElement(vp);
-    objectHash.put(vp, field);
+
+    registerComponent(vp, field, fieldTemplate);
 
     String comment = fieldTemplate.getComment();
 	    
@@ -2971,7 +2991,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    combo.addItemListener(this); // register callback
 	  }
 
-	objectHash.put(combo, field);
+        registerComponent(combo, field, fieldTemplate);
 
 	String comment = fieldTemplate.getComment();
 
@@ -2988,7 +3008,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     else if (fieldTemplate.isMultiLine())
       {
 	JstringArea sa = new JstringArea(6, FIELDWIDTH);
-	objectHash.put(sa, field);
+
+        registerComponent(sa, field, fieldTemplate);
 
 	sa.setAllowedChars(fieldTemplate.getOKChars());
 	sa.setDisallowedChars(fieldTemplate.getBadChars());
@@ -3026,8 +3047,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			      fieldTemplate.getOKChars(),
 			      fieldTemplate.getBadChars(),
 			      this);
-			      
-	objectHash.put(sf, field);
+
+        registerComponent(sf, field, fieldTemplate);
 			      
 	sf.setText((String)fieldInfo.getValue());
 	    			
@@ -3072,7 +3093,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     if (editable && fieldInfo.isEditable())
       {
 	JpassField pf = new JpassField(gc, 10, 8, editable && fieldInfo.isEditable());
-	objectHash.put(pf, field);
+
+        registerComponent(pf, field, fieldTemplate);
 			
 	if (editable && fieldInfo.isEditable())
 	  {
@@ -3101,7 +3123,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			      null,
 			      null);
 
-	objectHash.put(sf, field);
+        registerComponent(sf, field, fieldTemplate);
 			  
 	// the server won't give us an unencrypted password, we're clear here
 			  
@@ -3143,7 +3165,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       
     JnumberField nf = new JnumberField();
 
-    objectHash.put(nf, field);
+    registerComponent(nf, field, fieldTemplate);
 		      
     Integer value = (Integer)fieldInfo.getValue();
 
@@ -3192,8 +3214,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
     
     JfloatField nf = new JfloatField();
- 
-    objectHash.put(nf, field);
+
+    registerComponent(nf, field, fieldTemplate);
  		      
     Double value = (Double)fieldInfo.getValue();
  
@@ -3238,7 +3260,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   {
     JdateField df = new JdateField();
 
-    objectHash.put(df, field);
+    registerComponent(df, field, fieldTemplate);
 
     if (debug) {
       println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
@@ -3284,7 +3306,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     /* -- */
 
-    objectHash.put(cb, field);
+    registerComponent(cb, field, fieldTemplate);
+
     cb.setEnabled(editable && fieldInfo.isEditable());
 
     if (editable && fieldInfo.isEditable())
@@ -3483,7 +3506,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
         // the label if the user edits the label field of the
         // object we point to.
 
-        objectHash.put(b, field);
+        registerComponent(b, field, fieldTemplate);
 
         contentsPanel.addRow(fieldTemplate.getName(), b);
         contentsPanel.setRowVisible(b, fieldInfo.isVisible());
@@ -3647,8 +3670,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     
     // The update method still need to be able to find the field from
     // the JInvidChooser, so we save it in objectHash, too.
-    
-    objectHash.put(combo, field); 
+
+    registerComponent(combo, field, fieldTemplate);
     
     if (debug)
       {
@@ -3703,8 +3726,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	gc.processException(rx, "Could not determine if v6 Allowed for ip field: ");
 	throw new RuntimeException(rx);
       }
-    
-    objectHash.put(ipf, field);
+
+    registerComponent(ipf, field, fieldTemplate);
     
     bytes = (Byte[]) fieldInfo.getValue();
 
@@ -3801,6 +3824,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	objectHash = null;
       }
 
+    if (objectTemplateHash != null)
+      {
+        objectTemplateHash.clear();
+        objectTemplateHash = null;
+      }
+
     if (invidChooserHash != null)
       {
 	invidChooserHash.clear();
@@ -3823,5 +3852,18 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
 
     progressBar = null;
+  }
+
+  /**
+   * This private helper method records associations between the
+   * guiComponent and the db_field and field id connected to that gui
+   * component, so that we can rapidly look up the information as
+   * needed during runtime.
+   */
+
+  private void registerComponent(JComponent guiComponent, db_field field, FieldTemplate fieldTemplate)
+  {
+    objectHash.put(guiComponent, field);
+    objectTemplateHash.put(guiComponent, fieldTemplate);
   }
 }
