@@ -1962,7 +1962,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		      {
 			if (debug)
 			  {
-			    println("Removing value from field(strig selector)");
+			    println("Removing value from field(string selector)");
 			  }
 
 			returnValue = field.deleteElement(v.getValue());
@@ -1975,6 +1975,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			  }
 
 			returnValue = field.deleteElements((Vector) v.getValue());
+
+                        if (ReturnVal.didSucceed(returnValue))
+                          {
+                            ((vectorPanel) currentlyChangingComponent).refresh();
+                          }
 		      }
 		  }
 		catch (Exception rx)
