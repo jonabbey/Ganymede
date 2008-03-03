@@ -158,7 +158,7 @@ import arlut.csd.ganymede.rmi.field_option_field;
 
 public class containerPanel extends JStretchPanel implements ActionListener, JsetValueCallback, ItemListener {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
   static final boolean debug_persona = false;
   static final int FIELDWIDTH = 25;
 
@@ -1151,7 +1151,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     try
       {
 	db_field field = (db_field) objectHash.get(comp);
-        FieldTemplate fieldTemplate = (FieldTemplate) objectTemplateHash.get(comp);
 
 	// by getting a FieldInfo, we'll save a call to the server by
 	// not having to repeatedly probe the field for elements of
@@ -1949,8 +1948,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 		try
 		  {
-                    fieldTemplate = (FieldTemplate) objectTemplateHash.get(v.getSource());
-
 		    if (v instanceof JAddValueObject)
 		      {
 			if (debug)
@@ -1977,13 +1974,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			  }
 
 			returnValue = field.deleteElement(v.getValue());
-
-                        if (ReturnVal.didSucceed(returnValue) && fieldTemplate.isEditInPlace())
-                          {
-                            System.err.println("JDeleteValueObject: Forcing a refresh on an edit-in-place invid field");
-
-                            ((vectorPanel) currentlyChangingComponent).refresh();
-                          }
 		      }
 		    else if (v instanceof JDeleteVectorValueObject)
 		      {
@@ -1993,11 +1983,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			  }
 
 			returnValue = field.deleteElements((Vector) v.getValue());
-
-                        if (ReturnVal.didSucceed(returnValue) && fieldTemplate.isEditInPlace())
-                          {
-                            ((vectorPanel) currentlyChangingComponent).refresh();
-                          }
 		      }
 		  }
 		catch (Exception rx)
@@ -2130,7 +2115,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     /* -- */
 
     field = (db_field) objectHash.get(cb);
-    fieldTemplate = (FieldTemplate) objectTemplateHash.get(cb);
 
     if (field == null)
       {

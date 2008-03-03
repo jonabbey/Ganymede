@@ -795,20 +795,23 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	// don't risk screwing things up if we get our index numbers
 	// misaligned.
 
-	ReturnVal retVal = my_field.deleteElement(ew.getValue());
+        ReturnVal retVal = my_field.deleteElement(ew.getValue());
+
+        // If we got a successful result from the deleteElement call,
+        // we'll merge in a rescan for the field we're managing so
+        // that the gc.handleReturnVal() call will take care of
+        // redrawing us properly.
+
+        retVal = ReturnVal.merge(retVal, ReturnVal.success().addRescanField(container.getObjectInvid(), template.getID()));
 
 	gc.handleReturnVal(retVal);
-
-	// handleReturnVal will have called refresh on this
-	// vectorPanel for us, because db_field.deleteElement()
-	// mandates a field refresh for the field.
 
 	if (debug)
 	  {
 	    System.out.println("Deleting element (after handleReturnVal)");
 	  }
 
-	if ((retVal == null) || (retVal.didSucceed()))
+        if (ReturnVal.didSucceed(retVal))
 	  {
 	    gc.somethingChanged();
 
