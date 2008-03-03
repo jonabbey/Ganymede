@@ -158,7 +158,7 @@ import arlut.csd.ganymede.rmi.field_option_field;
 
 public class containerPanel extends JStretchPanel implements ActionListener, JsetValueCallback, ItemListener {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
   static final boolean debug_persona = false;
   static final int FIELDWIDTH = 25;
 
@@ -1980,6 +1980,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
                         if (ReturnVal.didSucceed(returnValue) && fieldTemplate.isEditInPlace())
                           {
+                            System.err.println("JDeleteValueObject: Forcing a refresh on an edit-in-place invid field");
+
                             ((vectorPanel) currentlyChangingComponent).refresh();
                           }
 		      }
