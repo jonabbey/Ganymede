@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -797,13 +797,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
         ReturnVal retVal = my_field.deleteElement(ew.getValue());
 
-        // If we got a successful result from the deleteElement call,
-        // we'll merge in a rescan for the field we're managing so
-        // that the gc.handleReturnVal() call will take care of
-        // redrawing us properly.
-
-        retVal = ReturnVal.merge(retVal, ReturnVal.success().addRescanField(container.getObjectInvid(), template.getID()));
-
 	gc.handleReturnVal(retVal);
 
 	if (debug)
@@ -813,6 +806,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
         if (ReturnVal.didSucceed(retVal))
 	  {
+            removeElement(ew);
+
+            invalidate();
+            container.frame.validate();
+
 	    gc.somethingChanged();
 
 	    if (debug)
@@ -851,25 +849,19 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	System.err.println("vectorPanel.refresh(" + name + ")");
       }
 
-    int size;
-
-    Hashtable serverInvids = new Hashtable();
-    Hashtable localInvids = new Hashtable();
-
-    containerPanel cp = null;
-
-    Invid invid = null;
-
     boolean needFullRefresh = false;
 
     /* -- */
 
     try
       {
-	size = my_field.size();
-
 	if (my_field instanceof invid_field)
 	  {
+            Invid invid = null;
+            Hashtable serverInvids = new Hashtable();
+            Hashtable localInvids = new Hashtable();
+            containerPanel cp = null;
+
 	    // figure out what invids are currently in my_field
 	    // on the server, save them so we can scratch them off
 	    // as we sync this vector panel 
@@ -927,14 +919,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    elementWrapper ew = (elementWrapper) ewHash.get(cp);
 
 		    ew.setIndex(localIndex);
-
-		    /*
-		      Not using this right now.. kind of a klunky UI
-		      feature.
-
-		      ew.checkValidation();
-		      */
-
 		    ew.refreshTitle();
 
 		    // we've updated this one.. scratch it off the server
@@ -955,16 +939,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    // the server doesn't have this invid anymore, so
 		    // we need to take it out of this vector panel
 
-		    compVector.removeElement(cp);
-
-		    // and let the frame know not to keep it in its
-		    // records anymore
-
-		    container.frame.removeContainerPanel(cp);
-
 		    elementWrapper ew = (elementWrapper) ewHash.get(cp);
-		    centerPanel.remove(ew);
-		    ewHash.remove(cp);
+
+                    removeElement(ew);
 
 		    needFullRefresh = true;
 		    localInvids.remove(invid);
@@ -1021,7 +998,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	  }
 	else if (my_field instanceof ip_field)
 	  {
-	    // this code hasn't been tested
+	    // this code branch hasn't been tested so well, since we
+	    // don't use an IP address vector in ARL's schema..
+
+            int size = my_field.size();
 
 	    for (int i = 0; i < size; i++)
 	      {
@@ -1031,7 +1011,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		    
 		    ipf.setValue((Byte[])my_field.getElement(i));
 
-		    elementWrapper ew = (elementWrapper) ewHash.get(cp);
+		    elementWrapper ew = (elementWrapper) ewHash.get(ipf);
 
 		    ew.setIndex(i);
 		  }
@@ -1053,13 +1033,17 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 	    int fieldCount = compVector.size();
 
+            if (fieldCount > 0)
+              {
+                needFullRefresh = true;
+              }
+
 	    // we count down so that we can remove extra fields off of the
 	    // end
 	    
 	    for (int i = fieldCount; i >= size; i--)
 	      {
-		centerPanel.remove((Component)ewHash.get(compVector.elementAt(i)));
-		compVector.removeElementAt(i);
+                removeElement((elementWrapper) ewHash.get(compVector.elementAt(i)));
 	      }
 	  }
 	else
@@ -1494,6 +1478,29 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       }
     
     return myFieldIsEditable.booleanValue();
+  }
+
+  /**
+   * This private helper method removes an element from this vectorPanel.
+   */
+
+  private void removeElement(elementWrapper ew)
+  {
+    Component component = ew.getComponent();
+
+    if (component != null)
+      {
+        if (template.isEditInPlace())
+          {
+            container.frame.removeContainerPanel((containerPanel) component);
+          }
+
+        centerPanel.remove(ew);
+        compVector.removeElement(component);
+        ewHash.remove(component);
+      }
+
+    ew.clearElement();
   }
 }
 

@@ -278,6 +278,11 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     throw new RuntimeException("Unrecognized value wrapped in elementWrapper");
   }
 
+  public void clearElement()
+  {
+    this.my_component = null;
+  }
+
   /**
    * Checks to see if the object on the server wrapped by this elementWrapper
    * is complete and correct, and sets the color of the elementWrapper based
@@ -457,4 +462,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   public void mouseExited(MouseEvent e) {}
   public void mousePressed(MouseEvent e) {}
   public void mouseReleased(MouseEvent e) {}
+
+
 }
