@@ -797,11 +797,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
         ReturnVal retVal = my_field.deleteElement(ew.getValue());
 
-        // Note that handleReturnVal may remove the element for us if
-        // the server encoded a rescan order into retVal.  The
-        // removeElement() method was designed to be a no-op if the
-        // element in question was already removed.
-
 	gc.handleReturnVal(retVal);
 
 	if (debug)
@@ -811,10 +806,15 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
         if (ReturnVal.didSucceed(retVal))
 	  {
-            removeElement(ew);
+            // removeElement will return false if the element was
+            // already removed by handleReturnVal() above, due to a
+            // server-ordered field refresh of this vectorPanel.
 
-            invalidate();
-            container.frame.validate();
+            if (removeElement(ew))
+              {
+                invalidate();
+                container.frame.validate();
+              }
 
 	    gc.somethingChanged();
 
@@ -1489,7 +1489,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * This private helper method removes an element from this vectorPanel.
    */
 
-  private void removeElement(elementWrapper ew)
+  private boolean removeElement(elementWrapper ew)
   {
     Component component = ew.getComponent();
 
@@ -1510,9 +1510,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
         centerPanel.remove(ew);
         compVector.removeElement(component);
         ewHash.remove(component);
+
+        ew.clearElement();
+
+        return true;
       }
 
-    ew.clearElement();
+    return false;
   }
 }
-
