@@ -23,7 +23,12 @@
     <vendor>Applied Research Laboratories</vendor>
     <homepage href="http://www.arlut.utexas.edu/gash2"/>
     <description>Ganymede Client</description>
-    <icon href="icon.gif"/>
+    <icon href="#WEBROOT/icon.gif" kind="default"/>
+    <icon href="#WEBROOT/ganymede_splash.png" kind="splash"/>
+    <shortcut online="true">
+      <desktop/>
+      <menu submenu="Ganymede"/>
+    </shortcut>
   </information>
   <resources>
     <j2se version="1.6+"/>
