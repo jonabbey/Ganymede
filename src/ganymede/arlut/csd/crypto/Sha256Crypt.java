@@ -127,7 +127,7 @@ public final class Sha256Crypt
    * This method actually generates an Sha256 crypted password hash
    * from a plaintext password and a salt.
    *
-   * The resulting string will be in the form '$5$&lt;rounds=n&gt;&&lt;salt&gt;$&lt;hashed mess&gt;
+   * The resulting string will be in the form '$5$&lt;rounds=n&gt;$&lt;salt&gt;$&lt;hashed mess&gt;
    *
    * @param keyStr Plaintext password
    *
