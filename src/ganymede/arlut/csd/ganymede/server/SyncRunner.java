@@ -588,7 +588,7 @@ public class SyncRunner implements Runnable {
     outStream = new FileOutputStream(this.getDirectory() + File.separator + String.valueOf(transRecord.getTransactionNumber()));
     bufStream = new BufferedOutputStream(outStream);
 
-    XMLDumpContext xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+    XMLDumpContext xmlOut = new XMLDumpContext(new UTF8XMLWriter(bufStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
 					       includePlaintextPasswords, // whether we include plaintext passwords when we have alternate hashes
 					       false, // don't include creator/modifier data
 					       this,
