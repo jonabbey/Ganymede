@@ -297,7 +297,7 @@ public class DBLog {
 
 	if (mailer != null)
 	  {
-	    mailer.stopThreaded();	// we'll block here while the mailer's email thread drains
+            mailer.close(); // we'll block here while the mailer's email thread drains
 	  }
       }
 

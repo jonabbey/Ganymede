@@ -106,6 +106,7 @@ public class Qsmtp implements Runnable {
   static final boolean debug = false;
   static final int DEFAULT_PORT = 25;
   static final String EOL = "\r\n"; // network end of line
+  static final public long messageTimeout = 15000;  // 15 seconds
 
   // --
 
@@ -116,6 +117,8 @@ public class Qsmtp implements Runnable {
   private Vector queuedMessages = new Vector();
   private boolean threaded = false;
   private Thread backgroundThread;
+
+  private MessageTimeoutThread timeoutThread = new MessageTimeoutThread(this);
 
   /* -- */
 
@@ -245,6 +248,25 @@ public class Qsmtp implements Runnable {
 	    return;		// oh, well.
 	  }
       }
+  }
+
+  /**
+   * This method is called to shutdown this mailer object.  Once it is
+   * shut down, no more mail can be sent through it.
+   */
+
+  public synchronized void close()
+  {
+    if (backgroundThread != null)
+      {
+        // shut down the background thread.. we might block here
+
+        this.stopThreaded();
+        backgroundThread = null;
+      }
+
+    timeoutThread.dieNow();
+    timeoutThread = null;
   }
 
   /**
@@ -510,219 +532,228 @@ public class Qsmtp implements Runnable {
 
     /* -- */
 
-    try 
-      {
-	local = InetAddress.getLocalHost();
-      }
-    catch (UnknownHostException ioe) 
-      {
-	System.err.println("No local IP address found - is your network up?");
-	throw ioe;
-      }
-
-    if (to_addresses == null ||
-	to_addresses.size() == 0)
-      {
-	return;
-      }
-
-    // initialize connection to our SMTP mailer
-
-    if (hostid != null)
-      {
-	sock = new Socket(hostid, port);
-      }
-    else
-      {
-	sock = new Socket(address, port);
-      }
-
     try
       {
-	replyStream = new DataInputStream(sock.getInputStream());
-	reply = new BufferedReader(new InputStreamReader(replyStream));
-	send = new PrintWriter(sock.getOutputStream(), true);
+        timeoutThread.enableTimeout();
 
-	rstr = reply.readLine();
+        try 
+          {
+            local = InetAddress.getLocalHost();
+          }
+        catch (UnknownHostException ioe) 
+          {
+            System.err.println("No local IP address found - is your network up?");
+            throw ioe;
+          }
 
-	if (!rstr.startsWith("220")) 
-	  {
-	    throw new ProtocolException(rstr);
-	  }
+        if (to_addresses == null ||
+            to_addresses.size() == 0)
+          {
+            return;
+          }
 
-	while (rstr.indexOf('-') == 3) 
-	  {
-	    rstr = reply.readLine();
+        // initialize connection to our SMTP mailer
 
-	    if (!rstr.startsWith("220")) 
-	      {
-		throw new ProtocolException(rstr);
-	      }
-	  }
+        if (hostid != null)
+          {
+            sock = new Socket(hostid, port);
+          }
+        else
+          {
+            sock = new Socket(address, port);
+          }
 
-	String host = local.getHostName();
+        try
+          {
+            replyStream = new DataInputStream(sock.getInputStream());
+            reply = new BufferedReader(new InputStreamReader(replyStream));
+            send = new PrintWriter(sock.getOutputStream(), true);
 
-	send.print("HELO " + host);
-	send.print(EOL);
-	send.flush();
+            rstr = reply.readLine();
 
-	rstr = reply.readLine();
-	if (!rstr.startsWith("250")) 
-	  {
-	    throw new ProtocolException(rstr);
-	  }
+            if (!rstr.startsWith("220")) 
+              {
+                throw new ProtocolException(rstr);
+              }
 
-	sstr = "MAIL FROM: " + from_address ;
-	send.print(sstr);
-	send.print(EOL);
-	send.flush();
+            while (rstr.indexOf('-') == 3) 
+              {
+                rstr = reply.readLine();
 
-	rstr = reply.readLine();
-	if (!rstr.startsWith("250")) 
-	  {
-	    throw new ProtocolException(rstr);
-	  }
+                if (!rstr.startsWith("220")) 
+                  {
+                    throw new ProtocolException(rstr);
+                  }
+              }
 
-	boolean successRcpt = false;
+            String host = local.getHostName();
 
-	for (int i = 0; i < to_addresses.size(); i++)
-	  {
-	    sstr = "RCPT TO: " + (String) to_addresses.elementAt(i);
-	    send.print(sstr);
-	    send.print(EOL);
-	    send.flush();
+            send.print("HELO " + host);
+            send.print(EOL);
+            send.flush();
 
-	    rstr = reply.readLine();
+            rstr = reply.readLine();
+            if (!rstr.startsWith("250")) 
+              {
+                throw new ProtocolException(rstr);
+              }
 
-	    if (!rstr.startsWith("250")) 
-	      {
-		// don't throw an exception here.. we're in a loop and
-		// we want to get the mail sent to others.
+            sstr = "MAIL FROM: " + from_address ;
+            send.print(sstr);
+            send.print(EOL);
+            send.flush();
 
-		System.err.println("Qsmtp.dispatchMessage(): " + rstr + " received for address " +
-				   (String) to_addresses.elementAt(i));
-	      }
-	    else
-	      {
-		successRcpt = true;
-	      }
-	  }
+            rstr = reply.readLine();
+            if (!rstr.startsWith("250")) 
+              {
+                throw new ProtocolException(rstr);
+              }
 
-	// if none of our addresses was accepted, just return.  Note
-	// that our finally {} clause will clean up for us.
+            boolean successRcpt = false;
 
-	if (!successRcpt)
-	  {
-	    return;
-	  }
+            for (int i = 0; i < to_addresses.size(); i++)
+              {
+                sstr = "RCPT TO: " + (String) to_addresses.elementAt(i);
+                send.print(sstr);
+                send.print(EOL);
+                send.flush();
 
-	send.print("DATA");
-	send.print(EOL);
-	send.flush();
+                rstr = reply.readLine();
 
-	rstr = reply.readLine();
-	if (!rstr.startsWith("354")) 
-	  {
-	    throw new ProtocolException(rstr);
-	  }
+                if (!rstr.startsWith("250")) 
+                  {
+                    // don't throw an exception here.. we're in a loop and
+                    // we want to get the mail sent to others.
 
-	send.print("From: " + from_address);
-	send.print(EOL);
+                    System.err.println("Qsmtp.dispatchMessage(): " + rstr + " received for address " +
+                                       (String) to_addresses.elementAt(i));
+                  }
+                else
+                  {
+                    successRcpt = true;
+                  }
+              }
 
-	StringBuffer targetString = new StringBuffer();
+            // if none of our addresses was accepted, just return.  Note
+            // that our finally {} clause will clean up for us.
 
-	for (int i = 0; i < to_addresses.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		targetString.append(", ");
-	      }
+            if (!successRcpt)
+              {
+                return;
+              }
 
-	    targetString.append((String) to_addresses.elementAt(i));
-	  }
+            send.print("DATA");
+            send.print(EOL);
+            send.flush();
 
-	send.print("To: " + targetString.toString());
-	send.print(EOL);
-	send.print("Subject: " + subject);
-	send.print(EOL);
+            rstr = reply.readLine();
+            if (!rstr.startsWith("354")) 
+              {
+                throw new ProtocolException(rstr);
+              }
+
+            send.print("From: " + from_address);
+            send.print(EOL);
+
+            StringBuffer targetString = new StringBuffer();
+
+            for (int i = 0; i < to_addresses.size(); i++)
+              {
+                if (i > 0)
+                  {
+                    targetString.append(", ");
+                  }
+
+                targetString.append((String) to_addresses.elementAt(i));
+              }
+
+            send.print("To: " + targetString.toString());
+            send.print(EOL);
+            send.print("Subject: " + subject);
+            send.print(EOL);
     
-	// Create Date - we'll cheat by assuming that local clock is right
+            // Create Date - we'll cheat by assuming that local clock is right
     
-	Date today_date = new Date();
-	send.print("Date: " + formatDate(today_date));
-	send.print(EOL);
-	send.flush();
+            Date today_date = new Date();
+            send.print("Date: " + formatDate(today_date));
+            send.print(EOL);
+            send.flush();
 
-	// Warn the world that we are on the loose - with the comments header:
+            // Warn the world that we are on the loose - with the comments header:
 
-	send.print("Comment: Unauthenticated sender");
-	send.print(EOL);
-	send.print("X-Mailer: JNet Qsmtp");
-	send.print(EOL);
+            send.print("Comment: Unauthenticated sender");
+            send.print(EOL);
+            send.print("X-Mailer: JNet Qsmtp");
+            send.print(EOL);
 
-	if (extraHeaders != null)
-	  {
-	    String header;
+            if (extraHeaders != null)
+              {
+                String header;
 
-	    for (int i = 0; i < extraHeaders.size(); i++)
-	      {
-		header = (String) extraHeaders.elementAt(i);
-		send.print(header);
-		send.print(EOL);
-		send.flush();
-	      }
-	  }
+                for (int i = 0; i < extraHeaders.size(); i++)
+                  {
+                    header = (String) extraHeaders.elementAt(i);
+                    send.print(header);
+                    send.print(EOL);
+                    send.flush();
+                  }
+              }
 
-	// Sending a blank line ends the header part.
+            // Sending a blank line ends the header part.
 
-	send.print(EOL);
+            send.print(EOL);
 
-	// Now send the message proper
-	send.print(message);
-	send.print(EOL);
-	send.print(".");
-	send.print(EOL);
-	send.flush();
+            // Now send the message proper
+            send.print(message);
+            send.print(EOL);
+            send.print(".");
+            send.print(EOL);
+            send.flush();
     
-	rstr = reply.readLine();
-	if (!rstr.startsWith("250")) 
-	  {
-	    throw new ProtocolException(rstr);
-	  }
+            rstr = reply.readLine();
+            if (!rstr.startsWith("250")) 
+              {
+                throw new ProtocolException(rstr);
+              }
 
-	// close our mailer connection
+            // close our mailer connection
 
-	send.print("QUIT");
-	send.print(EOL);
-	send.flush();
+            send.print("QUIT");
+            send.print(EOL);
+            send.flush();
+          }
+        finally
+          {
+            try
+              {
+                if (replyStream != null)
+                  {
+                    replyStream.close();
+                  }
+              }
+            catch (IOException ex)
+              {
+                // shrug
+              }
+
+            if (send != null)
+              {
+                send.close();
+              }
+
+            try
+              {
+                sock.close();
+              }
+            catch (IOException ex)
+              {
+                // shrug
+              }
+          }
       }
     finally
       {
-	try
-	  {
-	    if (replyStream != null)
-	      {
-		replyStream.close();
-	      }
-	  }
-	catch (IOException ex)
-	  {
-				// shrug
-	  }
-
-	if (send != null)
-	  {
-	    send.close();
-	  }
-
-	try
-	  {
-	    sock.close();
-	  }
-	catch (IOException ex)
-	  {
-				// shrug
-	  }
+        timeoutThread.disableTimeout();
       }
   }
 
@@ -735,6 +766,31 @@ public class Qsmtp implements Runnable {
     DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", 
 						java.util.Locale.US);
     return formatter.format(date);
+  }
+
+  /**
+   * This method interrupts the mailer's thread, due to a
+   * dispatchMessage taking longer than (messageTimeout / 1000)
+   * seconds.  It is called from this Qsmtp object's
+   * MessageTimeoutThread.
+   *
+   * This is useful and needed because we've seen a socket to a mail
+   * daemon block indefinitely on reply.readline.  By sending an
+   * interrupt signal to the mailing thread, we can break out of such
+   * a readline() call, by causing an InterruptedException to be
+   * thrown.
+   */
+
+  public void interrupt()
+  {
+    if (backgroundThread != null)
+      {
+        backgroundThread.interrupt();
+      }
+    else
+      {
+        Thread.currentThread().interrupt();
+      }
   }
 }
 
@@ -810,5 +866,70 @@ class messageObject {
     buffer.append(message);
 
     return buffer.toString();
+  }
+}
+
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                            MessageTimeoutThread
+
+------------------------------------------------------------------------------*/
+
+/**
+ */
+
+class MessageTimeoutThread extends Thread {
+
+  final boolean debug = false;
+  private Qsmtp mailer = null;
+  private boolean dieNow = false;
+  private long timeout = 0;
+
+  /* -- */
+
+  public MessageTimeoutThread(Qsmtp mailer)
+  {
+    super("Qsmtp MessageTimeoutThread");
+    this.setDaemon(true);       // don't block shutdown for us, in case someone forgets to close a mailer
+    this.mailer = mailer;
+  }
+
+  public synchronized void enableTimeout()
+  {
+    this.interrupt();
+    this.timeout = Qsmtp.messageTimeout;
+  }
+
+  public synchronized void disableTimeout()
+  {
+    this.interrupt();
+    this.timeout = 0;
+  }
+
+  public synchronized void run()
+  {
+    while (!dieNow)
+      {
+        try
+          {
+            wait(timeout);
+
+            if (timeout != 0)
+              {
+                mailer.interrupt();
+                timeout = 0;
+              }
+          }
+        catch (InterruptedException ie)
+          {
+          }
+      }
+  }
+
+  public synchronized void dieNow()
+  {
+    this.dieNow = true;
+    this.notifyAll();
   }
 }

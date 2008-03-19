@@ -1344,6 +1344,7 @@ public class GanymedeServer implements Server {
 						   null));
 
 	System.err.println();
+        // "Server completing shutdown.. waiting for log thread to complete."
 	System.err.println(ts.l("shutdown.closinglog"));
 
 	try
