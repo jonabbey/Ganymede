@@ -85,7 +85,7 @@ import java.util.Vector;
  * servers.
  *
  * The Qsmtp constructors take an address for a SMTP mail server, and all 
- * messages subsequently sent out by the Qstmp object are handled by
+ * messages subsequently sent out by the Qsmtp object are handled by
  * that SMTP server.
  *
  * Once created, a Qsmtp object can be used to send any number of messages
@@ -193,7 +193,7 @@ public class Qsmtp implements Runnable {
   {
     if (debug)
       {
-	System.err.println("Qstmp.stopThreaded()");
+	System.err.println("Qsmtp.stopThreaded()");
       }
 
     if (!this.threaded)
@@ -207,7 +207,7 @@ public class Qsmtp implements Runnable {
 
 	if (debug)
 	  {
-	    System.err.println("Qstmp.stopThreaded() - waking background thread");
+	    System.err.println("Qsmtp.stopThreaded() - waking background thread");
 	  }
 	
 	synchronized (queuedMessages)
@@ -221,7 +221,7 @@ public class Qsmtp implements Runnable {
 	  {
 	    if (debug)
 	      {
-		System.err.println("Qstmp.stopThreaded() - waiting for background thread to die");
+		System.err.println("Qsmtp.stopThreaded() - waiting for background thread to die");
 	      }
 
 	    // the backgroundThread variable is cleared when the
@@ -241,7 +241,7 @@ public class Qsmtp implements Runnable {
 	      {
 		if (debug)
 		  {
-		    System.err.println("Qstmp.stopThreaded() - background thread completed");
+		    System.err.println("Qsmtp.stopThreaded() - background thread completed");
 		  }
 	      }
 	  }
@@ -645,7 +645,7 @@ public class Qsmtp implements Runnable {
 
             if (!successRcpt)
               {
-                System.err.println("Qstmp: dispatchMessage() couldn't find acceptable recipients for message:\n");
+                System.err.println("Qsmtp: dispatchMessage() couldn't find acceptable recipients for message:\n");
                 System.err.println(msgObj.toString());
 
                 return true;    // no sense trying again, really
@@ -720,7 +720,27 @@ public class Qsmtp implements Runnable {
             send.flush();
     
             rstr = reply.readLine();
-            if (!rstr.startsWith("250")) 
+
+            if (rstr.startsWith("4"))
+              {
+                System.err.println("Qsmtp: dispatchMessage found transient error result " + rstr + " when sending mail:\n");
+                System.err.println(msgObj.toString());
+                System.err.println();
+
+                return false;   // transient failure, will retry
+              }
+
+            if (rstr.startsWith("5"))
+              {
+                System.err.println("Qsmtp: dispatchMessage found permanent error result " + rstr + " when sending mail:\n");
+                System.err.println(msgObj.toString());
+                System.err.println("Qsmtp: will not retry message transmission");
+                System.err.println();
+
+                return true;    // permanent failure, will not retry
+              }
+
+            if (!rstr.startsWith("2"))
               {
                 throw new ProtocolException(rstr);
               }
@@ -762,7 +782,7 @@ public class Qsmtp implements Runnable {
       }
     catch (Throwable ex)
       {
-        System.err.println("Qstmp: dispatchMessage found error when sending mail:\n");
+        System.err.println("Qsmtp: dispatchMessage found error when sending mail:\n");
         System.err.println(msgObj.toString());
         ex.printStackTrace();
         System.err.println();
@@ -796,7 +816,7 @@ public class Qsmtp implements Runnable {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Data-holding object used by the Qstmp class to queue messages for mailing
+ * <P>Data-holding object used by the Qsmtp class to queue messages for mailing
  * on a separate thread.</P>
  */
 
@@ -873,13 +893,13 @@ class messageObject {
 
 /**
  * This class implements a watchdog timer Thread to make sure
- * that the Qstmp.dispatchMessage() method doesn't take longer than
- * Qstmp.messageTimeout milliseconds to complete.
+ * that the Qsmtp.dispatchMessage() method doesn't take longer than
+ * Qsmtp.messageTimeout milliseconds to complete.
  *
  * The enableTimeout() and disableTimeout() methods in this class are
  * used to enable or disable a Qsmtp.messageTimeout duration timeout,
  * after which time, an interrupt will be sent to the thread running
- * the dispatchMessage() method in the Qstmp class.
+ * the dispatchMessage() method in the Qsmtp class.
  */
 
 class MessageTimeoutThread extends Thread {
@@ -902,7 +922,7 @@ class MessageTimeoutThread extends Thread {
    * thread that is handling the dispatchMessage() call.  It registers
    * the calling thread to be interrupted if the same thread does not
    * call disableTimeout() on this MessageTimeoutThread within
-   * Qstmp.messageTimeout milliseconds.
+   * Qsmtp.messageTimeout milliseconds.
    */
 
   public synchronized void enableTimeout()
@@ -925,7 +945,7 @@ class MessageTimeoutThread extends Thread {
 
     if (this.threadToWake != Thread.currentThread())
       {
-        System.err.println("Qstmp.MessageTimeoutThread: warning, mismatched thread in disableTimeout");
+        System.err.println("Qsmtp.MessageTimeoutThread: warning, mismatched thread in disableTimeout");
       }
 
     this.threadToWake = null;
