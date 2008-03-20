@@ -57,7 +57,7 @@ Added javadocs (9 June 1999).
 
 ***********************************************************************/
 
-package Qsmtp;			// thanks javac 1.4
+package Qsmtp;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -118,19 +118,13 @@ public class Qsmtp implements Runnable {
   private boolean threaded = false;
   private Thread backgroundThread;
 
-  private MessageTimeoutThread timeoutThread = new MessageTimeoutThread(this);
+  private MessageTimeoutThread timeoutThread = new MessageTimeoutThread();
 
   /* -- */
 
   public Qsmtp(String hostid)
   {
-    this.hostid = hostid;
-  }
-
-  public Qsmtp(String hostid, int port)
-  {
-    this.hostid = hostid;
-    this.port = port;
+    this(hostid, DEFAULT_PORT);
   }
 
   public Qsmtp(InetAddress address)
@@ -138,10 +132,18 @@ public class Qsmtp implements Runnable {
     this(address, DEFAULT_PORT);
   }
 
+  public Qsmtp(String hostid, int port)
+  {
+    this.hostid = hostid;
+    this.port = port;
+    timeoutThread.start();
+  }
+
   public Qsmtp(InetAddress address, int port)
   {
     this.address = address;
     this.port = port;
+    timeoutThread.start();
   }
 
   /** 
@@ -277,13 +279,14 @@ public class Qsmtp implements Runnable {
    * @param subject Subject for this message
    * @param message The text for the mail message
    *
-   * @exception IOException
+   * @return True if the message was successfully sent to the
+   * mailhost, false otherwise.
    */
 
-  public synchronized void sendmsg(String from_address, Vector to_addresses,
-				   String subject, String message) throws IOException
+  public synchronized boolean sendmsg(String from_address, Vector to_addresses,
+                                      String subject, String message) throws IOException
   {
-    sendmsg(from_address, to_addresses, subject, message, null);
+    return sendmsg(from_address, to_addresses, subject, message, null);
   }
 
   /**
@@ -300,12 +303,13 @@ public class Qsmtp implements Runnable {
    * show up in mail clients
    * @param textBody The text for the non-HTML part of the mail message
    *
-   * @exception IOException
+   * @return True if the message was successfully sent to the
+   * mailhost, false otherwise.
    */
 
-  public synchronized void sendHTMLmsg(String from_address, Vector to_addresses,
-				       String subject, String htmlBody, String htmlFilename,
-				       String textBody) throws IOException
+  public synchronized boolean sendHTMLmsg(String from_address, Vector to_addresses,
+                                          String subject, String htmlBody, String htmlFilename,
+                                          String textBody) throws IOException
   {
     Vector MIMEheaders = new Vector();
     String separator = "B24FDA77DFMIMEISNEAT4976B1CA5E8A49";
@@ -354,7 +358,7 @@ public class Qsmtp implements Runnable {
     buffer.append(separator);
     buffer.append("--\n\n");
 
-    sendmsg(from_address, to_addresses, subject, buffer.toString(), MIMEheaders);
+    return sendmsg(from_address, to_addresses, subject, buffer.toString(), MIMEheaders);
   }
 
   /**
@@ -368,12 +372,13 @@ public class Qsmtp implements Runnable {
    * @param extraHeaders Vector of string headers to include in the message's
    * envelope
    *
-   * @exception IOException
+   * @return True if the message was successfully sent to the
+   * mailhost, false otherwise.
    */
 
-  public synchronized void sendmsg(String from_address, Vector to_addresses, 
-				   String subject, String message,
-				   Vector extraHeaders) throws IOException
+  public synchronized boolean sendmsg(String from_address, Vector to_addresses, 
+                                      String subject, String message,
+                                      Vector extraHeaders)
   {
     messageObject msgObj = new messageObject(from_address, to_addresses,
 					     subject, message, extraHeaders);
@@ -385,10 +390,12 @@ public class Qsmtp implements Runnable {
 	    queuedMessages.addElement(msgObj);
 	    queuedMessages.notify();
 	  }
+
+        return true;
       }
     else
       {
-	dispatchMessage(msgObj);
+	return dispatchMessage(msgObj);
       }
   }
 
@@ -442,17 +449,21 @@ public class Qsmtp implements Runnable {
 
 	    if (message != null)
 	      {
-		try
-		  {
-		    dispatchMessage(message);
-		  }
-		catch (Throwable ex)
-		  {
- 		    System.err.println("Qstmp: dispatch thread found error when sending mail:\n");
-		    System.err.println(message.toString());
-		    ex.printStackTrace();
-		    System.err.println();
-		  }
+                int count = 0;
+
+                while (threaded && !dispatchMessage(message))
+                  {
+                    try
+                      {
+                        Thread.currentThread().sleep(count++ * 1000);  // delay for an increasing amount of time between tries
+                      }
+                    catch (InterruptedException ex)
+                      {
+                        // no-op
+                      }
+
+                    System.err.println("Retrying mail transmission.. internal mail queue has " + queuedMessages.size() + " elements.");
+                  }
 	      }
 	  }
       }
@@ -476,22 +487,12 @@ public class Qsmtp implements Runnable {
 			message = (messageObject) queuedMessages.firstElement();
 			queuedMessages.removeElementAt(0);
 
-			try
-			  {
-			    if (debug)
-			      {
-				System.err.println("Qsmtp: background thread sending mail");
-			      }
+                        if (debug)
+                          {
+                            System.err.println("Qsmtp: background thread sending mail");
+                          }
 
-			    dispatchMessage(message);
-			  }
-			catch (Throwable ex)
-			  {
-			    System.err.println("Qstmp: dispatch thread found error when draining mail:\n");
-			    System.err.println(message.toString());
-			    ex.printStackTrace();
-			    System.err.println();
-			  }
+                        dispatchMessage(message);  // if it fails, it fails.. we still need to shut down.
 		      }
 		  }
 	      }
@@ -509,10 +510,10 @@ public class Qsmtp implements Runnable {
   /**
    * <P>This method handles the actual mail-out</P>
    *
-   * @exception IOException
+   * @return False if any problems occurred during transmission.
    */
 
-  private void dispatchMessage(messageObject msgObj) throws IOException
+  private boolean dispatchMessage(messageObject msgObj)
   {
     String rstr;
     String sstr;
@@ -536,6 +537,12 @@ public class Qsmtp implements Runnable {
       {
         timeoutThread.enableTimeout();
 
+        if (to_addresses == null ||
+            to_addresses.size() == 0)
+          {
+            return true;
+          }
+
         try 
           {
             local = InetAddress.getLocalHost();
@@ -544,12 +551,6 @@ public class Qsmtp implements Runnable {
           {
             System.err.println("No local IP address found - is your network up?");
             throw ioe;
-          }
-
-        if (to_addresses == null ||
-            to_addresses.size() == 0)
-          {
-            return;
           }
 
         // initialize connection to our SMTP mailer
@@ -639,7 +640,10 @@ public class Qsmtp implements Runnable {
 
             if (!successRcpt)
               {
-                return;
+                System.err.println("Qstmp: dispatchMessage() couldn't find acceptable recipients for message:\n");
+                System.err.println(msgObj.toString());
+
+                return true;    // no sense trying again, really
               }
 
             send.print("DATA");
@@ -751,10 +755,21 @@ public class Qsmtp implements Runnable {
               }
           }
       }
+    catch (Throwable ex)
+      {
+        System.err.println("Qstmp: dispatchMessage found error when sending mail:\n");
+        System.err.println(msgObj.toString());
+        ex.printStackTrace();
+        System.err.println();
+
+        return false;        // don't propagate up any further, though
+      }
     finally
       {
         timeoutThread.disableTimeout();
       }
+
+    return true;
   }
 
   /**
@@ -766,31 +781,6 @@ public class Qsmtp implements Runnable {
     DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", 
 						java.util.Locale.US);
     return formatter.format(date);
-  }
-
-  /**
-   * This method interrupts the mailer's thread, due to a
-   * dispatchMessage taking longer than (messageTimeout / 1000)
-   * seconds.  It is called from this Qsmtp object's
-   * MessageTimeoutThread.
-   *
-   * This is useful and needed because we've seen a socket to a mail
-   * daemon block indefinitely on reply.readline.  By sending an
-   * interrupt signal to the mailing thread, we can break out of such
-   * a readline() call, by causing an InterruptedException to be
-   * thrown.
-   */
-
-  public void interrupt()
-  {
-    if (backgroundThread != null)
-      {
-        backgroundThread.interrupt();
-      }
-    else
-      {
-        Thread.currentThread().interrupt();
-      }
   }
 }
 
@@ -877,34 +867,63 @@ class messageObject {
 ------------------------------------------------------------------------------*/
 
 /**
+ * This class implements a watchdog timer Thread to make sure
+ * that the Qstmp.dispatchMessage() method doesn't take longer than
+ * Qstmp.messageTimeout milliseconds to complete.
+ *
+ * The enableTimeout() and disableTimeout() methods in this class are
+ * used to enable or disable a Qsmtp.messageTimeout duration timeout,
+ * after which time, an interrupt will be sent to the thread running
+ * the dispatchMessage() method in the Qstmp class.
  */
 
 class MessageTimeoutThread extends Thread {
 
   final boolean debug = false;
-  private Qsmtp mailer = null;
   private boolean dieNow = false;
   private long timeout = 0;
+  private Thread threadToWake = null;
 
   /* -- */
 
-  public MessageTimeoutThread(Qsmtp mailer)
+  public MessageTimeoutThread()
   {
     super("Qsmtp MessageTimeoutThread");
     this.setDaemon(true);       // don't block shutdown for us, in case someone forgets to close a mailer
-    this.mailer = mailer;
   }
+
+  /**
+   * This method is intended to be called by a Qsmtp object from the
+   * thread that is handling the dispatchMessage() call.  It registers
+   * the calling thread to be interrupted if the same thread does not
+   * call disableTimeout() on this MessageTimeoutThread within
+   * Qstmp.messageTimeout milliseconds.
+   */
 
   public synchronized void enableTimeout()
   {
-    this.interrupt();
+    this.threadToWake = Thread.currentThread();
     this.timeout = Qsmtp.messageTimeout;
+    this.interrupt();
   }
+
+  /**
+   * This method is intended to be called by a Qsmtp object from the
+   * thread that is handling the dispatchMessage() call.  It cancels
+   * any scheduled interrupt on the calling thread.
+   */
 
   public synchronized void disableTimeout()
   {
-    this.interrupt();
     this.timeout = 0;
+    this.interrupt();
+
+    if (this.threadToWake != Thread.currentThread())
+      {
+        System.err.println("Qstmp.MessageTimeoutThread: warning, mismatched thread in disableTimeout");
+      }
+
+    this.threadToWake = null;
   }
 
   public synchronized void run()
@@ -915,14 +934,20 @@ class MessageTimeoutThread extends Thread {
           {
             wait(timeout);
 
+            if (dieNow)
+              {
+                return;
+              }
+
             if (timeout != 0)
               {
-                mailer.interrupt();
+                threadToWake.interrupt();
                 timeout = 0;
               }
           }
         catch (InterruptedException ie)
           {
+            // if interrupted, we'll re-enter our loop from the top.
           }
       }
   }
