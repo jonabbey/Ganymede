@@ -721,35 +721,40 @@ public class Qsmtp implements Runnable {
     
             rstr = reply.readLine();
 
-            if (rstr.startsWith("4"))
+            try
               {
-                System.err.println("Qsmtp: dispatchMessage found transient error result " + rstr + " when sending mail:\n");
-                System.err.println(msgObj.toString());
-                System.err.println();
+                if (rstr.startsWith("4"))
+                  {
+                    System.err.println("Qsmtp: dispatchMessage found transient error result " + rstr + " when sending mail:\n");
+                    System.err.println(msgObj.toString());
+                    System.err.println();
 
-                return false;   // transient failure, will retry
+                    return false;   // transient failure, will retry
+                  }
+
+                if (rstr.startsWith("5"))
+                  {
+                    System.err.println("Qsmtp: dispatchMessage found permanent error result " + rstr + " when sending mail:\n");
+                    System.err.println(msgObj.toString());
+                    System.err.println("Qsmtp: will not retry message transmission");
+                    System.err.println();
+
+                    return true;    // permanent failure, will not retry
+                  }
+
+                if (!rstr.startsWith("2"))
+                  {
+                    throw new ProtocolException(rstr);
+                  }
               }
-
-            if (rstr.startsWith("5"))
+            finally
               {
-                System.err.println("Qsmtp: dispatchMessage found permanent error result " + rstr + " when sending mail:\n");
-                System.err.println(msgObj.toString());
-                System.err.println("Qsmtp: will not retry message transmission");
-                System.err.println();
+                // close our mailer connection
 
-                return true;    // permanent failure, will not retry
+                send.print("QUIT");
+                send.print(EOL);
+                send.flush();
               }
-
-            if (!rstr.startsWith("2"))
-              {
-                throw new ProtocolException(rstr);
-              }
-
-            // close our mailer connection
-
-            send.print("QUIT");
-            send.print(EOL);
-            send.flush();
           }
         finally
           {
