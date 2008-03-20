@@ -1578,11 +1578,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
 
-
-
-
-
-
   // ***
   //
   // The following private methods are used to support the DNS builder logic.
@@ -1878,7 +1873,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String groupname;
     Vector group_targets;
     Vector external_targets;
-    Invid userInvid;
+    Invid memberInvid;
     String target;
 
     int lengthlimit_remaining;
@@ -1913,9 +1908,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		result.append(", ");
 	      }
 
-	    userInvid = (Invid) group_targets.elementAt(i);
+	    memberInvid = (Invid) group_targets.elementAt(i);
 
-            target = getLabel(userInvid);
+            target = getLabel(memberInvid);
 
             if (2 + target.length() > lengthlimit_remaining)
               {

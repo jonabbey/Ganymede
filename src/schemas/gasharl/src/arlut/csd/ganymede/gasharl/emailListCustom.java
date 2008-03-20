@@ -157,6 +157,20 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 	return super.lookupLabel(object) + " (email list)";
       }
 
+    // and groups
+
+    if (object.getTypeID() == 257)
+      {
+        return super.lookupLabel(object) + " (group)";
+      }
+
+    // and user netgroups
+
+    if (object.getTypeID() == 270)
+      {
+        return super.lookupLabel(object) + " (user netgroup)";
+      }
+
     // mark external email records
 
     if (object.getTypeID() == 275)
@@ -225,11 +239,26 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 	
 	QueryNode root3 = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.getInvid()));
 	Query query3 = new Query((short) 274, root3, false); // list all other email groups, but not ourselves
+
+        // we also need to union in user netgroups and account groups
+        // that have the 'Can Receive Email' box checked.
+
+        // first groups
+
+        QueryNode root4 = new QueryDataNode(groupSchema.EMAILOK, QueryDataNode.DEFINED, null);
+        Query query4 = new Query((short) 257, root4, false);
+
+        // and then user netgroups
+
+        QueryNode root5 = new QueryDataNode(userNetgroupSchema.EMAILOK, QueryDataNode.DEFINED, null);
+        Query query5 = new Query((short) 270, root4, false);
 	
 	QueryResult result = editset.getSession().getGSession().query(query1, this);
 
 	result.append(editset.getSession().getGSession().query(query2, this));
 	result.append(editset.getSession().getGSession().query(query3, this));
+	result.append(editset.getSession().getGSession().query(query4, this));
+	result.append(editset.getSession().getGSession().query(query5, this));
 	
 	membersChoice = result;
       }
