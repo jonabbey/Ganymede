@@ -1352,14 +1352,12 @@ cloning of objects that themselves contain embedded objects.
 
 We had an incident in which the mailer thread in the Ganymede server
 got stuck trying to read from a socket from an SMTP server that was
-having some issues.  I've added a watchdog timer to help out the
-mailer thread, which will interrupt if a message takes longer than 15
-seconds to deliver.
+having some issues.  I've set SO_TIMEOUT on the mailer socket to help
+out the mailer thread, which will now interrupt socket reads if an
+individual socket read takes longer than 15 seconds to complete.
 
-The background mailer thread will now try harder to make sure that
-every message gets out, including the implementation of a simple
-increasing back-off algorithm for waiting until the SMTP server comes
-back up.
+In addition, various small tweaks to the SMTP handling logic in the
+Qsmtp class have been made to make Ganymede more compliant with SMTP.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
