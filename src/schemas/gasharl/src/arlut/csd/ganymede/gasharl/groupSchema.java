@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -75,6 +75,7 @@ public interface groupSchema {
   final static short GROUPNAME=256;
   final static short PASSWORD=257;
   final static short GID=258;
+  final static short EMAILOK=264;
   final static short DESCRIPTION=259;
   final static short CONTRACT=260;
   final static short USERS=261;

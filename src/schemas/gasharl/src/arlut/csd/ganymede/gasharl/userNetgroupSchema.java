@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -73,6 +73,7 @@ public interface userNetgroupSchema {
   // this file to match.
 
   final static short NETGROUPNAME=256;
+  final static short EMAILOK=260;
   final static short USERS=257;
   final static short MEMBERGROUPS=258;
   final static short OWNERNETGROUPS=259;
