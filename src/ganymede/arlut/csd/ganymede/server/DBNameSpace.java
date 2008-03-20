@@ -1888,7 +1888,8 @@ public final class DBNameSpace implements NameSpace {
         DBObject otherObject = otherField.getOwner();
 
         Ganymede.debug("Namespace " + this.getName() + " has a conflict for value " + value.toString() +
-                       " in Object " + thisObject.getLabel() + "'s " + thisField.getName() + " field, and in Object " +
+                       " in " + thisObject.getTypeName() + " " + thisObject.getLabel() + "'s " +
+                       thisField.getName() + " field, and in " + otherObject.getTypeName() + " " +
                        otherObject.getLabel() + "'s " + otherField.getName() + " field.");
       }
 
