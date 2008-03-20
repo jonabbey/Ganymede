@@ -1844,6 +1844,56 @@ public final class DBNameSpace implements NameSpace {
 	this.uniqueHash.remove(elementsToRemove.elementAt(i));
       }
   }
+
+  /**
+   * This method is designed for doing conflict detection between this
+   * DBNameSpace and another DBNameSpace that we might be looking at
+   * merging into this namespace.  This is usually necessary when a
+   * Ganymede adopter is collapsing two namespaces into one.
+   *
+   * In addition to returning true if there are values in conflict
+   * between the two namespaces, or false if conflicts exist, a report
+   * of the conflicting values will be written to the Ganymede admin
+   * console and the Ganymede server's stdout.
+   */
+
+  public synchronized boolean findConflicts(DBNameSpace otherSpace)
+  {
+    boolean success = true;
+    Enumeration en = this.uniqueHash.keys();
+
+    while (en.hasMoreElements())
+      {
+        Object value = en.nextElement();
+
+        if (!otherSpace.containsKey(value))
+          {
+            continue;
+          }
+
+        success = false;
+
+        DBField thisField = this.lookupPersistent(value);
+        DBField otherField = otherSpace.lookupPersistent(value);
+
+        if (thisField == null || otherField == null)
+          {
+            // oops, the conflict isn't really between persistent
+            // registrations across the two name spaces.. never mind.
+
+            continue;
+          }
+
+        DBObject thisObject = thisField.getOwner();
+        DBObject otherObject = otherField.getOwner();
+
+        Ganymede.debug("Namespace " + this.getName() + " has a conflict for value " + value.toString() +
+                       " in Object " + thisObject.getLabel() + "'s " + thisField.getName() + " field, and in Object " +
+                       otherObject.getLabel() + "'s " + otherField.getName() + " field.");
+      }
+
+    return success;
+  }
 }
 
 /*------------------------------------------------------------------------------
