@@ -453,9 +453,14 @@ public class Qsmtp implements Runnable {
 
                 while (threaded && !dispatchMessage(message))
                   {
+                    long delay = count++ * 1000;
+
+                    System.err.println("Qsmtp mailer thread: failure sending message");
+                    System.err.println("Will try to send the message again in " + count + " seconds.");
+
                     try
                       {
-                        Thread.currentThread().sleep(count++ * 1000);  // delay for an increasing amount of time between tries
+                        Thread.currentThread().sleep(delay);
                       }
                     catch (InterruptedException ex)
                       {
