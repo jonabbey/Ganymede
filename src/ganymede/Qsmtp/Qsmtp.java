@@ -118,7 +118,9 @@ public class Qsmtp implements Runnable {
   private boolean threaded = false;
   private Thread backgroundThread;
 
-  private MessageTimeoutThread timeoutThread = new MessageTimeoutThread();
+  private Socket sock = null;
+
+  private MessageTimeoutThread timeoutThread = new MessageTimeoutThread(this);
 
   /* -- */
 
@@ -518,7 +520,7 @@ public class Qsmtp implements Runnable {
    * @return False if any problems occurred during transmission.
    */
 
-  private boolean dispatchMessage(messageObject msgObj)
+  private synchronized boolean dispatchMessage(messageObject msgObj)
   {
     String rstr;
     String sstr;
@@ -534,7 +536,6 @@ public class Qsmtp implements Runnable {
     DataInputStream replyStream = null;
     BufferedReader reply = null;
     PrintWriter send = null;
-    Socket sock = null;
 
     /* -- */
 
@@ -797,9 +798,31 @@ public class Qsmtp implements Runnable {
     finally
       {
         timeoutThread.disableTimeout();
+        sock = null;
       }
 
     return true;
+  }
+
+  /**
+   * This method is used by the MessageTimeoutThread to force the
+   * network socket closed if it is currently in use.
+   */
+
+  public void forceSocketClosed()
+  {
+    try
+      {
+        this.sock.close();
+      }
+    catch (NullPointerException ex)
+      {
+        // shrug, guess we don't have a socket after all
+      }
+    catch (IOException ex)
+      {
+        // shrug, guess it's already closed?
+      }
   }
 
   /**
@@ -912,48 +935,41 @@ class MessageTimeoutThread extends Thread {
   final boolean debug = false;
   private boolean dieNow = false;
   private long timeout = 0;
-  private Thread threadToWake = null;
+  private Qsmtp mailer = null;
 
   /* -- */
 
-  public MessageTimeoutThread()
+  public MessageTimeoutThread(Qsmtp mailer)
   {
     super("Qsmtp MessageTimeoutThread");
+    this.mailer = mailer;
     this.setDaemon(true);       // don't block shutdown for us, in case someone forgets to close a mailer
   }
 
   /**
    * This method is intended to be called by a Qsmtp object from the
    * thread that is handling the dispatchMessage() call.  It registers
-   * the calling thread to be interrupted if the same thread does not
-   * call disableTimeout() on this MessageTimeoutThread within
+   * the Qsmtp object passed into the MessageTimeoutThread constructor
+   * to have its network socket forcibly closed if disableTimeout() is
+   * not called on this MessageTimeoutThread within
    * Qsmtp.messageTimeout milliseconds.
    */
 
   public synchronized void enableTimeout()
   {
-    this.threadToWake = Thread.currentThread();
     this.timeout = Qsmtp.messageTimeout;
     this.interrupt();
   }
 
   /**
-   * This method is intended to be called by a Qsmtp object from the
-   * thread that is handling the dispatchMessage() call.  It cancels
-   * any scheduled interrupt on the calling thread.
+   * This method stops this watchdog timer thread from firing the
+   * forced socket closure on the attached Qsmtp object.
    */
 
   public synchronized void disableTimeout()
   {
     this.timeout = 0;
     this.interrupt();
-
-    if (this.threadToWake != Thread.currentThread())
-      {
-        System.err.println("Qsmtp.MessageTimeoutThread: warning, mismatched thread in disableTimeout");
-      }
-
-    this.threadToWake = null;
   }
 
   public synchronized void run()
@@ -971,7 +987,7 @@ class MessageTimeoutThread extends Thread {
 
             if (timeout != 0)
               {
-                threadToWake.interrupt();
+                mailer.forceSocketClosed();
                 timeout = 0;
               }
           }
