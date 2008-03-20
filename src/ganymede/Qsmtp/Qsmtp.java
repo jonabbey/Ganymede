@@ -106,7 +106,7 @@ public class Qsmtp implements Runnable {
   static final boolean debug = false;
   static final int DEFAULT_PORT = 25;
   static final String EOL = "\r\n"; // network end of line
-  static final public long messageTimeout = 15000;  // 15 seconds
+  static final public int messageTimeout = 15000;  // 15 seconds
 
   // --
 
@@ -119,8 +119,6 @@ public class Qsmtp implements Runnable {
   private Thread backgroundThread;
 
   private Socket sock = null;
-
-  private MessageTimeoutThread timeoutThread = new MessageTimeoutThread(this);
 
   /* -- */
 
@@ -138,14 +136,12 @@ public class Qsmtp implements Runnable {
   {
     this.hostid = hostid;
     this.port = port;
-    timeoutThread.start();
   }
 
   public Qsmtp(InetAddress address, int port)
   {
     this.address = address;
     this.port = port;
-    timeoutThread.start();
   }
 
   /** 
@@ -268,9 +264,6 @@ public class Qsmtp implements Runnable {
         this.stopThreaded();
         backgroundThread = null;
       }
-
-    timeoutThread.dieNow();
-    timeoutThread = null;
   }
 
   /**
@@ -539,26 +532,26 @@ public class Qsmtp implements Runnable {
 
     /* -- */
 
+    if (to_addresses == null ||
+        to_addresses.size() == 0)
+      {
+        return true;
+      }
+
     try
       {
-        timeoutThread.enableTimeout();
+        local = InetAddress.getLocalHost();
+      }
+    catch (UnknownHostException ioe) 
+      {
+        System.err.println("No local IP address found - is your network up?");
+        ioe.printStackTrace();  // get it into our log
 
-        if (to_addresses == null ||
-            to_addresses.size() == 0)
-          {
-            return true;
-          }
+        return true;        // trying again won't help this message
+      }
 
-        try 
-          {
-            local = InetAddress.getLocalHost();
-          }
-        catch (UnknownHostException ioe) 
-          {
-            System.err.println("No local IP address found - is your network up?");
-            throw ioe;
-          }
-
+    try
+      {
         // initialize connection to our SMTP mailer
 
         if (hostid != null)
@@ -572,6 +565,8 @@ public class Qsmtp implements Runnable {
 
         try
           {
+            sock.setSoTimeout(Qsmtp.messageTimeout);
+
             replyStream = new DataInputStream(sock.getInputStream());
             reply = new BufferedReader(new InputStreamReader(replyStream));
             send = new PrintWriter(sock.getOutputStream(), true);
@@ -784,6 +779,8 @@ public class Qsmtp implements Runnable {
               {
                 // shrug
               }
+
+            sock = null;
           }
       }
     catch (Throwable ex)
@@ -795,34 +792,8 @@ public class Qsmtp implements Runnable {
 
         return false;        // don't propagate up any further, though
       }
-    finally
-      {
-        timeoutThread.disableTimeout();
-        sock = null;
-      }
 
     return true;
-  }
-
-  /**
-   * This method is used by the MessageTimeoutThread to force the
-   * network socket closed if it is currently in use.
-   */
-
-  public void forceSocketClosed()
-  {
-    try
-      {
-        this.sock.close();
-      }
-    catch (NullPointerException ex)
-      {
-        // shrug, guess we don't have a socket after all
-      }
-    catch (IOException ex)
-      {
-        // shrug, guess it's already closed?
-      }
   }
 
   /**
@@ -909,98 +880,5 @@ class messageObject {
     buffer.append(message);
 
     return buffer.toString();
-  }
-}
-
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                            MessageTimeoutThread
-
-------------------------------------------------------------------------------*/
-
-/**
- * This class implements a watchdog timer Thread to make sure
- * that the Qsmtp.dispatchMessage() method doesn't take longer than
- * Qsmtp.messageTimeout milliseconds to complete.
- *
- * The enableTimeout() and disableTimeout() methods in this class are
- * used to enable or disable a Qsmtp.messageTimeout duration timeout,
- * after which time, an interrupt will be sent to the thread running
- * the dispatchMessage() method in the Qsmtp class.
- */
-
-class MessageTimeoutThread extends Thread {
-
-  final boolean debug = false;
-  private boolean dieNow = false;
-  private long timeout = 0;
-  private Qsmtp mailer = null;
-
-  /* -- */
-
-  public MessageTimeoutThread(Qsmtp mailer)
-  {
-    super("Qsmtp MessageTimeoutThread");
-    this.mailer = mailer;
-    this.setDaemon(true);       // don't block shutdown for us, in case someone forgets to close a mailer
-  }
-
-  /**
-   * This method is intended to be called by a Qsmtp object from the
-   * thread that is handling the dispatchMessage() call.  It registers
-   * the Qsmtp object passed into the MessageTimeoutThread constructor
-   * to have its network socket forcibly closed if disableTimeout() is
-   * not called on this MessageTimeoutThread within
-   * Qsmtp.messageTimeout milliseconds.
-   */
-
-  public synchronized void enableTimeout()
-  {
-    this.timeout = Qsmtp.messageTimeout;
-    this.interrupt();
-  }
-
-  /**
-   * This method stops this watchdog timer thread from firing the
-   * forced socket closure on the attached Qsmtp object.
-   */
-
-  public synchronized void disableTimeout()
-  {
-    this.timeout = 0;
-    this.interrupt();
-  }
-
-  public synchronized void run()
-  {
-    while (!dieNow)
-      {
-        try
-          {
-            wait(timeout);
-
-            if (dieNow)
-              {
-                return;
-              }
-
-            if (timeout != 0)
-              {
-                mailer.forceSocketClosed();
-                timeout = 0;
-              }
-          }
-        catch (InterruptedException ie)
-          {
-            // if interrupted, we'll re-enter our loop from the top.
-          }
-      }
-  }
-
-  public synchronized void dieNow()
-  {
-    this.dieNow = true;
-    this.notifyAll();
   }
 }
