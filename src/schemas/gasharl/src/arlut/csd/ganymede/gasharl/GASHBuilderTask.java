@@ -296,6 +296,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     if (baseChanged(SchemaConstants.UserBase) || // users
+        baseChanged((short) 257) ||  // account groups
+        baseChanged((short) 270) || // user netgroups
 	baseChanged((short) 274) || // mail lists
 	baseChanged((short) 275) || // external mail addresses
 	baseChanged((short) 260)) // mailman lists  
@@ -1533,9 +1535,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This Method writes out a mailman list target line to the mailman lists file.<br><br>
+   * This Method writes out a mailman list target line to the mailman lists file.<br/><br/>
    *
-   * The mail list lines in this file look like the following:<br><br>
+   * The mail list lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
@@ -1637,6 +1639,28 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    writeGroupAlias(group, aliases_info);
 	  }
 
+        // add in emailable account groups 
+
+	mailgroups = enumerateObjects((short) 257);
+
+	while (mailgroups.hasMoreElements())
+	  {
+	    group = (DBObject) mailgroups.nextElement();
+	
+	    writeAccountGroupAlias(group, aliases_info);
+	  }
+
+        // add in emailable user netgroups
+
+	mailgroups = enumerateObjects((short) 270);
+
+	while (mailgroups.hasMoreElements())
+	  {
+	    group = (DBObject) mailgroups.nextElement();
+	
+	    writeUserNetgroupAlias(group, aliases_info);
+	  }
+
 	// and the external mail addresses
     
 	externals = enumerateObjects((short) 275);
@@ -1670,9 +1694,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   
 
   /**
-   * This method writes out a mailman alias line to the aliases_info GASH source file.<br><br>
+   * This method writes out a mailman alias line to the aliases_info GASH source file.<br/><br/>
    *
-   * The mailman alias lines in this file look like the following:<br><br>
+   * The mailman alias lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
@@ -1739,9 +1763,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 
   /**
-   * This method writes out a user alias line to the aliases_info GASH source file.<br><br>
+   * This method writes out a user alias line to the aliases_info GASH source file.<br/><br/>
    *
-   * The user alias lines in this file look like the following:<br><br>
+   * The user alias lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
@@ -1829,9 +1853,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a mail list alias line to the aliases_info GASH source file.<br><br>
+   * This method writes out a mail list alias line to the aliases_info GASH source file.<br/><br/>
    *
-   * The mail list lines in this file look like the following:<br><br>
+   * The mail list lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
@@ -1971,9 +1995,242 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a mail list alias line to the aliases_info GASH source file.<br><br>
+   * This method writes out a mail list alias line to the aliases_info
+   * GASH source file, as sourced from a gasharl account
+   * group.<br/><br/>
    *
-   * The mail list lines in this file look like the following:<br><br>
+   * The mail list lines in this file look like the following:<br/><br/>
+   *
+   * <pre>
+   *
+   * :oms:csd-news-dist-omg:csd_staff, granger, iselt, lemma, jonabbey@eden.com
+   *
+   * </pre>
+   *
+   * Where the leading colon identifies to the GASH makefile that it is a group
+   * line and 'oms' is the GASH ownership code.  Ganymede won't try to emit
+   * a GASH ownership code that could be used to load the aliases_info file
+   * back into GASH.
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this alias line
+   *
+   */
+
+  private void writeAccountGroupAlias(DBObject object, PrintWriter writer)
+  {
+    String groupname;
+    Vector group_targets;
+    Invid userInvid;
+    String target;
+
+    int lengthlimit_remaining;
+    int subgroup = 1;
+    String subname;
+
+    /* -- */
+
+    if (!object.isSet(groupSchema.EMAILOK))
+      {
+        return;
+      }
+
+    result.setLength(0);
+
+    groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
+    group_targets = object.getFieldValuesLocal(groupSchema.USERS);
+
+    result.append(":xxx:");
+    result.append(groupname);
+    result.append(":");
+
+    // NIS forces us to a 1024 character limit per key and value, we
+    // need to truncate and extend to match, here.  We'll cut it down
+    // to 900 to give ourselves some slack so we can write out our
+    // chain link at the end of the line
+
+    lengthlimit_remaining = 900 - result.length();
+
+    if (group_targets != null)
+      {
+	for (int i = 0; i < group_targets.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		result.append(", ");
+	      }
+
+	    userInvid = (Invid) group_targets.elementAt(i);
+
+            target = getLabel(userInvid);
+
+            if (2 + target.length() > lengthlimit_remaining)
+              {
+		if (subgroup > 1)
+		  {
+		    subname = groupname + "-gext" + subgroup;
+		  }
+		else
+		  {
+		    subname = groupname + "-gext";
+		  }
+
+                // point to the linked sublist, terminate this entry
+                // line
+
+                result.append(subname);
+                result.append("\n");
+
+                // and initialize the next line, containing the linked
+                // sublist
+
+                result.append(":xxx:");
+                result.append(subname);
+                result.append(":");
+                lengthlimit_remaining = 900 - subname.length() - 6;
+              }
+
+	    result.append(target);
+            lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
+	  }
+      }
+
+    writer.println(result.toString());
+  }
+
+
+  /**
+   *
+   * This method writes out a mail list alias line to the aliases_info
+   * GASH source file, as sourced from a gasharl user netgroup object.<br/><br/>
+   *
+   * The mail list lines in this file look like the following:<br/><br/>
+   *
+   * <pre>
+   *
+   * :oms:csd-news-dist-omg:csd_staff, granger, iselt, lemma, jonabbey@eden.com
+   *
+   * </pre>
+   *
+   * Where the leading colon identifies to the GASH makefile that it is a group
+   * line and 'oms' is the GASH ownership code.  Ganymede won't try to emit
+   * a GASH ownership code that could be used to load the aliases_info file
+   * back into GASH.
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this alias line
+   *
+   */
+
+  private void writeUserNetgroupAlias(DBObject object, PrintWriter writer)
+  {
+    String groupname;
+    Vector group_targets;
+    Vector sub_netgroups;
+    Vector targets;
+
+    String target;
+
+    int lengthlimit_remaining;
+    int subgroup = 1;
+    String subname;
+
+    /* -- */
+
+    if (!object.isSet(userNetgroupSchema.EMAILOK))
+      {
+        return;
+      }
+
+    result.setLength(0);
+
+    groupname = (String) object.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+    group_targets = object.getFieldValuesLocal(userNetgroupSchema.USERS);
+    sub_netgroups = object.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+
+    targets = new Vector();
+
+    if (group_targets != null)
+      {
+	for (int i = 0; i < group_targets.size(); i++)
+	  {
+            targets.addElement(getLabel((Invid) group_targets.elementAt(i)));
+          }
+      }
+
+    if (sub_netgroups != null)
+      {
+	for (int i = 0; i < sub_netgroups.size(); i++)
+	  {
+            DBObject subnetgroup = getObject((Invid) sub_netgroups.elementAt(i));
+
+            if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
+              {
+                targets.addElement(subnetgroup.getLabel());
+              }
+          }
+      }
+
+    result.append(":xxx:");
+    result.append(groupname);
+    result.append(":");
+
+    // NIS forces us to a 1024 character limit per key and value, we
+    // need to truncate and extend to match, here.  We'll cut it down
+    // to 900 to give ourselves some slack so we can write out our
+    // chain link at the end of the line
+
+    lengthlimit_remaining = 900 - result.length();
+
+    for (int i = 0; i < targets.size(); i++)
+      {
+        if (i > 0)
+          {
+            result.append(", ");
+          }
+
+        target = (String) targets.elementAt(i);
+
+        if (2 + target.length() > lengthlimit_remaining)
+          {
+            if (subgroup > 1)
+              {
+                subname = groupname + "-gext" + subgroup;
+              }
+            else
+              {
+                subname = groupname + "-gext";
+              }
+
+            // point to the linked sublist, terminate this entry
+            // line
+
+            result.append(subname);
+            result.append("\n");
+
+            // and initialize the next line, containing the linked
+            // sublist
+
+            result.append(":xxx:");
+            result.append(subname);
+            result.append(":");
+            lengthlimit_remaining = 900 - subname.length() - 6;
+          }
+
+        result.append(target);
+        lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
+      }
+
+    writer.println(result.toString());
+  }
+
+  /**
+   *
+   * This method writes out a mail list alias line to the aliases_info
+   * GASH source file, as sourced from an emailable user
+   * netgroup.<br/><br/>
+   *
+   * The mail list lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
@@ -2963,9 +3220,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a type 1 line to the hosts_info DNS source file.<br><br>
+   * This method writes out a type 1 line to the hosts_info DNS source file.<br/><br/>
    *
-   * The lines in this file look like the following:<br><br>
+   * The lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
@@ -3108,9 +3365,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a type 2 line to the hosts_info DNS source file.<br><br>
+   * This method writes out a type 2 line to the hosts_info DNS source file.<br/><br/>
    *
-   * The lines in this file look like the following:<br><br>
+   * The lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
