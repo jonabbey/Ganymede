@@ -510,7 +510,9 @@ public class Qsmtp implements Runnable {
   /**
    * <P>This method handles the actual mail-out</P>
    *
-   * @return False if any problems occurred during transmission.
+   * @return false if any problems occurred during transmission which
+   * should necessitate a retry of the message transmission, true
+   * otherwise.
    */
 
   private synchronized boolean dispatchMessage(messageObject msgObj)
