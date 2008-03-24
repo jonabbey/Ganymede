@@ -5,7 +5,6 @@
     <namespace name="username" case-sensitive="false"/>
     <namespace name="access" case-sensitive="false"/>
     <namespace name="persona" case-sensitive="false"/>
-    <namespace name="groupname" case-sensitive="false"/>
     <namespace name="IPspace" case-sensitive="false"/>
     <namespace name="DNS" case-sensitive="false"/>
     <namespace name="roomspace" case-sensitive="true"/>
@@ -585,7 +584,7 @@ Limited to 16 for NFS.</comment>
                 <minlength val="2"/>
                 <maxlength val="8"/>
                 <badchars val=" :"/>
-                <namespace val="groupname"/>
+                <namespace val="username"/>
               </typedef>
             </fielddef>
             <fielddef name="Password" id="257">
@@ -846,7 +845,7 @@ for this network.</comment>
                 <typedef type="string">
                   <maxlength val="24"/>
                   <badchars val=" :,"/>
-                  <namespace val="groupname"/>
+                  <namespace val="username"/>
                 </typedef>
               </fielddef>
               <fielddef name="Systems" id="257">
@@ -881,7 +880,7 @@ for this network.</comment>
                 <typedef type="string">
                   <maxlength val="24"/>
                   <badchars val=" ,:"/>
-                  <namespace val="groupname"/>
+                  <namespace val="username"/>
                 </typedef>
               </fielddef>
               <fielddef name="Can_Receive_Email" id="260">
