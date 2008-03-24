@@ -75,6 +75,7 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Random;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -111,8 +112,20 @@ public class Qsmtp implements Runnable {
   static final int DEFAULT_PORT = 25;
   static final String EOL = "\r\n"; // network end of line
   static final public int messageTimeout = 15000;  // 15 seconds
+  static final private Random randomizer = new Random();
 
-  // --
+  /**
+   * This method returns a properly mail-formatted date string.
+   */
+
+  static public String formatDate(Date date)
+  {
+    DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", 
+						java.util.Locale.US);
+    return formatter.format(date);
+  }
+
+  // ---
 
   private String hostid = null;
   private InetAddress address = null;
@@ -311,7 +324,7 @@ public class Qsmtp implements Runnable {
                                           String textBody) throws IOException
   {
     Vector MIMEheaders = new Vector();
-    String separator = "B24FDA77DFMIMEISNEAT4976B1CA5E8A49";
+    String separator = generateRandomBoundary();
     StringBuffer buffer = new StringBuffer();
 
     /* -- */
@@ -358,6 +371,16 @@ public class Qsmtp implements Runnable {
     buffer.append("--\n\n");
 
     return sendmsg(from_address, to_addresses, subject, buffer.toString(), MIMEheaders);
+  }
+
+  /**
+   * Convenience method to return a unique MIME separator for a given
+   * HTML attachment message
+   */
+
+  private String generateRandomBoundary()
+  {
+    return Integer.toHexString(randomizer.nextInt()) + "MIMEISNEAT" + Integer.toHexString(randomizer.nextInt());
   }
 
   /**
@@ -541,7 +564,7 @@ public class Qsmtp implements Runnable {
     if (to_addresses == null ||
         to_addresses.size() == 0)
       {
-        return true;
+        return true;            // we can't do anything here, no need to retry
       }
 
     try
@@ -810,16 +833,6 @@ public class Qsmtp implements Runnable {
     return true;
   }
 
-  /**
-   * <p>This method returns a properly mail-formatted date string.</p>
-   */
-
-  public static String formatDate(Date date)
-  {
-    DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", 
-						java.util.Locale.US);
-    return formatter.format(date);
-  }
 }
 
 /*------------------------------------------------------------------------------
