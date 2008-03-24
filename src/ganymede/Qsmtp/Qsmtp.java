@@ -753,9 +753,17 @@ public class Qsmtp implements Runnable {
               {
                 // close our mailer connection
 
-                send.print("QUIT");
-                send.print(EOL);
-                send.flush();
+                try
+                  {
+                    send.print("QUIT");
+                    send.print(EOL);
+                    send.flush();
+                  }
+                catch (Throwable ioex)
+                  {
+                    // we'll want to rethrow the original exception,
+                    // not one that happened here
+                  }
               }
           }
         finally
