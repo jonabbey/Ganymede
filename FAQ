@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-? ??, 2005
+April 1, 2008
 FAQ
 ---------------------------------------------
 
@@ -322,7 +322,7 @@ the source tree.  For about a year and a half, Jonathan Abbey and Deepak
 Giridharagopal developed a blizzard of new features and fixed a tremendous
 number of bugs.
 
-   At this point, Ganymede proper has been under development for ten years.
+  At this point, Ganymede proper has been under development for twelve years.
 
      ------------------------------------------------------------
 
@@ -413,6 +413,6 @@ see the question you asked or bug you reported.
 Ganymede FAQ
 Author: Jonathan Abbey
 Release: $name:  $
-Version: $Revision: 1.18 $
-Last Mod Date: $Date: 2001/10/12 02:38:44 $
+Version: $Revision$
+Last Mod Date: $Date$
 -------------------------------------------------------------------------------

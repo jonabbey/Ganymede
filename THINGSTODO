@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-January 1, 2008
+April 1, 2008
 THINGSTODO
 
 Last Revision Changed: $Rev$
@@ -29,6 +29,11 @@ is not workable from a user interface perspective, and may be a real
 burden on the client's memory.  For real scalability it might be
 better to require the user to manually type in items when the lists
 get too big.
+
+Note, however, that during development of Ganymede 2.0, we test-loaded
+the Ganymede server to 250,000 users and 250,000 groups of random
+data, using the userKit.  At those crazy levels, the Ganymede server
+balloons up to 600 megs of RAM, but it still works fine.
 
 1) Documentation/Help
 
