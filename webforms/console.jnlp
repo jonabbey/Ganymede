@@ -22,6 +22,8 @@
     <title>Ganymede Admin Console</title>
     <vendor>Applied Research Laboratories</vendor>
     <homepage href="http://www.arlut.utexas.edu/gash2"/>
+    <icon href="#WEBROOT/icon.gif" kind="default"/>
+    <icon href="#WEBROOT/ganymede_splash.png" kind="splash"/>
     <description>Ganymede Admin Console</description>
   </information>
   <resources>
