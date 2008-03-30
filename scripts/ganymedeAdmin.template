@@ -50,7 +50,7 @@ MINHEAP=32m
 # can grow to.  It should be expressed as a number followed by the
 # letter 'm' for megabyte.  I.e., 'MAXHEAP=256m', or 'MAXHEAP=2048m'.
 
-MAXHEAP=48m
+MAXHEAP=64m
 
 # If you want to force the use of a specific language in the client,
 # without respect to the native locale of the Java installation, you

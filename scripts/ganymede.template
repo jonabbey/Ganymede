@@ -52,7 +52,7 @@ MINHEAP=32m
 # Ganymede client caches data from the server extensively, so this
 # value may need to be bigger than you would think.
 
-MAXHEAP=72m
+MAXHEAP=128m
 
 # If you want to force the use of a specific language in the client,
 # without respect to the native locale of the Java installation, you
