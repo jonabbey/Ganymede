@@ -22,11 +22,11 @@ development contributions of the following individuals:
 
  Jonathan Abbey, jonabbey@arlut.utexas.edu
 
-Primary architect and coder on the project.  Developed the Ganymede
-server and admin console, the table and tree GUI components used in
-both the admin console and the primary client, the great bulk of the
-project documentation (or lack thereof) as well as much of the
-Subversion and build script work.  Answers e-mail.
+Primary architect and coder on the project.  Designed and implemented
+the Ganymede server and admin console, the table and tree GUI
+components used in both the admin console and the primary client, the
+great bulk of the project documentation (or lack thereof) as well as
+much of the Subversion and build script work.  Answers e-mail.
 
 --
 
@@ -36,11 +36,11 @@ While working at ARL, Deepak made extensive contributions to the
 development of Ganymede 2.0, including transitioning Ganymede's build
 system from old Perl scripts to using Ant.  Deepak also developed the
 Jython integration, and worked on the new Sync Channel software, both
-in the Ganymede client and especially in the wonder Python Sync
-Channel servicing code.
+in the Ganymede client and especially in the amazing Python Sync
+Channel servicing code framework, known as SyncUtil.
 
-Deepak designed and implemented the Ganymede 2.0 Query Language, using
-Terrance Parr's splendiferously good ANTLR tool.
+Deepak also designed and implemented the Ganymede 2.0 Query Language,
+using Terrance Parr's splendiferously good ANTLR tool.
 
 --
 
