@@ -58,5 +58,92 @@
    you write in the Ganymede system will be easily translatable by
    someone else.</p>
 
+   <h2>Translating Ganymede Messages</h2>
+
+   <p>The default message files are named after the classes they are
+   serving.  For instance, the message strings for the client's
+   central class, <code>arlut.csd.ganymede.client.gclient</code>, is
+   held in
+   <code>src/resources/arlut/csd/ganymede/client/gclient.properties</code>.</p>
+
+   <p>German language message strings are held in files named after
+   the class are named the same, with the ISO language code addded to
+   the name of the class.  The German version of the gclient message
+   file is called
+   <code>src/resources/arlut/csd/ganymede/client/gclient_de.properties</code>.</p>
+
+   <p>By extension, a French language message file would be
+   gclient_fr.properties, a Norwegian version would be
+   gclient_no.properties, etc.</p>
+
+   <p>You can find a complete list of these language codes at
+   <a href="http://ftp.ics.uci.edu/pub/ietf/http/related/iso639.txt">http://ftp.ics.uci.edu/pub/ietf/http/related/iso639.txt</a>.</p>
+
+   <p>To support adopters writing their own translations, Ganymede's
+   ant build script, <code>src/build.xml</code., includes special
+   support for validating all message files against the Ganymede
+   source code.</p>
+
+   <p>If you run <code>ant validate</code> a Perl script will be run
+   which will analyze all message files and cross-check them against
+   the Ganymede sources.  <code>ant validate</code> will print out a
+   report letting you know how complete your translation is, and
+   whether it is properly constructed.</p>
+
+   <p>If you do generate a new translation for Ganymede, we encourage
+   you to send us patches at ganymede_author@arlut.utexas.edu for us
+   to incorporate into the master Ganymede repository.</p>
+
+   <h2>Writing New Code to be Translatable</h2>
+
+   <p>The Ganymede source tree uses a class named <a
+   href="javadoc/arlut/csd/Util/TranslationService.html">arlut.csd.Util.TranslationService</a>
+   pervasively to handle translation for all text message strings in
+   the server, client, and admin console.</p>
+ 
+   <p>This class must be used in conjunction with a particular usage
+   convention in order to support automatic validation of message
+   files with the 'ant validate' task in the Ganymede build.xml file.</p>
+ 
+   <p>That convention is that every class that needs language
+   translation services must declare a static final TranslationService
+   object named 'ts' which is initialized with the fully qualified
+   name of the class to which it belongs.</p>
+
+   <p>All of your translatable code should include a declaration for
+   'ts' that looks like this:</p>
+
+<pre>
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeXMLSession");
+</pre>
+
+   <p>With 'arlut.csd.ganymede.server.GanymedeXMLSession' replaced
+   with the fully qualified name of your class.</p>
+ 
+   <p>Actual translation calls should all be in the form of
+   ts.l("messageName"), possibly with extra parameters, such as
+   ts.l("messageName", arg1, arg2), and so forth.  The 'l' method of
+   TranslationService is designed to be as compact as possible so that
+   it can be used wherever you would normally use a string.  It
+   returns a String formatted according to whatever language-sensitive
+   property files are defined in Ganymede's src/resources
+   directory.</p>
+ 
+   <p>If you follow these conventions, the 'ant validate' task will be
+   able to automatically analyze your code and cross reference it
+   against the message property files under src/resources.  'ant
+   validate' will warn you if you are missing messages, or if the
+   messages are malformed, or if the messages specify a different
+   number of parameters than the source code which users the messages
+   is expecting.</p>
+ 
+   <p>So, for use within Ganymede, please be sure always to follow
+   these conventions in your code.</p>
+
   </body>
 </html>
