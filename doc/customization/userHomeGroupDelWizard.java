@@ -263,7 +263,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 		    "ok.gif");
       }
 
-    if (retVal == null || retVal.didSucceed())
+    if (ReturnVal.didSucceed(retVal))
       {
 	// we're all systems go, go ahead and do the group
 	// deletion that started this whole thing
@@ -281,7 +281,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 
 	retVal = invF.deleteElement(index);
 
-	if (retVal == null || retVal.didSucceed())
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    retVal = success("Home Group Change Performed",
 			     "The user's old home group has been successfully removed, and a new default set.",

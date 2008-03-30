@@ -176,7 +176,6 @@ public class userRenameWizard extends GanymediatorWizard {
 	  }
       }
 
-
     System.err.println("userRenameWizard: Calling field.setValue()");
 
     state = DONE;		// let the userCustom wizardHook know to go 
@@ -189,6 +188,12 @@ public class userRenameWizard extends GanymediatorWizard {
     // go through to completion.
 
     retVal = field.setValue(newname);
+
+    if (!ReturnVal.didSucceed(retVal))
+      {
+        return retVal;
+      }
+
     System.err.println("userRenameWizard: Returned from field.setValue()");
 
     // now we need to add the old name to the alias list, possibly.
@@ -198,20 +203,17 @@ public class userRenameWizard extends GanymediatorWizard {
 	aliases.addElementLocal(oldname);
       }
 
-    if (retVal == null)
-      {
-	retVal = success("User Rename Performed",
-			 "OK, User renamed.",
-			 "Thanks",
-			 null,
-			 "ok.gif");
-	
-	retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
-	retVal.addRescanField(userObject.getInvid(), userSchema.ALIASES);
-	retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
-	retVal.addRescanField(userObject.getInvid(), userSchema.VOLUMES);
-	retVal.addRescanField(userObject.getInvid(), userSchema.EMAILTARGET);
-      }
+    retVal = ReturnVal.merge(retVal, success("User Rename Performed",
+                                             "OK, User renamed.",
+                                             "Thanks",
+                                             null,
+                                             "ok.gif"));
+
+    retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
+    retVal.addRescanField(userObject.getInvid(), userSchema.ALIASES);
+    retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
+    retVal.addRescanField(userObject.getInvid(), userSchema.VOLUMES);
+    retVal.addRescanField(userObject.getInvid(), userSchema.EMAILTARGET);
     
     System.err.println("Returning confirmation dialog");
     
