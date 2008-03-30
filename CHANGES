@@ -1246,7 +1246,7 @@ be thrown at run time when plug-in code is called which was compiled
 with versions of Ganymede prioer to Subversion repository version
 7845.
 
-For convenience's sake, the ReturnVal class has three new static
+For convenience's sake, the ReturnVal class has four new static
 methods which perform the proper null check as part of their
 operation, reducing the necessity for the constant
 
@@ -1258,11 +1258,12 @@ idiom.  Now, one can say
 
 to achieve the same effect.
 
-The three new static methods on ReturnVal are
+The four new static methods on ReturnVal are
 
   static public boolean didSucceed(ReturnVal retVal);
   static public boolean hasTransformedValue(ReturnVal retVal);
-  static public boolean isDoNormalProcessing(ReturnVal retVal)
+  static public boolean isDoNormalProcessing(ReturnVal retVal);
+  static public boolean wizardHandled(ReturnVal retVal);
 
 The biggest change to ReturnVal which assists in the internal logic of
 the Ganymede server is the addition of the static ReturnVal.merge()
