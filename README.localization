@@ -1,0 +1,80 @@
+Ganymede Release 2.0
+April 1, 2008
+README.localization
+
+Last Revision Changed: $Rev$
+Last Changed By: $Author$
+Last Mod Date: $Date$
+SVN URL: $HeadURL$
+
+---------------------------------------------
+
+Ganymede 2.0 includes extensive support for localization and
+internationalization.  The Ganymede server, client, admin console and
+text mode xmlclient all use property files to define all publicly
+visible message strings.
+
+These properties files are located under src/resources.  The bulk of
+the Ganymede server's message files are located under
+
+    src/resources/arlut/csd/ganymede/server
+
+and those for the client are located under
+
+    src/resources/arlut/csd/ganymede/client
+
+and for the admin console under
+
+    src/resources/arlut/csd/ganymede/admin
+
+The Ganymede 2.0 distribution currently includes the default English
+language message files and a quite complete German language
+translation, provided by Stefan Bier from fg-networking.de.
+
+When you run the Ganymede server, client, or admin console, you will
+by default see the language suitable for the system you are running
+the server, client, or admin console on.  Dates and numbers will also
+be printed with a region and language-suitable form.
+
+If you want, you can force the use of a specific language.  See the
+runServer script for instructions on how to set the language for the
+server, and the client.jnlp and console.jnlp files for instructions on
+how to force a specific language for the client and admin console.
+
+If you like, you can create your own translation files for Ganymede by
+creating new properties files in the above directories.
+
+The default message files are named after the classes they are
+serving.  For instance, the message strings for the client's central
+class, arlut.csd.ganymede.client.gclient, is held in
+src/resources/arlut/csd/ganymede/client/gclient.properties.
+
+German language message strings are held in files named after the
+class are named the same, with the ISO language code addded to the
+name of the class.  The German version of the gclient message file is
+called src/resources/arlut/csd/ganymede/client/gclient_de.properties.
+
+By extension, a French language message file would be
+gclient_fr.properties, a Norwegian version would be
+gclient_no.properties, etc.
+
+You can find a complete list of these language codes at
+http://ftp.ics.uci.edu/pub/ietf/http/related/iso639.txt
+
+To support adopters writing their own translations, Ganymede's ant
+build script, src/build.xml, includes special support for validating
+all message files against the Ganymede source code.
+
+If you run 'ant validate', a Perl script will be run which will
+analyze all message files and cross-check them against the Ganymede
+sources.  'ant validate' will print out a report letting you know how
+complete your translation is, and whether it is properly constructed.
+
+If you do generate a new translation for Ganymede, we encourage you to
+send us patches at ganymede_author@arlut.utexas.edu for us to
+incorporate into the master Ganymede repository.
+
+Thanks!
+
+Jonathan Abbey
+jonabbey@arlut.utexas.edu
