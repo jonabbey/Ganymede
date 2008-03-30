@@ -169,7 +169,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     retVal = numField.setValueLocal(uidVal);
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	success = false;
       }
@@ -207,7 +207,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	    retVal = invf.setValueLocal(objid.getInvid());
 
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		success = false;
 	      }
@@ -401,7 +401,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	passfield = (PasswordDBField) getField(userSchema.PASSWORD);
 	retVal = passfield.setCryptPass(null); // we know our schema uses crypted pass'es
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    finalizeInactivate(false);
 	    return retVal;
@@ -412,7 +412,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	stringfield = (StringDBField) getField(LOGINSHELL);
 	retVal = stringfield.setValueLocal("/bin/false");
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    finalizeInactivate(false);
 	    return retVal;
@@ -428,7 +428,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		retVal = stringfield.deleteElement(0);
 		
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    finalizeInactivate(false);
 		    return retVal;
@@ -444,7 +444,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	date = (DateDBField) getField(SchemaConstants.ExpirationField);
 	retVal = date.setValueLocal(null);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    finalizeInactivate(false);
 	    return retVal;
@@ -461,7 +461,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	date = (DateDBField) getField(SchemaConstants.RemovalField);
 	retVal = date.setValueLocal(cal.getTime());
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    finalizeInactivate(false);
 	    return retVal;
@@ -597,7 +597,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    passfield = (PasswordDBField) getField(userSchema.PASSWORD);
 	    retVal = passfield.setPlainTextPass(reactivateWizard.password);
 	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		finalizeReactivate(false);
 		return retVal;
@@ -633,7 +633,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    stringfield = (StringDBField) getField(LOGINSHELL);
 	    retVal = stringfield.setValue(reactivateWizard.shell);
 	    
-	    if (retVal != null && !retVal.didSucceed())
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		finalizeReactivate(false);
 		return retVal;
@@ -650,7 +650,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		retVal = stringfield.deleteElement(0);
 		
-		if (retVal != null && !retVal.didSucceed())
+		if (!ReturnVal.didSucceed(retVal))
 		  {
 		    finalizeReactivate(false);
 		    return retVal;
@@ -665,7 +665,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	date = (DateDBField) getField(SchemaConstants.RemovalField);
 	retVal = date.setValueLocal(null);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    finalizeReactivate(false);
 	    return retVal;
@@ -992,7 +992,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// do it.. we assume this is being done by user removal logic,
 	// so we won't press the issue.
 	
-	if (deleting && (value == null))
+	if (isDeleting() && (value == null))
 	  {
 	    return true;
 	  }
@@ -1104,7 +1104,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    ReturnVal retVal = sf.setValueLocal(tempString);
 
-	    if ((retVal != null) && (!retVal.didSucceed()))
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		if (okay)
 		  {
@@ -1396,7 +1396,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // if we're setting the field to null, don't need to pass it through
 	    // a wizard.. we're probably just deleting this user.
 
-	    if (deleting && (param1 == null))
+	    if (isDeleting() && (param1 == null))
 	      {
 		return null;
 	      }
