@@ -7,7 +7,7 @@
   <body BGCOLOR="#FFFFFF">
 
 <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo">
-<h1>Ganymede Installation Guide<br/>Release 2.0 - 3 January 2008</h1>
+<h1>Ganymede Installation Guide<br/>Release 2.0 - 1 April 2008</h1>
 <hr>
 
 <p>Note: If you are reading this as the <code>INSTALL</code> text file
@@ -130,8 +130,8 @@ Solaris, Linux, and Windows at <a
 href="http://java.sun.com/j2se/">http://java.sun.com/j2se/</a>.  The
 Ganymede server has primarily been developed and tested on Solaris and
 Linux, but the Ganymede clients have been successfully run on Solaris,
-Linux, Windows, Mac OS X Jaguar and later, FreeBSD, AIX, HP/UX, and
-others.</p>
+Linux, Windows XP, Vista, Mac OS X Jaguar and later, FreeBSD, AIX,
+HP/UX, and others.</p>
 
 <p>As well as Java, you will need /bin/sh, Perl 5.003 (or later), and
 Apache Ant to build and install the Ganymede software.  The Ganymede
@@ -482,25 +482,10 @@ functionality, so the Ganymede server doesn't know how to detach
 itself from your terminal window or console, and it doesn't know how
 to respond gracefully to kill signals.</p>
 
-<p>Because of these reasons, we suggest you run the Ganymede server in
-a fashion similar to this:</p>
-
-<pre>
-      server% bin/runServer >& server.log &
-</pre>
-
-<p>if you are running csh or tcsh, or</p>
-
-<pre>
-      bash$ bin/runServer > server.log 2>&1 &
-</pre>
-
-<p>if you are running sh or bash.</p>
-
-<p>In either case, you want to capture all stdout and stderr output
-from the server into a log file.  The Ganymede server will print out
-status and error messages as it runs, and you really want to capture
-this information.</p>
+<p>The Ganymede 2.0 runServer script takes care of detaching the
+Ganymede server from the console and automatically captures the
+server's stdout and stderr streams to the <code>server.log</code> file
+in the server installation directory.</p>
 
 <p>You can view the server's log as the server runs with the
 <code>tail</code> command, using the <code>-f</code> option, as
