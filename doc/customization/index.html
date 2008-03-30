@@ -6,7 +6,7 @@
   <BODY BGCOLOR="#FFFFFF">
 
     <IMG SRC="ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede">
-    <H1><FONT FACE="Arial,Helvetica">DBEditObject Subclass Customization Guide<br>Ganymede Release 2.0dev - ? ? 2005<br/>$Rev: 6254 $</FONT></H1>
+    <H1><FONT FACE="Arial,Helvetica">DBEditObject Subclass Customization Guide<br/>Ganymede Release 2.0 - 1 April 2008<br/>$Rev: 6254 $</FONT></H1>
     
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCFFCC">
@@ -1052,13 +1052,13 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
       </tr>
     </table> 
     
-    <br><br>
+    <br/><br/>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
 	<td colspan="1" align="right"><h3><b>PSEUDOSTATIC Methods</b></h3></td></tr></table> 
 
-    <br><br>
+    <br/><br/>
 
     <table border="1">
 	<th>Method</th>
@@ -1092,7 +1092,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	<td>
 	  Customization method to allow this Ganymede object type to
 	  override the default permissions mechanism for special
-	  purposes.<br><br>
+	  purposes.<br/><br/>
 	  
 	  If this method returns null, the default permissions mechanism
 	  will be followed.
@@ -1105,7 +1105,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	<td>
 	  Customization method to allow this Ganymede object type to grant
 	  permissions above and beyond the default permissions mechanism
-	  for special purposes.<br><br>
+	  for special purposes.<br/><br/>
 	  
 	  If this method returns null, the default permissions mechanism
 	  will be followed.
@@ -1183,7 +1183,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  to inactivate a given object.  The client's DBSession object
 	  will call this per-class method to do an object type-
 	  sensitive check to see if this object feels like being
-	  available for inactivating by the client.<br><br>
+	  available for inactivating by the client.<br/><br/>
 	  
 	  Note that unlike canRemove(), canInactivate() takes
 	  a DBEditObject instead of a DBObject.  This is because
@@ -1273,7 +1273,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
       </tr>
     </table>
 
-    <br><br>
+    <br/><br/>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr BGCOLOR="#CCCCFF">
@@ -1341,7 +1341,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  whether to allow it to proceed normally, to reject the
 	  operation outright, to do some other operation instead of
 	  the requested one, or to start a wizard process to handle
-	  things interactively with the user.<br><br>
+	  things interactively with the user.<br/><br/>
 	  
 	  This method is called before any of the finalize methods
 	  listed below.  The finalize methods represent the last
@@ -1413,7 +1413,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  cache the value returned by choices().  If the client
 	  already has the key cached on the client side, it can
 	  provide the choice list from its cache rather than calling
-	  choices() on this object again.<br><br>
+	  choices() on this object again.<br/><br/>
 
 	  If there is no caching key, this method will return null.
 	</td>
@@ -1426,7 +1426,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  This method provides a hook that can be used to generate
 	  choice lists for invid and string fields that provide
 	  such.  String and Invid DBFields will call their owner's
-	  obtainChoiceList() method to get a list of valid choices.<br><br>
+	  obtainChoiceList() method to get a list of valid choices.<br/><br/>
 	  
 	  This method will provide a reasonable default for targeted
 	  invid fields.
@@ -1523,6 +1523,27 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	<th>Purpose</th>
       <tr>
 	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#preCommitHook()">preCommitHook()</a>
+	</td>
+	<td>
+          This method provides a pre-commit hook that runs after the user
+          has hit commit but before the system has established write locks
+          for the commit.<br/><br/>
+   
+          The intended purpose of this hook is to allow objects that
+          dynamically maintain hidden label fields to update those fields
+          from the contents of the object's other fields at commit time.<br/><br/>
+   
+          This method runs in a checkpointed context.  If this method
+          fails in any operation, you should return a ReturnVal with a
+          failure dialog encoded, and the transaction's commit will be
+          blocked, the checkpoint is rolled back, and a dialog
+          explaining the problem will be presented to the
+          user.<br/><br/>
+	</td>
+      </tr>
+      <tr>
+	<td>
 	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#commitPhase1()">commitPhase1()</a>
 	</td>
 	<td>
@@ -1532,14 +1553,14 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  commit() routine, this object CAN NOT refuse commit()
 	  at a subsequent point.  Once commitPhase1() is called,
 	  the object CAN NOT be changed until the transaction
-	  is either fully committed or abandoned. <br><br>
+	  is either fully committed or abandoned. <br/><br/>
 
 	  This method is intended to be subclassed by application
 	  objects that need to include extra-Ganymede processes
 	  in the two-phase commit protocol.  If a particular
 	  subclass of DBEditObject does not need to involve outside
 	  processes in the full two-phase commit protocol, this
-	  method should not be overridden.<br><br>
+	  method should not be overridden.<br/><br/>
 
           Beware.. it can cause a server dead-lock to call GanymedeSession
           Query methods from within this method.
@@ -1551,14 +1572,14 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	</td>
 	<td>
 	  This method is a hook for subclasses to override to
-	  pass the phase-two commit command to external processes.<br><br>
+	  pass the phase-two commit command to external processes.<br/><br/>
 
 	  For normal usage this method would not be overridden.  For
 	  cases in which change to an object would result in an external
 	  process being initiated whose success or failure would not
 	  affect the successful commit of this DBEditObject in the
 	  Ganymede server, the process invokation should be placed here,
-	  rather than in commitPhase1().<br><br>
+	  rather than in commitPhase1().<br/><br/>
 
           Beware.. it can cause a server dead-lock to call GanymedeSession
           Query methods from within this method.
