@@ -6,16 +6,12 @@
   </head>
 
   <body>
-    <!--<IMG SRC="../gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede Logo"/>
-    <h1>Ganymede Synchronization Guide<br/>Release 2.0 dev - ? ? 2005<br/>$Rev$</h1>
-    <hr/>-->
-
     <div id="header">
-      <IMG SRC="../gifs/ganymede_title.gif" alt="Ganymede Logo"/>
+      <img src="../gifs/ganymede_title.gif" alt="Ganymede Logo"/>
 
       <div id="title">
         <h1>Ganymede 2.0 Sync Channel Guide</h1>
-        <p>Release 2.0 dev - ? ? 2005<br/>$Rev$</p>
+        <p>Release 2.0 - 1 April 2008<br/>$Rev$</p>
       </div>
 
       <div id="abstract">
@@ -496,43 +492,43 @@
     <p>Here's an example of the sort of XML file that the Full State
     Service Program must be prepared to process:</p>
 
-    <xmp class="listing"><ganymede major="1" minor="0">
-  <ganydata>
-    <object type="User" id="jonabbey" oid="3:1143">
-      <Username>jonabbey</Username>
-      <UID>6074</UID>
-      <Password><password plaintext="S00perSekret" crypt="zv16nogZ9eRP5" md5crypt="$1$bH3vxykP$dkmWhIdVuqC8Y1h0s7PQU1" lanman="8AF317306D28CA711D0DC6E\
-72A9441BB" ntmd4="D3A6370C044FD34C6A487A6F5F53A6C1" ssha="{SSHA}cdHEG7iIMT2ZSHkJEf4fR62v/b23rnMO"/></Password>
-      <Account_Category><invid type="User_Category" id="normal" oid="279:5"/></Account_Category>
-      <Full_Name>Jonathan Abbey</Full_Name>
-      <Badge>x819</Badge>
-      <Division>ITS</Division>
-      <Room>S321</Room>
-      <Office_Phone>835-3199</Office_Phone>
-      <Groups>
-        <invid type="Group" id="omssys" oid="257:245"/>
-        <invid type="Group" id="csdweb" oid="257:114"/>
-        <invid type="Group" id="omrgen" oid="257:264"/>
-      </Groups>
-      <Home_Group><invid type="Group" id="omssys" oid="257:245"/></Home_Group>
-      <Login_Shell>/bin/tcsh</Login_Shell>
-      <Home_Directory>/home/jonabbey</Home_Directory>
-      <Directory_Volume>
-      <object type="Embedded_Automounter_Map_Entry" id="jonabbey/auto.home.default" oid="278:1257">
-        <Automounter_Map><invid type="Automounter_Map" id="auto.home.default" oid="277:2"/></Automounter_Map>
-        <NFS_Volume><invid type="NFS_Volume" id="omg2" oid="276:636"/></NFS_Volume>
-      </object>
-      </Directory_Volume>
-      <Email_Aliases>
-        <string val="abbey"/>
-      </Email_Aliases>
-      <Signature_Alias>jonabbey</Signature_Alias>
-      <Email_target>
-        <string val="jonabbey@arlmail.arlut.utexas.edu"/>
-      </Email_target>
-    </object>
-  </ganydata> 
-</ganymede></xmp>
+    <pre class="listing">&lt;ganymede major="1" minor="0"&gt;
+  &lt;ganydata&gt;
+    &lt;object type="User" id="jonabbey" oid="3:1143"&gt;
+      &lt;Username&gt;jonabbey&lt;/Username&gt;
+      &lt;UID&gt;6074&lt;/UID&gt;
+      &lt;Password&gt;&lt;password plaintext="S00perSekret" crypt="zv16nogZ9eRP5" md5crypt="$1$bH3vxykP$dkmWhIdVuqC8Y1h0s7PQU1" lanman="8AF317306D28CA711D0DC6E\
+72A9441BB" ntmd4="D3A6370C044FD34C6A487A6F5F53A6C1" ssha="{SSHA}cdHEG7iIMT2ZSHkJEf4fR62v/b23rnMO"/&gt;&lt;/Password&gt;
+      &lt;Account_Category&gt;&lt;invid type="User_Category" id="normal" oid="279:5"/&gt;&lt;/Account_Category&gt;
+      &lt;Full_Name&gt;Jonathan Abbey&lt;/Full_Name&gt;
+      &lt;Badge&gt;x819&lt;/Badge&gt;
+      &lt;Division&gt;ITS&lt;/Division&gt;
+      &lt;Room&gt;S321&lt;/Room&gt;
+      &lt;Office_Phone&gt;835-3199&lt;/Office_Phone&gt;
+      &lt;Groups&gt;
+        &lt;invid type="Group" id="omssys" oid="257:245"/&gt;
+        &lt;invid type="Group" id="csdweb" oid="257:114"/&gt;
+        &lt;invid type="Group" id="omrgen" oid="257:264"/&gt;
+      &lt;/Groups&gt;
+      &lt;Home_Group&gt;&lt;invid type="Group" id="omssys" oid="257:245"/&gt;&lt;/Home_Group&gt;
+      &lt;Login_Shell&gt;/bin/tcsh&lt;/Login_Shell&gt;
+      &lt;Home_Directory&gt;/home/jonabbey&lt;/Home_Directory&gt;
+      &lt;Directory_Volume&gt;
+      &lt;object type="Embedded_Automounter_Map_Entry" id="jonabbey/auto.home.default" oid="278:1257"&gt;
+        &lt;Automounter_Map&gt;&lt;invid type="Automounter_Map" id="auto.home.default" oid="277:2"/&gt;&lt;/Automounter_Map&gt;
+        &lt;NFS_Volume&gt;&lt;invid type="NFS_Volume" id="omg2" oid="276:636"/&gt;&lt;/NFS_Volume&gt;
+      &lt;/object&gt;
+      &lt;/Directory_Volume&gt;
+      &lt;Email_Aliases&gt;
+        &lt;string val="abbey"/&gt;
+      &lt;/Email_Aliases&gt;
+      &lt;Signature_Alias&gt;jonabbey&lt;/Signature_Alias&gt;
+      &lt;Email_target&gt;
+        &lt;string val="jonabbey@arlmail.arlut.utexas.edu"/&gt;
+      &lt;/Email_target&gt;
+    &lt;/object&gt;
+  &lt;/ganydata&gt; 
+&lt;/ganymede&gt;</pre>
 
     <p>Some of the details of the XML schema used are dependent on the
     specific Ganymede schema in on the Ganymede server.  In
@@ -640,20 +636,20 @@
 
     <p>Each file that is written out looks like this:</p>
 
-    <xmp class="listing"><transaction major_version="1" minor_version="1" channel="Users" user="supergash" number="18" time="1111015745225">
-  <object_delta>
-    <before>
-      <object type="User" id="barkerr" oid="3:1175">
-        <Home_Phone>512-555-3481</Home_Phone>
-      </object>
-    </before>
-    <after>
-      <object type="User" id="barkerr" oid="3:1175">
-        <Home_Phone>512-555-3522</Home_Phone>
-      </object>
-    </after>
-  </object_delta>
-</transaction></xmp>
+    <pre class="listing">&lt;transaction major_version="1" minor_version="1" channel="Users" user="supergash" number="18" time="1111015745225"&gt;
+  &lt;object_delta&gt;
+    &lt;before&gt;
+      &lt;object type="User" id="barkerr" oid="3:1175"&gt;
+        &lt;Home_Phone&gt;512-555-3481&lt;/Home_Phone&gt;
+      &lt;/object&gt;
+    &lt;/before&gt;
+    &lt;after&gt;
+      &lt;object type="User" id="barkerr" oid="3:1175"&gt;
+        &lt;Home_Phone&gt;512-555-3522&lt;/Home_Phone&gt;
+      &lt;/object&gt;
+    &lt;/after&gt;
+  &lt;/object_delta&gt;
+&lt;/transaction&gt;</pre>
 
     <p id="transaction_element">The attributes in the &lt;transaction&gt; element are as follows:</p>
 
@@ -734,43 +730,43 @@
     <p>Here's an example of a user in the laboratory's Ganymede server
     being deleted by the expiration task:</p>
 
-<xmp class="listing"><transaction major_version="1" minor_version="1" channel="Users" user="expiration" number="21" time="1111730401435">
-  <object_delta>
-    <before>
-      <object type="User" id="raghu" oid="3:1657">
-        <Username>raghu</Username>
-        <UID>3025</UID>
-        <Global_UID>11f3a6c0-a9cd-11d8-b6ba-080020fd6b07</Global_UID>
-        <Account_Category><invid type="User_Category" id="normal" oid="279:5"/></Account_Category>
-        <Full_Name>Raj Raghu</Full_Name>
-        <Badge>5917</Badge>
-        <Division>ASD</Division>
-        <Room>N347</Room>
-        <Office_Phone>3872</Office_Phone>
-        <Groups>
-          <invid type="Group" id="asrmas" oid="257:143"/>
-          <invid type="Group" id="omssys" oid="257:851"/>
-        </Groups>
-        <Home_Group><invid type="Group" id="asrmas" oid="257:143"/></Home_Group>
-        <Login_Shell>/bin/bash</Login_Shell>
-        <Home_Directory>/home/raghu</Home_Directory>
-        <Directory_Volume>
-          <invid type="Embedded_Automounter_Map_Entry" id="Embedded Automounter Map Entry[1810]" oid="278:1810"/>
-        </Directory_Volume>
-        <Signature_Alias>raghu</Signature_Alias>
-        <Email_target>
-          <string val="raghu@arlmail.arlut.utexas.edu"/>
-        </Email_target>
-        <Password_Expiration><date val="Tue, 08 Mar 2005 00:00:01" timecode="1110261601003"/></Password_Expiration>
-        <Owner_list>
-          <invid type="Owner_Group" id="ATL" oid="0:9"/>
-        </Owner_list>
-      </object>
-    </before>
-    <after/>
-  </object_delta>
-</transaction>
-</xmp>
+<pre class="listing">&lt;transaction major_version="1" minor_version="1" channel="Users" user="expiration" number="21" time="1111730401435"&gt;
+  &lt;object_delta&gt;
+    &lt;before&gt;
+      &lt;object type="User" id="raghu" oid="3:1657"&gt;
+        &lt;Username&gt;raghu&lt;/Username&gt;
+        &lt;UID&gt;3025&lt;/UID&gt;
+        &lt;Global_UID&gt;11f3a6c0-a9cd-11d8-b6ba-080020fd6b07&lt;/Global_UID&gt;
+        &lt;Account_Category&gt;&lt;invid type="User_Category" id="normal" oid="279:5"/&gt;&lt;/Account_Category&gt;
+        &lt;Full_Name&gt;Raj Raghu&lt;/Full_Name&gt;
+        &lt;Badge&gt;5917&lt;/Badge&gt;
+        &lt;Division&gt;ASD&lt;/Division&gt;
+        &lt;Room&gt;N347&lt;/Room&gt;
+        &lt;Office_Phone&gt;3872&lt;/Office_Phone&gt;
+        &lt;Groups&gt;
+          &lt;invid type="Group" id="asrmas" oid="257:143"/&gt;
+          &lt;invid type="Group" id="omssys" oid="257:851"/&gt;
+        &lt;/Groups&gt;
+        &lt;Home_Group&gt;&lt;invid type="Group" id="asrmas" oid="257:143"/&gt;&lt;/Home_Group&gt;
+        &lt;Login_Shell&gt;/bin/bash&lt;/Login_Shell&gt;
+        &lt;Home_Directory&gt;/home/raghu&lt;/Home_Directory&gt;
+        &lt;Directory_Volume&gt;
+          &lt;invid type="Embedded_Automounter_Map_Entry" id="Embedded Automounter Map Entry[1810]" oid="278:1810"/&gt;
+        &lt;/Directory_Volume&gt;
+        &lt;Signature_Alias&gt;raghu&lt;/Signature_Alias&gt;
+        &lt;Email_target&gt;
+          &lt;string val="raghu@arlmail.arlut.utexas.edu"/&gt;
+        &lt;/Email_target&gt;
+        &lt;Password_Expiration&gt;&lt;date val="Tue, 08 Mar 2005 00:00:01" timecode="1110261601003"/&gt;&lt;/Password_Expiration&gt;
+        &lt;Owner_list&gt;
+          &lt;invid type="Owner_Group" id="ATL" oid="0:9"/&gt;
+        &lt;/Owner_list&gt;
+      &lt;/object&gt;
+    &lt;/before&gt;
+    &lt;after/&gt;
+  &lt;/object_delta&gt;
+&lt;/transaction&gt;
+</pre>
 
     <p>Notice that all fields that were contained in the object prior
     to the transaction commit and which match the <code
@@ -842,10 +838,10 @@
       as cleanly as possible.  Ideally, your Service Program should be
       able to recognize that the target service is already compliant
       with the after state of a given transaction.  This should only
-      ever happen with the first transaction your Service Program, as
-      <b>your Service Program should never start processing a
-      transaction before it has cleared the previous transaction from
-      the Queue Directory</b>.</li>
+      ever happen with the first transaction your Service Program has
+      to service in any run, as <b>your Service Program should never
+      start processing a transaction before it has cleared the
+      previous transaction from the Queue Directory</b>.</li>
 
       <li>If your Service Program encounters a transaction that it
       cannot process due to a transient error, it must stop processing
@@ -888,7 +884,6 @@
     as writing a callback Python function that takes data from the
     SyncUtils package and works with it from there.</p>
 
-
     <h2 id="xml_manual">6. The Sync Channel Manual Model</h2>
 
     <p>The Sync Channel Manual model is based on the <a
@@ -914,7 +909,7 @@
 
     <p>To generate a Sync Channel manual dump, you can run:</p>
 
-    <xmp class="listing">xmlclient -dumpdata -includeOid sync=Users > user_full_state.xml</xmp>
+    <div class="listing">xmlclient -dumpdata -includeOid sync=Users &gt; user_full_state.xml</div>
 
     <p>The output of such a <code>xmlclient -dumpdata -includeOid</code> command
     is identical to that produced by the <a
@@ -935,10 +930,6 @@
     be done when you know that you don't want the server ever to
     automatically generate an incremental or full state build for you
     using the Sync Channel.</p>
-
-    <h2 id="xml_formats">7. XML Formats</h2>
-    <h2 id="sync_utils">8. Python Sync Utils</h2>
-    <h2 id="ad_example">9. Active Directory Example</h2>
 
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
