@@ -3,11 +3,11 @@
    FieldOptionDBField.java
 
    This class defines the field option matrix field used to support
-   the GanymedeBuilderQueue message queueing build system.  Each
-   object and field type defined in the Ganymede schema can have an
-   option value attached to it in this field type.  These option
-   values are used to control how objects and fields are processed
-   with respect to a specific SyncChannel.
+   the SyncRunner message queueing build system.  Each object and
+   field type defined in the Ganymede schema can have an option value
+   attached to it in this field type.  These option values are used to
+   control how objects and fields are processed with respect to a
+   specific SyncChannel.
    
    Created: 25 January 2005
    Last Mod Date: $Date$
@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -108,7 +108,7 @@ import arlut.csd.ganymede.rmi.field_option_field;
  * arlut.csd.ganymede.server.FieldOptionDBField#matrixEntry(short,
  * short) matrixEntry()} methods to Strings.
  *
- * FieldOptionDBField is used to support the GanymedeBuilderQueue
+ * FieldOptionDBField is used to support the SyncRunner
  * mechanism for doing delta-based builds.
  */
 

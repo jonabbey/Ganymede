@@ -71,15 +71,38 @@ import java.util.ResourceBundle;
  * This class is designed to use localized properties files to do
  * string lookup and synthesis.</p>
  *
- * <p>Things to think about for TranslationServices..</p>
+ * <p>The Ganymede source tree uses TranslationService pervasively to
+ * handle translation for all text message strings in the server,
+ * client, and admin console.</p>
  *
- * <p>We'd like a way to force all TranslationServices objects to
- * reload their bundles, but Java's ResourceBundle and
- * PropertyResourceBundle classes really don't support that.  It would
- * be nice to be able to cause Ganymede to reload its
- * localization strings on demand, rather than forcing a
- * stop/restart, but we'd have to recreate the locale seeking logic
- * for locating and loading the property files to do this.</p>
+ * <p>This class must be used in conjunction with a particular usage
+ * convention in order to support automatic validation of message
+ * files with the 'ant validate' task in the Ganymede build.xml file.</p>
+ *
+ * <p>That convention is that every class that needs language
+ * translation services must declare a static final TranslationService
+ * object named 'ts' which is initialized with the fully qualified
+ * name of the class to which it belongs.</p>
+ *
+ * <p>Actual translation calls should all be in the form of
+ * ts.l("messageName"), possibly with extra parameters, such as
+ * ts.l("messageName", arg1, arg2), and so forth.  The 'l' method of
+ * TranslationService is designed to be as compact as possible so that
+ * it can be used wherever you would normally use a string.  It
+ * returns a String formatted according to whatever language-sensitive
+ * property files are defined in Ganymede's src/resources
+ * directory.</p>
+ *
+ * <p>If you follow these conventions, the 'ant validate' task will be
+ * able to automatically analyze your code and cross reference it
+ * against the message property files under src/resources.  'ant
+ * validate' will warn you if you are missing messages, or if the
+ * messages are malformed, or if the messages specify a different
+ * number of parameters than the source code which users the messages
+ * is expecting.</p>
+ *
+ * <p>So, for use within Ganymede, please be sure always to follow
+ * these conventions.</p>
  *
  * @version $Id$
  * @author Jonathan Abbey
