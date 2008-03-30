@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-January 1, 2007
+April 1, 2008
 CREDITS
 
 Last Revision Changed: $Rev$
@@ -205,18 +205,11 @@ come from Ulrich Drepper, who released the algorithms into the public
 domain.  See http://people.redhat.com/drepper/SHA-crypt.html for a
 discussion of details.
 
-The XML SAX reference classes and interfaces used by the Ganymede
-server's XML parsing routines were written and released into the
-public domain by David Meggison <david@megginson.com>.  More
-information on the SAX standard for XML parsing can be found at the
-SAX home page at http://www.saxproject.org/.
-
-The Ganymede server uses James Clark's excellent XMLWriter and XP
-parser class libraries for XML generation and parsing.  Both are
-copyright 1997, 1998 by James Clark, and are included in Ganymede in
-accordance with his stated licensing terms.  See
-http://www.jclark.com/xml/xp/index.html for information on the XP
-parser.
+The Ganymede server uses James Clark's excellent XMLWriter class
+library for XML generation.  It is copyright 1997, 1998 by James
+Clark, and is included in Ganymede in accordance with his stated
+licensing terms.  See http://www.jclark.com/xml/xp/copying.txt for his
+copyright terms.
 
 The Java UUID Generator code used by ARL custom code to generate RFC
 and DCE-compliant globally unique identifiers for our Macintosh LDAP
