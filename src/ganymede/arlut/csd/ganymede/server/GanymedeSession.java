@@ -3953,23 +3953,20 @@ final public class GanymedeSession implements Session, Unreferenced {
     // to verify the user's permissions to view the history, so we'll
     // have to return null
 
-    if (!isSuperGash())
+    obj = session.viewDBObject(invid);
+
+    if (obj == null)
       {
-        obj = session.viewDBObject(invid);
+        // "Can''t return history for an object that has been deleted or does not exist ({0})"
+        setLastError(ts.l("viewObjectHistory.null_pointer", String.valueOf(invid)));
+        return null;
+      }
 
-        if (obj == null)
-          {
-            // "Can''t return history for an object that has been deleted or does not exist ({0})"
-            setLastError(ts.l("viewObjectHistory.null_pointer", String.valueOf(invid)));
-            return null;
-          }
-
-        if (!getPerm(obj).isVisible())
-          {
-            // "Permissions denied to view the history for this invid."
-            setLastError(ts.l("viewObjectHistory.permissions"));
-            return null;
-          }
+    if (!getPerm(obj).isVisible())
+      {
+        // "Permissions denied to view the history for this invid."
+        setLastError(ts.l("viewObjectHistory.permissions"));
+        return null;
       }
 
     if (Ganymede.log == null)
@@ -3977,6 +3974,16 @@ final public class GanymedeSession implements Session, Unreferenced {
         // "Log not active, can''t view invid history"
         setLastError(ts.l("viewObjectHistory.no_log"));
         return null;
+      }
+
+    // don't bother looking for anything in the log before the object
+    // was created
+
+    Date creationDate = (Date) obj.getFieldValueLocal(SchemaConstants.CreationDateField);
+
+    if (since == null || since.before(creationDate))
+      {
+        since = creationDate;
       }
 
     return Ganymede.log.retrieveHistory(invid, since, false, fullTransactions, false); // *sync* DBLog 
