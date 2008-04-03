@@ -216,6 +216,10 @@ public class DBLogFileController implements DBLogController {
    * events occuring on or after the time specified in this Date
    * object.
    *
+   * @param beforeTime if not null, retrieveHistory() will only return
+   * events occurring on or before the time specified in this Date
+   * object.
+   *
    * @param keyOnAdmin if true, rather than returning a string
    * containing events that involved &lt;invid&gt;, retrieveHistory()
    * will return a string containing events performed on behalf of the
@@ -234,7 +238,7 @@ public class DBLogFileController implements DBLogController {
    * history events
    */
 
-  public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, 
+  public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, Date beforeTime,
 						   boolean keyOnAdmin,
                                                    boolean fullTransactions,
                                                    boolean getLoginEvents)
@@ -252,6 +256,7 @@ public class DBLogFileController implements DBLogController {
     boolean afterSinceTime = false;
     String dateString;
     long sinceLong = 0;
+    long beforeLong = 0;
     long timeCode;
 
     BufferedReader in = null;
@@ -260,6 +265,11 @@ public class DBLogFileController implements DBLogController {
     if (sinceTime != null)
       {
 	sinceLong = sinceTime.getTime();
+      }
+
+    if (beforeTime != null)
+      {
+        beforeLong = beforeTime.getTime();
       }
 
     // Java can be pretty slow at doing String operations.  String is
@@ -296,6 +306,7 @@ public class DBLogFileController implements DBLogController {
         String[] invidArgs = null;
         String[] adminArgs = null;
         String[] startArgs = null;
+        String[] beforeArgs = null;
         String[] loginArg = null;
 
         if (invid != null)
@@ -313,6 +324,11 @@ public class DBLogFileController implements DBLogController {
             startArgs = new String[] {"-s", Long.toString(sinceLong)};
           }
 
+        if (beforeLong != 0)
+          {
+            beforeArgs = new String[] {"-e", Long.toString(beforeLong)};
+          }
+
         if (getLoginEvents)
           {
             loginArg = new String[] {"-l"};
@@ -321,6 +337,7 @@ public class DBLogFileController implements DBLogController {
         String[] paramArgs = (String[]) ArrayUtils.concat(new String[] {Ganymede.logHelperProperty},
                                                           adminArgs,
                                                           startArgs,
+                                                          beforeArgs,
                                                           loginArg,
                                                           invidArgs);  // invid must be last for back compat
         
@@ -376,8 +393,8 @@ public class DBLogFileController implements DBLogController {
 
 	    // check to see if we've gotten to the requested start point
 
-	    if (sinceTime != null && !afterSinceTime)
-	      {
+            if ((sinceTime != null && !afterSinceTime) || beforeTime != null)
+              {
 		dateString = line.substring(0, line.indexOf('|'));
     
 		try
@@ -389,13 +406,17 @@ public class DBLogFileController implements DBLogController {
 		    throw new IOException("couldn't parse time code");
 		  }
 
-		if (timeCode < sinceLong)
-		  {
-		    continue;	// don't even bother parsing the rest of the line
-		  }
-		
-		afterSinceTime = true;
-	      }
+                if (sinceTime != null && timeCode < sinceLong)
+                  {
+                    afterSinceTime = true;
+                    continue; // don't even bother parsing the rest of the line
+                  }
+
+                if (beforeTime != null && timeCode > beforeLong)
+                  {
+                    break;
+                  }
+              }
 
 	    event = parseEvent(line);
 

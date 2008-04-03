@@ -1555,6 +1555,6 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public String getLoginHistory(Date startDate)
   {
-    return Ganymede.log.retrieveHistory(null, startDate, false, false, true).toString();
+    return Ganymede.log.retrieveHistory(null, startDate, null, false, false, true).toString();
   }
 }

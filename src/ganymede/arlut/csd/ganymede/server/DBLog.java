@@ -929,6 +929,10 @@ public class DBLog {
    * @param sinceTime if not null, retrieveHistory() will only return events
    * occuring on or after the time specified in this Date object.
    *
+   * @param beforeTime if not null, retrieveHistory() will only return
+   * events occurring on or before the time specified in this Date
+   * object.
+   *
    * @param keyOnAdmin if true, rather than returning a string containing events
    * that involved &lt;invid&gt;, retrieveHistory() will return a string containing events
    * performed on behalf of the administrator with invid &lt;invid&gt;.
@@ -944,12 +948,12 @@ public class DBLog {
    * @return A human-readable multiline string containing a list of history events
    */
 
-  public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime,
+  public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, Date beforeTime,
                                                    boolean keyOnAdmin,
 						   boolean fullTransactions,
                                                    boolean getLoginEvents)
   {
-    return logController.retrieveHistory(invid, sinceTime, keyOnAdmin, fullTransactions, getLoginEvents);
+    return logController.retrieveHistory(invid, sinceTime, beforeTime, keyOnAdmin, fullTransactions, getLoginEvents);
   }
 
   // -----

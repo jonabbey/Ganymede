@@ -62,6 +62,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -443,6 +444,10 @@ public class DBLogPostGreSQLController implements DBLogController {
    * @param sinceTime if not null, retrieveHistory() will only return events
    * occuring on or after the time specified in this Date object.
    *
+   * @param beforeTime if not null, retrieveHistory() will only return
+   * events occurring on or before the time specified in this Date
+   * object.
+   *
    * @param keyOnAdmin if true, rather than returning a string containing events
    * that involved &lt;invid&gt;, retrieveHistory() will return a string containing events
    * performed on behalf of the administrator with invid &lt;invid&gt;.
@@ -458,7 +463,7 @@ public class DBLogPostGreSQLController implements DBLogController {
    * @return A human-readable multiline string containing a list of history events
    */
 
-  public StringBuffer retrieveHistory(Invid invid, java.util.Date sinceTime,
+  public StringBuffer retrieveHistory(Invid invid, Date sinceTime, Date beforeTime,
                                       boolean keyOnAdmin,
 				      boolean fullTransactions,
                                       boolean getLoginEvents)
@@ -470,7 +475,7 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     StringBuffer buffer = new StringBuffer();
 
-    java.util.Date transDate = null;
+    Date transDate = null;
     String prevTransID = null;
     String transAdmin = null;
 
@@ -482,15 +487,15 @@ public class DBLogPostGreSQLController implements DBLogController {
       {
 	if (keyOnAdmin)
 	  {
-	    rs = queryEventsByAdmin(invid, sinceTime);
+	    rs = queryEventsByAdmin(invid, sinceTime, beforeTime);
 	  }
 	else if (fullTransactions)
 	  {
-	    rs = queryEventsByTransactions(invid, sinceTime);
+	    rs = queryEventsByTransactions(invid, sinceTime, beforeTime);
 	  }
 	else
 	  {
-	    rs = queryEvents(invid, sinceTime);
+	    rs = queryEvents(invid, sinceTime, beforeTime);
 	  }
 
 	while (rs.next())
@@ -530,7 +535,7 @@ public class DBLogPostGreSQLController implements DBLogController {
 
 	    if (token.equals("starttransaction"))
 	      {
-		transDate = new java.util.Date(time);
+		transDate = new Date(time);
 
 		String tmp2 = "---------- Transaction " + transDate.toString() + ": " + adminName + 
 		  " ----------\n";
@@ -546,7 +551,7 @@ public class DBLogPostGreSQLController implements DBLogController {
 	      }
 	    else if (token.equals("finishtransaction"))
 	      {
-		String tmp2 = "---------- End Transaction " + new java.util.Date(time).toString() + ": " + adminName + 
+		String tmp2 = "---------- End Transaction " + new Date(time).toString() + ": " + adminName + 
 		  " ----------\n\n";
 
 		prevTransID = null;
@@ -575,58 +580,64 @@ public class DBLogPostGreSQLController implements DBLogController {
     return buffer;
   }
 
-  public ResultSet queryEvents(Invid invid, java.util.Date date) throws SQLException
+  public ResultSet queryEvents(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
     Statement stmt = con.createStatement();
+    String dateRestriction = "";
 
-    if (date == null)
+    if (sinceDate != null)
       {
-	return stmt.executeQuery("SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, invids v " +
-				 "WHERE e.event_id = v.event_id AND v.invid = '" + invid.toString() +
-				 "' ORDER BY e.event_id");
+        dateRestriction = "AND e.javatime >= " + sinceDate.getTime();
       }
-    else
+
+    if (beforeDate != null)
       {
-	return stmt.executeQuery("SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, invids v " +
-				 "WHERE e.event_id = v.event_id AND v.invid = '" + invid.toString() +
-				 "' AND e.javatime > " + date.getTime() + 
-				 " ORDER BY e.event_id");
+        dateRestriction = dateRestriction + " AND e.javatime <= " + beforeDate.getTime();
       }
+
+    return stmt.executeQuery("SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, invids v " +
+                             "WHERE e.event_id = v.event_id AND v.invid = '" + invid.toString() + "' " + dateRestriction +
+                             " ORDER BY e.event_id");
   }
 
-  public ResultSet queryEventsByAdmin(Invid invid, java.util.Date date) throws SQLException
+  public ResultSet queryEventsByAdmin(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
     Statement stmt = con.createStatement();
+    String dateRestriction = "";
 
-    if (date == null)
+    if (sinceDate != null)
       {
-	return stmt.executeQuery("SELECT javatime, classtoken, admin_name, text, trans_id from event " +
-				 "WHERE admin_invid = '" + invid.toString() + "' ORDER BY event_id");
+        dateRestriction = "AND javatime >= " + sinceDate.getTime();
       }
-    else
+
+    if (beforeDate != null)
       {
-	return stmt.executeQuery("SELECT javatime, classtoken, admin_name, text, trans_id from event " +
-				 "WHERE admin_invid = '" + invid.toString() +
-				 "' AND javatime > " + date.getTime() + 
-				 " ORDER BY event_id");
+        dateRestriction = dateRestriction + " AND javatime <= " + beforeDate.getTime();
       }
+    
+    return stmt.executeQuery("SELECT javatime, classtoken, admin_name, text, trans_id from event " +
+                             "WHERE admin_invid = '" + invid.toString() + "' " + dateRestriction + " ORDER BY event_id");
   }
 
-  public ResultSet queryEventsByTransactions(Invid invid, java.util.Date date) throws SQLException
+  public ResultSet queryEventsByTransactions(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
     Statement stmt = con.createStatement();
 
-    if (date == null)
+    String dateRestriction = "";
+
+    if (sinceDate != null)
       {
-	return stmt.executeQuery("SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, transactions t " +
-				 "WHERE e.trans_id = t.trans_id AND t.invid =  '" + invid.toString() + "' ORDER BY e.event_id");
+        dateRestriction = "AND e.javatime >= " + sinceDate.getTime();
       }
-    else
+
+    if (beforeDate != null)
       {
-	return stmt.executeQuery("SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, transactions t " +
-				 "WHERE e.trans_id = t.trans_id AND t.invid =  '" + invid.toString() + 
-				 "' AND e.javatime > " + date.getTime() + " ORDER BY e.event_id");
+        dateRestriction = dateRestriction + " AND e.javatime <= " + beforeDate.getTime();
       }
+
+    return stmt.executeQuery("SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, transactions t " +
+                             "WHERE e.trans_id = t.trans_id AND t.invid =  '" + invid.toString() + "' " + dateRestriction +
+                             " ORDER BY e.event_id");
   }
 
   /**

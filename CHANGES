@@ -1202,7 +1202,7 @@ logscan.pl script.
 The Ganymede server and the logscan.pl script are designed such that a
 newer Ganymede server will continue to work properly with an older
 logscan.pl, but moving to the newer logscan.pl will improve log
-scanning efficiencies.
+scanning efficiencies significantly.
 
 78. [CLIENT] Cloning viewable objects now allowed in the graphical client
 

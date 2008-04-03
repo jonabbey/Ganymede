@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -94,6 +94,9 @@ public interface DBLogController {
    * @param sinceTime if not null, retrieveHistory() will only return events
    * occuring on or after the time specified in this Date object.
    *
+   * @param beforeTime if not null, retrieveHistory() will only return events
+   * occuring on or before the time specified in this Date object.
+   *
    * @param keyOnAdmin if true, rather than returning a string containing events
    * that involved &lt;invid&gt;, retrieveHistory() will return a string containing events
    * performed on behalf of the administrator with invid &lt;invid&gt;.
@@ -109,7 +112,7 @@ public interface DBLogController {
    * @return A human-readable multiline string containing a list of history events
    */
 
-  public StringBuffer retrieveHistory(Invid invid, Date sinceTime, boolean keyOnAdmin, boolean fullTransactions, boolean getLoginEvents);
+  public StringBuffer retrieveHistory(Invid invid, Date sinceTime, Date beforeTime, boolean keyOnAdmin, boolean fullTransactions, boolean getLoginEvents);
 
   /**
    * <p>This method shuts down this controller, freeing up any resources used by this

@@ -3907,14 +3907,14 @@ final public class GanymedeSession implements Session, Unreferenced {
    * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
    *
    * @param invid The invid identifier for the object whose history is sought
-   * @param since Report events since this date, or all events if this is null.
+   * @param since Report events since this time, or all events if this is null.
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
 
   public StringBuffer viewObjectHistory(Invid invid, Date since) throws NotLoggedInException
   {
-    return viewObjectHistory(invid, since, true);
+    return viewObjectHistory(invid, since, null, true);
   }
 
   /**
@@ -3922,7 +3922,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
    *
    * @param invid The invid identifier for the object whose history is sought
-   * @param since Report events since this date, or all events if this is null.
+   * @param since Report events since this time, or all events if this is null.
    * @param fullTransactions If false, only events directly involving the requested
    * object will be included in the result buffer.
    *
@@ -3930,6 +3930,22 @@ final public class GanymedeSession implements Session, Unreferenced {
    */
 
   public StringBuffer viewObjectHistory(Invid invid, Date since, boolean fullTransactions) throws NotLoggedInException
+  {
+    return viewObjectHistory(invid, since, null, true);
+  }
+
+  /**
+   * This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
+   *
+   * @param invid The invid identifier for the object whose history is sought
+   * @param since Report events since this time, or all events if this is null.
+   * @param before Report events occuring on or before this time
+   * @param fullTransactions If false, only events directly involving the requested
+   * object will be included in the result buffer.
+   */
+
+  public StringBuffer viewObjectHistory(Invid invid, Date since, Date before, boolean fullTransactions) throws NotLoggedInException
   {
     DBObject obj;
 
@@ -3986,7 +4002,20 @@ final public class GanymedeSession implements Session, Unreferenced {
         since = creationDate;
       }
 
-    return Ganymede.log.retrieveHistory(invid, since, false, fullTransactions, false); // *sync* DBLog 
+    Date lastModDate = (Date) obj.getFieldValueLocal(SchemaConstants.ModificationDateField);
+
+    if (before == null || before.after(lastModDate))
+      {
+        // earlier versions of Ganymede server would apply a slightly
+        // (milliseconds) earlier modification date in the data
+        // objects than the correponding log entry, so we're going to
+        // extend the lastModDate by ten seconds so that we'll be sure
+        // to catch the later time stamps in the log file.
+
+        before = new Date(lastModDate.getTime() + 10000);
+      }
+
+    return Ganymede.log.retrieveHistory(invid, since, before, false, fullTransactions, false); // *sync* DBLog 
   }
 
   /**
@@ -4043,7 +4072,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return null;
       }
 
-    return Ganymede.log.retrieveHistory(invid, since, true, true, false); // *sync* DBLog
+    return Ganymede.log.retrieveHistory(invid, since, null, true, true, false); // *sync* DBLog
   }
 
   /**

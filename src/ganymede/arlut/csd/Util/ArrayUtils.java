@@ -251,4 +251,67 @@ public class ArrayUtils {
 
     return results;
   }
+
+
+  /**
+   * Returns an Array of whatever object type ary1 contains, with the
+   * contents of ary2, ary3, ary4, ary5, and ary6 added to the end of
+   * the contents of ary1.
+   *
+   * An exception will be thrown if ary1, ary2, ary3, ary4, ary5, and
+   * ary6 are not arrays of compatible classes.
+   */
+
+  public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3, Object[] ary4, Object[] ary5, Object[] ary6)
+  {
+    int total_length = (ary1 != null ? ary1.length : 0) +
+      (ary2 != null ? ary2.length : 0) +
+      (ary3 != null ? ary3.length : 0) +
+      (ary4 != null ? ary4.length : 0) +
+      (ary5 != null ? ary5.length : 0);
+
+    Class arrayClass = ary1.getClass();
+    Class componentClass = arrayClass.getComponentType();
+
+    Object[] results = (Object[]) Array.newInstance(componentClass, total_length);
+
+    int length = 0;
+
+    if (ary1 != null)
+      {
+        System.arraycopy(ary1, 0, results, 0, ary1.length);
+        length += ary1.length;
+      }
+
+    if (ary2 != null)
+      {
+        System.arraycopy(ary2, 0, results, length, ary2.length);
+        length += ary2.length;
+      }
+
+    if (ary3 != null)
+      {
+        System.arraycopy(ary3, 0, results, length, ary3.length);
+        length += ary3.length;
+      }
+
+    if (ary4 != null)
+      {
+        System.arraycopy(ary4, 0, results, length, ary4.length);
+        length += ary4.length;
+      }
+
+    if (ary5 != null)
+      {
+        System.arraycopy(ary5, 0, results, length, ary5.length);
+        length += ary5.length;
+      }
+
+    if (ary6 != null)
+      {
+        System.arraycopy(ary6, 0, results, length, ary6.length);
+      }
+
+    return results;
+  }
 }
