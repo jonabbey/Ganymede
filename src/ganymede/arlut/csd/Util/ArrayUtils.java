@@ -268,7 +268,8 @@ public class ArrayUtils {
       (ary2 != null ? ary2.length : 0) +
       (ary3 != null ? ary3.length : 0) +
       (ary4 != null ? ary4.length : 0) +
-      (ary5 != null ? ary5.length : 0);
+      (ary5 != null ? ary5.length : 0) +
+      (ary6 != null ? ary6.length : 0);
 
     Class arrayClass = ary1.getClass();
     Class componentClass = arrayClass.getComponentType();
