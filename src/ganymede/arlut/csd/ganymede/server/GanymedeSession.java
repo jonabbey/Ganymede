@@ -3931,7 +3931,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public StringBuffer viewObjectHistory(Invid invid, Date since, boolean fullTransactions) throws NotLoggedInException
   {
-    return viewObjectHistory(invid, since, null, true);
+    return viewObjectHistory(invid, since, null, fullTransactions);
   }
 
   /**
