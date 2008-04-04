@@ -2143,6 +2143,7 @@ public class DBEditSet {
 		  {
 		    DBObject parentObj = session.getContainingObj(eObj);
 
+                    // "{0} {1}''s {2} ''{3}'', <{4}> was created.\n\n{5}\n"
 		    streamLogEvent("objectcreated",
 				   ts.l("commit_createLogEvent.embedded_created",
 					parentObj.getTypeName(),
@@ -2171,6 +2172,7 @@ public class DBEditSet {
 
 	    if (logNormal)
 	      {
+                // "{0} {1}, <{2}> was created.\n\n{3}\n"
 		streamLogEvent("objectcreated",
 			       ts.l("commit_createLogEvent.created",
 				    eObj.getTypeName(),

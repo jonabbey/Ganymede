@@ -1170,7 +1170,7 @@ public class DBLog {
 
     if (type.ccToOwners)
       {
-	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects, true, true));
+	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects, true, true, transSession));
       }
 
     mailList = VectorUtils.union(mailList, type.addressVect);
@@ -1545,13 +1545,15 @@ public class DBLog {
 	notifyVect = VectorUtils.union(event.notifyVect, 
 				       calculateOwnerAddresses(event.objects,
 							       mailToObjects,
-							       mailToOwners));
+							       mailToOwners,
+                                                               session));
       }
     else if (eventType.ccToOwners)
       {
 	notifyVect = VectorUtils.union(event.notifyVect, 
 				       calculateOwnerAddresses(event.objects, 
-							       true, true));
+							       true, true,
+                                                               session));
       }
     else
       {
