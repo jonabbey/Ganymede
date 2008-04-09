@@ -3411,7 +3411,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
     else
       {
-        MAC = "00:00:00:00:00:00";
+        MAC = "00-00-00-00-00-00";
       }
 
     // an interface is contained in the associated system, so we check our
