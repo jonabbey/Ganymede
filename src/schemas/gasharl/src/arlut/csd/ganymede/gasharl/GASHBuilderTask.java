@@ -110,7 +110,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private SharedStringBuffer result = new SharedStringBuffer();
 
   private Invid normalCategory = null;
-
   /**
    * customOptions is a Set of Invids for custom type definitions that
    * we encountered during a cycle of writing out DHCP information.
@@ -304,7 +303,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	Ganymede.debug("Need to build aliases map");
 
-	if (writeAliasesFile())
+	if (writeAliasesFile() && writeEmailList())
 	  {
 	    success = true;
 	  }
@@ -702,7 +701,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		      }
 		  }
 	      }
-    
+
 	    if (username != null && signature != null && badgeNum != null && 
 		category != null && category.equals(normalCategory) && !user.isInactivated())
 	      {
@@ -749,6 +748,106 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	out.close();
       }
+  }
+
+  /**
+   * This method writes out a simple list of all ARL employees who are
+   * to receive email when lab-wide email is sent.
+   *
+   * The file is simple, and contains one user name per line.
+   *
+   * We take the trouble in this method to eliminate redundant
+   * mailings that would come to the same person if 
+   */
+
+  private boolean writeEmailList()
+  {
+    PrintWriter out;
+    Set targets = new HashSet();  // record delivery targets we've seen
+
+    /* -- */
+
+    try
+      {
+	out = openOutFile(path + "all_users.txt", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open all_users.txt file: " + ex);
+	return false;
+      }
+
+    try
+      {
+        out.println("# all_users.txt");
+        out.println("#");
+        out.println("# Complete list of user names who should receive email when mail is sent");
+        out.println("# to 'all users' in laboratory, filtered to avoid redundant delivery.");
+        out.println("#");
+        out.println("# " + (new Date()).toString());
+        out.println();
+
+	DBObject user;
+	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+		
+        while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+
+	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
+	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
+
+	    if (normalCategory == null)
+	      {
+		if (category != null)
+		  {
+		    String label;
+
+		    label = getLabel(category);
+
+		    if (label != null && label.equals("normal"))
+		      {
+			normalCategory = category;
+		      }
+                    else
+                      {
+                        continue;  // non-normal user account
+                      }
+		  }
+	      }
+            else if (!normalCategory.equals(category))
+              {
+                continue;
+              }
+
+            Vector deliveryAddresses = user.getFieldValuesLocal(userSchema.EMAILTARGET);
+
+            boolean allSeen = true;
+
+            for (int i = 0; i < deliveryAddresses.size(); i++)
+              {
+                if (!targets.contains(deliveryAddresses.elementAt(i)))
+                  {
+                    allSeen = false;
+                    targets.add(deliveryAddresses.elementAt(i));
+                  }
+              }
+
+            if (allSeen)
+              {
+                continue;
+              }
+
+            targets.add(username);
+            out.println(username);
+          }
+      }
+    finally
+      {
+	out.close();
+      }
+
+    return true;
   }
   
   /**
