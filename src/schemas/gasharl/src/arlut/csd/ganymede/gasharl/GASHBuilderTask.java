@@ -795,6 +795,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    user = (DBObject) users.nextElement();
 
 	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
+
+            if (targets.contains(username))
+              {
+                continue;       // we've already arranged for delivery to this user
+              }
+
 	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
 
 	    if (normalCategory == null)
