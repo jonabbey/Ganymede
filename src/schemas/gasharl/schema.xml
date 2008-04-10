@@ -393,6 +393,7 @@ xmlclient.</comment>
             <fielddef name="Aliases" id="258">
               <typedef type="string">
                 <vector/>
+                <maxlength val="32"/>
                 <badchars val="@"/>
                 <namespace val="username"/>
               </typedef>
@@ -405,6 +406,7 @@ xmlclient.</comment>
           <tab name="General">
             <fielddef name="List_Name" id="256">
               <typedef type="string">
+                <maxlength val="32"/>
                 <badchars val="@ "/>
                 <namespace val="username"/>
               </typedef>
@@ -878,7 +880,7 @@ for this network.</comment>
             <tab name="General">
               <fielddef name="Netgroup_Name" id="256">
                 <typedef type="string">
-                  <maxlength val="24"/>
+                  <maxlength val="32"/>
                   <badchars val=" ,:"/>
                   <namespace val="username"/>
                 </typedef>
