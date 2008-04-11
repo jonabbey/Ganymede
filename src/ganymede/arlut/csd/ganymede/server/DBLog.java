@@ -1526,6 +1526,11 @@ public class DBLog {
 
     /* -- */
 
+    if (session == null)
+      {
+        session = gSession.getSession();
+      }
+
     // if the DBLogEvent has aleady been processed by us, we don't
     // want to redundantly add entries.
 
