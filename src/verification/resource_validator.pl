@@ -73,7 +73,7 @@ sub find_javas {
   @filtered = grep (!/^\./, @elements);
 
   foreach $item (@filtered) {
-    if (-f "$dir/$item" && $item =~ /\.java$/) {
+    if (-f "$dir/$item" && $item =~ /\.java$/ && $item !~ /TranslationService\.java$/) {
       push @javafiles, "$dir/$item";
     }
 
