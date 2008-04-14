@@ -1360,6 +1360,20 @@ individual socket read takes longer than 15 seconds to complete.
 In addition, various small tweaks to the SMTP handling logic in the
 Qsmtp class have been made to make Ganymede more compliant with SMTP.
 
+84. [CLIENT] Ganymede client displays basic information about concurrent use
+
+The Ganymede client will now display a little message showing how many
+users are logged into the Ganymede server.  Whenever any user commits
+a transaction (causing the build icon to start animating), a message
+will appear for a short time identifying the user who made the commit.
+
+This change is intended to provide a bit more context for Ganymede
+users, so they can get a better idea if other administrators are
+making changes at the same time they are.
+
+(This actually went into the Ganymede repository a little while ago,
+but I had neglected to mention it in CHANGES previously.)
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
