@@ -57,6 +57,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.util.StringTokenizer;
 
@@ -108,11 +109,11 @@ public class JMultiLineLabel extends JTextArea {
     setLineWrap(true);
     setWrapStyleWord(true);
 
-    setText(label);
-
     this.setBackground((Color)UIManager.get("Label.background"));
     this.setForeground((Color)UIManager.get("Label.foreground"));
     this.setFont((Font)UIManager.get("Label.font"));
+
+    setText(label);
   }
 
   /**
@@ -125,14 +126,23 @@ public class JMultiLineLabel extends JTextArea {
   {
     super.updateUI();
 
-    this.setBackground((Color)UIManager.get("Label.background"));
-    this.setForeground((Color)UIManager.get("Label.foreground"));
     this.setFont((Font)UIManager.get("Label.font"));
+    this.setForeground((Color)UIManager.get("Label.foreground"));
+    this.setBackground((Color)UIManager.get("Label.background"));
 
     this.setOpaque(false);
     this.setBorder(null);
 
     repaint();
+  }
+
+  public void update(Graphics g)
+  {
+    this.setFont((Font)UIManager.get("Label.font"));
+    this.setForeground((Color)UIManager.get("Label.foreground"));
+    this.setBackground((Color)UIManager.get("Label.background"));
+
+    super.update(g);
   }
 
   // Public functions
