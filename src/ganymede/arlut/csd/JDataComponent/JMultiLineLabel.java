@@ -109,11 +109,9 @@ public class JMultiLineLabel extends JTextArea {
 
     setText(label);
 
-    /*
     this.setBackground((Color)UIManager.get("Label.background"));
     this.setForeground((Color)UIManager.get("Label.foreground"));
     this.setFont((Font)UIManager.get("Label.font"));
-    */
   }
 
   // Public functions
