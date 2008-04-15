@@ -3,7 +3,7 @@
    DialogRsrc.java
 
    Non-serializable Resource class for use with StringDialog.java
-   
+
    Created: 16 June 1997
 
    Last Mod Date: $Date$
@@ -14,10 +14,10 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2005
+
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -81,7 +81,7 @@ import arlut.csd.Util.TranslationService;
  * DialogRsrc r = new DialogRsrc(frame, "Simple dialog", "Give us some information:");
  * r.addString("Name:");
  * r.addBoolean("Married:");
- * 
+ *
  * StringDialog d = new StringDialog(r);
  * Hashtable result = d.DialogShow();
  * if (result == null) {
@@ -111,14 +111,14 @@ public class DialogRsrc {
   static Hashtable imageCache = new Hashtable();
 
   // ---
-  
+
   Frame frame;
-  
+
   Vector objects;
 
   Image image;
 
-  String 
+  String
     title,
     text;
 
@@ -143,13 +143,13 @@ public class DialogRsrc {
     this(frame, Title, Text, ts.l("global.ok"), ts.l("global.cancel"), (Image) null);
   }
 
-  /** 
+  /**
    * Constructor with special "Ok" and "Cancel" strings
    *
    * @param frame Parent frame.
    * @param Title String for title of Dialog box.
    * @param Text String for message at top of dialog box.
-   * @param OK String for Ok button 
+   * @param OK String for Ok button
    * @param Cancel String for Cancel button
    */
 
@@ -158,14 +158,14 @@ public class DialogRsrc {
     this(frame, Title, Text, OK, Cancel, (Image) null);
   }
 
-  /** 
+  /**
    * Constructor with special "Ok" and "Cancel" strings, and a provided Image
    * to display
    *
    * @param frame Parent frame.
    * @param Title String for title of Dialog box.
    * @param Text String for message at top of dialog box.
-   * @param OK String for Ok button 
+   * @param OK String for Ok button
    * @param Cancel String for Cancel button
    * @param image Image to display next to text
 
@@ -174,7 +174,7 @@ public class DialogRsrc {
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, Image image)
   {
     this.frame = frame;
-    
+
     this.title = Title;
     this.text = Text;
     this.OKText = OK;
@@ -184,14 +184,14 @@ public class DialogRsrc {
     objects = new Vector();
   }
 
-  /** 
+  /**
    * Constructor with special "Ok" and "Cancel" strings, and the name
    * of an Image to pull out of CLASSPATH resources.
    *
    * @param frame Parent frame.
    * @param Title String for title of Dialog box.
    * @param Text String for message at top of dialog box.
-   * @param OK String for Ok button 
+   * @param OK String for Ok button
    * @param Cancel String for Cancel button
    * @param imageName Image to display next to text
    * @param refClass Class to use to act as a reference point for finding the resources.  The imageName
@@ -206,7 +206,7 @@ public class DialogRsrc {
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, String imageName, Class refClass)
   {
     this.frame = frame;
-    
+
     this.title = Title;
     this.text = Text;
     this.OKText = OK;
@@ -301,7 +301,7 @@ public class DialogRsrc {
    * @param maxDate What is the latest the date can be set to?
    *
    */
-  
+
   public void addDate(String label, Date currentDate, Date maxDate)
   {
     dateThing dt = new dateThing(label, currentDate, maxDate);
@@ -321,25 +321,25 @@ public class DialogRsrc {
   }
 
   /**
-   * 
+   *
    * Adds a labeled check box field
    *
    * @param label String to use as the label
    */
-  
+
   public void addBoolean(String label)
   {
     addBoolean(label, false);
   }
 
   /**
-   * 
+   *
    * Adds a labeled check box field
    *
    * @param label String to use as the label
    * @param value Initial value of field
    */
-  
+
   public void addBoolean(String label, boolean value)
   {
     objects.addElement(new booleanThing(label, value));
@@ -350,10 +350,10 @@ public class DialogRsrc {
    * Adds a choice field to the dialog
    *
    * @param label String to use as the label
-   * @param choices Vector of Strings to add to the choice 
+   * @param choices Vector of Strings to add to the choice
    * @param selectedItem Initially selected item
    */
-  
+
   public void addChoice(String label, Vector choices, Object selectedItem)
   {
     objects.addElement(new choiceThing(label, choices, selectedItem));
@@ -364,9 +364,9 @@ public class DialogRsrc {
    * Adds a choice field to the dialog
    *
    * @param label String to use as the label
-   * @param choices Vector of Strings to add to the choice 
+   * @param choices Vector of Strings to add to the choice
    */
-  
+
   public void addChoice(String label, Vector choices)
   {
     addChoice(label, choices, null);
@@ -409,7 +409,7 @@ public class DialogRsrc {
   {
     return text;
   }
-  
+
   public Image getImage()
   {
     return image;
@@ -426,7 +426,4 @@ public class DialogRsrc {
   {
     image = newImage;
   }
-
-}//DialogRsrc
-
-
+}
