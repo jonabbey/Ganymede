@@ -142,6 +142,9 @@ public class JMultiLineLabel extends JTextArea {
     this.setForeground((Color)UIManager.get("Label.foreground"));
     this.setBackground((Color)UIManager.get("Label.background"));
 
+    this.setOpaque(false);
+    this.setBorder(null);
+
     super.update(g);
   }
 
