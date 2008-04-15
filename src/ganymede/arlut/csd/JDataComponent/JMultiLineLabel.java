@@ -121,9 +121,9 @@ public class JMultiLineLabel extends JTextArea {
    * feel.
    */
 
-  public void setUI(ComponentUI newUI)
+  public void updateUI()
   {
-    super.setUI(newUI);
+    super.updateUI();
 
     this.setBackground((Color)UIManager.get("Label.background"));
     this.setForeground((Color)UIManager.get("Label.foreground"));
