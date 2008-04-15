@@ -60,6 +60,7 @@ import java.awt.FontMetrics;
 import java.awt.Insets;
 import java.util.StringTokenizer;
 
+import javax.swing.plaf.ComponentUI;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
@@ -112,6 +113,26 @@ public class JMultiLineLabel extends JTextArea {
     this.setBackground((Color)UIManager.get("Label.background"));
     this.setForeground((Color)UIManager.get("Label.foreground"));
     this.setFont((Font)UIManager.get("Label.font"));
+  }
+
+  /**
+   * If our UI Component delegate is changed, we'll want to go ahead
+   * and rework the color scheme to go along with the new look and
+   * feel.
+   */
+
+  public void setUI(ComponentUI newUI)
+  {
+    super.setUI(newUI);
+
+    this.setBackground((Color)UIManager.get("Label.background"));
+    this.setForeground((Color)UIManager.get("Label.foreground"));
+    this.setFont((Font)UIManager.get("Label.font"));
+
+    this.setOpaque(false);
+    this.setBorder(null);
+
+    repaint();
   }
 
   // Public functions
