@@ -512,7 +512,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
             add(w);
             w.setVisible(true);
             setSelectedWindow(w);
-            originalWindow.cleanUp();
+            originalWindow.setClosable(true);
+            originalWindow.setClosed(true);
           }
         else
           {
