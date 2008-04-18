@@ -136,7 +136,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
 					     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 					     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setBorder(null);
-    scrollPane.getViewport().setBorder(null);
+    scrollPane.setViewportBorder(null);
     scrollPane.getViewport().setOpaque(true);
     scrollPane.getViewport().setBackground(java.awt.Color.white);
 
