@@ -722,50 +722,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * Refreshes the tab that is showing.
-   *
-   * Currently, this only refreshes the general panel.  Other panels
-   * will generate a nice dialog telling the user to go away.
-   */
-
-  public void refresh()
-  {
-    if (editable)
-      {
-        return;
-      }
-
-    Component c = pane.getSelectedComponent();
-    
-    if (c instanceof JScrollPane)
-      {
-        try
-          {
-            server_object = (db_object) (gc.handleReturnVal(gc.getSession().view_db_object(invid))).getObject();
-          }
-        catch (RemoteException ex)
-          {
-	    gc.processExceptionRethrow(ex, "Could not refresh object:");
-          }
-
-	Component comp = ((JScrollPane)c).getViewport().getView();
-
-	if (comp instanceof containerPanel)
-	  {
-	    ((containerPanel)comp).updateAll();
-	  }
- 	else
-	  {
-	    // this error message isn't localized because i think it
-	    // should be eliminated
-
-	    System.err.println("Sorry, you can only refresh the panel containing " +
-			       "the general panel at this time.");
-	  }
-      }
-  }
-
-  /**
    * Uses the Ganymede server to e-mail a summary of this object to one
    * or more email addresses.
    */
@@ -1018,27 +974,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
 
     menuBar.add(fileM);
-
-    if (!editable)
-      {
-	JMenuItem refreshMI = new JMenuItem(ts.l("createMenuBar.object_menu_0"));// "Refresh"
-
-	refreshMI.setActionCommand("refresh_obj");
-
-	if (ts.hasPattern("createMenuBar.object_menu_0_key_optional"))
-	  {
-	    refreshMI.setMnemonic((int) ts.l("createMenuBar.object_menu_0_key_optional").charAt(0)); // "r"
-	  }
-
-	if (ts.hasPattern("createMenuBar.object_menu_0_tip_optional"))
-	  {
-	    // "Update this window with the current state of this object in the database"
-	    refreshMI.setToolTipText(ts.l("createMenuBar.object_menu_0_tip_optional"));
-	  }
-
-	refreshMI.addActionListener(this);
-	fileM.add(refreshMI);
-      }
 
     if (!gc.isApplet())
       {
@@ -1393,10 +1328,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     else if (e.getActionCommand().equals("send_mail"))
       {
 	sendMail();
-      }
-    else if (e.getActionCommand().equals("refresh_obj"))
-      {
-	refresh();
       }
     else if (e.getActionCommand().equals("set_expiration"))
       {
