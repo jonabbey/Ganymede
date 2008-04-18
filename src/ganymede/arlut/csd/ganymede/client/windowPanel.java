@@ -518,12 +518,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
           {
             w.setBounds(0, 0, 535, 400);
             placeWindow(w);
+            w.setLayer(new Integer(topLayer));
+	
+            add(w);
+            w.setVisible(true);		// for Kestrel
+            setSelectedWindow(w);
           }
-	
-	w.setLayer(new Integer(topLayer));
-	
-	add(w);
-	w.setVisible(true);		// for Kestrel
 
 	// turn the cancel button on once the window has appeared.
 
@@ -531,8 +531,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  {
 	    gc.cancel.setEnabled(true);
 	  }
-
-	setSelectedWindow(w);
       }
     catch (Throwable ex)
       {
