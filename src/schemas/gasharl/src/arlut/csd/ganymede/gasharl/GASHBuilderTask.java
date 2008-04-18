@@ -794,6 +794,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    user = (DBObject) users.nextElement();
 
+            if (user.isInactivated())
+              {
+                continue;
+              }
+
 	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
 
             if (targets.contains(username))
