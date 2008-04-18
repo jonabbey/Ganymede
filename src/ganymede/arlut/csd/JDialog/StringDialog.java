@@ -347,6 +347,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 				       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
     pane.getViewport().setOpaque(false);
+    pane.setViewportBorder(null);
 
     if (resource.getText() != null && !resource.getText().equals(""))
       {
