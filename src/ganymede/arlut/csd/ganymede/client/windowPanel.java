@@ -643,7 +643,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     
     try
       {
-	getDesktopManager().deiconifyFrame(window);
+        try
+          {
+            getDesktopManager().deiconifyFrame(window);
+          }
+        catch (IllegalArgumentException ex)
+          {
+            // some look and feels really don't like this
+          }
+
 	window.setSelected(true);
 	window.toFront();
       }
