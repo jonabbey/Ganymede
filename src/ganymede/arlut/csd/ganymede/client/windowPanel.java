@@ -290,7 +290,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   *
    * Create a new editable or view-only window in this windowPanel.
    *
    * @param object an individual object from the server to show
@@ -301,11 +300,27 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void addWindow(Invid invid, db_object object, boolean editable, String objectType)
   {
-    this.addWindow(invid, object, editable, objectType, false);
+    this.addWindow(invid, object, editable, objectType, false, null);
   }
 
   /**
+   * Create a new editable or view-only window in this windowPanel.
    *
+ * @param object an individual object from the server to show
+   * in this window
+   * @param editable if true, the object will be presented as editable
+   * @param objectType Used for the title of the new window
+   * @param originalWindow If not null, a framePanel that we are going to be replacing
+   * with a new window.  Used to replace a view window with an edit window, or to refresh
+   * a view window.
+   */
+
+  public void addWindow(Invid invid, db_object object, boolean editable, String objectType, framePanel originalWindow)
+  {
+    this.addWindow(invid, object, editable, objectType, false, originalWindow);
+  }
+
+  /**
    * Create a new editable or view-only window in this windowPanel.
    *
    * @param object an individual object from the server to show
@@ -313,9 +328,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * @param editable if true, the object will be presented as editable
    * @param objectType Used for the title of the new window
    * @param isNewlyCreated if true, this window will be a 'create object' window.
+   * @param originalWindow If not null, a framePanel that we are going to be replacing
+   * with a new window.  Used to replace a view window with an edit window, or to refresh
+   * a view window.
    */
 
-  public void addWindow(Invid invid, db_object object, boolean editable, String objectType, boolean isNewlyCreated)
+  public void addWindow(Invid invid, db_object object, boolean editable, String objectType, boolean isNewlyCreated, framePanel originalWindow)
   {
     Invid finalInvid = invid;
     String title = null;
@@ -486,9 +504,21 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  }
 
 	w.setOpaque(true);
-    
-	w.setBounds(0, 0, 535, 400);
-	placeWindow(w);
+
+        if (originalWindow != null)
+          {
+            w.setBounds(originalWindow.getBounds());
+            w.setLayer(new Integer(topLayer));
+            add(w);
+            w.setVisible(true);
+            setSelectedWindow(w);
+            originalWindow.cleanUp();
+          }
+        else
+          {
+            w.setBounds(0, 0, 535, 400);
+            placeWindow(w);
+          }
 	
 	w.setLayer(new Integer(topLayer));
 	

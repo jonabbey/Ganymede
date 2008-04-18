@@ -730,10 +730,24 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   public void refresh()
   {
+    if (editable)
+      {
+        return;
+      }
+
     Component c = pane.getSelectedComponent();
     
     if (c instanceof JScrollPane)
       {
+        try
+          {
+            server_object = (db_object) (gc.handleReturnVal(gc.getSession().view_db_object(invid))).getObject();
+          }
+        catch (RemoteException ex)
+          {
+	    gc.processExceptionRethrow(ex, "Could not refresh object:");
+          }
+
 	Component comp = ((JScrollPane)c).getViewport().getView();
 
 	if (comp instanceof containerPanel)
@@ -1396,7 +1410,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
     else if (e.getActionCommand().equals("edit_obj"))
       {
-	gc.editObject(getObjectInvid());
+	gc.editObject(getObjectInvid(), this);
       }
     else if (e.getActionCommand().equals("inact_obj"))
       {

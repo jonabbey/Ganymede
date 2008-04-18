@@ -3506,11 +3506,32 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * the only place windowPanel.addWindow() is called for editing
    * purposes.
    *
-   * @param invid id for the object to be edited in the new window.  */
+   * @param invid id for the object to be edited in the new window.
+   */
 
   public void editObject(Invid invid)
   {
-    editObject(invid, null);
+    editObject(invid, null, null);
+  }
+
+  /** 
+   * Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel} 
+   * window to allow the user to edit an object.
+   *
+   * Use this to edit objects, so gclient can keep track of the
+   * caches, tree nodes, and all the other dirty work.  This should be
+   * the only place windowPanel.addWindow() is called for editing
+   * purposes.
+   *
+   * @param invid id for the object to be edited in the new window.
+   * @param originalWindow The framePanel that we are replacing with
+   * the editing version.  If null, we won't do any frame
+   * replacement.. we'll just create a new frame.
+   */
+
+  public void editObject(Invid invid, framePanel originalWindow)
+  {
+    editObject(invid, null, originalWindow);
   }
 
   /**
@@ -3525,9 +3546,12 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
    * @param invid id for the object to be edited in the new window.
    * @param objectType String describing the kind of object being edited,
    * used in the titlebar of the window created.
+   * @param originalWindow The framePanel that we are replacing with
+   * the editing version.  If null, we won't do any frame
+   * replacement.. we'll just create a new frame.
    */
 
-  public void editObject(Invid invid, String objectType)
+  public void editObject(Invid invid, String objectType, framePanel originalWindow)
   {
     if (deleteHash.containsKey(invid))
       {
@@ -3597,7 +3621,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    return;
 	  }
 
-	wp.addWindow(invid, o, true, objectType);
+	wp.addWindow(invid, o, true, objectType, originalWindow);
 	  
 	changedHash.put(invid, invid);
 
@@ -3703,7 +3727,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	// "New Object"
 	ObjectHandle handle = new ObjectHandle(ts.l("global.new_object"), invid, false, false, false, true);
        
-	wp.addWindow(invid, obj, true, null, true);
+	wp.addWindow(invid, obj, true, null, true, null);
 
 	Short typeShort = new Short(invid.getType());
     
@@ -3837,7 +3861,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	// "New Object"
 	ObjectHandle handle = new ObjectHandle(ts.l("global.new_object"), invid, false, false, false, true);
        
-	wp.addWindow(invid, obj, true, null, true);
+	wp.addWindow(invid, obj, true, null, true, null);
 
 	Short typeShort = new Short(type);
     
@@ -4349,7 +4373,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     else
       {
-	editObject(invid, openDialog.getTypeString());
+	editObject(invid, openDialog.getTypeString(), null);
       }
   }
 
@@ -5841,7 +5865,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	  {
 	    InvidNode invidN = (InvidNode)node;
 
-	    editObject(invidN.getInvid(), invidN.getTypeText());
+	    editObject(invidN.getInvid(), invidN.getTypeText(), null);
 	  }
       }
     else if (event.getActionCommand().equals(clone_pop_action))
