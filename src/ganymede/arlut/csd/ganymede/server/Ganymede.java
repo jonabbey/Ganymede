@@ -877,6 +877,17 @@ public class Ganymede {
 	    debug(ts.l("main.badport", portString));
 	  }
       }
+
+    // register a thread to respond if the server gets ctrl-C, kill,
+    // etc.
+
+    Thread signalThread = new Thread(new Runnable() {
+        public void run() {
+          GanymedeServer.shutdown();
+        }
+      }, ts.l("main.signalCatchThread"));  // "Ganymede ctrl-C handling thread"
+
+    java.lang.Runtime.getRuntime().addShutdownHook(signalCatchThread);
     
     debug(ts.l("main.info_ready"));
   }

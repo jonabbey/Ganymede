@@ -1374,6 +1374,22 @@ making changes at the same time they are.
 (This actually went into the Ganymede repository a little while ago,
 but I had neglected to mention it in CHANGES previously.)
 
+85. [SERVER] Added a ctrl-C handler to allow for clean shutdown upon kill
+
+It turns out that Java 1.3 added support for the
+java.lang.Runtime.addShutdownHook() method, which allows a Java
+process to register a thread to be invoked in response to ctrl-C/kill.
+
+I've taken advantage of this mechanism to allow Ganymede to do a clean
+shutdown on ctrl-C/kill.  This will help us make sure our logs are
+flushed and any email is drained.
+
+kill -9 on the Ganymede server process will still terminate
+unconditionally of course, if that is required.
+
+I hadn't known that Java had this feature, until we started working
+with JBoss and saw that it was doing this somehow.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
