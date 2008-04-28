@@ -1248,9 +1248,6 @@ public class GanymedeServer implements Server {
 					      ts.l("shutdown.failure_text", semaphoreState));
 	  }
       }
-    
-    // wait for any phase 2 builder tasks to complete, block any new builder tasks
-    // from executing
 
     // "Server going down.. waiting for any builder tasks to finish phase 2"
     Ganymede.debug(ts.l("shutdown.goingdown"));
@@ -1263,6 +1260,8 @@ public class GanymedeServer implements Server {
       {
 	// not much that we can do at this point
       }
+
+    // at this point, no new builder tasks can be scheduled
 
     // "Server going down.. performing final dump"
     Ganymede.debug(ts.l("shutdown.dumping"));
