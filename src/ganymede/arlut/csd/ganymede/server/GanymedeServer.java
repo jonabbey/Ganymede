@@ -1252,6 +1252,7 @@ public class GanymedeServer implements Server {
     // wait for any phase 2 builder tasks to complete, block any new builder tasks
     // from executing
 
+    // "Server going down.. waiting for any builder tasks to finish phase 2"
     Ganymede.debug(ts.l("shutdown.goingdown"));
 
     try
@@ -1263,6 +1264,7 @@ public class GanymedeServer implements Server {
 	// not much that we can do at this point
       }
 
+    // "Server going down.. performing final dump"
     Ganymede.debug(ts.l("shutdown.dumping"));
 
     try
@@ -1283,6 +1285,7 @@ public class GanymedeServer implements Server {
 	  }
 	catch (IOException ex)
 	  {
+            // "shutdown error: couldn''t successfully consolidate db."
 	    Ganymede.debug(ts.l("shutdown.dumperror"));
 	    throw ex;		// maybe didn't lock, so go down hard
 	  }
@@ -1290,8 +1293,10 @@ public class GanymedeServer implements Server {
 	// ok, we now are left holding a dump lock.  it should be safe to kick
 	// everybody off and shut down the server
 
+        // "Server going down.. database locked"
 	Ganymede.debug(ts.l("shutdown.locked"));
 
+        // "Server going down.. disconnecting clients"
 	Ganymede.debug(ts.l("shutdown.clients"));
 
 	// forceOff modifies GanymedeServer.sessions, so we need to
@@ -1311,17 +1316,16 @@ public class GanymedeServer implements Server {
 	  {
 	    temp = (GanymedeSession) tempList.elementAt(i);
 
-	    temp.forceOff("Server going down");
+            // "Server going down"
+	    temp.forceOff(ts.l("shutdown.clientNotification"));
 	  }
 
-	// stop any background tasks running
-
+        // "Server going down.. interrupting scheduler"
 	Ganymede.debug(ts.l("shutdown.scheduler"));
 
 	Ganymede.scheduler.interrupt();
 
-	// disconnect the admin consoles
-
+        // "Server going down.. disconnecting consoles"
 	Ganymede.debug(ts.l("shutdown.consoles"));
 
 	GanymedeAdmin.closeAllConsoles(ts.l("shutdown.byeconsoles"));
@@ -1344,6 +1348,7 @@ public class GanymedeServer implements Server {
 						   null));
 
 	System.err.println();
+
         // "Server completing shutdown.. waiting for log thread to complete."
 	System.err.println(ts.l("shutdown.closinglog"));
 
@@ -1358,17 +1363,21 @@ public class GanymedeServer implements Server {
       }
     catch (Exception ex)
       {
+        // "Caught exception during final shutdown:"
 	System.err.println(ts.l("shutdown.Exception"));
 	ex.printStackTrace();
       }
     catch (Error ex)
       {
+        // "Caught error during final shutdown:"
 	System.err.println(ts.l("shutdown.Error"));
 	ex.printStackTrace();
       }
     finally
       {
 	System.err.println();
+
+        // "Server shutdown complete."
 	System.err.println(ts.l("shutdown.finally"));
 
 	arlut.csd.ganymede.common.Invid.printCount();
