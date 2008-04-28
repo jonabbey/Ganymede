@@ -85,11 +85,12 @@ import org.xml.sax.helpers.DefaultHandler;
  * entity by entity, rather than through the use of a callback interface, as is
  * traditionally done with SAX.</P>
  *
- * <P>When instantiated, the XMLReader creates a background thread that receives
- * SAX events from James Clark's XP XML parser.  These SAX events are converted
- * to {@link arlut.csd.Util.XMLItem XMLItem} objects and saved in an internal
- * buffer.  The user of the XMLReader class calls getNextItem() to retrieve
- * these XMLItem objects from the XMLReader buffer, in order of receipt.</P>
+ * <P>When instantiated, the XMLReader creates a background thread
+ * that receives SAX events from the Java 1.4 JAXP SAX2 parser.  These
+ * SAX events are converted to {@link arlut.csd.Util.XMLItem XMLItem}
+ * objects and saved in an internal buffer.  The user of the XMLReader
+ * class calls getNextItem() to retrieve these XMLItem objects from
+ * the XMLReader buffer, in order of receipt.</P>
  *
  * <P>The background parse thread is throttled back as needed to avoid overflowing
  * the XMLReader's internal buffer.</P>
@@ -486,7 +487,7 @@ public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Run
 		    finished = false; // loop again
 		  }
 	      }
-	  } // while (!finished)
+	  }
 
 	if (debug)
 	  {
