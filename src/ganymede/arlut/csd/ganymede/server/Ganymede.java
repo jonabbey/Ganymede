@@ -887,7 +887,7 @@ public class Ganymede {
         }
       }, ts.l("main.signalCatchThread"));  // "Ganymede ctrl-C handling thread"
 
-    java.lang.Runtime.getRuntime().addShutdownHook(signalCatchThread);
+    java.lang.Runtime.getRuntime().addShutdownHook(signalThread);
     
     debug(ts.l("main.info_ready"));
   }
