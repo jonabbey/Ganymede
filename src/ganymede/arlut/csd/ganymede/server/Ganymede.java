@@ -826,7 +826,7 @@ public class Ganymede {
 			
 			Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
 			
-			GanymedeServer.shutdown();
+			GanymedeServer.shutdown(false);
 		      }
 		  }
 		else
@@ -892,7 +892,7 @@ public class Ganymede {
         public void run() {
           try
             {
-              GanymedeServer.shutdown();
+              GanymedeServer.shutdown(true);
             }
           finally
             {

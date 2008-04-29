@@ -862,7 +862,7 @@ public class GanymedeServer implements Server {
 		  {
 		  }
 
-		GanymedeServer.shutdown();
+		GanymedeServer.shutdown(false);
 	      }
 	      }, ts.l("clearActiveUser.deathThread"));
 
@@ -1200,7 +1200,7 @@ public class GanymedeServer implements Server {
       {
 	GanymedeAdmin.setState(ts.l("setShutDown.nousers_state"));
 
-	GanymedeServer.shutdown();
+	GanymedeServer.shutdown(false);
 
 	return;
       }
@@ -1218,7 +1218,7 @@ public class GanymedeServer implements Server {
    * <p>This method actually does the shutdown.</p>
    */
 
-  public static ReturnVal shutdown()
+  public static ReturnVal shutdown(boolean signalHandling)
   {
     Vector tempList;
     GanymedeSession temp;
@@ -1380,8 +1380,11 @@ public class GanymedeServer implements Server {
 	System.err.println(ts.l("shutdown.finally"));
 
 	arlut.csd.ganymede.common.Invid.printCount();
-	
-	System.exit(0);
+
+        if (!signalHandling)
+          {
+            System.exit(0);
+          }
 	
 	return null;
       }
