@@ -890,7 +890,14 @@ public class Ganymede {
 
     Thread signalThread = new Thread(signalGroup, new Runnable() {
         public void run() {
-          GanymedeServer.shutdown();
+          try
+            {
+              GanymedeServer.shutdown();
+            }
+          finally
+            {
+              java.lang.Runtime.getRuntime().halt(1);
+            }
         }
       }, ts.l("main.signalCatchThread"));  // "Ganymede ctrl-C handling thread"
 
