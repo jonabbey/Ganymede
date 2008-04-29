@@ -884,7 +884,7 @@ public class Ganymede {
     ThreadGroup signalGroup = new ThreadGroup(ts.l("main.signalCatchGroup")) {
         public void uncaughtException(Thread t, Throwable e) {
           e.printStackTrace();
-          System.exit(1);
+          java.lang.Runtime.getRuntime().halt(1);
         }
       };
 
