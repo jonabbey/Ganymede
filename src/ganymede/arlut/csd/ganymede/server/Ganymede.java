@@ -881,14 +881,7 @@ public class Ganymede {
     // register a thread to respond if the server gets ctrl-C, kill,
     // etc.
 
-    ThreadGroup signalGroup = new ThreadGroup(ts.l("main.signalCatchGroup")) {
-        public void uncaughtException(Thread t, Throwable e) {
-          e.printStackTrace();
-          java.lang.Runtime.getRuntime().halt(1);
-        }
-      };
-
-    Thread signalThread = new Thread(signalGroup, new Runnable() {
+    Thread signalThread = new Thread(new Runnable() {
         public void run() {
           try
             {
