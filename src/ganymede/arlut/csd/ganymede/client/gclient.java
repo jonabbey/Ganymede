@@ -4964,7 +4964,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	
 	    wp.refreshTableWindows();
 
-	    handleReturnVal(openNewTransaction());
+	    openNewTransaction();
 
 	    //
 	    // This fixes all the icons in the tree, and closes any
@@ -5221,6 +5221,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	ReturnVal rv = session.openTransaction(ts.l("openNewTransaction.client_name"));
 	
 	handleReturnVal(rv);
+
 	if ((rv != null) && (!rv.didSucceed()))
 	  {
 	    // "Could not open a new transaction on the Ganymede server."
