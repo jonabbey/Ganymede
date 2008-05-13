@@ -302,6 +302,14 @@ public final class ReturnVal implements java.io.Serializable {
 		result.dialog.appendText(retVal2.dialog.getText());
 	      }
 	  }
+        else if (retVal.dialog != null)
+          {
+            result.dialog = retVal.dialog;
+          }
+        else if (retVal2.dialog != null)
+          {
+            result.dialog = retVal2.dialog;
+          }
       }
 
     // if either provide a newObjectInvid, or remoteObjectRef, we'll
