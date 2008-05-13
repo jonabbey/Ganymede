@@ -2256,6 +2256,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (session.editSet != null)
       {
+        // "Server: Error in openTransaction()"
+        // "Error.. transaction already opened"
 	return Ganymede.createErrorDialog(ts.l("openTransaction.error"),
 					  ts.l("openTransaction.error_text"));
       }
