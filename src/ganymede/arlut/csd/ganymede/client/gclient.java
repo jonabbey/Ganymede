@@ -4964,7 +4964,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	
 	    wp.refreshTableWindows();
 
-	    openNewTransaction();
+	    handleReturnVal(openNewTransaction());
 
 	    //
 	    // This fixes all the icons in the tree, and closes any
