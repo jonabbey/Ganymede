@@ -256,7 +256,13 @@ public class windowSizer {
         catch (Exception ex)
           {
           }
+        finally
+          {
+            return true;
+          }
       }
+
+    return false;
   }
 
   private String key(JFrame window, String keyName)
