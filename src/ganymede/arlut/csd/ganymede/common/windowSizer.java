@@ -229,7 +229,7 @@ public class windowSizer {
 
   public void saveLookAndFeel(String laf)
   {
-    String selectedLookAndFeel = UIManager.getLookAndFeel().toString();
+    String selectedLookAndFeel = UIManager.getLookAndFeel().getClass().getName();
 
     prefEngine.put(LOOKANDFEEL, selectedLookAndFeel);
   }
