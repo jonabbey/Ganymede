@@ -57,6 +57,7 @@ import java.awt.Frame;
 import java.util.prefs.Preferences;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.UIManager;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -78,8 +79,9 @@ public class windowSizer {
   static final String YPOS = "y_position";
   static final String WIDTH = "window_width";
   static final String HEIGHT = "window_height";
+  static final String LOOKANDFEEL = "look_and_feel";
 
-  Preferences prefEngine = null;
+  static private Preferences prefEngine = null;
 
   public windowSizer(Preferences prefs)
   {
@@ -218,6 +220,43 @@ public class windowSizer {
       }
 
     return false;
+  }
+
+  /**
+   * This method saves the selected look and feel to the
+   * system-dependent Java preferences store.
+   */
+
+  public void saveLookAndFeel(String laf)
+  {
+    String selectedLookAndFeel = UIManager.getLookAndFeel().toString();
+
+    prefEngine.put(LOOKANDFEEL, selectedLookAndFeel);
+  }
+
+  /**
+   * This method looks up the look and feel selection stored in the
+   * system-dependent Java preferences store, and applies it to this
+   * application.
+   */
+
+  public boolean restoreLookAndFeel()
+  {
+    String savedLookAndFeel = prefEngine.get(LOOKANDFEEL, null);
+
+    if (savedLookAndFeel != null)
+      {
+        try
+          {
+            UIManager.setLookAndFeel(savedLookAndFeel);
+          }
+        catch (javax.swing.UnsupportedLookAndFeelException ex)
+          {
+          }
+        catch (Exception ex)
+          {
+          }
+      }
   }
 
   private String key(JFrame window, String keyName)

@@ -333,6 +333,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	System.out.println("init in glogin");
       }
 
+    // Look up our saved look and feel, if any
+
+    gclient.sizer.restoreLookAndFeel();
+
     // Dowload the ganymede logo using the appropriate method
     
     ganymede_logo = PackageResources.getImageResource(this, "ganymede.jpg", getClass());

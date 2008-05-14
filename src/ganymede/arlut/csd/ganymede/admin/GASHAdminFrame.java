@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -55,6 +55,7 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -96,9 +97,15 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import arlut.csd.ganymede.common.windowSizer;
+import arlut.csd.JDataComponent.JSetValueObject;
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JErrorValueObject;
+import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.JFocusRootPanel;
 import arlut.csd.JDataComponent.JMultiLineLabel;
+import arlut.csd.JDataComponent.LAFMenu;
 import arlut.csd.JDialog.DialogRsrc;
+import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.messageDialog;
@@ -122,7 +129,7 @@ import arlut.csd.Util.TranslationService;
  *
  */
 
-public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback {
+public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback, JsetValueCallback {
 
   /**
    * TranslationService object for handling string localization in
@@ -151,6 +158,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   // ---
 
+  Image errorImage = null;
   Image question = null;
 
   JMenuBar mbar = null;
@@ -266,6 +274,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   aboutGanyDialog about = null;
 
+  LAFMenu LandFMenu = null;
+
   /* -- */
 
   /**
@@ -369,7 +379,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     controlMenu.addSeparator();
     controlMenu.add(dumpMI);
     controlMenu.addSeparator();
-    controlMenu.add(new arlut.csd.JDataComponent.LAFMenu(this)); // ??
+
+    LandFMenu = new arlut.csd.JDataComponent.LAFMenu(this);
+    LandFMenu.setCallback(this);
+
+    controlMenu.add(LandFMenu);
     controlMenu.add(quitMI);
 
     // "Debug"
@@ -1221,6 +1235,37 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     about.setVisible(true);
   }
 
+  /**
+   * This method comprises the JsetValueCallback interface, and is how
+   * some data-carrying components notify us when something changes.
+   *
+   * @see arlut.csd.JDataComponent.JsetValueCallback
+   * @see arlut.csd.JDataComponent.JValueObject
+   */
+
+  public boolean setValuePerformed(JValueObject o)
+  {
+    if (o instanceof JErrorValueObject)
+      {
+	showErrorMessage((String)o.getValue());
+      }
+    else if (o instanceof JSetValueObject && o.getSource() == LandFMenu)
+      {
+        sizer.saveLookAndFeel((String) o.getValue());
+      }
+    else
+      {
+	if (debug)
+	  {
+	    System.err.println("I don't know what to do with this setValuePerformed: " + o);
+	  }
+
+	return false;
+      }
+
+    return true;
+  }
+
   // methods for the rowSelectCallback
 
   public void rowSelected(Object key)
@@ -1378,6 +1423,72 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     adminDispatch.changeStatus("****************************************" +
 			       "****************************************\n");
+  }
+
+  /**
+   * Loads and returns the error Image for use in client dialogs.
+   * 
+   * Once the image is loaded, it is cached for future calls to 
+   * getErrorImage().
+   */
+
+  public final Image getErrorImage()
+  {
+    if (errorImage == null)
+      {
+	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
+      }
+    
+    return errorImage;
+  }
+
+  /**
+   * Pops up an error dialog with the default title.
+   */
+
+  public final void showErrorMessage(String message)
+  {
+    // "Error"
+    showErrorMessage(ts.l("global.error"), message);
+  }
+
+  /**
+   * Pops up an error dialog.  Pre-defines the icon for the dialog as
+   * the standard Ganymede error icon.
+   */
+
+  public final void showErrorMessage(String title, String message)
+  {
+    showErrorMessage(title, message, getErrorImage());
+  }
+
+  /** 
+   * Show an error dialog.
+   *
+   * @param title title of dialog.
+   * @param message Text of dialog.
+   * @param icon optional icon to display.
+   */
+
+  public final void showErrorMessage(String title, String message, Image icon)
+  {
+    if (debug)
+      {
+	System.err.println("Error message: " + message);
+      }
+
+    final GASHAdminFrame my_frame = this;
+    final String Title = title;
+    final String Message = message;
+    final Image fIcon = icon;
+
+    EventQueue.invokeLater(new Runnable() 
+			       {
+				 public void run()
+				   {
+				     new JErrorDialog(my_frame, Title, Message, fIcon); // implicit show
+				   }
+			       });
   }
 }
 

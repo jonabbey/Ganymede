@@ -104,6 +104,7 @@ import javax.swing.plaf.basic.BasicToolBarUI;
 
 import org.python.core.PySystemState;
 
+import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JErrorValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
@@ -5541,6 +5542,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     if (o instanceof JErrorValueObject)
       {
 	showErrorMessage((String)o.getValue());
+      }
+    else if (o instanceof JSetValueObject && o.getSource() == LandFMenu)
+      {
+        sizer.saveLookAndFeel((String) o.getValue());
       }
     else
       {

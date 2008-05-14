@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -64,6 +64,7 @@ import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
@@ -165,6 +166,12 @@ public class LAFMenu extends JMenu implements ActionListener
 	  {
 	    root.invalidate();
 	    SwingUtilities.updateComponentTreeUI(root);
+            
+            if (allowCallback)
+              {
+                my_parent.setValuePerformed(new JSetValueObject(this, look));
+              }
+
 	    root.validate();
 	  }
       } 
@@ -182,23 +189,11 @@ public class LAFMenu extends JMenu implements ActionListener
 	      {
 	      }
 	  }
-
-	if (debug)
-	  {
-	    System.out.println("That look and feel is not supported on this platform.");
-	  }
-
-	updateMenu();
       }
-    catch ( java.lang.InstantiationException e)
+    catch (Exception e)
       {
-	updateMenu();
       }
-    catch (java.lang.ClassNotFoundException e)
-      {
-	updateMenu();
-      }
-    catch (java.lang.IllegalAccessException e)
+    finally
       {
 	updateMenu();
       }
@@ -208,7 +203,7 @@ public class LAFMenu extends JMenu implements ActionListener
   {
     String current = UIManager.getLookAndFeel().toString();
 
-    if (current != null && current.indexOf(e.getActionCommand()) > 0)
+    if (StringUtils.stringEquals(current, e.getActionCommand()))
       {
 	if (debug)
 	  {

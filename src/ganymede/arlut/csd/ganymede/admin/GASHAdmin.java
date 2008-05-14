@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -269,6 +269,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
       {
 	loadParameters();
       }
+
+    GASHAdminFrame.sizer.restoreLookAndFeel();
 
     // let's get notified if we establish an SSL connection
 
