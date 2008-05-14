@@ -5545,7 +5545,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
       }
     else if (o instanceof JSetValueObject && o.getSource() == LandFMenu)
       {
-        sizer.saveLookAndFeel((String) o.getValue());
+        sizer.saveLookAndFeel();
       }
     else
       {

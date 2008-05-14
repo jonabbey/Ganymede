@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2006
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -227,7 +227,7 @@ public class windowSizer {
    * system-dependent Java preferences store.
    */
 
-  public void saveLookAndFeel(String laf)
+  public void saveLookAndFeel()
   {
     String selectedLookAndFeel = UIManager.getLookAndFeel().getClass().getName();
 

@@ -1251,7 +1251,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     else if (o instanceof JSetValueObject && o.getSource() == LandFMenu)
       {
-        sizer.saveLookAndFeel((String) o.getValue());
+        sizer.saveLookAndFeel();
       }
     else
       {
