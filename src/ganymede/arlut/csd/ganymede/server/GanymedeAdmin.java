@@ -1104,8 +1104,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
     else
       {
-	return GanymedeServer.shutdown(false); // we may never return if the shutdown succeeds.. the client
-                                               // will catch an exception in that case.
+	return GanymedeServer.shutdown(); // we may never return if the shutdown succeeds.. the client
+                                          // will catch an exception in that case.
       }
   }
 

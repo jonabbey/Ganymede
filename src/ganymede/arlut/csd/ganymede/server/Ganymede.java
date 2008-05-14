@@ -279,6 +279,16 @@ public class Ganymede {
 
   public static Vector syncRunners = new Vector();
 
+  /**
+   * The Thread that we have registered to handle cleanup if we get a
+   * kill/quit signal.
+   *
+   * This is public so that the GanymedeServer class can de-register
+   * this thread at shutdown time to avoid recursion on exit().
+   */
+
+  public static Thread signalHandlingThread = null;
+
   // properties from the ganymede.properties file
   
   public static String dbFilename = null;
@@ -826,7 +836,7 @@ public class Ganymede {
 			
 			Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
 			
-			GanymedeServer.shutdown(false);
+			GanymedeServer.shutdown();
 		      }
 		  }
 		else
@@ -881,11 +891,11 @@ public class Ganymede {
     // register a thread to respond if the server gets ctrl-C, kill,
     // etc.
 
-    Thread signalThread = new Thread(new Runnable() {
+    Ganymede.signalHandlingThread = new Thread(new Runnable() {
         public void run() {
           try
             {
-              GanymedeServer.shutdown(true);
+              GanymedeServer.shutdown();
             }
           finally
             {
@@ -894,7 +904,7 @@ public class Ganymede {
         }
       }, ts.l("main.signalCatchThread"));  // "Ganymede ctrl-C handling thread"
 
-    java.lang.Runtime.getRuntime().addShutdownHook(signalThread);
+    java.lang.Runtime.getRuntime().addShutdownHook(Ganymede.signalHandlingThread);
     
     debug(ts.l("main.info_ready"));
   }
