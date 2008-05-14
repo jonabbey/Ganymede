@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-April 1, 2008
+June 1, 2008
 CHANGES
 
 Last Revision Changed: $Rev$
@@ -11,7 +11,7 @@ SVN URL: $HeadURL$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: April 1, 2008
+RELEASE DATE: June 1, 2008
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1389,6 +1389,12 @@ unconditionally of course, if that is required.
 
 I hadn't known that Java had this feature, until we started working
 with JBoss and saw that it was doing this somehow.
+
+86. [CLIENT, ADMIN CONSOLE] Persisted the look and feel selection
+
+The admin console and graphical client now remember what look and feel
+a user last chose on any given system, and automatically re-instates
+the desired look and feel at startup.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
