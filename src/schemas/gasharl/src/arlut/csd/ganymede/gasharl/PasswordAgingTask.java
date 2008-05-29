@@ -90,6 +90,7 @@ import arlut.csd.ganymede.server.GanymedeSession;
 public class PasswordAgingTask implements Runnable {
 
   static final boolean debug = true;
+  static final public String name = "password aging task";
 
   /* -- */
 
@@ -145,7 +146,7 @@ public class PasswordAgingTask implements Runnable {
 
 	mySession.enableOversight(false);
 	
-	ReturnVal retVal = mySession.openTransaction("password aging task");
+	ReturnVal retVal = mySession.openTransaction(PasswordAgingTask.name);
 
 	if (retVal != null && !retVal.didSucceed())
 	  {

@@ -2013,12 +2013,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	for (int i = 0; i < group_targets.size(); i++)
 	  {
+	    memberInvid = (Invid) group_targets.elementAt(i);
+
+            if (isVeryDeadUser(memberInvid))
+              {
+                continue;
+              }
+
 	    if (i > 0)
 	      {
 		result.append(", ");
 	      }
-
-	    memberInvid = (Invid) group_targets.elementAt(i);
 
             target = getLabel(memberInvid);
 
@@ -2160,12 +2165,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	for (int i = 0; i < group_targets.size(); i++)
 	  {
+	    userInvid = (Invid) group_targets.elementAt(i);
+
+            if (isVeryDeadUser(userInvid))
+              {
+                continue;
+              }
+
 	    if (i > 0)
 	      {
 		result.append(", ");
 	      }
-
-	    userInvid = (Invid) group_targets.elementAt(i);
 
             target = getLabel(userInvid);
 
@@ -2259,7 +2269,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	for (int i = 0; i < group_targets.size(); i++)
 	  {
-            targets.addElement(getLabel((Invid) group_targets.elementAt(i)));
+            Invid targetInvid = (Invid) group_targets.elementAt(i);
+
+            if (isVeryDeadUser(targetInvid))
+              {
+                continue;
+              }
+
+            targets.addElement(getLabel(targetInvid));
           }
       }
 
@@ -2408,6 +2425,45 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     writer.println(result.toString());
+  }
+
+  /**
+   * This method checks to see if an invid is a user, and if that user
+   * was inactivated (or at least last edited by) anyone other than
+   * the password aging task.
+   *
+   * If we find such a user, we will not include him in email lists of
+   * any kind, lest we generate bounce messages to people sending to
+   * those lists.  If anyone other than the password aging task
+   * inactivated a user, we're going to assume that the user should
+   * not receive any more mail that was sent to a Ganymede mail list
+   * (of any variety), rather than directly to him.
+   */
+
+  private boolean isVeryDeadUser(Invid invid)
+  {
+    if (invid.getType() != 3)
+      {
+        return false;
+      }
+
+    DBObject userObject = getObject(invid);
+
+    if (!userObject.isInactivated())
+      {
+        return false;
+      }
+
+    String modifierName = (String) userObject.getFieldValueLocal(SchemaConstants.ModifierField);
+
+    if (modifierName.equals("[" + PasswordAgingTask.name + "]"))
+      {
+        return true;
+      }
+    else
+      {
+        return false;
+      }
   }
 
   /**
