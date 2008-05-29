@@ -2454,6 +2454,37 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         return false;
       }
 
+    Vector emailTargets = userObject.getFieldValuesLocal(userSchema.EMAILTARGET);
+
+    if (emailTargets == null)
+      {
+        // huh, no targets?  that's pretty dead!
+
+        return true;
+      }
+
+    if (emailTargets.size() > 1)
+      {
+        // multiple addresses?  someone's doing something fancy on
+        // purpose, let it pass
+
+        return false;
+      }
+
+    String target = (String) emailTargets.elementAt(0);
+
+    if (target.indexOf('@') == -1)
+      {
+        // we're pointing to another user, presumably.  let it pass
+
+        return false;
+      }
+
+    if (target.toLowerCase().endsWith("redirect"))
+      {
+        return true;            // no sending to bounce addresses, thanks
+      }
+
     String modifierName = (String) userObject.getFieldValueLocal(SchemaConstants.ModifierField);
 
     if (modifierName.equals("[" + PasswordAgingTask.name + "]"))
@@ -2461,7 +2492,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         return false;
       }
 
-    return true;
+    if (target.startsWith((userObject.getLabel() + "@")) && target.endsWith("arlut.utexas.edu"))
+      {
+        return true;            // we're mailing to the user himself,
+                                // and they weren't password
+                                // expired, skip mailing to this user
+      }
+
+    return false;
   }
 
   /**
