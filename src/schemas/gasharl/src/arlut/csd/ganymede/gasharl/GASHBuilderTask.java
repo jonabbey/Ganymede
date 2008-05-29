@@ -2456,14 +2456,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     String modifierName = (String) userObject.getFieldValueLocal(SchemaConstants.ModifierField);
 
-    if (!modifierName.equals("[" + PasswordAgingTask.name + "]"))
-      {
-        return true;
-      }
-    else
+    if (modifierName.equals("[" + PasswordAgingTask.name + "]"))
       {
         return false;
       }
+
+    return true;
   }
 
   /**
