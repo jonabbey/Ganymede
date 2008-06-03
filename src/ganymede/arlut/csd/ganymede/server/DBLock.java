@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -63,98 +63,107 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBLocks arbitrate access to {@link
+ * DBLocks arbitrate access to {@link
  * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects in the
- * Ganymede server's {@link arlut.csd.ganymede.server.DBStore DBStore}.
+ * Ganymede server's {@link arlut.csd.ganymede.server.DBStore
+ * DBStore}.
+ *
  * Threads wishing to read from, dump, or update object bases in the
- * DBStore must be in possession of an established DBLock.  The
- * general scheme is that any number of readers and/or dumpers can
- * read from an object base simultaneously.  If a number of readers are
- * processing when a thread attempts to establish a write lock, those
- * readers are allowed to complete their reading, but no new read lock
- * may be established until the writer has a chance to get in and make
- * its update.</p>
+ * DBStore must be in possession of an established DBLock.
+ *
+ * The general scheme is that any number of readers and/or dumpers can
+ * read from an object base simultaneously.  If a DBWriteLock to
+ * establish on an object base, all active readers are allowed to
+ * complete their reading, but no new read lock may be established
+ * until the writer has a chance to get in and make its update and
+ * then signals completion by calling release().  Writers are given
+ * priority in the DBLock queue over readers.
  * 
- * <p>If there are a number of writer locks queued up for update
- * access to a DBObjectBase in the DBStore when a thread attempts to
- * establish a dump lock, those writers are allowed to complete their
- * updates, but no new writer is queued until the dump thread finishes
- * dumping the locked bases.</p>
+ * Similarly, if there are a number of writer locks queued up for
+ * update access to a DBObjectBase in the DBStore when a thread
+ * attempts to establish a DBDumpLock, those writers are allowed to
+ * complete their updates, but no new writer is queued until the dump
+ * thread finishes dumping the locked bases.
  *
- * <P>All of this priority logic is implemented in the establish()
- * methods of the concrete DBLock subclasses.</P>
+ * All of this priority logic is implemented in the establish()
+ * methods of the concrete DBLock subclasses.
  *
- * <P>As mentioned above, all DBLock's are issued in the context of
- * one or more {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
+ * As mentioned above, all DBLock's are issued in the context of one
+ * or more {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
  * objects.  The DBObjectBases are actually the things being locked.
  * To maintain multi-threaded safety of the lock system across
  * multiple DBObjectBases, the DBLock {@link
- * arlut.csd.ganymede.server.DBLock#establish(java.lang.Object) establish()}
- * and {@link arlut.csd.ganymede.server.DBLock#release() release()} methods
- * (as implemented in {@link arlut.csd.ganymede.server.DBReadLock
- * DBReadLock}, {@link arlut.csd.ganymede.server.DBReadLock DBWriteLock}, and
- * {@link arlut.csd.ganymede.server.DBReadLock DBDumpLock}) are all
+ * arlut.csd.ganymede.server.DBLock#establish(java.lang.Object)
+ * establish()} and {@link arlut.csd.ganymede.server.DBLock#release()
+ * release()} methods (as implemented in {@link
+ * arlut.csd.ganymede.server.DBReadLock DBReadLock}, {@link
+ * arlut.csd.ganymede.server.DBReadLock DBWriteLock}, and {@link
+ * arlut.csd.ganymede.server.DBReadLock DBDumpLock}) are all
  * synchronized on the Ganymede's DBStore object.  This
  * synchronization is critical for the proper functioning of the
- * DBLock system.</P>
+ * DBLock system.
  * 
- * <p>There is currently no support for handling timeouts, and locks can persist
- * indefinitely.  However, the {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
- * class will detect a client that has died, and will properly clean up any
- * locks held by the user.</p> 
+ * There is currently no support for handling timeouts, and locks can
+ * persist indefinitely.  However, the {@link
+ * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class
+ * will detect a client that has died, and will properly clean up any
+ * locks held by the user.
  */
 
 public abstract class DBLock {
 
   /**
-   * <P>All DBLock's have an identifier key, which is used to
-   * identify the lock in the {@link arlut.csd.ganymede.server.DBStore DBStore}'s
-   * {@link arlut.csd.ganymede.server.DBLockSync DBLockSync} object.  The
-   * establish() methods in the DBLock subclasses consult the DBStore.lockSync
-   * to make sure that no {@link arlut.csd.ganymede.server.DBSession DBSession}
-   * ever possesses more than one write lock,
-   * to prevent deadlocks from occuring in the server.</P>
+   * All DBLock's have an identifier key, which is used to identify
+   * the lock in the {@link arlut.csd.ganymede.server.DBStore
+   * DBStore}'s {@link arlut.csd.ganymede.server.DBLockSync
+   * DBLockSync} object.  The establish() methods in the DBLock
+   * subclasses consult the DBStore.lockSync to make sure that no
+   * {@link arlut.csd.ganymede.server.DBSession DBSession} ever
+   * possesses more than one write lock, to prevent deadlocks from
+   * occuring in the server.
    */
 
   Object key;
 
   /**
-   * <P>All DBLock's establish() and release() methods synchronize
-   * their critical sections on the DBLockSync object held in the
+   * All DBLock's establish() and release() methods synchronize their
+   * critical sections on a singleton DBLockSync object held in the
    * Ganymede server's DBStore object in order to guarantee that all
-   * lock negotiations are thread-safe.</P>
+   * lock negotiations are thread-safe.
    */
 
   DBLockSync lockSync;
 
   /**
-   * <P>In order to prevent deadlocks, each individual lock must be established on
-   * all applicable {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases} at the
-   * time the lock is initially established.  baseSet is the Vector of DBObjectBases
-   * that this DBLock is/will be locked on.</P>
+   * In order to prevent deadlocks, each individual lock must be
+   * established on all applicable {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} at the time
+   * the lock is initially established.  baseSet is the Vector of
+   * DBObjectBases that this DBLock is/will be locked on.
    */
 
   Vector baseSet;
 
   /**
-   * <P>Will be true if a DBLock is successfully locked.</P>
+   * Will be true if a DBLock is successfully locked.
    *
-   * <P>Should not be directly accessed outside of the DBLock class hierarchy
-   * (unfortunately Java has no support for 'accessible to subclasses only').</P>
+   * Should not be directly accessed outside of the DBLock class
+   * hierarchy (unfortunately Java has no support for 'accessible to
+   * subclasses only').
    */
 
   boolean locked = false;
 
   /**
-   * <P>Will be true if a DBLock has had its abort() method called.  Once
-   * aborted, a lock may never be re-established;  the locking code must
-   * create a new lock.</P>
+   * Will be true if a DBLock has had its abort() method called.  Once
+   * aborted, a lock may never be re-established; the locking code
+   * must create a new lock.
    */
 
   boolean abort = false;
 
   /**
-   * <P>Will be true while a DBLock is in the process of being established.</P>
+   * Will be true while a DBLock is in the process of being established.
    */
   
   boolean inEstablish = false;

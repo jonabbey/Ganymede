@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -64,16 +64,17 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class acts as a general synchronization object for
- * interlock coordination.  All global data required for coordinating
- * lock activity is stored here.</P>
+ * This class acts to provide a singleton object for interlock
+ * coordination.  All global data required for coordinating DBLock
+ * lock activity is stored in the singleton object.
  *
- * <p>Note that much code in the various {@link arlut.csd.ganymede.server.DBLock}
- * subclasses, and in the rest of the Ganymede server, establishes external
- * synchronization on the DBLockSync object referenced in
- * {@link arlut.csd.ganymede.server.DBStore#lockSync DBStore.lockSync}, so certain
- * methods in this class which do not appear synchronized may in fact be
- * dependent on external synchronization.</p>
+ * Note that much code in the various {@link
+ * arlut.csd.ganymede.server.DBLock} subclasses, and in the rest of
+ * the Ganymede server, establishes external synchronization on the
+ * DBLockSync object referenced in {@link
+ * arlut.csd.ganymede.server.DBStore#lockSync DBStore.lockSync}, so
+ * certain methods in this class which do not appear synchronized may
+ * in fact be dependent on external synchronization.
  */
 
 public class DBLockSync {
