@@ -63,16 +63,20 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>DBDumpLock is a {@link arlut.csd.ganymede.server.DBLock DBLock} object used to lock the
- * {@link arlut.csd.ganymede.server.DBStore DBStore} for the purpose of
- * dumping the database.  A DBDumpLock establish request has lower
- * priority than {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}
- * requests, but once a DBDumpLock establish
- * request is submitted, no new DBWriteLock can be established until
- * the dumping thread has completed the dump and released the lock.</P>
+ * DBDumpLock is a {@link arlut.csd.ganymede.server.DBLock DBLock}
+ * object used to lock the {@link arlut.csd.ganymede.server.DBStore
+ * DBStore} either for the purpose of dumping the database or for
+ * handling a GanymedeBuilderTask build.  A DBDumpLock establish
+ * request has lower priority than {@link
+ * arlut.csd.ganymede.server.DBWriteLock DBWriteLock} requests, but
+ * once a DBDumpLock establish request is submitted, no new
+ * DBWriteLock can be established until the dumping thread has
+ * completed the dump and released the lock.
  *
- * <P>{@link arlut.csd.ganymede.server.DBReadLock DBReadLock}'s can be established
- * while a DBDumpLock is active.</P>
+ * {@link arlut.csd.ganymede.server.DBReadLock DBReadLock}'s can be established
+ * while a DBDumpLock is active, though.
+ *
+ * A DBDumpLock acts as a highest priority DBReadLock.
  */
 
 class DBDumpLock extends DBLock {
