@@ -763,9 +763,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     JPanel tableBox = new JPanel(new BorderLayout());
     tableBox.add("Center", table);
 
-    // "Users Connected"
-    tableBox.setBorder(new TitledBorder(ts.l("init.users_title")));
-
     //
     // create background task monitor
     //
@@ -798,7 +795,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     JPanel syncTaskBox = new JPanel(new java.awt.BorderLayout());
     syncTaskBox.add("Center", syncTaskTable);
-    syncTaskBox.setBorder(new TitledBorder(ts.l("init.sync_title")));
 
     // then the miscellaneous task monitor
 
@@ -807,9 +803,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 			  
     JPanel taskBox = new JPanel(new java.awt.BorderLayout());
     taskBox.add("Center", taskTable);
-
-    // "Task Monitor"
-    taskBox.setBorder(new TitledBorder(ts.l("init.task_title")));
 
     // and put them into our tab pane
 
