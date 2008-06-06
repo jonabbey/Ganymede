@@ -731,8 +731,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     JPanel topBox = new JPanel(new BorderLayout());
     topBox.add("Center",topPanel);
-    // "Ganymede Server"
-    topBox.setBorder(new TitledBorder(ts.l("init.title")));
+
+    //    // "Ganymede Server"
+    //    topBox.setBorder(new TitledBorder(ts.l("init.title")));
 
     getContentPane().add(topBox, BorderLayout.NORTH);
 
