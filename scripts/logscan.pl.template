@@ -278,7 +278,7 @@ sub seek_start_point {
 ##########################################################################
 
 sub oops_usage() {
-  print "Usage: logscan.pl [-a] [-l] [-i invid number] [-s start_date in java timecode] [-e end date in java timecode]\n";
+  print "Usage: $0 [-a] [-l] [-i invid number] [-s start_date in java timecode] [-e end date in java timecode]\n";
   print "\t-a: Search for admin invids rather than object invids\n";
   print "\t-l: Only retrieve login/logout type events\n";
   print "\t-s: Only retrieve events more recent than the start date, which is provided as a Java timecode\n";
@@ -360,7 +360,7 @@ while (<FILE>) {
   # if we're looking for a specific invid, let's see if the line has
   # invid in it
 
-  if (!defined $invid || /$invid/) {
+  PROCESSLINE: if (!defined $invid || /$invid/) {
 
     @fields = split(/\|/);
 
@@ -378,7 +378,7 @@ while (<FILE>) {
     }
 
     if (!(defined $invid) ||
-        ($fields[$fieldindex] =~ /(,|^)$invid(,|$)/) ||
+        ($fields[$fieldindex] =~ /(^|,)$invid(,|$)/) ||
         ($fields[$fieldindex] =~ /^$invid$/)) {
 
       print $_;
@@ -391,15 +391,17 @@ while (<FILE>) {
 
       if (@fields[2] =~ /starttransaction/) {
 
-	$pid = @fields[5];
+	$transaction_label = @fields[5];
 
-	while ($pid) {
+	while (1) {
 	  $_ = <FILE>;
 
-	  if (/$pid/) {
+          @fields = split(/\|/);
+
+	  if ($fields[5] eq $transaction_label) {
 	    print $_;
 	  } else {
-	    $pid = 0;
+            goto PROCESSLINE;
 	  }
 	}
       }
