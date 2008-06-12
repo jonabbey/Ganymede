@@ -474,7 +474,7 @@ public class DBLogFileController implements DBLogController {
 		  {
 		    transactionID = event.transactionID;
 
-		    // "---------- Transaction {0}: {1} ----------\n"
+		    // "---------- Transaction {0}: {1} ----------\n\n"
 		    buffer.append(ts.l("retrieveHistory.start_trans", event.time, event.adminName));
 		  }
 		else if (event.eventClassToken.equals("finishtransaction"))
