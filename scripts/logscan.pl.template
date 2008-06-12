@@ -378,7 +378,7 @@ while (<FILE>) {
     }
 
     if (!(defined $invid) ||
-        ($fields[$fieldindex] =~ /[,|\|]$invid[,|\|]/) ||
+        ($fields[$fieldindex] =~ /(,|^)$invid(,|$)/) ||
         ($fields[$fieldindex] =~ /^$invid$/)) {
 
       print $_;
