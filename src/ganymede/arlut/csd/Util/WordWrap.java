@@ -160,10 +160,13 @@ public class WordWrap {
 
 	    result.append(inString.substring(marker, p+1));
 
-	    if (prepend != null)
-	      {
-		result.append(prepend);
-	      }
+            if (p+1 < charAry.length)
+              {
+                if (prepend != null)
+                  {
+                    result.append(prepend);
+                  }
+              }
 
 	    if (debug)
 	      {
