@@ -67,6 +67,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -78,6 +79,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 
+import arlut.csd.JCalendar.JpopUpCalendar;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDataComponent.JsetValueCallback;
@@ -113,11 +115,16 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     historyText;
 
   JButton
+    selectDate,
+    clearDate,
     showHistory,
     showFullHistory;
 
   JPanel
     historyTextPanel;
+
+  JpopUpCalendar
+    popupCal = null;
 
   /**
    * We use a CardLayout so that we can display a 'man at work'
@@ -129,9 +136,6 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   CardLayout
     historyTextCard = new CardLayout();
 
-  JdateField
-    selectDate;
-
   TitledBorder
     titledBorder;
 
@@ -141,6 +145,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   gclient gc;
 
   Date
+    createdDate = null,
     selectedDate = null;
 
   StringBuffer
@@ -158,17 +163,48 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     this.invid = invid;
     this.gc = gc;
 
+    final date_field myCreation_date_field = creation_date_field;
+
+    try
+      {
+        createdDate = (Date) foxtrot.Worker.post(new foxtrot.Task()
+          {
+            public Object run() throws Exception
+            {
+              return myCreation_date_field.getValue();
+            }
+          }
+                                                           );
+      }
+    catch (Exception rx)
+      {
+        gc.processExceptionRethrow(rx, "Could not get pull object creation date.");
+      }
+
+    selectedDate = createdDate;
+
     setLayout(new BorderLayout());
       
     JPanel topPanel = new JPanel(new BorderLayout());
     JPanel buttonPanel = new JPanel(false);
+
+    // "Set starting date"
+    selectDate = new JButton(ts.l("init.start_date_button"));
+    selectDate.setActionCommand("Set starting date");
+    selectDate.addActionListener(this);
+    buttonPanel.add(selectDate);
+
+    // "Clear date"
+    clearDate = new JButton(ts.l("init.clear_date_button"));
+    clearDate.setActionCommand("Clear date");
+    clearDate.addActionListener(this);
+    buttonPanel.add(clearDate);
 
     // "Show history"
     showHistory = new JButton(ts.l("init.show_history_button"));
     // "Show all changes made to this specific object"
     showHistory.setToolTipText(ts.l("init.show_history_button_tooltip"));
     showHistory.addActionListener(this);
-    
     buttonPanel.add(showHistory);
 
     // "Show Transactional History"
@@ -176,16 +212,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     // "Show all transactions in which this object was changed"
     showFullHistory.setToolTipText(ts.l("init.show_transactional_button_tooltip"));
     showFullHistory.addActionListener(this);
-    
     buttonPanel.add(showFullHistory);
-
-    //    JPanel rightPanel = new JPanel(false);
-    //    rightPanel.add(new JLabel("Since:"));
-    //    selectDate = new JdateField();
-    //    selectDate.setCallback(this);
-    //    rightPanel.add(selectDate);
-    
-    // buttonPanel.add(rightPanel);
 
     JPanel midPanel = new JPanel(new BorderLayout());
     midPanel.add("West",  new datesPanel(creator_field, creation_date_field, 
@@ -236,8 +263,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topPanel, p);
     split.setOneTouchExpandable(true);
-    //    topPanel.setMinimumSize(new Dimension(1,1));
-    //    split.setDividerLocation(100);
+
     add("Center", split);
   }
   
@@ -246,6 +272,20 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     if (e.getSource() == showHistory || e.getSource() == showFullHistory)
       {
 	loadHistory(e.getSource() == showFullHistory);
+      }
+    else if (e.getActionCommand().equals("Set starting date"))
+      {
+	// show popup
+
+	if (popupCal == null)
+	  {
+            GregorianCalendar cal = new GregorianCalendar();
+            cal.setTime(selectedDate);
+
+	    popupCal = new JpopUpCalendar(cal, this, true);
+	  }
+
+	popupCal.setVisible(true);
       }
   }
 
@@ -296,31 +336,25 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
   public boolean setValuePerformed(JValueObject e)
   {
-    if (e.getSource() == selectDate)
+    if (e.getSource() == popupCal)
       {
 	Date value = (Date)e.getValue();
+
+        if (value.before(createdDate))
+          {
+            return false;
+          }
+
+	if (value.equals(selectedDate))
+	  {
+	    return false;
+	  }
+
 	selectedDate = value;
-	return true;
       }
 
-    return false;
+    return true;
   }
-
-  /**
-   *
-   * This method is called to clean up any auxiliary windows when our
-   * framePanel is closed in the client.
-   * 
-   */
-
-  public void unregister()
-  {
-    if (selectDate != null)
-      {
-	selectDate.unregister();
-      }
-  }
-
 
   /**
    * This method is called to break down this historyPanel object.
@@ -341,12 +375,8 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	historyTextPanel = null;
       }
 
-    if (selectDate != null)
-      {
-	selectDate.unregister();
-	selectDate = null;
-      }
-
+    selectDate = null;
+    clearDate = null;
     titledBorder = null;
     invid = null;
     gc = null;
