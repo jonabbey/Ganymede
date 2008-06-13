@@ -186,7 +186,9 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     setLayout(new BorderLayout());
       
     JPanel topPanel = new JPanel(new BorderLayout());
-    JPanel buttonPanel = new JPanel(false);
+    JPanel buttonStretchPanel = new JPanel(new BorderLayout());
+
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER), false);
 
     // "Set starting date"
     selectDate = new JButton(ts.l("init.start_date_button"));
@@ -214,6 +216,8 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     showFullHistory.addActionListener(this);
     buttonPanel.add(showFullHistory);
 
+    buttonStretchPanel.add("West", buttonPanel); // West forces the panel to refuse to be smaller than the contents
+
     JPanel midPanel = new JPanel(new BorderLayout());
     midPanel.add("West",  new datesPanel(creator_field, creation_date_field, 
 					 modifier_field, modification_date_field));;
@@ -226,7 +230,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     // "Detailed History"
     titledBorder = new TitledBorder(ts.l("init.bottom_panel_border"));
     p.setBorder(titledBorder);
-    p.add("North", buttonPanel);
+    p.add("North", buttonStretchPanel);
     
     historyText = new JTextArea();
     historyText.setBackground(Color.white);

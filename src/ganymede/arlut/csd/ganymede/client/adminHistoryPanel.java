@@ -183,7 +183,9 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
     // create our fixed top panel
 
-    JPanel topPanel = new JPanel(false);
+    JPanel topStretchPanel = new JPanel(new BorderLayout());
+
+    JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER), false);
 
     // "Set starting date"
     selectDate = new JButton(ts.l("init.start_date_button"));
@@ -204,7 +206,9 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     
     topPanel.add(showHistory);
 
-    add("North", topPanel);
+    topStretchPanel.add("West", topPanel); // West forces the panel to refuse to be smaller than the contents
+
+    add("North", topStretchPanel);
 
     // create our history-display panel, add it to our card layout
 
