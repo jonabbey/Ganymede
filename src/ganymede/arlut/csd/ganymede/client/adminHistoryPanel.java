@@ -80,6 +80,9 @@ import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_object;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -134,6 +137,7 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
   gclient gc;
 
   Date
+    createdDate,
     selectedDate;
 
   TitledBorder
@@ -148,6 +152,30 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
   {
     this.invid = invid;
     this.gc = gc;
+
+    final Invid myInvid = invid;
+    final gclient myGc = gc;
+
+    try
+      {
+        createdDate = (Date) foxtrot.Worker.post(new foxtrot.Task()
+          {
+            public Object run() throws Exception
+            {
+              ReturnVal retVal = myGc.getSession().view_db_object(myInvid);
+              db_object adminObj = retVal.getObject();
+
+              return adminObj.getFieldValue(SchemaConstants.CreationDateField);
+            }
+          }
+                                                           );
+      }
+    catch (Exception rx)
+      {
+        gc.processExceptionRethrow(rx, "Could not get admin persona to look at.");
+      }
+
+    selectedDate = createdDate;
     
     setLayout(new BorderLayout());
     
@@ -231,7 +259,7 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
       }
     else if (e.getActionCommand().equals("Clear date"))
       {
-	selectedDate = null;
+	selectedDate = createdDate;
       }
     else if (e.getActionCommand().equals("Set starting date"))
       {
@@ -239,7 +267,10 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
 	if (popupCal == null)
 	  {
-	    popupCal = new JpopUpCalendar(new GregorianCalendar(), this, true);
+            GregorianCalendar cal = new GregorianCalendar();
+            cal.setTime(selectedDate);
+
+	    popupCal = new JpopUpCalendar(cal, this, true);
 	  }
 
 	popupCal.setVisible(true);
@@ -251,6 +282,11 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     if (e.getSource() == popupCal)
       {
 	Date value = (Date)e.getValue();
+
+        if (value.before(createdDate))
+          {
+            return false;
+          }
 
 	if (value.equals(selectedDate))
 	  {

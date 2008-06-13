@@ -4074,6 +4074,16 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return null;
       }
 
+    // don't bother looking for anything in the log before the admin
+    // persona was created
+
+    Date creationDate = (Date) obj.getFieldValueLocal(SchemaConstants.CreationDateField);
+
+    if (since == null || since.before(creationDate))
+      {
+        since = creationDate;
+      }
+
     return Ganymede.log.retrieveHistory(invid, since, null, true, true, false); // *sync* DBLog
   }
 
