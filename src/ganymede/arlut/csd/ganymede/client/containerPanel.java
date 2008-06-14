@@ -88,6 +88,7 @@ import arlut.csd.JDataComponent.JErrorValueObject;
 import arlut.csd.JDataComponent.JIPField;
 import arlut.csd.JDataComponent.JLabelPanel;
 import arlut.csd.JDataComponent.JParameterValueObject;
+import arlut.csd.JDataComponent.JResetDateObject;
 import arlut.csd.JDataComponent.JStretchPanel;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JdateField;
@@ -1830,6 +1831,28 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    db_field field = (db_field) objectHash.get(v.getSource());
 
 	    /* -- */
+
+            if (v.getSource() instanceof JdateField && v instanceof JResetDateObject)
+              {
+                JResetDateObject jrdobj = (JResetDateObject) v;
+
+                Date lastSetDate = null;
+
+                try
+                  {
+                    lastSetDate = (Date) field.getValue();
+                  }
+                catch (RemoteException rx)
+                  {
+                    gc.processException(rx);
+
+                    return false;
+                  }
+
+                jrdobj.setTransformedDate(lastSetDate);
+
+                return true;
+              }
 
 	    try
 	      {
