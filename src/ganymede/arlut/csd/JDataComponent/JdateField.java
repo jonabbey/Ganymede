@@ -111,7 +111,8 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 
   private JsetValueCallback callback = null;
 
-  protected Date 
+  protected Date
+    original_date,
     my_date,
     old_date;
 
@@ -207,10 +208,12 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
     if (date == null)
       {
 	my_date = null; // new Date();
+        original_date = null;
       }
     else
       {
 	my_date = new Date(date.getTime());
+        original_date = my_date;
       }
 
     _myCalendar = new GregorianCalendar(_myTimeZone,Locale.getDefault());
@@ -631,6 +634,15 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	  {
 	    System.out.println("setValuePerformed called by Calendar");
 	  }
+
+        if (valueObj instanceof JResetDateObject)
+          {
+            JResetDateObject jrdobj = (JResetDateObject) valueObj;
+
+            jrdobj.setTransformedDate(original_date);
+
+            return true;
+          }
 
 	if (!(obj instanceof Date))
 	  {

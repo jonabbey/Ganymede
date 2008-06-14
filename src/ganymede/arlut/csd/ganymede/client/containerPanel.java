@@ -1832,28 +1832,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    /* -- */
 
-            if (v.getSource() instanceof JdateField && v instanceof JResetDateObject)
-              {
-                JResetDateObject jrdobj = (JResetDateObject) v;
-
-                Date lastSetDate = null;
-
-                try
-                  {
-                    lastSetDate = (Date) field.getValue();
-                  }
-                catch (RemoteException rx)
-                  {
-                    gc.processException(rx);
-
-                    return false;
-                  }
-
-                jrdobj.setTransformedDate(lastSetDate);
-
-                return true;
-              }
-
 	    try
 	      {
 		if (debug)
