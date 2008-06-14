@@ -183,32 +183,38 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
     // create our fixed top panel
 
-    JPanel topStretchPanel = new JPanel(new BorderLayout());
+    GridBagLayout gbl = new GridBagLayout();
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.fill = GridBagConstraints.NONE;
 
-    JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER), false);
+    JPanel topPanel = new JPanel(gbl);
 
     // "Set starting date"
     selectDate = new JButton(ts.l("init.start_date_button"));
     selectDate.setActionCommand("Set starting date");
     selectDate.addActionListener(this);
+    gbc.gridx = 0;
+    gbl.setConstraints(selectDate, gbc);
     topPanel.add(selectDate);
 
     // "Clear date"
     clearDate = new JButton(ts.l("init.clear_date_button"));
     clearDate.setActionCommand("Clear date");
     clearDate.addActionListener(this);
+    gbc.gridx = 1;
+    gbl.setConstraints(clearDate, gbc);
     topPanel.add(clearDate);
 
     // "Show history"
     showHistory = new JButton(ts.l("init.show_history_button"));
     showHistory.setActionCommand("Show history");
     showHistory.addActionListener(this);
-    
+    gbc.gridx = 1;
+    gbl.setConstraints(showHistory, gbc);
     topPanel.add(showHistory);
 
-    topStretchPanel.add("West", topPanel); // West forces the panel to refuse to be smaller than the contents
-
-    add("North", topStretchPanel);
+    add("North", topPanel);
 
     // create our history-display panel, add it to our card layout
 

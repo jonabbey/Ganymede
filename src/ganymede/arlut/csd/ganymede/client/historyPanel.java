@@ -184,22 +184,30 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     selectedDate = createdDate;
 
     setLayout(new BorderLayout());
-      
-    JPanel topPanel = new JPanel(new BorderLayout());
-    JPanel buttonStretchPanel = new JPanel(new BorderLayout());
 
-    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER), false);
+    JPanel topPanel = new JPanel(new BorderLayout());
+
+    GridBagLayout gbl = new GridBagLayout();
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.fill = GridBagConstraints.NONE;
+
+    JPanel buttonPanel = new JPanel(gbl);
 
     // "Set starting date"
     selectDate = new JButton(ts.l("init.start_date_button"));
     selectDate.setActionCommand("Set starting date");
     selectDate.addActionListener(this);
+    gbc.gridx = 0;
+    gbl.setConstraints(selectDate, gbc);
     buttonPanel.add(selectDate);
 
     // "Clear date"
     clearDate = new JButton(ts.l("init.clear_date_button"));
     clearDate.setActionCommand("Clear date");
     clearDate.addActionListener(this);
+    gbc.gridx = 1;
+    gbl.setConstraints(clearDate, gbc);
     buttonPanel.add(clearDate);
 
     // "Show history"
@@ -207,6 +215,8 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     // "Show all changes made to this specific object"
     showHistory.setToolTipText(ts.l("init.show_history_button_tooltip"));
     showHistory.addActionListener(this);
+    gbc.gridx = 2;
+    gbl.setConstraints(showHistory, gbc);
     buttonPanel.add(showHistory);
 
     // "Show Transactional History"
@@ -214,9 +224,9 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     // "Show all transactions in which this object was changed"
     showFullHistory.setToolTipText(ts.l("init.show_transactional_button_tooltip"));
     showFullHistory.addActionListener(this);
+    gbc.gridx = 3;
+    gbl.setConstraints(showFullHistory, gbc);
     buttonPanel.add(showFullHistory);
-
-    buttonStretchPanel.add("West", buttonPanel); // West forces the panel to refuse to be smaller than the contents
 
     JPanel midPanel = new JPanel(new BorderLayout());
     midPanel.add("West",  new datesPanel(creator_field, creation_date_field, 
@@ -230,7 +240,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     // "Detailed History"
     titledBorder = new TitledBorder(ts.l("init.bottom_panel_border"));
     p.setBorder(titledBorder);
-    p.add("North", buttonStretchPanel);
+    p.add("North", buttonPanel);
     
     historyText = new JTextArea();
     historyText.setBackground(Color.white);
