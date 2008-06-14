@@ -114,9 +114,13 @@ public class JpopUpCalendar extends JFrame implements JsetValueCallback {
 
     if (vObj instanceof JSetValueObject)
       {
+        JSetValueObject jsvobj = (JSetValueObject) vObj;
+
+        jsvobj.setSource(this);
+
         try 
           {
-            b = parent.setValuePerformed(new JSetValueObject(this,(Date)(vObj.getValue())));
+            b = parent.setValuePerformed(jsvobj);
           }
         catch (java.rmi.RemoteException e) 
           {
@@ -124,9 +128,13 @@ public class JpopUpCalendar extends JFrame implements JsetValueCallback {
       }
     else if (vObj instanceof JResetDateObject)
       {
+        JResetDateObject jrdobj = (JResetDateObject) vObj;
+
+        jrdobj.setSource(this);
+
         try 
           {
-            b = parent.setValuePerformed(new JResetDateObject(this,(Date)(vObj.getValue())));
+            b = parent.setValuePerformed(jrdobj);
           }
         catch (java.rmi.RemoteException e) 
           {

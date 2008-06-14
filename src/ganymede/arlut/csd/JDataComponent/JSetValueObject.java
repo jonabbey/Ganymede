@@ -91,6 +91,20 @@ public class JSetValueObject extends JValueObject {
   }
 
   /**
+   * This method is intended to allow re-sourcing of the component for
+   * this object, so that a component generating a callback can be
+   * wrapped in higher level components whose identity is known to the
+   * ultimate client of the component.
+   *
+   * See JpopUpCalendar for an example of the use of this method.
+   */
+
+  public void setSource(Component newSource)
+  {
+    this.source = newSource;
+  }
+
+  /**
    * Returns an auxiliary value.  Used for passing information about pop-up menu items, but may
    * be used for different purposes if needed.
    */
