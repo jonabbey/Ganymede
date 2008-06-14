@@ -214,7 +214,7 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     showHistory = new JButton(ts.l("init.show_history_button"));
     showHistory.setActionCommand("Show history");
     showHistory.addActionListener(this);
-    gbc.gridx = 1;
+    gbc.gridx = 2;
     gbl.setConstraints(showHistory, gbc);
     topPanel.add(showHistory);
 
