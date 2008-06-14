@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -284,6 +284,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     closeButton = new JButton(ts.l("init.closeButton")); // "Close"
     buttonPanel.add(closeButton,"East");
 
+    resetButton.addActionListener(this);
     closeButton.addActionListener(this);
   }
 
@@ -719,7 +720,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
                 // the date_object to something novel, we'll just set it
                 // to the previousDate.
 
-                if (selectedDate_calendar.getTime().equals(date_object.getValue()))
+                if (selectedDate_calendar.getTime().equals(date_object.getDateValue()))
                   {
                     this.setDate(previousDate);
                   }
