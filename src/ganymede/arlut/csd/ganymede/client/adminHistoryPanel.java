@@ -188,6 +188,7 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.anchor = GridBagConstraints.WEST;
+    gbc.ipadx = 2;
     gbc.fill = GridBagConstraints.NONE;
 
     JPanel topPanel = new JPanel(gbl);

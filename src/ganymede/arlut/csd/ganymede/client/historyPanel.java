@@ -190,6 +190,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.anchor = GridBagConstraints.WEST;
+    gbc.ipadx = 2;
     gbc.fill = GridBagConstraints.NONE;
 
     JPanel buttonPanel = new JPanel(gbl);
