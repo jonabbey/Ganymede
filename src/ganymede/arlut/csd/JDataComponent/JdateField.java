@@ -454,6 +454,11 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 
     _date.setText(s);
 
+    if (original_date == null)
+      {
+        original_date = d;
+      }
+
     my_date = d;
 
     if (my_date != null)
