@@ -61,6 +61,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
@@ -188,7 +189,7 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.anchor = GridBagConstraints.WEST;
-    gbc.ipadx = 2;
+    gbc.insets = new Insets(0,2,0,2);
     gbc.fill = GridBagConstraints.NONE;
 
     JPanel topPanel = new JPanel(gbl);
