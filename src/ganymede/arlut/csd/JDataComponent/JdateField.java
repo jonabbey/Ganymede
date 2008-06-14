@@ -641,7 +641,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 
             jrdobj.setTransformedDate(original_date);
 
-            return true;
+            obj = original_date;
           }
 
 	if (!(obj instanceof Date))
