@@ -80,6 +80,8 @@ import javax.swing.border.TitledBorder;
 
 import arlut.csd.JCalendar.JpopUpCalendar;
 import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JResetDateObject;
+import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
@@ -130,7 +132,6 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     popupCal = null;
 
   JButton
-    clearDate,
     showHistory,
     selectDate;
 
@@ -202,19 +203,11 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     gbl.setConstraints(selectDate, gbc);
     topPanel.add(selectDate);
 
-    // "Clear date"
-    clearDate = new JButton(ts.l("init.clear_date_button"));
-    clearDate.setActionCommand("Clear date");
-    clearDate.addActionListener(this);
-    gbc.gridx = 1;
-    gbl.setConstraints(clearDate, gbc);
-    topPanel.add(clearDate);
-
     // "Show history"
     showHistory = new JButton(ts.l("init.show_history_button"));
     showHistory.setActionCommand("Show history");
     showHistory.addActionListener(this);
-    gbc.gridx = 2;
+    gbc.gridx = 1;
     gbl.setConstraints(showHistory, gbc);
     topPanel.add(showHistory);
 
@@ -271,10 +264,6 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
       {
 	loadHistory();
       }
-    else if (e.getActionCommand().equals("Clear date"))
-      {
-	selectedDate = createdDate;
-      }
     else if (e.getActionCommand().equals("Set starting date"))
       {
 	// show popup
@@ -293,7 +282,12 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
   public boolean setValuePerformed(JValueObject e)
   {
-    if (e.getSource() == popupCal)
+    if (e.getSource() != popupCal)
+      {
+        return true;            // er, sure, whatever
+      }
+
+    if (e instanceof JSetValueObject)
       {
 	Date value = (Date)e.getValue();
 
@@ -308,6 +302,12 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 	  }
 
 	selectedDate = value;
+      }
+    else if (e instanceof JResetDateObject)
+      {
+        JResetDateObject resetObject = (JResetDateObject) e;
+
+        resetObject.setTransformedDate(createdDate);
       }
 
     return true;
@@ -364,7 +364,6 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
     historyTextCard = null;
     historyText = null;
     popupCal = null;
-    clearDate = null;
     showHistory = null;
     selectDate = null;
     invid = null;

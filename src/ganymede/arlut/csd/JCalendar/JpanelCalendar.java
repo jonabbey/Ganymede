@@ -88,6 +88,7 @@ import javax.swing.border.TitledBorder;
 import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JnumberField;
+import arlut.csd.JDataComponent.JResetDateObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDialog.JErrorDialog;
@@ -708,11 +709,29 @@ public class JpanelCalendar extends JPanel implements ActionListener {
       }
     else if (e.getSource() == resetButton)
       {
-        JSetValueObject date_object = new JResetDateObject(this, selectedDate_calendar.getTime());
+        JResetDateObject date_object = new JResetDateObject(this, selectedDate_calendar.getTime());
 
-        if (callback.setValuePerformed(date_object)
+        try
           {
-            this.setDate(date_object.getValue());
+            if (callback.setValuePerformed(date_object))
+              {
+                // if the callback didn't change the date referenced by
+                // the date_object to something novel, we'll just set it
+                // to the previousDate.
+
+                if (selectedDate_calendar.getTime().equals(date_object.getValue()))
+                  {
+                    this.setDate(previousDate);
+                  }
+
+                // otherwise, we'll set it to whatever the callback wants.
+
+                this.setDate(date_object.getDateValue());
+              }
+          }
+        catch (RemoteException ex)
+          {
+            // shrug, not our problem..
           }
       }
   }

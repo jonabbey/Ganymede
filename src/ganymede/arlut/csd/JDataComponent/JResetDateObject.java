@@ -123,7 +123,16 @@ public class JResetDateObject extends JValueObject {
    * Returns the value of the object being affected by this message.
    */
 
-  public Date getCurrentDate() 
+  public Object getValue()
+  {
+    return value;
+  }
+
+  /**
+   * Returns the value of the object being affected by this message.
+   */
+
+  public Date getDateValue()
   {
     return value;
   }

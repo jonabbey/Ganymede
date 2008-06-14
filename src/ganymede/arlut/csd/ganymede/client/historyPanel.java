@@ -81,6 +81,8 @@ import javax.swing.border.TitledBorder;
 
 import arlut.csd.JCalendar.JpopUpCalendar;
 import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JResetDateObject;
+import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.Util.TranslationService;
@@ -116,7 +118,6 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
   JButton
     selectDate,
-    clearDate,
     showHistory,
     showFullHistory;
 
@@ -203,20 +204,12 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     gbl.setConstraints(selectDate, gbc);
     buttonPanel.add(selectDate);
 
-    // "Clear date"
-    clearDate = new JButton(ts.l("init.clear_date_button"));
-    clearDate.setActionCommand("Clear date");
-    clearDate.addActionListener(this);
-    gbc.gridx = 1;
-    gbl.setConstraints(clearDate, gbc);
-    buttonPanel.add(clearDate);
-
     // "Show history"
     showHistory = new JButton(ts.l("init.show_history_button"));
     // "Show all changes made to this specific object"
     showHistory.setToolTipText(ts.l("init.show_history_button_tooltip"));
     showHistory.addActionListener(this);
-    gbc.gridx = 2;
+    gbc.gridx = 1;
     gbl.setConstraints(showHistory, gbc);
     buttonPanel.add(showHistory);
 
@@ -225,7 +218,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     // "Show all transactions in which this object was changed"
     showFullHistory.setToolTipText(ts.l("init.show_transactional_button_tooltip"));
     showFullHistory.addActionListener(this);
-    gbc.gridx = 3;
+    gbc.gridx = 2;
     gbl.setConstraints(showFullHistory, gbc);
     buttonPanel.add(showFullHistory);
 
@@ -351,7 +344,12 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
   public boolean setValuePerformed(JValueObject e)
   {
-    if (e.getSource() == popupCal)
+    if (e.getSource() != popupCal)
+      {
+        return true;            // er, sure, whatever
+      }
+
+    if (e instanceof JSetValueObject)
       {
 	Date value = (Date)e.getValue();
 
@@ -366,6 +364,12 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	  }
 
 	selectedDate = value;
+      }
+    else if (e instanceof JResetDateObject)
+      {
+        JResetDateObject resetObject = (JResetDateObject) e;
+
+        resetObject.setTransformedDate(createdDate);
       }
 
     return true;
@@ -391,7 +395,6 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
       }
 
     selectDate = null;
-    clearDate = null;
     titledBorder = null;
     invid = null;
     gc = null;
