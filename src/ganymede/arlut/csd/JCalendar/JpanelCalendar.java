@@ -156,6 +156,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
   protected JpopUpCalendar pCal = null;
   protected JButton closeButton;
+  protected JButton resetButton;
 
   /**
    * <p>The meat of the calendar.  This array of JdateButton's
@@ -275,7 +276,10 @@ public class JpanelCalendar extends JPanel implements ActionListener {
       }
 
     pCal = pC;
-    
+
+    resetButton = new JButton(ts.l("init.resetButton"));  // "Reset Date"
+    buttonPanel.add(resetButton, "West");
+
     closeButton = new JButton(ts.l("init.closeButton")); // "Close"
     buttonPanel.add(closeButton,"East");
 
@@ -701,6 +705,15 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	  }
 	
 	pCal.setVisible(false);
+      }
+    else if (e.getSource() == resetButton)
+      {
+        JSetValueObject date_object = new JResetDateObject(this, selectedDate_calendar.getTime());
+
+        if (callback.setValuePerformed(date_object)
+          {
+            this.setDate(date_object.getValue());
+          }
       }
   }
 

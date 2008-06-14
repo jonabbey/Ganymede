@@ -132,8 +132,7 @@ public class JResetDateObject extends JValueObject {
    * The callback can call this method to set the date that the
    * calendar object should reset the date to.
    *
-   * If newDate is null, the calendar will revert to the current time
-   * and date.
+   * If newDate is null, the calendar will revert to an unset state.
    */
 
   public void setTransformedDate(Date newDate)
