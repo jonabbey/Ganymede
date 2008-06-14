@@ -1396,6 +1396,14 @@ The admin console and graphical client now remember what look and feel
 a user last chose on any given system, and automatically re-instates
 the desired look and feel at startup.
 
+87. [CLIENT] Added a reset button to the calendar widget
+
+The popup calendar widget now features a reset date button, which can
+be used to revert the calendar to the date that was originally set in
+the calendar.  Useful for editing dates in object data as well as for
+setting the start date for object and admin persona history in the
+history panels.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
