@@ -1171,7 +1171,7 @@ public final class InvidDBField extends DBField implements invid_field {
             // "Your operation could not succeed because field {0} was linked to a remote reference {1} that could not be found \
             //  for unlinking.\n\nThis is a serious logic error in the server."
             return Ganymede.createErrorDialog(ts.l("bind.no_oldref"),
-                                              ts.l("bind.no_oldref_text", getName(), oldRef.toString()));
+                                              ts.l("bind.no_oldref_text", getName(), oldRemote.toString()));
           }
 
         // see if we are allowed to unlink the remote object without
