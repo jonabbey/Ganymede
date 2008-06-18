@@ -982,7 +982,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
 		rv = gc.handleReturnVal(rv);
 
-		if (rv == null || rv.didSucceed())
+		if (ReturnVal.didSucceed(rv))
 		  {
 		    // create the new containerPanel.. don't pre-load it..
 
