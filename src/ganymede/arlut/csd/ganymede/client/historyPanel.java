@@ -290,7 +290,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
             GregorianCalendar cal = new GregorianCalendar();
             cal.setTime(selectedDate);
 
-	    popupCal = new JpopUpCalendar(cal, this, true);
+	    popupCal = new JpopUpCalendar(gc, cal, this, true);
 	  }
 
 	popupCal.setVisible(true);

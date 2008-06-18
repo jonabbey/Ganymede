@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -51,22 +51,23 @@
 package arlut.csd.JCalendar;
 
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.util.Date;
 import java.util.GregorianCalendar;
-
-import javax.swing.JFrame;
 
 import arlut.csd.JDataComponent.JResetDateObject;
 import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 
+import arlut.csd.JDialog.JCenterDialog;
+
 import arlut.csd.Util.TranslationService;
 
 /**************************************************************/      
 
 
-public class JpopUpCalendar extends JFrame implements JsetValueCallback {
+public class JpopUpCalendar extends JCenterDialog implements JsetValueCallback {
 
   static final boolean debug = false;
 
@@ -84,11 +85,11 @@ public class JpopUpCalendar extends JFrame implements JsetValueCallback {
 
   /* -- */
 
-  public JpopUpCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback, boolean editable) 
+  public JpopUpCalendar(Frame parentFrame, GregorianCalendar parentCalendar, JsetValueCallback callback, boolean editable) 
   {
     // "Please Choose A Date And Time"
     // "Selected Date"
-    super(editable ? ts.l("init.chooseTitle") : ts.l("init.displayTitle"));
+    super(parentFrame, editable ? ts.l("init.chooseTitle") : ts.l("init.displayTitle"), false);
 
     if (callback == null)
       {

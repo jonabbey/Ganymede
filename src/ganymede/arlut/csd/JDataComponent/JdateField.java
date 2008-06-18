@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -55,6 +55,7 @@ package arlut.csd.JDataComponent;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -307,7 +308,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
       {
 	if (pCal == null)
 	  {
-	    pCal = new JpopUpCalendar(_myCalendar, this, iseditable);
+	    pCal = new JpopUpCalendar(findFrame((Component) c), _myCalendar, this, iseditable);
 
 	    if (callback instanceof Component)
 	      {
@@ -782,6 +783,18 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
       case FocusEvent.FOCUS_GAINED:
 	break;
       }
+  }
+
+  private Frame findFrame(Component thing)
+  {
+    Component parent = thing.getParent();
+
+    while (parent != null && !(parent instanceof Frame))
+      {
+        parent = parent.getParent();
+      }
+
+    return (Frame) parent;
   }
 }
 
