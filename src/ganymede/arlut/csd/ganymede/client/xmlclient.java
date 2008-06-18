@@ -567,7 +567,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	retVal = session.getXMLDump(includeHistory, includeOid);
       }
 
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
 	String errorMessage = retVal.getDialogText();
 
