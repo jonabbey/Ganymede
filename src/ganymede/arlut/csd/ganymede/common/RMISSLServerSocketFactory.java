@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -158,7 +158,7 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
 
 	if (x == null)
 	  {
-	    System.err.println("Hey, couldn't load " + keysResource);
+	    throw new RuntimeException("Hey, couldn't load " + keysResource);
 	  }
 	else
 	  {
@@ -183,9 +183,9 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
 		
 		System.err.println("Read " + count + " bytes from " + keysResource);
 	      }
-	  }
 
-	x.close();
+            x.close();
+	  }
       
 	ks.load(PackageResources.getPackageResourceAsStream(keysResource, this.getClass()), pass);
 	kmf.init(ks, pass);
