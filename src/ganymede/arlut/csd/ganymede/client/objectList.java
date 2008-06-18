@@ -492,13 +492,6 @@ public class objectList {
 
   public synchronized void addObjectHandle(ObjectHandle handle)
   {
-    //    sortHandles();
-
-    if (inserter == null)
-      {
-	System.out.println("Inserter is null!");
-      }
-
     inserter.insert(handles, handle);
 
     if (!handle.isInactive())
