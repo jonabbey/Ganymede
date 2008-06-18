@@ -1401,7 +1401,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		
 		QueryResult qr = invf.choices();
 
-		if (qr != null)
+		if (qr == null)
+                  {
+                    choiceHandles = new Vector();  // empty
+                  }
+                else
 		  {
 		    choiceHandles = qr.getListHandles(); // pre-sorted
 		  }
