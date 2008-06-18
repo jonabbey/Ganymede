@@ -719,7 +719,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
         ReturnVal retVal = session.runXMLQuery(queryString);
 
-        if (retVal != null && !retVal.didSucceed())
+        if (!ReturnVal.didSucceed(retVal))
           {
             String errorMessage = retVal.getDialogText();
 
