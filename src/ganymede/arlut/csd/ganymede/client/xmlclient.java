@@ -566,6 +566,10 @@ public final class xmlclient implements ClientListener, Runnable {
       {
 	retVal = session.getXMLDump(includeHistory, includeOid);
       }
+    else
+      {
+        throw new RuntimeException("ASSERT: neither sendSchema nor sendData set");
+      }
 
     if (!ReturnVal.didSucceed(retVal))
       {
