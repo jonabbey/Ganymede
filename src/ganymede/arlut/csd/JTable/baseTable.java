@@ -2,9 +2,9 @@
 
   baseTable.java
 
-  A JDK 1.1 table AWT component.
+  A JDK 1.1 table Swing component.
 
-  Copyright (C) 1996-2004
+  Copyright (C) 1996-2008
   The University of Texas at Austin
 
   This program is free software; you can redistribute it and/or modify

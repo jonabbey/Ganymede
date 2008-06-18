@@ -2,9 +2,9 @@
 
   rowTable.java
 
-  A JDK 1.1 table AWT component.
+  A JDK 1.1 table Swing component.
 
-  Copyright (C) 1996-2004
+  Copyright (C) 1996-2008
   The University of Texas at Austin
 
   This program is free software; you can redistribute it and/or modify
@@ -316,14 +316,7 @@ public class rowTable extends baseTable implements ActionListener {
 	System.err.println("rowTable.clickInCell(" + x + "," + y + "): seeking key");
       }
 
-    for (int i = 0; i < crossref.size(); i++)
-      {
-	if (((rowHandle) crossref.elementAt(i)).rownum == y)
-	  {
-	    element = (rowHandle) crossref.elementAt(i);
-	    break;
-	  }
-      }
+    element = findRow(y);
 
     if (debug)
       {
@@ -407,14 +400,7 @@ public class rowTable extends baseTable implements ActionListener {
     
     /* -- */
 
-    for (int i = 0; i < crossref.size(); i++)
-      {
-	if (((rowHandle) crossref.elementAt(i)).rownum == y)
-	  {
-	    element = (rowHandle) crossref.elementAt(i);
-	    break;
-	  }
-      }
+    element = findRow(y);
 
     if (element.key.equals(rowSelectedKey))
       {
@@ -833,14 +819,7 @@ public class rowTable extends baseTable implements ActionListener {
 	  }
       }
 
-    for (int i = 0; i < crossref.size(); i++)
-      {
-	if (((rowHandle) crossref.elementAt(i)).rownum == menuRow)
-	  {
-	    element = (rowHandle) crossref.elementAt(i);
-	    break;
-	  }
-      }
+    element = findRow(menuRow);
     
     // perform our callback
 
@@ -880,6 +859,19 @@ public class rowTable extends baseTable implements ActionListener {
       {
 	refreshTable();
       }
+  }
+
+  private rowHandle findRow(int y)
+  {
+    for (int i = 0; i < crossref.size(); i++)
+      {
+	if (((rowHandle) crossref.elementAt(i)).rownum == y)
+	  {
+	    return (rowHandle) crossref.elementAt(i);
+	  }
+      }
+
+    throw new RuntimeException("Couldn't find row " + y);
   }
 
 }
