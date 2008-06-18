@@ -2762,6 +2762,13 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		  }
 		previousNode = aboveNode.getParent();
 	      }
+            else
+              {
+                // for FindBugs' sake.. iconDragOver() and
+                // dragLineTween() should prevent this
+
+                throw new RuntimeException("ASSERT: aboveNode is an invalid type");
+              }
 
 	    if (debug)
 	      {
@@ -2878,6 +2885,13 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		newParent = (CatTreeNode) aboveNode.getParent().getParent().getParent();
 		previousNode = aboveNode.getParent();
 	      }
+            else
+              {
+                // for FindBugs' sake.. iconDragOver() and
+                // dragLineTween() should prevent this
+
+                throw new RuntimeException("ASSERT: aboveNode is an invalid type");
+              }
 
 	    if (debug)
 	      {

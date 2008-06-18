@@ -2884,9 +2884,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 				  CLOSED_CAT, 
 				  null);
       }
-    else if (debug)
+    else
       {
-	System.err.println("gclient.insertCategoryNode(): Unknown instance: " + node);
+        // for FindBugs.  Shouldn't happen due to tree structure
+	throw new RuntimeException("gclient.insertCategoryNode(): Unknown instance: " + node);
       }
 
     if ((newNode.getParent() == null) && (newNode.getPrevSibling() == null))

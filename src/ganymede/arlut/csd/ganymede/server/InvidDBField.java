@@ -2280,8 +2280,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    Ganymede.debug(ts.l("test.no_backpointers", temp, objectName, getName()));
 		    result = false;
 		  }
-
-		if (!backpointers.containsKey(myInvid))
+                else if (!backpointers.containsKey(myInvid))
 		  {
 		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
 		    result = false;

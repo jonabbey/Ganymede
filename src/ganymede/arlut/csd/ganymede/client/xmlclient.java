@@ -631,6 +631,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	  {
 	    // "Error, {0} does not contain an XML file."
 	    err.println(ts.l("global.nullDocElement", xmlFilename));
+            return;
 	  }
 
 	if (!docElement.matches("ganymede"))
