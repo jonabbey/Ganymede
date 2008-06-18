@@ -2,7 +2,8 @@
 
    datePanel.java
 
-   The tab that holds date information.
+   A tab that holds date information, typically for expiration and/or
+   removal fields.
    
    Created: 9 September 1997
 
@@ -17,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -145,20 +146,12 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
 
   /**
    *
-   * Display label used only in editable context.
+   * Display label used only in non-editable context.
    *
    */
 
   JLabel    topLabel;
 
-  /**
-   *
-   * Label field used only in non-editable context.
-   *
-   */
-
-  JLabel    noneditable_dateLabel;
-    
   protected GregorianCalendar 
     my_Calendar;
 
@@ -469,7 +462,7 @@ public class datePanel extends JPanel implements ActionListener, JsetValueCallba
       }
     else
       {
-	noneditable_dateLabel.setText(newLabel);
+	topLabel.setText(newLabel);
       }
   }
 
