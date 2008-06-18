@@ -2,9 +2,9 @@
 
   tableCell.java
 
-  A JDK 1.1 table AWT component.
+  A JDK 1.1 table Swing component.
 
-  Copyright (C) 1996 - 2004
+  Copyright (C) 1996 - 2008
   The University of Texas at Austin
 
   This program is free software; you can redistribute it and/or modify
@@ -247,7 +247,7 @@ class tableCell {
       {
 	return attr.fontMetric;
       }
-    else if (col != null && col.attr != null && col.attr.fontMetric != null)
+    else if (col.attr != null && col.attr.fontMetric != null)
       {
 	return col.attr.fontMetric;
       }
@@ -269,7 +269,7 @@ class tableCell {
       {
 	return attr.font;
       }
-    else if (col != null && col.attr != null && col.attr.font != null)
+    else if (col.attr != null && col.attr.font != null)
       {
 	return col.attr.font;
       }
@@ -291,7 +291,7 @@ class tableCell {
       {
 	return attr.align;
       }
-    else if (col != null && col.attr != null && col.attr.align != tableAttr.JUST_INHERIT)
+    else if (col.attr != null && col.attr.align != tableAttr.JUST_INHERIT)
       {
 	return col.attr.align;
       }
