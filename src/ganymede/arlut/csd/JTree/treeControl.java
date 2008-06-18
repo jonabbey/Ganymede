@@ -1437,17 +1437,20 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
     else if (actionCommand.equals("left"))
       {
-	if (selectedNode != null && selectedNode.expandable && selectedNode.isOpen())
-	  {
-	    contractNode(selectedNode, true);
-	  }
-	else if (selectedNode.getParent() != null)
-	  {
-	    moveSelection(selectedNode.getParent());
-            scrollToSelectedRow();
-	    canvas.render();
-	    canvas.repaint();
-	  }
+	if (selectedNode != null)
+          {
+            if (selectedNode.expandable && selectedNode.isOpen())
+              {
+                contractNode(selectedNode, true);
+              }
+            else if (selectedNode.getParent() != null)
+              {
+                moveSelection(selectedNode.getParent());
+                scrollToSelectedRow();
+                canvas.render();
+                canvas.repaint();
+              }
+          }
       }
     else if (actionCommand.equals("enter"))
       {
