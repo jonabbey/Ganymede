@@ -81,7 +81,7 @@ public class TimedKeySelectionManager implements JComboBox.KeySelectionManager {
 
   /* - */
 
-  private String searchString = new String();
+  private String searchString = "";
   private long lastTime;
   private int start = 0;
 
