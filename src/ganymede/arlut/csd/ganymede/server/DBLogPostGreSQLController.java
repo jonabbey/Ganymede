@@ -582,52 +582,92 @@ public class DBLogPostGreSQLController implements DBLogController {
 
   public ResultSet queryEvents(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
-    Statement stmt = con.createStatement();
+    String preparedTextPrefix = "SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, invids v " +
+      "WHERE e.event_id = v.event_id AND v.invid = ?";
+
+    String preparedTextSuffix = " ORDER BY e.event_id";
+
     String dateRestriction = "";
 
     if (sinceDate != null)
       {
-        dateRestriction = "AND e.javatime >= " + sinceDate.getTime();
+        dateRestriction = " AND e.javatime >= ?";
       }
 
     if (beforeDate != null)
       {
-        dateRestriction = dateRestriction + " AND e.javatime <= " + beforeDate.getTime();
+        dateRestriction = dateRestriction + " AND e.javatime <= ?";
       }
 
-    return stmt.executeQuery("SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, invids v " +
-                             "WHERE e.event_id = v.event_id AND v.invid = '" + invid.toString() + "' " + dateRestriction +
-                             " ORDER BY e.event_id");
+    PreparedStatement ps = con.prepareStatement(preparedTextPrefix + dateRestriction + preparedTextSuffix);
+
+    ps.setString(1, invid.toString());
+
+    int i = 1;
+
+    if (sinceDate != null)
+      {
+        ps.setLong(i++, sinceDate.getTime());
+      }
+
+    if (beforeDate != null)
+      {
+        ps.setLong(i, beforeDate.getTime());
+      }
+
+    return ps.executeQuery();
   }
 
   public ResultSet queryEventsByAdmin(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
-    Statement stmt = con.createStatement();
+    String preparedTextPrefix = "SELECT javatime, classtoken, admin_name, text, trans_id from event " +
+      "WHERE admin_invid = ?";
+
+    String preparedTextSuffix = " ORDER BY event_id";
+
     String dateRestriction = "";
 
     if (sinceDate != null)
       {
-        dateRestriction = "AND javatime >= " + sinceDate.getTime();
+        dateRestriction = " AND javatime >= " + sinceDate.getTime();
       }
 
     if (beforeDate != null)
       {
         dateRestriction = dateRestriction + " AND javatime <= " + beforeDate.getTime();
       }
+
+    PreparedStatement ps = con.prepareStatement(preparedTextPrefix + dateRestriction + preparedTextSuffix);
+
+    ps.setString(1, invid.toString());
+
+    int i = 1;
+
+    if (sinceDate != null)
+      {
+        ps.setLong(i++, sinceDate.getTime());
+      }
+
+    if (beforeDate != null)
+      {
+        ps.setLong(i, beforeDate.getTime());
+      }
     
-    return stmt.executeQuery("SELECT javatime, classtoken, admin_name, text, trans_id from event " +
-                             "WHERE admin_invid = '" + invid.toString() + "' " + dateRestriction + " ORDER BY event_id");
+    return ps.executeQuery();
   }
 
   public ResultSet queryEventsByTransactions(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
-    Statement stmt = con.createStatement();
+    String preparedTextPrefix = "SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, transactions t" +
+      "WHERE e.trans_id = t.trans_id AND t.invid = ?";
+
+    String preparedTextSuffix = " ORDER BY e.event_id";
 
     String dateRestriction = "";
 
     if (sinceDate != null)
       {
-        dateRestriction = "AND e.javatime >= " + sinceDate.getTime();
+        dateRestriction = " AND e.javatime >= " + sinceDate.getTime();
       }
 
     if (beforeDate != null)
@@ -635,9 +675,23 @@ public class DBLogPostGreSQLController implements DBLogController {
         dateRestriction = dateRestriction + " AND e.javatime <= " + beforeDate.getTime();
       }
 
-    return stmt.executeQuery("SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, transactions t " +
-                             "WHERE e.trans_id = t.trans_id AND t.invid =  '" + invid.toString() + "' " + dateRestriction +
-                             " ORDER BY e.event_id");
+    PreparedStatement ps = con.prepareStatement(preparedTextPrefix + dateRestriction + preparedTextSuffix);
+
+    ps.setString(1, invid.toString());
+
+    int i = 1;
+
+    if (sinceDate != null)
+      {
+        ps.setLong(i++, sinceDate.getTime());
+      }
+
+    if (beforeDate != null)
+      {
+        ps.setLong(i, beforeDate.getTime());
+      }
+    
+    return ps.executeQuery();
   }
 
   /**
