@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -2023,6 +2023,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     */
 
     this.tree.destroyTree();
+    this.tree.dispose();
     this.tree = null;
 
     this.editor = null;

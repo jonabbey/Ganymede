@@ -1602,4 +1602,19 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 			 rt.displayRegionFirstLine() +
 			 2 * (rt.row_height + rt.hRowLineThickness));
   }
+
+  public void dispose()
+  {
+    if (bg != null)
+      {
+        bg.dispose();
+        bg = null;
+      }
+
+    if (backing != null)
+      {
+        backing.flush();
+        backing = null;
+      }
+  }
 }

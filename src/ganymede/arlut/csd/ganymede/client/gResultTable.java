@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2007
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -910,6 +910,15 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     return buffer.toString();
   }
 
+  public void dispose()
+  {
+    if (table != null)
+      {
+        table.dispose();
+        table = null;
+      }
+  }
+
   // -- helper functions
 
   private final void setStatus(String s)
@@ -921,7 +930,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     wp.gc.setStatus(s, timeLimit);
   }
-
 
   /**
    * Creates and initializes the JInternalFrame's toolbar.

@@ -1444,6 +1444,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	updateWindowMenu();
       }
 
+    if (event.getSource() instanceof gResultTable)
+      {
+        ((gResultTable) event.getSource()).dispose();
+      }
+
     if (debug)
       {
 	System.err.println("windowPanel.internalFrameClosed(): exiting");

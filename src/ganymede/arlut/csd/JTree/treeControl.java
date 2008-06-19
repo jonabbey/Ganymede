@@ -21,7 +21,7 @@
 
    -----------------------------------------------------------------------
 
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -1806,6 +1806,20 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     repaint();
   }
 
+  /**
+   * Method to be called after this treeControl is removed from use
+   * and visibility.
+   */
+
+  public synchronized void dispose()
+  {
+    if (canvas != null)
+      {
+        canvas.dispose();
+        canvas = null;
+      }
+  }
+
   // MouseWheelListener
 
   public void mouseWheelMoved(MouseWheelEvent e)
@@ -3223,6 +3237,56 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	  }
 
 	ctrl.menu.show(this, e.getX(), e.getY());
+      }
+  }
+
+  /**
+   * Method to be called after this treeCanvas is removed from use and
+   * visibility.
+   */
+
+  public synchronized void dispose()
+  {
+    if (bg != null)
+      {
+        bg.dispose();
+        bg = null;
+      }
+
+    if (plusBox != null)
+      {
+        plusBox.flush();
+        plusBox = null;
+      }
+
+    if (minusBox != null)
+      {
+        minusBox.flush();
+        minusBox = null;
+      }
+
+    if (backing != null)
+      {
+        backing.flush();
+        backing = null;
+      }
+
+    if (images != null)
+      {
+        for (int i = 0; i < images.length; i++)
+          {
+            if (images[i] != null)
+              {
+                images[i].flush();
+                images[i] = null;
+              }
+          }
+      }
+
+    if (sprite != null)
+      {
+        sprite.flush();
+        sprite = null;
       }
   }
 }

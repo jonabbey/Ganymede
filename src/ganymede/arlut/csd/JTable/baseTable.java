@@ -2421,5 +2421,30 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
         vbar.setValue(vbar.getValue() + totalScrollAmount);
       }
   }
+
+  public synchronized void dispose()
+  {
+    if (canvas != null)
+      {
+        canvas.dispose();
+        canvas = null;
+      }
+
+    hbar = null;
+    vbar = null;
+    bounding_rect = null;
+    in = null;
+    colPos = null;
+    headerAttrib = null;
+    tableAttrib = null;
+    vHeadLineColor = null;
+    vRowLineColor = null;
+    hHeadLineColor = null;
+    hRowLineColor = null;
+    rows = null;
+    cols = null;
+    headerMenu = null;
+    menu = null;
+  }
 }
 
