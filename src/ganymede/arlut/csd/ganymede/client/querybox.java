@@ -1693,8 +1693,6 @@ class QueryRow implements ItemListener {
 	// in the long run, i'm not sure what to do here.. use the
 	// chooser sometimes, but not others based on some criteria?
 
-        short targetBase = field.getTargetBase();
-
         if (!(operand instanceof JstringField))
           {
             removeOperand();
