@@ -84,7 +84,7 @@ public class ArrayUtils {
   {
     if (ary1 == null && ary2 == null)
       {
-        return null;
+        return new Object[0];
       }
     else if (ary1 == null)
       {
