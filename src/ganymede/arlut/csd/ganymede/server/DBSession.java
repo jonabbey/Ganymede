@@ -151,14 +151,6 @@ final public class DBSession {
   DBEditSet editSet;
 
   /**
-   * <P>Optional string identifying this session in logging, etc.</P>
-   *
-   * <P>Used by {@link arlut.csd.ganymede.server.DBSession#getID() getID()}.
-   */
-
-  String id = null;
-
-  /**
    * <P>Identifying key used in the lock system to identify owner of
    * locks.</P>
    */
@@ -1611,11 +1603,6 @@ final public class DBSession {
     DBObject obj;
 
     /* -- */
-
-    if (id != null)
-      {
-	return id;
-      }
 
     obj = GSession.getUser();
 
