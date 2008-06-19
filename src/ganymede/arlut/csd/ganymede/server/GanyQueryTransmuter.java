@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -171,6 +171,8 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
   public Query transmuteQueryString(String queryString) throws GanyParseException
   {
+    myQueryString = queryString;
+
     QueryLexer lexer = new QueryLexer(new StringReader(queryString));
     QueryParser parser = new QueryParser(lexer);
 
@@ -183,9 +185,9 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	
       }
 
-    AST ast = parser.getAST();
+    myQueryTree = parser.getAST();
 
-    if (ast == null)
+    if (myQueryTree == null)
       {
 	// "Error parsing GanyQL query string.  Make sure you've parenthesized and quoted everything properly.\n\n{0}"
 	throw new GanyParseException(ts.l("transmuteQueryString.global_parse_error", queryString));
@@ -195,12 +197,12 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     try
       {
-	root = parse_tree(ast);
+	root = parse_tree(myQueryTree);
       }
     catch (RuntimeException ex)
       {
 	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	String mesg = ts.l("global.parse_exception", ex.getMessage(), queryString, ast.toStringList());
+	String mesg = ts.l("global.parse_exception", ex.getMessage(), queryString, myQueryTree.toStringList());
 	throw new RuntimeException(mesg, ex);
       }
 
