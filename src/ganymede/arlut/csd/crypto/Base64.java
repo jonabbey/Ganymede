@@ -793,18 +793,20 @@ public class Base64
         
         // Decode
         bytes = decode( bytes, 0, bytes.length );
-        
-        
+
+        if (bytes == null)
+          {
+            return null;
+          }
+
         // Check to see if it's gzip-compressed
         // GZIP Magic Two-Byte Number: 0x8b1f (35615)
         if( bytes.length >= 2 )
         {
             
             int head = ((int)bytes[0] & 0xff) | ((bytes[1] << 8) & 0xff00);       
-            if(
-            bytes != null &&      // In case decoding returned null
-            bytes.length >= 4  && // Don't want to get ArrayIndexOutOfBounds exception
-            java.util.zip.GZIPInputStream.GZIP_MAGIC == head ) 
+            if(bytes.length >= 4  && // Don't want to get ArrayIndexOutOfBounds exception
+               java.util.zip.GZIPInputStream.GZIP_MAGIC == head ) 
             {
                 java.io.ByteArrayInputStream  bais = null;
                 java.util.zip.GZIPInputStream gzis = null;

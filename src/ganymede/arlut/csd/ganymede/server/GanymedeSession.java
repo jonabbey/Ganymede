@@ -3381,6 +3381,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
 	  }
 
+        if (fieldDef == null)
+          {
+            // "Invalid field identifier"
+            throw new IllegalArgumentException(ts.l("queryDispatch.bad_field"));
+          }
+
 	// now we've got a field definition that we can try to do a
 	// direct look up on.  check to see if it has a namespace
 	// index we can use

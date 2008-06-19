@@ -2052,7 +2052,7 @@ public class PasswordDBField extends DBField implements pass_field {
 					  ts.l("setSSHAPass.error_text"));
       }
 
-    if (!text.startsWith("{SSHA}"))
+    if (text != null && !text.equals("") && !text.startsWith("{SSHA}"))
       {
 	// "Server: Error in PasswordDBField.setSSHAPass()"
 	// "The hash text passed to setSSHAPass(), "{0}", is not a well-formed, OpenLDAP-encoded SSHA-1 hash text."

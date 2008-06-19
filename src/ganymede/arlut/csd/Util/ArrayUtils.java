@@ -82,7 +82,17 @@ public class ArrayUtils {
 
   public static Object[] concat(Object[] ary1, Object[] ary2)
   {
-    int total_length = (ary1 != null ? ary1.length : 0) +
+    if (ary1 == null && ary2 == null)
+      {
+        return null;
+      }
+    else if (ary1 == null)
+      {
+        ary1 = ary2;
+        ary2 = null;
+      }
+
+    int total_length = ary1.length +
       (ary2 != null ? ary2.length : 0);
 
     Class arrayClass = ary1.getClass();
@@ -92,11 +102,8 @@ public class ArrayUtils {
 
     int length = 0;
 
-    if (ary1 != null)
-      {
-        System.arraycopy(ary1, 0, results, 0, ary1.length);
-        length += ary1.length;
-      }
+    System.arraycopy(ary1, 0, results, 0, ary1.length);
+    length += ary1.length;
 
     if (ary2 != null)
       {
@@ -116,7 +123,12 @@ public class ArrayUtils {
 
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3)
   {
-    int total_length = (ary1 != null ? ary1.length : 0) +
+    if (ary1 == null)
+      {
+        return concat(ary2, ary3);
+      }
+
+    int total_length = ary1.length +
       (ary2 != null ? ary2.length : 0) +
       (ary3 != null ? ary3.length : 0);
 
@@ -127,11 +139,8 @@ public class ArrayUtils {
 
     int length = 0;
 
-    if (ary1 != null)
-      {
-        System.arraycopy(ary1, 0, results, 0, ary1.length);
-        length += ary1.length;
-      }
+    System.arraycopy(ary1, 0, results, 0, ary1.length);
+    length += ary1.length;
 
     if (ary2 != null)
       {
@@ -158,7 +167,12 @@ public class ArrayUtils {
 
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3, Object[] ary4)
   {
-    int total_length = (ary1 != null ? ary1.length : 0) +
+    if (ary1 == null)
+      {
+        return concat(ary2, ary3, ary4);
+      }
+
+    int total_length = ary1.length +
       (ary2 != null ? ary2.length : 0) +
       (ary3 != null ? ary3.length : 0) +
       (ary4 != null ? ary4.length : 0);
@@ -170,11 +184,8 @@ public class ArrayUtils {
 
     int length = 0;
 
-    if (ary1 != null)
-      {
-        System.arraycopy(ary1, 0, results, 0, ary1.length);
-        length += ary1.length;
-      }
+    System.arraycopy(ary1, 0, results, 0, ary1.length);
+    length += ary1.length;
 
     if (ary2 != null)
       {
@@ -207,7 +218,12 @@ public class ArrayUtils {
 
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3, Object[] ary4, Object[] ary5)
   {
-    int total_length = (ary1 != null ? ary1.length : 0) +
+    if (ary1 == null)
+      {
+        return concat(ary2, ary3, ary4, ary5);
+      }
+
+    int total_length = ary1.length +
       (ary2 != null ? ary2.length : 0) +
       (ary3 != null ? ary3.length : 0) +
       (ary4 != null ? ary4.length : 0) +
@@ -220,11 +236,8 @@ public class ArrayUtils {
 
     int length = 0;
 
-    if (ary1 != null)
-      {
-        System.arraycopy(ary1, 0, results, 0, ary1.length);
-        length += ary1.length;
-      }
+    System.arraycopy(ary1, 0, results, 0, ary1.length);
+    length += ary1.length;
 
     if (ary2 != null)
       {
@@ -264,7 +277,12 @@ public class ArrayUtils {
 
   public static Object[] concat(Object[] ary1, Object[] ary2, Object[] ary3, Object[] ary4, Object[] ary5, Object[] ary6)
   {
-    int total_length = (ary1 != null ? ary1.length : 0) +
+    if (ary1 == null)
+      {
+        return concat(ary2, ary3, ary4, ary5, ary6);
+      }
+
+    int total_length = ary1.length +
       (ary2 != null ? ary2.length : 0) +
       (ary3 != null ? ary3.length : 0) +
       (ary4 != null ? ary4.length : 0) +
@@ -278,11 +296,8 @@ public class ArrayUtils {
 
     int length = 0;
 
-    if (ary1 != null)
-      {
-        System.arraycopy(ary1, 0, results, 0, ary1.length);
-        length += ary1.length;
-      }
+    System.arraycopy(ary1, 0, results, 0, ary1.length);
+    length += ary1.length;
 
     if (ary2 != null)
       {

@@ -2814,11 +2814,6 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	System.err.println("Press in row " + row);
       }
 
-    if (node == null)
-      {
-	throw new RuntimeException("null node");
-      }
-
     // we'll do the selection/popup logic here as well, just in case
     // we run on some weird system where the popup trigger is on
     // the main button without the CTRL or META modifiers (which

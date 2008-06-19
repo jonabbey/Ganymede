@@ -3337,7 +3337,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	    node.setImages(OPEN_FIELD_CREATE, CLOSED_FIELD_CREATE);
 	  }
-	else if (handle != null)
+	else
 	  {
 	    if (handle.isInactive())
 	      {
@@ -3401,27 +3401,6 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		  {
 		    node.setImages(OPEN_FIELD, CLOSED_FIELD);
 		  } 
-	      }
-	  }
-	else // no handle
-	  {
-	    if (changedHash.containsKey(invid))
-	      {
-		if (treeNodeDebug)
-		  {
-		    System.err.println("Setting icon to edit.");
-		  }
-		
-		node.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
-	      }
-	    else
-	      {
-		if (treeNodeDebug)
-		  {
-		    System.err.println("normal");
-		  }
-
-		node.setImages(OPEN_FIELD, CLOSED_FIELD);
 	      }
 	  }
       }

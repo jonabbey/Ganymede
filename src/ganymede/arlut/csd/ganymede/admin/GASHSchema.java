@@ -661,6 +661,10 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	newNode = new CatTreeNode(parentNode, category.getName(), category,
 				  prevNode, true, OPENFOLDERICON, CLOSEDFOLDERICON, categoryMenu);
       }
+    else
+      {
+        throw new RuntimeException("ASSERT: Unrecognized CategoryNode type.");
+      }
 
     tree.insertNode(newNode, true);
 
@@ -866,31 +870,24 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     
     tree.removeChildren(namespaces, false);
 
-    NameSpace[] spaces = null;
-
     try 
       {
+        NameSpace[] spaces = null;
+
 	spaces = editor.getNameSpaces();
+
+        for (int i = 0; i < spaces.length ; i++)
+          {
+	    SpaceNode newNode = new SpaceNode(namespaces, spaces[i].getName(), spaces[i], 
+					      null, false, BASEICON, BASEICON, nameSpaceObjectMenu);
+	    tree.insertNode(newNode, true);
+	  }
       }
     catch (RemoteException e)
       {
 	System.out.println("Exception getting NameSpaces: " + e);
       }
     
-    for (int i = 0; i < spaces.length ; i++)
-      {
-	try 
-	  {
-	    SpaceNode newNode = new SpaceNode(namespaces, spaces[i].getName(), spaces[i], 
-					      null, false, BASEICON, BASEICON, nameSpaceObjectMenu);
-	    tree.insertNode(newNode, true);
-	  }
-	catch (RemoteException e)
-	  {
-	    System.out.println("Exception getting NameSpaces: " + e);
-	  }
-      }
-
     if (isOpen)
       {
 	tree.expandNode(namespaces, false);

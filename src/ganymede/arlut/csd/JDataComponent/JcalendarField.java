@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -192,7 +192,7 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
 
     if (date == null)
       {
-	my_date = null; // new Date();
+	my_date = new Date();
       }
     else
       {

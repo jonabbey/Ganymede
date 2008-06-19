@@ -228,7 +228,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
 	
 	    changed = !value.equals(str);
 	  }
-	else			// value == null
+	else
 	  {
 	    if (debug)
 	      {
@@ -328,7 +328,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
 		System.err.println("JstringArea.sendCallback: setValue('" + str + "') accepted");
 	      }
 
-	    if (str != null && str.equals(""))
+	    if (str.equals(""))
 	      {
 		value = null;
 	      }

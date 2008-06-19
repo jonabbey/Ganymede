@@ -520,7 +520,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
       
      namespaceC.addItem("<none>");      
 
-     if ( (nameSpaces.length == 0) || (nameSpaces == null) )
+     if (nameSpaces == null || nameSpaces.length == 0)
        {
 	 if (debug)
 	   {

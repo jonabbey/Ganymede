@@ -1259,13 +1259,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public boolean setValuePerformed(JValueObject v)
   {
-    elementWrapper ew = (elementWrapper)v.getSource();
-    boolean returnValue = false;
-    
     if (v == null)
       {
 	throw new IllegalArgumentException("ValueObject Argument is null");
       }
+
+    elementWrapper ew = (elementWrapper)v.getSource();
+    boolean returnValue = false;
 
     if (v.getValue() == null)
       {

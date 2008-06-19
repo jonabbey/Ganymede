@@ -138,6 +138,12 @@ public class stopServer {
 	  {
 	    server = (Server) obj;
 	  }
+        else
+          {
+            // "main.not_bound = Ganymede stopServer: Remote RMI object is not a Ganymede server object at URL "{0}". "
+            System.err.println(ts.l("main.not_server", server_url));
+            System.exit(1);
+          }
       }
     catch (NotBoundException ex)
       {
