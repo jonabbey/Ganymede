@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -779,11 +779,11 @@ public class xmlfield implements FieldType {
 
 	if (val.equalsIgnoreCase("true") || val.equalsIgnoreCase("t"))
 	  {
-	    return new Boolean(true);
+	    return Boolean.TRUE;
 	  }
 	else if (val.equalsIgnoreCase("false") || val.equalsIgnoreCase("f"))
 	  {
-	    return new Boolean(false);
+	    return Boolean.FALSE;
 	  }
 	else
 	  {

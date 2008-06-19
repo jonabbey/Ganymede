@@ -4039,16 +4039,9 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	// Delete the object
 
-	retVal = session.remove_db_object(invid);
+	retVal = handleReturnVal(session.remove_db_object(invid));
 
-	ok = (retVal == null) ? true : retVal.didSucceed();
-
-	if (retVal != null)
-	  {
-	    retVal = handleReturnVal(retVal);
-	  }
-
-	if (ok)
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    // InvidNode node = (InvidNode)invidNodeHash.get(invid);
 
@@ -4725,7 +4718,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	try
 	  {
-	    retVal = session.setDefaultOwner(owners);
+	    handleReturnVal(session.setDefaultOwner(owners));
 	  }
 	catch (Exception rx)
 	  {

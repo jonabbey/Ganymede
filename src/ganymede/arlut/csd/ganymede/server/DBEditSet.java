@@ -1207,15 +1207,12 @@ public class DBEditSet {
 
   private final void commit_run_precommit_hooks() throws CommitNonFatalException
   {
-    Vector committedObjects;
     Iterator iter;
     ReturnVal retVal;
     String checkpointKey = description + " precommit hook";
     DBEditObject eObj;
 
     /* -- */
-
-    committedObjects = new Vector();
 
     // make a copy of the object references currently in the
     // transaction.

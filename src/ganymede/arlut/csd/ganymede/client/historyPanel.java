@@ -314,7 +314,6 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
   public void loadHistory(boolean fullHistory)
   {
-    final historyPanel me = this;
     final boolean showAll = fullHistory;
 
     /* -- */

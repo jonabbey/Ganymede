@@ -1474,7 +1474,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
 	try
 	  {
-	    myFieldIsEditable = new Boolean(my_field.isEditable());
+	    myFieldIsEditable = Boolean.valueOf(my_field.isEditable());
 	  }
 	catch (Exception rx)
 	  {

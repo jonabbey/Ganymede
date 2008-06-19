@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -1267,13 +1267,13 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
     switch(column) 
       {
       case 1:
-	return new Boolean(myRow.isVisible());
+	return Boolean.valueOf(myRow.isVisible());
       case 2:
-	return new Boolean(myRow.isCreatable());
+	return Boolean.valueOf(myRow.isCreatable());
       case 3:
-	return new Boolean(myRow.isEditable());
+	return Boolean.valueOf(myRow.isEditable());
       case 4:
-	return new Boolean(myRow.isDeletable());
+	return Boolean.valueOf(myRow.isDeletable());
       }
 
     return null;
@@ -1469,7 +1469,7 @@ class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
 
 		if (!myRow.isEnabled()) 
 		  {
-		    Boolean toFalse = new Boolean(false);
+		    Boolean toFalse = Boolean.FALSE;
 	    
 		    myRow.setVisible(toFalse);
 		    myRow.setCreatable(toFalse);

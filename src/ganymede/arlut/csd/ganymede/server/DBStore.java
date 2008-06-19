@@ -2786,9 +2786,9 @@ public final class DBStore implements JythonMap {
 
 	if (transactionEvent != null)
 	  {
-	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailBoolean, new Boolean(true));
-	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailToSelf, new Boolean(true));
-	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailOwners, new Boolean(true));
+	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailBoolean, Boolean.TRUE);
+	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailToSelf, Boolean.TRUE);
+	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailOwners, Boolean.TRUE);
 	    transactionEvent.setFieldValueLocal(SchemaConstants.NotesField, 
 						"This system event object is consulted to determine whether " +
 						"mail should be sent\nout when a transaction is committed.\n\n" +

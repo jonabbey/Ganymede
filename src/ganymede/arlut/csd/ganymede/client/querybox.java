@@ -1683,58 +1683,26 @@ class QueryRow implements ItemListener {
       }
     else if (field.isInvid())
       {
-	short targetBase = field.getTargetBase();
-
 	// right now we have this commented out because we don't want
 	// to always force the JInvidChooser.. it will often take
 	// longer to use the chooser to select a user name (for
 	// instance), not to mention the query time to get the list
 	// from the server. thankfully, the server can use either a
 	// label string or an invid for invid fields
-
+        //
 	// in the long run, i'm not sure what to do here.. use the
 	// chooser sometimes, but not others based on some criteria?
 
-	if (true /* (targetBase < 0) */)
-	  {
-	    if (!(operand instanceof JstringField))
-	      {
-		removeOperand();
+        short targetBase = field.getTargetBase();
 
-		operand= new JstringField();
-		((JstringField) operand).setEnterHandler(parent);
-		addOperand = true;
-	      }
-	  }
-	else
-	  {
-	    Short Target = new Short(targetBase);
-	    objectList list;
-	    JInvidChooser invidChooser;
-	    Vector choices;
+        if (!(operand instanceof JstringField))
+          {
+            removeOperand();
 
-	    /* -- */
-
-	    // we always want to reset the invid chooser
-
-	    removeOperand();
-
-	    // get a fully expanded (non-editables included) list of objects
-	    // from our parent.
-
-	    list = parent.gc.getObjectList(Target, true);
-
-	    choices = list.getListHandles(false, true); // no inactives, but do want non-editables
-	    choices = parent.gc.sortListHandleVector(choices);
-
-	    operand = invidChooser = new JInvidChooser(choices, null, targetBase);
-
-	    addOperand = true;
-
-	    invidChooser.setMaximumRowCount(12);
-	    invidChooser.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
-	    invidChooser.setEditable(false);
-	  }
+            operand= new JstringField();
+            ((JstringField) operand).setEnterHandler(parent);
+            addOperand = true;
+          }
       }
     else if (field.isIP())
       {
@@ -1902,7 +1870,7 @@ class QueryRow implements ItemListener {
     else if (operand instanceof JCheckBox)
       {
 	JCheckBox boolField = (JCheckBox) operand;
-	value = new Boolean(boolField.isSelected());
+	value = Boolean.valueOf(boolField.isSelected());
       }
     else if (operand instanceof JstringField)
       { 

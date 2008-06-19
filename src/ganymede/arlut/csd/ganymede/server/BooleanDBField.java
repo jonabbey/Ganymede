@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -149,7 +149,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   {
     this.owner = owner;
     this.fieldcode = definition.getID();
-    this.value = new Boolean(value);
+    this.value = Boolean.valueOf(value);
   }
 
   /**
@@ -175,7 +175,7 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = new Boolean(in.readBoolean());
+    value = Boolean.valueOf(in.readBoolean());
   }
 
   /**

@@ -3,7 +3,7 @@
    StringDialog.java
 
    A configurable Dialog box.
-   
+
    Created: 16 June 1997
 
    Last Mod Date: $Date$
@@ -14,10 +14,10 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2005
+
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -586,7 +586,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	    addRow(panel, cb, bt.getLabel(), i);
 		      
 	    componentHash.put(cb, bt.getLabel());
-	    valueHash.put(bt.getLabel(), new Boolean(bt.getValue()));
+	    valueHash.put(bt.getLabel(), Boolean.valueOf(bt.getValue()));
 	  }
 	else if (element instanceof choiceThing)
 	  {
@@ -855,13 +855,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	      {
 		JpasswordField pf = (JpasswordField) c;
 	    
-		valueHash.put(label, new String(pf.getPassword()));
+		valueHash.put(label, pf.getPassword());
 	      }
 	    else if (c instanceof JpassField)
 	      {
 		JpassField pf = (JpassField) c;
 	    
-		valueHash.put(label, new String(pf.getPassword()));
+		valueHash.put(label, pf.getPassword());
 	      }
 	    else if (c instanceof JcalendarField)
 	      {
@@ -873,7 +873,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	      {
 		JCheckBox cb = (JCheckBox) c;
 
-		valueHash.put(label, new Boolean(cb.isSelected()));
+		valueHash.put(label, Boolean.valueOf(cb.isSelected()));
 	      }
 	    else if (c instanceof JComboBox)
 	      {

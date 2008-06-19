@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -916,7 +916,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   private StringBuffer encodeObjectToStringBuffer(boolean showHistory, boolean showTransactions, 
 						  Date startDate)
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuffer buffer = null;
 
     try
       {

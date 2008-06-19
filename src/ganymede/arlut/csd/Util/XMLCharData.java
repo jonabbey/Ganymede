@@ -117,11 +117,11 @@ public class XMLCharData extends XMLItem {
       {
 	if (data.trim().length() != 0)
 	  {
-	    nonEmpty = new Boolean(true);
+	    nonEmpty = Boolean.TRUE;
 	  }
 	else
 	  {
-	    nonEmpty = new Boolean(false);
+	    nonEmpty = Boolean.FALSE;
 	  }
       }
 

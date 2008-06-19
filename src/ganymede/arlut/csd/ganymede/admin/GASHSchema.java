@@ -710,7 +710,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
 	while (tabNode != null)
 	  {
-	    tabNodes.put(tabNode.getText(), new Boolean(tabNode.isOpen()));
+	    tabNodes.put(tabNode.getText(), Boolean.valueOf(tabNode.isOpen()));
 	    tabNode = (TabNode) tabNode.getNextSibling();
 	  }
       }
@@ -2316,10 +2316,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   public boolean dragLineTween(treeNode dragNode, treeNode aboveNode, treeNode belowNode)
   {
-    treeNode parent = dragNode.getParent();
-
-    /* -- */
-
     if (debug)
       {
 	if (aboveNode != null && belowNode != null)

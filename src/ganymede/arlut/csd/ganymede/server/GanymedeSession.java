@@ -6422,14 +6422,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (inf2 != null)
 	  {
-	    Vector values = inf2.getValuesLocal();
-
-	    // *** Caution!  getValuesLocal() does not clone the field's contents..
-	    // 
-	    // DO NOT modify values here!
-
 	    if (permsdebug)
 	      {
+                Vector values = inf2.getValuesLocal();
+
+                // *** Caution!  getValuesLocal() does not clone the field's contents..
+                // 
+                // DO NOT modify values here!
+
 		// it's okay to loop on this field since we should be
 		// looking at a DBObject and not a DBEditObject
 

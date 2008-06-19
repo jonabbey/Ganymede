@@ -2132,7 +2132,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	
 	try
 	  {
-	    returnValue = field.setValue(new Boolean(newValue));
+	    returnValue = field.setValue(Boolean.valueOf(newValue));
 	  }
 	catch (Exception rx)
 	  {
@@ -3539,10 +3539,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     Vector choices = list.getListHandles(false, true);
 
     Invid currentChoice = (Invid) fieldInfo.getValue();
-    String currentChoiceLabel = gc.getSession().viewObjectLabel(currentChoice);
+    String currentChoiceLabel = null;
 
     if (debug)
       {
+        currentChoiceLabel = gc.getSession().viewObjectLabel(currentChoice);
 	println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
       }
 	

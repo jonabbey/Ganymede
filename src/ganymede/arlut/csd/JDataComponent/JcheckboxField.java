@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -238,14 +238,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
     this.value = state;
 
-    if (sendCallback)
-      {
-	super.setSelected(state);
-      }
-    else
-      {
-	super.setSelected(state);
-      }
+    super.setSelected(state);
   }
 
   protected void processFocusEvent(FocusEvent e)
@@ -286,7 +279,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
   private void notify(boolean value)
   {
-    Boolean bval = new Boolean(value);
+    Boolean bval = Boolean.valueOf(value);
 
     if (allowCallback) 
       {

@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -120,7 +120,6 @@ public class TabEditor extends JStretchPanel implements JsetValueCallback {
   void editTab(TabNode tabNode)
   {
     this.tabNode = tabNode;
-    treeNode node = tabNode.getChild();
 
     // we get the name that this tabNode should have by looking at the
     // TabName of our first child.  This is because the tab 'name' is
@@ -130,6 +129,8 @@ public class TabEditor extends JStretchPanel implements JsetValueCallback {
     tabNameS.setText(tabNode.getText());
 
     /*
+    treeNode node = tabNode.getChild();
+
     if (node == null)
       {
 	tabNameS.setText(ts.l("editTab.new_tab")); // "New Tab"

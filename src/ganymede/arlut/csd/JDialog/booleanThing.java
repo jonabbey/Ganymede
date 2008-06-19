@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -90,7 +90,7 @@ public class booleanThing implements java.io.Serializable {
 
   public Boolean getDefault()
   {
-    Boolean answer = new Boolean(Default);
+    Boolean answer = Boolean.valueOf(Default);
     return answer;
   }
 

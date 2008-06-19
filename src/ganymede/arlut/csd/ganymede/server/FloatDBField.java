@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -251,7 +251,6 @@ public class FloatDBField extends DBField implements float_field {
   public String getDiffString(DBField orig)
   {
     FloatDBField origN;
-    StringBuffer result = new StringBuffer();
 
     /* -- */
 

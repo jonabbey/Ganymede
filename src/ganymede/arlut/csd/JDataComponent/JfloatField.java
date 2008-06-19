@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -69,7 +69,7 @@ public class JfloatField extends JentryField {
 
   public static int DEFAULT_COLS = 20;
 
-  public static String allowedChars = new String("0123456789-.");
+  public static String allowedChars = "0123456789-.";
 
   private Double storedValue;
 

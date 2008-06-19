@@ -374,7 +374,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     this(base);
     this.editor = editor;
-    inUseCache = new Boolean(false);
+    inUseCache = Boolean.FALSE;
   }
 
   /**
@@ -1694,7 +1694,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_vector_op", new Boolean(_vect), root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_vector_op", Boolean.valueOf(_vect), root.getTreeString(), retVal.getDialogText()));
       }
 		
     if (_vect)
@@ -1863,7 +1863,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set labeled bit to {0}:\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doBooleanXML.bad_labeled_bit", new Boolean(_labeled), root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doBooleanXML.bad_labeled_bit", Boolean.valueOf(_labeled), root.getTreeString(), retVal.getDialogText()));
       }
 		
     if (_labeled)
@@ -2093,7 +2093,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set crypted flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_crypted", new Boolean(_crypted),
+					  ts.l("doPasswordXML.bad_crypted", Boolean.valueOf(_crypted),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -2269,7 +2269,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  ts.l("doIPXML.bad_vector_op",
-					       new Boolean(_vect), root.getTreeString(), retVal.getDialogText()));
+					       Boolean.valueOf(_vect), root.getTreeString(), retVal.getDialogText()));
       }
 		
     if (_vect)
@@ -2481,7 +2481,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  ts.l("doInvidXML.bad_vector_op",
-					       new Boolean(_vect), root.getTreeString(), retVal.getDialogText()));
+					       Boolean.valueOf(_vect), root.getTreeString(), retVal.getDialogText()));
       }
 		
     if (_vect)
@@ -2686,7 +2686,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   {
     if (inUseCache == null)
       {
-	inUseCache = new Boolean(((DBObjectBase) this.getBase()).fieldInUse(this));
+	inUseCache = Boolean.valueOf(((DBObjectBase) this.getBase()).fieldInUse(this));
       }
 
     return inUseCache.booleanValue();
