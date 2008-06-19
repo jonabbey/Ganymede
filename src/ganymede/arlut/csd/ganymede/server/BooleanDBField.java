@@ -280,7 +280,6 @@ public class BooleanDBField extends DBField implements boolean_field {
   public String getDiffString(DBField orig)
   {
     BooleanDBField origB;
-    StringBuffer result = new StringBuffer();
 
     /* -- */
 
