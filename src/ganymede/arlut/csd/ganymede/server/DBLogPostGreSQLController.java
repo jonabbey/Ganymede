@@ -585,13 +585,19 @@ public class DBLogPostGreSQLController implements DBLogController {
       }
     finally
       {
-        rs.close();
-
-        Statement st = rs.getStatement();
-
-        if (st != null)
+        try
           {
-            st.close();
+            rs.close();
+
+            Statement st = rs.getStatement();
+
+            if (st != null)
+              {
+                st.close();
+              }
+          }
+        catch (SQLException ex)
+          {
           }
       }
 
@@ -754,19 +760,40 @@ public class DBLogPostGreSQLController implements DBLogController {
   {
     if (statement != null)
       {
-        statement.close();
+        try
+          {
+            statement.close();
+          }
+        catch (SQLException ex)
+          {
+          }
+
         statement = null;
       }
 
     if (emailState != null)
       {
-        emailState.close();
+        try
+          {
+            emailState.close();
+          }
+        catch (SQLException ex)
+          {
+          }
+
         emailState = null;
       }
 
     if (invidState != null)
       {
-        invidState.close();
+        try
+          {
+            invidState.close();
+          }
+        catch (SQLException ex)
+          {
+          }
+
         invidState = null;
       }
 
