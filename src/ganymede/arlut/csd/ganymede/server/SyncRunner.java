@@ -250,7 +250,6 @@ public class SyncRunner implements Runnable {
 
   // ---
 
-  private Invid syncChannelInvid;
   private String name;
   private String directory;
   private String fullStateFile;
@@ -312,7 +311,6 @@ public class SyncRunner implements Runnable {
 	throw new IllegalArgumentException(ts.l("updateInfo.typeError"));
       }
 
-    this.syncChannelInvid = syncChannel.getInvid();
     this.name = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelName);
     this.directory = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelDirectory);
     this.fullStateFile = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFullStateFile);
