@@ -2268,6 +2268,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
+    /* FindBugs doesn't like me using == here, but it's a test for
+       null or identity, and we do the equals() test as well. */
+
     if ((newClassName == classname ||
 	 (newClassName != null && newClassName.equals(classname))) &&
 	(newOptionString == classOptionString ||
