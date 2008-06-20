@@ -566,7 +566,11 @@ public class SyncRunner implements Runnable {
       {
 	// "SyncRunner {0} deleting left over transaction fragment {1}"
 	Ganymede.debug(ts.l("unSync.deleting", this.getName(), syncFile.getPath()));
-	syncFile.delete();
+
+	if (!syncFile.delete())
+          {
+            throw new IOException("Could not delete " + syncFile.getPath());
+          }
       }
 
     this.transactionNumber = transRecord.getTransactionNumber() - 1;
