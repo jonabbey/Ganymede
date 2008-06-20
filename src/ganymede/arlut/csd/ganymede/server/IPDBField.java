@@ -93,7 +93,7 @@ import arlut.csd.Util.VectorUtils;
  * 0-255 IP octet range.</P>
  */
 
-public class IPDBField extends DBField implements ip_field {
+public class IPDBField extends DBField implements ip_field, Cloneable {
 
   /**
    * <p>TranslationService object for handling string localization in

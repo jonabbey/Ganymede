@@ -79,7 +79,7 @@ import arlut.csd.ganymede.rmi.boolean_field;
  * {@link arlut.csd.ganymede.rmi.boolean_field boolean_field} RMI interface.</P> 
  */
 
-public class BooleanDBField extends DBField implements boolean_field {
+public class BooleanDBField extends DBField implements boolean_field, Cloneable {
 
   /**
    * TranslationService object for handling string localization in the

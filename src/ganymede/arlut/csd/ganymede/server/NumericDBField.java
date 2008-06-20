@@ -80,7 +80,7 @@ import arlut.csd.Util.TranslationService;
  * {@link arlut.csd.ganymede.rmi.num_field num_field} RMI interface.</P> 
  */
 
-public class NumericDBField extends DBField implements num_field {
+public class NumericDBField extends DBField implements num_field, Cloneable {
 
   /**
    * TranslationService object for handling string localization in the

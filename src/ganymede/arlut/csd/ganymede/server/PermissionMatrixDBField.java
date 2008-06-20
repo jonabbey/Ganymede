@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -105,7 +105,7 @@ import arlut.csd.ganymede.rmi.perm_field;
  * by asking our {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} owner.
  */
 
-public class PermissionMatrixDBField extends DBField implements perm_field {
+public class PermissionMatrixDBField extends DBField implements perm_field, Cloneable {
 
   static final boolean debug = false;
 

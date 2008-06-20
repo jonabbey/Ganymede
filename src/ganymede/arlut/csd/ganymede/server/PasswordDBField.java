@@ -139,7 +139,7 @@ import arlut.csd.ganymede.rmi.pass_field;
  * of long term plaintext storage in the ganymede.db file.
  */
 
-public class PasswordDBField extends DBField implements pass_field {
+public class PasswordDBField extends DBField implements pass_field, Cloneable {
 
   static final boolean debug = false;
 

@@ -79,7 +79,7 @@ import arlut.csd.ganymede.rmi.float_field;
  * {@link arlut.csd.ganymede.rmi.float_field float_field} RMI interface.</P> 
  */
 
-public class FloatDBField extends DBField implements float_field {
+public class FloatDBField extends DBField implements float_field, Cloneable {
 
   /**
    * TranslationService object for handling string localization in the

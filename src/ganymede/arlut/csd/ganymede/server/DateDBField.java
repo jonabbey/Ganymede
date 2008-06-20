@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -87,7 +87,7 @@ import arlut.csd.Util.TranslationService;
  * millisecond resolution.  No Y2k problems here. ;-)</P>
  */
 
-public class DateDBField extends DBField implements date_field {
+public class DateDBField extends DBField implements date_field, Cloneable {
 
   static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss",
 						     java.util.Locale.US);
