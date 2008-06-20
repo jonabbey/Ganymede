@@ -117,7 +117,7 @@ public class imageTab extends clientTab {
   {
     loadImage();
 
-    JLabel image = new JLabel(new ImageIcon(icon), SwingConstants.TRAILING);
+    image = new JLabel(new ImageIcon(icon), SwingConstants.TRAILING);
     image.setOpaque(true);
     image.setBorder(BorderFactory.createEtchedBorder());
 
@@ -155,12 +155,18 @@ public class imageTab extends clientTab {
       }
   }
 
-  public void dispose()
+  public synchronized void dispose()
   {
     if (contentPane != null)
       {
 	contentPane.removeAll();
 	contentPane = null;
+      }
+
+    if (icon != null)
+      {
+        icon.flush();
+        icon = null;
       }
 
     super.dispose();
