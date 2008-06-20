@@ -127,8 +127,6 @@ public class DBLogPostGreSQLController implements DBLogController {
   String url = null;
   Connection con = null;
   PreparedStatement statement = null;
-  PreparedStatement emailState = null;
-  PreparedStatement invidState = null;
 
   /**
    * If we're in the middle of a transaction, transactionID will hold
@@ -769,32 +767,6 @@ public class DBLogPostGreSQLController implements DBLogController {
           }
 
         statement = null;
-      }
-
-    if (emailState != null)
-      {
-        try
-          {
-            emailState.close();
-          }
-        catch (SQLException ex)
-          {
-          }
-
-        emailState = null;
-      }
-
-    if (invidState != null)
-      {
-        try
-          {
-            invidState.close();
-          }
-        catch (SQLException ex)
-          {
-          }
-
-        invidState = null;
       }
 
     if (con != null)
