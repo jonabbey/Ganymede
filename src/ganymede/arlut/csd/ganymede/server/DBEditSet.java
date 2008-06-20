@@ -212,22 +212,6 @@ public class DBEditSet {
   private NamedStack checkpoints = new NamedStack();
 
   /**
-   * <p>We keep track of the thread that is doing checkpointing.. once
-   * a thread starts a checkpoint on this transaction, we don't allow
-   * any other threads to checkpoint until the first thread releases
-   * its checkpoint.  This is to prevent problems resulting from
-   * interleaved checkpoint/popCheckpoint/rollback activities across
-   * multiple threads.</p>
-   *
-   * <p>Note: This interleave check logic is currently inactivated in
-   * the code.  See the {@link
-   * arlut.csd.ganymede.server.DBEditSet#checkpoint(java.lang.String)}
-   * method source code, below, for details.</p>
-   */
-
-  //  private Thread currentCheckpointThread = null;
-
-  /**
    * <p>The writelock acquired during the course of a commit attempt.  We keep
    * this around as a DBEditSet field so that we can use the handy
    * {@link arlut.csd.ganymede.server.DBEditSet#releaseWriteLock() releaseWriteLock()}
@@ -687,78 +671,6 @@ public class DBEditSet {
 	return;
       }
 
-    /*
-      I had tried to put some check logic to make sure that multiple
-      threads interacting with the checkpoint system wouldn't
-      interfere with each other, by trying to track the last thread
-      that did a checkpoint operation, but the way RMI works, two
-      subsequent client actions by the same client could be processed
-      on separate server threads, making this check overly
-      restrictive.
-
-      I've left this here (but disabled) for now, but I'm still
-      uncertain as to whether this should be necessary.  When I've
-      seen this tripped before, it was due to a coding problem
-      elsewhere.
-    */
-
-    if (false)
-      {
-	Thread thisThread = java.lang.Thread.currentThread();
-
-	int waitcount = 0;
-
-	while (currentCheckpointThread != null && currentCheckpointThread != thisThread)
-	  {
-	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") on thread " + thisThread.toString() +
-			       " waiting for prior thread " +
-			       currentCheckpointThread.toString() + "(\"" + checkpoints.getTopName() + "\")" +
-			       " to finish with prior checkpoint");
-	    try
-	      {
-		wait(1000);		// only wait a second at a time, so we'll get lots of printlns if we get stuck
-	      }
-	    catch (InterruptedException ex)
-	      {
-		ex.printStackTrace();
-		throw new RuntimeException(ex.getMessage());
-	      }
-
-	    waitcount++;
-
-	    if (waitcount > 60)
-	      {
-		System.err.println("DBEditSet.checkpoint(\"" + name + "\") has waited to checkpoint for 60 seconds");
-		System.err.println("DBEditSet.checkpoint(\"" + name + "\") giving up to avoid deadlock");
-
-		System.err.println("DBEditSet.checkpoint(\"" + name + "\") stack trace:");
-		thisThread.dumpStack();
-
-		if (currentCheckpointThread.isAlive())
-		  {
-		    System.err.println("DBEditSet.checkpoint(\"" + name + "\") printing blocking thread stack trace:");
-		    currentCheckpointThread.dumpStack();
-		  }
-
-		throw new RuntimeException("DBEditSet.checkpoint(\"" + name + "\") timed out");
-	      }
-	  }
-
-	if (waitcount > 0)
-	  {
-	    System.err.println("DBEditSet.checkpoint(\"" + name + "\") proceeding");
-	  }
-
-	// if we slept until the transaction was committed or aborted, oops
-
-	if (session == null)
-	  {
-	    throw new RuntimeException("DBEditSet.checkpoint(" + name + ") slept until transaction committed/cleared");
-	  }
-
-	currentCheckpointThread = thisThread;
-      }
-
     // checkpoint our objects, logEvents, and deletion locks
 
     checkpoints.push(name, new DBCheckPoint(logEvents, getObjectList(), session));
@@ -876,7 +788,6 @@ public class DBEditSet {
 
     if (checkpoints.empty())
       {
-	currentCheckpointThread = null;
 	this.notifyAll();
       }
 
@@ -2879,8 +2790,6 @@ public class DBEditSet {
 	checkpoints.removeAllElements();
 	checkpoints = null;
       }
-
-    currentCheckpointThread = null;
 
     this.notifyAll();		// wake up any late checkpointers
   }
