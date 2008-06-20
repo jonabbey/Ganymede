@@ -1935,7 +1935,6 @@ class systemEventType {
   String name;
   String description;
   boolean mail;
-  String addresses;
   Vector addressVect;
   boolean ccToSelf;
   boolean ccToOwners;
@@ -1956,7 +1955,7 @@ class systemEventType {
     // and calculate the addresses that always need to be notified
     // of this type of system event
 
-    addresses = getAddresses(obj);
+    addressVect = getAddresses(obj);
   }
 
   private String getString(DBObject obj, short fieldId)
@@ -1989,14 +1988,13 @@ class systemEventType {
    * an event of this type is logged.</P>
    */
 
-  private String getAddresses(DBObject obj)
+  private Vector getAddresses(DBObject obj)
   {
-    StringBuffer result = new StringBuffer();
     StringDBField strF;
 
     /* -- */
 
-    addressVect = new Vector();
+    Vector addressVect = new Vector();
 
     // Get the list of addresses from the object's external email
     // string list.. we use union here so that we don't get
@@ -2014,20 +2012,8 @@ class systemEventType {
 
 	addressVect = VectorUtils.union(addressVect, strF.getValuesLocal());
       }
-	
-    // and create the address string
-    
-    for (int i = 0; i < addressVect.size(); i++)
-      {
-	if (i > 0)
-	  {
-	    result.append(", ");
-	  }
-	
-	result.append((String) addressVect.elementAt(i));
-      }
 
-    return result.toString();
+    return addressVect;
   }
 
 }
@@ -2049,7 +2035,6 @@ class objectEventType {
   short objType;
   String name;
   String description;
-  String addresses;
   Vector addressVect;
   boolean ccToSelf;
   boolean ccToOwners;
@@ -2064,7 +2049,7 @@ class objectEventType {
     token = getString(obj, SchemaConstants.ObjectEventToken);
     name = getString(obj, SchemaConstants.ObjectEventName);
     description = getString(obj, SchemaConstants.ObjectEventDescription);
-    addresses = getAddresses(obj);
+    addressVect = getAddresses(obj);
     ccToSelf = getBoolean(obj, SchemaConstants.ObjectEventMailToSelf);
     ccToOwners = getBoolean(obj, SchemaConstants.ObjectEventMailOwners);
     objType = (short) getInt(obj, SchemaConstants.ObjectEventObjectType);
@@ -2112,14 +2097,13 @@ class objectEventType {
    * an event of this type is logged.</P>
    */
 
-  private String getAddresses(DBObject obj)
+  private Vector getAddresses(DBObject obj)
   {
-    StringBuffer result = new StringBuffer();
     StringDBField strF;
  
     /* -- */
 
-    addressVect = new Vector();
+    Vector addressVect = new Vector();
 
     // Get the list of addresses from the object's external email
     // string list.. we use union here so that we don't get
@@ -2136,21 +2120,9 @@ class objectEventType {
 	// null.
 
 	addressVect = VectorUtils.union(addressVect, strF.getValuesLocal());
-
-	// and create the address string
-
-	for (int i = 0; i < addressVect.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
-	    
-	    result.append((String) addressVect.elementAt(i));
-	  }
       }
 
-    return result.toString();
+    return addressVect;
   }
 
 }
