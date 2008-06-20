@@ -225,7 +225,7 @@ public class DBEditSet {
    * method source code, below, for details.</p>
    */
 
-  private Thread currentCheckpointThread = null;
+  //  private Thread currentCheckpointThread = null;
 
   /**
    * <p>The writelock acquired during the course of a commit attempt.  We keep
