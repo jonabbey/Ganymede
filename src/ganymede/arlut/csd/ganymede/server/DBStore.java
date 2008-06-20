@@ -841,11 +841,16 @@ public final class DBStore implements JythonMap {
 					  directoryName);
 		  }
 
-		File oldDirectory = new File(directoryName + File.separator + "old");
+                String oldDirName = directoryName + File.separator + "old";
+
+		File oldDirectory = new File(oldDirName);
 		    
 		if (!oldDirectory.exists())
 		  {
-		    oldDirectory.mkdir();
+		    if (!oldDirectory.mkdir())
+                      {
+                        throw new IOException("Couldn't mkdir " + oldDirName);
+                      }
 		  }
 
 		DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", 
@@ -905,7 +910,10 @@ public final class DBStore implements JythonMap {
 	    System.err.println("DBStore: renaming new db");
 	  }
 
-	dbFile.renameTo(new File(filename + ".bak"));
+	if (!dbFile.renameTo(new File(filename + ".bak")))
+          {
+            throw new IOException("Couldn't rename " + filename + " to " + filename + ".bak");
+          }
 
 	// and move ganymede.db.new to ganymede.db.. note that we do
 	// have a very slight vulnerability here if we are interrupted
@@ -916,7 +924,12 @@ public final class DBStore implements JythonMap {
 	// In all other circumstances, the server will be able to come
 	// up and handle things cleanly without loss of data.
 
-	new File(filename + ".new").renameTo(dbFile);
+        File newFile = new File(filename + ".new");
+
+        if (!newFile.renameTo(dbFile))
+          {
+            throw new IOException("Couldn't rename " + filename + ".new to " + filename);
+          }
       }
     catch (IOException ex)
       {
