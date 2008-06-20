@@ -197,6 +197,10 @@ public class FileOps {
       {
 	return file.delete();
       }
+    else
+      {
+        return false;
+      }
   }
 
   /**
