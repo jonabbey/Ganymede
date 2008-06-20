@@ -629,12 +629,12 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     if (sinceDate != null)
       {
-        dateRestriction = " AND javatime >= " + sinceDate.getTime();
+        dateRestriction = " AND javatime >= ?";
       }
 
     if (beforeDate != null)
       {
-        dateRestriction = dateRestriction + " AND javatime <= " + beforeDate.getTime();
+        dateRestriction = dateRestriction + " AND javatime <= ?";
       }
 
     PreparedStatement ps = con.prepareStatement(preparedTextPrefix + dateRestriction + preparedTextSuffix);
@@ -667,12 +667,12 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     if (sinceDate != null)
       {
-        dateRestriction = " AND e.javatime >= " + sinceDate.getTime();
+        dateRestriction = " AND e.javatime >= ?";
       }
 
     if (beforeDate != null)
       {
-        dateRestriction = dateRestriction + " AND e.javatime <= " + beforeDate.getTime();
+        dateRestriction = dateRestriction + " AND e.javatime <= ?";
       }
 
     PreparedStatement ps = con.prepareStatement(preparedTextPrefix + dateRestriction + preparedTextSuffix);
