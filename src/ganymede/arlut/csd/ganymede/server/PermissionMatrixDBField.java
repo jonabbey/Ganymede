@@ -577,6 +577,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field, Clon
     
     /* -- */
 
+    if (obj == null)
+      {
+        return false;
+      }
+
     if (!(obj.getClass().equals(this.getClass())))
       {
 	return false;

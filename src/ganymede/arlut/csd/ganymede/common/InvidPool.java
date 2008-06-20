@@ -306,6 +306,11 @@ class InvidSlot extends SoftReference {
 
   public boolean equals(Object o)
   {
+    if (o == null)
+      {
+        return false;
+      }
+
     return (o.equals(get()));
   }
 

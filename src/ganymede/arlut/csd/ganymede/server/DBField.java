@@ -498,6 +498,11 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public synchronized boolean equals(Object obj)
   {
+    if (obj == null)
+      {
+        return false;
+      }
+
     if (!(obj.getClass().equals(this.getClass())))
       {
 	return false;

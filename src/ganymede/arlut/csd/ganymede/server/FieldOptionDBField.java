@@ -584,6 +584,11 @@ public class FieldOptionDBField extends DBField implements field_option_field, C
     
     /* -- */
 
+    if (obj == null)
+      {
+        return false;
+      }
+
     if (!(obj.getClass().equals(this.getClass())))
       {
 	return false;
