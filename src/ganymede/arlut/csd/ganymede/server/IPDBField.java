@@ -1213,7 +1213,7 @@ public class IPDBField extends DBField implements ip_field {
 
 	    for (int j = 0; j < x.length; j++)
 	      {
-		if (x[j] != y[j])
+		if (!x[j].equals(y[j]))
 		  {
 		    nochange = false;
 		  }
