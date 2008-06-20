@@ -286,14 +286,21 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     Statement stmt = con.createStatement();
 
-    ResultSet rs = stmt.executeQuery("select MAX(event_id) from event");
-
-    // we should only get one row
-
-    while (rs.next())
+    try
       {
-	max = rs.getInt(1);
-	max = max +1;
+        ResultSet rs = stmt.executeQuery("select MAX(event_id) from event");
+        
+        // we should only get one row
+        
+        while (rs.next())
+          {
+            max = rs.getInt(1);
+            max = max +1;
+          }
+      }
+    finally
+      {
+        stmt.close();
       }
 
     return max;
@@ -576,9 +583,29 @@ public class DBLogPostGreSQLController implements DBLogController {
 	Ganymede.debug(Ganymede.stackTrace(ex));
 	return buffer;
       }
+    finally
+      {
+        rs.close();
+
+        Statement st = rs.getStatement();
+
+        if (st != null)
+          {
+            st.close();
+          }
+      }
 
     return buffer;
   }
+
+
+  /**
+   * Queries for all events that involve the object whose Invid is
+   * invid.
+   *
+   * It is the caller's responsibility to close the ResultSet and the
+   * Statement backing the ResultSet.
+   */
 
   public ResultSet queryEvents(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
@@ -601,22 +628,38 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     PreparedStatement ps = con.prepareStatement(preparedTextPrefix + dateRestriction + preparedTextSuffix);
 
-    ps.setString(1, invid.toString());
-
-    int i = 1;
-
-    if (sinceDate != null)
+    try
       {
-        ps.setLong(i++, sinceDate.getTime());
-      }
+        ps.setString(1, invid.toString());
 
-    if (beforeDate != null)
+        int i = 1;
+
+        if (sinceDate != null)
+          {
+            ps.setLong(i++, sinceDate.getTime());
+          }
+
+        if (beforeDate != null)
+          {
+            ps.setLong(i, beforeDate.getTime());
+          }
+
+        return ps.executeQuery();
+      }
+    catch (SQLException ex)
       {
-        ps.setLong(i, beforeDate.getTime());
-      }
+        ps.close();
 
-    return ps.executeQuery();
+        throw ex;
+      }
   }
+
+  /**
+   * Queries for events performed by the admin whose Invid is invid.
+   *
+   * It is the caller's responsibility to close the ResultSet and the
+   * Statement backing the ResultSet.
+   */
 
   public ResultSet queryEventsByAdmin(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
@@ -655,6 +698,14 @@ public class DBLogPostGreSQLController implements DBLogController {
     
     return ps.executeQuery();
   }
+
+  /**
+   * Queries for all events in transactions that involve the object
+   * whose Invid is invid.
+   *
+   * It is the caller's responsibility to close the ResultSet and the
+   * Statement backing the ResultSet.
+   */
 
   public ResultSet queryEventsByTransactions(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
@@ -701,6 +752,24 @@ public class DBLogPostGreSQLController implements DBLogController {
 
   public synchronized void close()
   {
+    if (statement != null)
+      {
+        statement.close();
+        statement = null;
+      }
+
+    if (emailState != null)
+      {
+        emailState.close();
+        emailState = null;
+      }
+
+    if (invidState != null)
+      {
+        invidState.close();
+        invidState = null;
+      }
+
     if (con != null)
       {
 	try
