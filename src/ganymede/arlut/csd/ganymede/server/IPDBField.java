@@ -1102,10 +1102,6 @@ public class IPDBField extends DBField implements ip_field, Cloneable {
 
   public synchronized String getValueString()
   {
-    String result = "";
-
-    /* -- */
-
     if (!isVector())
       {
 	if (value == null)
@@ -1118,21 +1114,21 @@ public class IPDBField extends DBField implements ip_field, Cloneable {
 
     Vector values = getVectVal();
 
-    int size = size();
+    StringBuffer result = new StringBuffer();
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size(); i++)
       {
 	Byte[] element = (Byte[]) values.elementAt(i);
 
-	if (!result.equals(""))
-	  {
-	    result = result + ",";
-	  }
+        if (result.length() > 0)
+          {
+            result.append(",");
+          }
 
-	result = result + genIPString(element);
+        result.append(genIPString(element));
       }
 
-    return result;
+    return result.toString();
   }
 
   /**
