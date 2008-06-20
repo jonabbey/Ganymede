@@ -82,7 +82,6 @@ import arlut.csd.Util.XMLStartDocument;
 import arlut.csd.Util.XMLWarning;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.FileTransmitter;
-import arlut.csd.ganymede.rmi.Server;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.XMLSession;
 
@@ -157,12 +156,6 @@ public final class xmlclient implements ClientListener, Runnable {
   private boolean includeHistory = false;
   private boolean includeOid = false;
   private boolean finishedErrStream = false;
-
-  /**
-   * RMI reference to a Ganymede server
-   */
-
-  private Server server = null;
 
   /**
    * Remote session interface to the Ganymede server, used while
