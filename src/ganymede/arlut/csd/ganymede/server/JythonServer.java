@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -402,7 +402,12 @@ class JythonServerWorker extends Thread {
              * the password  */
             rawOutput.write(echoOff);
             rawOutput.flush();
-            rawInput.read(responseBuffer, 0, 3);
+
+            int chars_read = 0;
+            while (chars_read < 3)
+              {
+                chars_read += rawInput.read(responseBuffer, 0, 3);
+              }
             if (!Arrays.equals(responseBuffer, echoOffResponse))
               {
               	out.print("Your telnet client won't properly suppress character echo.");
@@ -417,7 +422,13 @@ class JythonServerWorker extends Thread {
              * business as usual */
             rawOutput.write(echoOn);
             rawOutput.flush();
-            rawInput.read(responseBuffer, 0, 3);
+
+            chars_read = 0;
+            while (chars_read < 3)
+              {
+                chars_read += rawInput.read(responseBuffer, 0, 3);
+              }
+
             if (!Arrays.equals(responseBuffer, echoOnResponse))
               {
               	out.print("Your telnet client won't properly resume character echo.");
