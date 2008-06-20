@@ -6258,14 +6258,8 @@ class PersonaListener implements ActionListener {
 
   Session session;
 
-  DialogRsrc
-    resource = null;
-
   gclient
     gc;
-
-  boolean
-    listen = true;
 
   // ---
 

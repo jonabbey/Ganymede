@@ -1290,8 +1290,6 @@ class QueryRow implements ItemListener {
   JPanel panel;
   FieldTemplate field = null;
 
-  Vector fields;		// FieldTemplate Vector for the selectedBase
-
   JComboBox
     fieldChoice = new JComboBox(),
     boolChoice = new JComboBox(),
@@ -1313,7 +1311,6 @@ class QueryRow implements ItemListener {
 
     try
       {
-	fields = parent.gc.getTemplateVector(parent.selectedBase.getTypeID());
 	resetFieldChoices();
       }
     catch (Exception ex)
