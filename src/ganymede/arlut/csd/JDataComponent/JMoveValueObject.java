@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin.
 
    Contact information
@@ -72,7 +72,6 @@ import java.awt.*;
 public class JMoveValueObject extends JValueObject {
 
   private Component source;
-  private Object value = null;
   private int index = -1;
   private int index2 = -1;
 
