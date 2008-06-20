@@ -1189,7 +1189,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	
 	if (!newDirectory.exists())
 	  {
-	    newDirectory.mkdir();
+	    if (!newDirectory.mkdir())
+              {
+                throw new IOException("Couldn't mkdir " + currentBackUpDirectory);
+              }
 	  }
       }
 
