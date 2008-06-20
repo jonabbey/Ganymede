@@ -212,12 +212,7 @@ public class xmlfield implements FieldType {
                 throw new RuntimeException(ts.l("constructor.scalar_error", nextItem.toString(), fieldDef.getName()));
               }
 
-	    Boolean bValue = parseBoolean(nextItem);
-
-	    if (bValue != null)
-	      {
-		value = bValue;
-	      }
+	    value = parseBoolean(nextItem);
 
 	    // fall through to skipToEndField()
 	  }
@@ -545,7 +540,6 @@ public class xmlfield implements FieldType {
 	  }
       }
 
-
     // if we get here, we haven't yet consumed the field close
     // element.. go ahead and eat everything up to and including the
     // field close element.
@@ -787,15 +781,13 @@ public class xmlfield implements FieldType {
 	  }
 	else
 	  {
-	    owner.xSession.err.println("\nUnrecognized character string found when boolean expected: " + item);
-	    return null;
+	    throw new RuntimeException("\nUnrecognized character string found when boolean expected: " + item);
 	  }
       }
 
     if (!item.matches("boolean"))
       {
-	owner.xSession.err.println("\nUnrecognized XML item found when boolean expected: " + item);
-	return null;
+        throw new RuntimeException("\nUnrecognized XML item found when boolean expected: " + item);
       }
 
     if (!item.isEmpty())
