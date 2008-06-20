@@ -177,6 +177,11 @@ public class helpPanel extends JDialog implements ActionListener{
 
   public void loadPage(String page, boolean keepInHistory)
   {
+    if (page == null)
+      {
+        throw new NullPointerException("page parameter is null");
+      }
+
     if (currentPage.equals(page))
       {
 	System.out.println("Can't fool me, Eric!  You are trying to load the page you are on.");
@@ -187,7 +192,7 @@ public class helpPanel extends JDialog implements ActionListener{
 	  {
 	    document.setPage(page);
 
-	    if (currentPage != null && keepInHistory)
+	    if (keepInHistory)
 	      {
 		history.push(currentPage);
 	      }
