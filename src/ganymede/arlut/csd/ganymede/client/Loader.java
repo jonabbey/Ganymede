@@ -85,7 +85,6 @@ public class Loader extends Thread {
   private Hashtable 
     baseMap,
     baseNames,
-    baseHash,
     baseToShort,
     nameShorts;
 
@@ -97,8 +96,7 @@ public class Loader extends Thread {
     baseNamesLoaded = false,
     baseListLoaded = false,
     baseMapLoaded = false,
-    templateLoading = false,
-    baseHashLoaded = false;
+    templateLoading = false;
 
   private Session
     session;
@@ -760,10 +758,7 @@ public class Loader extends Thread {
   /* -- Private methods  --  */
 
   /** 
-   * loadBaseList gets the list of types from the server.  This is
-   * used in loadBaseHash to get the rest of the BaseHash, but is
-   * also used in a few places in the client where the whole list
-   * of fields in the baseHash isn't needed.
+   * loadBaseList loads a sorted Vector of types from the server.
    */
 
   private synchronized void loadBaseList() throws RemoteException
@@ -816,61 +811,6 @@ public class Loader extends Thread {
       }
 
     baseNamesLoaded = true;
-    notifyAll();
-  }
-
-  /**
-   * loadBaseHash is used to prepare a hash table mapping Bases to
-   * Vector's of BaseField.. this is used to allow different pieces
-   * of client-side code to get access to the Base/BaseField information,
-   * which changes infrequently (not at all?) while the client is
-   * connected.. the perm_editor panel created by the windowPanel class
-   * benefits from this, as does buildTree() below. 
-   */
-
-  private synchronized void loadBaseHash() throws RemoteException
-  {
-    Base base;
-    Vector typesV;
-
-    /* -- */
-
-    typesV = getBaseList();
-
-    if (typesV == null)
-      {
-	throw new RuntimeException("typesV is null in Loader!");
-      }
-
-    if (baseHash != null)
-      {
-	baseHash.clear();
-      }
-    else
-      {
-	baseHash = new Hashtable(typesV.size());
-      }
-    
-    for (int i = 0; i < typesV.size(); i++)
-      {
-	base = (Base) typesV.elementAt(i);
-
-	if (base != null)
-	  {
-	    baseHash.put(base, base.getFields());
-
-	    if (debug)
-	      {
-		System.err.println("Putting another base on the old baseHash");
-	      }
-	  }
-	else if (debug)
-	  {
-	    System.err.println("Base was null");
-	  }
-      }
-
-    baseHashLoaded = true;
     notifyAll();
   }
 
