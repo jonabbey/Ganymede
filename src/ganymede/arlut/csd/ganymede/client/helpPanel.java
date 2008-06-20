@@ -177,7 +177,7 @@ public class helpPanel extends JDialog implements ActionListener{
 
   public void loadPage(String page, boolean keepInHistory)
   {
-    if (currentPage == page)
+    if (currentPage.equals(page))
       {
 	System.out.println("Can't fool me, Eric!  You are trying to load the page you are on.");
       }
