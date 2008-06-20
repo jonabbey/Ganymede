@@ -17,8 +17,8 @@
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2005
+
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -127,9 +127,8 @@ public class FileOps {
   public static boolean deleteFile(String filename) throws IOException
   {
     File file = new File(filename);
-    file.delete();
 
-    return true;
+    return file.delete();
   }
 
   public static boolean deleteDirectory(String directoryName) throws IOException
@@ -196,10 +195,8 @@ public class FileOps {
 
     if (success)
       {
-	file.delete();
+	return file.delete();
       }
-
-    return success;
   }
 
   /**
