@@ -404,10 +404,12 @@ class JythonServerWorker extends Thread {
             rawOutput.flush();
 
             int chars_read = 0;
+
             while (chars_read < 3)
               {
-                chars_read += rawInput.read(responseBuffer, 0, 3);
+                chars_read += rawInput.read(responseBuffer, chars_read, 3-chars_read);
               }
+
             if (!Arrays.equals(responseBuffer, echoOffResponse))
               {
               	out.print("Your telnet client won't properly suppress character echo.");
@@ -424,9 +426,10 @@ class JythonServerWorker extends Thread {
             rawOutput.flush();
 
             chars_read = 0;
+
             while (chars_read < 3)
               {
-                chars_read += rawInput.read(responseBuffer, 0, 3);
+                chars_read += rawInput.read(responseBuffer, chars_read, 3-chars_read);
               }
 
             if (!Arrays.equals(responseBuffer, echoOnResponse))
