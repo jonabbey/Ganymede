@@ -2251,7 +2251,6 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	  {
 	    CatTreeNode cn = (CatTreeNode) dragNode;
 	    Category category = cn.getCategory();
-	    Category oldCategory = category.getCategory();
 	    
 	    Category newCategory = null;
 
@@ -2264,7 +2263,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		if (debug)
 		  {
 		    System.err.println("Dropping category " + category.getName() + " from " +
-				       oldCategory.getName() + " onto " + newCategory.getName());
+				       category.getCategory().getName() + " onto " + newCategory.getName());
 		  }
 
 		newCategory.moveCategoryNode(category.getPath(), null);
