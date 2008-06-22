@@ -85,7 +85,7 @@ import arlut.csd.Util.VectorUtils;
  * {@link arlut.csd.ganymede.rmi.string_field string_field} RMI interface.</P> 
  */
 
-public class StringDBField extends DBField implements string_field {
+public class StringDBField extends DBField implements string_field, Cloneable {
 
   /**
    * TranslationService object for handling string localization in the

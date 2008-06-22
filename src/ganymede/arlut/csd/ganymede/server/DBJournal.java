@@ -377,7 +377,10 @@ public class DBJournal implements ObjectStatus {
 	System.err.println(ts.l("reset.savingold", newname));
       }
 
-    file.renameTo(new File(newname));
+    if (!file.renameTo(new File(newname)))
+      {
+	throw new IOException("Couldn't rename " + file.getPath() + " to " + newname);
+      }
 
     if (debug)
       {
