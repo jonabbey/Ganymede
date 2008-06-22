@@ -1861,33 +1861,29 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     ActionMap actionMap = getActionMap();
 
-    actionMap.put("unitdown", new treeControlAction("unitdown", this));
-    actionMap.put("unitup", new treeControlAction("unitup", this));
-    actionMap.put("scrolldown", new treeControlAction("scrolldown", this));
-    actionMap.put("scrollup", new treeControlAction("scrollup", this));
-    actionMap.put("scrolltop", new treeControlAction("scrolltop", this));
-    actionMap.put("scrollbottom", new treeControlAction("scrollbottom", this));
-    actionMap.put("right", new treeControlAction("right", this));
-    actionMap.put("left", new treeControlAction("left", this));
-    actionMap.put("enter", new treeControlAction("enter", this));
-    actionMap.put("context", new treeControlAction("context", this));
+    actionMap.put("unitdown", new treeControlAction("unitdown"));
+    actionMap.put("unitup", new treeControlAction("unitup"));
+    actionMap.put("scrolldown", new treeControlAction("scrolldown"));
+    actionMap.put("scrollup", new treeControlAction("scrollup"));
+    actionMap.put("scrolltop", new treeControlAction("scrolltop"));
+    actionMap.put("scrollbottom", new treeControlAction("scrollbottom"));
+    actionMap.put("right", new treeControlAction("right"));
+    actionMap.put("left", new treeControlAction("left"));
+    actionMap.put("enter", new treeControlAction("enter"));
+    actionMap.put("context", new treeControlAction("context"));
   }
 
   private class treeControlAction extends javax.swing.AbstractAction {
 
-    private treeControl tree;
-
-    public treeControlAction(String name, treeControl tree)
+    public treeControlAction(String name)
     {
       super(name);
-
-      this.tree = tree;
     }
 
     public void actionPerformed(ActionEvent e)
     {
-      ActionEvent ae = new ActionEvent(tree, 0, (String) getValue(NAME));
-      tree.actionPerformed(ae);
+      ActionEvent ae = new ActionEvent(treeControl.this, 0, (String) getValue(NAME));
+      treeControl.this.actionPerformed(ae);
     }
   }
 }
