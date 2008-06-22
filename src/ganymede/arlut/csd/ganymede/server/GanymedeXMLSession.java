@@ -65,6 +65,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import org.xml.sax.SAXException;
@@ -3099,14 +3101,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		// "Objects created:"
 		err.println(ts.l("integrateXMLTransaction.objects_created"));
 		
-		Iterator iter = createCount.keySet().iterator();
+		Iterator iter = createCount.entrySet().iterator();
 		
 		while (iter.hasNext())
 		  {
-		    String key = (String) iter.next();
+		    Map.Entry item = (Map.Entry) iter.next();
+		    String key = (String) item.getKey();
 		    
 		    // "\t{0}: {1,number,#}"
-		    err.println(ts.l("integrateXMLTransaction.object_count", key, createCount.get(key)));
+		    err.println(ts.l("integrateXMLTransaction.object_count", key, item.getValue()));
 		  }
 	      }
 	    
@@ -3115,14 +3118,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		// "Objects edited:"
 		err.println(ts.l("integrateXMLTransaction.objects_edited"));
 		
-		Iterator iter = editCount.keySet().iterator();
+		Iterator iter = editCount.entrySet().iterator();
 		
 		while (iter.hasNext())
 		  {
-		    String key = (String) iter.next();
+		    Map.Entry item = (Map.Entry) iter.next();
+		    String key = (String) item.getKey();
 
 		    // "\t{0}: {1,number,#}"
-		    err.println(ts.l("integrateXMLTransaction.object_count", key, editCount.get(key)));
+		    err.println(ts.l("integrateXMLTransaction.object_count", key, item.getValue()));
 		  }
 	      }
 	    
@@ -3131,14 +3135,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		// "Objects deleted:"
 		err.println(ts.l("integrateXMLTransaction.objects_deleted"));
 		
-		Iterator iter = deleteCount.keySet().iterator();
+		Iterator iter = deleteCount.entrySet().iterator();
 		
 		while (iter.hasNext())
 		  {
-		    String key = (String) iter.next();
+		    Map.Entry item = (Map.Entry) iter.next();
+		    String key = (String) item.getKey();
 
 		    // "\t{0}: {1,number,#}"
-		    err.println(ts.l("integrateXMLTransaction.object_count", key, deleteCount.get(key)));		    
+		    err.println(ts.l("integrateXMLTransaction.object_count", key, item.getValue()));
 		  }
 	      }
 	    
@@ -3147,14 +3152,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 		// "Objects inactivated:"
 		err.println(ts.l("integrateXMLTransaction.objects_inactivated"));
 		
-		Iterator iter = inactivateCount.keySet().iterator();
+		Iterator iter = inactivateCount.entrySet().iterator();
 		
 		while (iter.hasNext())
 		  {
-		    String key = (String) iter.next();
+		    Map.Entry item = (Map.Entry) iter.next();
+		    String key = (String) item.getKey();
 
 		    // "\t{0}: {1,number,#}"
-		    err.println(ts.l("integrateXMLTransaction.object_count", key, inactivateCount.get(key)));		    
+		    err.println(ts.l("integrateXMLTransaction.object_count", key, item.getValue()));
 		  }
 	      }
 
