@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -77,7 +77,6 @@ import arlut.csd.ganymede.rmi.invid_field;
 
 public class personaeTab extends clientTab {
 
-  private ownerPanel owner_panel;
   private JPanel contentPane;
   private personaPanel pP;
   private invid_field persona_field;

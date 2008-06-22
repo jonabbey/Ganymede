@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2006
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -88,7 +88,6 @@ import arlut.csd.Util.PackageResources;
 
 public class imageTab extends clientTab {
 
-  private ownerPanel owner_panel;
   private JPanel contentPane;
   private String url_string;
   private Image icon = null;
