@@ -27,7 +27,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -99,6 +99,15 @@ import arlut.csd.ganymede.rmi.AdminAsyncResponder;
 public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
   /**
+   * <p>How many events we'll queue up before deciding that the
+   * Client isn't responding.</p>
+   */
+
+  private static final int maxBufferSize = 25; // we shouldn't even need this many, since we replaceEvent
+
+  // ---
+
+  /**
    * <p>Our queue of {@link arlut.csd.ganymede.common.adminAsyncMessage adminAsyncMessage} objects.</p>
    */
 
@@ -121,13 +130,6 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
    */
 
   private int ebSz = 0;
-
-  /**
-   * <p>How many events we'll queue up before deciding that the
-   * Client isn't responding.</p>
-   */
-
-  private final int maxBufferSize = 25; // we shouldn't even need this many, since we replaceEvent
 
   /**
    * <p>If true, we have been told to shut down, and our

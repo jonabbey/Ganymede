@@ -26,7 +26,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -96,6 +96,15 @@ import arlut.csd.ganymede.rmi.ClientAsyncResponder;
 public class serverClientAsyncResponder implements ClientAsyncResponder {
 
   /**
+   * <p>How many events we'll queue up before deciding that the
+   * Client isn't responding.</p>
+   */
+
+  private static final int maxBufferSize = 15; // we shouldn't even need this many
+
+  // ---
+
+  /**
    * <p>Our queue of {@link arlut.csd.ganymede.common.clientAsyncMessage clientAsyncMessage} objects.</p>
    */
 
@@ -118,13 +127,6 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
    */
 
   private int ebSz = 0;
-
-  /**
-   * <p>How many events we'll queue up before deciding that the
-   * Client isn't responding.</p>
-   */
-
-  private final int maxBufferSize = 15; // we shouldn't even need this many
 
   /**
    * <p>If true, we have been told to shut down, and our

@@ -1188,8 +1188,6 @@ class DeathWatcherThread extends Thread {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.DeathWatcherThread");
 
-  final boolean debug = false;
-
   String message = null;
 
   /* -- */
@@ -1286,7 +1284,7 @@ class DeathWatcherThread extends Thread {
 
 class ExitThread extends Thread {
 
-  final boolean debug = false;
+  final static boolean debug = false;
 
   String message;
 

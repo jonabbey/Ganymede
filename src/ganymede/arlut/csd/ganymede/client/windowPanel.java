@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -126,11 +126,16 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.windowPanel");
 
-  boolean debug = false;
+  /**
+   * Constant, the front-most layer in which newly created windows are
+   * placed.
+   */
 
-  final boolean debugProperty = false;
-  
+  final static int topLayer = 0;
+
   // --
+
+  boolean debug = false;
 
   /**
    * Reference to the client's main class, used for some utility functions.
@@ -138,13 +143,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   gclient
     gc;
-
-  /**
-   * Constant, the front-most layer in which newly created windows are
-   * placed.
-   */
-
-  final int topLayer = 0;
 
   /**
    * Used to keep track of multiple 'guy working' internal wait windows

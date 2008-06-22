@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -97,7 +97,7 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.SaveDialog");
 
-  private final boolean debug = false;
+  private static final boolean debug = false;
 
   boolean
     addedFormatChoice = false,
@@ -243,6 +243,7 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
   public boolean showDialog()
   {
     setVisible(true);
+
     if (debug)
       {
 	System.err.println("Returning " + returnValue);
