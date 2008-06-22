@@ -795,7 +795,7 @@ public class xmlfield implements FieldType {
 	owner.xSession.err.println("\nError, found a non-empty boolean field value element: " + item);
       }
 
-    return new Boolean(item.getAttrBoolean("val"));
+    return Boolean.valueOf(item.getAttrBoolean("val"));
   }
 
   public Integer parseNumeric(XMLItem item) throws SAXException

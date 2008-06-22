@@ -1780,7 +1780,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set multiline: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_multiline", new Boolean(_multiline), root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_multiline", Boolean.valueOf(_multiline), root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setNameSpace(_namespace);
@@ -2104,7 +2104,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_md5_crypted", new Boolean(_md5crypted),
+					  ts.l("doPasswordXML.bad_md5_crypted", Boolean.valueOf(_md5crypted),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -2610,7 +2610,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "fielddef could not set embedded status: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  ts.l("doInvidXML.bad_embedded_status",
-					       new Boolean(_embedded),
+					       Boolean.valueOf(_embedded),
 					       root.getTreeString(),
 					       retVal.getDialogText()));
       }
