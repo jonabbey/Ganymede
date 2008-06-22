@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -71,7 +71,7 @@ import javax.swing.JDialog;
 
 public class JCenterDialog extends JDialog {
 
-  private final boolean debug = false;
+  private final static boolean debug = false;
 
   Frame frame;
 
