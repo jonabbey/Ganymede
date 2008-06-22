@@ -525,8 +525,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public DBObjectBase(DBStore store, boolean embedded, boolean createFields) throws RemoteException
   {
-    debug = Ganymede.debug;
-
     this.store = store;
 
     writerList = new Vector();
