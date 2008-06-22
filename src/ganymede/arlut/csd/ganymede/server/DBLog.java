@@ -66,6 +66,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import Qsmtp.Qsmtp;
@@ -1230,19 +1231,21 @@ public class DBLog {
 
   private void sendObjectMail(String returnAddr, String adminName, HashMap objectOuts, Date currentTime)
   {
-    Iterator iter = objectOuts.keySet().iterator();
+    Iterator iter = objectOuts.entrySet().iterator();
 
     while (iter.hasNext())
       {
-	String key = (String) iter.next();
-	HashMap addresses = (HashMap) objectOuts.get(key);
+	Map.Entry item = (Map.Entry) iter.next();
+	String key = (String) item.getKey();
+	HashMap addresses = (HashMap) item.getValue();
 
-	Iterator iter2 = addresses.keySet().iterator();
+	Iterator iter2 = addresses.entrySet().iterator();
 
 	while (iter2.hasNext())
 	  {
-	    String address = (String) iter2.next();
-	    MailOut mailout = (MailOut) addresses.get(address);
+	    Map.Entry item2 = (Map.Entry) iter2.next();
+	    String address = (String) item2.getKey();
+	    MailOut mailout = (MailOut) item2.getValue();
 
 	    objectEventType type = (objectEventType) objEventCodes.get(key);
 
