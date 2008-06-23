@@ -836,7 +836,7 @@ public class Qsmtp implements Runnable {
     return true;
   }
 
-  private String scanLine(BufferedReader reply) throws ProtocolException
+  private String scanLine(BufferedReader reply) throws IOException, ProtocolException
   {
     String line = reply.readLine();
 
