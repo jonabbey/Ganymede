@@ -410,7 +410,7 @@ public class NumericDBField extends DBField implements num_field, Cloneable {
 
     if (o == null)
       {
-	return eObj.verifyNewValue(this, o);
+	return eObj.verifyNewValue(this, null);  // explicit for FindBugs
       }
 
     retVal = verifyBasicConstraints(o);

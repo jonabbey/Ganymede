@@ -426,7 +426,7 @@ public class DateDBField extends DBField implements date_field, Cloneable {
 
     if (o == null)
       {
-	return eObj.verifyNewValue(this, o);
+	return eObj.verifyNewValue(this, null);  // FindBugs explicit
       }
 
     d = (Date) o;

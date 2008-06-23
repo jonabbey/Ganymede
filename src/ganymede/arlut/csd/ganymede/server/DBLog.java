@@ -1519,7 +1519,7 @@ public class DBLog {
    * code that originally generated the log event.</P>
    */
 
-  private void calculateMailTargets(DBLogEvent event, DBSession session, 
+  private void calculateMailTargets(DBLogEvent event, DBSession session,
 				    systemEventType eventType, 
 				    boolean mailToObjects,
 				    boolean mailToOwners)
@@ -1622,7 +1622,7 @@ public class DBLog {
 
     if (transactionType == null)
       {
-	calculateMailTargets(event, session, transactionType, true, true);
+	calculateMailTargets(event, session, null, true, true);  // null explicitly to quiet FindBugs
       }
     else
       {

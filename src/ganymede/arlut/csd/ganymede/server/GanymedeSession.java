@@ -1898,9 +1898,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     /* - */
 
-    if (ownerInvids == null)
+    if (ownerInvids == null || ownerInvids.size() == 0)
       {
-	visibilityFilterInvids = ownerInvids;
+	visibilityFilterInvids = null;
 	return null;
       }
 

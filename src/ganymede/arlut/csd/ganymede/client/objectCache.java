@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -238,7 +238,7 @@ public class objectCache {
   {
     objectList list = (objectList) idMap.get(key);
 
-    if (key == null)
+    if (list == null)
       {
 	throw new RuntimeException("error, no list found with key " + key);
       }

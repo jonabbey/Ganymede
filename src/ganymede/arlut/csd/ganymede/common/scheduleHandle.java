@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -418,7 +418,7 @@ public class scheduleHandle implements java.io.Serializable {
       }
     else
       {
-	startTime.setTime(startTime.getTime() + (long) (60000 * interval));
+	startTime.setTime(startTime.getTime() + (60000L * interval));
 	return true;
       }
   }

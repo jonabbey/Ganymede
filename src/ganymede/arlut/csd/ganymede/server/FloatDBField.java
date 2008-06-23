@@ -383,7 +383,7 @@ public class FloatDBField extends DBField implements float_field, Cloneable {
 
     if (o == null)
       {
-	return eObj.verifyNewValue(this, o);
+	return eObj.verifyNewValue(this, null);  // explicit for FindBugs
       }
 
     I = (Double) o;

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -339,7 +339,7 @@ public class GanymedeScheduler extends Thread {
     
     periodMinutes *= periodCount;
     
-    periodInterval = periodMinutes * 60 * 1000;
+    periodInterval = periodMinutes * 60 * 1000L;
     
     // we need to find the next moment to run the task with, using the periodAnchor
     
