@@ -1063,7 +1063,7 @@ public class IPDBField extends DBField implements ip_field, Cloneable {
 		    if (badBoy == null)
 		      {
 			// "Error encountered attempting to dissociate reserved value {0} from field {1}.  This should not have happened, and must be due to a server error."
-			throw new RuntimeException(ts.l("global.really_bad_unmark", approvedValues.elementAt(i), this));
+			badBoy = new RuntimeException(ts.l("global.really_bad_unmark", approvedValues.elementAt(i), this));
 		      }
 		  }
 	      }
