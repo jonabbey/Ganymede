@@ -776,7 +776,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
    * @return HashTable of labels to values
    */
 
-  public Hashtable DialogShow()
+  public Hashtable showDialog()
   {
     mainPanel.revalidate();
     this.pack();
@@ -810,7 +810,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	valueHash = null;
       }
 
-    // pop down so that DialogShow() can proceed to completion.
+    // pop down so that showDialog() can proceed to completion.
 
     done = true;
 
@@ -821,7 +821,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
    *
    * This method is responsible for scanning all of the input fields
    * in this dialog and loading their values into valueHash for
-   * DialogShow() to return.
+   * showDialog() to return.
    * 
    */
 

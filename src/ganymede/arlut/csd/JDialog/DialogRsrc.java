@@ -83,7 +83,7 @@ import arlut.csd.Util.TranslationService;
  * r.addBoolean("Married:");
  *
  * StringDialog d = new StringDialog(r);
- * Hashtable result = d.DialogShow();
+ * Hashtable result = d.showDialog();
  * if (result == null) {
  *     // cancel was clicked...
  * } else {
