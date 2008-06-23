@@ -971,7 +971,7 @@ class rowSorter {
 
 	// okay, not null.
 	
-	return one.compareToIgnoreCase(two);
+	return one.compareToIgnoreCase(two);  // FindBugs 1.3.4 doesn't analyze this for null properly ;-/
       }
 
     // if we are sorting dates, we expect everything in this column
