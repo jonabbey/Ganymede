@@ -842,7 +842,7 @@ public class Qsmtp implements Runnable {
 
     if (line == null)
       {
-        throw ProtocolException("SMTP connection closed abruptly");
+        throw new ProtocolException("SMTP connection closed abruptly");
       }
 
     return line;
