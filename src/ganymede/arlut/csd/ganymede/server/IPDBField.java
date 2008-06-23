@@ -391,15 +391,21 @@ public class IPDBField extends DBField implements ip_field, Cloneable {
 
   private boolean equalTest(Byte[] localBytes, Byte[] foreignBytes)
   {
-    if ((foreignBytes == null) && (localBytes == null))
+    if (foreignBytes == null)
       {
-	return true;
+        if (localBytes == null)
+          {
+            return true;
+          }
+        else
+          {
+            return false;
+          }
       }
 
-    if (((foreignBytes == null) && (localBytes != null)) ||
-	((foreignBytes != null) && (localBytes == null)))
+    if (localBytes == null)
       {
-	return false;
+        return false;
       }
 
     if (foreignBytes.length != localBytes.length)
