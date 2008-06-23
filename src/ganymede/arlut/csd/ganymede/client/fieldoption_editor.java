@@ -92,12 +92,6 @@ public class fieldoption_editor extends JFrame
 				   ts.l("global.changed"), // "When Changed"
 				   ts.l("global.always")}; // "Always"
 
-  /* Reference to the background colour of the tree.
-   * This is used to make the background of the individual cell renderers
-   * the same as that of the Tree.
-   */
-  public static Color treeBG;
-
   public static boolean debug = false;
 
   /* Flag that indicated whether or not the widget it currently being
@@ -234,8 +228,6 @@ public class fieldoption_editor extends JFrame
     collapseAllNodes();
     smartExpandNodes();
 
-    treeBG = tree.getBackground();
-    
     edit_pane = new JScrollPane(treeTable);
     edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     edit_pane.getViewport().setOpaque(true);
@@ -1092,7 +1084,7 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
 	setSelected(true);
       }
 
-    this.setBackground(fieldoption_editor.treeBG);
+    this.setBackground(treetable.getTree().getBackground());
     this.addActionListener(this);
   }
 
@@ -1155,7 +1147,7 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
     setEnabled(editable);
     setEditable(false);
     addItemListener(this);
-    setBackground(fieldoption_editor.treeBG);
+    setBackground(treetable.getTree().getBackground());
     setSelectedIndex(selectionIndex);
   }
   
