@@ -210,7 +210,12 @@ public class DateDBField extends DBField implements date_field {
   public void emitDateXML(XMLDumpContext xmlOut, Date value) throws IOException
   {
     xmlOut.startElement("date");
-    xmlOut.attribute("val", formatter.format(value));
+
+    synchronized (formatter)
+      {
+        xmlOut.attribute("val", formatter.format(value));
+      }
+
     xmlOut.attribute("timecode", java.lang.Long.toString(value.getTime()));
     xmlOut.endElement("date");
   }
