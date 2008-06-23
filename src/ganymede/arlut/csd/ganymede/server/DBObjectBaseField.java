@@ -2115,7 +2115,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_apache_md5_crypted", new Boolean(_apachemd5crypted),
+					  ts.l("doPasswordXML.bad_apache_md5_crypted", Boolean.valueOf(_apachemd5crypted),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -2126,7 +2126,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set windows hashing flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_windows_hashed", new Boolean(_winHashed),
+					  ts.l("doPasswordXML.bad_windows_hashed", Boolean.valueOf(_winHashed),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -2137,7 +2137,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set SSHA hashing flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_ssha_hashed", new Boolean(_sshaHashed),
+					  ts.l("doPasswordXML.bad_ssha_hashed", Boolean.valueOf(_sshaHashed),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -2149,7 +2149,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "fielddef could not set SHA Unix Crypt hashing flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  ts.l("doPasswordXML.bad_sha_unix_crypted",
-					       new Boolean(_shaUnixCrypted),
+					       Boolean.valueOf(_shaUnixCrypted),
 					       root.getTreeString(),
 					       retVal.getDialogText()));
       }
@@ -2184,7 +2184,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set plaintext flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_plaintext", new Boolean(_plaintext),
+					  ts.l("doPasswordXML.bad_plaintext", Boolean.valueOf(_plaintext),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
