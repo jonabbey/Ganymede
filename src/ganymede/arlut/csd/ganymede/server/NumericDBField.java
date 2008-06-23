@@ -80,7 +80,7 @@ import arlut.csd.Util.TranslationService;
  * {@link arlut.csd.ganymede.rmi.num_field num_field} RMI interface.</P> 
  */
 
-public class NumericDBField extends DBField implements num_field, Cloneable {
+public class NumericDBField extends DBField implements num_field {
 
   /**
    * TranslationService object for handling string localization in the
@@ -161,9 +161,9 @@ public class NumericDBField extends DBField implements num_field, Cloneable {
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
-  public Object clone()
+  public Object clone() throws CloneNotSupportedException
   {
-    return new NumericDBField(owner, this);
+    throw new CloneNotSupportedException();
   }
 
   void emit(DataOutput out) throws IOException

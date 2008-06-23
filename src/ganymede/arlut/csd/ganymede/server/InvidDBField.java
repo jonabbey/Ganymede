@@ -112,7 +112,7 @@ import arlut.csd.ganymede.rmi.invid_field;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public final class InvidDBField extends DBField implements invid_field, Cloneable {
+public final class InvidDBField extends DBField implements invid_field {
 
   static final boolean debug = false;
 
@@ -249,9 +249,9 @@ public final class InvidDBField extends DBField implements invid_field, Cloneabl
       }
   }
 
-  public Object clone()
+  public Object clone() throws CloneNotSupportedException
   {
-    return new InvidDBField(owner, this);
+    throw new CloneNotSupportedException();
   }
 
   /**

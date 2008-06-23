@@ -112,7 +112,7 @@ import arlut.csd.ganymede.rmi.field_option_field;
  * mechanism for doing delta-based builds.
  */
 
-public class FieldOptionDBField extends DBField implements field_option_field, Cloneable {
+public class FieldOptionDBField extends DBField implements field_option_field {
 
   static final boolean debug = false;
 
@@ -726,9 +726,9 @@ public class FieldOptionDBField extends DBField implements field_option_field, C
 				      ts.l("setValue.error_text"));
   }
 
-  public Object clone()
+  public Object clone() throws CloneNotSupportedException
   {
-    return new FieldOptionDBField(owner, this);
+    throw new CloneNotSupportedException();
   }
 
   synchronized void emit(DataOutput out) throws IOException

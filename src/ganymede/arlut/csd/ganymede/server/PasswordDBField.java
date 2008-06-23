@@ -139,7 +139,7 @@ import arlut.csd.ganymede.rmi.pass_field;
  * of long term plaintext storage in the ganymede.db file.
  */
 
-public class PasswordDBField extends DBField implements pass_field, Cloneable {
+public class PasswordDBField extends DBField implements pass_field {
 
   static final boolean debug = false;
 
@@ -512,9 +512,9 @@ public class PasswordDBField extends DBField implements pass_field, Cloneable {
     throw new IllegalArgumentException("PasswordDBFields may not be tracked in namespaces");
   }
 
-  public Object clone()
+  public Object clone() throws CloneNotSupportedException
   {
-    return new PasswordDBField(owner, this);
+    throw new CloneNotSupportedException();
   }
 
   void emit(DataOutput out) throws IOException

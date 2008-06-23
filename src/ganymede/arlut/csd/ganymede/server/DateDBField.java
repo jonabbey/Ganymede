@@ -87,7 +87,7 @@ import arlut.csd.Util.TranslationService;
  * millisecond resolution.  No Y2k problems here. ;-)</P>
  */
 
-public class DateDBField extends DBField implements date_field, Cloneable {
+public class DateDBField extends DBField implements date_field {
 
   static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss",
 						     java.util.Locale.US);
@@ -182,20 +182,7 @@ public class DateDBField extends DBField implements date_field, Cloneable {
 
   public Object clone() throws CloneNotSupportedException
   {
-    DateDBField returnObj = (DateDBField) super.clone();
-
-    returnObj.fieldcode = getID();
-
-    if (value == null)
-      {
-        returnObj.value = null;
-      }
-    else if (value instanceof Date)
-      {
-        returnObj.value = new Date(((Date) value).getTime());
-      }
-
-    return returnObj;
+    throw new CloneNotSupportedException();
   }
 
   void emit(DataOutput out) throws IOException

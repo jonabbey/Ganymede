@@ -105,7 +105,7 @@ import arlut.csd.ganymede.rmi.perm_field;
  * by asking our {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} owner.
  */
 
-public class PermissionMatrixDBField extends DBField implements perm_field, Cloneable {
+public class PermissionMatrixDBField extends DBField implements perm_field {
 
   static final boolean debug = false;
 
@@ -717,9 +717,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field, Clon
 				      ts.l("setValue.error_text"));
   }
 
-  public Object clone()
+  public Object clone() throws CloneNotSupportedException
   {
-    return new PermissionMatrixDBField(owner, this);
+    throw new CloneNotSupportedException();
   }
 
   synchronized void emit(DataOutput out) throws IOException

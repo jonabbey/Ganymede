@@ -85,7 +85,7 @@ import arlut.csd.Util.VectorUtils;
  * {@link arlut.csd.ganymede.rmi.string_field string_field} RMI interface.</P> 
  */
 
-public class StringDBField extends DBField implements string_field, Cloneable {
+public class StringDBField extends DBField implements string_field {
 
   /**
    * TranslationService object for handling string localization in the
@@ -200,9 +200,9 @@ public class StringDBField extends DBField implements string_field, Cloneable {
       }
   }
 
-  public Object clone()
+  public Object clone() throws CloneNotSupportedException
   {
-    return new StringDBField(owner, this);
+    throw new CloneNotSupportedException();
   }
 
   void emit(DataOutput out) throws IOException
