@@ -71,6 +71,8 @@ import javax.security.cert.X509Certificate;
 
 public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serializable {
 
+  static final long serialVersionUID = -7421176607557939283L;
+
   private int _hashCode = "arlut.csd.ganymede.common.RMISSLServerSocketFactory".hashCode();
 
   private static String passphrase = "ganypassphrase";

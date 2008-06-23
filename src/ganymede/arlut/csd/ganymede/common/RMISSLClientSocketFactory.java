@@ -69,6 +69,8 @@ import javax.net.ssl.*;
 
 public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serializable {
 
+  static final long serialVersionUID = -1503453227599275210L;
+
   private int _hashCode = "arlut.csd.ganymede.common.RMISSLClientSocketFactory".hashCode();
 
   private static String certsResource = "client.truststore";

@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -73,7 +73,7 @@ import java.util.Vector;
 
 public class BaseListTransport implements java.io.Serializable {
 
-  /* XXX static final long serialVersionUID = -5281402897372108079L; */
+  static final long serialVersionUID = -8386494641226607100L;
 
   // ---
 
