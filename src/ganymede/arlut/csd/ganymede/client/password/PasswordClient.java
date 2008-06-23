@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Properties;
 
+import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.client.ClientBase;
 import arlut.csd.ganymede.client.ClientEvent;
 import arlut.csd.ganymede.client.ClientListener;
@@ -81,6 +82,13 @@ public class PasswordClient implements ClientListener {
 
   final static boolean debug = false;
   static String url;
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.password.PasswordClient");
 
   // ---
 
@@ -132,7 +140,8 @@ public class PasswordClient implements ClientListener {
       }
     catch (Exception ex)
       {
-	error("Connection to Ganymede server failed: " + ex.getMessage());
+        // "Connection to Ganymede server failed: {0}"
+	error(ts.l("changePassword.connection_fail", ex.getMessage()));
 	return false;
       }
 
@@ -152,8 +161,9 @@ public class PasswordClient implements ClientListener {
 	      {
 		System.out.println(" logged in, looking for :" + username + ":");
 	      }
-	    
-	    error("Wrong password.");
+
+            // "Wrong password."	    
+	    error(ts.l("changePassword.wrong_pass"));
 	    return false;
 	  }
 
@@ -195,7 +205,8 @@ public class PasswordClient implements ClientListener {
 
 	    if (user == null)
 	      {
-		error("Could not get handle on user object.  Someone else might be editing it.");
+                // "Could not get handle on user object.  Someone else might be editing it."
+		error(ts.l("changePassword.locked"));
 		session.abortTransaction();
 		client.disconnect();
 		return false;
@@ -257,7 +268,8 @@ public class PasswordClient implements ClientListener {
 	  {
 	    if (results == null)
 	      {
-		System.out.println("No user " + username + ", can't change password");
+                // "No user {0} found, can''t change password."
+		System.out.println(ts.l("changePassword.no_such_user", username));
 	      }
 	    else
 	      {
@@ -330,7 +342,8 @@ public class PasswordClient implements ClientListener {
 
   public void disconnected(ClientEvent e)
   {
-    error("Error, prematurely kicked off by the server. " + e.getMessage());
+    // "Error, the server forced us to disconnect. {0}"
+    error(ts.l("disconnected.kicked", e.getMessage()));
   }
 
   /**
@@ -349,7 +362,8 @@ public class PasswordClient implements ClientListener {
 
   public void messageReceived(ClientEvent e)
   {
-    error("ClientBase says: " + e.getMessage());
+    // "Server: {0}"
+    error(ts.l("messageReceived", e.getMessage()));
   }
 
   /**
@@ -367,7 +381,8 @@ public class PasswordClient implements ClientListener {
 
     if (argv.length != 2)
       {
-	System.err.println("Wrong number of params: required params is <properties> <user>");
+        // "Wrong number of command line parameters: required parameters are <properties> <user>"
+	System.err.println(ts.l("main.args_error"));
 	System.exit(0);
       }
 
@@ -410,7 +425,8 @@ public class PasswordClient implements ClientListener {
 
 	// Get the old password
 
-	System.out.print("Old password:");
+        // "Old password:"
+	System.out.print(ts.l("main.old_pass_prompt"));
 	oldPassword = in.readLine();
 	System.out.println();
 
@@ -420,20 +436,35 @@ public class PasswordClient implements ClientListener {
 	// correctly twice.
 	do
 	  {
-	    System.out.print("New password:");
+            // "New password:"
+	    System.out.print(ts.l("main.new_pass_prompt"));
 	    newPassword = in.readLine();
+
+            if (newPassword == null)
+              {
+                throw new IOException("EOF");
+              }
+
 	    System.out.println();
 
-	    System.out.print("Verify:");
+            // "Verify:"
+	    System.out.print(ts.l("main.verify_prompt"));
 	    verify = in.readLine();
+
+            if (verify == null)
+              {
+                throw new IOException("EOF");
+              }
+
 	    System.out.println();
 	    
 	    if (verify.equals(newPassword))
 	      {
 		break;
 	      }
-	    
-	    System.out.println("Passwords do not match.  Try again.");
+
+            // "Passwords do not match.  Try again."	    
+	    System.out.println(ts.l("main.no_match"));
 	  } while (true);
       }
     catch (java.io.IOException ex)
@@ -447,11 +478,13 @@ public class PasswordClient implements ClientListener {
 
     if (success)
       {
-	System.out.println("Successfully changed password.");
+        // "Successfully changed password."
+	System.out.println(ts.l("main.success"));
       }
     else
       {
-	System.out.println("Password change failed.");
+        // "Password change failed."
+	System.out.println(ts.l("main.fail"));
       }
 
     System.exit(0);
@@ -488,14 +521,15 @@ public class PasswordClient implements ClientListener {
 	  }
 	catch (NumberFormatException ex)
 	  {
-	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-			       registryPort);
+            // Couldn''t get a valid registry port number from the ganymede.properties file: {0}
+	    System.err.println(ts.l("loadProperties.bad_port_property", registryPort));
 	  }
       }
 
     if (serverhost == null)
       {
-	System.err.println("Couldn't get the server host property");
+        // "Couldn''t get the server host property."
+	System.err.println(ts.l("loadProperties.bad_host_property"));
 	success = false;
       }
     else
