@@ -184,12 +184,6 @@ public class xmlobject {
   boolean forceCreate = false;
 
   /**
-   * If true, this object was an embedded object
-   */
-
-  boolean embedded = false;
-
-  /**
    * Reference to the GanymedeXMLSession working with us.
    */
 
@@ -209,22 +203,6 @@ public class xmlobject {
   
   public xmlobject(XMLElement openElement, GanymedeXMLSession xSession) throws SAXException
   {
-    this(openElement, false, xSession);
-  }
-
-  /**
-   * This constructor takes the XMLElement defining an object to
-   * be created or manipulated on the server and loads all information
-   * for this object into the xmlobject created.
-   *
-   * This constructor reads all elements from the xmlclient
-   * XML stream up to and including the matching close element for
-   * this object.
-   */
-  
-  public xmlobject(XMLElement openElement, boolean embedded, GanymedeXMLSession xSession) throws SAXException
-  {
-    this.embedded = embedded;
     this.xSession = xSession;
 
     // handle any attributes in the element

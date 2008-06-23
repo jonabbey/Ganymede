@@ -670,7 +670,7 @@ public class xmlfield implements FieldType {
 		  {
 		    // we've got an embedded object.. add it, we'll process it later
 
-		    newValue = new xmlobject((XMLElement) nextItem, true, owner.xSession);
+		    newValue = new xmlobject((XMLElement) nextItem, owner.xSession);
 		  }
 		else
 		  {
