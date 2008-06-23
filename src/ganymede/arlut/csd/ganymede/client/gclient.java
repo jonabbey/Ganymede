@@ -5756,7 +5756,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    postQuery(base);
 	  }
       }
-    else if (event.getActionCommand().equals(show_pop_action))
+    else if (event.getActionCommand().equals(show_pop_action) && (node instanceof BaseNode))
       {
 	BaseNode bn = (BaseNode) node;
 
@@ -5772,7 +5772,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	try
 	  {
 	    bn.showAll(true);
-	    node.setMenu(((BaseNode)node).canCreate() ? pMenuAllCreatable : pMenuAll);
+	    node.setMenu(bn.canCreate() ? pMenuAllCreatable : pMenuAll);
 
 	    if (bn.isOpen())
 	      {
@@ -5796,14 +5796,14 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	    setNormalCursor();
 	  }
       }
-    else if (event.getActionCommand().equals(hide_pop_action))
+    else if (event.getActionCommand().equals(hide_pop_action) && (node instanceof BaseNode))
       {
 	BaseNode bn = (BaseNode) node;
 
 	/* -- */
 
 	bn.showAll(false);
-	bn.setMenu(((BaseNode)node).canCreate() ? pMenuEditableCreatable : pMenuEditable);
+	bn.setMenu(bn.canCreate() ? pMenuEditableCreatable : pMenuEditable);
 
 	if (bn.isOpen())
 	  {
