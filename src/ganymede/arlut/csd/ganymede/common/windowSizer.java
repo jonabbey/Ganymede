@@ -81,7 +81,7 @@ public class windowSizer {
   static final String HEIGHT = "window_height";
   static final String LOOKANDFEEL = "look_and_feel";
 
-  static private Preferences prefEngine = null;
+  private Preferences prefEngine = null;
 
   public windowSizer(Preferences prefs)
   {
