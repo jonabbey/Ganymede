@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2007
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -476,7 +476,16 @@ public class phoneClient implements ClientListener {
 
     // Get the server URL
 
-    loadProperties(argv[0]);
+    try
+      {
+        loadProperties(argv[0]);
+      }
+    catch (IOException ex)
+      {
+        System.err.println("Couldn't read system properties.");
+        System.exit(1);
+      }
+
 
     // Create the client
 
@@ -526,7 +535,7 @@ public class phoneClient implements ClientListener {
       }
   }
 
-  private static boolean loadProperties(String filename)
+  private static boolean loadProperties(String filename) throws IOException
   {
     Properties props = new Properties();
     boolean success = true;
@@ -534,13 +543,16 @@ public class phoneClient implements ClientListener {
 
     /* -- */
 
+    FileInputStream fis = new FileInputStream(filename);
+    BufferedInputStream bis = new BufferedInputStream(fis);
+
     try
       {
-	props.load(new BufferedInputStream(new FileInputStream(filename)));
+	props.load(bis);
       }
-    catch (IOException ex)
+    finally
       {
-	return false;
+        bis.close();
       }
 
     serverhost = props.getProperty("ganymede.serverhost");

@@ -735,7 +735,17 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     /* -- */
 
-    props.load(new BufferedInputStream(new FileInputStream(filename)));
+    FileInputStream fis = new FileInputStream(filename);
+    BufferedInputStream bis = new BufferedInputStream(fis);
+
+    try
+      {
+        props.load(bis);
+      }
+    finally
+      {
+        bis.close();
+      }
 
     serverhost = props.getProperty("ganymede.serverhost");
 
