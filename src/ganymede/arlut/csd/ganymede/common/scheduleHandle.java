@@ -101,6 +101,8 @@ import arlut.csd.ganymede.server.taskMonitor;
 
 public class scheduleHandle implements java.io.Serializable {
 
+  static final long serialVersionUID = 2408115703212284629L;
+
   static final boolean debug = false;
 
   /**

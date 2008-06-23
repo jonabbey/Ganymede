@@ -28,6 +28,8 @@ package arlut.csd.Util;
  
 public final class SharedStringBuffer implements java.io.Serializable {
 
+  static final long serialVersionUID = 6662274466893884738L;
+
   private static final int DEFAULTSIZE = 32;
 
   /** The value is used for character storage. */

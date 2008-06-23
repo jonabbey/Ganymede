@@ -75,6 +75,8 @@ package arlut.csd.Util;
 
 public class booleanSemaphore implements java.io.Serializable {
 
+  static final long serialVersionUID = -3446577789138582378L;
+
   private boolean state;
 
   /* -- */
