@@ -1085,11 +1085,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	      {
 		if (askNoQuestions)
 		  {
-		    if (w instanceof framePanel)
-		      {
-			((framePanel) w).stopNow();	// stop all container threads asap
-			((framePanel) w).closingApproved = true;
-		      }
+                    w.stopNow();	// stop all container threads asap
+                    w.closingApproved = true;
 		  }
 
 		w.setClosed(true);
