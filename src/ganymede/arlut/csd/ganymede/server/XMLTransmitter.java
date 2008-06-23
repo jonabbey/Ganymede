@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -83,7 +83,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * over RMI in order to receive the file.
  */
 
-public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitter {
+public class XMLTransmitter implements FileTransmitter {
 
   private static final boolean debug = false;
 
@@ -121,8 +121,6 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
 
   public XMLTransmitter(boolean sendData, boolean sendSchema, String syncChannel, boolean includeHistory, boolean includeOid) throws IOException, RemoteException
   {
-    super();			// UnicastRemoteObject initialization
-
     if (debug)
       {
 	System.err.println("XMLTransmitter constructed!");
@@ -159,6 +157,8 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
     // and set it running
     
     dumpThread.start();
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**
@@ -170,8 +170,6 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
 
   public XMLTransmitter(GanymedeSession session, Query query, QueryResult rows) throws IOException, RemoteException
   {
-    super();			// UnicastRemoteObject initialization
-
     if (debug)
       {
 	System.err.println("XMLTransmitter[query] constructed!");
@@ -259,6 +257,8 @@ public class XMLTransmitter extends UnicastRemoteObject implements FileTransmitt
     // and set it running
     
     dumpThread.start();
+
+    Ganymede.rmi.publishObject(this);
   }
 
   /**
