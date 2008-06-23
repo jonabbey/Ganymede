@@ -876,7 +876,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					  ts.l("save.overwrite_button"),
 					  ts.l("global.cancel"),
 					  null);
-	Hashtable result = d.DialogShow();
+	Hashtable result = d.showDialog();
 
 	if (result == null)
 	  {
@@ -1732,7 +1732,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					    ts.l("global.cancel"),
 					    gclient.client.getQuestionImage());
 
-		Hashtable result = okToKill.DialogShow();
+		Hashtable result = okToKill.showDialog();
 	    
 		if (result == null)
 		  {
@@ -1772,7 +1772,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					    ts.l("global.cancel"),
 					    gclient.client.getQuestionImage());
 
-		Hashtable result = okToKill.DialogShow();
+		Hashtable result = okToKill.showDialog();
 	    
 		if (result == null)
 		  {

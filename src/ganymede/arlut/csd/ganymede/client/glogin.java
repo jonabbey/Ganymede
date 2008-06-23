@@ -748,7 +748,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 			     ts.l("run.login_error_text", connectError),
 			     ts.l("global.ok"),
 			     null,
-			     getErrorImage()).DialogShow();
+			     getErrorImage()).showDialog();
 
 	    EventQueue.invokeLater(new Runnable() 
 	      {

@@ -2024,7 +2024,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 							 "Confirm",
 							 "Cancel");
 		
-		Hashtable answer = changeLabelTypeDialog.DialogShow();
+		Hashtable answer = changeLabelTypeDialog.showDialog();
 
 		if (answer != null)  //Ok button was clicked
 		  {

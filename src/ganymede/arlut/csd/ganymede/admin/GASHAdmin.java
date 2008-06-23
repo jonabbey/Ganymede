@@ -569,7 +569,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("global.loginErrorMsg", connectError), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
 			     ts.l("global.loginErrorOKButton"), // "Ok"
 			     null,
-			     getErrorImage()).DialogShow();
+			     getErrorImage()).showDialog();
 	    
 	    SwingUtilities.invokeLater(new Runnable() 
 	      {
@@ -634,7 +634,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("global.loginErrorMsg", rx.getMessage()), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
 			     ts.l("global.loginErrorOKButton"), // "Ok"
 			     null,
-			     getErrorImage()).DialogShow();
+			     getErrorImage()).showDialog();
 
 	    connected.set(false);
 
@@ -651,7 +651,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("actionPerformed.loginErrorMsg", ex.getMessage()),
 			     ts.l("actionPerformed.loginErrorOKButton"),
 			     null, 
-			     getErrorImage()).DialogShow();
+			     getErrorImage()).showDialog();
 	    
 	    password.setText("");
 	    return;

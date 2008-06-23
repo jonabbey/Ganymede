@@ -948,7 +948,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 					  ts.l("global.yes"), ts.l("global.no"), question);
 	  }
 
-	if (dumpDialog.DialogShow() != null)
+	if (dumpDialog.showDialog() != null)
 	  {
 	    if (debug)
 	      {
@@ -975,7 +975,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 							ts.l("actionPerformed.invid_question"),
 							ts.l("global.yes"), ts.l("global.no"), question);
 
-	if (invidTestDialog.DialogShow() != null)
+	if (invidTestDialog.showDialog() != null)
 	  {
 	    if (debug)
 	      {
@@ -1001,7 +1001,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 							ts.l("actionPerformed.invidsweep_question"),
 							ts.l("global.yes"), ts.l("global.no"), question);
 
-	if (invidTestDialog.DialogShow() != null)
+	if (invidTestDialog.showDialog() != null)
 	  {
 	    if (debug)
 	      {
@@ -1027,7 +1027,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 							ts.l("actionPerformed.embedded_question"),
 							ts.l("global.yes"), ts.l("global.no"), question);
 
-	if (invidTestDialog.DialogShow() != null)
+	if (invidTestDialog.showDialog() != null)
 	  {
 	    if (debug)
 	      {
@@ -1054,7 +1054,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 							ts.l("actionPerformed.embedded_sweep_question"),
 							ts.l("global.yes"), ts.l("global.no"), question);
 
-	if (invidTestDialog.DialogShow() != null)
+	if (invidTestDialog.showDialog() != null)
 	  {
 	    if (debug)
 	      {
@@ -1077,7 +1077,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
 	shutdownDialog = new consoleShutdownDialog(this);
 
-	int result = shutdownDialog.DialogShow();
+	int result = shutdownDialog.showDialog();
 
 	if (result == 0)
 	  {
@@ -1140,7 +1140,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     
 	killAllDLG = new StringDialog(killAllDLGR);
 	
-	if (killAllDLG.DialogShow() == null)
+	if (killAllDLG.showDialog() == null)
 	  {
 	    return;
 	  }
@@ -1296,7 +1296,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	if (new StringDialog(this,
 			     ts.l("rowMenuPerformed.kill_title"),
 			     ts.l("rowMenuPerformed.kill_question", key),
-			     ts.l("global.yes"), ts.l("global.no"), question).DialogShow() != null)
+			     ts.l("global.yes"), ts.l("global.no"), question).showDialog() != null)
 	  {
 	    if (debug)
 	      {
@@ -1653,7 +1653,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
    * @return HashTable of labels to values
    */
 
-  public int DialogShow()
+  public int showDialog()
   {
     mainPanel.revalidate();
     this.setVisible(true);
@@ -1688,7 +1688,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
 	return;
       }
 
-    // pop down so that DialogShow() can proceed to completion.
+    // pop down so that showDialog() can proceed to completion.
 
     done = true;
 

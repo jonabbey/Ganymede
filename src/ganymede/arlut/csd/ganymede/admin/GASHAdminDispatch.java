@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -1071,7 +1071,7 @@ class GASHAdminDispatch implements Runnable {
 	// display the Dialog sent to us by the server, get the
 	// result of the user's interaction with it.
 	    
-	dialogResults = dialog.DialogShow();
+	dialogResults = dialog.showDialog();
 
 	if (debug)
 	  {

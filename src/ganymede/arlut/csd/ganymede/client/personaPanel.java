@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2007
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -385,7 +385,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
 	gc.setNormalCursor();
 
-	if (d.DialogShow() == null)
+	if (d.showDialog() == null)
 	  {
 	    if (debug)
 	      {

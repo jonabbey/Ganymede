@@ -2496,7 +2496,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 		// display the Dialog sent to us by the server, get the
 		// result of the user's interaction with it.
 	    
-		dialogResults = dialog.DialogShow();
+		dialogResults = dialog.showDialog();
 	      }
 	    finally
 	      {
@@ -3450,7 +3450,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
                                                      result,
                                                      false);
 
-        resultDialog.DialogShow();
+        resultDialog.showDialog();
       }
     finally
       {
@@ -3570,7 +3570,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 
 	StringDialog verifyDialog = new StringDialog(rsrc);
 
-	dialogResults = verifyDialog.DialogShow();
+	dialogResults = verifyDialog.showDialog();
 
 	if (dialogResults != null)
 	  {
@@ -4005,7 +4005,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 					  StringDialog.getDefaultOk(),
 					  StringDialog.getDefaultCancel(),
 					  getQuestionImage());
-	Hashtable result = d.DialogShow();
+	Hashtable result = d.showDialog();
 	
 	if (result == null)
 	  {
@@ -4802,10 +4802,10 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 					       ts.l("OKToProceed.yes"),
 					       StringDialog.getDefaultCancel());
 
-	// if DialogShow is null, cancel was clicked So return will be
+	// if showDialog is null, cancel was clicked So return will be
 	// false if cancel was clicked
 
-	return (dialog.DialogShow() != null);
+	return (dialog.showDialog() != null);
       }
     else
       {
@@ -5424,7 +5424,7 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
     r.addString("Invid number:");
     StringDialog d = new StringDialog(r);
     
-    Hashtable result = d.DialogShow();
+    Hashtable result = d.showDialog();
 
     /* -- */
 
@@ -6291,7 +6291,7 @@ class PersonaListener implements ActionListener {
 					      ts.l("actionPerformed.commit_dialog_txt"),
 					      ts.l("actionPerformed.commit_dialog_yes"),
 					      ts.l("actionPerformed.commit_dialog_no"));
-	    Hashtable result = d.DialogShow();
+	    Hashtable result = d.showDialog();
 	    
 	    if (result == null)
 	      {

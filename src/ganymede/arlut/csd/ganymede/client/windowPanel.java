@@ -796,7 +796,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 									   ts.l("addTableWindow.query_result_try_again"),
 									   StringDialog.getDefaultCancel());
 
-					 if (d.DialogShow() != null)
+					 if (d.showDialog() != null)
 					   {
 					     my_gc.postQuery(null);
 					   }

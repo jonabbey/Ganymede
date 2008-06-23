@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -114,7 +114,7 @@ public class ExceptionDialog {
     d.setWrapLength(180);	// give a generous wrap length so that
 				// we size our dialog reasonably
 
-    Hashtable results = d.DialogShow();	// StringDialog is modal, so we'll block here
+    Hashtable results = d.showDialog();	// StringDialog is modal, so we'll block here
 
     if (results != null)
       {

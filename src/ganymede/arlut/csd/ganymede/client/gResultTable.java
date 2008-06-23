@@ -389,7 +389,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 					      ts.l("sendReport.overwrite"),
 					      StringDialog.getDefaultCancel(),
 					      null);
-	    Hashtable result = d.DialogShow();
+	    Hashtable result = d.showDialog();
 
 	    if (result == null)
 	      {

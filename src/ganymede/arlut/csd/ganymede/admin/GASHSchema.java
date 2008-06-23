@@ -1173,7 +1173,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 			     ts.l("treeNodeMenuPerformed.mandatory_category"),
 			     ts.l("treeNodeMenuPerformed.root_category_delete"),
 			     ts.l("global.ok"),
-			     null).DialogShow();
+			     null).showDialog();
 	    return;
 	  }
 
@@ -1187,7 +1187,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				 ts.l("treeNodeMenuPerformed.mandatory_category"),
 				 ts.l("treeNodeMenuPerformed.category_not_empty"),
 				 ts.l("global.ok"),
-				 null).DialogShow();
+				 null).showDialog();
 		return;
 	      }
 
@@ -1199,7 +1199,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 					    ts.l("treeNodeMenuPerformed.deleteButton"), ts.l("global.cancel"),
 					    questionImage);
 
-	    Hashtable results = new StringDialog(dialogResource).DialogShow();
+	    Hashtable results = new StringDialog(dialogResource).showDialog();
 
 	    if (results != null)
 	      {
@@ -1283,7 +1283,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	dialogResource.addString(ts.l("treeNodeMenuPerformed.namespace_name_field")); // "Namespace:"
 	dialogResource.addBoolean(ts.l("treeNodeMenuPerformed.namespace_case_field")); // "Case Insensitive:"
 
-	Hashtable results = new StringDialog(dialogResource).DialogShow();
+	Hashtable results = new StringDialog(dialogResource).showDialog();
 
 	String newNameSpace = null;
 	Boolean insensitive = null;
@@ -1437,7 +1437,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 						   ts.l("global.cancel"),
 						   questionImage);
 
-	Hashtable results = new StringDialog(dialogResource).DialogShow();
+	Hashtable results = new StringDialog(dialogResource).showDialog();
 
 	if (results != null)
 	  {
@@ -1487,7 +1487,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				 ts.l("treeNodeMenuPerformed.deleteObjectTitle"),
 				 ts.l("treeNodeMenuPerformed.deleteObjectText", node.getText()),
 				 ts.l("treeNodeMenuPerformed.deleteButton"),
-				 ts.l("global.cancel")).DialogShow() == null)
+				 ts.l("global.cancel")).showDialog() == null)
 	      {
 		if (debug)
 		  {
@@ -1521,7 +1521,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    new StringDialog(this,
 			     ts.l("treeNodeMenuPerformed.badDeleteObjectTitle"),
 			     ts.l("treeNodeMenuPerformed.badDeleteObjectText", node.getText()),
-			     ts.l("global.ok"), null).DialogShow();
+			     ts.l("global.ok"), null).showDialog();
 	  }
       }
     else if (event.getSource() == createTabMI)
@@ -1611,7 +1611,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				 ts.l("treeNodeMenuPerformed.deleteTabTitle"),
 				 ts.l("treeNodeMenuPerformed.deleteTabText", tNode.getText(), bNode.getText()),
 				 ts.l("treeNodeMenuPerformed.deleteButton"),
-				 ts.l("global.cancel")).DialogShow() == null)
+				 ts.l("global.cancel")).showDialog() == null)
 	      {
 		if (debug)
 		  {
@@ -1840,7 +1840,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 						   ts.l("global.cancel"),
 						   questionImage);
 
-	Hashtable results = new StringDialog(dialogResource).DialogShow();
+	Hashtable results = new StringDialog(dialogResource).showDialog();
 
 	if (results != null)
 	  {
@@ -2992,7 +2992,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	// display the Dialog sent to us by the server, get the
 	// result of the user's interaction with it.
 	    
-	dialogResults = dialog.DialogShow();
+	dialogResults = dialog.showDialog();
 
 	if (debug)
 	  {
