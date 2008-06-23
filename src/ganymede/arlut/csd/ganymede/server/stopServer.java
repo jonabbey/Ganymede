@@ -323,7 +323,6 @@ class stopServerAdmin {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.stopServerAdmin");
 
-  private Server server = null;
   private adminSession aSession = null;
 
   /* -- */
@@ -333,8 +332,6 @@ class stopServerAdmin {
     ReturnVal retVal = null;
 
     /* -- */
-
-    this.server = server;
 
     try
       {
