@@ -956,22 +956,25 @@ class rowSorter {
 
 	// null is always lesser
 
-	if (one == null && two != null)
-	  {
-	    return -1;
-	  }
-	else if (one == null && two == null)
-	  {
-	    return 0;
-	  }
-	else if (one != null && two == null)
+	if (one == null)
+          {
+            if (two == null)
+              {
+                return 0;
+              }
+            else
+              {
+                return -1;
+              }
+          }
+	else if (two == null)
 	  {
 	    return 1;
 	  }
 
 	// okay, not null.
 	
-	return one.compareToIgnoreCase(two);  // FindBugs 1.3.4 doesn't analyze this for null properly ;-/
+	return one.compareToIgnoreCase(two);
       }
 
     // if we are sorting dates, we expect everything in this column
