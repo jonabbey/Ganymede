@@ -145,8 +145,15 @@ public class DateDBField extends DBField implements date_field, Cloneable {
   {
     this.owner = owner;
     this.fieldcode = field.getID();
-    
-    value = field.value;
+
+    if (field.value instanceof Date)
+      {
+        value = new Date(((Date) field.value).getTime());
+      }
+    else
+      {
+        value = field.value;
+      }
   }
 
   /**
@@ -173,9 +180,22 @@ public class DateDBField extends DBField implements date_field, Cloneable {
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
-  public Object clone()
+  public Object clone() throws CloneNotSupportedException
   {
-    return new DateDBField(owner, this);
+    DateDBField returnObj = (DateDBField) super.clone();
+
+    returnObj.fieldcode = getID();
+
+    if (value == null)
+      {
+        returnObj.value = null;
+      }
+    else if (value instanceof Date)
+      {
+        returnObj.value = new Date(((Date) value).getTime());
+      }
+
+    return returnObj;
   }
 
   void emit(DataOutput out) throws IOException
