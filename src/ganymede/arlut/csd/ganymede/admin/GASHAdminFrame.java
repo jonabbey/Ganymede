@@ -151,12 +151,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   static final String SPLITTER_POS = "admin_splitter_pos";
 
-  static GASHAdminDispatch adminDispatch = null;
-  static GASHSchema schemaEditor = null;
   static final boolean debug = false;
-  static String debugFilename = null;
 
   // ---
+
+  GASHAdminDispatch adminDispatch = null;
+  GASHSchema schemaEditor = null;
 
   Image errorImage = null;
   Image question = null;
@@ -284,7 +284,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
    *
    */
 
-  public GASHAdminFrame(String title, GASHAdmin loginPanel)
+  public GASHAdminFrame(String title, GASHAdmin loginPanel, String debugFilename)
   {
     super(title);
 
@@ -874,7 +874,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   public void setDispatch(GASHAdminDispatch ad)
   {
-    GASHAdminFrame.adminDispatch = ad;
+    adminDispatch = ad;
   }
 
   /**
@@ -1156,7 +1156,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     else if (event.getSource() == schemaMI)
       {
-	if (GASHAdminFrame.schemaEditor != null)
+	if (schemaEditor != null)
 	  {
 	    return;
 	  }
@@ -1165,7 +1165,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	  {
             schemaMI.setEnabled(false);
 
-	    GASHAdminFrame.schemaEditor = adminDispatch.pullSchema();
+	    schemaEditor = adminDispatch.pullSchema();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -1173,7 +1173,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	  }
         finally
           {
-            if (GASHAdminFrame.schemaEditor == null)
+            if (schemaEditor == null)
               {
                 schemaMI.setEnabled(true);
               }
@@ -1390,9 +1390,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	// make sure that we cancel any schema editing in process if
 	// we have it open and we are made to close the main window
 
-	if (GASHAdminFrame.schemaEditor != null)
+	if (schemaEditor != null)
 	  {
-	    GASHAdminFrame.schemaEditor.cancel();
+	    schemaEditor.cancel();
 	  }
 
 	disconnect();

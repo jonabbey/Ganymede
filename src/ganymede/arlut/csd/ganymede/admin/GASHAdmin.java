@@ -179,6 +179,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   static Image admin_logo = null;
   static Image admin_ssl_logo = null;
 
+  String debugFilename = null;
+
   JLabel image = null;
   JTextField username = null;
   JPasswordField password = null;
@@ -209,12 +211,13 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   // Our primary constructor.  This will always be called, either
   // from main(), below, or by the environment building our applet.
 
-  public GASHAdmin() 
+  public GASHAdmin(String debugFilename)
   {
     admin_logo = PackageResources.getImageResource(this, "ganymede_admin.jpg", getClass());
     admin_ssl_logo = PackageResources.getImageResource(this, "ganymede_ssl_admin.jpg", getClass());
 
     GASHAdmin.applet = this;
+    this.debugFilename = debugFilename;
   }
 
   public static void main(String[] argv)
@@ -242,12 +245,14 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	  }
       }
 
+    String debugFilename = null;
+
     if (argv.length > 1)
       {
-	GASHAdminFrame.debugFilename = argv[1];
+	debugFilename = argv[1];
       }
 
-    applet = new GASHAdmin();
+    applet = new GASHAdmin(debugFilename);
 
     // "Admin console login"
     my_frame = new GASHAdminLoginFrame(ts.l("global.loginTitle"), applet);
@@ -669,7 +674,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 	// when we create the frame, it shows itself.
 
-	frame = new GASHAdminFrame(ts.l("global.consoleTitle"), applet); // "Ganymede Admin Console"
+	frame = new GASHAdminFrame(ts.l("global.consoleTitle"), applet, debugFilename); // "Ganymede Admin Console"
 
 	hideLoginBox();
 	
