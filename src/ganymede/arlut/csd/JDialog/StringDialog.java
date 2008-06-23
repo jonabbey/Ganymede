@@ -385,15 +385,15 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     
     JPanel flowPanel = new JPanel();
 
-    OKButton = new JButton(resource.OKText);
+    OKButton = new JButton(resource.getOkText());
     OKButton.addActionListener(this);
     flowPanel.add(OKButton);
 
     // if cancel is null, don't put it on there
 
-    if (resource.CancelText != null)
+    if (resource.getCancelText() != null)
       {
-	CancelButton = new JButton(resource.CancelText);
+	CancelButton = new JButton(resource.getCancelText());
 	CancelButton.addActionListener(this);
 	flowPanel.add(CancelButton);
       }

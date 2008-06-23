@@ -122,9 +122,9 @@ public class DialogRsrc {
     title,
     text;
 
-  public String
-    OKText,
-    CancelText;
+  private String
+    okText,
+    cancelText;
 
   Class myRefClass;
 
@@ -177,8 +177,8 @@ public class DialogRsrc {
 
     this.title = Title;
     this.text = Text;
-    this.OKText = OK;
-    this.CancelText = Cancel;
+    this.okText = OK;
+    this.cancelText = Cancel;
     this.image = image;
 
     objects = new Vector();
@@ -209,8 +209,8 @@ public class DialogRsrc {
 
     this.title = Title;
     this.text = Text;
-    this.OKText = OK;
-    this.CancelText = Cancel;
+    this.okText = OK;
+    this.cancelText = Cancel;
 
     if (refClass == null)
       {
@@ -409,6 +409,16 @@ public class DialogRsrc {
   {
     return text;
   }
+
+  public String getOkText()
+  {
+    return okText;
+  }
+
+  public String getCancelText()
+  {
+    return cancelText;
+  } 
 
   public Image getImage()
   {
