@@ -1579,12 +1579,7 @@ public final class DBStore implements JythonMap {
 		  }
 		else
 		  {
-		    throw new RuntimeException("Found unknown thing in category tree.." + cn.toString());
-		  }
-
-		if (bc == null)
-		  {
-		    System.err.println("DBStore.getCategory(): found null");
+		    throw new RuntimeException("Found unknown/null thing in category tree.." + cn.toString());
 		  }
 	      }
 	    

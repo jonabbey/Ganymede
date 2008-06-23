@@ -358,12 +358,6 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 	    this.dispose();
 	    return;
 	  }
-	
-	if (debug)
-	  {
-	    System.out.println("rowVector initialized");
-	    System.err.println("got it, it " + (rowRootNode == null ? "is " : "isn't ") + "equal to null");
-	  }
       }
     catch (Exception ex)
       {

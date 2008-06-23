@@ -2550,7 +2550,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 						   true, // editable
 						   true,   // canChoose
 						   false);  // mustChoose
-	    ss.setCellWidth(available != null ? 150 : 300);
+	    ss.setCellWidth(150);
             ss.setMinimumRowCount(3);
             ss.setMaximumRowCount(8);
 	    ss.update(available, true, null, (Vector) fieldInfo.getValue(), true, null);
@@ -2568,7 +2568,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    associateFieldId(fieldInfo, ss);
 
-	    contentsPanel.addFillRow(fieldTemplate.getName(), ss, available == null? 1: 2);
+	    contentsPanel.addFillRow(fieldTemplate.getName(), ss, 2);
 	    contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
 	  }
       }

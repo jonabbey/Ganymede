@@ -1445,20 +1445,21 @@ public class PermissionMatrixDBField extends DBField implements perm_field, Clon
 				   getName() + ", not in an editable context");
       }
 
-    if (!(oldval instanceof PermMatrixCkPoint))
-      {
-	throw new RuntimeException("Invalid rollback on field " + 
-				   getName() + ", not a PermMatrixCkPoint");
-      }
-
     if (oldval == null)
       {
 	this.setUndefined(true);
+        return;
       }
-    else
+
+    if ((oldval instanceof PermMatrixCkPoint))
       {
-	this.matrix = ((PermMatrixCkPoint) oldval).matrix;
+        this.matrix = ((PermMatrixCkPoint) oldval).matrix;
+        return;
       }
+
+    throw new RuntimeException("Invalid rollback on field " + 
+                               getName() + ", not a PermMatrixCkPoint");
+
   }
 
   /**

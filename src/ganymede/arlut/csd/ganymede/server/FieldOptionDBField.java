@@ -1415,20 +1415,20 @@ public class FieldOptionDBField extends DBField implements field_option_field, C
 				   getName() + ", not in an editable context");
       }
 
-    if (!(oldval instanceof FieldOptionMatrixCkPoint))
-      {
-	throw new RuntimeException("Invalid rollback on field " + 
-				   getName() + ", not a FieldOptionMatrixCkPoint");
-      }
-
     if (oldval == null)
       {
 	this.setUndefined(true);
+        return;
       }
-    else
+
+    if (oldval instanceof FieldOptionMatrixCkPoint)
       {
 	this.matrix = ((FieldOptionMatrixCkPoint) oldval).matrix;
+        return;
       }
+
+    throw new RuntimeException("Invalid rollback on field " + 
+                               getName() + ", not a FieldOptionMatrixCkPoint");
   }
 
   /**

@@ -3295,114 +3295,104 @@ public class gclient extends JFrame implements treeCallback, ActionListener, Jse
 	return;
       }
 
-    if (node == null)
+    ObjectHandle handle = node.getHandle();
+
+    // if we can't edit it, assume it'll never be anything other
+    // than inaccessible
+
+    if (!handle.isEditable())
       {
-	if (debug)
-	  {
-	    System.err.println("gclient.setIconForNode(): There is no node for this invid, silly!");
-	  }
+        node.setImages(OBJECTNOWRITE, OBJECTNOWRITE);
+        node.setMenu(objectViewPM);
+        return;
+      }
+
+    // The order here matters, because it might be in more than
+    // one hash.  So put the most important stuff first
+
+    if (deleteHash.containsKey(invid))
+      {
+        if (treeNodeDebug)
+          {
+            System.err.println("Setting icon to delete.");
+          }
+
+        node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
+      }
+    else if (createHash.containsKey(invid))
+      {
+        if (treeNodeDebug)
+          {
+            System.err.println("Setting icon to create.");
+          }
+
+        node.setImages(OPEN_FIELD_CREATE, CLOSED_FIELD_CREATE);
       }
     else
       {
-	ObjectHandle handle = node.getHandle();
+        if (handle.isInactive())
+          {
+            if (treeNodeDebug)
+              {
+                System.err.println("inactivate");
+              }
 
-	// if we can't edit it, assume it'll never be anything other
-	// than inaccessible
+            // "{0} (inactive)"
+            node.setText(ts.l("global.inactive_pattern", handle.getLabel()));
 
-	if (!handle.isEditable())
-	  {
-	    node.setImages(OBJECTNOWRITE, OBJECTNOWRITE);
-	    node.setMenu(objectViewPM);
-	    return;
-	  }
+            node.setMenu(objectReactivatePM);
+            node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
+          }
+        else
+          {
+            node.setText(handle.getLabel());
 
-	// The order here matters, because it might be in more than
-	// one hash.  So put the most important stuff first
+            BaseDump bd = (BaseDump) getBaseMap().get(new Short(node.getInvid().getType()));
 
-	if (deleteHash.containsKey(invid))
-	  {
-	    if (treeNodeDebug)
-	      {
-		System.err.println("Setting icon to delete.");
-	      }
+            if (bd.canInactivate())
+              {
+                node.setMenu(objectInactivatePM);
+              }
+            else 
+              {
+                node.setMenu(objectRemovePM);
+              }
 
-	    node.setImages(OPEN_FIELD_DELETE, CLOSED_FIELD_DELETE);
-	  }
-	else if (createHash.containsKey(invid))
-	  {
-	    if (treeNodeDebug)
-	      {
-		System.err.println("Setting icon to create.");
-	      }
+            // now take care of the rest of the menus.
 
-	    node.setImages(OPEN_FIELD_CREATE, CLOSED_FIELD_CREATE);
-	  }
-	else
-	  {
-	    if (handle.isInactive())
-	      {
-		if (treeNodeDebug)
-		  {
-		    System.err.println("inactivate");
-		  }
+            if (handle.isExpirationSet())
+              {
+                if (treeNodeDebug)
+                  {
+                    System.err.println("isExpirationSet");
+                  }
 
-		// "{0} (inactive)"
-		node.setText(ts.l("global.inactive_pattern", handle.getLabel()));
+                node.setImages(OPEN_FIELD_EXPIRESET, CLOSED_FIELD_EXPIRESET);
+              }
+            else if (handle.isRemovalSet())
+              {
+                if (treeNodeDebug)
+                  {
+                    System.err.println("isRemovalSet()");
+                  }
 
-		node.setMenu(objectReactivatePM);
-		node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
-	      }
-	    else
-	      {
-		node.setText(handle.getLabel());
-
-		BaseDump bd = (BaseDump) getBaseMap().get(new Short(node.getInvid().getType()));
-
-		if (bd.canInactivate())
-		  {
-		    node.setMenu(objectInactivatePM);
-		  }
-		else 
-		  {
-		    node.setMenu(objectRemovePM);
-		  }
-
-		// now take care of the rest of the menus.
-
-		if (handle.isExpirationSet())
-		  {
-		    if (treeNodeDebug)
-		      {
-			System.err.println("isExpirationSet");
-		      }
-
-		    node.setImages(OPEN_FIELD_EXPIRESET, CLOSED_FIELD_EXPIRESET);
-		  }
-		else if (handle.isRemovalSet())
-		  {
-		    if (treeNodeDebug)
-		      {
-			System.err.println("isRemovalSet()");
-		      }
-
-		    node.setMenu(objectReactivatePM);
-		    node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
-		  }
-		else if (changedHash.containsKey(invid))
-		  {
-		    if (treeNodeDebug)
-		      {
-			System.err.println("Setting icon to edit.");
-		      }
+                node.setMenu(objectReactivatePM);
+                node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
+              }
+            else if (changedHash.containsKey(invid))
+              {
+                if (treeNodeDebug)
+                  {
+                    System.err.println("Setting icon to edit.");
+                  }
 		
-		    node.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
-		  }
-		else // nothing special in handle
-		  {
-		    node.setImages(OPEN_FIELD, CLOSED_FIELD);
-		  } 
-	      }
-	  }
+                node.setImages(OPEN_FIELD_CHANGED, CLOSED_FIELD_CHANGED);
+              }
+            else // nothing special in handle
+              {
+                node.setImages(OPEN_FIELD, CLOSED_FIELD);
+              } 
+          }
       }
   }
 
