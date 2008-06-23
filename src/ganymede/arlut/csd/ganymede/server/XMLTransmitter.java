@@ -66,7 +66,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Vector;
 
 import com.jclark.xml.output.UTF8XMLWriter;
