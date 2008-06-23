@@ -2694,7 +2694,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	userIdentifier = personaName;
       }
-    else if (personaName == null)
+    else if (username != null)
       {
 	userIdentifier = username;
       }
