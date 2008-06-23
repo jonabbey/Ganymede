@@ -600,7 +600,7 @@ public class Qsmtp implements Runnable {
             reply = new BufferedReader(new InputStreamReader(replyStream));
             send = new PrintWriter(sock.getOutputStream(), true);
 
-            rstr = reply.readLine();
+            rstr = scanLine(reply);
 
             if (!rstr.startsWith("220")) 
               {
@@ -609,7 +609,7 @@ public class Qsmtp implements Runnable {
 
             while (rstr.indexOf('-') == 3) 
               {
-                rstr = reply.readLine();
+                rstr = scanLine(reply);
 
                 if (!rstr.startsWith("220")) 
                   {
@@ -623,7 +623,8 @@ public class Qsmtp implements Runnable {
             send.print(EOL);
             send.flush();
 
-            rstr = reply.readLine();
+            rstr = scanLine(reply);
+
             if (!rstr.startsWith("250")) 
               {
                 throw new ProtocolException(rstr);
@@ -634,7 +635,8 @@ public class Qsmtp implements Runnable {
             send.print(EOL);
             send.flush();
 
-            rstr = reply.readLine();
+            rstr = scanLine(reply);
+
             if (!rstr.startsWith("250")) 
               {
                 throw new ProtocolException(rstr);
@@ -649,7 +651,7 @@ public class Qsmtp implements Runnable {
                 send.print(EOL);
                 send.flush();
 
-                rstr = reply.readLine();
+                rstr = scanLine(reply);
 
                 if (!rstr.startsWith("250")) 
                   {
@@ -680,7 +682,8 @@ public class Qsmtp implements Runnable {
             send.print(EOL);
             send.flush();
 
-            rstr = reply.readLine();
+            rstr = scanLine(reply);
+
             if (!rstr.startsWith("354")) 
               {
                 throw new ProtocolException(rstr);
@@ -744,7 +747,7 @@ public class Qsmtp implements Runnable {
             send.print(EOL);
             send.flush();
     
-            rstr = reply.readLine();
+            rstr = scanLine(reply);
 
             try
               {
@@ -831,6 +834,18 @@ public class Qsmtp implements Runnable {
       }
 
     return true;
+  }
+
+  private String scanLine(BufferedReader reply) throws ProtocolException
+  {
+    String line = reply.readLine();
+
+    if (line == null)
+      {
+        throw ProtocolException("SMTP connection closed abruptly");
+      }
+
+    return line;
   }
 
 }
