@@ -102,6 +102,13 @@ import arlut.csd.ganymede.rmi.adminSession;
 public class GanymedeServer implements Server {
 
   /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeServer");
+
+  /**
    * <P>Singleton server object.  A running Ganymede Server will have one
    * instance of GanymedeServer active and bound into the RMI registry,
    * and this field will point to it.</P>
@@ -163,13 +170,6 @@ public class GanymedeServer implements Server {
   static loginSemaphore shutdownSemaphore = new loginSemaphore();
 
   /**
-   * <p>TranslationService object for handling string localization in
-   * the Ganymede server.</p>
-   */
-
-  static TranslationService ts = null;
-
-  /**
    * <p>During the login process, we need to get exclusive access over
    * an extended time to synchronized methods in a privileged
    * GanymedeSession to do the query operations for login.  If we used
@@ -196,8 +196,6 @@ public class GanymedeServer implements Server {
 
   public GanymedeServer() throws RemoteException
   {
-    ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeServer");
- 
     if (server == null)
       {
 	server = this;
