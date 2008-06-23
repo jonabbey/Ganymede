@@ -785,9 +785,6 @@ public final class DBStore implements JythonMap {
     BufferedOutputStream bufStream = null;
     DataOutputStream out = null;
     
-    FileOutputStream textOutStream = null;
-    PrintWriter textOut = null;
-    
     short namespaceCount;
     DBDumpLock lock = null;
     DBNameSpace ns;
@@ -965,16 +962,6 @@ public final class DBStore implements JythonMap {
 	if (outStream != null)
 	  {
 	    outStream.close();
-	  }
-
-	if (textOut != null)
-	  {
-	    textOut.close();
-	  }
-
-	if (textOutStream != null)
-	  {
-	    textOutStream.close();
 	  }
       }
 
