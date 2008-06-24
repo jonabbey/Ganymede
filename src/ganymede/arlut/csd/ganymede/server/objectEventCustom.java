@@ -73,6 +73,13 @@ import arlut.csd.Util.TranslationService;
 public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
   /**
+   * TranslationService object for handling string localization in the
+   * Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.objectEventCustom");
+
+  /**
    *
    * We're going to present the user with a list of recommended event
    * names to choose from.
@@ -81,13 +88,20 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
   static QueryResult eventNames = null;
 
-  /**
-   * TranslationService object for handling string localization in the
-   * Ganymede server.
-   */
+  static
+  {
+    eventNames = new QueryResult(true);
 
-  static final TranslationService ts =
-    TranslationService.getTranslationService("arlut.csd.ganymede.server.objectEventCustom");
+    eventNames.addRow(null, "objectcreated", false);
+    eventNames.addRow(null, "objectchanged", false);
+    eventNames.addRow(null, "inactivateobject", false);
+    eventNames.addRow(null, "deleteobject", false);
+    eventNames.addRow(null, "reactivateobject", false);
+    eventNames.addRow(null, "expirationwarn", false);
+    eventNames.addRow(null, "expirenotify", false);
+    eventNames.addRow(null, "removalwarn", false);
+    eventNames.addRow(null, "removenotify", false);
+  }
 
   // ---
 
@@ -102,7 +116,6 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    */
 
   QueryResult objectTypeList = null;
-
 
   /* -- */
 
@@ -221,21 +234,6 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.ObjectEventToken)
       {
-	if (eventNames == null)
-	  {
-	    eventNames = new QueryResult(true);
-
-	    eventNames.addRow(null, "objectcreated", false);
-	    eventNames.addRow(null, "objectchanged", false);
-	    eventNames.addRow(null, "inactivateobject", false);
-	    eventNames.addRow(null, "deleteobject", false);
-	    eventNames.addRow(null, "reactivateobject", false);
-	    eventNames.addRow(null, "expirationwarn", false);
-	    eventNames.addRow(null, "expirenotify", false);
-	    eventNames.addRow(null, "removalwarn", false);
-	    eventNames.addRow(null, "removenotify", false);
-	  }
-
 	return eventNames;
       }
 
