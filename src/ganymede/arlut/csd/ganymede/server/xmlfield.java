@@ -115,10 +115,28 @@ public class xmlfield implements FieldType {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.xmlfield");
 
   /**
-   * <p>Formatter that we use for generating and parsing date fields</p>
+   * <p>Array of formatters that we use for generating and parsing
+   * date fields in Ganymede XML files</p>
    */
 
-  static DateFormat[] formatters = null;
+  static private final DateFormat[] formatters = new DateFormat[6];
+
+  static
+  {
+    // 0 = mail-style date with timezone
+    // 1 = mail-style date no timezone
+    // 2 = UNIX date output, with timezone "Tue Jul 11 01:04:55 CDT 2000"
+    // 3 = UNIX date output, without timezone
+    // 4 = no-comma style 0
+    // 5 = no-comma style 1
+
+    formatters[0] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+    formatters[1] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
+    formatters[2] = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+    formatters[3] = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy");
+    formatters[4] = new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss z");
+    formatters[5] = new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss");
+  }
 
   /**
    * <p>constant string for the addIfNotPresent mode</p>
@@ -839,25 +857,6 @@ public class xmlfield implements FieldType {
 
     /* -- */
 
-    if (formatters == null)
-      {
-	formatters = new DateFormat[6];
-
-	// 0 = mail-style date with timezone
-	// 1 = mail-style date no timezone
-	// 2 = UNIX date output, with timezone "Tue Jul 11 01:04:55 CDT 2000"
-	// 3 = UNIX date output, without timezone
-	// 4 = no-comma style 0
-	// 5 = no-comma style 1
-
-	formatters[0] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
-	formatters[1] = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss");
-	formatters[2] = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
-	formatters[3] = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy");
-	formatters[4] = new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss z");
-	formatters[5] = new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss");
-      }
-
     if (!item.matches("date"))
       {
 	throw new RuntimeException("\nUnrecognized XML item found when date expected: " + item);
@@ -876,7 +875,10 @@ public class xmlfield implements FieldType {
 	  {
 	    try
 	      {
-		result1 = formatters[i].parse(formattedDate);
+                synchronized (formatters[i])
+                  {
+                    result1 = formatters[i].parse(formattedDate);
+                  }
 	      }
 	    catch (ParseException ex)
 	      {
@@ -920,8 +922,12 @@ public class xmlfield implements FieldType {
 	  {
 	    owner.xSession.err.println("\nWarning, date element " + item + " is not internally consistent.");
 	    owner.xSession.err.println("Ignoring date string \"" + formattedDate + "\", which was parsed as ");
-	    owner.xSession.err.println(formatters[0].format(result1));
-	    owner.xSession.err.println("Using timecode data string \"" + formatters[0].format(result2) + "\".");
+
+            synchronized (formatters[0])
+              {
+                owner.xSession.err.println(formatters[0].format(result1));
+                owner.xSession.err.println("Using timecode data string \"" + formatters[0].format(result2) + "\".");
+              }
 	  }
 
 	return result2;
