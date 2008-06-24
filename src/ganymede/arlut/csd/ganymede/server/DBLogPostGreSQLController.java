@@ -611,7 +611,7 @@ public class DBLogPostGreSQLController implements DBLogController {
    * Statement backing the ResultSet.
    */
 
-  public ResultSet queryEvents(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
+  private ResultSet queryEvents(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
     String preparedTextPrefix = "SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, invids v " +
       "WHERE e.event_id = v.event_id AND v.invid = ?";
@@ -667,7 +667,7 @@ public class DBLogPostGreSQLController implements DBLogController {
    * Statement backing the ResultSet.
    */
 
-  public ResultSet queryEventsByAdmin(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
+  private ResultSet queryEventsByAdmin(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
     String preparedTextPrefix = "SELECT javatime, classtoken, admin_name, text, trans_id from event " +
       "WHERE admin_invid = ?";
@@ -715,7 +715,7 @@ public class DBLogPostGreSQLController implements DBLogController {
    * Statement backing the ResultSet.
    */
 
-  public ResultSet queryEventsByTransactions(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
+  private ResultSet queryEventsByTransactions(Invid invid, Date sinceDate, Date beforeDate) throws SQLException
   {
     String preparedTextPrefix = "SELECT e.javatime, e.classtoken, e.admin_name, e.text, e.trans_id from event e, transactions t" +
       "WHERE e.trans_id = t.trans_id AND t.invid = ?";
