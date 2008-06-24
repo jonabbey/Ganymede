@@ -1199,16 +1199,16 @@ public class Ganymede {
    * a mapping of old class names to new ones for the built-in classes.</p>
    */
 
-  static private void prepClassMap()
+  static synchronized private void prepClassMap()
   {
     if (upgradeClassMap == null)
       {
-	upgradeClassMap = new Hashtable();
-	upgradeClassMap.put("arlut.csd.ganymede.dumpAndArchiveTask", "arlut.csd.ganymede.server.dumpAndArchiveTask");
-	upgradeClassMap.put("arlut.csd.ganymede.dumpTask", "arlut.csd.ganymede.server.dumpTask");
-	upgradeClassMap.put("arlut.csd.ganymede.GanymedeExpirationTask", "arlut.csd.ganymede.server.GanymedeExpirationTask");
-	upgradeClassMap.put("arlut.csd.ganymede.GanymedeValidationTask", "arlut.csd.ganymede.server.GanymedeValidationTask");
-	upgradeClassMap.put("arlut.csd.ganymede.GanymedeWarningTask", "arlut.csd.ganymede.server.GanymedeWarningTask");
+        upgradeClassMap = new Hashtable();
+        upgradeClassMap.put("arlut.csd.ganymede.dumpAndArchiveTask", "arlut.csd.ganymede.server.dumpAndArchiveTask");
+        upgradeClassMap.put("arlut.csd.ganymede.dumpTask", "arlut.csd.ganymede.server.dumpTask");
+        upgradeClassMap.put("arlut.csd.ganymede.GanymedeExpirationTask", "arlut.csd.ganymede.server.GanymedeExpirationTask");
+        upgradeClassMap.put("arlut.csd.ganymede.GanymedeValidationTask", "arlut.csd.ganymede.server.GanymedeValidationTask");
+        upgradeClassMap.put("arlut.csd.ganymede.GanymedeWarningTask", "arlut.csd.ganymede.server.GanymedeWarningTask");
       }
   }
 
