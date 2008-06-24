@@ -132,8 +132,8 @@ public class Qsmtp implements Runnable {
   private int port = DEFAULT_PORT;
 
   private Vector queuedMessages = new Vector();
-  private boolean threaded = false;
-  private Thread backgroundThread;
+  private volatile boolean threaded = false;
+  private volatile Thread backgroundThread;
 
   private Socket sock = null;
 
