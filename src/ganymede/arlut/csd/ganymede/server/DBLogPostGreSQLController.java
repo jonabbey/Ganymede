@@ -630,6 +630,8 @@ public class DBLogPostGreSQLController implements DBLogController {
         dateRestriction = dateRestriction + " AND e.javatime <= ?";
       }
 
+    // note: we close this statement in retrieveHistory()'s finally clause
+
     PreparedStatement ps = con.prepareStatement(preparedTextPrefix + dateRestriction + preparedTextSuffix);
 
     try
@@ -684,6 +686,8 @@ public class DBLogPostGreSQLController implements DBLogController {
         dateRestriction = dateRestriction + " AND javatime <= ?";
       }
 
+    // note: we close this statement in retrieveHistory()'s finally clause
+
     PreparedStatement ps = con.prepareStatement(preparedTextPrefix + dateRestriction + preparedTextSuffix);
 
     ps.setString(1, invid.toString());
@@ -729,6 +733,8 @@ public class DBLogPostGreSQLController implements DBLogController {
       {
         dateRestriction = dateRestriction + " AND e.javatime <= ?";
       }
+
+    // note: we close this statement in retrieveHistory()'s finally clause
 
     PreparedStatement ps = con.prepareStatement(preparedTextPrefix + dateRestriction + preparedTextSuffix);
 
