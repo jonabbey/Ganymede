@@ -82,7 +82,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * over RMI in order to receive the file.
  */
 
-public class XMLTransmitter implements FileTransmitter {
+public final class XMLTransmitter implements FileTransmitter {
 
   private static final boolean debug = false;
 

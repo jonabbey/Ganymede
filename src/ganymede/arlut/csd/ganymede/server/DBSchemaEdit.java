@@ -143,7 +143,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * the DBStore object whose DBObjectBases are being edited
    */
 
-  DBStore store;		
+  private final DBStore store;
 
   /**
    * this holds a copy of the DBObjectBase objects comprising
@@ -1081,8 +1081,6 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
     // to us.
 
     rootCategory = null;
-
-    this.store = null;
 
     GanymedeServer.lSemaphore.enable("schema edit");
 

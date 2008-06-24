@@ -174,7 +174,7 @@ import foxtrot.Worker;
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 
-public class gclient extends JFrame implements treeCallback, ActionListener, JsetValueCallback {
+public final class gclient extends JFrame implements treeCallback, ActionListener, JsetValueCallback {
 
   public static boolean debug = false;  
 

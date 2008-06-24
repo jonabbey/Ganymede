@@ -98,7 +98,7 @@ import arlut.csd.ganymede.rmi.date_field;
  * class for more information on the structure of the Ganymede client.
  */
 
-public class datePanel extends JPanel implements ActionListener, JsetValueCallback, Runnable {
+public final class datePanel extends JPanel implements ActionListener, JsetValueCallback, Runnable {
 
   final static boolean debug = false;
 

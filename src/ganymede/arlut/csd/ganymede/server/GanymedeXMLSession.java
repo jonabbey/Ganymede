@@ -1938,7 +1938,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     try
       {
-	_root = new DBBaseCategory(editor.store, categoryRoot.getAttrStr("name"));
+	_root = new DBBaseCategory(Ganymede.db, categoryRoot.getAttrStr("name"));
       }
     catch (RemoteException ex)
       {

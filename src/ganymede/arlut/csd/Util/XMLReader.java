@@ -96,7 +96,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * the XMLReader's internal buffer.</P>
  */
 
-public class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Runnable {
+public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Runnable {
   
   public final static boolean debug = false;
 

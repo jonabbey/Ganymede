@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -90,9 +90,9 @@ public class Loader extends Thread {
 
   private Vector
     baseList;
- 
-  private boolean
-    keepGoing = true,
+
+  private volatile boolean
+    isShutdown = true,
     baseNamesLoaded = false,
     baseListLoaded = false,
     baseMapLoaded = false,
@@ -150,71 +150,47 @@ public class Loader extends Thread {
 
     try
       {
-	synchronized (this)
-	  {
-	    if (keepGoing)
-	      {
-		loadBaseList();
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("**Stopping before baseList is loaded");
-		  }
+        if (isShutdown)
+          {
+            if (debug)
+              {
+                System.err.println("**Stopping before baseList is loaded");
+              }
 
-		// Ok, it's not really loaded, but this basically means that it is finished.
+            // Ok, it's not really loaded, but this basically means that it is finished.
 
-		baseListLoaded = true;
-		notifyAll();
-	      }
-	  }
+            baseListLoaded = true;
+          }
 
-	synchronized (this)
-	  {
-	    if (keepGoing)
-	      {
-		loadBaseNames();
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("**Stopping before baseNames are loaded");
-		  }
+        loadBaseList();
 
-		baseNamesLoaded = true;
-		this.notifyAll();
-	      }
-	  }
+        if (isShutdown)
+          {
+            if (debug)
+              {
+                System.err.println("**Stopping before baseNames are loaded");
+              }
+            
+            baseNamesLoaded = true;
+          }
 
-	synchronized (this)
-	  {
-	    if (keepGoing)
-	      {
-		loadBaseMap();
-	      }
-	    else
-	      {
-		System.err.println("**Stopping before baseMap is loaded");
+        loadBaseNames();
+
+        if (isShutdown)
+          {
+            if (debug)
+              {
+                System.err.println("**Stopping before baseMap is loaded");
+              }
 		
-		baseMapLoaded = true;
-		this.notifyAll();
-	      }
-	  }
+            baseMapLoaded = true;
+          }
+
+        loadBaseMap();
       }
     catch (RemoteException rx)
       {
 	throw new RuntimeException("Could not load base hash/map in Loader: " + rx);
-      }
-    finally
-      {
-	// wake anybody up, just in case
-
-	synchronized (this)
-	  {
-	    this.notifyAll();
-	  }
       }
 
     if (debug)
@@ -240,7 +216,7 @@ public class Loader extends Thread {
 	System.err.println("Starting to load the loader again");
       }
 
-    keepGoing = true;
+    isShutdown = false;
 
     // start up a new thread
 
@@ -260,11 +236,11 @@ public class Loader extends Thread {
 	System.err.println("** Loader cleanUp()");
       }
 
-    keepGoing = false;
+    isShutdown = true;
 
     synchronized (this) 
       {
-	// setting keepGoing to false should cause the loader run
+	// setting isShutdown to true should cause the loader run
 	// method to quickly drop out and set the loader flags to
 	// true, so we wait until all of the boolean loaded flags are
 	// set
@@ -372,14 +348,11 @@ public class Loader extends Thread {
 
   public Vector getBaseList()
   {
-    if (!baseListLoaded || !keepGoing)
+    if (!baseListLoaded && !isShutdown)
       {
 	synchronized (this)
 	  {
-	    // we have to check baseListLoaded inside the
-	    // synchronization loop or else we can get deadlocked
-
-	    while (!baseListLoaded || !keepGoing)
+	    while (!baseListLoaded && !isShutdown)
 	      {
 		if (debug)
 		  {
@@ -423,14 +396,14 @@ public class Loader extends Thread {
 
   public Hashtable getBaseNames()
   {
-    if (!baseNamesLoaded || !keepGoing)
+    if (!baseNamesLoaded && !isShutdown)
       {
 	synchronized (this)
 	  {
 	    // we have to check baseNamesLoaded inside the
 	    // synchronization loop or else we can get deadlocked
 
-	    while (!baseNamesLoaded || !keepGoing)
+	    while (!baseNamesLoaded && !isShutdown)
 	      {
 		if (debug)
 		  {
@@ -474,14 +447,14 @@ public class Loader extends Thread {
 
   public Hashtable getBaseMap()
   {
-    if (!baseMapLoaded || !keepGoing)
+    if (!baseMapLoaded && !isShutdown)
       {
 	synchronized (this)
 	  {
 	    // we have to check baseMapLoaded inside the
 	    // synchronization loop or else we can get deadlocked
 
-	    while (!baseMapLoaded || !keepGoing)
+	    while (!baseMapLoaded && !isShutdown)
 	      {
 		if (debug)
 		  {
@@ -530,14 +503,14 @@ public class Loader extends Thread {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
 
-    if (!baseMapLoaded || !keepGoing)
+    if (!baseMapLoaded && !isShutdown)
       {
 	synchronized (this)
 	  {
 	    // we have to check baseMapLoaded inside the
 	    // synchronization loop or else we can get deadlocked
 
-	    while (!baseMapLoaded || !keepGoing)
+	    while (!baseMapLoaded && !isShutdown)
 	      {
 		if (debug)
 		  {
@@ -585,14 +558,14 @@ public class Loader extends Thread {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
 
-    if (!baseMapLoaded || !keepGoing)
+    if (!baseMapLoaded && !isShutdown)
       {
 	synchronized (this)
 	  {
 	    // we have to check baseMapLoaded inside the
 	    // synchronization loop or else we can get deadlocked
 
-	    while (!baseMapLoaded || !keepGoing)
+	    while (!baseMapLoaded && !isShutdown)
 	      {
 		if (debug)
 		  {
@@ -692,11 +665,11 @@ public class Loader extends Thread {
 
     /* -- */
 
-    if (!keepGoing)
+    if (!isShutdown)
       {
 	if (debug)
 	  {
-	    System.err.println("Loader.getTemplateVector() -- keepGoing is false");
+	    System.err.println("Loader.getTemplateVector() -- isShutdown is false");
 	  }
 
 	return null;
