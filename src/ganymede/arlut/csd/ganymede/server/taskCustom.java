@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -75,7 +75,15 @@ import arlut.csd.ganymede.common.SchemaConstants;
 
 public class taskCustom extends DBEditObject implements SchemaConstants {
 
-  static QueryResult choiceList = null;
+  static final QueryResult choiceList = new QueryResult(true);
+
+  static
+  {
+    choiceList.addRow(null, GanymedeScheduler.minutes_str, false);
+    choiceList.addRow(null, GanymedeScheduler.hours_str, false);
+    choiceList.addRow(null, GanymedeScheduler.days_str, false);
+    choiceList.addRow(null, GanymedeScheduler.weeks_str, false);
+  }
 
   /* -- */
 
@@ -147,16 +155,6 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.TaskPeriodUnit)
       {
-	if (choiceList == null)
-	  {
-	    choiceList = new QueryResult(true);
-
-	    choiceList.addRow(null, GanymedeScheduler.minutes_str, false);
-	    choiceList.addRow(null, GanymedeScheduler.hours_str, false);
-	    choiceList.addRow(null, GanymedeScheduler.days_str, false);
-	    choiceList.addRow(null, GanymedeScheduler.weeks_str, false);
-	  }
-
 	return choiceList;
       }
 
