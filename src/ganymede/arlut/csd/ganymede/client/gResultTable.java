@@ -623,7 +623,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     wp.setWindowTitle(this, ts.l("loadResults.window_title",
 				 queryType,
 				 new Integer(rows)));
-    wp.updateWindowMenu();
   }
 
   public void rowSelected(Object key)
@@ -1030,5 +1029,15 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   JToolBar getToolBar() 
   {
     return toolbar;
+  }
+
+  /**
+   * Give access to the protected paramString() method of our
+   * ancestors for debug.
+   */
+
+  public String paramString()
+  {
+    return super.paramString();
   }
 }

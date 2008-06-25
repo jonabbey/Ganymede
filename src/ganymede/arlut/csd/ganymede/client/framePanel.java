@@ -1897,4 +1897,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     isCleaned = true;
   }
+
+  /**
+   * Give access to the protected paramString() method of our
+   * ancestors for debug.
+   */
+
+  public String paramString()
+  {
+    return super.paramString();
+  }
 }

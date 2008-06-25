@@ -828,28 +828,30 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	// "Could not get the result table."
 	setStatus(ts.l("addTableWindow.failure_status"));
-      }
-    else
-      {
-	rt.setLayer(new Integer(topLayer));
-	rt.setBounds(0, 0, 500,500);
-	rt.setResizable(true);
-	rt.setClosable(true);
-	rt.setMaximizable(true);
-	rt.setIconifiable(true);
-	rt.addInternalFrameListener(this);
 
-	placeWindow(rt);
-	  
-	add(rt);
-	rt.setVisible(true);	// for Kestrel
-	setSelectedWindow(rt);
-
-	updateWindowMenu();
-	gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-	setStatus("Done.", 1);
-	rt.getToolBar().grabFocus();
+        return;
       }
+
+    rt.setLayer(new Integer(topLayer));
+    rt.setBounds(0, 0, 500,500);
+    rt.setResizable(true);
+    rt.setClosable(true);
+    rt.setMaximizable(true);
+    rt.setIconifiable(true);
+
+    placeWindow(rt);
+
+    add(rt);
+    rt.setVisible(true);	// for Kestrel
+    setSelectedWindow(rt);
+
+    rt.addInternalFrameListener(this);
+
+    gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+    setStatus(ts.l("addTableWindow.done"), 1); // "Done."
+
+    rt.getToolBar().grabFocus();
   }
 
   /**
@@ -1419,11 +1421,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void internalFrameClosed(InternalFrameEvent event)
   {
-    if (debug)
-      {
-	System.err.println("windowPanel.internalFrameClosed(): Closing an internal frame");
-      }
-    
     String oldTitle = ((JInternalFrame)event.getSource()).getTitle();
     
     if (oldTitle == null)
@@ -1432,16 +1429,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
     else
       {
-	//System.err.println(" Removing button- " + oldTitle);
-	
-	windowList.remove(oldTitle);
+        windowList.remove(oldTitle);
 	
 	updateWindowMenu();
-      }
-
-    if (event.getSource() instanceof gResultTable)
-      {
-        ((gResultTable) event.getSource()).dispose();
       }
 
     if (debug)
@@ -1451,10 +1441,28 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   public void internalFrameDeiconified(InternalFrameEvent e) {}
-  public void internalFrameClosing(InternalFrameEvent e) {}
+
+  public void internalFrameClosing(InternalFrameEvent e)
+  {
+    // For some reason, I'm seeing internalFrameClosing() called on
+    // gResultTable when the user clicks on the close icon, but
+    // internalFrameClosed() is not.
+    //
+    // So, I'm going to remove the gResultTable from our windowList
+    // when the close icon is being processed, here.
+
+    if (e.getSource() instanceof gResultTable)
+      {
+        gResultTable rt = (gResultTable) e.getSource();
+
+        windowList.remove(rt.getTitle());
+
+	updateWindowMenu();
+      }
+  }
+
   public void internalFrameActivated(InternalFrameEvent e) {}
   public void internalFrameDeactivated(InternalFrameEvent e) {}
   public void internalFrameOpened(InternalFrameEvent e) {}
   public void internalFrameIconified(InternalFrameEvent e) {}
 }
-
