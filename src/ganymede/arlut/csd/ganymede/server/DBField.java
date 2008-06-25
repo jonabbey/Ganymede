@@ -69,11 +69,13 @@ import java.util.Vector;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
-import arlut.csd.ganymede.common.GanyPermissionsException;
+
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.FieldType;
+import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.db_field;
@@ -3427,6 +3429,18 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	  {
 	    return false;
 	  }
+
+        if (owner.getGSession() != null)
+          {
+            try
+              {
+                owner.getGSession().checklogin();  // mostly for the lastaction update side-effect
+              }
+            catch (NotLoggedInException ex)
+              {
+                return false;
+              }
+          }
 
 	return pe.isEditable();
       }
