@@ -163,9 +163,11 @@ refresh the jar files.
            debuglevel="${debug.level}"
            target="1.4"
            source="1.4"
-           deprecation="on">
-           <src path="${src.dir}"/>
-           <classpath refid="classpath"/>
+           deprecation="on"
+           srcdir="${src.dir}"
+           excludes="**/GanymedeUncaughtExceptionHandler.java">
+      <src path="${src.dir}"/>
+      <classpath refid="classpath"/>
     </javac>
 
     <!-- Compile all of our Stub/Skel classes -->
