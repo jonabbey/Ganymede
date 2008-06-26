@@ -336,7 +336,7 @@ public final class XMLTransmitter implements FileTransmitter {
       }
     catch (IOException ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 	throw new RemoteException(ex.getMessage());
       }
     finally
@@ -349,7 +349,7 @@ public final class XMLTransmitter implements FileTransmitter {
 	      }
 	    catch (IOException ex)
 	      {
-		ex.printStackTrace();
+                Ganymede.logError(ex);
 	      }
 	  }
       }
@@ -370,7 +370,7 @@ public final class XMLTransmitter implements FileTransmitter {
       }
     catch (IOException ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
       }
   }
 }

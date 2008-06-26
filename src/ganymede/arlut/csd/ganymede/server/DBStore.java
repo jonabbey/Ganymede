@@ -353,7 +353,7 @@ public final class DBStore implements JythonMap {
 	// "Caught DBBaseCategory exception: {0}"
 	System.err.println(ts.l("init.exception", ex.getMessage()));
 
-	ex.printStackTrace();
+	Ganymede.logError(ex);
 
 	// "Couldn''t initialize rootCategory"
 	throw new Error(ts.l("init.error")); // XXX wrap earlier exception if we are JDK 1.4+ only?
@@ -490,7 +490,7 @@ public final class DBStore implements JythonMap {
 	  {
  	    System.err.println("DBStore initialization error: DBStore id read failure for " + filename);
 	    System.err.println("IOException: ");
-	    ex.printStackTrace();
+	    Ganymede.logError(ex);
 
 	    throw new RuntimeException(ts.l("load.initerror", filename));
 	  }
@@ -686,7 +686,7 @@ public final class DBStore implements JythonMap {
 	  {
 	    // what do we really want to do here?
 
-	    ex.printStackTrace();
+	    Ganymede.logError(ex);
 
 	    throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
 	  }
@@ -734,7 +734,7 @@ public final class DBStore implements JythonMap {
 	      {
 		// what do we really want to do here?
 
-		ex.printStackTrace();
+		Ganymede.logError(ex);
 		throw new RuntimeException("couldn't load journal");
 	      }
 	    catch (InterruptedException ex)
@@ -742,7 +742,7 @@ public final class DBStore implements JythonMap {
 		// we got interrupted while waiting to lock
 		// the database.. unlikely in the extreme here.
 
-		ex.printStackTrace();
+		Ganymede.logError(ex);
 		throw new RuntimeException("couldn't dump journal");
 	      }
 	  }
@@ -1261,7 +1261,7 @@ public final class DBStore implements JythonMap {
 	      }
 	    catch (IOException ex)
 	      {
-		ex.printStackTrace();
+		Ganymede.logError(ex);
 	      }
 	  }
 	
@@ -1273,7 +1273,7 @@ public final class DBStore implements JythonMap {
 	      }
 	    catch (IOException ex)
 	      {
-		ex.printStackTrace();
+		Ganymede.logError(ex);
 	      }
 	  }
       }
@@ -2813,7 +2813,7 @@ public final class DBStore implements JythonMap {
 	      }
 	    catch (Throwable ex)
 	      {
-		ex.printStackTrace();
+		Ganymede.logError(ex);
 	      }
 	    finally
 	      {
@@ -2827,7 +2827,7 @@ public final class DBStore implements JythonMap {
       }
     catch (Throwable ex)
       {
-	ex.printStackTrace();
+	Ganymede.logError(ex);
       }
     finally
       {

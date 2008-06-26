@@ -463,7 +463,7 @@ public final class DBObjectDeltaRec implements FieldType {
     catch (IOException ex)
       {
 	System.err.println("DBObjectDeltaRec constructor: IOException in state " + status);
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 
 	throw ex;
       }

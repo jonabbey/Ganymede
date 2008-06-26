@@ -929,6 +929,34 @@ public class Ganymede {
   }
 
   /**
+   * This is a convenience method used by server-side code to send
+   * error logging output to stderr, to any attached admin consoles,
+   * and to the registered bugReportAddressProperty.
+   */
+
+  static public void logError(Throwable ex)
+  {
+    ex.printStackTrace();
+
+    GanymedeAdmin.setStatus(stackTrace(ex));
+  }
+
+  /**
+   * This is a convenience method used by server-side code to send
+   * error logging output to stderr, to any attached admin consoles,
+   * and to the registered bugReportAddressProperty.
+   */
+
+  static public void logError(Throwable ex, String contextMsg)
+  {
+    System.err.println(contextMsg);
+
+    ex.printStackTrace();
+
+    GanymedeAdmin.setStatus(contextMsg + stackTrace(ex));
+  }
+
+  /**
    * This is a convenience method used by the server to get a
    * stack trace from a throwable object in String form.
    */

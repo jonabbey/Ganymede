@@ -1188,7 +1188,7 @@ public class GanymedeServer implements Server {
       }
     catch (InterruptedException ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 	throw new RuntimeException(ex.getMessage());
       }
 
@@ -1236,7 +1236,7 @@ public class GanymedeServer implements Server {
 	  }
 	catch (InterruptedException ex)
 	  {
-	    ex.printStackTrace();
+            Ganymede.logError(ex);
 	    throw new RuntimeException(ex.getMessage());
 	  }
 
@@ -1361,14 +1361,12 @@ public class GanymedeServer implements Server {
     catch (Exception ex)
       {
         // "Caught exception during final shutdown:"
-	System.err.println(ts.l("shutdown.Exception"));
-	ex.printStackTrace();
+        Ganymede.logError(ex, ts.l("shutdown.Exception"));
       }
     catch (Error ex)
       {
         // "Caught error during final shutdown:"
-	System.err.println(ts.l("shutdown.Error"));
-	ex.printStackTrace();
+        Ganymede.logError(ex, ts.l("shutdown.Error"));
       }
     finally
       {
@@ -1923,7 +1921,7 @@ public class GanymedeServer implements Server {
       }
     catch (RemoteException ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 	throw new RuntimeException(ex.getMessage());
       }
 

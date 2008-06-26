@@ -586,7 +586,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
       }
     catch (RemoteException ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 	throw new RuntimeException("should never happen " + ex.getMessage());
       }
 
@@ -980,12 +980,12 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	  }
 	catch (IOException ex)
 	  {
-	    ex.printStackTrace();
+            Ganymede.logError(ex);
 	    dumpedOk = true;	// if we had an io exception, retrying isn't likely to succeed
 	  }
 	catch (InterruptedException ex)
 	  {
-	    ex.printStackTrace();
+            Ganymede.logError(ex);
 	    Ganymede.debug("DBSchemaEdit: retrying database dump");
 	  }
       }

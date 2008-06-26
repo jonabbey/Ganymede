@@ -950,7 +950,7 @@ final public class DBSession {
       }
     catch (Throwable ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 
 	rollback(ckp_label);
 
@@ -1053,7 +1053,7 @@ final public class DBSession {
       }
     catch (Throwable ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 
 	// oops, irredeemable failure.  rollback.
 
@@ -1152,7 +1152,7 @@ final public class DBSession {
       }
     catch (Throwable ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 
 	// oops, irredeemable failure.  rollback.
 

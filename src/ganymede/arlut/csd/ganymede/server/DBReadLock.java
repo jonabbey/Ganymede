@@ -269,7 +269,7 @@ public class DBReadLock extends DBLock {
 		      }
 		    catch (RuntimeException ex)
 		      {
-			ex.printStackTrace();
+                        Ganymede.logError(ex);
 
 			// clean up intelligently if we can
 

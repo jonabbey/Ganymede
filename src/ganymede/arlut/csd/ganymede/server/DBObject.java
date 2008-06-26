@@ -1978,11 +1978,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	      }
 	    catch (NullPointerException ex)
 	      {
-		System.err.println("Null pointer exception in checkRequiredFields().");
-		ex.printStackTrace();
-		System.err.println("\n");
-		
-		System.err.println("My type is " + getTypeName() + "\nMy invid is " + getInvid());
+		Ganymede.logError(ex, "Null pointer exception in checkRequiredFields().\n" +
+                                  "My type is " + getTypeName() + "\nMy invid is " + getInvid());
 	      }
 	  }
       }

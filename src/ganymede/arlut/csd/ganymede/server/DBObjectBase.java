@@ -1417,7 +1417,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 		  }
 		catch (RemoteException ex)
 		  {
-		    ex.printStackTrace();
+                    Ganymede.logError(ex);
 		    throw new RuntimeException("Publishing error " + ex.getMessage());
 		  }
 
@@ -2036,7 +2036,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
           {
             InvocationTargetException tex = (InvocationTargetException) ex;
 
-            tex.getTargetException().printStackTrace();
+            Ganymede.logError(tex.getTargetException());
 
             error_code = "Invocation Target Exception "
                 + tex.getTargetException();

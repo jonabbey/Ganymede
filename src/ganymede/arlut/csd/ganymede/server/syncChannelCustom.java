@@ -400,7 +400,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
       }
     catch (Throwable ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
       }
 
     // never show the hidden index field

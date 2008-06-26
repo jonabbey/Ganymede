@@ -1473,7 +1473,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
     catch (InterruptedException ex)
       {
-	ex.printStackTrace();
+	Ganymede.logError(ex);
 	throw new RuntimeException(ex.getMessage());
       }
 

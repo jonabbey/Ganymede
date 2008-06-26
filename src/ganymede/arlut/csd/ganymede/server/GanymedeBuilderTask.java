@@ -403,7 +403,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    decPhase1(true);
 	    alreadyDecdCount = true;
 
-	    ex.printStackTrace();
+	    Ganymede.logError(ex);
 	    return;
 	  }
 	finally
@@ -1272,7 +1272,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
       {
 	// assuming we get the pattern right, this shouldn't happen
 
-	ex.printStackTrace();
+	Ganymede.logError(ex);
 	return;
       }
 

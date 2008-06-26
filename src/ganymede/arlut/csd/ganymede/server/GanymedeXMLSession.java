@@ -683,7 +683,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
 	catch (RuntimeException ex)
 	  {
-	    ex.printStackTrace();
+            Ganymede.logError(ex);
 	  }
       }
 
@@ -1593,7 +1593,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     catch (RemoteException ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 	throw new RuntimeException(ex.getMessage());
       }
 
@@ -1708,7 +1708,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  {
 	    // should never ever happen
 
-	    ex.printStackTrace();
+            Ganymede.logError(ex);
 	    throw new RuntimeException(ex.getMessage());
 	  }
       }
@@ -3414,7 +3414,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
 	catch (InterruptedException ex)
 	  {
-	    ex.printStackTrace();
+            Ganymede.logError(ex);
 	    throw new RuntimeException(ex.getMessage());
 	  }
       }

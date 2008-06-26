@@ -452,7 +452,7 @@ public class xmlfield implements FieldType {
 	      }
 	    catch (NullPointerException ex)
 	      {
-		ex.printStackTrace();
+                Ganymede.logError(ex);
 	      }
 
 	    // fall through to skipToEndField()
@@ -1589,7 +1589,7 @@ public class xmlfield implements FieldType {
       }
     catch (RemoteException ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 	throw new RuntimeException(ex.getMessage());
       }
 
@@ -1675,9 +1675,8 @@ public class xmlfield implements FieldType {
       }
     catch (ClassCastException ex)
       {
-        Ganymede.debug("Error processing xmlfield dereferenceInvids().");
-        Ganymede.debug("xmlfield is " + this.toString());
-        ex.printStackTrace();
+        Ganymede.logError(ex, "Error processing xmlfield dereferenceInvids()." +
+                          "xmlfield is " + this.toString());
       }
   }
 

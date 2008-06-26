@@ -113,7 +113,7 @@ public class JythonServer extends Thread {
       }
     catch (IOException ex)
       {
-        ex.printStackTrace();
+        Ganymede.logError(ex);
       }
   }
 
@@ -498,13 +498,13 @@ class JythonServerWorker extends Thread {
               }
             catch (Exception e)
               {
-                e.printStackTrace(); // Move along
+                Ganymede.logError(e); // Move along
               }
           }
       }
     catch (IOException e)
       {
-        e.printStackTrace();
+        Ganymede.logError(e);
       }
   }
 }

@@ -834,7 +834,7 @@ public class DBEditSet {
 	  }
 	catch (RuntimeException ex)
 	  {
-	    ex.printStackTrace();
+            Ganymede.logError(ex);
 	  }
 
 	return false;
@@ -1734,7 +1734,7 @@ public class DBEditSet {
 		    // what can we do?  keep clearing them out as best we
 		    // can
 
-		    inex.printStackTrace();
+                    Ganymede.logError(inex);
 		  }
 	      }
 	  }

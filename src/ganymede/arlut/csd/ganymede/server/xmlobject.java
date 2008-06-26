@@ -356,7 +356,7 @@ public class xmlobject {
       }
     catch (RemoteException ex)
       {
-        ex.printStackTrace();
+        Ganymede.logError(ex);
         throw new RuntimeException(ex.getMessage());
       }
 

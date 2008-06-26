@@ -1205,7 +1205,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       }
     catch (RemoteException ex)
       {
-	ex.printStackTrace();
+	Ganymede.logError(ex);
 	throw new RuntimeException("wow, surprising remote local exception");
       }
 
@@ -1303,7 +1303,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 	  }
 	catch (RemoteException ex)
 	  {
-	    ex.printStackTrace();
+            Ganymede.logError(ex);
 	    throw new RuntimeException("rmi local failure?" + ex.getMessage());
 	  }
       }
@@ -1318,7 +1318,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 	      }
 	    catch (RemoteException ex)
 	      {
-		ex.printStackTrace();
+                Ganymede.logError(ex);
 		throw new RuntimeException("rmi local failure?" + ex.getMessage());
 	      }
 	  }

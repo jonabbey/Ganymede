@@ -237,9 +237,7 @@ public class GanymedeScheduler extends Thread {
       }
     catch (ClassNotFoundException ex)
       {
-	ex.printStackTrace();
-
-	System.err.println("GanymedeScheduler.registerTaskObject(): class definition could not be found: " + ex);
+	Ganymede.logError(ex, "GanymedeScheduler.registerTaskObject(): class definition could not be found");
 	return;
       }
 		
@@ -267,8 +265,7 @@ public class GanymedeScheduler extends Thread {
 	  }
 	catch (Exception ex)
 	  {
-	    System.err.println("Error, ran into exception trying to construct task with Invid constructor");
-	    ex.printStackTrace();
+            Ganymede.logError(ex, "Error, ran into exception trying to construct task with Invid constructor");
 	  }
       }
 

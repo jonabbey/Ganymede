@@ -3728,7 +3728,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
       }
     catch (NullPointerException ex)
       {
-	ex.printStackTrace();
+        Ganymede.logError(ex);
 
 	return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
 					  ts.l("getConflictDialog.simpleError", conflictValue));
