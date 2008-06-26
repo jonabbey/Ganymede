@@ -665,11 +665,11 @@ public class Loader extends Thread {
 
     /* -- */
 
-    if (!isShutdown)
+    if (isShutdown)
       {
 	if (debug)
 	  {
-	    System.err.println("Loader.getTemplateVector() -- isShutdown is false");
+	    System.err.println("Loader.getTemplateVector() -- isShutdown is true");
 	  }
 
 	return null;
@@ -710,6 +710,8 @@ public class Loader extends Thread {
       }
   }
 
+  /* -- Private methods  --  */
+
   private void constructTemplateNameHash(Short objectId, Vector fieldTemplates)
   {
     Hashtable nameHash = new Hashtable();
@@ -727,8 +729,6 @@ public class Loader extends Thread {
 
     templateNameHash.put(objectId, nameHash);
   }
-
-  /* -- Private methods  --  */
 
   /** 
    * loadBaseList loads a sorted Vector of types from the server.
