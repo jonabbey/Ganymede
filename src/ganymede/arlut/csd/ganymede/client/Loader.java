@@ -92,7 +92,7 @@ public class Loader extends Thread {
     baseList;
 
   private volatile boolean
-    isShutdown = true,
+    isShutdown = false,
     baseNamesLoaded = false,
     baseListLoaded = false,
     baseMapLoaded = false,
