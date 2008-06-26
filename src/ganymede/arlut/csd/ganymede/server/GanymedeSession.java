@@ -2750,7 +2750,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     StringBuffer report = new StringBuffer();
 
     // "\nClient Version Report:\nuser == "{0}"\nhost == "{1}"\nclient id string == "{2}"
-    report.append(ts.l("reportClientBug.logPattern", userIdentifier, clienthost, clientIdentifier));
+    report.append(ts.l("reportClientVersion.logPattern", userIdentifier, clienthost, clientIdentifier));
 
     Ganymede.debug(report.toString());
   }
