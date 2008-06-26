@@ -277,7 +277,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * is called.
    */
 
-  Date lastActionTime = new Date();
+  private Date lastActionTime = new Date();
 
   /**
    * The name of the user logged in.  If the person logged in is using
@@ -889,7 +889,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return;
       }
 
-    long millisIdle = System.currentTimeMillis() - lastActionTime.getTime();
+    long millisIdle = 0;
+
+    synchronized (lastActionTime)
+      {
+        millisIdle = System.currentTimeMillis() - lastActionTime.getTime();
+      }
 
     int minutesIdle = (int) (millisIdle / 60000);
 
@@ -1250,7 +1255,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // help the garbage collector
 
 	    connecttime = null;
-	    lastActionTime = null;
 	    // skip username.. we'll do it below
 	    // skip userInvid.. we'll do it below
 	    clienthost = null;
@@ -6832,6 +6836,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 	throw new NotLoggedInException();
       }
 
-    lastActionTime.setTime(System.currentTimeMillis());
+    synchronized (lastActionTime)
+      {
+        lastActionTime.setTime(System.currentTimeMillis());
+      }
   }
 }
