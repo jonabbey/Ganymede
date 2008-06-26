@@ -925,7 +925,7 @@ public class Ganymede {
 	System.err.println(string);
       }
 
-    GanymedeAdmin.setStatus(string);
+    GanymedeAdmin.logAppend(string);
   }
 
   /**
@@ -938,7 +938,7 @@ public class Ganymede {
   {
     ex.printStackTrace();
 
-    GanymedeAdmin.setStatus(stackTrace(ex));
+    GanymedeAdmin.logAppend(stackTrace(ex));
   }
 
   /**
@@ -953,7 +953,7 @@ public class Ganymede {
 
     ex.printStackTrace();
 
-    GanymedeAdmin.setStatus(contextMsg + stackTrace(ex));
+    GanymedeAdmin.logAppend(contextMsg + stackTrace(ex));
   }
 
   /**

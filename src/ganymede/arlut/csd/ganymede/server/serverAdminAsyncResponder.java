@@ -346,7 +346,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
    * admin console's log display.</p>
    */
 
-  public void changeStatus(String status) throws RemoteException
+  public void logAppend(String status) throws RemoteException
   {
     adminAsyncMessage newLogEvent;
 
@@ -363,28 +363,28 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
     synchronized (eventBuffer)
       {
-	// if we have another changeStatus event in the eventBuffer,
+	// if we have another logAppend event in the eventBuffer,
 	// go ahead and append the new log entry directly to its
 	// StringBuffer
 
-	if (lookUp[adminAsyncMessage.CHANGESTATUS] != -1)
+	if (lookUp[adminAsyncMessage.LOGAPPEND] != -1)
 	  {
 	    // coalesce this append to the log message
 
-	    StringBuffer buffer = (StringBuffer) eventBuffer[lookUp[adminAsyncMessage.CHANGESTATUS]].getParam(0);
+	    StringBuffer buffer = (StringBuffer) eventBuffer[lookUp[adminAsyncMessage.LOGAPPEND]].getParam(0);
 	    buffer.append(status);
 	    return;
 	  }
 
 	// if we didn't find an event to append to, go ahead and add a
-	// new CHANGESTATUS log update event to the eventBuffer
+	// new LOGAPPEND log update event to the eventBuffer
 
-	newLogEvent = new adminAsyncMessage(adminAsyncMessage.CHANGESTATUS, new StringBuffer().append(status));
+	newLogEvent = new adminAsyncMessage(adminAsyncMessage.LOGAPPEND, new StringBuffer().append(status));
 
 	// queue the log event, keep a pointer to it in lookUp so we
 	// can quickly find it next time
 
-	lookUp[adminAsyncMessage.CHANGESTATUS] = addEvent(newLogEvent);
+	lookUp[adminAsyncMessage.LOGAPPEND] = addEvent(newLogEvent);
       }
   }
 

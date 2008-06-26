@@ -256,8 +256,8 @@ class GASHAdminDispatch implements Runnable {
 		    changeState(event.getString(0));
 		    break;
 
-		  case adminAsyncMessage.CHANGESTATUS:
-		    changeStatus(((StringBuffer) event.getParam(0)).toString());
+		  case adminAsyncMessage.LOGAPPEND:
+		    logAppend(((StringBuffer) event.getParam(0)).toString());
 		    break;
 
 		  case adminAsyncMessage.CHANGEADMINS:
@@ -472,11 +472,11 @@ class GASHAdminDispatch implements Runnable {
    * the trailing newline included.
    */
 
-  public void changeStatus(String status)
+  public void logAppend(String status)
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.changeStatus()");
+	System.err.println("GASHAdminDispatch.logAppend()");
       }
 
     if (frame == null)
@@ -857,7 +857,7 @@ class GASHAdminDispatch implements Runnable {
   public void forceDisconnect(String reason)
   {
     // "Disconnected: {0}\n"
-    changeStatus(ts.l("forceDisconnect.disconnectMessage", reason));
+    logAppend(ts.l("forceDisconnect.disconnectMessage", reason));
     server = null;
   }
 

@@ -203,7 +203,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * to append information to the console logs.
    */
 
-  public static void setStatus(String status)
+  public static void logAppend(String status)
   {
     GanymedeAdmin temp;
     String stampedLine;
@@ -213,12 +213,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	if (GanymedeServer.lSemaphore.checkEnabled() == null)
 	  {
 	    // "{0, Date} [{1, number, #}] {2}\n"
-	    stampedLine = ts.l("setStatus.enabled_template", new Date(), new Integer(GanymedeServer.lSemaphore.getCount()), status);
+	    stampedLine = ts.l("logAppend.enabled_template", new Date(), new Integer(GanymedeServer.lSemaphore.getCount()), status);
 	  }
 	else
 	  {
 	    // "{0, Date} [*] {1}\n"
-	    stampedLine = ts.l("setStatus.disabled_template", new Date(), status);
+	    stampedLine = ts.l("logAppend.disabled_template", new Date(), status);
 	  }
       }
 
@@ -232,7 +232,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
 	    try
 	      {
-		temp.asyncPort.changeStatus(stampedLine);
+		temp.asyncPort.logAppend(stampedLine);
 	      }
 	    catch (RemoteException ex)
 	      {

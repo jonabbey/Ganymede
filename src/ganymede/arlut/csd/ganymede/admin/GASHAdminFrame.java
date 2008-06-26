@@ -1404,19 +1404,19 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   private void exceptionHandler(Throwable ex)
   {
-    adminDispatch.changeStatus("******************** " +
-			       "Error occurred while communicating with the server " +
-			       "********************\n");
+    adminDispatch.logAppend("******************** " +
+                            "Error occurred while communicating with the server " +
+                            "********************\n");
     StringWriter stringTarget = new StringWriter();
     PrintWriter writer = new PrintWriter(stringTarget);
     
     ex.printStackTrace(writer);
     writer.close();
 
-    adminDispatch.changeStatus(stringTarget.toString());
+    adminDispatch.logAppend(stringTarget.toString());
 
-    adminDispatch.changeStatus("****************************************" +
-			       "****************************************\n");
+    adminDispatch.logAppend("****************************************" +
+                            "****************************************\n");
   }
 
   /**

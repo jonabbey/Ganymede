@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -79,7 +79,7 @@ public class adminAsyncMessage implements java.io.Serializable {
   static public final int SETOBJSCHECKOUT = 3;
   static public final int SETLOCKSHELD = 4;
   static public final int CHANGESTATE = 5;
-  static public final int CHANGESTATUS = 6;
+  static public final int LOGAPPEND = 6;
   static public final int CHANGEADMINS = 7;
   static public final int CHANGEUSERS = 8;
   static public final int CHANGETASKS = 9;
@@ -169,8 +169,8 @@ public class adminAsyncMessage implements java.io.Serializable {
 	result.append("changeState");
 	break;
 
-      case CHANGESTATUS:
-	result.append("changeStatus");
+      case LOGAPPEND:
+	result.append("logAppend");
 	break;
 
       case CHANGEADMINS:
