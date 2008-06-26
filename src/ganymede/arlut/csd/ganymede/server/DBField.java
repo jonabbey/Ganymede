@@ -3421,33 +3421,31 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public boolean verifyWritePermission()
   {
-    if (owner instanceof DBEditObject)
-      {
-	PermEntry pe = owner.getFieldPerm(getID());
-
-	if (pe == null)
-	  {
-	    return false;
-	  }
-
-        if (owner.getGSession() != null)
-          {
-            try
-              {
-                owner.getGSession().checklogin();  // mostly for the lastaction update side-effect
-              }
-            catch (NotLoggedInException ex)
-              {
-                return false;
-              }
-          }
-
-	return pe.isEditable();
-      }
-    else
+    if (!(owner instanceof DBEditObject))
       {
 	return false;  // if we're not in a transaction, we certainly can't be edited.
       }
+
+    if (owner.getGSession() != null)
+      {
+        try
+          {
+            owner.getGSession().checklogin();  // mostly for the lastaction update side-effect
+          }
+        catch (NotLoggedInException ex)
+          {
+            return false;
+          }
+      }
+
+    PermEntry pe = owner.getFieldPerm(getID());
+
+    if (pe == null)
+      {
+        return false;
+      }
+
+    return pe.isEditable();
   }
 
   /**
