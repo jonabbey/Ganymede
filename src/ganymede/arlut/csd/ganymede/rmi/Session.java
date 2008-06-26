@@ -478,6 +478,16 @@ public interface Session extends Remote {
   void reportClientBug(String clientIdentifier, String exceptionReport) throws RemoteException;
 
   /**
+   * <p>This method allows clients to report their version information to
+   * the server for logging and what-not.</p>
+   *
+   * @param clientIdentifier A string identifying any information
+   * about the client that the client feels like providing.
+   */
+
+  void reportClientVersion(String clientIdentifier) throws RemoteException;
+
+  /**
    * <p>This method provides the hook for doing a
    * fast database dump to a string form.  The 
    * {@link arlut.csd.ganymede.common.DumpResult DumpResult}

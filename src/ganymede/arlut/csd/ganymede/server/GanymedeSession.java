@@ -2721,6 +2721,41 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
+   * This method allows clients to report their version information to
+   * the server for logging and what-not.
+   *
+   * This method will also email the bug report to the email address
+   *
+   * @param clientIdentifier A string identifying any information
+   * about the client that the client feels like providing.
+   */
+
+  public void reportClientVersion(String clientIdentifier) throws NotLoggedInException
+  {
+    String userIdentifier;
+
+    if (personaName != null)
+      {
+	userIdentifier = personaName;
+      }
+    else if (username != null)
+      {
+	userIdentifier = username;
+      }
+    else
+      {
+	userIdentifier = "unknown user";
+      }
+
+    StringBuffer report = new StringBuffer();
+
+    // "\nClient Version Report:\nuser == "{0}"\nhost == "{1}"\nclient id string == "{2}"
+    report.append(ts.l("reportClientBug.logPattern", userIdentifier, clienthost, clientIdentifier));
+
+    Ganymede.debug(report.toString());
+  }
+
+  /**
    * This method allows the client to get a status update on a
    * specific list of invids.
    *

@@ -186,6 +186,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.gclient");
 
   /**
+   * If reportVersionToServer is true, the Ganymede client will report
+   * the Java version information to the server that it has logged
+   * into on startup.
+   */
+
+  private static final boolean reportVersionToServer = true;
+
+  /**
    * Preferences object for the Ganymede client.  Using this object,
    * we can save and retrieve preferences data from a system-dependent
    * backing-store.. the Registry on Windows, a XML file under
@@ -699,6 +707,27 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     catch (RemoteException rx)
       {
 	processExceptionRethrow(rx);
+      }
+
+    if (reportVersionToServer)
+      {
+        try
+          {
+            // "GUI Client, running on
+            // java version \"{0}\" on
+            // OS: \"{1}\", version:
+            // \"{2}\", on \"{3}\""
+
+            session.reportClientVersion(ts.l("showExceptionMessage.client_exception",
+                                             System.getProperty("java.version"),
+                                             System.getProperty("os.name"),
+                                             System.getProperty("os.version"),
+                                             System.getProperty("os.arch")));
+          }
+        catch (RemoteException ex)
+          {
+            // nada
+          }
       }
 
     JDefaultOwnerDialog.clear();
