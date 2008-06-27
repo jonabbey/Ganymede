@@ -82,9 +82,9 @@ public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptio
     // throwing this exception, we'll just print it out and return,
     // rather than doing whatever Ganymede.logError() does.
 
-    StackTraceElement trace[] = ex.getStackTrace();
+    StackTraceElement traces[] = ex.getStackTrace();
 
-    for (StackTraceElement traceElement: trace)
+    for (StackTraceElement traceElement: traces)
       {
 	if (traceElement.getClassName().equals("arlut.csd.ganymede.server.GanymedeUncaughtExceptionHandler") &&
 	    traceElement.getMethodName().equals("uncaughtException"))
