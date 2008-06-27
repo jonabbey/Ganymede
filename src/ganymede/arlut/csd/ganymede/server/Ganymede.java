@@ -68,6 +68,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RMISecurityManager;
@@ -423,10 +425,11 @@ public class Ganymede {
 
     /* -- */
 
-    /* If the "usedirectory" option is set, then use the supplied directory name 
-     * as the base path to the properties file (which is assumed to be 
-     * "ganymede.properties" and the debug log (assumed to be debug.log).
-     */
+    // If the "usedirectory" option is set, then use the supplied
+    // directory name as the base path to the properties file (which
+    // is assumed to be "ganymede.properties" and the debug log
+    // (assumed to be debug.log).
+
     useDirectory = ParseArgs.getArg("usedirectory", argv);
 
     if (useDirectory != null)
@@ -530,6 +533,10 @@ public class Ganymede {
 
 	System.getProperties().setProperty("sun.rmi.server.exceptionTrace", "true");
       }
+
+    // register our default UncaughtExceptionHandler
+
+    setupUncaughtExceptionHandler();
 
     // create the database 
 
@@ -1532,6 +1539,57 @@ public class Ganymede {
   }
 
   /**
+   * Sets up our default UncaughtExceptionHandler, if we're running
+   * on Java 1.5 or later.
+   */
+
+  private static void setupUncaughtExceptionHandler()
+  {
+    // we do this via Reflection so that this class won't have a
+    // static dependency on a class which can only be compiled/loaded
+    // on a system running Java 5.
+    
+    try
+      {
+	Class handlerClass = Class.forName("arlut.csd.ganymede.server.GanymedeUncaughtExceptionHandler");
+	Method setupMethod = handlerClass.getMethod("setup");
+	setupMethod.invoke(null);
+
+	System.err.println("GanymedeUncaughtExceptionHandler initialized");
+      }
+    catch (ClassNotFoundException ex)
+      {
+	System.err.println("GanymedeUncaughtExceptionHandler not present");
+	return;
+      }
+    catch (LinkageError ex)
+      {
+	System.err.println("GanymedeUncaughtExceptionHandler not supported");
+	return;
+      }
+    catch (IllegalAccessException ex)
+      {
+	System.err.println("IllegalAccessException loading GanymedeUncaughtExceptionHandler");
+	return;
+      }
+    catch (InvocationTargetException ex)
+      {
+	System.err.println("InvocationTargetException loading GanymedeUncaughtExceptionHandler");
+	return;
+      }
+    catch (NoSuchMethodException ex)
+      {
+	System.err.println("NoSuchMethodException loading GanymedeUncaughtExceptionHandler");
+	return;
+      }
+    catch (SecurityException ex)
+      {
+	System.err.println("SecurityException loading GanymedeUncaughtExceptionHandler");
+	return;
+      }
+  }
+
+  /**
    * <p>This method loads properties from the ganymede.properties
    * file.</p>
    *
@@ -1807,7 +1865,6 @@ public class Ganymede {
 	      {
 	      }
 	  }
-
       }
 
     return success;

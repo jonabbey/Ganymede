@@ -65,15 +65,33 @@ package arlut.csd.ganymede.server;
  * exceptions which lead to thread death on the server can be properly
  * logged and reported.
  *
- * This class has dependencies on Java 5 features.
+ * GanymedeUncaughtExceptionHandler requires Java 5 to function, but
+ * we don't want to make the Ganymede code base depend on Java 5
+ * yet.  As such, we require this class to handle its own
+ * initialization and registration as our default
+ * UncaughtExceptionHandler.
+ *
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
 public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
-  static
+  /**
+   * We call this static method through Java Reflection in the
+   * Ganymede server startup path.  That allows the Ganymede server
+   * startup to dynamically decide whether
+   * GanymedeUncaughtExceptionHandler was compiled or not, without
+   * making the compilation of arlut.csd.ganymede.server.Ganymede
+   * itself dependent on whether or not this class was compiled at
+   * build time.
+   */
+
+  public static void setup()
   {
     Thread.setDefaultUncaughtExceptionHandler(new GanymedeUncaughtExceptionHandler());
   }
+
+  // ---
 
   public void uncaughtException(Thread t, Throwable ex)
   {
