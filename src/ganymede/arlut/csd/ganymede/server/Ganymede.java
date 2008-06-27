@@ -1553,7 +1553,7 @@ public class Ganymede {
       {
 	Class handlerClass = Class.forName("arlut.csd.ganymede.server.GanymedeUncaughtExceptionHandler");
 	Method setupMethod = handlerClass.getMethod("setup", new Class[0]);
-	setupMethod.invoke(null, (Class[]) null);
+	setupMethod.invoke(null, (Object[]) null);
 
 	System.err.println("GanymedeUncaughtExceptionHandler initialized");
       }
