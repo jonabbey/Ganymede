@@ -52,7 +52,7 @@ public class SunJDK141ConditionalEventPump extends SunJDK14ConditionalEventPump
    {
       try
       {
-         Object first = getFirstMethod.invoke(event, null);
+	Object first = getFirstMethod.invoke(event, (Object[])null);
          if (first == event) return true;
       }
       catch (Exception ignored)

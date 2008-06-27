@@ -91,7 +91,7 @@ class JREVersion
          {
             try
             {
-               cls.getDeclaredMethod("getFirst", null);
+	      cls.getDeclaredMethod("getFirst", (Class[])null);
                return Boolean.TRUE;
             }
             catch (Exception ignored)
