@@ -64,6 +64,8 @@ package arlut.csd.ganymede.server;
  * bound as the system's default Thread.UncaughtExceptionHandler, any
  * exceptions which lead to thread death on the server can be properly
  * logged and reported.
+ *
+ * This class has dependencies on Java 5 features.
  */
 
 public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
