@@ -89,9 +89,15 @@ public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptio
 	if (traceElement.getClassName().equals("arlut.csd.ganymede.server.GanymedeUncaughtExceptionHandler") &&
 	    traceElement.getMethodName().equals("uncaughtException"))
 	  {
-	    System.err.println("Exception loop processing:\n");
-	    ex.printStackTrace();
-	    return;
+	    try
+	      {
+		System.err.println("Exception loop processing:\n");
+		ex.printStackTrace();
+	      }
+	    finally
+	      {
+		return;
+	      }
 	  }
       }
 
