@@ -75,6 +75,26 @@ public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptio
 
   public void uncaughtException(Thread t, Throwable ex)
   {
+    // We need to make sure that we didn't somehow cause the exception
+    // we're responding to by calling Ganymede.logError().
+    //
+    // If we detect that this method previously participated in
+    // throwing this exception, we'll just print it out and return,
+    // rather than doing whatever Ganymede.logError() does.
+
+    StackTraceElement trace[] = ex.getStackTrace();
+
+    for (StackTraceElement traceElement: trace)
+      {
+	if (traceElement.getClassName().equals("arlut.csd.ganymede.server.GanymedeUncaughtExceptionHandler") &&
+	    traceElement.getMethodName().equals("uncaughtException"))
+	  {
+	    System.err.println("Exception loop processing:\n");
+	    ex.printStackTrace();
+	    return;
+	  }
+      }
+
     Ganymede.logError(ex);
   }
 }
