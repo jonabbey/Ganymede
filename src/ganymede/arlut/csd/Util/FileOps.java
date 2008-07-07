@@ -215,9 +215,46 @@ public class FileOps {
    * the subprocess from blocking due to its output piling up.</p>
    */
 
+  public static int runProcess(String[] cmdArgs) throws IOException, InterruptedException
+  {
+    Process p = java.lang.Runtime.getRuntime().exec(cmdArgs);
+
+    return runProcess(p);
+  }
+
+  /**
+   * <P>This method is used to run an external process line for the
+   * Ganymede server.  This method waits until the external command
+   * completes before returning, and all file handles opened to
+   * communicate with the process will be closed before returning.</P>
+   *
+   * <p>While this method is waiting for the process to exit, it will
+   * spin on the stdout and stderr from the process, consuming and
+   * discarding anything written by the subprocess so as to prevent
+   * the subprocess from blocking due to its output piling up.</p>
+   */
+
   public static int runProcess(String commandLine) throws IOException, InterruptedException
   {
     Process p = java.lang.Runtime.getRuntime().exec(commandLine);
+
+    return runProcess(p);
+  }
+
+  /**
+   * <P>This method is used to run an external process line for the
+   * Ganymede server.  This method waits until the external command
+   * completes before returning, and all file handles opened to
+   * communicate with the process will be closed before returning.</P>
+   *
+   * <p>While this method is waiting for the process to exit, it will
+   * spin on the stdout and stderr from the process, consuming and
+   * discarding anything written by the subprocess so as to prevent
+   * the subprocess from blocking due to its output piling up.</p>
+   */
+
+  private static int runProcess(Process p) throws IOException, InterruptedException
+  {
     InputStream iStream = p.getInputStream();
     InputStream eStream = p.getErrorStream();
 
