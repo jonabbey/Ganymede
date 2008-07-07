@@ -161,8 +161,8 @@ refresh the jar files.
     <javac destdir="${build.classes}"
            debug="${debug.flag}"
            debuglevel="${debug.level}"
-           target="1.4"
-           source="1.4"
+           target="1.5"
+           source="1.5"
            deprecation="on"
            srcdir="${src.dir}"
            excludes="**/GanymedeUncaughtExceptionHandler.java">

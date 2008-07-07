@@ -1404,6 +1404,15 @@ the calendar.  Useful for editing dates in object data as well as for
 setting the start date for object and admin persona history in the
 history panels.
 
+88. [EVERYTHING] Reworked the build process for Ganymede to make it require Java 5
+
+As of 7 July 2008, we're going to go ahead and make Ganymede dependent
+on Java 5, so we can take advantage of some new features in Java 5,
+most especially the defaultUncaughtExceptionHandler mechanism.
+
+Going forward, we'll bring Java 5 features into Ganymede as seems best
+appropriate.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
