@@ -151,7 +151,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // this interface, go ahead and null it out as part of our
     // pre-commit activities.
 
-    if (this.isSet(interfaceSchema.IPNET) && !fieldRequired(this, interfaceSchema.ETHERNETINFO))
+    if (this.isDefined(interfaceSchema.IPNET) && !fieldRequired(this, interfaceSchema.ETHERNETINFO))
       {
         ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
 
