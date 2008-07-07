@@ -164,8 +164,7 @@ refresh the jar files.
            target="1.5"
            source="1.5"
            deprecation="on"
-           srcdir="${src.dir}"
-           excludes="**/GanymedeUncaughtExceptionHandler.java">
+           srcdir="${src.dir}">
       <src path="${src.dir}"/>
       <classpath refid="classpath"/>
     </javac>
