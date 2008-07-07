@@ -883,8 +883,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
             toAddresses.addElement("broccol@arlut.utexas.edu");
 
             Ganymede.log.sendMail(toAddresses,
-                                  "Exchange User " + this.getLabel() + " Scheduled for Deletion",
-                                  "User " + this.getLabel() +
+                                  "Exchange User " + object.getLabel() + " Scheduled for Deletion",
+                                  "User " + object.getLabel() +
                                   " is scheduled to be deleted from Ganymede in " + days +
                                   " days.\n\nPCS will need to be prepared for clearing the account out of the Exchange server.\n");
             return false;
