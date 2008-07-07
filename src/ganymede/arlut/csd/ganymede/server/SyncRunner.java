@@ -1216,7 +1216,8 @@ public class SyncRunner implements Runnable {
   public void runIncremental()
   {
     int myTransactionNumber;
-    String myName, myServiceProgram, invocation;
+    String myName, myServiceProgram;
+    String invocation[];
     String shutdownState = null;
     File file;
 
@@ -1227,7 +1228,9 @@ public class SyncRunner implements Runnable {
 	myName = getName();
 	myTransactionNumber = getTransactionNumber();
 	myServiceProgram = getServiceProgram();
-	invocation = myServiceProgram + " " + String.valueOf(myTransactionNumber);
+        invocation = new String[2];
+	invocation[0] = myServiceProgram;
+        invocation[1] = String.valueOf(myTransactionNumber);
 	needBuild.set(false);
       }
 
