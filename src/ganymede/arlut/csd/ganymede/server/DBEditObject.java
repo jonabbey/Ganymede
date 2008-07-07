@@ -1016,6 +1016,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * that session reference may be used by the verifying code if
    * the code needs to access the database.
    *
+   * This method is for custom checks specific to custom DBEditObject
+   * subclasses.  Standard checking for missing fields for which
+   * fieldRequired() returns true is done by {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_checkObjectMissingFields(arlut.csd.ganymede.server.DBEditObject)}
+   * during {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_handlePhase1()}.
+   *
    * To be overridden on necessity in DBEditObject subclasses.
    *
    * <b>*PSEUDOSTATIC*</b>
@@ -3449,7 +3456,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // before this transaction started, report the problem.
 
     // If this object is in an inconsistent state, and was before the
-    // transaction started, don't block the commit
+    // transaction started, don't block the commit, because the object
+    // may have been rendered inconsistent by forcible deletion of
+    // other objects previously linked by this object, and we don't
+    // want to block a commit that a non-privileged, non-supergash
+    // admin may not necessarily be able to fix.
 
     if (getGSession().enableOversight)
       {
