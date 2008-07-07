@@ -151,7 +151,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // this interface, go ahead and null it out as part of our
     // pre-commit activities.
 
-    if (!fieldRequired(this, interfaceSchema.ETHERNETINFO))
+    if (this.isSet(interfaceSchema.IPNET) && !fieldRequired(this, interfaceSchema.ETHERNETINFO))
       {
         ReturnVal retVal = this.setFieldValueLocal(interfaceSchema.ETHERNETINFO, null);
 
@@ -490,7 +490,14 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
       case interfaceSchema.ETHERNETINFO:
         DBObject networkObj = object.lookupInvid((Invid)object.getFieldValueLocal(interfaceSchema.IPNET));
 
-        return networkObj.isSet(networkSchema.MACREQUIRED);
+        // If networkObj is null, the DBEditSet will trigger on the
+        // missing/unset IPNET field, so we don't need to worry about
+        // that here.  We don't want to throw an exception, though.
+
+        if (networkObj != null)
+          {
+            return networkObj.isSet(networkSchema.MACREQUIRED);
+          }
       }
 
     return false;
