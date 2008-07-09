@@ -170,7 +170,7 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
     this.setContentPane(pane);
     this.setBackground(java.awt.Color.white);
 
-    // "JDK Information\n\nJava Vendor: {0}\nJava VM Name: {1}\nJava Version: {2}\nOS Name: {3}\nOS Version: {4}\nSystem Architecture: {5}"
+    // "JDK Information\n\nJava Vendor: {0}\nJava VM Name: {1}\nJava Version: {2}\n\nOS Name: {3}\nOS Version: {4}\nSystem Architecture: {5}"
 
     textbox.setText(ts.l("init.version_string",
                          System.getProperty("java.vendor"),
