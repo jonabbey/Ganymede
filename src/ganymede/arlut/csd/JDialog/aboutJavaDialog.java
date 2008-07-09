@@ -138,7 +138,7 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
     scrollPane.getViewport().setOpaque(true);
     scrollPane.getViewport().setBackground(java.awt.Color.white);
 
-    ok = new JButton("Ok");
+    ok = new JButton(StringDialog.ok);  // localized
     ok.addActionListener(this);
 
     gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -170,13 +170,15 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
     this.setContentPane(pane);
     this.setBackground(java.awt.Color.white);
 
-    // "Java Version: {0}\nOS Name: {1}\nOS Version: {2}\System Architecture: {3}"
+    // "JVM Information\n\nJava Version: {0}\nOS Name: {1}\nOS Version: {2}\nSystem Architecture: {3}"
 
     textbox.setText(ts.l("init.version_string",
                          System.getProperty("java.version"),
                          System.getProperty("os.name"),
                          System.getProperty("os.version"),
                          System.getProperty("os.arch")));
+
+    pack();
   }
 
   public void setVisible(boolean state)
