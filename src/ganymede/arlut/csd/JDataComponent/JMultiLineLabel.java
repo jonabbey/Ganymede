@@ -87,6 +87,8 @@ import arlut.csd.Util.WordWrap;
 
 public class JMultiLineLabel extends JTextArea {
 
+  static final boolean debug = true;
+
   /**
    * Controls the default word wrap length.  The default value of 128
    * columns should hopefully be wide enough to handle exception
@@ -161,7 +163,14 @@ public class JMultiLineLabel extends JTextArea {
 
     if (c == null)
       {
-	return null;
+	return (Color)UIManager.get("Label.background");
+      }
+
+    Color result = c.getBackground();
+
+    if (debug)
+      {
+	System.err.println("getParentBGColor() returning " + result.toString());
       }
 
     return c.getBackground();
