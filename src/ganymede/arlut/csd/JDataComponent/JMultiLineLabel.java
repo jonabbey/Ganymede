@@ -139,9 +139,10 @@ public class JMultiLineLabel extends JTextArea {
       {
 	super.setBackground(this.getParent().getBackground());
       }
-
-    this.setOpaque(false);
-    this.setBorder(null);
+    else
+      {
+	this.setOpaque(false);
+      }
 
     repaint();
   }
@@ -163,9 +164,10 @@ public class JMultiLineLabel extends JTextArea {
       {
 	super.setBackground(this.getParent().getBackground());
       }
-
-    this.setOpaque(false);
-    this.setBorder(null);
+    else
+      {
+	this.setOpaque(false);
+      }
 
     super.update(g);
   }
