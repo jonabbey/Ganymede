@@ -111,6 +111,11 @@ public class JMultiLineLabel extends JTextArea {
 
   public JMultiLineLabel(String label)
   {
+    if (debug)
+      {
+	System.err.println("JMultiLineLabel(" + label + ") initializing");
+      }
+
     setEditable(false);
     setOpaque(false);
     setBorder(null); 
@@ -154,6 +159,7 @@ public class JMultiLineLabel extends JTextArea {
 
   private Color getParentBGColor()
   {
+    Color result = null;
     Component c = this.getParent();
 
     while (c != null && c.getBackground() == null)
@@ -163,17 +169,24 @@ public class JMultiLineLabel extends JTextArea {
 
     if (c == null)
       {
-	return (Color)UIManager.get("Label.background");
+	result = (Color)UIManager.get("Label.background");
+
+	if (debug)
+	  {
+	    System.err.println("getParentBGColor() no parent color set, returning " + result.toString());
+	  }
+
+	return result;
       }
 
-    Color result = c.getBackground();
+    result = c.getBackground();
 
     if (debug)
       {
 	System.err.println("getParentBGColor() returning " + result.toString());
       }
 
-    return c.getBackground();
+    return result;
   }
 
   public void paint(Graphics g)
