@@ -58,7 +58,9 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.util.StringTokenizer;
 
 import javax.swing.plaf.ComponentUI;
@@ -103,6 +105,7 @@ public class JMultiLineLabel extends JTextArea {
 
   public JMultiLineLabel(String label)
   {
+    setEnabled(false);
     setEditable(false);
     setOpaque(false);
     setBorder(null); 
@@ -134,6 +137,14 @@ public class JMultiLineLabel extends JTextArea {
     this.setBorder(null);
 
     repaint();
+  }
+
+  public void paint(Graphics g)
+  {
+    Graphics2D g2 = (Graphics2D) g;
+    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+    super.paint(g);
   }
 
   public void update(Graphics g)
