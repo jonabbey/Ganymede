@@ -1226,12 +1226,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   public void showJavaVersion()
   {
-    if (about == null)
+    if (java_ver_dialog == null)
       {
-	about = new aboutGanyDialog(this, ts.l("showJavaVersion.dialog_title"));  // "Java Version"
+	java_ver_dialog = new aboutJavaDialog(this, ts.l("showJavaVersion.dialog_title"));  // "Java Version"
       }
 
-    about.setVisible(true);
+    java_ver_dialog.setVisible(true);
   }
 
   /**
