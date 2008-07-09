@@ -98,8 +98,6 @@ public class JMultiLineLabel extends JTextArea {
   int 
     columns = 128;
 
-  private boolean backgroundSet = false;
-
   /*
    * Constructors
    */
@@ -118,7 +116,6 @@ public class JMultiLineLabel extends JTextArea {
 
     setEditable(false);
     setOpaque(false);
-    setBorder(null); 
     setLineWrap(true);
     setWrapStyleWord(true);
 
@@ -145,7 +142,7 @@ public class JMultiLineLabel extends JTextArea {
 
     Color bgColor = getParentBGColor();
 
-    if (bgColor != null && !this.backgroundSet)
+    if (bgColor != null)
       {
 	super.setBackground(bgColor);
       }
@@ -160,7 +157,7 @@ public class JMultiLineLabel extends JTextArea {
   private Color getParentBGColor()
   {
     Color result = null;
-    Component c = this.getParent();
+    Component c = this;
 
     while (c != null && c.getBackground() == null)
       {
@@ -204,7 +201,7 @@ public class JMultiLineLabel extends JTextArea {
 
     Color bgColor = getParentBGColor();
 
-    if (bgColor != null && !this.backgroundSet)
+    if (bgColor != null)
       {
 	super.setBackground(bgColor);
       }
@@ -217,13 +214,6 @@ public class JMultiLineLabel extends JTextArea {
   }
 
   // Public functions
-
-  public void setBackground(Color color)
-  {
-    backgroundSet = (color != null);
-
-    super.setBackground(color);
-  }
 
   public void setWrapLength(int val)
   {
