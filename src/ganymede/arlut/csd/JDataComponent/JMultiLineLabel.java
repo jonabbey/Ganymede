@@ -54,6 +54,7 @@
 package arlut.csd.JDataComponent;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -135,9 +136,11 @@ public class JMultiLineLabel extends JTextArea {
     this.setFont((Font)UIManager.get("Label.font"));
     this.setForeground((Color)UIManager.get("Label.foreground"));
 
-    if (this.getParent() != null && !this.backgroundSet)
+    Color bgColor = getParentBGColor();
+
+    if (bgColor != null && !this.backgroundSet)
       {
-	super.setBackground(this.getParent().getBackground());
+	super.setBackground(bgColor);
       }
     else
       {
@@ -145,6 +148,23 @@ public class JMultiLineLabel extends JTextArea {
       }
 
     repaint();
+  }
+
+  private Color getParentBGColor()
+  {
+    Component c = this.getParent();
+
+    while (c != null && c.getBackground() == null)
+      {
+	c = c.getParent();
+      }
+
+    if (c == null)
+      {
+	return null;
+      }
+
+    return c.getBackground();
   }
 
   public void paint(Graphics g)
@@ -157,12 +177,14 @@ public class JMultiLineLabel extends JTextArea {
 
   public void update(Graphics g)
   {
-    this.setFont((Font)UIManager.get("Label.font"));
-    this.setForeground((Color)UIManager.get("Label.foreground"));
+    //    this.setFont((Font)UIManager.get("Label.font"));
+    //     this.setForeground((Color)UIManager.get("Label.foreground"));
 
-    if (this.getParent() != null && !this.backgroundSet)
+    Color bgColor = getParentBGColor();
+
+    if (bgColor != null && !this.backgroundSet)
       {
-	super.setBackground(this.getParent().getBackground());
+	super.setBackground(bgColor);
       }
     else
       {
