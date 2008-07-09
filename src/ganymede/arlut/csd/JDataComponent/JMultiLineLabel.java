@@ -105,7 +105,6 @@ public class JMultiLineLabel extends JTextArea {
 
   public JMultiLineLabel(String label)
   {
-    setEnabled(false);
     setEditable(false);
     setOpaque(false);
     setBorder(null); 
