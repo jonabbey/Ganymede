@@ -63,6 +63,7 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.util.StringTokenizer;
 
+import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
@@ -111,11 +112,13 @@ public class JMultiLineLabel extends JTextArea {
     setLineWrap(true);
     setWrapStyleWord(true);
 
-    this.setBackground((Color)UIManager.get("Label.background"));
+    //    this.setBackground((Color)UIManager.get("Label.background"));
     this.setForeground((Color)UIManager.get("Label.foreground"));
     this.setFont((Font)UIManager.get("Label.font"));
 
     setText(label);
+
+    setBorder(new EmptyBorder(new Insets(0,0,0,10)));
   }
 
   /**
@@ -130,7 +133,7 @@ public class JMultiLineLabel extends JTextArea {
 
     this.setFont((Font)UIManager.get("Label.font"));
     this.setForeground((Color)UIManager.get("Label.foreground"));
-    this.setBackground((Color)UIManager.get("Label.background"));
+    //    this.setBackground((Color)UIManager.get("Label.background"));
 
     this.setOpaque(false);
     this.setBorder(null);
@@ -150,7 +153,7 @@ public class JMultiLineLabel extends JTextArea {
   {
     this.setFont((Font)UIManager.get("Label.font"));
     this.setForeground((Color)UIManager.get("Label.foreground"));
-    this.setBackground((Color)UIManager.get("Label.background"));
+    //    this.setBackground((Color)UIManager.get("Label.background"));
 
     this.setOpaque(false);
     this.setBorder(null);
