@@ -718,16 +718,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
         try
           {
-            // "GUI Client, running on
-            // java version \"{0}\" on
-            // OS: \"{1}\", version:
-            // \"{2}\", on \"{3}\""
-
-            session.reportClientVersion(ts.l("showExceptionMessage.client_exception",
-                                             System.getProperty("java.version"),
-                                             System.getProperty("os.name"),
-                                             System.getProperty("os.version"),
-                                             System.getProperty("os.arch")));
+            session.reportClientVersion(aboutJavaDialog.getVersionInfoString());
           }
         catch (RemoteException ex)
           {
@@ -2294,20 +2285,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
 					 try
 					   {
-					     StringBuffer clientInfo = new StringBuffer();
-
-					     // "GUI Client, running on
-					     // java version \"{0}\" on
-					     // OS: \"{1}\", version:
-					     // \"{2}\", on \"{3}\""
-
-					     clientInfo.append(ts.l("showExceptionMessage.client_exception",
-								    System.getProperty("java.version"),
-								    System.getProperty("os.name"),
-								    System.getProperty("os.version"),
-								    System.getProperty("os.arch")));
-
-					     session.reportClientBug(clientInfo.toString(), Message);
+					     session.reportClientBug(aboutJavaDialog.getVersionInfoString(), Message);
 					     success = true;
 					   }
 					 catch (Throwable ex)
