@@ -116,6 +116,7 @@ import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.messageDialog;
 import arlut.csd.JDialog.aboutGanyDialog;
+import arlut.csd.JDialog.aboutJavaDialog;
 import arlut.csd.JTree.treeCallback;
 import arlut.csd.JTree.treeControl;
 import arlut.csd.JTree.treeMenu;
@@ -269,6 +270,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     default_owner_action = "Set Default Owner",
     help_action = "Help",
     about_action = "About Ganymede",
+    java_version_action = "Java Version",
     credits_action = "Credits",
     motd_action = "Message of the day";
 
@@ -436,6 +438,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   aboutGanyDialog
     about = null;
+
+  aboutJavaDialog
+    java_ver_dialog = null;
 
   Vector
     personae,
@@ -1119,6 +1124,15 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     showMOTDMI.setActionCommand(motd_action);
     showMOTDMI.addActionListener(this);
     helpMenu.add(showMOTDMI);
+
+    helpMenu.addSeparator();
+
+    // "Java Version"
+    JMenuItem javaVersionMI = new JMenuItem(ts.l("createMenuBar.help_menu_3"));
+    setMenuMnemonic(javaVersionMI, ts.l("createMenuBar.help_menu_3_key_optional"));
+    javaVersionMI.setActionCommand(java_version_action);
+    javaVersionMI.addActionListener(this);
+    helpMenu.add(javaVersionMI);
 
     menubar.add(fileMenu);
     menubar.add(LandFMenu);
@@ -2002,6 +2016,21 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
 	help.setVisible(true);
       }
+  }
+
+  /**
+   * Shows the Java Version dialog.
+   */
+
+  public void showJavaVersion()
+  {
+    if (java_ver_dialog == null)
+      {
+	// "Java Version"
+	java_ver_dialog = new aboutJavaDialog(this, ts.l("showJavaVersion.dialog_title"));
+      }
+
+    java_ver_dialog.setVisible(true);
   }
 
   /**
@@ -5376,6 +5405,15 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	// did.
 
 	showHelpWindow();
+      }
+    else if (command.equals(java_version_action))
+      {
+	Thread thread = new Thread(new Runnable() {
+	  public void run() {
+	    showJavaVersion();
+	  }});
+	thread.setPriority(Thread.NORM_PRIORITY);
+	thread.start();
       }
     else if (command.equals(about_action))
       {

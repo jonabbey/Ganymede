@@ -1,12 +1,10 @@
 /*
 
-   aboutGanyDialog.java
+   aboutJavaDialog.java
 
-   A dialog class used to display text and HTML with an optional
-   image on the left side, used for the about.. and motd features
-   in the Ganymede client.
+   A dialog class used to display information about the JDK being used.
    
-   Created: 4 March 2005
+   Created: 7 July 2008
 
    Last Mod Date: $Date$
    Last Revision Changed: $Rev$
@@ -19,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -79,20 +77,20 @@ import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                 aboutGanyDialog
+                                                                 aboutJavaDialog
 
 ------------------------------------------------------------------------------*/
 
 /**
  *
- * A dialog class used to display information about Ganymede
+ * A dialog class used to display information about the JDK being used.
  *   
  * @version $Id$
  * @author Jonathan Abbey
  *
  */
 
-public class aboutGanyDialog extends JCenterDialog implements ActionListener {
+public class aboutJavaDialog extends JCenterDialog implements ActionListener {
 
   private final static boolean debug = false;
 
@@ -101,7 +99,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
    * the Ganymede server.</p>
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDialog.aboutGanyDialog");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDialog.aboutJavaDialog");
 
   // ---
 
@@ -113,7 +111,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
 
   /* -- */
 
-  public aboutGanyDialog(JFrame frame, String title)
+  public aboutJavaDialog(JFrame frame, String title)
   {
     super(frame, title, false);	// not modal, thanks
 
@@ -140,7 +138,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     scrollPane.getViewport().setOpaque(true);
     scrollPane.getViewport().setBackground(java.awt.Color.white);
 
-    ok = new JButton(StringDialog.ok); // localized
+    ok = new JButton("Ok");
     ok.addActionListener(this);
 
     gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -171,18 +169,14 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
 
     this.setContentPane(pane);
     this.setBackground(java.awt.Color.white);
-  }
 
-  public void loadAboutText()
-  {
-    textbox.setText(ts.l("loadAboutText.aboutText", arlut.csd.Util.SVNVersion.getReleaseString()));
-    super.pack();
-  }
+    // "Java Version: {0}\nOS Name: {1}\nOS Version: {2}\System Architecture: {3}"
 
-  public void loadCreditsText()
-  {
-    textbox.setText(ts.l("loadCreditsText.creditsText"));
-    super.pack();
+    textbox.setText(ts.l("init.version_string",
+                         System.getProperty("java.version"),
+                         System.getProperty("os.name"),
+                         System.getProperty("os.version"),
+                         System.getProperty("os.arch")));
   }
 
   public void setVisible(boolean state)

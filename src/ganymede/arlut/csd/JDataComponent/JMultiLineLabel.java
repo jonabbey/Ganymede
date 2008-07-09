@@ -87,7 +87,7 @@ import arlut.csd.Util.WordWrap;
 
 public class JMultiLineLabel extends JTextArea {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   /**
    * Controls the default word wrap length.  The default value of 128

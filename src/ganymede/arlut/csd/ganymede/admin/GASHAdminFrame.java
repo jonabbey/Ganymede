@@ -110,6 +110,7 @@ import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.messageDialog;
 import arlut.csd.JDialog.aboutGanyDialog;
+import arlut.csd.JDialog.aboutJavaDialog;
 import arlut.csd.JTable.rowSelectCallback;
 import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.PackageResources;
@@ -180,6 +181,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   JMenu helpMenu = null;
   JMenuItem showAboutMI = null;
   JMenuItem showCreditsMI = null;
+  JMenuItem showJavaVersionMI = null;
 
   JPopupMenu popMenu = null;
   JMenuItem killUserMI = null;
@@ -273,6 +275,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     aboutMessage = null;
 
   aboutGanyDialog about = null;
+
+  aboutJavaDialog java_ver_dialog = null;
 
   LAFMenu LandFMenu = null;
 
@@ -468,6 +472,19 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     showCreditsMI.addActionListener(this);
     helpMenu.add(showCreditsMI);
+
+    helpMenu.addSeparator();
+
+    // "Java Version"
+    showJavaVersionMI = new JMenuItem(ts.l("init.help_menu_2"));
+
+    if (ts.hasPattern("init.help_menu_2_key_optional"))
+      {
+        showJavaVersionMI.setMnemonic((int) ts.l("init.help_menu_2_key_optional").charAt(0));
+      }
+
+    showJavaVersionMI.addActionListener(this);
+    helpMenu.add(showJavaVersionMI);
 
     mbar.add(controlMenu);
     mbar.add(debugMenu);
@@ -1179,6 +1196,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
               }
           }
       }
+    else if (event.getSource() == showJavaVersionMI)
+      {
+        showJavaVersion();
+      }
     else if (event.getSource() == showAboutMI)
       {
 	showAboutMessage();
@@ -1200,6 +1221,20 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   }
 
   /**
+   * Shows the Java Version dialog.
+   */
+
+  public void showJavaVersion()
+  {
+    if (about == null)
+      {
+	about = new aboutGanyDialog(this, ts.l("showJavaVersion.dialog_title"));  // "Java Version"
+      }
+
+    about.setVisible(true);
+  }
+
+  /**
    * Shows the About... dialog.
    */
 
@@ -1207,7 +1242,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (about == null)
       {
-	about = new aboutGanyDialog(this, "About Ganymede");
+	about = new aboutGanyDialog(this, ts.l("showAboutMessage.dialog_title"));  // "About Ganymede"
       }
 
     about.loadAboutText();
@@ -1222,7 +1257,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (about == null)
       {
-	about = new aboutGanyDialog(this, "About Ganymede");
+	about = new aboutGanyDialog(this, ts.l("showCreditsMessage.dialog_title"));  // "Ganymede Credits"
       }
 
     about.loadCreditsText();
