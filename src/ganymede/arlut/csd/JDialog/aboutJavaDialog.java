@@ -92,14 +92,42 @@ import arlut.csd.Util.TranslationService;
 
 public class aboutJavaDialog extends JCenterDialog implements ActionListener {
 
-  private final static boolean debug = false;
-
   /**
    * <p>TranslationService object for handling string localization in
    * the Ganymede server.</p>
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JDialog.aboutJavaDialog");
+
+  private final static boolean debug = false;
+
+  private static String versionString = null;
+
+  /**
+   * This static method is used to generate the Java version string
+   * from System properties.
+   *
+   * We expect other classes to call this method when they need to get
+   * a reportable Java version info string.
+   */
+
+  public static synchronized String getVersionInfoString()
+  {
+    if (versionString == null)
+      {
+        // "JDK Information\n\nJava Vendor: {0}\nJava VM Name: {1}\nJava Version: {2}\n\nOS Name: {3}\nOS Version: {4}\nSystem Architecture: {5}"
+
+        versionString = ts.l("getVersionInfo.version_string",
+                             System.getProperty("java.vendor"),
+                             System.getProperty("java.vm.name"),
+                             System.getProperty("java.version"),
+                             System.getProperty("os.name"),
+                             System.getProperty("os.version"),
+                             System.getProperty("os.arch"));
+      }
+
+    return versionString;
+  }
 
   // ---
 
@@ -170,15 +198,7 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
     this.setContentPane(pane);
     this.setBackground(java.awt.Color.white);
 
-    // "JDK Information\n\nJava Vendor: {0}\nJava VM Name: {1}\nJava Version: {2}\n\nOS Name: {3}\nOS Version: {4}\nSystem Architecture: {5}"
-
-    textbox.setText(ts.l("init.version_string",
-                         System.getProperty("java.vendor"),
-                         System.getProperty("java.vm.name"),
-                         System.getProperty("java.version"),
-                         System.getProperty("os.name"),
-                         System.getProperty("os.version"),
-                         System.getProperty("os.arch")));
+    textbox.setText(getVersionInfoString());
 
     pack();
   }
