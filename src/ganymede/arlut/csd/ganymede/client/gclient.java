@@ -192,7 +192,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * into on startup.
    */
 
-  private static final boolean reportVersionToServer = true;
+  private static final boolean reportVersionToServer = false;
 
   /**
    * Preferences object for the Ganymede client.  Using this object,
