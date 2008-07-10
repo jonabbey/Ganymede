@@ -115,12 +115,13 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
   {
     if (versionString == null)
       {
-        // "JDK Information\n\nJava Vendor: {0}\nJava VM Name: {1}\nJava Version: {2}\n\nOS Name: {3}\nOS Version: {4}\nSystem Architecture: {5}"
+        // "JDK Information\n\nJava Vendor: {0}\nJava VM Name: {1}\nJava Version: {2}\nJava VM Version: {3}\n\nOS Name: {4}\nOS Version: {5}\nSystem Architecture: {6}"
 
         versionString = ts.l("getVersionInfoString.version_string",
                              System.getProperty("java.vendor"),
                              System.getProperty("java.vm.name"),
                              System.getProperty("java.version"),
+                             System.getProperty("java.vm.version"),
                              System.getProperty("os.name"),
                              System.getProperty("os.version"),
                              System.getProperty("os.arch"));
