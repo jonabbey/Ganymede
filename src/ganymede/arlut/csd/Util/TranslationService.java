@@ -287,45 +287,16 @@ public class TranslationService {
    * <p>This method takes a localization key and a parameter and
    * creates a localized string out of them.</p>
    *
-   * <p>This heavily overloaded method is called 'l' for localize, and
-   * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
-   */
-
-  public String l(String key, Object param)
-  {
-    String pattern = null;
-    Object[] singleArgs = new Object[1];
-
-    /* -- */
-
-    try
-      {
-	pattern = bundle.getString(key);
-      }
-    catch (MissingResourceException ex)
-      {
-	return null;
-      }
-
-    singleArgs[0] = param;
-
-    return this.format(pattern, singleArgs);
-  }
-
-  /**
-   * <p>This method takes a localization key and parameters and
-   * creates a localized string out of them.</p>
+   * <p>This method is called 'l' for localize, and it has such a
+   * short name so that I can use it everywhere in Ganymede with
+   * minimal source code disruption.</p>
    *
-   * <p>This heavily overloaded method is called 'l' for localize, and
-   * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
+   * This method obviously requires Java 5 due to its use of varargs.
    */
 
-  public String l(String key, Object param, Object param2)
+  public String l(String key, Object... params)
   {
     String pattern = null;
-    Object[] doubleArgs = new Object[2];
 
     /* -- */
 
@@ -338,145 +309,7 @@ public class TranslationService {
 	return null;
       }
 
-    doubleArgs[0] = param; 
-    doubleArgs[1] = param2; 
-
-    return this.format(pattern, doubleArgs);
-  }
-
-  /**
-   * <p>This method takes a localization key and parameters and
-   * creates a localized string out of them.</p>
-   *
-   * <p>This heavily overloaded method is called 'l' for localize, and
-   * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
-   */
-
-  public String l(String key, Object param, Object param2, Object param3)
-  {
-    String pattern = null;
-    Object[] tripleArgs = new Object[3];
-
-    /* -- */
-
-    try
-      {
-	pattern = bundle.getString(key);
-      }
-    catch (MissingResourceException ex)
-      {
-	return null;
-      }
-
-    tripleArgs[0] = param; 
-    tripleArgs[1] = param2; 
-    tripleArgs[2] = param3; 
-
-    return this.format(pattern, tripleArgs);
-  }
-
-  /**
-   * <p>This method takes a localization key and parameters and
-   * creates a localized string out of them.</p>
-   *
-   * <p>This heavily overloaded method is called 'l' for localize, and
-   * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
-   */
-
-  public String l(String key, Object param, Object param2, Object param3, Object param4)
-  {
-    String pattern = null;
-    Object[] quadArgs = new Object[4];
-
-    /* -- */
-
-    try
-      {
-	pattern = bundle.getString(key);
-      }
-    catch (MissingResourceException ex)
-      {
-	return null;
-      }
-    
-    quadArgs[0] = param; 
-    quadArgs[1] = param2; 
-    quadArgs[2] = param3;
-    quadArgs[3] = param4;
-
-    return this.format(pattern, quadArgs);
-  }
-
-  /**
-   * <p>This method takes a localization key and parameters and
-   * creates a localized string out of them.</p>
-   *
-   * <p>This heavily overloaded method is called 'l' for localize, and
-   * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
-   */
-
-  public String l(String key, Object param, Object param2, Object param3, Object param4, Object param5)
-  {
-    String pattern = null;
-    String result;
-    Object quintArgs[] = new Object[5];
-
-    /* -- */
-
-    try
-      {
-	pattern = bundle.getString(key);
-      }
-    catch (MissingResourceException ex)
-      {
-	return null;
-      }
-    
-    quintArgs[0] = param;
-    quintArgs[1] = param2;
-    quintArgs[2] = param3;
-    quintArgs[3] = param4;
-    quintArgs[4] = param5;
-
-    return this.format(pattern, quintArgs);
-  }
-
-  /**
-   * <p>This method takes a localization key and parameters and
-   * creates a localized string out of them.</p>
-   *
-   * <p>This heavily overloaded method is called 'l' for localize, and
-   * it has such a short name so that I can use it everywhere in
-   * Ganymede without concern.</p>
-   */
-
-  public String l(String key, Object param, Object param2, Object param3, Object param4, Object param5, Object param6)
-  {
-    String pattern = null;
-    Object sextArgs[] = new Object[6];
-
-    /* -- */
-
-    try
-      {
-	pattern = bundle.getString(key);
-      }
-    catch (MissingResourceException ex)
-      {
-	return null;
-      }
-    
-    sextArgs[0] = param;
-    sextArgs[1] = param2;
-    sextArgs[2] = param3;
-    sextArgs[3] = param4;
-    sextArgs[4] = param5;
-    sextArgs[5] = param6;
-
-    return this.format(pattern, sextArgs);
+    return this.format(pattern, params);
   }
 
   public String toString()
