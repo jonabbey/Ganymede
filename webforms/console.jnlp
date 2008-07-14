@@ -29,7 +29,6 @@
   <resources>
     <j2se version="1.6+"/>
     <j2se version="1.5+"/>
-    <j2se version="1.4+"/>
     <j2se version="1.7+"/>
     <jar href="ganymedeAdmin.jar"/>
     <property name="ganymede.serverhost" value="#SERVERHOST"/>
