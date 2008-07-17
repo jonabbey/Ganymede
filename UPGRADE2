@@ -1,14 +1,14 @@
-   [1]Ganymede Logo
+   Ganymede Logo
 
                            Ganymede 2.0 Upgrade Guide
 
    Release 2.0 - April 1, 2008
-   $Rev: 7960 $
+   $Rev: 8219 $
 
    This document discusses what's new in Ganymede 2.0, and what you'll need
    to think about if you are upgrading from an installation of Ganymede 1.0.
 
-   By [2]Jonathan Abbey
+   By Jonathan Abbey
 
 Welcome to Ganymede 2.0
 
@@ -30,12 +30,12 @@ Welcome to Ganymede 2.0
        been reversed so that clients will work properly on systems with local
        firewalls. In addition, Ganymede no longer requires an external RMI
        registry process.
-     * Ganymede 2.0 supports a new [3]incremental XML build system that can
+     * Ganymede 2.0 supports a new incremental XML build system that can
        enqueue directory changes for transmission to external directory
        services that support discrete change commands.
-     * Ganymede 2.0 has an [4]SQL-like textual query language which is
-       available for programming in the Ganymede framework, as well as for
-       doing direct queries with the [5]xmlclient.
+     * Ganymede 2.0 has an SQL-like textual query language which is available
+       for programming in the Ganymede framework, as well as for doing direct
+       queries with the xmlclient.
      * The Ganymede client, server, and admin console are internationalized,
        and all user-facing message strings have been pulled into
        language-specific resource files to support easy translation. A German
@@ -59,12 +59,12 @@ Welcome to Ganymede 2.0
        advantage of this feature to properly monitor your builds.
      * Ganymede now knows how to generate hash text for passwords in
        OpenLDAP/Netscape's Salted SHA password hash format, as well as Ulrich
-       Drepper's [6]Unix Crypt with Sha algorithm.
+       Drepper's Unix Crypt with Sha algorithm.
      * Ganymede is now a U.S. registered trademark of The University of Texas
        at Austin.
 
    For a comprehensive list of changes in the 2.0 release, please see the
-   [7]CHANGES file. You should be especially sure to consult this file if you
+   CHANGES file. You should be especially sure to consult this file if you
    have any previous programming experience with the Ganymede framework, as a
    good number of minor changes have accumulated over the last few years.
 
@@ -156,7 +156,7 @@ Schema Changes
 
    --------------------------------------------------------------------------
 
-    [8]Jonathan Abbey
+    Jonathan Abbey
 
-   $Date: 2008-03-30 00:21:44 -0500 (Sun, 30 Mar 2008) $, $Rev: 7960 $,
+   $Date: 2008-07-14 15:55:19 -0500 (Mon, 14 Jul 2008) $, $Rev: 8219 $,
    $Author: broccol $
