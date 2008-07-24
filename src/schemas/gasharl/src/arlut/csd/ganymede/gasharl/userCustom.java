@@ -870,6 +870,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Vector values = null;
 
     deliveryAddresses = (StringDBField) object.getField(userSchema.EMAILTARGET);
+
+    if (deliveryAddresses == null)
+      {
+	Ganymede.debug("Missing email target for user " + object.getLabel());
+
+	return false;
+      }
+
     values = deliveryAddresses.getValuesLocal();
 
     for (int i = 0; i < values.size(); i++)
@@ -987,6 +995,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  case userSchema.VOLUMES:
 	  case userSchema.CATEGORY:
 	  case userSchema.HOMEGROUP:
+	  case userSchema.EMAILTARGET: // we need EMAILTARGET for reactToRemovalWarning().
 	    return true;
 	  }
       }
