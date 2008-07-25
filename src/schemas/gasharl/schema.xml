@@ -452,7 +452,7 @@ xmlclient.</comment>
               <comment>Password for an individual privileged to log into Ganymede and/or the network</comment>
               <typedef type="password">
                 <maxlength val="14"/>
-                <badchars val=":;,'&quot;"/>
+                <badchars val=":;,'&quot;@&amp;"/>
                 <crypted/>
                 <md5crypted/>
                 <winHashed/>
@@ -473,7 +473,6 @@ xmlclient.</comment>
             <fielddef name="Badge" id="276">
               <typedef type="string">
                 <maxlength val="8"/>
-                <regexp val="^\d*$" desc="The badge must be a numeric string"/>
               </typedef>
             </fielddef>
             <fielddef name="Division" id="258">
@@ -758,6 +757,7 @@ for this network.</comment>
               <typedef type="boolean"/>
             </fielddef>
             <fielddef name="Public_Network" id="266">
+              <comment>If checked, all Ganymede admins have access to placing records on this network</comment>
               <typedef type="boolean"/>
             </fielddef>
             <fielddef name="Allocation_Range" id="265">
