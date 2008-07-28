@@ -320,7 +320,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	Ganymede.debug("Need to build aliases map");
 
-	if (writeAliasesFile() && writeEmailList())
+	if (writeAliasesFile() && writeEmailLists())
 	  {
 	    success = true;
 	  }
@@ -884,10 +884,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * mailings that would come to the same person if 
    */
 
-  private boolean writeEmailList()
+  private boolean writeEmailLists()
   {
-    PrintWriter out;
+    PrintWriter out, out2;
     Set targets = new HashSet();  // record delivery targets we've seen
+    Set targets2 = new HashSet(); // the same, for employees only
 
     /* -- */
 
@@ -903,6 +904,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
+	out2 = openOutFile(path + "all_employees.txt", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open all_employees.txt file: " + ex);
+
+	out.close();
+	return false;
+      }
+
+    try
+      {
         out.println("# all_users.txt");
         out.println("#");
         out.println("# Complete list of user names who should receive email when mail is sent");
@@ -910,6 +923,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         out.println("#");
         out.println("# " + (new Date()).toString());
         out.println();
+
+        out2.println("# all_employees.txt");
+        out2.println("#");
+        out2.println("# Complete list of employees in the laboratory who should receive email when mail is sent");
+        out2.println("# to 'all employees' in laboratory, filtered to avoid redundant delivery.");
+        out2.println("#");
+        out2.println("# " + (new Date()).toString());
+        out2.println();
 
 	DBObject user;
 	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
@@ -923,13 +944,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
-
-            if (targets.contains(username))
-              {
-                continue;       // we've already arranged for delivery to this user
-              }
-
 	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
 
 	    if (category == null ||
@@ -938,31 +952,60 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		continue;
 	      }
 
-            Vector deliveryAddresses = user.getFieldValuesLocal(userSchema.EMAILTARGET);
+	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
+	    Vector deliveryAddresses = user.getFieldValuesLocal(userSchema.EMAILTARGET);
 
-            boolean allSeen = true;
+	    // first all users
 
-            for (int i = 0; i < deliveryAddresses.size(); i++)
-              {
-                if (!targets.contains(deliveryAddresses.elementAt(i)))
-                  {
-                    allSeen = false;
-                    targets.add(deliveryAddresses.elementAt(i));
-                  }
-              }
+	    if (!targets.contains(username) && (category.equals(getNormalCategory()) || category.equals(getAgencyCategory())))
+	      {
+		boolean allSeen = true;
 
-            if (allSeen)
-              {
-                continue;
-              }
+		for (int i = 0; i < deliveryAddresses.size(); i++)
+		  {
+		    if (!targets.contains(deliveryAddresses.elementAt(i)))
+		      {
+			allSeen = false;
+			targets.add(deliveryAddresses.elementAt(i));
+		      }
+		  }
 
-            targets.add(username);
-            out.println(username);
+		if (!allSeen)
+		  {
+		    targets.add(username);
+
+		    out.println(username);
+		  }
+	      }
+
+	    // then employees only
+
+	    if (!targets2.contains(username) && category.equals(getNormalCategory()))
+	      {
+		boolean allSeen = true;
+
+		for (int i = 0; i < deliveryAddresses.size(); i++)
+		  {
+		    if (!targets2.contains(deliveryAddresses.elementAt(i)))
+		      {
+			allSeen = false;
+			targets2.add(deliveryAddresses.elementAt(i));
+		      }
+		  }
+
+		if (!allSeen)
+		  {
+		    targets2.add(username);
+
+		    out2.println(username);
+		  }
+	      }
           }
       }
     finally
       {
 	out.close();
+	out2.close();
       }
 
     return true;
