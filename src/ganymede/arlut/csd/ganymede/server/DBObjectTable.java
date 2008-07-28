@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -53,7 +53,10 @@
 
 package arlut.csd.ganymede.server;
 
+import java.lang.Iterable;
+
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /*------------------------------------------------------------------------------
@@ -71,7 +74,7 @@ import java.util.NoSuchElementException;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBObjectTable {
+public class DBObjectTable implements Iterable {
 
   /**
    * The hash table data.
@@ -166,6 +169,24 @@ public class DBObjectTable {
   public boolean isEmpty() 
   {
     return count == 0;
+  }
+
+  /**
+   * Returns an Iterator of the objects in this DBObjectTable.
+   *
+   * Use the Iterator methods on the returned object to fetch the
+   * elements sequentially.
+   *
+   * This method allows DBObjectTable to support the Java 5 foreach
+   * loop construct.
+   *
+   * @return  an Iterator of the objects in this DBObjectTable.
+   * @see     java.util.Iterator
+   */
+
+  public synchronized Iterator iterator()
+  {
+    return new DBObjectTableIterator(table);
   }
 
   /**
@@ -575,5 +596,73 @@ class DBObjectTableEnumerator implements Enumeration {
       }
 
     throw new NoSuchElementException("HashtableEnumerator");
+  }
+}
+
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                           DBObjectTableIterator
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <P>A {@link arlut.csd.ganymede.server.DBObjectTable DBObjectTable}
+ * Iterator class.  This class should remain opaque to the client,
+ * which will use the Iterator interface.</P>
+ */
+
+class DBObjectTableIterator implements Iterator {
+
+  int index;
+  DBObject table[];
+  DBObject entry;
+
+  /* -- */
+
+  DBObjectTableIterator(DBObject table[]) 
+  {
+    this.table = table;
+    this.index = table.length;
+  }
+	
+  public boolean hasNext() 
+  {
+    if (entry != null) 
+      {
+	return true;
+      }
+
+    while (index-- > 0) 
+      {
+	if ((entry = table[index]) != null) 
+	  {
+	    return true;
+	  }
+      }
+
+    return false;
+  }
+
+  public Object next() 
+  {
+    if (entry == null) 
+      {
+	while ((index-- > 0) && ((entry = table[index]) == null));
+      }
+
+    if (entry != null) 
+      {
+	DBObject e = entry;
+	entry = e.next;
+	return e;
+      }
+
+    throw new NoSuchElementException("HashtableEnumerator");
+  }
+
+  public void remove()
+  {
+    throw new UnsupportedOperationException();
   }
 }

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -53,7 +53,10 @@
 
 package arlut.csd.ganymede.server;
 
+import java.lang.Iterable;
+
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /*------------------------------------------------------------------------------
@@ -72,7 +75,7 @@ import java.util.NoSuchElementException;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBBaseFieldTable {
+public class DBBaseFieldTable implements Iterable {
 
   /**
    * The hash table data.
@@ -167,6 +170,24 @@ public class DBBaseFieldTable {
   public boolean isEmpty() 
   {
     return count == 0;
+  }
+
+  /**
+   * Returns an Iterator of the objects in this DBBaseFieldTable.
+   *
+   * Use the Iterator methods on the returned object to fetch the
+   * elements sequentially.
+   *
+   * This method allows DBBaseFieldTable to support the Java 5 foreach
+   * loop construct.
+   *
+   * @return  an Iterator of the objects in this DBObjectTable.
+   * @see     java.util.Iterator
+   */
+
+  public synchronized Iterator iterator()
+  {
+    return new DBBaseFieldTableIterator(table);
   }
 
   /**
@@ -642,5 +663,72 @@ class DBBaseFieldTableEnumerator implements Enumeration {
       }
 
     throw new NoSuchElementException("HashtableEnumerator");
+  }
+}
+
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                        DBBaseFieldTableIterator
+
+------------------------------------------------------------------------------*/
+
+/**
+ * A DBBaseFieldTable Iterator class.  This class should remain opaque 
+ * to the client. It will use the Iterator interface. 
+ */
+
+class DBBaseFieldTableIterator implements Iterator {
+
+  short index;
+  DBObjectBaseField table[];
+  DBObjectBaseField entry;
+
+  /* -- */
+
+  DBBaseFieldTableIterator(DBObjectBaseField table[]) 
+  {
+    this.table = table;
+    this.index = (short) table.length;
+  }
+	
+  public boolean hasNext() 
+  {
+    if (entry != null) 
+      {
+	return true;
+      }
+
+    while (index-- > 0) 
+      {
+	if ((entry = table[index]) != null) 
+	  {
+	    return true;
+	  }
+      }
+
+    return false;
+  }
+
+  public Object next() 
+  {
+    if (entry == null) 
+      {
+	while ((index-- > 0) && ((entry = table[index]) == null));
+      }
+
+    if (entry != null) 
+      {
+	DBObjectBaseField e = entry;
+	entry = e.next;
+	return e;
+      }
+
+    throw new NoSuchElementException("HashtableEnumerator");
+  }
+
+  public void remove()
+  {
+    throw new UnsupportedOperationException();
   }
 }
