@@ -104,12 +104,28 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private static String dnsdomain = null;
   private static String buildScript = null;
 
+  private static final String normalCategoryLabel = "normal";
+  private static final String agencyCategoryLabel = "agency worker";
+
   // ---
 
   private Date now = null;
   private SharedStringBuffer result = new SharedStringBuffer();
 
+  /**
+   * We cache the normalCategory during the build cycle to make the
+   * generation of export data for IRIS a bit more efficient.
+   */
+
   private Invid normalCategory = null;
+
+  /**
+   * We cache the agencyCategory during the build cycle to make the
+   * generation of export data for IRIS a bit more efficient.
+   */
+
+  private Invid agencyCategory = null;
+
   /**
    * customOptions is a Set of Invids for custom type definitions that
    * we encountered during a cycle of writing out DHCP information.
@@ -221,6 +237,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 
 	writeMailDirect2();
+	writeMailDirect3();	// the new gany_iris_export.txt file for Carrie
 	writeSambafileVersion1();
 	writeSambafileVersion2();
 	writeUserSyncFile();
@@ -687,23 +704,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    String badgeNum = (String) user.getFieldValueLocal(userSchema.BADGE);
 	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
 
-	    if (normalCategory == null)
-	      {
-		if (category != null)
-		  {
-		    String label;
-
-		    label = getLabel(category);
-
-		    if (label != null && label.equals("normal"))
-		      {
-			normalCategory = category;
-		      }
-		  }
-	      }
-
 	    if (username != null && signature != null && badgeNum != null && 
-		category != null && category.equals(normalCategory) && !user.isInactivated())
+		category != null && category.equals(getNormalCategory()) && !user.isInactivated())
 	      {
 		if (map.containsKey(badgeNum))
 		  {
@@ -749,6 +751,128 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	out.close();
       }
   }
+
+  /**
+   * we write out a file that maps badge numbers to a
+   * user's primary email address and user name for the
+   * personnel office's phonebook database to use
+   *
+   * This method writes lines to the gany_iris_export.txt GASH output
+   * file.
+   *
+   * The lines in this file look like the following.
+   *
+   * XXXXXXYYYYYYYYZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+   *
+   * Where XXXXXX is the badge number with trailing spaces if necessary,
+   * YYYYYYYY is the username with trailing spaces if necessary (up to 8 chars),
+   * and ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ is the email
+   * address, with trailing spaces if necessary (up to 50 characters,
+   * 32 plus '@arlut.utexas.edu'.
+   *
+   */
+
+  private void writeMailDirect3()
+  {
+    PrintWriter out;
+    HashMap<String, DBObject> map = new HashMap<String, DBObject>(); // map badge numbers to DBObject
+    HashMap<String, String> results = new HashMap<String, String>(); // map badge numbers to strings
+
+    /* -- */
+
+    try
+      {
+	out = openOutFile(path + "gany_iris_export.txt", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open gany_iris_export.txt file: " + ex);
+	return;
+      }
+	
+    try
+      {
+	DBObject user;
+	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+
+	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
+	    String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
+	    String badgeNum = (String) user.getFieldValueLocal(userSchema.BADGE);
+	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
+
+	    if (username != null && signature != null && badgeNum != null && 
+		category != null &&
+		(category.equals(getNormalCategory()) || category.equals(getAgencyCategory())) &&
+		!user.isInactivated())
+	      {
+		if (map.containsKey(badgeNum))
+		  {
+		    // we've got more than one entry with the same
+		    // badge number.. that should only
+		    // happen if one of the users is an GASH admin, or
+		    // if one is inactivated.
+
+		    DBObject oldUser = map.get(badgeNum);
+
+		    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+
+		    if (field != null && field.isDefined())
+		      {
+			continue; // we've already got an admin record for this badge number
+		      }
+		  }
+
+		result.setLength(0);
+
+		result.append(badgeNum);
+
+		int length = 6 - badgeNum.length();
+
+		for (int i = 0; i < length; i++)
+		  {
+		    result.append(" ");
+		  }
+
+		result.append(username);
+
+		length = 8 - username.length();
+
+		for (int i = 0; i < length; i++)
+		  {
+		    result.append(" ");
+		  }
+
+		String emailAddr = signature + "@" + dnsdomain.substring(1);
+
+		result.append(emailAddr);
+
+		length = 50 - emailAddr.length();
+
+		for (int i = 0; i < length; i++)
+		  {
+		    result.append(" ");
+		  }
+
+		map.put(badgeNum, user);
+		results.put(badgeNum, result.toString());
+	      }
+	  }
+
+	for (String line: results.values())
+	  {
+	    out.println(line);
+	  }
+      }
+    finally
+      {
+	out.close();
+      }
+  }
+
 
   /**
    * This method writes out a simple list of all ARL employees who are
@@ -808,28 +932,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
 
-	    if (normalCategory == null)
+	    if (category == null ||
+		(!category.equals(getNormalCategory()) && !category.equals(getAgencyCategory())))
 	      {
-		if (category != null)
-		  {
-		    String label;
-
-		    label = getLabel(category);
-
-		    if (label != null && label.equals("normal"))
-		      {
-			normalCategory = category;
-		      }
-                    else
-                      {
-                        continue;  // non-normal user account
-                      }
-		  }
+		continue;
 	      }
-            else if (!normalCategory.equals(category))
-              {
-                continue;
-              }
 
             Vector deliveryAddresses = user.getFieldValuesLocal(userSchema.EMAILTARGET);
 
@@ -4186,6 +4293,87 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             customOptions.add(optionInvid);
           }
+      }
+  }
+
+  /**
+   * This method returns the Invid for the 'normal' user category in
+   * the gasharl schema from our local cache if we've looked it up
+   * before, or else scans the user category objects looking for it.
+   *
+   * Note that this only works so long as scanCategories() has the
+   * proper constant for the name of the normal user category.
+   */
+
+  private Invid getNormalCategory()
+  {
+    if (this.normalCategory != null)
+      {
+	return this.normalCategory;
+      }
+
+    scanCategories();
+
+    return this.normalCategory;
+  }
+
+  /**
+   * This method returns the Invid for the 'agency worker' user
+   * category in the gasharl schema from our local cache if we've
+   * looked it up before, or else scans the user category objects
+   * looking for it.
+   *
+   * Note that this only works so long as scanCategories() has the
+   * proper constant for the name of the agency worker category.
+   */
+
+  private Invid getAgencyCategory()
+  {
+    if (this.agencyCategory != null)
+      {
+	return this.agencyCategory;
+      }
+
+    scanCategories();
+
+    return this.agencyCategory;
+  }
+
+  /**
+   * This method scans the user category object base in order to
+   * identify the normal worker and agency worker user category
+   * invids.
+   */
+
+  private void scanCategories()
+  {
+    Enumeration categories = enumerateObjects((short) 279);
+
+    while (categories.hasMoreElements() &&
+	   (this.normalCategory == null || this.agencyCategory == null))
+      {
+	DBObject category = (DBObject) categories.nextElement();
+	Invid categoryInvid = category.getInvid();
+	String label = getLabel(categoryInvid);
+
+	if (normalCategoryLabel.equals(label))
+	  {
+	    this.normalCategory = categoryInvid;
+	  }
+	else if (agencyCategoryLabel.equals(label))
+	  {
+	    this.agencyCategory = categoryInvid;
+	  }
+      }
+
+    if (this.normalCategory == null)
+      {
+	Ganymede.debug("ERROR: GASHBuilderTask.scanCategories() couldn't find the " + normalCategoryLabel + " user category!");
+      }
+
+    if (this.agencyCategory == null)
+      {
+	Ganymede.debug("ERROR: GASHBuilderTask.scanCategories() couldn't find the " + agencyCategoryLabel + " user category!");
       }
   }
 }

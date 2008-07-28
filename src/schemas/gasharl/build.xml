@@ -86,8 +86,8 @@ refresh the jar files.
            debug="${debug.flag}"
            debuglevel="${debug.level}"
            nowarn="true"
-           target="1.4"
-           source="1.4"
+           target="1.5"
+           source="1.5"
            deprecation="on">
            <src path="${src.dir}"/>
            <classpath refid="classpath"/>
