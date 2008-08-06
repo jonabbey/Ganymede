@@ -453,7 +453,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (asEmbedded)
       {
+	xmlOut.indentOut();
+
 	target.emitXML(xmlOut);
+
+	xmlOut.indentIn();
       }
     else
       {
