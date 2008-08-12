@@ -82,6 +82,29 @@ import arlut.csd.ganymede.rmi.invid_field;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * This class is a specialized client to read phone creation information from
+ * a command line script.
+ *
+ * This program expects to read the following information from stdin, one field
+ * per line.
+ *       {login:persona}
+ *       {password}
+ *       {hostname}
+ *       {gany-network}
+ *       {MAC address}
+ *       {Manufacturer}
+ *       {System type}
+ *       {Model}
+ *       {Room}
+ *       {Primary user}
+ *
+ * Where {login:persona} is the Ganymede user and admin information that will log
+ * into Ganymede to perform the phone object creation, and {password} is that
+ * admin persona's password.
+ *
+ */
+
 public class phoneClient implements ClientListener {
 
   final static boolean debug = false;
