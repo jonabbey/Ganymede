@@ -102,7 +102,6 @@ import arlut.csd.ganymede.rmi.invid_field;
  * Where {login:persona} is the Ganymede user and admin information that will log
  * into Ganymede to perform the phone object creation, and {password} is that
  * admin persona's password.
- *
  */
 
 public class phoneClient implements ClientListener {
