@@ -184,6 +184,25 @@ public class xmlobject {
   boolean forceCreate = false;
 
   /**
+   * If we're an embedded object, the owner object will refer to the
+   * invid xmlfield that contains this embedded object.
+   *
+   * Otherwise, it will be null.
+   */
+
+  xmlfield ownerField = null;
+
+  /**
+   * If we are a pre-existing embedded object, we may be identified by
+   * an index attribute rather than an id, which the xml author may
+   * not have easy access to.
+   *
+   * Otherwise, it will be -1.
+   */
+
+  int index = -1;
+
+  /**
    * Reference to the GanymedeXMLSession working with us.
    */
 
@@ -201,9 +220,10 @@ public class xmlobject {
    * this object.
    */
   
-  public xmlobject(XMLElement openElement, GanymedeXMLSession xSession) throws SAXException
+  public xmlobject(XMLElement openElement, GanymedeXMLSession xSession, xmlfield ownerField) throws SAXException
   {
     this.xSession = xSession;
+    this.ownerField = ownerField;
 
     // handle any attributes in the element
 
@@ -243,6 +263,13 @@ public class xmlobject {
     if (numInt != null)
       {
 	num = numInt.intValue();
+      }
+
+    Integer indexInt = openElement.getAttrInt("index");
+
+    if (ownerField != null && indexInt != null)
+      {
+	index = indexInt.intValue();
       }
 
     // If the server was run with the -magic_import flag, we'll record
@@ -517,42 +544,70 @@ public class xmlobject {
 
   public Invid getInvid() throws NotLoggedInException
   {
-    if (invid == null && !knownNonExistent)
+    if (invid != null || knownNonExistent)
+      {
+	return invid;
+      }
+
+    /* We haven't established an Invid for this object yet.  Let's figure it out. */
+
+    if (num != -1)
       {
 	// if we were given a number, assume they really do
 	// mean for us to edit a pre-existing object with
 	// that number, and don't argue
 
-	if (num != -1)
+	invid = Invid.createInvid(type.shortValue(), num);
+      }
+    else if (id != null)
+      {
+	// try to look it up on the server
+
+	if (debug)
 	  {
-	    invid = Invid.createInvid(type.shortValue(), num);
+	    xSession.err.println("xmlobject.getInvid() calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
 	  }
-	else if (id != null)
+
+	invid = xSession.session.findLabeledObject(id, type.shortValue());
+
+	if (invid == null)
 	  {
-	    // try to look it up on the server
-
 	    if (debug)
 	      {
-		xSession.err.println("xmlobject.getInvid() calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+		xSession.err.println("xmlobject.getInvid() deciding known non existent on " + type + ":" + id);
 	      }
 
-	    invid = xSession.session.findLabeledObject(id, type.shortValue());
+	    knownNonExistent = true;
+	  }
 
-	    if (invid == null)
-	      {
-		if (debug)
-		  {
-		    xSession.err.println("xmlobject.getInvid() deciding known non existent on " + type + ":" + id);
-		  }
+	if (debug)
+	  {
+	    xSession.err.println("xmlobject called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+	    xSession.err.println("findLabeledObject() returned " + invid + "[3]");
+	  }
+      }
+    else if (ownerField != null && index != -1)
+      {
+	// if we've got no id but we do have an index, we must be an
+	// embedded object that already existed on the server.  Let's
+	// find our containing field and parent object and get the
+	// invid for the embedded object with matching index.
 
-		knownNonExistent = true;
-	      }
+	xmlobject ownerObject = ownerField.owner;
+	Invid parentInvid = ownerObject.getInvid();
 
-	    if (debug)
-	      {
-		xSession.err.println("xmlobject called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
-		xSession.err.println("findLabeledObject() returned " + invid + "[3]");
-	      }
+	try
+	  {
+	    ReturnVal parentResult = xSession.session.view_db_object(parentInvid);
+	    db_object parentObject = parentResult.getObject();
+	    InvidDBField containerField = (InvidDBField) parentObject.getField(ownerField.fieldDef.getID());
+	    invid = (Invid) containerField.getElementLocal(index);
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+	catch (NullPointerException ex)
+	  {
 	  }
       }
 

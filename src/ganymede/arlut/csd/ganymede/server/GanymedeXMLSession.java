@@ -2028,7 +2028,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 		try
 		  {
-		    objectRecord = new xmlobject((XMLElement) item, this);
+		    objectRecord = new xmlobject((XMLElement) item, this, null);
 		  }
 		catch (NullPointerException ex)
 		  {
