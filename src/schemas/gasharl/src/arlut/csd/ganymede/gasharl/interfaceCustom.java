@@ -532,10 +532,10 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // we don't want to mess with the available-network
     // management code if we are doing bulk-loading.
 
-    if (!gSession.enableOversight || !gSession.enableWizards)
-      {
-	return null;
-      }
+    //    if (!gSession.enableOversight || !gSession.enableWizards)
+    //      {
+    //	return null;
+    //      }
 
     if (field.getID() == interfaceSchema.IPNET)
       {
