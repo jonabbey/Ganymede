@@ -5649,6 +5649,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    */
   public void treeNodeUnSelected(treeNode node, boolean otherNode)
   {
+    selectedNode = null;
   }
 
   /**

@@ -165,8 +165,6 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
   ImageIcon
     icon;
 
-  String lastValue = null;
-
   String selectedBaseName = null;
   String selectedObjectName = null;
   boolean selectedFound = false;
@@ -479,8 +477,9 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	// the tree, since we're going to be working with a different
 	// object.
 
-	client.tree.unselectAllNodes(false);
+	client.tree.unselectAllNodes(true);
 	client.tree.refresh();
+	currentObject = null;
 
 	if (list == null)
 	  {
@@ -645,7 +644,6 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
     lastClick = e.getWhen();
     lastObject = currentObject;
-
   }
 
   public void mousePressed(MouseEvent e) {}
