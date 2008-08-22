@@ -522,6 +522,8 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	      {
 		close(true);
 	      }
+
+	    return;
 	  }
 	catch (java.rmi.RemoteException ex)
 	  {
