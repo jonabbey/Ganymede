@@ -2828,15 +2828,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public Invid findLabeledObject(String objectName, String objectType) throws NotLoggedInException
   {
-    DBObjectBase base = Ganymede.db.getObjectBase(objectType);
-
-    if (base == null)
-      {
-	// "Error, "{0}" is not a valid object type in this Ganymede server."
-	throw new RuntimeException(ts.l("global.no_such_object_type", objectType));
-      }
-
-    return this.findLabeledObject(objectName, base.getTypeID());
+    return this.findLabeledObject(objectName, objectType, false);
   }
 
   /**
@@ -2850,11 +2842,65 @@ final public class GanymedeSession implements Session, Unreferenced {
    * may not be called from a DBEditObject's commitPhase1/2() methods
    * without risking deadlock.
    *
-   * @param name Label for an object
+   * @param objectName Label for an object
    * @param type Object type id number
    */
 
-  public Invid findLabeledObject(String name, short type) throws NotLoggedInException
+  public Invid findLabeledObject(String objectName, short type) throws NotLoggedInException
+  {
+    return this.findLabeledObject(objectName, type, false);
+  }
+
+  /**
+   * Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.
+   *
+   * If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.
+   *
+   * This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.
+   *
+   * @param objectName Label for the object to lookup
+   * @param objectType Name of the object type
+   * @param allowAliases If true, findLabeledObject will return an
+   * Invid that has name attached to the same namespace as the label
+   * field for the object type sought.
+   */
+
+  public Invid findLabeledObject(String objectName, String objectType, boolean allowAliases) throws NotLoggedInException
+  {
+    DBObjectBase base = Ganymede.db.getObjectBase(objectType);
+
+    if (base == null)
+      {
+	// "Error, "{0}" is not a valid object type in this Ganymede server."
+	throw new RuntimeException(ts.l("global.no_such_object_type", objectType));
+      }
+
+    return this.findLabeledObject(objectName, base.getTypeID(), allowAliases);
+  }
+
+  /**
+   * Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.
+   *
+   * If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.
+   *
+   * This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.
+   *
+   * @param objectName Label for an object
+   * @param type Object type id number.
+   * @param allowAliases If true, findLabeledObject will return an
+   * Invid that has name attached to the same namespace as the label
+   * field for the object type sought.
+   */
+
+  public Invid findLabeledObject(String objectName, short type, boolean allowAliases) throws NotLoggedInException
   {
     Invid value;
 
@@ -2863,7 +2909,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     checklogin();
 
     Query localquery = new Query(type,
-				 new QueryDataNode(QueryDataNode.EQUALS, name),
+				 new QueryDataNode(QueryDataNode.EQUALS, objectName),
 				 false);
 
     Vector results = internalQuery(localquery);
@@ -2873,31 +2919,57 @@ final public class GanymedeSession implements Session, Unreferenced {
 	Ganymede.debug("findLabeledObject() found results, size = " + results.size());
       }
 
-    if (results == null || results.size() != 1)
+    if (results != null && results.size() == 1)
+      {
+	Result tmp = (Result) results.elementAt(0);
+
+	value = tmp.getInvid();
+
+	// make sure we've got the right kind of object back.. this is a
+	// debugging assertion to make sure that we're always handling
+	// embedded objects properly.
+
+	if (value.getType() != type)
+	  {
+	    throw new RuntimeException("findLabeledObject() ASSERTFAIL: Error in query processing," + 
+				       " didn't get back right kind of object");
+	  }
+
+	if (debug)
+	  {
+	    Ganymede.debug("findLabeledObject() found results, returning = " + value);
+	  }
+
+	return value;
+      }
+
+    if (!allowAliases)
       {
 	return null;
       }
 
-    Result tmp = (Result) results.elementAt(0);
+    // we can allow aliases.  let's see if the objectName maps to
+    // an object of the desired type through the namespace.
 
-    value = tmp.getInvid();
-
-    // make sure we've got the right kind of object back.. this is a
-    // debugging assertion to make sure that we're always handling
-    // embedded objects properly.
-
-    if (value.getType() != type)
+    try
       {
-	throw new RuntimeException("findLabeledObject() ASSERTFAIL: Error in query processing," + 
-				   " didn't get back right kind of object");
-      }
+	DBObjectBase base = DBStore.db.getObjectBase(type);
+	DBObjectBaseField labelField = base.getLabelFieldDef();
+	DBNameSpace namespace = labelField.namespace;
+	DBField targetField = namespace.lookupPersistent(objectName);
+	DBObject targetObject = targetField.getOwner();
 
-    if (debug)
+	while (targetObject.isEmbedded())
+	  {
+	    targetObject = targetObject.getParentObj();
+	  }
+
+	return targetObject.getInvid();
+      }
+    catch (NullPointerException ex)
       {
-	Ganymede.debug("findLabeledObject() found results, returning = " + value);
+	return null;
       }
-
-    return value;
   }
 
   /**

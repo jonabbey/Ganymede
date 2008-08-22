@@ -24,7 +24,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -269,7 +269,12 @@ public class BaseDump implements Base, CategoryNode {
   public short getLabelField() 
   {
     return label_id;
-  }  
+  }
+
+  public BaseField getLabelFieldDef()
+  {
+    throw new RuntimeException("this method not supported in BaseDump");
+  }
 
   public String getLabelFieldName() 
   {

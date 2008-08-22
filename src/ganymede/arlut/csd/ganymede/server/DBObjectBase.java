@@ -2550,6 +2550,22 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
+   * <p>Returns the field definition for the field designated as this
+   * object's primary label field.  null is returned if no label has
+   * been designated.</p>
+   */
+
+  public DBObjectBaseField getLabelFieldDef()
+  {
+    if (label_id == -1)
+      {
+	return null;
+      }
+    
+    return (DBObjectBaseField) getField(label_id);
+  }
+
+  /**
    * <p>Returns the field name for the field designated as this object's
    * primary label field.  null is returned if no label has been
    * designated.</p>

@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -138,17 +138,21 @@ public interface Base extends CategoryNode, Remote {
 
   /**
    * Returns the short type id for the field designated as this object's
-   * primary label field, if any.  Objects do not need to have a primary
-   * label field designated if labels for this object type are dynamically
-   * generated.
+   * primary label field.
    */
 
   public short getLabelField() throws RemoteException;
 
   /**
+   * Returns the BaseField for the field designated as this object's
+   * primary label field.
+   */
+
+  public BaseField getLabelFieldDef() throws RemoteException;
+
+  /**
    * Returns the field name for the field designated as this object's
-   * primary label field.  null is returned if no label has been
-   * designated.
+   * primary label field.
    */
 
   public String getLabelFieldName() throws RemoteException;

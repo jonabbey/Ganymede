@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -471,160 +471,153 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
 	    invid = (Invid)currentObject.getObject();
 	    close(true);
+
+	    return;
+	  }
+
+	// We're looking up a new one.  Deselect the selected node in
+	// the tree, since we're going to be working with a different
+	// object.
+
+	client.tree.unselectAllNodes(false);
+
+	if (list == null)
+	  {
+	    list = new JList();
+	    list.setBorder(client.lineBorder);
+	    list.setModel(new DefaultListModel());
+	    list.addMouseListener(this);
 	  }
 	else
 	  {
-	    if (list == null)
+	    ((DefaultListModel)list.getModel()).clear();
+	  }
+
+	if (pane == null)
+	  {
+	    pane = new JScrollPane(list);
+
+	    // "Matching Objects"
+	    pane.setBorder(new TitledBorder(ts.l("actionPerformed.matching_border")));
+	  }
+
+	listHandle lh = (listHandle) type.getSelectedItem();
+	Short baseID = (Short) lh.getObject();
+
+	if (debug)
+	  {
+	    System.out.println("BaseID = " + baseID + ", string = " + string);
+	  }
+
+	// "Searching for object named {0}."
+	client.setStatus(ts.l("actionPerformed.searching_status", string));
+
+	// First see if this exactly matches something, then do the STARTSWITH stuff
+
+	try
+	  {
+	    invid = client.session.findLabeledObject(string, baseID, true);
+
+	    if (invid != null)
 	      {
-		list = new JList();
-		list.setBorder(client.lineBorder);
-		list.setModel(new DefaultListModel());
-		list.addMouseListener(this);
+		close(true);
+	      }
+	  }
+	catch (java.rmi.RemoteException ex)
+	  {
+	    close(false);
+	    client.processExceptionRethrow(ex, "Remote Exception calling findLabeledObject()");
+	  }
+
+	// no direct match, let's look for a prefix match
+
+	QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, string);
+	QueryResult edit_query = null;
+	Vector edit_invids = null;
+
+	try
+	  {
+	    if (debug)
+	      {
+		System.out.println("Looking for Startswith...");
+	      }
+
+	    // "Searching for objects whose names begin with {0}."
+	    client.setStatus(ts.l("actionPerformed.searching_prefix_status", string));
+
+	    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);
+	    edit_query = null;
+
+	    edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
+
+	    edit_invids = edit_query.getListHandles();
+
+	    if (edit_invids.size() == 1)
+	      {
+		invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
+		close(true);
+	      }
+	    else if (edit_invids.size() == 0)
+	      {
+		// "Error Finding Object"
+		// "No editable object starts with that string."
+		// "No viewable object starts with that string."
+		client.showErrorMessage(ts.l("actionPerformed.error_title"),
+					editableOnly ?
+					ts.l("actionPerformed.no_editable_text") :
+					ts.l("actionPerformed.no_viewable_text"));
+		return;
 	      }
 	    else
 	      {
-		((DefaultListModel)list.getModel()).clear();
-	      }
+		(new VecQuickSort(edit_invids,
+				  new Comparator() {
+				    public int compare(Object a, Object b)
+				    {
+				      listHandle aF, bF;
+				      
+				      aF = (listHandle) a;
+				      bF = (listHandle) b;
+				      int comp = 0;
 
-	    if (pane == null)
-	      {
-		pane = new JScrollPane(list);
+				      comp =  aF.toString().compareToIgnoreCase(bF.toString());
 
-		// "Matching Objects"
-		pane.setBorder(new TitledBorder(ts.l("actionPerformed.matching_border")));
-	      }
+				      if (comp < 0)
+					{
+					  return -1;
+					}
+				      else if (comp > 0)
+					{
+					  return 1;
+					}
+				      else
+					{
+					  return 0;
+					}
+				    }
+				  })).sort();
 
-	    listHandle lh = (listHandle) type.getSelectedItem();
-	    Short baseID = (Short) lh.getObject();
+		DefaultListModel model = (DefaultListModel)list.getModel();
 
-	    if (debug)
-	      {
-		System.out.println("BaseID = " + baseID + ", string = " + string);
-	      }
-
-	    // First see if this exactly matches something, then do the STARTSWITH stuff
-
-	    QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, string);
-	    QueryResult edit_query = null;
-	    Vector edit_invids = null;
-
-	    try
-	      {
-		if (debug)
+		for (int i = 0; i < edit_invids.size(); i++)
 		  {
-		    System.out.println("Trying exact match...");
+		    model.addElement(edit_invids.elementAt(i));
 		  }
 
-		// "Searching for object named {0}."
-		client.setStatus(ts.l("actionPerformed.searching_status", string));
+		gbc.gridx = 0;
+		gbc.gridy = 3;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbl.setConstraints(pane, gbc);
 
-		edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
-
-		if (edit_query != null)
-		  {
-		    edit_invids = edit_query.getListHandles();
-
-		    if (debug)
-		      {
-			System.out.println("edit_invids: " + edit_invids.size());
-		      }
-		  }
-
-		if ((edit_invids != null ) && (edit_invids.size() == 1))
-		  {
-		    if (debug)
-		      {
-			System.out.println("Found it, exact match");
-		      }
-
-		    invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
-		    close(true);
-
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			System.out.println("Looking for Startswith...");
-		      }
-
-		    // "Searching for objects whose names begin with {0}."
-		    client.setStatus(ts.l("actionPerformed.searching_prefix_status", string));
-
-		    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);
-		    edit_query = null;
-
-		    edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
-
-		    edit_invids = edit_query.getListHandles();
-
-		    if (edit_invids.size() == 1)
-		      {
-			invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
-			close(true);
-		      }
-		    else if (edit_invids.size() == 0)
-		      {
-			// "Error Finding Object"
-			// "No editable object starts with that string."
-			// "No viewable object starts with that string."
-			client.showErrorMessage(ts.l("actionPerformed.error_title"),
-						editableOnly ?
-						ts.l("actionPerformed.no_editable_text") :
-						ts.l("actionPerformed.no_viewable_text"));
-			return;
-		      }
-		    else
-		      {
-			(new VecQuickSort(edit_invids,
-					  new Comparator() {
-			  public int compare(Object a, Object b)
-			    {
-			      listHandle aF, bF;
-
-			      aF = (listHandle) a;
-			      bF = (listHandle) b;
-			      int comp = 0;
-
-			      comp =  aF.toString().compareToIgnoreCase(bF.toString());
-
-			      if (comp < 0)
-				{
-				  return -1;
-				}
-			      else if (comp > 0)
-				{
-				  return 1;
-				}
-			      else
-				{
-				  return 0;
-				}
-			    }
-			})).sort();
-
-			DefaultListModel model = (DefaultListModel)list.getModel();
-
-			for (int i = 0; i < edit_invids.size(); i++)
-			  {
-			    model.addElement(edit_invids.elementAt(i));
-			  }
-
-			gbc.gridx = 0;
-			gbc.gridy = 3;
-			gbc.gridwidth = GridBagConstraints.REMAINDER;
-			gbc.fill = GridBagConstraints.HORIZONTAL;
-			gbl.setConstraints(pane, gbc);
-
-			middle.add(pane);
-			pack();
-		      }
-		  }
+		middle.add(pane);
+		pack();
 	      }
-	    catch (java.rmi.RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get query: " + rx);
-	      }
+	  }
+	catch (java.rmi.RemoteException rx)
+	  {
+	    close(false);
+	    client.processExceptionRethrow(rx, "Remote Exception opening object");
 	  }
       }
     else if (e.getActionCommand().equals(CANCEL))

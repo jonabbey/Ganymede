@@ -556,6 +556,38 @@ public interface Session extends Remote {
   public Invid findLabeledObject(String objectName, String objectType) throws RemoteException;
 
   /**
+   * <p>Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.</p>
+   *
+   * <p>If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.</p>
+   *
+   * @param name Label for an object
+   * @param type Object type id number
+   * @param allowAliases If true, findLabeledObject will return an
+   * Invid that has name attached to the same namespace as the label
+   * field for the object type sought.
+   */
+
+  public Invid findLabeledObject(String name, short type, boolean allowAliases) throws RemoteException;
+
+  /**
+   * <p>Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.</p>
+   *
+   * <p>If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.</p>
+   *
+   * @param objectName Label for the object to lookup
+   * @param objectType Name of the object type
+   * @param allowAliases If true, findLabeledObject will return an
+   * Invid that has name attached to the same namespace as the label
+   * field for the object type sought.
+   */
+
+  public Invid findLabeledObject(String objectName, String objectType, boolean allowAliases) throws RemoteException;
+
+  /**
    * <p>List objects in the database meeting the given query criteria.</p>
    *
    * <p>The database will be read-locked during the query, assuring
