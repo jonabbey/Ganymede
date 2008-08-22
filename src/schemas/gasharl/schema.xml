@@ -411,6 +411,15 @@ xmlclient.</comment>
                 <namespace val="username"/>
               </typedef>
             </fielddef>
+            <fielddef name="Aliases" id="259">
+              <comment>Alternate names for this list.</comment>
+              <typedef type="string">
+                <vector maxSize="8"/>
+                <maxlength val="64"/>
+                <badchars val="@ :"/>
+                <namespace val="username"/>
+              </typedef>
+            </fielddef>
             <fielddef name="Internal_Members" id="257">
               <typedef type="invid">
                 <vector/>
@@ -457,6 +466,7 @@ xmlclient.</comment>
                 <md5crypted/>
                 <winHashed/>
                 <sshaHashed/>
+                <shaUnixCrypted type="512" rounds="5000"/>
               </typedef>
             </fielddef>
             <fielddef name="Account_Category" id="273">
