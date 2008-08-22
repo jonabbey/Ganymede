@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -73,6 +73,7 @@ public interface emailListSchema {
   // this file to match.
 
   final static short LISTNAME=256;
+  final static short ALIASES=259;
   final static short MEMBERS=257;
   final static short EXTERNALTARGETS=258;
 }

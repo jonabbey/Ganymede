@@ -2014,9 +2014,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
   }
 
-
-
-
   /**
    * This method writes out a user alias line to the aliases_info GASH source file.<br/><br/>
    *
@@ -2114,24 +2111,26 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * <pre>
    *
-   * :oms:csd-news-dist-omg:csd_staff, granger, iselt, lemma, jonabbey@eden.com
+   * :csd-news-dist-omg:alias, alias, alias:csd_staff, granger, iselt, lemma, jonabbey@eden.com
    *
    * </pre>
    *
    * Where the leading colon identifies to the GASH makefile that it is a group
-   * line and 'oms' is the GASH ownership code.  Ganymede won't try to emit
-   * a GASH ownership code that could be used to load the aliases_info file
-   * back into GASH.
+   * line.
+   *
+   * NB: I've modified this method in 2008 to add the aliases field,
+   * above.  This is a modification of the classic GASH aliases_info
+   * file, which did not support aliases for email lists.
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-   *
    */
 
   private void writeGroupAlias(DBObject object, PrintWriter writer)
   {
     String groupname;
     Vector group_targets;
+    Vector group_aliases;
     Vector external_targets;
     Invid memberInvid;
     String target;
@@ -2145,11 +2144,29 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.setLength(0);
 
     groupname = (String) object.getFieldValueLocal(emailListSchema.LISTNAME);
+    group_aliases = object.getFieldValuesLocal(emailListSchema.ALIASES);
     group_targets = object.getFieldValuesLocal(emailListSchema.MEMBERS);
     external_targets = object.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
 
-    result.append(":xxx:");
+    result.append(":");
     result.append(groupname);
+    result.append(":");
+
+    if (group_aliases != null)
+      {
+	for (int i = 0; i < group_aliases.size(); i++)
+	  {
+	    String alias = (String) group_aliases.elementAt(i);
+
+	    if (i > 0)
+	      {
+		result.append(", ");
+	      }
+
+	    result.append(alias);
+	  }
+      }
+
     result.append(":");
 
     // NIS forces us to a 1024 character limit per key and value, we
