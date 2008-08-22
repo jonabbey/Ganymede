@@ -480,6 +480,7 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	// object.
 
 	client.tree.unselectAllNodes(false);
+	client.tree.refresh();
 
 	if (list == null)
 	  {
