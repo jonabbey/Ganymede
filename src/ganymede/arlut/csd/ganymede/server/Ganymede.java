@@ -717,10 +717,12 @@ public class Ganymede {
 
     if (debugFilename != null)
       {
+	// "Server startup - Debug mode"
 	startMesg = ts.l("main.info_debug_start");
       }
     else
       {
+	// "Server startup - Not in Debug mode"
 	startMesg = ts.l("main.info_nodebug_start");
       }
 
@@ -789,6 +791,7 @@ public class Ganymede {
       }
     catch (NotLoggedInException ex)
       {
+	// "Mysterious not logged in exception: "
 	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
       }
 
@@ -797,6 +800,7 @@ public class Ganymede {
 
     try
       {
+	// "Binding GanymedeServer in RMI Registry"
 	debug(ts.l("main.info_binding_registry"));
 
 	String hostname = null;
@@ -875,8 +879,12 @@ public class Ganymede {
 
     if (debug)
       {
+	// "Setup and bound server object OK"
 	debug(ts.l("main.info_setup_okay"));
       }
+
+    // if we've been given a telnet port on the command line, set up a
+    // Jython console interpreter that implementers can telnet to for debug.
 
     String portString = ParseArgs.getArg("telnet", argv);
     
@@ -912,7 +920,8 @@ public class Ganymede {
       }, ts.l("main.signalCatchThread"));  // "Ganymede ctrl-C handling thread"
 
     java.lang.Runtime.getRuntime().addShutdownHook(Ganymede.signalHandlingThread);
-    
+
+    // "Ganymede Server Ready."    
     debug(ts.l("main.info_ready"));
   }
 
