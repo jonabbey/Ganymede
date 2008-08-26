@@ -665,27 +665,19 @@ public class Ganymede {
 	throw new RuntimeException(ts.l("main.error_fail_session") + ex);
       }
 
-    // set up the log
+    // -- set up the log --
     
-    /* suppressEmail is the email "master switch". If it's set to true, 
-     * then we won't actually send any emails out.
-     */
+    // First, we check to see if there is a designated mail host. If
+    // not, then we automatically turn off the sending of emails.
+    //
+    // Likewise, suppressEmail is the email command line "master
+    // switch". If it's set to true, then we won't actually send any
+    // emails out.
      
-    /* First, we check to see if there is a designated mail host. If not,
-     * then we automatically turn off the sending of emails.
-     */
-     
-    if (mailHostProperty == null || mailHostProperty.equals(""))
+    if (mailHostProperty == null || mailHostProperty.equals("") ||
+	ParseArgs.switchExists("suppressEmail", argv))
       {
       	suppressEmail = true;
-      }
-    else
-      {
-      	/* We have a valid mail host, but check to see if a command-line
-      	 * argument has instructed us to suppress mailouts anyways.
-      	 */
-      
-      	suppressEmail = ParseArgs.switchExists("suppressEmail", argv);
       }
 
     try
