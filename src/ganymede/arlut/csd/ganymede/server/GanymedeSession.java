@@ -4254,6 +4254,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (obj == null)
       {
+	// "Object Not Found"
+	// "Could not find object {0} in the database.  Perhaps the object does not exist?"
+
 	return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
 					  ts.l("view_db_object.no_object_error_text", String.valueOf(invid)));
       }
