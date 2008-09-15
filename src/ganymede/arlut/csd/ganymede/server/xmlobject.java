@@ -7,12 +7,7 @@
    --
 
    Created: 2 May 2000
-   Version: $Revision$
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
+   Version: $Id$
 
    Module By: Jonathan Abbey
 
