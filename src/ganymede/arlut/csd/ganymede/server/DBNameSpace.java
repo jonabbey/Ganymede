@@ -1516,7 +1516,7 @@ public final class DBNameSpace implements NameSpace {
 	    handle.setShadowField(null);
 	    handle.setInUse(true);
 	  }
-	else
+	else if (handle.owner == editSet)
 	  {
 	    uniqueHash.remove(value);
 	  }
