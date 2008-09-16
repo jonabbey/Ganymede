@@ -1342,7 +1342,7 @@ public final class DBNameSpace implements NameSpace {
 		handle.owner = null;
 		handle.setInUse(true);
 	      }
-	    else
+	    else if (handle.owner == editSet)
 	      {
 		// the value was not reserved in the namespace before
 		// this transaction allocated it, so we can just
