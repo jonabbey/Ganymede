@@ -5,10 +5,6 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -984,38 +980,26 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public boolean fieldRequired(DBObject object, short fieldid)
   {
-    if (object.isInactivated())
+    switch (fieldid)
       {
-	switch (fieldid)
-	  {
-	  case userSchema.USERNAME:
-	  case userSchema.UID:
-	  case userSchema.LOGINSHELL:
-	  case userSchema.HOMEDIR:
-	  case userSchema.VOLUMES:
-	  case userSchema.CATEGORY:
-	  case userSchema.HOMEGROUP:
-	  case userSchema.EMAILTARGET: // we need EMAILTARGET for reactToRemovalWarning().
-	    return true;
-	  }
-      }
-    else
-      {
-	switch (fieldid)
-	  {
-	  case userSchema.USERNAME:
-	  case userSchema.PASSWORD:
-	  case userSchema.SIGNATURE:
-	  case userSchema.EMAILTARGET:
-	  case userSchema.UID:
-	  case userSchema.LOGINSHELL:
-	  case userSchema.HOMEDIR:
-	  case userSchema.VOLUMES:
-	  case userSchema.CATEGORY:
-	  case userSchema.HOMEGROUP:
-	  case userSchema.PASSWORDCHANGETIME:
-	    return true;
-	  }
+      case userSchema.USERNAME:
+
+      case userSchema.UID:
+      case userSchema.LOGINSHELL:
+      case userSchema.HOMEDIR:
+      case userSchema.VOLUMES:
+      case userSchema.CATEGORY:
+      case userSchema.HOMEGROUP:
+      case userSchema.SIGNATURE:
+	return true;
+
+      // the following fields are only necessary if the account has
+      // not been inactivated
+
+      case userSchema.PASSWORD:
+      case userSchema.PASSWORDCHANGETIME:
+      case userSchema.EMAILTARGET:
+	return !object.isInactivated();
       }
 
     // Whether or not the Badge number field is required depends on
