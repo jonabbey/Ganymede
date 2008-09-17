@@ -991,6 +991,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case userSchema.CATEGORY:
       case userSchema.HOMEGROUP:
       case userSchema.SIGNATURE:
+      case userSchema.EMAILTARGET:
 	return true;
 
       // the following fields are only necessary if the account has
@@ -998,7 +999,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
       case userSchema.PASSWORD:
       case userSchema.PASSWORDCHANGETIME:
-      case userSchema.EMAILTARGET:
 	return !object.isInactivated();
       }
 
