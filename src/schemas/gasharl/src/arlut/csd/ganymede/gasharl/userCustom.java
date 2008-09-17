@@ -983,7 +983,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     switch (fieldid)
       {
       case userSchema.USERNAME:
-
       case userSchema.UID:
       case userSchema.LOGINSHELL:
       case userSchema.HOMEDIR:
