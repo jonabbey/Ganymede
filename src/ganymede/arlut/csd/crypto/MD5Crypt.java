@@ -4,8 +4,8 @@
 
    Created: 3 November 1999
    Release: $Name:  $
-   Version: $Revision$
-   Last Mod Date: $Date$
+   Version: $Revision: 7678 $
+   Last Mod Date: $Date: 2007-12-28 11:51:49 -0600 (Fri, 28 Dec 2007) $
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
    Original C Version:
    ----------------------------------------------------------------------------
@@ -15,42 +15,21 @@
    this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
    ----------------------------------------------------------------------------
 
-   -----------------------------------------------------------------------
+   This Java Port is  
 
-   Ganymede Directory Management System
+     Copyright (c) 1999-2008 The University of Texas at Austin.
 
-   Copyright (C) 1996-2008
-   The University of Texas at Austin
+     All rights reserved.
 
-   Contact information
-
-   Web site: http://www.arlut.utexas.edu/gash2
-   Author Email: ganymede_author@arlut.utexas.edu
-   Email mailing list: ganymede@arlut.utexas.edu
-
-   US Mail:
-
-   Computer Science Division
-   Applied Research Laboratories
-   The University of Texas at Austin
-   PO Box 8029, Austin TX 78713-8029
-
-   Telephone: (512) 835-3200
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA
+     Redistribution and use in source and binary form are permitted
+     provided that distributions retain this entire copyright notice
+     and comment. Neither the name of the University nor the names of
+     its contributors may be used to endorse or promote products
+     derived from this software without specific prior written
+     permission. THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY
+     EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE
+     IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+     PARTICULAR PURPOSE.
 
 */
 
@@ -69,14 +48,6 @@ import java.security.MessageDigest;
  * {@link MD5Crypt#crypt(java.lang.String, java.lang.String) crypt()}, which
  * takes a password and a salt string and generates an OpenBSD/FreeBSD/Linux-compatible
  * md5-encoded password entry.
- *
- * Original C Version:
- * ----------------------------------------------------------------------------
- * "THE BEER-WARE LICENSE" (Revision 42):
- * phk@login.dknet.dk wrote this file.  As long as you retain this notice you
- * can do whatever you want with this stuff. If we meet some day, and you think
- * this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
- * ----------------------------------------------------------------------------
  */
 
 public final class MD5Crypt {
