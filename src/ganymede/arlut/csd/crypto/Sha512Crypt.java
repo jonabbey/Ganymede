@@ -2,9 +2,9 @@
    Sha512Crypt.java
 
    Created: 18 December 2007
-   Last Changed By: $Author$
-   Version: $Revision$
-   Last Mod Date: $Date$
+   Last Changed By: $Author: broccol $
+   Version: $Revision: 7692 $
+   Last Mod Date: $Date: 2007-12-30 01:55:31 -0600 (Sun, 30 Dec 2007) $
 
    Java Port By: James Ratcliff, falazar@arlut.utexas.edu
 
@@ -26,42 +26,21 @@
 
    http://people.redhat.com/drepper/SHA-crypt.txt
 
-   -----------------------------------------------------------------------
+   This Java Port is  
 
-   Ganymede Directory Management System
+     Copyright (c) 2008 The University of Texas at Austin.
 
-   Copyright (C) 1996-2008
-   The University of Texas at Austin
+     All rights reserved.
 
-   Contact information
-
-   Web site: http://www.arlut.utexas.edu/gash2
-   Author Email: ganymede_author@arlut.utexas.edu
-   Email mailing list: ganymede@arlut.utexas.edu
-
-   US Mail:
-
-   Computer Science Division
-   Applied Research Laboratories
-   The University of Texas at Austin
-   PO Box 8029, Austin TX 78713-8029
-
-   Telephone: (512) 835-3200
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA
+     Redistribution and use in source and binary form are permitted
+     provided that distributions retain this entire copyright notice
+     and comment. Neither the name of the University nor the names of
+     its contributors may be used to endorse or promote products
+     derived from this software without specific prior written
+     permission. THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY
+     EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE
+     IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+     PARTICULAR PURPOSE.
 
 */
 
