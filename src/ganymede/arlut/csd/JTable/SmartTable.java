@@ -192,26 +192,24 @@ public class SmartTable extends JPanel implements ActionListener
     private boolean DEBUG = true;
     public Vector rows; // vector of rowHandle objects, holds actual data cells 
     private String[] columnNames;
+    private Class[] columnClasses;
 
-    // constructor function
     public MyTableModel(String[] columnValues)
     {
       if (debug) System.err.println("DEBUG: MyTableModel Constructor");
 
       rows = new Vector();
-      //columnNames = new String[columnValues.length];
       columnNames = columnValues;
-
-    } // MyTableModel Constructor
+      columnClasses = new Class[columnValues.length];
+    }       
       
-      
-    public int getColumnCount() {
-      //System.out.println("column count is "+columnNames.length);
-      return columnNames.length;
+    public int getColumnCount() 
+    {
+	return columnNames.length;
     }
 
-    public int getRowCount() {
-      //System.out.println("row count is "+rows.size());
+    public int getRowCount() 
+    {
       return rows.size();
     }
     
@@ -233,22 +231,30 @@ public class SmartTable extends JPanel implements ActionListener
       rows = new Vector();     // Clear Rows
     }
      
-    public String getColumnName(int col) {
+    public String getColumnName(int col) 
+    {
       return columnNames[col];
     }
 
     // pass in and set entire array of column names, or column headers
-    public void setColumnNames(int columnCnt, String[] columns) {
+    public void setColumnNames(int columnCnt, String[] columns) 
+    {
       columnNames = new String[columnCnt];
       columnNames = columns;
     }
       
-    public Object getValueAt(int row, int col) {
+    public Object getValueAt(int row, int col) 
+    {
       return getRowHandler(row).cells[col];
     }      
       
-    public void setValueAt(Object value, int row, int col) {
-      getRowHandler(row).cells[col] = value;
+    public void setValueAt(Object value, int row, int col) 
+    {
+	if (value != null && columnClasses[col] == null)
+	    {
+		columnClasses[col] = value.getClass();
+	    }
+	getRowHandler(row).cells[col] = value;
     }      
 
     /**
@@ -263,7 +269,6 @@ public class SmartTable extends JPanel implements ActionListener
     {
       Integer row = (Integer) index.get(key);
       int row2 = row.intValue();
-            //System.err.println("setCellValue: key:"+key+" col:"+col+" value:"+value+" row2:"+row2);
       setValueAt(value, row2, col);
     }
     
@@ -278,7 +283,6 @@ public class SmartTable extends JPanel implements ActionListener
       Integer row = (Integer) index.get(key);
       int row2 = row.intValue();
       return getValueAt(row2, col);
-      //return myModel.getValueAt(row2, col);
     }
 
 
@@ -291,36 +295,48 @@ public class SmartTable extends JPanel implements ActionListener
      * JTable uses this method to determine the default renderer/
      * editor for each cell. 
      */
-    public Class getColumnClass(int c) {
-      return getValueAt(0, c).getClass();
+    public Class getColumnClass(int c) 
+    {
+      if (columnClasses[c] == null)
+	{
+	  return Object.class;
+	}
+      else
+	{
+	  return columnClasses[c];
+	}
     }
       
-    /*
+    /**
      * Don't need to implement this method unless your table's
      * editable.
      */
-    public boolean isCellEditable(int row, int col) {          	  
+    public boolean isCellEditable(int row, int col) 
+    {          	  
       return false; // For our tables, all columns are uneditable
       //Note that the data/cell address is constant,
       //no matter where the cell appears onscreen.
     }
 
-    private void printDebugData() {
+    private void printDebugData() 
+    {
       int numRows = getRowCount();
       int numCols = getColumnCount();
       System.out.println("numCols = "+numCols);
 	
-      for (int i=0; i < numRows; i++) {
-	System.out.print("    row " + i + ":");
-	for (int j=0; j < numCols; j++) {
-	  System.out.print("  " + getValueAt(i,j));
+      for (int i=0; i < numRows; i++) 
+	{
+	  System.out.print("    row " + i + ":");
+	  for (int j=0; j < numCols; j++) 
+	    {
+	      System.out.print("  " + getValueAt(i,j));
+	    }
+	  System.out.println();
 	}
-	System.out.println();
-      }
       System.out.println("--------------------------");
     }
   } // MyTableModel class
-
+  
 
 
   /**
@@ -376,14 +392,12 @@ public class SmartTable extends JPanel implements ActionListener
     headerMenu.add(revSortByMI);
     sortByMI.addActionListener(this);
     revSortByMI.addActionListener(this);
-    //System.out.println("getColumnCount value is:"+table.getColumnCount()+"*");
-    //if (table.getColumnCount() > 1)
-    {
-      headerMenu.add(deleteColMI);
-      headerMenu.add(optimizeColWidMI);
-      deleteColMI.addActionListener(this);
-      optimizeColWidMI.addActionListener(this);
-    }
+
+    headerMenu.add(deleteColMI);
+    headerMenu.add(optimizeColWidMI);
+    deleteColMI.addActionListener(this);
+    optimizeColWidMI.addActionListener(this);
+
     // add the listener specifically to the header 
     table.getTableHeader().addMouseListener(new PopupListener(this,headerMenu));
       
@@ -412,27 +426,35 @@ public class SmartTable extends JPanel implements ActionListener
 
 
   // Mouse class to control the right click menus
-  class PopupListener extends MouseAdapter {
+  class PopupListener extends MouseAdapter 
+  {
     SmartTable master_control;
     JPopupMenu popMenu;
 
-    public PopupListener(SmartTable master, JPopupMenu popMenu1) {
+    public PopupListener(SmartTable master, JPopupMenu popMenu1) 
+    {
       this.master_control = master;
       popMenu = popMenu1;   // passing in needed menu
     }
   
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(MouseEvent e) 
+    {
       showPopup(e);
     }
 
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent e) 
+    {
       showPopup(e);
     }
 
-    private void showPopup(MouseEvent e) {
+    private void showPopup(MouseEvent e) 
+    {
       if (e.isPopupTrigger()) {
-	if (debug) System.out.println("mouseevent on row:"+ table.rowAtPoint(e.getPoint()) +"*");			
-	if (debug) System.out.println("mouseevent on col:"+ table.columnAtPoint(e.getPoint()) +"*");			
+	if (debug) 
+	  {
+	    System.out.println("mouseevent on row:"+ table.rowAtPoint(e.getPoint()) +"*");			
+	    System.out.println("mouseevent on col:"+ table.columnAtPoint(e.getPoint()) +"*");			
+	  }
 	// show the passed in menu
 	master_control.remember_row = master_control.table.rowAtPoint(e.getPoint());
 	master_control.remember_col = master_control.remember_col2 = master_control.table.columnAtPoint(e.getPoint());
@@ -445,7 +467,10 @@ public class SmartTable extends JPanel implements ActionListener
 	  
 	  int viewColumn = columnModel.getColumnIndexAtX(e.getX());
 	  int column = columnModel.getColumn(viewColumn).getModelIndex();
-	  if (debug) System.out.println("second way is col:"+ column +"*");			
+	  if (debug) 
+	    {
+	      System.out.println("second way is col:"+ column +"*");			
+	    }
 	  
 	  master_control.remember_col = column; 
 	} // secondary unaltered column
@@ -499,7 +524,10 @@ public class SmartTable extends JPanel implements ActionListener
 	else // pass back to parent to deal with Row menu actions
 	{
 	  Object key = getRowKey(sorter.modelIndex(remember_row)); // get real key from sorter model	      
-	  if (debug) System.err.println("actionPerformed processing hash key: row=" + remember_row + ", invid=" + key);
+	  if (debug) 
+	    {
+	      System.err.println("actionPerformed processing hash key: row=" + remember_row + ", invid=" + key);
+	    }
 	  callback.rowMenuPerformed(key, event);
 	}
 
@@ -546,48 +574,52 @@ public class SmartTable extends JPanel implements ActionListener
     // Now Read in all the result lines
     // Get the max textwidth for each column
     for (int i=0; i < rows; i++)
-    {
-      for (int j=0; j < cols; j++)
       {
-	cellResult = table.getValueAt(i, j);          
-	columnTotWidths[j] += cellResult.toString().length();
-        if (columnWidths[j] < cellResult.toString().length())
-	  columnWidths[j] = cellResult.toString().length();
-	//System.out.println("on column j:"+j+" length="+cellResult.toString().length()+" max "+columnWidths[j]+"   now value="+cellResult);        
-      }
-    } // for i	
-
+	for (int j=0; j < cols; j++)
+	  {
+	    cellResult = table.getValueAt(i, j);          
+	    if (cellResult != null)
+	      {
+		columnTotWidths[j] += cellResult.toString().length();
+		if (columnWidths[j] < cellResult.toString().length())
+		  {
+		    columnWidths[j] = cellResult.toString().length();
+		  }
+	      }
+	  }
+      } // for i	
+    
     // FIX THIS, CANT BE SET COLMN WIDTH HERE ARG
     // 10 letters app 75px 8px per char? try
     // decrease all columns that dont need 10 letters
     int decreased = 0;
     int inccnt = 0; // count cols to increase
     for (int j=0; j < cols; j++)
-    {
-      //System.out.print("col j:"+j+" columnNames[j] \t\t max "+columnWidths[j]+"  total:"+columnTotWidths[j]+"/"+rows+" = "+columnTotWidths[j]/rows);
-      if (columnWidths[j] <= 8) 
-      { cmodel.getColumn(j).setPreferredWidth(columnWidths[j]*9);
-	decreased += 8 - columnWidths[j];
-	//System.out.println(" shrinking col   decreased="+decreased+"   inccnt:"+inccnt);	
-      }
-      //else System.out.println(" ");
-      if (columnTotWidths[j]/rows > 8) inccnt++;
-    } // for j
-
-
+      {
+	//System.out.print("col j:"+j+" columnNames[j] \t\t max "+columnWidths[j]+"  total:"+columnTotWidths[j]+"/"+rows+" = "+columnTotWidths[j]/rows);
+	if (columnWidths[j] <= 8) 
+	  { cmodel.getColumn(j).setPreferredWidth(columnWidths[j]*9);
+	    decreased += 8 - columnWidths[j];
+	    //System.out.println(" shrinking col   decreased="+decreased+"   inccnt:"+inccnt);	
+	  }
+	//else System.out.println(" ");
+	if (columnTotWidths[j]/rows > 8) inccnt++;
+      } // for j
+    
+    
     // then increase the rest with the extra stuff
     int charadds =  (int) Math.ceil((double)decreased / (double)inccnt);
     //System.out.println(" columns that need increasing ="+inccnt+" chars avail to spread "+ decreased+" charadds:"+charadds);
     for (int j=0; j < cols; j++)
-    {
-      if (columnTotWidths[j]/rows > 8) 
       {
-	cmodel.getColumn(j).setPreferredWidth((8+charadds)*9);  // add in chars here
-	//System.out.println(" increasing col j:"+j+" columnNames[j] \t\t max "+columnWidths[j]+"  total:"+columnTotWidths[j]+"/"+rows+" = "+columnTotWidths[j]/rows);
-      }
-    } // for j
+	if (columnTotWidths[j]/rows > 8) 
+	  {
+	    cmodel.getColumn(j).setPreferredWidth((8+charadds)*9);  // add in chars here
+	    //System.out.println(" increasing col j:"+j+" columnNames[j] \t\t max "+columnWidths[j]+"  total:"+columnTotWidths[j]+"/"+rows+" = "+columnTotWidths[j]/rows);
+	  }
+      } // for j
   } // optimizeColumns
-
+  
 
   // Print the JTable, WYSIWYG, print in landscape mode
   public void print() 
@@ -596,7 +628,8 @@ public class SmartTable extends JPanel implements ActionListener
       {
 	table.print();
       }
-    catch (PrinterException pe) {
+    catch (PrinterException pe) 
+    {
       System.err.println("Error printing: " + pe.getMessage());
     }
   } // print
@@ -658,7 +691,8 @@ public class SmartTable extends JPanel implements ActionListener
   }
 
   // pass in and set entire array of column names, or column headers
-  public void setColumnNames(int columnCnt, String[] columns) {
+  public void setColumnNames(int columnCnt, String[] columns) 
+  {
     myModel.setColumnNames(columnCnt, columns);
   }
 

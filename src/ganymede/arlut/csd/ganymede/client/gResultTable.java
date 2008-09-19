@@ -138,10 +138,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.gResultTable");
 
   static final String
-    refresh_query = ts.l("global.refresh_query"), // "Refresh Query"
+    mail_report = ts.l("global.mail_report"), // "Mail Report"
     save_report = ts.l("global.save_report"), // "Save Report"
     print_report = ts.l("global.print_report"), // "Print Report"
-    mail_report = ts.l("global.mail_report"); // "Mail Report"
+    refresh_query = ts.l("global.refresh_query"); // "Refresh Query"
 
   static final String
     tab_option = ts.l("global.tab_option"), // "Tab separated ASCII"
@@ -219,6 +219,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   public gResultTable(windowPanel wp, Session session, Query query, DumpResult results) throws RemoteException
   {
     super();			// JInternalFrame init
+
+
+    System.out.println("starting gResultTable");
+    if (debug) System.out.println("starting gResultTable 2");
+
 
     this.wp = wp;
     this.session = session;
@@ -314,6 +319,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       {
 	cellResult = results.getResult(i, j);	
 	sTable.setCellValue(invid, j, cellResult);
+
 	if (cellResult != null && !cellResult.toString().equals(""))
 	{
 	    used[j] = true;  
@@ -323,7 +329,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     //sTable.fixTableColumns();
 
-    /* TODO
+    /* TODO */
     // we have to do this backwards so that we don't
     // change the index of a column we'll later delete
 
@@ -331,10 +337,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       {
 	if (!used[i])
 	  {
-	    table.deleteColumn(i,true);
+	      //table.deleteColumn(i,true);
+	      sTable.table.removeColumn(sTable.table.getColumnModel().getColumn(i));  
 	  }
       }
-*/
 
 
     validate(); // needed after refresh results.
@@ -522,8 +528,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     Image mailIcon = PackageResources.getImageResource(this, "queryTB_mail.gif", getClass());
     Image saveIcon = PackageResources.getImageResource(this, "queryTB_save.gif", getClass());
-    Image refreshIcon = PackageResources.getImageResource(this, "queryTB_refresh.gif", getClass());
     Image printIcon = PackageResources.getImageResource(this, "queryTB_refresh.gif", getClass()); // TODO GET OWN PRINT ICON
+    Image refreshIcon = PackageResources.getImageResource(this, "queryTB_refresh.gif", getClass());
 
     Insets insets = new Insets(0,0,0,0);
     JToolBar toolBarTemp = new JToolBar();
@@ -543,7 +549,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
     b.setMargin(insets);
-    b.setActionCommand("Mail Report");
+    b.setActionCommand(mail_report);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
 
@@ -570,7 +576,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	b.setFont(new Font("SansSerif", Font.PLAIN, 10));
 	b.setMargin(insets);
-	b.setActionCommand("Save Report");
+	b.setActionCommand(save_report);
 	b.setVerticalTextPosition(b.BOTTOM);
 	b.setHorizontalTextPosition(b.CENTER);
 
@@ -586,7 +592,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     
 
     // "Print"
-    b = new JButton(ts.l("createToolBar.print_button_mnemonic_optional"), new ImageIcon(saveIcon));
+    b = new JButton(ts.l("createToolBar.print_button"), new ImageIcon(printIcon));
     
     // "P"
     if (ts.hasPattern("createToolBar.print_button_mnemonic_optional"))
@@ -596,7 +602,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
     b.setMargin(insets);
-    b.setActionCommand("Print Report");
+    b.setActionCommand(print_report);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     
@@ -621,12 +627,12 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
     b.setMargin(insets);
-    b.setActionCommand("Refresh Query");
+    b.setActionCommand(refresh_query);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
 
     // "Refresh query"
-    if (ts.hasPattern("createToolBar.refersh_button_tooltip_optional"))
+    if (ts.hasPattern("createToolBar.refresh_button_tooltip_optional"))
       {
 	b.setToolTipText(ts.l("createToolBar.refresh_button_tooltip_optional"));
       }
@@ -660,6 +666,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     
      if (event.getActionCommand().equals(print_report))
      {
+	 System.out.println("Callign print command now! ");
        sTable.print(); 
        toolbar.requestFocus();
        return;

@@ -350,7 +350,6 @@ public class DumpResult implements java.io.Serializable, List {
     /* -- */
 
     headerObjects = new Vector();
-    headers = new Vector();
     invids = new Vector();
     rows = new Vector();
 
