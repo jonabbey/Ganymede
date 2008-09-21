@@ -179,14 +179,13 @@ public final class DBNameSpace implements NameSpace {
   // constructors
 
   /**
-   *
    * Create a new DBNameSpace object from a stream definition.
-   *
    */
 
   public DBNameSpace(DataInput in) throws IOException, RemoteException
   {
     receive(in);
+
     uniqueHash = new GHashtable(caseInsensitive); // size?
     transactions = new Hashtable(TRANSCOUNT);
 
@@ -194,7 +193,6 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   *
    * Constructor for new DBNameSpace for DBStore initialization.
    *
    * @param name Name for this name space
@@ -212,9 +210,7 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   *
    * Read in a namespace definition from a DataInput stream.
-   *
    */
 
   public void receive(DataInput in) throws IOException
@@ -224,9 +220,7 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   *
    * Write out a namespace definition to a DataOutput stream.
-   *
    */
 
   public void emit(DataOutput out) throws IOException
@@ -257,7 +251,6 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   *
    * Returns the name of this namespace.
    *
    * @see arlut.csd.ganymede.rmi.NameSpace
@@ -269,7 +262,6 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   *
    * Sets the name of this namespace.  Returns false
    * if the name is already taken by another namespace
    *
@@ -286,7 +278,6 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   *
    * Returns true if case is to be disregarded in comparing
    * entries in namespace managed fields.
    *
@@ -299,7 +290,6 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   *
    * Turns case sensitivity on/off.  If b is true, case will be
    * disregarded in comparing entries in namespace managed fields.
    *
@@ -325,14 +315,16 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * <p>This method returns the {@link arlut.csd.ganymede.server.DBNameSpaceTransaction DBNameSpaceTransaction}
-   * associated with the given transaction, creating one if one was not previously
-   * so associated.</p>
+   * <p>This method returns the {@link
+   * arlut.csd.ganymede.server.DBNameSpaceTransaction
+   * DBNameSpaceTransaction} associated with the given transaction,
+   * creating one if one was not previously so associated.</p>
    *
-   * <p>This method will always return a valid DBNameSpaceTransaction record.</p>
+   * <p>This method will always return a valid DBNameSpaceTransaction
+   * record.</p>
    */
 
-  public synchronized DBNameSpaceTransaction getTransactionRecord(DBEditSet transaction)
+  private synchronized DBNameSpaceTransaction getTransactionRecord(DBEditSet transaction)
   {
     DBNameSpaceTransaction transRecord = (DBNameSpaceTransaction) transactions.get(transaction);
 
@@ -395,14 +387,14 @@ public final class DBNameSpace implements NameSpace {
    * the DBField returned may contain the value (if value is a String) with
    * different capitalization.</p>
    *
-   * <p>As well, this method is really probably useful in the context of
+   * <p>As well, this method is really probably only useful in the context of
    * a DBReadLock, but we're not doing anything to enforce this requirement 
    * at this point.</p>
    *
    * @param value The value to search for in the namespace hash.
    */
 
-  public synchronized DBField lookupPersistent(Object value)
+  public DBField lookupPersistent(Object value)
   {
     DBNameSpaceHandle _handle;
 
@@ -416,72 +408,6 @@ public final class DBNameSpace implements NameSpace {
       }
 
     return _handle.getPersistentField(null);
-  }
-
-  /**
-   * <p>This method allows the namespace to be used as a unique valued 
-   * search index.</p>
-   *   
-   * <p>Note that this lookup is case sensitive or not according to the case
-   * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
-   * the DBField returned may contain the value (if value is a String) with
-   * different capitalization.</p>
-   *
-   * <p>Note that the DBField returned will have the same object Invid
-   * and field Id as the field that has the value in the persistent
-   * database, but if you are providing a live session which happens
-   * to be editing that object, the field you get back will be
-   * editable, and may not actually contain the value, as it may have
-   * been changed during the session's transactional manipulations.
-   * If you are concerned about getting back the actual read-only
-   * field from the persistent store that has the value you're looking
-   * for, you can do as follows:</p>
-   *
-   * <p>Assume resultField is what you get from this
-   * lookupPersistent() call.  Then do the following:<br/>
-   * <br/>
-   * <pre>
-   * DBField readOnlyField = null;
-   * DBObject owner = resultField.getOwner();
-   *
-   * if (owner instanceof DBEditObject)
-   *   {
-   *      DBObject original = ((DBEditObject) owner).getOriginal();
-   *      readOnlyField = original.getField(resultField.getID());
-   *   }
-   * else
-   *   {
-   *      readOnlyField = resultField;
-   *   }
-   * </pre>
-   * <br/>
-   * And the readOnlyField you get back will be the persistent field from
-   * the database that had the value you were looking for at the time you
-   * did the lookupPersistent call.</p>
-   * 
-   * <p>As well, this method is really probably useful in the context of
-   * a DBReadLock, but we're not doing anything to enforce this requirement 
-   * at this point.</p>
-   *
-   * @param session The GanymedeSession to use to lookup the containing object..
-   * useful when a GanymedeSession is doing the looking up of value
-   * @param value The value to search for in the namespace hash.
-   */
-
-  public synchronized DBField lookupPersistent(GanymedeSession session, Object value)
-  {
-    DBNameSpaceHandle _handle;
-
-    /* -- */
-
-    _handle = (DBNameSpaceHandle) uniqueHash.get(value);
-
-    if (_handle == null)
-      {
-	return null;
-      }
-
-    return _handle.getPersistentField(session);
   }
 
   /**

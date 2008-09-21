@@ -158,7 +158,6 @@ public class DBJournal implements ObjectStatus {
   /* -- */
 
   /**
-   *
    * <p>The DBJournal constructor takes a filename and creates a DBJournal object.
    * If the file named does not exist, the DBJournal constructor will create
    * the file and write the DBJournal header, leaving the file pointer pointing
@@ -167,7 +166,6 @@ public class DBJournal implements ObjectStatus {
    *
    * <p>In either case, the file will be made ready for new transactions to be
    * written.</p>
-   *
    */
   
   public DBJournal(DBStore store, String filename) throws IOException
@@ -406,16 +404,18 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
-   * <P>The load() method reads in all transactions in the current DBStore Journal
-   * and makes the appropriate changes to the DBStore Object Bases.  This
-   * method should be called after the main body of the DBStore is loaded
-   * and before the DBStore is put into production mode.</P>
+   * <P>The load() method reads in all transactions in the current
+   * DBStore Journal and makes the appropriate changes to the DBStore
+   * Object Bases.  This method should be called after the main body
+   * of the DBStore is loaded and before the DBStore is put into
+   * production mode.</P>
    *
-   * <P>load() will return true if the on-disk journal was in a consistent state,
-   * with no incomplete transactions.  If load() encounters EOF in the middle
-   * of attempting to read in a transaction record, load() will return false.  In
-   * either case, any valid and complete transaction records will be processed
-   * and integrated into the DBStore.</P>
+   * <P>load() will return true if the on-disk journal was in a
+   * consistent state, with no incomplete transactions.  If load()
+   * encounters EOF in the middle of attempting to read in a
+   * transaction record, load() will return false.  In either case,
+   * any valid and complete transaction records will be processed and
+   * integrated into the DBStore.</P>
    */
 
   public synchronized boolean load() throws IOException
@@ -1023,8 +1023,9 @@ public class DBJournal implements ObjectStatus {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class holds data corresponding to a modification record for a single
- * object in the server's {@link arlut.csd.ganymede.server.DBJournal DBJournal} class.</P>
+ * <P>This class holds data corresponding to a modification record for
+ * a single object in the server's {@link
+ * arlut.csd.ganymede.server.DBJournal DBJournal} class.</P>
  */
 
 class JournalEntry {
@@ -1110,7 +1111,7 @@ class JournalEntry {
 		      {
 			for (int j = 0; j < _field.size(); j++)
 			  {
-			    if (definition.namespace.lookupPersistent(Ganymede.internalSession, _field.key(j)) != _field)
+			    if (definition.namespace.lookupPersistent(_field.key(j)) != _field)
 			      {
 				throw new RuntimeException("Error, namespace mismatch in DBJournal code [" + j + "]");
 			      }
@@ -1120,7 +1121,7 @@ class JournalEntry {
 		      }
 		    else
 		      {
-			if (definition.namespace.lookupPersistent(Ganymede.internalSession, _field.key()) != _field)
+			if (definition.namespace.lookupPersistent(_field.key()) != _field)
 			  {
 			    throw new RuntimeException("Error, namespace mismatch in DBJournal code");
 			  }
