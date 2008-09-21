@@ -1,3 +1,5 @@
 *.class
+*.jar
 *~
-
+src/build/classes/
+src/build/crypto/
