@@ -87,14 +87,14 @@ class DBNameSpaceHandle implements Cloneable {
    * by a transaction, this is the transaction
    */
 
-  DBEditSet owner;
+  DBEditSet editingTransaction;
 
   /**
    * remember if the value was in use at the
    * start of the transaction
    */
 
-  boolean original;
+  boolean previouslyUsed;
 
   /**
    * is the value currently in use?
@@ -113,7 +113,7 @@ class DBNameSpaceHandle implements Cloneable {
    * an active transaction.</P>
    */
 
-  private Invid persistentFieldInvid;
+  private Invid persistentFieldInvid = null;
 
   /**
    * <P>If this handle is associated with a value that has been
@@ -122,7 +122,7 @@ class DBNameSpaceHandle implements Cloneable {
    * within the object referenced by persistentFieldInvid.</P>
    */
 
-  private short persistentFieldId;
+  private short persistentFieldId = -1;
 
   /**
    * if this handle is currently being edited by an editset,
@@ -160,21 +160,21 @@ class DBNameSpaceHandle implements Cloneable {
 
   public DBNameSpaceHandle(DBEditSet owner, boolean originalValue)
   {
-    this.owner = owner;
-    this.original = this.inuse = originalValue;
+    this.editingTransaction = owner;
+    this.previouslyUsed = this.inuse = originalValue;
   }
 
   public DBNameSpaceHandle(DBEditSet owner, boolean originalValue, DBField field)
   {
-    this.owner = owner;
-    this.original = this.inuse = originalValue;
+    this.editingTransaction = owner;
+    this.previouslyUsed = this.inuse = originalValue;
 
     setPersistentField(field);
   }
 
   public boolean matches(DBEditSet set)
   {
-    return (this.owner == set);
+    return (this.editingTransaction == set);
   }
 
   /**
@@ -263,13 +263,13 @@ class DBNameSpaceHandle implements Cloneable {
   /**
    * Returns true if this DBNameSpaceHandle is referring to a value
    * that is in use, either in the persistent datastore, or in the
-   * transaction referred to by the owner field.
+   * transaction referred to by the editingTransaction field.
    *
    * This method will return false if a transaction has checked out an
    * object for editing and then cleared this value from a field.  If
    * this transaction is aborted, then inuse will be set to true again
    * as part of the abort process.  If the transaction is committed,
-   * all namespace handles owned by the owner transaction whose inuse
+   * all namespace handles owned by the editingTransaction whose inuse
    * flags are false will be removed from the namespace.
    *
    * This method may also return false if a transaction has reserved
@@ -300,7 +300,7 @@ class DBNameSpaceHandle implements Cloneable {
 
   public boolean isEditedByUs(GanymedeSession session)
   {
-    return (owner != null && session.getSession().getEditSet() == owner);
+    return (editingTransaction != null && session.getSession().getEditSet() == editingTransaction);
   }
 
   /**
@@ -311,7 +311,7 @@ class DBNameSpaceHandle implements Cloneable {
 
   public boolean isEditedByUs(DBEditSet editSet)
   {
-    return (owner != null && editSet == owner);
+    return (editingTransaction != null && editSet == editingTransaction);
   }
 
   /**
@@ -421,7 +421,7 @@ class DBNameSpaceHandle implements Cloneable {
 
   public void cleanup()
   {
-    owner = null;
+    editingTransaction = null;
     persistentFieldInvid = null;
     shadowField = null;
     shadowFieldB = null;
@@ -431,9 +431,9 @@ class DBNameSpaceHandle implements Cloneable {
   {
     StringBuffer result = new StringBuffer();
 
-    if (owner != null)
+    if (editingTransaction != null)
       {
-	result.append("owner == " + owner.toString());
+	result.append("editingTransaction == " + editingTransaction.toString());
       }
 
     if (result.length() != 0)
@@ -441,13 +441,13 @@ class DBNameSpaceHandle implements Cloneable {
 	result.append(", ");
       }
 
-    if (original)
+    if (previouslyUsed)
       {
-	result.append("original");
+	result.append("previouslyUsed");
       }
     else
       {
-	result.append("!original");
+	result.append("!previouslyUsed");
       }
 
     if (inuse)
