@@ -6,10 +6,8 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Version: $Id$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -1077,8 +1075,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 			throw new RuntimeException(ts.l("receive.vectornamespace", tmp.key(j), definition, definition.namespace));
 		      } 
 
-		    definition.namespace.putHandle(tmp.key(j), 
-						   new DBNameSpaceHandle(null, true, tmp));
+		    definition.namespace.receiveValue(tmp.key(j), tmp);
 		  }
 	      }
 	    else
@@ -1091,8 +1088,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		    throw new RuntimeException(ts.l("receive.scalarnamespace", tmp.key(), definition, definition.namespace));
 		  }
 
-		definition.namespace.putHandle(tmp.key(), 
-					       new DBNameSpaceHandle(null, true, tmp));
+		definition.namespace.receiveValue(tmp.key(), tmp);
 	      }
 	  }
 	

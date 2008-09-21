@@ -5,10 +5,8 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Version: $Id$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -16,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -1056,9 +1054,6 @@ class JournalEntry {
     DBObject 
       oldObject;
 
-    DBNameSpaceHandle
-      currentHandle;
-
     /* -- */
 
     if (debug)
@@ -1115,9 +1110,7 @@ class JournalEntry {
 		      {
 			for (int j = 0; j < _field.size(); j++)
 			  {
-			    currentHandle = definition.namespace.getHandle(_field.key(j));
-
-			    if (currentHandle.getPersistentField(Ganymede.internalSession) != _field)
+			    if (definition.namespace.lookupPersistent(Ganymede.internalSession, _field.key(j)) != _field)
 			      {
 				throw new RuntimeException("Error, namespace mismatch in DBJournal code [" + j + "]");
 			      }
@@ -1127,9 +1120,7 @@ class JournalEntry {
 		      }
 		    else
 		      {
-			currentHandle = definition.namespace.getHandle(_field.key());
-
-			if (currentHandle.getPersistentField(Ganymede.internalSession) != _field)
+			if (definition.namespace.lookupPersistent(Ganymede.internalSession, _field.key()) != _field)
 			  {
 			    throw new RuntimeException("Error, namespace mismatch in DBJournal code");
 			  }
@@ -1183,14 +1174,13 @@ class JournalEntry {
 
 		    for (int j = 0; j < _field.size(); j++)
 		      {
-			definition.namespace.putHandle(_field.key(j), 
-						       new DBNameSpaceHandle(null, true, _field));
+			definition.namespace.receiveValue(_field.key(j), _field);
 		      }
 		  }
 		else
 		  {
 		    // mark the scalar value in the namespace
-		    definition.namespace.putHandle(_field.key(), new DBNameSpaceHandle(null, true, _field));
+		    definition.namespace.receiveValue(_field.key(), _field);
 		  }
 	      }
 	  }

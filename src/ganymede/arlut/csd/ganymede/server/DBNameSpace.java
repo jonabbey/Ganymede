@@ -91,20 +91,26 @@ import arlut.csd.ganymede.rmi.NameSpace;
  * or {@link arlut.csd.ganymede.server.DBNameSpace#rollback(arlut.csd.ganymede.server.DBEditSet,java.lang.String) rollback()}
  * methods.</p>
  *
- * <p>In order to perform this unique value management, DBNameSpace maintains
- * a private Hashtable, {@link arlut.csd.ganymede.server.DBNameSpace#uniqueHash uniqueHash},
- * that associates the allocated vales in the namespace with {@link arlut.csd.ganymede.server.DBNameSpaceHandle DBNameSpaceHandle}
- * objects which track the transaction that is manipulating the value, if any, as well
- * as the DBField object in the database that is checked in with that value.  The
- * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} query logic takes
- * advantage of this to do optimized, hashed look-ups of values for unique value
- * constrained fields to locate objects in the database rather than having to iterate
- * over all objects of a given type to find a particular match.</p>
+ * <p>In order to perform this unique value management, DBNameSpace
+ * maintains a private Hashtable, {@link
+ * arlut.csd.ganymede.server.DBNameSpace#uniqueHash uniqueHash}, that
+ * associates the allocated vales in the namespace with {@link
+ * arlut.csd.ganymede.server.DBNameSpaceHandle DBNameSpaceHandle}
+ * objects which track the transaction that is manipulating the value,
+ * if any, as well as the DBField object in the database that is
+ * checked in with that value.  The {@link
+ * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} query
+ * logic takes advantage of this to do optimized, hashed look-ups of
+ * values for unique value constrained fields to locate objects in the
+ * database rather than having to iterate over all objects of a given
+ * type to find a particular match.</p>
  *
- * <p>DBNameSpaces may be defined in the server's schema editor to be either case sensitive
- * or case insensitive.  The DBNameSpace class uses the {@link arlut.csd.ganymede.server.GHashtable GHashtable}
- * class to handle the representational issues in the unique value hash for this, as well as
- * for things like IP address representation.</p>
+ * <p>DBNameSpaces may be defined in the server's schema editor to be
+ * either case sensitive or case insensitive.  The DBNameSpace class
+ * uses the {@link arlut.csd.ganymede.server.GHashtable GHashtable}
+ * class to handle the representational issues in the unique value
+ * hash for this, as well as for things like IP address
+ * representation.</p>
  */
 
 public final class DBNameSpace implements NameSpace {
@@ -138,10 +144,11 @@ public final class DBNameSpace implements NameSpace {
   private String name;
 
   /**
-   * <p>Hashtable mapping values allocated (permanently, for objects checked in to the database, or
-   * temporarily, for objects being manipulated by active transactions) in this namespace to
-   * {@link arlut.csd.ganymede.server.DBNameSpaceHandle DBNameSpaceHandle} objects that track
-   * the current status of the values.</p>
+   * <p>Hashtable mapping values allocated (permanently, for objects
+   * checked in to the database, or temporarily, for objects being
+   * manipulated by active transactions) in this namespace to {@link
+   * arlut.csd.ganymede.server.DBNameSpaceHandle DBNameSpaceHandle}
+   * objects that track the current status of the values.</p>
    */
 
   private GHashtable uniqueHash;
@@ -348,20 +355,9 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * <p>Returns the DBNameSpaceHandle associated with the value
-   * in this namespace, or null if the value is not allocated in
-   * this namespace.</p>
-   */
-
-  public DBNameSpaceHandle getHandle(Object value)
-  {
-    return (DBNameSpaceHandle) uniqueHash.get(value);
-  }
-
-  /**
-   * <p>Publicly accessible function used to associate the given
-   * {@link arlut.csd.ganymede.server.DBNameSpaceHandle DBNameSpaceHandle}
-   * with a value in this namespace in a non-transactional fashion.</p>
+   * <p>Publicly accessible function used to record the presence of a
+   * namespace value in this namespace during Ganymede database
+   * loading.</p>
    *
    * <p>Used by the {@link arlut.csd.ganymede.server.DBObject DBObject}
    * receive() method and the {@link arlut.csd.ganymede.server.DBJournal
@@ -370,9 +366,9 @@ public final class DBNameSpace implements NameSpace {
    * start-up.</p>
    */
 
-  public void putHandle(Object value, DBNameSpaceHandle handle)
+  public void receiveValue(Object value, DBField field)
   {
-    uniqueHash.put(value, handle);
+    uniqueHash.put(value, new DBNameSpaceHandle(null, true, field));
   }
 
   /**
@@ -390,14 +386,7 @@ public final class DBNameSpace implements NameSpace {
     uniqueHash.remove(value);
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                              lookupPersistent()
-
-  ----------------------------------------------------------------------------*/
-
   /**
-   *
    * <p>This method allows the namespace to be used as a unique valued 
    * search index.</p>
    *
@@ -411,7 +400,6 @@ public final class DBNameSpace implements NameSpace {
    * at this point.</p>
    *
    * @param value The value to search for in the namespace hash.
-   *
    */
 
   public synchronized DBField lookupPersistent(Object value)
@@ -431,7 +419,6 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   *
    * <p>This method allows the namespace to be used as a unique valued 
    * search index.</p>
    *   
@@ -479,7 +466,6 @@ public final class DBNameSpace implements NameSpace {
    * @param session The GanymedeSession to use to lookup the containing object..
    * useful when a GanymedeSession is doing the looking up of value
    * @param value The value to search for in the namespace hash.
-   *
    */
 
   public synchronized DBField lookupPersistent(GanymedeSession session, Object value)
@@ -497,12 +483,6 @@ public final class DBNameSpace implements NameSpace {
 
     return _handle.getPersistentField(session);
   }
-
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                  lookupShadow()
-
-  ----------------------------------------------------------------------------*/
 
   /**
    * <p>If the value is attached to an object that is being created or edited in
@@ -537,14 +517,7 @@ public final class DBNameSpace implements NameSpace {
     return _handle.getShadowField();
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                 lookupMyValue()
-
-  ----------------------------------------------------------------------------*/
-
   /**
-   *
    * <p>This method looks to find where the given value is bound in the namespace,
    * taking into account the transactional view the calling session has.  If the
    * value is attached to an object in the current transaction, this method will
@@ -565,7 +538,6 @@ public final class DBNameSpace implements NameSpace {
    * @param session The GanymedeSession to use to lookup the containing object..
    * useful when a GanymedeSession is doing the looking up of value
    * @param value The value to search for in the namespace hash.
-   *
    */
 
   public synchronized DBField lookupMyValue(GanymedeSession session, Object value)
@@ -601,15 +573,7 @@ public final class DBNameSpace implements NameSpace {
     return _handle.getPersistentField(session);
   }
 
-
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                      testmark()
-
-  ----------------------------------------------------------------------------*/
-
   /**
-   *
    * <p>This method tests to see whether a value in the namespace can
    * be marked as in use.  Such a marking is done to allow an editset
    * to have the ability to juggle values in namespace associated
@@ -625,7 +589,6 @@ public final class DBNameSpace implements NameSpace {
    *
    * @param editSet The transaction testing permission to claim value.
    * @param value The unique value desired by editSet.
-   * 
    */
 
   public synchronized boolean testmark(DBEditSet editSet, Object value)
@@ -670,14 +633,7 @@ public final class DBNameSpace implements NameSpace {
     return true;
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                          mark()
-
-  ----------------------------------------------------------------------------*/
-
   /**
-   *
    * <p>This method marks a value as being used in this namespace.  Marked
    * values are held in editSet's, which are free to shuffle these
    * reserved values around during processing.  The inuse and original
@@ -688,7 +644,6 @@ public final class DBNameSpace implements NameSpace {
    * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
    * @param field The DBField which will take the unique value.  Used to provide an index.
-   *  
    */
 
   public synchronized boolean mark(DBEditSet editSet, Object value, DBField field)
@@ -828,12 +783,6 @@ public final class DBNameSpace implements NameSpace {
 
     return true;
   }
-
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                       reserve()
-
-  ----------------------------------------------------------------------------*/
 
   /**
    * <p>This method reserves a value so that the given editSet is
@@ -981,14 +930,7 @@ public final class DBNameSpace implements NameSpace {
     return true;
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                    testunmark()
-
-  ----------------------------------------------------------------------------*/
-
   /**
-   *
    *  <p>This method tests to see whether a value in the namespace can
    *  be marked as not in use.  Such a marking is done to allow an
    *  editset to have the ability to juggle values in namespace
@@ -1005,7 +947,6 @@ public final class DBNameSpace implements NameSpace {
    *
    * @param editSet The transaction that is determining whether value can be freed.
    * @param value The unique value being tested.
-   *
    */
 
   public synchronized boolean testunmark(DBEditSet editSet, Object value, DBField oldField)
@@ -1052,14 +993,7 @@ public final class DBNameSpace implements NameSpace {
 				// be unmarking it
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                        unmark()
-
-  ----------------------------------------------------------------------------*/
-
   /**
-   *
    * <p>Used to mark a value as not used in the namespace.  Unmarked
    * values are not available for other threads / editset's until
    * commit is called on this namespace on behalf of this editset.</p>
@@ -1068,7 +1002,6 @@ public final class DBNameSpace implements NameSpace {
    * @param value The unique value being tentatively marked as unused.
    * @param oldField The old DBField that the namespace value is being
    * unmarked for
-   * 
    */
 
   public synchronized boolean unmark(DBEditSet editSet, Object value, DBField oldField)
@@ -1197,12 +1130,6 @@ public final class DBNameSpace implements NameSpace {
     return true;
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                    checkpoint()
-
-  ----------------------------------------------------------------------------*/
-
   /**
    * <p>Method to checkpoint namespace changes made by a specific transaction
    * so that state can be rolled back if necessary at a later time.</p>
@@ -1221,14 +1148,7 @@ public final class DBNameSpace implements NameSpace {
     getTransactionRecord(editSet).pushCheckpoint(name, new DBNameSpaceCkPoint(this, editSet));
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                 popCheckpoint()
-
-  ----------------------------------------------------------------------------*/
-
   /**
-   *
    * <p>Method to remove a checkpoint from this namespace's DBNameSpaceCkPoint
    * hash.</p>
    *
@@ -1238,7 +1158,6 @@ public final class DBNameSpace implements NameSpace {
    *
    * @param editSet The transaction that is requesting the checkpoint pop.
    * @param name The name of the checkpoint to be popped.
-   *
    */
 
   public synchronized void popCheckpoint(DBEditSet editSet, String name)
@@ -1251,14 +1170,7 @@ public final class DBNameSpace implements NameSpace {
     getTransactionRecord(editSet).popCheckpoint(name);
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                      rollback()
-
-  ----------------------------------------------------------------------------*/
-
   /**
-   *
    * <p>Method to rollback namespace changes made by a specific transaction
    * to a checkpoint.</p>
    *
@@ -1266,7 +1178,6 @@ public final class DBNameSpace implements NameSpace {
    * @param name The name of the checkpoint to be rolled back to.
    *
    * @return false if the checkpoint could not be found.
-   *
    */
 
   public synchronized boolean rollback(DBEditSet editSet, String name)
@@ -1379,12 +1290,6 @@ public final class DBNameSpace implements NameSpace {
     return true;
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                         verify_noninteractive()
-
-  ----------------------------------------------------------------------------*/
-
   /**
    * This method returns null if the given transaction doesn't have
    * any shadowFieldB's outstanding.  This is the desired case.  If
@@ -1468,18 +1373,11 @@ public final class DBNameSpace implements NameSpace {
     return results;
   }
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                         abort()
-
-  ----------------------------------------------------------------------------*/
-
   /**
    * <p>Method to revert an editSet's namespace modifications to its
    * original state.  Used when a transaction is rolled back.</p>
    *
    * @param editSet The transaction whose claimed values in this namespace need to be freed.
-   *
    */
 
   public synchronized void abort(DBEditSet editSet)
@@ -1529,11 +1427,6 @@ public final class DBNameSpace implements NameSpace {
 
     transactions.remove(editSet);
   }
-
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                        commit()
-  ----------------------------------------------------------------------------*/
 
   /**
    * <p>Method to put the editSet's current namespace modifications into
@@ -1607,32 +1500,21 @@ public final class DBNameSpace implements NameSpace {
     transactions.remove(editSet);
   }  
 
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                      remember()
-
-  Remember that this editSet has changed the location/status of this value.
-
-  This is a private convenience method.
-
-  ----------------------------------------------------------------------------*/
-
   /**
-   * <p>This method associates the value with the given editset in a
+   * Remember that this editSet has changed the location/status of
+   * this value.
+   *
+   * This is a private convenience method.
+   *
+   * This method associates the value with the given editset in a
    * stored transaction record, so that we can rollback the namespace
-   * to a fixed state later.</p>
+   * to a fixed state later.
    */
 
   private void remember(DBEditSet editSet, Object value)
   {
     getTransactionRecord(editSet).remember(value);
   }
-
-  /*----------------------------------------------------------------------------
-                                                                          method
-                                                                   dumpNameSpace
-
-  ----------------------------------------------------------------------------*/
 
   /**
    * <p>This method is just a debug instrument, it prints to stderr a list of
@@ -1661,11 +1543,13 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * <p>This method prepares this DBNameSpace for changes to be made during schema editing.
-   * A back-up copy of the uniqueHash is made, to allow reversion in case the schema
-   * edit is aborted.  Between schemaEditCheckout() and either schemaEditCommit() or
-   * schemaEditAbort(), the schemaEditRegister() and schemaEditUnregister() methods
-   * may be called to handle attaching/detaching fields to the namespace.</p>
+   * <p>This method prepares this DBNameSpace for changes to be made
+   * during schema editing.  A back-up copy of the uniqueHash is made,
+   * to allow reversion in case the schema edit is aborted.  Between
+   * schemaEditCheckout() and either schemaEditCommit() or
+   * schemaEditAbort(), the schemaEditRegister() and
+   * schemaEditUnregister() methods may be called to handle
+   * attaching/detaching fields to the namespace.</p>
    */
 
   public synchronized void schemaEditCheckout()
@@ -1894,239 +1778,246 @@ public final class DBNameSpace implements NameSpace {
 
     return success;
   }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                          DBNameSpaceTransaction
-
-------------------------------------------------------------------------------*/
-
-/**
- * <P>This class holds information associated with an active transaction (a
- * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}) in care of a 
- * {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace}.</p>
- */
-
-class DBNameSpaceTransaction {
-
-  private NamedStack checkpointStack;
-  private Hashtable reservedValues;
-  private DBEditSet transaction;
-
-  /* -- */
-
-  DBNameSpaceTransaction(DBEditSet transaction)
-  {
-    this.transaction = transaction;
-    this.reservedValues = new Hashtable();
-    this.checkpointStack = new NamedStack();
-  }
-
-  public synchronized void remember(Object value)
-  {
-    if (reservedValues.containsKey(value))
-      {
-	try
-	  {
-	    throw new RuntimeException("ASSERT: DBNameSpaceTransaction.remember(): transaction " + transaction +
-				       " already contains value " + value);
-	  }
-	catch (RuntimeException ex)
-	  {
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	  }
-
-	return;
-      }
-
-    reservedValues.put(value, value);
-  }
-
-  public synchronized void forget(Object value)
-  {
-    if (!reservedValues.containsKey(value))
-      {
-	try
-	  {
-	    throw new RuntimeException("ASSERT: DBNameSpaceTransaction.forget(): transaction " + transaction +
-				       " does not contain value " + value);
-	  }
-	catch (RuntimeException ex)
-	  {
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	  }
-
-	return;
-      }
-    
-    reservedValues.remove(value);
-  }
 
   /**
-   * <p>This method dissolves everything referenced by this DBNameSpaceTransaction,
-   * in order to facilitate speedy garbage collection.</p>
+   * <p>Returns the DBNameSpaceHandle associated with the value
+   * in this namespace, or null if the value is not allocated in
+   * this namespace.</p>
    */
 
-  public synchronized void cleanup()
-  {
-    if (checkpointStack != null)
-      {
-	while (checkpointStack.size() != 0)
-	  {
-	    DBNameSpaceCkPoint ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
-	    ckpoint.cleanup();
-	  }
-
-	checkpointStack = null;
-      }
-
-    if (reservedValues != null)
-      {
-	reservedValues.clear();
-	reservedValues = null;
-      }
-
-    transaction = null;
-  }
-
-  public Enumeration getReservedEnum()
-  {
-    return reservedValues.elements();
-  }
-
-  public Hashtable getReservedHash()
-  {
-    return reservedValues;
-  }
-
-  public DBEditSet getDBEditSet()
-  {
-    return transaction;
-  }
-
-  public void pushCheckpoint(String name, DBNameSpaceCkPoint cPoint)
-  {
-    checkpointStack.push(name, cPoint);
-  }
-
-  public DBNameSpaceCkPoint popCheckpoint(String name)
-  {
-    DBNameSpaceCkPoint point = (DBNameSpaceCkPoint) checkpointStack.pop(name);
-
-    if (point == null)
-      {
-	try
-	  {
-	    throw new RuntimeException("ASSERT: DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
-				       " does not contain a checkpoint named " + name);
-	  }
-	catch (RuntimeException ex)
-	  {
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	  }
-      }
-
-    return point;
-  }
-
-  public NamedStack getCheckpointStack()
-  {
-    return checkpointStack;
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                              DBNameSpaceCkPoint
-
-------------------------------------------------------------------------------*/
-
-class DBNameSpaceCkPoint {
-
-  Hashtable reserved;
-  Hashtable uniqueHash;
-
-  /* -- */
-
-  DBNameSpaceCkPoint(DBNameSpace space, DBEditSet transaction)
-  {
-    DBNameSpaceTransaction tRecord = space.getTransactionRecord(transaction);
-
-    reserved = tRecord.getReservedHash();
-
-    if (reserved != null)
-      {
-	// clone the hash to avoid sync problems with other threads
-
-	reserved = (Hashtable) reserved.clone();
-
-	if (reserved.size() > 0)
-	  {
-	    // size a hashtable for the elements we need to retain
-
-	    uniqueHash = new Hashtable(reserved.size(), 1.0f);
-	  }
-	else
-	  {
-	    // just create a small one
-
-	    uniqueHash = new Hashtable(10);
-	  }
-
-	// now copy our hash to preserve the namespace handles
-	
-	Enumeration en = reserved.elements();
-	
-	while (en.hasMoreElements())
-	  {
-	    Object value = en.nextElement();
-		
-	    DBNameSpaceHandle handle = space.getHandle(value);
-		
-	    handle = (DBNameSpaceHandle) handle.clone();
-		
-	    uniqueHash.put(value, handle);
-	  }
-      }
-  }
-
-  public boolean containsValue(Object value)
-  {
-    return reserved.containsKey(value);
-  }
-
-  public DBNameSpaceHandle getValueHandle(Object value)
+  private DBNameSpaceHandle getHandle(Object value)
   {
     return (DBNameSpaceHandle) uniqueHash.get(value);
   }
 
   /**
-   * <p>This method dissolves everything referenced by this DBNameSpaceCkPoint
-   * in order to facilitate speedy garbage collection.</p>
+   * <P>This inner class holds information associated with an active
+   * transaction (a {@link arlut.csd.ganymede.server.DBEditSet
+   * DBEditSet}) in care of a {@link
+   * arlut.csd.ganymede.server.DBNameSpace DBNameSpace}.</p>
    */
 
-  public synchronized void cleanup()
-  {
-    if (reserved != null)
-      {
-	reserved.clear();
-	reserved = null;
-      }
+  class DBNameSpaceTransaction {
 
-    if (uniqueHash != null)
-      {
-	Enumeration en = uniqueHash.elements();
+    private NamedStack checkpointStack;
+    private Hashtable reservedValues;
+    private DBEditSet transaction;
 
-	while (en.hasMoreElements())
-	  {
-	    DBNameSpaceHandle handle = (DBNameSpaceHandle) en.nextElement();
+    /* -- */
 
-	    handle.cleanup();
-	  }
+    DBNameSpaceTransaction(DBEditSet transaction)
+    {
+      this.transaction = transaction;
+      this.reservedValues = new Hashtable();
+      this.checkpointStack = new NamedStack();
+    }
 
-	uniqueHash.clear();
-	uniqueHash = null;
-      }
+    public synchronized void remember(Object value)
+    {
+      if (reservedValues.containsKey(value))
+	{
+	  try
+	    {
+	      throw new RuntimeException("ASSERT: DBNameSpaceTransaction.remember(): transaction " + transaction +
+					 " already contains value " + value);
+	    }
+	  catch (RuntimeException ex)
+	    {
+	      Ganymede.debug(Ganymede.stackTrace(ex));
+	    }
+
+	  return;
+	}
+
+      reservedValues.put(value, value);
+    }
+
+    public synchronized void forget(Object value)
+    {
+      if (!reservedValues.containsKey(value))
+	{
+	  try
+	    {
+	      throw new RuntimeException("ASSERT: DBNameSpaceTransaction.forget(): transaction " + transaction +
+					 " does not contain value " + value);
+	    }
+	  catch (RuntimeException ex)
+	    {
+	      Ganymede.debug(Ganymede.stackTrace(ex));
+	    }
+
+	  return;
+	}
+    
+      reservedValues.remove(value);
+    }
+
+    /**
+     * <p>This method dissolves everything referenced by this DBNameSpaceTransaction,
+     * in order to facilitate speedy garbage collection.</p>
+     */
+
+    public synchronized void cleanup()
+    {
+      if (checkpointStack != null)
+	{
+	  while (checkpointStack.size() != 0)
+	    {
+	      DBNameSpaceCkPoint ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
+	      ckpoint.cleanup();
+	    }
+
+	  checkpointStack = null;
+	}
+
+      if (reservedValues != null)
+	{
+	  reservedValues.clear();
+	  reservedValues = null;
+	}
+
+      transaction = null;
+    }
+
+    public Enumeration getReservedEnum()
+    {
+      return reservedValues.elements();
+    }
+
+    public Hashtable getReservedHash()
+    {
+      return reservedValues;
+    }
+
+    public DBEditSet getDBEditSet()
+    {
+      return transaction;
+    }
+
+    public void pushCheckpoint(String name, DBNameSpaceCkPoint cPoint)
+    {
+      checkpointStack.push(name, cPoint);
+    }
+
+    public DBNameSpaceCkPoint popCheckpoint(String name)
+    {
+      DBNameSpaceCkPoint point = (DBNameSpaceCkPoint) checkpointStack.pop(name);
+
+      if (point == null)
+	{
+	  try
+	    {
+	      throw new RuntimeException("ASSERT: DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
+					 " does not contain a checkpoint named " + name);
+	    }
+	  catch (RuntimeException ex)
+	    {
+	      Ganymede.debug(Ganymede.stackTrace(ex));
+	    }
+	}
+
+      return point;
+    }
+    
+    public NamedStack getCheckpointStack()
+    {
+      return checkpointStack;
+    }
+  }
+
+  /**
+   * <P>This inner class holds checkpoint information associated with
+   * an active transaction (a {@link
+   * arlut.csd.ganymede.server.DBEditSet DBEditSet}) in care of a
+   * {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace}.</p>
+   */
+
+  class DBNameSpaceCkPoint {
+
+    Hashtable reserved;
+    Hashtable uniqueHash;
+
+    /* -- */
+
+    DBNameSpaceCkPoint(DBNameSpace space, DBEditSet transaction)
+    {
+      DBNameSpaceTransaction tRecord = space.getTransactionRecord(transaction);
+
+      reserved = tRecord.getReservedHash();
+
+      if (reserved != null)
+	{
+	  // clone the hash to avoid sync problems with other threads
+
+	  reserved = (Hashtable) reserved.clone();
+
+	  if (reserved.size() > 0)
+	    {
+	      // size a hashtable for the elements we need to retain
+
+	      uniqueHash = new Hashtable(reserved.size(), 1.0f);
+	    }
+	  else
+	    {
+	      // just create a small one
+
+	      uniqueHash = new Hashtable(10);
+	    }
+
+	  // now copy our hash to preserve the namespace handles
+
+	  Enumeration en = reserved.elements();
+
+	  while (en.hasMoreElements())
+	    {
+	      Object value = en.nextElement();
+
+	      DBNameSpaceHandle handle = space.getHandle(value);
+
+	      handle = (DBNameSpaceHandle) handle.clone();
+
+	      uniqueHash.put(value, handle);
+	    }
+	}
+    }
+
+    public boolean containsValue(Object value)
+    {
+      return reserved.containsKey(value);
+    }
+
+    public DBNameSpaceHandle getValueHandle(Object value)
+    {
+      return (DBNameSpaceHandle) uniqueHash.get(value);
+    }
+
+    /**
+     * <p>This method dissolves everything referenced by this DBNameSpaceCkPoint
+     * in order to facilitate speedy garbage collection.</p>
+     */
+
+    public synchronized void cleanup()
+    {
+      if (reserved != null)
+	{
+	  reserved.clear();
+	  reserved = null;
+	}
+
+      if (uniqueHash != null)
+	{
+	  Enumeration en = uniqueHash.elements();
+
+	  while (en.hasMoreElements())
+	    {
+	      DBNameSpaceHandle handle = (DBNameSpaceHandle) en.nextElement();
+
+	      handle.cleanup();
+	    }
+
+	  uniqueHash.clear();
+	  uniqueHash = null;
+	}
+    }
   }
 }
