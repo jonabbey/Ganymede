@@ -1,1 +1,11 @@
-*.java ident
+*.java ident export-subst crlf
+*.html ident export-subst crlf
+README ident export-subst crlf
+README.first ident export-subst crlf
+README.source ident export-subst crlf
+README.localization ident export-subst crlf
+THINGSTODO ident export-subst crlf
+CHANGES ident export-subst crlf
+CREDITS ident export-subst crlf
+FAQ ident export-subst crlf
+KNOWNBUGS ident export-subst crlf
