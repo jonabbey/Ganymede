@@ -61,12 +61,17 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.print.PrinterException;
+import java.awt.print.Printable;
+import java.awt.print.PrinterJob;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.AncestorEvent;
 import javax.swing.JMenuItem;
@@ -622,7 +627,30 @@ public class SmartTable extends JPanel implements ActionListener
   {
     try
       {
-	table.print();
+	// fetch the printable
+	Printable printable = table.getPrintable(JTable.PrintMode.FIT_WIDTH,
+						 null,
+						 new MessageFormat("Page - {0}"));
+
+	// fetch a PrinterJob
+	PrinterJob job = PrinterJob.getPrinterJob();
+
+	// set the Printable on the PrinterJob
+	job.setPrintable(printable);
+
+	// create an attribute set to store attributes from the print dialog
+	PrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
+
+	// display a print dialog and record whether or not the user cancels it
+	boolean printAccepted = job.printDialog(attr);
+
+	// if the user didn't cancel the dialog
+	if (printAccepted) 
+	{
+	  // do the printing (may need to handle PrinterException)
+	  job.print(attr);
+	}
+
       }
     catch (PrinterException pe) 
     {
