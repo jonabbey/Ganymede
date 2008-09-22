@@ -1,6 +1,5 @@
 /*
-
-   smartTable.java
+   SmartTable.java
 
    This Module encapsulates some more user interactions with a Jtable, including
    right click menus to sort and remove columns
@@ -56,9 +55,12 @@ package arlut.csd.JTable;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension; 
-import java.awt.event.*;  //# test add
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.print.PrinterException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -79,9 +81,6 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
 import arlut.csd.Util.TranslationService;
-
-
-import java.awt.print.*;
 
 
 /*------------------------------------------------------------------------------
@@ -173,7 +172,6 @@ public class SmartTable extends JPanel implements ActionListener
   {
     public void ancestorAdded(AncestorEvent e) 
     {
-      System.out.println("Added");
       fixTableColumns();
     }
     public void ancestorMoved(AncestorEvent e) 
@@ -182,7 +180,7 @@ public class SmartTable extends JPanel implements ActionListener
     public void ancestorRemoved(AncestorEvent e) 
     {
     }
-  } // SmartTableAncestorListener
+  }
 
     
   // New Class added in to help define the table results
@@ -250,11 +248,11 @@ public class SmartTable extends JPanel implements ActionListener
       
     public void setValueAt(Object value, int row, int col) 
     {
-	if (value != null && columnClasses[col] == null)
-	    {
-		columnClasses[col] = value.getClass();
-	    }
-	getRowHandler(row).cells[col] = value;
+      if (value != null && columnClasses[col] == null)
+	{
+	  columnClasses[col] = value.getClass();
+	}
+      getRowHandler(row).cells[col] = value;
     }      
 
     /**
@@ -314,8 +312,8 @@ public class SmartTable extends JPanel implements ActionListener
     public boolean isCellEditable(int row, int col) 
     {          	  
       return false; // For our tables, all columns are uneditable
-      //Note that the data/cell address is constant,
-      //no matter where the cell appears onscreen.
+      // Note that the data/cell address is constant,
+      // no matter where the cell appears onscreen.
     }
 
     private void printDebugData() 
@@ -366,7 +364,6 @@ public class SmartTable extends JPanel implements ActionListener
       if (value instanceof Date)
         {
           Date dateValue = (Date) value;
-          //DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT);
 	  DateFormat df = new SimpleDateFormat("M/d/yyyy");
           setText(df.format(dateValue));
         }
@@ -487,14 +484,10 @@ public class SmartTable extends JPanel implements ActionListener
   // Function for the Toolbar, Rightclick Row Menus, called from popuplistener
   public void actionPerformed(ActionEvent event)
   {    
-    System.out.println(" currently in actionPerformed ");
-
     if (event.getSource() instanceof JMenuItem)
     {
       JMenuItem eventSource = (JMenuItem) event.getSource();
       Container parentContainer = eventSource.getParent();
-      
-      //System.out.println(" parentContainer ="+parentContainer);
       
       if (parentContainer instanceof JPopupMenu)
       {
@@ -504,19 +497,19 @@ public class SmartTable extends JPanel implements ActionListener
 	  if (debug) System.out.println("mouseevent remove col:"+ remember_col2 +"*");			
 	  table.removeColumn(table.getColumnModel().getColumn(remember_col2));  
 	}
-	else if (event.getSource() == sortByMI) // 
+	else if (event.getSource() == sortByMI) 
 	{
 	  if (debug) System.out.println("mouseevent sortby col:"+ remember_col +"*");	
 	  sorter.cancelSorting();
 	  sorter.setSortingStatus(remember_col, 1);  // Column, Status		
 	}
-	else if (event.getSource() ==  revSortByMI) // 
+	else if (event.getSource() ==  revSortByMI) 
 	{
 	  if (debug) System.out.println("mouseevent reverse sort by col:"+ remember_col +"*");			
 	  sorter.cancelSorting();
 	  sorter.setSortingStatus(remember_col, -1);  // Column, Status
 	}
-	else if (event.getSource() == optimizeColWidMI) // 
+	else if (event.getSource() == optimizeColWidMI) 
 	{
 	  if (debug) System.out.println("mouseevent optimize all columns ");
 	  optimizeColumns();
@@ -539,15 +532,18 @@ public class SmartTable extends JPanel implements ActionListener
   // Optimize the columnWidths on start
   public void fixTableColumns() 
   {
-    System.out.println(" table cols "+table.getColumnCount()+ " is smaller than panel width "+table.getParent().getWidth());
+    //System.out.println(" table cols "+table.getColumnCount()+ " is smaller than panel width "+table.getParent().getWidth());
 
     // default width is 75, if not default, use getPreferredWidth()
     int colWidth = table.getColumnModel().getColumn(0).getPreferredWidth();
     int colCount = table.getColumnCount();
-    System.out.println(" table cols "+colCount+" and  width "+colWidth);
+    //System.out.println(" table cols "+colCount+" and  width "+colWidth);
 
     // Get Table Size, then get Container size, if table smaller than container, stretch table out to fit
-    if (colWidth*colCount < table.getParent().getWidth()) table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); 
+    if (colWidth*colCount < table.getParent().getWidth()) 
+      {
+	table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); 
+      }
   } // fixTableColumns
 
 
@@ -632,7 +628,7 @@ public class SmartTable extends JPanel implements ActionListener
     {
       System.err.println("Error printing: " + pe.getMessage());
     }
-  } // print
+  } 
 
 
 
@@ -644,7 +640,7 @@ public class SmartTable extends JPanel implements ActionListener
   public Object getRowKey(int rownum)
   {
     return myModel.getRowHandler(rownum).key;
-  } // getRowKey
+  } 
 
   /**
    * Creates a new row, adds it to the hashtable
@@ -654,17 +650,17 @@ public class SmartTable extends JPanel implements ActionListener
   public void newRow(Object key)
   {
     myModel.newRow(key);
-  } // newRow
+  } 
 
   public void clearRows()
   {
     myModel.clearRows();
-  } // clearRows
+  } 
 
   public void refresh()
   {
     myModel.fireTableDataChanged(); // redraw table
-  } // refresh
+  } 
 
   /**
    * Sets the contents of a cell in the table.
@@ -787,19 +783,15 @@ This class is used to map a hash key to a position in the table.
 
 ------------------------------------------------------------------------------*/
 
-class rowHandler {
-
+class rowHandler 
+{
   Object  key;
-
   Object[] cells;  
 
   public rowHandler(Object key, int columns)
   {
     //System.err.println("New rowHandler created, key = " + key+" with columnscnt:"+columns);
-
     cells = new Object[columns]; // set the size of cells list
-
     this.key = key;
-
   }
-} // rowhandler
+} 
