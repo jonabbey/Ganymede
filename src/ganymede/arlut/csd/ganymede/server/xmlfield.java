@@ -94,7 +94,6 @@ import arlut.csd.ganymede.rmi.field_option_field;
  * class is also responsible for actually registering its data
  * on the server on demand.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 

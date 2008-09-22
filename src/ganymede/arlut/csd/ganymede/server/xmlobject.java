@@ -80,7 +80,6 @@ import arlut.csd.ganymede.rmi.db_object;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}.
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 

@@ -181,7 +181,6 @@ import arlut.csd.ganymede.rmi.db_object;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
