@@ -547,21 +547,19 @@ public final class DBNameSpace implements NameSpace {
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.editingTransaction != null && handle.editingTransaction != editSet)
+	if (handle.isEditedByOtherTransaction(editSet))
 	  {
-	    // either someone else is manipulating this value, or an object
-	    // stored in the database holds this value.  We would need to
-	    // pull that object out of the database and unmark the value on
-	    // that object before we could mark that value someplace else.
-
 	    return false;	// somebody else owns it
 	  }
 
-	// we own it.. it may or may not be in use in an object
-	// already, but it's ours, at least
+	// either we own it, or no one does.
 
 	if (onlyUnused && handle.isInUse())
 	  {
+	    // this value is already in use.  we would need to edit
+	    // the object that contains the value and unmark the other
+	    // field before we could reserve the value
+
 	    return false;
 	  }
 
@@ -627,7 +625,7 @@ public final class DBNameSpace implements NameSpace {
 
     handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-    if (handle.editingTransaction != null && handle.editingTransaction != editSet)
+    if (handle.isEditedByOtherTransaction(editSet))
       {
 	return false;	// another active transaction owns it
       }
@@ -692,7 +690,7 @@ public final class DBNameSpace implements NameSpace {
 
     handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-    if (handle.editingTransaction != null && handle.editingTransaction != editSet)
+    if (handle.isEditedByOtherTransaction(editSet))
       {
 	// this handle has been checked out by a different
 	// transaction, we can't mess with it
@@ -805,14 +803,14 @@ public final class DBNameSpace implements NameSpace {
 
     handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
+    if (handle.isEditedByOtherTransaction(editSet))
+      {
+	return false;	// somebody else owns it
+      }
+
     if (handle.editingTransaction == null)
       {
 	return true;
-      }
-
-    if (handle.editingTransaction != editSet)
-      {
-	return false;	// somebody else owns it
       }
 
     if (!handle.matches(oldField) &&
@@ -858,7 +856,21 @@ public final class DBNameSpace implements NameSpace {
     DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
     // let's make sure this is a proper unbinding.
-    //
+
+    if (handle.isEditedByOtherTransaction(editSet))
+      {
+	// somebody else owns it.. that somebody may be a
+	// non-interactive session speculatively marking the
+	// value, but if so, the non-interactive session will
+	// learn soon enough that its transaction has to fail,
+	// since it can't edit our exclusively checked out
+	// object containing oldField, which would be
+	// necessary to complete the speculative namespace
+	// shuffle.
+	
+	throw new RuntimeException("ASSERT unmarking another transaction's value");
+      }
+
     // if we're non-interactive (as in the xmlclient), we should
     // only be unsetting field associations that pre-dated this
     // transaction.  We don't expect the xmlclient to set an
@@ -891,20 +903,6 @@ public final class DBNameSpace implements NameSpace {
         remember(editSet, value);
 
 	return true;
-      }
-
-    if (handle.editingTransaction != editSet)
-      {
-	// somebody else owns it.. that somebody may be a
-	// non-interactive session speculatively marking the
-	// value, but if so, the non-interactive session will
-	// learn soon enough that its transaction has to fail,
-	// since it can't edit our exclusively checked out
-	// object containing oldField, which would be
-	// necessary to complete the speculative namespace
-	// shuffle.
-	
-	throw new RuntimeException("ASSERT unmarking another transaction's value");
       }
 
     // we own it, but we don't want to change the original

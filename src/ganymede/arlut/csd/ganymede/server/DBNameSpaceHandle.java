@@ -315,6 +315,17 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
+   * <p>This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by some active
+   * transaction other than the editSet passed in.</p>
+   */
+
+  public boolean isEditedByOtherTransaction(DBEditSet editSet)
+  {
+    return (editingTransaction != null && editSet != editingTransaction);
+  }
+
+  /**
    * <p>If this namespace-managed value is being edited in an active
    * Ganymede transaction, this method may be used to set a pointer to
    * the editable DBField which contains the constrained value in the
