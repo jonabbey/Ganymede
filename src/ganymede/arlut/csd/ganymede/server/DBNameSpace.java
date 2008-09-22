@@ -322,7 +322,7 @@ public final class DBNameSpace implements NameSpace {
    * Returns true if this namespace has value allocated.
    */
 
-  public boolean containsKey(Object value)
+  public synchronized boolean containsKey(Object value)
   {
     return uniqueHash.containsKey(value);
   }
@@ -354,7 +354,7 @@ public final class DBNameSpace implements NameSpace {
    * start-up.
    */
   
-  public void clearHandle(Object value)
+  public synchronized void clearHandle(Object value)
   {
     uniqueHash.remove(value);
   }
