@@ -977,12 +977,14 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * Method to remove a checkpoint from this namespace's DBNameSpaceCkPoint
-   * hash.
+   * Method to remove a checkpoint from this namespace's
+   * DBNameSpaceCkPoint hash.  This is to be done when the calling
+   * code knows that it will no longer need to be able to rollback to
+   * the named checkpoint.
    *
-   * This method really isn't very important, because when the transaction
-   * is committed or aborted, the checkpoints hashtable will be cleared of
-   * editSet anyway.
+   * This method really isn't very important, because when the
+   * transaction is committed or aborted, the checkpoints hashtable
+   * will be cleared of editSet anyway.
    *
    * @param editSet The transaction that is requesting the checkpoint pop.
    * @param name The name of the checkpoint to be popped.
