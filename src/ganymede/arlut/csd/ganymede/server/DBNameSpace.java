@@ -134,6 +134,8 @@ public final class DBNameSpace implements NameSpace {
 
   static final int TRANSCOUNT = 30;
 
+  // ---
+
   /**
    * treat differently-cased Strings as the same for key?
    */
@@ -178,8 +180,6 @@ public final class DBNameSpace implements NameSpace {
   private Hashtable transactions;
 
   /* -- */
-
-  // constructors
 
   /**
    * Create a new DBNameSpace object from a stream definition.
@@ -534,6 +534,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -572,12 +573,7 @@ public final class DBNameSpace implements NameSpace {
 	return true;
       }
 
-    // we're creating a new value, the current value isn't held in the namespace
-
     handle = new DBNameSpaceHandle(editSet, false, null);
-
-    // we're reserving it now, but it's not actually in use yet.
-
     handle.setInUse(false);
     handle.setShadowField(null);
     handle.setShadowFieldB(null);
@@ -611,6 +607,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -660,6 +657,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -785,6 +783,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -840,6 +839,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -968,6 +968,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -992,6 +993,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -1012,6 +1014,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -1216,6 +1219,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -1288,6 +1292,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash != null)
       {
+	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
@@ -1465,6 +1470,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash == null)
       {
+	// "Can''t perform, not in schema edit."
 	throw new RuntimeException(ts.l("global.not_editing"));
       }
 
@@ -1493,6 +1499,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash == null)
       {
+	// "Can''t perform, not in schema edit."
 	throw new RuntimeException(ts.l("global.not_editing"));
       }
 
@@ -1522,6 +1529,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash == null)
       {
+	// "Can''t perform, not in schema edit."
 	throw new RuntimeException(ts.l("global.not_editing"));
       }
 
