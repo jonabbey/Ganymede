@@ -122,7 +122,7 @@ import arlut.csd.ganymede.rmi.Session;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.
  *
- * @version $Id: f85df3f1c13ba280eaebd0ed7584d1fde262f4df $
+ * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
