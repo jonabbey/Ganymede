@@ -206,6 +206,7 @@ public final class DBNameSpace implements NameSpace {
   {
     this.name = name;
     this.caseInsensitive = caseInsensitive;
+
     uniqueHash = new GHashtable(caseInsensitive); // size?
     transactions = new Hashtable(TRANSCOUNT);
 
@@ -216,7 +217,7 @@ public final class DBNameSpace implements NameSpace {
    * Read in a namespace definition from a DataInput stream.
    */
 
-  public void receive(DataInput in) throws IOException
+  public synchronized void receive(DataInput in) throws IOException
   {
     name = in.readUTF();
     caseInsensitive = in.readBoolean();
@@ -226,7 +227,7 @@ public final class DBNameSpace implements NameSpace {
    * Write out a namespace definition to a DataOutput stream.
    */
 
-  public void emit(DataOutput out) throws IOException
+  public synchronized void emit(DataOutput out) throws IOException
   {
     out.writeUTF(name);
     out.writeBoolean(caseInsensitive);
@@ -236,7 +237,7 @@ public final class DBNameSpace implements NameSpace {
    * <P>Write out an XML entity for this namespace.</P>
    */
 
-  public void emitXML(XMLDumpContext xDump) throws IOException
+  public synchronized void emitXML(XMLDumpContext xDump) throws IOException
   {
     xDump.startElementIndent("namespace");
     xDump.attribute("name", getName());
@@ -259,7 +260,7 @@ public final class DBNameSpace implements NameSpace {
    * @see arlut.csd.ganymede.rmi.NameSpace
    */
 
-  public String getName()
+  public synchronized String getName()
   {
     return name;
   }
@@ -271,7 +272,7 @@ public final class DBNameSpace implements NameSpace {
    * @see arlut.csd.ganymede.rmi.NameSpace
    */
 
-  public boolean setName(String newName)
+  public synchronized boolean setName(String newName)
   {
     // XXX need to make sure this new name isn't in conflict
     // with existing names XXX
@@ -287,7 +288,7 @@ public final class DBNameSpace implements NameSpace {
    * @see arlut.csd.ganymede.rmi.NameSpace
    */
 
-  public boolean isCaseInsensitive()
+  public synchronized boolean isCaseInsensitive()
   {
     return caseInsensitive;
   }
@@ -315,29 +316,6 @@ public final class DBNameSpace implements NameSpace {
     // if we've got here, we are okay to go
 
     this.caseInsensitive = b;
-  }
-
-  /**
-   * <p>This method returns the {@link
-   * arlut.csd.ganymede.server.DBNameSpaceTransaction
-   * DBNameSpaceTransaction} associated with the given transaction,
-   * creating one if one was not previously so associated.</p>
-   *
-   * <p>This method will always return a valid DBNameSpaceTransaction
-   * record.</p>
-   */
-
-  private synchronized DBNameSpaceTransaction getTransactionRecord(DBEditSet transaction)
-  {
-    DBNameSpaceTransaction transRecord = (DBNameSpaceTransaction) transactions.get(transaction);
-
-    if (transRecord == null)
-      {
-	transRecord = new DBNameSpaceTransaction(transaction);
-	transactions.put(transaction, transRecord);
-      }
-
-    return transRecord;
   }
 
   /**
@@ -397,7 +375,7 @@ public final class DBNameSpace implements NameSpace {
    * @param value The value to search for in the namespace hash.
    */
 
-  public DBField lookupPersistent(Object value)
+  public synchronized DBField lookupPersistent(Object value)
   {
     DBNameSpaceHandle _handle;
 
@@ -642,34 +620,28 @@ public final class DBNameSpace implements NameSpace {
 
     /* -- */
 
-    if (uniqueHash.containsKey(value))
+    if (!uniqueHash.containsKey(value))
       {
-	handle = (DBNameSpaceHandle) uniqueHash.get(value);
-
-	if (handle.editingTransaction != null && handle.editingTransaction != editSet)
-	  {
-	    return false;	// another active transaction owns it
-	  }
-	else
-	  {
-	    if (editSet.isInteractive())
-	      {
-		return !handle.isInUse();
-	      }
-	    else
-	      {
-		if (!handle.isInUse() || handle.getShadowFieldB() == null)
-		  {
-		    return true;
-		  }
-		else
-		  {
-		    return false;
-		  }
-	      }
-	  }
+	return true;
       }
-    
+
+    handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+    if (handle.editingTransaction != null && handle.editingTransaction != editSet)
+      {
+	return false;	// another active transaction owns it
+      }
+
+    if (editSet.isInteractive())
+      {
+	return !handle.isInUse();
+      }
+
+    if (handle.isInUse() && handle.getShadowFieldB() != null)
+      {
+	return false;
+      }
+
     return true;
   }
 
@@ -1382,43 +1354,6 @@ public final class DBNameSpace implements NameSpace {
     transactions.remove(editSet);
   }  
 
-  /**
-   * Remember that this editSet has changed the location/status of
-   * this value.
-   *
-   * This is a private convenience method.
-   *
-   * This method associates the value with the given editset in a
-   * stored transaction record, so that we can rollback the namespace
-   * to a fixed state later.
-   */
-
-  private void remember(DBEditSet editSet, Object value)
-  {
-    getTransactionRecord(editSet).remember(value);
-  }
-
-  /**
-   * <p>This method is just a debug instrument, it prints to stderr a list of
-   * the contents of this namespace's unique value hash.</p>
-   */
-
-  private void dumpNameSpace()
-  {
-    Enumeration en;
-    Object key;
-    
-    /* -- */
-
-    en = uniqueHash.keys();
-
-    while (en.hasMoreElements())
-      {
-	key = en.nextElement();
-	System.err.println("key: " + key + ", value: " + uniqueHash.get(key));
-      }
-  }
-
   public String toString()
   {
     return name;
@@ -1670,6 +1605,66 @@ public final class DBNameSpace implements NameSpace {
   private DBNameSpaceHandle getHandle(Object value)
   {
     return (DBNameSpaceHandle) uniqueHash.get(value);
+  }
+
+  /**
+   * <p>This method returns the {@link
+   * arlut.csd.ganymede.server.DBNameSpaceTransaction
+   * DBNameSpaceTransaction} associated with the given transaction,
+   * creating one if one was not previously so associated.</p>
+   *
+   * <p>This method will always return a valid DBNameSpaceTransaction
+   * record.</p>
+   */
+
+  private synchronized DBNameSpaceTransaction getTransactionRecord(DBEditSet transaction)
+  {
+    DBNameSpaceTransaction transRecord = (DBNameSpaceTransaction) transactions.get(transaction);
+
+    if (transRecord == null)
+      {
+	transRecord = new DBNameSpaceTransaction(transaction);
+	transactions.put(transaction, transRecord);
+      }
+
+    return transRecord;
+  }
+
+  /**
+   * Remember that this editSet has changed the location/status of
+   * this value.
+   *
+   * This is a private convenience method.
+   *
+   * This method associates the value with the given editset in a
+   * stored transaction record, so that we can rollback the namespace
+   * to a fixed state later.
+   */
+
+  private void remember(DBEditSet editSet, Object value)
+  {
+    getTransactionRecord(editSet).remember(value);
+  }
+
+  /**
+   * <p>This method is just a debug instrument, it prints to stderr a list of
+   * the contents of this namespace's unique value hash.</p>
+   */
+
+  private void dumpNameSpace()
+  {
+    Enumeration en;
+    Object key;
+    
+    /* -- */
+
+    en = uniqueHash.keys();
+
+    while (en.hasMoreElements())
+      {
+	key = en.nextElement();
+	System.err.println("key: " + key + ", value: " + uniqueHash.get(key));
+      }
   }
 
   /**
