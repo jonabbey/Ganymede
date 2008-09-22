@@ -6,9 +6,7 @@
    The GANYMEDE object storage system.
 
    Created: 11 Februrary 2005
-   Version: $Revision$
-   Last Mod Date: $Date$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -21,6 +19,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 

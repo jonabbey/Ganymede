@@ -7,7 +7,7 @@
    --
 
    Created: 2 May 2000
-   Version: $Id$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
