@@ -83,9 +83,10 @@ import arlut.csd.ganymede.rmi.NameSpace;
  * invidivual objects, and through the atomic acquisition of values
  * for unique value constrained DBFields.  Once a transaction allocates
  * a unique value using either the {@link arlut.csd.ganymede.server.DBNameSpace#mark(arlut.csd.ganymede.server.DBEditSet,
- * java.lang.Object,arlut.csd.ganymede.server.DBField) mark()}, or
+ * java.lang.Object,arlut.csd.ganymede.server.DBField) mark()},
  * {@link arlut.csd.ganymede.server.DBNameSpace#unmark(arlut.csd.ganymede.server.DBEditSet,
- * java.lang.Object,arlut.csd.ganymede.server.DBField oldField) unmark()},
+ * java.lang.Object,arlut.csd.ganymede.server.DBField oldField) unmark()}, or
+ * {@link arlut.csd.ganymede.server.DBNameSpace#reserve(arlut.csd.ganymede.server.DBEditSet,java.lang.Object) reserve()}
  * methods, no other transaction can allocate that value, until the first transaction
  * calls the {@link arlut.csd.ganymede.server.DBNameSpace#commit(arlut.csd.ganymede.server.DBEditSet) commit()},
  * {@link arlut.csd.ganymede.server.DBNameSpace#abort(arlut.csd.ganymede.server.DBEditSet) abort()},
@@ -499,6 +500,117 @@ public final class DBNameSpace implements NameSpace {
       }
 
     return _handle.getPersistentField(session);
+  }
+
+  /**
+   * <p>This method reserves a value so that the given editSet is
+   * assured of being able to use this value at some point before the
+   * transaction is commited or canceled.  reserve() is different from
+   * mark() in that there is no field specified to be holding the
+   * value, and that when the transaction is committed or canceled,
+   * the value will be returned to the available list.  During the
+   * transaction, the transaction code can mark the value at any time
+   * with assurance that they will be able to do so.</p>
+   *
+   * <p>If a transaction attempts to reserve() a
+   * value that is already being held by an object in the transaction,
+   * reserve() will return true, even though a subsequent mark()
+   * attempt would fail.</p>
+   *
+   * @param editSet The transaction claiming the unique value <value>
+   * @param value The unique value that transaction editset is attempting to claim
+   *
+   * @return true if the value could be reserved in the given editSet.  
+   */
+
+  public boolean reserve(DBEditSet editSet, Object value)
+  {
+    return reserve(editSet, value, false);
+  }
+
+  /**
+   * <p>This method reserves a value so that the given editSet is
+   * assured of being able to use this value at some point before the
+   * transaction is commited or canceled.  reserve() is different from
+   * mark() in that there is no field specified to be holding the
+   * value, and that when the transaction is committed or canceled,
+   * the value will be returned to the available list.  During the
+   * transaction, the transaction code can mark the value at any time
+   * with assurance that they will be able to do so.</p>
+   *
+   * <p>If onlyUsed is false and a transaction attempts to reserve() a
+   * value that is already being held by an object in the transaction,
+   * reserve() will return true, even though a subsequent mark()
+   * attempt would fail.</p>
+   *
+   * @param editSet The transaction claiming the unique value <value>
+   * @param value The unique value that transaction editset is attempting to claim
+   * @param onlyUnused If true, reserve() will return false if the value is already
+   * attached to a field connected to this namespace, even if in an object attached
+   * to the editSet provided.
+   *
+   * @return true if the value could be reserved in the given editSet.  
+   */
+
+  public synchronized boolean reserve(DBEditSet editSet, Object value, boolean onlyUnused)
+  {
+    if (this.saveHash != null)
+      {
+	throw new RuntimeException(ts.l("global.editing"));
+      }
+
+    DBNameSpaceHandle handle;
+    
+    /* -- */
+
+    // Is this value already taken?
+
+    if (uniqueHash.containsKey(value))
+      {
+	handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+	if (handle.editingTransaction != null && handle.editingTransaction != editSet)
+	  {
+	    // either someone else is manipulating this value, or an object
+	    // stored in the database holds this value.  We would need to
+	    // pull that object out of the database and unmark the value on
+	    // that object before we could mark that value someplace else.
+
+	    return false;	// somebody else owns it
+	  }
+
+	// we own it.. it may or may not be in use in an object
+	// already, but it's ours, at least
+
+	if (onlyUnused && handle.isInUse())
+	  {
+	    return false;
+	  }
+
+	if (handle.editingTransaction == null)
+	  {
+	    handle.editingTransaction = editSet;
+	    remember(editSet, value);
+	  }
+
+	return true;
+      }
+
+    // we're creating a new value, the current value isn't held in the namespace
+
+    handle = new DBNameSpaceHandle(editSet, false, null);
+
+    // we're reserving it now, but it's not actually in use yet.
+
+    handle.setInUse(false);
+    handle.setShadowField(null);
+    handle.setShadowFieldB(null);
+
+    uniqueHash.put(value, handle);
+
+    remember(editSet, value);
+
+    return true;
   }
 
   /**
