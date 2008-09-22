@@ -339,7 +339,7 @@ public final class DBNameSpace implements NameSpace {
    * start-up.
    */
 
-  public void receiveValue(Object value, DBField field)
+  public synchronized void receiveValue(Object value, DBField field)
   {
     uniqueHash.put(value, new DBNameSpaceHandle(null, true, field));
   }
