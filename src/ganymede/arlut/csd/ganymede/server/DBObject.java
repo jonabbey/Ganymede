@@ -6,7 +6,6 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Version: $Id$
    Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -182,7 +181,6 @@ import arlut.csd.ganymede.rmi.db_object;
  *
  * <p>Is all this clear?  Good!</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

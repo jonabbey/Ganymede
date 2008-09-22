@@ -6,7 +6,6 @@
    The GANYMEDE object storage system.
 
    Created: 15 January 1999
-   Version: $Id$
    Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -312,6 +311,17 @@ class DBNameSpaceHandle implements Cloneable {
   public boolean isEditedByUs(DBEditSet editSet)
   {
     return (editingTransaction != null && editSet == editingTransaction);
+  }
+
+  /**
+   * <p>This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by some active
+   * transaction other than the editSet passed in.</p>
+   */
+
+  public boolean isEditedByOtherTransaction(DBEditSet editSet)
+  {
+    return (editingTransaction != null && editSet != editingTransaction);
   }
 
   /**

@@ -6,7 +6,6 @@
    of a query.
    
    Created: 14 July 1997
-   Version: $Id$
    Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -120,7 +119,6 @@ import arlut.csd.ganymede.rmi.Session;
  * server if the user chooses to refresh the query, but normally the dump query
  * is performed by gclient.
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 

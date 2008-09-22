@@ -5,7 +5,6 @@
    Class to handle the journal file for the DBStore.
    
    Created: 3 December 1996
-   Version: $Id$
    Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu

@@ -7,7 +7,7 @@
    --
 
    Created: 2 May 2000
-   Version: $Id$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey
 
@@ -80,7 +80,6 @@ import arlut.csd.ganymede.rmi.db_object;
  * object and field data for an XML object element for
  * {@link arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}.
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
