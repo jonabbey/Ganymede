@@ -134,6 +134,13 @@ public final class DBNameSpace implements NameSpace {
 
   static final int TRANSCOUNT = 30;
 
+  /**
+   * The initial number of slots that we will reserve in our
+   * uniqueHash hashtable.
+   */
+
+  static final int DEFAULTSIZE = 101; // prime
+
   // ---
 
   /**
@@ -189,7 +196,7 @@ public final class DBNameSpace implements NameSpace {
   {
     receive(in);
 
-    uniqueHash = new GHashtable(caseInsensitive); // size?
+    uniqueHash = new GHashtable(DEFAULTSIZE, caseInsensitive);
     transactions = new Hashtable(TRANSCOUNT);
   }
 
@@ -205,7 +212,7 @@ public final class DBNameSpace implements NameSpace {
     this.name = name;
     this.caseInsensitive = caseInsensitive;
 
-    uniqueHash = new GHashtable(caseInsensitive); // size?
+    uniqueHash = new GHashtable(DEFAULTSIZE, caseInsensitive);
     transactions = new Hashtable(TRANSCOUNT);
   }
 
