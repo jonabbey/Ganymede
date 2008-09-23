@@ -513,14 +513,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    // if we try to pass a non-exported object
 	    // back to it, anyway.
 	
-	    try
-	      {
-		Ganymede.rmi.publishObject(field);
-	      }
-	    catch (RemoteException ex)
-	      {
-		return;
-	      }
+	    Ganymede.rmi.publishObject(field);
 	  }
       }
   }
@@ -559,15 +552,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    // unexport can fail if the object has already been
 	    // unexported, or if it was never exported.  This should
 	    // never happen, but if it does, we'll log it.
-	
-	    try
-	      {
-		Ganymede.rmi.unpublishObject(field, true);
-	      }
-	    catch (NoSuchObjectException ex)
-	      {
-		Ganymede.debug(Ganymede.stackTrace(ex)); // continue
-	      }
+
+	    Ganymede.rmi.unpublishObject(field, true);
 	  }
       }
   }

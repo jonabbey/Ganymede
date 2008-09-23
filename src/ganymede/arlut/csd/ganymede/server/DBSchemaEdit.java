@@ -5,10 +5,7 @@
    Server side interface for schema editing
    
    Created: 17 April 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -16,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -231,9 +228,12 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	for (int i=0; i < store.nameSpaces.size(); i++)
 	  {
 	    DBNameSpace ns = (DBNameSpace) store.nameSpaces.elementAt(i);
+
+	    Ganymede.rmi.publishObject(ns);
+
 	    oldNameSpaces.addElement(ns);
 	  }
-      } // end synchronized (store)
+      }
 
     Ganymede.rmi.publishObject(this);
   }
@@ -926,6 +926,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	    ns.schemaEditCommit();
 	  }
 
+	unexportNameSpaces();
+
 	// ** need to unlink old objectBases / rootCategory for GC here? **
 
 	// all the bases already have containingHash pointing to
@@ -1057,6 +1059,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	    
 	    ns.schemaEditAbort();
 	  }
+
+	unexportNameSpaces();
       }
 
     // unlock the server
@@ -1085,6 +1089,26 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
     GanymedeServer.lSemaphore.enable("schema edit");
 
     return;
+  }
+
+  private void unexportNameSpaces()
+  {
+    if (oldNameSpaces != null)
+      {
+	for (int i = 0; i < oldNameSpaces.size(); i++)
+	  {
+	    DBNameSpace ns = (DBNameSpace) oldNameSpaces.elementAt(i);
+
+	    Ganymede.rmi.unpublishObject(ns, true);
+	  }
+      }
+
+    for (int i = 0; i < store.nameSpaces.size(); i++)
+      {
+	DBNameSpace ns = (DBNameSpace) store.nameSpaces.elementAt(i);
+
+	Ganymede.rmi.unpublishObject(ns, true);
+      }
   }
 
   /**
