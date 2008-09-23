@@ -208,6 +208,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     contentPane = getContentPane();
     contentPane.setLayout(new BorderLayout());
 
+    this.setMaximum(true); // maximize JInternalFrame
+
     loadResults(results);
   }
 
@@ -274,16 +276,12 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       used[i] = false;
     }
     
-
     // Pass our SmartTable the results set, and a text Row menu
     // This will render the table nicely and setup a header and row right click menu (user provided)
     // header can sort and remove columns, the columns must be defined before creating the table, the 
     // data cells may be filled in later.
     sTable = new SmartTable(rowMenu, getContentPane(), columnNames, this); // this is for the callback functions
 
-    // Allows horizontal scrolling - Lets all cols bet about 100 px as opposed to fitting panel
-    //sTable.table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); unneeded now
-    
 
     // Now Read in all the result lines
     for (int i=0; i < rows; i++)
@@ -306,7 +304,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     //sTable.fixTableColumns();
 
-    // we have to do this backwards so that we don't
+    // Removing empty columns, we have to do this backwards so that we don't
     // change the index of a column we'll later delete
 
     for (int i = used.length-1; i >= 0 ; i--)
@@ -316,7 +314,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	      sTable.table.removeColumn(sTable.table.getColumnModel().getColumn(i));  
 	  }
       }
-
 
     validate(); // needed after refresh results.
 
