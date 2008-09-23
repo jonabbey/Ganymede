@@ -85,11 +85,12 @@ import arlut.csd.ganymede.rmi.NameSpace;
  * java.lang.Object,arlut.csd.ganymede.server.DBField) mark()},
  * {@link arlut.csd.ganymede.server.DBNameSpace#unmark(arlut.csd.ganymede.server.DBEditSet,
  * java.lang.Object,arlut.csd.ganymede.server.DBField oldField) unmark()}, or
- * {@link arlut.csd.ganymede.server.DBNameSpace#reserve(arlut.csd.ganymede.server.DBEditSet,java.lang.Object) reserve()}
+ * {@link arlut.csd.ganymede.server.DBNameSpace#reserve(arlut.csd.ganymede.server.DBEditSet,
+ * java.lang.Object) reserve()}
  * methods, no other transaction can allocate that value, until the first transaction
- * calls the {@link arlut.csd.ganymede.server.DBNameSpace#commit(arlut.csd.ganymede.server.DBEditSet) commit()},
- * {@link arlut.csd.ganymede.server.DBNameSpace#abort(arlut.csd.ganymede.server.DBEditSet) abort()},
- * or {@link arlut.csd.ganymede.server.DBNameSpace#rollback(arlut.csd.ganymede.server.DBEditSet,
+ * calls the {@link arlut.csd.ganymede.server.DBNameSpace#commit(arlut.csd.ganymede.server.DBEditSet)
+ * commit()}, {@link arlut.csd.ganymede.server.DBNameSpace#abort(arlut.csd.ganymede.server.DBEditSet)
+ * abort()}, or {@link arlut.csd.ganymede.server.DBNameSpace#rollback(arlut.csd.ganymede.server.DBEditSet,
  * java.lang.String) rollback()}
  * methods.
  *
@@ -376,18 +377,14 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized DBField lookupPersistent(Object value)
   {
-    DBNameSpaceHandle _handle;
+    DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-    /* -- */
-
-    _handle = (DBNameSpaceHandle) uniqueHash.get(value);
-
-    if (_handle == null)
+    if (handle == null)
       {
 	return null;
       }
 
-    return _handle.getPersistentField(null);
+    return handle.getPersistentField(null);
   }
 
   /**
@@ -409,28 +406,26 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized DBField lookupShadow(Object value)
   {
-    DBNameSpaceHandle _handle;
+    DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-    /* -- */
-
-    _handle = (DBNameSpaceHandle) uniqueHash.get(value);
-
-    if (_handle == null)
+    if (handle == null)
       {
 	return null;
       }
 
-    return _handle.getShadowField();
+    return handle.getShadowField();
   }
 
   /**
-   * This method looks to find where the given value is bound in the namespace,
-   * taking into account the transactional view the calling session has.  If the
-   * value is attached to an object in the current transaction, this method will
-   * return a reference to the editable shadow DBField.  If not, this method
-   * will either return the read-only persistent version from the DBStore, or null
-   * if the value sought has been cleared from use in the objects being edited by
-   * the transaction.
+   * This method looks to find where the given value is bound in the
+   * namespace, taking into account the transactional view the calling
+   * session has.  If the value is attached to an object in the
+   * current transaction, this method will return a reference to the
+   * editable shadow DBField containing the value.  If not, this
+   * method will either return the DBField containing the read-only
+   * persistent version from the DBStore, or null if the value sought
+   * has been cleared from use in the objects being edited by the
+   * transaction.
    *   
    * Note that this lookup is case sensitive or not according to the case
    * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
@@ -448,35 +443,24 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized DBField lookupMyValue(GanymedeSession session, Object value)
   {
-    DBNameSpaceHandle _handle;
-    DBField shadow;
-
-    /* -- */
-
     if (value == null)
       {
 	return null;
       }
 
-    _handle = (DBNameSpaceHandle) uniqueHash.get(value);
+    DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-    if (_handle == null)
+    if (handle == null)
       {
 	return null;
       }
 
-    if (_handle.isEditedByUs(session))
+    if (handle.isEditedByUs(session))
       {
-	shadow = _handle.getShadowField();
-
-	// if the value is not in use in our transaction even though
-	// we have edited with that value, shadow will be null, and so
-	// we'll return null
-	
-	return shadow;
+	return handle.getShadowField();
       }
 
-    return _handle.getPersistentField(session);
+    return handle.getPersistentField(session);
   }
 
   /**
