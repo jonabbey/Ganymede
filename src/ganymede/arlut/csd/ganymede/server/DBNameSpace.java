@@ -191,8 +191,6 @@ public final class DBNameSpace implements NameSpace {
 
     uniqueHash = new GHashtable(caseInsensitive); // size?
     transactions = new Hashtable(TRANSCOUNT);
-
-    Ganymede.rmi.publishObject(this);
   }
 
   /**
@@ -209,8 +207,6 @@ public final class DBNameSpace implements NameSpace {
 
     uniqueHash = new GHashtable(caseInsensitive); // size?
     transactions = new Hashtable(TRANSCOUNT);
-
-    Ganymede.rmi.publishObject(this);
   }
 
   /**

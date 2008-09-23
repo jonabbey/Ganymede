@@ -141,18 +141,25 @@ public class GanymedeRMIManager {
    * if the underlying exportObject() call threw a RemoteException.</p>
    */
 
-  public boolean publishObject(Remote obj) throws RemoteException
+  public boolean publishObject(Remote obj)
   {
-    if (useSSL)
+    try
       {
-	UnicastRemoteObject.exportObject(obj, this.port, this.csf, this.ssf);
-      }
-    else
-      {
-	UnicastRemoteObject.exportObject(obj, this.port);
-      }
+	if (useSSL)
+	  {
+	    UnicastRemoteObject.exportObject(obj, this.port, this.csf, this.ssf);
+	  }
+	else
+	  {
+	    UnicastRemoteObject.exportObject(obj, this.port);
+	  }
 
-    return true;
+	return true;
+      }
+    catch (RemoteException ex)
+      {
+	return false;
+      }
   }
 
   /**
@@ -165,8 +172,15 @@ public class GanymedeRMIManager {
    * some problem.</p>
    */
 
-  public boolean unpublishObject(Remote obj, boolean force) throws NoSuchObjectException
+  public boolean unpublishObject(Remote obj, boolean force)
   {
-    return UnicastRemoteObject.unexportObject(obj, force);
+    try
+      {
+	return UnicastRemoteObject.unexportObject(obj, force);
+      }
+    catch (NoSuchObjectException ex)
+      {
+	return false;
+      }
   }
 }

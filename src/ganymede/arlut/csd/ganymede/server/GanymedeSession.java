@@ -675,7 +675,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	asyncPort = new serverClientAsyncResponder();
 
-	Ganymede.rmi.publishObject(this); // may throw RemoteException
+	Ganymede.rmi.publishObject(this);
       }
 
     if (userObject != null)
@@ -1174,16 +1174,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    if (remoteClient)
 	      {
-		try
-		  {
-		    // must force, since we ourselves are probably in
-		    // the middle of an RMI call
-
-		    Ganymede.rmi.unpublishObject(this, true);
-		  }
-		catch (NoSuchObjectException ex)
-		  {
-		  }
+		Ganymede.rmi.unpublishObject(this, true);
 	      }
 
 	    // if we weren't forced off, do normal logout logging
@@ -6849,14 +6840,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      }
 	  }
 
-	try
-	  {
-	    Ganymede.rmi.publishObject(object);
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException(ex);
-	  }
+	Ganymede.rmi.publishObject(object);
 
 	exported.add(object);
 	object.exportFields();
@@ -6898,14 +6882,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      {
 		exported.remove(i);
 
-		try
-		  {
-		    Ganymede.rmi.unpublishObject((Remote) x, true); // go ahead and force
-		  }
-		catch (NoSuchObjectException ex)
-		  {
-		    Ganymede.debug(Ganymede.stackTrace(ex)); // report but continue unexporting
-		  }
+		Ganymede.rmi.unpublishObject((Remote) x, true); // go ahead and force
 
 		x.unexportFields();
 	      }

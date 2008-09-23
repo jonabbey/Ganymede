@@ -291,13 +291,7 @@ public class GanymedeServer implements Server {
 
     // publish the GanymedeXMLSession for the client to use
 
-    try
-      {
-	Ganymede.rmi.publishObject(xSession);
-      }
-    catch (RemoteException ex)
-      {
-      }
+    Ganymede.rmi.publishObject(xSession);
 
     // replace our remote Session reference with the XMLSession
     // reference, and pass it to the client.. they can query the
