@@ -476,10 +476,10 @@ public final class DBNameSpace implements NameSpace {
    * transaction, the transaction code can mark the value at any time
    * with assurance that they will be able to do so.
    *
-   * If a transaction attempts to reserve() a
-   * value that is already being held by an object in the transaction,
-   * reserve() will return true, even though a subsequent mark()
-   * attempt would fail.
+   * If a transaction attempts to reserve() a value that is already
+   * being held by an object in the transaction, reserve() will return
+   * true, even though a subsequent mark() attempt would fail, unless
+   * the value is first unmarked.
    *
    * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
@@ -505,7 +505,7 @@ public final class DBNameSpace implements NameSpace {
    * If onlyUsed is false and a transaction attempts to reserve() a
    * value that is already being held by an object in the transaction,
    * reserve() will return true, even though a subsequent mark()
-   * attempt would fail.
+   * attempt would fail unless the value is first unmarked.
    *
    * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
@@ -522,6 +522,11 @@ public final class DBNameSpace implements NameSpace {
       {
 	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
+      }
+
+    if (editSet == null || value == null)
+      {
+	throw new IllegalArgumentException();
       }
 
     DBNameSpaceHandle handle;
@@ -581,9 +586,14 @@ public final class DBNameSpace implements NameSpace {
    * For array db fields, all elements in the array should be
    * testmark'ed in the context of a synchronized block on the
    * namespace before going back and marking each value (while still
-   * in the synchronized block on the * namespace).. this ensures
+   * in the synchronized block on the namespace).. this ensures
    * that we won't mark several values in an array before discovering
    * that one of the values in a DBArrayField is already taken.
+   *
+   * The success of testmark() is no guarantee of a future successful
+   * mark() operation, of course, unless the testmark and mark
+   * operations are done within a synchronization block on the
+   * namespace.
    *
    * @param editSet The transaction testing permission to claim value.
    * @param value The unique value desired by editSet.
@@ -595,6 +605,11 @@ public final class DBNameSpace implements NameSpace {
       {
 	// "Can''t perform, still in schema edit."
 	throw new RuntimeException(ts.l("global.editing"));
+      }
+
+    if (editSet == null || value == null)
+      {
+	throw new IllegalArgumentException();
       }
 
     DBNameSpaceHandle handle;
@@ -627,12 +642,12 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method marks a value as being used in this namespace.  Marked
-   * values are held in editSet's, which are free to shuffle these
-   * reserved values around during processing.  The inuse and original
-   * fields in the namespace object are used during unique value searches
-   * to do direct hash lookups without getting confused by any shuffling
-   * being performed by a current thread.
+   * This method marks a value as being used in this namespace.
+   * Marked values are held in editSet's, which are free to shuffle
+   * these reserved values around during processing.  The inuse and
+   * previouslyUsed fields in the namespace object are used during
+   * unique value searches to do direct hash lookups without getting
+   * confused by any shuffling being performed by a current thread.
    *
    * @param editSet The transaction claiming the unique value &lt;value&gt;
    * @param value The unique value that transaction editset is attempting to claim
@@ -647,9 +662,9 @@ public final class DBNameSpace implements NameSpace {
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
-    if (field == null)
+    if (editSet == null || value == null || field == null)
       {
-        throw new NullPointerException("ASSERT: Improper null field value passed to mark");
+	throw new IllegalArgumentException();
       }
 
     DBNameSpaceHandle handle;
@@ -773,6 +788,11 @@ public final class DBNameSpace implements NameSpace {
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
+    if (oldField == null || editSet == null || value == null)
+      {
+	throw new IllegalArgumentException();
+      }
+
     DBNameSpaceHandle handle;
 
     /* -- */
@@ -829,7 +849,7 @@ public final class DBNameSpace implements NameSpace {
 	throw new RuntimeException(ts.l("global.editing"));
       }
 
-    if (oldField == null || editSet == null)
+    if (oldField == null || editSet == null || value == null)
       {
 	throw new IllegalArgumentException();
       }
@@ -845,27 +865,10 @@ public final class DBNameSpace implements NameSpace {
 
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	// somebody else owns it.. that somebody may be a
-	// non-interactive session speculatively marking the
-	// value, but if so, the non-interactive session will
-	// learn soon enough that its transaction has to fail,
-	// since it can't edit our exclusively checked out
-	// object containing oldField, which would be
-	// necessary to complete the speculative namespace
-	// shuffle.
-	
 	throw new RuntimeException("ASSERT unmarking another transaction's value");
       }
 
-    // if we're non-interactive (as in the xmlclient), we should
-    // only be unsetting field associations that pre-dated this
-    // transaction.  We don't expect the xmlclient to set an
-    // association and then break it.  Nonetheless, I'll go ahead
-    // and check oldField against both shadowFields held in the
-    // handle, just in case some non-interactive transaction does
-    // try to make and then break a namespace mark
-
-    if (!handle.matches(oldField) && handle.getShadowField() != oldField && handle.getShadowFieldB() != oldField)
+    if (!handle.matchesAnySlot(oldField))
       {
         throw new RuntimeException("Error, unmarking a value from a field that shouldn't have had it!");
       }
@@ -891,33 +894,32 @@ public final class DBNameSpace implements NameSpace {
 	return true;
       }
 
-    // we own it, but we don't want to change the original
-    // value, which we will need if we abort this editset
+    // we already have this value checked out for editing by our
+    // transaction
 
     if (editSet.isInteractive())
       {
 	handle.setInUse(false);
 	handle.setShadowField(null);
 
+	// leave previouslyUsed alone
+
 	return true;
       }
 
-    // I really don't expect getShadowFieldB() to be
-    // equal to the oldField, but I'll let it handle
-    // that case in the event we do have some very
-    // weird non-interactive client talking to us
-    // which decided to set a prospective mark and
-    // then clear it
+    // I really don't expect getShadowFieldB() to be equal to the
+    // oldField, but I'll let it handle that case in the event we do
+    // have some very weird non-interactive client talking to us which
+    // decided to set a prospective mark and then clear it
 
-    // What we're really wanting to do here, however,
-    // is to handle the case where we are unmarking a
-    // previously persistent association, in which
-    // case we will let the shadowFieldB become the
-    // primary association
+    // What we're really wanting to do here, however, is to handle the
+    // case where we are unmarking a previously persistent
+    // association, in which case we will let the field previously
+    // held in this handle's shadowFieldB become the primary
+    // association
 
-    // otherwise if we have no shadowFieldB waiting on
-    // deck, we do what we normally do to clear the
-    // handle from being used
+    // otherwise if we have no shadowFieldB waiting on deck, we do
+    // what we normally do to clear the handle from being used
 
     if (handle.getShadowFieldB() == oldField)
       {
@@ -1711,8 +1713,8 @@ public final class DBNameSpace implements NameSpace {
 
       if (point == null)
 	{
-	  Ganymede.db.logAssert("ASSERT: DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
-				" does not contain a checkpoint named " + name);
+	  Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
+			     " does not contain a checkpoint named " + name);
 	}
 
       return point;

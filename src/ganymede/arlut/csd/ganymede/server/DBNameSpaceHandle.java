@@ -171,11 +171,6 @@ class DBNameSpaceHandle implements Cloneable {
     setPersistentField(field);
   }
 
-  public boolean matches(DBEditSet set)
-  {
-    return (this.editingTransaction == set);
-  }
-
   /**
    * <p>This method returns true if the namespace-managed value that
    * this handle is associated with is held in a committed object in the
@@ -394,6 +389,11 @@ class DBNameSpaceHandle implements Cloneable {
       }
   }
 
+  public boolean matches(DBEditSet set)
+  {
+    return (this.editingTransaction == set);
+  }
+
   /**
    * <p>This method is used to verify that this handle points to the same
    * field as the one specified by the parameter list.</p>
@@ -423,6 +423,17 @@ class DBNameSpaceHandle implements Cloneable {
   {
     return (this.persistentFieldInvid.getType() == objectType) &&
       (this.persistentFieldId == persistentFieldId);
+  }
+
+  /**
+   * Returns true if the given field is associated with this handle in
+   * any of the persistent, transaction-local, or xml transaction
+   * secondary field slots.
+   */
+
+  public boolean matchesAnySlot(DBField field)
+  {
+    return (this.matches(field) || this.getShadowField() == field || this.getShadowFieldB() == field);
   }
 
   /**
