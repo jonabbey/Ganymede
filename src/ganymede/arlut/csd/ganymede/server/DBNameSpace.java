@@ -185,7 +185,7 @@ public final class DBNameSpace implements NameSpace {
    * Create a new DBNameSpace object from a stream definition.
    */
 
-  public DBNameSpace(DataInput in) throws IOException, RemoteException
+  public DBNameSpace(DataInput in) throws IOException
   {
     receive(in);
 
@@ -200,7 +200,7 @@ public final class DBNameSpace implements NameSpace {
    * @param caseInsensitive If true, case is disregarded in this namespace
    */
 
-  public DBNameSpace(String name, boolean caseInsensitive) throws RemoteException
+  public DBNameSpace(String name, boolean caseInsensitive)
   {
     this.name = name;
     this.caseInsensitive = caseInsensitive;
