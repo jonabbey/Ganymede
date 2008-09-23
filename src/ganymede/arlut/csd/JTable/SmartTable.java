@@ -57,6 +57,8 @@ import java.awt.Container;
 import java.awt.Dimension; 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -74,6 +76,10 @@ import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.AncestorEvent;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.TableColumnModelListener;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;  
 import javax.swing.JPopupMenu;
@@ -83,6 +89,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;  
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import arlut.csd.Util.TranslationService;
@@ -166,10 +173,73 @@ public class SmartTable extends JPanel implements ActionListener
     currPanel.add(scrollPane); 
 
     // Fix column widths, if too small, stretch them out
-    SmartTableAncestorListener ancestor = new SmartTableAncestorListener();
-    table.addAncestorListener(ancestor);
+    table.addAncestorListener(new SmartTableAncestorListener());
+
+    currPanel.addComponentListener(new SmartTableComponentListener());
+
+    // TESTING LAST PART.
+    JTableHeader header = table.getTableHeader();
+    //TableColumnModel colModel = header.getColumnModel();
+    //colModel.addColumnModelListener(new myColModelListener());    
+    // TODO attach a listener to the header.
+    // header.addColumnModelListener(new TableColumnModelListener());    
+
   } // SmartTable Constructor
 
+
+  public class TableColumnModelListener 
+  {
+    public void columnAdded(TableColumnModelEvent e) {
+      System.out.println("Added");
+    }
+    
+    public void columnMarginChanged(ChangeEvent e) 
+    {
+      System.out.println("Margin");
+      // TODO, get the column that has changed.
+
+      // TODO then I can turn on the wordwrap for those two columns with known functions.
+    }
+    
+    public void columnMoved(TableColumnModelEvent e) {
+      System.out.println("Moved");
+    }
+    
+    public void columnRemoved(TableColumnModelEvent e) {
+      System.out.println("Removed");
+    }
+    
+    public void columnSelectionChanged(ListSelectionEvent e) {
+      System.out.println("Selection Changed");
+    }
+  }
+
+
+
+  /** listener for when the main panel is resized */
+  public class SmartTableComponentListener implements ComponentListener
+  {
+    public void componentResized(ComponentEvent e)
+    {
+      fixTableColumns();	
+    }
+    public void componentMoved(ComponentEvent e)
+    {
+      //System.out.println("HeaderCL: componentMoved");
+    }
+    
+    public void componentShown(ComponentEvent e)
+    {
+      //System.out.println("HeaderCL: componentShown");
+    }
+    
+    public void componentHidden(ComponentEvent e)
+    {
+      //System.out.println("HeaderCL: componentHidden");
+    }
+  }
+
+  
 
   // Class to assist with FixTable Columns, allowing it to be called AFTER the 
   // table is drawn, to get in the correct Table and Panel size to match with
@@ -187,7 +257,7 @@ public class SmartTable extends JPanel implements ActionListener
     }
   }
 
-    
+  
   // New Class added in to help define the table results
   // Contructor takes in the results of a query, and constructs a JTable from it
   class MyTableModel extends AbstractTableModel 
@@ -483,7 +553,7 @@ public class SmartTable extends JPanel implements ActionListener
         popMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     }
-  } // popupListener
+  } // Class popupListener
 
 
   // Function for the Toolbar, Rightclick Row Menus, called from popuplistener
@@ -501,6 +571,7 @@ public class SmartTable extends JPanel implements ActionListener
 	{
 	  if (debug) System.out.println("mouseevent remove col:"+ remember_col2 +"*");			
 	  table.removeColumn(table.getColumnModel().getColumn(remember_col2));  
+	  fixTableColumns();
 	}
 	else if (event.getSource() == sortByMI) 
 	{
@@ -537,16 +608,22 @@ public class SmartTable extends JPanel implements ActionListener
   // Optimize the columnWidths on start
   public void fixTableColumns() 
   {
-    //System.out.println(" table cols "+table.getColumnCount()+ " is smaller than panel width "+table.getParent().getWidth());
+    //System.out.println("fixTableColumns: table cols "+table.getColumnCount()+ " is smaller than panel width "+table.getParent().getWidth());
 
     // default width is 75, if not default, use getPreferredWidth()
     int colWidth = table.getColumnModel().getColumn(0).getPreferredWidth();
     int colCount = table.getColumnCount();
-    //System.out.println(" table cols "+colCount+" and  width "+colWidth);
+    //System.out.println("fixTableColumns: table cols "+colCount+" and width "+colWidth);
 
     // Get Table Size, then get Container size, if table smaller than container, stretch table out to fit
     if (colWidth*colCount < table.getParent().getWidth()) 
       {
+	//System.out.println("Stretching out table now.");
+	table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN); 
+      }
+    else 
+      {
+	//System.out.println("Turning off resize now.");
 	table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); 
       }
   } // fixTableColumns

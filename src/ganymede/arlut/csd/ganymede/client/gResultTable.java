@@ -57,6 +57,7 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyVetoException;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -208,8 +209,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     contentPane = getContentPane();
     contentPane.setLayout(new BorderLayout());
 
-    this.setMaximum(true); // maximize JInternalFrame
-
     loadResults(results);
   }
 
@@ -302,7 +301,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       }
     } // for i
 
-    //sTable.fixTableColumns();
 
     // Removing empty columns, we have to do this backwards so that we don't
     // change the index of a column we'll later delete
@@ -315,7 +313,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  }
       }
 
-    validate(); // needed after refresh results.
+    validate(); // needed after refresh results.x
+
+    sTable.fixTableColumns();
 
     // "Query Complete."
     setStatus(ts.l("loadResults.complete_status"));   
