@@ -1636,15 +1636,8 @@ public final class DBNameSpace implements NameSpace {
     {
       if (reservedValues.containsKey(value))
 	{
-	  try
-	    {
-	      throw new RuntimeException("ASSERT: DBNameSpaceTransaction.remember(): transaction " + transaction +
-					 " already contains value " + value);
-	    }
-	  catch (RuntimeException ex)
-	    {
-	      Ganymede.debug(Ganymede.stackTrace(ex));
-	    }
+	  Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.remember(): transaction " + transaction +
+			     " already contains value " + value);
 
 	  return;
 	}
@@ -1656,15 +1649,8 @@ public final class DBNameSpace implements NameSpace {
     {
       if (!reservedValues.containsKey(value))
 	{
-	  try
-	    {
-	      throw new RuntimeException("ASSERT: DBNameSpaceTransaction.forget(): transaction " + transaction +
-					 " does not contain value " + value);
-	    }
-	  catch (RuntimeException ex)
-	    {
-	      Ganymede.debug(Ganymede.stackTrace(ex));
-	    }
+	  Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.forget(): transaction " + transaction +
+			     " does not contain value " + value);
 
 	  return;
 	}
@@ -1725,15 +1711,8 @@ public final class DBNameSpace implements NameSpace {
 
       if (point == null)
 	{
-	  try
-	    {
-	      throw new RuntimeException("ASSERT: DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
-					 " does not contain a checkpoint named " + name);
-	    }
-	  catch (RuntimeException ex)
-	    {
-	      Ganymede.debug(Ganymede.stackTrace(ex));
-	    }
+	  Ganymede.db.logAssert("ASSERT: DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
+				" does not contain a checkpoint named " + name);
 	}
 
       return point;
