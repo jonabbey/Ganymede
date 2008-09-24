@@ -69,6 +69,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -120,7 +121,7 @@ public class SmartTable extends JPanel implements ActionListener
    * The GUI table component.
    */
   public JTable table = null;
-  MyTableModel myModel;
+  public MyTableModel myModel;
   TableSorter sorter = null;
 
   public Hashtable index; // hashable index for selecting rows by key field
@@ -152,6 +153,7 @@ public class SmartTable extends JPanel implements ActionListener
     table = new JTable(sorter);             
     sorter.setTableHeader(table.getTableHeader()); 
     table.setPreferredScrollableViewportSize(new Dimension(500, 70)); // no real effect    
+
     // Allows horizontal scrolling - Lets all cols bet about 100 px as opposed to fitting panel
     table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); 
 
@@ -172,45 +174,93 @@ public class SmartTable extends JPanel implements ActionListener
     // Add the scroll pane to the Main panel.
     currPanel.add(scrollPane); 
 
-    // Fix column widths, if too small, stretch them out
+    // Fix column widths, if too small for panel, stretch them out to full panel.
     table.addAncestorListener(new SmartTableAncestorListener());
-
     currPanel.addComponentListener(new SmartTableComponentListener());
 
-    // TESTING LAST PART.
+    // If a column size is changed, turn on text-wrapping for that and next column.
     JTableHeader header = table.getTableHeader();
-    //TableColumnModel colModel = header.getColumnModel();
-    //colModel.addColumnModelListener(new myColModelListener());    
-    // TODO attach a listener to the header.
-    // header.addColumnModelListener(new TableColumnModelListener());    
+    TableColumnModel colModel = header.getColumnModel();
+    colModel.addColumnModelListener(new myColModelListener());    
 
   } // SmartTable Constructor
 
 
-  public class TableColumnModelListener 
+  // The listener class for the table column model.
+  public class myColModelListener implements TableColumnModelListener
   {
-    public void columnAdded(TableColumnModelEvent e) {
-      System.out.println("Added");
+    public void columnAdded(TableColumnModelEvent e) 
+    {
+      //System.out.println("Added");
     }
     
     public void columnMarginChanged(ChangeEvent e) 
     {
-      System.out.println("Margin");
-      // TODO, get the column that has changed.
+      //System.out.println("column Margin changed");
+      
+      TableColumn tc = table.getTableHeader().getResizingColumn();
+      if (tc != null)
+	{
+	  int colIndex = tc.getModelIndex();      
+	  int colIndex2 = getNextColumnIndex(colIndex);
+	  //System.out.println("\nCol #"+colIndex+" and "+colIndex2+" are being changed");
 
-      // TODO then I can turn on the wordwrap for those two columns with known functions.
+	  // Turn on text-wrapping for both columns.
+	  setColumnTextWrap(colIndex);
+	  if (colIndex2 != -1) 
+	    {
+	      setColumnTextWrap(colIndex2);
+	    }
+	}
+    }
+
+
+    // Get the next physical columns index number. Needed for when columns are moved, 
+    // thier indexes remain the same.
+    private int getNextColumnIndex(int colIndex)
+    {
+      // Get next column, cant just add number, cause they can be reordered.
+      TableColumnModel colModel = table.getTableHeader().getColumnModel();
+      
+      // get list of columns, physical order.
+      Enumeration e2 = colModel.getColumns();
+      int i = 0;
+      int colIndex2 = -1;
+      TableColumn tc2 = null;
+      while (e2.hasMoreElements() && colIndex2 != colIndex)
+	{	  
+	  tc2 = (TableColumn)e2.nextElement();	      
+	  colIndex2 = tc2.getModelIndex();	      
+	  //System.out.println(i+". col index is:"+ colIndex2);
+	  i++;
+	}
+      
+      if (e2.hasMoreElements())
+	{
+	  tc2 = (TableColumn)e2.nextElement();	      
+	  colIndex2 = tc2.getModelIndex();	      
+	  //System.out.println("Found next column index: "+colIndex2);
+	  return colIndex2;
+	}
+      else
+	{
+	  return -1;
+	}
+    }
+        
+    public void columnMoved(TableColumnModelEvent e) 
+    {
+      //System.out.println("Moved");
     }
     
-    public void columnMoved(TableColumnModelEvent e) {
-      System.out.println("Moved");
+    public void columnRemoved(TableColumnModelEvent e) 
+    {
+      //System.out.println("Removed");
     }
     
-    public void columnRemoved(TableColumnModelEvent e) {
-      System.out.println("Removed");
-    }
-    
-    public void columnSelectionChanged(ListSelectionEvent e) {
-      System.out.println("Selection Changed");
+    public void columnSelectionChanged(ListSelectionEvent e) 
+    {
+      //System.out.println("Selection Changed");
     }
   }
 
@@ -261,11 +311,12 @@ public class SmartTable extends JPanel implements ActionListener
   // New Class added in to help define the table results
   // Contructor takes in the results of a query, and constructs a JTable from it
   class MyTableModel extends AbstractTableModel 
-  {
+  {  
     private boolean DEBUG = true;
     public Vector rows; // vector of rowHandle objects, holds actual data cells 
     private String[] columnNames;
     private Class[] columnClasses;
+
 
     public MyTableModel(String[] columnValues)
     {
@@ -283,7 +334,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     public int getRowCount() 
     {
-      return rows.size();
+      return rows.size(); 
     }
     
     public void newRow(Object key)
@@ -358,9 +409,9 @@ public class SmartTable extends JPanel implements ActionListener
       return getValueAt(row2, col);
     }
 
-
       
-    public rowHandler getRowHandler(int row) {
+    public rowHandler getRowHandler(int row) 
+    {
       return (rowHandler) rows.elementAt(row);
     }
       
@@ -407,6 +458,35 @@ public class SmartTable extends JPanel implements ActionListener
 	  System.out.println();
 	}
       System.out.println("--------------------------");
+    }
+
+    // Get the physical columns position number. Needed for when columns are moved, 
+    // thier indexes remain the same.
+    public int getPhysicalColumnPos(int colIndex)
+    {
+      TableColumnModel colModel = table.getTableHeader().getColumnModel();
+      
+      // get list of columns, physical order.
+      Enumeration e2 = colModel.getColumns();
+      int i = 0;
+      int colIndex2 = -1;
+      TableColumn tc2 = null;
+      while (e2.hasMoreElements() && colIndex2 != colIndex)
+	{	  
+	  tc2 = (TableColumn)e2.nextElement();	      
+	  colIndex2 = tc2.getModelIndex();	      
+	  //System.out.println(i+". col index is:"+ colIndex2);
+	  i++;
+	}
+      
+      if (colIndex2 == colIndex)
+	{
+	  return --i;
+	}
+      else
+	{
+	  return -1;
+	}
     }
   } // MyTableModel class
   
@@ -638,13 +718,10 @@ public class SmartTable extends JPanel implements ActionListener
     int[] columnWidths;
     int[] columnTotWidths;
 
-    // We use our cell renderer for all columns
-    TableColumnModel cmodel = table.getColumnModel();
-    TextAreaRenderer textAreaRenderer = new TextAreaRenderer();
     // Set Each Column to Auto-Wrap text if needed
     for (int i=0; i < cols; i++)      
     {
-      cmodel.getColumn(i).setCellRenderer(textAreaRenderer);
+      setColumnTextWrap(i);
     }    
 
     columnWidths = new int[cols];	
@@ -667,6 +744,8 @@ public class SmartTable extends JPanel implements ActionListener
 	  }
       } // for i	
     
+    TableColumnModel cmodel = table.getColumnModel();
+
     // FIX THIS, CANT BE SET COLMN WIDTH HERE ARG
     // 10 letters app 75px 8px per char? try
     // decrease all columns that dont need 10 letters
@@ -676,7 +755,8 @@ public class SmartTable extends JPanel implements ActionListener
       {
 	//System.out.print("col j:"+j+" columnNames[j] \t\t max "+columnWidths[j]+"  total:"+columnTotWidths[j]+"/"+rows+" = "+columnTotWidths[j]/rows);
 	if (columnWidths[j] <= 8) 
-	  { cmodel.getColumn(j).setPreferredWidth(columnWidths[j]*9);
+	  { 
+	    cmodel.getColumn(j).setPreferredWidth(columnWidths[j]*9);
 	    decreased += 8 - columnWidths[j];
 	    //System.out.println(" shrinking col   decreased="+decreased+"   inccnt:"+inccnt);	
 	  }
@@ -697,6 +777,21 @@ public class SmartTable extends JPanel implements ActionListener
 	  }
       } // for j
   } // optimizeColumns
+
+  // Turn on text wrapping if the column is not a Date class.
+  // this appears to be using physical instead of Index position.
+  private void setColumnTextWrap(int colIndex)
+  {
+    String colClass = myModel.getColumnClass(colIndex).toString();
+    if (!colClass.equals("class java.util.Date")) 
+      {
+	TableColumnModel cmodel = table.getColumnModel();
+	TextAreaRenderer textAreaRenderer = new TextAreaRenderer();
+	int physPos = myModel.getPhysicalColumnPos(colIndex);
+
+	cmodel.getColumn(physPos).setCellRenderer(textAreaRenderer);
+      }
+  }
   
 
   // Print the JTable, WYSIWYG, print in landscape mode
