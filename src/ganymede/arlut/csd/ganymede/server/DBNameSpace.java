@@ -220,7 +220,7 @@ public final class DBNameSpace implements NameSpace {
    * Read in a namespace definition from a DataInput stream.
    */
 
-  public synchronized void receive(DataInput in) throws IOException
+  private void receive(DataInput in) throws IOException
   {
     name = in.readUTF();
     caseInsensitive = in.readBoolean();
@@ -446,11 +446,6 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized DBField lookupMyValue(GanymedeSession session, Object value)
   {
-    if (value == null)
-      {
-	return null;
-      }
-
     DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
     if (handle == null)
@@ -518,11 +513,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean reserve(DBEditSet editSet, Object value, boolean onlyUnused)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     if (editSet == null || value == null)
       {
@@ -601,11 +592,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean testmark(DBEditSet editSet, Object value)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     if (editSet == null || value == null)
       {
@@ -656,11 +643,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean mark(DBEditSet editSet, Object value, DBField field)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     if (editSet == null || value == null || field == null)
       {
@@ -782,11 +765,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean testunmark(DBEditSet editSet, Object value, DBField oldField)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     if (oldField == null || editSet == null || value == null)
       {
@@ -843,11 +822,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean unmark(DBEditSet editSet, Object value, DBField oldField)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     if (oldField == null || editSet == null || value == null)
       {
@@ -954,11 +929,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void checkpoint(DBEditSet editSet, String name)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     getTransactionRecord(editSet).pushCheckpoint(name, new DBNameSpaceCkPoint(this, editSet));
   }
@@ -979,11 +950,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void popCheckpoint(DBEditSet editSet, String name)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     getTransactionRecord(editSet).popCheckpoint(name);
   }
@@ -1000,11 +967,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean rollback(DBEditSet editSet, String name)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     Object value;
     Vector elementsToRemove = new Vector();
@@ -1205,11 +1168,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void abort(DBEditSet editSet)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     DBNameSpaceTransaction tRecord;
     Enumeration en;
@@ -1278,11 +1237,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void commit(DBEditSet editSet)
   {
-    if (this.saveHash != null)
-      {
-	// "Can''t perform, still in schema edit."
-	throw new RuntimeException(ts.l("global.editing"));
-      }
+    checkSchemaEditInProgress(false);
 
     DBNameSpaceTransaction tRecord;
     Enumeration en;
@@ -1364,10 +1319,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void schemaEditCheckout()
   {
-    if (this.saveHash != null)
-      {
-	throw new RuntimeException("non-null savehash");
-      }
+    checkSchemaEditInProgress(false);
 
     this.saveHash = this.uniqueHash;
 
@@ -1416,6 +1368,26 @@ public final class DBNameSpace implements NameSpace {
     return (this.saveHash != null);
   }
 
+  public synchronized void checkSchemaEditInProgress(boolean expecting)
+  {
+    if (expecting)
+      {
+	if (this.saveHash == null)
+	  {
+	    // "Can''t perform, not in schema edit."
+	    throw new RuntimeException(ts.l("global.not_editing"));
+	  }
+      }
+    else
+      {
+	if (this.saveHash != null)
+	  {
+	    // "Can''t perform, still in schema edit."
+	    throw new RuntimeException(ts.l("global.editing"));
+	  }
+      }
+  }
+
   /**
    * This method locks in any changes made after schema editing is complete.
    */
@@ -1456,11 +1428,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean schemaEditRegister(Object value, DBField field)
   {
-    if (this.saveHash == null)
-      {
-	// "Can''t perform, not in schema edit."
-	throw new RuntimeException(ts.l("global.not_editing"));
-      }
+    checkSchemaEditInProgress(true);
 
     if (uniqueHash.containsKey(value))
       {
@@ -1485,11 +1453,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean schemaEditUnregister(Object value, Invid objid, short field)
   {
-    if (this.saveHash == null)
-      {
-	// "Can''t perform, not in schema edit."
-	throw new RuntimeException(ts.l("global.not_editing"));
-      }
+    checkSchemaEditInProgress(true);
 
     DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
@@ -1515,11 +1479,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void schemaEditUnregister(short objectType, short fieldId)
   {
-    if (this.saveHash == null)
-      {
-	// "Can''t perform, not in schema edit."
-	throw new RuntimeException(ts.l("global.not_editing"));
-      }
+    checkSchemaEditInProgress(true);
 
     Vector elementsToRemove = new Vector();
     Enumeration en = this.uniqueHash.keys();
