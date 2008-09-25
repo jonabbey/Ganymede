@@ -1694,7 +1694,7 @@ public final class DBNameSpace implements NameSpace {
 
       while (en.hasMoreElements())
 	{
-	  Object value = en.nextElement();
+	  Object value = en.nextElement(); // will be IPwrap if the underlying value is a Byte[]
 
 	  DBNameSpaceHandle handle = space.getHandle(value);
 
