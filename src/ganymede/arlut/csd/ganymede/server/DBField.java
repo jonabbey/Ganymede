@@ -323,6 +323,21 @@ public abstract class DBField implements Remote, db_field, FieldType {
       }
   }
 
+  /**
+   * Returns true if both field1 and field2 are non-null and belong to
+   * the same invid and share the same field id.
+   */
+
+  public static boolean matches(DBField field1, DBField field2)
+  {
+    if (field1 == null || field2 == null)
+      {
+	return false;
+      }
+
+    return field1.matches(field2);
+  }
+
   // ---
 
   /**
@@ -533,6 +548,17 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
 	return true;
       }
+  }
+
+  /**
+   * Returns true if otherField has the same invid and field id as
+   * this field.
+   */
+
+  public boolean matches(DBField otherField)
+  {
+    return otherField.getOwner().getInvid().equals(getOwner().getInvid()) &&
+      otherField.getID() == getID();
   }
 
   /**
