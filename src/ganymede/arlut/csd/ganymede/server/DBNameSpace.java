@@ -1106,25 +1106,11 @@ public final class DBNameSpace implements NameSpace {
 	    results = new Vector();
 	  }
 
-	String valueStr;
-
-	// most of the values we track are printable, but the byte
-	// arrays we use to encode IP addresses are not
-
-	if (value instanceof Byte[])
-	  {
-	    valueStr = IPDBField.genIPString((Byte[]) value);
-	  }
-	else
-	  {
-	    valueStr = String.valueOf(value);
-	  }
-
 	if (handle.getShadowField() != null)
 	  {
 	    // "{0}, value in conflict = {1}"
 	    results.addElement(ts.l("verify_noninteractive.template",
-				    handle.getConflictString(), valueStr));
+				    handle.getConflictString(), GHashtable.keyString(value)));
 	  }
 	else
 	  {
@@ -1143,7 +1129,7 @@ public final class DBNameSpace implements NameSpace {
 
 	    // "{0}, value in conflict = {1}"
 	    results.addElement(ts.l("verify_noninteractive.template",
-				    checkedInConflictStr, valueStr));
+				    checkedInConflictStr, GHashtable.keyString(value)));
 	  }
       }
 
@@ -1193,7 +1179,7 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    if (debug)
 	      {
-		Ganymede.debug("DBNameSpace.commit(): trying to commit handle for value " + value +
+		Ganymede.debug("DBNameSpace.commit(): trying to commit handle for value " + GHashtable.keyString(value) +
 			       " that is being edited by another transaction.");
 	      }
 
@@ -1254,7 +1240,7 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    if (debug)
 	      {
-		Ganymede.debug("DBNameSpace.abort(): trying to abort handle for value" + value +
+		Ganymede.debug("DBNameSpace.abort(): trying to abort handle for value" + GHashtable.keyString(value) +
 			       " that is being edited by another transaction.");
 	      }
 
