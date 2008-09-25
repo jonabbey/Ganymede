@@ -387,7 +387,7 @@ public final class DBNameSpace implements NameSpace {
 	return null;
       }
 
-    return handle.getPersistentField(null);
+    return handle.getPersistentField();
   }
 
   /**
@@ -617,7 +617,7 @@ public final class DBNameSpace implements NameSpace {
       }
 
     if (!handle.isKeepOnCommit() ||
-	(!editSet.isInteractive() && handle.getShadowFieldB() != null))
+	(!editSet.isInteractive() && handle.getShadowFieldB() == null))
       {
 	return true;
       }
@@ -674,31 +674,33 @@ public final class DBNameSpace implements NameSpace {
 	return false;
       }
 
-    if (handle.getShadowField() == null ||
-	handle.getShadowField() == field)
+    if (!handle.isKeepOnCommit())
       {
 	assert handle.getShadowFieldB() == null;
-
-	if (handle.editingTransaction == null)
-	  {
-	    handle.editingTransaction = editSet;
-	    remember(editSet, value);
-	  }
 
 	handle.setShadowField(field);
 
 	return true;
       }
 
-    if (!editSet.isInteractive() &&
-	(handle.getShadowFieldB() == null ||
-	 handle.getShadowFieldB() == field))
+    if (!editSet.isInteractive())
       {
-	assert handle.editingTransaction != null;
+	if (handle.editingTransaction == null)
+	  {
+	    // check it out and bind the shadowField to the checked
+	    // out object
 
-	handle.setShadowFieldB(field);
+	    handle.setShadowField(handle.getPersistentField(editSet.session));
+	    handle.editingTransaction = editSet;
+	    remember(editSet, value);
+	  }
 
-	return true;
+	assert !DBField.matches(handle.getShadowField(), field);
+
+	if (handle.getShadowFieldB() == null || handle.getShadowFieldB().matches(field))
+	  {
+	    handle.setShadowFieldB(field);
+	  }
       }
 
     return false;
@@ -755,7 +757,6 @@ public final class DBNameSpace implements NameSpace {
 
     return handle.isKeepOnCommit();
   }
-
   /**
    * Used to mark a value as not used in the namespace.  Unmarked
    * values are not available for other threads / editset's until
@@ -814,12 +815,13 @@ public final class DBNameSpace implements NameSpace {
 
     if (!editSet.isInteractive())
       {
-	if (handle.getShadowFieldB() != oldField && handle.getShadowField() != oldField)
+	if (!DBField.matches(handle.getShadowFieldB(), oldField) &&
+	    !DBField.matches(handle.getShadowField(), oldField))
 	  {
 	    throw new RuntimeException("ASSERT: mismatched field in non-interactive unmark");
 	  }
 
-	if (handle.getShadowFieldB() == oldField)
+	if (DBField.matches(handle.getShadowFieldB(), oldField))
 	  {
 	    // I really don't expect getShadowFieldB() to be equal to
 	    // the oldField, given how the non-interactive xmlclient
@@ -833,7 +835,7 @@ public final class DBNameSpace implements NameSpace {
 	    return true;
 	  }
 
-	if (handle.getShadowFieldB() != null && handle.getShadowField() == oldField)
+	if (handle.getShadowFieldB() != null && DBField.matches(handle.getShadowField(), oldField))
 	  {
 	    // promote B to A
 
