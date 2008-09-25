@@ -1156,70 +1156,6 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * Method to revert an editSet's namespace modifications to its
-   * original state.  Used when a transaction is rolled back.
-   *
-   * @param editSet The transaction whose claimed values in this
-   * namespace need to be freed.
-   */
-
-  public synchronized void abort(DBEditSet editSet)
-  {
-    checkSchemaEditInProgress(false);
-
-    DBNameSpaceTransaction tRecord;
-    Enumeration en;
-    Object value;
-    DBNameSpaceHandle handle;
-
-    /* -- */
-
-    tRecord = getTransactionRecord(editSet);
-
-    en = tRecord.getReservedEnum();
-
-    // loop over the values in the namespace that were changed or affected
-    // by this editset, and revert them to their checked-in status, or
-    // get rid of them entirely if they weren't allocated in this namespace
-    // before this transaction allocated them
-
-    while (en.hasMoreElements())
-      {
-	value = en.nextElement();
-	handle = getHandle(value);
-
-	if (handle.editingTransaction != editSet)
-	  {
-	    if (debug)
-	      {
-		Ganymede.debug("DBNameSpace.abort(): trying to abort handle for value" + value +
-			       " that is being edited by another transaction.");
-	      }
-
-	    continue;
-	  }
-
-	if (handle.previouslyUsed)
-	  {
-	    handle.editingTransaction = null;
-	    handle.setShadowFieldB(null);
-	    handle.setShadowField(null);
-	    handle.setInUse(true);
-	  }
-	else
-	  {
-	    uniqueHash.remove(value);
-	  }
-      }
-
-    // we're done with this transaction
-
-    tRecord.cleanup();
-
-    transactions.remove(editSet);
-  }
-
-  /**
    * Method to put the editSet's current namespace modifications into
    * final effect and to make any abandoned values available for other
    * namespaces.
@@ -1271,24 +1207,11 @@ public final class DBNameSpace implements NameSpace {
 
 	if (handle.isInUse())
 	  {
-	    // note that the DBEditSet commit logic should have
-	    // rejected the transaction if any of our handles still
-	    // have a shadowFieldB set at this late date.. let's just
-	    // verify that here
-
-	    if (handle.getShadowFieldB() != null)
-	      {
-		throw new RuntimeException("ASSERT: " + editSet.session.key +
-                                           ": DBNameSpace.commit().. lingering shadowFieldB!");
-	      }
-
-	    handle.editingTransaction = null;
-	    handle.setPersistentField(handle.getShadowField());
-	    handle.setShadowField(null);
+	    handle.commitBack();
 	  }
 	else
 	  {
-	    uniqueHash.remove(value);
+	    removeHandle(value);
 	  }
       }
 
@@ -1298,6 +1221,67 @@ public final class DBNameSpace implements NameSpace {
 
     transactions.remove(editSet);
   }  
+
+  /**
+   * Method to revert an editSet's namespace modifications to its
+   * original state.  Used when a transaction is rolled back.
+   *
+   * @param editSet The transaction whose claimed values in this
+   * namespace need to be freed.
+   */
+
+  public synchronized void abort(DBEditSet editSet)
+  {
+    checkSchemaEditInProgress(false);
+
+    DBNameSpaceTransaction tRecord;
+    Enumeration en;
+    Object value;
+    DBNameSpaceHandle handle;
+
+    /* -- */
+
+    tRecord = getTransactionRecord(editSet);
+
+    en = tRecord.getReservedEnum();
+
+    // loop over the values in the namespace that were changed or affected
+    // by this editset, and revert them to their checked-in status, or
+    // get rid of them entirely if they weren't allocated in this namespace
+    // before this transaction allocated them
+
+    while (en.hasMoreElements())
+      {
+	value = en.nextElement();
+	handle = getHandle(value);
+
+	if (handle.editingTransaction != editSet)
+	  {
+	    if (debug)
+	      {
+		Ganymede.debug("DBNameSpace.abort(): trying to abort handle for value" + value +
+			       " that is being edited by another transaction.");
+	      }
+
+	    continue;
+	  }
+
+	if (handle.previouslyUsed)
+	  {
+	    handle.releaseBack();
+	  }
+	else
+	  {
+	    removeHandle(value);
+	  }
+      }
+
+    // we're done with this transaction
+
+    tRecord.cleanup();
+
+    transactions.remove(editSet);
+  }
 
   public String toString()
   {

@@ -446,6 +446,43 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
+   * This method is used to positively configure this handle for
+   * re-integration into the persistent namespace store after a
+   * transaction is positively resolved.
+   */
+
+  public void commitBack()
+  {
+    if (shadowFieldB != null)
+      {
+	throw new RuntimeException("ASSERT: lingering shadowFieldB at commit time for transaction " +
+				   editingTransaction.session.key);
+      }
+
+    editingTransaction = null;
+    setPersistentField(getShadowField());
+
+    shadowField = null;
+
+    inuse = true;
+  }
+
+  /**
+   * This method is used to negatively re-configure this handle,
+   * clearing out any changes made during the transaction, and leaving
+   * it configured for further use.
+   */
+
+  public void releaseBack()
+  {
+    editingTransaction = null;
+    shadowField = null;
+    shadowFieldB = null;
+
+    inuse = true;
+  }
+
+  /**
    * Affirmative dissolution for gc.
    */
 
