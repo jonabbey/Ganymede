@@ -821,7 +821,7 @@ public final class DBNameSpace implements NameSpace {
   {
     checkSchemaEditInProgress(false);
 
-    if (oldField == null || editSet == null || value == null)
+    if (editSet == null || value == null || oldField == null)
       {
 	throw new IllegalArgumentException();
       }
@@ -842,7 +842,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (!handle.matchesAnySlot(oldField))
       {
-        throw new RuntimeException("Error, unmarking a value from a field that shouldn't have had it!");
+        throw new RuntimeException("Error, unmarking a value from a field that didn't have it, according the records of namespace " + this.getName());
       }
 
     if (handle.editingTransaction == null)
@@ -850,68 +850,63 @@ public final class DBNameSpace implements NameSpace {
         // no one has claimed this for transactional lock-out,
         // give it to this editSet.
 
-        // note that since this handle currently has no owner, we
-        // know that the original (persisted) state should be
-        // true, else it wouldn't have been in the hash to begin
+        // note that since this handle currently has no editing
+        // transaction, we know that the previouslyUsed flag should be
+        // true, else we wouldn't have found it in the hash to begin
         // with
+
+        handle.setInUse(false);
+
+        handle.setShadowField(null);
+        handle.setShadowFieldB(null);
 
         handle.editingTransaction = editSet;
         handle.previouslyUsed = true;
-        handle.setInUse(false);
-        handle.setShadowFieldB(null);
-        handle.setShadowField(null);
 
         remember(editSet, value);
 
 	return true;
       }
 
-    // we already have this value checked out for editing by our
-    // transaction
-
-    if (editSet.isInteractive())
+    if (!editSet.isInteractive())
       {
-	handle.setInUse(false);
-	handle.setShadowField(null);
-
-	// leave previouslyUsed alone
-
-	return true;
-      }
-
-    // I really don't expect getShadowFieldB() to be equal to the
-    // oldField, but I'll let it handle that case in the event we do
-    // have some very weird non-interactive client talking to us which
-    // decided to set a prospective mark and then clear it
-
-    // What we're really wanting to do here, however, is to handle the
-    // case where we are unmarking a previously persistent
-    // association, in which case we will let the field previously
-    // held in this handle's shadowFieldB become the primary
-    // association
-
-    // otherwise if we have no shadowFieldB waiting on deck, we do
-    // what we normally do to clear the handle from being used
-
-    if (handle.getShadowFieldB() == oldField)
-      {
-	handle.setShadowFieldB(null);
-      }
-    else if (handle.getShadowFieldB() != null)
-      {
-	if (!handle.isInUse())
+	if (handle.getShadowFieldB() != oldField && handle.getShadowField() != oldField)
 	  {
-	    throw new RuntimeException("ASSERT: surprise false inuse in shadowFieldB promotion.");
+	    throw new RuntimeException("ASSERT: mismatched field in non-interactive unmark");
 	  }
 
-	handle.setShadowField(handle.getShadowFieldB());
-	handle.setShadowFieldB(null);
+	if (handle.getShadowFieldB() == oldField)
+	  {
+	    // I really don't expect getShadowFieldB() to be equal to
+	    // the oldField, given how the non-interactive xmlclient
+	    // works, but we'll handle that case in the event we do
+	    // have some very weird non-interactive client talking to
+	    // us which decided to set a prospective mark and then
+	    // clear it
+
+	    handle.setShadowFieldB(null);
+
+	    return true;
+	  }
+
+	if (handle.getShadowFieldB() != null && handle.getShadowField() == oldField)
+	  {
+	    // promote B to A
+
+	    if (!handle.isInUse())
+	      {
+		throw new RuntimeException("ASSERT: surprise false inuse in shadowFieldB promotion.");
+	      }
+
+	    handle.setShadowField(handle.getShadowFieldB());
+	    handle.setShadowFieldB(null);
+
+	    return true;
+	  }
       }
-    else
-      {
-	handle.setInUse(false);
-	handle.setShadowField(null);
-      }
+
+    handle.setInUse(false);
+    handle.setShadowField(null);
 
     return true;
   }
