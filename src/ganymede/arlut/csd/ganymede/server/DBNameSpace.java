@@ -677,7 +677,7 @@ public final class DBNameSpace implements NameSpace {
     if (handle.getShadowField() == null ||
 	handle.getShadowField() == field)
       {
-	assert handle.getShadowFieldB() != null;
+	assert handle.getShadowFieldB() == null;
 
 	if (handle.editingTransaction == null)
 	  {
