@@ -286,6 +286,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     for (int i=0; i < rows; i++)
     {
       invid = results.getInvid(i);
+
       // Save invid to refer to later, as it is the key field
       sTable.newRow(invid);
       
@@ -328,10 +329,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   private JToolBar createToolBar()
   {
-    Image mailIcon = PackageResources.getImageResource(this, "queryTB_mail.gif", getClass());
-    Image saveIcon = PackageResources.getImageResource(this, "queryTB_save.gif", getClass());
-    Image printIcon = PackageResources.getImageResource(this, "queryTB_refresh.gif", getClass()); // TODO GET OWN PRINT ICON
-    Image refreshIcon = PackageResources.getImageResource(this, "queryTB_refresh.gif", getClass());
+    // New image icons from: http://tango.freedesktop.org/Tango_Icon_Library
+    Image mailIcon = PackageResources.getImageResource(this, "queryTB_mail.png", getClass());
+    Image saveIcon = PackageResources.getImageResource(this, "queryTB_save.png", getClass());
+    Image printIcon = PackageResources.getImageResource(this, "queryTB_print.png", getClass()); 
+    Image refreshIcon = PackageResources.getImageResource(this, "queryTB_refresh.png", getClass());
 
     Insets insets = new Insets(0,0,0,0);
     JToolBar toolBarTemp = new JToolBar();
@@ -778,8 +780,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  {
 	    result.append("<TD>");
 
-	    //cellText = table.getCellText(j, i); todo remove
-
 	    cellText = table.getValueAt(i, j).toString();
 	    if (cellText != null)
 	      {
@@ -826,8 +826,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	      {
 		result.append(sepChar);
 	      }
-
-	    //cellText = table.getCellText(j, i); todo remove
 
 	    cellText = table.getValueAt(i, j).toString();
 	    if (cellText != null)
