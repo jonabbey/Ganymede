@@ -329,11 +329,13 @@ public class GHashtable extends Hashtable {
                                                                            class
                                                                             GKey
 
-This class provides a mapping to allow keys of differing capitalization to be
-treated as identical in a hashtable, while allowing the capitalization-preserved
-key value to be retrieved on demand, in support of the Hashtable.keys() method.
-
 ------------------------------------------------------------------------------*/
+
+/**
+ * This class provides a mapping to allow keys of differing capitalization to be
+ * treated as identical in a hashtable, while allowing the capitalization-preserved
+ * key value to be retrieved on demand, in support of the Hashtable.keys() method.
+ */
 
 class GKey {
 
@@ -388,11 +390,13 @@ class GKey {
                                                                            class
                                                                            GEnum
 
-This class is in support of the Hashtable keys() method, to provide an 
-enumeration which will 'unwrap' GKey objects to provide access to the original
-key submitted to the GHashtable, with capitalization preserved.
-
 ------------------------------------------------------------------------------*/
+
+/**
+ * This class is in support of the Hashtable keys() method, to provide an 
+ * enumeration which will 'unwrap' GKey objects to provide access to the original
+ * key submitted to the GHashtable, with capitalization preserved.
+ */
 
 class GEnum implements Enumeration {
 
