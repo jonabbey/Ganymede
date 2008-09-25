@@ -205,6 +205,19 @@ class DBNameSpaceHandle implements Cloneable {
    * handle is associated with a field in an already-committed
    * object), this method will return a pointer to the DBField that
    * contains this handle's value in the committed data store.</p>
+   */
+
+  public DBField getPersistentField()
+  {
+    return getPersistentField((DBSession) null);
+  }
+
+  /**
+   * <p>If the value that this handle is associated with is stored in
+   * the Ganymede server's persistent data store (i.e., that this
+   * handle is associated with a field in an already-committed
+   * object), this method will return a pointer to the DBField that
+   * contains this handle's value in the committed data store.</p>
    *
    * <p>Note that if the GanymedeSession passed in is currently
    * editing the object which is identified by persistentFieldInvid,
@@ -214,7 +227,27 @@ class DBNameSpaceHandle implements Cloneable {
    * contain the value sought.</p>
    */
 
-  public DBField getPersistentField(GanymedeSession session)
+  public DBField getPersistentField(GanymedeSession gsession)
+  {
+    return getPersistentField(gsession.session);
+  }
+
+  /**
+   * <p>If the value that this handle is associated with is stored in
+   * the Ganymede server's persistent data store (i.e., that this
+   * handle is associated with a field in an already-committed
+   * object), this method will return a pointer to the DBField that
+   * contains this handle's value in the committed data store.</p>
+   *
+   * <p>Note that if the DBSession passed in is currently
+   * editing the object which is identified by persistentFieldInvid,
+   * the DBField returned will be the editable version of the field
+   * from the DBEditObject the session is working with.  This may be
+   * something of a surprise, as the field returned may not actually
+   * contain the value sought.</p>
+   */
+
+  public DBField getPersistentField(DBSession session)
   {
     if (persistentFieldInvid == null)
       {
@@ -223,7 +256,7 @@ class DBNameSpaceHandle implements Cloneable {
 
     if (session != null)
       {
-	DBObject _obj = session.session.viewDBObject(persistentFieldInvid);
+	DBObject _obj = session.viewDBObject(persistentFieldInvid);
 
 	if (_obj == null)
 	  {
