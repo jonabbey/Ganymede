@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
  
    Copyright (C) 1996-2008
@@ -89,19 +89,6 @@ class DBNameSpaceHandle implements Cloneable {
   DBEditSet editingTransaction;
 
   /**
-   * remember if the value was in use at the
-   * start of the transaction
-   */
-
-  boolean previouslyUsed;
-
-  /**
-   * is the value currently in use?
-   */
-
-  private boolean inuse;
-
-  /**
    * <P>So that the namespace hash can be used as an index,
    * persistentFieldInvid always points to the object that contained
    * the field that contained this value at the time this field was
@@ -164,8 +151,6 @@ class DBNameSpaceHandle implements Cloneable {
 
   public DBNameSpaceHandle(DBField field)
   {
-    this.previouslyUsed = this.inuse = true;
-
     setPersistentField(field);
   }
 
@@ -264,34 +249,33 @@ class DBNameSpaceHandle implements Cloneable {
 
   /**
    * Returns true if this DBNameSpaceHandle is referring to a value
-   * that is in use, either in the persistent datastore, or in the
-   * transaction referred to by the editingTransaction field.
+   * that should be dropped if the editing transaction is aborted or
+   * rolled back past the point at which this handle was associated
+   * with the editing transaction.
+   *
+   * This method will return true if a transaction has checked out an
+   * object for editing and then cleared this value from any fields.
+   */
+
+  public boolean isDropOnAbort()
+  {
+    return !isPersisted();
+  }
+
+  /**
+   * Returns true if this DBNameSpaceHandle is referring to a value
+   * that will be kept if the editing transaction is committed.
    *
    * This method will return false if a transaction has checked out an
-   * object for editing and then cleared this value from a field.  If
-   * this transaction is aborted, then inuse will be set to true again
-   * as part of the abort process.  If the transaction is committed,
-   * all namespace handles owned by the editingTransaction whose inuse
-   * flags are false will be removed from the namespace.
+   * object for editing and then cleared this value from a field.
    *
    * This method may also return false if a transaction has reserved
    * this value without setting it into a field.
    */
 
-  public boolean isInUse()
+  public boolean isKeepOnCommit()
   {
-    return this.inuse;
-  }
-
-  /**
-   * Changes the value of the inuse flag.  See {@link
-   * arlut.csd.ganymede.server.DBNameSpaceHandle#isInUse()} for
-   * interpretation.
-   */
-
-  public void setInUse(boolean val)
-  {
-    this.inuse = val;
+    return editingTransaction == null || shadowField != null;
   }
 
   /**
@@ -453,18 +437,11 @@ class DBNameSpaceHandle implements Cloneable {
 
   public void commitBack()
   {
-    if (shadowFieldB != null)
-      {
-	throw new RuntimeException("ASSERT: lingering shadowFieldB at commit time for transaction " +
-				   editingTransaction.session.key);
-      }
-
     editingTransaction = null;
     setPersistentField(getShadowField());
 
     shadowField = null;
-
-    inuse = true;
+    shadowFieldB = null;
   }
 
   /**
@@ -476,10 +453,9 @@ class DBNameSpaceHandle implements Cloneable {
   public void releaseBack()
   {
     editingTransaction = null;
+
     shadowField = null;
     shadowFieldB = null;
-
-    inuse = true;
   }
 
   /**
@@ -506,24 +482,6 @@ class DBNameSpaceHandle implements Cloneable {
     if (result.length() != 0)
       {
 	result.append(", ");
-      }
-
-    if (previouslyUsed)
-      {
-	result.append("previouslyUsed");
-      }
-    else
-      {
-	result.append("!previouslyUsed");
-      }
-
-    if (inuse)
-      {
-	result.append(", inuse");
-      }
-    else
-      {
-	result.append(", !inuse");
       }
 
     if (shadowField != null)

@@ -488,8 +488,8 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method reserves a value so that the given editSet is
-   * assured of being able to use this value at some point before the
+   * This method reserves a value so that the given editSet is assured
+   * of being able to use this value at some point before the
    * transaction is commited or canceled.  reserve() is different from
    * mark() in that there is no field specified to be holding the
    * value, and that when the transaction is committed or canceled,
@@ -503,12 +503,14 @@ public final class DBNameSpace implements NameSpace {
    * attempt would fail unless the value is first unmarked.
    *
    * @param editSet The transaction claiming the unique value <value>
-   * @param value The unique value that transaction editset is attempting to claim
-   * @param onlyUnused If true, reserve() will return false if the value is already
-   * attached to a field connected to this namespace, even if in an object attached
-   * to the editSet provided.
+   * @param value The unique value that transaction editset is
+   * attempting to claim
+   * @param onlyUnused If true, reserve() will return false if the
+   * value is already attached to a field connected to this namespace,
+   * even if in an object attached to the editSet provided.
    *
-   * @return true if the value could be reserved in the given editSet.  
+   * @return true if the value was successfully reserved in the given
+   * editSet.
    */
 
   public synchronized boolean reserve(DBEditSet editSet, Object value, boolean onlyUnused)
@@ -530,26 +532,28 @@ public final class DBNameSpace implements NameSpace {
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.isEditedByOtherTransaction(editSet))
+	if (handle.editingTransaction == null)
 	  {
-	    return false;	// somebody else owns it
+	    handle.editingTransaction = editSet;
+	    remember(editSet, value);
+
+	    return true;
 	  }
 
-	// either we own it, or no one does.
+	if (handle.isEditedByOtherTransaction(editSet))
+	  {
+	    return false;
+	  }
 
-	if (onlyUnused && handle.isInUse())
+	// we must own it
+
+	if (onlyUnused && handle.getShadowField() != null)
 	  {
 	    // this value is already in use.  we would need to edit
 	    // the object that contains the value and unmark the other
 	    // field before we could reserve the value
 
 	    return false;
-	  }
-
-	if (handle.editingTransaction == null)
-	  {
-	    handle.editingTransaction = editSet;
-	    remember(editSet, value);
 	  }
 
 	return true;
@@ -612,26 +616,23 @@ public final class DBNameSpace implements NameSpace {
 	return false;	// another active transaction owns it
       }
 
-    if (editSet.isInteractive())
+    if (!handle.isKeepOnCommit() ||
+	(!editSet.isInteractive() && handle.getShadowFieldB() != null))
       {
-	return !handle.isInUse();
+	return true;
       }
 
-    if (handle.isInUse() && handle.getShadowFieldB() != null)
-      {
-	return false;
-      }
-
-    return true;
+    return false;
   }
 
   /**
    * This method marks a value as being used in this namespace.
    * Marked values are held in editSet's, which are free to shuffle
-   * these reserved values around during processing.  The inuse and
-   * previouslyUsed fields in the namespace object are used during
-   * unique value searches to do direct hash lookups without getting
-   * confused by any shuffling being performed by a current thread.
+   * these reserved values around during processing.  The persistent
+   * fieldInvid and fieldId fields in the namespace handle object are
+   * used during unique value searches to do direct hash lookups
+   * without getting confused by any shuffling being performed by a
+   * current thread.
    *
    * @param editSet The transaction claiming the unique value &lt;value&gt;
    * @param value The unique value that transaction editset is attempting to claim
@@ -653,11 +654,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (!uniqueHash.containsKey(value))
       {
-	// we're creating a new value.. previous value
-	// is false
-
 	handle = new DBNameSpaceHandle(editSet);
-	handle.setInUse(true);
 	handle.setShadowField(field);
 	
 	uniqueHash.put(value, handle);
@@ -677,18 +674,10 @@ public final class DBNameSpace implements NameSpace {
 	return false;
       }
 
-    // not checked out by another active transaction, but it might be
-    // checked out by us..
-
-    if (!handle.isInUse())
+    if (handle.getShadowField() == null ||
+	handle.getShadowField() == field)
       {
-	handle.setInUse(true);
-	handle.setShadowField(field);
-
-	if (handle.getShadowFieldB() != null)
-	  {
-	    throw new RuntimeException("ASSERT: shadowFieldB() set on !inuse");
-	  }
+	assert handle.getShadowFieldB() != null;
 
 	if (handle.editingTransaction == null)
 	  {
@@ -696,49 +685,23 @@ public final class DBNameSpace implements NameSpace {
 	    remember(editSet, value);
 	  }
 
+	handle.setShadowField(field);
+
 	return true;
       }
 
-    if (editSet.isInteractive())
+    if (!editSet.isInteractive() &&
+	(handle.getShadowFieldB() == null ||
+	 handle.getShadowFieldB() == field))
       {
-	// If we are an interactive transaction, we can't
-	// mark this value, since the namespace value is
-	// still being used in an object in the database.
-	// they need to unmark the value in one place
-	// before they can mark it in another.
+	assert handle.editingTransaction != null;
 
-	return false;
+	handle.setShadowFieldB(field);
+
+	return true;
       }
 
-    // the handle is non-interactive and in use, so we're going to
-    // have to remember the proposed new field association in our
-    // handle's shadowFieldB variable.. if we later unmark the
-    // original association, we'll promote the shadowFieldB
-    // association to shadowField 'A'.
-		
-    if (handle.getShadowFieldB() != null &&
-	handle.getShadowFieldB() != field)
-      {
-	// we've already speculatively associated
-	// ourselves with this value with another
-	// field.. we can't do more than one
-	// speculative association in one
-	// non-interactive transaction and have any
-	// chance of consistency at the end, so just
-	// go ahead and reject this attempt
-
-	return false;
-      }
-
-    if (handle.editingTransaction == null)
-      {
-	handle.editingTransaction = editSet;	// yoinks!  ours!
-	remember(editSet, value);
-      }
-
-    handle.setShadowFieldB(field);
-
-    return true;
+    return false;
   }
 
   /**
@@ -769,40 +732,28 @@ public final class DBNameSpace implements NameSpace {
 	throw new IllegalArgumentException();
       }
 
-    DBNameSpaceHandle handle;
-
-    /* -- */
-
     if (!uniqueHash.containsKey(value))
       {
-	// if the value isn't already in the name
-	// space, it doesn't make sense for us to
-	// be unmarking it
-
-	return false;
+	throw new RuntimeException("ASSERT: testunmark called on value '" + GHashtable.keyString(value) +
+				   "' not in namespace: " + this.getName());
       }
 
-    handle = (DBNameSpaceHandle) uniqueHash.get(value);
+    DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	return false;	// somebody else owns it
+	throw new RuntimeException("ASSERT: testunmark called on value '" + GHashtable.keyString(value) +
+				   "' that namespace: " + this.getName() +
+				   " believes is being edited by another transaction.  Field is " + oldField);
       }
 
-    if (handle.editingTransaction == null)
+    if (!handle.matchesAnySlot(oldField))
       {
-	return true;
+	throw new RuntimeException("ASSERT: testunmark called on value '" + GHashtable.keyString(value) +
+				   "' that namespace: " + this.getName() + " believes is not in field " + oldField);
       }
 
-    if (!handle.matches(oldField) &&
-	handle.getShadowField() != oldField &&
-	handle.getShadowFieldB() != oldField)
-      {
-	return false;	// we don't think that value should be
-                        // associated with that field
-      }
-
-    return handle.isInUse();
+    return handle.isKeepOnCommit();
   }
 
   /**
@@ -828,41 +779,34 @@ public final class DBNameSpace implements NameSpace {
 
     if (!uniqueHash.containsKey(value))
       {
-        throw new RuntimeException("ASSERT: unmarking an unmarked value " + GHashtable.keyString(value));
+	throw new RuntimeException("ASSERT: unmark called on value '" + GHashtable.keyString(value) +
+				   "' not in namespace: " + this.getName());
       }
 
     DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-    // let's make sure this is a proper unbinding.
-
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	throw new RuntimeException("ASSERT: unmarking another transaction's value in namespace " + this.getName());
+	throw new RuntimeException("ASSERT: unmark called on value '" + GHashtable.keyString(value) +
+				   "' that namespace: " + this.getName() +
+				   " believes is being edited by another transaction.  Field is " + oldField);
       }
 
     if (!handle.matchesAnySlot(oldField))
       {
-        throw new RuntimeException("ASSERT: unmarking a value from a field that didn't have it, according the records of namespace " + this.getName());
+	throw new RuntimeException("ASSERT: unmark called on value '" + GHashtable.keyString(value) +
+				   "' that namespace: " + this.getName() + " believes is not in field " + oldField);
       }
 
     if (handle.editingTransaction == null)
       {
-        // no one has claimed this for transactional lock-out,
-        // give it to this editSet.
-
-        // note that since this handle currently has no editing
-        // transaction, we know that the previouslyUsed flag should be
-        // true, else we wouldn't have found it in the hash to begin
-        // with
-
-        handle.setInUse(false);
-
         handle.setShadowField(null);
         handle.setShadowFieldB(null);
 
-        handle.editingTransaction = editSet;
-        handle.previouslyUsed = true;
+        // no one has claimed this for transactional lock-out,
+        // give it to this editSet.
 
+        handle.editingTransaction = editSet;
         remember(editSet, value);
 
 	return true;
@@ -893,9 +837,9 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    // promote B to A
 
-	    if (!handle.isInUse())
+	    if (!handle.isKeepOnCommit())
 	      {
-		throw new RuntimeException("ASSERT: surprise false inuse in shadowFieldB promotion.");
+		throw new RuntimeException("ASSERT: surprise false keepOnCommit in shadowFieldB promotion.");
 	      }
 
 	    handle.setShadowField(handle.getShadowFieldB());
@@ -905,7 +849,6 @@ public final class DBNameSpace implements NameSpace {
 	  }
       }
 
-    handle.setInUse(false);
     handle.setShadowField(null);
 
     return true;
@@ -1011,30 +954,13 @@ public final class DBNameSpace implements NameSpace {
 
 	if (!point.containsValue(value))
 	  {
-	    if (handle.previouslyUsed)
+	    if (handle.isDropOnAbort())
 	      {
-		// remember, shadowField and shadowFieldB are just for
-		// our use while we're manipulating a namespace
-		// allocation within a transaction.  we're not
-		// screwing with handle.persistentFieldInvid or
-		// handle.persistentFieldId here, which are still left
-		// standing so that the namespace-optimized query
-		// mechanism in GanymedeSession can track down the
-		// field bound to the namespace value.
-
-		handle.setShadowFieldB(null);
-		handle.setShadowField(null);
-		handle.editingTransaction = null;
-		handle.setInUse(true);
+		removeHandle(value);
 	      }
 	    else
 	      {
-		// the value was not reserved in the namespace before
-		// this transaction allocated it, so we can just
-		// forget it entirely, and allow other transactions to
-		// use it.
-
-		uniqueHash.remove(value);
+		handle.releaseBack();
 	      }
 
 	    elementsToRemove.addElement(value);
@@ -1186,7 +1112,13 @@ public final class DBNameSpace implements NameSpace {
 	    continue;
 	  }
 
-	if (handle.isInUse())
+	if (handle.getShadowFieldB() != null)
+	  {
+	    throw new RuntimeException("ASSERT: lingering shadowFieldB at commit time for transaction " +
+				       editSet.session.key);
+	  }
+
+	if (handle.isKeepOnCommit())
 	  {
 	    handle.commitBack();
 	  }
@@ -1247,13 +1179,13 @@ public final class DBNameSpace implements NameSpace {
 	    continue;
 	  }
 
-	if (handle.previouslyUsed)
+	if (handle.isDropOnAbort())
 	  {
-	    handle.releaseBack();
+	    removeHandle(value);
 	  }
 	else
 	  {
-	    removeHandle(value);
+	    handle.releaseBack();
 	  }
       }
 
@@ -1427,7 +1359,7 @@ public final class DBNameSpace implements NameSpace {
 	return false;
       }
 
-    uniqueHash.remove(value);
+    removeHandle(value);
 
     return true;
   }
@@ -1457,7 +1389,7 @@ public final class DBNameSpace implements NameSpace {
 
     for (int i = 0; i < elementsToRemove.size(); i++)
       {
-	this.uniqueHash.remove(elementsToRemove.elementAt(i));
+	removeHandle(elementsToRemove.elementAt(i));
       }
   }
 
@@ -1531,6 +1463,12 @@ public final class DBNameSpace implements NameSpace {
 	System.err.println("key: " + key + ", value: " + uniqueHash.get(key));
       }
   }
+
+  /*------------------------------------------------------------------------------
+                                                                       inner class
+                                                            DBNameSpaceTransaction
+
+  ------------------------------------------------------------------------------*/
 
   /**
    * This inner class holds information associated with an active
@@ -1645,6 +1583,12 @@ public final class DBNameSpace implements NameSpace {
       return checkpointStack;
     }
   }
+
+  /*------------------------------------------------------------------------------
+                                                                       inner class
+                                                                DBNameSpaceCkPoint
+
+  ------------------------------------------------------------------------------*/
 
   /**
    * This inner class holds checkpoint information associated with
