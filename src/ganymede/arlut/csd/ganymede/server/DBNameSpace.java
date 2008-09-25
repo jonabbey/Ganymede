@@ -532,15 +532,7 @@ public final class DBNameSpace implements NameSpace {
       {
 	handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (handle.editingTransaction == null)
-	  {
-	    handle.editingTransaction = editSet;
-	    remember(editSet, value);
-
-	    return true;
-	  }
-
-	if (handle.isEditedByOtherTransaction(editSet))
+	if (!handle.isEditedByUs(editSet))
 	  {
 	    return false;
 	  }
