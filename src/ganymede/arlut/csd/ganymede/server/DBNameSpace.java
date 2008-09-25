@@ -357,7 +357,7 @@ public final class DBNameSpace implements NameSpace {
    * start-up.
    */
   
-  public synchronized void clearHandle(Object value)
+  public synchronized void removeHandle(Object value)
   {
     uniqueHash.remove(value);
   }

@@ -1115,7 +1115,7 @@ class JournalEntry {
 				throw new RuntimeException("Error, namespace mismatch in DBJournal code [" + j + "]");
 			      }
 
-			    definition.namespace.clearHandle(_field.key(j));
+			    definition.namespace.removeHandle(_field.key(j));
 			  }
 		      }
 		    else
@@ -1125,7 +1125,7 @@ class JournalEntry {
 			    throw new RuntimeException("Error, namespace mismatch in DBJournal code");
 			  }
 
-			definition.namespace.clearHandle(_field.key());
+			definition.namespace.removeHandle(_field.key());
 		      }
 		  }
 	      }
