@@ -1502,7 +1502,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (transRecord == null)
       {
-	transRecord = new DBNameSpaceTransaction(transaction);
+	transRecord = new DBNameSpaceTransaction(transaction, caseInsensitive);
 	transactions.put(transaction, transRecord);
       }
 
@@ -1556,15 +1556,15 @@ public final class DBNameSpace implements NameSpace {
   class DBNameSpaceTransaction {
 
     private NamedStack checkpointStack;
-    private Hashtable reservedValues;
+    private GHashtable reservedValues;
     private DBEditSet transaction;
 
     /* -- */
 
-    DBNameSpaceTransaction(DBEditSet transaction)
+    DBNameSpaceTransaction(DBEditSet transaction, boolean caseInsensitive)
     {
       this.transaction = transaction;
-      this.reservedValues = new Hashtable();
+      this.reservedValues = new GHashtable(caseInsensitive);
       this.checkpointStack = new NamedStack();
     }
 
@@ -1573,7 +1573,7 @@ public final class DBNameSpace implements NameSpace {
       if (reservedValues.containsKey(value))
 	{
 	  Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.remember(): transaction " + transaction +
-			     " already contains value " + value);
+			     " already contains value " + GHashtable.keyString(value));
 
 	  return;
 	}
@@ -1586,7 +1586,7 @@ public final class DBNameSpace implements NameSpace {
       if (!reservedValues.containsKey(value))
 	{
 	  Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.forget(): transaction " + transaction +
-			     " does not contain value " + value);
+			     " does not contain value " + GHashtable.keyString(value));
 
 	  return;
 	}
