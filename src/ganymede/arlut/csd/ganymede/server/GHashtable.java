@@ -69,12 +69,27 @@ import java.util.Hashtable;
  * the hashtable is specified at hash creation time, and may not change
  * thereafter.</p>
  *
- * <p>This hashtable also has special support for handling arrays of Bytes as
- * keys in the hash, using the {@link arlut.csd.ganymede.server.IPwrap IPwrap}
- * class for I.P. address representation.</p>
+ * <p>This hashtable also has special support for handling arrays of
+ * Bytes as keys in the hash, using the {@link
+ * arlut.csd.ganymede.server.IPwrap IPwrap} class for I.P. address
+ * representation.  All enumerations or iterations on GHashtables will
+ * represent keys originally presented as Byte arrays as IPwrap
+ * objects.</p>
  */
 
 public class GHashtable extends Hashtable {
+
+  public static String keyString(Object x)
+  {
+    if (x instanceof Byte[])
+      {
+	return String.valueOf(new IPwrap((Byte[]) x));
+      }
+    else
+      {
+	return String.valueOf(x);
+      }
+  }
 
   private boolean caseInsensitive; // we don't allow this to change after creation
 
