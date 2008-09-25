@@ -419,7 +419,8 @@ class DBNameSpaceHandle implements Cloneable {
 
   public boolean matches(Invid persistentFieldInvid, short persistentFieldId)
   {
-    return (this.persistentFieldInvid == persistentFieldInvid) && (this.persistentFieldId == persistentFieldId);
+    return (this.persistentFieldInvid == persistentFieldInvid) &&
+      (this.persistentFieldId == persistentFieldId);
   }
 
   /**
@@ -427,7 +428,7 @@ class DBNameSpaceHandle implements Cloneable {
    * kind of field as the one specified by the parameter list.</p>
    */
 
-  public boolean matches (short objectType, short persistentFieldId)
+  public boolean matchesFieldType(short objectType, short persistentFieldId)
   {
     return (this.persistentFieldInvid.getType() == objectType) &&
       (this.persistentFieldId == persistentFieldId);

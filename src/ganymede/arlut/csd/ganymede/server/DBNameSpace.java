@@ -1484,7 +1484,7 @@ public final class DBNameSpace implements NameSpace {
 	Object value = en.nextElement();
 	DBNameSpaceHandle handle = (DBNameSpaceHandle) this.uniqueHash.get(value);
 
-	if (handle.matches(objectType, fieldId))
+	if (handle.matchesFieldType(objectType, fieldId))
 	  {
 	    elementsToRemove.addElement(value);
 	  }
