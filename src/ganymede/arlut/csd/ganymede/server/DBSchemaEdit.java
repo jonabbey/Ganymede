@@ -343,70 +343,61 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public synchronized Base[] getBases(boolean embedded)
   {
-    Base[] bases;
+    DBObjectBase[] bases;
     Enumeration en;
     int i = 0;
     int size = 0;
-    Base base;
+    DBObjectBase base;
 
     /* -- */
 
+    // calculate how many bases of the proper type (embedded or
+    // non-embedded) we're going to return to the caller
+
     en = newBases.elements();
 
     while (en.hasMoreElements())
       {
-	base = (Base) en.nextElement();
+	base = (DBObjectBase) en.nextElement();
 
-	try
+	if (base.isEmbedded())
 	  {
-	    if (base.isEmbedded())
+	    if (embedded)
 	      {
-		if (embedded)
-		  {
-		    size++;
-		  }
-	      }
-	    else
-	      {
-		if (!embedded)
-		  {
-		    size++;
-		  }
+		size++;
 	      }
 	  }
-	catch (RemoteException ex)
+	else
 	  {
-	    throw new RuntimeException("caught remote: " + ex);
+	    if (!embedded)
+	      {
+		size++;
+	      }
 	  }
       }
 
-    bases = new Base[size];
+    // and create the return list
+
+    bases = new DBObjectBase[size];
     en = newBases.elements();
 
     while (en.hasMoreElements())
       {
-	base = (Base) en.nextElement();
+	base = (DBObjectBase) en.nextElement();
 
-	try
+	if (base.isEmbedded())
 	  {
-	    if (base.isEmbedded())
+	    if (embedded)
 	      {
-		if (embedded)
-		  {
-		    bases[i++] = base;
-		  }
-	      }
-	    else
-	      {
-		if (!embedded)
-		  {
-		    bases[i++] = base;
-		  }
+		bases[i++] = base;
 	      }
 	  }
-	catch (RemoteException ex)
+	else
 	  {
-	    throw new RuntimeException("caught remote: " + ex);
+	    if (!embedded)
+	      {
+		bases[i++] = base;
+	      }
 	  }
       }
 
@@ -723,7 +714,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public synchronized NameSpace getNameSpace(String name)
   {
-    NameSpace ns;
+    DBNameSpace ns;
     Enumeration en;
 
     /* -- */
@@ -734,18 +725,11 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
 	while (en.hasMoreElements())
 	  {
-	    ns = (NameSpace) en.nextElement();
+	    ns = (DBNameSpace) en.nextElement();
 
-	    try
+	    if (ns.getName().equals(name))
 	      {
-		if (ns.getName().equals(name))
-		  {
-		    return ns;
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		// we'll just fall through to return null below.
+		return ns;
 	      }
 	  }
       }
@@ -773,18 +757,11 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	throw new RuntimeException("already released/committed");
       }
 
-    try
+    synchronized (store)
       {
 	ns = new DBNameSpace(name, caseInsensitive);
 
-	synchronized (store)
-	  {
-	    store.nameSpaces.addElement(ns);
-	  }
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("couldn't initialize new namespace" + ex);
+	store.nameSpaces.addElement(ns);
       }
 
     return ns;

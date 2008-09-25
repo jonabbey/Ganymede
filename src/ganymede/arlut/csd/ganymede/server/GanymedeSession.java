@@ -3559,13 +3559,16 @@ final public class GanymedeSession implements Session, Unreferenced {
 		    // to convert strings to invids here for a
 		    // namespace-optimized lookup
 
-		    resultfield = ns.lookupMyValue(this, node.value); // *sync* DBNameSpace
-
-		    if (debug)
+		    if (node.value != null)
 		      {
-			System.err.println("Did a namespace lookup in " + ns.getName() + 
-					   " for value " + node.value);
-			System.err.println("Found " + resultfield);
+			resultfield = ns.lookupMyValue(this, node.value); // *sync* DBNameSpace
+
+			if (debug)
+			  {
+			    System.err.println("Did a namespace lookup in " + ns.getName() + 
+					       " for value " + node.value);
+			    System.err.println("Found " + resultfield);
+			  }
 		      }
 		  }
 

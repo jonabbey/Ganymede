@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
  
    Copyright (C) 1996-2008
@@ -89,19 +89,6 @@ class DBNameSpaceHandle implements Cloneable {
   DBEditSet editingTransaction;
 
   /**
-   * remember if the value was in use at the
-   * start of the transaction
-   */
-
-  boolean previouslyUsed;
-
-  /**
-   * is the value currently in use?
-   */
-
-  private boolean inuse;
-
-  /**
    * <P>So that the namespace hash can be used as an index,
    * persistentFieldInvid always points to the object that contained
    * the field that contained this value at the time this field was
@@ -157,23 +144,24 @@ class DBNameSpaceHandle implements Cloneable {
 
   /* -- */
 
-  public DBNameSpaceHandle(DBEditSet owner, boolean originalValue)
-  {
-    this.editingTransaction = owner;
-    this.previouslyUsed = this.inuse = originalValue;
-  }
+  /**
+   * Constructor used by the system to originate a value when reading
+   * from the database.
+   */
 
-  public DBNameSpaceHandle(DBEditSet owner, boolean originalValue, DBField field)
+  public DBNameSpaceHandle(DBField field)
   {
-    this.editingTransaction = owner;
-    this.previouslyUsed = this.inuse = originalValue;
-
     setPersistentField(field);
   }
 
-  public boolean matches(DBEditSet set)
+  /**
+   * Constructor used by a transaction marking a value that is new to
+   * the namespace.
+   */
+
+  public DBNameSpaceHandle(DBEditSet owner)
   {
-    return (this.editingTransaction == set);
+    this.editingTransaction = owner;
   }
 
   /**
@@ -261,34 +249,33 @@ class DBNameSpaceHandle implements Cloneable {
 
   /**
    * Returns true if this DBNameSpaceHandle is referring to a value
-   * that is in use, either in the persistent datastore, or in the
-   * transaction referred to by the editingTransaction field.
+   * that should be dropped if the editing transaction is aborted or
+   * rolled back past the point at which this handle was associated
+   * with the editing transaction.
+   *
+   * This method will return true if a transaction has checked out an
+   * object for editing and then cleared this value from any fields.
+   */
+
+  public boolean isDropOnAbort()
+  {
+    return !isPersisted();
+  }
+
+  /**
+   * Returns true if this DBNameSpaceHandle is referring to a value
+   * that will be kept if the editing transaction is committed.
    *
    * This method will return false if a transaction has checked out an
-   * object for editing and then cleared this value from a field.  If
-   * this transaction is aborted, then inuse will be set to true again
-   * as part of the abort process.  If the transaction is committed,
-   * all namespace handles owned by the editingTransaction whose inuse
-   * flags are false will be removed from the namespace.
+   * object for editing and then cleared this value from a field.
    *
    * This method may also return false if a transaction has reserved
    * this value without setting it into a field.
    */
 
-  public boolean isInUse()
+  public boolean isKeepOnCommit()
   {
-    return this.inuse;
-  }
-
-  /**
-   * Changes the value of the inuse flag.  See {@link
-   * arlut.csd.ganymede.server.DBNameSpaceHandle#isInUse()} for
-   * interpretation.
-   */
-
-  public void setInUse(boolean val)
-  {
-    this.inuse = val;
+    return editingTransaction == null || shadowField != null;
   }
 
   /**
@@ -394,6 +381,11 @@ class DBNameSpaceHandle implements Cloneable {
       }
   }
 
+  public boolean matches(DBEditSet set)
+  {
+    return (this.editingTransaction == set);
+  }
+
   /**
    * <p>This method is used to verify that this handle points to the same
    * field as the one specified by the parameter list.</p>
@@ -411,7 +403,8 @@ class DBNameSpaceHandle implements Cloneable {
 
   public boolean matches(Invid persistentFieldInvid, short persistentFieldId)
   {
-    return (this.persistentFieldInvid == persistentFieldInvid) && (this.persistentFieldId == persistentFieldId);
+    return (this.persistentFieldInvid == persistentFieldInvid) &&
+      (this.persistentFieldId == persistentFieldId);
   }
 
   /**
@@ -419,17 +412,57 @@ class DBNameSpaceHandle implements Cloneable {
    * kind of field as the one specified by the parameter list.</p>
    */
 
-  public boolean matches (short objectType, short persistentFieldId)
+  public boolean matchesFieldType(short objectType, short persistentFieldId)
   {
     return (this.persistentFieldInvid.getType() == objectType) &&
       (this.persistentFieldId == persistentFieldId);
   }
 
   /**
+   * Returns true if the given field is associated with this handle in
+   * any of the persistent, transaction-local, or xml transaction
+   * secondary field slots.
+   */
+
+  public boolean matchesAnySlot(DBField field)
+  {
+    return (this.matches(field) || this.getShadowField() == field || this.getShadowFieldB() == field);
+  }
+
+  /**
+   * This method is used to positively configure this handle for
+   * re-integration into the persistent namespace store after a
+   * transaction is positively resolved.
+   */
+
+  public void commitBack()
+  {
+    editingTransaction = null;
+    setPersistentField(getShadowField());
+
+    shadowField = null;
+    shadowFieldB = null;
+  }
+
+  /**
+   * This method is used to negatively re-configure this handle,
+   * clearing out any changes made during the transaction, and leaving
+   * it configured for further use.
+   */
+
+  public void releaseBack()
+  {
+    editingTransaction = null;
+
+    shadowField = null;
+    shadowFieldB = null;
+  }
+
+  /**
    * Affirmative dissolution for gc.
    */
 
-  public void cleanup()
+  public void scrub()
   {
     editingTransaction = null;
     persistentFieldInvid = null;
@@ -449,24 +482,6 @@ class DBNameSpaceHandle implements Cloneable {
     if (result.length() != 0)
       {
 	result.append(", ");
-      }
-
-    if (previouslyUsed)
-      {
-	result.append("previouslyUsed");
-      }
-    else
-      {
-	result.append("!previouslyUsed");
-      }
-
-    if (inuse)
-      {
-	result.append(", inuse");
-      }
-    else
-      {
-	result.append(", !inuse");
       }
 
     if (shadowField != null)
