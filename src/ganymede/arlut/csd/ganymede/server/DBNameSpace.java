@@ -344,7 +344,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void receiveValue(Object value, DBField field)
   {
-    uniqueHash.put(value, new DBNameSpaceHandle(null, true, field));
+    uniqueHash.put(value, new DBNameSpaceHandle(field));
   }
 
   /**
@@ -555,10 +555,7 @@ public final class DBNameSpace implements NameSpace {
 	return true;
       }
 
-    handle = new DBNameSpaceHandle(editSet, false, null);
-    handle.setInUse(false);
-    handle.setShadowField(null);
-    handle.setShadowFieldB(null);
+    handle = new DBNameSpaceHandle(editSet);
 
     uniqueHash.put(value, handle);
 
@@ -659,7 +656,7 @@ public final class DBNameSpace implements NameSpace {
 	// we're creating a new value.. previous value
 	// is false
 
-	handle = new DBNameSpaceHandle(editSet, false, null);
+	handle = new DBNameSpaceHandle(editSet);
 	handle.setInUse(true);
 	handle.setShadowField(field);
 	
@@ -1435,9 +1432,7 @@ public final class DBNameSpace implements NameSpace {
 	return false;
       }
 
-    DBNameSpaceHandle handle = new DBNameSpaceHandle(null, true, field);
-
-    uniqueHash.put(value, handle);
+    uniqueHash.put(value, new DBNameSpaceHandle(field));
 
     return true;
   }

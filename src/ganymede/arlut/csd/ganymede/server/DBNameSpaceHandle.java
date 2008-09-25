@@ -157,18 +157,26 @@ class DBNameSpaceHandle implements Cloneable {
 
   /* -- */
 
-  public DBNameSpaceHandle(DBEditSet owner, boolean originalValue)
-  {
-    this.editingTransaction = owner;
-    this.previouslyUsed = this.inuse = originalValue;
-  }
+  /**
+   * Constructor used by the system to originate a value when reading
+   * from the database.
+   */
 
-  public DBNameSpaceHandle(DBEditSet owner, boolean originalValue, DBField field)
+  public DBNameSpaceHandle(DBField field)
   {
-    this.editingTransaction = owner;
-    this.previouslyUsed = this.inuse = originalValue;
+    this.previouslyUsed = this.inuse = true;
 
     setPersistentField(field);
+  }
+
+  /**
+   * Constructor used by a transaction marking a value that is new to
+   * the namespace.
+   */
+
+  public DBNameSpaceHandle(DBEditSet owner)
+  {
+    this.editingTransaction = owner;
   }
 
   /**
