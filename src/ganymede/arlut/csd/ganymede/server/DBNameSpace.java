@@ -828,7 +828,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (!uniqueHash.containsKey(value))
       {
-        throw new RuntimeException("ASSERT unmarking an unmarked value!");
+        throw new RuntimeException("ASSERT: unmarking an unmarked value " + GHashtable.keyString(value));
       }
 
     DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
@@ -837,12 +837,12 @@ public final class DBNameSpace implements NameSpace {
 
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	throw new RuntimeException("ASSERT unmarking another transaction's value");
+	throw new RuntimeException("ASSERT: unmarking another transaction's value in namespace " + this.getName());
       }
 
     if (!handle.matchesAnySlot(oldField))
       {
-        throw new RuntimeException("Error, unmarking a value from a field that didn't have it, according the records of namespace " + this.getName());
+        throw new RuntimeException("ASSERT: unmarking a value from a field that didn't have it, according the records of namespace " + this.getName());
       }
 
     if (handle.editingTransaction == null)
