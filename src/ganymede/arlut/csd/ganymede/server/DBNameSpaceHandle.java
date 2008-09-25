@@ -486,7 +486,7 @@ class DBNameSpaceHandle implements Cloneable {
    * Affirmative dissolution for gc.
    */
 
-  public void cleanup()
+  public void scrub()
   {
     editingTransaction = null;
     persistentFieldInvid = null;

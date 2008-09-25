@@ -1754,7 +1754,7 @@ public final class DBNameSpace implements NameSpace {
 	    {
 	      DBNameSpaceHandle handle = (DBNameSpaceHandle) en.nextElement();
 
-	      handle.cleanup();
+	      handle.scrub();
 	    }
 
 	  uniqueHash.clear();
