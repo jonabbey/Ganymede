@@ -692,9 +692,9 @@ public final class DBNameSpace implements NameSpace {
 
 	    return true;
 	  }
-	else if (!handle.getShadowField().matches(field) &&
+	else if (!field.matches(handle.getShadowField()) &&
 		 (handle.getShadowFieldB() == null ||
-		  handle.getShadowFieldB().matches(field)))
+		  field.matches(handle.getShadowFieldB())))
 	  {
 	    handle.setShadowFieldB(field);
 
