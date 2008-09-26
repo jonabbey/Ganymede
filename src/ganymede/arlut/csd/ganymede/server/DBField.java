@@ -3739,7 +3739,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	    String conflictLabel = conflictObject.getLabel();
 	    String conflictClassName = conflictObject.getTypeName();
 
-	    // This action could not be completed because "{0}" is already being used in a transaction.
+	    // This action could not be completed because "{0}" is currently being manipulated in a concurrent transaction.
 	    //
 	    // {1} "{2}" contains this value in its {3} field.
 	    //
