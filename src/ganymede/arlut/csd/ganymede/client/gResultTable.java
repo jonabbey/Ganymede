@@ -221,38 +221,25 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   public void loadResults(DumpResult results)
   {
-    Vector headerVect = new Vector();
-    int rows = 0;
-    Invid invid;      // Used to hold query result
-    Object cellResult; // hold single cell result of query
-    String[] columnNames;
-    boolean[] used;
-
     // "Loading table"
     setStatus(ts.l("loadResults.loading_status"), 0);
 
     getContentPane().removeAll(); // for the refresh, we must clean this pane out
 
-    // Set our title with the result count
-    String queryType = null;
-    if (query.objectName != null) queryType = query.objectName;
-    else if (query.objectType != -1) queryType = wp.getgclient().loader.getObjectType(query.objectType);
-    else queryType = ts.l("loadResults.unknown_query_type");   // "<unknown>"
 
-    // "Query: [{0}] results: {1,num,#} entries"
-    rows = results.resultSize();
-    wp.setWindowTitle(this, ts.l("loadResults.window_title", queryType, new Integer(rows)));
-    wp.updateWindowMenu();
-
-
-    // Add our Toolbar in
+    // Add our Toolbar in.
     toolbar = createToolBar();
     add("North",toolbar);
     toolbar.grabFocus();
 
+    // Create Row Menus popups now.
+    viewMI = new JMenuItem(ts.l("init.view")); // "View Entry"
+    editMI = new JMenuItem(ts.l("init.edit")); // "Edit Entry"
+    cloneMI = new JMenuItem(ts.l("init.clone")); // "Clone Entry"
+    deleteMI = new JMenuItem(ts.l("init.delete")); // "Delete Entry"
+    inactivateMI = new JMenuItem(ts.l("init.inactivate")); // "Inactivate Entry"
 
-    // Create Row Menus Now
-    JPopupMenu rowMenu = new JPopupMenu(); // rowMenu right-click popup, and its functions
+    JPopupMenu rowMenu = new JPopupMenu();
     rowMenu.add(viewMI);
     rowMenu.add(editMI);
     rowMenu.add(cloneMI);
@@ -260,12 +247,31 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     rowMenu.add(inactivateMI);
 
 
-    headerVect = results.getHeaders();
-    rows = results.resultSize();
-    columnNames = new String[headerVect.size()];	
-    used = new boolean[headerVect.size()];
-    if (debug) System.err.println("gResultTable: " + headerVect.size() + " headers returned by query");
+    // Set our title with the result count
+    String queryType = null;
+    if (query.objectName != null) 
+      {
+	queryType = query.objectName;
+      }
+    else if (query.objectType != -1) 
+      {
+	queryType = wp.getgclient().loader.getObjectType(query.objectType);
+      }
+    else 
+      {
+	queryType = ts.l("loadResults.unknown_query_type");   // "<unknown>"
+      }
 
+    // "Query: [{0}] results: {1,num,#} entries"
+    int rows = results.resultSize();
+    wp.setWindowTitle(this, ts.l("loadResults.window_title", queryType, new Integer(rows)));
+    wp.updateWindowMenu();
+
+
+    Vector headerVect = results.getHeaders();
+    String[] columnNames = new String[headerVect.size()];	
+    boolean[] used = new boolean[headerVect.size()];
+    if (debug) System.err.println("gResultTable: " + headerVect.size() + " headers returned by query");
     
     // Get all Column Names now
     for (int i=0; i < headerVect.size(); i++)      
@@ -278,34 +284,35 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // Pass our SmartTable the results set, and a text Row menu
     // This will render the table nicely and setup a header and row right click menu (user provided)
     // header can sort and remove columns, the columns must be defined before creating the table, the 
-    // data cells may be filled in later.
-    sTable = new SmartTable(rowMenu, getContentPane(), columnNames, this); // this is for the callback functions
+    // data cells may be filled in later.  this is for the callback functions
+    sTable = new SmartTable(rowMenu, columnNames, this); 
+    getContentPane().add(sTable); 
 
 
-    // Now Read in all the result lines
+    // Now Read in all the result lines.
     for (int i=0; i < rows; i++)
     {
-      invid = results.getInvid(i);
-
-      // Save invid to refer to later, as it is the key field
+      // Save invid to refer to later, as it is the key field.
+      Invid invid = results.getInvid(i);
       sTable.newRow(invid);
+
+      //System.out.println("loadResults: loading val "+invid.toString()+" into row:"+i);
       
       for (int j=0; j < headerVect.size(); j++)
       {
-	cellResult = results.getResult(i, j);	
+	Object cellResult = results.getResult(i, j);	
 	sTable.setCellValue(invid, j, cellResult);
 
-	if (cellResult != null && !cellResult.toString().equals(""))
+	if (!used[j] && cellResult != null && !cellResult.toString().equals(""))
 	{
 	    used[j] = true;  
 	}
       }
-    } // for i
+    } 
 
 
     // Removing empty columns, we have to do this backwards so that we don't
     // change the index of a column we'll later delete
-
     for (int i = used.length-1; i >= 0 ; i--)
       {
 	if (!used[i])
@@ -314,7 +321,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  }
       }
 
-    validate(); // needed after refresh results.x
+    validate(); // needed after refresh results.
 
     sTable.fixTableColumns();
 

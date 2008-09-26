@@ -52,6 +52,10 @@
 
 package arlut.csd.JTable;
 
+import arlut.csd.ganymede.common.Invid;  // test debug
+
+
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension; 
@@ -121,31 +125,34 @@ public class SmartTable extends JPanel implements ActionListener
    * The GUI table component.
    */
   public JTable table = null;
-  public MyTableModel myModel;
-  TableSorter sorter = null;
-
-  public Hashtable index; // hashable index for selecting rows by key field
-  rowSelectCallback callback;
+  private MyTableModel myModel;
+  private TableSorter sorter = null;
+  
+  /**
+   * Hashable index for selecting rows by key field
+   */
+  private Hashtable index; 
+  private rowSelectCallback callback;
 
   // Header Menus for right click popup
-  JMenuItem menuTitle     = new JMenuItem(ts.l("init.menu_title"));       // "Column Menu"
-  JMenuItem sortByMI      = new JMenuItem(ts.l("init.sort_by"));          // "Sort By This Column"
-  JMenuItem revSortByMI   = new JMenuItem(ts.l("init.rev_sort_by"));	  // "Reverse Sort By This Column"
-  JMenuItem deleteColMI   = new JMenuItem(ts.l("init.del_col"));          // "Delete This Column"
-  JMenuItem optimizeColWidMI = new JMenuItem(ts.l("init.opt_col_widths"));// "Optimize Column Widths"
+  private JMenuItem menuTitle     = new JMenuItem(ts.l("init.menu_title"));       // "Column Menu"
+  private JMenuItem deleteColMI   = new JMenuItem(ts.l("init.del_col"));          // "Delete This Column"
+  private JMenuItem optimizeColWidMI = new JMenuItem(ts.l("init.opt_col_widths"));// "Optimize Column Widths"
   
   // vars to remember to pass into the mouse actions
-  int remember_row;
-  int remember_col;
-  int remember_col2;
+  private int remember_row;
+  private int remember_col;
+  private int remember_col2;
 
 
   // constructor function
-  public SmartTable(JPopupMenu rowMenu, Container currPanel, String[] columnValues, rowSelectCallback callback)
+  public SmartTable(JPopupMenu rowMenu, String[] columnValues, rowSelectCallback callback)
   {
     if (debug) System.err.println("DEBUG: SmartTable Constructor");
+    this.setLayout(new BorderLayout());
+
     index = new Hashtable();
-    this.callback = callback; // save parent panel
+    this.callback = callback; 
 
     // Create and set up the results content pane.
     myModel = new MyTableModel(columnValues);
@@ -154,377 +161,32 @@ public class SmartTable extends JPanel implements ActionListener
     sorter.setTableHeader(table.getTableHeader()); 
     table.setPreferredScrollableViewportSize(new Dimension(500, 70)); // no real effect    
 
-    // Allows horizontal scrolling - Lets all cols bet about 100 px as opposed to fitting panel
+    // Allows horizontal scrolling - Lets all cols be about 100 px as opposed to fitting panel
     table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF); 
 
-    // Allow only single row selection
     table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
     // Fix to display dates nicely
     table.setDefaultRenderer(Date.class, new DateCellRenderer());
 
-    addPopupMenus(rowMenu);  // adds the rightclick menu's for header and rows
+    // adds the rightclick menu's for header and rows
+    addPopupMenus(rowMenu);  
 
     // Sort Function Call Here - default first field ASC
-    sorter.setSortingStatus(0, 1);  // Column, sort Status (dir)
-    
-    // Create the scroll pane and add the table to it.
-    JScrollPane scrollPane = new JScrollPane(table);
-
-    // Add the scroll pane to the Main panel.
-    currPanel.add(scrollPane); 
-
-    // Fix column widths, if too small for panel, stretch them out to full panel.
-    table.addAncestorListener(new SmartTableAncestorListener());
-    currPanel.addComponentListener(new SmartTableComponentListener());
+    sorter.setSortingStatus(0, 1); 
 
     // If a column size is changed, turn on text-wrapping for that and next column.
     JTableHeader header = table.getTableHeader();
     TableColumnModel colModel = header.getColumnModel();
     colModel.addColumnModelListener(new myColModelListener());    
 
+    JScrollPane scrollPane = new JScrollPane(table);
+    this.add(scrollPane); 
+
+    // Fix column widths, if too small for panel, stretch them out to full panel.
+    table.addAncestorListener(new SmartTableAncestorListener());
+    this.addComponentListener(new SmartTableComponentListener());
   } // SmartTable Constructor
-
-
-  // The listener class for the table column model.
-  public class myColModelListener implements TableColumnModelListener
-  {
-    public void columnAdded(TableColumnModelEvent e) 
-    {
-      //System.out.println("Added");
-    }
-    
-    public void columnMarginChanged(ChangeEvent e) 
-    {
-      //System.out.println("column Margin changed");
-      
-      TableColumn tc = table.getTableHeader().getResizingColumn();
-      if (tc != null)
-	{
-	  int colIndex = tc.getModelIndex();      
-	  int colIndex2 = getNextColumnIndex(colIndex);
-	  //System.out.println("\nCol #"+colIndex+" and "+colIndex2+" are being changed");
-
-	  // Turn on text-wrapping for both columns.
-	  setColumnTextWrap(colIndex);
-	  if (colIndex2 != -1) 
-	    {
-	      setColumnTextWrap(colIndex2);
-	    }
-	}
-    }
-
-
-    // Get the next physical columns index number. Needed for when columns are moved, 
-    // thier indexes remain the same.
-    private int getNextColumnIndex(int colIndex)
-    {
-      // Get next column, cant just add number, cause they can be reordered.
-      TableColumnModel colModel = table.getTableHeader().getColumnModel();
-      
-      // get list of columns, physical order.
-      Enumeration e2 = colModel.getColumns();
-      int i = 0;
-      int colIndex2 = -1;
-      TableColumn tc2 = null;
-      while (e2.hasMoreElements() && colIndex2 != colIndex)
-	{	  
-	  tc2 = (TableColumn)e2.nextElement();	      
-	  colIndex2 = tc2.getModelIndex();	      
-	  //System.out.println(i+". col index is:"+ colIndex2);
-	  i++;
-	}
-      
-      if (e2.hasMoreElements())
-	{
-	  tc2 = (TableColumn)e2.nextElement();	      
-	  colIndex2 = tc2.getModelIndex();	      
-	  //System.out.println("Found next column index: "+colIndex2);
-	  return colIndex2;
-	}
-      else
-	{
-	  return -1;
-	}
-    }
-        
-    public void columnMoved(TableColumnModelEvent e) 
-    {
-      //System.out.println("Moved");
-    }
-    
-    public void columnRemoved(TableColumnModelEvent e) 
-    {
-      //System.out.println("Removed");
-    }
-    
-    public void columnSelectionChanged(ListSelectionEvent e) 
-    {
-      //System.out.println("Selection Changed");
-    }
-  }
-
-
-
-  /** listener for when the main panel is resized */
-  public class SmartTableComponentListener implements ComponentListener
-  {
-    public void componentResized(ComponentEvent e)
-    {
-      fixTableColumns();	
-    }
-    public void componentMoved(ComponentEvent e)
-    {
-      //System.out.println("HeaderCL: componentMoved");
-    }
-    
-    public void componentShown(ComponentEvent e)
-    {
-      //System.out.println("HeaderCL: componentShown");
-    }
-    
-    public void componentHidden(ComponentEvent e)
-    {
-      //System.out.println("HeaderCL: componentHidden");
-    }
-  }
-
-  
-
-  // Class to assist with FixTable Columns, allowing it to be called AFTER the 
-  // table is drawn, to get in the correct Table and Panel size to match with
-  class SmartTableAncestorListener implements AncestorListener
-  {
-    public void ancestorAdded(AncestorEvent e) 
-    {
-      fixTableColumns();
-    }
-    public void ancestorMoved(AncestorEvent e) 
-    {
-    }
-    public void ancestorRemoved(AncestorEvent e) 
-    {
-    }
-  }
-
-  
-  // New Class added in to help define the table results
-  // Contructor takes in the results of a query, and constructs a JTable from it
-  class MyTableModel extends AbstractTableModel 
-  {  
-    private boolean DEBUG = true;
-    public Vector rows; // vector of rowHandle objects, holds actual data cells 
-    private String[] columnNames;
-    private Class[] columnClasses;
-
-
-    public MyTableModel(String[] columnValues)
-    {
-      if (debug) System.err.println("DEBUG: MyTableModel Constructor");
-
-      rows = new Vector();
-      columnNames = columnValues;
-      columnClasses = new Class[columnValues.length];
-    }       
-      
-    public int getColumnCount() 
-    {
-	return columnNames.length;
-    }
-
-    public int getRowCount() 
-    {
-      return rows.size(); 
-    }
-    
-    public void newRow(Object key)
-    {
-      if (index.containsKey(key))
-      {
-	throw new IllegalArgumentException("newRow(): row " + key + " already exists.");
-      }
-
-      rowHandler newRow1 = new rowHandler(key, getColumnCount());
-      rows.add(newRow1);
-      index.put(key, new Integer(rows.size()-1));
-    }
-
-    public void clearRows()
-    {
-      index = new Hashtable(); // Clear Keys
-      rows = new Vector();     // Clear Rows
-    }
-     
-    public String getColumnName(int col) 
-    {
-      return columnNames[col];
-    }
-
-    // pass in and set entire array of column names, or column headers
-    public void setColumnNames(int columnCnt, String[] columns) 
-    {
-      columnNames = new String[columnCnt];
-      columnNames = columns;
-    }
-      
-    public Object getValueAt(int row, int col) 
-    {
-      return getRowHandler(row).cells[col];
-    }      
-      
-    public void setValueAt(Object value, int row, int col) 
-    {
-      if (value != null && columnClasses[col] == null)
-	{
-	  columnClasses[col] = value.getClass();
-	}
-      getRowHandler(row).cells[col] = value;
-    }      
-
-    /**
-     * Sets the contents of a cell in the table.
-     *
-     * @param key key to the row of the cell to be changed
-     * @param col column of the cell to be changed
-     * @param data A piece of data to be held with this cell, will be used for sorting
-     *
-     */
-    public final void setCellValue(Object key, int col, Object value)
-    {
-      Integer row = (Integer) index.get(key);
-      int row2 = row.intValue();
-      setValueAt(value, row2, col);
-    }
-    
-    /**
-     * Gets the contents of a cell in the table.
-     *
-     * @param key key to the row of the cell
-     * @param col column of the cell
-     */
-    public final Object getCellValue(Object key, int col)
-    {
-      Integer row = (Integer) index.get(key);
-      int row2 = row.intValue();
-      return getValueAt(row2, col);
-    }
-
-      
-    public rowHandler getRowHandler(int row) 
-    {
-      return (rowHandler) rows.elementAt(row);
-    }
-      
-    /*
-     * JTable uses this method to determine the default renderer/
-     * editor for each cell. 
-     */
-    public Class getColumnClass(int c) 
-    {
-      if (columnClasses[c] == null)
-	{
-	  return Object.class;
-	}
-      else
-	{
-	  return columnClasses[c];
-	}
-    }
-      
-    /**
-     * Don't need to implement this method unless your table's
-     * editable.
-     */
-    public boolean isCellEditable(int row, int col) 
-    {          	  
-      return false; // For our tables, all columns are uneditable
-      // Note that the data/cell address is constant,
-      // no matter where the cell appears onscreen.
-    }
-
-    private void printDebugData() 
-    {
-      int numRows = getRowCount();
-      int numCols = getColumnCount();
-      System.out.println("numCols = "+numCols);
-	
-      for (int i=0; i < numRows; i++) 
-	{
-	  System.out.print("    row " + i + ":");
-	  for (int j=0; j < numCols; j++) 
-	    {
-	      System.out.print("  " + getValueAt(i,j));
-	    }
-	  System.out.println();
-	}
-      System.out.println("--------------------------");
-    }
-
-    // Get the physical columns position number. Needed for when columns are moved, 
-    // thier indexes remain the same.
-    public int getPhysicalColumnPos(int colIndex)
-    {
-      TableColumnModel colModel = table.getTableHeader().getColumnModel();
-      
-      // get list of columns, physical order.
-      Enumeration e2 = colModel.getColumns();
-      int i = 0;
-      int colIndex2 = -1;
-      TableColumn tc2 = null;
-      while (e2.hasMoreElements() && colIndex2 != colIndex)
-	{	  
-	  tc2 = (TableColumn)e2.nextElement();	      
-	  colIndex2 = tc2.getModelIndex();	      
-	  //System.out.println(i+". col index is:"+ colIndex2);
-	  i++;
-	}
-      
-      if (colIndex2 == colIndex)
-	{
-	  return --i;
-	}
-      else
-	{
-	  return -1;
-	}
-    }
-  } // MyTableModel class
-  
-
-
-  /**
-   * A cell renderer for Date values.
-   */
-  private class DateCellRenderer extends DefaultTableCellRenderer
-  {
-    /**
-     * Returns the component that is used for rendering the value.
-     *
-     * @param table the JTable
-     * @param value the value of the object
-     * @param isSelected is the cell selected?
-     * @param hasFocus has the cell the focus?
-     * @param row the row to render
-     * @param column the cell to render
-     * 
-     * @return this component (the default table cell renderer)
-     */
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected,
-                                                   boolean hasFocus, int row,
-                                                   int column)
-    {
-      super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
-                                          row, column);
-      if (value instanceof Date)
-        {
-          Date dateValue = (Date) value;
-	  DateFormat df = new SimpleDateFormat("M/d/yyyy");
-          setText(df.format(dateValue));
-        }
-      return this;
-    }
-  } // class datecellrenderer
 
 
 
@@ -540,10 +202,6 @@ public class SmartTable extends JPanel implements ActionListener
       
     headerMenu.add(menuTitle);
     headerMenu.addSeparator();
-    headerMenu.add(sortByMI);
-    headerMenu.add(revSortByMI);
-    sortByMI.addActionListener(this);
-    revSortByMI.addActionListener(this);
 
     headerMenu.add(deleteColMI);
     headerMenu.add(optimizeColWidMI);
@@ -551,7 +209,7 @@ public class SmartTable extends JPanel implements ActionListener
     optimizeColWidMI.addActionListener(this);
 
     // add the listener specifically to the header 
-    table.getTableHeader().addMouseListener(new PopupListener(this,headerMenu));
+    table.getTableHeader().addMouseListener(new PopupListener(this, headerMenu));
       
     // Iterate thru rowMenu, and add listener
     if (rowMenu != null)
@@ -576,66 +234,6 @@ public class SmartTable extends JPanel implements ActionListener
   } // addPopupMenus
 
 
-
-  // Mouse class to control the right click menus
-  class PopupListener extends MouseAdapter 
-  {
-    SmartTable master_control;
-    JPopupMenu popMenu;
-
-    public PopupListener(SmartTable master, JPopupMenu popMenu1) 
-    {
-      this.master_control = master;
-      popMenu = popMenu1;   // passing in needed menu
-    }
-  
-    public void mousePressed(MouseEvent e) 
-    {
-      showPopup(e);
-    }
-
-    public void mouseReleased(MouseEvent e) 
-    {
-      showPopup(e);
-    }
-
-    private void showPopup(MouseEvent e) 
-    {
-      if (e.isPopupTrigger()) {
-	if (debug) 
-	  {
-	    System.out.println("mouseevent on row:"+ table.rowAtPoint(e.getPoint()) +"*");			
-	    System.out.println("mouseevent on col:"+ table.columnAtPoint(e.getPoint()) +"*");			
-	  }
-	// show the passed in menu
-	master_control.remember_row = master_control.table.rowAtPoint(e.getPoint());
-	master_control.remember_col = master_control.remember_col2 = master_control.table.columnAtPoint(e.getPoint());
-
-	// if table is altered by moving or deleting a column, get true column number here
-	if (e.getSource() instanceof JMenuItem)
-	{
-	  JTableHeader h = (JTableHeader) e.getSource();
-	  TableColumnModel columnModel = h.getColumnModel();
-	  
-	  int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-	  int column = columnModel.getColumn(viewColumn).getModelIndex();
-	  if (debug) 
-	    {
-	      System.out.println("second way is col:"+ column +"*");			
-	    }
-	  
-	  master_control.remember_col = column; 
-	} // secondary unaltered column
-
-	// Select a single row for right clicks - rows 1 to 1
-	table.addRowSelectionInterval(master_control.remember_row, master_control.remember_row);
-
-        popMenu.show(e.getComponent(), e.getX(), e.getY());
-      }
-    }
-  } // Class popupListener
-
-
   // Function for the Toolbar, Rightclick Row Menus, called from popuplistener
   public void actionPerformed(ActionEvent event)
   {    
@@ -652,18 +250,6 @@ public class SmartTable extends JPanel implements ActionListener
 	  if (debug) System.out.println("mouseevent remove col:"+ remember_col2 +"*");			
 	  table.removeColumn(table.getColumnModel().getColumn(remember_col2));  
 	  fixTableColumns();
-	}
-	else if (event.getSource() == sortByMI) 
-	{
-	  if (debug) System.out.println("mouseevent sortby col:"+ remember_col +"*");	
-	  sorter.cancelSorting();
-	  sorter.setSortingStatus(remember_col, 1);  // Column, Status		
-	}
-	else if (event.getSource() ==  revSortByMI) 
-	{
-	  if (debug) System.out.println("mouseevent reverse sort by col:"+ remember_col +"*");			
-	  sorter.cancelSorting();
-	  sorter.setSortingStatus(remember_col, -1);  // Column, Status
 	}
 	else if (event.getSource() == optimizeColWidMI) 
 	{
@@ -688,8 +274,6 @@ public class SmartTable extends JPanel implements ActionListener
   // Optimize the columnWidths on start
   public void fixTableColumns() 
   {
-    //System.out.println("fixTableColumns: table cols "+table.getColumnCount()+ " is smaller than panel width "+table.getParent().getWidth());
-
     // default width is 75, if not default, use getPreferredWidth()
     int colWidth = table.getColumnModel().getColumn(0).getPreferredWidth();
     int colCount = table.getColumnCount();
@@ -911,9 +495,8 @@ public class SmartTable extends JPanel implements ActionListener
 
 
 
-  // UNIMPLEMENTED API CALLS!
-
   /**
+   * UNIMPLEMENTED API CALL!
    * Deletes a row.
    *
    * @param key A hashtable key for the row to delete
@@ -959,6 +542,413 @@ public class SmartTable extends JPanel implements ActionListener
 //     reShape();
   } // delete row
 
+
+
+
+
+
+
+
+
+  // The listener class for the table column model.
+  public class myColModelListener implements TableColumnModelListener
+  {
+    public void columnAdded(TableColumnModelEvent e) 
+    {
+      //System.out.println("Added");
+    }
+    
+    public void columnMarginChanged(ChangeEvent e) 
+    {
+      //System.out.println("column Margin changed");
+      
+      TableColumn tc = table.getTableHeader().getResizingColumn();
+      if (tc != null)
+	{
+	  int colIndex = tc.getModelIndex();      
+	  int colIndex2 = getNextColumnIndex(colIndex);
+	  //System.out.println("\nCol #"+colIndex+" and "+colIndex2+" are being changed");
+
+	  // Turn on text-wrapping for both columns.
+	  setColumnTextWrap(colIndex);
+	  if (colIndex2 != -1) 
+	    {
+	      setColumnTextWrap(colIndex2);
+	    }
+	}
+    }
+
+
+    // Get the next physical columns index number. Needed for when columns are moved, 
+    // their indexes remain the same.
+    private int getNextColumnIndex(int colIndex)
+    {
+      // Get next column, can't just add number, because they can be reordered.
+      TableColumnModel colModel = table.getTableHeader().getColumnModel();
+      
+      // get list of columns, physical order.
+      Enumeration e2 = colModel.getColumns();
+      int i = 0;
+      int colIndex2 = -1;
+      TableColumn tc2 = null;
+      while (e2.hasMoreElements() && colIndex2 != colIndex)
+	{	  
+	  tc2 = (TableColumn)e2.nextElement();	      
+	  colIndex2 = tc2.getModelIndex();	      
+	  //System.out.println(i+". col index is:"+ colIndex2);
+	  i++;
+	}
+      
+      if (e2.hasMoreElements())
+	{
+	  tc2 = (TableColumn)e2.nextElement();	      
+	  colIndex2 = tc2.getModelIndex();	      
+	  //System.out.println("Found next column index: "+colIndex2);
+	  return colIndex2;
+	}
+      else
+	{
+	  return -1;
+	}
+    }
+        
+    public void columnMoved(TableColumnModelEvent e) 
+    {
+      //System.out.println("Moved");
+    }
+    
+    public void columnRemoved(TableColumnModelEvent e) 
+    {
+      //System.out.println("Removed");
+    }
+    
+    public void columnSelectionChanged(ListSelectionEvent e) 
+    {
+      //System.out.println("Selection Changed");
+    }
+  } // myColModelListener
+
+
+
+  /** listener for when the main panel is resized */
+  public class SmartTableComponentListener implements ComponentListener
+  {
+    public void componentResized(ComponentEvent e)
+    {
+      fixTableColumns();	
+    }
+    public void componentMoved(ComponentEvent e)
+    {
+      //System.out.println("HeaderCL: componentMoved");
+    }
+    
+    public void componentShown(ComponentEvent e)
+    {
+      //System.out.println("HeaderCL: componentShown");
+    }
+    
+    public void componentHidden(ComponentEvent e)
+    {
+      //System.out.println("HeaderCL: componentHidden");
+    }
+  }
+
+  
+
+  // Class to assist with FixTable Columns, allowing it to be called AFTER the 
+  // table is drawn, to get in the correct Table and Panel size to match with
+  class SmartTableAncestorListener implements AncestorListener
+  {
+    public void ancestorAdded(AncestorEvent e) 
+    {
+      fixTableColumns();
+    }
+    public void ancestorMoved(AncestorEvent e) 
+    {
+    }
+    public void ancestorRemoved(AncestorEvent e) 
+    {
+    }
+  }
+
+
+  // Mouse class to control the right click menus
+  class PopupListener extends MouseAdapter 
+  {
+    SmartTable master_control;
+    JPopupMenu popMenu;
+
+    public PopupListener(SmartTable master, JPopupMenu popMenu1) 
+    {
+      this.master_control = master;
+      popMenu = popMenu1;   // passing in needed menu
+    }
+  
+    public void mousePressed(MouseEvent e) 
+    {
+      showPopup(e);
+    }
+
+    public void mouseReleased(MouseEvent e) 
+    {
+      showPopup(e);
+    }
+
+    private void showPopup(MouseEvent e) 
+    {
+      if (e.isPopupTrigger()) {
+	if (debug) 
+	  {
+	    System.out.println("mouseevent on row:"+ table.rowAtPoint(e.getPoint()) +"*");			
+	    System.out.println("mouseevent on col:"+ table.columnAtPoint(e.getPoint()) +"*");			
+	  }
+	// show the passed in menu
+	master_control.remember_row = master_control.table.rowAtPoint(e.getPoint());
+	master_control.remember_col = master_control.remember_col2 = master_control.table.columnAtPoint(e.getPoint());
+
+	// if table is altered by moving or deleting a column, get true column number here
+	if (e.getSource() instanceof JMenuItem)
+	{
+	  JTableHeader h = (JTableHeader) e.getSource();
+	  TableColumnModel columnModel = h.getColumnModel();
+	  
+	  int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+	  int column = columnModel.getColumn(viewColumn).getModelIndex();
+	  if (debug) 
+	    {
+	      System.out.println("second way is col:"+ column +"*");			
+	    }
+	  
+	  master_control.remember_col = column; 
+	} // secondary unaltered column
+
+	// Select a single row for right clicks - rows 1 to 1
+	table.addRowSelectionInterval(master_control.remember_row, master_control.remember_row);
+
+        popMenu.show(e.getComponent(), e.getX(), e.getY());
+      }
+    }
+  } // Class popupListener
+
+
+  
+  // New Class added in to help define the table results
+  // Contructor takes in the results of a query, and constructs a JTable from it
+  class MyTableModel extends AbstractTableModel 
+  {  
+    private boolean DEBUG = true;
+    public Vector rows; // vector of rowHandle objects, holds actual data cells 
+    private String[] columnNames;
+    private Class[] columnClasses;
+
+
+    public MyTableModel(String[] columnValues)
+    {
+      if (debug) System.err.println("DEBUG: MyTableModel Constructor");
+
+      rows = new Vector();
+      columnNames = columnValues;
+      columnClasses = new Class[columnValues.length];
+    }       
+      
+    public int getColumnCount() 
+    {
+	return columnNames.length;
+    }
+
+    public int getRowCount() 
+    {
+      return rows.size(); 
+    }
+    
+    public void newRow(Object key)
+    {
+      if (index.containsKey(key))
+      {
+	throw new IllegalArgumentException("newRow(): row " + key + " already exists.");
+      }
+
+      rowHandler newRow1 = new rowHandler(key, getColumnCount());
+      rows.add(newRow1);
+      index.put(key, new Integer(rows.size()-1));
+    }
+
+    public void clearRows()
+    {
+      index = new Hashtable(); // Clear Keys
+      rows = new Vector();     // Clear Rows
+    }
+     
+    public String getColumnName(int col) 
+    {
+      return columnNames[col];
+    }
+
+    // pass in and set entire array of column names, or column headers
+    public void setColumnNames(int columnCnt, String[] columns) 
+    {
+      columnNames = new String[columnCnt];
+      columnNames = columns;
+    }
+      
+    public Object getValueAt(int row, int col) 
+    {
+      return getRowHandler(row).cells[col];
+    }      
+      
+    public void setValueAt(Object value, int row, int col) 
+    {
+      if (value != null && columnClasses[col] == null)
+	{
+	  columnClasses[col] = value.getClass();
+	}
+      getRowHandler(row).cells[col] = value;
+    }      
+
+    /**
+     * Sets the contents of a cell in the table.
+     *
+     * @param key key to the row of the cell to be changed
+     * @param col column of the cell to be changed
+     * @param data A piece of data to be held with this cell, will be used for sorting
+     *
+     */
+    public final void setCellValue(Object key, int col, Object value)
+    {
+      Integer row = (Integer) index.get(key);
+      int row2 = row.intValue();
+      setValueAt(value, row2, col);
+    }
+    
+    /**
+     * Gets the contents of a cell in the table.
+     *
+     * @param key key to the row of the cell
+     * @param col column of the cell
+     */
+    public final Object getCellValue(Object key, int col)
+    {
+      Integer row = (Integer) index.get(key);
+      int row2 = row.intValue();
+      return getValueAt(row2, col);
+    }
+
+      
+    public rowHandler getRowHandler(int row) 
+    {
+      return (rowHandler) rows.elementAt(row);
+    }
+      
+    /*
+     * JTable uses this method to determine the default renderer/
+     * editor for each cell. 
+     */
+    public Class getColumnClass(int c) 
+    {
+      if (columnClasses[c] == null)
+	{
+	  return Object.class;
+	}
+      else
+	{
+	  return columnClasses[c];
+	}
+    }
+      
+    /**
+     * Don't need to implement this method unless your table's
+     * editable.
+     */
+    public boolean isCellEditable(int row, int col) 
+    {          	  
+      return false; // For our tables, all columns are uneditable
+      // Note that the data/cell address is constant,
+      // no matter where the cell appears onscreen.
+    }
+
+    private void printDebugData() 
+    {
+      int numRows = getRowCount();
+      int numCols = getColumnCount();
+      System.out.println("numCols = "+numCols);
+	
+      for (int i=0; i < numRows; i++) 
+	{
+	  System.out.print("    row " + i + ":");
+	  for (int j=0; j < numCols; j++) 
+	    {
+	      System.out.print("  " + getValueAt(i,j));
+	    }
+	  System.out.println();
+	}
+      System.out.println("--------------------------");
+    }
+
+    // Get the physical columns position number. Needed for when columns are moved, 
+    // their indexes remain the same.
+    public int getPhysicalColumnPos(int colIndex)
+    {
+      TableColumnModel colModel = table.getTableHeader().getColumnModel();
+      
+      // get list of columns, physical order.
+      Enumeration e2 = colModel.getColumns();
+      int i = 0;
+      int colIndex2 = -1;
+      TableColumn tc2 = null;
+      while (e2.hasMoreElements() && colIndex2 != colIndex)
+	{	  
+	  tc2 = (TableColumn)e2.nextElement();	      
+	  colIndex2 = tc2.getModelIndex();	      
+	  //System.out.println(i+". col index is:"+ colIndex2);
+	  i++;
+	}
+      
+      if (colIndex2 == colIndex)
+	{
+	  return --i;
+	}
+      else
+	{
+	  return -1;
+	}
+    }
+  } // MyTableModel class
+  
+
+
+  /**
+   * A cell renderer for Date values.
+   */
+  private class DateCellRenderer extends DefaultTableCellRenderer
+  {
+    /**
+     * Returns the component that is used for rendering the value.
+     *
+     * @param table the JTable
+     * @param value the value of the object
+     * @param isSelected is the cell selected?
+     * @param hasFocus has the cell the focus?
+     * @param row the row to render
+     * @param column the cell to render
+     * 
+     * @return this component (the default table cell renderer)
+     */
+    public Component getTableCellRendererComponent(JTable table, Object value,
+                                                   boolean isSelected,
+                                                   boolean hasFocus, int row,
+                                                   int column)
+    {
+      super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
+                                          row, column);
+      if (value instanceof Date)
+        {
+          Date dateValue = (Date) value;
+	  DateFormat df = new SimpleDateFormat("M/d/yyyy");
+          setText(df.format(dateValue));
+        }
+      return this;
+    }
+  } // class datecellrenderer
 
 
 

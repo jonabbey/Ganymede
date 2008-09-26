@@ -1852,6 +1852,11 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0), "left");
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter");
 
+
+    // xxx test to get a keystroke - james add.
+    //inputMap.put(KeyStroke.getKeyStroke('f', 0), "char");
+
+
     // NB: Starting in Java 1.5, there is support for
     // KeyEvent.VK_CONTEXT_MENU, which has value 0x020D.  We're not
     // using the named constant here because we need to support
@@ -1860,6 +1865,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     inputMap.put(KeyStroke.getKeyStroke(0x020D, 0), "context");
 
     ActionMap actionMap = getActionMap();
+
+    // xxx james testing new stuff
+    //actionMap.put("unitdown", new treeControlAction("char"));
+
 
     actionMap.put("unitdown", new treeControlAction("unitdown"));
     actionMap.put("unitup", new treeControlAction("unitup"));
