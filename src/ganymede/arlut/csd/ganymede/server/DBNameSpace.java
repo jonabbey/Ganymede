@@ -551,7 +551,7 @@ public final class DBNameSpace implements NameSpace {
 	return true;
       }
 
-    handle = new DBNameSpaceHandle(editSet);
+    handle = new DBNameSpaceEditingHandle(editSet, null);
 
     uniqueHash.put(value, handle);
 
@@ -605,10 +605,10 @@ public final class DBNameSpace implements NameSpace {
 
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	return false;	// another active transaction owns it
+	return false;
       }
 
-    if (!handle.isKeepOnCommit() ||
+    if (handle.getShadowField() == null ||
 	(!editSet.isInteractive() && handle.getShadowFieldB() == null))
       {
 	return true;
@@ -646,7 +646,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (!uniqueHash.containsKey(value))
       {
-	handle = new DBNameSpaceHandle(editSet);
+	handle = new DBNameSpaceEditingHandle(editSet, null);
 	handle.setShadowField(field);
 	
 	uniqueHash.put(value, handle);
@@ -660,38 +660,45 @@ public final class DBNameSpace implements NameSpace {
 
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	// this handle has been checked out by a different
-	// transaction, we can't mess with it
-
 	return false;
       }
 
-    if (!handle.isKeepOnCommit())
+    if (editSet.isInteractive())
       {
-	assert handle.getShadowFieldB() == null;
-
-	handle.setShadowField(field);
+	if (!handle.isCheckedOut() || handle.getShadowField() != null)
+	  {
+	    return false;
+	  }
 
 	return true;
       }
-
-    if (!editSet.isInteractive())
+    else
       {
-	if (handle.editingTransaction == null)
+	if (!handle.isCheckedOut())
 	  {
-	    // check it out and bind the shadowField to the checked
-	    // out object
+	    handle = handle.checkout(editSet);
 
-	    handle.setShadowField(handle.getPersistentField(editSet.session));
-	    handle.editingTransaction = editSet;
+	    uniqueHash.put(value, handle);
 	    remember(editSet, value);
+
+	    handle.setShadowField(handle.getPersistentField(editSet));
+	    handle.setShadowFieldB(field);
+
+	    return true;
 	  }
+	else if (handle.getShadowField() != null)
+	  {
+	    handle.setShadowField(field);
 
-	assert !DBField.matches(handle.getShadowField(), field);
-
-	if (handle.getShadowFieldB() == null || handle.getShadowFieldB().matches(field))
+	    return true;
+	  }
+	else if (!handle.getShadowField().matches(field) &&
+		 (handle.getShadowFieldB() == null ||
+		  handle.getShadowFieldB().matches(field)))
 	  {
 	    handle.setShadowFieldB(field);
+
+	    return true;
 	  }
       }
 
@@ -747,8 +754,9 @@ public final class DBNameSpace implements NameSpace {
 				   "' that namespace: " + this.getName() + " believes is not in field " + oldField);
       }
 
-    return handle.isKeepOnCommit();
+    return true;
   }
+
   /**
    * Used to mark a value as not used in the namespace.  Unmarked
    * values are not available for other threads / editset's until
@@ -791,29 +799,32 @@ public final class DBNameSpace implements NameSpace {
 				   "' that namespace: " + this.getName() + " believes is not in field " + oldField);
       }
 
-    if (handle.editingTransaction == null)
+    if (!handle.isCheckedOut())
       {
-        handle.setShadowField(null);
-        handle.setShadowFieldB(null);
+	handle = handle.checkout(editSet);
 
-        // no one has claimed this for transactional lock-out,
-        // give it to this editSet.
-
-        handle.editingTransaction = editSet;
+	uniqueHash.put(value, handle);
         remember(editSet, value);
+
+	return true;
+      }
+
+    if (oldField.matches(handle.getShadowField()))
+      {
+	handle.setShadowField(null);
 
 	return true;
       }
 
     if (!editSet.isInteractive())
       {
-	if (!DBField.matches(handle.getShadowFieldB(), oldField) &&
-	    !DBField.matches(handle.getShadowField(), oldField))
+	if (!oldField.matches(handle.getShadowFieldB()) &&
+	    !oldField.matches(handle.getShadowField()))
 	  {
 	    throw new RuntimeException("ASSERT: mismatched field in non-interactive unmark");
 	  }
 
-	if (DBField.matches(handle.getShadowFieldB(), oldField))
+	if (oldField.matches(handle.getShadowFieldB()))
 	  {
 	    // I really don't expect getShadowFieldB() to be equal to
 	    // the oldField, given how the non-interactive xmlclient
@@ -827,14 +838,9 @@ public final class DBNameSpace implements NameSpace {
 	    return true;
 	  }
 
-	if (handle.getShadowFieldB() != null && DBField.matches(handle.getShadowField(), oldField))
+	if (handle.getShadowFieldB() != null)
 	  {
 	    // promote B to A
-
-	    if (!handle.isKeepOnCommit())
-	      {
-		throw new RuntimeException("ASSERT: surprise false keepOnCommit in shadowFieldB promotion.");
-	      }
 
 	    handle.setShadowField(handle.getShadowFieldB());
 	    handle.setShadowFieldB(null);
@@ -843,9 +849,7 @@ public final class DBNameSpace implements NameSpace {
 	  }
       }
 
-    handle.setShadowField(null);
-
-    return true;
+    return false;
   }
 
   /**
@@ -902,7 +906,7 @@ public final class DBNameSpace implements NameSpace {
     Vector elementsToRemove = new Vector();
     DBNameSpaceTransaction tRecord; 
     DBNameSpaceCkPoint point;
-    DBNameSpaceHandle handle;
+    DBNameSpaceEditingHandle handle;
     Enumeration en;
 
     /* -- */
@@ -921,63 +925,37 @@ public final class DBNameSpace implements NameSpace {
 				   tRecord.getCheckpointStack());
       }
 
-    // now we need to set about reconstituting the state of the
-    // namespace for the values that were recorded at the time the
-    // point was established.  Once a DBNameSpace reserves a value on
-    // behalf of a transaction, it won't be forgotten no matter what
-    // happens, so we don't need to worry about values that were
-    // reserved in the checkpoint that are not reserved anymore; we'll
-    // just iterate over the values that are currently reserved for
-    // the transaction, and check them against the checkpoint we are
-    // reverting to.
-
-    // NOTA BENE: The above comment is just attempting to describe why
-    // we can loop over tRecord.getReservedEnum(), even though we
-    // might have unmarked values from our namespace since a given
-    // checkpoint was taken.
-
     en = tRecord.getReservedEnum();
 
     while (en.hasMoreElements())
       {
 	value = en.nextElement();
-	handle = (DBNameSpaceHandle) uniqueHash.get(value);
-
-	// ok, we've got a value that is in our current reserved list.
-	// Now, was it in our checkpoint?
+	handle = (DBNameSpaceEditingHandle) uniqueHash.get(value);
 
 	if (!point.containsValue(value))
 	  {
-	    if (handle.isDropOnAbort())
+	    DBNameSpaceHandle oldHandle = handle.getOriginal();
+
+	    if (oldHandle == null)
 	      {
 		removeHandle(value);
 	      }
 	    else
 	      {
-		handle.releaseBack();
+		uniqueHash.put(value, oldHandle);
 	      }
 
 	    elementsToRemove.addElement(value);
 	  }
 	else
 	  {
-	    // the checkpoint did have value reserved.  we need to
-	    // revert the DBNameSpaceHandle for that value to that
-	    // stored in the checkpoint.
-
 	    uniqueHash.put(value, point.getValueHandle(value));
 	  }
       }
 
-    // now clean out the vector of values for this editset, removing
-    // any values that are being freed up by this rollback.  Note
-    // that we have to use the elementsToRemove vector and do the
-    // forgetting in a separate loop to avoid screwing with the
-    // enumeration we were using.
-
-    for (int i = 0; i < elementsToRemove.size(); i++)
+    for (Object element: elementsToRemove)
       {
-	tRecord.forget(elementsToRemove.elementAt(i));
+	tRecord.forget(element);
       }
 
     return true;
@@ -1000,7 +978,7 @@ public final class DBNameSpace implements NameSpace {
     DBNameSpaceTransaction tRecord;
     Enumeration en;
     Object value;
-    DBNameSpaceHandle handle;
+    DBNameSpaceEditingHandle handle;
     Vector results = null;
 
     /* -- */
@@ -1012,7 +990,7 @@ public final class DBNameSpace implements NameSpace {
     while (en.hasMoreElements())
       {
 	value = en.nextElement();
-	handle = getHandle(value);
+	handle = (DBNameSpaceEditingHandle) getHandle(value);
 
 	if (handle.getShadowFieldB() == null)
 	  {
@@ -1040,7 +1018,7 @@ public final class DBNameSpace implements NameSpace {
 	    // to the in-xml session object.
 
 	    String editingRefStr = String.valueOf(handle.getShadowFieldB());
-	    DBField conflictField = handle.getPersistentField(editSet.getGSession());
+	    DBField conflictField = handle.getPersistentField(editSet);
 
 	    // "{0} conflicts with checked-in {1}"
 	    String checkedInConflictStr = ts.l("verify_noninteractive.persistent_conflict",
@@ -1076,7 +1054,7 @@ public final class DBNameSpace implements NameSpace {
     DBNameSpaceTransaction tRecord;
     Enumeration en;
     Object value;
-    DBNameSpaceHandle handle;
+    DBNameSpaceEditingHandle handle;
 
     /* -- */
 
@@ -1093,9 +1071,9 @@ public final class DBNameSpace implements NameSpace {
     while (en.hasMoreElements())
       {
 	value = en.nextElement();
-	handle = getHandle(value);
+	handle = (DBNameSpaceEditingHandle) getHandle(value);
 
-	if (handle.editingTransaction != editSet)
+	if (!handle.isEditedByUs(editSet))
 	  {
 	    if (debug)
 	      {
@@ -1112,20 +1090,19 @@ public final class DBNameSpace implements NameSpace {
 				       editSet.session.key);
 	  }
 
-	if (handle.isKeepOnCommit())
-	  {
-	    handle.commitBack();
-	  }
-	else
+	DBNameSpaceHandle newHandle = handle.getNewHandle();
+
+	if (newHandle == null)
 	  {
 	    removeHandle(value);
 	  }
+	else
+	  {
+	    uniqueHash.put(value, newHandle);
+	  }
       }
 
-    // we're done with this transaction
-
     tRecord.cleanup();
-
     transactions.remove(editSet);
   }  
 
@@ -1144,7 +1121,7 @@ public final class DBNameSpace implements NameSpace {
     DBNameSpaceTransaction tRecord;
     Enumeration en;
     Object value;
-    DBNameSpaceHandle handle;
+    DBNameSpaceEditingHandle handle;
 
     /* -- */
 
@@ -1160,9 +1137,9 @@ public final class DBNameSpace implements NameSpace {
     while (en.hasMoreElements())
       {
 	value = en.nextElement();
-	handle = getHandle(value);
+	handle = (DBNameSpaceEditingHandle) getHandle(value);
 
-	if (handle.editingTransaction != editSet)
+	if (!handle.isEditedByUs(editSet))
 	  {
 	    if (debug)
 	      {
@@ -1173,20 +1150,19 @@ public final class DBNameSpace implements NameSpace {
 	    continue;
 	  }
 
-	if (handle.isDropOnAbort())
+	DBNameSpaceHandle oldHandle = handle.getOriginal();
+
+	if (oldHandle == null)
 	  {
 	    removeHandle(value);
 	  }
 	else
 	  {
-	    handle.releaseBack();
+	    uniqueHash.put(value, oldHandle);
 	  }
       }
 
-    // we're done with this transaction
-
     tRecord.cleanup();
-
     transactions.remove(editSet);
   }
 
@@ -1223,11 +1199,7 @@ public final class DBNameSpace implements NameSpace {
 
 	DBNameSpaceHandle handleCopy = (DBNameSpaceHandle) handle.clone();
 
-	// a DBNameSpace copy should only be constructed during schema
-	// editing.  check a couple of things to warn with.  we don't
-	// really need to be exhaustive in testing here.
-
-	if (handleCopy.editingTransaction != null)
+	if (!handleCopy.isCheckedOut())
 	  {
 	    // "Error, non-null handle owner found during copy of namespace {0} for key: {1}."
 	    throw new RuntimeException(ts.l("schemaEditCheckout.non_null_owner",
@@ -1381,9 +1353,9 @@ public final class DBNameSpace implements NameSpace {
 	  }
       }
 
-    for (int i = 0; i < elementsToRemove.size(); i++)
+    for (Object element: elementsToRemove)
       {
-	removeHandle(elementsToRemove.elementAt(i));
+	removeHandle(element);
       }
   }
 
@@ -1437,32 +1409,11 @@ public final class DBNameSpace implements NameSpace {
     getTransactionRecord(editSet).remember(value);
   }
 
-  /**
-   * This method is just a debug instrument, it prints to stderr a list of
-   * the contents of this namespace's unique value hash.
-   */
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                          DBNameSpaceTransaction
 
-  private void dumpNameSpace()
-  {
-    Enumeration en;
-    Object key;
-    
-    /* -- */
-
-    en = uniqueHash.keys();
-
-    while (en.hasMoreElements())
-      {
-	key = en.nextElement();
-	System.err.println("key: " + key + ", value: " + uniqueHash.get(key));
-      }
-  }
-
-  /*------------------------------------------------------------------------------
-                                                                       inner class
-                                                            DBNameSpaceTransaction
-
-  ------------------------------------------------------------------------------*/
+  ----------------------------------------------------------------------------*/
 
   /**
    * This inner class holds information associated with an active
@@ -1578,11 +1529,11 @@ public final class DBNameSpace implements NameSpace {
     }
   }
 
-  /*------------------------------------------------------------------------------
-                                                                       inner class
-                                                                DBNameSpaceCkPoint
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                              DBNameSpaceCkPoint
 
-  ------------------------------------------------------------------------------*/
+  ----------------------------------------------------------------------------*/
 
   /**
    * This inner class holds checkpoint information associated with
@@ -1615,25 +1566,17 @@ public final class DBNameSpace implements NameSpace {
 
       if (reserved.size() > 0)
 	{
-	  // size a hashtable for the elements we need to retain
-
 	  uniqueHash = new Hashtable(reserved.size(), 1.0f);
 	}
       else
 	{
-	  // just create a small one
-
 	  uniqueHash = new Hashtable(10);
 	}
 
       // now copy our hash to preserve the namespace handles
 
-      Enumeration en = reserved.elements();
-
-      while (en.hasMoreElements())
+      for (Object value: reserved.keySet())
 	{
-	  Object value = en.nextElement(); // will be IPwrap if the underlying value is a Byte[]
-
 	  DBNameSpaceHandle handle = space.getHandle(value);
 
 	  handle = (DBNameSpaceHandle) handle.clone();
@@ -1667,18 +1610,650 @@ public final class DBNameSpace implements NameSpace {
 
       if (uniqueHash != null)
 	{
-	  Enumeration en = uniqueHash.elements();
-
-	  while (en.hasMoreElements())
-	    {
-	      DBNameSpaceHandle handle = (DBNameSpaceHandle) en.nextElement();
-
-	      handle.scrub();
-	    }
-
 	  uniqueHash.clear();
 	  uniqueHash = null;
 	}
     }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                               DBNameSpaceHandle
+
+------------------------------------------------------------------------------*/
+
+/**
+ * This class is intended to be the targets of elements of a name
+ * space's {@link arlut.csd.ganymede.server.DBNameSpace#uniqueHash
+ * uniqueHash}.  The fields in this class are used to keep track of
+ * who currently 'owns' a given value, and whether or not there is
+ * actually any field in the namespace that really contains that
+ * value.
+ */
+
+class DBNameSpaceHandle implements Cloneable {
+
+  /**
+   * So that the namespace hash can be used as an index,
+   * persistentFieldInvid always points to the object that contained
+   * the field that contained this value at the time this field was
+   * last committed in a transaction.
+   *
+   * persistentFieldInvid will be null if the value pointing to
+   * this handle has not been committed into the database outside of
+   * an active transaction.
+   */
+
+  private Invid persistentFieldInvid = null;
+
+  /**
+   * If this handle is associated with a value that has been
+   * checked into the database, persistentFieldId will be the field
+   * number for the field that holds that value in the database,
+   * within the object referenced by persistentFieldInvid.
+   */
+
+  private short persistentFieldId = -1;
+
+  /* -- */
+
+  /**
+   * Constructor used by the system to originate a value when reading
+   * from the database.
+   */
+
+  public DBNameSpaceHandle(DBField field)
+  {
+    setPersistentField(field);
+  }
+
+  /**
+   * This method creates a new editable DBNameSpaceEditingHandle that
+   * will revert to this handle if the DBEditSet is aborted.
+   *
+   * The checked out handle is returned with a null shadowField and
+   * shadowFieldB, as would be appropriate if a user was unmarking a
+   * value in the namespace uniqueHash.
+   *
+   * If the handle is being checked out by a non-interactive xmlclient
+   * that needs to address the shadowFieldB member, it will need to be
+   * sure to set the shadowField() to point to the appropriate field
+   * at check out time.
+   */
+
+  public DBNameSpaceEditingHandle checkout(DBEditSet editSet)
+  {
+    DBNameSpaceHandle newHandle = new DBNameSpaceEditingHandle(editSet, this);
+
+    newHandle.persistentFieldInvid = persistentFieldInvid;
+    newHandle.persistentFieldId = persistentFieldId;
+
+    return (DBNameSpaceEditingHandle) newHandle;
+  }
+
+  /**
+   * This method returns true if this handle has been checked out of
+   * the DBNameSpace.uniqueHash by a transaction, or false otherwise.
+   */
+
+  public boolean isCheckedOut()
+  {
+    return false;
+  }
+
+  /**
+   * This method returns true if the namespace-managed value that
+   * this handle is associated with is held in a committed object in the
+   * Ganymede data store.
+   *
+   * If this method returns false, that means that this handle must
+   * be associated with a field in an active DBEditSet's transaction
+   * set, or else we wouldn't have a handle for it.
+   */
+
+  public boolean isPersisted()
+  {
+    return persistentFieldInvid != null;
+  }
+
+  /**
+   * This method associates this value with a DBField that is
+   * persisted (or will be persisted?) in the Ganymede persistent
+   * store.
+   */
+
+  public void setPersistentField(DBField field)
+  {
+    if (field != null)
+      {
+	persistentFieldInvid = field.getOwner().getInvid();
+	persistentFieldId = field.getID();
+      }
+    else
+      {
+	persistentFieldInvid = null;
+	persistentFieldId = -1;
+      }
+  }
+
+  /**
+   * If the value that this handle is associated with is stored in
+   * the Ganymede server's persistent data store (i.e., that this
+   * handle is associated with a field in an already-committed
+   * object), this method will return a pointer to the DBField that
+   * contains this handle's value in the committed data store.
+   */
+
+  public DBField getPersistentField()
+  {
+    return getPersistentField((DBSession) null);
+  }
+
+  /**
+   * If the value that this handle is associated with is stored in
+   * the Ganymede server's persistent data store (i.e., that this
+   * handle is associated with a field in an already-committed
+   * object), this method will return a pointer to the DBField that
+   * contains this handle's value in the committed data store.
+   *
+   * Note that if the DBEditSet passed in is currently editing the
+   * object which is identified by persistentFieldInvid, the DBField
+   * returned will be the editable version of the field from the
+   * DBEditObject the session is working with.  This may be something
+   * of a surprise, as the field returned may not actually contain the
+   * value sought.
+   */
+
+  public DBField getPersistentField(DBEditSet editSet)
+  {
+    return getPersistentField(editSet.session);
+  }
+
+  /**
+   * If the value that this handle is associated with is stored in
+   * the Ganymede server's persistent data store (i.e., that this
+   * handle is associated with a field in an already-committed
+   * object), this method will return a pointer to the DBField that
+   * contains this handle's value in the committed data store.
+   *
+   * Note that if the GanymedeSession passed in is currently
+   * editing the object which is identified by persistentFieldInvid,
+   * the DBField returned will be the editable version of the field
+   * from the DBEditObject the session is working with.  This may be
+   * something of a surprise, as the field returned may not actually
+   * contain the value sought.
+   */
+
+  public DBField getPersistentField(GanymedeSession gsession)
+  {
+    return getPersistentField(gsession.session);
+  }
+
+  /**
+   * If the value that this handle is associated with is stored in
+   * the Ganymede server's persistent data store (i.e., that this
+   * handle is associated with a field in an already-committed
+   * object), this method will return a pointer to the DBField that
+   * contains this handle's value in the committed data store.
+   *
+   * Note that if the DBSession passed in is currently
+   * editing the object which is identified by persistentFieldInvid,
+   * the DBField returned will be the editable version of the field
+   * from the DBEditObject the session is working with.  This may be
+   * something of a surprise, as the field returned may not actually
+   * contain the value sought.
+   */
+
+  public DBField getPersistentField(DBSession session)
+  {
+    if (persistentFieldInvid == null)
+      {
+	return null;
+      }
+
+    if (session != null)
+      {
+	DBObject _obj = session.viewDBObject(persistentFieldInvid);
+
+	if (_obj == null)
+	  {
+	    return null;
+	  }
+	
+	return (DBField) _obj.getField(persistentFieldId);
+      }
+    else
+      {
+	// during start-up, before we have a session available
+
+	DBObject _obj = Ganymede.db.viewDBObject(persistentFieldInvid);
+
+	if (_obj == null)
+	  {
+	    return null;
+	  }
+
+	return (DBField) _obj.getField(persistentFieldId);
+      }
+  }
+
+  /**
+   * This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by the GanymedeSession
+   * provided.
+   */
+
+  public boolean isEditedByUs(GanymedeSession session)
+  {
+    return false;
+  }
+
+  /**
+   * This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by the transaction
+   * provided.
+   */
+
+  public boolean isEditedByUs(DBEditSet editSet)
+  {
+    return false;
+  }
+
+  /**
+   * This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by some active
+   * transaction other than the editSet passed in.
+   */
+
+  public boolean isEditedByOtherTransaction(DBEditSet editSet)
+  {
+    return false;
+  }
+
+  /**
+   * If this namespace-managed value is being edited in an active
+   * Ganymede transaction, this method may be used to set a pointer to
+   * the editable DBField which contains the constrained value in the
+   * active transaction.
+   */
+
+  public void setShadowField(DBField newShadow)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * If this namespace-managed value is being edited in an active
+   * Ganymede transaction, this method will return a pointer to the
+   * editable DBField which contains the constrained value in the active
+   * transaction.
+   */
+
+  public DBField getShadowField()
+  {
+    return null;
+  }
+
+  /**
+   * If this namespace-managed value is being edited in an active,
+   * non-interactive Ganymede transaction, this method may be used to
+   * set a pointer to the editable DBField which aspires to contain
+   * the constrained value in the active transaction.
+   *
+   * This is the 'B' shadowField because it is not a firm association,
+   * and cannot be one unless and until the original persistent field
+   * that contains the constrained value is made to release the value.
+   * At the time the constrained value is released from the earlier
+   * field, shadowField will be set to shadowFieldB, and shadowFieldB
+   * will be cleared.
+   */
+
+  public void setShadowFieldB(DBField newShadow)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * If this namespace-managed value is being edited in an active,
+   * non-interactive Ganymede transaction, this method will return a
+   * pointer to the editable DBField which is proposed to contain the
+   * constrained value once the existing use of the value is cleared.
+   */
+
+  public DBField getShadowFieldB()
+  {
+    return null;
+  }
+
+  /**
+   * This method is used to verify that this handle points to the same
+   * field as the one specified by the parameter list.
+   */
+
+  public boolean matches(DBField field)
+  {
+    return (this.matches(field.getOwner().getInvid(), field.getID()));
+  }
+
+  /**
+   * This method is used to verify that this handle points to the same
+   * field as the one specified by the parameter list.
+   */
+
+  public boolean matches(Invid persistentFieldInvid, short persistentFieldId)
+  {
+    return (this.persistentFieldInvid == persistentFieldInvid) &&
+      (this.persistentFieldId == persistentFieldId);
+  }
+
+  /**
+   * This method is used to verify that this handle points to the same
+   * kind of field as the one specified by the parameter list.
+   */
+
+  public boolean matchesFieldType(short objectType, short persistentFieldId)
+  {
+    return (this.persistentFieldInvid.getType() == objectType) &&
+      (this.persistentFieldId == persistentFieldId);
+  }
+
+  /**
+   * Returns true if the given field is associated with this handle in
+   * any of the persistent, transaction-local, or xml transaction
+   * secondary field slots.
+   */
+
+  public boolean matchesAnySlot(DBField field)
+  {
+    return this.matches(field);
+  }
+
+  /**
+   * We want to allow cloning.
+   */
+
+  public Object clone()
+  {
+    try
+      {
+	return super.clone();
+      }
+    catch (CloneNotSupportedException ex)
+      {
+	throw new RuntimeException(ex.getMessage());
+      }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                        DBNameSpaceEditingHandle
+
+------------------------------------------------------------------------------*/
+
+class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts =
+    TranslationService.getTranslationService("arlut.csd.ganymede.server.DBNameSpaceEditingHandle");
+
+  // ---
+
+  /**
+   * The DBNameSpaceHandle that this handle is replacing during value
+   * manipulation by a transaction.  If the transaction's namespace
+   * manipulations are cancelled or rolled back, this handle will be
+   * take this editing handle's place in the namespace's uniqueHash.
+   */
+
+  private DBNameSpaceHandle original;
+
+  /**
+   * If editingTransaction is null, that means that the field
+   * containing the value tracked by this handle is 'checked in' to
+   * the datastore.
+   *
+   * If editingTransaction is not null, a transaction has checked the
+   * value tracked by this handle out for manipulation, and no other
+   * transaction may mess with that value's binding until the first
+   * transaction has released this handle.
+   */
+
+  private DBEditSet editingTransaction;
+
+  /**
+   * if this handle is currently being edited by an editset,
+   * shadowField points to the field in the transaction that contains
+   * this value.  If the transaction is committed, the DBField pointer
+   * in shadowField will be transferred to persistentFieldInvid and
+   * persistentFieldId.  If this value is not being manipulated by a
+   * transaction, shadowField will be equal to null.
+   */
+
+  private DBField shadowField;
+
+  /**
+   * Non-interactive transactions need to be able to shuffle
+   * namespace values between two fields in the data store, even if
+   * the operation to mark the unique value for association with a
+   * second field is done before the operation to unlink the unique
+   * value from the persistently stored field is done.
+   *
+   * To support this, we have both shadowField and shadowFieldB,
+   * along the lines of the A-B-C values used in swapping values
+   * between two memory locations with the aid of a third.
+   *
+   * This is the 'B' shadowField because it is not a firm
+   * association, and cannot be one unless and until the original
+   * persistent field that contains the constrained value is made to
+   * release the value.  At the time the constrained value is released
+   * from the earlier field, shadowField will be set to shadowFieldB,
+   * and shadowFieldB will be cleared.
+   */
+
+  private DBField shadowFieldB;
+
+  /* -- */
+
+  /**
+   * Constructor used by a transaction marking a value that is new to
+   * the namespace.
+   */
+
+  public DBNameSpaceEditingHandle(DBEditSet owner, DBNameSpaceHandle original)
+  {
+    super(null);
+
+    this.editingTransaction = owner;
+    this.original = original;
+  }
+
+  /**
+   * This method returns true if this handle has been checked out of
+   * the DBNameSpace.uniqueHash by a transaction, or false otherwise.
+   */
+
+  public boolean isCheckedOut()
+  {
+    return true;
+  }
+
+  /**
+   * This method creates a new editable DBNameSpaceEditingHandle that
+   * will revert to this handle if the DBEditSet is aborted.
+   *
+   * The checked out handle is returned with a null shadowField and
+   * shadowFieldB, as would be appropriate if a user was unmarking a
+   * value in the namespace uniqueHash.
+   *
+   * If the handle is being checked out by a non-interactive xmlclient
+   * that needs to address the shadowFieldB member, it will need to be
+   * sure to set the shadowField() to point to the appropriate field
+   * at check out time.
+   */
+
+  public DBNameSpaceEditingHandle checkout(DBEditSet editSet)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * This method returns the DBNameSpaceHandle that should be used to
+   * replace this DBNameSpaceHandle if this transaction is committed.
+   */
+
+  public DBNameSpaceHandle getNewHandle()
+  {
+    if (getShadowField() == null)
+      {
+	return null;
+      }
+    else
+      {
+	return new DBNameSpaceHandle(getShadowField());
+      }
+  }
+
+  /**
+   * This method returns the DBNameSpaceHandle that should be used to
+   * replace this DBNameSpaceHandle if this transaction is aborted.
+   */
+
+  public DBNameSpaceHandle getOriginal()
+  {
+    return original;
+  }
+
+  /**
+   * This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by the GanymedeSession
+   * provided.
+   */
+
+  public boolean isEditedByUs(GanymedeSession session)
+  {
+    return session.getSession().getEditSet() == editingTransaction;
+  }
+
+  /**
+   * This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by the transaction
+   * provided.
+   */
+
+  public boolean isEditedByUs(DBEditSet editSet)
+  {
+    return editSet == editingTransaction;
+  }
+
+  /**
+   * This method returns true if the namespace-constrained value
+   * controlled by this handle is being edited by some active
+   * transaction other than the editSet passed in.
+   */
+
+  public boolean isEditedByOtherTransaction(DBEditSet editSet)
+  {
+    return editSet != editingTransaction;
+  }
+
+  /**
+   * If this namespace-managed value is being edited in an active
+   * Ganymede transaction, this method may be used to set a pointer to
+   * the editable DBField which contains the constrained value in the
+   * active transaction.
+   */
+
+  public void setShadowField(DBField newShadow)
+  {
+    shadowField = newShadow;
+  }
+
+  /**
+   * If this namespace-managed value is being edited in an active
+   * Ganymede transaction, this method will return a pointer to the
+   * editable DBField which contains the constrained value in the active
+   * transaction.
+   */
+
+  public DBField getShadowField()
+  {
+    return shadowField;
+  }
+
+  /**
+   * If this namespace-managed value is being edited in an active,
+   * non-interactive Ganymede transaction, this method may be used to
+   * set a pointer to the editable DBField which aspires to contain
+   * the constrained value in the active transaction.
+   *
+   * This is the 'B' shadowField because it is not a firm association,
+   * and cannot be one unless and until the original persistent field
+   * that contains the constrained value is made to release the value.
+   * At the time the constrained value is released from the earlier
+   * field, shadowField will be set to shadowFieldB, and shadowFieldB
+   * will be cleared.
+   */
+
+  public void setShadowFieldB(DBField newShadow)
+  {
+    shadowFieldB = newShadow;
+  }
+
+  /**
+   * If this namespace-managed value is being edited in an active,
+   * non-interactive Ganymede transaction, this method will return a
+   * pointer to the editable DBField which is proposed to contain the
+   * constrained value once the existing use of the value is cleared.
+   */
+
+  public DBField getShadowFieldB()
+  {
+    return shadowFieldB;
+  }
+
+  /**
+   * This helper method is intended to report when a non-interactive
+   * xml session has two objects checked out for editing with a
+   * conflicting value at transaction commit time.
+   */
+
+  public String getConflictString()
+  {
+    // "Conflict: {0} and {1}"
+    return ts.l("getConflictString.template",
+                String.valueOf(shadowField), String.valueOf(shadowFieldB));
+  }
+
+  public String toString()
+  {
+    StringBuffer result = new StringBuffer();
+
+    if (editingTransaction != null)
+      {
+	result.append("editingTransaction == " + editingTransaction.toString());
+      }
+
+    if (result.length() != 0)
+      {
+	result.append(", ");
+      }
+
+    if (shadowField != null)
+      {
+	result.append(", shadowField == " + shadowField.toString());
+      }
+
+    if (shadowFieldB != null)
+      {
+	result.append(", shadowFieldB == " + shadowFieldB.toString());
+      }
+
+    return result.toString();
   }
 }
