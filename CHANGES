@@ -1,17 +1,14 @@
 Ganymede Release 2.0
-June 1, 2008
+October 1, 2008
 CHANGES
 
-Last Revision Changed: $Rev$
-Last Changed By: $Author$
-Last Mod Date: $Date$
-SVN URL: $HeadURL$
+Last Commit: $Format:%cd$
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: June 1, 2008
+RELEASE DATE: October 1, 2008
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1412,6 +1409,17 @@ most especially the defaultUncaughtExceptionHandler mechanism.
 
 Going forward, we'll bring Java 5 features into Ganymede as seems best
 appropriate.
+
+89. [SERVER] Refactored DBNameSpace classes
+
+Gil reported a bug with concurrent xmlclient activity that was capable
+of confusing the Ganymede object store's namespace system.  We have
+now rewritten the DBNameSpace classes top to bottom.  We fixed some
+unsynchronized operations so as to prevent race conditions, and
+improved collision detection logic in several respects.
+
+Users may notice that the memory loading for DBNameSpaceHandle class
+has been reduced somewhat, as well.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
