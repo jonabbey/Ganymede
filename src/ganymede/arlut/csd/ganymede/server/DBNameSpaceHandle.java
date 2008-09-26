@@ -62,14 +62,57 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is intended to be the targets of elements of a name
- * space's unique value hash.  The fields in this class are used to
- * keep track of who currently 'owns' a given value, and whether or not
- * there is actually any field in the namespace that really contains
- * that value.</p>
+ * This class is intended to be the targets of elements of a name
+ * space's {@link arlut.csd.ganymede.server.DBNameSpace#uniqueHash
+ * uniqueHash}.  The fields in this class are used to keep track of
+ * who currently 'owns' a given value, and whether or not there is
+ * actually any field in the namespace that really contains that
+ * value.
  *
- * <p>This class will be manipulated by the DBNameSpace class and by the
- * DBEditObject class.</p>
+ * There are three broad states that a DBNameSpaceHandle can be in:
+ *
+ * 1) editingTransaction == null, persistentFieldInvid and
+ * persistentFieldId are defined, and shadowField and shadowFieldB are
+ * null.
+ *
+ * In this state, the value bound to this handle in the DBNameSpace
+ * uniqueHash is persistently bound to a field in the datastore, and
+ * can be checked out by any transaction which checks out the DBObject
+ * pointed to by persistentFieldInvid for editing.
+ *
+ * Values loaded into the data store from the on disk ganymede.db file
+ * at server start up are in this state.
+ *
+ * 2) editingTransaction != null, shadowField is not null, and
+ * shadowFieldB, persistentFieldInvid and persistentFieldId may or may
+ * not be null.
+ *
+ * In this state, the value bound to this handle has been claimed by a
+ * transaction, and no other transaction can manipulate that value in
+ * the namespace containing this handle.  If the transaction is
+ * committed, persistentFieldInvid and persistentFieldId will be set
+ * to point to the field referenced by the shadowField variable.  If
+ * the transaction is aborted, the handle will be put back in state 1
+ * if and only if persistentFieldInvid and persistentFieldId are
+ * defined.
+ *
+ * New values entered into the namespace system by a Ganymede client
+ * are in this state.
+ *
+ * 3) editingTransaction != null, shadowField and shadowFieldB are
+ * null, and persistentFieldInvid and persistentFieldId may or may not
+ * be null.
+ *
+ * In this state, the value bound to this handle is being manipulated
+ * by a transaction, and no other transaction can manipulate that
+ * value in the the namespace containing this handle.  If the
+ * transaction is committed, the value will be unbound from the
+ * namespace.  If the transaction is aborted, the handle will be put
+ * back in state 1 if and only if persistentFieldInvid and
+ * persistentFieldId are defined.
+ *
+ * Values can only be put in this state if they are reserve()'ed or
+ * unmark()'ed by the DBNameSpace class.
  */
 
 class DBNameSpaceHandle implements Cloneable {
@@ -82,30 +125,36 @@ class DBNameSpaceHandle implements Cloneable {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBNameSpaceHandle");
 
   /**
-   * if this value is currently being shuffled
-   * by a transaction, this is the transaction
+   * If editingTransaction is null, that means that the field
+   * containing the value tracked by this handle is 'checked in' to
+   * the datastore.
+   *
+   * If editingTransaction is not null, a transaction has checked the
+   * value tracked by this handle out for manipulation, and no other
+   * transaction may mess with that value's binding until the first
+   * transaction has released this handle.
    */
 
   DBEditSet editingTransaction;
 
   /**
-   * <P>So that the namespace hash can be used as an index,
+   * So that the namespace hash can be used as an index,
    * persistentFieldInvid always points to the object that contained
    * the field that contained this value at the time this field was
-   * last committed in a transaction.</P>
+   * last committed in a transaction.
    *
-   * <P>persistentFieldInvid will be null if the value pointing to
+   * persistentFieldInvid will be null if the value pointing to
    * this handle has not been committed into the database outside of
-   * an active transaction.</P>
+   * an active transaction.
    */
 
   private Invid persistentFieldInvid = null;
 
   /**
-   * <P>If this handle is associated with a value that has been
+   * If this handle is associated with a value that has been
    * checked into the database, persistentFieldId will be the field
    * number for the field that holds that value in the database,
-   * within the object referenced by persistentFieldInvid.</P>
+   * within the object referenced by persistentFieldInvid.
    */
 
   private short persistentFieldId = -1;
@@ -122,22 +171,22 @@ class DBNameSpaceHandle implements Cloneable {
   private DBField shadowField;
 
   /**
-   * <P>Non-interactive transactions need to be able to shuffle
+   * Non-interactive transactions need to be able to shuffle
    * namespace values between two fields in the data store, even if
    * the operation to mark the unique value for association with a
    * second field is done before the operation to unlink the unique
-   * value from the persistently stored field is done.</P>
+   * value from the persistently stored field is done.
    *
-   * <P>To support this, we have both shadowField and shadowFieldB,
+   * To support this, we have both shadowField and shadowFieldB,
    * along the lines of the A-B-C values used in swapping values
-   * between two memory locations with the aid of a third.</P>
+   * between two memory locations with the aid of a third.
    *
-   * <P>This is the 'B' shadowField because it is not a firm
+   * This is the 'B' shadowField because it is not a firm
    * association, and cannot be one unless and until the original
    * persistent field that contains the constrained value is made to
    * release the value.  At the time the constrained value is released
    * from the earlier field, shadowField will be set to shadowFieldB,
-   * and shadowFieldB will be cleared.</P>
+   * and shadowFieldB will be cleared.
    */
 
   private DBField shadowFieldB;
@@ -165,13 +214,13 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>This method returns true if the namespace-managed value that
+   * This method returns true if the namespace-managed value that
    * this handle is associated with is held in a committed object in the
-   * Ganymede data store.</p>
+   * Ganymede data store.
    *
-   * <p>If this method returns false, that means that this handle must
+   * If this method returns false, that means that this handle must
    * be associated with a field in an active DBEditSet's transaction
-   * set, or else we wouldn't have a handle for it.</p>
+   * set, or else we wouldn't have a handle for it.
    */
 
   public boolean isPersisted()
@@ -180,9 +229,9 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>This method associates this value with a DBField that is
+   * This method associates this value with a DBField that is
    * persisted (or will be persisted?) in the Ganymede persistent
-   * store.</p>
+   * store.
    */
 
   public void setPersistentField(DBField field)
@@ -200,11 +249,11 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>If the value that this handle is associated with is stored in
+   * If the value that this handle is associated with is stored in
    * the Ganymede server's persistent data store (i.e., that this
    * handle is associated with a field in an already-committed
    * object), this method will return a pointer to the DBField that
-   * contains this handle's value in the committed data store.</p>
+   * contains this handle's value in the committed data store.
    */
 
   public DBField getPersistentField()
@@ -213,18 +262,18 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>If the value that this handle is associated with is stored in
+   * If the value that this handle is associated with is stored in
    * the Ganymede server's persistent data store (i.e., that this
    * handle is associated with a field in an already-committed
    * object), this method will return a pointer to the DBField that
-   * contains this handle's value in the committed data store.</p>
+   * contains this handle's value in the committed data store.
    *
-   * <p>Note that if the GanymedeSession passed in is currently
+   * Note that if the GanymedeSession passed in is currently
    * editing the object which is identified by persistentFieldInvid,
    * the DBField returned will be the editable version of the field
    * from the DBEditObject the session is working with.  This may be
    * something of a surprise, as the field returned may not actually
-   * contain the value sought.</p>
+   * contain the value sought.
    */
 
   public DBField getPersistentField(GanymedeSession gsession)
@@ -233,18 +282,18 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>If the value that this handle is associated with is stored in
+   * If the value that this handle is associated with is stored in
    * the Ganymede server's persistent data store (i.e., that this
    * handle is associated with a field in an already-committed
    * object), this method will return a pointer to the DBField that
-   * contains this handle's value in the committed data store.</p>
+   * contains this handle's value in the committed data store.
    *
-   * <p>Note that if the DBSession passed in is currently
+   * Note that if the DBSession passed in is currently
    * editing the object which is identified by persistentFieldInvid,
    * the DBField returned will be the editable version of the field
    * from the DBEditObject the session is working with.  This may be
    * something of a surprise, as the field returned may not actually
-   * contain the value sought.</p>
+   * contain the value sought.
    */
 
   public DBField getPersistentField(DBSession session)
@@ -312,9 +361,9 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>This method returns true if the namespace-constrained value
+   * This method returns true if the namespace-constrained value
    * controlled by this handle is being edited by the GanymedeSession
-   * provided.</p>
+   * provided.
    */
 
   public boolean isEditedByUs(GanymedeSession session)
@@ -323,9 +372,9 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>This method returns true if the namespace-constrained value
+   * This method returns true if the namespace-constrained value
    * controlled by this handle is being edited by the transaction
-   * provided.</p>
+   * provided.
    */
 
   public boolean isEditedByUs(DBEditSet editSet)
@@ -334,9 +383,9 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>This method returns true if the namespace-constrained value
+   * This method returns true if the namespace-constrained value
    * controlled by this handle is being edited by some active
-   * transaction other than the editSet passed in.</p>
+   * transaction other than the editSet passed in.
    */
 
   public boolean isEditedByOtherTransaction(DBEditSet editSet)
@@ -345,10 +394,10 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>If this namespace-managed value is being edited in an active
+   * If this namespace-managed value is being edited in an active
    * Ganymede transaction, this method may be used to set a pointer to
    * the editable DBField which contains the constrained value in the
-   * active transaction.</p>
+   * active transaction.
    */
 
   public void setShadowField(DBField newShadow)
@@ -357,10 +406,10 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>If this namespace-managed value is being edited in an active
+   * If this namespace-managed value is being edited in an active
    * Ganymede transaction, this method will return a pointer to the
    * editable DBField which contains the constrained value in the active
-   * transaction.</p>
+   * transaction.
    */
 
   public DBField getShadowField()
@@ -369,17 +418,17 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>If this namespace-managed value is being edited in an active,
+   * If this namespace-managed value is being edited in an active,
    * non-interactive Ganymede transaction, this method may be used to
    * set a pointer to the editable DBField which aspires to contain
-   * the constrained value in the active transaction.</p>
+   * the constrained value in the active transaction.
    *
-   * <p>This is the 'B' shadowField because it is not a firm
-   * association, and cannot be one unless and until the original
-   * persistent field that contains the constrained value is made to
-   * release the value.  At the time the constrained value is released
-   * from the earlier field, shadowField will be set to shadowFieldB,
-   * and shadowFieldB will be cleared.</p>
+   * This is the 'B' shadowField because it is not a firm association,
+   * and cannot be one unless and until the original persistent field
+   * that contains the constrained value is made to release the value.
+   * At the time the constrained value is released from the earlier
+   * field, shadowField will be set to shadowFieldB, and shadowFieldB
+   * will be cleared.
    */
 
   public void setShadowFieldB(DBField newShadow)
@@ -388,10 +437,10 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>If this namespace-managed value is being edited in an active,
+   * If this namespace-managed value is being edited in an active,
    * non-interactive Ganymede transaction, this method will return a
    * pointer to the editable DBField which is proposed to contain the
-   * constrained value once the existing use of the value is cleared.</p>
+   * constrained value once the existing use of the value is cleared.
    */
 
   public DBField getShadowFieldB()
@@ -420,8 +469,8 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>This method is used to verify that this handle points to the same
-   * field as the one specified by the parameter list.</p>
+   * This method is used to verify that this handle points to the same
+   * field as the one specified by the parameter list.
    */
 
   public boolean matches(DBField field)
@@ -430,8 +479,8 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>This method is used to verify that this handle points to the same
-   * field as the one specified by the parameter list.</p>
+   * This method is used to verify that this handle points to the same
+   * field as the one specified by the parameter list.
    */
 
   public boolean matches(Invid persistentFieldInvid, short persistentFieldId)
@@ -441,8 +490,8 @@ class DBNameSpaceHandle implements Cloneable {
   }
 
   /**
-   * <p>This method is used to verify that this handle points to the same
-   * kind of field as the one specified by the parameter list.</p>
+   * This method is used to verify that this handle points to the same
+   * kind of field as the one specified by the parameter list.
    */
 
   public boolean matchesFieldType(short objectType, short persistentFieldId)
@@ -459,7 +508,9 @@ class DBNameSpaceHandle implements Cloneable {
 
   public boolean matchesAnySlot(DBField field)
   {
-    return (this.matches(field) || this.getShadowField() == field || this.getShadowFieldB() == field);
+    return (this.matches(field) ||
+	    this.getShadowField() == field ||
+	    this.getShadowFieldB() == field);
   }
 
   /**
