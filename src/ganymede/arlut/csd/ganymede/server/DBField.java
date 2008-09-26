@@ -557,7 +557,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public boolean matches(DBField otherField)
   {
-    return otherField.getOwner().getInvid().equals(getOwner().getInvid()) &&
+    return otherField != null && otherField.getOwner().getInvid().equals(getOwner().getInvid()) &&
       otherField.getID() == getID();
   }
 
