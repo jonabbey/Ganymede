@@ -807,13 +807,6 @@ public final class DBNameSpace implements NameSpace {
 	return true;
       }
 
-    if (oldField.matches(handle.getShadowField()))
-      {
-	handle.setShadowField(null);
-
-	return true;
-      }
-
     if (!editSet.isInteractive())
       {
 	if (!oldField.matches(handle.getShadowFieldB()) &&
@@ -845,6 +838,13 @@ public final class DBNameSpace implements NameSpace {
 
 	    return true;
 	  }
+      }
+
+    if (oldField.matches(handle.getShadowField()))
+      {
+	handle.setShadowField(null);
+
+	return true;
       }
 
     return false;
