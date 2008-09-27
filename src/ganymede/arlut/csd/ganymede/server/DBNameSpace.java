@@ -473,8 +473,7 @@ public final class DBNameSpace implements NameSpace {
    *
    * If a transaction attempts to reserve() a value that is already
    * being held by an object in the transaction, reserve() will return
-   * true, even though a subsequent mark() attempt would fail, unless
-   * the value is first unmarked.
+   * false.
    *
    * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
@@ -484,7 +483,50 @@ public final class DBNameSpace implements NameSpace {
 
   public boolean reserve(DBEditSet editSet, Object value)
   {
-    return reserve(editSet, value, false);
+    checkSchemaEditInProgress(false);
+
+    if (editSet == null || value == null)
+      {
+	throw new IllegalArgumentException();
+      }
+
+    DBNameSpaceHandle handle;
+    
+    /* -- */
+
+    // Is this value already taken?
+
+    if (uniqueHash.containsKey(value))
+      {
+	handle = (DBNameSpaceHandle) uniqueHash.get(value);
+
+	if (!handle.isCheckedOut())
+	  {
+	    return false;
+	  }
+	else
+	  {
+	    if (!handle.isEditedByUs(editSet))
+	      {
+		return false;
+	      }
+
+	    if (handle.getShadowField() != null)
+	      {
+		return false;
+	      }
+	  }
+
+	return true;
+      }
+
+    handle = new DBNameSpaceEditingHandle(editSet, null);
+
+    uniqueHash.put(value, handle);
+
+    remember(editSet, value);
+
+    return true;
   }
 
   /**
@@ -511,51 +553,20 @@ public final class DBNameSpace implements NameSpace {
    *
    * @return true if the value was successfully reserved in the given
    * editSet.
+   *
+   * @deprecated We are no longer supporting false values of the
+   * onlyUnused paramater.  We never did so properly before, anyway.
    */
 
-  public synchronized boolean reserve(DBEditSet editSet, Object value, boolean onlyUnused)
+  @Deprecated
+  public boolean reserve(DBEditSet editSet, Object value, boolean onlyUnused)
   {
-    checkSchemaEditInProgress(false);
-
-    if (editSet == null || value == null)
+    if (onlyUnused != true)
       {
-	throw new IllegalArgumentException();
+	throw new UnsupportedOperationException("reserve() no longer accepts a false onlyUnused parameter");
       }
 
-    DBNameSpaceHandle handle;
-    
-    /* -- */
-
-    // Is this value already taken?
-
-    if (uniqueHash.containsKey(value))
-      {
-	handle = (DBNameSpaceHandle) uniqueHash.get(value);
-
-	if (!handle.isEditedByUs(editSet))
-	  {
-	    return false;
-	  }
-
-	if (onlyUnused && handle.getShadowField() != null)
-	  {
-	    // this value is already in use.  we would need to edit
-	    // the object that contains the value and unmark the other
-	    // field before we could reserve the value
-
-	    return false;
-	  }
-
-	return true;
-      }
-
-    handle = new DBNameSpaceEditingHandle(editSet, null);
-
-    uniqueHash.put(value, handle);
-
-    remember(editSet, value);
-
-    return true;
+    return this.reserve(editSet, value);
   }
 
   /**
