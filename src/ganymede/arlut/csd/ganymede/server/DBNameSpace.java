@@ -537,8 +537,6 @@ public final class DBNameSpace implements NameSpace {
 	    return false;
 	  }
 
-	// we must own it
-
 	if (onlyUnused && handle.getShadowField() != null)
 	  {
 	    // this value is already in use.  we would need to edit
