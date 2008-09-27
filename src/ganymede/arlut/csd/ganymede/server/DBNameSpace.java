@@ -1555,7 +1555,7 @@ public final class DBNameSpace implements NameSpace {
       return reservedValues.elements();
     }
 
-    public Hashtable getReservedHash()
+    public GHashtable getReservedHash()
     {
       return reservedValues;
     }
@@ -1604,7 +1604,7 @@ public final class DBNameSpace implements NameSpace {
 
   class DBNameSpaceCkPoint {
 
-    Hashtable reserved;
+    GHashtable reserved;
     Hashtable uniqueHash;
 
     /* -- */
@@ -1622,7 +1622,7 @@ public final class DBNameSpace implements NameSpace {
 
       // clone the hash to avoid sync problems with other threads
 
-      reserved = (Hashtable) reserved.clone();
+      reserved = (GHashtable) reserved.clone();
 
       if (reserved.size() > 0)
 	{
@@ -1635,7 +1635,7 @@ public final class DBNameSpace implements NameSpace {
 
       // now copy our hash to preserve the namespace handles
 
-      for (Object value: reserved.keySet())
+      for (Object value: reserved.values())
 	{
 	  DBNameSpaceHandle handle = space.getHandle(value);
 
