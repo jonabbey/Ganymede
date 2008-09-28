@@ -2491,7 +2491,7 @@ public class DBEditSet {
    * This should be run as late as possible in the commit()
    * sequence to minimize the chance that a previously scheduled
    * builder task completes and updates its lastRunTime field after we
-   * have touched the timestamps on the changed bases.<
+   * have touched the timestamps on the changed bases.
    *
    * @param fieldsTouched hash of DBObjectBases that contain objects
    * created, changed, or deleted during this transaction
