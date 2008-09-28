@@ -1,15 +1,12 @@
 Ganymede Release 2.0
-April 1, 2008
+October 1, 2008
 CREDITS
 
-Last Revision Changed: $Rev$
-Last Changed By: $Author$
-Last Mod Date: $Date$
-SVN URL: $HeadURL$
+Last Commit: $Format:%cd$
 
 ---------------------------------------------
 
-Ganymede has been under development for over 10 years now, in both
+Ganymede has been under development for over 12 years now, in both
 planning and execution.  The work has primarily been performed in the
 Information Technology Services Division of the Applied Research
 Laboratories at the University of Texas at Austin, with support from
@@ -95,6 +92,15 @@ in the Java 1.0 days.
 
 --
 
+ James Ratcliff
+
+James replaced the ARL-written baseTable, gridTable, and rowTable
+classes used in the Ganymede client with a new SmartTable class that
+wraps the javax.swing.JTable class with a compatible interface.  This
+work has made report printing possible in Ganymede.
+
+--
+
  Erik Grostic
 
 Erik worked on Ganymede from mid 1997 through his departure
@@ -165,10 +171,14 @@ archive included in the src/lib directory contains the binary
 distribution of this software.  The GNU Regexp for Java page is at
 http://www.cacas.org/java/gnu/regexp/.
 
+--
+
 The Java implementation of the standard UNIX crypt() function was
 converted from C by John Dumas, jdumas@zgs.com, whose code can be
 found at http://208.223.9.21/jfd/crypt.html.  jcrypt is included in
 Ganymede by permission of the author.
+
+--
 
 The Qsmtp class was originally written by James Driscoll
 (maus@io.com), and placed into the public domain.  See
@@ -177,6 +187,8 @@ Java code. Note that the version of Qstmp packaged with Ganymede has
 been significantly modified, to provide more convenient use in a
 threaded context, and to provide rudimentary MIME file attachment
 support.
+
+--
 
 The MD5Crypt class used to support FreeBSD-style md5 passwords was
 originally written by Poul-Henning Kamp (phk@login.dknet.dk) in C, and
@@ -190,6 +202,8 @@ information was placed on the original code:
    this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
    ----------------------------------------------------------------------------
 
+--
+
 The MD4 class used to support Windows NT-compatible cryptographic
 hashes was derived from MD classes written by Harry Mantakos,
 harry@meretrix.com.  The MD classes came from Harry's JOTP project,
@@ -199,11 +213,15 @@ Andrew Tridgell and released under the GPL as part of the Samba source
 code, and was ported to Java by Jonathan Abbey, using Harry's MD4 code
 to perform the fundamental cryptographic hash function.
 
+--
+
 The Unix SHA Crypt algorithms embodied in the
 arlut.csd.crypto.Sha256Crypt and arlut.csd.crypto.Sha512Crypt classes
 come from Ulrich Drepper, who released the algorithms into the public
 domain.  See http://people.redhat.com/drepper/SHA-crypt.html for a
 discussion of details.
+
+--
 
 The Ganymede server uses James Clark's excellent XMLWriter class
 library for XML generation.  It is copyright 1997, 1998 by James
@@ -211,16 +229,22 @@ Clark, and is included in Ganymede in accordance with his stated
 licensing terms.  See http://www.jclark.com/xml/xp/copying.txt for his
 copyright terms.
 
+--
+
 The Java UUID Generator code used by ARL custom code to generate RFC
 and DCE-compliant globally unique identifiers for our Macintosh LDAP
 synchronization was written by Tatu Saloranta, tatu.saloranta@iki.fi,
 and is included in Ganymede under the Lesser General Public License.
 See http://www.doomdark.org/doomdark/proj/jug/ for more information.
 
+--
+
 The Java Base 64 encoder/decoder (here arlut.csd.crypto.Base64) was
 written by Robert Harder (rob@iharder.net) and placed into the public
 domain as part of his 'xmlizable' package.  More information on this
 class may be found at http://iharder.net/xmlizable.
+
+--
 
 Ganymede 2.0 ships with Jython, in src/jython.  Jython is used in the
 Ganymede server to allow DBEditObject sub classes to be written in
@@ -259,6 +283,8 @@ Developers and is licensed under the following BSD-like terms:
 
 Jython is at http://www.jython.org/
 
+--
+
 The Ganymede client makes use of the Foxtrot project
 (http://foxtrot.sourceforge.net/) by Simone Bordet, a very nifty GUI
 threading tool that allows us to synchronously decouple the client's
@@ -267,10 +293,38 @@ client while allowing the GUI thread to dispatch GUI events until the
 network activity is done.  The Foxtrot project is included in the
 Ganymede clients under the BSD license.
 
+--
+
 Some code in Ganymede 2.0 is based on Terence Parr's incredutastic
 ANTLR parser generator.  The src/lib directory contains a jar file of
 classes from his project, which he has placed into the public domain.
 See http://www.antlr.org/ for information on ANTLR.
+
+--
+
+Ganymede uses the gnu.trove PrimeFinder class to optimize its hash
+tables.
+
+The Trove library is licensed under the Lesser GNU Public License,
+which is included with the distribution in a file called LICENSE.txt.
+
+Other license arrangements are possible, for a fee: contact 
+ericdf@users.sourceforge.net for terms/pricing.
+
+The PrimeFinder and HashFunctions classes in Trove are subject to the
+following license restrictions:
+
+Copyright (c) 1999 CERN - European Organization for Nuclear Research.
+
+Permission to use, copy, modify, distribute and sell this software and
+its documentation for any purpose is hereby granted without fee,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation. CERN makes no representations about the
+suitability of this software for any purpose. It is provided "as is"
+without expressed or implied warranty.
+
+--
 
 The 'ant validate' task makes use of the Perl Config::Properties
 package, copyright by Randy Jay Yarger, Craig Manley, and Salvador
@@ -292,5 +346,5 @@ for details on PerfAnal.
 
 --
 
-Special thanks to authors of Ant and Subversion for high quality build
-and version control tools.
+Special thanks to authors of Ant, Subversion, and Git for high quality
+build and version control tools.
