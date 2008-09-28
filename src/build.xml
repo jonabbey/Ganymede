@@ -235,6 +235,7 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="Qsmtp/**/*.class"/>
       <fileset dir="${build.classes}" includes="jcrypt/**/*.class"/>
       <fileset dir="${build.classes}" includes="md5/**/*.class"/>
+      <fileset dir="${build.classes}" includes="gnu/trove/*.class"/>
 
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/server/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/common/*.class"/>

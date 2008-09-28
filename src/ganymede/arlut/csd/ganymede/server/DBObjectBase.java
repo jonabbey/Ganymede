@@ -159,6 +159,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   final static boolean debug2 = false;
   final static boolean xmldebug = false;
 
+  /**
+   * The number of spaces we save in our hashtable before it will need
+   * to grow again.
+   */
+
+  static final int GROWTHSPACE = 250;
+
   static Hashtable upgradeClassMap = null;
 
   public static void setDebug(boolean val)
@@ -895,9 +902,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     Vector tmpIterationSet = new Vector(object_count);
 
-    temp_val = (object_count > 0) ? (object_count * 2 + 1) : 4000;
+    if (object_count > 0)
+      {
+	temp_val = gnu.trove.PrimeFinder.nextPrime((int) Math.ceil((object_count + GROWTHSPACE) / 0.75f));
+      }
+    else
+      {
+	temp_val = gnu.trove.PrimeFinder.nextPrime((int) Math.ceil(500 / 0.75f));
+      }
 
-    objectTable = new DBObjectTable(temp_val, (float) 1.0);
+    objectTable = new DBObjectTable(temp_val,  0.75f);
 
     for (int i = 0; i < object_count; i++)
       {

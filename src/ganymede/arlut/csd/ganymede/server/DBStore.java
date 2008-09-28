@@ -151,7 +151,7 @@ public final class DBStore implements JythonMap {
   // type identifiers used in the object store
 
   /**
-   * All ganymede.db and ganymede.schema files will start with this string
+   * All ganymede.db files will start with this string
    */
 
   static final String id_string = "Gstore";
@@ -168,7 +168,7 @@ public final class DBStore implements JythonMap {
    * after id_string
    */
 
-  static final byte minor_version = 13;
+  static final byte minor_version = 14;
 
   /**
    * Enable/disable debug in the DBStore methods

@@ -136,12 +136,29 @@ public final class DBNameSpace implements NameSpace {
 
   /**
    * The initial number of slots that we will reserve in our
-   * uniqueHash hashtable.
+   * uniqueHash hashtable, if we are starting from scratch with a new
+   * namespace.
    */
 
-  static final int DEFAULTSIZE = 101; // prime
+  static final int DEFAULTSIZE = 397; // prime
+
+  /**
+   * The number of spaces we save in our hashtable before it will need
+   * to grow again.
+   */
+
+  static final int GROWTHSPACE = 250;
 
   // ---
+
+  /**
+   * At startup, if we are reading from a Ganymede db file of version
+   * 2.14 or later, we will read the size of the hash to allocate at
+   * database loading time so we don't have to do a lot of hash
+   * expansion.
+   */
+
+  private int hashSize;
 
   /**
    * treat differently-cased Strings as the same for key?
@@ -196,7 +213,7 @@ public final class DBNameSpace implements NameSpace {
   {
     receive(in);
 
-    uniqueHash = new GHashtable(DEFAULTSIZE, caseInsensitive);
+    uniqueHash = new GHashtable(hashSize, caseInsensitive);
     transactions = new Hashtable(TRANSCOUNT);
   }
 
@@ -224,6 +241,15 @@ public final class DBNameSpace implements NameSpace {
   {
     name = in.readUTF();
     caseInsensitive = in.readBoolean();
+
+    if (Ganymede.db.isAtLeast(2, 14))
+      {
+	hashSize = gnu.trove.PrimeFinder.nextPrime((int)Math.ceil((in.readInt() + GROWTHSPACE) / 0.75f));
+      }
+    else
+      {
+	hashSize = DEFAULTSIZE;
+      }
   }
 
   /**
@@ -234,6 +260,7 @@ public final class DBNameSpace implements NameSpace {
   {
     out.writeUTF(name);
     out.writeBoolean(caseInsensitive);
+    out.writeInt(uniqueHash.size());
   }
 
   /**
