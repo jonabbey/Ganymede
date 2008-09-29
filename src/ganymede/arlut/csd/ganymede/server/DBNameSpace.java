@@ -1812,16 +1812,8 @@ class DBNameSpaceHandle implements Cloneable {
 
   public void setPersistentField(DBField field)
   {
-    if (field != null)
-      {
-	persistentFieldInvid = field.getOwner().getInvid();
-	persistentFieldId = field.getID();
-      }
-    else
-      {
-	persistentFieldInvid = null;
-	persistentFieldId = -1;
-      }
+    persistentFieldInvid = field.getOwner().getInvid();
+    persistentFieldId = field.getID();
   }
 
   /**
