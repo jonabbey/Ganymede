@@ -189,6 +189,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   JMenuItem deleteMI = new JMenuItem(ts.l("init.delete")); // "Delete Entry"
   JMenuItem inactivateMI = new JMenuItem(ts.l("init.inactivate")); // "Inactivate Entry"
 
+  public boolean[] used;
 
   /**
    * Constructor for gResultTable.  Creates the GUI table, loads it,
@@ -270,7 +271,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     Vector headerVect = results.getHeaders();
     String[] columnNames = new String[headerVect.size()];	
-    boolean[] used = new boolean[headerVect.size()];
+    used = new boolean[headerVect.size()];
     if (debug) System.err.println("gResultTable: " + headerVect.size() + " headers returned by query");
     
     // Get all Column Names now

@@ -52,9 +52,6 @@
 
 package arlut.csd.JTable;
 
-import arlut.csd.ganymede.common.Invid;  // test debug
-
-
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -98,6 +95,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import arlut.csd.Util.TranslationService;
+import arlut.csd.ganymede.client.gResultTable;
 
 
 /*------------------------------------------------------------------------------
@@ -132,7 +130,7 @@ public class SmartTable extends JPanel implements ActionListener
    * Hashable index for selecting rows by key field
    */
   private Hashtable index; 
-  private rowSelectCallback callback;
+  private gResultTable gResultT;
 
   // Header Menus for right click popup
   private JMenuItem menuTitle     = new JMenuItem(ts.l("init.menu_title"));       // "Column Menu"
@@ -146,13 +144,13 @@ public class SmartTable extends JPanel implements ActionListener
 
 
   // constructor function
-  public SmartTable(JPopupMenu rowMenu, String[] columnValues, rowSelectCallback callback)
+  public SmartTable(JPopupMenu rowMenu, String[] columnValues, gResultTable gResultT)
   {
     if (debug) System.err.println("DEBUG: SmartTable Constructor");
     this.setLayout(new BorderLayout());
 
     index = new Hashtable();
-    this.callback = callback; 
+    this.gResultT = gResultT; 
 
     // Create and set up the results content pane.
     myModel = new MyTableModel(columnValues);
@@ -249,6 +247,7 @@ public class SmartTable extends JPanel implements ActionListener
 	{
 	  if (debug) System.out.println("mouseevent remove col:"+ remember_col2 +"*");			
 	  table.removeColumn(table.getColumnModel().getColumn(remember_col2));  
+	  gResultT.used[remember_col2] = false;
 	  fixTableColumns();
 	}
 	else if (event.getSource() == optimizeColWidMI) 
@@ -263,7 +262,7 @@ public class SmartTable extends JPanel implements ActionListener
 	    {
 	      System.err.println("actionPerformed processing hash key: row=" + remember_row + ", invid=" + key);
 	    }
-	  callback.rowMenuPerformed(key, event);
+	  gResultT.rowMenuPerformed(key, event);
 	}
 
       } // parentContainer
@@ -305,7 +304,10 @@ public class SmartTable extends JPanel implements ActionListener
     // Set Each Column to Auto-Wrap text if needed
     for (int i=0; i < cols; i++)      
     {
-      setColumnTextWrap(i);
+      if (gResultT.used[i])
+	{
+ 	  setColumnTextWrap(i);
+	} 
     }    
 
     columnWidths = new int[cols];	
@@ -316,13 +318,16 @@ public class SmartTable extends JPanel implements ActionListener
       {
 	for (int j=0; j < cols; j++)
 	  {
-	    cellResult = table.getValueAt(i, j);          
-	    if (cellResult != null)
+	    if (gResultT.used[j])
 	      {
-		columnTotWidths[j] += cellResult.toString().length();
-		if (columnWidths[j] < cellResult.toString().length())
+		cellResult = table.getValueAt(i, j);          
+		if (cellResult != null)
 		  {
-		    columnWidths[j] = cellResult.toString().length();
+		    columnTotWidths[j] += cellResult.toString().length();
+		    if (columnWidths[j] < cellResult.toString().length())
+		      {
+			columnWidths[j] = cellResult.toString().length();
+		      }
 		  }
 	      }
 	  }
