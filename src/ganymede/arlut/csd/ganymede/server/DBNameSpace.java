@@ -206,18 +206,6 @@ public final class DBNameSpace implements NameSpace {
   /* -- */
 
   /**
-   * Create a new DBNameSpace object from a stream definition.
-   */
-
-  public DBNameSpace(DataInput in) throws IOException
-  {
-    receive(in);
-
-    uniqueHash = new GHashtable(hashSize, caseInsensitive);
-    transactions = new Hashtable(TRANSCOUNT);
-  }
-
-  /**
    * Constructor for new DBNameSpace for DBStore initialization.
    *
    * @param name Name for this name space
@@ -230,6 +218,18 @@ public final class DBNameSpace implements NameSpace {
     this.caseInsensitive = caseInsensitive;
 
     uniqueHash = new GHashtable(DEFAULTSIZE, caseInsensitive);
+    transactions = new Hashtable(TRANSCOUNT);
+  }
+
+  /**
+   * Create a new DBNameSpace object from a stream definition.
+   */
+
+  public DBNameSpace(DataInput in) throws IOException
+  {
+    receive(in);
+
+    uniqueHash = new GHashtable(hashSize, caseInsensitive);
     transactions = new Hashtable(TRANSCOUNT);
   }
 
