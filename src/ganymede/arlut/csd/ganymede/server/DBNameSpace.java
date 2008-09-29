@@ -371,7 +371,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void receiveValue(Object value, DBField field)
   {
-    uniqueHash.put(value, new DBNameSpaceHandle(field));
+    putHandle(value, new DBNameSpaceHandle(field));
   }
 
   /**
@@ -549,7 +549,7 @@ public final class DBNameSpace implements NameSpace {
 
     handle = new DBNameSpaceEditingHandle(editSet, null);
 
-    uniqueHash.put(value, handle);
+    putHandle(value, handle);
 
     remember(editSet, value);
 
@@ -684,8 +684,8 @@ public final class DBNameSpace implements NameSpace {
       {
 	handle = new DBNameSpaceEditingHandle(editSet, null);
 	handle.setShadowField(field);
-	
-	uniqueHash.put(value, handle);
+
+	putHandle(value, handle);
 
 	remember(editSet, value);
 
@@ -714,7 +714,7 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    handle = handle.checkout(editSet);
 
-	    uniqueHash.put(value, handle);
+	    putHandle(value, handle);
 	    remember(editSet, value);
 
 	    handle.setShadowField(handle.getPersistentField(editSet));
@@ -839,7 +839,7 @@ public final class DBNameSpace implements NameSpace {
       {
 	handle = handle.checkout(editSet);
 
-	uniqueHash.put(value, handle);
+	putHandle(value, handle);
         remember(editSet, value);
 
 	return true;
@@ -978,14 +978,14 @@ public final class DBNameSpace implements NameSpace {
 	      }
 	    else
 	      {
-		uniqueHash.put(value, oldHandle);
+		putHandle(value, oldHandle);
 	      }
 
 	    elementsToRemove.addElement(value);
 	  }
 	else
 	  {
-	    uniqueHash.put(value, point.getValueHandle(value));
+	    putHandle(value, point.getValueHandle(value));
 	  }
       }
 
@@ -1134,7 +1134,7 @@ public final class DBNameSpace implements NameSpace {
 	  }
 	else
 	  {
-	    uniqueHash.put(value, newHandle);
+	    putHandle(value, newHandle);
 	  }
       }
 
@@ -1194,7 +1194,7 @@ public final class DBNameSpace implements NameSpace {
 	  }
 	else
 	  {
-	    uniqueHash.put(value, oldHandle);
+	    putHandle(value, oldHandle);
 	  }
       }
 
@@ -1251,7 +1251,7 @@ public final class DBNameSpace implements NameSpace {
 					    key));
 	  }
 
-	this.uniqueHash.put(key, handleCopy);
+	putHandle(key, handleCopy);
       }
   }
 
@@ -1331,7 +1331,7 @@ public final class DBNameSpace implements NameSpace {
 	return false;
       }
 
-    uniqueHash.put(value, new DBNameSpaceHandle(field));
+    putHandle(value, new DBNameSpaceHandle(field));
 
     return true;
   }
@@ -1444,6 +1444,18 @@ public final class DBNameSpace implements NameSpace {
       }
 
     return success;
+  }
+
+  /**
+   * Performs some assertinon checking, then places the given
+   * DBNameSpaceHandle in the uniqueHash using value as they key.
+   */
+
+  private void putHandle(Object value, DBNameSpaceHandle handle)
+  {
+    assert (handle instanceof DBNameSpaceEditingHandle) || handle.isPersisted();
+
+    uniqueHash.put(value, handle);
   }
 
   /**
