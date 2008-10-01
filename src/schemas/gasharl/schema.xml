@@ -461,7 +461,7 @@ xmlclient.</comment>
               <comment>Password for an individual privileged to log into Ganymede and/or the network</comment>
               <typedef type="password">
                 <maxlength val="14"/>
-                <badchars val=":;,'&quot;@&amp;"/>
+                <badchars val=":;,'&quot;@&amp;*"/>
                 <crypted/>
                 <md5crypted/>
                 <winHashed/>
@@ -483,6 +483,7 @@ xmlclient.</comment>
             <fielddef name="Badge" id="276">
               <typedef type="string">
                 <maxlength val="8"/>
+                <regexp val="AW\d{3}|\d{4,5}" desc="A Badge must match AWnnn where n is a digit, or a sequence of 4 or 5 digits."/>
               </typedef>
             </fielddef>
             <fielddef name="Division" id="258">
