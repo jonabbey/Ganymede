@@ -329,7 +329,7 @@ public class TableSorter extends AbstractTableModel {
 
 	for (int row = 0; row < tableModelRowCount; row++)
 	  {
-	    viewToModel.set(row, new Row(row));
+	    viewToModel.add(new Row(row));
 	  }
 
 	if (isSorting())
