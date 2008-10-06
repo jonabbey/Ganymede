@@ -134,7 +134,7 @@ public class TableSorter extends AbstractTableModel {
 
   // ---
 
-  private Row[] viewToModel;
+  private List<Row> viewToModel;
   private int[] modelToView;
 
   private JTableHeader tableHeader;
@@ -320,21 +320,21 @@ public class TableSorter extends AbstractTableModel {
     return LEXICAL_COMPARATOR;
   }
 
-  private Row[] getViewToModel()
+  private List<Row> getViewToModel()
   {
     if (viewToModel == null)
       {
 	int tableModelRowCount = tableModel.getRowCount();
-	viewToModel = new Row[tableModelRowCount];
+	viewToModel = new ArrayList<Row>(tableModelRowCount);
 
 	for (int row = 0; row < tableModelRowCount; row++)
 	  {
-	    viewToModel[row] = new Row(row);
+	    viewToModel.set(row, new Row(row));
 	  }
 
 	if (isSorting())
 	  {
-	    Arrays.sort(viewToModel);
+	    java.util.Collections.sort(viewToModel); // stable merge sort
 	  }
       }
 
@@ -343,14 +343,14 @@ public class TableSorter extends AbstractTableModel {
 
   public int modelIndex(int viewIndex)
   {
-    return getViewToModel()[viewIndex].modelIndex;
+    return getViewToModel().get(viewIndex).modelIndex;
   }
 
   private int[] getModelToView()
   {
     if (modelToView == null)
       {
-	int n = getViewToModel().length;
+	int n = getViewToModel().size();
 	modelToView = new int[n];
 
 	for (int i = 0; i < n; i++)
