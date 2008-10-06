@@ -145,6 +145,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   static final String TABLE_SAVE = "query_table_default_dir";
 
+  // ---
 
   /**
    * Reference to the desktop pane containing the client's internal windows.  Used to access
@@ -154,7 +155,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   windowPanel wp;
 
   /**
-   * Our SmartTable implemented
+   * Our key-indexed SmartTable
    */
 
   SmartTable sTable;
@@ -174,8 +175,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   Query query;
 
   /**
-   * The contentPane for this internal window.  We place the rowTable in this
-   * container.
+   * The contentPane for this internal window.  We place the table in
+   * this container.
    */
 
   Container contentPane;
@@ -201,8 +202,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     super();			// JInternalFrame init
 
-    if (debug) System.out.println("starting gResultTable");
-
     this.wp = wp;
     this.session = session;
     this.query = query;
@@ -227,7 +226,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     getContentPane().removeAll(); // for the refresh, we must clean this pane out
 
-
     // Add our Toolbar in.
     toolbar = createToolBar();
     add("North",toolbar);
@@ -247,9 +245,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     rowMenu.add(deleteMI);
     rowMenu.add(inactivateMI);
 
-
     // Set our title with the result count
+
     String queryType = null;
+
     if (query.objectName != null) 
       {
 	queryType = query.objectName;
@@ -272,48 +271,56 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     Vector headerVect = results.getHeaders();
     String[] columnNames = new String[headerVect.size()];	
     used = new boolean[headerVect.size()];
-    if (debug) System.err.println("gResultTable: " + headerVect.size() + " headers returned by query");
+
+    if (debug)
+      {
+	System.err.println("gResultTable: " + headerVect.size() + " headers returned by query");
+      }
     
     // Get all Column Names now
+
     for (int i=0; i < headerVect.size(); i++)      
-    {
-      columnNames[i] = (String) headerVect.elementAt(i);
-      if (debug) System.out.println("columnNames "+i+" value is:"+columnNames[i]+"*");
-      used[i] = false;
-    }
+      {
+	columnNames[i] = (String) headerVect.elementAt(i);
+
+	if (debug)
+	  {
+	    System.out.println("columnNames "+i+" value is:"+columnNames[i]+"*");
+	  }
+
+	used[i] = false;
+      }
     
     // Pass our SmartTable the results set, and a text Row menu
     // This will render the table nicely and setup a header and row right click menu (user provided)
     // header can sort and remove columns, the columns must be defined before creating the table, the 
     // data cells may be filled in later.  this is for the callback functions
+
     sTable = new SmartTable(rowMenu, columnNames, this); 
     getContentPane().add(sTable); 
 
-
     // Now Read in all the result lines.
     for (int i=0; i < rows; i++)
-    {
-      // Save invid to refer to later, as it is the key field.
-      Invid invid = results.getInvid(i);
-      sTable.newRow(invid);
-
-      //System.out.println("loadResults: loading val "+invid.toString()+" into row:"+i);
-      
-      for (int j=0; j < headerVect.size(); j++)
       {
-	Object cellResult = results.getResult(i, j);	
-	sTable.setCellValue(invid, j, cellResult);
+	// Save invid to refer to later, as it is the key field.
+	Invid invid = results.getInvid(i);
+	sTable.newRow(invid);
 
-	if (!used[j] && cellResult != null && !cellResult.toString().equals(""))
-	{
-	    used[j] = true;  
-	}
-      }
-    } 
+	for (int j=0; j < headerVect.size(); j++)
+	  {
+	    Object cellResult = results.getResult(i, j);	
+	    sTable.setCellValue(invid, j, cellResult);
 
+	    if (!used[j] && cellResult != null && !cellResult.toString().equals(""))
+	      {
+		used[j] = true;  
+	      }
+	  }
+      } 
 
     // Removing empty columns, we have to do this backwards so that we don't
     // change the index of a column we'll later delete
+
     for (int i = used.length-1; i >= 0 ; i--)
       {
 	if (!used[i])
@@ -328,8 +335,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     // "Query Complete."
     setStatus(ts.l("loadResults.complete_status"));   
-  } // loadresults
-
+  }
 
   /**
    * Creates and initializes the JInternalFrame's toolbar.
@@ -426,7 +432,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     b.addActionListener(this);
     toolBarTemp.add(b);
-
 
     // "Refresh"
     b = new JButton(ts.l("createToolBar.refresh_button"), new ImageIcon(refreshIcon));
@@ -645,67 +650,76 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // "Querying server"
     setStatus(ts.l("refreshQuery.querying_status"), 0);
 
-    if (query != null)
+    if (query == null)
       {
-	try
+	return;
+      }
+
+    try
+      {
+	buffer = session.dump(query);
+      }
+    catch (Exception ex)
+      {
+	this.wp.getgclient().processException(ex);
+      }
+
+    if (buffer == null)
+      {
+	if (debug)
 	  {
-	    buffer = session.dump(query);
-	  }
-	catch (Exception ex)
-	  {
-	    this.wp.getgclient().processException(ex);
+	    System.err.println("null query dump result");
 	  }
 
-	if (buffer == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("null query dump result");
-	      }
-
-	    // "No results"
-	    setStatus(ts.l("refreshQuery.no_result_status"));
-	  }
-	else
-	  {
-	    loadResults(buffer);
-	  }
+	// "No results"
+	setStatus(ts.l("refreshQuery.no_result_status"));
+      }
+    else
+      {
+	loadResults(buffer);
       }
   }
 
-
   /**
-   * Called when a row is double selected (double clicked) in rowTable
+   * Called when a row is double selected (double clicked) in the table
    * 
    * @param key Hash key for the selected row
    */
-  public void rowSelected(Object key){}
 
+  public void rowSelected(Object key)
+  {
+  }
 
   /**
-   * Called when a row is unselected in rowTable
+   * Called when a row is unselected in the table
    * 
    * @param key Hash key for the unselected row
    * @param endSelected false if the callback should assume that the final
    *                    state of the system due to the user's present 
    *                    action will have no row selected
    */
-  public void rowDoubleSelected(Object key) {}
-  
+
+  public void rowDoubleSelected(Object key)
+  {
+  }
 
   /**
-   * Called when a row is unselected in rowTable
+   * Called when a row is unselected in the table
    * 
    * @param key Hash key for the row on which the popup menu item was performed
    * @param event the original ActionEvent from the popupmenu.  
    *              See event.getSource() to identify the menu item performed.
    */
-  public void rowUnSelected(Object key, boolean endSelected) {}
+
+  public void rowUnSelected(Object key, boolean endSelected)
+  {
+  }
 
   /**
    * This function is called from inside SmartTable via the right
    * click row menus, then passed back up to main client
    */
+
   public void rowMenuPerformed(Object key, java.awt.event.ActionEvent event)
   {
     if (event.getSource() == viewMI)
@@ -757,51 +771,52 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // we are likely to be dispatched from the GUI thread,
     // this may not be an issue.
 
-    result.append("<HTML>\n");
-    result.append("<HEAD>\n");
-    result.append("<TITLE>Ganymede Table Dump - ");
+    result.append("<html>\n");
+    result.append("<head>\n");
+    result.append("<title>Ganymede Table Dump - ");
     result.append(date);
-    result.append("</TITLE>\n");
-    result.append("</HEAD>\n");
-    result.append("<BODY BGCOLOR=\"#FFFFFF\">\n");
-    result.append("<H1>Ganymede Table Dump - ");
+    result.append("</title>\n");
+    result.append("</head>\n");
+    result.append("<body bgcolor=\"#FFFFFF\">\n");
+    result.append("<h1>Ganymede Table Dump - ");
     result.append(date);
-    result.append("</H1>\n");
-    result.append("<HR>\n");
-    result.append("<TABLE BORDER>\n");
-    result.append("<TR>\n");
+    result.append("</h1>\n");
+    result.append("<hr>\n");
+    result.append("<table border>\n");
+    result.append("<tr>\n");
     
     for (int i = 0; i < colcount; i++)
       {
-	result.append("<TH>");
+	result.append("<th>");
 	result.append(table.getColumnName(i));
-	result.append("</TH>\n");
+	result.append("</th>\n");
       }
 
-    result.append("</TR>\n");
+    result.append("</tr>\n");
 
     for (int i = 0; i < size; i++)
       {
-	result.append("<TR>\n");
+	result.append("<tr>\n");
 
 	for (int j = 0; j < colcount; j++)
 	  {
-	    result.append("<TD>");
+	    result.append("<td>");
 
 	    cellText = table.getValueAt(i, j).toString();
+
 	    if (cellText != null)
 	      {
 		cellText = escapeHTML(cellText);
 		result.append(cellText);
 	      }
 
-	    result.append("</TD>\n");
+	    result.append("</td>\n");
 	  }
 
-	result.append("</TR>\n");
+	result.append("</tr>\n");
       }
 
-    result.append("</TABLE><HR></BODY></HTML>\n");
+    result.append("</table><hr></body></html>\n");
 
     return result;
   }
@@ -836,6 +851,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	      }
 
 	    cellText = table.getValueAt(i, j).toString();
+
 	    if (cellText != null)
 	      {
 		cellText = escapeString(cellText, sepChar);
@@ -848,7 +864,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     return result;
   }
-
 
   /**
    * This method generates a Ganymede XML data file containing the
@@ -929,10 +944,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   }
 
   /**
-   *
    * This helper method makes a field string safe to emit
    * to an HTML file.
-   *
    */
 
   String escapeHTML(String string)
@@ -961,7 +974,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     return buffer.toString();
   }
 
-
   // -- helper functions
 
   private final void setStatus(String s)
@@ -973,7 +985,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     wp.gc.setStatus(s, timeLimit);
   }
-
 
   /**
    * Give access to the protected paramString() method of our
