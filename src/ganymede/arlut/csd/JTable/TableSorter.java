@@ -73,10 +73,6 @@ import javax.swing.table.*;
  * @author Parwinder Sekhon
  * @version 2.0 02/27/04
  *
- *
- * Copy From: http://java.sun.com/docs/books/tutorial/uiswing/components/example-1dot4/TableSorterDemo.java
- * License URL: http://java.sun.com/docs/books/tutorial/information/license.html
- *
  * Copyright (c) 1995 - 2008 Sun Microsystems, Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -116,7 +112,7 @@ public class TableSorter extends AbstractTableModel {
 
   private static Directive EMPTY_DIRECTIVE = new Directive(-1, NOT_SORTED);
 
-  public static final Comparator COMPARABLE_COMAPRATOR = new Comparator()
+  public static final Comparator COMPARABLE_COMPARATOR = new Comparator()
     {
       public int compare(Object o1, Object o2)
       {
@@ -314,7 +310,7 @@ public class TableSorter extends AbstractTableModel {
 
     if (Comparable.class.isAssignableFrom(columnType))
       {
-	return COMPARABLE_COMAPRATOR;
+	return COMPARABLE_COMPARATOR;
       }
 
     return LEXICAL_COMPARATOR;
@@ -399,7 +395,11 @@ public class TableSorter extends AbstractTableModel {
     tableModel.setValueAt(aValue, modelIndex(row), column);
   }
 
-  // Helper classes
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                                             Row
+
+  ----------------------------------------------------------------------------*/
 
   private class Row implements Comparable
   {
@@ -450,6 +450,12 @@ public class TableSorter extends AbstractTableModel {
       return 0;
     }
   }
+
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                               TableModelHandler
+
+  ----------------------------------------------------------------------------*/
 
   private class TableModelHandler implements TableModelListener
   {
@@ -512,6 +518,12 @@ public class TableSorter extends AbstractTableModel {
     }
   }
 
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                                    MouseHandler
+
+  ----------------------------------------------------------------------------*/
+
   private class MouseHandler extends MouseAdapter
   {
     public void mouseClicked(MouseEvent e)
@@ -549,6 +561,12 @@ public class TableSorter extends AbstractTableModel {
 	}
     }
   }
+
+  /*----------------------------------------------------------------------------
+                                                              static inner class
+                                                                           Arrow
+
+  ----------------------------------------------------------------------------*/
 
   private static class Arrow implements Icon
   {
@@ -612,6 +630,12 @@ public class TableSorter extends AbstractTableModel {
     }
   }
 
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                          SortableHeaderRenderer
+
+  ----------------------------------------------------------------------------*/
+
   private class SortableHeaderRenderer implements TableCellRenderer
   {
     private TableCellRenderer tableCellRenderer;
@@ -641,6 +665,12 @@ public class TableSorter extends AbstractTableModel {
       return c;
     }
   }
+
+  /*----------------------------------------------------------------------------
+                                                              static inner class
+                                                                       Directive
+
+  ----------------------------------------------------------------------------*/
 
   private static class Directive
   {
