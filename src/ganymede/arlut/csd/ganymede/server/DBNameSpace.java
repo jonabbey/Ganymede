@@ -2074,6 +2074,8 @@ class DBNameSpaceHandle implements Cloneable {
 
   public boolean matchesAnySlot(DBField field)
   {
+    assert field != null;
+
     return this.matches(field);
   }
 
@@ -2369,6 +2371,20 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
   public DBField getShadowFieldB()
   {
     return shadowFieldB;
+  }
+
+
+  /**
+   * Returns true if the given field is associated with this handle in
+   * any of the persistent, transaction-local, or xml transaction
+   * secondary field slots.
+   */
+
+  public boolean matchesAnySlot(DBField field)
+  {
+    assert field != null;
+
+    return (field == shadowField) || (field == shadowFieldB) || this.matches(field);
   }
 
   /**
