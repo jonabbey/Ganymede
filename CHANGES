@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-October 1, 2008
+October 15, 2008
 CHANGES
 
 Last Commit: $Format:%cd$
@@ -8,7 +8,7 @@ Last Commit: $Format:%cd$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: October 1, 2008
+RELEASE DATE: October 15, 2008
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1420,6 +1420,13 @@ improved collision detection logic in several respects.
 
 Users may notice that the memory loading for DBNameSpaceHandle class
 has been reduced somewhat, as well.
+
+90. [CLIENT] Converted the client's report window to use JTable, support printing
+
+James replaced the old ARL-custom table component in the Ganymede
+client with a Swing JTable-based keyed table.  This enabled fancier
+sort control, and most especially made it possible to print query
+reports.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
