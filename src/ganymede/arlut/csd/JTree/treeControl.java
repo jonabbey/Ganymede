@@ -72,13 +72,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.lang.System;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -112,8 +118,8 @@ import javax.swing.KeyStroke;
  * @see arlut.csd.JTree.treeNode
  */
 
-public class treeControl extends JPanel implements AdjustmentListener, ActionListener, MouseWheelListener {
-
+public class treeControl extends JPanel implements AdjustmentListener, ActionListener, FocusListener, MouseWheelListener 
+{
   static final boolean debug = false;
 
   static final int borderSpace = 0;
@@ -178,6 +184,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   treeNode 
     menuedNode = null;		// node most recently selected by a popup menu
 
+  
+
   /* -- */
 
 
@@ -233,7 +241,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     rows = new Vector();
 
     addMouseWheelListener(this);
+
+    addKeyListener(new myKeyListener());
+
     initializeKeyboardActions();
+
+    setFocusable(true);
+
+    addFocusListener(this);
   }  
 
   /**
@@ -1283,6 +1298,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	return;
       }
 
+
     String actionCommand = e.getActionCommand();
 
     if (actionCommand == null)
@@ -1796,14 +1812,16 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       {
 	System.err.println("exiting adjustScrollbars()");
       }
-
   }
+
+  /**
+   * Redraw the canvas.
+   */
 
   void refreshTree()
   {
     canvas.render();
     canvas.repaint();
-    repaint();
   }
 
   /**
@@ -1820,9 +1838,21 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
   }
 
+  // focusListener methods
+
+  public synchronized void focusGained(FocusEvent e)
+  {
+    refreshTree();
+  }
+
+  public synchronized void focusLost(FocusEvent e)
+  {
+    refreshTree();
+  }
+
   // MouseWheelListener
 
-  public void mouseWheelMoved(MouseWheelEvent e)
+  public synchronized void mouseWheelMoved(MouseWheelEvent e)
   {
     if (vbar_visible)
       {
@@ -1851,24 +1881,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "left");
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0), "left");
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter");
-
-
-    // xxx test to get a keystroke - james add.
-    //inputMap.put(KeyStroke.getKeyStroke('f', 0), "char");
-
-
-    // NB: Starting in Java 1.5, there is support for
-    // KeyEvent.VK_CONTEXT_MENU, which has value 0x020D.  We're not
-    // using the named constant here because we need to support
-    // compilation under 1.4.
-
-    inputMap.put(KeyStroke.getKeyStroke(0x020D, 0), "context");
-
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_CONTEXT_MENU, 0), "context");
+  
     ActionMap actionMap = getActionMap();
-
-    // xxx james testing new stuff
-    //actionMap.put("unitdown", new treeControlAction("char"));
-
 
     actionMap.put("unitdown", new treeControlAction("unitdown"));
     actionMap.put("unitup", new treeControlAction("unitup"));
@@ -1882,8 +1897,68 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     actionMap.put("context", new treeControlAction("context"));
   }
 
-  private class treeControlAction extends javax.swing.AbstractAction {
+  /**
+   * This method is used by the myKeyListener on this tree to advance
+   * the selection mark in response to data entry keyboard input from
+   * the user.
+   */
 
+  private synchronized void tryMatchString(String matchOn)
+  {
+    treeNode firstNode = selectedNode;
+
+    if (firstNode.expanded && firstNode.child != null)
+      {
+	firstNode = firstNode.child;
+      }
+
+    treeNode matchNode = firstNode;
+
+    Pattern pattern = Pattern.compile("^" + matchOn, Pattern.CASE_INSENSITIVE);
+
+    boolean found = pattern.matcher(matchNode.text).find() &&
+      (matchOn.length() > 1 || firstNode != selectedNode) ;
+
+    while (!found)
+      {
+	if (matchNode.nextSibling != null) 
+	  {
+	    matchNode = matchNode.nextSibling;
+	  }
+	else if (matchNode.nextSibling == null && matchNode.parent == null)
+	  {
+	    matchNode = root;
+	  }
+	else if (matchNode.nextSibling == null && matchNode.parent != null)
+	  {
+	    matchNode = matchNode.parent.child;
+	  }
+
+	if (matchNode == firstNode)
+	  {
+	    break;
+	  }
+	
+	found = pattern.matcher(matchNode.text).find();
+      }
+
+    if (found)
+      {
+	moveSelection(matchNode);
+	scrollToSelectedRow();	
+	canvas.render();
+	canvas.repaint();
+      }
+  }
+
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                               treeControlAction
+
+  ----------------------------------------------------------------------------*/
+
+  private class treeControlAction extends javax.swing.AbstractAction 
+  {    
     public treeControlAction(String name)
     {
       super(name);
@@ -1895,6 +1970,70 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       treeControl.this.actionPerformed(ae);
     }
   }
+
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                                   myKeyListener
+
+  ----------------------------------------------------------------------------*/
+
+  private class myKeyListener implements KeyListener
+  {
+    /**
+     * The time code (in milliseconds since epoch UTC) before which we
+     * need to see the next keystroke, or else we'll clear the key buffer.
+     */
+
+    private long matchTime = 0;
+
+    /**
+     * Milliseconds interval for continued key buffer accretion.
+     */
+
+    private long matchTimeout = 1000;
+
+    /**
+     * The key buffer we've built up through sub-second keystroke
+     * intervals.
+     */
+
+    private StringBuilder matchString = new StringBuilder();
+
+    /* -- */
+
+    private myKeyListener()
+    {
+    }
+
+    public void keyTyped(KeyEvent e)
+    {
+      if (e.getKeyChar() == '\n')
+	{
+	  return;
+	}
+
+      long timeNow = java.lang.System.currentTimeMillis();
+
+      if (timeNow > matchTime || e.isActionKey() || e.getKeyChar() == '\b')
+	{
+	  matchString.setLength(0);
+	}
+      
+      matchTime = timeNow + matchTimeout;
+      matchString.append(e.getKeyChar());
+
+      tryMatchString(matchString.toString());
+    }
+    
+    public void keyReleased(KeyEvent e)
+    {      
+    }
+    
+    public void keyPressed(KeyEvent e)
+    {      
+    }
+  }
+
 }
 
 /*------------------------------------------------------------------------------
@@ -2045,6 +2184,11 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 	  }
 	return result;
       }
+  }
+
+  public boolean isRequestFocusEnabled()
+  {
+    return true;
   }
 
   /**
@@ -2476,7 +2620,16 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (node.selected)
       {
-	bg.setColor(fgColor);
+	if (ctrl.isFocusOwner())
+	  {
+	    bg.setColor(fgColor);
+	  }
+	else
+	  {
+	    Color transparentFgColor = new Color(fgColor.getRed(), fgColor.getGreen(), fgColor.getBlue(), 64);
+
+	    bg.setColor(transparentFgColor);
+	  }
 
 	bg.fillRect(x1,
 		    (horizLine - rowAscent/2),
@@ -3295,6 +3448,12 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
       }
   }
 }
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                           Range
+
+------------------------------------------------------------------------------*/
 
 /**
  * <p>This class is used as a simple struct to hold scratch information

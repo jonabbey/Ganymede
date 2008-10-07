@@ -1243,9 +1243,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     windowMenu.add(removeAllMI);
     windowMenu.addSeparator();
 
+    boolean emptyList = true;
+
     synchronized (windowList)
       {
-	windows = windowList.keys();      
+	windows = windowList.keys();
 
 	while (windows.hasMoreElements())
 	  {
@@ -1276,8 +1278,14 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 		MI.setActionCommand("showWindow");
 		MI.addActionListener(this);
 		windowMenu.add(MI);
+		emptyList = false;
 	      }
 	  }
+      }
+
+    if (emptyList)
+      {
+	gc.tree.requestFocus();
       }
 
     return windowMenu;
