@@ -542,12 +542,19 @@ public final class DBNameSpace implements NameSpace {
 	      {
 		return false;
 	      }
+
+	    if (handle.isReserved())
+	      {
+		return false;
+	      }
 	  }
 
 	return true;
       }
 
     handle = new DBNameSpaceEditingHandle(editSet, null);
+
+    handle.setReserved(true);
 
     putHandle(value, handle);
 
@@ -705,6 +712,8 @@ public final class DBNameSpace implements NameSpace {
 	  {
 	    return false;
 	  }
+
+	handle.setShadowField(field);
 
 	return true;
       }
@@ -2068,6 +2077,16 @@ class DBNameSpaceHandle implements Cloneable {
     return this.matches(field);
   }
 
+  public boolean isReserved()
+  {
+    return false;
+  }
+
+  public void setReserved(boolean reserved)
+  {
+    throw new UnsupportedOperationException();
+  }
+
   /**
    * We want to allow cloning.
    */
@@ -2156,6 +2175,12 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
    */
 
   private DBField shadowFieldB;
+
+  /**
+   * If true, this value has been reserved.
+   */
+
+  private boolean reserved;
 
   /* -- */
 
@@ -2259,6 +2284,16 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
   public boolean isEditedByOtherTransaction(DBEditSet editSet)
   {
     return editSet != editingTransaction;
+  }
+
+  public boolean isReserved()
+  {
+    return this.reserved;
+  }
+
+  public void setReserved(boolean reserved)
+  {
+    this.reserved = reserved;
   }
 
   /**
