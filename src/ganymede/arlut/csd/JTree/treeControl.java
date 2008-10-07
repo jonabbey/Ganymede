@@ -1869,14 +1869,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "left");
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0), "left");
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter");
-
-
-    // NB: Starting in Java 1.5, there is support for
-    // KeyEvent.VK_CONTEXT_MENU, which has value 0x020D.  We're not
-    // using the named constant here because we need to support
-    // compilation under 1.4.
-
-    inputMap.put(KeyStroke.getKeyStroke(0x020D, 0), "context");
+    inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_CONTEXT_MENU, 0), "context");
   
     ActionMap actionMap = getActionMap();
 
