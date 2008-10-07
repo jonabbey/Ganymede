@@ -68,7 +68,8 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.print.attribute.HashPrintRequestAttributeSet;
@@ -97,7 +98,7 @@ import arlut.csd.ganymede.client.gResultTable;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                      smartTable
+                                                                      SmartTable
 
 ------------------------------------------------------------------------------*/
 
@@ -133,7 +134,7 @@ public class SmartTable extends JPanel implements ActionListener
    * Hashable index for selecting rows by key field
    */
 
-  private Hashtable index;
+  private Map<Object, Integer> index;
   private gResultTable gResultT;
 
   // Header Menus for right click popup
@@ -157,7 +158,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     this.setLayout(new BorderLayout());
 
-    index = new Hashtable();
+    index = new HashMap<Object, Integer>();
     this.gResultT = gResultT;
 
     myModel = new MyTableModel(columnValues);
@@ -347,9 +348,11 @@ public class SmartTable extends JPanel implements ActionListener
 	    if (gResultT.used[j])
 	      {
 		cellResult = table.getValueAt(i, j);
+
 		if (cellResult != null)
 		  {
 		    columnTotWidths[j] += cellResult.toString().length();
+
 		    if (columnWidths[j] < cellResult.toString().length())
 		      {
 			columnWidths[j] = cellResult.toString().length();
@@ -514,7 +517,7 @@ public class SmartTable extends JPanel implements ActionListener
 
   public void clearCells()
   {
-    index = new Hashtable();
+    index = new HashMap<Object, Integer>();
   }
 
   /*----------------------------------------------------------------------------
@@ -789,7 +792,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     public void clearRows()
     {
-      index = new Hashtable(); // Clear Keys
+      index = new HashMap<Object, Integer>(); // Clear Keys
       rows = new Vector();     // Clear Rows
     }
 
@@ -830,7 +833,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     public final void setCellValue(Object key, int col, Object value)
     {
-      Integer row = (Integer) index.get(key);
+      Integer row = index.get(key);
       int row2 = row.intValue();
       setValueAt(value, row2, col);
     }
@@ -844,7 +847,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     public final Object getCellValue(Object key, int col)
     {
-      Integer row = (Integer) index.get(key);
+      Integer row = index.get(key);
       int row2 = row.intValue();
       return getValueAt(row2, col);
     }
@@ -993,7 +996,7 @@ public class SmartTable extends JPanel implements ActionListener
 
 class rowHandler
 {
-  Object  key;
+  Object key;
   Object[] cells;
 
   public rowHandler(Object key, int columns)
