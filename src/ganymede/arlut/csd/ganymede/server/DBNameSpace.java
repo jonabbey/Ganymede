@@ -2077,10 +2077,20 @@ class DBNameSpaceHandle implements Cloneable {
     return this.matches(field);
   }
 
+  /**
+   * Returns true if this handle has been reserved during an editing
+   * transaction.
+   */
+
   public boolean isReserved()
   {
     return false;
   }
+
+  /**
+   * Used to mark this handle as being reserved by the editing
+   * transaction.
+   */
 
   public void setReserved(boolean reserved)
   {
@@ -2286,10 +2296,20 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
     return editSet != editingTransaction;
   }
 
+  /**
+   * Returns true if this handle has been reserved during an editing
+   * transaction.
+   */
+
   public boolean isReserved()
   {
     return this.reserved;
   }
+
+  /**
+   * Used to mark this handle as being reserved by the editing
+   * transaction.
+   */
 
   public void setReserved(boolean reserved)
   {
