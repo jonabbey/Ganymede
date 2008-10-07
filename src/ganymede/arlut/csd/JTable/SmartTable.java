@@ -964,6 +964,7 @@ public class SmartTable extends JPanel implements ActionListener
      *
      * @return this component (the default table cell renderer)
      */
+
     public Component getTableCellRendererComponent(JTable table, Object value,
                                                    boolean isSelected,
                                                    boolean hasFocus, int row,
@@ -974,7 +975,11 @@ public class SmartTable extends JPanel implements ActionListener
       if (value instanceof Date)
         {
           Date dateValue = (Date) value;
-	  DateFormat df = new SimpleDateFormat(SmartTable.ts.l("getTableCellRendererComponent.datePattern")); // "M/d/yyyy"
+	  
+	  // "M/d/yyyy"
+	  String datePattern = SmartTable.ts.l("getTableCellRendererComponent.datePattern");
+
+	  DateFormat df = new SimpleDateFormat(datePattern);
           setText(df.format(dateValue));
         }
 
