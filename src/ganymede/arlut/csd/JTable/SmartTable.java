@@ -409,9 +409,16 @@ public class SmartTable extends JPanel implements ActionListener
       {
 	TableColumnModel cmodel = table.getColumnModel();
 	TextAreaRenderer textAreaRenderer = new TextAreaRenderer();
-	int physPos = myModel.getPhysicalColumnPos(colIndex);
 
-	cmodel.getColumn(physPos).setCellRenderer(textAreaRenderer);
+	try
+	  {
+	    int physPos = myModel.getPhysicalColumnPos(colIndex);
+
+	    cmodel.getColumn(physPos).setCellRenderer(textAreaRenderer);
+	  }
+	catch (IndexOutOfBoundsException ex)
+	  {
+	  }
       }
   }
 
