@@ -909,9 +909,14 @@ public class SmartTable extends JPanel implements ActionListener
     }
 
     /**
-     * Gets a physical column's position number.  Needed because colum
-     * indexes in the TableModel do not move when the columns are
-     * physically slid around in the table.
+     * Gets a physical column's position number from a TableModel
+     * column index.
+     *
+     * Needed because colums can be physically slid around by the user, while the TableModel
+     * column indexes do not change.
+     *
+     * @returns The physical index of TableModel column colIndex
+     * @throws IndexOutOfBoundsException if colIndex is out of range
      */
 
     public int getPhysicalColumnPos(int colIndex)
@@ -931,7 +936,7 @@ public class SmartTable extends JPanel implements ActionListener
 	  i++;
 	}
 
-      return -1;
+      throw new IndexOutOfBoundsException();
     }
   }
 
