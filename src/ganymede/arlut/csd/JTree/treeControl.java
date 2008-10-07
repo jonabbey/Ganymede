@@ -81,6 +81,8 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.lang.System;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -93,8 +95,6 @@ import javax.swing.JScrollBar;
 import javax.swing.KeyStroke;
 
 
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 
 /*------------------------------------------------------------------------------
@@ -1958,11 +1958,13 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	    stop = true;
 	  }
       }
-    
-    scrollToSelectedRow();	
-    canvas.render();
-    canvas.repaint();
-    // yyy 
+
+    if (found)
+      {
+	scrollToSelectedRow();	
+	canvas.render();
+	canvas.repaint();
+      }
   }
 
   private class myKeyListener implements KeyListener
