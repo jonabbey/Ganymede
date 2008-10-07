@@ -74,11 +74,13 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.lang.System;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -116,8 +118,8 @@ import java.util.regex.Matcher;
  * @see arlut.csd.JTree.treeNode
  */
 
-public class treeControl extends JPanel implements AdjustmentListener, ActionListener, MouseWheelListener {
-
+public class treeControl extends JPanel implements AdjustmentListener, ActionListener, MouseWheelListener 
+{
   static final boolean debug = false;
 
   static final int borderSpace = 0;
@@ -182,6 +184,12 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   treeNode 
     menuedNode = null;		// node most recently selected by a popup menu
 
+  String matchString = "";
+  
+  long matchTime = 0;
+
+  long matchTimeout = 1000;    // milliseconds to clear match string.
+
   /* -- */
 
 
@@ -237,6 +245,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     rows = new Vector();
 
     addMouseWheelListener(this);
+
+    addKeyListener(new myKeyListener(this));
+
     initializeKeyboardActions();
   }  
 
@@ -1288,12 +1299,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
 
 
-    // xxx
-    //System.out.println("paramString of actionPerformed: "+e.paramString());
-
-
-
-
     String actionCommand = e.getActionCommand();
 
     if (actionCommand == null)
@@ -1494,87 +1499,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
             MouseEvent me = new MouseEvent(this, 0, System.currentTimeMillis(), 0, x, y, 1, true);
             canvas.popupHandler(me, selectedNode);
           }
-      }
-    else if (actionCommand.equals("fkey"))
-      {
-	/// xxx
-	System.out.println("I have detected an F2 was pressed");
-      }
-    else if (actionCommand.equals("alphakey"))
-      {
-	/// xxx
-	System.out.println("I have detected an alphakey was pressed");
-
-	// TODO what is the keypressed???
-	String matchOn = "ba";
-
-	// todo add timer. 
-
-	// debug, tell me what node it is, if its a folder node, if its expanded, 
-	// and who its parent is if it has one.
-	System.out.println("Text of node is:"+ selectedNode.text);
-	System.out.println("Node is expandable:"+ selectedNode.expandable);
-	System.out.println("Node is expanded:"+ selectedNode.expanded);
-	if (selectedNode.parent != null) System.out.println("Parent node text:"+ selectedNode.parent.text);
-	if (selectedNode.child != null)  System.out.println("Child node text:"+ selectedNode.child.text);
-
-
-
-
-
-	// If open folder, goto first child on list.
-	if (selectedNode.expanded && selectedNode.child != null)
-	  {
-	    moveSelection(selectedNode.child);
-	  }
-
-	treeNode firstNode = selectedNode;
-	// While not matched, and not looped all the way around.
-	// Advance to next on list that matches, unless end, then wrap around.
-
-	// Compile regular expression
-	String patternStr = "^"+matchOn;
-	Pattern pattern = Pattern.compile(patternStr);
-	boolean found = false;
-	boolean stop = false;
-	while (!found && !stop)
-	  {
-	    if (selectedNode.nextSibling != null) 
-	      {
-		//System.out.println("going to nextSibling: "+selectedNode.nextSibling.text);
-		moveSelection(selectedNode.nextSibling);
-	      }
-	    // if end of list, and no parent, goto root.
-	    else if (selectedNode.nextSibling == null && selectedNode.parent == null)
-	      {
-		moveSelection(root);
-		System.out.println("restarting at root: "+selectedNode.text);
-	      }
-	    // if end of list, goto first child.
-	    else if (selectedNode.nextSibling == null && selectedNode.parent != null)
-	      {
-		moveSelection(selectedNode.parent.child);
-		System.out.println("restarting at top child: "+selectedNode.text);
-	      }
-	    
-	    Matcher matcher = pattern.matcher(selectedNode.text);
-	    // Check for a match here.
-	    if (matcher.find())
-	      {
-		System.out.println("i found a match!!!");
-		found = true;
-	      }
-	    else if (selectedNode.text.equals(firstNode.text))
-	      {
-		System.out.println("could not find a match, leaving :{ \n");
-		stop = true;
-	      }
-	  }
-
-	scrollToSelectedRow();	
-	canvas.render();
-	canvas.repaint();
-	// yyy 
       }
   }
 
@@ -1945,24 +1869,13 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter");
 
 
-    // xxx test to get a keystroke - james add.
-    inputMap.put(KeyStroke.getKeyStroke("F2"), "fkey");
-
-    for ( char ch = 'a';  ch <= 'z';  ch++ )
-      inputMap.put(KeyStroke.getKeyStroke(ch), "alphakey");
-    for ( char ch = 'A';  ch <= 'Z';  ch++ )
-      inputMap.put(KeyStroke.getKeyStroke(ch), "alphakey");
-    for ( char ch = '0';  ch <= '9';  ch++ )
-      inputMap.put(KeyStroke.getKeyStroke(ch), "alphakey");
-
-
     // NB: Starting in Java 1.5, there is support for
     // KeyEvent.VK_CONTEXT_MENU, which has value 0x020D.  We're not
     // using the named constant here because we need to support
     // compilation under 1.4.
 
     inputMap.put(KeyStroke.getKeyStroke(0x020D, 0), "context");
-
+  
     ActionMap actionMap = getActionMap();
 
     actionMap.put("unitdown", new treeControlAction("unitdown"));
@@ -1975,14 +1888,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     actionMap.put("left", new treeControlAction("left"));
     actionMap.put("enter", new treeControlAction("enter"));
     actionMap.put("context", new treeControlAction("context"));
-
-    // xxx james testing new stuff
-    actionMap.put("fkey", new treeControlAction("fkey"));
-    actionMap.put("alphakey", new treeControlAction("alphakey"));
   }
 
-  private class treeControlAction extends javax.swing.AbstractAction {
-
+  private class treeControlAction extends javax.swing.AbstractAction 
+  {    
     public treeControlAction(String name)
     {
       super(name);
@@ -1990,13 +1899,113 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     public void actionPerformed(ActionEvent e)
     {
-
-      ///System.out.println("treeControl actionPerformed is called "+(String) getValue(NAME));
-
       ActionEvent ae = new ActionEvent(treeControl.this, 0, (String) getValue(NAME));
       treeControl.this.actionPerformed(ae);
     }
   }
+
+
+  public void tryMatchString(String matchOn)
+  {
+    // If open folder, goto first child on list.
+    if (selectedNode.expanded && selectedNode.child != null)
+      {
+	moveSelection(selectedNode.child);
+      }
+    
+    treeNode firstNode = selectedNode;
+
+    // While not matched, and not looped all the way around.
+    // Advance to next on list that matches, unless end, then wrap around.
+    
+    String patternStr = "^"+matchOn;
+    Pattern pattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+    boolean found = false;
+    boolean stop = false;
+
+    Matcher matcher = pattern.matcher(selectedNode.text);
+    if (matcher.find() && matchOn.length() > 1)
+      {
+	found = true;
+      }
+
+    while (!found && !stop)
+      {
+	if (selectedNode.nextSibling != null) 
+	  {
+	    moveSelection(selectedNode.nextSibling);
+	  }
+	// if end of list, and no parent, goto root.
+	else if (selectedNode.nextSibling == null && selectedNode.parent == null)
+	  {
+	    moveSelection(root);
+	  }
+	// if end of list, goto first child.
+	else if (selectedNode.nextSibling == null && selectedNode.parent != null)
+	  {
+	    moveSelection(selectedNode.parent.child);
+	  }
+	
+	matcher = pattern.matcher(selectedNode.text);
+
+	// Check for a match here.
+	if (matcher.find())
+	  {
+	    found = true;
+	  }
+	else if (selectedNode.text.equals(firstNode.text))
+	  {
+	    stop = true;
+	  }
+      }
+    
+    scrollToSelectedRow();	
+    canvas.render();
+    canvas.repaint();
+    // yyy 
+  }
+
+  private class myKeyListener implements KeyListener
+  {
+    private JPanel parent;
+    
+    private myKeyListener(JPanel parent)
+    {
+      this.parent = parent;
+    }
+
+    public void keyTyped(KeyEvent e)
+    {
+      // reset match timer.
+      long timeNow = java.lang.System.currentTimeMillis();
+
+      // if enter key pressed, ignore.
+      if (e.getKeyChar() == '\n')
+	{
+	  return;
+	}
+
+      // if timed out, or backspace key pressed, clear match string.
+      if (timeNow - matchTime > matchTimeout || e.getKeyChar() == '\b')
+	{
+	  matchString = "";
+	}
+      
+      matchTime = java.lang.System.currentTimeMillis();
+      matchString += e.getKeyChar();
+
+      tryMatchString(matchString);
+    }
+    
+    public void keyReleased(KeyEvent e)
+    {      
+    }
+    
+    public void keyPressed(KeyEvent e)
+    {      
+    }
+  }
+
 }
 
 /*------------------------------------------------------------------------------
