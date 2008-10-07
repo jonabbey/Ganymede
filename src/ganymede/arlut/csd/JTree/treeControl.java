@@ -2014,7 +2014,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
       long timeNow = java.lang.System.currentTimeMillis();
 
-      if (timeNow > matchTime || e.isActionKey() || e.getKeyChar() == '\b')
+      if (timeNow > matchTime || e.isActionKey() || e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE)
 	{
 	  matchString.setLength(0);
 	}
