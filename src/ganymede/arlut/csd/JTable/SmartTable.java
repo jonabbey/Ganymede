@@ -890,7 +890,8 @@ public class SmartTable extends JPanel implements ActionListener
     {
       int numRows = getRowCount();
       int numCols = getColumnCount();
-      System.out.println("numCols = "+numCols);
+
+      System.out.println("numCols = " + numCols);
 
       for (int i=0; i < numRows; i++)
 	{
@@ -908,38 +909,31 @@ public class SmartTable extends JPanel implements ActionListener
     }
 
     /**
-     * Get the physical columns position number. Needed for when columns are moved,
-     * their indexes remain the same.
+     * Gets a physical column's position number.  Needed because colum
+     * indexes in the TableModel do not move when the columns are
+     * physically slid around in the table.
      */
 
     public int getPhysicalColumnPos(int colIndex)
     {
-      TableColumnModel colModel = table.getTableHeader().getColumnModel();
-
-      // get list of columns, physical order.
-      Enumeration e2 = colModel.getColumns();
       int i = 0;
-      int colIndex2 = -1;
-      TableColumn tc2 = null;
-      while (e2.hasMoreElements() && colIndex2 != colIndex)
+      Enumeration columns = table.getTableHeader().getColumnModel().getColumns();
+
+      while (columns.hasMoreElements())
 	{
-	  tc2 = (TableColumn)e2.nextElement();
-	  colIndex2 = tc2.getModelIndex();
-	  //System.out.println(i+". col index is:"+ colIndex2);
+	  TableColumn col = (TableColumn) columns.nextElement();
+
+	  if (col.getModelIndex() == colIndex)
+	    {
+	      return i;
+	    }
+
 	  i++;
 	}
 
-      if (colIndex2 == colIndex)
-	{
-	  return --i;
-	}
-      else
-	{
-	  return -1;
-	}
+      return -1;
     }
   }
-
 
   /*----------------------------------------------------------------------------
                                                                      inner class
