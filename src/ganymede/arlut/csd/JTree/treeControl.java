@@ -1812,14 +1812,16 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       {
 	System.err.println("exiting adjustScrollbars()");
       }
-
   }
+
+  /**
+   * Redraw the canvas.
+   */
 
   void refreshTree()
   {
     canvas.render();
     canvas.repaint();
-    repaint();
   }
 
   /**
