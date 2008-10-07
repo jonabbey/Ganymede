@@ -57,14 +57,13 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyVetoException;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -75,21 +74,20 @@ import javax.swing.JFileChooser;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JTable;
 import javax.swing.JToolBar;
 
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JTable.rowSelectCallback;
-import arlut.csd.JTable.rowTable;
-import arlut.csd.Util.PackageResources;
-import arlut.csd.Util.TranslationService;
+import arlut.csd.JTable.SmartTable;  
 import arlut.csd.ganymede.common.DumpResult;
-import arlut.csd.ganymede.common.DumpResultCol;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
-import arlut.csd.ganymede.common.RegexpException;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.FileTransmitter;
 import arlut.csd.ganymede.rmi.Session;
+import arlut.csd.Util.PackageResources;
+import arlut.csd.Util.TranslationService;
 
 
 /*------------------------------------------------------------------------------
@@ -122,8 +120,8 @@ import arlut.csd.ganymede.rmi.Session;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
-public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener {
-  
+public class gResultTable extends JInternalFrame implements rowSelectCallback, ActionListener 
+{  
   static final boolean debug = false;
 
   /**
@@ -134,9 +132,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.gResultTable");
 
   static final String
-    refresh_query = ts.l("global.refresh_query"), // "Refresh Query"
+    mail_report = ts.l("global.mail_report"), // "Mail Report"
     save_report = ts.l("global.save_report"), // "Save Report"
-    mail_report = ts.l("global.mail_report"); // "Mail Report"
+    print_report = ts.l("global.print_report"), // "Print Report"
+    refresh_query = ts.l("global.refresh_query"); // "Refresh Query"
 
   static final String
     tab_option = ts.l("global.tab_option"), // "Tab separated ASCII"
@@ -156,10 +155,16 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   windowPanel wp;
 
   /**
+   * Our key-indexed SmartTable
+   */
+
+  SmartTable sTable;
+
+  /**
    * Main remote interface for communications with the server.  Used to resubmit the
    * query on query refresh.
    */
-
+  
   Session session;
 
   /**
@@ -170,35 +175,22 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   Query query;
 
   /**
-   * The GUI table component.
-   */
-
-  rowTable table = null;
-
-  /**
-   * A cache of header definitions that we can use to manage column
-   * deletion.
-   */
-
-  Vector headerObjects = null;
-
-  /**
-   * The contentPane for this internal window.  We place the rowTable in this
-   * container.
+   * The contentPane for this internal window.  We place the table in
+   * this container.
    */
 
   Container contentPane;
 
-  JPopupMenu popMenu;
-  JMenuItem viewMI;
-  JMenuItem editMI;
-  JMenuItem deleteMI;
-  JMenuItem inactivateMI;
-  JMenuItem cloneMI;
-
   JToolBar toolbar;
 
-  /* -- */
+  // Row Menus for right click popup
+  JMenuItem viewMI = new JMenuItem(ts.l("init.view")); // "View Entry"
+  JMenuItem editMI = new JMenuItem(ts.l("init.edit")); // "Edit Entry"
+  JMenuItem cloneMI = new JMenuItem(ts.l("init.clone")); // "Clone Entry"
+  JMenuItem deleteMI = new JMenuItem(ts.l("init.delete")); // "Delete Entry"
+  JMenuItem inactivateMI = new JMenuItem(ts.l("init.inactivate")); // "Inactivate Entry"
+
+  public boolean[] used;
 
   /**
    * Constructor for gResultTable.  Creates the GUI table, loads it,
@@ -214,35 +206,270 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     this.session = session;
     this.query = query;
 
-    popMenu = new JPopupMenu();
+    contentPane = getContentPane();
+    contentPane.setLayout(new BorderLayout());
+
+    loadResults(results);
+  }
+
+  /**
+   *
+   * This method loads the DumpResult into a table.  The DumpResult is
+   * dissociated when this method is through with it, to aid GC.
+   *
+   */
+
+  public void loadResults(DumpResult results)
+  {
+    // "Loading table"
+    setStatus(ts.l("loadResults.loading_status"), 0);
+
+    getContentPane().removeAll(); // for the refresh, we must clean this pane out
+
+    // Add our Toolbar in.
+    toolbar = createToolBar();
+    add("North",toolbar);
+    toolbar.grabFocus();
+
+    // Create Row Menus popups now.
     viewMI = new JMenuItem(ts.l("init.view")); // "View Entry"
     editMI = new JMenuItem(ts.l("init.edit")); // "Edit Entry"
     cloneMI = new JMenuItem(ts.l("init.clone")); // "Clone Entry"
     deleteMI = new JMenuItem(ts.l("init.delete")); // "Delete Entry"
     inactivateMI = new JMenuItem(ts.l("init.inactivate")); // "Inactivate Entry"
 
-    popMenu.add(viewMI);
-    popMenu.add(editMI);
-    popMenu.add(cloneMI);
-    popMenu.add(deleteMI);
-    popMenu.add(inactivateMI);
+    JPopupMenu rowMenu = new JPopupMenu();
+    rowMenu.add(viewMI);
+    rowMenu.add(editMI);
+    rowMenu.add(cloneMI);
+    rowMenu.add(deleteMI);
+    rowMenu.add(inactivateMI);
 
-    contentPane = getContentPane();
+    // Set our title with the result count
 
-    contentPane.setLayout(new BorderLayout());
+    String queryType = null;
 
-    toolbar = createToolBar();
-    contentPane.add("North",toolbar);
-    toolbar.grabFocus();
+    if (query.objectName != null) 
+      {
+	queryType = query.objectName;
+      }
+    else if (query.objectType != -1) 
+      {
+	queryType = wp.getgclient().loader.getObjectType(query.objectType);
+      }
+    else 
+      {
+	queryType = ts.l("loadResults.unknown_query_type");   // "<unknown>"
+      }
 
-    loadResults(results);
+    // "Query: [{0}] results: {1,num,#} entries"
+    int rows = results.resultSize();
+    wp.setWindowTitle(this, ts.l("loadResults.window_title", queryType, new Integer(rows)));
+    wp.updateWindowMenu();
+
+
+    Vector headerVect = results.getHeaders();
+    String[] columnNames = new String[headerVect.size()];	
+    used = new boolean[headerVect.size()];
+
+    if (debug)
+      {
+	System.err.println("gResultTable: " + headerVect.size() + " headers returned by query");
+      }
+    
+    // Get all Column Names now
+
+    for (int i=0; i < headerVect.size(); i++)      
+      {
+	columnNames[i] = (String) headerVect.elementAt(i);
+
+	if (debug)
+	  {
+	    System.out.println("columnNames "+i+" value is:"+columnNames[i]+"*");
+	  }
+
+	used[i] = false;
+      }
+    
+    // Pass our SmartTable the results set, and a text Row menu
+    // This will render the table nicely and setup a header and row right click menu (user provided)
+    // header can sort and remove columns, the columns must be defined before creating the table, the 
+    // data cells may be filled in later.  this is for the callback functions
+
+    sTable = new SmartTable(rowMenu, columnNames, this); 
+    getContentPane().add(sTable); 
+
+    // Now Read in all the result lines.
+    for (int i=0; i < rows; i++)
+      {
+	// Save invid to refer to later, as it is the key field.
+	Invid invid = results.getInvid(i);
+	sTable.newRow(invid);
+
+	for (int j=0; j < headerVect.size(); j++)
+	  {
+	    Object cellResult = results.getResult(i, j);	
+	    sTable.setCellValue(invid, j, cellResult);
+
+	    if (!used[j] && cellResult != null && !cellResult.toString().equals(""))
+	      {
+		used[j] = true;  
+	      }
+	  }
+      } 
+
+    // Removing empty columns, we have to do this backwards so that we don't
+    // change the index of a column we'll later delete
+
+    for (int i = used.length-1; i >= 0 ; i--)
+      {
+	if (!used[i])
+	  {
+	      sTable.table.removeColumn(sTable.table.getColumnModel().getColumn(i));  
+	  }
+      }
+
+    validate(); // needed after refresh results.
+
+    sTable.fixTableColumns();
+
+    // "Query Complete."
+    setStatus(ts.l("loadResults.complete_status"));   
+  }
+
+  /**
+   * Creates and initializes the JInternalFrame's toolbar.
+   */
+
+  private JToolBar createToolBar()
+  {
+    // New image icons from: http://tango.freedesktop.org/Tango_Icon_Library
+    Image mailIcon = PackageResources.getImageResource(this, "queryTB_mail.png", getClass());
+    Image saveIcon = PackageResources.getImageResource(this, "queryTB_save.png", getClass());
+    Image printIcon = PackageResources.getImageResource(this, "queryTB_print.png", getClass()); 
+    Image refreshIcon = PackageResources.getImageResource(this, "queryTB_refresh.png", getClass());
+
+    Insets insets = new Insets(0,0,0,0);
+    JToolBar toolBarTemp = new JToolBar();
+
+    toolBarTemp.setBorderPainted(true);
+    toolBarTemp.setFloatable(false);
+    toolBarTemp.setMargin(insets);
+
+    // "Mail"
+    JButton b = new JButton(ts.l("createToolBar.mail_button"), new ImageIcon(mailIcon));
+
+    // "M"
+    if (ts.hasPattern("createToolBar.mail_button_mnemonic_optional"))
+      {
+	b.setMnemonic((int) ts.l("createToolBar.mail_button_mnemonic_optional").charAt(0));
+      }
+
+    b.setFont(new Font("SansSerif", Font.PLAIN, 10));
+    b.setMargin(insets);
+    b.setActionCommand(mail_report);
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
+
+    // "Email results"
+    if (ts.hasPattern("createToolBar.mail_button_tooltip_optional"))
+      {
+	b.setToolTipText(ts.l("createToolBar.mail_button_tooltip_optional"));
+      }
+
+    b.addActionListener(this);
+    toolBarTemp.add(b);
+
+    // No save feature if running from applet
+    if (!glogin.isApplet())
+      {
+	// "Save"
+	b = new JButton(ts.l("createToolBar.save_button"), new ImageIcon(saveIcon));
+
+	// "S"
+	if (ts.hasPattern("createToolBar.save_button_mnemonic_optional"))
+	  {
+	    b.setMnemonic((int) ts.l("createToolBar.save_button_mnemonic_optional").charAt(0));
+	  }
+
+	b.setFont(new Font("SansSerif", Font.PLAIN, 10));
+	b.setMargin(insets);
+	b.setActionCommand(save_report);
+	b.setVerticalTextPosition(b.BOTTOM);
+	b.setHorizontalTextPosition(b.CENTER);
+
+	// "Save results"
+	if (ts.hasPattern("createToolBar.save_button_tooltip_optional"))
+	  {
+	    b.setToolTipText(ts.l("createToolBar.save_button_tooltip_optional"));
+	  }
+
+	b.addActionListener(this);
+	toolBarTemp.add(b);
+      }
+    
+
+    // "Print"
+    b = new JButton(ts.l("createToolBar.print_button"), new ImageIcon(printIcon));
+    
+    // "P"
+    if (ts.hasPattern("createToolBar.print_button_mnemonic_optional"))
+      {
+	b.setMnemonic((int) ts.l("createToolBar.print_button_mnemonic_optional").charAt(0));
+      }
+    
+    b.setFont(new Font("SansSerif", Font.PLAIN, 10));
+    b.setMargin(insets);
+    b.setActionCommand(print_report);
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
+    
+    // "Print results"
+    if (ts.hasPattern("createToolBar.print_button_tooltip_optional"))
+      {
+	b.setToolTipText(ts.l("createToolBar.print_button_tooltip_optional"));
+      }
+
+    b.addActionListener(this);
+    toolBarTemp.add(b);
+
+    // "Refresh"
+    b = new JButton(ts.l("createToolBar.refresh_button"), new ImageIcon(refreshIcon));
+
+    // "R"
+    if (ts.hasPattern("createToolBar.refresh_button_mnemonic_optional"))
+      {
+	b.setMnemonic((int) ts.l("createToolBar.refresh_button_mnemonic_optional").charAt(0));
+      }
+
+    b.setFont(new Font("SansSerif", Font.PLAIN, 10));
+    b.setMargin(insets);
+    b.setActionCommand(refresh_query);
+    b.setVerticalTextPosition(b.BOTTOM);
+    b.setHorizontalTextPosition(b.CENTER);
+
+    // "Refresh query"
+    if (ts.hasPattern("createToolBar.refresh_button_tooltip_optional"))
+      {
+	b.setToolTipText(ts.l("createToolBar.refresh_button_tooltip_optional"));
+      }
+
+    b.addActionListener(this);
+    toolBarTemp.add(b);
+
+    return toolBarTemp;
+  }
+
+  JToolBar getToolBar() 
+  {
+    return toolbar;
   }
 
   public void actionPerformed(ActionEvent event)
   {
-    if (event.getActionCommand().equals(refresh_query))
+    if (event.getActionCommand().equals(mail_report))
       {
-	refreshQuery();
+	sendReport(true);
 	toolbar.requestFocus();
 	return;
       }
@@ -254,9 +481,16 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	return;
       }
     
-    if (event.getActionCommand().equals(mail_report))
+     if (event.getActionCommand().equals(print_report))
+     {
+       sTable.print(); 
+       toolbar.requestFocus();
+       return;
+     }
+
+    if (event.getActionCommand().equals(refresh_query))
       {
-	sendReport(true);
+	refreshQuery();
 	toolbar.requestFocus();
 	return;
       }
@@ -269,8 +503,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     String addresses;
     String format;
     StringBuffer report = null;
-
-    /* -- */
 
     formatChoices.addElement(tab_option);
     formatChoices.addElement(csv_option);
@@ -415,223 +647,78 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     DumpResult buffer = null;
 
-    /* -- */
-
     // "Querying server"
     setStatus(ts.l("refreshQuery.querying_status"), 0);
 
-    if (query != null)
+    if (query == null)
       {
-	try
+	return;
+      }
+
+    try
+      {
+	buffer = session.dump(query);
+      }
+    catch (Exception ex)
+      {
+	this.wp.getgclient().processException(ex);
+      }
+
+    if (buffer == null)
+      {
+	if (debug)
 	  {
-	    buffer = session.dump(query);
-	  }
-	catch (Exception ex)
-	  {
-	    this.wp.getgclient().processException(ex);
+	    System.err.println("null query dump result");
 	  }
 
-	if (buffer == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("null query dump result");
-	      }
-
-	    // "No results"
-	    setStatus(ts.l("refreshQuery.no_result_status"));
-	  }
-	else
-	  {
-	    loadResults(buffer);
-	  }
+	// "No results"
+	setStatus(ts.l("refreshQuery.no_result_status"));
+      }
+    else
+      {
+	loadResults(buffer);
       }
   }
 
   /**
-   *
-   * This method loads the DumpResult into a table.  The DumpResult is
-   * dissociated when this method is through with it, to aid GC.
-   *
+   * Called when a row is double selected (double clicked) in the table
+   * 
+   * @param key Hash key for the selected row
    */
-
-  public void loadResults(DumpResult results)
-  {
-    boolean firstTime = true;
-    boolean[] used;
-    String[] headers;
-    int [] colWidths;
-    Invid invid;
-    String tempString = null;
-    Object cellResult;
-    Object data = null;
-    DateFormat format = new SimpleDateFormat("M/d/yyyy");
-    int rows = 0;
-
-    /* -- */
-
-    // "Loading table"
-    setStatus(ts.l("loadResults.loading_status"), 0);
-
-    headerObjects = new Vector(results.getHeaderObjects());
-    rows = results.resultSize();
-    headers = new String[headerObjects.size()];
-    used = new boolean[headerObjects.size()];
-
-    if (debug)
-      {
-	System.err.println("gResultTable: " + headerObjects.size() + " headers returned by query");
-      }
-    
-    for (int i = 0; i < headerObjects.size(); i++)
-      {
-	headers[i] = ((DumpResultCol) headerObjects.elementAt(i)).getName();
-	used[i] = false;
-      }
-
-    colWidths = new int[headerObjects.size()];
-
-    for (int i = 0; i < colWidths.length; i++)
-      {
-	colWidths[i] = 50;
-      }
-
-    // now we can initialize the table
-    
-    if (table == null)
-      {
-	table = new rowTable(colWidths, headers, this, popMenu, true);
-	contentPane.add("Center", table);
-      }
-    else
-      {
-	table.reinitialize(colWidths, headers);
-	firstTime = false;
-      }
-
-    // now read in all the result lines
-
-    for (int i = 0; i < rows; i++)
-      {
-	invid = results.getInvid(i);
-	table.newRow(invid);
-
-	for (int j = 0; j < headers.length; j++)
-	  {
-	    cellResult = results.getResult(i, j);
-
-	    if (cellResult == null)
-	      {
-		table.setCellText(invid, j, "", false);
-	      }
-	    else
-	      {
-		if (cellResult instanceof Integer)
-		  {
-		    tempString = cellResult.toString();
-		    data = cellResult;
-		  }
-		else if (cellResult instanceof Double)
-		  {
-		    tempString = cellResult.toString();
-		    data = cellResult;
-		  }
-		else if (cellResult instanceof Date)
-		  {
-		    tempString = format.format(cellResult);
-		    data = cellResult;
-		  }
-		else if (cellResult instanceof String)
-		  {
-		    tempString = (String) cellResult;
-		    data = null;
-		  }
-		else
-		  {
-		    System.err.println("ERROR! Unknown result type in cell " + i + "," + j + ": "+ cellResult);
-		  }
-
-		if (tempString.equals(""))
-		  {
-		    table.setCellText(invid, j, "", false);
-		  }
-		else
-		  {
-		    used[j] = true;
-		    table.setCellText(invid, j, tempString, data, false);
-		  }
-	      }
-	  }
-      }
-
-    // we're done with the results now.. break it apart and forget about it.
-
-    results.dissociate();
-
-    // we have to do this backwards so that we don't
-    // change the index of a column we'll later delete
-
-    for (int i = used.length-1; i >= 0 ; i--)
-      {
-	if (!used[i])
-	  {
-	    table.deleteColumn(i,true);
-	  }
-      }
-
-    // sort by the first column in ascending order
-
-    // "Sorting table on first column"
-    setStatus(ts.l("loadResults.sorting_status"), 0);
-
-    table.resort(0, true, false);
-
-    // "Query Complete."
-    setStatus(ts.l("loadResults.complete_status"));
-
-    // the first time we're called, the table will not be visible, so we
-    // don't want to refresh it here..
-
-    if (!firstTime)
-      {
-	table.refreshTable();
-      }
-
-    // set our title with the result count
-
-    String queryType = null;
-
-    if (query.objectName != null)
-      {
-	queryType = query.objectName;
-      }
-    else if (query.objectType != -1)
-      {
-	queryType = wp.getgclient().loader.getObjectType(query.objectType);
-      }
-    else
-      {
-	// "<unknown>"
-	queryType = ts.l("loadResults.unknown_query_type");
-      }
-
-    // "Query: [{0}] results: {1,num,#} entries"
-    wp.setWindowTitle(this, ts.l("loadResults.window_title",
-				 queryType,
-				 new Integer(rows)));
-  }
 
   public void rowSelected(Object key)
   {
   }
 
+  /**
+   * Called when a row is unselected in the table
+   * 
+   * @param key Hash key for the unselected row
+   * @param endSelected false if the callback should assume that the final
+   *                    state of the system due to the user's present 
+   *                    action will have no row selected
+   */
+
   public void rowDoubleSelected(Object key)
   {
   }
 
+  /**
+   * Called when a row is unselected in the table
+   * 
+   * @param key Hash key for the row on which the popup menu item was performed
+   * @param event the original ActionEvent from the popupmenu.  
+   *              See event.getSource() to identify the menu item performed.
+   */
+
   public void rowUnSelected(Object key, boolean endSelected)
   {
   }
+
+  /**
+   * This function is called from inside SmartTable via the right
+   * click row menus, then passed back up to main client
+   */
 
   public void rowMenuPerformed(Object key, java.awt.event.ActionEvent event)
   {
@@ -659,14 +746,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   public void colMenuPerformed(int menuCol, java.awt.event.ActionEvent event)
   {
-    if (event.getActionCommand().equals(rowTable.delColStr))
-      {
-        DumpResultCol colHeader = (DumpResultCol) headerObjects.elementAt(menuCol);
-
-        headerObjects.removeElementAt(menuCol);
-
-        query.removeField(colHeader.getFieldId());
-      }
   }
 
   /**
@@ -679,13 +758,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   StringBuffer generateHTMLRep()
   {
     StringBuffer result = new StringBuffer();
-    Vector headers = table.getTableHeaders();
-    int colcount = headers.size();
+    JTable table = sTable.table;
+    int colcount = table.getColumnCount();
     int size = table.getRowCount();
     String cellText;
     String date = (new Date()).toString();
-
-    /* -- */
 
     // we just have to hope that the table isn't going to
     // change while we're creating things.  There's actually
@@ -694,38 +771,38 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // we are likely to be dispatched from the GUI thread,
     // this may not be an issue.
 
-    result.append("<HTML>\n");
-    result.append("<HEAD>\n");
-    result.append("<TITLE>Ganymede Table Dump - ");
+    result.append("<html>\n");
+    result.append("<head>\n");
+    result.append("<title>Ganymede Table Dump - ");
     result.append(date);
-    result.append("</TITLE>\n");
-    result.append("</HEAD>\n");
-    result.append("<BODY BGCOLOR=\"#FFFFFF\">\n");
-    result.append("<H1>Ganymede Table Dump - ");
+    result.append("</title>\n");
+    result.append("</head>\n");
+    result.append("<body bgcolor=\"#FFFFFF\">\n");
+    result.append("<h1>Ganymede Table Dump - ");
     result.append(date);
-    result.append("</H1>\n");
-    result.append("<HR>\n");
-    result.append("<TABLE BORDER>\n");
-    result.append("<TR>\n");
+    result.append("</h1>\n");
+    result.append("<hr>\n");
+    result.append("<table border>\n");
+    result.append("<tr>\n");
     
-    for (int i = 0; i < headers.size(); i++)
+    for (int i = 0; i < colcount; i++)
       {
-	result.append("<TH>");
-	result.append(headers.elementAt(i));
-	result.append("</TH>\n");
+	result.append("<th>");
+	result.append(table.getColumnName(i));
+	result.append("</th>\n");
       }
 
-    result.append("</TR>\n");
+    result.append("</tr>\n");
 
     for (int i = 0; i < size; i++)
       {
-	result.append("<TR>\n");
+	result.append("<tr>\n");
 
 	for (int j = 0; j < colcount; j++)
 	  {
-	    result.append("<TD>");
+	    result.append("<td>");
 
-	    cellText = table.getCellText(j, i);
+	    cellText = table.getValueAt(i, j).toString();
 
 	    if (cellText != null)
 	      {
@@ -733,13 +810,13 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 		result.append(cellText);
 	      }
 
-	    result.append("</TD>\n");
+	    result.append("</td>\n");
 	  }
 
-	result.append("</TR>\n");
+	result.append("</tr>\n");
       }
 
-    result.append("</TABLE><HR></BODY></HTML>\n");
+    result.append("</table><hr></body></html>\n");
 
     return result;
   }
@@ -752,12 +829,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   StringBuffer generateTextRep(char sepChar)
   {
     StringBuffer result = new StringBuffer();
-    Vector headers = table.getTableHeaders();
-    int colcount = headers.size();
+    JTable table = sTable.table;
+    int colcount = table.getColumnCount();
     int size = table.getRowCount();
     String cellText;
-
-    /* -- */
 
     // we just have to hope that the table isn't going to
     // change while we're creating things.  There's actually
@@ -775,7 +850,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 		result.append(sepChar);
 	      }
 
-	    cellText = table.getCellText(j, i);
+	    cellText = table.getValueAt(i, j).toString();
 
 	    if (cellText != null)
 	      {
@@ -838,8 +913,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     char[] chars;
     StringBuffer buffer = new StringBuffer();
 
-    /* -- */
-
     chars = string.toCharArray();
 
     for (int j = 0; j < chars.length; j++)
@@ -871,18 +944,14 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   }
 
   /**
-   *
    * This helper method makes a field string safe to emit
    * to an HTML file.
-   *
    */
 
   String escapeHTML(String string)
   {
     char[] chars;
     StringBuffer buffer = new StringBuffer();
-
-    /* -- */
 
     chars = string.toCharArray();
 
@@ -905,15 +974,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     return buffer.toString();
   }
 
-  public void dispose()
-  {
-    if (table != null)
-      {
-        table.dispose();
-        table = null;
-      }
-  }
-
   // -- helper functions
 
   private final void setStatus(String s)
@@ -924,107 +984,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   private final void setStatus(String s, int timeLimit)
   {
     wp.gc.setStatus(s, timeLimit);
-  }
-
-  /**
-   * Creates and initializes the JInternalFrame's toolbar.
-   */
-
-  private JToolBar createToolBar()
-  {
-    Image mailIcon = PackageResources.getImageResource(this, "queryTB_mail.gif", getClass());
-    Image saveIcon = PackageResources.getImageResource(this, "queryTB_save.gif", getClass());
-    Image refreshIcon = PackageResources.getImageResource(this, "queryTB_refresh.gif", getClass());
-
-    Insets insets = new Insets(0,0,0,0);
-    JToolBar toolBarTemp = new JToolBar();
-
-    toolBarTemp.setBorderPainted(true);
-    toolBarTemp.setFloatable(false);
-    toolBarTemp.setMargin(insets);
-
-    // "Mail"
-    JButton b = new JButton(ts.l("createToolBar.mail_button"), new ImageIcon(mailIcon));
-
-    // "M"
-    if (ts.hasPattern("createToolBar.mail_button_mnemonic_optional"))
-      {
-	b.setMnemonic((int) ts.l("createToolBar.mail_button_mnemonic_optional").charAt(0));
-      }
-
-    b.setFont(new Font("SansSerif", Font.PLAIN, 10));
-    b.setMargin(insets);
-    b.setActionCommand("Mail Report");
-    b.setVerticalTextPosition(b.BOTTOM);
-    b.setHorizontalTextPosition(b.CENTER);
-
-    // "Email results"
-    if (ts.hasPattern("createToolBar.mail_button_tooltip_optional"))
-      {
-	b.setToolTipText(ts.l("createToolBar.mail_button_tooltip_optional"));
-      }
-
-    b.addActionListener(this);
-    toolBarTemp.add(b);
-
-    // No save feature if running from applet
-    if (!glogin.isApplet())
-      {
-	// "Save"
-	b = new JButton(ts.l("createToolBar.save_button"), new ImageIcon(saveIcon));
-
-	// "S"
-	if (ts.hasPattern("createToolBar.save_button_mnemonic_optional"))
-	  {
-	    b.setMnemonic((int) ts.l("createToolBar.save_button_mnemonic_optional").charAt(0));
-	  }
-
-	b.setFont(new Font("SansSerif", Font.PLAIN, 10));
-	b.setMargin(insets);
-	b.setActionCommand("Save Report");
-	b.setVerticalTextPosition(b.BOTTOM);
-	b.setHorizontalTextPosition(b.CENTER);
-
-	// "Save results"
-	if (ts.hasPattern("createToolBar.save_button_tooltip_optional"))
-	  {
-	    b.setToolTipText(ts.l("createToolBar.save_button_tooltip_optional"));
-	  }
-
-	b.addActionListener(this);
-	toolBarTemp.add(b);
-      }
-    
-    // "Refresh"
-    b = new JButton(ts.l("createToolBar.refresh_button"), new ImageIcon(refreshIcon));
-
-    // "R"
-    if (ts.hasPattern("createToolBar.refresh_button_mnemonic_optional"))
-      {
-	b.setMnemonic((int) ts.l("createToolBar.refresh_button_mnemonic_optional").charAt(0));
-      }
-
-    b.setFont(new Font("SansSerif", Font.PLAIN, 10));
-    b.setMargin(insets);
-    b.setActionCommand("Refresh Query");
-    b.setVerticalTextPosition(b.BOTTOM);
-    b.setHorizontalTextPosition(b.CENTER);
-
-    // "Refresh query"
-    if (ts.hasPattern("createToolBar.refersh_button_tooltip_optional"))
-      {
-	b.setToolTipText(ts.l("createToolBar.refresh_button_tooltip_optional"));
-      }
-
-    b.addActionListener(this);
-    toolBarTemp.add(b);
-
-    return toolBarTemp;
-  }
-
-  JToolBar getToolBar() 
-  {
-    return toolbar;
   }
 
   /**
