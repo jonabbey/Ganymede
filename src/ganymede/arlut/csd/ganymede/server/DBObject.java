@@ -1055,8 +1055,17 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		  {
 		    if (definition.namespace.containsKey(tmp.key(j)))
 		      {
-			// "Non-unique value {0} detected in vector field {1} which is constrained by namespace {2}"
-			throw new RuntimeException(ts.l("receive.vectornamespace", tmp.key(j), definition, definition.namespace));
+			try
+			  {
+			    // "Non-unique value {0} detected in vector field {1} which is constrained by namespace {2}"
+			    throw new RuntimeException(ts.l("receive.vectornamespace",
+							    GHashtable.keyString(tmp.key(j)),
+							    definition, definition.namespace));
+			  }
+			catch (RuntimeException ex)
+			  {
+			    ex.printStackTrace();
+			  }
 		      } 
 
 		    definition.namespace.receiveValue(tmp.key(j), tmp);
@@ -1069,7 +1078,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		if (definition.namespace.containsKey(tmp.key()))
 		  {
 		    // "Non-unique value {0} detected in scalar field {1} which is constrained by namespace {2}"
-		    throw new RuntimeException(ts.l("receive.scalarnamespace", tmp.key(), definition, definition.namespace));
+		    try
+		      {
+			throw new RuntimeException(ts.l("receive.scalarnamespace",
+							GHashtable.keyString(tmp.key()),
+							definition, definition.namespace));
+		      }
+		    catch (RuntimeException ex)
+		      {
+			ex.printStackTrace();
+		      }
 		  }
 
 		definition.namespace.receiveValue(tmp.key(), tmp);
