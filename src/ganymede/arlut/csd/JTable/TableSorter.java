@@ -1,8 +1,8 @@
 /*
    TableSorter.java
 
-   This Module encapsulates user interactions with a Jtable, including
-   right click menus to sort and remove columns
+   TableSorter is a decorator for TableModels; adding sorting
+   functionality to a supplied TableModel.
 
    Created: 27 February 2004
    Last Commit: $Format:%cd$
@@ -139,6 +139,10 @@ public class TableSorter extends AbstractTableModel {
   private Map columnComparators = new HashMap();
   private List sortingColumns = new ArrayList();
 
+  private boolean need_resort = false;
+
+  /* -- */
+
   public TableSorter()
   {
     this.mouseListener = new MouseHandler();
@@ -158,10 +162,15 @@ public class TableSorter extends AbstractTableModel {
     setTableModel(tableModel);
   }
 
-  private void clearSortingState()
+  private void clearSortingState(boolean forceFullReset)
   {
-    viewToModel = null;
-    modelToView = null;
+    need_resort = true;
+
+    if (forceFullReset)
+      {
+	viewToModel = null;
+	modelToView = null;
+      }
   }
 
   public TableModel getTableModel()
@@ -183,7 +192,7 @@ public class TableSorter extends AbstractTableModel {
 	this.tableModel.addTableModelListener(tableModelListener);
       }
 
-    clearSortingState();
+    clearSortingState(true);
     fireTableStructureChanged();
   }
 
@@ -242,7 +251,7 @@ public class TableSorter extends AbstractTableModel {
 
   private void sortingStatusChanged()
   {
-    clearSortingState();
+    clearSortingState(false);
     fireTableDataChanged();
 
     if (tableHeader != null)
@@ -330,8 +339,12 @@ public class TableSorter extends AbstractTableModel {
 
 	if (isSorting())
 	  {
-	    java.util.Collections.sort(viewToModel); // stable merge sort
+	    java.util.Collections.sort(viewToModel);
 	  }
+      }
+    else if (need_resort)
+      {
+	java.util.Collections.sort(viewToModel); // stable merge sort
       }
 
     return viewToModel;
@@ -405,6 +418,8 @@ public class TableSorter extends AbstractTableModel {
   {
     private int modelIndex;
 
+    /* -- */
+
     public Row(int index)
     {
       this.modelIndex = index;
@@ -464,7 +479,7 @@ public class TableSorter extends AbstractTableModel {
       // If we're not sorting by anything, just pass the event along.
       if (!isSorting())
 	{
-	  clearSortingState();
+	  clearSortingState(true);
 	  fireTableChanged(e);
 	  return;
 	}
@@ -512,7 +527,7 @@ public class TableSorter extends AbstractTableModel {
 	}
 
       // Something has happened to the data that may have invalidated the row order.
-      clearSortingState();
+      clearSortingState(true);
       fireTableDataChanged();
       return;
     }
