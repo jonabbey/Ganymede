@@ -1428,6 +1428,12 @@ client with a Swing JTable-based keyed table.  This enabled fancier
 sort control, and most especially made it possible to print query
 reports.
 
+91. [CLIENT] Added extended keyboard navigation to the tree component
+
+The tree component used in the Ganymede client and admin console
+schema editor now support full content search through prefix match
+with keyboard text entry.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
