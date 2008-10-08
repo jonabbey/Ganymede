@@ -1983,7 +1983,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
           matchString.setLength(0);
         }
 
-      if (e.getKeyChar() == '\n')
+      if (e.getKeyChar() == '\n' || e.getKeyChar() == '\b')
         {
           return;
         }
