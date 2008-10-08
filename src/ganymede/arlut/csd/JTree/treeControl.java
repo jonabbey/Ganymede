@@ -109,7 +109,6 @@ import javax.swing.KeyStroke;
  * 'drag-tween' and 'drag on' drag supported.
  *
  * @author Jonathan Abbey
- * @version $Id$
  *
  * @see arlut.csd.JTree.treeCallback
  * @see arlut.csd.JTree.treeNode
@@ -184,6 +183,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   /* -- */
 
   /**
+   * Constructor
    *
    * @param font Font for text in the Tree Canvas
    * @param fgColor Foreground color for text in the treeCanvas
@@ -191,7 +191,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    * @param callback Object to receive notification of events
    * @param images Array of images to be used in the canvas;  nodes refer to images by index
    * @param menu Popup menu to attach to the treeControl
-   *
    */
 
   public treeControl(Font font, Color fgColor, Color bgColor, treeCallback callback,
@@ -246,13 +245,13 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
+   * Constructor
    *
    * @param font Font for text in the Tree Canvas
    * @param fgColor Foreground color for text in the treeCanvas
    * @param bgColor Background color for text in the treeCanvas
    * @param callback Object to receive notification of events
    * @param images Array of images to be used in the canvas;  nodes refer to images by index
-   *
    */
 
   public treeControl(Font font, Color fgColor, Color bgColor, treeCallback callback,
@@ -262,7 +261,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * This method is used to set the drag behavior of the tree.
    *
    * @param dCallback DragDrop manager object
@@ -270,7 +268,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    * and treeControl.DRAG_LINE.
    *
    * @see arlut.csd.JTree.treeDragDropCallback
-   *
    */
 
   public synchronized void setDrag(treeDragDropCallback dCallback, int mode)
@@ -300,9 +297,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Clear out the tree.
-   *
    */
 
   public synchronized void clearTree()
@@ -335,9 +330,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Clear the tree and establish a new root node.
-   *
    */
 
   public synchronized void setRoot(treeNode root)
@@ -387,13 +380,17 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     refreshTree();
   }
 
+  /**
+   * Sets the minimum width the treeControl will demand in a sliding
+   * pane.
+   */
+
   public void setMinimumWidth(int minWidth)
   {
     this.minWidth = minWidth;
   }
 
   /**
-   *
    * Inserts a new node into the tree.  newNode's prevSibling is
    * checked first.  If it is non-null, newNode is inserted after
    * newNode.prevSibling, regardless of what newNode.parent says.  If
@@ -402,7 +399,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    *
    * @param newNode The node to be inserted.  Properties of the node determine where the node is inserted.
    * @param repaint If true, immediately re-render and refresh the treeCanvas.
-   *
    */
 
   public synchronized void insertNode(treeNode newNode, boolean repaint)
@@ -548,7 +544,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * <p>Removes a node from the tree, along with all its children.
    * Any child nodes attached to the node to be deleted will be
    * unlinked from one another.  If you want to be able to re-insert
@@ -557,7 +552,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    *
    * @param node The node to be removed.
    * @param repaint If true, immediately re-render and refresh the treeCanvas.
-   *
    */
 
   public synchronized void deleteNode(treeNode node, boolean repaint)
@@ -648,7 +642,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Moves a node (possibly the root of an extensive subtree) from one
    * location in the tree to another.<br><br>
    *
@@ -663,7 +656,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    * @param repaint If true, immediately re-render and refresh the treeCanvas after moving the node.
    *
    * @return a reference to a copy of the node in its new location
-   *
    */
 
   public synchronized treeNode moveNode(treeNode node, treeNode parent,
@@ -764,12 +756,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Helper function to break down links in a tree to speed GC.
    * breakdownTree will disassociate all nodes in an unlinked
    * tree, so new nodes will need to be assembled in order
    * to be resubmitted to the tree.
-   *
    */
 
   void breakdownTree(treeNode node)
@@ -799,16 +789,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Helper method to force recalculation of childStacks.  This method
    * should be called on the child of a node, not on the node itself,
    * lest clearStacks recurse along the node's siblings.. not that
    * that will cause any great hardship, but it would slow things down
    * a very little bit.
-   *
    */
 
-  void clearStacks(treeNode node)
+  private void clearStacks(treeNode node)
   {
     if (node == null)
       {
@@ -825,9 +813,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Get access to the root of the treeCanvas's tree of nodes.
-   *
    */
 
   public treeNode getRoot()
@@ -836,9 +822,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Recalculate and redraw the tree.
-   *
    */
 
   public void refresh()
@@ -847,7 +831,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     refreshTree();
   }
 
-  // internal diagnostic method
+  /**
+   * Internal diagnostic method, prints the structure of this tree to
+   * System.err.
+   */
 
   public void dumpRows()
   {
@@ -883,9 +870,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   // internal methods, called by treeCanvas
 
   /**
-   *
    * open the given node
-   *
    */
 
   public void expandNode(treeNode node, boolean repaint)
@@ -894,9 +879,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * open the given node
-   *
    */
 
   public synchronized void expandNode(treeNode node, boolean repaint, boolean doCallback)
@@ -935,7 +918,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * recursive routine to make descendant nodes visible.  will not
    * expand any contracted nodes, but will add any nodes reachable
    * without passing below a contracted node to the visibility
@@ -943,10 +925,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    * @param row the row to match the node to.
    *
    * @return the row number of the last descendant made visible
-   *
    */
 
-  int makeDescendantsVisible(treeNode node, int row)
+  private int makeDescendantsVisible(treeNode node, int row)
   {
     while (node != null)
       {
@@ -966,9 +947,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * close the given node
-   *
    */
 
   public void contractNode(treeNode node, boolean repaint)
@@ -977,9 +956,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * close the given node
-   *
    */
 
   public synchronized void contractNode(treeNode node, boolean repaint, boolean doCallback)
@@ -1064,14 +1041,15 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
-   * calculates the rows that are visible at and below node,
+   * Calculates the rows that are visible at and below node,
    * so that contractNode() can remove all nodes in that
    * range from visibility
    *
+   * @param node The node of the subtree we need to examine
+   * @param range We encode the range below node in the Range object
    */
 
-  void getVisibleDescendantRange(treeNode node, Range range)
+  private void getVisibleDescendantRange(treeNode node, Range range)
   {
     treeNode myNode = node;
 
@@ -1114,11 +1092,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Select a node without issuing a callback to the client.<br><br>
    *
    * Used to implement highlighting during drag-and-drop.
-   *
    */
 
   void transientSelectNode(treeNode node)
@@ -1133,6 +1109,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     selectedNode = node;
   }
 
+  /**
+   * Used to trigger the default action in the callback.
+   */
+
   void doubleClickNode(treeNode node)
   {
     if (callback != null)
@@ -1142,12 +1122,12 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Mark a node as selected, issuing a callback to the client
    * reporting the selection.<br><br>
    *
    * This method does not deselect other nodes.
    *
+   * @param node The node to select
    */
 
   public void selectNode(treeNode node)
@@ -1168,10 +1148,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * This method deselects the currently selected node (if any) and
    * selects the paramater node.
    *
+   * @param node The node to select
    */
 
   void moveSelection(treeNode node)
@@ -1190,11 +1170,11 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Deselect a node without issuing a callback to the client.<br><br>
    *
    * Used to implement highlighting during drag-and-drop.
    *
+   * @param node The node to deselect
    */
 
   void transientUnselectNode(treeNode node)
@@ -1210,14 +1190,13 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Deselect a node, issuing a callback to the client
    * reporting the deselection.<br><br>
    *
    * @param anySelected If true, the client will be told
    * that some node will remain selected after this operation
    * is completed
-   *
+   * @param node The node to deselect
    */
 
   void unselectNode(treeNode node, boolean anySelected)
@@ -1238,14 +1217,12 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Deselect all nodes, issuing a callback to the client
    * reporting the deselection.<br><br>
    *
    * @param anySelected If true, the client will be told
    * that some node will remain selected after this operation
    * is completed.
-   *
    */
 
   public void unselectAllNodes(boolean anySelected)
@@ -1266,10 +1243,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   }
 
   /**
-   *
    * Handle notification from popupmenus and from key board navigation
    * actions
    *
+   * @param e The event we're receiving as an ActionListener 
    */
 
   public void actionPerformed(ActionEvent e)
@@ -1530,13 +1507,19 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     refreshTree();
   }
 
-  // This method is called when our size is changed.  We need to know
-  // this so we can update the scrollbars and what-not.
+  /**
+   * This method is called when our size is changed.  We need to know
+   * this so we can update the scrollbars and what-not.
+   */
 
   public void resize(int x, int y, int width, int height)
   {
     setBounds(x,y,width,height);
   }
+
+  /**
+   * Called when we are being resized by our container.
+   */
 
   public synchronized void setBounds(int x, int y, int width, int height)
   {
@@ -1575,15 +1558,13 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   // Internal method
 
   /**
-   *
    * This method recalculates the general parameters of our tree's
    * display.  That is, it calculates whether or not we need scroll
    * bars, adds or deletes the scroll bars, and scales the column
    * positions to match the general rendering parameters.
-   *
    */
 
-  void reShape()
+  private void reShape()
   {
     if (debug)
       {
@@ -1603,15 +1584,13 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   // Internal method
 
   /**
-   *
    * Check to see whether we need scrollbars in our current component size,
    * set the min/max/visible parameters<br><br>
    *
    * This method is intended to be called from reShape().
-   *
    */
 
-  void adjustScrollbars()
+  private void adjustScrollbars()
   {
     int
       vSize;
@@ -1680,7 +1659,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	    this.add("East", vbar);
 	    vbar.setValue(0);
 	    this.doLayout();
-	    //	    getParent().doLayout();
 	  }
 	vbar_visible = true;
 
@@ -1695,7 +1673,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	  {
 	    this.remove(vbar);
 	    this.doLayout();
-	    //	    getParent().doLayout();
 	  }
 	vbar_visible = false;
 
@@ -1719,7 +1696,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	    this.add("South", hbar);
 	    hbar.setValue(0);
 	    this.doLayout();
-	    //	    getParent().doLayout();
 	  }
 	hbar_visible = true;
 
@@ -1734,7 +1710,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 	  {
 	    this.remove(hbar);
 	    this.doLayout();
-	    //	    getParent().doLayout();
 	  }
 	hbar_visible = false;
 
@@ -2099,12 +2074,12 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   /* -- */
 
   /**
+   * Constructor
    *
    * @param font Font for text in the Tree Canvas
    * @param fgColor Foreground color for text in the treeCanvas
    * @param bgColor Background color for text in the treeCanvas
    * @param images Array of images to be used in the canvas;  nodes refer to images by index
-   *
    */
 
   public treeCanvas(treeControl ctrl, Font font, Color fgColor, Color bgColor, Image[] images)
@@ -2190,9 +2165,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   }
 
   /**
-   *
    * Copy our backing store to our canvas
-   *
    */
 
   public void paint(Graphics g)
@@ -2231,10 +2204,8 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   }
 
   /**
-   *
    * Call our paint method without
    * clearing to prevent flashing
-   *
    */
 
   public void update(Graphics g)
@@ -2280,12 +2251,10 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
     return result;
   }
 
-  /* ----------------------------------------------------------------------
-
-     This is our main rendering routine, which does all the work to
-     generate our tree image.
-
-     ---------------------------------------------------------------------- */
+  /**
+   * This is our main rendering routine, which does all the work to
+   * generate our tree image, minus the drag/drop sprite effects.
+   */
 
   synchronized void render()
   {
@@ -2414,19 +2383,18 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
       }
   }
 
-  /*-------------------------------
-          internal rendering method
+  /**
+   * Internal rendering method
+   *
+   * Should only be called from render(), which provides the
+   * thread-synchronized entry point.
+   *
+   * Generate and record information about the columns to the left of the
+   * current node, used by drawRow to properly position each drawn node in
+   * the hierarchy
+   */
 
-  should only be called from render(), which provides the
-  thread-synchronized entry point.
-
-  generate and record information about the columns to the left of the
-  current node, used by drawRow to properly position each drawn node in
-  the hierarchy
-
-  -------------------------------*/
-
-  void recursiveGenStack(treeNode node, Stack stack)
+  private void recursiveGenStack(treeNode node, Stack stack)
   {
     if (node == null)
       {
@@ -2447,17 +2415,12 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
     return;
   }
 
-  /*-------------------------------
-          internal rendering method
-
-  should only be called from render(), which provides the
-  thread-synchronized entry point
-
-  -------------------------------*/
-
   /**
    * drawRow() is the internal rendering method for each row of the
    * treeControl.
+   *
+   * Should only be called from render(), which provides the
+   * thread-synchronized entry point
    *
    * @param node The treeNode corresponding to the row to be drawn
    * @param row The row's number in the overall tree's list of rows
@@ -2466,7 +2429,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
    * to properly render the containment graphics for this row.
    */
 
-  void drawRow(treeNode node, int row, Vector s)
+  private void drawRow(treeNode node, int row, Vector s)
   {
     int
       horizLine,		// y pos of this row's horizontal connecting line
@@ -2743,14 +2706,11 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
     return ctrl.maxWidth;
   }
 
-  /*----------------------------------------------------------
-                                                        helper
-                                                    buildBoxes
-  Generate our +/- box images
+  /**
+   * Generate our +/- box images
+   */
 
-  ----------------------------------------------------------*/
-
-  boolean buildBoxes()
+  private boolean buildBoxes()
   {
     Graphics g;
 
@@ -3365,7 +3325,9 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   {
   }
 
-  // popup dispatcher
+  /**
+   * popup dispatcher
+   */
 
   void popupHandler(MouseEvent e, treeNode node)
   {
@@ -3454,9 +3416,9 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is used as a simple struct to hold scratch information
+ * This class is used as a simple struct to hold scratch information
  * for the {@link arlut.csd.JTree.treeControl treeControl} rendering
- * logic.</p>
+ * logic.
  */
 
 class Range {
