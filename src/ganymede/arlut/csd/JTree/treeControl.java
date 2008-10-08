@@ -2007,22 +2007,6 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     public void keyTyped(KeyEvent e)
     {
-      if (e.getKeyChar() == '\n')
-	{
-	  return;
-	}
-
-      long timeNow = java.lang.System.currentTimeMillis();
-
-      if (timeNow > matchTime || e.isActionKey() || e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE)
-	{
-	  matchString.setLength(0);
-	}
-      
-      matchTime = timeNow + matchTimeout;
-      matchString.append(e.getKeyChar());
-
-      tryMatchString(matchString.toString());
     }
     
     public void keyReleased(KeyEvent e)
@@ -2030,7 +2014,27 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     }
     
     public void keyPressed(KeyEvent e)
-    {      
+    {
+      long timeNow = java.lang.System.currentTimeMillis();
+
+      if (timeNow > matchTime)
+        {
+          matchString.setLength(0);
+        }
+      else if (e.isActionKey() ||
+               e.getKeyCode() == KeyEvent.VK_BACK_SPACE ||
+               e.getKeyCode() == KeyEvent.VK_DELETE ||
+               e.getKeyChar() == '\n')
+        {
+          matchString.setLength(0);
+
+          return;
+        }
+
+      matchTime = timeNow + matchTimeout;
+      matchString.append(e.getKeyChar());
+
+      tryMatchString(matchString.toString());
     }
   }
 
