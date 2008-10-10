@@ -169,7 +169,8 @@ X ships with very good Java Web Start support, as well.
    Fairly scalable.  At ARL:UT, we use Ganymede to manage a rather
 complex NIS domain containing around 800 users and our DNS domain with
 over 2500 system records defined. During execution our Ganymede server
-takes up only about 9 megabytes of JVM heap space.
+takes up only about 25 megabytes of JVM heap space, or about 100
+megabytes in total counting shared libraries, etc., for the JVM.
 
    During development of Ganymede 2.0, we test-loaded the Ganymede
 server to 250,000 users and 250,000 groups of random data, using the
