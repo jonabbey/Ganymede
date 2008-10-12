@@ -5,10 +5,7 @@
    This class is intended to dump the Ganymede datastore to GASH.
    
    Created: 21 May 1998
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -4101,7 +4098,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         if (macAddress.equals("00:00:00:00:00:00"))
           {
             return;             // don't write out DHCP for systems
-                                // with unspecified mac addresses
+                                // with unspecified MAC addresses
           }
       }
     else
@@ -4144,170 +4141,190 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     // now build our output stanza
+    //
+    // we need to loop twice on this, the first time writing out
+    // the fixed address, the second time the roaming definition
 
-    result.append("host ");
-    result.append(sysname);
-    result.append("\n\t{\n");
-
-    result.append("\thardware ethernet\t\t");
-    result.append(macAddress);
-    result.append(" ;\n");
-
-    result.append("\tfixed-address\t\t\t");
-    result.append(ipAddress);
-    result.append(" ;\n");
-
-    result.append("\toption host-name\t\t");
-    result.append(quote(sysname));
-    result.append(";\n");
-
-    Iterator values = options.values().iterator();
-
-    // first make sure we've declared any site-option-space that we'll need to use
-
-    HashSet spaces = new HashSet();
-
-    while (values.hasNext())
+    for (int i = 0; i < 2; i++)
       {
-        dhcp_entry entry = (dhcp_entry) values.next();
+	result.append("host ");
+	result.append(sysname);
+	result.append("\n\t{\n");
 
-        if (entry.builtin)
-          {
-            continue;
-          }
+	result.append("\thardware ethernet\t\t");
+	result.append(macAddress);
+	result.append(" ;\n");
 
-        if (entry.name.indexOf('.') != -1)
-          {
-            String spaceName = entry.name.substring(0, entry.name.indexOf('.'));
+	if (i == 0)
+	  {
+	    // we'll skip this the second time for our roaming entry
 
-            if (spaces.size() == 0)
-              {
-                result.append("\tsite-option-space\t\t\"" + spaceName + "\";\n");
-                spaces.add(spaceName);
-              }
-            else
-              {
-                if (!spaces.contains(spaceName))
-                  {
-                    Ganymede.debug("GASHBuilderTask: writeDHCPInfo() ran into problems with " + object.getLabel() + " due to conflicting DHCP option spaces.");
-                  }
-              }
-          }
-      }
+	    result.append("\tfixed-address\t\t\t");
+	    result.append(ipAddress);
+	    result.append(" ;\n");
+	  }
 
-    // second make sure that we've forced any mandatory options
+	result.append("\toption host-name\t\t");
+	result.append(quote(sysname));
+	result.append(";\n");
 
-    HashSet forcedOptions = new HashSet();
+	Iterator values = options.values().iterator();
 
-    values = options.values().iterator();
+	// first make sure we've declared any site-option-space that
+	// we'll need to use
 
-    while (values.hasNext())
-      {
-        dhcp_entry entry = (dhcp_entry) values.next();
+	HashSet spaces = new HashSet();
 
-        if (entry.forced)
-          {
-            forcedOptions.add(entry);
-          }
-      }
+	while (values.hasNext())
+	  {
+	    dhcp_entry entry = (dhcp_entry) values.next();
 
-    if (forcedOptions.size() > 0)
-      {
-        StringBuffer hexOptionCodes = new StringBuffer();
-        StringBuffer concatPrefix = new StringBuffer();
+	    if (entry.builtin)
+	      {
+		continue;
+	      }
 
-        values = forcedOptions.iterator();
+	    if (entry.name.indexOf('.') != -1)
+	      {
+		String spaceName = entry.name.substring(0, entry.name.indexOf('.'));
 
-        while (values.hasNext())
-          {
-            dhcp_entry entry = (dhcp_entry) values.next();
+		if (spaces.size() == 0)
+		  {
+		    result.append("\tsite-option-space\t\t\"" + spaceName + "\";\n");
+		    spaces.add(spaceName);
+		  }
+		else
+		  {
+		    if (!spaces.contains(spaceName))
+		      {
+			Ganymede.debug("GASHBuilderTask: writeDHCPInfo() ran into problems with " +
+				       object.getLabel() + " due to conflicting DHCP option spaces.");
+		      }
+		  }
+	      }
+	  }
 
-            if (entry.forced && entry.code != 0)
-              {
-                if (hexOptionCodes.length() == 0)
-                  {
-                    hexOptionCodes.append(",");
-                  }
-                else
-                  {
-                    hexOptionCodes.append("),");
-                  }
+	// second make sure that we've forced any mandatory options
 
-                if (concatPrefix.length () == 0)
-                  {
-                    concatPrefix.append("concat(option dhcp-parameter-request-list");
-                  }
-                else
-                  {
-                    concatPrefix.insert(0, "concat(");
-                  }
+	HashSet forcedOptions = new HashSet();
+
+	values = options.values().iterator();
+
+	while (values.hasNext())
+	  {
+	    dhcp_entry entry = (dhcp_entry) values.next();
+
+	    if (entry.forced)
+	      {
+		forcedOptions.add(entry);
+	      }
+	  }
+
+	if (forcedOptions.size() > 0)
+	  {
+	    StringBuffer hexOptionCodes = new StringBuffer();
+	    StringBuffer concatPrefix = new StringBuffer();
+
+	    values = forcedOptions.iterator();
+
+	    while (values.hasNext())
+	      {
+		dhcp_entry entry = (dhcp_entry) values.next();
+
+		if (entry.forced && entry.code != 0)
+		  {
+		    if (hexOptionCodes.length() == 0)
+		      {
+			hexOptionCodes.append(",");
+		      }
+		    else
+		      {
+			hexOptionCodes.append("),");
+		      }
+
+		    if (concatPrefix.length () == 0)
+		      {
+			concatPrefix.append("concat(option dhcp-parameter-request-list");
+		      }
+		    else
+		      {
+			concatPrefix.insert(0, "concat(");
+		      }
                       
-                hexOptionCodes.append(java.lang.Integer.toHexString(entry.code));
-              }
-          }
+		    hexOptionCodes.append(java.lang.Integer.toHexString(entry.code));
+		  }
+	      }
 
-        if (hexOptionCodes.length() != 0)
-          {
-            hexOptionCodes.append(");\n");
+	    if (hexOptionCodes.length() != 0)
+	      {
+		hexOptionCodes.append(");\n");
 
-            result.append("\tif exists dhcp-parameter-request-list {\n");
-            result.append("\t\t# Ganymede forced dhcp options\n");
-            result.append("\t\toption dhcp-parameter-request-list = ");
-            result.append(concatPrefix);
-            result.append(hexOptionCodes);
-            result.append("\t}\n");
-          }
-      }
+		result.append("\tif exists dhcp-parameter-request-list {\n");
+		result.append("\t\t# Ganymede forced dhcp options\n");
+		result.append("\t\toption dhcp-parameter-request-list = ");
+		result.append(concatPrefix);
+		result.append(hexOptionCodes);
+		result.append("\t}\n");
+	      }
+	  }
 
-    // third, let's write out the actual options for this host
+	// third, let's write out the actual options for this host
 
-    values = options.values().iterator();
+	values = options.values().iterator();
 
-    while (values.hasNext())
-      {
-        dhcp_entry entry = (dhcp_entry) values.next();
+	while (values.hasNext())
+	  {
+	    dhcp_entry entry = (dhcp_entry) values.next();
 
-        int length = 0;
+	    int length = 0;
 
-        if (!entry.builtin)
-          {
-            result.append("\toption ");
-            length = 7;
-          }
-        else
-          {
-            result.append("\t");
-            length = 0;
-          }
+	    if (!entry.builtin)
+	      {
+		result.append("\toption ");
+		length = 7;
+	      }
+	    else
+	      {
+		result.append("\t");
+		length = 0;
+	      }
 
-        result.append(entry.name);
+	    result.append(entry.name);
 
-        if (length + entry.name.length() < 16)
-          {
-            result.append("\t\t\t");
-          }
-        else if (length + entry.name.length() < 24)
-          {
-            result.append("\t\t");
-          }
-        else
-          {
-            result.append("\t");
-          }
+	    if (length + entry.name.length() < 16)
+	      {
+		result.append("\t\t\t");
+	      }
+	    else if (length + entry.name.length() < 24)
+	      {
+		result.append("\t\t");
+	      }
+	    else
+	      {
+		result.append("\t");
+	      }
         
-        if (entry.type.equals("string") || entry.type.equals("text"))
-          {
-            result.append(quote(entry.value));
-            result.append(" ;\n");
-          }
-        else
-          {
-            result.append(entry.value);
-            result.append(" ;\n");
-          }
-      }
+	    if (entry.type.equals("string") || entry.type.equals("text"))
+	      {
+		result.append(quote(entry.value));
+		result.append(" ;\n");
+	      }
+	    else
+	      {
+		result.append(entry.value);
+		result.append(" ;\n");
+	      }
+	  }
 
-    result.append("\t} # END host");
+	if (i == 0)
+	  {
+	    result.append("\t} # END host\n");
+	  }
+	else
+	  {
+	    result.append("\t} # END roaming host entry\n");
+	  }
+      }
 
     writer.println(result.toString());
   }
@@ -4347,9 +4364,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             typecode = typeCode.intValue();
           }
 
-        resultMap.put(typeName, new dhcp_entry(typeName, typeString, value, optionObject.isSet(dhcpOptionSchema.BUILTIN), typecode, optionObject.isSet(dhcpOptionSchema.FORCESEND)));
+        resultMap.put(typeName, new dhcp_entry(typeName,
+					       typeString,
+					       value,
+					       optionObject.isSet(dhcpOptionSchema.BUILTIN),
+					       typecode,
+					       optionObject.isSet(dhcpOptionSchema.FORCESEND)));
 
-        if (!optionObject.isSet(dhcpOptionSchema.BUILTIN) && optionObject.isSet(dhcpOptionSchema.CUSTOMOPTION))
+        if (!optionObject.isSet(dhcpOptionSchema.BUILTIN) &&
+	    optionObject.isSet(dhcpOptionSchema.CUSTOMOPTION))
           {
             customOptions.add(optionInvid);
           }
