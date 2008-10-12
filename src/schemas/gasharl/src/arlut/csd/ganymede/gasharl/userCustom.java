@@ -5,6 +5,7 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -298,7 +299,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	int count = 0;
 	uidVal = new Integer(rand.nextInt(31767) + lowUID);
     
-	while (!namespace.reserve(getEditSet(), uidVal, true) && count < 30000)
+	while (!namespace.reserve(getEditSet(), uidVal) && count < 30000)
 	  {
 	    uidVal = new Integer(rand.nextInt(31767) + lowUID);
 	    count++;
@@ -311,7 +312,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	
 	    uidVal = new Integer(lowUID);
 	
-	    while (!namespace.reserve(getEditSet(), uidVal, true))
+	    while (!namespace.reserve(getEditSet(), uidVal))
 	      {
 		uidVal = new Integer(uidVal.intValue() + 1);
 	    

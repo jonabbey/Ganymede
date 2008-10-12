@@ -5,10 +5,7 @@
    This file is a management class for system objects in Ganymede.
 
    Created: 15 October 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -827,7 +824,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    System.err.println("systemCustom checking " + IPDBField.genIPString(address));
 	  }
 
-	if (namespace.reserve(editset, address, true))
+	if (namespace.reserve(editset, address))
 	  {
 	    found = true;
 	  }
