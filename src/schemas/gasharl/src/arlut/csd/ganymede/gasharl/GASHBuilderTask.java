@@ -4318,11 +4318,19 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	if (i == 0)
 	  {
-	    result.append("\t} # END host\n");
+	    result.append("\t} # END host\n\n");
 	  }
 	else
 	  {
 	    result.append("\t} # END roaming host entry\n");
+	  }
+
+	if (options.size() == 0)
+	  {
+	    // no custom dhcp, so we don't need to create a roaming
+	    // entry, just break out
+
+	    break;
 	  }
       }
 
