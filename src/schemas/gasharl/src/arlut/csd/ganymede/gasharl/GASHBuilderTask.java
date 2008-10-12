@@ -4318,7 +4318,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	if (i == 0)
 	  {
-	    result.append("\t} # END host\n\n");
+	    result.append("\t} # END host\n");
 	  }
 	else
 	  {
