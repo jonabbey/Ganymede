@@ -24,10 +24,7 @@
 
   Created: 29 May 1996
 
-  Last Mod Date: $Date$
-  Last Revision Changed: $Rev$
-  Last Changed By: $Author$
-  SVN URL: $HeadURL$
+  Last Commit: $Format:%cd$
 
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
@@ -91,7 +88,6 @@ import javax.swing.JScrollBar;
  * @see arlut.csd.JTable.rowTable
  * @see arlut.csd.JTable.gridTable
  * @author Jonathan Abbey
- * @version $Id$
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener, MouseWheelListener {
