@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-April 1, 2008
+October 9, 2008
 FAQ
 ---------------------------------------------
 
@@ -17,13 +17,11 @@ Questions Answered:
 10) How can I help?
 11) Why is it called Ganymede?
 12) What is Ganymede's development history like?
-13) I see a bunch of messages about missing fonts when I run the
-    Ganymede client or admin console GUI under Linux, what's up?
-14) When I try to start the Ganymede server, I see a message complaining about
+13) When I try to start the Ganymede server, I see a message complaining about
     the system hostname resolving to the 127.0.0.1 loopback address and
     the server quits.  What's going on?
-15) Where's the Ganymede web site?
-16) What's the best way to report bugs?  How should I ask questions?
+14) Where's the Ganymede web site?
+15) What's the best way to report bugs?  How should I ask questions?
 
 --====================================================================--
 
@@ -142,11 +140,11 @@ someone else's client.
 and requires GNU tar to decompress it, due to extremely long
 file/path names in the archive.
 
-   The Ganymede system requires Java 1.4 or better.  Since Ganymede
+   The Ganymede system requires Java 5 or better.  Since Ganymede
 supports running the Ganymede client and admin console on Windows
-browsers with Sun's Plug-In (see http://java.sun.com/products/plugin/),
-you can get away with just the basic Java environment on your UNIX
-system to run the server on.
+browsers with Sun's Plug-In (see
+http://java.sun.com/products/plugin/), you can get away with just the
+basic Java environment on your UNIX system to run the server on.
 
    The Ganymede server can be memory intensive, as all data registered in
 Ganymede is kept in an in-memory database backed by disk.  A 64 meg
@@ -171,7 +169,8 @@ X ships with very good Java Web Start support, as well.
    Fairly scalable.  At ARL:UT, we use Ganymede to manage a rather
 complex NIS domain containing around 800 users and our DNS domain with
 over 2500 system records defined. During execution our Ganymede server
-takes up only about 9 megabytes of JVM heap space.
+takes up only about 25 megabytes of JVM heap space, or about 100
+megabytes in total counting shared libraries, etc., for the JVM.
 
    During development of Ganymede 2.0, we test-loaded the Ganymede
 server to 250,000 users and 250,000 groups of random data, using the
@@ -246,11 +245,12 @@ excellent but cryptically named 'SyncUtils' package for Python.
 
 8) What's up with DNS management?  The current stuff is weak.
 
-   Yes, that's true.  Our use of Ganymede to manage DNS is limited to only
-that which we need in our environment, and it's part of the larger GASHARL
-schema kit, which is partially shipped with Ganymede 2.0.  If you want a more full featured
-DNS management kit built on top of Ganymede, and you can speak German, take a look at
-DoctorDNS, at http://www.fg-networking.de/software/doctordns.html.
+   Yes, that's true.  Our use of Ganymede to manage DNS is limited to
+only that which we need in our environment, and it's part of the
+larger GASHARL schema kit, which is partially shipped with Ganymede
+2.0.  If you want a more full featured DNS management kit built on top
+of Ganymede, and you can speak German, take a look at DoctorDNS, at
+http://www.doctordns.org/.
 
      ------------------------------------------------------------
 
@@ -316,35 +316,20 @@ January, 1999.
   Minor refinements continued for several years as ARL:UT used Ganymede in
 24/7 production.
 
-  Work on Ganymede 2.0 began in earnest in 2004 when the release of Subversion
-made it feasible to really move things around and start breaking things in
-the source tree.  For about a year and a half, Jonathan Abbey and Deepak
-Giridharagopal developed a blizzard of new features and fixed a tremendous
-number of bugs.
+  Work on Ganymede 2.0 began in earnest in 2004 when the release of
+Subversion made it feasible to really move things around and start
+breaking things in the source tree.  Since then, we've made continual
+refinements and improvements, some quite extensive.
 
-  At this point, Ganymede proper has been under development for twelve years.
+  We've recently moved to GIT, and that has accelerated our work even
+further.
 
-     ------------------------------------------------------------
-
-13) I see a bunch of messages about missing fonts when I run the
-    Ganymede client or admin console GUI under Linux, what's up?
-
-   The common implementations of the JVM provided by both Sun and the
-Blackdown organization include an AWT library that expects a number of
-fonts to be present on the X display.  Many of those fonts are
-available on a Sun Workstation but are generally not available on
-common X servers such as that from XFree86.org.  The lack of those
-fonts shouldn't get in the way of using the Ganymede GUI clients, but
-some font displays will appear a bit off, including the 'About Ganymede'
-and 'Credits' dialogs.
-
-   The Blackdown JDK FAQ addresses this question at
-
-http://www.blackdown.org/java-linux/docs/support/faq-release/FAQ-java-linux-6.html#ss6.4
+  At this point, Ganymede proper has been under development for twelve
+years, and in 24/7 production use for nine.
 
      ------------------------------------------------------------
 
-14) When I try to start the Ganymede server, I see a message complaining about
+13) When I try to start the Ganymede server, I see a message complaining about
     the system hostname resolving to the 127.0.0.1 loopback address and
     the server quits.  What's going on?
 
@@ -388,13 +373,13 @@ script and add the -forcelocalhost option to the Java invocation line.
 
      ------------------------------------------------------------
 
-16) Where's the Ganymede web site?
+14) Where's the Ganymede web site?
 
     http://www.arlut.utexas.edu/gash2/
 
      ------------------------------------------------------------
 
-17) What's the best way to report bugs?  How should I ask questions?
+15) What's the best way to report bugs?  How should I ask questions?
 
     We have a bugzilla database running at the Ganymede web site.  You should
 visit the bugzilla database and report bugs there.  
@@ -412,8 +397,5 @@ see the question you asked or bug you reported.
 -------------------------------------------------------------------------------
 Ganymede FAQ
 Author: Jonathan Abbey
-Last Revision Changed: $Rev$
-Last Changed By: $Author$
-Last Mod Date: $Date$
-SVN URL: $HeadURL$
+Last Commit: $Format:%cd$
 -------------------------------------------------------------------------------

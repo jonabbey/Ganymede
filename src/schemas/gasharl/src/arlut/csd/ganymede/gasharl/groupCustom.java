@@ -5,10 +5,7 @@
    This file is a management class for group objects in Ganymede.
    
    Created: 30 July 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -221,7 +218,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
     // now, find a gid.. unfortunately, we have to use immutable Integers here.. not
     // the most efficient at all.
 
-    while (!namespace.reserve(editset, gidVal, true))
+    while (!namespace.reserve(editset, gidVal))
       {
 	gidVal = new Integer(gidVal.intValue()+1);
       }
