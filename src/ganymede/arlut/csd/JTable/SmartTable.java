@@ -295,9 +295,14 @@ public class SmartTable extends JPanel implements ActionListener
 
   public void fixTableColumns()
   {
+    int colCount = table.getColumnCount();
+    if (colCount == 0) 
+      {
+	return;
+      }
+
     // default width is 75, if not default, use getPreferredWidth()
     int colWidth = table.getColumnModel().getColumn(0).getPreferredWidth();
-    int colCount = table.getColumnCount();
 
     // Get Table Size, then get Container size, if table smaller than
     // container, stretch table out to fit
