@@ -53,6 +53,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -120,6 +122,12 @@ public class SmartTable extends JPanel implements ActionListener
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JTable.SmartTable");
 
+  /**
+   * Date pattern for rendering dates in the table.
+   */
+
+  static final String datePattern = SmartTable.ts.l("getTableCellRendererComponent.datePattern"); // "M/d/yyyy"
+
   // ---
 
   /**
@@ -148,6 +156,22 @@ public class SmartTable extends JPanel implements ActionListener
   private int remember_row;
   private int remember_col;
   private int remember_col2;
+
+  /**
+   * A float that indicates how big the total width of the table is relative
+   * to the requested total width of the columns.
+   */
+
+  private float scalefact = 1.0f;
+
+  /**
+   * The original sum of all column widths, used to calculate the
+   * scale factor.
+   */
+
+  private int origTotalWidth = 0;
+
+  /* -- */
 
   public SmartTable(JPopupMenu rowMenu, String[] columnValues, gResultTable gResultT)
   {
@@ -272,7 +296,7 @@ public class SmartTable extends JPanel implements ActionListener
 		    System.out.println("mouseevent optimize all columns ");
 		  }
 
-		optimizeColumns();
+		optimizeCols();
 	      }
 	    else // pass back to parent to deal with Row menu actions
 	      {
@@ -296,6 +320,7 @@ public class SmartTable extends JPanel implements ActionListener
   public void fixTableColumns()
   {
     int colCount = table.getColumnCount();
+
     if (colCount == 0) 
       {
 	return;
@@ -303,6 +328,8 @@ public class SmartTable extends JPanel implements ActionListener
 
     // default width is 75, if not default, use getPreferredWidth()
     int colWidth = table.getColumnModel().getColumn(0).getPreferredWidth();
+
+    origTotalWidth = colWidth * colCount;
 
     // Get Table Size, then get Container size, if table smaller than
     // container, stretch table out to fit
@@ -318,21 +345,39 @@ public class SmartTable extends JPanel implements ActionListener
   }
 
   /**
-   * Optimize the columnWidths, shorten some columns, and expand
-   * longer ones if there is room
+   *
+   * This method will go through all of the columns and optimize
+   * the pole placement to minimize wasted space and provide a decent
+   * balance of row and column sizes.
+   *
+   * Somehow.
+   *
    */
 
-  public void optimizeColumns()
+  public synchronized void optimizeCols()
   {
-    Object cellResult; // hold single cell result of query
-    int rows = table.getRowCount();
-    int cols = table.getColumnCount();
-    int[] columnWidths;
-    int[] columnTotWidths;
+    if (debug)
+      {
+	System.err.println("baseTable.optimizeCols(): entering");
+      }
+
+    int nominalWidth[];
+    int localNW;
+    float totalOver, spareSpace;
+
+    float 
+      percentSpace,
+      shrinkFactor,
+      percentOver,
+      growthFactor;
+
+    float redistribute = (float) 0.0;
+
+    /* -- */
 
     // Set Each Column to Auto-Wrap text if needed
 
-    for (int i=0; i < cols; i++)
+    for (int i=0; i < table.getColumnCount(); i++)
     {
       if (gResultT.used[i])
 	{
@@ -340,63 +385,132 @@ public class SmartTable extends JPanel implements ActionListener
 	}
     }
 
-    columnWidths = new int[cols];
-    columnTotWidths = new int[cols];
+    /*
+      This method uses the following variables to do its calculations.
 
-    // Now Read in all the result lines
-    // Get the max textwidth for each column
+      nominalWidth[] - An array of ints holding the width needed by each column.
 
-    for (int i=0; i < rows; i++)
+      totalOver - the aggregate amount of horizontal space that the columns are short,
+                  in the absence of wordwrapping.
+
+      spareSpace - the aggregate amount of horizontal space that the columns have to
+                   spare.
+
+			      ----------
+
+      In addition, the following variable is defined in baseTable that this method uses:
+
+      scalefact - A float that indicates how big the total width of the table is relative
+                  to the requested total width of the columns.
+
+    */
+
+    if (debug)
       {
-	for (int j=0; j < cols; j++)
+	System.err.println("this.getBounds().width = " + this.getBounds().width);
+	System.err.println("origTotalWidth = " + origTotalWidth);
+      }
+
+    scalefact = this.getBounds().width / origTotalWidth;
+
+    if (debug)
+      {
+	System.err.println("scalefact = " + scalefact);
+      }
+
+    nominalWidth = new int[table.getColumnCount()];
+    totalOver = (float) 0.0;
+    spareSpace = (float) 0.0;
+
+    for (int i = 0; i < table.getColumnCount(); i++)
+      {
+	TableColumn col = table.getColumnModel().getColumn(i);
+	TextAreaRenderer renderer = (TextAreaRenderer) col.getCellRenderer();
+
+	nominalWidth[i] = 20;
+
+	for (int j = 0; j < myModel.getRowCount(); j++)
 	  {
-	    if (gResultT.used[j])
+	    Object value = myModel.getValueAt(j, i);
+
+	    localNW = renderer.getUnwrappedWidth(this.table, value) + 5;
+
+	    if (localNW > nominalWidth[i])
 	      {
-		cellResult = table.getValueAt(i, j);
-
-		if (cellResult != null)
-		  {
-		    columnTotWidths[j] += cellResult.toString().length();
-
-		    if (columnWidths[j] < cellResult.toString().length())
-		      {
-			columnWidths[j] = cellResult.toString().length();
-		      }
-		  }
+		nominalWidth[i] = localNW;
 	      }
 	  }
-      }
 
-    TableColumnModel cmodel = table.getColumnModel();
+	// nominalWidth[i] is now the required width of this column
 
-    // FIX THIS, CAN'T BE SET COLUMN WIDTH HERE ARG
-    // 10 letters app 75px 8px per char? try
-    // decrease all columns that dont need 10 letters
-    int decreased = 0;
-    int inccnt = 0; // count cols to increase
-
-    for (int j=0; j < cols; j++)
-      {
-	if (columnWidths[j] <= 8)
+	if (debug)
 	  {
-	    cmodel.getColumn(j).setPreferredWidth(columnWidths[j]*9);
-	    decreased += 8 - columnWidths[j];
+	    System.err.println("Column " + i + " has nominalWidth of " + nominalWidth[i] +
+			       "and a cellWidth of " + col.getWidth());
 	  }
 
-	if (columnTotWidths[j]/rows > 8)
+	if (nominalWidth[i] < col.getWidth())
 	  {
-	    inccnt++;
+	    spareSpace += col.getWidth() - nominalWidth[i];
+	  }
+	else
+	  {
+	    totalOver += (float) nominalWidth[i] - col.getWidth();
 	  }
       }
 
-    // then increase the rest with the extra stuff
-    int charadds =  (int) Math.ceil((double)decreased / (double)inccnt);
-
-    for (int j=0; j < cols; j++)
+    if (debug)
       {
-	if (columnTotWidths[j]/rows > 8)
+	System.err.println("spareSpace = " + spareSpace + ", totalOver = " + totalOver);
+      }
+
+    redistribute = java.lang.Math.min(spareSpace, totalOver);
+
+    if (debug)
+      {
+	System.err.println("redistribute = " + redistribute);
+      }
+
+    for (int i = 0; i < table.getColumnCount(); i++)
+      {
+	TableColumn col = table.getColumnModel().getColumn(i);
+
+	// are we going to be actually doing some redistributing?
+
+	if (redistribute > 1.0)
 	  {
-	    cmodel.getColumn(j).setPreferredWidth((8+charadds)*9);  // add in chars here
+	    // Does this column have space to give?
+
+	    if (nominalWidth[i] < col.getWidth())
+	      {
+		percentSpace = (col.getWidth() - nominalWidth[i]) / spareSpace;
+		shrinkFactor = redistribute * percentSpace;
+
+		if (debug)
+		  {
+		    System.err.println("Column " + i + ": percentSpace = " + percentSpace +
+				       " , reducing by " + shrinkFactor + ", new width = " +
+				       (col.getWidth() - shrinkFactor));
+		  }
+
+		col.setPreferredWidth((int) (col.getWidth() - shrinkFactor));
+	      }
+	    else // need to grow
+	      {
+		// what percentage of the overage goes to this col?
+
+		percentOver = (nominalWidth[i] - col.getWidth()) / totalOver; 
+		growthFactor = redistribute * percentOver;
+
+		if (debug)
+		  {
+		    System.err.println("Column " + i + ": percentOver = " + percentOver + 
+				       " , growing by " + growthFactor + ", new width = " + 
+				       (col.getWidth() + growthFactor));
+		  }
+
+		col.setPreferredWidth((int) (col.getWidth() + growthFactor));
+	      }
 	  }
       }
   }
@@ -924,8 +1038,8 @@ public class SmartTable extends JPanel implements ActionListener
      * Gets a physical column's position number from a TableModel
      * column index.
      *
-     * Needed because colums can be physically slid around by the user, while the TableModel
-     * column indexes do not change.
+     * Needed because colums can be physically slid around by the
+     * user, while the TableModel column indexes do not change.
      *
      * @returns The physical index of TableModel column colIndex
      * @throws IndexOutOfBoundsException if colIndex is out of range
@@ -962,8 +1076,18 @@ public class SmartTable extends JPanel implements ActionListener
    * A cell renderer for Date values.
    */
 
-  private class DateCellRenderer extends DefaultTableCellRenderer
+  private class DateCellRenderer extends TextAreaRenderer
   {
+    /**
+     * Cached FontMetrics object, used to calculate the necessary width
+     * for a specific string in the SmartTable's optimizeCols()
+     * method.
+     */
+
+    private FontMetrics metrics = null;
+
+    /* -- */
+
     /**
      * Returns the component that is used for rendering the value.
      *
@@ -988,14 +1112,37 @@ public class SmartTable extends JPanel implements ActionListener
         {
           Date dateValue = (Date) value;
 	  
-	  // "M/d/yyyy"
-	  String datePattern = SmartTable.ts.l("getTableCellRendererComponent.datePattern");
-
-	  DateFormat df = new SimpleDateFormat(datePattern);
-          setText(df.format(dateValue));
+	  setText(getString(dateValue));
         }
 
       return this;
+    }
+
+    /**
+     * Returns the necessary width required to render value with this
+     * renderer, given the table's defined font.
+     */
+
+    public int getUnwrappedWidth(JTable table, Object value)
+    {
+      if (value == null)
+	{
+	  return 0;
+	}
+
+      if (metrics == null)
+	{
+	  metrics = this.getFontMetrics(table.getFont());
+	}
+
+      Date dateValue = (Date) value;
+
+      return metrics.stringWidth(getString(dateValue));
+    }
+
+    private String getString(Date dateValue)
+    {
+      return new SimpleDateFormat(SmartTable.datePattern).format(dateValue);
     }
   }
 }

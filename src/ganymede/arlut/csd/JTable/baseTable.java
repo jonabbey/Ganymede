@@ -1483,13 +1483,6 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	if (nominalWidth[i] < scaledWidth)
 	  {
 	    spareSpace += scaledWidth - nominalWidth[i];
-
-	    /*
-	      if ((scaledWidth - (nominalWidth[i] * scalefact)) > 0)
-	      {
-	      spareSpace += scaledWidth - (nominalWidth[i] * scalefact);
-	      }
-	    */
 	  }
 	else
 	  {
