@@ -1285,7 +1285,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (emptyList)
       {
-	gc.tree.requestFocus();
+	try
+	  {
+	    gc.tree.requestFocus();
+	  }
+	catch (NullPointerException ex)
+	  {
+	    // if we're closing down, we might have zeroed out the
+	    // tree reference already.
+	  }
       }
 
     return windowMenu;
