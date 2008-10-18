@@ -157,20 +157,6 @@ public class SmartTable extends JPanel implements ActionListener
   private int remember_col;
   private int remember_col2;
 
-  /**
-   * A float that indicates how big the total width of the table is relative
-   * to the requested total width of the columns.
-   */
-
-  private float scalefact = 1.0f;
-
-  /**
-   * The original sum of all column widths, used to calculate the
-   * scale factor.
-   */
-
-  private int origTotalWidth = 0;
-
   /* -- */
 
   public SmartTable(JPopupMenu rowMenu, String[] columnValues, gResultTable gResultT)
@@ -329,8 +315,6 @@ public class SmartTable extends JPanel implements ActionListener
     // default width is 75, if not default, use getPreferredWidth()
     int colWidth = table.getColumnModel().getColumn(0).getPreferredWidth();
 
-    origTotalWidth = colWidth * colCount;
-
     // Get Table Size, then get Container size, if table smaller than
     // container, stretch table out to fit
 
@@ -396,26 +380,11 @@ public class SmartTable extends JPanel implements ActionListener
       spareSpace - the aggregate amount of horizontal space that the columns have to
                    spare.
 
-			      ----------
-
-      In addition, the following variable is defined in baseTable that this method uses:
-
-      scalefact - A float that indicates how big the total width of the table is relative
-                  to the requested total width of the columns.
-
     */
 
     if (debug)
       {
 	System.err.println("this.getBounds().width = " + this.getBounds().width);
-	System.err.println("origTotalWidth = " + origTotalWidth);
-      }
-
-    scalefact = this.getBounds().width / origTotalWidth;
-
-    if (debug)
-      {
-	System.err.println("scalefact = " + scalefact);
       }
 
     nominalWidth = new int[table.getColumnCount()];
