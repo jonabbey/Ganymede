@@ -390,42 +390,26 @@ public class SmartTable extends JPanel implements ActionListener
     totalOver = (float) 0.0;
     spareSpace = (float) 0.0;
 
-    int n = -1;
+    Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+    int i = -1;
 
-    for (int i = 0; i < table.getColumnCount(); i++)
+    while (columns.hasMoreElements())
       {
-	if (!gResultT.used[i])
-	  {
-	    if (debug)
-	      {
-		System.err.println("Skipping column " + i);
-	      }
-
-	    continue;
-	  }
-	else
-	  {
-	    n++;
-	  }
+	TableColumn col = columns.nextElement();
+	i++;
 
 	if (debug)
 	  {
-	    System.err.println("Examining column " + n);
+	    System.err.println("Examining column " + i);
 	  }
 
-	TableColumn col = table.getColumnModel().getColumn(n);
 	TextAreaRenderer renderer = (TextAreaRenderer) col.getCellRenderer();
 
 	nominalWidth[i] = 20;
 
 	for (int j = 0; j < myModel.getRowCount(); j++)
 	  {
-	    if (debug)
-	      {
-		System.err.print(".");
-	      }
-
-	    Object value = myModel.getValueAt(j, i);
+	    Object value = myModel.getValueAt(j, col.getModelIndex());
 
 	    int localNW = renderer.getUnwrappedWidth(this.table, value) + 5;
 
@@ -470,14 +454,13 @@ public class SmartTable extends JPanel implements ActionListener
 	System.err.println("redistribute = " + redistribute);
       }
 
-    for (int i = 0; i < table.getColumnCount(); i++)
-      {
-	if (!gResultT.used[i])
-	  {
-	    continue;
-	  }
+    columns = table.getColumnModel().getColumns();
+    i = -1;
 
-	TableColumn col = table.getColumnModel().getColumn(i);
+    while (columns.hasMoreElements())
+      {
+	TableColumn col = columns.nextElement();
+	i++;
 
 	// are we going to be actually doing some redistributing?
 
