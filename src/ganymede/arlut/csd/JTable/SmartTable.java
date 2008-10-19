@@ -390,11 +390,22 @@ public class SmartTable extends JPanel implements ActionListener
     totalOver = (float) 0.0;
     spareSpace = (float) 0.0;
 
+    int n = 0;
+
     for (int i = 0; i < table.getColumnCount(); i++)
       {
 	if (!gResultT.used[i])
 	  {
+	    if (debug)
+	      {
+		System.err.println("Skipping column " + i);
+	      }
+
 	    continue;
+	  }
+	else
+	  {
+	    n++;
 	  }
 
 	if (debug)
@@ -402,7 +413,7 @@ public class SmartTable extends JPanel implements ActionListener
 	    System.err.println("Examining column " + i);
 	  }
 
-	TableColumn col = table.getColumnModel().getColumn(i);
+	TableColumn col = table.getColumnModel().getColumn(n);
 	TextAreaRenderer renderer = (TextAreaRenderer) col.getCellRenderer();
 
 	nominalWidth[i] = 20;
