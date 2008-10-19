@@ -346,7 +346,6 @@ public class SmartTable extends JPanel implements ActionListener
       }
 
     int nominalWidth[];
-    int localNW;
     float totalOver, spareSpace;
 
     float 
@@ -407,7 +406,7 @@ public class SmartTable extends JPanel implements ActionListener
 	  {
 	    Object value = myModel.getValueAt(j, i);
 
-	    localNW = renderer.getUnwrappedWidth(this.table, value) + 5;
+	    int localNW = renderer.getUnwrappedWidth(this.table, value) + 5;
 
 	    if (localNW > nominalWidth[i])
 	      {
@@ -420,7 +419,7 @@ public class SmartTable extends JPanel implements ActionListener
 	if (debug)
 	  {
 	    System.err.println("Column " + i + " has nominalWidth of " + nominalWidth[i] +
-			       "and a cellWidth of " + col.getWidth());
+			       " and a cellWidth of " + col.getWidth());
 	  }
 
 	if (nominalWidth[i] < col.getWidth())
@@ -502,6 +501,11 @@ public class SmartTable extends JPanel implements ActionListener
   private void setColumnTextWrap(int colIndex)
   {
     String colClass = myModel.getColumnClass(colIndex).toString();
+
+    if (debug)
+      {
+	System.err.println("setColumnTextWrap(" + colIndex + ") = " + colClass);
+      }
 
     if (!colClass.equals("class java.util.Date"))
       {
