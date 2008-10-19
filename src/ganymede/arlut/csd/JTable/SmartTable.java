@@ -397,6 +397,11 @@ public class SmartTable extends JPanel implements ActionListener
 	    continue;
 	  }
 
+	if (debug)
+	  {
+	    System.err.println("Examining column " + i);
+	  }
+
 	TableColumn col = table.getColumnModel().getColumn(i);
 	TextAreaRenderer renderer = (TextAreaRenderer) col.getCellRenderer();
 
