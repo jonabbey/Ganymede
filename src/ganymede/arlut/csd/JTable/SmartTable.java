@@ -409,6 +409,11 @@ public class SmartTable extends JPanel implements ActionListener
 
 	for (int j = 0; j < myModel.getRowCount(); j++)
 	  {
+	    if (debug)
+	      {
+		System.err.print(".");
+	      }
+
 	    Object value = myModel.getValueAt(j, i);
 
 	    int localNW = renderer.getUnwrappedWidth(this.table, value) + 5;
@@ -417,6 +422,11 @@ public class SmartTable extends JPanel implements ActionListener
 	      {
 		nominalWidth[i] = localNW;
 	      }
+	  }
+
+	if (debug)
+	  {
+	    System.err.println();
 	  }
 
 	// nominalWidth[i] is now the required width of this column
