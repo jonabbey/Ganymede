@@ -113,7 +113,7 @@ import arlut.csd.ganymede.client.gResultTable;
 
 public class SmartTable extends JPanel implements ActionListener
 {
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   /**
    * TranslationService object for handling string localization in the
@@ -362,12 +362,12 @@ public class SmartTable extends JPanel implements ActionListener
     // Set Each Column to Auto-Wrap text if needed
 
     for (int i=0; i < table.getColumnCount(); i++)
-    {
-      if (gResultT.used[i])
-	{
- 	  setColumnTextWrap(i);
-	}
-    }
+      {
+	if (gResultT.used[i])
+	  {
+	    setColumnTextWrap(i);
+	  }
+      }
 
     /*
       This method uses the following variables to do its calculations.
@@ -393,6 +393,11 @@ public class SmartTable extends JPanel implements ActionListener
 
     for (int i = 0; i < table.getColumnCount(); i++)
       {
+	if (!gResultT.used[i])
+	  {
+	    continue;
+	  }
+
 	TableColumn col = table.getColumnModel().getColumn(i);
 	TextAreaRenderer renderer = (TextAreaRenderer) col.getCellRenderer();
 
@@ -442,6 +447,11 @@ public class SmartTable extends JPanel implements ActionListener
 
     for (int i = 0; i < table.getColumnCount(); i++)
       {
+	if (!gResultT.used[i])
+	  {
+	    continue;
+	  }
+
 	TableColumn col = table.getColumnModel().getColumn(i);
 
 	// are we going to be actually doing some redistributing?
