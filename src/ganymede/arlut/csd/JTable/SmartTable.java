@@ -360,12 +360,13 @@ public class SmartTable extends JPanel implements ActionListener
 
     // Set Each Column to Auto-Wrap text if needed
 
-    for (int i=0; i < table.getColumnCount(); i++)
+    Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+
+    while (columns.hasMoreElements())
       {
-	if (gResultT.used[i])
-	  {
-	    setColumnTextWrap(i);
-	  }
+	TableColumn col = columns.nextElement();
+
+	setColumnTextWrap(col);
       }
 
     /*
@@ -390,7 +391,7 @@ public class SmartTable extends JPanel implements ActionListener
     totalOver = (float) 0.0;
     spareSpace = (float) 0.0;
 
-    Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+    columns = table.getColumnModel().getColumns();
     int i = -1;
 
     while (columns.hasMoreElements())
@@ -530,6 +531,30 @@ public class SmartTable extends JPanel implements ActionListener
 	catch (IndexOutOfBoundsException ex)
 	  {
 	  }
+      }
+  }
+
+  /**
+   * Turn on text wrapping if the column is not a Date class.
+   * this appears to be using physical instead of Index position.
+   */
+
+  private void setColumnTextWrap(TableColumn column)
+  {
+    int colIndex = column.getModelIndex();
+    String colClass = myModel.getColumnClass(colIndex).toString();
+
+    if (debug)
+      {
+	System.err.println("setColumnTextWrap(" + column + ") = " + colClass);
+      }
+
+    if (!colClass.equals("class java.util.Date"))
+      {
+	TableColumnModel cmodel = table.getColumnModel();
+	TextAreaRenderer textAreaRenderer = new TextAreaRenderer();
+
+	column.setCellRenderer(textAreaRenderer);
       }
   }
 
