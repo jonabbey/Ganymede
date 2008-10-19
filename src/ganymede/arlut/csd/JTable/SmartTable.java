@@ -113,7 +113,7 @@ import arlut.csd.ganymede.client.gResultTable;
 
 public class SmartTable extends JPanel implements ActionListener
 {
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   /**
    * TranslationService object for handling string localization in the
