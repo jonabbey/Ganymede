@@ -390,7 +390,7 @@ public class SmartTable extends JPanel implements ActionListener
     totalOver = (float) 0.0;
     spareSpace = (float) 0.0;
 
-    int n = 0;
+    int n = -1;
 
     for (int i = 0; i < table.getColumnCount(); i++)
       {
@@ -410,7 +410,7 @@ public class SmartTable extends JPanel implements ActionListener
 
 	if (debug)
 	  {
-	    System.err.println("Examining column " + i);
+	    System.err.println("Examining column " + n);
 	  }
 
 	TableColumn col = table.getColumnModel().getColumn(n);
