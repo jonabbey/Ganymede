@@ -9,10 +9,7 @@
    logfile itself orderly.
    
    Created: 31 October 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -1749,6 +1746,11 @@ public class DBLog {
     if (debug)
       {
 	System.err.println("DBLog.java: calculateOwnerAddresses");
+      }
+
+    if (objects == null)
+      {
+	return results;
       }
 
     objectsIter = objects.iterator();
