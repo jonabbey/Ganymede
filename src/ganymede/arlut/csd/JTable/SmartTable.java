@@ -95,8 +95,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import arlut.csd.Util.TranslationService;
-import arlut.csd.ganymede.client.gResultTable;
-
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -143,7 +141,12 @@ public class SmartTable extends JPanel implements ActionListener
    */
 
   private Map<Object, Integer> index;
-  private gResultTable gResultT;
+
+  /**
+   * The callback we'll send menu activity notifications to.
+   */
+
+  private rowSelectCallback callback;
 
   // Header Menus for right click popup
 
@@ -159,7 +162,7 @@ public class SmartTable extends JPanel implements ActionListener
 
   /* -- */
 
-  public SmartTable(JPopupMenu rowMenu, String[] columnValues, gResultTable gResultT)
+  public SmartTable(JPopupMenu rowMenu, String[] columnValues, rowSelectCallback callback)
   {
     if (debug)
       {
@@ -169,7 +172,7 @@ public class SmartTable extends JPanel implements ActionListener
     this.setLayout(new BorderLayout());
 
     index = new HashMap<Object, Integer>();
-    this.gResultT = gResultT;
+    this.callback = callback;
 
     myModel = new MyTableModel(columnValues);
     sorter = new TableSorter(myModel);
@@ -272,7 +275,6 @@ public class SmartTable extends JPanel implements ActionListener
 		  }
 
 		table.removeColumn(table.getColumnModel().getColumn(remember_col2));
-		gResultT.used[remember_col2] = false;
 		fixTableColumns();
 	      }
 	    else if (event.getSource() == optimizeColWidMI)
@@ -293,7 +295,7 @@ public class SmartTable extends JPanel implements ActionListener
 		    System.err.println("actionPerformed processing hash key: row=" + remember_row + ", invid=" + key);
 		  }
 
-		gResultT.rowMenuPerformed(key, event);
+		callback.rowMenuPerformed(key, event);
 	      }
 	  }
       }
