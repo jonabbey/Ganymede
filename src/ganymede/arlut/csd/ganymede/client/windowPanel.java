@@ -520,7 +520,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
             w.setLayer(new Integer(topLayer));
 	
             add(w);
-            w.setVisible(true);		// for Kestrel
+            w.setVisible(true);
             setSelectedWindow(w);
           }
 
@@ -641,15 +641,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     
     try
       {
-        try
-          {
-            getDesktopManager().deiconifyFrame(window);
-          }
-        catch (IllegalArgumentException ex)
-          {
-            // some look and feels really don't like this
-          }
-
 	window.setSelected(true);
 	window.toFront();
       }
