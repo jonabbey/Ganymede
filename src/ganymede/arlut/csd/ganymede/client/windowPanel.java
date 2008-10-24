@@ -637,6 +637,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  }
       }
 
+    try
+      {
+	window.setIcon(false);
+      }
+    catch (java.beans.PropertyVetoException e)
+      {
+	System.err.println("Could not de-iconify window");
+      }
+
     window.moveToFront();
     
     try
@@ -646,7 +655,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
     catch (java.beans.PropertyVetoException e)
       {
-	System.err.println("Could not set selected false.  sorry.");
+	System.err.println("Could not set selected and bring window to front");
       }
   }
 
