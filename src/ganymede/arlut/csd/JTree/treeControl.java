@@ -1874,6 +1874,11 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
   private synchronized void tryMatchString(String matchOn)
   {
+    if (selectedNode == null)
+      {
+	selectNode(root);
+      }
+
     treeNode firstNode = selectedNode;
 
     if (firstNode.expanded && firstNode.child != null)
