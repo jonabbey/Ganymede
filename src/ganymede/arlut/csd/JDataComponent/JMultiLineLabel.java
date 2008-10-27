@@ -5,11 +5,7 @@
    A simple label supporting multiple lines.
 
    Created: 28 January 1998
-
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Michael Mulvaney
 
@@ -87,8 +83,6 @@ import arlut.csd.Util.WordWrap;
 
 public class JMultiLineLabel extends JTextArea {
 
-  static final boolean debug = false;
-
   /**
    * Controls the default word wrap length.  The default value of 128
    * columns should hopefully be wide enough to handle exception
@@ -109,18 +103,10 @@ public class JMultiLineLabel extends JTextArea {
 
   public JMultiLineLabel(String label)
   {
-    if (debug)
-      {
-	System.err.println("JMultiLineLabel(" + label + ") initializing");
-      }
-
     setEditable(false);
     setOpaque(false);
     setLineWrap(true);
     setWrapStyleWord(true);
-
-    this.setForeground((Color)UIManager.get("Label.foreground"));
-    this.setFont((Font)UIManager.get("Label.font"));
 
     setText(label);
 
@@ -136,9 +122,6 @@ public class JMultiLineLabel extends JTextArea {
   public void updateUI()
   {
     super.updateUI();
-
-    this.setFont((Font)UIManager.get("Label.font"));
-    this.setForeground((Color)UIManager.get("Label.foreground"));
 
     Color bgColor = getParentBGColor();
 
@@ -168,20 +151,10 @@ public class JMultiLineLabel extends JTextArea {
       {
 	result = (Color)UIManager.get("Label.background");
 
-	if (debug)
-	  {
-	    System.err.println("getParentBGColor() no parent color set, returning " + result.toString());
-	  }
-
 	return result;
       }
 
     result = c.getBackground();
-
-    if (debug)
-      {
-	System.err.println("getParentBGColor() returning " + result.toString());
-      }
 
     return result;
   }
@@ -195,7 +168,7 @@ public class JMultiLineLabel extends JTextArea {
 
     if (bgColor != null)
       {
-	super.setBackground(bgColor);
+	//	super.setBackground(bgColor);
       }
     else
       {
@@ -207,16 +180,9 @@ public class JMultiLineLabel extends JTextArea {
 
   public void update(Graphics g)
   {
-    //    this.setFont((Font)UIManager.get("Label.font"));
-    //     this.setForeground((Color)UIManager.get("Label.foreground"));
-
     Color bgColor = getParentBGColor();
 
-    if (bgColor != null)
-      {
-	super.setBackground(bgColor);
-      }
-    else
+    if (bgColor == null)
       {
 	this.setOpaque(false);
       }
