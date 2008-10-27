@@ -237,7 +237,6 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     p.add("North", buttonPanel);
     
     historyText = new JTextArea();
-    historyText.setBackground(Color.white);
     historyText.setEditable(false);
 
     historyTextPanel = new JPanel(historyTextCard);
@@ -247,15 +246,11 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     JLabel waitLabel = new JLabel(waitImage);
 
     JPanel waitPanel = new JPanel(new BorderLayout());
-    waitPanel.setBackground(java.awt.Color.white);
 
     // "Waiting for history from server..."
     JLabel waitText = new JLabel(ts.l("init.waiting_text"));
-    waitText.setForeground(java.awt.Color.black);
-    waitText.setFont(Font.getFont("Courier"));
 
     JPanel topwaitPanel = new JPanel(new FlowLayout());
-    topwaitPanel.setBackground(java.awt.Color.white);
     topwaitPanel.add(waitText);
 
     waitPanel.add("North", topwaitPanel);
@@ -557,27 +552,16 @@ class datesPanel extends JPanel {
 
     /* -- */
     
-    //    comp.setBorder(BorderFactory.createLineBorder(java.awt.Color.black));
-    //    comp.setBackground(java.awt.Color.white);
-    //    comp.setForeground(java.awt.Color.black);
-    //    comp.setOpaque(true);
-
-    comp.setForeground(java.awt.Color.black);
-    comp.setFont(Font.getFont("Courier"));
-
     gbc.gridwidth = 1;
     gbc.gridy = row;
 
     gbc.gridx = 0;
-    //    gbc.weightx = 1.0;
     gbc.fill = GridBagConstraints.NONE;
 
     gbl.setConstraints(l, gbc);
     add(l);
 
     gbc.gridx = 1;
-    //    gbc.weightx = 4.0;
-    //    gbc.fill = GridBagConstraints.HORIZONTAL;
 
     gbl.setConstraints(comp, gbc);
     add(comp);
