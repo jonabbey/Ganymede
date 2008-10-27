@@ -126,6 +126,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     pane.setBackground(java.awt.Color.white);
 
     ImageIcon logo = new ImageIcon(PackageResources.getImageResource(frame,
+								     "small_ganymede_title.png",
 								     "small_ganymede_title.gif",
 								     getClass()));
     JLabel pictureLabel = new JLabel(logo);
