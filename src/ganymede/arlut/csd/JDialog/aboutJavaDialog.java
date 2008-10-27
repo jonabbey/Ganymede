@@ -150,11 +150,9 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
     JPanel pane = new JPanel();
     pane.setLayout(gbl);
     pane.setOpaque(true);
-    pane.setBackground(java.awt.Color.white);
 
     ImageIcon logo = new ImageIcon(PackageResources.getImageResource(frame,
 								     "small_ganymede_title.png",
-								     "small_ganymede_title.gif",
 								     getClass()));
     JLabel pictureLabel = new JLabel(logo);
 
@@ -166,7 +164,6 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
     scrollPane.setBorder(null);
     scrollPane.setViewportBorder(null);
     scrollPane.getViewport().setOpaque(true);
-    scrollPane.getViewport().setBackground(java.awt.Color.white);
 
     ok = new JButton(StringDialog.ok);  // localized
     ok.addActionListener(this);
@@ -198,7 +195,6 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
     pane.add(ok);
 
     this.setContentPane(pane);
-    this.setBackground(java.awt.Color.white);
 
     textbox.setText(getVersionInfoString());
 
