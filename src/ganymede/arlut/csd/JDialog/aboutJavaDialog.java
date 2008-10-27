@@ -5,11 +5,7 @@
    A dialog class used to display information about the JDK being used.
    
    Created: 7 July 2008
-
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey
 

@@ -4,10 +4,7 @@
    The tab that holds history information.
    
    Created: 9 September 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Michael Mulvaney
 
