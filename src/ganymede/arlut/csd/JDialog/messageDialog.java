@@ -133,7 +133,6 @@ public class messageDialog extends JCenterDialog implements ActionListener {
 
     text = new JEditorPane();
     text.setEditable(false);
-    text.setForeground(java.awt.Color.black);
 
     scrollpane = new JScrollPane(text);
 
