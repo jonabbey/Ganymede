@@ -121,7 +121,6 @@ public class JMultiLineLabel extends JTextArea {
   public JMultiLineLabel(String label, boolean allowCopyPaste)
   {
     setEditable(false);
-    setOpaque(false);
     setLineWrap(true);
     setWrapStyleWord(true);
 
@@ -130,6 +129,7 @@ public class JMultiLineLabel extends JTextArea {
     setBorder(new EmptyBorder(new Insets(0,0,0,10)));
 
     this.allowCopyPaste = allowCopyPaste;
+    setOpaque(allowCopyPaste);
   }
 
   /**
