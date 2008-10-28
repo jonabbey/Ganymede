@@ -183,17 +183,6 @@ public class JMultiLineLabel extends JTextArea {
     Graphics2D g2 = (Graphics2D) g;
     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-    Color bgColor = getParentBGColor();
-
-    if (bgColor != null)
-      {
-	//	super.setBackground(bgColor);
-      }
-    else
-      {
-	this.setOpaque(false);
-      }
-
     super.paint(g);
   }
 
