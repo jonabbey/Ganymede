@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-October 1, 2008
+October 28, 2008
 CREDITS
 
 Last Commit: $Format:%cd$
@@ -23,7 +23,7 @@ Primary architect and coder on the project.  Designed and implemented
 the Ganymede server and admin console, the table and tree GUI
 components used in both the admin console and the primary client, the
 great bulk of the project documentation (or lack thereof) as well as
-much of the Subversion and build script work.  Answers e-mail.
+much of the Git and build script work.  Answers e-mail.
 
 --
 
