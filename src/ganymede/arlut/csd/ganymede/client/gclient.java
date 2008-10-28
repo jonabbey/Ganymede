@@ -865,55 +865,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     this.setVisible(true);
 
-    // Adjust size of toolbar buttons to that of largest button
-    // Must be done after components are displayed. Otherwise, 
-    // getWidth & getHeight return 0's.
-
-    // Not sure about status of "uniform buttons" so
-    // using toggle to save having to comment out and in.
-
-    boolean sameSize = true;
-
-    if (sameSize) 
-      { 
-	int width=0;
-	int height=0;
-
-	// Get width/height for biggest button
-      
-	for (int i = 0; i<toolBar.getComponentCount(); i++) 
-	  {
-	    JButton b = (JButton)toolBar.getComponent(i);
-	
-	    int temp = b.getWidth();
-
-	    if (temp > width) 
-	      {
-		width = temp;
-	      }
-	
-	    int temp2 = b.getHeight();
-	  
-	    if (temp2 > height) 
-	      {
-		height = temp2;
-	      }
-	  }
-      
-	Dimension buttonSize = new Dimension(width,height);    
-
-	// Set width/height of all buttons to that of biggest
-        
-	for (int j = 0; j<toolBar.getComponentCount(); j++) 
-	  {
-	    JButton b = (JButton)toolBar.getComponent(j);
-
-	    b.setMaximumSize(buttonSize);
-	    b.setMinimumSize(buttonSize);
-	    b.setPreferredSize(buttonSize);
-	  }
-      }
-
     setLoginCount(g.getInitialLoginCount());
 
     getContentPane().validate();
