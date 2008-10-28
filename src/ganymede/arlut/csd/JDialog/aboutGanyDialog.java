@@ -130,31 +130,9 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
 
     tabPane = new JTabbedPane();
 
-    aboutTextbox = new JMultiLineLabel(true);
-    aboutTextbox.setOpaque(true);
-    aboutTextbox.setText(ts.l("init.aboutText",
-			      arlut.csd.Util.SVNVersion.getReleaseString()));
-
-    JScrollPane aboutScrollPane = new JScrollPane(aboutTextbox,
-						  JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						  JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    aboutScrollPane.setBorder(null);
-    aboutScrollPane.setViewportBorder(null);
-    aboutScrollPane.getViewport().setOpaque(true);
-
-    creditsTextbox = new JMultiLineLabel(true);
-    creditsTextbox.setOpaque(true);
-    creditsTextbox.setText(ts.l("init.creditsText"));
-
-    JScrollPane creditsScrollPane = new JScrollPane(creditsTextbox,
-						    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-						    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    creditsScrollPane.setBorder(null);
-    creditsScrollPane.setViewportBorder(null);
-    creditsScrollPane.getViewport().setOpaque(true);
-
-    tabPane.addTab(ts.l("init.about_tab"), null, aboutScrollPane);
-    tabPane.addTab(ts.l("init.credits_tab"), null, creditsScrollPane);
+    addTab(ts.l("init.about_tab"), ts.l("init.aboutText",
+					arlut.csd.Util.SVNVersion.getReleaseString()));
+    addTab(ts.l("init.credits_tab"), ts.l("init.creditsText"));
 
     ok = new JButton(StringDialog.ok); // localized
     ok.addActionListener(this);
@@ -188,6 +166,28 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     this.setContentPane(pane);
 
     super.pack();
+
+    // we add the license tab after packing so that we don't cause the
+    // dialog to get really tall in a futile attempt to encompass the
+    // whole GPL
+
+    addTab(ts.l("init.license_tab"), ts.l("init.licenseText"));
+  }
+
+  private void addTab(String title, String text)
+  {
+    JMultiLineLabel textbox = new JMultiLineLabel(true);
+    textbox.setOpaque(true);
+    textbox.setText(text);
+
+    JScrollPane scrollpane = new JScrollPane(textbox,
+					     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+					     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    scrollpane.setBorder(null);
+    scrollpane.setViewportBorder(null);
+    scrollpane.getViewport().setOpaque(true);
+
+    tabPane.addTab(title, null, scrollpane);
   }
 
   public void setVisible(boolean state)
