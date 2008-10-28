@@ -68,6 +68,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTabbedPane;
 
 import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.Util.PackageResources;
@@ -101,11 +102,13 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
 
   // ---
 
-  private JMultiLineLabel textbox = null;
+  private JMultiLineLabel aboutTextbox = null;
+  private JMultiLineLabel creditsTextbox = null;
   private JScrollPane scrollpane = null;
   private GridBagLayout gbl = null;
   private GridBagConstraints gbc = null;
   private JButton ok = null;
+  private JTabbedPane tabPane = null;
 
   /* -- */
 
@@ -125,15 +128,33 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
 								     getClass()));
     JLabel pictureLabel = new JLabel(logo);
 
-    textbox = new JMultiLineLabel(true);
-    textbox.setOpaque(true);
+    tabPane = new JTabbedPane();
 
-    JScrollPane scrollPane = new JScrollPane(textbox,
-					     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-					     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    scrollPane.setBorder(null);
-    scrollPane.setViewportBorder(null);
-    scrollPane.getViewport().setOpaque(true);
+    aboutTextbox = new JMultiLineLabel(true);
+    aboutTextbox.setOpaque(true);
+    aboutTextbox.setText(ts.l("init.aboutText",
+			      arlut.csd.Util.SVNVersion.getReleaseString()));
+
+    JScrollPane aboutScrollPane = new JScrollPane(aboutTextbox,
+						  JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						  JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    aboutScrollPane.setBorder(null);
+    aboutScrollPane.setViewportBorder(null);
+    aboutScrollPane.getViewport().setOpaque(true);
+
+    creditsTextbox = new JMultiLineLabel(true);
+    creditsTextbox.setOpaque(true);
+    creditsTextbox.setText(ts.l("init.creditsText"));
+
+    JScrollPane creditsScrollPane = new JScrollPane(creditsTextbox,
+						    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+						    JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    creditsScrollPane.setBorder(null);
+    creditsScrollPane.setViewportBorder(null);
+    creditsScrollPane.getViewport().setOpaque(true);
+
+    tabPane.addTab(ts.l("init.about_tab"), null, aboutScrollPane);
+    tabPane.addTab(ts.l("init.credits_tab"), null, creditsScrollPane);
 
     ok = new JButton(StringDialog.ok); // localized
     ok.addActionListener(this);
@@ -153,8 +174,8 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     gbc.weighty = 1.0;
     gbc.weightx = 1.0;
     gbc.insets = new Insets(5,5,5,5);
-    gbl.setConstraints(scrollPane, gbc);
-    pane.add(scrollPane);
+    gbl.setConstraints(tabPane, gbc);
+    pane.add(tabPane);
 
     gbc.fill = GridBagConstraints.NONE;
     gbc.anchor = GridBagConstraints.SOUTH;    
@@ -165,18 +186,6 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     pane.add(ok);
 
     this.setContentPane(pane);
-  }
-
-  public void loadAboutText()
-  {
-    textbox.setText(ts.l("loadAboutText.aboutText", arlut.csd.Util.SVNVersion.getReleaseString()));
-    super.pack();
-  }
-
-  public void loadCreditsText()
-  {
-    textbox.setText(ts.l("loadCreditsText.creditsText"));
-    super.pack();
   }
 
   public void setVisible(boolean state)

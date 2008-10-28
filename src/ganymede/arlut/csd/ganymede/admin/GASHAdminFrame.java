@@ -180,7 +180,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   JMenu helpMenu = null;
   JMenuItem showAboutMI = null;
-  JMenuItem showCreditsMI = null;
   JMenuItem showJavaVersionMI = null;
 
   JPopupMenu popMenu = null;
@@ -462,25 +461,14 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     showAboutMI.addActionListener(this);
     helpMenu.add(showAboutMI);
 
-    // "Ganymede Credits"
-    showCreditsMI = new JMenuItem(ts.l("init.help_menu_1"));
-
-    if (ts.hasPattern("init.help_menu_1_key_optional"))
-      {
-	showCreditsMI.setMnemonic((int) ts.l("init.help_menu_1_key_optional").charAt(0));
-      }
-
-    showCreditsMI.addActionListener(this);
-    helpMenu.add(showCreditsMI);
-
     helpMenu.addSeparator();
 
     // "Java Version"
-    showJavaVersionMI = new JMenuItem(ts.l("init.help_menu_2"));
+    showJavaVersionMI = new JMenuItem(ts.l("init.help_menu_1"));
 
-    if (ts.hasPattern("init.help_menu_2_key_optional"))
+    if (ts.hasPattern("init.help_menu_1_key_optional"))
       {
-        showJavaVersionMI.setMnemonic((int) ts.l("init.help_menu_2_key_optional").charAt(0));
+        showJavaVersionMI.setMnemonic((int) ts.l("init.help_menu_1_key_optional").charAt(0));
       }
 
     showJavaVersionMI.addActionListener(this);
@@ -1204,10 +1192,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       {
 	showAboutMessage();
       }
-    else if (event.getSource() == showCreditsMI)
-      {
-	showCreditsMessage();
-      }
     else if (event.getSource() == clearLogMI)
       {
 	statusArea.setText("");
@@ -1245,22 +1229,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	about = new aboutGanyDialog(this, ts.l("showAboutMessage.dialog_title"));  // "About Ganymede"
       }
 
-    about.loadAboutText();
-    about.setVisible(true);
-  }
-
-  /**
-   * Shows the Credits dialog.
-   */
-
-  public void showCreditsMessage()
-  {
-    if (about == null)
-      {
-	about = new aboutGanyDialog(this, ts.l("showCreditsMessage.dialog_title"));  // "Ganymede Credits"
-      }
-
-    about.loadCreditsText();
     about.setVisible(true);
   }
 

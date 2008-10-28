@@ -271,7 +271,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     help_action = "Help",
     about_action = "About Ganymede",
     java_version_action = "Java Version",
-    credits_action = "Credits",
     motd_action = "Message of the day";
 
   /**
@@ -1102,16 +1101,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     showAboutMI.addActionListener(this);
     helpMenu.add(showAboutMI);
 
-    // "Credits"
-    JMenuItem showCreditsMI = new JMenuItem(ts.l("createMenuBar.help_menu_1"));
-    setMenuMnemonic(showCreditsMI, ts.l("createMenuBar.help_menu_1_key_optional"));
-    showCreditsMI.setActionCommand(credits_action);
-    showCreditsMI.addActionListener(this);
-    helpMenu.add(showCreditsMI);
-
     // "Message of the day"
-    JMenuItem showMOTDMI = new JMenuItem(ts.l("createMenuBar.help_menu_2"));
-    setMenuMnemonic(showMOTDMI, ts.l("createMenuBar.help_menu_2_key_optional"));
+    JMenuItem showMOTDMI = new JMenuItem(ts.l("createMenuBar.help_menu_1"));
+    setMenuMnemonic(showMOTDMI, ts.l("createMenuBar.help_menu_1_key_optional"));
     showMOTDMI.setActionCommand(motd_action);
     showMOTDMI.addActionListener(this);
     helpMenu.add(showMOTDMI);
@@ -1119,8 +1111,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     helpMenu.addSeparator();
 
     // "Java Version"
-    JMenuItem javaVersionMI = new JMenuItem(ts.l("createMenuBar.help_menu_3"));
-    setMenuMnemonic(javaVersionMI, ts.l("createMenuBar.help_menu_3_key_optional"));
+    JMenuItem javaVersionMI = new JMenuItem(ts.l("createMenuBar.help_menu_2"));
+    setMenuMnemonic(javaVersionMI, ts.l("createMenuBar.help_menu_2_key_optional"));
     javaVersionMI.setActionCommand(java_version_action);
     javaVersionMI.addActionListener(this);
     helpMenu.add(javaVersionMI);
@@ -2041,28 +2033,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	about.setTitle(ts.l("showAboutMessage.dialog_title"));
       }
 
-    about.loadAboutText();
-    about.setVisible(true);
-  }
-
-  /**
-   * Shows the credits dialog.
-   */
-
-  public void showCredits()
-  {
-    if (about == null)
-      {
-	// "Ganymede Credits"
-	about = new aboutGanyDialog(this, ts.l("showCredits.dialog_title"));
-      }
-    else
-      {
-	// "Ganymede Credits"
-	about.setTitle(ts.l("showCredits.dialog_title"));
-      }
-
-    about.loadCreditsText();
     about.setVisible(true);
   }
 
@@ -5398,15 +5368,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	Thread thread = new Thread(new Runnable() {
 	  public void run() {
 	    showAboutMessage();
-	  }});
-	thread.setPriority(Thread.NORM_PRIORITY);
-	thread.start();
-      }
-    else if (command.equals(credits_action))
-      {
-	Thread thread = new Thread(new Runnable() {
-	  public void run() {
-	    showCredits();
 	  }});
 	thread.setPriority(Thread.NORM_PRIORITY);
 	thread.start();
