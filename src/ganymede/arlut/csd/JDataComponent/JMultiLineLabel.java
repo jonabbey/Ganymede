@@ -252,7 +252,7 @@ public class JMultiLineLabel extends JTextArea {
 
   public boolean isFocusable()
   {
-    return false;
+    return true;
   }
 
   ///////////////////////////////////////////////////////////////////////////////
