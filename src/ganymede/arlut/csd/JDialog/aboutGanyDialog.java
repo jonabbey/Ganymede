@@ -179,6 +179,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     JMultiLineLabel textbox = new JMultiLineLabel(true);
     textbox.setOpaque(true);
     textbox.setText(text);
+    textbox.setCaretPosition(0);
 
     JScrollPane scrollpane = new JScrollPane(textbox,
 					     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
