@@ -152,7 +152,7 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
 								     getClass()));
     JLabel pictureLabel = new JLabel(logo);
 
-    textbox = new JMultiLineLabel();
+    textbox = new JMultiLineLabel(true);
 
     JScrollPane scrollPane = new JScrollPane(textbox,
 					     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,

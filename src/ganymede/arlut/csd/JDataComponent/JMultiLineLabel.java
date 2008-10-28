@@ -92,16 +92,33 @@ public class JMultiLineLabel extends JTextArea {
   int 
     columns = 128;
 
+  /**
+   * If true, we'll let ourselves be focused, which enables copy and
+   * paste.
+   */
+
+  private boolean allowCopyPaste;
+
   /*
    * Constructors
    */
 
   public JMultiLineLabel()
   {
-    this(null);
+    this(null, false);
+  }
+
+  public JMultiLineLabel(boolean allowCopyPaste)
+  {
+    this(null, allowCopyPaste);
   }
 
   public JMultiLineLabel(String label)
+  {
+    this(label, false);
+  }
+
+  public JMultiLineLabel(String label, boolean allowCopyPaste)
   {
     setEditable(false);
     setOpaque(false);
@@ -111,6 +128,8 @@ public class JMultiLineLabel extends JTextArea {
     setText(label);
 
     setBorder(new EmptyBorder(new Insets(0,0,0,10)));
+
+    this.allowCopyPaste = allowCopyPaste;
   }
 
   /**
@@ -252,7 +271,7 @@ public class JMultiLineLabel extends JTextArea {
 
   public boolean isFocusable()
   {
-    return true;
+    return this.allowCopyPaste;
   }
 
   ///////////////////////////////////////////////////////////////////////////////

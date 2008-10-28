@@ -125,7 +125,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
 								     getClass()));
     JLabel pictureLabel = new JLabel(logo);
 
-    textbox = new JMultiLineLabel();
+    textbox = new JMultiLineLabel(true);
     textbox.setOpaque(true);
 
     JScrollPane scrollPane = new JScrollPane(textbox,
