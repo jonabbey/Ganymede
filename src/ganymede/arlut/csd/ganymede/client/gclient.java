@@ -96,6 +96,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -5515,6 +5516,52 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     else if (o instanceof JSetValueObject && o.getSource() == LandFMenu)
       {
         sizer.saveLookAndFeel();
+	SwingUtilities.updateComponentTreeUI(_myglogin);
+	
+	if (about != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(about);
+	  }
+
+	if (motd != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(motd);
+	  }
+
+	if (java_ver_dialog != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(java_ver_dialog);
+	  }
+
+	if (filterDialog != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(filterDialog);
+	  }
+
+	if (openDialog != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(openDialog);
+	  }
+
+	if (createDialog != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(createDialog);
+	  }
+
+	if (defaultOwnerDialog != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(defaultOwnerDialog);
+	  }
+
+	if (my_querybox != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(my_querybox);
+	  }
+
+	if (personaDialog != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(personaDialog);
+	  }
       }
     else
       {
