@@ -186,6 +186,8 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     pane.add(ok);
 
     this.setContentPane(pane);
+
+    super.pack();
   }
 
   public void setVisible(boolean state)
