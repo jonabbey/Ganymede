@@ -579,11 +579,14 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	// "Save Report As"
 	chooser.setDialogTitle(ts.l("sendReport.dialog_title"));
 
-	String defaultPath = gclient.prefs.get(TABLE_SAVE, null);
-
-	if (defaultPath != null)
+	if (gclient.prefs != null)
 	  {
-	    chooser.setCurrentDirectory(new File(defaultPath));
+	    String defaultPath = gclient.prefs.get(TABLE_SAVE, null);
+
+	    if (defaultPath != null)
+	      {
+		chooser.setCurrentDirectory(new File(defaultPath));
+	      }
 	  }
 
 	int returnValue = chooser.showDialog(wp.gc, null);
@@ -598,7 +601,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	try
 	  {
-	    gclient.prefs.put(TABLE_SAVE, directory.getCanonicalPath());
+	    if (gclient.prefs != null)
+	      {
+		gclient.prefs.put(TABLE_SAVE, directory.getCanonicalPath());
+	      }
 	  }
 	catch (java.io.IOException ex)
 	  {

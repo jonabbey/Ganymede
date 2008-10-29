@@ -835,12 +835,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     chooser.setDialogType(JFileChooser.SAVE_DIALOG);
     chooser.setDialogTitle(ts.l("save.file_dialog_title")); // "Save window as"
-    
-    String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
 
-    if (defaultPath != null)
+    if (gclient.prefs != null)
       {
-	chooser.setCurrentDirectory(new File(defaultPath));
+	String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
+
+	if (defaultPath != null)
+	  {
+	    chooser.setCurrentDirectory(new File(defaultPath));
+	  }
       }
 
     returnValue = chooser.showDialog(gc, null);
@@ -854,14 +857,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     File directory = chooser.getCurrentDirectory();
 
-    try
+    if (gclient.prefs != null)
       {
-	gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
-      }
-    catch (java.io.IOException ex)
-      {
-	// we don't really care if we can't save the directory
-	// path in our preferences all that much.
+	try
+	  {
+	    gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
+	  }
+	catch (java.io.IOException ex)
+	  {
+	    // we don't really care if we can't save the directory
+	    // path in our preferences all that much.
+	  }
       }
     
     if (file.exists())

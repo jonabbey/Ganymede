@@ -204,17 +204,20 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     types = new JComboBox(listHandles);
 
     // see if we remember a type of object to create
-    
-    String defaultType = gclient.prefs.get(DEFAULT_CREATE, null);
 
-    if (defaultType != null)
+    if (gclient.prefs != null)
       {
-	for (int i = 0; i < listHandles.size(); i++)
+	String defaultType = gclient.prefs.get(DEFAULT_CREATE, null);
+
+	if (defaultType != null)
 	  {
-	    if (defaultType.equals(((listHandle) listHandles.elementAt(i)).getLabel()))
+	    for (int i = 0; i < listHandles.size(); i++)
 	      {
-		types.setSelectedItem(listHandles.elementAt(i));
-		break;
+		if (defaultType.equals(((listHandle) listHandles.elementAt(i)).getLabel()))
+		  {
+		    types.setSelectedItem(listHandles.elementAt(i));
+		    break;
+		  }
 	      }
 	  }
       }
@@ -279,7 +282,10 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
       {
 	listHandle choice = (listHandle)types.getSelectedItem();
 
-	gclient.prefs.put(DEFAULT_CREATE, choice.getLabel());
+	if (gclient.prefs != null)
+	  {
+	    gclient.prefs.put(DEFAULT_CREATE, choice.getLabel());
+	  }
 
 	Short type = (Short)choice.getObject();
 

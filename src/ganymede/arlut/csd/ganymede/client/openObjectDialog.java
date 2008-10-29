@@ -208,7 +208,10 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
       }
     else
       {
-	selectedBaseName = gclient.prefs.get(DEFAULT_OPEN, null);
+	if (gclient.prefs != null)
+	  {
+	    selectedBaseName = gclient.prefs.get(DEFAULT_OPEN, null);
+	  }
       }
 
     gbl = new GridBagLayout();
@@ -405,7 +408,10 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	invid = null;
       }
 
-    gclient.prefs.put(DEFAULT_OPEN, getTypeString());
+    if (gclient.prefs != null)
+      {
+	gclient.prefs.put(DEFAULT_OPEN, getTypeString());
+      }
 
     setVisible(false);
 
