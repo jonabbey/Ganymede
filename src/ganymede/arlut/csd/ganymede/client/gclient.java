@@ -3633,18 +3633,27 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	
 	try
 	  {
-	    /*
-	      Use foxtrot to keep the GUI refreshing while we're waiting
-	      for the server to clone the object for us.
-	    */
+	    ReturnVal rv;
 
-	    ReturnVal rv = (ReturnVal) foxtrot.Worker.post(new foxtrot.Task()
+	    try
 	      {
-		public Object run() throws Exception
-		{
-		  return session.clone_db_object(local_origInvid);
-		}
-	      });
+		/*
+		  Use foxtrot to keep the GUI refreshing while we're waiting
+		  for the server to clone the object for us.
+		*/
+
+		rv = (ReturnVal) foxtrot.Worker.post(new foxtrot.Task()
+		  {
+		    public Object run() throws Exception
+		    {
+		      return session.clone_db_object(local_origInvid);
+		    }
+		  });
+	      }
+	    catch (java.security.AccessControlException ex)
+	      {
+		rv = session.clone_db_object(origInvid);
+	      }
 
 	    rv = handleReturnVal(rv);
 	    obj = (db_object) rv.getObject();
@@ -3767,18 +3776,27 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	  {
 	    final short local_type = type;
 
-	    /*
-	      Use foxtrot to keep the GUI refreshing while we're
-	      waiting for the server to create the object for us.
-	    */
+	    ReturnVal rv; 
 
-	    ReturnVal rv = (ReturnVal) foxtrot.Worker.post(new foxtrot.Task()
+	    try
 	      {
-		public Object run() throws Exception
-		{
-		  return session.create_db_object(local_type);
-		}
-	      });
+		/*
+		  Use foxtrot to keep the GUI refreshing while we're
+		  waiting for the server to create the object for us.
+		*/
+
+		rv = (ReturnVal) foxtrot.Worker.post(new foxtrot.Task()
+		  {
+		    public Object run() throws Exception
+		    {
+		      return session.create_db_object(local_type);
+		    }
+		  });
+	      }
+	    catch (java.security.AccessControlException ex)
+	      {
+		rv = session.create_db_object(local_type);
+	      }
 
 	    rv = handleReturnVal(rv);
 	    obj = (db_object) rv.getObject();

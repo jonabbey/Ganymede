@@ -468,29 +468,49 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	    gc.logoutMI.setEnabled(false);
 
-	    w = (framePanel) foxtrot.Worker.post(new foxtrot.Task()
+	    try
 	      {
-		public Object run() throws Exception
-		{
-		  try
+		w = (framePanel) foxtrot.Worker.post(new foxtrot.Task()
+		  {
+		    public Object run() throws Exception
 		    {
-		      framePanel foxFP = new framePanel(localFinalInvid,
-							localObject, 
-							localEditable,
-							localWindowPanel,
-							localIsNewlyCreated);
+		      try
+			{
+			  framePanel foxFP = new framePanel(localFinalInvid,
+							    localObject, 
+							    localEditable,
+							    localWindowPanel,
+							    localIsNewlyCreated);
 
-		      localWindowPanel.setWindowTitle(foxFP, localTitle);
-		      return foxFP;
+			  localWindowPanel.setWindowTitle(foxFP, localTitle);
+			  return foxFP;
+			}
+		      catch (Throwable ex)
+			{
+			  gc.processExceptionRethrow(ex);
+			  return null;
+			}
 		    }
-		  catch (Throwable ex)
-		    {
-		      gc.processExceptionRethrow(ex);
-		      return null;
-		    }
-		}
-	      }
+		  }
 						    );
+	      }
+	    catch (java.security.AccessControlException ex)
+	      {
+		try
+		  {
+		    w = new framePanel(finalInvid,
+				       object, 
+				       editable,
+				       this,
+				       isNewlyCreated);
+
+		    localWindowPanel.setWindowTitle(w, title);
+		  }
+		catch (Exception ex2)
+		  {
+		    gc.processExceptionRethrow(ex);
+		  }
+	      }
 	  }
 	catch (Exception ex)
 	  {

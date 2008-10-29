@@ -5,10 +5,7 @@
    The tab that holds history information.
    
    Created: 9 September 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Michael Mulvaney
 
@@ -162,17 +159,26 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
     try
       {
-        createdDate = (Date) foxtrot.Worker.post(new foxtrot.Task()
-          {
-            public Object run() throws Exception
-            {
-              ReturnVal retVal = myGc.getSession().view_db_object(myInvid);
-              db_object adminObj = retVal.getObject();
+	try
+	  {
+	    createdDate = (Date) foxtrot.Worker.post(new foxtrot.Task()
+	      {
+		public Object run() throws Exception
+		{
+		  ReturnVal retVal = myGc.getSession().view_db_object(myInvid);
+		  db_object adminObj = retVal.getObject();
+		  
+		  return adminObj.getFieldValue(SchemaConstants.CreationDateField);
+		}
+	      });
+	  }
+	catch (java.security.AccessControlException ex)
+	  {
+	    ReturnVal retVal = myGc.getSession().view_db_object(myInvid);
+	    db_object adminObj = retVal.getObject();
 
-              return adminObj.getFieldValue(SchemaConstants.CreationDateField);
-            }
-          }
-                                                           );
+	    createdDate = (Date) adminObj.getFieldValue(SchemaConstants.CreationDateField);
+	  }
       }
     catch (Exception rx)
       {
@@ -332,14 +338,20 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
     try
       {
-        historyBuffer = (StringBuffer) foxtrot.Worker.post(new foxtrot.Task()
-          {
-            public Object run() throws Exception
-            {
-              return gc.getSession().viewAdminHistory(invid, selectedDate);
-            }
-          }
-                                                           );
+	try
+	  {
+	    historyBuffer = (StringBuffer) foxtrot.Worker.post(new foxtrot.Task()
+	      {
+		public Object run() throws Exception
+		{
+		  return gc.getSession().viewAdminHistory(invid, selectedDate);
+		}
+	      });
+	  }
+	catch (java.security.AccessControlException ex)
+	  {
+	    historyBuffer = gc.getSession().viewAdminHistory(invid, selectedDate);
+	  }
       }
     catch (Exception rx)
       {
