@@ -91,6 +91,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -1249,6 +1250,36 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     else if (o instanceof JSetValueObject && o.getSource() == LandFMenu)
       {
         sizer.saveLookAndFeel();
+
+	if (about != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(about);
+	  }
+
+	if (java_ver_dialog != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(java_ver_dialog);
+	  }
+
+	if (shutdownDialog != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(java_ver_dialog);
+	  }
+
+	if (dumpDialog != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(dumpDialog);
+	  }
+
+	if (schemaEditor != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(schemaEditor);
+	  }
+
+	if (loginPanel != null)
+	  {
+	    SwingUtilities.updateComponentTreeUI(loginPanel);
+	  }
       }
     else
       {
