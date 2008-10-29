@@ -203,7 +203,24 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * other platforms.
    */
 
-  public static final Preferences prefs = Preferences.userNodeForPackage(gclient.class);
+  public static final Preferences prefs;
+
+  static
+  {
+    Preferences _prefs = null;
+
+    try
+      {
+	_prefs = Preferences.userNodeForPackage(gclient.class);
+      }
+    catch (Throwable ex)
+      {
+	ex.printStackTrace();
+      }
+
+    prefs = _prefs;
+  }
+
   public static final windowSizer sizer = new windowSizer(prefs);
 
   /**
@@ -3369,11 +3386,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     chooser.setDialogType(JFileChooser.OPEN_DIALOG);
     chooser.setDialogTitle(ts.l("processXMLSubmission.file_dialog_title")); // "Ganymede XML File"
 
-    String defaultPath = this.prefs.get("file_load_default_dir", null);
-
-    if (defaultPath != null)
+    if (this.prefs != null)
       {
-	chooser.setCurrentDirectory(new File(defaultPath));
+	String defaultPath = this.prefs.get("file_load_default_dir", null);
+	
+	if (defaultPath != null)
+	  {
+	    chooser.setCurrentDirectory(new File(defaultPath));
+	  }
       }
 
     int returnValue = chooser.showDialog(this, null);
@@ -3391,15 +3411,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-        try
-          {
-            this.prefs.put("file_load_default_dir", directory.getCanonicalPath());
-          }
-        catch (java.io.IOException ex)
-          {
-            // we don't really care if we can't save the directory
-            // path in our preferences all that much.
-          }
+	if (this.prefs != null)
+	  {
+	    try
+	      {
+		this.prefs.put("file_load_default_dir", directory.getCanonicalPath());
+	      }
+	    catch (java.io.IOException ex)
+	      {
+		// we don't really care if we can't save the directory
+		// path in our preferences all that much.
+	      }
+	  }
     
         String result = xmlclient.submitXML(this, file);
 

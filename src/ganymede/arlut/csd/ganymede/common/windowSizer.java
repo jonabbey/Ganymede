@@ -98,6 +98,11 @@ public class windowSizer {
 
   public void saveSize(JFrame window)
   {
+    if (prefEngine == null)
+      {
+	return;
+      }
+
     int status = window.getExtendedState();
 
     prefEngine.putBoolean(key(window, SIZESAVED), true);
@@ -129,7 +134,7 @@ public class windowSizer {
 
   public boolean restoreSize(JFrame window)
   {
-    if (!prefEngine.getBoolean(key(window, SIZESAVED), false))
+    if (prefEngine == null || !prefEngine.getBoolean(key(window, SIZESAVED), false))
       {
 	return false;
       }
@@ -176,6 +181,11 @@ public class windowSizer {
 
   public void saveSize(JDialog dialog)
   {
+    if (prefEngine == null)
+      {
+	return;
+      }
+
     prefEngine.putBoolean(key(dialog, SIZESAVED), true);
 
     prefEngine.putInt(key(dialog, XPOS), dialog.getX());
@@ -197,7 +207,7 @@ public class windowSizer {
 
   public boolean restoreSize(JDialog dialog)
   {
-    if (!prefEngine.getBoolean(key(dialog, SIZESAVED), false))
+    if (prefEngine == null || !prefEngine.getBoolean(key(dialog, SIZESAVED), false))
       {
 	return false;
       }
@@ -229,6 +239,11 @@ public class windowSizer {
 
   public void saveLookAndFeel()
   {
+    if (prefEngine == null)
+      {
+	return;
+      }
+
     String selectedLookAndFeel = UIManager.getLookAndFeel().getClass().getName();
 
     prefEngine.put(LOOKANDFEEL, selectedLookAndFeel);
@@ -242,6 +257,11 @@ public class windowSizer {
 
   public boolean restoreLookAndFeel()
   {
+    if (prefEngine == null)
+      {
+	return false;
+      }
+
     String savedLookAndFeel = prefEngine.get(LOOKANDFEEL, null);
 
     if (savedLookAndFeel != null)
