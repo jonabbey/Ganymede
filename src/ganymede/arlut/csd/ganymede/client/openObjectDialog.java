@@ -5,10 +5,7 @@
    A Dialog to open an object from the database for a variety of operations.
 
    Created: 31 October 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Mike Mulvaney
 

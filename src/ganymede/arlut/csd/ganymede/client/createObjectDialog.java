@@ -6,10 +6,7 @@
    create a new object in the client.
    
    Created: 17 September 1998
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Mike Mulvaney
 
@@ -17,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2006
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information

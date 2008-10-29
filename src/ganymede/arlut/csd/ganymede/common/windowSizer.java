@@ -6,10 +6,7 @@
    Ganymede client.
    
    Created: 21 January 2006
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey
 

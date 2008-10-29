@@ -4,11 +4,7 @@
    Ganymede client main module
 
    Created: 24 Feb 1997
-
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
 
