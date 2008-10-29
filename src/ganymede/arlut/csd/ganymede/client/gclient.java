@@ -201,6 +201,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   public static final Preferences prefs;
 
+  // If we're running as an applet, we might not be able to
+  // successfully load our static Preferences reference.  Make sure
+  // that we don't block this class' static initialization if we can't
+  // get Preferences.
+
   static
   {
     Preferences _prefs = null;

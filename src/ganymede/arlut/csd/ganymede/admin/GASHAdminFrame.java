@@ -148,7 +148,29 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
    * who-knows-what on other platforms.
    */
 
-  public static final Preferences prefs = Preferences.userNodeForPackage(GASHAdminFrame.class);
+  public static final Preferences prefs;
+
+  // If we're running as an applet, we might not be able to
+  // successfully load our static Preferences reference.  Make sure
+  // that we don't block this class' static initialization if we can't
+  // get Preferences.
+
+  static
+  {
+    Preferences _prefs = null;
+
+    try
+      {
+	_prefs = Preferences.userNodeForPackage(GASHAdminFrame.class);
+      }
+    catch (Throwable ex)
+      {
+	ex.printStackTrace();
+      }
+
+    prefs = _prefs;
+  }
+
   public static final windowSizer sizer = new windowSizer(prefs);
 
   static final String SPLITTER_POS = "admin_splitter_pos";
@@ -845,7 +867,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	sizer.saveSize(this);	// save an initial size before the user might maximize
       }
 
-    int splitterPos = prefs.getInt(SPLITTER_POS, -1);
+    int splitterPos = -1;
+
+    if (prefs != null)
+      {
+	splitterPos = prefs.getInt(SPLITTER_POS, -1);
+      }
 
     this.setVisible(true);
 
@@ -1201,8 +1228,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   private void saveWindowPrefs()
   {
-    sizer.saveSize(this);
-    prefs.putInt(SPLITTER_POS, splitterPane.getDividerLocation());
+    if (prefs != null)
+      {
+	sizer.saveSize(this);
+	prefs.putInt(SPLITTER_POS, splitterPane.getDividerLocation());
+      }
   }
 
   /**
