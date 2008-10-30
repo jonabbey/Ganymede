@@ -201,11 +201,12 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   // Our primary constructor.  This will always be called, either
   // from main(), below, or by the environment building our applet.
 
+  public GASHAdmin()
+  {
+  }
+
   public GASHAdmin(String debugFilename)
   {
-    admin_logo = PackageResources.getImageResource(this, "ganymede_admin.jpg", getClass());
-    admin_ssl_logo = PackageResources.getImageResource(this, "ganymede_ssl_admin.jpg", getClass());
-
     this.debugFilename = debugFilename;
   }
 
@@ -269,6 +270,9 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     // let's get notified if we establish an SSL connection
 
     RMISSLClientSocketFactory.setSSLClientListener(this);
+
+    admin_logo = PackageResources.getImageResource(this, "ganymede_admin.jpg", getClass());
+    admin_ssl_logo = PackageResources.getImageResource(this, "ganymede_ssl_admin.jpg", getClass());
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add("Center", createLoginPanel());
