@@ -115,7 +115,7 @@ javadoc_clean - Cleans the java doc tree
 
 dist_clean    - Cleans the directories at the top distribution level
 
-veryclean     - Does all of distclean, javadoc_clean, clean
+veryclean     - Does all of dist_clean, javadoc_clean, clean
 
 cleankeys     - Deletes the existing SSL key and cert material.  Be careful!  When
                 you delete or regenerate your SSL key material, you will have to be
