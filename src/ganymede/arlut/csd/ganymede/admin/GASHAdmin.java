@@ -525,7 +525,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	
 	if (connected.isSet())
 	  {
-	    if (this.cipherSuite != null && !ssl_logo)
+	    if (isSSL() && !ssl_logo)
 	      {
 		image.setIcon(new ImageIcon(admin_ssl_logo));
 		this.ssl_logo = true;
@@ -699,7 +699,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
   public boolean isSSL()
   {
-    return this.cipherSuite != null;
+    return RMISSLClientSocketFactory.isSSLEnabled();
   }
 
   /**

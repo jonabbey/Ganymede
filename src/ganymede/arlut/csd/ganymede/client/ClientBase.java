@@ -518,6 +518,16 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   }
 
   /**
+   * Returns true if the RMISSLClientSocketFactory for this client has
+   * been invoked to create a socket since JVM startup.
+   */
+
+  public boolean isSSLEnabled()
+  {
+    return RMISSLClientSocketFactory.isSSLEnabled();
+  }
+
+  /**
    * This method is from the RMISSLClientListener, and we use it to
    * get notified about the SSL cipher suite used if we wind up using
    * SSL to connect to an RMI server.

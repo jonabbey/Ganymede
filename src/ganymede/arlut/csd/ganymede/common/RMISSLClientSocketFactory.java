@@ -3,10 +3,7 @@
    RMISSLServerSocketFactory.java
  
    Created: 27 August 2004
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
@@ -79,6 +76,13 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   private static final boolean mrShouty = false;
   private static RMISSLClientListener listener = null;
 
+  /**
+   * This variable is true if this class has been used to create an
+   * SSL socket since JVM startup.  We use this as a proxy for whether
+   * or not we are communicating with the Ganymede server in SSL mode.
+   */
+
+  private static boolean enabled = false;
   private transient SSLSocketFactory sf;
 
   /**
@@ -92,6 +96,16 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
     RMISSLClientSocketFactory.listener = listener;
   }
 
+  /**
+   * Returns true if this RMISSLClientSocketFactory has been invoked
+   * to create a socket since JVM startup.
+   */
+
+  public synchronized static boolean isSSLEnabled()
+  {
+    return RMISSLClientSocketFactory.enabled;
+  }
+
   /* -- */
 
   public RMISSLClientSocketFactory()
@@ -100,6 +114,11 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 
   public Socket createSocket(String host, int port) throws IOException
   {
+    synchronized (arlut.csd.ganymede.common.RMISSLClientSocketFactory.class)
+      {
+	RMISSLClientSocketFactory.enabled = true;
+      }
+
     if (socketDebug)
       {
 	synchronized (arlut.csd.ganymede.common.RMISSLClientSocketFactory.class)
@@ -118,7 +137,8 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 
     if (mrShouty)
       {
-	System.err.println("RMISSLClientSocketFactory: created SSL socket to host " + host + " on port " + port + ", using " + cipherSuite);
+	System.err.println("RMISSLClientSocketFactory: created SSL socket to host " + host +
+			   " on port " + port + ", using " + cipherSuite);
       }
 
     synchronized (RMISSLClientSocketFactory.class)
@@ -151,6 +171,11 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   {
     if (sf != null)
       {
+	if (socketDebug)
+	  {
+	    System.err.println("getSF() returning a pre-existing SocketFactory");
+	  }
+
 	return sf;
       }
 

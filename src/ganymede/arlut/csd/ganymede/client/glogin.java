@@ -700,7 +700,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 	if (connected.isSet())
 	  {
-	    if (my_client.getCipherSuite() != null && !ssl)
+	    if (my_client.isSSLEnabled() && !ssl)
 	      {
 		ssl = true;
 		image.setIcon(new ImageIcon(ganymede_ssl_logo));
@@ -718,6 +718,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		      // "Login to server (NO SSL)"
 		      connector.setText(ts.l("run.login_nossl"));
 		    }
+
 		  enableButtons(true);
 		  connector.paintImmediately(connector.getVisibleRect());
 		  setNormalCursor();
