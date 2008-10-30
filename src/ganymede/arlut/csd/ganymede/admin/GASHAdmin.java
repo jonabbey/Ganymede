@@ -463,11 +463,6 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     try
       {
-	if (connected.isSet())
-	  {
-	    return;
-	  }
-    
 	while (!connected.isSet())
 	  {
 	    if (try_number++ > 20)
@@ -483,12 +478,6 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 		  {
 		    server = (Server) obj;
 		    server.up();	// RMI call to verify our connection
-		  }
-
-		if (this.cipherSuite != null && !ssl_logo)
-		  {
-		    image.setIcon(new ImageIcon(admin_ssl_logo));
-		    this.ssl_logo = true;
 		  }
 
 		connected.set(true);
@@ -536,6 +525,12 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	
 	if (connected.isSet())
 	  {
+	    if (this.cipherSuite != null && !ssl_logo)
+	      {
+		image.setIcon(new ImageIcon(admin_ssl_logo));
+		this.ssl_logo = true;
+	      }
+
 	    SwingUtilities.invokeLater(new Runnable() 
 	      {
 		public void run()
