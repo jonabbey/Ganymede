@@ -195,8 +195,8 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   JButton 
     OkButton = new JButton(ts.l("global.submit_button")), // "Submit"
     CancelButton = new JButton(ts.l("global.cancel_button")), // "Cancel"
-    addButton = new JButton(ts.l("global.add_choices_button")),	// "Add Choices"
-    removeButton = new JButton(ts.l("global.remove_choices_button")); // "Remove Choices"
+    addButton = new JButton(ts.l("global.add_choices_button")),	// "Add Filter"
+    removeButton = new JButton(ts.l("global.remove_choices_button")); // "Remove Filter"
 
   GridBagLayout gbl = new GridBagLayout();
   GridBagConstraints gbc = new GridBagConstraints();
