@@ -408,6 +408,11 @@ public class SmartTable extends JPanel implements ActionListener
 
 	TextAreaRenderer renderer = (TextAreaRenderer) col.getCellRenderer();
 
+	if (renderer == null)
+	  {
+	    continue;
+	  }
+
 	nominalWidth[i] = 20;
 
 	for (int j = 0; j < myModel.getRowCount(); j++)
