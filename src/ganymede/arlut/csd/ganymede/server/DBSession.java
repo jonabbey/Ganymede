@@ -1604,18 +1604,20 @@ final public class DBSession {
 
     /* -- */
 
-    obj = GSession.getUser();
+    obj = GSession.getPersona();
 
     if (obj != null)
       {
 	result = obj.getLabel();
       }
-
-    obj = GSession.getPersona();
-
-    if (obj != null)
+    else
       {
-	result += ":" + obj.getLabel();
+	obj = GSession.getUser();
+
+	if (obj != null)
+	  {
+	    result = obj.getLabel();
+	  }
       }
 
     return result;
