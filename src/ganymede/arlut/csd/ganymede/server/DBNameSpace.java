@@ -260,7 +260,7 @@ public final class DBNameSpace implements NameSpace {
   {
     out.writeUTF(name);
     out.writeBoolean(caseInsensitive);
-    out.writeInt(uniqueHash.size());
+    out.writeInt(uniqueHash.size()); // added at DBStore version 2.14
   }
 
   /**
