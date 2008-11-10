@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-October 15, 2008
+November 10, 2008
 CHANGES
 
 Last Commit: $Format:%cd$
@@ -1433,6 +1433,22 @@ reports.
 The tree component used in the Ganymede client and admin console
 schema editor now support full content search through prefix match
 with keyboard text entry.
+
+92. [CLIENT] Fixed numerous bugs when using the GTK look and feel on Linux
+
+The Ganymede client now renders properly when using the GTK look and
+feel on Linux.
+
+93. [CLIENT, ADMIN CONSOLE] Client, console work properly as an applet once again
+
+The Ganymede client and admin console have been broken for some time
+when run as an applet.  The client and admin console now behave
+properly whichever method (applet, plugin, webstart) you choose.
+
+94. [CLIENT, ADMIN CONSOLE] Expanded the 'About Ganymede' dialog.
+
+The 'Credits' and 'About Ganymede' dialogs have been folded into one
+expanded 'About Ganymede' dialog.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
