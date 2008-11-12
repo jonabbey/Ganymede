@@ -461,7 +461,7 @@ xmlclient.</comment>
               <comment>Password for an individual privileged to log into Ganymede and/or the network</comment>
               <typedef type="password">
                 <maxlength val="14"/>
-                <badchars val=":;,'&quot;@&amp;*"/>
+                <badchars val=",&quot;@&amp;"/>
                 <crypted/>
                 <md5crypted/>
                 <winHashed/>
