@@ -1124,13 +1124,31 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Invid homeGroupInvid = (Invid) object.getFieldValueLocal(HOMEGROUP);
     Vector myGroups = object.getFieldValuesLocal(GROUPLIST);
 
-    if (!myGroups.contains(homeGroupInvid))
+    if (myGroups != null)
       {
-        DBObject homeGroupObj = object.lookupInvid(homeGroupInvid, false);
+	if (!myGroups.contains(homeGroupInvid))
+	  {
+	    DBObject homeGroupObj = object.lookupInvid(homeGroupInvid, false);
 
-        return Ganymede.createErrorDialog("Bad Home Group",
-                                          "Ganymede server configuration error.  The home group (" + homeGroupObj.getLabel() + ") for this user is " +
-                                          "not a valid choice.");
+	    if (homeGroupObj != null)
+	      {
+		return Ganymede.createErrorDialog("Bad Home Group",
+						  "Ganymede server configuration error.  The home group (" +
+						  homeGroupObj.getLabel() + ") for this user is " +
+						  "not a valid choice.");
+	      }
+	    else
+	      {
+		return Ganymede.createErrorDialog("Bad Home Group",
+						  "Ganymede server configuration error.  The home group " +
+						  "for this user does not point to a valid object.");
+	      }
+	  }
+      }
+    else
+      {
+	return Ganymede.createErrorDialog("Missing Groups",
+					  "This user is not a member of any groups.");
       }
 
     // and make sure that the badge number is unique, if we're a
