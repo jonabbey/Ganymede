@@ -120,7 +120,7 @@ public class BrowserLauncher {
       {
 	Method browseMethod = desktopClass.getMethod("browse", new Class [] {java.net.URI.class});
 
-	browseMethod.invoke(urlObj, (Object []) null);
+	browseMethod.invoke(desktopObject, new Object [] {urlObj});
       }
     catch (Exception ex)
       {
