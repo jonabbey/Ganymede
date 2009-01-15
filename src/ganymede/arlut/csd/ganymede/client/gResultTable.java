@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -264,7 +264,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     // "Query: [{0}] results: {1,num,#} entries"
     int rows = results.resultSize();
-    wp.setWindowTitle(this, ts.l("loadResults.window_title", queryType, new Integer(rows)));
+    wp.setWindowTitle(this, ts.l("loadResults.window_title", queryType, Integer.valueOf(rows)));
     wp.updateWindowMenu();
 
 

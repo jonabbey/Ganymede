@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -1348,7 +1348,7 @@ public final class DBStore implements JythonMap {
 
   public DBObjectBase getObjectBase(short id)
   {
-    return (DBObjectBase) objectBases.get(new Short(id));
+    return (DBObjectBase) objectBases.get(Short.valueOf(id));
   }
 
   /**
@@ -1452,12 +1452,12 @@ public final class DBStore implements JythonMap {
 		// and that the journal file is older than the ganymede.db file.  You should be able to
 		// remove the journal file and restart the server.
 
-		throw new IntegrityConstraintException(ts.l("updateTransactionNumber.lingeringJournal", new Integer(nextNumber), new Integer(transactionNumber+1)));
+		throw new IntegrityConstraintException(ts.l("updateTransactionNumber.lingeringJournal", Integer.valueOf(nextNumber), Integer.valueOf(transactionNumber+1)));
 	      }
 	    else
 	      {
 		// "Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.  Throwing up."
-		throw new IntegrityConstraintException(ts.l("updateTransactionNumber.badnumber", new Integer(nextNumber), new Integer(transactionNumber+1)));
+		throw new IntegrityConstraintException(ts.l("updateTransactionNumber.badnumber", Integer.valueOf(nextNumber), Integer.valueOf(transactionNumber+1)));
 	      }
 	  }
 

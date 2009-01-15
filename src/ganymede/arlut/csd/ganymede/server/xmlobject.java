@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -237,7 +237,7 @@ public class xmlobject {
 
     try
       {
-	type = new Short(xSession.getTypeNum(typeString));
+	type = Short.valueOf(xSession.getTypeNum(typeString));
       }
     catch (NullPointerException ex)
       {

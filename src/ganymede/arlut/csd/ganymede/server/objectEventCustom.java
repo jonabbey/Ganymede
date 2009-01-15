@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -279,7 +279,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
 	ReturnVal retVal = null;
 
-	retVal = setFieldValueLocal(SchemaConstants.ObjectEventObjectType, new Integer(base.getTypeID()));
+	retVal = setFieldValueLocal(SchemaConstants.ObjectEventObjectType, Integer.valueOf(base.getTypeID()));
 
 	if (!ReturnVal.didSucceed(retVal))
 	  {

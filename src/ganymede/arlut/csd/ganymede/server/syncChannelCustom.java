@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -311,7 +311,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    if (this.isDeleting())
 	      {
-		indexField.setValueLocal(new Integer(-1));
+		indexField.setValueLocal(Integer.valueOf(-1));
 	      }
 	    else
 	      {
@@ -323,15 +323,15 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    if (type.equals(ts.l("global.manual")))
 	      {
-		indexField.setValueLocal(new Integer(0));
+		indexField.setValueLocal(Integer.valueOf(0));
 	      }
 	    else if (type.equals(ts.l("global.incremental")))
 	      {
-		indexField.setValueLocal(new Integer(1));
+		indexField.setValueLocal(Integer.valueOf(1));
 	      }
 	    else if (type.equals(ts.l("global.fullstate")))
 	      {
-		indexField.setValueLocal(new Integer(2));
+		indexField.setValueLocal(Integer.valueOf(2));
 	      }
 	    else
 	      {

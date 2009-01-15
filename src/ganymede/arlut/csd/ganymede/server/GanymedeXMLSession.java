@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -511,7 +511,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    while (reader != null && !reader.isDone() && waitCount < 10)
 	      {
 		// "Waiting for reader to close down: {0,number,#}"
-		System.err.println(ts.l("xmlSubmit.waiting_for_reader", new Integer(waitCount)));
+		System.err.println(ts.l("xmlSubmit.waiting_for_reader", Integer.valueOf(waitCount)));
 
 		try
 		  {
@@ -1300,7 +1300,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (_oldBase == null)
 	      {
 		// " Error, couldn''t find DBObjectBase for {0} in pass {1,number,#}."
-		err.println(ts.l("processSchema.bad_base", _entry.getTreeString(), new Integer(1)));
+		err.println(ts.l("processSchema.bad_base", _entry.getTreeString(), Integer.valueOf(1)));
 
 		return false;
 	      }
@@ -1339,7 +1339,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (_oldBase == null)
 	      {
 		// " Error, couldn''t find DBObjectBase for {0} in pass {1,number,#}."
-		err.println(ts.l("processSchema.bad_base", _entry.getTreeString(), new Integer(2)));
+		err.println(ts.l("processSchema.bad_base", _entry.getTreeString(), Integer.valueOf(2)));
 
 		return false;
 	      }
@@ -1368,7 +1368,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (_oldBase == null)
 	      {
 		// " Error, couldn''t find DBObjectBase for {0} in pass {1,number,#}."
-		err.println(ts.l("processSchema.bad_base", _entry.getTreeString(), new Integer(3)));
+		err.println(ts.l("processSchema.bad_base", _entry.getTreeString(), Integer.valueOf(3)));
 
 		return false;
 	      }
@@ -1659,7 +1659,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    return false;
 	  }
 
-	Short key = new Short(id.shortValue());
+	Short key = Short.valueOf(id.shortValue());
 	xmlBases.addElement(key);
 
 	if (entries.containsKey(key))
@@ -2123,7 +2123,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	err.println();
 
 	// "Done scanning XML for data elements.  Integrating transaction for {0,number,#} <object> elements."
-	err.println(ts.l("processData.integrating", new Integer(totalCount)));
+	err.println(ts.l("processData.integrating", Integer.valueOf(totalCount)));
 
 	err.println();
 
@@ -2196,7 +2196,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	  }
 
 	objectTypes.put(base.getName(), fieldHash);
-	objectTypeIDs.put(new Short(base.getTypeID()), fieldHash);
+	objectTypeIDs.put(Short.valueOf(base.getTypeID()), fieldHash);
       }
   }
 
@@ -2284,7 +2284,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     else if (object.num != -1)
       {
-	Integer intKey = new Integer(object.num);
+	Integer intKey = Integer.valueOf(object.num);
 
 	if (objectHash.containsKey(intKey))
 	  {
@@ -2329,7 +2329,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public xmlobject getXMLObjectTarget(short typeId, String objectId)
   {
-    Hashtable objectHash = (Hashtable) objectStore.get(new Short(typeId));
+    Hashtable objectHash = (Hashtable) objectStore.get(Short.valueOf(typeId));
 
     if (objectHash == null)
       {
@@ -2366,7 +2366,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     /* -- */
 
-    typeKey = new Short(typeId);
+    typeKey = Short.valueOf(typeId);
     objectHash = (Hashtable) objectStore.get(typeKey);
 
     if (objectHash == null)
@@ -2464,7 +2464,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public xmlobject getObject(String baseName, String objectID)
   {
-    return getObject(new Short(getTypeNum(baseName)), objectID);
+    return getObject(Short.valueOf(getTypeNum(baseName)), objectID);
   }
 
   /**
@@ -2504,7 +2504,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public xmlobject getObject(String baseName, Integer objectNum)
   {
-    return getObject(new Short(getTypeNum(baseName)), objectNum);
+    return getObject(Short.valueOf(getTypeNum(baseName)), objectNum);
   }
 
   /**
@@ -2609,7 +2609,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public FieldTemplate getFieldTemplate(short type, String fieldName)
   {
-    return getFieldTemplate(new Short(type), fieldName);
+    return getFieldTemplate(Short.valueOf(type), fieldName);
   }
 
   /**
@@ -2871,12 +2871,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (msg != null)
 	      {
 		// "[{0,number,#}] Error registering fields for {1}:\n{2}"
-		err.println(ts.l("integrateXMLTransaction.error_registering", new Integer(2), object, msg));
+		err.println(ts.l("integrateXMLTransaction.error_registering", Integer.valueOf(2), object, msg));
 	      }
 	    else
 	      {
 		// "[{0,number,#}] Error detected registering fields for {1}."
-		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(2), object));
+		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", Integer.valueOf(2), object));
 	      }
 
 	    success = false;
@@ -2905,12 +2905,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (msg != null)
 	      {
 		// "[{0,number,#}] Error registering fields for {1}:\n{2}"
-		err.println(ts.l("integrateXMLTransaction.error_registering", new Integer(3), newObject, msg));
+		err.println(ts.l("integrateXMLTransaction.error_registering", Integer.valueOf(3), newObject, msg));
 	      }
 	    else
 	      {
 		// "[{0,number,#}] Error detected registering fields for {1}."
-		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(3), newObject));
+		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", Integer.valueOf(3), newObject));
 	      }
 
 	    success = false;
@@ -2933,12 +2933,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (msg != null)
 	      {
 		// "[{0,number,#}] Error registering fields for {1}:\n{2}"
-		err.println(ts.l("integrateXMLTransaction.error_registering", new Integer(4), object, msg));
+		err.println(ts.l("integrateXMLTransaction.error_registering", Integer.valueOf(4), object, msg));
 	      }
 	    else
 	      {
 		// "[{0,number,#}] Error detected registering fields for {1}."
-		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(4), object));
+		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", Integer.valueOf(4), object));
 	      }
 
 	    success = false;
@@ -2962,12 +2962,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    if (msg != null)
 	      {
 		// "[{0,number,#}] Error registering fields for {1}:\n{2}"
-		err.println(ts.l("integrateXMLTransaction.error_registering", new Integer(5), object, msg));
+		err.println(ts.l("integrateXMLTransaction.error_registering", Integer.valueOf(5), object, msg));
 	      }
 	    else
 	      {
 		// "[{0,number,#}] Error detected registering fields for {1}."
-		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", new Integer(5), object));
+		err.println(ts.l("integrateXMLTransaction.error_registering_no_msg", Integer.valueOf(5), object));
 	      }
 
 	    success = false;
@@ -3300,11 +3300,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     if (x == null)
       {
-	table.put(type, new Integer(1));
+	table.put(type, Integer.valueOf(1));
       }
     else
       {	
-	table.put(type, new Integer(x.intValue() + 1));
+	table.put(type, Integer.valueOf(x.intValue() + 1));
       }
   }
 

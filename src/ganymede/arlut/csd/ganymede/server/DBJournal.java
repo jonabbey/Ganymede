@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -504,7 +504,7 @@ public class DBJournal implements ObjectStatus {
 
 	    for (int i = 0; i < object_count; i++)
 	      {
-		Integer iObj = new Integer(i);
+		Integer iObj = Integer.valueOf(i);
 
 		// "Reading operation code for object {0}"
 		status = ts.l("load.readingopcode", iObj);
@@ -515,7 +515,7 @@ public class DBJournal implements ObjectStatus {
 		status = ts.l("load.readingtype", iObj);
 
 		obj_type = jFile.readShort();
-		base = (DBObjectBase) store.objectBases.get(new Short(obj_type));
+		base = (DBObjectBase) store.objectBases.get(Short.valueOf(obj_type));
 
 		switch (operation)
 		  {
@@ -591,7 +591,7 @@ public class DBJournal implements ObjectStatus {
 		    if (debug)
 		      {
 			// "Delete: {0}:{1}"
-			System.err.println(ts.l("load.delete", base.object_name, new Short(obj_id)));
+			System.err.println(ts.l("load.delete", base.object_name, Short.valueOf(obj_id)));
 		      }
 		
 		    entries.addElement(new JournalEntry(base, obj_id, null));
@@ -630,7 +630,7 @@ public class DBJournal implements ObjectStatus {
 		    if (!success)
 		      {
 			// "DBJournal: transaction {0} not finalized in journal, rejecting"
-			throw new IOException(ts.l("load.notfinalized", new Integer(nextTransactionNumber)));
+			throw new IOException(ts.l("load.notfinalized", Integer.valueOf(nextTransactionNumber)));
 		      }
 		  }
 		catch (IOException ex)
@@ -667,7 +667,7 @@ public class DBJournal implements ObjectStatus {
 	    // okay, process this transaction
 
 	    // "Processing {0} objects"
-	    System.err.println(ts.l("load.processing", new Integer(entries.size())));
+	    System.err.println(ts.l("load.processing", Integer.valueOf(entries.size())));
 
 	    for (int i = 0; i < entries.size(); i++)
 	      {
@@ -763,7 +763,7 @@ public class DBJournal implements ObjectStatus {
 	if (debug)
 	  {
 	    // "Objects in Transaction: {0}"
-	    System.err.println(ts.l("writeTransaction.objcount", new Integer(objects.length)));
+	    System.err.println(ts.l("writeTransaction.objcount", Integer.valueOf(objects.length)));
 	  }
 	
 	jFile.writeInt(objects.length);
@@ -813,7 +813,7 @@ public class DBJournal implements ObjectStatus {
 		if (debug)
 		  {
 		    // "Wrote object deletion record:\n\t{0} : {1}"
-		    System.err.println(ts.l("writeTransaction.wroteobjdel", eObj.objectBase.object_name, new Integer(eObj.getID())));
+		    System.err.println(ts.l("writeTransaction.wroteobjdel", eObj.objectBase.object_name, Integer.valueOf(eObj.getID())));
 		  }
 		break;
 		

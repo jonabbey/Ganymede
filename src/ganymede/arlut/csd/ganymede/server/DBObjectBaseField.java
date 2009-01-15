@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -1706,7 +1706,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    // "XML"
 	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
 	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doStringXML.bad_vector_limit", new Integer(_maxSize),
+					      ts.l("doStringXML.bad_vector_limit", Integer.valueOf(_maxSize),
 						   root.getTreeString(), retVal.getDialogText()));
 	  }
       }
@@ -1718,7 +1718,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_min_length", new Integer(_minlength),
+					  ts.l("doStringXML.bad_min_length", Integer.valueOf(_minlength),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -1729,7 +1729,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_max_length", new Integer(_maxlength),
+					  ts.l("doStringXML.bad_max_length", Integer.valueOf(_maxlength),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -2049,7 +2049,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_min_length", new Integer(_minlength),
+					  ts.l("doPasswordXML.bad_min_length", Integer.valueOf(_minlength),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -2060,7 +2060,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	// "XML"
 	// "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_max_length", new Integer(_maxlength),
+					  ts.l("doPasswordXML.bad_max_length", Integer.valueOf(_maxlength),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -2281,7 +2281,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    // "XML"
 	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
 	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doIPXML.bad_vector_limit", new Integer(_maxSize),
+					      ts.l("doIPXML.bad_vector_limit", Integer.valueOf(_maxSize),
 						   root.getTreeString(), retVal.getDialogText()));
 	  }
       }
@@ -2493,7 +2493,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	    // "XML"
 	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
 	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doInvidXML.bad_vector_limit", new Integer(_maxSize),
+					      ts.l("doInvidXML.bad_vector_limit", Integer.valueOf(_maxSize),
 						   root.getTreeString(), retVal.getDialogText()));
 	  }
       }
@@ -3326,7 +3326,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	// "Field id number {0,number,#} is out of range: {1}."
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setID.out_of_range", new Integer(id),
+					  ts.l("setID.out_of_range", Integer.valueOf(id),
 					       this.toString()));
       }
 
@@ -3341,7 +3341,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	// "Can''t set field id number {0,number,#} on field {1}.  That field id number is already in use by another field definition."
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setID.in_use", new Integer(id),
+					  ts.l("setID.in_use", Integer.valueOf(id),
 					       this.toString()));
       }
 
@@ -3364,7 +3364,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
   public Short getKey()
   {
-    return new Short(field_code);
+    return Short.valueOf(field_code);
   }
 
   /**
@@ -4472,7 +4472,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     else
       {
 	// "Can''t set the target base to base number {0,number,#}.  No such base is defined: {0}."
-	throw new IllegalArgumentException(ts.l("setTargetBase.bad_target_num", new Integer(val)));
+	throw new IllegalArgumentException(ts.l("setTargetBase.bad_target_num", Integer.valueOf(val)));
       }
 
     if (isInUse())
@@ -4677,7 +4677,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	// "Can''t set target field on a non-symmetric invid field {0} to {1,number,#}"
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setTargetField.asymmetry_num", this.toString(), new Integer(val)));
+					  ts.l("setTargetField.asymmetry_num", this.toString(), Integer.valueOf(val)));
       }
 
     try
@@ -4692,7 +4692,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    // "Can''t find object type {0,number,#} in order to set target field for {2} to {1,number,#}"
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setTargetField.bad_base_num", new Integer(allowedTarget), new Integer(val),
+					      ts.l("setTargetField.bad_base_num", Integer.valueOf(allowedTarget), Integer.valueOf(val),
 						   this.toString()));
 	  }
 	
@@ -4702,7 +4702,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    // "Can''t find target field numbered {0,number,#} in order to set target field for {1}."
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setTargetField.bad_target_field_num", new Integer(val),
+					      ts.l("setTargetField.bad_target_field_num", Integer.valueOf(val),
 						   this.toString()));
 	  }
       }
@@ -4794,7 +4794,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	  {
 	    // "Can''t find object type {0,number,#} in order to set target field for {2} to {1}"
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setTargetField.bad_base", new Integer(allowedTarget),
+					      ts.l("setTargetField.bad_base", Integer.valueOf(allowedTarget),
 						   fieldName, this.toString()));
 	  }
 	
@@ -5467,7 +5467,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 
       default:
 	// "<<bad type code: " + field_type + " >>"
-	result = ts.l("getTypeDesc.bad_code", new Integer(field_type));
+	result = ts.l("getTypeDesc.bad_code", Integer.valueOf(field_type));
       }
 
     if (array)

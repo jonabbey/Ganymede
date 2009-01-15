@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -147,7 +147,7 @@ public class NumericDBField extends DBField implements num_field {
   {
     this.owner = owner;
     this.fieldcode = definition.getID();
-    this.value = new Integer(value);
+    this.value = Integer.valueOf(value);
   }
 
   /**
@@ -173,7 +173,7 @@ public class NumericDBField extends DBField implements num_field {
 
   void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = new Integer(in.readInt());
+    value = Integer.valueOf(in.readInt());
   }
 
   /**
@@ -429,7 +429,7 @@ public class NumericDBField extends DBField implements num_field {
 	    return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
 					      ts.l("verifyNewValue.over_range",
 						   I, this.getName(), owner.getLabel(),
-						   new Integer(this.getMinValue())));
+						   Integer.valueOf(this.getMinValue())));
 	  }
 
 	if (getMaxValue() < I.intValue())
@@ -437,7 +437,7 @@ public class NumericDBField extends DBField implements num_field {
 	    return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
 					      ts.l("verifyNewValue.under_range",
 						   I, this.getName(), owner.getLabel(),
-						   new Integer(this.getMinValue())));
+						   Integer.valueOf(this.getMinValue())));
 	  }
       }
 

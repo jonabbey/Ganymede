@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -1560,7 +1560,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     while (this.contains(name))
       {
-	name = ts.l("newSubCategory.new_category_indexed", new Integer(i++));
+	name = ts.l("newSubCategory.new_category_indexed", Integer.valueOf(i++));
       }
 
     try
@@ -1685,7 +1685,7 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     if (editor != null)
       {
-	return (DBObjectBase) baseHash.get(new Short(id));
+	return (DBObjectBase) baseHash.get(Short.valueOf(id));
       }
     else
       {

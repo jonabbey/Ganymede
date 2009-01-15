@@ -24,7 +24,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -543,7 +543,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 		// re-use the Vector.
 
 		EIPfields.addElement(template);
-		getEmbedded(EIPfields, null, new Short(selectedBase.getTypeID()), Embedded);
+		getEmbedded(EIPfields, null, Short.valueOf(selectedBase.getTypeID()), Embedded);
 		EIPfields.removeElement(template);
 
 		if (!Embedded.isEmpty())
@@ -588,7 +588,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 	    
 		// and to the base
 	    
-		mapNameToId(name, new Short(selectedBase.getTypeID()));
+		mapNameToId(name, Short.valueOf(selectedBase.getTypeID()));
 
 		// and finally add to fieldChoices
 		fieldChoices.addElement(name);
@@ -696,7 +696,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
 	    if (tempID >= 0)
 	      {
-		tempIDobj = new Short(tempID);
+		tempIDobj = Short.valueOf(tempID);
 
 		// process embedded fields for target
 
@@ -1200,7 +1200,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   BaseDump getBaseFromShort(short id)
   {
-    return (BaseDump) gc.getBaseMap().get(new Short(id));
+    return (BaseDump) gc.getBaseMap().get(Short.valueOf(id));
   }
 
   // WindowListener methods

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -526,7 +526,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
         if (originalWindow != null)
           {
             w.setBounds(originalWindow.getBounds());
-            w.setLayer(new Integer(topLayer));
+            w.setLayer(Integer.valueOf(topLayer));
             add(w);
             w.setVisible(true);
             setSelectedWindow(w);
@@ -537,7 +537,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
           {
             w.setBounds(0, 0, 535, 400);
             placeWindow(w);
-            w.setLayer(new Integer(topLayer));
+            w.setLayer(Integer.valueOf(topLayer));
 	
             add(w);
             w.setVisible(true);
@@ -852,7 +852,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
         return;
       }
 
-    rt.setLayer(new Integer(topLayer));
+    rt.setLayer(Integer.valueOf(topLayer));
     rt.setBounds(0, 0, 500,500);
     rt.setResizable(true);
     rt.setClosable(true);
@@ -893,7 +893,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     frame.getContentPane().add(new JLabel(ts.l("addWaitWindow.label"),
 					  icon,
 					  SwingConstants.CENTER));
-    frame.setLayer(new Integer(topLayer));
+    frame.setLayer(Integer.valueOf(topLayer));
 
     if (debug)
       {

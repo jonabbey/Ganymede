@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -882,7 +882,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 	      {
 		invid = (Invid) serverValues.elementAt(i);
 
-		serverInvids.put(invid, new Integer(i));
+		serverInvids.put(invid, Integer.valueOf(i));
 	      }
 
 	    // what invid's are currently in this vector panel?

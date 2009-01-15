@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -213,7 +213,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	if (GanymedeServer.lSemaphore.checkEnabled() == null)
 	  {
 	    // "{0, Date} [{1, number, #}] {2}\n"
-	    stampedLine = ts.l("logAppend.enabled_template", new Date(), new Integer(GanymedeServer.lSemaphore.getCount()), status);
+	    stampedLine = ts.l("logAppend.enabled_template", new Date(), Integer.valueOf(GanymedeServer.lSemaphore.getCount()), status);
 	  }
 	else
 	  {
@@ -261,7 +261,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	if (consoles.size() > 1)
 	  {
 	    // "{0, number, #} consoles attached"
-	    message = ts.l("setConsoleCount.multiple_attached", new Integer(consoles.size()));
+	    message = ts.l("setConsoleCount.multiple_attached", Integer.valueOf(consoles.size()));
 	  }
 	else
 	  {
@@ -967,7 +967,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     if (consoles.size() > 1)
       {
 	// "{0, number, #} consoles attached"
-	asyncPort.changeAdmins(ts.l("setConsoleCount.multiple_attached", new Integer(consoles.size())));
+	asyncPort.changeAdmins(ts.l("setConsoleCount.multiple_attached", Integer.valueOf(consoles.size())));
       }
     else
       {

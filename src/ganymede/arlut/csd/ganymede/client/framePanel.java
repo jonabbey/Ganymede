@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -1107,7 +1107,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	editObjMI.addActionListener(this);
 	fileM.add(editObjMI);
 
-	BaseDump bd = (BaseDump) gc.getBaseMap().get(new Short(getObjectInvid().getType()));
+	BaseDump bd = (BaseDump) gc.getBaseMap().get(Short.valueOf(getObjectInvid().getType()));
 
 	if (bd.canInactivate())
 	  {

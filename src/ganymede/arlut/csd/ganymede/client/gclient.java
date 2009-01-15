@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -1375,7 +1375,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   public Vector getTemplateVector(short id)
   {
-    return loader.getTemplateVector(new Short(id));
+    return loader.getTemplateVector(Short.valueOf(id));
   }
 
   /**
@@ -1386,7 +1386,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   public FieldTemplate getFieldTemplate(short objType, short fieldId)
   {
-    Vector vect = loader.getTemplateVector(new Short(objType));
+    Vector vect = loader.getTemplateVector(Short.valueOf(objType));
 
     for (int i = 0; i < vect.size(); i++)
       {
@@ -1735,7 +1735,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (type == null)
       {
-	type = new Short(invid.getType());
+	type = Short.valueOf(invid.getType());
       }
 
     if (cachedLists.containsList(type))
@@ -1790,7 +1790,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     else
       {
         // "{0,number,#} users logged in."
-        loginLabel.setText(ts.l("setLoginCount.multi_login", new Integer(loginCount)));
+        loginLabel.setText(ts.l("setLoginCount.multi_login", Integer.valueOf(loginCount)));
       }
   }
 
@@ -3192,7 +3192,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	    ObjectHandle newHandle = (ObjectHandle) handleList.elementAt(i);
 	    invid = newHandle.getInvid();
 
-	    objectTypeKey = new Short(invid.getType());
+	    objectTypeKey = Short.valueOf(invid.getType());
 
 	    InvidNode nodeToUpdate = (InvidNode) invidNodeHash.get(invid);
 		
@@ -3323,7 +3323,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
           {
             node.setText(handle.getLabel());
 
-            BaseDump bd = (BaseDump) getBaseMap().get(new Short(node.getInvid().getType()));
+            BaseDump bd = (BaseDump) getBaseMap().get(Short.valueOf(node.getInvid().getType()));
 
             if (bd.canInactivate())
               {
@@ -3691,7 +3691,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
        
 	wp.addWindow(invid, obj, true, null, true, null);
 
-	Short typeShort = new Short(invid.getType());
+	Short typeShort = Short.valueOf(invid.getType());
     
 	if (cachedLists.containsList(typeShort))
 	  {
@@ -3834,7 +3834,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
        
 	wp.addWindow(invid, obj, true, null, true, null);
 
-	Short typeShort = new Short(type);
+	Short typeShort = Short.valueOf(type);
     
 	if (cachedLists.containsList(typeShort))
 	  {
@@ -4020,7 +4020,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	Short id = new Short(invid.getType());
+	Short id = Short.valueOf(invid.getType());
 
 	if (debug)
 	  {

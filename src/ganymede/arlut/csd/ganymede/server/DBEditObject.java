@@ -17,7 +17,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -598,7 +598,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // "DBEditObject.setFieldValue() couldn''t find field {0} in object {1}"
 
     return Ganymede.createErrorDialog(ts.l("setFieldValue.error"),
-				      ts.l("setFieldValue.errorTxt", new Short(fieldID), getLabel()));
+				      ts.l("setFieldValue.errorTxt", Short.valueOf(fieldID), getLabel()));
   }
 
   /**
@@ -625,7 +625,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // "DBEditObject.setFieldValueLocal() couldn''t find field {0} in object {1}"
 
     return Ganymede.createErrorDialog(ts.l("setFieldValueLocal.error"),
-				      ts.l("setFieldValueLocal.errorTxt", new Short(fieldID), getLabel()));
+				      ts.l("setFieldValueLocal.errorTxt", Short.valueOf(fieldID), getLabel()));
   }
 
   /**
@@ -2205,7 +2205,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    return null;
 	  }
 
-	return new Short(baseId);
+	return Short.valueOf(baseId);
       }
 
     return null;
@@ -3266,7 +3266,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	// ok, we know we need to do the unbinding for this field.
 
-	fieldsToUnbind.addElement(new Short(tmpField.getID()));
+	fieldsToUnbind.addElement(Short.valueOf(tmpField.getID()));
       }
 
     if (remobj instanceof DBEditObject)
@@ -3320,7 +3320,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 		// "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
 		// "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
 		return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
-						  ts.l("clearBackLink.badTarget", new Short(targetField), oldRef.getLabel()));
+						  ts.l("clearBackLink.badTarget", Short.valueOf(targetField), oldRef.getLabel()));
 	      }
 	  }
 
@@ -3334,7 +3334,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    // "Your operation could not succeed due to an inconsistency in the server''s database schema.  Target field number {0} in object {1} does not exist, or you do not have permission to access this field."
 
 	    return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
-					      ts.l("clearBackLink.badSchema", new Short(targetField), oldRef.getLabel()));
+					      ts.l("clearBackLink.badSchema", Short.valueOf(targetField), oldRef.getLabel()));
 	  }
 
 	try
@@ -3676,7 +3676,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 		continue;
 	      }
 
-	    key = new Short(field.getID());
+	    key = Short.valueOf(field.getID());
 	    value = field.checkpoint();
 
 	    if (value != null)

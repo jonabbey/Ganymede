@@ -22,7 +22,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -169,7 +169,7 @@ public class Parser {
 
     try
       {
-	return new Integer(nextBit).intValue();
+	return Integer.valueOf(nextBit).intValue();
       }
     catch (NumberFormatException ex)
       {

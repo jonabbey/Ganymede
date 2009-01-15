@@ -675,8 +675,8 @@ public abstract class DBField implements Remote, db_field, FieldType {
 		return Ganymede.createErrorDialog(ts.l("validateContents.too_big_array",
 						       this.getName(),
 						       owner.getLabel(),
-						       new Integer(size()),
-						       new Integer(getMaxArraySize())));
+						       Integer.valueOf(size()),
+						       Integer.valueOf(getMaxArraySize())));
 	      }
 	  }
       }
@@ -1494,7 +1494,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
       {
 	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
 	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
-						      new Integer(index),
+						      Integer.valueOf(index),
 						      getName(),
 						      owner.getLabel()));
       }
@@ -1519,7 +1519,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
       {
 	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
 	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
-						      new Integer(index),
+						      Integer.valueOf(index),
 						      getName(),
 						      owner.getLabel()));
       }
@@ -1565,7 +1565,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
       {
 	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
 	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
-						      new Integer(index),
+						      Integer.valueOf(index),
 						      getName(),
 						      owner.getLabel()));
       }
@@ -1618,7 +1618,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
       {
 	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
 	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
-						      new Integer(index),
+						      Integer.valueOf(index),
 						      getName(),
 						      owner.getLabel()));
       }
@@ -1727,7 +1727,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
 	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
                                                          DBEditObject.SETELEMENT,
-                                                         new Integer(index),
+                                                         Integer.valueOf(index),
                                                          submittedValue));
 
 	// if a wizard intercedes, we are going to let it take the
@@ -2284,9 +2284,9 @@ public abstract class DBField implements Remote, db_field, FieldType {
 	return Ganymede.createErrorDialog(ts.l("addElements.overflow",
 					       getName(),
 					       owner.getLabel(),
-					       new Integer(submittedValues.size()),
-					       new Integer(size()),
-					       new Integer(getMaxArraySize())));
+					       Integer.valueOf(submittedValues.size()),
+					       Integer.valueOf(size()),
+					       Integer.valueOf(getMaxArraySize())));
       }
 
     // check to see if all of the submitted values are acceptable in
@@ -2579,7 +2579,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
     if ((index < 0) || (index >= values.size()))
       {
 	// "Invalid index {0,number,#} for array access on field {0} in object {1}."
-	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range", new Integer(index), getName(), owner.getLabel()));
+	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range", Integer.valueOf(index), getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
@@ -2588,7 +2588,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
+	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, Integer.valueOf(index), null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 

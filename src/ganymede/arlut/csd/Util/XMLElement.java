@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -304,7 +304,7 @@ public class XMLElement extends XMLItem {
 	  {
 	    try
 	      {
-		return new Integer(attrVals[i]);
+		return Integer.valueOf(attrVals[i]);
 	      }
 	    catch (NumberFormatException ex)
 	      {

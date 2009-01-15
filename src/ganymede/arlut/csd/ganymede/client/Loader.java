@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -327,7 +327,7 @@ public class Loader extends Thread {
     try
       {
 	Hashtable baseMap = getBaseMap(); // block
-	BaseDump base = (BaseDump) baseMap.get(new Short(typeId));
+	BaseDump base = (BaseDump) baseMap.get(Short.valueOf(typeId));
 
 	return base.getName();
       }
@@ -606,7 +606,7 @@ public class Loader extends Thread {
 
   public FieldTemplate getFieldTemplate(short objectid, String fieldname)
   {
-    return getFieldTemplate(new Short(objectid), fieldname);
+    return getFieldTemplate(Short.valueOf(objectid), fieldname);
   }
 
   /**
@@ -647,7 +647,7 @@ public class Loader extends Thread {
 
   public Vector getTemplateVector(short id)
   {
-    return getTemplateVector(new Short(id));
+    return getTemplateVector(Short.valueOf(id));
   }
 
   /**
@@ -810,7 +810,7 @@ public class Loader extends Thread {
     for (int i = 0; i < size; i++)
       {
 	base = (Base) myBaseList.elementAt(i);
-	Short id = new Short(base.getTypeID());
+	Short id = Short.valueOf(base.getTypeID());
 
 	baseMap.put(id, base);
 	baseToShort.put(base, id);

@@ -14,8 +14,8 @@
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2008
+
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -818,7 +818,7 @@ public class xmlfield implements FieldType {
 
 	try
 	  {
-	    return new Integer(val);
+	    return Integer.valueOf(val);
 	  }
 	catch (NumberFormatException ex)
 	  {

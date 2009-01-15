@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -605,7 +605,7 @@ public class scheduleHandle implements java.io.Serializable {
 	if (weeks > 1)
 	  {
 	    // "{0,num,#} weeks"
-	    buff.append(ts.l("setInterval.weeks_pattern", new Integer(weeks)));
+	    buff.append(ts.l("setInterval.weeks_pattern", Integer.valueOf(weeks)));
 	  }
 	else
 	  {
@@ -624,7 +624,7 @@ public class scheduleHandle implements java.io.Serializable {
 	if (days > 1)
 	  {
 	    // "{0,num,#} days"
-	    buff.append(ts.l("setInterval.days_pattern", new Integer(days)));
+	    buff.append(ts.l("setInterval.days_pattern", Integer.valueOf(days)));
 	  }
 	else
 	  {
@@ -643,7 +643,7 @@ public class scheduleHandle implements java.io.Serializable {
 	if (hours > 1)
 	  {
 	    // "{0,num,#} hours"
-	    buff.append(ts.l("setInterval.hours_pattern", new Integer(hours)));
+	    buff.append(ts.l("setInterval.hours_pattern", Integer.valueOf(hours)));
 	  }
 	else
 	  {
@@ -662,7 +662,7 @@ public class scheduleHandle implements java.io.Serializable {
 	if (minutes > 1)
 	  {
 	    // "{0,num,#} minutes"
-	    buff.append(ts.l("setInterval.minutes_pattern", new Integer(minutes)));
+	    buff.append(ts.l("setInterval.minutes_pattern", Integer.valueOf(minutes)));
 	  }
 	else
 	  {

@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -145,16 +145,16 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     op_vector_mapping.put("len==", new Byte(QueryDataNode.LENGTHEQ));
 
     validity_mapping = new HashMap();
-    validity_mapping.put(new Integer(FieldType.DATE), new String[] {"<", ">", "<=", ">=", "==", "defined"});
-    validity_mapping.put(new Integer(FieldType.NUMERIC), new String[] {"<", ">", "<=", ">=", "==", "defined"});
-    validity_mapping.put(new Integer(FieldType.FLOAT), new String[] {"<", ">", "<=", ">=", "==", "defined"});
-    validity_mapping.put(new Integer(FieldType.BOOLEAN), new String[] {"==", "defined"});
-    validity_mapping.put(new Integer(FieldType.IP), new String[] {"==", "=~", "==_ci", "=~_ci", "starts", "ends", "defined"});
-    validity_mapping.put(new Integer(FieldType.STRING), new String[] {"<", ">", "<=", ">=", "=~", "=~_ci", "==", "==_ci", "starts", "ends", "defined"});
-    validity_mapping.put(new Integer(FieldType.INVID), new String[] {"<", ">", "<=", ">=", "=~", "=~_ci", "==", "==_ci", "starts", "ends", "defined"});
-    validity_mapping.put(new Integer(FieldType.PASSWORD), new String[] {"defined"});
-    validity_mapping.put(new Integer(FieldType.PERMISSIONMATRIX), new String[] {"defined"});
-    validity_mapping.put(new Integer(FieldType.FIELDOPTIONS), new String[] {"defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.DATE), new String[] {"<", ">", "<=", ">=", "==", "defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.NUMERIC), new String[] {"<", ">", "<=", ">=", "==", "defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.FLOAT), new String[] {"<", ">", "<=", ">=", "==", "defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.BOOLEAN), new String[] {"==", "defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.IP), new String[] {"==", "=~", "==_ci", "=~_ci", "starts", "ends", "defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.STRING), new String[] {"<", ">", "<=", ">=", "=~", "=~_ci", "==", "==_ci", "starts", "ends", "defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.INVID), new String[] {"<", ">", "<=", ">=", "=~", "=~_ci", "==", "==_ci", "starts", "ends", "defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.PASSWORD), new String[] {"defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.PERMISSIONMATRIX), new String[] {"defined"});
+    validity_mapping.put(Integer.valueOf(FieldType.FIELDOPTIONS), new String[] {"defined"});
   }
 
   // ---
@@ -544,7 +544,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
 	// "I couldn''t process parser node type {0}.  GanyQueryTransmuter.java has probably not been kept up to date with the grammar."
 	throw new GanyParseException(ts.l("global.parse_exception",
-					  ts.l("parse_where_clause.bad_type", new Integer(root_type)),
+					  ts.l("parse_where_clause.bad_type", Integer.valueOf(root_type)),
 					  myQueryString,
 					  myQueryTree.toStringList()));
       }
@@ -552,7 +552,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
   private boolean valid_op(String op, int field_type)
   {
-    String[] ops = (String[]) validity_mapping.get(new Integer(field_type));
+    String[] ops = (String[]) validity_mapping.get(Integer.valueOf(field_type));
 
     if (ops == null)		// should only happen if field_type is invalid
       {
@@ -590,7 +590,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	    // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
 	    // "Unrecognized argument type parsing argument {0}."
 	    throw new GanyParseException(ts.l("global.parse_exception",
-					      ts.l("parse_argument.unrecognized_argument", new Integer(argument)),
+					      ts.l("parse_argument.unrecognized_argument", Integer.valueOf(argument)),
 					      myQueryString,
 					      myQueryTree.toStringList()));
 	  }
@@ -606,7 +606,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     if (field_type == FieldType.NUMERIC && argument_type == QueryParserTokenTypes.INT_VALUE)
       {
-	return new Integer(argument);
+	return Integer.valueOf(argument);
       }
     else if (field_type == FieldType.FLOAT && argument_type == QueryParserTokenTypes.DECIMAL_VALUE)
       {

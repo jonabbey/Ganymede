@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -1523,7 +1523,7 @@ public class GanymedeServer implements Server {
 
 			    if (vectorEmpty)
 			      {
-				removeVector.addElement(new Short(iField.getID()));
+				removeVector.addElement(Short.valueOf(iField.getID()));
 			      }
 			  }
 			else
@@ -1533,7 +1533,7 @@ public class GanymedeServer implements Server {
 			    if (session.viewDBObject(invid) == null)
 			      {
 				swept = true;
-				removeVector.addElement(new Short(iField.getID()));
+				removeVector.addElement(Short.valueOf(iField.getID()));
 
 				Ganymede.debug(ts.l("sweepInvids.removing_scalar",
 						    invid.toString(),
@@ -1678,7 +1678,7 @@ public class GanymedeServer implements Server {
 	synchronized (Ganymede.db.backPointers)
 	  {
 	    Ganymede.debug(ts.l("checkInvids.backpointers"));
-	    Ganymede.debug(ts.l("checkInvids.backpointers2", new Integer(Ganymede.db.backPointers.size())));
+	    Ganymede.debug(ts.l("checkInvids.backpointers2", Integer.valueOf(Ganymede.db.backPointers.size())));
 
 	    Enumeration keys = Ganymede.db.backPointers.keys();
 

@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -245,7 +245,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     this.index = index;
 
     // "{0,number,#}. {1}"
-    title.setText(ts.l("setIndex.element_pattern", new Integer(index+1), titleText));
+    title.setText(ts.l("setIndex.element_pattern", Integer.valueOf(index+1), titleText));
   }
 
   public Component getComponent() 

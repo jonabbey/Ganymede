@@ -26,7 +26,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -951,11 +951,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
 	      {
-		forceOff(ts.l("timeCheck.forceOffNoObjs", new Integer(Ganymede.timeoutIdleNoObjs)));
+		forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
 	      }
 	    else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
 	      {
-		forceOff(ts.l("timeCheck.forceOffWithObjs", new Integer(Ganymede.timeoutIdleWithObjs)));
+		forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
 	      }
 	  }
 
@@ -964,11 +964,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0)
       {
-	forceOff(ts.l("timeCheck.forceOffNoObjs", new Integer(Ganymede.timeoutIdleNoObjs)));
+	forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
       }
     else if (minutesIdle > Ganymede.timeoutIdleWithObjs)
       {
-	forceOff(ts.l("timeCheck.forceOffWithObjs", new Integer(Ganymede.timeoutIdleWithObjs)));
+	forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
       }
   }
 
@@ -4559,7 +4559,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	if (base == null)
 	  {
 	    // "Permission to create object of *invalid* type {0} denied."
-	    error = ts.l("create_db_object.invalid_type", new Integer(type));
+	    error = ts.l("create_db_object.invalid_type", Integer.valueOf(type));
 	  }
 	else
 	  {
@@ -5289,7 +5289,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	try
 	  {
-	    throw new RuntimeException(ts.l("getObjects.no_base", new Integer(baseid)));
+	    throw new RuntimeException(ts.l("getObjects.no_base", Integer.valueOf(baseid)));
 	  }
 	catch (RuntimeException ex)
 	  {

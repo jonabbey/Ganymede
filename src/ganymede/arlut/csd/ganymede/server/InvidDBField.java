@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -2617,7 +2617,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
                                                          DBEditObject.SETELEMENT,
-                                                         new Integer(index),
+                                                         Integer.valueOf(index),
                                                          submittedValue));
 
 	// if a wizard intercedes, we are going to let it take the ball.
@@ -3565,7 +3565,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, new Integer(index), null);
+	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, Integer.valueOf(index), null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
 	

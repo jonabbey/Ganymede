@@ -18,8 +18,8 @@
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2006
+
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -776,7 +776,7 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     switch(column) 
       {
       case 1:
-	return new Integer(myRow.getOptionValue());
+	return Integer.valueOf(myRow.getOptionValue());
       }
 
     return null;

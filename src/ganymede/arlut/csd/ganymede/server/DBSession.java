@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -424,7 +424,7 @@ final public class DBSession {
 	    
 	    for (int i = 0; i < fields.length; i++)
 	      {
-		Ganymede.debug(ts.l("createDBObject.field_report", new Integer(i), new Integer(fields[i].getID()), fields[i].getName()));
+		Ganymede.debug(ts.l("createDBObject.field_report", Integer.valueOf(i), Integer.valueOf(fields[i].getID()), fields[i].getName()));
 	      }
 	  }
 	catch (java.rmi.RemoteException ex)
@@ -588,7 +588,7 @@ final public class DBSession {
 
     if (obj == null)
       {
-	System.err.println(ts.l("editDBObject.noobject", new Integer(baseID), new Integer(objectID)));
+	System.err.println(ts.l("editDBObject.noobject", Integer.valueOf(baseID), Integer.valueOf(objectID)));
 	return null;
       }
 

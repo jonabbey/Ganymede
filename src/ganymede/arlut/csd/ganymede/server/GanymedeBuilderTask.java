@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -357,7 +357,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    synchronized (GanymedeBuilderTask.class) 
 	      {
 		// "builder: {0,number,#}"
-		label = ts.l("run.label_pattern", new Integer(id++));
+		label = ts.l("run.label_pattern", Integer.valueOf(id++));
 	      }
 
 	    session = new GanymedeSession(label);
@@ -1017,11 +1017,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (x == null)
       {
-	backupsBusy.put(path, new Integer(1));
+	backupsBusy.put(path, Integer.valueOf(1));
       }
     else
       {
-	backupsBusy.put(path, new Integer(x.intValue() + 1));
+	backupsBusy.put(path, Integer.valueOf(x.intValue() + 1));
       }
   }
 
@@ -1040,7 +1040,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
       }
     else
       {
-	backupsBusy.put(path, new Integer(val - 1));
+	backupsBusy.put(path, Integer.valueOf(val - 1));
       }
 
     if (oldBackUpDirectory != null && oldBackUpDirectory.equals(path))

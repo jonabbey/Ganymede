@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -215,7 +215,7 @@ public class JnumberField extends JentryField {
 	return null;
       }
 
-    return new Integer(str);
+    return Integer.valueOf(str);
   }
 
   /**
@@ -230,7 +230,7 @@ public class JnumberField extends JentryField {
 
   public void setValue(int num)
   {
-    setValue(new Integer(num));
+    setValue(Integer.valueOf(num));
   }
 
   /**
@@ -410,7 +410,7 @@ public class JnumberField extends JentryField {
 		// nope, revert.
 
 		// "{0}" must be between {1,num,#} and {2,num,#}.
-		reportError(ts.l("sendCallback.out_of_range", getText(), new Integer(minSize), new Integer(maxSize)));
+		reportError(ts.l("sendCallback.out_of_range", getText(), Integer.valueOf(minSize), Integer.valueOf(maxSize)));
 
 		// revert
 

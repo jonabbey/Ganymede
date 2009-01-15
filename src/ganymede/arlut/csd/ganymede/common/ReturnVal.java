@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -839,7 +839,7 @@ public final class ReturnVal implements java.io.Serializable {
 	else
 	  {
 	    Vector vec;
-	    Short fieldID = new Short(atom);
+	    Short fieldID = Short.valueOf(atom);
 
 	    if (original.containsKey(invid) && !original.get(invid).equals("all"))
 	      {
@@ -1426,7 +1426,7 @@ public final class ReturnVal implements java.io.Serializable {
 
     Hashtable rescanInfo = new Hashtable(1);
     Vector fields = new Vector(1);
-    fields.addElement(new Short(fieldId));
+    fields.addElement(Short.valueOf(fieldId));
     rescanInfo.put(invid, fields);
 
     tempRetVal.encodeRescanList(rescanInfo);

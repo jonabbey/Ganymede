@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -649,7 +649,7 @@ public class IPDBField extends DBField implements ip_field {
 	retVal = ReturnVal.merge(retVal,
 				 eObj.wizardHook(this,
 						 DBEditObject.SETELEMENT,
-						 new Integer(index),
+						 Integer.valueOf(index),
 						 value));
 
 	// if a wizard intercedes, we are going to let it take the ball.
@@ -899,8 +899,8 @@ public class IPDBField extends DBField implements ip_field {
 	// "Server: Error in IPDBField.addElements()"
 	// "Error in IPDBField.addElements(): Field {1} in object {0} is limited to {2} items.  Can't add the {3} additional items requested."
 	return Ganymede.createErrorDialog(ts.l("addElements.oops"),
-					  ts.l("addElements.too_big", owner.getLabel(), getName(), new Integer(getMaxArraySize()),
-					       new Integer(submittedValues.size())));
+					  ts.l("addElements.too_big", owner.getLabel(), getName(), Integer.valueOf(getMaxArraySize()),
+					       Integer.valueOf(submittedValues.size())));
       }
 
     // check for duplicate values.. if we're not in copyFieldMode, we
@@ -1736,7 +1736,7 @@ public class IPDBField extends DBField implements ip_field {
 
     for (int i = 0; i < octets.length; i++)
       {
-	absoctets[i] = new Short((short) (octets[i].shortValue() + 128)); // don't want negative values
+	absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
       }
 
     result.append(absoctets[0].toString());
@@ -2065,7 +2065,7 @@ public class IPDBField extends DBField implements ip_field {
 
     for (i = 0; i < octets.length; i++)
       {
-	absoctets[i] = new Short((short) (octets[i].shortValue() + 128)); // don't want negative values
+	absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
 
 	//	System.err.println("Converting byte " + octets[i].intValue() + " to abs " + absoctets[i].intValue());
       }

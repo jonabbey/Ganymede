@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -937,7 +937,7 @@ public class SmartTable extends JPanel implements ActionListener
 
       rowHandler newRow1 = new rowHandler(key, getColumnCount());
       rows.add(newRow1);
-      index.put(key, new Integer(rows.size()-1));
+      index.put(key, Integer.valueOf(rows.size()-1));
     }
 
     public void clearRows()

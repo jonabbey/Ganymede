@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -298,7 +298,7 @@ public class Query implements java.io.Serializable {
 	permitSet = new HashSet();
       }
 
-    permitSet.add(new Short(id));
+    permitSet.add(Short.valueOf(id));
   }
 
   /**
@@ -318,7 +318,7 @@ public class Query implements java.io.Serializable {
         return;
       }
 
-    permitSet.remove(new Short(id));
+    permitSet.remove(Short.valueOf(id));
   }
 
   /**
@@ -333,7 +333,7 @@ public class Query implements java.io.Serializable {
 	return true;
       }
 
-    return permitSet.contains(new Short(id));
+    return permitSet.contains(Short.valueOf(id));
   }
 
   /**

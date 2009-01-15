@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -1280,7 +1280,7 @@ public class DBLog {
 		    title = ts.l("sendObjectMail.multi_object_subject",
 				 Ganymede.subjectPrefixProperty,
 				 type.name,
-				 new Integer(mailout.entryCount));
+				 Integer.valueOf(mailout.entryCount));
 		  }
 		else
 		  {
@@ -1288,7 +1288,7 @@ public class DBLog {
 		    title = ts.l("sendObjectMail.multi_object_subject",
 				 Ganymede.subjectPrefixProperty,
 				 type.token,
-				 new Integer(mailout.entryCount));
+				 Integer.valueOf(mailout.entryCount));
 		  }
 	      }
 

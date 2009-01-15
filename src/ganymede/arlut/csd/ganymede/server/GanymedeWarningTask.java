@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -249,7 +249,7 @@ public class GanymedeWarningTask implements Runnable {
 		      {
 			// "{0} {1} expires in {2,num,#} weeks"
 			title = ts.l("run.expire_multi_week_email_subj",
-				     base.getName(), mySession.viewObjectLabel(invid), new Integer(i+1));
+				     base.getName(), mySession.viewObjectLabel(invid), Integer.valueOf(i+1));
 		      }
 
 		    obj = mySession.session.viewDBObject(invid);
@@ -323,7 +323,7 @@ public class GanymedeWarningTask implements Runnable {
 		      {
 			// "{0} {1} will be removed in {2,num,#} weeks"
 			title = ts.l("run.remove_multi_week_email_subj",
-				     base.getName(), mySession.viewObjectLabel(invid), new Integer(i+1));
+				     base.getName(), mySession.viewObjectLabel(invid), Integer.valueOf(i+1));
 		      }
 
                     obj = mySession.session.viewDBObject(invid);

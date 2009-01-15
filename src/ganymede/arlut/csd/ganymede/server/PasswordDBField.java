@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -2542,7 +2542,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	// "Password Field Error"
 	// "The submitted password is too long.  The maximum plaintext password length accepted is {0,number,#} characters."
 	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("verifyNewValue.too_long", new Integer(this.maxSize())));
+					  ts.l("verifyNewValue.too_long", Integer.valueOf(this.maxSize())));
       }
 
     if (s.length() < minSize())
@@ -2550,7 +2550,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	// "Password Field Error"
 	// "The submitted password is too short.  The minimum plaintext password length accepted is {0,number,#} characters."
 	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("verifyNewValue.too_short", new Integer(this.minSize())));
+					  ts.l("verifyNewValue.too_short", Integer.valueOf(this.minSize())));
       }
     
     if (allowedChars() != null)

@@ -4,7 +4,7 @@
 
   A JDK 1.1 table Swing component.
 
-  Copyright (C) 1996-2008
+  Copyright (C) 1996-2009
   The University of Texas at Austin
 
   This program is free software; you can redistribute it and/or modify
@@ -287,12 +287,12 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 				     colAttribs != null?colAttribs[i]:null));
 	origTotalWidth += colWidths[i];
 	
-	colPos.addElement(new Integer(0));
+	colPos.addElement(Integer.valueOf(0));
       }
 
     // and one to grow one for the last pole
 
-    colPos.addElement(new Integer(0));
+    colPos.addElement(Integer.valueOf(0));
 
     // initialize our vector of tableRow's
     // we don't actually allocate cells until they are set
@@ -1733,12 +1733,12 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 				     colAttribs != null?colAttribs[i]:null));
 	origTotalWidth += colWidths[i];
 
-	colPos.addElement(new Integer(0));
+	colPos.addElement(Integer.valueOf(0));
       }
 
     // and one to grow on for our last pole
 
-    colPos.addElement(new Integer(0));
+    colPos.addElement(Integer.valueOf(0));
 
     rows = new Vector();
 
@@ -2184,13 +2184,13 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	    element = (tableCol) cols.elementAt(i);
 	    element.width = (int) element.origWidth;
 
-	    colPos.setElementAt(new Integer(pos), i);
+	    colPos.setElementAt(Integer.valueOf(pos), i);
 	    pos += element.width + vLineThickness;
 	  }
 
 	// set the last pole directly to avoid scaling artifacts
 
-	colPos.setElementAt(new Integer(origTotalWidth + (cols.size() + 1) * vLineThickness),
+	colPos.setElementAt(Integer.valueOf(origTotalWidth + (cols.size() + 1) * vLineThickness),
 			    cols.size());
 
 	// and set the last column's width directly to avoid the same
@@ -2244,7 +2244,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	  {
 	    element = (tableCol) cols.elementAt(i);
 	    
-	    colPos.setElementAt(new Integer(pos), i);
+	    colPos.setElementAt(Integer.valueOf(pos), i);
 	    element.width = Math.round(element.origWidth * scalefact);
 	    pos += element.width + vLineThickness;
 	  }
@@ -2253,7 +2253,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 	// a scrollbar.  set it directly to avoid integer/float
 	// precision problems.
 
-	colPos.setElementAt(new Integer(canvas.getBounds().width - 1), cols.size());
+	colPos.setElementAt(Integer.valueOf(canvas.getBounds().width - 1), cols.size());
 
 	if (cols.size() > 0)
 	  {

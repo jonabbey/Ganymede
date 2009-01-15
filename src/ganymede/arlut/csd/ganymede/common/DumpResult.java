@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -543,7 +543,7 @@ public class DumpResult implements java.io.Serializable, List {
 		  {
 		    try
 		      {
-			rowMap.put(currentHeader, new Integer(tempString.toString()));
+			rowMap.put(currentHeader, Integer.valueOf(tempString.toString()));
 		      }
 		    catch (NumberFormatException ex)
 		      {

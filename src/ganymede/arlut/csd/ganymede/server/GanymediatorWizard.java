@@ -28,7 +28,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -457,7 +457,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
 	// "Ganymede Wizard Error"
 	// "GanymediatorWizard.callDialog(): Couldn''t find a processDialog{0,number,#}() method in the wizard subclass!"
 	return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
-					  ts.l("callDialog.state_error", new Integer(state)));
+					  ts.l("callDialog.state_error", Integer.valueOf(state)));
       }
 
     try
@@ -472,7 +472,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
 	// "Ganymede Wizard Error"
 	// "GanymediatorWizard.callDialog(): Invocation error in state {0,number,#}:\n\n{1}"
 	return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
-					  ts.l("callDialog.invocation_error", new Integer(state), Ganymede.stackTrace(original)));
+					  ts.l("callDialog.invocation_error", Integer.valueOf(state), Ganymede.stackTrace(original)));
       }
     catch (IllegalAccessException ex)
       {
@@ -480,7 +480,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
 	// "Ganymede Wizard Error"
 	// "GanymediatorWizard.callDialog(): Illegal Access error in state {0,number,#}:\n\n{1}"
 	return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
-					  ts.l("callDialog.illegal_error", new Integer(state), ex.getMessage()));
+					  ts.l("callDialog.illegal_error", Integer.valueOf(state), ex.getMessage()));
       }
 
     return localResult;

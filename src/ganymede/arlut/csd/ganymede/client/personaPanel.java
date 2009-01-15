@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -268,7 +268,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	// the persona object's actual title upon loading.
 
 	// "Persona {0,number,#}"
-	middle.addTab(ts.l("init.default_tab_title", new Integer(i)), pc);
+	middle.addTab(ts.l("init.default_tab_title", Integer.valueOf(i)), pc);
 
         SwingUtilities.invokeLater(pc);
       }
@@ -334,7 +334,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	    personaContainer pc = new personaContainer(newObject.getInvid(), editable, this, newObject);
 
 	    // "New Persona {0,number,#}"
-	    middle.addTab(ts.l("actionPerformed.new_tab_title", new Integer(index)), pc);
+	    middle.addTab(ts.l("actionPerformed.new_tab_title", Integer.valueOf(index)), pc);
 
 	    panels.addElement(pc);
 

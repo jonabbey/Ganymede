@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -109,7 +109,7 @@ class BaseNode extends arlut.csd.JTree.treeNode {
       {
 	try
 	  {
-	    type = new Short(base.getTypeID());
+	    type = Short.valueOf(base.getTypeID());
 	  }
 	catch (Exception rx)
 	  {

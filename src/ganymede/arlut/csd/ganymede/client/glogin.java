@@ -21,7 +21,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -401,7 +401,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // "{0}, port {1,number,#}"
     JLabel hostLabel = new JLabel(ts.l("createLoginPanel.server_label2", 
 				       serverhost, 
-				       new Integer(registryPortProperty)));
+				       Integer.valueOf(registryPortProperty)));
     Font x = new Font("Courier", Font.ITALIC, 14);
     hostLabel.setFont(x);
     hostLabel.setForeground(Color.black);

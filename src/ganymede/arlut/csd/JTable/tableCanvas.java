@@ -4,7 +4,7 @@
 
   A JDK 1.1 table Swing component.
 
-  Copyright (C) 1996-2008
+  Copyright (C) 1996-2009
   The University of Texas at Austin
 
   This program is free software; you can redistribute it and/or modify
@@ -1194,7 +1194,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 	    System.err.println("Adjusting column " + colDrag);
 	  }
 
-	rt.colPos.setElementAt(new Integer(x), colDrag);
+	rt.colPos.setElementAt(Integer.valueOf(x), colDrag);
 
 	if (rt.hbar_visible)
 	  {

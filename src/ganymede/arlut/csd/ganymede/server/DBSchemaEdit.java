@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -438,7 +438,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public Base getBase(short id)
   {
-    return (Base) newBases.get(new Short(id));
+    return (Base) newBases.get(Short.valueOf(id));
   }
 
   /**
@@ -566,7 +566,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
     while (getBase(newName) != null)
       {
 	// "New Base {0,number,#}"
-	newName = ts.l("createNewBase.new_base_indexed", new Integer(i++));
+	newName = ts.l("createNewBase.new_base_indexed", Integer.valueOf(i++));
       }
 
     base.setName(newName);
@@ -656,7 +656,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	throw new RuntimeException("already released/committed");
       }
     
-    tmpBase = (DBObjectBase) newBases.get(new Short(id));
+    tmpBase = (DBObjectBase) newBases.get(Short.valueOf(id));
 
     if (tmpBase.objectTable.size() > 0)
       {
@@ -668,7 +668,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     parent = tmpBase.getCategory();
     parent.removeNode(tmpBase);
-    newBases.remove(new Short(id));
+    newBases.remove(Short.valueOf(id));
 
     return null;
   }

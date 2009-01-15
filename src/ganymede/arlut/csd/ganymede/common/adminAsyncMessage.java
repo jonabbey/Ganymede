@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -125,7 +125,7 @@ public class adminAsyncMessage implements java.io.Serializable {
 
     this.method = method;
     params = new Object[1];
-    params[0] = new Integer(param);
+    params[0] = Integer.valueOf(param);
   }
 
   public adminAsyncMessage(int method, Object param[])

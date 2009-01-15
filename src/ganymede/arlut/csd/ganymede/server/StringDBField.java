@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -857,7 +857,7 @@ public class StringDBField extends DBField implements string_field {
 	
 	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
 					  ts.l("verifyBasicConstraints.overlength",
-					       s, this.getName(), owner.getLabel(), new Integer(this.maxSize())));
+					       s, this.getName(), owner.getLabel(), Integer.valueOf(this.maxSize())));
       }
 
     if (s.length() < minSize())
@@ -868,7 +868,7 @@ public class StringDBField extends DBField implements string_field {
 	
 	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
 					  ts.l("verifyBasicConstraints.underlength",
-					       s, this.getName(), owner.getLabel(), new Integer(this.minSize())));
+					       s, this.getName(), owner.getLabel(), Integer.valueOf(this.minSize())));
       }
 
     if (getFieldDef().regexp != null)

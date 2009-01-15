@@ -184,7 +184,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
       }
 
     Object params[] = new Object[2];
-    params[0] = new Integer(type);
+    params[0] = Integer.valueOf(type);
     params[1] = message;
 
     addEvent(new clientAsyncMessage(clientAsyncMessage.SENDMESSAGE, params));

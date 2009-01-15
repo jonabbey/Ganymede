@@ -20,7 +20,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -996,7 +996,7 @@ public class SyncRunner implements Runnable {
 	    synchronized (SyncRunner.class) 
 	      {
 		// "sync channel: {0,number,#}"
-		label = ts.l("runFullState.label_pattern", new Integer(id++));
+		label = ts.l("runFullState.label_pattern", Integer.valueOf(id++));
 	      }
 
 	    session = new GanymedeSession(label);
@@ -1201,7 +1201,7 @@ public class SyncRunner implements Runnable {
         //
         // I got a result code of {2} when I tried to run it.
 
-        String message = ts.l("runFullStateService.externalerror", path, this.getName(), new Integer(resultCode));
+        String message = ts.l("runFullStateService.externalerror", path, this.getName(), Integer.valueOf(resultCode));
 
         DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
@@ -1300,7 +1300,7 @@ public class SyncRunner implements Runnable {
                 //
                 // I got a result code of {2} when I tried to run it.
 
-                String message = ts.l("runIncremental.externalerror", path, this.getName(), new Integer(resultCode));
+                String message = ts.l("runIncremental.externalerror", path, this.getName(), Integer.valueOf(resultCode));
 
                 DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 

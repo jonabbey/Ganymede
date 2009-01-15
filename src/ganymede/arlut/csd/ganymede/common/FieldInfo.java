@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -170,7 +170,7 @@ public class FieldInfo implements java.io.Serializable {
 
   public Short getIDObj()
   {
-    return new Short(ID);
+    return Short.valueOf(ID);
   }
 
   public boolean isDefined()

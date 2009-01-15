@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -701,7 +701,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (index == -1)
       {
 	// "Unrecognized fieldcode: {0}"
-	throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", new Integer(fieldcode)));
+	throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", Integer.valueOf(fieldcode)));
       }
 
     if (permCacheAry == null)
@@ -800,7 +800,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	if (result == null || result.length() == 0)
 	  {
 	    // "New {0}: {1,number,#}"
-	    result = ts.l("getLabel.null_label", getTypeName(), new Integer(getID()));
+	    result = ts.l("getLabel.null_label", getTypeName(), Integer.valueOf(getID()));
 	  }
 
 	return result;
@@ -811,7 +811,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// database without their label field.
 
 	// "New {0}: {1,number,#}"
-	return ts.l("getLabel.null_label", getTypeName(), new Integer(getID()));
+	return ts.l("getLabel.null_label", getTypeName(), Integer.valueOf(getID()));
       }
   }
 
@@ -966,7 +966,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (debug && tmp_count == 0)
       {
 	// "DBObject.receive(): No fields reading object {0}"
-	System.err.println(ts.l("receive.nofields", new Integer(getID())));
+	System.err.println(ts.l("receive.nofields", Integer.valueOf(getID())));
       }
 
     fieldAry = new DBField[tmp_count];
@@ -1022,7 +1022,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	else if (definition == null)
 	  {
 	    // "What the heck?  Null definition for {0}, fieldcode = {1}, {2}th field in object"
-	    throw new RuntimeException(ts.l("receive.nulldef", this.getTypeName(), new Integer(fieldcode), new Integer(i)));
+	    throw new RuntimeException(ts.l("receive.nulldef", this.getTypeName(), Integer.valueOf(fieldcode), Integer.valueOf(i)));
 	  }
 
         tmp = DBField.readField(this, in, definition);
@@ -1110,7 +1110,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (getTypeID() == SchemaConstants.OwnerBase && upgradeSkipCount != 0)
       {
 	// "Skipped over {0} objects in deprecated OwnerObjectsOwned field while reading owner group {1}"
-	System.err.println(ts.l("receive.upgradeSkippingOwned", new Integer(upgradeSkipCount), this.getLabel()));
+	System.err.println(ts.l("receive.upgradeSkippingOwned", Integer.valueOf(upgradeSkipCount), this.getLabel()));
       }
   }
 
@@ -3343,7 +3343,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (key instanceof PyInteger)
       {
         PyInteger pi = (PyInteger) key;
-        return (DBField) getField(new Integer(pi.getValue()).shortValue());
+        return (DBField) getField(Integer.valueOf(pi.getValue()).shortValue());
       }
     else if (key instanceof Integer)
       {

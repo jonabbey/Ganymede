@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -791,7 +791,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
-	System.err.println(ts.l("receive.fieldcount", new Integer(size)));
+	System.err.println(ts.l("receive.fieldcount", Integer.valueOf(size)));
       }
 
     // read in the custom field dictionary for this object
@@ -842,7 +842,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
-	System.err.println(ts.l("receive.label", new Integer(label_id)));
+	System.err.println(ts.l("receive.label", Integer.valueOf(label_id)));
       }
 
     // at file version 1.3, we introduced object base categories's.
@@ -897,7 +897,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
-    	System.err.println(ts.l("receive.reading", new Integer(object_count)));
+    	System.err.println(ts.l("receive.reading", Integer.valueOf(object_count)));
       }
 
     Vector tmpIterationSet = new Vector(object_count);
@@ -933,7 +933,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
-	System.err.println(ts.l("receive.maxid", object_name, new Integer(maxid)));
+	System.err.println(ts.l("receive.maxid", object_name, Integer.valueOf(maxid)));
       }
   }
 
@@ -1345,7 +1345,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
 	DBObjectBaseField _field = (DBObjectBaseField) customFields.elementAt(i);
 
-	fieldsInBase.addElement(new Integer(_field.getID()));
+	fieldsInBase.addElement(Integer.valueOf(_field.getID()));
       }
 
     _fieldsToDelete = VectorUtils.difference(fieldsInBase, fieldsInXML);
@@ -2622,7 +2622,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public Short getKey()
   {
-    return new Short(type_code);
+    return Short.valueOf(type_code);
   }
 
   /**
@@ -3727,7 +3727,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
 
     // "Error, couldn''t add field def {0} after field {1}, field {1} was not found in object base."
-    throw new IllegalArgumentException(ts.l("addFieldAfter.noSuchPrevious", field, new Integer(previousField)));
+    throw new IllegalArgumentException(ts.l("addFieldAfter.noSuchPrevious", field, Integer.valueOf(previousField)));
   }
 
   /**

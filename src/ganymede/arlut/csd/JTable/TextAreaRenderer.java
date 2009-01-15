@@ -14,10 +14,10 @@
    Module By: James Ratcliff, falazar@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2008
    The University of Texas at Austin
 
    Contact information
@@ -151,15 +151,15 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 	cellSizes.put(table, rows);
       }
 
-    HashMap<Integer, Integer> rowheights = rows.get(new Integer(row));
+    HashMap<Integer, Integer> rowheights = rows.get(Integer.valueOf(row));
 
     if (rowheights == null) 
       {
 	rowheights = new HashMap<Integer, Integer>();
-	rows.put(new Integer(row), rowheights);
+	rows.put(Integer.valueOf(row), rowheights);
       }
 
-    rowheights.put(new Integer(column), new Integer(height));
+    rowheights.put(Integer.valueOf(column), Integer.valueOf(height));
   }
 
   /**
@@ -197,7 +197,7 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 	return 0;
       }
 
-    Map rowheights = (Map) rows.get(new Integer(row));
+    Map rowheights = (Map) rows.get(Integer.valueOf(row));
 
     if (rowheights == null)
       {

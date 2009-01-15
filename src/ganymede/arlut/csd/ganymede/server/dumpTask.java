@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -106,7 +106,7 @@ class dumpTask implements Runnable {
           }
 
 	started = true;
-	Ganymede.debug(ts.l("running", new Integer(Ganymede.db.journal.transactionsInJournal)));
+	Ganymede.debug(ts.l("running", Integer.valueOf(Ganymede.db.journal.transactionsInJournal)));
 
 	try
 	  {

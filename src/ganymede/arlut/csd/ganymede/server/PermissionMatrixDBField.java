@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -188,7 +188,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	try
 	  {
-	    basenum = new Short(entry.substring(0, sepIndex)).shortValue();
+	    basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
 	    base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
 
 	    if (base == null)
@@ -240,7 +240,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
 	try
 	  {
-	    basenum = new Short(entry.substring(0, sepIndex)).shortValue();
+	    basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
 	    base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
 
 	    if (base == null)
@@ -259,7 +259,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 		  {
 		    try
 		      {
-			fieldnum = new Short(fieldId).shortValue();
+			fieldnum = Short.valueOf(fieldId).shortValue();
 
 			field = (DBObjectBaseField) base.getField(fieldnum);
 
@@ -333,7 +333,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     try
       {
-	basenum = new Short(entry.substring(0, sepIndex)).shortValue();
+	basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
 	base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
 
 	if (base == null)
@@ -348,7 +348,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	      {
 		try
 		  {
-		    fieldnum = new Short(fieldId).shortValue();
+		    fieldnum = Short.valueOf(fieldId).shortValue();
 		    
 		    field = (DBObjectBaseField) base.getField(fieldnum);
 		    
@@ -675,7 +675,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public Object key()
   {
-    return new Integer(owner.getID());
+    return Integer.valueOf(owner.getID());
   }
 
   /**

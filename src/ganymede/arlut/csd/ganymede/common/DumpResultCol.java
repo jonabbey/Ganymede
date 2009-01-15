@@ -20,7 +20,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -112,7 +112,7 @@ public class DumpResultCol {
 
   public Short getFieldIdValue()
   {
-    return new Short(this.fieldId);
+    return Short.valueOf(this.fieldId);
   }
 
   /**
@@ -135,6 +135,6 @@ public class DumpResultCol {
 
   public Short getFieldTypeValue()
   {
-    return new Short(this.fieldType);
+    return Short.valueOf(this.fieldType);
   }
 }
