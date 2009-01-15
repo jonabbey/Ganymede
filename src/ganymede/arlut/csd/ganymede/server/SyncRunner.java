@@ -103,15 +103,17 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * SyncRunner synchronization is done in a split phase manner, in
  * which step 1 writes out data files and step 2 executes an external
  * script to process the files.  Unlike GanymedeBuilderTask,
- * SyncRunner's step 1 is done synchronously with transaction commit.
- * Every time a transaction is committed, the Ganymede server compares
- * the objects involved in the transaction against every registered
- * <code>Sync Channel</code> object.  If any of the objects or fields
- * created, deleted, or edited during the transaction matches against
- * a Sync Channel's so-called <code>Field Options</code> matrix of
- * objects and fields to sync, that Sync Channel will write an XML
- * file to the directory configured in the Sync Channel's
- * <code>Queue Directory</code> field.</p>
+ * SyncRunner's step 1 is done synchronously with transaction commit,
+ * rather than being done on a best-effort basis at some point after
+ * the transaction is committed.  Every time a transaction is
+ * committed, the Ganymede server compares the objects involved in the
+ * transaction against every registered <code>Sync Channel</code>
+ * object.  If any of the objects or fields created, deleted, or
+ * edited during the transaction matches against a Sync Channel's
+ * so-called <code>Field Options</code> matrix of objects and fields
+ * to sync, that Sync Channel will write an XML file to the directory
+ * configured in the Sync Channel's <code>Queue Directory</code>
+ * field.</p>
  *
  * <p>Each XML file that is created in a Sync Channel output directory
  * is given a unique filename, based on the number of transactions
