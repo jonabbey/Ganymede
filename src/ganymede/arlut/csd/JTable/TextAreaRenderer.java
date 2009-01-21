@@ -113,7 +113,7 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
     addSize(table, row, column, height_wanted);
     height_wanted = findTotalMaximumRowSize(table, row);
 
-    if (height_wanted != table.getRowHeight(row)) 
+    if (height_wanted > 0 && height_wanted != table.getRowHeight(row))
       {
 	table.setRowHeight(row, height_wanted);
       }
