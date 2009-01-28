@@ -455,6 +455,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	Invid mapInvid = (Invid) eObj.getFieldValueLocal(mapEntrySchema.MAP);
 
+	if (mapInvid == null)
+	  {
+	    return Ganymede.createErrorDialog("Can't commit transaction with an empty automounter map definition in user " + this.getLabel());
+	  }
+
 	DBObject mapObj = getSession().viewDBObject(mapInvid);
 
 	String mapName = mapObj.getLabel();
