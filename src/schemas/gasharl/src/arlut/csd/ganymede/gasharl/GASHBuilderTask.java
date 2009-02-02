@@ -69,6 +69,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.Util.FileOps;
+import arlut.csd.Util.NullWriter;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
@@ -3888,42 +3889,39 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private boolean writeDHCPFile()
   {
-    StringWriter dhcpStringWriter = new StringWriter();
+    NullWriter nullWriter = new Nullwriter();
     PrintWriter dhcpFileWriter = null;
+    Enumeration systems = null;
+    List<DBObject> networks = null;
 
     /* -- */
 
+    // Do a first pass to collect the customOptions declarations we'll
+    // need up top, using a side effect of writeDHCPNetwork() and
+    // writeDHCPSystem().
+
     this.customOptions = new HashSet();
+
+    networks = (List<DBObject>) java.util.Collections.list(enumerateObjects((short) 268));
+    java.util.Collections.sort(networks, new NetworkSortByName());
+
+    for (DBObject networkObject: networks)
+      {
+	writeDHCPNetwork(networkObject, nullWriter);
+      }
+
+    systems = enumerateObjects((short) 263);
+
+    while (systems.hasMoreElements())
+      {
+	writeDHCPSystem((DBObject) systems.nextElement(), nullWriter);
+      }
+
+    // okay, we've got our custom options, we can go ahead and write
+    // out the file in a single, second pass
 
     try
       {
-        dhcpStringWriter.println("\n#===============================================================================");
-        dhcpStringWriter.println("# Shared Networks Data");
-        dhcpStringWriter.println("#===============================================================================");
-
-	// we're going to sort the DHCPNetwork objects by name so that
-	// we are sure to write out the _GLOBAL_ record first.
-
-	List<DBObject> networks = (List<DBObject>) java.util.Collections.list(enumerateObjects((short) 268));
-	java.util.Collections.sort(networks, new NetworkSortByName());
-
-	for (DBObject networkObject: networks)
-	  {
-	    writeDHCPNetwork(networkObject, dhcpStringWriter);
-	  }
-
-	dhcpStringWriter.println("\n#===============================================================================");
-	dhcpStringWriter.println("# Per System Data");
-	dhcpStringWriter.println("#===============================================================================");
-
-	Enumeration systems = enumerateObjects((short) 263);
-
-	while (systems.hasMoreElements())
-	  {
-	    DBObject system = (DBObject) systems.nextElement();
-	    writeDHCPSystem(system, dhcpStringWriter);
-	  }
-
         try
           {
             dhcpFileWriter = openOutFile(path + "new_dhcpd.conf", "gasharl");
@@ -3935,7 +3933,32 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           }
 
 	writeDHCPCustomOptions(dhcpFileWriter);
-	dhcp_dataFile.println(dhcpStringWriter.toString());
+
+        dhcpFileWriter.println("\n#===============================================================================");
+        dhcpFileWriter.println("# Shared Networks Data");
+        dhcpFileWriter.println("#===============================================================================");
+
+	// we're going to sort the DHCPNetwork objects by name so that
+	// we are sure to write out the _GLOBAL_ record first.
+
+	networks = (List<DBObject>) java.util.Collections.list(enumerateObjects((short) 268));
+	java.util.Collections.sort(networks, new NetworkSortByName());
+
+	for (DBObject networkObject: networks)
+	  {
+	    writeDHCPNetwork(networkObject, dhcpFileWriter);
+	  }
+
+	dhcpFileWriter.println("\n#===============================================================================");
+	dhcpFileWriter.println("# Per System Data");
+	dhcpFileWriter.println("#===============================================================================");
+
+	systems = enumerateObjects((short) 263);
+
+	while (systems.hasMoreElements())
+	  {
+	    writeDHCPSystem((DBObject) systems.nextElement(), dhcpFileWriter);
+	  }
 
 	return true;
       }
@@ -3943,7 +3966,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         this.customOptions = null;
 
-	dhcp_dataFile.close();
+	if (dhcpFileWriter != null)
+	  {
+	    dhcpFileWriter.close();
+	  }
       }
   }
 

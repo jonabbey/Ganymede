@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -927,7 +927,7 @@ public class IPv4Range {
 
     for (int i = 0; i < octets.length; i++)
       {
-	absoctets[i] = new Short((short) (octets[i].shortValue() + 128)); // don't want negative values
+	absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
       }
 
     result.append(absoctets[0].toString());
