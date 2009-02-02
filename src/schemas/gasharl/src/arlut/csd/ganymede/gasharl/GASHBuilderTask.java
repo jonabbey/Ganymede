@@ -1,4 +1,4 @@
-/*
+ /*
 
    GASHBuilderTask.java
 
@@ -4225,7 +4225,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	buffer.append("\thardware ethernet\t\t");
 	buffer.append(macAddress);
-	buffer.append(" ;\n");
+	buffer.append(";\n");
 
 	if (i == 0)
 	  {
@@ -4233,7 +4233,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    buffer.append("\tfixed-address\t\t\t");
 	    buffer.append(ipAddress);
-	    buffer.append(" ;\n");
+	    buffer.append(";\n");
 	  }
 
 	buffer.append("\toption host-name\t\t");
