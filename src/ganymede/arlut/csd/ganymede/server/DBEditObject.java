@@ -2877,14 +2877,19 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     this.deleting = true;
 
-    try				// finally {this.deleting = false;}
+    try
       {
-	// first we need to take care of any back links. This scans
+	// First we need to take care of any back links. This scans
 	// this object for asymmetric fields, checks objects pointed
-	// to by us out for editing, and takes this object's invid
-	// out of all fields in those objects.
+	// to by us out for editing, and takes this object's Invid out
+	// of all fields in those objects.
+	//
+	// Note that the InvidDBField logic will take care of clearing
+	// any symmetric or embedded object container field links when
+	// the InvidDBFields are cleared of its value(s) in the
+	// following for loop over the fieldVect.
 
-	retVal = attemptBackLinkClear(true);
+	retVal = attemptAsymBackLinkClear(true);
 
 	if (!ReturnVal.didSucceed(retVal))
 	  {
@@ -2901,8 +2906,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    field = (DBField) fieldVect.elementAt(i);
 
-	    // we can't clear field 0 yet, since we need that
-	    // for permissions verifications for other fields
+	    // we can't clear field 0 (the container field) yet, since
+	    // we need that for permissions verifications for other
+	    // fields
 
 	    if (field.getID() == 0)
 	      {
@@ -3084,7 +3090,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @return null on success, or a ReturnVal with an error dialog encoded on failure
    */
 
-  private final ReturnVal attemptBackLinkClear(boolean local)
+  private final ReturnVal attemptAsymBackLinkClear(boolean local)
   {
     ReturnVal
       retVal = null;
@@ -3098,7 +3104,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (false)
       {
-	System.err.println("Entering attemptBackLinkClear() for object " + toString());
+	System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
       }
 
     synchronized (Ganymede.db.backPointers)
@@ -3149,12 +3155,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is called by attemptBackLinkClear(), and is responsible for
-   * checking the object with Invid remote out for editing, and clearing our
-   * own Invid out of all of the remote object's fields.
+   * This method is called by attemptAsymBackLinkClear(), and is
+   * responsible for checking the object with Invid remote out for
+   * editing, and clearing our own Invid out of all of the remote
+   * object's fields.
    *
-   * This method does no checkpointing, so attemptBackLinkClear() has to
-   * do that for us.
+   * This method does no checkpointing, so attemptAsymBackLinkClear()
+   * has to do that for us.
    *
    * @param remote An Invid for an object that we have asymmetric back links to.
    * @param local If true, we won't do a permissions check before trying to edit the
@@ -3231,8 +3238,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    continue;
 	  }
 
-	// if the field is symmetric and doesn't point to us, we won't
-	// try to unlink it here.
+	// if the field is symmetric, the InvidDBField logic should
+	// take care of the unbinding, so we won't need to take care
+	// of it ourselves.
 
 	if (tmpField.getFieldDef().isSymmetric())
 	  {
