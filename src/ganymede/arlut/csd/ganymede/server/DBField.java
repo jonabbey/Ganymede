@@ -2747,7 +2747,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
 
   public ReturnVal deleteAllElements() throws GanyPermissionsException
   {
-    return this.deleteElements(this.getValues());
+    return this.deleteElements((Vector) this.getValues().clone());
   }
 
   /**
