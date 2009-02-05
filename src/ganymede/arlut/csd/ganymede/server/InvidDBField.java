@@ -3840,6 +3840,9 @@ public final class InvidDBField extends DBField implements invid_field {
 		  {
 		    Invid remote = (Invid) valuesToDelete.elementAt(i);
 
+		    currentValues.removeElement(remote);
+		    qr = null;
+
 		    retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
 
 		    if (!ReturnVal.didSucceed(retVal))
