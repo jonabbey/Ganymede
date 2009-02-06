@@ -70,6 +70,8 @@ import arlut.csd.ganymede.server.DBSession;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeSession;
 import arlut.csd.ganymede.server.InvidDBField;
+import arlut.csd.ganymede.server.IPDBField;
+import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -123,11 +125,31 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
-  {
+  {    
     switch (fieldid)
       {
         case dhcpNetworkSchema.NAME:
           return true;
+      }
+
+    if (fieldid == dhcpNetworkSchema.GUEST_RANGE)
+      {
+	return object.isDefined(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
+      }
+
+    // If network name is _GLOBAL_ we dont want a network number or mask, or allow registered guests.... just options.
+    // otherwise network number and mask are required.
+
+    String name = (String) object.getFieldValueLocal(dhcpNetworkSchema.NAME);
+
+    if (!name.equals("_GLOBAL_"))
+      {
+	switch (fieldid)
+	  {
+	    case dhcpNetworkSchema.NETWORK_NUMBER:
+	    case dhcpNetworkSchema.NETWORK_MASK:
+	      return true;
+	  }	
       }
 
     return false;
@@ -350,4 +372,168 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 	return Ganymede.loginError(ex);
       }
   }
+
+
+
+  /**
+   * Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of 
+   * {@link arlut.csd.ganymede.server.DBField DBField} will
+   * wind up calling up to here to let us override the normal visibility
+   * process.
+   *
+   * Note that it is permissible for session to be null, in which case
+   * this method will always return the default visiblity for the field
+   * in question.
+   *
+   * If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public boolean canSeeField(DBSession session, DBField field)
+  {
+    String name = (String) field.getOwner().getFieldValueLocal(dhcpNetworkSchema.NAME);
+    if (name != null && name.equals("_GLOBAL_"))
+      {
+	if ( field.getID() == dhcpNetworkSchema.NETWORK_NUMBER ||
+	     field.getID() == dhcpNetworkSchema.NETWORK_MASK ||
+	     field.getID() == dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS ||
+	     field.getID() == dhcpNetworkSchema.GUEST_RANGE ||
+	     field.getID() == dhcpNetworkSchema.GUEST_OPTIONS  
+	   )
+	  {
+	    return false;
+	  }
+      }
+    
+    Boolean allow_registered_guests = (Boolean) field.getOwner().getFieldValueLocal(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
+    if (allow_registered_guests == null || !allow_registered_guests.booleanValue())
+      {
+	if ( field.getID() == dhcpNetworkSchema.GUEST_RANGE ||
+	     field.getID() == dhcpNetworkSchema.GUEST_OPTIONS  
+	   )
+	  {
+	    return false;
+	  }
+      }
+    
+
+    return super.canSeeField(session, field);
+  }
+
+  /**
+   * This method is called after the set value operation has been ok'ed
+   * by any appropriate wizard code.
+   */
+
+  public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
+  {
+    // If the name is _GLOBAL_ it does not get a network number, netmask or allow registered guests.
+    // by when the username field is being changed.
+
+    if (field.getID() == dhcpNetworkSchema.NAME)
+      {
+	ReturnVal result = new ReturnVal(true,true);
+
+	String name = (String) value;
+	if (name != null && name.equals("_GLOBAL_"))
+	  {
+	    getSession().checkpoint("clearing _global_ fields");
+	    
+	    try
+	      {
+		IPDBField network_number = (IPDBField) getField(dhcpNetworkSchema.NETWORK_NUMBER);
+		result = ReturnVal.merge(result, network_number.setValueLocal(null));
+		
+		IPDBField network_mask = (IPDBField) getField(dhcpNetworkSchema.NETWORK_MASK);
+		result = ReturnVal.merge(result, network_mask.setValueLocal(null));	
+		
+		DBField allow_registered_guests = (DBField) getField(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
+		result = ReturnVal.merge(result, allow_registered_guests.setValueLocal(false));
+		
+		StringDBField guest_range = (StringDBField) getField(dhcpNetworkSchema.GUEST_RANGE);
+		result = ReturnVal.merge(result, guest_range.setValueLocal(null));
+		
+		DBField guest_options = (DBField) getField(dhcpNetworkSchema.GUEST_OPTIONS);
+		try
+		  {
+		    result = ReturnVal.merge(result, guest_options.deleteAllElements());
+		  }
+		catch (GanyPermissionsException ex)
+		  {
+		    return Ganymede.createErrorDialog("permissions", "permissions error deleting embedded object" + ex);
+		  }
+	      }	    
+	    finally
+	      {
+		if (!ReturnVal.didSucceed(result))
+		  {
+		    getSession().rollback("clearing _global_ fields");
+		  }
+		else
+		  {
+		    getSession().popCheckpoint("clearing _global_ fields");
+		  }
+	      } 
+	  }	    
+
+	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.NETWORK_NUMBER);
+	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.NETWORK_MASK);
+	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
+	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_RANGE);
+	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_OPTIONS);	
+	return result;
+      }
+
+    // If the allow register guests checkbox is changed, hide/show the field and options next.
+
+    if (field.getID() == dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS)
+      {
+	ReturnVal result = new ReturnVal(true,true);
+
+	if (value == null || Boolean.FALSE.equals(value))
+	  {
+	    getSession().checkpoint("clearing guest fields");
+
+	    try
+	      {
+		StringDBField guest_range = (StringDBField) getField(dhcpNetworkSchema.GUEST_RANGE);
+		result = ReturnVal.merge(result, guest_range.setValueLocal(null));
+
+		DBField guest_options = (DBField) getField(dhcpNetworkSchema.GUEST_OPTIONS);
+		try
+		  {
+		    result = ReturnVal.merge(result, guest_options.deleteAllElements());
+		  }
+		catch (GanyPermissionsException ex)
+		  {
+                    return Ganymede.createErrorDialog("permissions", "permissions error deleting embedded object" + ex);
+		  }
+	      }	    
+	    finally
+	      {
+		if (!ReturnVal.didSucceed(result))
+		  {
+		    getSession().rollback("clearing guest fields");
+		  }
+		else
+		  {
+		    getSession().popCheckpoint("clearing guest fields");
+		  }
+	      }
+	  }
+
+	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_RANGE);
+	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_OPTIONS);
+
+	return result;
+      }
+    
+    return null;
+  }
+
 }
