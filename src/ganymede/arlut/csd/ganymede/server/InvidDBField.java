@@ -3760,23 +3760,15 @@ public final class InvidDBField extends DBField implements invid_field {
     
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
-    if (debug)
+    try
       {
-	System.err.println("][ InvidDBField.deleteElements() checkpointed " + checkkey);
-      }
-
-    // if we are an edit in place object, we don't want to do an
-    // unbinding.. we'll do a deleteDBObject() below, instead.  The
-    // reason for this is that the deleteDBObject() code requires that
-    // the SchemaConstants.ContainerField field be intact to properly
-    // check permissions for embedded objects.
-
-    if (!getFieldDef().isEditInPlace())
-      {
-	try
+	if (debug)
 	  {
-	    // do all the remote unbinding, as needed
+	    System.err.println("][ InvidDBField.deleteElements() checkpointed " + checkkey);
+	  }
 
+	if (!getFieldDef().isEditInPlace())
+	  {
 	    for (int i = 0; i < valuesToDelete.size(); i++)
 	      {
 		Invid remote = (Invid) valuesToDelete.elementAt(i);
@@ -3789,15 +3781,13 @@ public final class InvidDBField extends DBField implements invid_field {
 		  }
 	      }
 
-	    // check to make sure our container is okay with us deleting
-	    // all of these values
+	    // check to make sure the DBObject we're contained within
+	    // is okay with us deleting all of these values
 
 	    retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
 
 	    if (ReturnVal.didSucceed(retVal))
 	      {
-		// our container is okay, go ahead and remove
-
 		for (int i = 0; i < valuesToDelete.size(); i++)
 		  {
 		    currentValues.removeElement(valuesToDelete.elementAt(i));
@@ -3809,28 +3799,12 @@ public final class InvidDBField extends DBField implements invid_field {
 
             return retVal;
 	  }
-	finally
+	else
 	  {
-	    // if we've had success, clear the checkpoint, else rollback
-
-	    if (success)
-	      {
-		eObj.getSession().popCheckpoint(checkkey);
-	      }
-	    else
-	      {
-		// undo the bindings
-		
-		eObj.getSession().rollback(checkkey);
-	      }
-	  }
-      }
-    else			// deleting embedded objects
-      {
-	try
-	  {
-	    // check to make sure our container is okay with us deleting
-	    // all of these values
+	    // We're edit in place.  We can't do an unbinding of our
+	    // edit in place invids here because the deleteDBObject
+	    // calls below will need to consult the ContainerField in
+	    // the embedded objects, which unbinding would undo.
 
 	    retVal = eObj.finalizeDeleteElements(this, valuesToDelete);
 
@@ -3841,7 +3815,6 @@ public final class InvidDBField extends DBField implements invid_field {
 		    Invid remote = (Invid) valuesToDelete.elementAt(i);
 
 		    currentValues.removeElement(remote);
-		    qr = null;
 
 		    retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
 
@@ -3851,23 +3824,22 @@ public final class InvidDBField extends DBField implements invid_field {
 		      }
 		  }
 
+		qr = null;
 		success = true;
 	      }
 
 	    return retVal;
 	  }
-	finally
+      }
+    finally
+      {
+	if (success)
 	  {
-	    if (success)
-	      {
-		eObj.getSession().popCheckpoint(checkkey);
-	      }
-	    else
-	      {
-		// undo the bindings
-		
-		eObj.getSession().rollback(checkkey);
-	      }
+	    eObj.getSession().popCheckpoint(checkkey);
+	  }
+	else
+	  {
+	    eObj.getSession().rollback(checkkey);
 	  }
       }
   }
