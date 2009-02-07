@@ -3690,10 +3690,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
   {
-    DBEditObject eObj;
     ReturnVal retVal = null;
-    boolean success = false;
     String checkkey = null;
+    boolean success = false;
+    DBEditObject eObj;
     Vector currentValues;
 
     /* -- */
@@ -3757,7 +3757,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	System.err.println("][ InvidDBField.deleteElements() checkpointing " + checkkey);
       }
-    
+
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     try
@@ -3777,12 +3777,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (!ReturnVal.didSucceed(retVal))
 		  {
-		    return retVal; // abort.  the finally clause will uncheckpoint
+		    return retVal;
 		  }
 	      }
 
-	    // check to make sure the DBObject we're contained within
-	    // is okay with us deleting all of these values
+	    // We call finalizeDeleteElements() as our last optional
+	    // step, as we are meant to guarantee performance if
+	    // finalizeDeleteElements() returns a positive result.
 
 	    retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
 
@@ -3806,28 +3807,51 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // calls below will need to consult the ContainerField in
 	    // the embedded objects, which unbinding would undo.
 
-	    retVal = eObj.finalizeDeleteElements(this, valuesToDelete);
-
-	    if (ReturnVal.didSucceed(retVal))
+	    for (int i = 0; i < valuesToDelete.size(); i++)
 	      {
-		for (int i = 0; i < valuesToDelete.size(); i++)
+		Invid remote = (Invid) valuesToDelete.elementAt(i);
+
+		retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
+
+		if (!ReturnVal.didSucceed(retVal))
 		  {
-		    Invid remote = (Invid) valuesToDelete.elementAt(i);
-
-		    currentValues.removeElement(remote);
-
-		    retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
-
-		    if (!ReturnVal.didSucceed(retVal))
-		      {
-			return retVal;
-		      }
+		    return retVal;
 		  }
-
-		qr = null;
-		success = true;
 	      }
 
+	    retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
+
+	    if (!ReturnVal.didSucceed(retVal))
+	      {
+		return retVal;
+	      }
+
+	    for (int i = 0; i < valuesToDelete.size(); i++)
+	      {
+		Invid remote = (Invid) valuesToDelete.elementAt(i);
+
+		boolean deleted = currentValues.removeElement(remote);
+
+		if (!deleted)
+		  {
+		    // we should expect to see this if the
+		    // deleteDBObject() call above resulted in this
+		    // edit-in-place invid field being unbound.
+		    //
+		    // Currently, I don't believe calling
+		    // deleteDBObject() on an embedded object causes
+		    // the containing object's invid field to be
+		    // cleared, but I'm not yet sure why not.
+
+		    Ganymede.debug("INFO: couldn't delete element " + remote +
+				   " from " + this.toString() +
+				   " in InvidDBField.deleteElements().. deleteDBObject");
+		  }
+	      }
+
+	    qr = null;
+	    success = true;
+		
 	    return retVal;
 	  }
       }
