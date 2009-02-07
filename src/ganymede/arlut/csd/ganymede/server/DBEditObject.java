@@ -2852,16 +2852,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // set the deleting flag to true so that our subclasses won't
     // freak about values being set to null.
 
-    // NOTE: notice that we don't log a DBLogEvent for the object's
-    // deletion anywhere in this method, as is done similarly in
-    // finalizeInactivate() and finalizeReactivate().  Logging for
-    // object removal, like that for object creation and editing, is
-    // done in DBEditSet.commit().  We have to take care of logging
-    // for inactivation and reactivation in finalizeInactivate() and
-    // finalizeReactivate() because otherwise we have no way of
-    // determining that we inactivated or reactivated an object in the
-    // context of the DBEditSet.commit() method.
-
     this.deleting = true;
 
     try
@@ -2893,9 +2883,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    field = (DBField) fieldVect.elementAt(i);
 
-	    // we can't clear field 0 (the container field) yet, since
-	    // we need that for permissions verifications for other
-	    // fields
+	    // we can't clear field 0 (the owner/container field) yet,
+	    // since we need that for permissions verifications for
+	    // other fields
 
 	    if (field.getID() == 0)
 	      {
@@ -2911,12 +2901,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		while (field.size() > 0)
 		  {
-		    // if this is an InvidDBField, deleteElement()
-		    // will convert this request into a deletion of
-		    // the embedded object.
-
 		    try
 		      {
+			// if this is an edit-in-place InvidDBField,
+			// deleteElement() will convert this request into
+			// a deletion of the embedded object if necessary
+
 			retVal = ReturnVal.merge(retVal, field.deleteElement(0)); // *sync*
 
 			if (!ReturnVal.didSucceed(retVal))
@@ -2947,16 +2937,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	    else
 	      {
+		if (debug)
+		  {
+		    System.err.println("++ Attempting to clear scalar field " + field.getName());
+		  }
+
 		// permission and field option matrices, along with
 		// passwords, don't allow us to call set value
 		// directly.  We're mainly concerned with invid's (for
 		// linking), i.p. addresses and strings (for the
 		// namespace) here anyway.
-
-		if (debug)
-		  {
-		    System.err.println("++ Attempting to clear scalar field " + field.getName());
-		  }
 
 		if (field.getType() != PERMISSIONMATRIX &&
 		    field.getType() != PASSWORD &&
@@ -3285,8 +3275,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
 					  ts.l("clearBackLink.perm", getLabel(), remobj.toString()));
       }
-
-    // initialize a ReturnVal to remember our rescan information.
 
     for (int i = 0; i < fieldsToUnbind.size(); i++)
       {
