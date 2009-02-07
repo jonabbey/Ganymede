@@ -2620,13 +2620,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    invids.addElement(this.getInvid());
 
-	    StringBuffer buffer = new StringBuffer();
-
 	    // "{0} {1} has been inactivated.\n\nThe object is due to be removed from the database at {2}.\n\n"
-	    buffer.append(ts.l("finalizeInactivate.removeSet", getTypeName(), getLabel(), getFieldValueLocal(SchemaConstants.RemovalField).toString()));
-
 	    editset.logEvent(new DBLogEvent("inactivateobject",
-					    buffer.toString(),
+					    ts.l("finalizeInactivate.removeSet", getTypeName(), getLabel(), getFieldValueLocal(SchemaConstants.RemovalField).toString()),
 					    (gSession.personaInvid == null ?
 					     gSession.userInvid : gSession.personaInvid),
 					    gSession.getMyUserName(),
@@ -2639,13 +2635,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    invids.addElement(this.getInvid());
 
-	    StringBuffer buffer = new StringBuffer();
-
 	    // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
-	    buffer.append(ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()));
-
 	    editset.logEvent(new DBLogEvent("inactivateobject",
-					    buffer.toString(),
+					    ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()),
 					    (gSession.personaInvid == null ?
 					     gSession.userInvid : gSession.personaInvid),
 					    gSession.getMyUserName(),
@@ -2731,14 +2723,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	invids.addElement(this.getInvid());
 
-	StringBuffer buffer = new StringBuffer();
-
 	// "{0} {1} has been reactivated.\n\n"
-
-	buffer.append(ts.l("finalizeReactivate.message", getTypeName(), getLabel()));
-
 	editset.logEvent(new DBLogEvent("reactivateobject",
-					buffer.toString(),
+					ts.l("finalizeReactivate.message", getTypeName(), getLabel()),
 					(gSession.personaInvid == null ?
 					 gSession.userInvid : gSession.personaInvid),
 					gSession.getMyUserName(),
