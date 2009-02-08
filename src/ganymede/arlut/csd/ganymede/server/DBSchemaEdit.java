@@ -343,7 +343,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public synchronized Base[] getBases(boolean embedded)
   {
-    DBObjectBase[] bases;
+    Base[] bases;
     Enumeration en;
     int i = 0;
     int size = 0;
@@ -378,7 +378,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     // and create the return list
 
-    bases = new DBObjectBase[size];
+    bases = new Base[size];
     en = newBases.elements();
 
     while (en.hasMoreElements())
