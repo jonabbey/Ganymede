@@ -2620,13 +2620,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    invids.addElement(this.getInvid());
 
-	    StringBuffer buffer = new StringBuffer();
-
 	    // "{0} {1} has been inactivated.\n\nThe object is due to be removed from the database at {2}.\n\n"
-	    buffer.append(ts.l("finalizeInactivate.removeSet", getTypeName(), getLabel(), getFieldValueLocal(SchemaConstants.RemovalField).toString()));
-
 	    editset.logEvent(new DBLogEvent("inactivateobject",
-					    buffer.toString(),
+					    ts.l("finalizeInactivate.removeSet", getTypeName(), getLabel(), getFieldValueLocal(SchemaConstants.RemovalField).toString()),
 					    (gSession.personaInvid == null ?
 					     gSession.userInvid : gSession.personaInvid),
 					    gSession.getMyUserName(),
@@ -2639,13 +2635,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    invids.addElement(this.getInvid());
 
-	    StringBuffer buffer = new StringBuffer();
-
 	    // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
-	    buffer.append(ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()));
-
 	    editset.logEvent(new DBLogEvent("inactivateobject",
-					    buffer.toString(),
+					    ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()),
 					    (gSession.personaInvid == null ?
 					     gSession.userInvid : gSession.personaInvid),
 					    gSession.getMyUserName(),
@@ -2731,14 +2723,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	invids.addElement(this.getInvid());
 
-	StringBuffer buffer = new StringBuffer();
-
 	// "{0} {1} has been reactivated.\n\n"
-
-	buffer.append(ts.l("finalizeReactivate.message", getTypeName(), getLabel()));
-
 	editset.logEvent(new DBLogEvent("reactivateobject",
-					buffer.toString(),
+					ts.l("finalizeReactivate.message", getTypeName(), getLabel()),
 					(gSession.personaInvid == null ?
 					 gSession.userInvid : gSession.personaInvid),
 					gSession.getMyUserName(),
@@ -2865,26 +2852,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // set the deleting flag to true so that our subclasses won't
     // freak about values being set to null.
 
-    // NOTE: notice that we don't log a DBLogEvent for the object's
-    // deletion anywhere in this method, as is done similarly in
-    // finalizeInactivate() and finalizeReactivate().  Logging for
-    // object removal, like that for object creation and editing, is
-    // done in DBEditSet.commit().  We have to take care of logging
-    // for inactivation and reactivation in finalizeInactivate() and
-    // finalizeReactivate() because otherwise we have no way of
-    // determining that we inactivated or reactivated an object in the
-    // context of the DBEditSet.commit() method.
-
     this.deleting = true;
 
-    try				// finally {this.deleting = false;}
+    try
       {
-	// first we need to take care of any back links. This scans
+	// First we need to take care of any back links. This scans
 	// this object for asymmetric fields, checks objects pointed
-	// to by us out for editing, and takes this object's invid
-	// out of all fields in those objects.
+	// to by us out for editing, and takes this object's Invid out
+	// of all fields in those objects.
+	//
+	// Note that the InvidDBField logic will take care of clearing
+	// any symmetric or embedded object container field links when
+	// the InvidDBFields are cleared of its value(s) in the
+	// following for loop over the fieldVect.
 
-	retVal = attemptBackLinkClear(true);
+	retVal = attemptAsymBackLinkClear(true);
 
 	if (!ReturnVal.didSucceed(retVal))
 	  {
@@ -2901,8 +2883,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    field = (DBField) fieldVect.elementAt(i);
 
-	    // we can't clear field 0 yet, since we need that
-	    // for permissions verifications for other fields
+	    // we can't clear field 0 (the owner/container field) yet,
+	    // since we need that for permissions verifications for
+	    // other fields
 
 	    if (field.getID() == 0)
 	      {
@@ -2918,12 +2901,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		while (field.size() > 0)
 		  {
-		    // if this is an InvidDBField, deleteElement()
-		    // will convert this request into a deletion of
-		    // the embedded object.
-
 		    try
 		      {
+			// if this is an edit-in-place InvidDBField,
+			// deleteElement() will convert this request into
+			// a deletion of the embedded object if necessary
+
 			retVal = ReturnVal.merge(retVal, field.deleteElement(0)); // *sync*
 
 			if (!ReturnVal.didSucceed(retVal))
@@ -2954,16 +2937,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	    else
 	      {
+		if (debug)
+		  {
+		    System.err.println("++ Attempting to clear scalar field " + field.getName());
+		  }
+
 		// permission and field option matrices, along with
 		// passwords, don't allow us to call set value
 		// directly.  We're mainly concerned with invid's (for
 		// linking), i.p. addresses and strings (for the
 		// namespace) here anyway.
-
-		if (debug)
-		  {
-		    System.err.println("++ Attempting to clear scalar field " + field.getName());
-		  }
 
 		if (field.getType() != PERMISSIONMATRIX &&
 		    field.getType() != PASSWORD &&
@@ -3084,7 +3067,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @return null on success, or a ReturnVal with an error dialog encoded on failure
    */
 
-  private final ReturnVal attemptBackLinkClear(boolean local)
+  private final ReturnVal attemptAsymBackLinkClear(boolean local)
   {
     ReturnVal
       retVal = null;
@@ -3098,7 +3081,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (false)
       {
-	System.err.println("Entering attemptBackLinkClear() for object " + toString());
+	System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
       }
 
     synchronized (Ganymede.db.backPointers)
@@ -3149,12 +3132,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is called by attemptBackLinkClear(), and is responsible for
-   * checking the object with Invid remote out for editing, and clearing our
-   * own Invid out of all of the remote object's fields.
+   * This method is called by attemptAsymBackLinkClear(), and is
+   * responsible for checking the object with Invid remote out for
+   * editing, and clearing our own Invid out of all of the remote
+   * object's fields.
    *
-   * This method does no checkpointing, so attemptBackLinkClear() has to
-   * do that for us.
+   * This method does no checkpointing, so attemptAsymBackLinkClear()
+   * has to do that for us.
    *
    * @param remote An Invid for an object that we have asymmetric back links to.
    * @param local If true, we won't do a permissions check before trying to edit the
@@ -3231,8 +3215,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    continue;
 	  }
 
-	// if the field is symmetric and doesn't point to us, we won't
-	// try to unlink it here.
+	// if the field is symmetric, the InvidDBField logic should
+	// take care of the unbinding, so we won't need to take care
+	// of it ourselves.
 
 	if (tmpField.getFieldDef().isSymmetric())
 	  {
@@ -3290,8 +3275,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
 					  ts.l("clearBackLink.perm", getLabel(), remobj.toString()));
       }
-
-    // initialize a ReturnVal to remember our rescan information.
 
     for (int i = 0; i < fieldsToUnbind.size(); i++)
       {

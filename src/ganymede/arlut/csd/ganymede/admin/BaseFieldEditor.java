@@ -456,13 +456,22 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	editPanel.setRowVisible(editInPlaceCF, true);
 	editPanel.setRowVisible(targetC, true);
 
-	if (((String)targetC.getModel().getSelectedItem()).equalsIgnoreCase("<any>"))
+	if (editInPlaceCF.isSelected())
 	  {
+	    // edit in place fields don't target specific fields.
+
 	    editPanel.setRowVisible(fieldC, false);
 	  }
 	else
 	  {
-	    editPanel.setRowVisible(fieldC, true);
+	    if (((String)targetC.getModel().getSelectedItem()).equalsIgnoreCase("<any>"))
+	      {
+		editPanel.setRowVisible(fieldC, false);
+	      }
+	    else
+	      {
+		editPanel.setRowVisible(fieldC, true);
+	      }
 	  }
       }
     else
@@ -570,7 +579,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     try
       {
-
 	// if this field is edit in place, we only want to list embeddable
 	// object types
 	
@@ -623,7 +631,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     /* -- */
     
-    target = (String)targetC.getModel().getSelectedItem();
+    target = (String) targetC.getModel().getSelectedItem();
 
     try
       {
