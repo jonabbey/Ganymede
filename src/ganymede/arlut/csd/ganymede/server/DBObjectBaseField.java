@@ -2567,9 +2567,10 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 	      }
 	  }
 
-	// then we try to set the target field, if any
+	// then we try to set the target field, if any.  we don't
+	// track target fields for edit-in-place invid fields, though.
 
-	if (_targetfieldStr != null)
+	if (_targetfieldStr != null && !_embedded)
 	  {
 	    retVal = setTargetField(_targetfieldStr);
 
@@ -2584,7 +2585,7 @@ public final class DBObjectBaseField implements BaseField, FieldType {
 						       retVal.getDialogText()));
 	      }
 	  }
-	else if (_targetfield != null)
+	else if (_targetfield != null && !_embedded)
 	  {
 	    retVal = setTargetField(_targetfield.shortValue());
 
