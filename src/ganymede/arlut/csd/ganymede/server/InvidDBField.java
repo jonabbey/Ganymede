@@ -359,7 +359,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    * This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().
+   * out this field to disk.
    */
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
