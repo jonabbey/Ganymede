@@ -1115,8 +1115,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>This method is used when this object is being dumped.  It is
-   * mated with receiveXML().</p> 
+   * <p>This method is used when this object is being dumped.</p>
    */
 
   synchronized public void emitXML(XMLDumpContext xmlOut) throws IOException

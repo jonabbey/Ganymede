@@ -14,7 +14,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
  
    Copyright (C) 1996-2009
@@ -271,7 +271,7 @@ public class StringDBField extends DBField implements string_field {
 
   /**
    * <p>This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().</p>
+   * out this field to disk.</p>
    */
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
