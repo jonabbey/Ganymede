@@ -848,7 +848,20 @@ public final class DBObjectBaseField implements BaseField, FieldType {
       {
 	allowedTarget = in.readShort();
 	editInPlace = in.readBoolean();
-	targetField = in.readShort();
+
+	if (!editInPlace)
+	  {
+	    targetField = in.readShort();
+	  }
+	else
+	  {
+	    // we no longer allow edit-in-place invid fields to target
+	    // an explicit field in the embedded object.  the
+	    // relationship with the container field in the embedded
+	    // object is now always implicit.
+
+	    in.readShort();
+	  }
 
 	// In DBStore file version 1.17 we dropped the use of the back
 	// links field.  Some folks apparently used the schema editor
@@ -4371,6 +4384,16 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     
     editInPlace = b;
 
+    if (editInPlace)
+      {
+	// we don't target specific fields with embedded invid
+	// fields.. the relationship with the container field in
+	// edit-in-place objects is implicit with embedded invid
+	// fields.
+
+	targetField = -1;
+      }
+
     return null;
   }
 
@@ -4646,6 +4669,12 @@ public final class DBObjectBaseField implements BaseField, FieldType {
     if (!isInvid())
       {
 	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+      }
+
+    if (isEditInPlace() && val != -1)
+      {
+	// "Can''t set target field on an embedded invid field {0}."
+	throw new IllegalStateException(ts.l("setTargetField.no_embedded_target_field", this.toString()));
       }
 
     if (val == targetField)
