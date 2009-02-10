@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -54,7 +54,11 @@
 
 package arlut.csd.ganymede.server;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
@@ -74,30 +78,23 @@ import arlut.csd.ganymede.common.Invid;
 public class DBDeletionManager {
 
   /**
-   * A hashtable mapping {@link arlut.csd.ganymede.server.DBSession
-   * DBSession} objects to a Vector of {@link
-   * arlut.csd.ganymede.common.Invid Invid} objects.
+   * DBSession objects will appear as keys in this Map when those
+   * sessions have locked Invids in the database against deletion.
    *
-   * DBSession will appear as keys in this hash when those sessions
-   * have locked Invids in the database against deletion.  The Vector
-   * of Invids mapped from the DBSession is the list of Invids that
-   * that DBSession has locked.
+   * The Set of Invids mapped from the DBSession is the set of Invids
+   * that that DBSession has locked.
    */
 
-  private static Hashtable sessions = new Hashtable();
+  private static Map<DBSession, Set<Invid>> sessions = new HashMap<DBSession, Set<Invid>>();
 
   /**
-   * A hashtable mapping {@link arlut.csd.ganymede.common.Invid Invid}
-   * objects to a Vector of {@link arlut.csd.ganymede.server.DBSession
-   * DBSession} objects.
-   *
-   * Invids will appear as keys in this hash when the DBObjects
+   * Invids will appear as keys in this Map when the DBObjects
    * corresponding to those Invids have been delete locked by
-   * DBSessions in the server.  The Vector of DBSession objects is the
+   * DBSessions in the server.  The Set of DBSession objects is the
    * list of DBSessions that have locked the Invid.
    */
 
-  private static Hashtable invids = new Hashtable();
+  private static Map<Invid, Set<DBSession>> invids = new HashMap<Invid, Set<DBSession>>();
 
   /* -- */
 
@@ -148,28 +145,28 @@ public class DBDeletionManager {
     // invidList is a list of invid's that this session
     // has locked
 
-    Vector invidList = (Vector) sessions.get(session);
+    Set<Invid> invidSet = sessions.get(session);
 
-    if (invidList == null)
+    if (invidSet == null)
       {
-	invidList = new Vector();
-	sessions.put(session, invidList);
+	invidSet = new HashSet<Invid>();
+	sessions.put(session, invidSet);
       }
 
-    VectorUtils.unionAdd(invidList, objInvid);
+    invidSet.add(objInvid);
 
-    // sessionList is a list of DBSession objects that
-    // have locked this invid
+    // sessionSet is a Set of DBSession objects that have locked this
+    // invid
 
-    Vector sessionList = (Vector) invids.get(objInvid);
+    Set<DBSession> sessionSet = invids.get(objInvid);
 
-    if (sessionList == null)
+    if (sessionSet == null)
       {
-	sessionList = new Vector();
-	invids.put(objInvid, sessionList);
+	sessionSet = new HashSet<DBSession>();
+	invids.put(objInvid, sessionSet);
       }
 
-    VectorUtils.unionAdd(sessionList, session);
+    sessionSet.add(session);
 
     return true;
   }
@@ -192,14 +189,14 @@ public class DBDeletionManager {
     // go ahead and set the deletion status, which will prevent
     // deleteLockObject() from messing with us
 
-    Vector sessionList = (Vector) invids.get(objInvid);
+    Set<DBSession> sessionSet = invids.get(objInvid);
 
-    if (sessionList != null)
+    if (sessionSet != null)
       {
 	// if more than one session is associated with this invid, we
 	// can't allow deletion
 
-	if (sessionList.size() > 1)
+	if (sessionSet.size() > 1)
 	  {
 	    return false;
 	  }
@@ -207,7 +204,7 @@ public class DBDeletionManager {
 	// if that one session isn't the one requesting deletion privs,
 	// we can't allow it either
 
-	if (sessionList.elementAt(0) != session)
+	if (!sessionSet.contains(session))
 	  {
 	    return false;
 	  }
@@ -234,26 +231,24 @@ public class DBDeletionManager {
 
   public static synchronized void releaseSession(DBSession session)
   {
-    Vector invidList = (Vector) sessions.get(session);
+    Set<Invid> invidSet = sessions.get(session);
 
-    if (invidList == null)
+    if (invidSet == null)
       {
 	return;
       }
 
-    for (int i = 0; i < invidList.size(); i++)
+    for (Invid invid: invidSet)
       {
-	Invid invid = (Invid) invidList.elementAt(i);
-
-	Vector sessionList = (Vector) invids.get(invid);
+	Set<DBSession> sessionSet = invids.get(invid);
 	
-	if (sessionList.size() == 1)
+	if (sessionSet.size() == 1)
 	  {
 	    invids.remove(invid);
 	  }
 	else
 	  {
-	    sessionList.removeElement(session);
+	    sessionSet.remove(session);
 	  }
       }
 
@@ -265,25 +260,26 @@ public class DBDeletionManager {
    * without changes if the deletion-locks could not all be performed.
    */
 
-  public static synchronized boolean addSessionInvids(DBSession session, Vector invidList)
+  public static synchronized boolean addSessionInvids(DBSession session, Set<Invid> invidSet)
   {
-    Invid invid;
     DBObject obj;
     DBEditObject eObj;
 
     /* -- */
 
-    if (invidList == null || invidList.size() == 0)
+    if (invidSet == null || invidSet.size() == 0)
       {
 	return true;
       }
 
-    Vector currentList = (Vector) sessions.get(session);
-    Vector toAdd = VectorUtils.difference(invidList, currentList);
+    Set<Invid> currentSet = sessions.get(session);
 
-    for (int i=0; i < toAdd.size(); i++)
+    Set<Invid> toAdd = new HashSet<Invid>(invidSet);
+
+    currentSet.removeAll(currentSet);
+
+    for (Invid invid: currentSet)
       {
-	invid = (Invid) toAdd.elementAt(i);
 	obj = session.viewDBObject(invid);
 	eObj = obj.shadowObject;
 
@@ -305,9 +301,8 @@ public class DBDeletionManager {
     // okay, we know that all off the objects in toAdd are not yet
     // deletion locked.. go ahead and lock them all
 
-    for (int i=0; i < toAdd.size(); i++)
+    for (Invid invid: toAdd)
       {
-	invid = (Invid) toAdd.elementAt(i);
 	obj = session.viewDBObject(invid);
 
 	if (!deleteLockObject(session.viewDBObject(invid), session))
@@ -334,14 +329,14 @@ public class DBDeletionManager {
 
   public static synchronized Vector getSessionCheckpoint(DBSession session)
   {
-    Vector invidList = (Vector) sessions.get(session);
+    Set<Invid> invidSet = sessions.get(session);
 
-    if (invidList == null)
+    if (invidSet == null)
       {
 	return new Vector();
       }
 
-    return (Vector) invidList.clone();
+    return new Vector(invidSet);
   }
 
   /**
@@ -354,9 +349,14 @@ public class DBDeletionManager {
 
   public static synchronized void revertSessionCheckpoint(DBSession session, Vector invidList)
   {
-    Vector currentList = (Vector) sessions.get(session);
-    Vector toRemove = VectorUtils.difference(currentList, invidList);
-    Vector badItems = VectorUtils.difference(invidList, currentList);
+    Set<Invid> invidSet = (Set<Invid>) new HashSet(invidList);
+    Set<Invid> currentSet = sessions.get(session);
+
+    Set<Invid> badItems = new HashSet<Invid>(invidSet);
+    badItems.removeAll(currentSet);
+
+    Set<Invid> toRemove = new HashSet<Invid>(currentSet);
+    toRemove.removeAll(invidSet);
 
     if (badItems.size() != 0)
       {
@@ -364,23 +364,20 @@ public class DBDeletionManager {
 					   "fed invids that weren't deletion-locked");
       }
 
-    for (int i = 0; i < toRemove.size(); i++)
+    for (Invid invid: toRemove)
       {
-	Invid invid = (Invid) toRemove.elementAt(i);
-
-	Vector sessionList = (Vector) invids.get(invid);
+	Set<DBSession> sessionSet = invids.get(invid);
 	
-	if (sessionList.size() == 1)
+	if (sessionSet.size() == 1)
 	  {
 	    invids.remove(invid);
 	  }
 	else
 	  {
-	    sessionList.removeElement(session);
+	    sessionSet.remove(session);
 	  }
       }
 
-    sessions.put(session, invidList);
+    sessions.put(session, invidSet);
   }
 }
-

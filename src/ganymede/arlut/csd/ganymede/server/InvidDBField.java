@@ -359,7 +359,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   /**
    * This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().
+   * out this field to disk.
    */
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
@@ -2145,27 +2145,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (asymBackPointer)
 	      {
-		synchronized (Ganymede.db.backPointers)
+		if (!Ganymede.db.backPointers.linkExists(myInvid, temp))
 		  {
-		    Hashtable backpointers = (Hashtable) Ganymede.db.backPointers.get(temp);
+		    // "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
+		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
+		    result = false;
 
-		    if (backpointers == null)
-		      {
-			// "*** InvidDBField.test(): No backpointer hash at all for Invid {0} pointed to from : {1} in field {2}"
-			Ganymede.debug(ts.l("test.no_backpointers", temp, objectName, getName()));
-			result = false;
-
-			continue;
-		      }
-
-		    if (!backpointers.containsKey(myInvid))
-		      {
-			// "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
-			Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
-			result = false;
-
-			continue;
-		      }
+		    continue;
 		  }
 	      }
 	    else
@@ -2275,20 +2261,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (asymBackPointer)
 	  {
-	    synchronized (Ganymede.db.backPointers)
+	    if (!Ganymede.db.backPointers.linkExists(myInvid, temp))
 	      {
-		Hashtable backpointers = (Hashtable) Ganymede.db.backPointers.get(temp);
-
-		if (backpointers == null)
-		  {
-		    Ganymede.debug(ts.l("test.no_backpointers", temp, objectName, getName()));
-		    result = false;
-		  }
-                else if (!backpointers.containsKey(myInvid))
-		  {
-		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
-		    result = false;
-		  }
+		// "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
+		Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
+		result = false;
 	      }
 	  }
 	else
@@ -3588,13 +3565,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkpointed = true;
 
-    if (debug)
-      {
-	System.err.println("][ InvidDBField.deleteElement() checkpointed " + checkkey);
-      }
-
     try
       {
+	if (debug)
+	  {
+	    System.err.println("][ InvidDBField.deleteElement() checkpointed " + checkkey);
+	  }
+
 	// if we are an edit in place object, we don't want to do an
 	// unbinding.. we'll do a deleteDBObject() below, instead.  The
 	// reason for this is that the deleteDBObject() code requires that
@@ -3618,15 +3595,15 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (ReturnVal.didSucceed(retVal))
 	  {
-	    values.removeElementAt(index);
-
-	    qr = null;	// Clear the cache to force the choices to be read again
-
-	    // if we are an editInPlace field, unlinking this object means
-	    // that we should go ahead and delete the object.
-
 	    if (getFieldDef().isEditInPlace())
 	      {
+		// We're edit in place.  We unlink an embedded object
+		// by deleting it, and letting the asymmetric link
+		// breaking logic in the server remove the deleted
+		// invids out of values for us by way of
+		// DBEditObject.finalizeRemove() and
+		// attemptAsymBackLinkClear().
+
 		retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
 
 		if (!ReturnVal.didSucceed(retVal))
@@ -3634,9 +3611,14 @@ public final class InvidDBField extends DBField implements invid_field {
 		    return retVal;	// go ahead and return our error code
 		  }
 	      }
+	    else
+	      {
+		values.removeElementAt(index);
+	      }
 
 	    // success
 
+	    qr = null;	// Clear the cache to force the choices to be read again
 	    eObj.getSession().popCheckpoint(checkkey);
 	    checkpointed = false;
 
@@ -3802,10 +3784,12 @@ public final class InvidDBField extends DBField implements invid_field {
 	  }
 	else
 	  {
-	    // We're edit in place.  We can't do an unbinding of our
-	    // edit in place invids here because the deleteDBObject
-	    // calls below will need to consult the ContainerField in
-	    // the embedded objects, which unbinding would undo.
+	    // We're edit in place.  We unlink an embedded object
+	    // by deleting it, and letting the asymmetric link
+	    // breaking logic in the server remove the deleted
+	    // invids out of values for us by way of
+	    // DBEditObject.finalizeRemove() and
+	    // attemptAsymBackLinkClear().
 
 	    for (int i = 0; i < valuesToDelete.size(); i++)
 	      {
@@ -3824,29 +3808,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		return retVal;
-	      }
-
-	    for (int i = 0; i < valuesToDelete.size(); i++)
-	      {
-		Invid remote = (Invid) valuesToDelete.elementAt(i);
-
-		boolean deleted = currentValues.removeElement(remote);
-
-		if (!deleted)
-		  {
-		    // we should expect to see this if the
-		    // deleteDBObject() call above resulted in this
-		    // edit-in-place invid field being unbound.
-		    //
-		    // Currently, I don't believe calling
-		    // deleteDBObject() on an embedded object causes
-		    // the containing object's invid field to be
-		    // cleared, but I'm not yet sure why not.
-
-		    Ganymede.debug("INFO: couldn't delete element " + remote +
-				   " from " + this.toString() +
-				   " in InvidDBField.deleteElements().. deleteDBObject");
-		  }
 	      }
 
 	    qr = null;

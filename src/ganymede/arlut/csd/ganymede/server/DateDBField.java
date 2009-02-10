@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -197,7 +197,7 @@ public class DateDBField extends DBField implements date_field {
 
   /**
    * <p>This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().</p>
+   * out this field to disk.</p>
    */
 
   synchronized void emitXML(XMLDumpContext xmlOut) throws IOException

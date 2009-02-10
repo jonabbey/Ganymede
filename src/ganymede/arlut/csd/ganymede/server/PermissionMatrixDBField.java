@@ -14,7 +14,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
  
    Copyright (C) 1996-2009
@@ -793,7 +793,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    * This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().
+   * out this field to disk.
    */
 
   void emitXML(XMLDumpContext dump) throws IOException
@@ -803,7 +803,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   /**
    * This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().
+   * out this field to disk.
    */
 
   synchronized void emitXML(XMLDumpContext xmlOut, boolean writeSurroundContext) throws IOException

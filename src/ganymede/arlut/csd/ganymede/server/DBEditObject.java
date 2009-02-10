@@ -55,10 +55,12 @@ package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -3053,10 +3055,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   /**
    * This method is used to find all objects which point to us through
-   * non-symmetric links, edit them, and break the link.  We do this by
-   * consulting the global Ganymede.db.backPointers hash structure to get
-   * the list of objects which point to us, and doing the unlink in a
-   * fashion similar to InvidDBField.unbindAll().
+   * non-symmetric links, edit them, and break the link.  We do this
+   * by consulting the global Ganymede.db.backPointers DBLinkTracker
+   * to get the list of objects which point to us, and doing the
+   * unlink in a fashion similar to InvidDBField.unbindAll().
    *
    * <b>This method is private, and is not to be called by any code outside
    * of this class.</b>
@@ -3072,11 +3074,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     ReturnVal
       retVal = null;
 
-    Vector
-      targets;
-
-    Invid remote;
-
     /* -- */
 
     if (false)
@@ -3084,51 +3081,19 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
       }
 
-    synchronized (Ganymede.db.backPointers)
+    List<Invid> linkSources = Ganymede.db.backPointers.getLinkSources(getInvid());
+
+    for (Invid remote: linkSources)
       {
-	Hashtable backPointers = (Hashtable) Ganymede.db.backPointers.get(getInvid());
-
-	if (backPointers == null)
-	  {
-	    return null;
-	  }
-
-	targets = new Vector();
-
-	if (false)
-	  {
-	    System.err.println("Deleting " + toString() + ", chasing back pointers from global hash");
-	  }
-
-	Enumeration en = backPointers.keys();
-
-	while (en.hasMoreElements())
-	  {
-	    remote = (Invid) en.nextElement();
-
-	    if (false)
-	      {
-		System.err.println("\t" + getGSession().describe(remote));
-	      }
-
-	    targets.addElement(remote);
-	  }
-      }
-
-    Enumeration targetEnum = targets.elements();
-
-    while (targetEnum.hasMoreElements())
-      {
-	remote = (Invid) targetEnum.nextElement();
 	retVal = ReturnVal.merge(retVal, clearBackLink(remote, local));
 
 	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    return retVal;
+	    return retVal;	// finalizeRemove() will rollback
 	  }
       }
 
-    return retVal;		// success
+    return retVal;
   }
 
   /**
@@ -3168,8 +3133,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     ReturnVal
       retVal = ReturnVal.success();
 
-    Vector
-      fieldsToUnbind = new Vector();
+    ArrayList<Short>
+      fieldsToUnbind = new ArrayList<Short>();
 
     /* -- */
 
@@ -3238,7 +3203,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    Invid tempInvid = (Invid) tmpField.getValueLocal();
 
-	    if (tempInvid == null || !tempInvid.equals(myInvid))
+	    if (!myInvid.equals(tempInvid))
 	      {
 		continue;
 	      }
@@ -3251,7 +3216,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	// ok, we know we need to do the unbinding for this field.
 
-	fieldsToUnbind.addElement(Short.valueOf(tmpField.getID()));
+	fieldsToUnbind.add(tmpField.getID());
       }
 
     if (remobj instanceof DBEditObject)
@@ -3276,9 +3241,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 					  ts.l("clearBackLink.perm", getLabel(), remobj.toString()));
       }
 
-    for (int i = 0; i < fieldsToUnbind.size(); i++)
+    for (Short remote_fieldid: fieldsToUnbind)
       {
-	Short remote_fieldid = (Short) fieldsToUnbind.elementAt(i);
 	targetField = remote_fieldid.shortValue();
 
 	retVal.addRescanField(remote, targetField);

@@ -814,7 +814,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   /**
    * This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().
+   * out this field to disk.
    */
 
   void emitXML(XMLDumpContext dump) throws IOException
@@ -824,7 +824,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   /**
    * This method is used when the database is being dumped, to write
-   * out this field to disk.  It is mated with receiveXML().
+   * out this field to disk.
    */
 
   synchronized void emitXML(XMLDumpContext dump, boolean writeSurroundContext) throws IOException

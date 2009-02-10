@@ -255,15 +255,11 @@ public final class DBStore implements JythonMap {
   Hashtable objectBases;
 
   /** 
-   * hash mapping {@link arlut.csd.ganymede.common.Invid Invid}'s to Hashtables
-   * of Invid's.  Used to record the set of Invids that point to a
-   * given Invid.
-   *
-   * That is, backPointers.get(anInvid) returns a hashtable whose keys
-   * are the Invid's that point to that Invid via an asymmetric link.
+   * The backPointers Object tracking invids which point to specific
+   * objects in the Ganymede persistent data store.
    */
 
-  Hashtable backPointers;
+  DBLinkTracker backPointers;
 
   /** 
    * A collection of {@link arlut.csd.ganymede.server.DBNameSpace
@@ -338,7 +334,7 @@ public final class DBStore implements JythonMap {
     debug = Ganymede.debug;
 
     objectBases = new Hashtable(20); // default 
-    backPointers = new Hashtable(1000);	// default
+    backPointers = new DBLinkTracker();
     nameSpaces = new Vector();
 
     try
@@ -2961,45 +2957,6 @@ public final class DBStore implements JythonMap {
   {
     lockSync.removeLock();
   }
-
-  public void debugBackPointers()
-  {
-    synchronized (backPointers)
-      {
-	Enumeration en = backPointers.keys();
-
-	while (en.hasMoreElements())
-	  {
-	    Invid objInvid = (Invid) en.nextElement();
-
-	    System.err.println("Object: " + describe(objInvid));
-
-	    Hashtable backs = (Hashtable) backPointers.get(objInvid);
-
-	    Enumeration backenum = backs.keys();
-
-	    while (backenum.hasMoreElements())
-	      {
-		System.err.println("\t" + describe((Invid) backenum.nextElement()));
-	      }
-
-	    System.err.println("\n");
-	  }
-      }
-  }
-
-  private final String describe(Invid x)
-  {
-    // very little synchronization involved here aside from
-    // backpointers in the debugBackPointers() method above, so we're
-    // not very worried about deadlocks here
-
-    return Ganymede.internalSession.describe(x);
-  }
-
-  
-  
-  
 
   /* *************************************************************************
    *

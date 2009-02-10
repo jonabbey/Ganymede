@@ -1115,8 +1115,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>This method is used when this object is being dumped.  It is
-   * mated with receiveXML().</p> 
+   * <p>This method is used when this object is being dumped.</p>
    */
 
   synchronized public void emitXML(XMLDumpContext xmlOut) throws IOException
@@ -2849,22 +2848,20 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * object is checked out by a DBEditSet.</p> 
    */
 
-  public Vector getASymmetricTargets()
+  public Set<Invid> getASymmetricTargets()
   {
-    Vector results = new Vector();
-    DBField field;
-    InvidDBField invField;
-
     if (fieldAry == null)
       {
 	throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
+    HashSet<Invid> results = new HashSet<Invid>();
+
     synchronized (fieldAry)
       {
 	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    field = fieldAry[i];
+	    DBField field = fieldAry[i];
 
 	    if (field == null)
 	      {
@@ -2873,18 +2870,20 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	    if (field instanceof InvidDBField)
 	      {
-		invField = (InvidDBField) field;
+		InvidDBField invField = (InvidDBField) field;
 
-		if (invField.isDefined() && !invField.getFieldDef().isSymmetric())
+		if (!invField.isDefined() || invField.getFieldDef().isSymmetric())
 		  {
-		    if (!invField.isVector())
-		      {
-			VectorUtils.unionAdd(results, invField.value);
-		      }
-		    else
-		      {
-			results = VectorUtils.union(results, invField.getValuesLocal());
-		      }
+		    continue;
+		  }
+
+		if (invField.isVector())
+		  {
+		    results.addAll((Vector<Invid>) invField.getValuesLocal());
+		  }
+		else
+		  {
+		    results.add((Invid) invField.value);
 		  }
 	      }
 	  }
@@ -2900,25 +2899,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Vector getBackLinks()
   {
-    Vector results = new Vector();
-
-    synchronized (Ganymede.db.backPointers)
-      {
-	Hashtable table = (Hashtable) Ganymede.db.backPointers.get(this.getInvid());
-
-	if (table != null)
-	  {
-	    int size = table.size();
-	    Enumeration en = table.elements();
-
-	    for (int i = 0; i < size; i++)
-	      {
-		results.addElement(en.nextElement());
-	      }
-	  }
-      }
-
-    return results;
+    return new Vector(Ganymede.db.backPointers.getLinkSources(this.getInvid()));
   }
 
   /**
@@ -2937,31 +2918,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   void setBackPointers()
   {
-    Vector backPointers;
-    Invid target;
-    Hashtable reverseLinks;
-
-    /* -- */
-
-    synchronized (Ganymede.db.backPointers)
-      {
-	backPointers = getASymmetricTargets();
-
-	for (int i = 0; i < backPointers.size(); i++)
-	  {
-	    target = (Invid) backPointers.elementAt(i);
-
-	    reverseLinks = (Hashtable) Ganymede.db.backPointers.get(target);
-
-	    if (reverseLinks == null)
-	      {
-		reverseLinks = new Hashtable();
-		Ganymede.db.backPointers.put(target, reverseLinks);
-	      }
-
-	    reverseLinks.put(getInvid(), getInvid());
-	  }
-      }
+    Ganymede.db.backPointers.registerObject(getASymmetricTargets(), getInvid());
   }
 
   /**
@@ -2980,35 +2937,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   void unsetBackPointers()
   {
-    Vector backPointers;
-    Invid target;
-    Hashtable reverseLinks;
-
-    /* -- */
-
-    synchronized (Ganymede.db.backPointers)
-      {
-	backPointers = getASymmetricTargets();
-
-	for (int i = 0; i < backPointers.size(); i++)
-	  {
-	    target = (Invid) backPointers.elementAt(i);
-
-	    reverseLinks = (Hashtable) Ganymede.db.backPointers.get(target);
-
-	    if (reverseLinks == null)
-	      {
-		continue;
-	      }
-
-	    reverseLinks.remove(getInvid());
-
-	    if (reverseLinks.size() == 0)
-	      {
-		Ganymede.db.backPointers.remove(target);
-	      }
-	  }
-      }
+    Ganymede.db.backPointers.unregisterObject(getASymmetricTargets(), getInvid());
   }
 
   /**
