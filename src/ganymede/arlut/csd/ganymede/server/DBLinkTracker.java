@@ -101,9 +101,8 @@ public class DBLinkTracker {
   /* --- */
 
   /**
-   * This Map maps object invid keys to the invids of all objects
-   * which contain asymmetric links to the object pointed to by the
-   * invid key.
+   * This Map maps target invids to Sets of invids that point to the
+   * target.
    */
 
   private Map<Invid, Set<Invid>> backPointers;
@@ -129,6 +128,7 @@ public class DBLinkTracker {
     if (linkSources == null)
       {
 	linkSources = new HashSet<Invid>();
+	backPointers.put(target, linkSources);
       }
 
     linkSources.add(source);
@@ -311,7 +311,12 @@ public class DBLinkTracker {
   {
     boolean ok = true;
 
+    // "Testing Ganymede backPointers hash structure for validity"
+
     Ganymede.debug(ts.l("checkInvids.backpointers"));
+
+    // "Ganymede backPointers hash structure tracking {0} invid''s."
+
     Ganymede.debug(ts.l("checkInvids.backpointers2", Integer.valueOf(backPointers.size())));
 
     for (Invid key: backPointers.keySet())
@@ -321,6 +326,8 @@ public class DBLinkTracker {
 	    if (session.viewDBObject(backTarget) == null)
 	      {
 		ok = false;
+
+		// "***Backpointers hash for object {0} has an invid pointing to a non-existent object: {1}"
 
 		Ganymede.debug(ts.l("checkInvids.aha", 
 				    session.getGSession().describe(key),
