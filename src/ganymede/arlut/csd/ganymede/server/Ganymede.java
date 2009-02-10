@@ -913,7 +913,7 @@ public class Ganymede {
 
     java.lang.Runtime.getRuntime().addShutdownHook(Ganymede.signalHandlingThread);
 
-    debug("--------------------------------------------------------------------------------");
+    debug("\n--------------------------------------------------------------------------------");
 
     // "Ganymede Server Ready."
     debug(ts.l("main.info_ready"));
