@@ -273,36 +273,32 @@ public class DBDeletionManager {
       }
 
     Set<Invid> currentSet = sessions.get(session);
+    Set<Invid> toAdd = new HashSet<Invid>(invidSet);
 
-    if (currentSet != null)
+    toAdd.removeAll(currentSet);
+
+    for (Invid invid: toAdd)
       {
-	currentSet.removeAll(currentSet);
+	obj = session.viewDBObject(invid);
+	eObj = obj.shadowObject;
 
-	for (Invid invid: currentSet)
+	// N.B. the obj that we get from session.viewDBObject() may
+	// well be a DBEditObject already if this session has checked
+	// it out for editing, but in that case eObj will be null, as
+	// DBEditObjects always have no shadowObject, and the
+	// following check won't complain, which is appropriate, since
+	// we are only interested in blocking out other sessions
+
+	if (eObj != null &&
+	    (eObj.getStatus() == DBEditObject.DROPPING ||
+	     eObj.getStatus() == DBEditObject.DELETING))
 	  {
-	    obj = session.viewDBObject(invid);
-	    eObj = obj.shadowObject;
-
-	    // N.B. the obj that we get from session.viewDBObject() may
-	    // well be a DBEditObject already if this session has checked
-	    // it out for editing, but in that case eObj will be null, as
-	    // DBEditObjects always have no shadowObject, and the
-	    // following check won't complain, which is appropriate, since
-	    // we are only interested in blocking out other sessions
-
-	    if (eObj != null &&
-		(eObj.getStatus() == DBEditObject.DROPPING ||
-		 eObj.getStatus() == DBEditObject.DELETING))
-	      {
-		return false;
-	      }
+	    return false;
 	  }
       }
 
-    // okay, we know that all off the objects in toAdd are not yet
-    // deletion locked.. go ahead and lock them all
-
-    Set<Invid> toAdd = new HashSet<Invid>(invidSet);
+    // Okay, we know that we can safely delete lock all of the invids
+    // in toAdd.  Let's proceed.
 
     for (Invid invid: toAdd)
       {
