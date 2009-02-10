@@ -119,9 +119,12 @@ public class DBLinkTracker {
    * the target Invid, such that if the object pointed to by the
    * target Invid is deleted, the object pointed to by the source
    * Invid will need to be edited to remove the link.
+   *
+   * @return true if the source previously was not registered as
+   * pointing to target, false if it was already registered.
    */
 
-  public synchronized void linkObject(Invid target, Invid source)
+  public synchronized boolean linkObject(Invid target, Invid source)
   {
     Set<Invid> linkSources = backPointers.get(target);
 
@@ -131,7 +134,34 @@ public class DBLinkTracker {
 	backPointers.put(target, linkSources);
       }
 
-    linkSources.add(source);
+    return linkSources.add(source);
+  }
+
+  /**
+   * This method makes a note that the source object is no longer
+   * pointing to the target object.
+   *
+   * @return true if the source previously was registered as pointing
+   * to target, false otherwise.
+   */
+
+  public synchronized boolean unlinkObject(Invid target, Invid source)
+  {
+    Set<Invid> linkSources = backPointers.get(target);
+
+    if (linkSources == null)
+      {
+	return false;
+      }
+
+    boolean result = linkSources.remove(source);
+
+    if (linkSources.size() == 0)
+      {
+	backPointers.remove(target);
+      }
+
+    return result;
   }
 
   /**
@@ -157,21 +187,6 @@ public class DBLinkTracker {
     for (Set<Invid> innerSet: backPointers.values())
       {
 	innerSet.remove(source);
-      }
-  }
-
-  /**
-   * This method makes a note that the source object is no longer
-   * pointing to the target object.
-   */
-
-  public synchronized void unlinkObject(Invid target, Invid source)
-  {
-    Set<Invid> linkSources = backPointers.get(target);
-
-    if (linkSources == null)
-      {
-	throw new RuntimeException("No invids are recorded as pointing at Invid " + target);
       }
   }
 
@@ -242,42 +257,16 @@ public class DBLinkTracker {
 
     for (Invid target: removedBackPointers)
       {
-	linkSources = backPointers.get(target);
-
-	if (linkSources == null)
-	  {
-	    // error.. it should be there so we can remove it
-
-	    System.err.println("DBEditObject.syncObjBackPointers(): missing linkSources found removing a backlink: " +
-			       target);
-	    continue;
-	  }
-
-	if (!linkSources.remove(ourInvid))
+	if (!unlinkObject(target, ourInvid))
 	  {
 	    System.err.println("DBEditObject.syncObjBackPointers(): couldn't find and remove proper backlink for: " +
 			       target);
-	  }
-
-	// if that was the last back-link, clear the target out
-
-	if (linkSources.size() == 0)
-	  {
-	    backPointers.remove(target);
 	  }
       }
 
     for (Invid target: addedBackPointers)
       {
-	linkSources = backPointers.get(target);
-
-	if (linkSources == null)
-	  {
-	    linkSources = new HashSet<Invid>();
-	    backPointers.put(target, linkSources);
-	  }
-
-	linkSources.add(ourInvid);
+	linkObject(target, ourInvid);
       }
   }
 
