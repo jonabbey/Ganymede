@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -2398,7 +2398,7 @@ public class DBEditSet {
 	// we need to update DBStore.backPointers to take into account
 	// the changes made to this object.
 
-	syncObjBackPointers(eObj);
+	Ganymede.db.backPointers.syncObjBackPointers(eObj);
 
 	// Create a read-only version of eObj, with all fields
 	// reset to checked-in status, put it into our object hash
@@ -2425,7 +2425,7 @@ public class DBEditSet {
 	// we need to update DBStore.backPointers to take into account
 	// the changes made to this object.
 
-	syncObjBackPointers(eObj);
+	Ganymede.db.backPointers.syncObjBackPointers(eObj);
 
 	// Deleted objects had their deletion finalization done before
 	// we ever got to this point.
@@ -2523,105 +2523,6 @@ public class DBEditSet {
       {
 	DBObjectBaseField fieldDef = (DBObjectBaseField) iter.next();
 	fieldDef.updateTimeStamp();
-      }
-  }
-
-  /**
-   * <p>This method is executed towards the end of a transaction commit,
-   * and compares the current state of this object with its original state,
-   * and makes the appropriate changes to the
-   * {@link arlut.csd.ganymede.server.DBStore#backPointers backPointers} hash in
-   * the server's {@link arlut.csd.ganymede.server.DBStore DBStore} object.</p>
-   *
-   * <p>The purpose of this is to support the decoupling of an object
-   * from its backlinks, so that objects can be asymmetrically linked
-   * to an object without having to check that object out for editing.</p>
-   */
-
-  private void syncObjBackPointers(DBEditObject obj)
-  {
-    Vector oldBackPointers;
-    Vector newBackPointers;
-    Vector removedBackPointers;
-    Vector addedBackPointers;
-
-    Invid target;
-    Invid ourInvid = obj.getInvid();
-    Invid testInvid;
-
-    Hashtable reverseLinks;
-
-    DBObject original;
-
-    /* -- */
-
-    synchronized (Ganymede.db.backPointers)
-      {
-	original = obj.getOriginal();
-
-	if (original == null)
-	  {
-	    oldBackPointers = null;
-	  }
-	else
-	  {
-	    oldBackPointers = original.getASymmetricTargets();
-	  }
-
-	newBackPointers = obj.getASymmetricTargets();
-
-	removedBackPointers = VectorUtils.difference(oldBackPointers, newBackPointers);
-	addedBackPointers = VectorUtils.difference(newBackPointers, oldBackPointers);
-
-	for (int i = 0; i < removedBackPointers.size(); i++)
-	  {
-	    target = (Invid) removedBackPointers.elementAt(i);
-
-	    reverseLinks = (Hashtable) Ganymede.db.backPointers.get(target);
-
-	    if (reverseLinks == null)
-	      {
-		// error.. it should be there so we can remove it
-
-		System.err.println("DBEditObject.syncObjBackPointers(): missing reverseLinks found removing a backlink: " +
-				   target);
-		continue;
-	      }
-
-	    testInvid = (Invid) reverseLinks.remove(ourInvid);
-
-	    if (testInvid == null || !testInvid.equals(ourInvid))
-	      {
-		System.err.println("DBEditObject.syncObjBackPointers(): couldn't find and remove proper backlink for: " +
-				   target);
-	      }
-
-	    // if that was the last back-link, pull the second level hash out
-
-	    // this is safe only because we are using synchronization
-	    // on Ganymede.db.backPointers to restrict modifications
-	    // to the backPointers structure to a thread at a time
-
-	    if (reverseLinks.size() == 0)
-	      {
-		Ganymede.db.backPointers.remove(target);
-	      }
-	  }
-
-	for (int i = 0; i < addedBackPointers.size(); i++)
-	  {
-	    target = (Invid) addedBackPointers.elementAt(i);
-
-	    reverseLinks = (Hashtable) Ganymede.db.backPointers.get(target);
-
-	    if (reverseLinks == null)
-	      {
-		reverseLinks = new Hashtable();
-		Ganymede.db.backPointers.put(target, reverseLinks);
-	      }
-
-	    reverseLinks.put(ourInvid, ourInvid);
-	  }
       }
   }
 

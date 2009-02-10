@@ -1675,37 +1675,9 @@ public class GanymedeServer implements Server {
         // find objects pointing to other objects with non-symmetric
         // links
 
-	synchronized (Ganymede.db.backPointers)
+	if (!Ganymede.db.backPointers.checkInvids(session))
 	  {
-	    Ganymede.debug(ts.l("checkInvids.backpointers"));
-	    Ganymede.debug(ts.l("checkInvids.backpointers2", Integer.valueOf(Ganymede.db.backPointers.size())));
-
-	    Enumeration keys = Ganymede.db.backPointers.keys();
-
-	    while (keys.hasMoreElements())
-	      {
-		Invid key = (Invid) keys.nextElement();
-		Hashtable ptrTable = (Hashtable) Ganymede.db.backPointers.get(key);
-		Enumeration backpointers = ptrTable.keys();
-
-		while (backpointers.hasMoreElements())
-		  {
-		    Invid backTarget = (Invid) backpointers.nextElement();
-
-		    if (session.viewDBObject(backTarget) == null)
-		      {
-			ok = false;
-
-			// again, this use of Ganymede.internalSession
-			// is safe because it just winds up being
-			// another viewDBObject call
-		    
-			Ganymede.debug(ts.l("checkInvids.aha", 
-					    session.getGSession().describe(key),
-					    backTarget.toString()));
-		      }
-		  }
-	      }
+	    ok = false;
 	  }
       }
     finally

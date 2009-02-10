@@ -2145,27 +2145,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (asymBackPointer)
 	      {
-		synchronized (Ganymede.db.backPointers)
+		if (!Ganymede.db.backPointers.linkExists(myInvid, temp))
 		  {
-		    Hashtable backpointers = (Hashtable) Ganymede.db.backPointers.get(temp);
+		    // "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
+		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
+		    result = false;
 
-		    if (backpointers == null)
-		      {
-			// "*** InvidDBField.test(): No backpointer hash at all for Invid {0} pointed to from : {1} in field {2}"
-			Ganymede.debug(ts.l("test.no_backpointers", temp, objectName, getName()));
-			result = false;
-
-			continue;
-		      }
-
-		    if (!backpointers.containsKey(myInvid))
-		      {
-			// "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
-			Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
-			result = false;
-
-			continue;
-		      }
+		    continue;
 		  }
 	      }
 	    else
@@ -2275,20 +2261,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (asymBackPointer)
 	  {
-	    synchronized (Ganymede.db.backPointers)
+	    if (!Ganymede.db.backPointers.linkExists(myInvid, temp))
 	      {
-		Hashtable backpointers = (Hashtable) Ganymede.db.backPointers.get(temp);
-
-		if (backpointers == null)
-		  {
-		    Ganymede.debug(ts.l("test.no_backpointers", temp, objectName, getName()));
-		    result = false;
-		  }
-                else if (!backpointers.containsKey(myInvid))
-		  {
-		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
-		    result = false;
-		  }
+		// "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
+		Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
+		result = false;
 	      }
 	  }
 	else
