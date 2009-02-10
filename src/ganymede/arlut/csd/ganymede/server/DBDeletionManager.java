@@ -275,7 +275,10 @@ public class DBDeletionManager {
     Set<Invid> currentSet = sessions.get(session);
     Set<Invid> toAdd = new HashSet<Invid>(invidSet);
 
-    toAdd.removeAll(currentSet);
+    if (currentSet != null)
+      {
+	toAdd.removeAll(currentSet);
+      }
 
     for (Invid invid: toAdd)
       {
