@@ -2818,18 +2818,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     /* -- */
 
-    if (debug)
-      {
-	System.err.println("++ finalizeRemove(" + ckp_label + ")");
-      }
-
     if (!success)
       {
-	if (debug)
-	  {
-	    System.err.println("++ rolling back " + ckp_label);
-	  }
-
 	editset.rollback(ckp_label); // *sync*
 
 	// "Object Removal Error"
@@ -2837,25 +2827,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	return Ganymede.createErrorDialog(ts.l("finalizeRemove.error"),
 					  ts.l("finalizeRemove.errorTxt", label));
-      }
-
-    if (debug)
-      {
-	System.err.println("++ Attempting to delete object " + label);
-
-	if (isEmbedded())
-	  {
-	    InvidDBField invf = (InvidDBField) getField(SchemaConstants.ContainerField);
-
-	    if (invf == null)
-	      {
-		System.err.println("++ Argh, no container field in embedded!");
-	      }
-	    else
-	      {
-		System.err.println("++ We are embedded in object " + invf.getValueString());
-	      }
-	  }
       }
 
     // we want to delete / null out all fields.. this will take care
@@ -2887,44 +2858,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    if (field.isVector())
 	      {
-		if (debug)
-		  {
-		    System.err.println("++ Attempting to clear vector field " + field.getName());
-		  }
-
 		while (field.size() > 0)
 		  {
 		    try
 		      {
-			if (debug)
-			  {
-			    System.err.println("++ field size is " + field.size());
-			    System.err.println("++ Calling field.deleteElement(0)");
-			  }
-
 			// if this is an edit-in-place InvidDBField,
 			// deleteElement() will convert this request into
 			// a deletion of the embedded object if necessary
 
 			retVal = ReturnVal.merge(retVal, field.deleteElement(0)); // *sync*
 
-			if (debug)
-			  {
-			    System.err.println("++ Returned from field.deleteElement(0)");
-
-			    if (retVal != null)
-			      {
-				System.err.println("++ retVal was " + retVal.toString());
-			      }
-			  }
-
 			if (!ReturnVal.didSucceed(retVal))
 			  {
-			    if (debug)
-			      {
-				System.err.println("++ rolling back " + ckp_label);
-			      }
-
 			    editset.rollback(ckp_label); // *sync*
 
 			    if (retVal.getDialog() != null)
@@ -2951,11 +2896,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	    else
 	      {
-		if (debug)
-		  {
-		    System.err.println("++ Attempting to clear scalar field " + field.getName());
-		  }
-
 		// permission and field option matrices, along with
 		// passwords, don't allow us to call set value
 		// directly.  We're mainly concerned with invid's (for
@@ -2970,11 +2910,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		    if (!ReturnVal.didSucceed(retVal))
 		      {
-			if (debug)
-			  {
-			    System.err.println("++ rolling back " + ckp_label);
-			  }
-
 			editset.rollback(ckp_label); // *sync*
 
 			if (retVal.getDialog() != null)
@@ -3026,11 +2961,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		    if (!ReturnVal.didSucceed(retVal))
 		      {
-			if (debug)
-			  {
-			    System.err.println("++ rolling back " + ckp_label);
-			  }
-
 			editset.rollback(ckp_label); // *sync*
 
 			// "Server: Error in DBEditObject.finalizeRemove()"
@@ -3069,38 +2999,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	// checked out by this session, and takes this object's Invid
 	// out of all fields in those objects.
 
-	if (debug)
-	  {
-	    System.err.println("++ Calling attemptAsymBackLinkClear()");
-	    System.err.println("\n++ before:");
-	    System.err.println(Ganymede.db.backPointers.linkSourcesToString(getInvid()));
-	    System.err.println();
-	  }
-
 	retVal = attemptAsymBackLinkClear(true);
-
-	if (debug)
-	  {
-	    System.err.println("\n++ after:");
-	    System.err.println(Ganymede.db.backPointers.linkSourcesToString(getInvid()));
-	    System.err.println();
-	  }
 
 	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    if (debug)
-	      {
-		System.err.println("++ rolling back " + ckp_label);
-	      }
-
 	    editset.rollback(ckp_label); // *sync*
 
 	    return retVal;
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("++ popping checkpoint " + ckp_label);
 	  }
 
 	editset.popCheckpoint(ckp_label);
@@ -3275,11 +3180,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	  }
 
-	if (debug)
-	  {
-	    System.err.println(">>> clearBackLink(): need to clear field " + tmpField.toString());
-	  }
-
 	// ok, we know we need to do the unbinding for this field.
 
 	fieldsToUnbind.add(tmpField.getID());
@@ -3353,11 +3253,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	try
 	  {
 	    // clear any reference in this field to us, if we can
-
-	    if (debug)
-	      {
-		System.err.println(">>> DBEditObject.clearBackLink(): calling dissolve on " + oldRefField);
-	      }
 
 	    retVal = ReturnVal.merge(retVal, oldRefField.dissolve(getInvid(), local));
 

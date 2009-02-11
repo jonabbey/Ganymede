@@ -3556,22 +3556,12 @@ public final class InvidDBField extends DBField implements invid_field {
     // so we can easily undo any changes that we make
     // if we have to return failure.
 
-    if (debug)
-      {
-	System.err.println("][ InvidDBField.deleteElement() checkpointing " + checkkey);
-      }
-
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     checkpointed = true;
 
     try
       {
-	if (debug)
-	  {
-	    System.err.println("][ InvidDBField.deleteElement() checkpointed " + checkkey);
-	  }
-
 	// if we are an edit in place object, we don't want to do an
 	// unbinding.. we'll do a deleteDBObject() below, instead.  The
 	// reason for this is that the deleteDBObject() code requires that
@@ -3604,22 +3594,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		// DBEditObject.finalizeRemove() and
 		// attemptAsymBackLinkClear().
 
-		if (debug)
-		  {
-		    System.err.println("+++ Calling deleteDBObject() on embedded object from edit-in-place field.");
-		  }
-
 		retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
-
-		if (debug)
-		  {
-		    System.err.println("+++ Returned from deleteDBObject() on embedded object.");
-
-		    if (retVal != null)
-		      {
-			System.err.println("+++ retVal was " + retVal.toString());
-		      }
-		  }
 
 		if (!ReturnVal.didSucceed(retVal))
 		  {
@@ -3632,11 +3607,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	      }
 
 	    // success
-
-	    if (debug)
-	      {
-		System.err.println("][ InvidDBField.deleteElement() popping checkpoint " + checkkey);
-	      }
 
 	    qr = null;	// Clear the cache to force the choices to be read again
 	    eObj.getSession().popCheckpoint(checkkey);
@@ -3668,11 +3638,6 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	if (checkpointed)
 	  {
-	    if (debug)
-	      {
-		System.err.println("][ InvidDBField.deleteElement() rolling back " + checkkey);
-	      }
-
 	    eObj.getSession().rollback(checkkey);
 	  }
       }
@@ -3704,11 +3669,6 @@ public final class InvidDBField extends DBField implements invid_field {
     Vector currentValues;
 
     /* -- */
-
-    if (debug)
-      {
-	System.err.println("InvidDBField.deleteElements(" + VectorUtils.vectorString(valuesToDelete) + ")");
-      }
 
     if (!isEditable(local))
       {
@@ -3760,20 +3720,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = RandomUtils.getSaltedString("delElements[" + getName() + ":" + owner.getLabel() + "]");
 
-    if (debug)
-      {
-	System.err.println("][ InvidDBField.deleteElements() checkpointing " + checkkey);
-      }
-
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     try
       {
-	if (debug)
-	  {
-	    System.err.println("][ InvidDBField.deleteElements() checkpointed " + checkkey);
-	  }
-
 	if (!getFieldDef().isEditInPlace())
 	  {
 	    for (int i = 0; i < valuesToDelete.size(); i++)
