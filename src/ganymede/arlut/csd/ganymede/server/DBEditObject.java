@@ -3074,6 +3074,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    System.err.println("++ Calling attemptAsymBackLinkClear()");
 	    System.err.println("\n++ before:");
 	    System.err.println(Ganymede.db.backPointers.linkSourcesToString(getInvid()));
+	    System.err.println();
 	  }
 
 	retVal = attemptAsymBackLinkClear(true);
@@ -3082,6 +3083,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    System.err.println("\n++ after:");
 	    System.err.println(Ganymede.db.backPointers.linkSourcesToString(getInvid()));
+	    System.err.println();
 	  }
 
 	if (!ReturnVal.didSucceed(retVal))
@@ -3152,6 +3154,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    return retVal;	// finalizeRemove() will rollback
 	  }
       }
+
+    // clear the registration of the back links we just removed
+
+    Ganymede.db.backPointers.unlinkTarget(getInvid());
 
     return retVal;
   }
@@ -3269,9 +3275,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	  }
 
-	if (false)
+	if (debug)
 	  {
-	    System.err.println("\tNeed to clear field " + tmpField.toString());
+	    System.err.println(">>> clearBackLink(): need to clear field " + tmpField.toString());
 	  }
 
 	// ok, we know we need to do the unbinding for this field.
@@ -3348,9 +3354,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    // clear any reference in this field to us, if we can
 
-	    if (false)
+	    if (debug)
 	      {
-		System.err.println("DBEditObject.clearBackLink(): calling dissolve on " + oldRefField);
+		System.err.println(">>> DBEditObject.clearBackLink(): calling dissolve on " + oldRefField);
 	      }
 
 	    retVal = ReturnVal.merge(retVal, oldRefField.dissolve(getInvid(), local));
