@@ -2825,6 +2825,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (!success)
       {
+	if (debug)
+	  {
+	    System.err.println("++ rolling back " + ckp_label);
+	  }
+
 	editset.rollback(ckp_label); // *sync*
 
 	// "Object Removal Error"
@@ -2915,6 +2920,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 			if (!ReturnVal.didSucceed(retVal))
 			  {
+			    if (debug)
+			      {
+				System.err.println("++ rolling back " + ckp_label);
+			      }
+
 			    editset.rollback(ckp_label); // *sync*
 
 			    if (retVal.getDialog() != null)
@@ -2960,6 +2970,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		    if (!ReturnVal.didSucceed(retVal))
 		      {
+			if (debug)
+			  {
+			    System.err.println("++ rolling back " + ckp_label);
+			  }
+
 			editset.rollback(ckp_label); // *sync*
 
 			if (retVal.getDialog() != null)
@@ -3011,6 +3026,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 		    if (!ReturnVal.didSucceed(retVal))
 		      {
+			if (debug)
+			  {
+			    System.err.println("++ rolling back " + ckp_label);
+			  }
+
 			editset.rollback(ckp_label); // *sync*
 
 			// "Server: Error in DBEditObject.finalizeRemove()"
@@ -3049,13 +3069,36 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	// checked out by this session, and takes this object's Invid
 	// out of all fields in those objects.
 
+	if (debug)
+	  {
+	    System.err.println("++ Calling attemptAsymBackLinkClear()");
+	    System.err.println("\n++ before:");
+	    System.err.println(Ganymede.db.backPointers.linkSourcesToString(getInvid()));
+	  }
+
 	retVal = attemptAsymBackLinkClear(true);
+
+	if (debug)
+	  {
+	    System.err.println("\n++ after:");
+	    System.err.println(Ganymede.db.backPointers.linkSourcesToString(getInvid()));
+	  }
 
 	if (!ReturnVal.didSucceed(retVal))
 	  {
+	    if (debug)
+	      {
+		System.err.println("++ rolling back " + ckp_label);
+	      }
+
 	    editset.rollback(ckp_label); // *sync*
 
 	    return retVal;
+	  }
+
+	if (debug)
+	  {
+	    System.err.println("++ popping checkpoint " + ckp_label);
 	  }
 
 	editset.popCheckpoint(ckp_label);
