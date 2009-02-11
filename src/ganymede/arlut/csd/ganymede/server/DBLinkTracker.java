@@ -220,19 +220,26 @@ public class DBLinkTracker {
 
   public synchronized String linkSourcesToString(Invid target)
   {
-    Set<Invid> linkSources = backPointers.get(target);
-
     StringBuilder builder = new StringBuilder();
 
     builder.append("-> Asymmetric links to ");
     builder.append(describe(target));
     builder.append("\n");
 
-    for (Invid source: linkSources)
+    Set<Invid> linkSources = backPointers.get(target);
+
+    if (linkSources == null)
       {
-	builder.append("<--- ");
-	builder.append(describe(source));
-	builder.append("\n");
+	builder.append("-> ** empty ** \n");
+      }
+    else
+      {
+	for (Invid source: linkSources)
+	  {
+	    builder.append("<--- ");
+	    builder.append(describe(source));
+	    builder.append("\n");
+	  }
       }
 
     return builder.toString();
