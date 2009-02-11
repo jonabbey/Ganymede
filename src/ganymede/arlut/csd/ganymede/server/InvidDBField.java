@@ -3604,7 +3604,22 @@ public final class InvidDBField extends DBField implements invid_field {
 		// DBEditObject.finalizeRemove() and
 		// attemptAsymBackLinkClear().
 
+		if (debug)
+		  {
+		    System.err.println("+++ Calling deleteDBObject() on embedded object from edit-in-place field.");
+		  }
+
 		retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
+
+		if (debug)
+		  {
+		    System.err.println("+++ Returned from deleteDBObject() on embedded object.");
+
+		    if (retVal != null)
+		      {
+			System.err.println("+++ retVal was " + retVal.toString());
+		      }
+		  }
 
 		if (!ReturnVal.didSucceed(retVal))
 		  {

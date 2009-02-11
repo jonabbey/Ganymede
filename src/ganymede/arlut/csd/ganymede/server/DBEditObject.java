@@ -2818,6 +2818,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("++ finalizeRemove(" + ckp_label + ")");
+      }
+
     if (!success)
       {
 	editset.rollback(ckp_label); // *sync*
@@ -2886,11 +2891,27 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 		  {
 		    try
 		      {
+			if (debug)
+			  {
+			    System.err.println("++ field size is " + field.size());
+			    System.err.println("++ Calling field.deleteElement(0)");
+			  }
+
 			// if this is an edit-in-place InvidDBField,
 			// deleteElement() will convert this request into
 			// a deletion of the embedded object if necessary
 
 			retVal = ReturnVal.merge(retVal, field.deleteElement(0)); // *sync*
+
+			if (debug)
+			  {
+			    System.err.println("++ Returned from field.deleteElement(0)");
+
+			    if (retVal != null)
+			      {
+				System.err.println("++ retVal was " + retVal.toString());
+			      }
+			  }
 
 			if (!ReturnVal.didSucceed(retVal))
 			  {
