@@ -2858,25 +2858,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     try
       {
-	// First we need to take care of any back links. This scans
-	// this object for asymmetric fields, checks objects pointed
-	// to by us out for editing, and takes this object's Invid out
-	// of all fields in those objects.
-	//
-	// Note that the InvidDBField logic will take care of clearing
-	// any symmetric or embedded object container field links when
-	// the InvidDBFields are cleared of its value(s) in the
-	// following for loop over the fieldVect.
-
-	retVal = attemptAsymBackLinkClear(true);
-
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    editset.rollback(ckp_label); // *sync*
-
-	    return retVal;
-	  }
-
 	// get a sync'ed snapshot of this object's fields
 
 	Vector fieldVect = getFieldVect();
@@ -3039,6 +3020,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 						      ts.l("finalizeRemove.badScalarClear", field.getName()));
 		  }
 	      }
+	  }
+
+	// Finally we need to take care of any back links. This scans
+	// all objects which have asymmetric invid fields pointing to
+	// us, checks them out for editing if they are not already
+	// checked out by this session, and takes this object's Invid
+	// out of all fields in those objects.
+
+	retVal = attemptAsymBackLinkClear(true);
+
+	if (!ReturnVal.didSucceed(retVal))
+	  {
+	    editset.rollback(ckp_label); // *sync*
+
+	    return retVal;
 	  }
 
 	editset.popCheckpoint(ckp_label);
