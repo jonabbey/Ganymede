@@ -191,6 +191,16 @@ public class DBLinkTracker {
   }
 
   /**
+   * This method removes all links registered from all sources to
+   * target.
+   */
+
+  public synchronized void unlinkTarget(Invid target)
+  {
+    backPointers.remove(target);
+  }
+
+  /**
    * This method returns a List of all Invids pointing to the target
    * object in the server's persistent data store.
    */
@@ -202,10 +212,37 @@ public class DBLinkTracker {
 
     if (linkSources != null)
       {
-	linkSources.addAll(sources);
+	sources.addAll(linkSources);
       }
 
     return sources;
+  }
+
+  public synchronized String linkSourcesToString(Invid target)
+  {
+    StringBuilder builder = new StringBuilder();
+
+    builder.append("-> Asymmetric links to ");
+    builder.append(describe(target));
+    builder.append("\n");
+
+    Set<Invid> linkSources = backPointers.get(target);
+
+    if (linkSources == null)
+      {
+	builder.append("-> ** empty ** \n");
+      }
+    else
+      {
+	for (Invid source: linkSources)
+	  {
+	    builder.append("<--- ");
+	    builder.append(describe(source));
+	    builder.append("\n");
+	  }
+      }
+
+    return builder.toString();
   }
 
   /**

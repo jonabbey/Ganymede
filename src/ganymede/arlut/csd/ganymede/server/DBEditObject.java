@@ -2829,25 +2829,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 					  ts.l("finalizeRemove.errorTxt", label));
       }
 
-    if (debug)
-      {
-	System.err.println("++ Attempting to delete object " + label);
-
-	if (isEmbedded())
-	  {
-	    InvidDBField invf = (InvidDBField) getField(SchemaConstants.ContainerField);
-
-	    if (invf == null)
-	      {
-		System.err.println("++ Argh, no container field in embedded!");
-	      }
-	    else
-	      {
-		System.err.println("++ We are embedded in object " + invf.getValueString());
-	      }
-	  }
-      }
-
     // we want to delete / null out all fields.. this will take care
     // of invid links, embedded objects, and namespace allocations.
 
@@ -2858,25 +2839,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     try
       {
-	// First we need to take care of any back links. This scans
-	// this object for asymmetric fields, checks objects pointed
-	// to by us out for editing, and takes this object's Invid out
-	// of all fields in those objects.
-	//
-	// Note that the InvidDBField logic will take care of clearing
-	// any symmetric or embedded object container field links when
-	// the InvidDBFields are cleared of its value(s) in the
-	// following for loop over the fieldVect.
-
-	retVal = attemptAsymBackLinkClear(true);
-
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    editset.rollback(ckp_label); // *sync*
-
-	    return retVal;
-	  }
-
 	// get a sync'ed snapshot of this object's fields
 
 	Vector fieldVect = getFieldVect();
@@ -2896,11 +2858,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    if (field.isVector())
 	      {
-		if (debug)
-		  {
-		    System.err.println("++ Attempting to clear vector field " + field.getName());
-		  }
-
 		while (field.size() > 0)
 		  {
 		    try
@@ -2939,11 +2896,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	    else
 	      {
-		if (debug)
-		  {
-		    System.err.println("++ Attempting to clear scalar field " + field.getName());
-		  }
-
 		// permission and field option matrices, along with
 		// passwords, don't allow us to call set value
 		// directly.  We're mainly concerned with invid's (for
@@ -3041,6 +2993,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	  }
 
+	// Finally we need to take care of any back links. This scans
+	// all objects which have asymmetric invid fields pointing to
+	// us, checks them out for editing if they are not already
+	// checked out by this session, and takes this object's Invid
+	// out of all fields in those objects.
+
+	retVal = attemptAsymBackLinkClear(true);
+
+	if (!ReturnVal.didSucceed(retVal))
+	  {
+	    editset.rollback(ckp_label); // *sync*
+
+	    return retVal;
+	  }
+
 	editset.popCheckpoint(ckp_label);
 
 	return retVal;
@@ -3092,6 +3059,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    return retVal;	// finalizeRemove() will rollback
 	  }
       }
+
+    // clear the registration of the back links we just removed
+
+    Ganymede.db.backPointers.unlinkTarget(getInvid());
 
     return retVal;
   }
@@ -3209,11 +3180,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	  }
 
-	if (false)
-	  {
-	    System.err.println("\tNeed to clear field " + tmpField.toString());
-	  }
-
 	// ok, we know we need to do the unbinding for this field.
 
 	fieldsToUnbind.add(tmpField.getID());
@@ -3287,11 +3253,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	try
 	  {
 	    // clear any reference in this field to us, if we can
-
-	    if (false)
-	      {
-		System.err.println("DBEditObject.clearBackLink(): calling dissolve on " + oldRefField);
-	      }
 
 	    retVal = ReturnVal.merge(retVal, oldRefField.dissolve(getInvid(), local));
 

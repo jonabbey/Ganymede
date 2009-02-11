@@ -3556,22 +3556,12 @@ public final class InvidDBField extends DBField implements invid_field {
     // so we can easily undo any changes that we make
     // if we have to return failure.
 
-    if (debug)
-      {
-	System.err.println("][ InvidDBField.deleteElement() checkpointing " + checkkey);
-      }
-
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     checkpointed = true;
 
     try
       {
-	if (debug)
-	  {
-	    System.err.println("][ InvidDBField.deleteElement() checkpointed " + checkkey);
-	  }
-
 	// if we are an edit in place object, we don't want to do an
 	// unbinding.. we'll do a deleteDBObject() below, instead.  The
 	// reason for this is that the deleteDBObject() code requires that
@@ -3680,11 +3670,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    if (debug)
-      {
-	System.err.println("InvidDBField.deleteElements(" + VectorUtils.vectorString(valuesToDelete) + ")");
-      }
-
     if (!isEditable(local))
       {
 	return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
@@ -3735,20 +3720,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = RandomUtils.getSaltedString("delElements[" + getName() + ":" + owner.getLabel() + "]");
 
-    if (debug)
-      {
-	System.err.println("][ InvidDBField.deleteElements() checkpointing " + checkkey);
-      }
-
     eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     try
       {
-	if (debug)
-	  {
-	    System.err.println("][ InvidDBField.deleteElements() checkpointed " + checkkey);
-	  }
-
 	if (!getFieldDef().isEditInPlace())
 	  {
 	    for (int i = 0; i < valuesToDelete.size(); i++)
