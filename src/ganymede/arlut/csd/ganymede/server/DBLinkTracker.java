@@ -212,7 +212,7 @@ public class DBLinkTracker {
 
     if (linkSources != null)
       {
-	linkSources.addAll(sources);
+	sources.addAll(linkSources);
       }
 
     return sources;
