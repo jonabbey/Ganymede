@@ -208,6 +208,22 @@ public class DBLinkTracker {
     return sources;
   }
 
+  public synchronized String linkSourcesToString(Invid target)
+  {
+    Set<Invid> linkSources = backPointers.get(target);
+
+    StringBuilder builder = new StringBuilder();
+
+    builder.append("-> Asymmetric links to " + describe(target));
+
+    for (Invid source: linkSources)
+      {
+	builder.append("<--- " + describe(source));
+      }
+
+    return builder.toString();
+  }
+
   /**
    * This method updates the data structures held by this
    * DBLinkTracker object in keeping with the changes being made by
