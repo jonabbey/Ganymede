@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -78,24 +78,24 @@ import java.util.Stack;
  * the stack.</p>
  */
 
-final public class NamedStack {
+final public class NamedStack<E> {
 
-  private Stack stack;
+  private Stack<NamedStackHandle<E>> stack;
 
   /* -- */
 
   public NamedStack()
   {
-    stack = new Stack();
+    stack = new Stack<NamedStackHandle<E>>();
   }
 
   /**
    * <p>push pushes a named item onto the stack.</p>
    */
 
-  public synchronized Object push(String name, Object item)
+  public synchronized E push(String name, E item)
   {
-    stack.push(new NamedStackHandle(name, item));
+    stack.push(new NamedStackHandle<E>(name, item));
 
     return item;
   }
@@ -105,7 +105,7 @@ final public class NamedStack {
    * the top-most named object matching name was pushed.</p>
    */
 
-  public synchronized Object pop(String name)
+  public synchronized E pop(String name)
   {
     // okay, i'm a bad person.  i micro-optimized this to avoid having
     // to do a few name equality tests twice.  i figure everything's
@@ -124,7 +124,7 @@ final public class NamedStack {
 	stack.pop();
       }
 
-    return ((NamedStackHandle) stack.pop()).getData();
+    return stack.pop().getData();
   }
 
   /**
@@ -132,21 +132,19 @@ final public class NamedStack {
    * without regard to its name.</p>
    */
 
-  public synchronized Object pop()
+  public synchronized E pop()
   {
     if (stack.size() == 0)
       {
 	return null;
       }
 
-    NamedStackHandle handle = (NamedStackHandle) stack.pop();
-    
-    return handle.getData();
+    return stack.pop().getData();
   }
 
-  public Object elementAt(int index)
+  public E elementAt(int index)
   {
-    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(index);
+    NamedStackHandle<E> handle = stack.elementAt(index);
 
     if (handle == null)
       {
@@ -158,7 +156,7 @@ final public class NamedStack {
 
   public String nameAt(int index)
   {
-    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(index);
+    NamedStackHandle handle = stack.elementAt(index);
 
     if (handle == null)
       {
@@ -190,9 +188,7 @@ final public class NamedStack {
 	return null;
       }
 
-    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(stack.size()-1);
-    
-    return handle.getName();
+    return stack.elementAt(stack.size()-1).getName();
   }
 
   /**
@@ -200,16 +196,14 @@ final public class NamedStack {
    * onto this name stack, without altering the stack.</p>
    */
 
-  public synchronized Object getTopObject()
+  public synchronized E getTopObject()
   {
     if (stack.size() == 0)
       {
 	return null;
       }
 
-    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(stack.size()-1);
-    
-    return handle.getData();
+    return stack.elementAt(stack.size()-1).getData();
   }
 
   /**
@@ -221,9 +215,7 @@ final public class NamedStack {
   {
     for (int i = stack.size()-1; i >= 0; i--)
       {
-	NamedStackHandle handle = (NamedStackHandle) stack.elementAt(i);
-
-	if (handle.getName().equals(name))
+	if (stack.elementAt(i).getName().equals(name))
 	  {
 	    return i;
 	  }
@@ -245,7 +237,7 @@ final public class NamedStack {
 
     for (int i = stack.size()-1; i >= 0; i--)
       {
-	NamedStackHandle handle = (NamedStackHandle) stack.elementAt(i);
+	NamedStackHandle handle = stack.elementAt(i);
 	
 	result.append(i);
 	result.append(" : ");
@@ -264,14 +256,14 @@ final public class NamedStack {
  * {@link arlut.csd.Util.NamedStack NamedStack} data structure.</p>
  */
 
-final class NamedStackHandle {
+final class NamedStackHandle<E> {
 
   private String name;
-  private Object data;
+  private E data;
 
   /* -- */
 
-  public NamedStackHandle(String name, Object data)
+  public NamedStackHandle(String name, E data)
   {
     if (name == null)
       {
@@ -292,7 +284,7 @@ final class NamedStackHandle {
     return name;
   }
 
-  public Object getData()
+  public E getData()
   {
     return data;
   }
