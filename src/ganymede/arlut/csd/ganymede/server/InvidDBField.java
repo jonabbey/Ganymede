@@ -3633,6 +3633,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    // success
 
+	    if (debug)
+	      {
+		System.err.println("][ InvidDBField.deleteElement() popping checkpoint " + checkkey);
+	      }
+
 	    qr = null;	// Clear the cache to force the choices to be read again
 	    eObj.getSession().popCheckpoint(checkkey);
 	    checkpointed = false;
@@ -3663,6 +3668,11 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	if (checkpointed)
 	  {
+	    if (debug)
+	      {
+		System.err.println("][ InvidDBField.deleteElement() rolling back " + checkkey);
+	      }
+
 	    eObj.getSession().rollback(checkkey);
 	  }
       }
