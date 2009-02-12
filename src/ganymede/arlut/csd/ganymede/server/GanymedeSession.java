@@ -3996,23 +3996,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public String describe(Invid invid)
   {
-    // We don't check permissions here, as we use session.viewDBObject().
-
+    // We don't check permissions here.
+    //
     // We have made the command decision that finding the label for an
     // invid is not something we need to guard against.  Using
     // session.viewDBObject() here makes this a much more lightweight
     // operation.
     
-    try
-      {
-	DBObject obj = session.viewDBObject(invid);
-
-	return obj.getTypeName() + " " + obj.getLabel();
-      }
-    catch (NullPointerException ex)
-      {
-	return null;
-      }
+    return session.describe(invid);
   }
 
   /**
