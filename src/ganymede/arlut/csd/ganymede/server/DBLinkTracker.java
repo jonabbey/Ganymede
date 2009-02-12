@@ -55,6 +55,8 @@
 package arlut.csd.ganymede.server;
 
 import arlut.csd.ganymede.common.Invid;
+
+import arlut.csd.Util.NamedStack;
 import arlut.csd.Util.TranslationService;
 
 import java.util.ArrayList;
@@ -101,17 +103,33 @@ public class DBLinkTracker {
   /* --- */
 
   /**
-   * This Map maps target invids to Sets of invids that point to the
-   * target.
+   * persistentLinks stores sets of object invids that point to the
+   * invid keys.  When looking up an invid in the persistentLinks map,
+   * a set of invids with asymmetric links pointing to the invid key
+   * is returned.
    */
 
-  private Map<Invid, Set<Invid>> backPointers;
+  private Map<Invid, Set<Invid>> persistentLinks;
+
+  /**
+   * sessionOverlays tracks modifications that are accruing in active
+   * sessions on the DBStore.  These modifications are private to the
+   * session unless/until the session is committed, at which time the
+   * overlays are folded into the persistentLinks structure.
+   *
+   * The DBLinkTrackerSession objects kept in this Map for each active
+   * DBSession include support for handling checkpoints and rollbacks
+   * across the duration of the DBSessions.
+   */
+
+  private Map<DBSession, DBLinkTrackerSession> sessionOverlays;
 
   /* -- */
 
   public DBLinkTracker()
   {
-    backPointers = new HashMap<Invid, Set<Invid>>(1000); // default
+    persistentLinks = new HashMap<Invid, Set<Invid>>(1000);
+    sessionOverlays = new HashMap<DBSession, DBLinkTrackerSession>(23);
   }
 
   /**
@@ -126,12 +144,12 @@ public class DBLinkTracker {
 
   public synchronized boolean linkObject(Invid target, Invid source)
   {
-    Set<Invid> linkSources = backPointers.get(target);
+    Set<Invid> linkSources = persistentLinks.get(target);
 
     if (linkSources == null)
       {
 	linkSources = new HashSet<Invid>();
-	backPointers.put(target, linkSources);
+	persistentLinks.put(target, linkSources);
       }
 
     return linkSources.add(source);
@@ -147,7 +165,7 @@ public class DBLinkTracker {
 
   public synchronized boolean unlinkObject(Invid target, Invid source)
   {
-    Set<Invid> linkSources = backPointers.get(target);
+    Set<Invid> linkSources = persistentLinks.get(target);
 
     if (linkSources == null)
       {
@@ -158,7 +176,7 @@ public class DBLinkTracker {
 
     if (linkSources.size() == 0)
       {
-	backPointers.remove(target);
+	persistentLinks.remove(target);
       }
 
     return result;
@@ -184,7 +202,7 @@ public class DBLinkTracker {
 
   public synchronized void unregisterObject(Set<Invid> targets, Invid source)
   {
-    for (Set<Invid> innerSet: backPointers.values())
+    for (Set<Invid> innerSet: persistentLinks.values())
       {
 	innerSet.remove(source);
       }
@@ -197,7 +215,7 @@ public class DBLinkTracker {
 
   public synchronized void unlinkTarget(Invid target)
   {
-    backPointers.remove(target);
+    persistentLinks.remove(target);
   }
 
   /**
@@ -208,7 +226,7 @@ public class DBLinkTracker {
   public synchronized List<Invid> getLinkSources(Invid target)
   {
     List<Invid> sources = new ArrayList<Invid>();
-    Set<Invid> linkSources = backPointers.get(target);
+    Set<Invid> linkSources = persistentLinks.get(target);
 
     if (linkSources != null)
       {
@@ -226,7 +244,7 @@ public class DBLinkTracker {
     builder.append(describe(target));
     builder.append("\n");
 
-    Set<Invid> linkSources = backPointers.get(target);
+    Set<Invid> linkSources = persistentLinks.get(target);
 
     if (linkSources == null)
       {
@@ -316,7 +334,7 @@ public class DBLinkTracker {
   {
     Set<Invid> linkSources;
 
-    linkSources = backPointers.get(target);
+    linkSources = persistentLinks.get(target);
 
     if (linkSources == null)
       {
@@ -337,17 +355,17 @@ public class DBLinkTracker {
   {
     boolean ok = true;
 
-    // "Testing Ganymede backPointers hash structure for validity"
+    // "Testing Ganymede persistentLinks hash structure for validity"
 
     Ganymede.debug(ts.l("checkInvids.backpointers"));
 
-    // "Ganymede backPointers hash structure tracking {0} invid''s."
+    // "Ganymede persistentLinks hash structure tracking {0} invid''s."
 
-    Ganymede.debug(ts.l("checkInvids.backpointers2", Integer.valueOf(backPointers.size())));
+    Ganymede.debug(ts.l("checkInvids.backpointers2", Integer.valueOf(persistentLinks.size())));
 
-    for (Invid key: backPointers.keySet())
+    for (Invid key: persistentLinks.keySet())
       {
-	for (Invid backTarget: backPointers.get(key))
+	for (Invid backTarget: persistentLinks.get(key))
 	  {
 	    if (session.viewDBObject(backTarget) == null)
 	      {
@@ -367,11 +385,11 @@ public class DBLinkTracker {
 
   public synchronized void debugDump()
   {
-    for (Invid objInvid: backPointers.keySet())
+    for (Invid objInvid: persistentLinks.keySet())
       {
 	System.err.println("Object: " + describe(objInvid));
 
-	for (Invid pointedToBy: backPointers.get(objInvid))
+	for (Invid pointedToBy: persistentLinks.get(objInvid))
 	  {
 	    System.err.println("\t" + describe(pointedToBy));
 	  }
@@ -387,5 +405,88 @@ public class DBLinkTracker {
     // worried about deadlocks here
 
     return Ganymede.internalSession.describe(invid);
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                            DBLinkTrackerSession
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Helper class associated with {@link arlut.csd.ganymede.server.DBLinkTracker}.
+ *
+ * DBLinkTrackerSession is responsible for tracking the view a
+ * particular DBSession has of the Ganymede DBStore's asymmetric
+ * links.
+ *
+ * In the Ganymede DBStore, each DBSession has its own view of the
+ * underlying data store, with private visibility of changes that have
+ * been made in the session's transaction, but not yet committed into
+ * the underlying object store.
+ *
+ * DBLinkTrackerSession maintains the per-session overlay on top of
+ * the persisted back link structure, and supports a {@link
+ * arlut.csd.Util.NamedStack} of {@link
+ * arlut.csd.ganymede.server.DBLinkTrackerElement
+ * DBLinkTrackerElements} to allow checkpoint, popCheckpoint, and
+ * rollback operations to properly interact with the DBLinkTracker
+ * system.
+ */
+
+class DBLinkTrackerSession
+{
+  /**
+   * The DBSession object that this DBLinkTrackerSession is tracking overlays for.
+   */
+
+  private DBSession session;
+
+  /**
+   * Named stack of DBLinkTrackerElement objects, tracking the
+   * overlays on the asymmetric link structures of DBLinkTracker as
+   * checkpoints are established and popped/rolledback for the
+   * DBSession.
+   */
+
+  private NamedStack<DBLinkTrackerElement> elements;
+
+  /* -- */
+
+  public DBLinkTrackerSession(DBSession session)
+  {
+    this.session = session;
+    elements = new NamedStack<DBLinkTrackerElement>();
+
+    DBLinkTrackerElement defaultElement = new DBLinkTrackerElement();
+
+    elements.push(DBLinkTrackerSession.class.getName(), defaultElement);
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                            DBLinkTrackerElement
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Helper class associated with DBLinkTracker.
+ *
+ * DBLinkTrackerElement is responsible for recording per-DBSession
+ * overlays onto the DBLinkTracker's main persistentLinks structure,
+ * representing additions or subtractions from the persistentLinks
+ * that affect a particular DBSession.
+ *
+ * DBLinkTrackerSession supports maintaining a checkpoint NamedStack
+ * to allow checkpoint, popCheckpoint, and rollback operations to
+ * properly interact with the DBLinkTracker system.
+ */
+
+class DBLinkTrackerElement
+{
+  public DBLinkTrackerElement()
+  {
   }
 }
