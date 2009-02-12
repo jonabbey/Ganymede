@@ -276,7 +276,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     original = null;
     this.editset = editset;
-    this.gSession = getSession().getGSession();
+    this.gSession = editset.getSession().getGSession();
     commitSemaphore.set(false);
     stored = false;
     status = CREATING;
@@ -344,13 +344,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     /* -- */
 
     this.editset = editset;
+    this.gSession = editset.getSession().getGSession();
+
     commitSemaphore.set(false);
     stored = true;
     status = EDITING;
 
     fieldAry = new DBField[objectBase.fieldTable.size()];
-
-    this.gSession = getSession().getGSession();
 
     this.original = original;
     this.myInvid = original.myInvid;
@@ -402,26 +402,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	  }
       }
-  }
-
-  /**
-   * Returns the DBSession that this object is checked out in
-   * care of.
-   *
-   * @see arlut.csd.ganymede.server.DBSession
-   */
-
-  public final DBSession getSession()
-  {
-    // to handle use of this method in DBEditObject objectHook
-    // subclass usage without throwing a NullPointerException
-
-    if (editset == null)
-      {
-	return null;
-      }
-
-    return editset.getSession();
   }
 
   /**

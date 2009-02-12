@@ -739,6 +739,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * Returns the DBSession that this object is checked out in care of,
+   * or null if it is checked out from the persistent store.
+   */
+
+  public final DBSession getSession()
+  {
+    try
+      {
+	return gSession.getSession();
+      }
+    catch (NullPointerException ex)
+      {
+	return null;
+      }
+  }
+
+  /**
    *
    * Provide easy server-side access to this object's name in a String
    * context for debug and non-critical output.
