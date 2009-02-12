@@ -196,6 +196,8 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 
   public ReturnVal initializeNewObject()
   {
+    return null;
+	/*
     try
       {
         ReturnVal retVal = null;
@@ -209,13 +211,14 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
           {
             return Ganymede.createErrorDialog("permissions", "permissions error creating embedded object" + ex);
           }
-    
+
         return retVal;
       }
     catch (NotLoggedInException ex)
       {
 	return Ganymede.loginError(ex);
       }
+	*/    
   }
 
   /**
