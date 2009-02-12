@@ -103,6 +103,8 @@ final public class NamedStack<E> {
   /**
    * <p>pop rolls the state of the stack back to the time just before
    * the top-most named object matching name was pushed.</p>
+   *
+   * @return The top-most named object matching name.
    */
 
   public synchronized E pop(String name)
