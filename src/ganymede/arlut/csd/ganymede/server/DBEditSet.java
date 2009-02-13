@@ -991,6 +991,8 @@ public class DBEditSet {
 	  }
       }
 
+    Ganymede.db.backPointers.rollback(session, name);
+
     return success;
   }
 
@@ -1542,6 +1544,7 @@ public class DBEditSet {
     commit_replace_objects();
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
+    Ganymede.db.backPointers.commit(session);
     commit_updateBases(fieldsTouched);
   }
 
@@ -2605,6 +2608,10 @@ public class DBEditSet {
     // release any deletion locks we have asserted
 
     DBDeletionManager.releaseSession(session);
+
+    // and scrub any link tracking data for the session
+
+    Ganymede.db.backPointers.abort(session);
 
     // make sure that we haven't somehow left a write lock
     // hanging.. and let's do it before we deconstruct.  This is a

@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -3028,7 +3029,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
       }
 
-    List<Invid> linkSources = Ganymede.db.backPointers.getLinkSources(getInvid());
+    Set<Invid> linkSources = Ganymede.db.backPointers.getLinkSources(getSession(), getInvid());
 
     for (Invid remote: linkSources)
       {
@@ -3042,7 +3043,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     // clear the registration of the back links we just removed
 
-    Ganymede.db.backPointers.unlinkTarget(getInvid());
+    Ganymede.db.backPointers.unlinkTarget(getSession(), getInvid());
 
     return retVal;
   }

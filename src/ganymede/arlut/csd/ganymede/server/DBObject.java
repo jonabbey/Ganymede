@@ -2916,7 +2916,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Vector getBackLinks()
   {
-    return new Vector(Ganymede.db.backPointers.getLinkSources(this.getInvid()));
+    return new Vector(Ganymede.db.backPointers.getLinkSources(getSession(),getInvid()));
   }
 
   /**
@@ -2927,15 +2927,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * the database, at a time when the DBStore backPointers hash structure
    * has no entries for this object at all.</p>
    *
-   * <p>During the commit process of a normal transaction, the
-   * {@link arlut.csd.ganymede.server.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.server.DBEditObject) syncObjBackPointers()}
-   * method in the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class handles these
-   * updates.</p>
+   * <p>During the commit process of a normal transaction, the {@link
+   * arlut.csd.ganymede.server.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.server.DBEditObject)
+   * syncObjBackPointers()} method in the {@link
+   * arlut.csd.ganymede.server.DBEditSet DBEditSet} class handles
+   * these updates instead.</p>
    */
 
   void setBackPointers()
   {
-    Ganymede.db.backPointers.registerObject(getASymmetricTargets(), getInvid());
+    Ganymede.db.backPointers.registerObject(null, getASymmetricTargets(), getInvid());
   }
 
   /**
@@ -2946,15 +2947,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * the database in response to a journal entry, or if the object is
    * being replaced with an updated version from the journal.</p>
    *
-   * <p>During the commit process of a normal transaction, the
-   * {@link arlut.csd.ganymede.server.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.server.DBEditObject) syncObjBackPointers()}
-   * method in the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class handles these
-   * updates.</p>
+   * <p>During the commit process of a normal transaction, the {@link
+   * arlut.csd.ganymede.server.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.server.DBEditObject)
+   * syncObjBackPointers()} method in the {@link
+   * arlut.csd.ganymede.server.DBEditSet DBEditSet} class handles
+   * these updates instead.</p>
    */
 
   void unsetBackPointers()
   {
-    Ganymede.db.backPointers.unregisterObject(getASymmetricTargets(), getInvid());
+    Ganymede.db.backPointers.unregisterObject(null, getASymmetricTargets(), getInvid());
   }
 
   /**
