@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -184,7 +184,7 @@ public class DBObjectTable implements Iterable {
    * @see     java.util.Iterator
    */
 
-  public synchronized Iterator iterator()
+  public synchronized Iterator<DBObject> iterator()
   {
     return new DBObjectTableIterator(table);
   }
@@ -612,7 +612,7 @@ class DBObjectTableEnumerator implements Enumeration {
  * which will use the Iterator interface.</P>
  */
 
-class DBObjectTableIterator implements Iterator {
+class DBObjectTableIterator implements Iterator<DBObject> {
 
   int index;
   DBObject table[];
@@ -644,7 +644,7 @@ class DBObjectTableIterator implements Iterator {
     return false;
   }
 
-  public Object next() 
+  public DBObject next() 
   {
     if (entry == null) 
       {

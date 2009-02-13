@@ -3413,7 +3413,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     QueryResult result = new QueryResult(forTransport);
     DBObjectBase base = null;
-    Enumeration en;
+    Iterator<DBObject> it;
     DBObject obj;
     DBLock rLock = null;
 
@@ -3691,7 +3691,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		System.err.println("Query: " + username + " : got read lock");
 	      }
 
-	    en = base.objectTable.elements();
+	    it = base.objectTable.iterator();
 	  }
 	else
 	  {
@@ -3701,7 +3701,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 				   " : skipping read lock, iterating over iterationSet snapshot");
 	      }
 
-	    en = base.getIterationSet().elements();
+	    it = base.getIterationSet().iterator();
 	  }
 
 	// iterate over the objects in the base we're searching on,
@@ -3714,9 +3714,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 	// of a query, so we'll check that as well.
 
 	while (loggedInSemaphore.isSet() && 
-	       (rLock == null || session.isLocked(rLock)) && en.hasMoreElements())
+	       (rLock == null || session.isLocked(rLock)) && it.hasNext())
 	  {
-	    obj = (DBObject) en.nextElement();
+	    obj = it.next();
 
 	    // if we're editing it, let's look at our version of it
 
@@ -3996,23 +3996,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public String describe(Invid invid)
   {
-    // We don't check permissions here, as we use session.viewDBObject().
-
+    // We don't check permissions here.
+    //
     // We have made the command decision that finding the label for an
     // invid is not something we need to guard against.  Using
     // session.viewDBObject() here makes this a much more lightweight
     // operation.
     
-    try
-      {
-	DBObject obj = session.viewDBObject(invid);
-
-	return obj.getTypeName() + " " + obj.getLabel();
-      }
-    catch (NullPointerException ex)
-      {
-	return null;
-      }
+    return session.describe(invid);
   }
 
   /**
@@ -5264,18 +5255,18 @@ final public class GanymedeSession implements Session, Unreferenced {
    * This is only a server-side method.  getObjects() does
    * not do anything to check access permissions.
    *
-   * It is the responsiblity of the code that gets a Vector
-   * back from this method not to modify the Vector returned
+   * It is the responsiblity of the code that gets a List
+   * back from this method not to modify the List returned
    * in any way, as it may be shared by other threads.
    *
    * Any objects returned by getObjects() will reflect the
    * state of that object in this session's transaction, if a
    * transaction is open.
    *
-   * @return a Vector of DBObject references.
+   * @return a List of DBObject references.
    */
 
-  public synchronized Vector getObjects(short baseid) throws NotLoggedInException
+  public synchronized List<DBObject> getObjects(short baseid) throws NotLoggedInException
   {
     DBObjectBase base;
 
@@ -5306,8 +5297,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     else
       {
-	Vector iterationSet;
-	Map objects;
+	List<DBObject> iterationSet;
+	Map<Invid, DBEditObject> objects;
 
 	// grab a snapshot reference to the vector of objects
 	// checked into the database
@@ -5320,23 +5311,17 @@ final public class GanymedeSession implements Session, Unreferenced {
 	
 	// and generate our list
 
-	Vector results = new Vector(iterationSet.size(), 100);
+	List<DBObject> results = new ArrayList<DBObject>(iterationSet.size());
 
-	// optimize this loop a bit
-
-	int setSize = iterationSet.size();
-	
-	for (int i = 0; i < setSize; i++)
+	for (DBObject obj: iterationSet)
 	  {
-	    DBObject obj = (DBObject) iterationSet.elementAt(i);
-	    
 	    if (objects.containsKey(obj.getInvid()))
 	      {
-		results.addElement(objects.get(obj.getInvid()));
+		results.add(objects.get(obj.getInvid()));
 	      }
 	    else
 	      {
-		results.addElement(obj);
+		results.add(obj);
 	      }
 	  }
 
@@ -5347,16 +5332,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 	// we've recorded any objects that are in the database.. now
 	// look to see if there are any objects that are newly created
 	// in our transaction's object list and add them as well.
-	    
-	Iterator iter = objects.values().iterator();
-	    
-	while (iter.hasNext())
+
+	for (DBEditObject eObj: objects.values())
 	  {
-	    DBEditObject eObj = (DBEditObject) iter.next();
-	    
 	    if ((eObj.getStatus() == ObjectStatus.CREATING) && (eObj.getTypeID()==baseid))
 	      {
-		results.addElement(eObj);
+		results.add(eObj);
 	      }
 	  }
 	

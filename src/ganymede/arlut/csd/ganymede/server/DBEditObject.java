@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -276,7 +277,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     original = null;
     this.editset = editset;
-    this.gSession = getSession().getGSession();
+    this.gSession = editset.getSession().getGSession();
     commitSemaphore.set(false);
     stored = false;
     status = CREATING;
@@ -344,13 +345,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     /* -- */
 
     this.editset = editset;
+    this.gSession = editset.getSession().getGSession();
+
     commitSemaphore.set(false);
     stored = true;
     status = EDITING;
 
     fieldAry = new DBField[objectBase.fieldTable.size()];
-
-    this.gSession = getSession().getGSession();
 
     this.original = original;
     this.myInvid = original.myInvid;
@@ -402,26 +403,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      }
 	  }
       }
-  }
-
-  /**
-   * Returns the DBSession that this object is checked out in
-   * care of.
-   *
-   * @see arlut.csd.ganymede.server.DBSession
-   */
-
-  public final DBSession getSession()
-  {
-    // to handle use of this method in DBEditObject objectHook
-    // subclass usage without throwing a NullPointerException
-
-    if (editset == null)
-      {
-	return null;
-      }
-
-    return editset.getSession();
   }
 
   /**
@@ -3048,7 +3029,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
       }
 
-    List<Invid> linkSources = Ganymede.db.backPointers.getLinkSources(getInvid());
+    Set<Invid> linkSources = Ganymede.db.backPointers.getLinkSources(getSession(), getInvid());
 
     for (Invid remote: linkSources)
       {
@@ -3062,7 +3043,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     // clear the registration of the back links we just removed
 
-    Ganymede.db.backPointers.unlinkTarget(getInvid());
+    Ganymede.db.backPointers.unlinkTarget(getSession(), getInvid());
 
     return retVal;
   }
@@ -3825,15 +3806,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * have been run since any of a given field have been changed in a given
    * DBObjectBase.
    *
-   * @param changedFieldDefs If not null, this parameter will be a
-   * HashMap that the diff algorithm should insert unity mappings
-   * for each DBObjectBaseField whose value was found to have changed
-   * in this diff.
+   * @param changedFieldDefs If not null, this parameter will be a Set
+   * that the diff algorithm should insert DBObjectBaseFields whose
+   * value was found to have changed in this diff.
    *
    * @return null if no difference was found
    */
 
-  public synchronized String diff(HashMap changedFieldDefs)
+  public synchronized String diff(Set<DBObjectBaseField> changedFieldDefs)
   {
     boolean diffFound = false;
     StringBuffer result = new StringBuffer();
@@ -3894,7 +3874,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    if (changedFieldDefs != null)
 	      {
-		changedFieldDefs.put(fieldDef, fieldDef);
+		changedFieldDefs.add(fieldDef);
 	      }
 	  }
 	else
@@ -3915,7 +3895,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    if (changedFieldDefs != null)
 	      {
-		changedFieldDefs.put(fieldDef, fieldDef);
+		changedFieldDefs.add(fieldDef);
 	      }
 
 	    // "\t{0}: {1}\n"
@@ -3935,7 +3915,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    if (changedFieldDefs != null)
 	      {
-		changedFieldDefs.put(fieldDef, fieldDef);
+		changedFieldDefs.add(fieldDef);
 	      }
 
 	    // "\t{0}: {1}\n"
@@ -3957,7 +3937,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      {
 		if (changedFieldDefs != null)
 		  {
-		    changedFieldDefs.put(fieldDef, fieldDef);
+		    changedFieldDefs.add(fieldDef);
 		  }
 
 		changed.append(fieldDef.getName());
