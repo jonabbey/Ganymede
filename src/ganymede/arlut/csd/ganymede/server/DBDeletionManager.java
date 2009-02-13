@@ -329,16 +329,16 @@ public class DBDeletionManager {
    * the transaction is rolled back.
    */
 
-  public static synchronized Set<Invid> getSessionCheckpoint(DBSession session)
+  public static synchronized Vector getSessionCheckpoint(DBSession session)
   {
     Set<Invid> invidSet = sessions.get(session);
 
     if (invidSet == null)
       {
-	return new HashSet<Invid>();
+	return new Vector();
       }
 
-    return new HashSet<Invid>(invidSet);
+    return new Vector(invidSet);
   }
 
   /**
@@ -349,14 +349,15 @@ public class DBDeletionManager {
    * session between a checkpoint and rollback.
    */
 
-  public static synchronized void revertSessionCheckpoint(DBSession session, Set<Invid> invidSet)
+  public static synchronized void revertSessionCheckpoint(DBSession session, Vector invidList)
   {
+    Set<Invid> invidSet = (Set<Invid>) new HashSet(invidList);
     Set<Invid> currentSet = sessions.get(session);
 
-    Set<Invid> badItems = new HashSet<Invid>(invidSet); // copy
+    Set<Invid> badItems = new HashSet<Invid>(invidSet);
     badItems.removeAll(currentSet);
 
-    Set<Invid> toRemove = new HashSet<Invid>(currentSet); // copy
+    Set<Invid> toRemove = new HashSet<Invid>(currentSet);
     toRemove.removeAll(invidSet);
 
     if (badItems.size() != 0)

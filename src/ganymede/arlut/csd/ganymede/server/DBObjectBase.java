@@ -64,7 +64,6 @@ import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
@@ -472,7 +471,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * drop reference to it when the iteration is complete.</P>
    */
 
-  private List<DBObject> iterationSet;
+  private Vector iterationSet;
 
   // Customization Management Object
 
@@ -539,7 +538,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     readerList = new Vector();
     dumperList = new Vector();
     dumpLockList = new Vector();
-    iterationSet = Collections.synchronizedList(new ArrayList<DBObject>());
+    iterationSet = new Vector();
 
     object_name = "";
     classname = "";
@@ -901,7 +900,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     	System.err.println(ts.l("receive.reading", Integer.valueOf(object_count)));
       }
 
-    List<DBObject> tmpIterationSet = Collections.synchronizedList(new ArrayList<DBObject>(object_count));
+    Vector tmpIterationSet = new Vector(object_count);
 
     if (object_count > 0)
       {
@@ -923,7 +922,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	    maxid = tempObject.getID();
 	  }
 
-	tmpIterationSet.add(tempObject);
+	tmpIterationSet.addElement(tempObject);
 	objectTable.putNoSyncNoRemove(tempObject);
 	tempObject.setBackPointers(); // register anonymous invid fields
       }
@@ -3303,7 +3302,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * of the vector will be disrupted.</P>
    */
 
-  List<DBObject> getIterationSet()
+  Vector getIterationSet()
   {
     return iterationSet;
   }

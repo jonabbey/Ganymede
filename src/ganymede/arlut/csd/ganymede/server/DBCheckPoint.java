@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -51,11 +51,7 @@
 
 package arlut.csd.ganymede.server;
 
-import arlut.csd.ganymede.common.Invid;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -79,13 +75,14 @@ class DBCheckPoint {
 
   // ---
 
-  List<DBLogEvent> logEvents = null;
-  List<DBCheckPointObj> objects = null;
-  Set<Invid> invidDeleteLocks = null;
+  Vector
+    objects = null,
+    logEvents = null,
+    invidDeleteLocks = null;
 
   /* -- */
 
-  DBCheckPoint(List<DBLogEvent> logEvents, DBEditObject[] transObjects, DBSession session)
+  DBCheckPoint(Vector logEvents, DBEditObject[] transObjects, DBSession session)
   {
     DBEditObject obj;
 
@@ -94,9 +91,9 @@ class DBCheckPoint {
     // assume that log events are not going to change once recorded,
     // so we can make do with a shallow copy.
 
-    this.logEvents = new ArrayList<DBLogEvent>(logEvents);
+    this.logEvents = (Vector) logEvents.clone();
 
-    objects = new ArrayList<DBCheckPointObj>(transObjects.length);
+    objects = new Vector(transObjects.length);
 
     for (int i = 0; i < transObjects.length; i++)
       {
@@ -108,7 +105,7 @@ class DBCheckPoint {
 			       " (" + obj.getInvid().toString() + ")");
 	  }
 
-	objects.add(new DBCheckPointObj(obj));
+	objects.addElement(new DBCheckPointObj(obj));
       }
 
     invidDeleteLocks = DBDeletionManager.getSessionCheckpoint(session);

@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2008
    The University of Texas at Austin
 
    Contact information
@@ -55,7 +55,6 @@ package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
@@ -106,8 +105,8 @@ public class GanymedeValidationTask implements Runnable {
   {
     GanymedeSession mySession = null;
     boolean everythingsfine = true;
-    List<DBObject> objects;
-    Vector missingFields;
+    Vector objects, missingFields;
+    DBObject object;
     DBObjectBase base;
     Enumeration baseEnum;
     Thread currentThread = java.lang.Thread.currentThread();
@@ -163,12 +162,14 @@ public class GanymedeValidationTask implements Runnable {
 		Ganymede.debug(ts.l("run.scanning", base.getName()));
 	      }
 
-	    for (DBObject object: objects)
+	    for (int i = 0; i < objects.size(); i++)
 	      {
 		if (currentThread.isInterrupted())
 		  {
 		    throw new InterruptedException(ts.l("run.interrupted"));
 		  }
+
+		object = (DBObject) objects.elementAt(i);
 
 		missingFields = object.checkRequiredFields();
 

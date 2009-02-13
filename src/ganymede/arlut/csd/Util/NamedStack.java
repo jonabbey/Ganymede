@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2009
+   Copyright (C) 1996 - 2004
    The University of Texas at Austin
 
    Contact information
@@ -78,24 +78,24 @@ import java.util.Stack;
  * the stack.</p>
  */
 
-final public class NamedStack<E> {
+final public class NamedStack {
 
-  private Stack<NamedStackHandle<E>> stack;
+  private Stack stack;
 
   /* -- */
 
   public NamedStack()
   {
-    stack = new Stack<NamedStackHandle<E>>();
+    stack = new Stack();
   }
 
   /**
    * <p>push pushes a named item onto the stack.</p>
    */
 
-  public synchronized E push(String name, E item)
+  public synchronized Object push(String name, Object item)
   {
-    stack.push(new NamedStackHandle<E>(name, item));
+    stack.push(new NamedStackHandle(name, item));
 
     return item;
   }
@@ -103,11 +103,9 @@ final public class NamedStack<E> {
   /**
    * <p>pop rolls the state of the stack back to the time just before
    * the top-most named object matching name was pushed.</p>
-   *
-   * @return The top-most named object matching name.
    */
 
-  public synchronized E pop(String name)
+  public synchronized Object pop(String name)
   {
     // okay, i'm a bad person.  i micro-optimized this to avoid having
     // to do a few name equality tests twice.  i figure everything's
@@ -126,7 +124,7 @@ final public class NamedStack<E> {
 	stack.pop();
       }
 
-    return stack.pop().getData();
+    return ((NamedStackHandle) stack.pop()).getData();
   }
 
   /**
@@ -134,19 +132,21 @@ final public class NamedStack<E> {
    * without regard to its name.</p>
    */
 
-  public synchronized E pop()
+  public synchronized Object pop()
   {
     if (stack.size() == 0)
       {
 	return null;
       }
 
-    return stack.pop().getData();
+    NamedStackHandle handle = (NamedStackHandle) stack.pop();
+    
+    return handle.getData();
   }
 
-  public E elementAt(int index)
+  public Object elementAt(int index)
   {
-    NamedStackHandle<E> handle = stack.elementAt(index);
+    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(index);
 
     if (handle == null)
       {
@@ -158,7 +158,7 @@ final public class NamedStack<E> {
 
   public String nameAt(int index)
   {
-    NamedStackHandle handle = stack.elementAt(index);
+    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(index);
 
     if (handle == null)
       {
@@ -190,7 +190,9 @@ final public class NamedStack<E> {
 	return null;
       }
 
-    return stack.elementAt(stack.size()-1).getName();
+    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(stack.size()-1);
+    
+    return handle.getName();
   }
 
   /**
@@ -198,14 +200,16 @@ final public class NamedStack<E> {
    * onto this name stack, without altering the stack.</p>
    */
 
-  public synchronized E getTopObject()
+  public synchronized Object getTopObject()
   {
     if (stack.size() == 0)
       {
 	return null;
       }
 
-    return stack.elementAt(stack.size()-1).getData();
+    NamedStackHandle handle = (NamedStackHandle) stack.elementAt(stack.size()-1);
+    
+    return handle.getData();
   }
 
   /**
@@ -217,7 +221,9 @@ final public class NamedStack<E> {
   {
     for (int i = stack.size()-1; i >= 0; i--)
       {
-	if (stack.elementAt(i).getName().equals(name))
+	NamedStackHandle handle = (NamedStackHandle) stack.elementAt(i);
+
+	if (handle.getName().equals(name))
 	  {
 	    return i;
 	  }
@@ -239,7 +245,7 @@ final public class NamedStack<E> {
 
     for (int i = stack.size()-1; i >= 0; i--)
       {
-	NamedStackHandle handle = stack.elementAt(i);
+	NamedStackHandle handle = (NamedStackHandle) stack.elementAt(i);
 	
 	result.append(i);
 	result.append(" : ");
@@ -258,14 +264,14 @@ final public class NamedStack<E> {
  * {@link arlut.csd.Util.NamedStack NamedStack} data structure.</p>
  */
 
-final class NamedStackHandle<E> {
+final class NamedStackHandle {
 
   private String name;
-  private E data;
+  private Object data;
 
   /* -- */
 
-  public NamedStackHandle(String name, E data)
+  public NamedStackHandle(String name, Object data)
   {
     if (name == null)
       {
@@ -286,7 +292,7 @@ final class NamedStackHandle<E> {
     return name;
   }
 
-  public E getData()
+  public Object getData()
   {
     return data;
   }
