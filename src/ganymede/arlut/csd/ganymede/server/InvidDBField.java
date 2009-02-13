@@ -2101,7 +2101,7 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    *
    * This method tests to see if the invid's held in this InvidDBField
-   * are properly back-referenced.
+   * point to existing objects and are properly back-referenced.
    *
    */
 
@@ -2145,6 +2145,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (asymBackPointer)
 	      {
+		target = session.viewDBObject(temp);
+
+		if (target == null)
+		  {
+		    // "*** InvidDBField.test(): Invid pointer to null object {0} located: {1} in field {2}"
+		    Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
+		    result = false;
+
+		    continue;
+		  }
+
 		if (!Ganymede.db.backPointers.linkExists(getSession(), myInvid, temp))
 		  {
 		    // "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
@@ -2261,6 +2272,15 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (asymBackPointer)
 	  {
+	    target = session.viewDBObject(temp);
+
+	    if (target == null)
+	      {
+		// "*** InvidDBField.test(): Invid pointer to null object {0} located: {1} in field {2}"
+		Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
+		result = false;
+	      }
+
 	    if (!Ganymede.db.backPointers.linkExists(getSession(), myInvid, temp))
 	      {
 		// "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
