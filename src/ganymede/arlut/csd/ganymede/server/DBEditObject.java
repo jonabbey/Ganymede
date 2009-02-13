@@ -3805,15 +3805,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * have been run since any of a given field have been changed in a given
    * DBObjectBase.
    *
-   * @param changedFieldDefs If not null, this parameter will be a
-   * HashMap that the diff algorithm should insert unity mappings
-   * for each DBObjectBaseField whose value was found to have changed
-   * in this diff.
+   * @param changedFieldDefs If not null, this parameter will be a Set
+   * that the diff algorithm should insert DBObjectBaseFields whose
+   * value was found to have changed in this diff.
    *
    * @return null if no difference was found
    */
 
-  public synchronized String diff(HashMap changedFieldDefs)
+  public synchronized String diff(Set<DBObjectBaseField> changedFieldDefs)
   {
     boolean diffFound = false;
     StringBuffer result = new StringBuffer();
@@ -3874,7 +3873,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    if (changedFieldDefs != null)
 	      {
-		changedFieldDefs.put(fieldDef, fieldDef);
+		changedFieldDefs.add(fieldDef);
 	      }
 	  }
 	else
@@ -3895,7 +3894,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    if (changedFieldDefs != null)
 	      {
-		changedFieldDefs.put(fieldDef, fieldDef);
+		changedFieldDefs.add(fieldDef);
 	      }
 
 	    // "\t{0}: {1}\n"
@@ -3915,7 +3914,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    if (changedFieldDefs != null)
 	      {
-		changedFieldDefs.put(fieldDef, fieldDef);
+		changedFieldDefs.add(fieldDef);
 	      }
 
 	    // "\t{0}: {1}\n"
@@ -3937,7 +3936,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	      {
 		if (changedFieldDefs != null)
 		  {
-		    changedFieldDefs.put(fieldDef, fieldDef);
+		    changedFieldDefs.add(fieldDef);
 		  }
 
 		changed.append(fieldDef.getName());

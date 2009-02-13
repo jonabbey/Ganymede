@@ -52,13 +52,17 @@
 package arlut.csd.ganymede.server;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.Util.NamedStack;
@@ -147,31 +151,27 @@ public class DBEditSet {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBEditSet");
 
   /**
-   * <p>A hashtable mapping Invids to {@link
-   * arlut.csd.ganymede.server.DBEditObject DBEditObject}s checked out in
-   * care of this transaction.</p>
+   * <p>Maps Invids to {@link arlut.csd.ganymede.server.DBEditObject
+   * DBEditObject}s checked out in care of this transaction.</p>
    */
 
-  private Map objects = null;
+  private Map<Invid, DBEditObject> objects = null;
 
   /**
-   * <p>A list of {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvent}'s
+   * <p>A List of {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvent}'s
    * to be written to the Ganymede logfile and/or mailed out when
    * this transaction commits.</p>
    */
 
-  private Vector logEvents = null;
+  private List<DBLogEvent> logEvents = null;
 
   /**
    * <p>A record of the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}'s
    * touched by this transaction.  These DBObjectBase's will be locked
    * when this transaction is committed.</p>
-   *
-   * <p>This Hashtable maps DBObjectBase's to this, serving as a
-   * pre-Java 2 HashSet.</p>
    */
 
-  private HashMap basesModified;
+  private Set<DBObjectBase> basesModified = null;
 
   /**
    * Who's our daddy?
@@ -269,9 +269,9 @@ public class DBEditSet {
     this.dbStore = dbStore;
     this.description = description;
     this.interactive = interactive;
-    objects = Collections.synchronizedMap(new HashMap());
-    logEvents = new Vector();
-    basesModified = new HashMap(dbStore.objectBases.size());
+    objects = Collections.synchronizedMap(new HashMap<Invid, DBEditObject>());
+    logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
+    basesModified = new HashSet(dbStore.objectBases.size());
 
     if (session.GSession != null && session.GSession.xSession != null && Ganymede.allowMagicImport)
       {
@@ -359,11 +359,11 @@ public class DBEditSet {
    * <p>To allow the GanymedeSession to get a copy of our object hash.</p>
    */
 
-  public HashMap getObjectHashClone()
+  public Map<Invid, DBEditObject> getObjectHashClone()
   {
     synchronized (objects)
       {
-	return new HashMap(objects);
+	return new HashMap<Invid,DBEditObject>(objects);
       }
   }
 
@@ -373,21 +373,7 @@ public class DBEditSet {
 
   public DBEditObject[] getObjectList()
   {
-    synchronized (objects)
-      {
-	int size = objects.size();
-
-	DBEditObject[] results = new DBEditObject[size];
-
-	Iterator iter = objects.values().iterator();
-
-	for (int i = 0; i < size; i++)
-	  {
-	    results[i] = (DBEditObject) iter.next();
-	  }
-
-	return results;
-      }
+    return objects.values().toArray(new DBEditObject[0]);
   }
 
   /**
@@ -468,7 +454,7 @@ public class DBEditSet {
 	// indicate that this object's base is involved in the
 	// transaction.
 
-	basesModified.put(object.objectBase, this);
+	basesModified.add(object.objectBase);
       }
 
     return true;
@@ -497,7 +483,7 @@ public class DBEditSet {
     DBLogEvent event = new DBLogEvent(eventClassToken, description,
 				      admin, adminName,
 				      objects, notifyList);
-    logEvents.addElement(event);
+    logEvents.add(event);
   }
 
   /**
@@ -511,7 +497,7 @@ public class DBEditSet {
 
   public void logEvent(DBLogEvent event)
   {
-    logEvents.addElement(event);
+    logEvents.add(event);
   }
 
   /**
@@ -529,7 +515,7 @@ public class DBEditSet {
   public void logMail(Vector addresses, String subject, String message,
 		      Invid admin, String adminName, Vector objects)
   {
-    logEvents.addElement(new DBLogEvent(addresses, subject, message, admin, adminName, objects));
+    logEvents.add(new DBLogEvent(addresses, subject, message, admin, adminName, objects));
   }
 
   /**
@@ -543,7 +529,7 @@ public class DBEditSet {
 
   public void logMail(Vector addresses, String subject, String message)
   {
-    logEvents.addElement(new DBLogEvent(addresses, subject, message, null, null, null));
+    logEvents.add(new DBLogEvent(addresses, subject, message, null, null, null));
   }
 
   /**
@@ -561,7 +547,7 @@ public class DBEditSet {
 
     addresses.addElement(toAddress);
 
-    logEvents.addElement(new DBLogEvent(addresses, subject, message, null, null, null));
+    logEvents.add(new DBLogEvent(addresses, subject, message, null, null, null));
   }
 
   /**
@@ -682,6 +668,8 @@ public class DBEditSet {
       {
 	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).checkpoint(this, name);
       }
+
+    Ganymede.db.backPointers.checkpoint(session, name);
   }
 
   /**
@@ -780,6 +768,8 @@ public class DBEditSet {
 	  }
       }
 
+    Ganymede.db.backPointers.popCheckpoint(session, name);
+
     // if we've cleared the last checkpoint stacked, wake up any
     // threads that are blocking to create new checkpoints
 
@@ -807,8 +797,6 @@ public class DBEditSet {
   public synchronized boolean rollback(String name)
   {
     DBCheckPoint point = null;
-    DBCheckPointObj objck;
-    DBEditObject obj;
 
     /* -- */
 
@@ -858,10 +846,8 @@ public class DBEditSet {
     // the time of this checkpoint.. we want to revert these objects to
     // their checkpoint-time status
 
-    for (int i = 0; i < point.objects.size(); i++)
+    for (DBCheckPointObj objck: point.objects)
       {
-	objck = (DBCheckPointObj) point.objects.elementAt(i);
-
 	if (debug)
 	  {
 	    System.err.println("Object in transaction at checkpoint time: " + objck.invid.toString());
@@ -869,7 +855,7 @@ public class DBEditSet {
 	    System.err.println("Looking for object " + objck.invid.toString() + " in database");
 	  }
 
-	obj = findObject(objck.invid);
+	DBEditObject obj = findObject(objck.invid);
 
 	if (obj != null)
 	  {
@@ -901,18 +887,16 @@ public class DBEditSet {
       {
 	System.err.println("DBEditSet.rollback() At checkpoint:");
 
-	for (int i = 0; i < point.objects.size(); i++)
+	for (DBCheckPointObj ckp_obj: point.objects)
 	  {
-	    System.err.println(point.objects.elementAt(i));
+	    System.err.println(ckp_obj);
 	  }
 
 	System.err.println("\nDBEditSet.rollback() Now:");
 
-	Iterator iter = objects.values().iterator();
-
-	while (iter.hasNext())
+	for (DBEditObject obj: objects.values())
 	  {
-	    System.err.println(iter.next());
+	    System.err.println(obj);
 	  }
       }
 
@@ -925,16 +909,14 @@ public class DBEditSet {
     // calculate what DBEditObjects we have in the transaction at the
     // present time that we didn't have in the checkpoint
 
-    Vector drop = new Vector();
+    HashSet<Invid> oldvalues = new HashSet<Invid>();
 
-    Hashtable oldvalues = new Hashtable();
-
-    for (int i = 0; i < point.objects.size(); i++)
+    for (DBCheckPointObj obj: point.objects)
       {
-	Invid chkinvid = ((DBCheckPointObj) point.objects.elementAt(i)).invid;
-
-	oldvalues.put(chkinvid, chkinvid);
+	oldvalues.add(obj.invid);
       }
+
+    ArrayList<DBEditObject> drop = new ArrayList<DBEditObject>();
 
     Iterator iter = objects.values().iterator();
 
@@ -944,20 +926,16 @@ public class DBEditSet {
 
 	Invid tmpvid = eobjRef.getInvid();
 
-	if (!oldvalues.containsKey(tmpvid))
+	if (!oldvalues.contains(tmpvid))
 	  {
-	    drop.addElement(eobjRef);
+	    drop.add(eobjRef);
 	  }
       }
 
     // and now we get rid of DBEditObjects we need to drop
 
-    for (int i = 0; i < drop.size(); i++)
+    for (DBEditObject obj: drop)
       {
-	// ok, we've got a new object since the checkpoint.  Ditch it.
-
-	obj = (DBEditObject) drop.elementAt(i);
-
 	obj.release(true);
 
 	switch (obj.getStatus())
@@ -992,9 +970,9 @@ public class DBEditSet {
 
     // now go ahead and clean out the dropped objects
 
-    for (int i = 0; i < drop.size(); i++)
+    for (DBEditObject obj: drop)
       {
-	objects.remove(((DBEditObject) drop.elementAt(i)).getInvid());
+	objects.remove(obj.getInvid());
       }
 
     // and our namespaces
@@ -1190,11 +1168,9 @@ public class DBEditSet {
 
     /* -- */
 
-    iter = this.basesModified.keySet().iterator();
-
-    while (iter.hasNext())
+    for (DBObjectBase base: basesModified)
       {
-	baseSet.addElement(iter.next());
+	baseSet.addElement(base);
       }
 
     // and try to lock the bases down.
@@ -1544,7 +1520,7 @@ public class DBEditSet {
 
   private final void commit_integrateChanges() throws CommitFatalException
   {
-    HashMap fieldsTouched = new HashMap();
+    Set<DBObjectBaseField> fieldsTouched = new HashSet<DBObjectBaseField>();
 
     /* -- */
 
@@ -1831,15 +1807,14 @@ public class DBEditSet {
    * commit() method, and handles logging for any changes made to
    * objects during the committed transaction.
    *
-   * While this method is examining each object in the transaction
-   * to determine the diffs, we'll also take the opportunity to track
-   * the identity of all fields in all object bases that have
-   * themselves been touched.  We use the fieldsTouched hashtable for
-   * this purpose, storing identity maps for the DBObjectBaseFields
-   * that were touched.
+   * While this method is examining each object in the transaction to
+   * determine the diffs, we'll also take the opportunity to track the
+   * identity of all fields in all object bases that have themselves
+   * been touched.  We use the fieldsTouched Set for this purpose,
+   * storing the DBObjectBaseFields that were touched.
    */
 
-  private final void commit_log_events(HashMap fieldsTouched)
+  private final void commit_log_events(Set<DBObjectBaseField> fieldsTouched)
   {
     Iterator iter = objects.values().iterator();
 
@@ -1875,7 +1850,7 @@ public class DBEditSet {
    * that were touched.</p>
    */
 
-  private final void commit_log_event(DBEditObject eObj, HashMap fieldsTouched)
+  private final void commit_log_event(DBEditObject eObj, Set<DBObjectBaseField> fieldsTouched)
   {
     if (Ganymede.log == null)
       {
@@ -2199,7 +2174,7 @@ public class DBEditSet {
 
 		if (origField != null && origField.isDefined())
 		  {
-		    fieldsTouched.put(fieldDef, fieldDef);
+		    fieldsTouched.add(fieldDef);
 		  }
 	      }
 	  }
@@ -2259,7 +2234,7 @@ public class DBEditSet {
    * that have built up over the course of this transaction.</p>
    */
 
-  private final void commit_logTransaction(HashMap fieldsTouched)
+  private final void commit_logTransaction(Set<DBObjectBaseField> fieldsTouched)
   {
     Invid responsibleInvid;
     String responsibleName;
@@ -2324,14 +2299,14 @@ public class DBEditSet {
 	    // then transmit/log any pre-recorded log events that we
 	    // have accumulated during the user's session/transaction
 
-	    for (int i = 0; i < logEvents.size(); i++)
+	    for (DBLogEvent event: logEvents)
 	      {
-		streamLogEvent((DBLogEvent) logEvents.elementAt(i));
+		streamLogEvent(event);
 	      }
 
 	    // for garbage collection
 
-	    logEvents.removeAllElements();
+	    logEvents.clear();
 
 	    // then create and stream log events describing the
 	    // objects that are in this transaction at the time of
@@ -2497,14 +2472,10 @@ public class DBEditSet {
    * created, changed, or deleted during this transaction
    */
 
-  private final void commit_updateBases(HashMap fieldsTouched)
+  private final void commit_updateBases(Set<DBObjectBaseField> fieldsTouched)
   {
-    Iterator iter = this.basesModified.keySet().iterator();
-
-    while (iter.hasNext())
+    for (DBObjectBase base: basesModified)
       {
-	DBObjectBase base = (DBObjectBase) iter.next();
-
 	base.updateTimeStamp();
 
 	// and, very important, update the base's snapshot vector
@@ -2517,11 +2488,8 @@ public class DBEditSet {
     // And in addition to updating the time stamps on the object
     // bases, update the time stamps on each field.
 
-    iter = fieldsTouched.keySet().iterator();
-
-    while (iter.hasNext())
+    for (DBObjectBaseField fieldDef: fieldsTouched)
       {
-	DBObjectBaseField fieldDef = (DBObjectBaseField) iter.next();
 	fieldDef.updateTimeStamp();
       }
   }
@@ -2668,7 +2636,7 @@ public class DBEditSet {
 
     if (logEvents != null)
       {
-	logEvents.removeAllElements();
+	logEvents.clear();
 	logEvents = null;
       }
 
