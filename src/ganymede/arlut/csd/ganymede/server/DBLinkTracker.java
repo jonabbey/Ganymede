@@ -296,7 +296,7 @@ public class DBLinkTracker {
       {
 	if (!unlinkObject(target, ourInvid))
 	  {
-	    System.err.println("DBEditObject.syncObjBackPointers(): couldn't find and remove proper backlink for: " +
+	    System.err.println("DBLinkTracker.syncObjBackPointers(): couldn't find and remove proper backlink for: " +
 			       target);
 	  }
       }
