@@ -319,8 +319,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (definition.isArray())
       {
-	//	System.err.println("Reading InvidDBField: " + getName());
-
 	if (Ganymede.db.isLessThan(2,3))
 	  {
 	    count = in.readShort();
@@ -329,8 +327,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    count = in.readInt();
 	  }
-
-	//	System.err.println(count + " values");
 
 	if (count > 0)
 	  {
