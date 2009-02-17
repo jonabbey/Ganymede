@@ -1099,27 +1099,33 @@ public final class InvidDBField extends DBField implements invid_field {
     eObj = (DBEditObject) this.owner;
     session = eObj.getSession();
 
-    if ((oldRemote != null) && oldRemote.equals(newRemote))
+    if (newRemote.equals(oldRemote))
       {
 	return null;		// success
       }
 
-    // If we're the container field in an embedded object, do nothing.
-    // We'll let createNewEmbedded() take care of the linkages.
+    if (!getFieldDef().isSymmetric())
+      {
+	// we're establishing the backlink tracking (the converse of
+	// the forward link being established in this invid field), so
+	// the target is actually *us*, and the source is the remote!
+
+	Ganymede.db.backPointers.linkObject(getSession(), getOwner().getInvid(), newRemote);
+      }
+
+    // If we're the container field in an embedded object, we're
+    // done.. we don't want to do a deleteLockObject() on our parent
+    // object because the existence of embedded objects should not
+    // block the deletion of the parent.
 
     if (owner.objectBase.isEmbedded() && getID() == SchemaConstants.ContainerField)
       {
-        return null;	// done!
+        return null;
       }
 
     if (!getFieldDef().isSymmetric())
       {
-	// With an asymmetric field, we don't actually ever touch the
-	// target object(s).  Instead, we depend on the DBEditSet
-	// commit logic doing an update of the DBStore backPointers
-	// hash structure at the right time.
-
-	// We do need to make sure that we're not trying to link to an
+	// We need to make sure that we're not trying to link to an
 	// object that is in the middle of being deleted, so we check
 	// that here.  If deleteLockObject() returns true, the system
 	// will prevent the target object from being deleted until our
@@ -1133,17 +1139,15 @@ public final class InvidDBField extends DBField implements invid_field {
 	// be able to revert the link to oldRemote if the transaction
 	// is cancelled.
 
-	if (DBDeletionManager.deleteLockObject(session.viewDBObject(newRemote), session))
-	  {
-	    return null;
-	  }
-	else
+	if (!DBDeletionManager.deleteLockObject(session.viewDBObject(newRemote), session))
 	  {
 	    // "Bind link error"
 	    // "Can't forge an asymmetric link between {0} and invid {1}, the target object is being deleted."
 	    return Ganymede.createErrorDialog(ts.l("bind.deletedremote_sub"),
 					      ts.l("bind.deletedremote_text", this.getName(), newRemote.toString()));
 	  }
+
+	return null;
       }
 
     // we're symmetric, so find out what field in remote we need to
@@ -1601,13 +1605,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // find out whether there is an explicit back-link field
 
-    if (getFieldDef().isSymmetric())
-      {
-	// find out what field in remote we might need to update
-
-	targetField = getFieldDef().getTargetField();
-      }
-    else
+    if (!getFieldDef().isSymmetric())
       {
 	// if we are unbinding an asymmetric field, we do nothing.
 	// the fact that we were asymmetrically linked to remote at
@@ -1619,8 +1617,15 @@ public final class InvidDBField extends DBField implements invid_field {
 	// object.  See DBEditSet.addObject() to see how this implicit
 	// locking is done.
 
+	// XXX we probably do need to clear the back link from the
+	// link tracker, though..
+
 	return null;
       }
+
+    // find out what field in remote we might need to update
+
+    targetField = getFieldDef().getTargetField();
 
     // check to see if we have permission to anonymously unlink
     // this field from the target field, else go through the
