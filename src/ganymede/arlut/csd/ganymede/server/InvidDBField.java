@@ -1604,25 +1604,61 @@ public final class InvidDBField extends DBField implements invid_field {
 	throw new IllegalArgumentException(ts.l("unbind.noteditable", getName(), owner.getLabel()));
       }
 
+    if (debug)
+      {
+	System.err.println("InvidDBField[" + toString() + "].unbind(" + remote + ", " + local + ")");
+      }
+
     eObj = (DBEditObject) this.owner;
     session = eObj.getSession();
 
-    // find out whether there is an explicit back-link field
-
     if (!getFieldDef().isSymmetric())
       {
-	// if we are unbinding an asymmetric field, we do nothing.
-	// the fact that we were asymmetrically linked to remote at
-	// some point during this transaction is enough to insure that
-	// the object pointed to by remote is delete locked for the
-	// duration of this transaction.  If and when the transaction
-	// commits, the remote object will have its delete lock
-	// cleared, and later transactions will be able to delete that
-	// object.  See DBEditSet.addObject() to see how this implicit
-	// locking is done.
+	// we need to remove the asymmetric back link pointer if we're
+	// the last field in our object to contain an asymmetric link
+	// to remote
 
-	// XXX we probably do need to clear the back link from the
-	// link tracker, though..
+	Vector<DBField> ownerFields = (Vector<DBField>) owner.getFieldVector(false);
+
+	boolean lastLink = true;
+
+	for (DBField siblingField: ownerFields)
+	  {
+	    if (siblingField == this)
+	      {
+		continue;
+	      }
+
+	    if (!siblingField.getFieldDef().isInvid() || siblingField.getFieldDef().isSymmetric())
+	      {
+		continue;
+	      }
+
+	    if (siblingField.isVector())
+	      {
+		if (siblingField.containsElementLocal(remote))
+		  {
+		    lastLink = false;
+		    break;
+		  }
+	      }
+	    else
+	      {
+		if (remote.equals(siblingField.value))
+		  {
+		    lastLink = false;
+		    break;
+		  }
+	      }
+	  }
+
+	if (lastLink)
+	  {
+	    // again, we're dealing with the back link track, so the
+	    // target is us, and the source is the remote.
+
+	    Ganymede.db.backPointers.unlinkObject(session, owner.getInvid(), remote);
+	  }
 
 	return null;
       }
