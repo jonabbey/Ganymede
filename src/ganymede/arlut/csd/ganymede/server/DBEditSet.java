@@ -2376,7 +2376,7 @@ public class DBEditSet {
 	// we need to update DBStore.backPointers to take into account
 	// the changes made to this object.
 
-	Ganymede.db.backPointers.syncObjBackPointers(eObj);
+	Ganymede.db.backPointers.syncObjTargets(eObj);
 
 	// Create a read-only version of eObj, with all fields
 	// reset to checked-in status, put it into our object hash
@@ -2403,7 +2403,7 @@ public class DBEditSet {
 	// we need to update DBStore.backPointers to take into account
 	// the changes made to this object.
 
-	Ganymede.db.backPointers.syncObjBackPointers(eObj);
+	Ganymede.db.backPointers.syncObjTargets(eObj);
 
 	// Deleted objects had their deletion finalization done before
 	// we ever got to this point.

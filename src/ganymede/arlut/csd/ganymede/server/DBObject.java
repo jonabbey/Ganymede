@@ -2911,12 +2911,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * <p>This method returns a Vector of Invids that point to this object via
-   * asymmetric link fields.</p>
+   * forward asymmetric link fields.</p>
    */
 
   public Vector getBackLinks()
   {
-    return new Vector(Ganymede.db.backPointers.getLinkSources(getSession(),getInvid()));
+    return new Vector(Ganymede.db.backPointers.getReverseLinks(getSession(), getInvid()));
   }
 
   /**

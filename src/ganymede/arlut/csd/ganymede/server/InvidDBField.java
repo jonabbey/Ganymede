@@ -1024,6 +1024,10 @@ public final class InvidDBField extends DBField implements invid_field {
    * This method is used to link the remote invid to this checked-out invid
    * in accordance with this field's defined symmetry constraints.
    *
+   * This method deals with the back pointers (symmetric or
+   * asymmetric), the forward link is established in InvidDBField
+   * through direct manipulation of the field's value.
+   *
    * This method will extract the objects referenced by the old and new
    * remote parameters, and will cause the appropriate invid dbfields in
    * them to be updated to reflect the change in link status.  If either
@@ -1547,6 +1551,10 @@ public final class InvidDBField extends DBField implements invid_field {
   /**
    * This method is used to unlink this field from the specified remote
    * invid in accordance with this field's defined symmetry constraints.
+   *
+   * This method deals with the back pointer (symmetric or
+   * asymmetric), the forward link is broken in InvidDBField through
+   * direct manipulation of the field's value.
    *
    * <b>This method is private, and is not to be called by any code outside
    * of this class.</b>
