@@ -3029,7 +3029,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
       }
 
-    Set<Invid> linkSources = Ganymede.db.backPointers.getLinkSources(getSession(), getInvid());
+    Set<Invid> linkSources = Ganymede.db.backPointers.getReverseLinks(getSession(), getInvid());
 
     for (Invid remote: linkSources)
       {
@@ -3043,7 +3043,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     // clear the registration of the back links we just removed
 
-    Ganymede.db.backPointers.unlinkTarget(getSession(), getInvid());
+    Ganymede.db.backPointers.unlinkSource(getSession(), getInvid());
 
     return retVal;
   }
@@ -3052,12 +3052,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * This method is called by attemptAsymBackLinkClear(), and is
    * responsible for checking the object with Invid remote out for
    * editing, and clearing our own Invid out of all of the remote
+   * object's asymmetric Invid fields.
    * object's fields.
    *
    * This method does no checkpointing, so attemptAsymBackLinkClear()
    * has to do that for us.
    *
-   * @param remote An Invid for an object that we have asymmetric back links to.
+   * @param remote An Invid for an object that we believe has
+   * asymmetric forward links to us.
    * @param local If true, we won't do a permissions check before trying to edit the
    * remote object.
    *
