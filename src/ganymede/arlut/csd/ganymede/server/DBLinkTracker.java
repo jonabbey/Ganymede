@@ -55,12 +55,13 @@
 package arlut.csd.ganymede.server;
 
 import arlut.csd.ganymede.common.Invid;
-
 import arlut.csd.Util.NamedStack;
 import arlut.csd.Util.TranslationService;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -74,14 +75,8 @@ import java.util.Set;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is responsible for tracking virtual reverse pointers for
- * Invid fields that point forward asymmetrically to DBObjects in the
- * Ganymede persistent datastore.
- *
- * That is, this class is reponsible for remembering all objects that
- * are pointed to by other objects in the server's datastore, with the
- * exception of pointers are symmetrically set up with forward and
- * reverse pointers in paired data fields.
+ * This class is responsible for tracking forward asymmetric links
+ * from sources to targets in the Ganymede data store.
  *
  * This class makes it possible to efficiently delete objects from the
  * Ganymede datastore without having to scan the entire datastore in
@@ -90,13 +85,6 @@ import java.util.Set;
  * Once the Invids for objects which link to a to-be-deleted object
  * are retrieved, the objects containing these Invids can (and will
  * be) edited to remove these links.
- *
- * Throughout this class, 'source' refers to the source and 'target'
- * refers to the target of the forward asymmetric links that are
- * represented directly in the InvidDBFields in the database.
- *
- * As a consequence, the virtual reverse pointers we are tracking in
- * this class actually lead from the targets to the sources.
  */
 
 public class DBLinkTracker {
@@ -113,10 +101,10 @@ public class DBLinkTracker {
   /* --- */
 
   /**
-   * persistentLinks stores sets of object invids that point to the
-   * invid keys.  When looking up an invid in the persistentLinks map,
-   * a set of invids with asymmetric links pointing to the invid key
-   * is returned.
+   * persistentLinks stores sets of source object invids that have
+   * forward asymmetric links to the target invid keys.  When looking
+   * up an invid in the persistentLinks map, a set of invids with
+   * forward asymmetric links pointing to the invid key is returned.
    */
 
   private DBLinkTrackerElement persistentLinks;
@@ -295,9 +283,8 @@ public class DBLinkTracker {
   }
 
   /**
-   * This method removes the virtual reverse pointers (target->source)
-   * for all forward asymmetric links registered from source to the
-   * Invids in the targets Set.
+   * This method removes the tracking for all forward asymmetric links
+   * registered from source to the Invids in the targets Set.
    */
 
   public synchronized void unregisterObject(DBSession session, Set<Invid> targets, Invid source)
@@ -316,54 +303,37 @@ public class DBLinkTracker {
   }
 
   /**
-   * This method removes all the reverse pointers corresponding to
-   * forward asymmetric links coming from source.
+   * This method returns a Set of all Invids that we are tracking as
+   * having forward asymmetric links to the target Invid in the
+   * current data we are tracking for session, or in the persistent
+   * data store if session is null.
    */
 
-  public synchronized void unlinkSource(DBSession session, Invid source)
+  public synchronized Set<Invid> getForwardLinkSources(DBSession session, Invid target)
   {
-    if (source == null)
+    if (target == null)
       {
 	throw new NullPointerException();
       }
 
-    if (debug)
-      {
-	System.err.println("DBLinkTracker.unlinkSource(" + session + ", " + source + ")");
-      }
-
-    getElement(session).unlinkSource(source);
+    return getElement(session).getForwardLinkSources(target);
   }
 
   /**
-   * This method returns a Set of all virtual reverse pointers
-   * corresponding to forward asymmetric links from the source object
-   * in the server's persistent data store.
+   * Returns a string describing the objects that we are tracking as
+   * having forward asymmetric links to the target Invid in the
+   * current data we are tracking for session, or in the persistent
+   * data store if session is null.
    */
 
-  public synchronized Set<Invid> getReverseLinks(DBSession session, Invid source)
+  public synchronized String forwardAsymmetricLinksToString(DBSession session, Invid target)
   {
-    if (source == null)
+    if (target == null)
       {
 	throw new NullPointerException();
       }
 
-    return getElement(session).getReverseLinks(source);
-  }
-
-  /**
-   * Returns a string describing the objects that have virtual reverse
-   * pointers corresponding to forward asymmetric links from source.
-   */
-
-  public synchronized String reverseLinksToString(DBSession session, Invid source)
-  {
-    if (source == null)
-      {
-	throw new NullPointerException();
-      }
-
-    return getElement(session).reverseLinksToString(session, source);
+    return getElement(session).forwardAsymmetricLinksToString(target);
   }
 
   /**
@@ -449,6 +419,13 @@ public class DBLinkTracker {
    * perform a validation of the persistent DBLinkTracker structures
    * for the sake of the 'check invid integrity' debug option in the
    * Ganymede Admin console.
+   *
+   * This method should always be called from a context that has a
+   * DBDumpLock established on the entirety of the server.
+   *
+   * Note that this method will be *extremely* expensive to run, and
+   * will effectively shut down the server due to its synchronization
+   * and dump lock!
    */
 
   public synchronized boolean checkInvids(DBSession session)
@@ -461,23 +438,39 @@ public class DBLinkTracker {
 
     // "Ganymede persistentLinks hash structure tracking {0} invid''s."
 
-    Ganymede.debug(ts.l("checkInvids.backpointers2", Integer.valueOf(persistentLinks.overlay.size())));
+    Ganymede.debug(ts.l("checkInvids.backpointers2", Integer.valueOf(persistentLinks.targetToSourcesMap.size())));
 
-    for (Invid source: persistentLinks.overlay.keySet())
+    for (Invid target: persistentLinks.targetToSourcesMap.keySet())
       {
-	for (Invid target: persistentLinks.overlay.get(source))
+	Set<Invid> sources = persistentLinks.targetToSourcesMap.get(target);
+
+	Enumeration baseEnum = Ganymede.db.objectBases.elements();
+
+	while (baseEnum.hasMoreElements())
 	  {
-	    if (session.viewDBObject(target) == null)
+	    DBObjectBase base = (DBObjectBase) baseEnum.nextElement();
+
+	    Ganymede.debug(ts.l("checkInvids.checking", base.getName()));
+
+	    Enumeration objectEnum = base.objectTable.elements();
+
+	    while (objectEnum.hasMoreElements())
 	      {
-		ok = false;
+		DBObject object = (DBObject) objectEnum.nextElement();
 
-		// "***DBLinkTracker records a virtual back pointer from a non-existent target {0} to source Invid {1}"
+		Invid objInvid = object.getInvid();
 
-		if (session != null)
+		Set<Invid> asymTargets = object.getASymmetricTargets();
+
+		if (asymTargets.contains(target) && !sources.contains(objInvid))
 		  {
-		    Ganymede.debug(ts.l("checkInvids.aha", 
-					target.toString(),
-					describe(session, source)));
+		    // "** DBLinkTracker.checkInvids(): DBObject {0} has a forward asymmetric link to invid {1} that is not present in the DBLinkTracker structures!"
+		    Ganymede.debug(ts.l("checkInvids.extraLink", object.toString(), target));
+		  }
+		else if (sources.contains(objInvid) && !asymTargets.contains(target))
+		  {
+		    // "** DBLinkTracker.checkInvids(): DBObject {0} is lacking a forward asymmetric link to invid {1} that the DBLinkTracker thinks should be there!"
+		    Ganymede.debug(ts.l("checkInvids.missingLink", object.toString(), target));
 		  }
 	      }
 	  }
@@ -656,25 +649,39 @@ public class DBLinkTracker {
 
   class DBLinkTrackerElement
   {
-    private DBLinkTrackerElement parent;
-    private Map<Invid, Set<Invid>> overlay;
+    DBLinkTrackerElement parent;
+
+    Map<Invid, Set<Invid>> targetToSourcesMap;
+
+    DBSession session;
 
     /* -- */
 
     public DBLinkTrackerElement()
     {
-      this(null);
+      parent = null;
+      session = null;
+      targetToSourcesMap = new HashMap<Invid, Set<Invid>>();
+    }
+
+    public DBLinkTrackerElement(DBSession session)
+    {
+      this();
+
+      this.session = session;
     }
 
     public DBLinkTrackerElement(DBLinkTrackerElement parent)
     {
+      this();
+
       this.parent = parent;
-      overlay = new HashMap<Invid, Set<Invid>>();
+      this.session = parent.session;
     }
 
     public synchronized void transferFrom(DBLinkTrackerElement otherElement)
     {
-      // We're copying all sets of link sources from otherElement.
+      // We're copying all sets of link targets from otherElement.
       // Some of these sets might be empty, but if we have a parent
       // element, we still need to copy these, as they signify that
       // the otherElement's frame deleted all of the links to that
@@ -687,24 +694,24 @@ public class DBLinkTracker {
 
       if (parent != null)
 	{
-	  this.overlay.putAll(otherElement.overlay);
+	  this.targetToSourcesMap.putAll(otherElement.targetToSourcesMap);
 	}
       else
 	{
 	  // source has forward asymmetric links, we're tracking the
 	  // reverse pointers from the targets
 
-	  for (Invid source: otherElement.overlay.keySet())
+	  for (Invid target: otherElement.targetToSourcesMap.keySet())
 	    {
-	      Set<Invid> targets = otherElement.overlay.get(source);
+	      Set<Invid> sources = otherElement.targetToSourcesMap.get(target);
 
-	      if (targets.size() == 0)
+	      if (sources.size() == 0)
 		{
-		  this.overlay.remove(source);
+		  this.targetToSourcesMap.remove(target);
 		}
 	      else
 		{
-		  this.overlay.put(source, targets);
+		  this.targetToSourcesMap.put(target, sources);
 		}
 	    }
 	}
@@ -726,7 +733,7 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      return getReverseLinks(source).add(target);
+      return getForwardLinkSources(target).add(source);
     }
 
     /**
@@ -744,13 +751,13 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      Set<Invid> targets = getReverseLinks(source);
+      Set<Invid> sources = getForwardLinkSources(target);
 
-      boolean result = targets.remove(target);
+      boolean result = sources.remove(source);
 
-      if (parent == null && targets.size() == 0)
+      if (parent == null && sources.size() == 0)
 	{
-	  overlay.remove(source);
+	  targetToSourcesMap.remove(target);
 	}
 
       return result;
@@ -794,30 +801,6 @@ public class DBLinkTracker {
     }
 
     /**
-     * This method removes all the virtual reverse pointers
-     * corresponding to forward asymmetric links coming from source.
-     */
-
-    public synchronized void unlinkSource(Invid source)
-    {
-      if (source == null)
-	{
-	  throw new NullPointerException();
-	}
-
-      if (parent != null)
-	{
-	  Set<Invid> targets = getReverseLinks(source);
-
-	  targets.clear();
-	}
-      else
-	{
-	  overlay.remove(source);
-	}
-    }
-
-    /**
      * Returns true if a forward asymmetric link is registered from
      * source to target.  That is, if we have registered a virtual
      * back pointer from target to source.
@@ -830,7 +813,7 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      return getReverseLinks(source).contains(target);
+      return getForwardLinkSources(target).contains(source);
     }
 
     /**
@@ -838,43 +821,43 @@ public class DBLinkTracker {
      * pointers corresponding to forward asymmetric links from source.
      */
 
-    public synchronized String reverseLinksToString(DBSession session, Invid source)
+    public synchronized String forwardAsymmetricLinksToString(Invid target)
     {
-      if (source == null)
+      if (target == null)
 	{
 	  throw new NullPointerException();
 	}
 
       StringBuilder builder = new StringBuilder();
 
-      builder.append("-> Virtual back links pointing at ");
-      builder.append(describe(session, source));
+      builder.append("-> Tracked forward links pointing at ");
+      builder.append(describe(session, target));
       builder.append("\n");
 
-      Set<Invid> targets = overlay.get(source);
+      Set<Invid> sources = targetToSourcesMap.get(target);
 
-      if (targets == null && parent != null)
+      if (sources == null && parent != null)
 	{
 	  DBLinkTrackerElement p = parent;
 
-	  while (targets == null && p != null)
+	  while (sources == null && p != null)
 	    {
-	      targets = p.overlay.get(source);
+	      sources = p.targetToSourcesMap.get(target);
 
 	      p = p.parent;
 	    }
 	}
 
-      if (targets == null)
+      if (sources == null)
 	{
 	  builder.append("-> ** empty ** \n");
 	}
       else
 	{
-	  for (Invid target: targets)
+	  for (Invid source: sources)
 	    {
 	      builder.append("<--- ");
-	      builder.append(describe(session, target));
+	      builder.append(describe(session, source));
 	      builder.append("\n");
 	    }
 	}
@@ -883,30 +866,30 @@ public class DBLinkTracker {
     }
 
     /**
-     * This method returns a Set of all virtual reverse pointers
-     * corresponding to forward asymmetric links from the source object
-     * in the server's persistent data store.
+     * This method returns a Set of all Invids that point to the
+     * target object through forward asymmetric links in this
+     * DBLinkTrackerElement's context.
      *
      * If we don't have a set in our own element, we'll either copy
-     * the set for the source from our nearest parent that has a set
-     * for the source, or else we'll create a new empty set.. in this
-     * way, we provide a Set of virtual reverse pointers that is
+     * the set for the target from our nearest parent that has a set
+     * for the target, or else we'll create a new empty set.. in this
+     * way, we provide a Set of forward pointer Invids that is
      * specific to this element in our session/checkpoint stack.
      */
 
-    private Set<Invid> getReverseLinks(Invid source)
+    private Set<Invid> getForwardLinkSources(Invid target)
     {
-      Set<Invid> targets = overlay.get(source);
+      Set<Invid> sources = targetToSourcesMap.get(target);
 
-      if (targets == null)
+      if (sources == null)
 	{
 	  DBLinkTrackerElement p = parent;
 
 	  while (p != null)
 	    {
-	      if (p.overlay.containsKey(source))
+	      if (p.targetToSourcesMap.containsKey(target))
 		{
-		  targets = new HashSet<Invid>(p.overlay.get(source));
+		  sources = new HashSet<Invid>(p.targetToSourcesMap.get(target));
 
 		  break;
 		}
@@ -916,13 +899,13 @@ public class DBLinkTracker {
 
 	  if (p == null)
 	    {
-	      targets = new HashSet<Invid>();
+	      sources = new HashSet<Invid>();
 	    }
 
-	  overlay.put(source, targets);
+	  targetToSourcesMap.put(target, sources);
 	}
 
-      return targets;
+      return sources;
     }
   }
 }

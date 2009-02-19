@@ -2916,7 +2916,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Vector getBackLinks()
   {
-    return new Vector(Ganymede.db.backPointers.getReverseLinks(getSession(), getInvid()));
+    return new Vector(Ganymede.db.backPointers.getForwardLinkSources(getSession(), getInvid()));
   }
 
   /**
