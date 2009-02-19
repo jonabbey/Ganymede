@@ -747,6 +747,16 @@ public class DBLinkTracker {
     }
 
     /**
+     * Returns true if this context is the root node, with no
+     * associated DBSessionTracker, sourcesTouched Set, or parent.
+     */
+
+    public boolean isRootNode()
+    {
+      return parent == null;
+    }
+
+    /**
      * This method is used to fold changes made in another context
      * into our own.
      *
@@ -770,7 +780,7 @@ public class DBLinkTracker {
 	  throw new RuntimeException("Can't transfer changes from a context that is not associated with a session tracker.");
 	}
 
-      if (parent != null)
+      if (!isRootNode())
 	{
 	  if (sessionTracker != otherContext.sessionTracker)
 	    {
@@ -829,7 +839,10 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      sourcesTouched.add(source);
+      if (!isRootNode())
+	{
+	  sourcesTouched.add(source);
+	}
 
       return getForwardLinkSources(target).add(source);
     }
@@ -849,13 +862,16 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      sourcesTouched.add(source);
+      if (!isRootNode())
+	{
+	  sourcesTouched.add(source);
+	}
 
       Set<Invid> sources = getForwardLinkSources(target);
 
       boolean result = sources.remove(source);
 
-      if (parent == null && sources.size() == 0)
+      if (isRootNode() && sources.size() == 0)
 	{
 	  // we can only remove a target from the targetToSourcesMap
 	  // if we are the root node, else transferFrom() will not
@@ -879,7 +895,10 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      sourcesTouched.add(source);
+      if (!isRootNode())
+	{
+	  sourcesTouched.add(source);
+	}
 
       for (Invid target: targets)
 	{
@@ -900,7 +919,10 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      sourcesTouched.add(source);
+      if (!isRootNode())
+	{
+	  sourcesTouched.add(source);
+	}
 
       for (Invid target: targets)
 	{
