@@ -3448,6 +3448,10 @@ public final class InvidDBField extends DBField implements invid_field {
         values.addElement(embeddedObj.getInvid());  // do a live modification of this field's invid vector
         qr = null;
 
+	// record that we created this forward asymmetric link
+
+	Ganymede.db.aSymLinkTracker.linkObject(getSession(), embeddedObj.getInvid(), owner.getInvid());
+
         // now we need to initialize the new embedded object, since we
         // defer that activity for embedded objects until after we
         // get the embedded object linked to the parent
