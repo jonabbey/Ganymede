@@ -743,7 +743,15 @@ public class DBLinkTracker {
 
       this.parent = parent;
       this.sessionTracker = sessionTracker;
-      this.sourcesTouched = new HashSet<Invid>(parent.sourcesTouched);
+
+      if (parent.sourcesTouched == null)
+	{
+	  this.sourcesTouched = new HashSet<Invid>();
+	}
+      else
+	{
+	  this.sourcesTouched = new HashSet<Invid>(parent.sourcesTouched);
+	}
     }
 
     /**
