@@ -1106,11 +1106,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!getFieldDef().isSymmetric())
       {
-	// we're establishing the backlink tracking (the converse of
-	// the forward link being established in this invid field), so
-	// the target is actually *us*, and the source is the remote!
-
-	Ganymede.db.aSymLinkTracker.linkObject(getSession(), getOwner().getInvid(), newRemote);
+	Ganymede.db.aSymLinkTracker.linkObject(getSession(), newRemote, getOwner().getInvid());
       }
 
     // If we're the container field in an embedded object, we're
@@ -1657,7 +1653,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // again, we're dealing with the back link track, so the
 	    // target is us, and the source is the remote.
 
-	    Ganymede.db.aSymLinkTracker.unlinkObject(session, owner.getInvid(), remote);
+	    Ganymede.db.aSymLinkTracker.unlinkObject(session, remote, owner.getInvid());
 	  }
 
 	return null;
@@ -3450,7 +3446,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	// record that we created this forward asymmetric link
 
-	Ganymede.db.aSymLinkTracker.linkObject(getSession(), owner.getInvid(), embeddedObj.getInvid());
+	Ganymede.db.aSymLinkTracker.linkObject(getSession(), embeddedObj.getInvid(), owner.getInvid());
 
         // now we need to initialize the new embedded object, since we
         // defer that activity for embedded objects until after we
