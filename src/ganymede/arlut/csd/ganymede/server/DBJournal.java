@@ -1089,10 +1089,10 @@ class JournalEntry {
 	    // objects in their post-commit state, so we don't have
 	    // to worry about it here.
 
-	    // We do need to unregister any backlinks from the DBStore
-	    // backPointers hash structure, however.
+	    // We do need to unregister the former asymmetric links
+	    // from the DBStore aSymLinkTracker, however.
 
-	    oldObject.unsetBackPointers();
+	    oldObject.unregisterAsymmetricLinks();
 
 	    // and we need to clear out any namespace pointers
 
@@ -1144,7 +1144,7 @@ class JournalEntry {
 
 	if (oldObject != null)
 	  {
-	    oldObject.unsetBackPointers();
+	    oldObject.unregisterAsymmetricLinks();
 	  }
 
 	// Second, we need to go through and put these values in the namespace.. note that
@@ -1189,7 +1189,7 @@ class JournalEntry {
 
 	// update the backpointers for this object
 
-	obj.setBackPointers();
+	obj.registerAsymmetricLinks();
 
 	// keep our base's maxid up to date for
 	// any newly created objects in the journal

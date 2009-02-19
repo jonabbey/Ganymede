@@ -3029,8 +3029,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
       }
 
-    Set<Invid> linkSources = Ganymede.db.backPointers.getForwardLinkSources(getSession(), getInvid());
-    Set<Invid> linkSources = Ganymede.db.backPointers.getReverseLinks(getSession(), getInvid());
+    Set<Invid> linkSources = Ganymede.db.aSymLinkTracker.getForwardLinkSources(getSession(), getInvid());
 
     for (Invid remote: linkSources)
       {

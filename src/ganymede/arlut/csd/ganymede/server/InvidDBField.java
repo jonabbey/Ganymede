@@ -105,7 +105,7 @@ import arlut.csd.ganymede.rmi.invid_field;
  * references in the server are symmetric.  If one object points to
  * another via an InvidDBField, the target of that pointer will point
  * back, either through a field explicitly specified in the schema, or
- * through the server's in-memory {@link arlut.csd.ganymede.server.DBStore#backPointers backPointers}
+ * through the server's in-memory {@link arlut.csd.ganymede.server.DBStore#aSymLinkTracker aSymLinkTracker}
  * hash structure.
  *
  * @version $Id$
@@ -114,7 +114,7 @@ import arlut.csd.ganymede.rmi.invid_field;
 
 public final class InvidDBField extends DBField implements invid_field {
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   /**
    * TranslationService object for handling string localization in
@@ -1110,7 +1110,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	// the forward link being established in this invid field), so
 	// the target is actually *us*, and the source is the remote!
 
-	Ganymede.db.backPointers.linkObject(getSession(), getOwner().getInvid(), newRemote);
+	Ganymede.db.aSymLinkTracker.linkObject(getSession(), getOwner().getInvid(), newRemote);
       }
 
     // If we're the container field in an embedded object, we're
@@ -1657,7 +1657,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // again, we're dealing with the back link track, so the
 	    // target is us, and the source is the remote.
 
-	    Ganymede.db.backPointers.unlinkObject(session, owner.getInvid(), remote);
+	    Ganymede.db.aSymLinkTracker.unlinkObject(session, owner.getInvid(), remote);
 	  }
 
 	return null;
@@ -2144,10 +2144,12 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
+   * This test method checks to see if the invid's held in this
+   * InvidDBField point to existing objects and are properly
+   * back-referenced.
    *
-   * This method tests to see if the invid's held in this InvidDBField
-   * point to existing objects and are properly back-referenced.
-   *
+   * It is typically triggered from the admin console's "Integrity
+   * Test" command in the console's debug menu.
    */
 
   synchronized boolean test(DBSession session, String objectName)
@@ -2169,7 +2171,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	asymBackPointer = true;	// we'll test Ganymede.db.backPointers
+	asymBackPointer = true;	// we'll test Ganymede.db.aSymLinkTracker
 	targetField = -1;
       }
 
@@ -2201,7 +2203,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    continue;
 		  }
 
-		if (!Ganymede.db.backPointers.linkExists(getSession(), myInvid, temp))
+		if (!Ganymede.db.aSymLinkTracker.linkExists(getSession(), myInvid, temp))
 		  {
 		    // "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
 		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
@@ -2326,7 +2328,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		result = false;
 	      }
 
-	    if (!Ganymede.db.backPointers.linkExists(getSession(), myInvid, temp))
+	    if (!Ganymede.db.aSymLinkTracker.linkExists(getSession(), myInvid, temp))
 	      {
 		// "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
 		Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));

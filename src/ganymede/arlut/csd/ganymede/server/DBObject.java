@@ -2916,16 +2916,17 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Vector getBackLinks()
   {
-    return new Vector(Ganymede.db.backPointers.getForwardLinkSources(getSession(), getInvid()));
+    return new Vector(Ganymede.db.aSymLinkTracker.getForwardLinkSources(getSession(), getInvid()));
   }
 
   /**
    * <p>This method is called to register all asymmetric pointers in
-   * this object with the DBStore's backPointers hash structure.</p>
+   * this object with the DBStore's aSymLinkTracker hash
+   * structure.</p>
    *
-   * <p>Typically this will be done when an object is first loaded from
-   * the database, at a time when the DBStore backPointers hash structure
-   * has no entries for this object at all.</p>
+   * <p>Typically this will be done when an object is first loaded
+   * from the database, at a time when the DBStore aSymLinkTracker
+   * hash structure has no entries for this object at all.</p>
    *
    * <p>During the commit process of a normal transaction, the {@link
    * arlut.csd.ganymede.server.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.server.DBEditObject)
@@ -2934,29 +2935,27 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * these updates instead.</p>
    */
 
-  void setBackPointers()
+  void registerAsymmetricLinks()
   {
-    Ganymede.db.backPointers.registerObject(null, getASymmetricTargets(), getInvid());
+    Ganymede.db.aSymLinkTracker.registerObject(null, getASymmetricTargets(), getInvid());
   }
 
   /**
    * <p>This method is called to unregister all asymmetric pointers in
-   * this object from the DBStore's backPointers hash structure.</p>
+   * this object from the DBStore's aSymLinkTracker hash structure.</p>
    *
    * <p>Typically this will be done when an object is being deleted from
    * the database in response to a journal entry, or if the object is
    * being replaced with an updated version from the journal.</p>
    *
    * <p>During the commit process of a normal transaction, the {@link
-   * arlut.csd.ganymede.server.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.server.DBEditObject)
-   * syncObjBackPointers()} method in the {@link
    * arlut.csd.ganymede.server.DBEditSet DBEditSet} class handles
    * these updates instead.</p>
    */
 
-  void unsetBackPointers()
+  void unregisterAsymmetricLinks()
   {
-    Ganymede.db.backPointers.unregisterObject(null, getASymmetricTargets(), getInvid());
+    Ganymede.db.aSymLinkTracker.unregisterObject(null, getASymmetricTargets(), getInvid());
   }
 
   /**

@@ -1675,7 +1675,7 @@ public class GanymedeServer implements Server {
         // find objects pointing to other objects with non-symmetric
         // links
 
-	if (!Ganymede.db.backPointers.checkInvids(session))
+	if (!Ganymede.db.aSymLinkTracker.checkInvids(session))
 	  {
 	    ok = false;
 	  }

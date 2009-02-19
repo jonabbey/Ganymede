@@ -925,7 +925,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	tmpIterationSet.add(tempObject);
 	objectTable.putNoSyncNoRemove(tempObject);
-	tempObject.setBackPointers(); // register anonymous invid fields
+	tempObject.registerAsymmetricLinks(); // register anonymous invid fields
       }
     
     // and switch it in

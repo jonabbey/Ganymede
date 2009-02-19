@@ -255,11 +255,11 @@ public final class DBStore implements JythonMap {
   Hashtable<Short,DBObjectBase> objectBases;
 
   /** 
-   * The backPointers Object tracking invids which point to specific
-   * objects in the Ganymede persistent data store.
+   * Tracks invids which point to specific objects via asymmetric
+   * links in the Ganymede persistent data store.
    */
 
-  DBLinkTracker backPointers;
+  DBLinkTracker aSymLinkTracker;
 
   /** 
    * A collection of {@link arlut.csd.ganymede.server.DBNameSpace
@@ -334,7 +334,7 @@ public final class DBStore implements JythonMap {
     debug = Ganymede.debug;
 
     objectBases = new Hashtable<Short, DBObjectBase>(20); // default 
-    backPointers = new DBLinkTracker();
+    aSymLinkTracker = new DBLinkTracker();
     nameSpaces = new Vector();
 
     try

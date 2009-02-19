@@ -669,7 +669,7 @@ public class DBEditSet {
 	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).checkpoint(this, name);
       }
 
-    Ganymede.db.backPointers.checkpoint(session, name);
+    Ganymede.db.aSymLinkTracker.checkpoint(session, name);
   }
 
   /**
@@ -768,7 +768,7 @@ public class DBEditSet {
 	  }
       }
 
-    Ganymede.db.backPointers.popCheckpoint(session, name);
+    Ganymede.db.aSymLinkTracker.popCheckpoint(session, name);
 
     // if we've cleared the last checkpoint stacked, wake up any
     // threads that are blocking to create new checkpoints
@@ -991,7 +991,7 @@ public class DBEditSet {
 	  }
       }
 
-    Ganymede.db.backPointers.rollback(session, name);
+    Ganymede.db.aSymLinkTracker.rollback(session, name);
 
     return success;
   }
@@ -1544,7 +1544,7 @@ public class DBEditSet {
     commit_replace_objects();
     commit_updateNamespaces();
     DBDeletionManager.releaseSession(session);
-    Ganymede.db.backPointers.commit(session);
+    Ganymede.db.aSymLinkTracker.commit(session);
     commit_updateBases(fieldsTouched);
   }
 
@@ -2373,10 +2373,10 @@ public class DBEditSet {
       case ObjectStatus.CREATING:
       case ObjectStatus.EDITING:
 
-	// we need to update DBStore.backPointers to take into account
-	// the changes made to this object.
+	// we need to update DBStore.aSymLinkTracker to take into
+	// account the changes made to this object.
 
-	Ganymede.db.backPointers.syncObjTargets(eObj);
+	Ganymede.db.aSymLinkTracker.syncObjTargets(eObj);
 
 	// Create a read-only version of eObj, with all fields
 	// reset to checked-in status, put it into our object hash
@@ -2400,10 +2400,11 @@ public class DBEditSet {
 
       case ObjectStatus.DELETING:
 
-	// we need to update DBStore.backPointers to take into account
-	// the changes made to this object.
+	// we need to update DBStore.aSymLinkTracker to take into
+	// account the changes made to this object (by comparing eObj
+	// with eObj.original)
 
-	Ganymede.db.backPointers.syncObjTargets(eObj);
+	Ganymede.db.aSymLinkTracker.syncObjTargets(eObj);
 
 	// Deleted objects had their deletion finalization done before
 	// we ever got to this point.
@@ -2425,9 +2426,6 @@ public class DBEditSet {
 	break;
 
       case ObjectStatus.DROPPING:
-
-	// don't need to update backpointers, since this object was
-	// created and destroyed within this transaction
 
 	// dropped objects had their deletion finalization done before
 	// we ever got to this point..
@@ -2611,7 +2609,7 @@ public class DBEditSet {
 
     // and scrub any link tracking data for the session
 
-    Ganymede.db.backPointers.abort(session);
+    Ganymede.db.aSymLinkTracker.abort(session);
 
     // make sure that we haven't somehow left a write lock
     // hanging.. and let's do it before we deconstruct.  This is a
