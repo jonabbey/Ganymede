@@ -4017,5 +4017,4 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     return null;
   }
-
 }
