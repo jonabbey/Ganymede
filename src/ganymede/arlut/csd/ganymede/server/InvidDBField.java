@@ -2205,7 +2205,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (!Ganymede.db.aSymLinkTracker.linkExists(getSession(), myInvid, temp))
 		  {
-		    // "*** InvidDBField.test(): aSymLinkTracker doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
+		    // "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
 		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
 		    result = false;
 

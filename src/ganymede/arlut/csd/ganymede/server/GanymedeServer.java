@@ -1701,15 +1701,6 @@ public class GanymedeServer implements Server {
 
   public boolean checkEmbeddedObjects()
   {
-    Enumeration
-      enum1, enum2;
-
-    DBObjectBase
-      base;
-
-    DBObject
-      object;
-
     boolean
       ok = true;
 
@@ -1743,12 +1734,8 @@ public class GanymedeServer implements Server {
       {
 	// loop over the object bases
 
-	enum1 = Ganymede.db.objectBases.elements();
-
-	while (enum1.hasMoreElements())
+	for (DBObjectBase base: Ganymede.db.objectBases.values())
 	  {
-	    base = (DBObjectBase) enum1.nextElement();
-
 	    if (!base.isEmbedded())
 	      {
 		continue;
@@ -1758,12 +1745,8 @@ public class GanymedeServer implements Server {
 
 	    Ganymede.debug(ts.l("checkEmbeddedObjects.checking", base.getName()));
 	
-	    enum2 = base.objectTable.elements();
-
-	    while (enum2.hasMoreElements())
+	    for (DBObject object: base.objectTable)
 	      {
-		object = (DBObject) enum2.nextElement();
-
 		try
 		  {
 		    gSession.getContainingObj(object);
