@@ -430,53 +430,69 @@ public class DBLinkTracker {
 
   public synchronized boolean checkInvids(DBSession session)
   {
-    boolean ok = true;
+    DBLinkTrackerElement realLinks = new DBLinkTrackerElement();
+
+    /* -- */
 
     // "Testing Ganymede.db.backPointers structure for validity"
-
     Ganymede.debug(ts.l("checkInvids.backpointers"));
 
     // "Ganymede persistentLinks hash structure tracking {0} invid''s."
-
     Ganymede.debug(ts.l("checkInvids.backpointers2", Integer.valueOf(persistentLinks.targetToSourcesMap.size())));
 
-    for (Invid target: persistentLinks.targetToSourcesMap.keySet())
+    for (DBObjectBase base: Ganymede.db.objectBases.values())
       {
-	Set<Invid> sources = persistentLinks.targetToSourcesMap.get(target);
-
-	Enumeration baseEnum = Ganymede.db.objectBases.elements();
-
-	while (baseEnum.hasMoreElements())
+	for (DBObject object: base.getObjectTable())
 	  {
-	    DBObjectBase base = (DBObjectBase) baseEnum.nextElement();
+	    realLinks.registerObject(object.getASymmetricTargets(), object.getInvid());
+	  }
+      }
 
-	    Ganymede.debug(ts.l("checkInvids.checking", base.getName()));
+    if (realLinks.targetToSourcesMap.equals(persistentLinks.targetToSourcesMap))
+      {
+	return true;
+      }
 
-	    Enumeration objectEnum = base.objectTable.elements();
+    for (Invid target: realLinks.targetToSourcesMap.keySet())
+      {
+	Set<Invid> realSources = realLinks.targetToSourcesMap.get(target);
 
-	    while (objectEnum.hasMoreElements())
+	if (!persistentLinks.targetToSourcesMap.containsKey(target))
+	  {
+	    // "** DBLinkTracker.checkInvids() target object {0} is not listed in the DBLinkTracker structures."
+	    Ganymede.debug(ts.l("checkInvids.missingTarget", describe(null, target)));
+
+	    continue;
+	  }
+
+	Set<Invid> trackedSources = persistentLinks.targetToSourcesMap.get(target);
+
+	Set<Invid> extraReal = new HashSet<Invid>(realSources);
+	extraReal.removeAll(trackedSources);
+
+	Set<Invid> extraTracked = new HashSet<Invid>(trackedSources);
+	extraTracked.removeAll(realSources);
+
+	if (extraReal.size() > 0)
+	  {
+	    for (Invid extraSource: extraReal)
 	      {
-		DBObject object = (DBObject) objectEnum.nextElement();
+		// "** DBLinkTracker.checkInvids(): DBObject {0} has a forward asymmetric link to invid {1} that is not present in the DBLinkTracker structures!"
+		Ganymede.debug(ts.l("checkInvids.extraLink", extraSource, target));
+	      }
+	  }
 
-		Invid objInvid = object.getInvid();
-
-		Set<Invid> asymTargets = object.getASymmetricTargets();
-
-		if (asymTargets.contains(target) && !sources.contains(objInvid))
-		  {
-		    // "** DBLinkTracker.checkInvids(): DBObject {0} has a forward asymmetric link to invid {1} that is not present in the DBLinkTracker structures!"
-		    Ganymede.debug(ts.l("checkInvids.extraLink", object.toString(), target));
-		  }
-		else if (sources.contains(objInvid) && !asymTargets.contains(target))
-		  {
-		    // "** DBLinkTracker.checkInvids(): DBObject {0} is lacking a forward asymmetric link to invid {1} that the DBLinkTracker thinks should be there!"
-		    Ganymede.debug(ts.l("checkInvids.missingLink", object.toString(), target));
-		  }
+	if (extraTracked.size() > 0)
+	  {
+	    for (Invid missingSource: extraTracked)
+	      {
+		// "** DBLinkTracker.checkInvids(): DBObject {0} is lacking a forward asymmetric link to invid {1} that the DBLinkTracker thinks should be there!"
+		Ganymede.debug(ts.l("checkInvids.missingLink", missingSource, target));
 	      }
 	  }
       }
 
-    return ok;
+    return false;
   }
 
   private String describe(DBSession session, Invid invid)
