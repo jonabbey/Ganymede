@@ -252,7 +252,7 @@ public final class DBStore implements JythonMap {
    * hash mapping object type to DBObjectBase's
    */
 	
-  Hashtable objectBases;
+  Hashtable<Short,DBObjectBase> objectBases;
 
   /** 
    * The backPointers Object tracking invids which point to specific
@@ -333,7 +333,7 @@ public final class DBStore implements JythonMap {
   {
     debug = Ganymede.debug;
 
-    objectBases = new Hashtable(20); // default 
+    objectBases = new Hashtable<Short, DBObjectBase>(20); // default 
     backPointers = new DBLinkTracker();
     nameSpaces = new Vector();
 
