@@ -3041,9 +3041,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  }
       }
 
-    // clear the registration of the back links we just removed
-
-    Ganymede.db.backPointers.unlinkSource(getSession(), getInvid());
 
     return retVal;
   }
