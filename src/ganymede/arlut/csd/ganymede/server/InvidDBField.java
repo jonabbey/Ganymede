@@ -114,7 +114,7 @@ import arlut.csd.ganymede.rmi.invid_field;
 
 public final class InvidDBField extends DBField implements invid_field {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   /**
    * TranslationService object for handling string localization in
@@ -1094,6 +1094,11 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	// "Not an editable invid field: {0} in object {1}"
 	throw new IllegalArgumentException(ts.l("bind.noteditable", getName(), owner.getLabel()));
+      }
+
+    if (debug)
+      {
+	System.err.println("InvidDBField.bind(" + oldRemote + ", " + newRemote + ", " + local + ")");
       }
 
     eObj = (DBEditObject) this.owner;
@@ -3595,6 +3600,11 @@ public final class InvidDBField extends DBField implements invid_field {
     if (!isVector())
       {
 	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+      }
+
+    if (debug)
+      {
+	System.err.println("InvidDBField[" + toString() + ".deleteElement(" + index + ", " + local + ", " + noWizards + ")");
       }
 
     Vector values = getVectVal();
