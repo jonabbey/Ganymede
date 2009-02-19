@@ -1582,7 +1582,7 @@ public class GanymedeServer implements Server {
   public boolean checkInvids()
   {
     Enumeration
-      enum1, enum2;
+      baseEnum, objectEnum;
 
     DBObjectBase
       base;
@@ -1627,25 +1627,25 @@ public class GanymedeServer implements Server {
 
     try
       {
-	// loop over the object bases
+	// first we're going to do our forward test, making sure that
+	// all pointers registered in the objects in our data store
+	// point to valid objects and that they have valid symmetric
+	// back pointers or virtual back pointer registrations in the
+	// DBLinkTracker class.
 
-	enum1 = Ganymede.db.objectBases.elements();
+	baseEnum = Ganymede.db.objectBases.elements();
 
-	while (enum1.hasMoreElements())
+	while (baseEnum.hasMoreElements())
 	  {
-	    base = (DBObjectBase) enum1.nextElement();
-
-	    // loop over the objects in this base
+	    base = (DBObjectBase) baseEnum.nextElement();
 
 	    Ganymede.debug(ts.l("checkInvids.checking", base.getName()));
-	
-	    enum2 = base.objectTable.elements();
 
-	    while (enum2.hasMoreElements())
+	    objectEnum = base.objectTable.elements();
+
+	    while (objectEnum.hasMoreElements())
 	      {
-		object = (DBObject) enum2.nextElement();
-
-		// loop over the fields in this object	    
+		object = (DBObject) objectEnum.nextElement();
 
 		synchronized (object.fieldAry)
 		  {
