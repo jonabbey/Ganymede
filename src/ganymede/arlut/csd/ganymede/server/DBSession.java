@@ -1646,7 +1646,16 @@ final public class DBSession {
       {
 	DBObject obj = viewDBObject(invid);
 
-	return obj.getTypeName() + " " + obj.getLabel();
+	if (obj != null)
+	  {
+	    return obj.getTypeName() + " " + obj.getLabel();
+	  }
+	else
+	  {
+	    DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+
+	    return base.getName() + " " + invid.toString() + " (non-existing)";
+	  }
       }
     catch (NullPointerException ex)
       {
