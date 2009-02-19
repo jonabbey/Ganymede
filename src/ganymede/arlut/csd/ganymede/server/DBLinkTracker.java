@@ -107,7 +107,7 @@ public class DBLinkTracker {
    * forward asymmetric links pointing to the invid key is returned.
    */
 
-  private DBLinkTrackerElement persistentLinks;
+  private DBLinkTrackerContext persistentLinks;
 
   /**
    * sessionOverlays tracks modifications that are accruing in active
@@ -126,7 +126,7 @@ public class DBLinkTracker {
 
   public DBLinkTracker()
   {
-    persistentLinks = new DBLinkTrackerElement();
+    persistentLinks = new DBLinkTrackerContext();
     sessionOverlays = new HashMap<DBSession, DBLinkTrackerSession>(23);
   }
 
@@ -195,7 +195,7 @@ public class DBLinkTracker {
 
     DBLinkTrackerSession tracker = getSession(session);
 
-    persistentLinks.transferFrom(tracker.getCurrentElement());
+    persistentLinks.transferFrom(tracker.getCurrentContext());
 
     sessionOverlays.remove(session);
   }
@@ -236,7 +236,7 @@ public class DBLinkTracker {
 	System.err.println("DBLinkTracker.linkObject(" + session + ", " + target + ", " + source + ")");
       }
 
-    return getElement(session).linkObject(target, source);
+    return getContext(session).linkObject(target, source);
   }
 
   /**
@@ -259,7 +259,7 @@ public class DBLinkTracker {
 	System.err.println("DBLinkTracker.unlinkObject(" + session + ", " + target + ", " + source + ")");
       }
 
-    return getElement(session).unlinkObject(target, source);
+    return getContext(session).unlinkObject(target, source);
   }
 
   /**
@@ -279,7 +279,7 @@ public class DBLinkTracker {
 	System.err.println("DBLinkTracker.registerObject(" + session + ", " + targets + ", " + source + ")");
       }
 
-    getElement(session).registerObject(targets, source);
+    getContext(session).registerObject(targets, source);
   }
 
   /**
@@ -299,7 +299,7 @@ public class DBLinkTracker {
 	System.err.println("DBLinkTracker.unregisterObject(" + session + ", " + targets + ", " + source + ")");
       }
 
-    getElement(session).unregisterObject(targets, source);
+    getContext(session).unregisterObject(targets, source);
   }
 
   /**
@@ -316,7 +316,7 @@ public class DBLinkTracker {
 	throw new NullPointerException();
       }
 
-    return getElement(session).getForwardLinkSources(target);
+    return getContext(session).getForwardLinkSources(target);
   }
 
   /**
@@ -333,7 +333,7 @@ public class DBLinkTracker {
 	throw new NullPointerException();
       }
 
-    return getElement(session).forwardAsymmetricLinksToString(target);
+    return getContext(session).forwardAsymmetricLinksToString(target);
   }
 
   /**
@@ -411,7 +411,7 @@ public class DBLinkTracker {
 	throw new NullPointerException();
       }
 
-    return getElement(session).linkExists(source, target);
+    return getContext(session).linkExists(source, target);
   }
 
   /**
@@ -431,7 +431,7 @@ public class DBLinkTracker {
   public synchronized boolean checkInvids(DBSession session)
   {
     boolean ok = true;
-    DBLinkTrackerElement realLinks = new DBLinkTrackerElement();
+    DBLinkTrackerContext realLinks = new DBLinkTrackerContext();
 
     /* -- */
 
@@ -531,7 +531,7 @@ public class DBLinkTracker {
       }
     else
       {
-	DBLinkTrackerSession sessionObj = new DBLinkTrackerSession();
+	DBLinkTrackerSession sessionObj = new DBLinkTrackerSession(session);
 
 	sessionOverlays.put(session, sessionObj);
 
@@ -540,18 +540,18 @@ public class DBLinkTracker {
   }
 
   /**
-   * This method returns the appropriate, active DBLinkTrackerElement
+   * This method returns the appropriate, active DBLinkTrackerContext
    * for the session being requested.
    *
    * The session parameter may be null, in which case the
-   * persistentLinks element is returned.
+   * persistentLinks context is returned.
    *
    * If the session has not been seen before, a new
-   * DBLinkTrackerSession and DBLinkTrackerElement will be created to
+   * DBLinkTrackerSession and DBLinkTrackerContext will be created to
    * service the session.
    */
 
-  private DBLinkTrackerElement getElement(DBSession session)
+  private DBLinkTrackerContext getContext(DBSession session)
   {
     if (session == null)
       {
@@ -562,15 +562,15 @@ public class DBLinkTracker {
       {
 	DBLinkTrackerSession sessionObj = sessionOverlays.get(session);
 
-	return sessionObj.getCurrentElement();
+	return sessionObj.getCurrentContext();
       }
     else
       {
-	DBLinkTrackerSession sessionObj = new DBLinkTrackerSession();
+	DBLinkTrackerSession sessionObj = new DBLinkTrackerSession(session);
 
 	sessionOverlays.put(session, sessionObj);
 
-	return sessionObj.getCurrentElement();
+	return sessionObj.getCurrentContext();
       }
   }
 
@@ -597,8 +597,8 @@ public class DBLinkTracker {
    * DBLinkTrackerSession maintains the per-session overlay on top of
    * the persisted back link structure, and supports a {@link
    * arlut.csd.Util.NamedStack} of {@link
-   * arlut.csd.ganymede.server.DBLinkTrackerElement
-   * DBLinkTrackerElements} to allow checkpoint, popCheckpoint, and
+   * arlut.csd.ganymede.server.DBLinkTrackerContext
+   * DBLinkTrackerContexts} to allow checkpoint, popCheckpoint, and
    * rollback operations to properly interact with the DBLinkTracker
    * system.
    */
@@ -606,61 +606,65 @@ public class DBLinkTracker {
   class DBLinkTrackerSession
   {
     /**
-     * Named stack of DBLinkTrackerElement objects, tracking the
+     * Named stack of DBLinkTrackerContext objects, tracking the
      * overlays on the asymmetric link structures of DBLinkTracker as
      * checkpoints are established and popped/rolledback for the
      * DBSession.
      */
 
-    private NamedStack<DBLinkTrackerElement> elements;
+    private NamedStack<DBLinkTrackerContext> contexts;
+
+    private DBSession session = null;
 
     /* -- */
 
-    public DBLinkTrackerSession()
+    public DBLinkTrackerSession(DBSession session)
     {
-      elements = new NamedStack<DBLinkTrackerElement>();
+      this.session = session;
 
-      DBLinkTrackerElement defaultElement = new DBLinkTrackerElement(persistentLinks);
+      contexts = new NamedStack<DBLinkTrackerContext>();
 
-      elements.push(DBLinkTrackerSession.class.getName(), defaultElement);
+      DBLinkTrackerContext defaultContext = new DBLinkTrackerContext(this, persistentLinks);
+
+      contexts.push(DBLinkTrackerSession.class.getName(), defaultContext);
     }
 
-    public synchronized DBLinkTrackerElement getCurrentElement()
+    public DBLinkTrackerContext getCurrentContext()
     {
-      return elements.getTopObject();
+      return contexts.getTopObject();
     }
 
-    public synchronized void checkpoint(String ckp_key)
+    public void checkpoint(String ckp_key)
     {
-      elements.push(ckp_key, new DBLinkTrackerElement(getCurrentElement()));
+      contexts.push(ckp_key, new DBLinkTrackerContext(this, getCurrentContext()));
     }
 
-    public synchronized void rollback(String ckp_key)
+    public void rollback(String ckp_key)
     {
-      elements.pop(ckp_key);
+      contexts.pop(ckp_key);
     }
 
-    public synchronized void consolidate(String ckp_key)
+    public void consolidate(String ckp_key)
     {
-      DBLinkTrackerElement consolidationElement = getCurrentElement();
+      DBLinkTrackerContext consolidationContext = getCurrentContext();
 
-      if (elements.pop(ckp_key) != null)
+      if (contexts.pop(ckp_key) != null)
 	{
-	  getCurrentElement().transferFrom(consolidationElement);
+	  getCurrentContext().transferFrom(consolidationContext);
 	}
     }
   }
 
   /*----------------------------------------------------------------------------
                                                                      inner class
-                                                            DBLinkTrackerElement
+                                                            DBLinkTrackerContext
 
   ----------------------------------------------------------------------------*/
 
   /**
    * Helper class associated with DBLinkTracker.
    *
-   * DBLinkTrackerElement is responsible for recording per-DBSession
+   * DBLinkTrackerContext is responsible for recording per-DBSession
    * overlays onto the DBLinkTracker's main overlay structure,
    * representing additions or subtractions from the overlay
    * that affect a particular DBSession.
@@ -670,71 +674,140 @@ public class DBLinkTracker {
    * properly interact with the DBLinkTracker system.
    */
 
-  class DBLinkTrackerElement
+  class DBLinkTrackerContext
   {
-    DBLinkTrackerElement parent;
+    /**
+     * If we are representing changes made by a DBSession, we'll need
+     * to point to our parent context.  Checkpoints made in a
+     * DBEditSet will stack DBLinkTrackerContexts in the
+     * DBLinkTrackerSession class, with each checkpoint pointing to
+     * the DBLinkTrackerContext that preceded it in the checkpoint
+     * stack.
+     */
+
+    DBLinkTrackerContext parent;
+
+    /**
+     * If we are tracking changes made by a specific DBSession, we'll
+     * record a reference to the DBLinkTrackerSession here.
+     *
+     * Note that sessionTracker will only be null if parent is null,
+     * as we must then be representing the persistent, checked-in
+     * state of the linkages.
+     */
+
+    DBLinkTrackerSession sessionTracker;
+
+    /**
+     * Map of target Invids to Sets of Invids that have forward
+     * asymmetric links to the target in this context.
+     */
 
     Map<Invid, Set<Invid>> targetToSourcesMap;
 
-    DBSession session;
+    /**
+     * These are source invids that our session has modified.  We know
+     * that only one session at a time can have an object checked out
+     * for editing, so we know that sourcesTouched by one
+     * DBLinkTrackerContext cannot overlap with sourcesTouched from a
+     * DBLinkTrackerContext associated with a different DBSession.
+     *
+     * Thus, if we have an Invid our sourcesTouched Set, we know that
+     * we can add or remove it from another context when we are merged
+     * down into it.
+     */
+
+    Set<Invid> sourcesTouched;
 
     /* -- */
 
-    public DBLinkTrackerElement()
+    /**
+     * Constructor for the root context.
+     */
+
+    public DBLinkTrackerContext()
     {
       parent = null;
-      session = null;
+      sessionTracker = null;
+      sourcesTouched = null;
       targetToSourcesMap = new HashMap<Invid, Set<Invid>>();
     }
 
-    public DBLinkTrackerElement(DBSession session)
-    {
-      this();
+    /**
+     * Constructor for a session context.
+     */
 
-      this.session = session;
-    }
-
-    public DBLinkTrackerElement(DBLinkTrackerElement parent)
+    public DBLinkTrackerContext(DBLinkTrackerSession sessionTracker, DBLinkTrackerContext parent)
     {
       this();
 
       this.parent = parent;
-      this.session = parent.session;
+      this.sessionTracker = sessionTracker;
+      this.sourcesTouched = new HashSet<Invid>(parent.sourcesTouched);
     }
 
-    public synchronized void transferFrom(DBLinkTrackerElement otherElement)
+    /**
+     * This method is used to fold changes made in another context
+     * into our own.
+     *
+     * If we are associated with a DBLinkTrackerSession, we must be
+     * receiving a fold-in from a checkpoint context that is being
+     * coalesced into our own in response to a
+     * DBEditSet.popCheckpoint().  In this case, we want to replace
+     * our own data with the one from the newer checkpoint.
+     *
+     * If do not have an associated DBLinkTrackerSession, we are the
+     * context for the persisted checked-in objects in the DBStore,
+     * and we have to take care to only transfer relating to
+     * asymmetric links from Invids that were checked out by the
+     * otherContext's associated DBSession.
+     */
+
+    public void transferFrom(DBLinkTrackerContext otherContext)
     {
-      // We're copying all sets of link targets from otherElement.
-      // Some of these sets might be empty, but if we have a parent
-      // element, we still need to copy these, as they signify that
-      // the otherElement's frame deleted all of the links to that
-      // invid.
-      //
-      // If we are the root node of the DBLinkTrackerElement chain, we
-      // can go ahead and just delete those empty sources, because
-      // we'll never need to represent the deletion of those links to
-      // an underlying element.
+      if (otherContext.sessionTracker == null)
+	{
+	  throw new RuntimeException("Can't transfer changes from a context that is not associated with a session tracker.");
+	}
 
       if (parent != null)
 	{
-	  this.targetToSourcesMap.putAll(otherElement.targetToSourcesMap);
-	}
-      else
-	{
-	  // source has forward asymmetric links, we're tracking the
-	  // reverse pointers from the targets
-
-	  for (Invid target: otherElement.targetToSourcesMap.keySet())
+	  if (sessionTracker != otherContext.sessionTracker)
 	    {
-	      Set<Invid> sources = otherElement.targetToSourcesMap.get(target);
+	      throw new RuntimeException("We can't transfer from one session to another.");
+	    }
 
-	      if (sources.size() == 0)
+	  this.targetToSourcesMap.putAll(otherContext.targetToSourcesMap);
+	  this.sourcesTouched.addAll(otherContext.sourcesTouched);
+
+	  return;
+	}
+
+      // okay, we're the root node, which means we have to take care
+      // only to fold in changes relating to source invids that the
+      // otherContext has checked out for its session, otherwise we
+      // might get errors from concurrent sessions working.
+
+      for (Invid target: otherContext.targetToSourcesMap.keySet())
+	{
+	  Set<Invid> otherSources = otherContext.targetToSourcesMap.get(target);
+	  Set<Invid> localSources = targetToSourcesMap.get(target);
+
+	  if (localSources == null)
+	    {
+	      localSources = new HashSet<Invid>();
+	      targetToSourcesMap.put(target, localSources);
+	    }
+
+	  for (Invid touchedSource: otherContext.sourcesTouched)
+	    {
+	      if (otherSources.contains(touchedSource))
 		{
-		  this.targetToSourcesMap.remove(target);
+		  localSources.add(touchedSource);
 		}
 	      else
 		{
-		  this.targetToSourcesMap.put(target, sources);
+		  localSources.remove(touchedSource);
 		}
 	    }
 	}
@@ -749,12 +822,14 @@ public class DBLinkTracker {
      * pointer from target to source, false if we previously were.
      */
 
-    public synchronized boolean linkObject(Invid target, Invid source)
+    public boolean linkObject(Invid target, Invid source)
     {
       if (target == null || source == null)
 	{
 	  throw new NullPointerException();
 	}
+
+      sourcesTouched.add(source);
 
       return getForwardLinkSources(target).add(source);
     }
@@ -767,12 +842,14 @@ public class DBLinkTracker {
      * to target, false otherwise.
      */
 
-    public synchronized boolean unlinkObject(Invid target, Invid source)
+    public boolean unlinkObject(Invid target, Invid source)
     {
       if (target == null || source == null)
 	{
 	  throw new NullPointerException();
 	}
+
+      sourcesTouched.add(source);
 
       Set<Invid> sources = getForwardLinkSources(target);
 
@@ -780,6 +857,10 @@ public class DBLinkTracker {
 
       if (parent == null && sources.size() == 0)
 	{
+	  // we can only remove a target from the targetToSourcesMap
+	  // if we are the root node, else transferFrom() will not
+	  // know that we made any changes to links pointing to target
+
 	  targetToSourcesMap.remove(target);
 	}
 
@@ -791,12 +872,14 @@ public class DBLinkTracker {
      * links to all object invids in the targets set.
      */
 
-    public synchronized void registerObject(Set<Invid> targets, Invid source)
+    public void registerObject(Set<Invid> targets, Invid source)
     {
       if (targets == null || source == null)
 	{
 	  throw new NullPointerException();
 	}
+
+      sourcesTouched.add(source);
 
       for (Invid target: targets)
 	{
@@ -810,12 +893,14 @@ public class DBLinkTracker {
      * Invids in the targets Set.
      */
 
-    public synchronized void unregisterObject(Set<Invid> targets, Invid source)
+    public void unregisterObject(Set<Invid> targets, Invid source)
     {
       if (targets == null || source == null)
 	{
 	  throw new NullPointerException();
 	}
+
+      sourcesTouched.add(source);
 
       for (Invid target: targets)
 	{
@@ -829,7 +914,7 @@ public class DBLinkTracker {
      * back pointer from target to source.
      */
 
-    public synchronized boolean linkExists(Invid source, Invid target)
+    public boolean linkExists(Invid source, Invid target)
     {
       if (target == null || source == null)
 	{
@@ -844,7 +929,7 @@ public class DBLinkTracker {
      * pointers corresponding to forward asymmetric links from source.
      */
 
-    public synchronized String forwardAsymmetricLinksToString(Invid target)
+    public String forwardAsymmetricLinksToString(Invid target)
     {
       if (target == null)
 	{
@@ -854,14 +939,14 @@ public class DBLinkTracker {
       StringBuilder builder = new StringBuilder();
 
       builder.append("-> Tracked forward links pointing at ");
-      builder.append(describe(session, target));
+      builder.append(describe(sessionTracker.session, target));
       builder.append("\n");
 
       Set<Invid> sources = targetToSourcesMap.get(target);
 
       if (sources == null && parent != null)
 	{
-	  DBLinkTrackerElement p = parent;
+	  DBLinkTrackerContext p = parent;
 
 	  while (sources == null && p != null)
 	    {
@@ -880,7 +965,7 @@ public class DBLinkTracker {
 	  for (Invid source: sources)
 	    {
 	      builder.append("<--- ");
-	      builder.append(describe(session, source));
+	      builder.append(describe(sessionTracker.session, source));
 	      builder.append("\n");
 	    }
 	}
@@ -891,13 +976,13 @@ public class DBLinkTracker {
     /**
      * This method returns a Set of all Invids that point to the
      * target object through forward asymmetric links in this
-     * DBLinkTrackerElement's context.
+     * DBLinkTrackerContext's context.
      *
-     * If we don't have a set in our own element, we'll either copy
+     * If we don't have a set in our own context, we'll either copy
      * the set for the target from our nearest parent that has a set
      * for the target, or else we'll create a new empty set.. in this
      * way, we provide a Set of forward pointer Invids that is
-     * specific to this element in our session/checkpoint stack.
+     * specific to this context in our session/checkpoint stack.
      */
 
     private Set<Invid> getForwardLinkSources(Invid target)
@@ -906,7 +991,7 @@ public class DBLinkTracker {
 
       if (sources == null)
 	{
-	  DBLinkTrackerElement p = parent;
+	  DBLinkTrackerContext p = parent;
 
 	  while (p != null)
 	    {
