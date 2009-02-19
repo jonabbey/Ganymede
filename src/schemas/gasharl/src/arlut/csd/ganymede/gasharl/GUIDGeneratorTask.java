@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -54,6 +54,7 @@
 package arlut.csd.ganymede.gasharl;
 
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Vector;
 
 import org.doomdark.uuid.EthernetAddress;
@@ -203,15 +204,14 @@ public class GUIDGeneratorTask implements Runnable {
 
   public boolean createGUIDs() throws NotLoggedInException
   {
-    Vector users = mySession.getObjects(SchemaConstants.UserBase);
+    List<DBObject> users = mySession.getObjects(SchemaConstants.UserBase);
     UUIDGenerator gen = UUIDGenerator.getInstance();
     EthernetAddress myAddress = new EthernetAddress("8:0:20:fd:6b:7");
 
     /* -- */
     
-    for (int i = 0; i < users.size(); i++)
+    for (DBObject user: users)
       {
-	DBObject user = (DBObject) users.elementAt(i);
 	Invid invid = user.getInvid();
 
 	ReturnVal retVal = mySession.edit_db_object(invid);

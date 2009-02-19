@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -54,6 +54,7 @@
 package arlut.csd.ganymede.gasharl;
 
 import java.rmi.RemoteException;
+import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.ganymede.common.Invid;
@@ -208,11 +209,10 @@ public class FixupLabelsTask implements Runnable {
 
   private boolean assignAutomounterLabels() throws InterruptedException, NotLoggedInException
   {
-    Vector users = mySession.getObjects(SchemaConstants.UserBase);
-    
-    for (int i = 0; i < users.size(); i++)
+    List<DBObject> users = mySession.getObjects(SchemaConstants.UserBase);
+
+    for (DBObject user: users)
       {
-	DBObject user = (DBObject) users.elementAt(i);
 	Invid invid = user.getInvid();
 
 	// all we need to do is to edit the systems and the
@@ -231,11 +231,10 @@ public class FixupLabelsTask implements Runnable {
 
   private boolean fixupInterfaceLabels() throws InterruptedException, NotLoggedInException
   {
-    Vector systems = mySession.getObjects(interfaceSchema.BASE);
+    List<DBObject> systems = mySession.getObjects(interfaceSchema.BASE);
     
-    for (int i = 0; i < systems.size(); i++)
+    for (DBObject system: systems)
       {
-	DBObject system = (DBObject) systems.elementAt(i);
 	Invid invid = system.getInvid();
 
 	// all we need to do is to edit the systems and the
