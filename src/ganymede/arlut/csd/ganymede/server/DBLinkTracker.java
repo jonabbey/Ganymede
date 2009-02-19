@@ -89,7 +89,7 @@ import java.util.Set;
 
 public class DBLinkTracker {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   /**
    * <p>TranslationService object for handling string localization in
@@ -430,6 +430,7 @@ public class DBLinkTracker {
 
   public synchronized boolean checkInvids(DBSession session)
   {
+    boolean ok = true;
     DBLinkTrackerElement realLinks = new DBLinkTrackerElement();
 
     /* -- */
@@ -462,6 +463,8 @@ public class DBLinkTracker {
 	    // "** DBLinkTracker.checkInvids() target object {0} is not listed in the DBLinkTracker structures."
 	    Ganymede.debug(ts.l("checkInvids.missingTarget", describe(null, target)));
 
+	    ok = false;
+
 	    continue;
 	  }
 
@@ -479,6 +482,8 @@ public class DBLinkTracker {
 	      {
 		// "** DBLinkTracker.checkInvids(): DBObject {0} has a forward asymmetric link to invid {1} that is not present in the DBLinkTracker structures!"
 		Ganymede.debug(ts.l("checkInvids.extraLink", extraSource, target));
+
+		ok = false;
 	      }
 	  }
 
@@ -488,11 +493,13 @@ public class DBLinkTracker {
 	      {
 		// "** DBLinkTracker.checkInvids(): DBObject {0} is lacking a forward asymmetric link to invid {1} that the DBLinkTracker thinks should be there!"
 		Ganymede.debug(ts.l("checkInvids.missingLink", missingSource, target));
+
+		ok = false;
 	      }
 	  }
       }
 
-    return false;
+    return ok;
   }
 
   private String describe(DBSession session, Invid invid)
