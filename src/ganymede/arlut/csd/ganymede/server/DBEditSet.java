@@ -2544,10 +2544,6 @@ public class DBEditSet {
 
   private final void release()
   {
-    DBEditObject eObj;
-
-    /* -- */
-
     if (debug)
       {
 	System.err.println("DBEditSet.release()");
@@ -2558,11 +2554,8 @@ public class DBEditSet {
 	throw new RuntimeException(ts.l("global.already"));
       }
 
-    Iterator iter = objects.values().iterator();
-
-    while (iter.hasNext())
+    for (DBEditObject eObj: objects.values())
       {
-	eObj = (DBEditObject) iter.next();
 	eObj.release(true);
 
 	switch (eObj.getStatus())
