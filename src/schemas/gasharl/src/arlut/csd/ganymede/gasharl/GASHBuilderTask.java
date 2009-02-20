@@ -4147,7 +4147,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    writer.write("\t\t{\n");
 	    String guest_range = (String) object.getFieldValueLocal(dhcpNetworkSchema.GUEST_RANGE);
 	    HashMap options2 = new HashMap(); 
-	    writer.write("\t\t\trange\t" + guest_range + "\n");
+	    writer.write("\t\t\trange\t" + guest_range + ";\n");
 	    
 	    if (object.isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
 	      {
