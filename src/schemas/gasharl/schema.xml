@@ -31,6 +31,7 @@
     <namespace name="dhcp_group" case-sensitive="false"/>
     <namespace name="dhcp_option_entry" case-sensitive="false"/>
     <namespace name="dhcp_option_type" case-sensitive="false"/>
+    <namespace name="dhcp_network" case-sensitive="false"/>
   </namespaces>
 
   <object_type_definitions>
