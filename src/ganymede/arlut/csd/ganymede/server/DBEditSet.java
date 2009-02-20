@@ -2373,11 +2373,6 @@ public class DBEditSet {
       case ObjectStatus.CREATING:
       case ObjectStatus.EDITING:
 
-	// we need to update DBStore.aSymLinkTracker to take into
-	// account the changes made to this object.
-
-	Ganymede.db.aSymLinkTracker.syncObjTargets(eObj);
-
 	// Create a read-only version of eObj, with all fields
 	// reset to checked-in status, put it into our object hash
 
@@ -2399,12 +2394,6 @@ public class DBEditSet {
 	break;
 
       case ObjectStatus.DELETING:
-
-	// we need to update DBStore.aSymLinkTracker to take into
-	// account the changes made to this object (by comparing eObj
-	// with eObj.original)
-
-	Ganymede.db.aSymLinkTracker.syncObjTargets(eObj);
 
 	// Deleted objects had their deletion finalization done before
 	// we ever got to this point.

@@ -337,68 +337,6 @@ public class DBLinkTracker {
   }
 
   /**
-   * This method updates the data structures held by this
-   * DBLinkTracker object in keeping with the changes being made by
-   * the DBEditObject obj.
-   *
-   * <p>This method is executed towards the end of a transaction
-   * commit, and compares the current state of this object with its
-   * original state, and makes the appropriate changes to the internal
-   * state of this DBLinkTracker.</p>
-   *
-   * <p>The purpose of this is to support the decoupling of an object
-   * from its backlinks, so that objects can be asymmetrically linked
-   * to an object without having to check that object out for editing.</p>
-   */
-
-  public synchronized void syncObjTargets(DBEditObject obj)
-  {
-    Set<Invid> addedTargets;
-    Set<Invid> removedTargets;
-
-    Invid ourInvid = obj.getInvid();
-    Invid testInvid;
-
-    Set<Invid> linkSources;
-
-    DBObject original;
-
-    /* -- */
-
-    original = obj.getOriginal();
-
-    addedTargets = obj.getASymmetricTargets();
-
-    if (original == null)
-      {
-	removedTargets = new HashSet<Invid>();
-      }
-    else
-      {
-	Set<Invid> oldTargets = original.getASymmetricTargets();
-
-	removedTargets = new HashSet<Invid>(oldTargets);
-	removedTargets.removeAll(addedTargets);
-
-	addedTargets.removeAll(oldTargets);
-      }
-
-    for (Invid target: removedTargets)
-      {
-	if (!unlinkObject(obj.getSession(), target, ourInvid))
-	  {
-	    System.err.println("DBEditObject.syncObjTargets(): couldn't find and remove proper backlink for: " +
-			       target);
-	  }
-      }
-
-    for (Invid target: addedTargets)
-      {
-	linkObject(obj.getSession(), target, ourInvid);
-      }
-  }
-
-  /**
    * Returns true if a forward asymmetric link is registered from
    * source to target.  That is, if we have registered a virtual
    * back pointer from target to source.
