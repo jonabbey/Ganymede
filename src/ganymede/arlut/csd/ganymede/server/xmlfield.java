@@ -1307,6 +1307,8 @@ public class xmlfield implements FieldType {
 			    owner.xSession.err.println("Creating embedded object " + object);
 			  }
 
+			result.setInvid(null); // so merge doesn't complain
+
 			result = ReturnVal.merge(result, field.createNewEmbedded());
 
 			if (!ReturnVal.didSucceed(result))
