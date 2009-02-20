@@ -694,6 +694,23 @@ public abstract class DBField implements Remote, db_field, FieldType {
   {
   }
 
+  /**
+   * Returns the DBSession that this field is associated with or null
+   * if it is being viewed from the persistent store.
+   */
+
+  public final DBSession getSession()
+  {
+    try
+      {
+	return owner.getSession();
+      }
+    catch (NullPointerException ex)
+      {
+	return null;
+      }
+  }
+
   // ****
   //
   // db_field methods

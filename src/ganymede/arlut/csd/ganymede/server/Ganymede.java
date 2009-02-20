@@ -24,7 +24,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -79,6 +79,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.RemoteServer;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -1183,7 +1184,7 @@ public class Ganymede {
     if (true || Ganymede.db.isLessThan(2,11))
       {
 	boolean success = true;
-	Vector objects = internalSession.getObjects(SchemaConstants.ObjectEventBase);
+	List<DBObject> objects = internalSession.getObjects(SchemaConstants.ObjectEventBase);
 
 	if (objects.size() > 0)
 	  {
@@ -1191,10 +1192,8 @@ public class Ganymede {
 
 	    try
 	      {
-		for (int i = 0; i < objects.size(); i++)
+		for (DBObject object: objects)
 		  {
-		    DBObject object = (DBObject) objects.elementAt(i);
-
 		    StringDBField labelField = (StringDBField) object.getField(SchemaConstants.ObjectEventLabel);
 
 		    if (labelField == null)
@@ -1259,8 +1258,7 @@ public class Ganymede {
 
   static private void registerTasks() throws NotLoggedInException
   {
-    Vector objects = internalSession.getObjects(SchemaConstants.TaskBase);
-    DBObject object;
+    List<DBObject> objects = internalSession.getObjects(SchemaConstants.TaskBase);
 
     /* -- */
 
@@ -1271,10 +1269,8 @@ public class Ganymede {
 	    System.err.println(ts.l("registerTasks.empty_builders"));
 	  }
 
-	for (int i = 0; i < objects.size(); i++)
+	for (DBObject object: objects)
 	  {
-	    object = (DBObject) objects.elementAt(i);
-
 	    // At DBStore version 2.7, we changed the package name for
 	    // our built-in task classes.  If loaded an older file and
 	    // we recognize one of the built-in task class names, go
@@ -1430,8 +1426,7 @@ public class Ganymede {
 
   static private void registerSyncChannels() throws NotLoggedInException
   {
-    Vector objects = internalSession.getObjects(SchemaConstants.SyncChannelBase);
-    DBObject object;
+    List<DBObject> objects = internalSession.getObjects(SchemaConstants.SyncChannelBase);
 
     /* -- */
 
@@ -1442,9 +1437,8 @@ public class Ganymede {
 	    System.err.println(ts.l("registerSyncChannels.no_syncs"));
 	  }
 
-	for (int i = 0; i < objects.size(); i++)
+	for (DBObject object: objects)
 	  {
-	    object = (DBObject) objects.elementAt(i);
 	    SyncRunner runner = new SyncRunner(object);
 
 	    if (debug)

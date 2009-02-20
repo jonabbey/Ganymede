@@ -1633,6 +1633,27 @@ final public class DBSession {
     return GSession;
   }
 
+  /** 
+   * This method is intended as a lightweight way of returning a
+   * handy description of the type and label of the specified invid.
+   * No locking is done, and the label returned will be viewed through
+   * the context of the current transaction, if any. 
+   */
+
+  public String describe(Invid invid)
+  {
+    try
+      {
+	DBObject obj = viewDBObject(invid);
+
+	return obj.getTypeName() + " " + obj.getLabel();
+      }
+    catch (NullPointerException ex)
+      {
+	return null;
+      }
+  }
+
   /**
    * <P>This method returns a handle to the objectHook for
    * a particular Invid.</P>
