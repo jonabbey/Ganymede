@@ -1307,8 +1307,6 @@ public class xmlfield implements FieldType {
 			    owner.xSession.err.println("Creating embedded object " + object);
 			  }
 
-			result.setInvid(null); // so merge doesn't complain
-
 			result = ReturnVal.merge(result, field.createNewEmbedded());
 
 			if (!ReturnVal.didSucceed(result))
@@ -1328,6 +1326,15 @@ public class xmlfield implements FieldType {
 			  {
 			    object.setInvid(result.getInvid());
 			    object.objref = result.getObject();
+
+			    // now that we've copied the object
+			    // carrier info out, clear the return val
+			    // so that the ReturnVal.merge() will work
+			    // properly the next time through the
+			    // loop.
+
+			    result.setInvid(null);
+			    result.setObject(null);
 
 			    // store this embedded object so we can
 			    // resolve xinvid references to it
