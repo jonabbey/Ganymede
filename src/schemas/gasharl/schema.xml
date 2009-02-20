@@ -483,7 +483,7 @@ xmlclient.</comment>
             <fielddef name="Badge" id="276">
               <typedef type="string">
                 <maxlength val="8"/>
-                <regexp val="AW\d{3}|\d{4,5}" desc="A Badge must match AWnnn where n is a digit, or a sequence of 4 or 5 digits."/>
+                <regexp val="^AW\d{3}|\d{4,5}$" desc="A Badge must match AWnnn where n is a digit, or a sequence of 4 or 5 digits."/>
               </typedef>
             </fielddef>
             <fielddef name="Division" id="258">
@@ -1272,7 +1272,7 @@ conflicts with this name.</comment>
               <comment>Email address for the person who will be administering this mailing list.</comment>
               <typedef type="string">
                 <maxlength val="256"/>
-                <regexp val="[^\t]*" desc="No tab characters are allowed."/>
+                <regexp val="^[^\t]*$" desc="No tab characters are allowed."/>
               </typedef>
             </fielddef>
             <fielddef name="List_Password" id="258">
@@ -1323,6 +1323,48 @@ if the client does not explicitly request it.</comment>
             </fielddef>
             <fielddef name="Option_Type" id="258">
               <typedef type="string">
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
+        <objectdef name="DHCP_Network" id="268">
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpNetworkCustom"/>
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="Name" id="256">
+              <typedef type="string">
+                <maxlength val="64"/>
+                <namespace val="dhcp_network"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Network_Number" id="257">
+              <typedef type="ip"/>
+            </fielddef>
+            <fielddef name="Network_Mask" id="258">
+              <typedef type="ip"/>
+            </fielddef>
+            <fielddef name="Options" id="259">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="DHCP_Option_Value"/>
+                <embedded/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Allow_Registered_Guests" id="260">
+              <comment>If checked, this network will support roaming by Ethernet MAC addresses registered in Ganymede.</comment>
+              <typedef type="boolean"/>
+            </fielddef>
+            <fielddef name="Guest_Range" id="261">
+              <typedef type="string">
+                <maxlength val="64"/>
+                <regexp val="^\d\d?\d?\.\d\d?\d?\.\d\d?\d?\.\d\d?\d? \d\d?\d?\.\d\d?\d?\.\d\d?\d?\.\d\d?\d?$" desc="Two four octet IPv4 addresses separated by a space."/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Guest_Options" id="262">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="DHCP_Option_Value"/>
+                <embedded/>
               </typedef>
             </fielddef>
           </tab>
