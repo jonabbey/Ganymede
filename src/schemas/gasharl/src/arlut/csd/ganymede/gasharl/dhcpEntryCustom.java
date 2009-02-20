@@ -252,6 +252,17 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
     return object.getParentInvid().getType() == (short) 262;
   }
 
+  private boolean ownedByDHCPNetwork()
+  {
+    return this.ownedByDHCPNetwork(this);
+  }
+
+  private boolean ownedByDHCPNetwork(DBObject object)
+  {
+    return object.getParentInvid().getType() == (short) 268;
+  }
+
+
   private Vector getSiblingInvids()
   {
     Vector result = null;
@@ -264,9 +275,26 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
       {
         result = (Vector) getParentObj().getFieldValuesLocal(systemSchema.DHCPOPTIONS).clone();
       }
-    
-    // we are not our own sibling.
+    else if (ownedByDHCPNetwork())
+      {
+	Vector optionsVect = (Vector) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.OPTIONS).clone();
+	Vector guestOptionsVect = (Vector) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS).clone();
 
+	if (optionsVect.contains(getInvid()))
+	  {
+	    result = optionsVect;
+	  }
+	else if (guestOptionsVect.contains(getInvid()))
+	  {
+	    result = guestOptionsVect;
+	  }
+	else
+	  {
+	    throw new RuntimeException("couldn't find our own invid in parent dhcp network fields.");
+	  }
+      }    
+
+    // we are not our own sibling.
     result.removeElement(getInvid());
 
     return result;
