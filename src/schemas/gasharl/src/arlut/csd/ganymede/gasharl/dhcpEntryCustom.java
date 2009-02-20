@@ -441,14 +441,26 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
         return null;        // we're being deleted
       }
 
-    // when we rename a group, we have lots to do.. a number of other
-    // fields in this object and others need to be updated to match.
-
     if (field.getID() == TYPE && value != null)
       {
         Invid oldInvid = (Invid) field.getValueLocal();
 
-        if (oldInvid != null)
+	if (oldInvid == null)
+	  {
+	    // we set the type after the value.  make sure the value
+	    // is compatible with the type.
+
+	    StringDBField valueField = (StringDBField) this.getField(dhcpEntrySchema.VALUE);
+	    String valueString = (String) valueField.getValueLocal();
+		  
+	    if (valueString != null)
+	      {
+		DBObject verifyObject = lookupInvid((Invid) value);
+
+		result = ReturnVal.merge(result, dhcpOptionCustom.verifyAcceptableValue(verifyObject, valueString));
+	      }
+	  }
+	else
           {
             DBObject oldOptionObject = lookupInvid(oldInvid);
             String oldOptionType = (String) oldOptionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
