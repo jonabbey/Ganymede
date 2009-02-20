@@ -549,6 +549,13 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 	  }
 
         Invid dhcpType = (Invid) getFieldValueLocal(dhcpEntrySchema.TYPE);
+
+	if (dhcpType == null)
+	  {
+	    // okay, we'll verify it later.
+	    return null;
+	  }
+
         DBObject verifyObject = lookupInvid(dhcpType);
 
         ReturnVal retVal = dhcpOptionCustom.verifyAcceptableValue(verifyObject, inString);
