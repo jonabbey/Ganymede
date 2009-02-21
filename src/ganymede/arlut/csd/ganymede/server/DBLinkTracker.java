@@ -55,7 +55,6 @@ import arlut.csd.Util.NamedStack;
 import arlut.csd.Util.TranslationService;
 
 import java.util.ArrayList;
-
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;

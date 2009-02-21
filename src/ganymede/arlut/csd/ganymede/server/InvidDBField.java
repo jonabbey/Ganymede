@@ -1111,6 +1111,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!getFieldDef().isSymmetric())
       {
+	if (oldRemote != null)
+	  {
+	    unlinkTarget(oldRemote);
+	  }
+
 	Ganymede.db.aSymLinkTracker.linkObject(getSession(), newRemote, getOwner().getInvid());
       }
 
@@ -1615,51 +1620,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!getFieldDef().isSymmetric())
       {
-	// we need to remove the asymmetric back link pointer if we're
-	// the last field in our object to contain an asymmetric link
-	// to remote
-
-	Vector<DBField> ownerFields = (Vector<DBField>) owner.getFieldVector(false);
-
-	boolean lastLink = true;
-
-	for (DBField siblingField: ownerFields)
-	  {
-	    if (siblingField == this)
-	      {
-		continue;
-	      }
-
-	    if (!siblingField.getFieldDef().isInvid() || siblingField.getFieldDef().isSymmetric())
-	      {
-		continue;
-	      }
-
-	    if (siblingField.isVector())
-	      {
-		if (siblingField.containsElementLocal(remote))
-		  {
-		    lastLink = false;
-		    break;
-		  }
-	      }
-	    else
-	      {
-		if (remote.equals(siblingField.value))
-		  {
-		    lastLink = false;
-		    break;
-		  }
-	      }
-	  }
-
-	if (lastLink)
-	  {
-	    // again, we're dealing with the back link track, so the
-	    // target is us, and the source is the remote.
-
-	    Ganymede.db.aSymLinkTracker.unlinkObject(session, remote, owner.getInvid());
-	  }
+	unlinkTarget(remote);
 
 	return null;
       }
@@ -1735,7 +1696,12 @@ public final class InvidDBField extends DBField implements invid_field {
 		    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
 		    // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}."
 		    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-						      ts.l("bind.busy_old", this.getName(), remobj.getLabel(), remobj.getTypeName(), edit_username, edit_hostname));
+						      ts.l("bind.busy_old",
+							   this.getName(),
+							   remobj.getLabel(),
+							   remobj.getTypeName(),
+							   edit_username,
+							   edit_hostname));
 		  }
 		catch (NullPointerException ex)
 		  {
@@ -1743,7 +1709,10 @@ public final class InvidDBField extends DBField implements invid_field {
 		    // "Field {0} could not be unlinked from the {1} {2} object.  
 		    // This is probably a temporary condition due to other user activity on the Ganymede server."
 		    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-						      ts.l("bind.busy_old_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
+						      ts.l("bind.busy_old_temp",
+							   this.getName(),
+							   remobj.getLabel(),
+							   remobj.getTypeName()));
 		  }
 	      }
 	  }
@@ -1771,7 +1740,9 @@ public final class InvidDBField extends DBField implements invid_field {
 	// "InvidDBField.unbind(): Couldn''t unlink from old reference"
 	// "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
 	return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-					  ts.l("bind.schema_error", oldRef.getFieldName(targetField), oldRef.getLabel()));
+					  ts.l("bind.schema_error",
+					       oldRef.getFieldName(targetField),
+					       oldRef.getLabel()));
       }
 
     if (oldRefField == null)
@@ -1789,13 +1760,18 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
 	    // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
 	    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-					      ts.l("bind.inconsistency", Integer.toString(targetField), oldRef.getLabel()));	  }
+					      ts.l("bind.inconsistency",
+						   Integer.toString(targetField),
+						   oldRef.getLabel()));
+	  }
 	else
 	  {
 	    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
 	    // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field {0} is undefined in object {1}."
 	    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-					      ts.l("bind.inconsistency", fieldDef.getName(), oldRef.getLabel()));
+					      ts.l("bind.inconsistency",
+						   fieldDef.getName(),
+						   oldRef.getLabel()));
 	  }
       }
 
@@ -1841,7 +1817,8 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   * This method is used to effect the remote side of an unbind operation.
+   * This method is used to effect the remote side of a unbind
+   * operation on a symmetric link.
    *
    * An InvidDBField being manipulated with the standard editing accessors
    * (setValue, addElement, deleteElement, setElement) will call this method
@@ -1867,7 +1844,6 @@ public final class InvidDBField extends DBField implements invid_field {
   synchronized final ReturnVal dissolve(Invid oldInvid, boolean local)
   {
     Invid tmp;
-
     DBEditObject eObj;
 
     /* -- */
@@ -1910,20 +1886,28 @@ public final class InvidDBField extends DBField implements invid_field {
 		    // "InvidDBField.dissolve(): couldn''t finalizeDeleteElement"
 		    // "The custom plug-in class for object {0} refused to allow us to clear out all the references in field {1}:\n\n{2}"
 		    return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_vect"),
-						      ts.l("dissolve.refused_vect", eObj.getLabel(), getName(), retVal.getDialog().getText()));
+						      ts.l("dissolve.refused_vect",
+							   eObj.getLabel(),
+							   getName(),
+							   retVal.getDialog().getText()));
 		  }
 		else
 		  {
 		    // "InvidDBField.dissolve(): couldn''t finalizeDeleteElement"
 		    // "The custom plug-in class for object {0} refused to allow us to clear out all the references in field {1}"
 		    return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_vect"),
-						      ts.l("dissolve.refused_vect_notext", eObj.getLabel(), getName()));
+						      ts.l("dissolve.refused_vect_notext",
+							   eObj.getLabel(),
+							   getName()));
 		  }
 	      }
 	  }
 
 	// "Warning: dissolve for {0}:{1} called with an unbound invid {2}"
-	Ganymede.debug(ts.l("dissolve.unbound_vector", owner.getLabel(), getName(), oldInvid.toString()));
+	Ganymede.debug(ts.l("dissolve.unbound_vector",
+			    owner.getLabel(),
+			    getName(),
+			    oldInvid.toString()));
 	
 	return null;	// we're already dissolved, effectively
       }
@@ -1968,7 +1952,8 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   * This method is used to effect the remote side of an bind operation.
+   * This method is used to effect the remote side of a bind operation
+   * on a symmetric link.
    *
    * An InvidDBField being manipulated with the standard editing accessors
    * (setValue, addElement, deleteElement, setElement) will call this method
@@ -2048,13 +2033,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	retVal = eObj.finalizeAddElement(this, newInvid);
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    values.addElement(newInvid);
-	    qr = null;
-	    return retVal;
-	  }
-	else
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    if (retVal.getDialog() != null)
 	      {
@@ -2073,6 +2052,12 @@ public final class InvidDBField extends DBField implements invid_field {
 		return Ganymede.createErrorDialog(ts.l("establish.no_add_sub"),
 						  ts.l("establish.no_add_text2", getName(), getOwner().getLabel()));
 	      }
+	  }
+	else
+	  {
+	    values.addElement(newInvid);
+	    qr = null;
+	    return retVal;
 	  }
       }
     else
@@ -2095,7 +2080,10 @@ public final class InvidDBField extends DBField implements invid_field {
 		// Have your adopter check the schema."
 		return Ganymede.createErrorDialog(ts.l("establish.schema_sub"),
 						  ts.l("establish.schema_scalar_text",
-						       getName(), getOwner().getLabel(), newObject.getTypeName(), newObject.getLabel()));
+						       getName(),
+						       getOwner().getLabel(),
+						       newObject.getTypeName(),
+						       newObject.getLabel()));
 	      }
 
 	    retVal = unbind(tmp, local);
@@ -4237,5 +4225,51 @@ public final class InvidDBField extends DBField implements invid_field {
     // have our parent make the final ok on the value
 
     return eObj.verifyNewValue(this, o);
+  }
+
+  private void unlinkTarget(Invid target)
+  {
+    // we need to remove the asymmetric back link pointer if we're
+    // the last field in our object to contain an asymmetric link
+    // to target
+
+    Vector<DBField> ownerFields = (Vector<DBField>) owner.getFieldVector(false);
+
+    boolean lastLink = true;
+
+    for (DBField siblingField: ownerFields)
+      {
+	if (siblingField == this)
+	  {
+	    continue;
+	  }
+
+	if (!siblingField.getFieldDef().isInvid() || siblingField.getFieldDef().isSymmetric())
+	  {
+	    continue;
+	  }
+
+	if (siblingField.isVector())
+	  {
+	    if (siblingField.containsElementLocal(target))
+	      {
+		lastLink = false;
+		break;
+	      }
+	  }
+	else
+	  {
+	    if (target.equals(siblingField.value))
+	      {
+		lastLink = false;
+		break;
+	      }
+	  }
+      }
+
+    if (lastLink)
+      {
+	Ganymede.db.aSymLinkTracker.unlinkObject(getSession(), target, owner.getInvid());
+      }
   }
 }
