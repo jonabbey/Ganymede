@@ -562,20 +562,56 @@ public class DBLinkTracker {
       contexts.push(DBLinkTrackerSession.class.getName(), defaultContext);
     }
 
+    /**
+     * Returns the DBLinkTrackerContext on the top of the checkpoint
+     * stack.
+     */
+
     public DBLinkTrackerContext getCurrentContext()
     {
       return contexts.getTopObject();
     }
+
+    /**
+     * Creates a new DBLinkTrackerContext for the session, which will
+     * be used for all future modifications to the invids tracked by
+     * the session until such time as the top of the contexts stack is
+     * modified by another checkpoint, a rollback, or a consolidate
+     * call.
+     *
+     * Whatever context is at the top of the stack prior to pushing
+     * the new DBLinkTrackerContext effectively becomes the named
+     * checkpoint, and will be restored when and if a rollback
+     * operation removes all contexts above the checkpoint on the
+     * contexts stack.
+     */
 
     public void checkpoint(String ckp_key)
     {
       contexts.push(ckp_key, new DBLinkTrackerContext(this, getCurrentContext()));
     }
 
+    /**
+     * Removes all contexts on the checkpoint stack at and above the
+     * named checkpoint, leaving the top context pointing to the
+     * context that was in place when checkpoint ckp_key was
+     * established.
+     */
+
     public void rollback(String ckp_key)
     {
       contexts.pop(ckp_key);
     }
+
+    /**
+     * Removes all contexts above checkpoint ckp_key from the stack
+     * and updates the remaining top context with the contents of the
+     * context at the top of the stack when consolidate() is called.
+     *
+     * Used to reduce memory loading in the contexts stack when it is
+     * known that we will never need to rollback to a specific
+     * checkpoint.
+     */
 
     public void consolidate(String ckp_key)
     {
@@ -667,7 +703,9 @@ public class DBLinkTracker {
     }
 
     /**
-     * Constructor for a session context.
+     * Constructor for a session context.  parent will either be a
+     * reference to the root context or to a DBLinkTrackerContext
+     * lower on a DBLinkTrackerSession's contexts stack.
      */
 
     public DBLinkTrackerContext(DBLinkTrackerSession sessionTracker, DBLinkTrackerContext parent)
@@ -698,6 +736,22 @@ public class DBLinkTracker {
     }
 
     /**
+     * Returns true if otherContext has this context as an ancestor.
+     */
+
+    public boolean isAncestorOf(DBLinkTrackerContext otherContext)
+    {
+      DBLinkTrackerContext c = otherContext;
+
+      while (c != this && c != null)
+	{
+	  c = c.parent;
+	}
+
+      return c != null;
+    }
+
+    /**
      * This method is used to fold changes made in another context
      * into our own.
      *
@@ -721,44 +775,53 @@ public class DBLinkTracker {
 	  throw new RuntimeException("Can't transfer changes from a context that is not associated with a session tracker.");
 	}
 
-      if (!isRootNode())
+      if (!isAncestorOf(otherContext))
 	{
-	  if (sessionTracker != otherContext.sessionTracker)
-	    {
-	      throw new RuntimeException("We can't transfer from one session to another.");
-	    }
-
-	  this.targetToSourcesMap.putAll(otherContext.targetToSourcesMap);
-	  this.sourcesTouched.addAll(otherContext.sourcesTouched);
-
-	  return;
+	  throw new RuntimeException("Can't transfer changes from a non-descendant context.");
 	}
 
-      // okay, we're the root node, which means we have to take care
-      // only to fold in changes relating to source invids that the
-      // otherContext has checked out for its session, otherwise we
-      // might get errors from concurrent sessions working.
+      if (!isRootNode() && sessionTracker != otherContext.sessionTracker)
+	{
+	  throw new RuntimeException("We can't transfer from one session to another.");
+	}
+
+      rollupMerge(otherContext);
+    }
+
+
+    /**
+     * Recursive helper function to integrate changes from
+     * otherContext.
+     *
+     * rollupMerge() recurses up the chain of DBLinkTrackerContexts
+     * from otherContext to find the context whose parent this is,
+     * then unwinds down the chain (and up the contexts stack),
+     * merging changes as it goes.
+     */
+
+    private void rollupMerge(DBLinkTrackerContext otherContext)
+    {
+      if (otherContext == null || otherContext.parent == null || otherContext == this)
+	{
+	  throw new RuntimeException("invalid recursion case");
+	}
+
+      if (otherContext.parent != this)
+	{
+	  rollupMerge(otherContext.parent);
+	}
 
       for (Invid target: otherContext.targetToSourcesMap.keySet())
 	{
-	  Set<Invid> otherSources = otherContext.targetToSourcesMap.get(target);
-	  Set<Invid> localSources = targetToSourcesMap.get(target);
-
-	  if (localSources == null)
+	  for (Invid source: otherContext.sourcesTouched)
 	    {
-	      localSources = new HashSet<Invid>();
-	      targetToSourcesMap.put(target, localSources);
-	    }
-
-	  for (Invid touchedSource: otherContext.sourcesTouched)
-	    {
-	      if (otherSources.contains(touchedSource))
+	      if (otherContext.linkExists(source, target))
 		{
-		  localSources.add(touchedSource);
+		  linkObject(target, source);
 		}
 	      else
 		{
-		  localSources.remove(touchedSource);
+		  unlinkObject(target, source);
 		}
 	    }
 	}
