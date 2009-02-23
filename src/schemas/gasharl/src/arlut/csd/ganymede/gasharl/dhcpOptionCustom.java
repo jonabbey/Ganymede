@@ -480,6 +480,11 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       {
         String valueStr = (String) value;
 
+	if (valueStr == null)
+	  {
+	    return null;
+	  }
+
         if (valueStr.startsWith("dhcp.") ||
             valueStr.startsWith("server.") ||
             valueStr.startsWith("agent.") ||
