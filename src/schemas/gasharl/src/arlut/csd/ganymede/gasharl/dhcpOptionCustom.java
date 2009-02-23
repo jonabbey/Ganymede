@@ -103,8 +103,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   private static Pattern flagRegex = Pattern.compile("^true|false$", Pattern.CASE_INSENSITIVE);
-  private static Pattern hostNameRegex = Pattern.compile("^[a-z][a-z0-9]*$", Pattern.CASE_INSENSITIVE);
-  private static Pattern arlDomainNameRegex = Pattern.compile("^([a-z][a-z0-9]*)\\.arlut\\.utexas\\.edu$", Pattern.CASE_INSENSITIVE);
+  private static Pattern hostNameRegex = Pattern.compile("^[a-zA-Z\\d]+[a-zA-Z\\d\\-]*$", Pattern.CASE_INSENSITIVE);
+  private static Pattern arlDomainNameRegex = Pattern.compile("^([a-zA-Z\\d]+[a-zA-Z\\d\\-]*)\\.arlut\\.utexas\\.edu$", Pattern.CASE_INSENSITIVE);
 
   private static long maxUByte = 255;
   private static long maxUShort = 65535;
