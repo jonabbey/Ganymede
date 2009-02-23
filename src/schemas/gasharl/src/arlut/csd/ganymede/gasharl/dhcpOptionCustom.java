@@ -639,7 +639,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
               {
                 String query = "select object from 'Embedded System Interface' where " +
 		  "'Containing Object'->('System Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "') or " +
-		  "'Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci + '" + hostname + "'";
+		  "'Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "'";
 
                 QueryResult results = null;
 
