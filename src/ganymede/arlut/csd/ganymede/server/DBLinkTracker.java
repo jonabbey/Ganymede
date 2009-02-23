@@ -714,15 +714,6 @@ public class DBLinkTracker {
 
       this.parent = parent;
       this.sessionTracker = sessionTracker;
-
-      if (parent.sourcesTouched == null)
-	{
-	  this.sourcesTouched = new HashSet<Invid>();
-	}
-      else
-	{
-	  this.sourcesTouched = new HashSet<Invid>(parent.sourcesTouched);
-	}
     }
 
     /**
@@ -811,6 +802,11 @@ public class DBLinkTracker {
 	  rollupMerge(otherContext.parent);
 	}
 
+      if (otherContext.sourcesTouched == null)
+	{
+	  return;		// no changes made in otherContext
+	}
+
       for (Invid target: otherContext.targetToSourcesMap.keySet())
 	{
 	  for (Invid source: otherContext.sourcesTouched)
@@ -843,10 +839,7 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      if (!isRootNode())
-	{
-	  sourcesTouched.add(source);
-	}
+      touchSource(source);
 
       return getForwardLinkSources(target).add(source);
     }
@@ -866,10 +859,7 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      if (!isRootNode())
-	{
-	  sourcesTouched.add(source);
-	}
+      touchSource(source);
 
       Set<Invid> sources = getForwardLinkSources(target);
 
@@ -899,10 +889,7 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      if (!isRootNode())
-	{
-	  sourcesTouched.add(source);
-	}
+      touchSource(source);
 
       for (Invid target: targets)
 	{
@@ -923,10 +910,7 @@ public class DBLinkTracker {
 	  throw new NullPointerException();
 	}
 
-      if (!isRootNode())
-	{
-	  sourcesTouched.add(source);
-	}
+      touchSource(source);
 
       for (Invid target: targets)
 	{
@@ -1040,6 +1024,25 @@ public class DBLinkTracker {
 	}
 
       return sources;
+    }
+
+    /**
+     * Records that a source was touched by this context.
+     */
+
+    private void touchSource(Invid source)
+    {
+      if (isRootNode())
+	{
+	  return;
+	}
+
+      if (sourcesTouched == null)
+	{
+	  sourcesTouched = new HashSet<Invid>();
+	}
+
+      sourcesTouched.add(source);
     }
   }
 }
