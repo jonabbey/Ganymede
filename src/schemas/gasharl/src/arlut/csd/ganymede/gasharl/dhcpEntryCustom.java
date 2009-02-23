@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -436,7 +436,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
     ReturnVal result = null;
     Invid parentInvid = getParentInvid();
 
-    if (parentInvid == null)
+    if (isDeleting())
       {
         return null;        // we're being deleted
       }
