@@ -637,7 +637,9 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
               }
             else
               {
-                String query = "select object from 'System' where 'System Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "'";
+                String query = "select object from 'Embedded System Interface' where " +
+		  "'Containing Object'->('System Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "') or " +
+		  "'Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci + '" + hostname + "'";
 
                 QueryResult results = null;
 
@@ -665,10 +667,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
                 try
                   {
-                    Invid selectedInvid = results.getInvid(0);
-                    DBObject systemObject = object.lookupInvid(selectedInvid);
-                    Invid firstInterface = (Invid) systemObject.getFieldElementLocal(systemSchema.INTERFACES, 0);
-                    DBObject interfaceObject = object.lookupInvid(firstInterface);
+                    Invid interfaceInvid = results.getInvid(0);
+		    DBObject interfaceObject = object.lookupInvid(interfaceInvid);
                     DBField ipField = (DBField) interfaceObject.getField(interfaceSchema.ADDRESS);
 
                     ReturnVal retVal = new ReturnVal(true, true);
