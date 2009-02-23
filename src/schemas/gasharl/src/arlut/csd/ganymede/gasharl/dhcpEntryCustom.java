@@ -278,23 +278,29 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
     else if (ownedByDHCPNetwork())
       {
 	Vector optionsVect = (Vector) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.OPTIONS).clone();
-	Vector guestOptionsVect = (Vector) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS).clone();
 
 	if (optionsVect.contains(getInvid()))
 	  {
 	    result = optionsVect;
 	  }
-	else if (guestOptionsVect.contains(getInvid()))
+	else if (getParentObj().isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
 	  {
-	    result = guestOptionsVect;
+	    Vector guestOptionsVect = (Vector) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS).clone();
+
+	    if (guestOptionsVect.contains(getInvid()))
+	      {
+		result = guestOptionsVect;
+	      }
 	  }
-	else
+
+	if (result == null)
 	  {
 	    throw new RuntimeException("couldn't find our own invid in parent dhcp network fields.");
 	  }
-      }    
+      }
 
     // we are not our own sibling.
+
     result.removeElement(getInvid());
 
     return result;
