@@ -3086,51 +3086,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // Figure out which fields we want to include in our result buffer
 
-    Vector fieldDefs = new Vector();
-    DBObjectBaseField field;
-    Vector baseFields = base.getFields();
+    Vector<DBObjectBaseField> fieldDefs = new Vector<DBObjectBaseField>();
 
-    for (int i = 0; i < baseFields.size(); i++)
+    for (DBObjectBaseField field: base.getFields())
       {
-	field = (DBObjectBaseField) baseFields.elementAt(i);
-	
-	if (!query.hasPermitSet())
+	if (query.returnField(field.getKey()) &&
+	    (supergashMode || 
+	     getPerm(base.getTypeID(), field.getID(), true).isVisible()))
 	  {
-	    // If they haven't specified the list of fields they want
-	    // back, make sure we don't show them built in fields and
-	    // we don't show them the objects owned field in the
-	    // OwnerBase.. that could entail many thousands of objects
-	    // listed.  If they really, really want to see them, let
-	    // them say so explicitly.
-
-	    // XXX Note that as of DBStore version 2.7, we no longer
-	    // include the OwnerObjectsOwned field in the OwnerBase,
-	    // so this bit of logic isn't really operative any
-	    // more. XXX
-
-	    if (!(base.getTypeID() == SchemaConstants.OwnerBase &&
-		  field.getID() == SchemaConstants.OwnerObjectsOwned))
-	      {
-		if (supergashMode)
-		  {
-		    fieldDefs.addElement(field);
-		  }
-		else if (getPerm(base.getTypeID(), field.getID(), true).isVisible())
-		  {
-		    fieldDefs.addElement(field);
-		  }
-	      }
-	  }
-	else if (query.returnField(field.getKey()))
-	  {
-	    if (supergashMode)
-	      {
-		fieldDefs.addElement(field);
-	      }
-	    else if (getPerm(base.getTypeID(), field.getID(), true).isVisible())
-	      {
-		fieldDefs.addElement(field);
-	      }
+	    fieldDefs.addElement(field);
 	  }
       }
 
