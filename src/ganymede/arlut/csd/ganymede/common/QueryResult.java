@@ -18,7 +18,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -57,7 +57,9 @@ package arlut.csd.ganymede.common;
 
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.JDataComponent.listHandle;
@@ -112,8 +114,8 @@ public class QueryResult implements java.io.Serializable {
 
   // for use pre-serialized
 
-  transient Hashtable invidHash = null;
-  transient Hashtable labelHash = null;
+  private transient HashMap<Invid, String> invidMap = null;
+  private transient Set<String> labelSet = null;
   private boolean forTransport = true;
   private transient boolean nonEditable = false;
 
@@ -125,9 +127,9 @@ public class QueryResult implements java.io.Serializable {
 
   transient private boolean unpacked = false;
 
-  transient Vector handles = null;
-  transient Vector labelList = null;
-  transient Vector invidList = null;
+  transient Vector<ObjectHandle> handles = null;
+  transient Vector<String> labelList = null;
+  transient Vector<Invid> invidList = null;
 
   transient VecSortInsert inserter;
 
@@ -136,9 +138,9 @@ public class QueryResult implements java.io.Serializable {
   public QueryResult()
   {
     buffer = new StringBuffer();
-    invidHash = new Hashtable();
-    labelHash = new Hashtable();
-    handles = new Vector();
+    invidMap = new HashMap<Invid, String>();
+    labelSet = new HashSet<String>();
+    handles = new Vector<ObjectHandle>();
   }
 
   /**
@@ -311,7 +313,7 @@ public class QueryResult implements java.io.Serializable {
 
     if (invid != null)
       {
-	invidHash.put(invid, label);
+	invidMap.put(invid, label);
 
 	if (invidList != null)
 	  {
@@ -321,7 +323,7 @@ public class QueryResult implements java.io.Serializable {
 
     if (label != null)
       {
-	labelHash.put(label, label);
+	labelSet.add(label);
 
 	if (labelList != null)
 	  {
@@ -353,7 +355,7 @@ public class QueryResult implements java.io.Serializable {
    *
    */
 
-  public Vector getHandles()
+  public Vector<ObjectHandle> getHandles()
   {
     if (forTransport && !unpacked)
       {
@@ -417,7 +419,7 @@ public class QueryResult implements java.io.Serializable {
       }
   }
 
-  public Vector getLabels()
+  public Vector<String> getLabels()
   {
     if (forTransport && !unpacked)
       {
@@ -426,7 +428,7 @@ public class QueryResult implements java.io.Serializable {
 
     if (nonEditable)
       {
-        Vector myLabelList = new Vector();
+        Vector<String> myLabelList = new Vector<String>();
             
         for (int i = 0; i < handles.size(); i++)
           {
@@ -439,7 +441,7 @@ public class QueryResult implements java.io.Serializable {
       {
         if (labelList == null)
           {
-            labelList = new Vector();
+            labelList = new Vector<String>();
             
             for (int i = 0; i < handles.size(); i++)
               {
@@ -481,7 +483,7 @@ public class QueryResult implements java.io.Serializable {
    * Vector representation of the results included in this QueryResult.
    */
 
-  public Vector getListHandles()
+  public Vector<listHandle> getListHandles()
   {
     return getListHandles(true, true);
   }
@@ -496,10 +498,10 @@ public class QueryResult implements java.io.Serializable {
    * in the returned vector
    */
 
-  public synchronized Vector getListHandles(boolean includeInactives,
-					    boolean includeNonEditables)
+  public synchronized Vector<listHandle> getListHandles(boolean includeInactives,
+							boolean includeNonEditables)
   {
-    Vector valueHandles = new Vector();
+    Vector<listHandle> valueHandles = new Vector<listHandle>();
     ObjectHandle handle;
 
     /* -- */
@@ -529,18 +531,12 @@ public class QueryResult implements java.io.Serializable {
 
   public listHandle getListHandle(int row)
   {
-    ObjectHandle handle;
-
-    /* -- */
-
     if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
 
-    handle = (ObjectHandle) handles.elementAt(row);
-
-    return handle.getListHandle();
+    return handles.elementAt(row).getListHandle();
   }
 
   /**
@@ -549,18 +545,12 @@ public class QueryResult implements java.io.Serializable {
 
   public ObjectHandle getObjectHandle(int row)
   {
-    ObjectHandle handle;
-
-    /* -- */
-
     if (forTransport && !unpacked)
       {
 	unpackBuffer();
       }
 
-    handle = (ObjectHandle) handles.elementAt(row);
-
-    return handle;
+    return handles.elementAt(row);
   }
 
   // ***
@@ -579,7 +569,7 @@ public class QueryResult implements java.io.Serializable {
 
   public synchronized boolean containsInvid(Invid invid)
   {
-    return invidHash.containsKey(invid);
+    return invidMap.containsKey(invid);
   }
 
   /**
@@ -592,7 +582,7 @@ public class QueryResult implements java.io.Serializable {
 
   public synchronized boolean containsLabel(String label)
   {
-    return labelHash.containsKey(label);
+    return labelSet.contains(label);
   }
 
   /**
@@ -612,25 +602,8 @@ public class QueryResult implements java.io.Serializable {
     buffer.append(result.buffer.toString());
     unpacked = false;
 
-    Enumeration en = result.invidHash.keys();
-
-    while (en.hasMoreElements())
-      {
-	Object key = en.nextElement();
-	Object val = result.invidHash.get(key);
-
-	this.invidHash.put(key, val);
-      }
-
-    en = result.labelHash.keys();
-
-    while (en.hasMoreElements())
-      {
-	Object key = en.nextElement();
-	Object val = result.labelHash.get(key);
-
-	this.labelHash.put(key, val);
-      }
+    this.invidMap.putAll(result.invidMap);
+    this.labelSet.addAll(result.labelSet);
   }
 
   /**

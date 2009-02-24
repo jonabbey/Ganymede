@@ -142,7 +142,7 @@ public class Query implements java.io.Serializable {
    * should be returned.
    */
 
-  private Set permitSet = null;
+  private Set<Short> permitSet = null;
 
   /* -- */
 
@@ -295,7 +295,7 @@ public class Query implements java.io.Serializable {
   {
     if (permitSet == null)
       {
-	permitSet = new HashSet();
+	permitSet = new HashSet<Short>();
       }
 
     permitSet.add(Short.valueOf(id));
@@ -356,15 +356,15 @@ public class Query implements java.io.Serializable {
    * wants to have returned.
    */
 
-  public synchronized Set getFieldSet()
+  public synchronized Set<Short> getFieldSet()
   {
     if (permitSet == null)
       {
-        return new HashSet();
+        return new HashSet<Short>();
       }
     else
       {
-        return new HashSet(permitSet);
+        return new HashSet<Short>(permitSet);
       }
   }
 
