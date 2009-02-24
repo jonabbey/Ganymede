@@ -56,7 +56,7 @@ package arlut.csd.ganymede.common;
 
 import java.rmi.Remote;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -109,6 +109,9 @@ import arlut.csd.Util.TranslationService;
  * server may walk the user through an iterative set of dialogs to
  * finally complete the desired operation.</p>
  *
+ * <p>ReturnVal is not thread safe, so don't use it in multiple
+ * concurrent threads.</p>
+ *
  * @see arlut.csd.JDialog.JDialogBuff
  * @see arlut.csd.JDialog.DialogRsrc
  * @see arlut.csd.JDialog.StringDialog
@@ -119,6 +122,13 @@ public final class ReturnVal implements java.io.Serializable {
 
   static final boolean debug = false;
   static final long serialVersionUID = 5358187112973957394L;
+
+  /**
+   * Sentinel object representing an order to have the client refresh
+   * all objects.
+   */
+
+  private static final Vector<Short> all = new Vector<Short>();
 
   /**
    * TranslationService object for handling string localization in
@@ -423,11 +433,13 @@ public final class ReturnVal implements java.io.Serializable {
   private Ganymediator callback = null;
 
   /**
-   * <p>Maps Invid's to RescanBuf's.  Used on the client-side
-   * post-serialization.</p>
+   * <p>Maps Invids to a Vector of Shorts representing fields in the
+   * Invid objects that need to be refreshed by the client.</p>
+   *
+   * <p>Used on the client-side post-serialization.</p>
    */
 
-  private transient Hashtable rescanHash = null;
+  private transient HashMap<Invid,Vector<Short>> rescanHash = null;
 
   /**
    * This field is set if the verifyNewValue() method transforms a
@@ -643,28 +655,16 @@ public final class ReturnVal implements java.io.Serializable {
    * those objects which need to have some field rescan work done.</p>
    */
 
-  public Vector getRescanObjectsList()
+  public Vector<Invid> getRescanObjectsList()
   {
-    Vector result = new Vector();
-    Enumeration en;
-
-    /* -- */
-
     if (!doRescan())
       {
-	return result;
+	return new Vector<Invid>();
       }
 
     breakOutRescanList();
 
-    en = rescanHash.keys();
-
-    while (en.hasMoreElements())
-      {
-	result.addElement(en.nextElement());
-      }
-    
-    return result;
+    return new Vector<Invid>(rescanHash.keySet()); // copy
   }
 
   /**
@@ -704,7 +704,7 @@ public final class ReturnVal implements java.io.Serializable {
 
     breakOutRescanList();
 
-    if (rescanHash.containsKey(objID) && rescanHash.get(objID).equals("all"))
+    if (rescanHash.containsKey(objID) && rescanHash.get(objID) == all)
       {
 	return true;
       }
@@ -718,7 +718,7 @@ public final class ReturnVal implements java.io.Serializable {
    * or null if all or no fields need to be processed.</p>
    */
   
-  public Vector getRescanList(Invid objID)
+  public Vector<Short> getRescanList(Invid objID)
   {
     if (!doRescan())
       {
@@ -727,14 +727,14 @@ public final class ReturnVal implements java.io.Serializable {
 
     breakOutRescanList();
 
-    Object result = rescanHash.get(objID);
+    Vector<Short> result = rescanHash.get(objID);
 
-    if (result == null || result.equals("all"))
+    if (result == null || result == all)
       {
 	return null;
       }
 
-    return (Vector) result;
+    return result;
   }
 
   /**
@@ -766,7 +766,7 @@ public final class ReturnVal implements java.io.Serializable {
 
   /**
    * <p>This private method converts the rescanList StringBuffer to
-   * a Hashtable (rescanHash) that maps Invid's to either Vector of
+   * a HashMap (rescanHash) that maps Invid's to either Vector of
    * Short's or "all".</p>
    */
 
@@ -777,7 +777,7 @@ public final class ReturnVal implements java.io.Serializable {
 	return;
       }
 
-    rescanHash = new Hashtable();
+    rescanHash = new HashMap<Invid, Vector<Short>>();
     decodeRescanList(rescanList, rescanHash);
   }
 
@@ -786,21 +786,21 @@ public final class ReturnVal implements java.io.Serializable {
    *
    * <pre>263:170|all|271:131|31|57|286:41|all|310:4|134|13|92|</pre>
    *
-   * <p>and returns a Hashtable mapping Invid's to the rescan information
+   * <p>and returns a HashMap mapping Invid's to the rescan information
    * for that Invid, where the rescan information will either be the
    * String "all", indicating that all fields need to be rescanned, or
    * a Vector of Short's specifying field id's to be rescanned for
    * that object.</p>
    *
    * @param buffer The StringBuffer to be decoded.
-   * @param original The Hashtable to put the results into.. this method
+   * @param original The HashMap to put the results into.. this method
    * will put into original the Union of the field rescan information
    * specified in original and the rescan information held in buffer.
    *  
    * @return A reference to original.
    */
 
-  private Hashtable decodeRescanList(StringBuffer buffer, Hashtable original)
+  private HashMap<Invid, Vector<Short>> decodeRescanList(StringBuffer buffer, HashMap<Invid, Vector<Short>> original)
   {
     if (buffer == null)
       {
@@ -834,16 +834,16 @@ public final class ReturnVal implements java.io.Serializable {
 	  }
 	else if (atom.equals("all"))
 	  {
-	    original.put(invid, atom);
+	    original.put(invid, all);
 	  }
 	else
 	  {
 	    Vector vec;
 	    Short fieldID = Short.valueOf(atom);
 
-	    if (original.containsKey(invid) && !original.get(invid).equals("all"))
+	    if (original.containsKey(invid) && original.get(invid) != all)
 	      {
-		vec = (Vector) original.get(invid);
+		vec = (Vector<Short>) original.get(invid);
 
 		if (!vec.contains(fieldID))
 		  {
@@ -852,7 +852,7 @@ public final class ReturnVal implements java.io.Serializable {
 	      }
 	    else if (!original.containsKey(invid))
 	      {
-		vec = new Vector();
+		vec = new Vector<Short>();
 		vec.addElement(fieldID);
 
 		original.put(invid, vec);
@@ -1004,7 +1004,7 @@ public final class ReturnVal implements java.io.Serializable {
 	  }
 	else
 	  {
-	    Hashtable result = new Hashtable();
+	    HashMap<Invid,Vector<Short>> result = new HashMap<Invid,Vector<Short>>();
 
 	    decodeRescanList(retVal.rescanList, result);
 	    decodeRescanList(rescanList, result);
@@ -1017,20 +1017,15 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>This method takes a Hashtable mapping Invid's to Vectors
+   * <p>This method takes a HashMap mapping Invid's to Vectors
    * of Short field identifiers or the String "all" and generates
    * the StringBuffer to be serialized down to the client.</p>
    *
    * <p>For use on the server-side.</p>
    */
 
-  private void encodeRescanList(Hashtable rescanTable)
+  private void encodeRescanList(HashMap<Invid,Vector<Short>> rescanTable)
   {
-    Enumeration en;
-    Invid invid;
-
-    /* -- */
-
     if (rescanList == null)
       {
 	rescanList = new StringBuffer();
@@ -1040,26 +1035,22 @@ public final class ReturnVal implements java.io.Serializable {
 	rescanList.setLength(0);
       }
 
-    en = rescanTable.keys();
-
-    while (en.hasMoreElements())
+    for (Invid invid: rescanTable.keySet())
       {
-	invid = (Invid) en.nextElement();
-
 	rescanList.append(invid.toString());
 	rescanList.append("|");
 	
-	if (rescanTable.get(invid).equals("all"))
+	if (rescanTable.get(invid) == all)
 	  {
 	    rescanList.append("all|");
 	  }
 	else
 	  {
-	    Vector fields = (Vector) rescanTable.get(invid);
+	    Vector<Short> fields = rescanTable.get(invid);
 
-	    for (int i = 0; i < fields.size(); i++)
+	    for (Short field: fields)
 	      {
-		rescanList.append(fields.elementAt(i).toString());
+		rescanList.append(field.toString());
 		rescanList.append("|");
 	      }
 	  }
@@ -1424,15 +1415,16 @@ public final class ReturnVal implements java.io.Serializable {
 
     ReturnVal tempRetVal = new ReturnVal(true);
 
-    Hashtable rescanInfo = new Hashtable(1);
-    Vector fields = new Vector(1);
+    HashMap<Invid,Vector<Short>> rescanInfo = new HashMap<Invid,Vector<Short>>(1);
+
+    Vector<Short> fields = new Vector<Short>(1);
     fields.addElement(Short.valueOf(fieldId));
+
     rescanInfo.put(invid, fields);
 
     tempRetVal.encodeRescanList(rescanInfo);
-    this.unionRescan(tempRetVal);
 
-    return this;
+    return this.unionRescan(tempRetVal);
   }
 
   /**
