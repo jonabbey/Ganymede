@@ -811,6 +811,10 @@ public class DBLinkTracker {
 	{
 	  for (Invid source: otherContext.sourcesTouched)
 	    {
+	      // calling otherContext.linkExists() is safe because we
+	      // only call it for targets we know are in
+	      // otherContext's targetToSourcesMap.
+
 	      if (otherContext.linkExists(source, target))
 		{
 		  linkObject(target, source);
