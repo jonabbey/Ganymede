@@ -633,6 +633,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
 	ReturnVal retVal = new ReturnVal(true, true);
 	retVal.setTransformedValueObject(resultBuilder.toString());
+
+	return retVal;
       }
     else
       {
