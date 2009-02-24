@@ -601,101 +601,136 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       }
     else if (currentType.equals("ip-address"))
       {
-        if (debug)
-          {
-            Ganymede.debug("trying to verify ip-address");
-          }
-
-        Byte[] parsedAddress = null;
-
-        try
-          {
-            parsedAddress = IPDBField.genIPV4bytes(value);
-          }
-        catch (IllegalArgumentException ex)
-          {
-            String hostname = null;
-
-            if (hostNameRegex.matcher(value).matches())
-              {
-                hostname = value;
-              }
-            else
-              {
-                Matcher m = arlDomainNameRegex.matcher(value);
-
-                if (m.matches())
-                  {
-                    hostname = m.group(1);
-                  }
-              }
-
-            if (hostname == null)
-              {
-                return Ganymede.createErrorDialog("Unacceptable value",
-                                                  "This dhcp option type requires an IP address");
-              }
-            else
-              {
-                String query = "select object from 'Embedded System Interface' where " +
-		  "'Containing Object'->('System Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "') or " +
-		  "'Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "'";
-
-                QueryResult results = null;
-
-                try
-                  {
-                    results = Ganymede.internalSession.query(query);
-                  }
-                catch (NotLoggedInException exa)
-                  {
-                    return Ganymede.createErrorDialog("Internal error",
-                                                      exa.getMessage());
-                  }
-                catch (GanyParseException exb)
-                  {
-                    return Ganymede.createErrorDialog("Internal error",
-                                                      exb.getMessage());
-                  }
-
-                if (results.size() != 1)
-                  {
-                    return Ganymede.createErrorDialog("Unacceptable error",
-                                                      "This dhcp option type requires an IP address.\n\n" +
-                                                      "Couldn't recognize hostname " + value);
-                  }
-
-                try
-                  {
-                    Invid interfaceInvid = results.getInvid(0);
-		    DBObject interfaceObject = object.lookupInvid(interfaceInvid);
-                    DBField ipField = (DBField) interfaceObject.getField(interfaceSchema.ADDRESS);
-
-                    ReturnVal retVal = new ReturnVal(true, true);
-                    retVal.setTransformedValueObject(ipField.getEncodingString());
-
-                    return retVal;
-                  }
-                catch (NullPointerException ex2)
-                  {
-                    return Ganymede.createErrorDialog("Internal error",
-                                                      ex2.getMessage());
-                  }
-              }
-          }
-
-        ReturnVal retVal = new ReturnVal(true, true);
-        retVal.setTransformedValueObject(IPDBField.genIPV4string(parsedAddress));
-
-        return retVal;
+	return validateIP(object, value);
       }
     else if (currentType.equals("array of ip-address"))
       {
+	StringBuilder resultBuilder = new StringBuilder();
+	String pieces[] = value.split(",\\s*");
+
+	boolean first_pass = true;
+
+	for (String piece: pieces)
+	  {
+	    ReturnVal retVal = validateIP(object, piece);
+
+	    if (!retVal.didSucceed())
+	      {
+		return retVal;
+	      }
+
+	    if (first_pass)
+	      {
+		first_pass = false;
+	      }
+	    else
+	      {
+		resultBuilder.append(", ");
+	      }
+
+	    resultBuilder.append((String) retVal.getTransformedValueObject());
+	  }
+
+	ReturnVal retVal = new ReturnVal(true, true);
+	retVal.setTransformedValueObject(resultBuilder.toString());
       }
     else
       {
       }
 
     return null;
+  }
+
+  private static ReturnVal validateIP(DBObject object, String ipOrHost)
+  {
+    Byte[] parsedAddress = null;
+
+    try
+      {
+	parsedAddress = IPDBField.genIPV4bytes(ipOrHost);
+      }
+    catch (IllegalArgumentException ex)
+      {
+	String hostname = null;
+
+	if (hostNameRegex.matcher(ipOrHost).matches())
+	  {
+	    hostname = ipOrHost;
+	  }
+	else
+	  {
+	    Matcher m = arlDomainNameRegex.matcher(ipOrHost);
+
+	    if (m.matches())
+	      {
+		hostname = m.group(1);
+	      }
+	  }
+
+	if (hostname == null)
+	  {
+	    return Ganymede.createErrorDialog("Unacceptable value",
+					      "This dhcp option type requires an IP address");
+	  }
+	else
+	  {
+	    String query = "select object from 'Embedded System Interface' where " +
+	      "'Containing Object'->('System Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "') or " +
+	      "'Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "'";
+
+	    QueryResult results = null;
+
+	    try
+	      {
+		if (object.getGSession() == null)
+		  {
+		    results = Ganymede.internalSession.query(query);
+		  }
+		else
+		  {
+		    results = object.getGSession().query(query);
+		  }
+	      }
+	    catch (NotLoggedInException exa)
+	      {
+		return Ganymede.createErrorDialog("Internal error",
+						  exa.getMessage());
+	      }
+	    catch (GanyParseException exb)
+	      {
+		return Ganymede.createErrorDialog("Internal error",
+						  exb.getMessage());
+	      }
+
+	    if (results.size() != 1)
+	      {
+		return Ganymede.createErrorDialog("Unacceptable error",
+						  "This dhcp option type requires an IP address.\n\n" +
+						  "Couldn't recognize hostname " + ipOrHost);
+	      }
+
+	    try
+	      {
+		Invid interfaceInvid = results.getInvid(0);
+		DBObject interfaceObject = object.lookupInvid(interfaceInvid);
+		DBField ipField = (DBField) interfaceObject.getField(interfaceSchema.ADDRESS);
+
+		ReturnVal retVal = new ReturnVal(true, true);
+		retVal.setTransformedValueObject(ipField.getEncodingString());
+
+		return retVal;
+	      }
+	    catch (NullPointerException ex2)
+	      {
+		return Ganymede.createErrorDialog("Internal error",
+						  ex2.getMessage());
+	      }
+	  }
+      }
+
+    ReturnVal retVal = new ReturnVal(true, true);
+    retVal.setTransformedValueObject(IPDBField.genIPV4string(parsedAddress));
+
+    return retVal;
   }
 }
