@@ -18,7 +18,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -61,7 +61,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 import java.io.PrintWriter;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -729,7 +730,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 	return startingItem;
       }
     
-    Vector children = new Vector();
+    List<XMLItem> children = new ArrayList<XMLItem>();
 
     while (true)
       {
@@ -755,7 +756,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 		
 		for (int i = 0; i < children.size(); i++)
 		  {
-		    childrenAry[i] = (XMLItem) children.elementAt(i);
+		    childrenAry[i] = children.get(i);
 		  }
 		
 		startingItem.setChildren(childrenAry);
@@ -765,7 +766,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 	  }
 
 	nextItem.setParent(startingItem);
-	children.addElement(nextItem);
+	children.add(nextItem);
       }
   }
 
