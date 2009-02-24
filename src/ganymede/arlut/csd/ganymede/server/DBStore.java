@@ -266,7 +266,7 @@ public final class DBStore implements JythonMap {
    * DBNameSpaces} registered in this DBStore.  
    */
 
-  Vector nameSpaces;
+  Vector<DBNameSpace> nameSpaces;
 
   /** 
    * if true, {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
@@ -335,7 +335,7 @@ public final class DBStore implements JythonMap {
 
     objectBases = new Hashtable<Short, DBObjectBase>(20); // default 
     aSymLinkTracker = new DBLinkTracker();
-    nameSpaces = new Vector();
+    nameSpaces = new Vector<DBNameSpace>();
 
     try
       {
@@ -580,11 +580,11 @@ public final class DBStore implements JythonMap {
 
 	    if (baseCount > 0)
 	      {
-		objectBases = new Hashtable(baseCount);
+		objectBases = new Hashtable<Short, DBObjectBase>(baseCount);
 	      }
 	    else
 	      {
-		objectBases = new Hashtable();	
+		objectBases = new Hashtable<Short, DBObjectBase>();
 	      }
 
 	    // Actually read in the object bases
@@ -706,12 +706,8 @@ public final class DBStore implements JythonMap {
 		// loading bypasses the transaction mechanism where this is
 		// normally done
 
-		Enumeration en = objectBases.elements();
-
-		while (en.hasMoreElements())
+		for (DBObjectBase base: objectBases.values())
 		  {
-		    DBObjectBase base = (DBObjectBase) en.nextElement();
-
 		    base.updateIterationSet();
 		  }
 
@@ -1202,23 +1198,15 @@ public final class DBStore implements JythonMap {
 	    xmlOut.startElementIndent("ganydata");
 	    xmlOut.indentOut();
 	    
-	    Vector bases = getBases();
-	    
-	    for (int i = 0; i < bases.size(); i++)
+	    for (DBObjectBase base: getBases())
 	      {
-		DBObjectBase base = (DBObjectBase) bases.elementAt(i);
-		
 		if (base.isEmbedded())
 		  {
 		    continue;
 		  }
 		
-		Enumeration en = base.objectTable.elements();
-		
-		while (en.hasMoreElements())
+		for (DBObject x: base.objectTable)
 		  {
-		    DBObject x = (DBObject) en.nextElement();
-		    
 		    if (xmlOut.mayInclude(x))
 		      {
 			x.emitXML(xmlOut);
@@ -1280,20 +1268,17 @@ public final class DBStore implements JythonMap {
    * defined in this DBStore.
    */
 
-  public Vector getBaseNameList()
+  public Vector<String> getBaseNameList()
   {
-    Vector result = new Vector();
-    Enumeration en;
+    Vector<String> result = new Vector<String>();
 
     /* -- */
 
     synchronized (objectBases)
       {
-	en = objectBases.elements();
-	
-	while (en.hasMoreElements())
+	for (DBObjectBase base: objectBases.values())
 	  {
-	    result.addElement(((DBObjectBase) en.nextElement()).getName());
+	    result.add(base.getName());
 	  }
       }
     
@@ -1305,21 +1290,13 @@ public final class DBStore implements JythonMap {
    * defined in this DBStore.
    */
 
-  public Vector getBases()
+  public Vector<DBObjectBase> getBases()
   {
-    Vector result = new Vector();
-    Enumeration en;
-
-    /* -- */
+    Vector<DBObjectBase> result;
 
     synchronized (objectBases)
       {
-	en = objectBases.elements();
-	
-	while (en.hasMoreElements())
-	  {
-	    result.addElement(en.nextElement());
-	  }
+	result = new Vector<DBObjectBase>(objectBases.values());
       }
     
     return result;
@@ -1333,7 +1310,7 @@ public final class DBStore implements JythonMap {
 
   public DBObjectBase getObjectBase(Short id)
   {
-    return (DBObjectBase) objectBases.get(id);
+    return objectBases.get(id);
   }
 
   /**
@@ -1344,7 +1321,7 @@ public final class DBStore implements JythonMap {
 
   public DBObjectBase getObjectBase(short id)
   {
-    return (DBObjectBase) objectBases.get(Short.valueOf(id));
+    return objectBases.get(Short.valueOf(id));
   }
 
   /**
@@ -1355,19 +1332,10 @@ public final class DBStore implements JythonMap {
 
   public DBObjectBase getObjectBase(String baseName)
   {
-    DBObjectBase base;
-    Enumeration en;
-
-    /* -- */
-
     synchronized (objectBases)
       {
-	en = objectBases.elements();
-	
-	while (en.hasMoreElements())
+	for (DBObjectBase base: objectBases.values())
 	  {
-	    base = (DBObjectBase) en.nextElement();
-	    
 	    if (base.getName().equals(baseName))
 	      {
 		return base;
@@ -1462,11 +1430,14 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Method to obtain the object from the DBStore represented by the given
-   * Invid. NOTE: this method will give you a direct reference to the actual
-   * DBObject, not a clone. So be careful, and treat the returned objects as
-   * "read only".
+   * Method to obtain the object from the DBStore represented by the
+   * given Invid.
+   *
+   * NOTE: this method will give you a direct reference to the actual
+   * DBObject, not a clone. So be careful, and treat the returned
+   * objects as "read only".
    */
+
   public DBObject getObject(Invid invid)
   {
     return getObjectBase(invid.getType()).getObject(invid.getNum());
@@ -1480,16 +1451,10 @@ public final class DBStore implements JythonMap {
 
   public DBNameSpace getNameSpace(String name)
   {
-    DBNameSpace namespace;
-
-    /* -- */
-
     synchronized (nameSpaces)
       {
-	for (int i = 0; i < nameSpaces.size(); i++)
+	for (DBNameSpace namespace: nameSpaces)
 	  {
-	    namespace = (DBNameSpace) nameSpaces.elementAt(i);
-	    
 	    if (namespace.getName().equals(name))
 	      {
 		return namespace;
@@ -2461,12 +2426,9 @@ public final class DBStore implements JythonMap {
   boolean verify_label_fields()
   {
     boolean ok = true;
-    Enumeration en = objectBases.elements();
 
-    while (en.hasMoreElements())
+    for (DBObjectBase base: objectBases.values())
       {
-	DBObjectBase base = (DBObjectBase) en.nextElement();
-
 	if (base.label_id == -1)
 	  {
 	    // "Error, object base {0} has no label field defined."
@@ -2988,17 +2950,18 @@ public final class DBStore implements JythonMap {
     return getBases().contains(value);
   }
 
-  public Set entrySet()
+  public Set<Entry> entrySet()
   {
-    Vector bases = getBases();
-    DBObjectBase currentBase;
-    Set entrySet = new HashSet();
-    
-    for (Iterator iter = bases.iterator(); iter.hasNext();)
+    Set<Entry> entrySet = new HashSet<Entry>();
+
+    synchronized( objectBases)
       {
-        currentBase = (DBObjectBase) iter.next();
-        entrySet.add(new Entry(currentBase));
+	for (DBObjectBase base: objectBases.values())
+	  {
+	    entrySet.add(new Entry(base));
+	  }
       }
+    
     return entrySet;
   }
 
@@ -3018,12 +2981,12 @@ public final class DBStore implements JythonMap {
       }
   }
 
-  public Set keySet()
+  public Set<String> keySet()
   {
-    return (new HashSet(getBaseNameList()));
+    return new HashSet<String>(getBaseNameList());
   }
 
-  public Set keys()
+  public Set<String> keys()
   {
     return keySet();
   }
@@ -3031,16 +2994,13 @@ public final class DBStore implements JythonMap {
   public List items()
   {
     List list = new ArrayList();
-    Vector bases = getBases();
-    DBObjectBase currentBase;
     Object[] tuple;
     
-    for (Iterator iter = bases.iterator(); iter.hasNext();)
+    for (DBObjectBase base: objectBases.values())
       {
-        currentBase = (DBObjectBase) iter.next();
         tuple = new Object[2];
-        tuple[0] = currentBase.getName();
-        tuple[1] = currentBase;
+        tuple[0] = base.getName();
+        tuple[1] = base;
         list.add(tuple);
       }
     
@@ -3066,6 +3026,7 @@ public final class DBStore implements JythonMap {
    * Implements key/value pairs for use in a 
    * {@link java.util.Map}'s {@link java.util.Map#entrySet()} method.
    */
+
   static class Entry implements Map.Entry
   {
     Object key, value;
