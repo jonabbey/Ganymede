@@ -433,6 +433,32 @@ public final class ReturnVal implements java.io.Serializable {
   private Ganymediator callback = null;
 
   /**
+   * This variable will be non-null if the operation being reported on
+   * changed the object's label.  The GUI client will look for this
+   * variable in order to trigger a fix-up of all pointers to the
+   * object that was modified by the action that resulted in this
+   * ReturnVal.
+   *
+   * If newLabel is not null, newObjectInvid must be set to point to
+   * the Invid which is being relabeled.
+   */
+
+  private String newLabel = null;
+
+  /**
+   * <p>This boolean variable is used to convey a context-specific
+   * flag indicating whether the attempted operation requires
+   * exceptional handling.  Some examples of this include the
+   * determination whether the field code that invoked wizardHook on a
+   * DBEditObject subclass should continue with its normal process or
+   * whether it should immediately return this ReturnVal to the
+   * (client-side) caller.  It is also used to decide whether a
+   * failure to commit a transaction is retryable or not.</p>
+   */
+
+  public boolean doNormalProcessing;
+
+  /**
    * <p>Maps Invids to a Vector of Shorts representing fields in the
    * Invid objects that need to be refreshed by the client.</p>
    *
@@ -458,32 +484,6 @@ public final class ReturnVal implements java.io.Serializable {
    */
 
   private transient boolean transformedSet = false;
-
-  /**
-   * This variable will be non-null if the operation being reported on
-   * changed the object's label.  The GUI client will look for this
-   * variable in order to trigger a fix-up of all pointers to the
-   * object that was modified by the action that resulted in this
-   * ReturnVal.
-   *
-   * If newLabel is not null, newObjectInvid must be set to point to
-   * the Invid which is being relabeled.
-   */
-
-  private String newLabel = null;
-
-  /**
-   * <p>This boolean variable is used to convey a context-specific
-   * flag indicating whether the attempted operation requires
-   * exceptional handling.  Some examples of this include the
-   * determination whether the field code that invoked wizardHook on a
-   * DBEditObject subclass should continue with its normal process or
-   * whether it should immediately return this ReturnVal to the
-   * (client-side) caller.  It is also used to decide whether a
-   * failure to commit a transaction is retryable or not.</p>
-   */
-
-  public boolean doNormalProcessing;
 
   /* -- */
 
