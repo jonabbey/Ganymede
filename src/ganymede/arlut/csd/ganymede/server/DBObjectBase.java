@@ -313,7 +313,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * DBObjectBaseFields}.
    */
 
-  Vector customFields;
+  Vector<DBObjectBaseField> customFields;
 
   /**
    * <P>Cached template vector</P>
@@ -2633,7 +2633,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base
    */
 
-  public Vector getFields()
+  public Vector<DBObjectBaseField> getFields()
   {
     return getFields(true);
   }
@@ -2651,38 +2651,26 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Base 
    */
 
-  public synchronized Vector getFields(boolean includeBuiltIns)
+  public synchronized Vector<DBObjectBaseField> getFields(boolean includeBuiltIns)
   {
-    Vector result;
-    Enumeration en;
-    DBObjectBaseField field;
+    Vector<DBObjectBaseField> result = new Vector<DBObjectBaseField>();
 
     /* -- */
 
-    result = new Vector();
+    // first we return the custom fields, pre-sorted display order
 
-    // first we return the custom fields, in display order
-
-    en = customFields.elements();
-    
-    while (en.hasMoreElements())
+    for (DBObjectBaseField field: customFields)
       {
-	field = (DBObjectBaseField) en.nextElement();
-	
 	result.addElement(field);
       }
 
     // now if we are to return the built-in fields, go ahead and add
-    // them in whatever hashing order we find them
+    // them to the end in whatever hashing order we find them
 
     if (includeBuiltIns)
       {
-	en = fieldTable.elements();
-
-	while (en.hasMoreElements())
+	for (DBObjectBaseField field: fieldTable)
 	  {
-	    field = (DBObjectBaseField) en.nextElement();
-
 	    if (field.isBuiltIn())
 	      {	    
 		result.addElement(field);
@@ -3316,19 +3304,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   private void updateBaseRefs()
   {
-    Enumeration en;
-    DBObject obj;
-
-    /* -- */
-
     synchronized (objectTable)
       {
-	en = objectTable.elements();
-	
-	while (en.hasMoreElements())
+	for (DBObject obj: objectTable)
 	  {
-	    obj = (DBObject) en.nextElement();
-	   
 	    if (DBSchemaEdit.debug)
 	      {
 		// "Updating base reference on {0}"
@@ -3636,33 +3615,23 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public synchronized Vector getFieldTemplateVector()
+  public synchronized Vector<FieldTemplate> getFieldTemplateVector()
   {
     if (templateVector == null)
       {
-	templateVector = new Vector();
-	Enumeration en;
-	DBObjectBaseField fieldDef;
+	templateVector = new Vector<FieldTemplate>();
 
-	// first load our custom fields
+	// first load our custom fields, in display sorted order
 
-	en = customFields.elements();
-	
-	while (en.hasMoreElements())
+	for (DBObjectBaseField fieldDef: customFields)
 	  {
-	    fieldDef = (DBObjectBaseField) en.nextElement();
-	
 	    templateVector.addElement(fieldDef.getTemplate());
 	  }
 
 	// then load our system fields
 
-	en = fieldTable.elements();
-
-	while (en.hasMoreElements())
+	for (DBObjectBaseField fieldDef: fieldTable)
 	  {
-	    fieldDef = (DBObjectBaseField) en.nextElement();
-
 	    if (!fieldDef.isBuiltIn())
 	      {
 		continue;
@@ -3713,7 +3682,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
 	for (int i = 0; i < customFields.size(); i++)
 	  {
-	    DBObjectBaseField myDef = (DBObjectBaseField) customFields.elementAt(i);
+	    DBObjectBaseField myDef = customFields.elementAt(i);
 
 	    if (myDef.field_code == previousField)
 	      {

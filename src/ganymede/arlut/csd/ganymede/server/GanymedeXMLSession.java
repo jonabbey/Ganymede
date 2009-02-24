@@ -2180,11 +2180,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	System.err.println("GanymedeXMLSession: initializeLookups");
       }
 
-    Vector baseList = Ganymede.db.getBases();
-
-    for (int i = 0; i < baseList.size(); i++)
+    for (DBObjectBase base: Ganymede.db.getBases())
       {
-	DBObjectBase base = (DBObjectBase) baseList.elementAt(i);
 	Vector templates = base.getFieldTemplateVector();
 	Hashtable fieldHash = new Hashtable();
 	

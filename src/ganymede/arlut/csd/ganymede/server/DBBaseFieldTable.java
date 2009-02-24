@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -75,7 +75,7 @@ import java.util.NoSuchElementException;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBBaseFieldTable implements Iterable {
+public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   /**
    * The hash table data.
@@ -185,7 +185,7 @@ public class DBBaseFieldTable implements Iterable {
    * @see     java.util.Iterator
    */
 
-  public synchronized Iterator iterator()
+  public synchronized Iterator<DBObjectBaseField> iterator()
   {
     return new DBBaseFieldTableIterator(table);
   }
@@ -678,7 +678,7 @@ class DBBaseFieldTableEnumerator implements Enumeration {
  * to the client. It will use the Iterator interface. 
  */
 
-class DBBaseFieldTableIterator implements Iterator {
+class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
 
   short index;
   DBObjectBaseField table[];
@@ -710,7 +710,7 @@ class DBBaseFieldTableIterator implements Iterator {
     return false;
   }
 
-  public Object next() 
+  public DBObjectBaseField next() 
   {
     if (entry == null) 
       {
