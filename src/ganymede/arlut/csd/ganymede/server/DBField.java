@@ -711,6 +711,24 @@ public abstract class DBField implements Remote, db_field, FieldType {
       }
   }
 
+  /**
+   * Returns the GanymedeSession that this field is associated with,
+   * or null if it is being viewed from a naked DBSession or directly
+   * from the persistent store.
+   */
+
+  public final GanymedeSession getGSession()
+  {
+    try
+      {
+	return getSession().getGSession();
+      }
+    catch (NullPointerException ex)
+      {
+	return null;
+      }
+  }
+
   // ****
   //
   // db_field methods

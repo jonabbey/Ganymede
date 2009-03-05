@@ -603,7 +603,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // where will we go to look up the label for our target(s)?
 
-    gsession = owner.getGSession();
+    gsession = getGSession();
 
     if (gsession == null)
       {
@@ -780,7 +780,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     origI = (InvidDBField) orig;
 
-    gsession = owner.getGSession();
+    gsession = getGSession();
     
     if (gsession == null)
       {
@@ -1195,7 +1195,7 @@ public final class InvidDBField extends DBField implements invid_field {
                                                                        targetField,
                                                                        this.getOwner(),
                                                                        this.getID(),
-                                                                       session.getGSession());
+                                                                       getGSession());
 
         // if we're already editing it, just go with that.
 
@@ -1205,7 +1205,7 @@ public final class InvidDBField extends DBField implements invid_field {
           }
         else
           {
-            if (anonymous || session.getGSession().getPerm(remobj).isEditable())
+            if (anonymous || getGSession().getPerm(remobj).isEditable())
               {
                 oldRef = (DBEditObject) session.editDBObject(oldRemote);
               }
@@ -1358,7 +1358,7 @@ public final class InvidDBField extends DBField implements invid_field {
                                                                   targetField, 
                                                                   this.getOwner(),
                                                                   this.getID(),
-                                                                  session.getGSession());
+                                                                  getGSession());
     // if we're already editing it, just go with that.
 
     if (remobj instanceof DBEditObject)
@@ -1377,7 +1377,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        if (anonymous2 || session.getGSession().getPerm(remobj).isEditable())
+        if (anonymous2 || getGSession().getPerm(remobj).isEditable())
           {
             newRef = (DBEditObject) session.editDBObject(newRemote);
           }
@@ -1657,7 +1657,7 @@ public final class InvidDBField extends DBField implements invid_field {
 								targetField, 
 								this.getOwner(),
 								this.getID(),
-								session.getGSession());
+								getGSession());
 
     // if we're already editing it, just go with that.
 
@@ -1667,7 +1667,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	if (anonymous || session.getGSession().getPerm(remobj).isEditable())
+	if (anonymous || getGSession().getPerm(remobj).isEditable())
 	  {
 	    oldRef = (DBEditObject) session.editDBObject(remote);
 
@@ -1727,7 +1727,7 @@ public final class InvidDBField extends DBField implements invid_field {
 						   getName(),
 						   getOwner().getLabel(),
 						   remobj.getFieldName(targetField), 
-						   getRemoteLabel(session.getGSession(), remote, false)));
+						   getRemoteLabel(getGSession(), remote, false)));
 	  }
       }
 
@@ -2486,7 +2486,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!noWizards && !local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && getGSession().enableOversight)
       {
 	// Wizard check
 	
@@ -2644,7 +2644,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!local && eObj.getGSession().enableOversight)
+    if (!local && getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -2790,7 +2790,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!noWizards && !local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -3014,7 +3014,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!noWizards && !local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -3404,7 +3404,7 @@ public final class InvidDBField extends DBField implements invid_field {
         // the schema.  Doing it this way, we don't have to worry about
         // whether the admins got this part of the schema right.
 
-        if (!local && eObj.getGSession().enableOversight)
+        if (!local && getGSession().enableOversight)
           {
             // Wizard check
 
@@ -3603,7 +3603,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = RandomUtils.getSaltedString("delElement[" + getName() + ":" + owner.getLabel() + "]");
 
-    if (!noWizards && !local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -3765,7 +3765,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) owner;
 
-    if (!noWizards && !local && eObj.getGSession().enableOversight)
+    if (!noWizards && !local && getGSession().enableOversight)
       {
 	// Wizard check
 
@@ -3915,7 +3915,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     Vector values = getVectVal();
 
-    gsession = owner.getGSession();
+    gsession = getGSession();
 
     if (gsession == null)
       {
@@ -4042,7 +4042,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (applyFilter)
       {
-	qr = eObj.getGSession().filterQueryResult(qr);
+	qr = getGSession().filterQueryResult(qr);
       }
 
     return qr;
