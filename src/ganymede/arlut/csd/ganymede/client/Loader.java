@@ -71,8 +71,9 @@ import arlut.csd.ganymede.rmi.Session;
 ------------------------------------------------------------------------------*/
 
 /**
- * Client-side thread class for loading object and field type definitions from
- * the server in the background during the client's start-up.
+ * Client-side cache for loading object and field type definitions
+ * from the server in the background during the client's start-up, and
+ * providing that information to the client during its operations.
  *
  * @version $Id$
  * @author Mike Mulvaney
