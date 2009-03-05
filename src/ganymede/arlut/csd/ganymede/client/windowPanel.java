@@ -290,21 +290,22 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   /**
    * Create a new editable or view-only window in this windowPanel.
    *
+   * @param invid The invid of the object to be viewed or edited
    * @param object an individual object from the server to show
    * in this window
    * @param editable if true, the object will be presented as editable
-   * @param objectType Used for the title of the new window
    */
 
-  public void addWindow(Invid invid, db_object object, boolean editable, String objectType)
+  public void addWindow(Invid invid, db_object object, boolean editable)
   {
-    this.addWindow(invid, object, editable, objectType, false, null);
+    this.addWindow(invid, object, editable, false, null);
   }
 
   /**
    * Create a new editable or view-only window in this windowPanel.
    *
- * @param object an individual object from the server to show
+   * @param invid The invid of the object to be viewed or edited
+   * @param object an individual object from the server to show
    * in this window
    * @param editable if true, the object will be presented as editable
    * @param objectType Used for the title of the new window
@@ -313,25 +314,25 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * a view window.
    */
 
-  public void addWindow(Invid invid, db_object object, boolean editable, String objectType, framePanel originalWindow)
+  public void addWindow(Invid invid, db_object object, boolean editable, framePanel originalWindow)
   {
-    this.addWindow(invid, object, editable, objectType, false, originalWindow);
+    this.addWindow(invid, object, editable, false, originalWindow);
   }
 
   /**
    * Create a new editable or view-only window in this windowPanel.
    *
+   * @param invid The invid of the object to be viewed or edited
    * @param object an individual object from the server to show
    * in this window
    * @param editable if true, the object will be presented as editable
-   * @param objectType Used for the title of the new window
    * @param isNewlyCreated if true, this window will be a 'create object' window.
    * @param originalWindow If not null, a framePanel that we are going to be replacing
    * with a new window.  Used to replace a view window with an edit window, or to refresh
    * a view window.
    */
 
-  public void addWindow(Invid invid, db_object object, boolean editable, String objectType, boolean isNewlyCreated, framePanel originalWindow)
+  public void addWindow(Invid invid, db_object object, boolean editable, boolean isNewlyCreated, framePanel originalWindow)
   {
     Invid finalInvid = invid;
     String title = null;
@@ -413,10 +414,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     
 	try
 	  {
-	    if (objectType == null)
-	      {
-		objectType = gc.getObjectType(finalInvid);
-	      }
+	    String objectType = gc.getObjectType(finalInvid);
 
 	    if (isNewlyCreated)
 	      {

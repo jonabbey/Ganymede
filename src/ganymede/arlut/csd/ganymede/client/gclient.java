@@ -3574,7 +3574,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	    return;
 	  }
 
-	wp.addWindow(invid, o, true, objectType, originalWindow);
+	wp.addWindow(invid, o, true, originalWindow);
 	  
 	changedHash.put(invid, invid);
 
@@ -3689,7 +3689,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	// "New Object"
 	ObjectHandle handle = new ObjectHandle(ts.l("global.new_object"), invid, false, false, false, true);
        
-	wp.addWindow(invid, obj, true, null, true, null);
+	wp.addWindow(invid, obj, true, true, null);
 
 	Short typeShort = Short.valueOf(invid.getType());
     
@@ -3832,7 +3832,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	// "New Object"
 	ObjectHandle handle = new ObjectHandle(ts.l("global.new_object"), invid, false, false, false, true);
        
-	wp.addWindow(invid, obj, true, null, true, null);
+	wp.addWindow(invid, obj, true, true, null);
 
 	Short typeShort = Short.valueOf(type);
     
@@ -3931,7 +3931,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	    return;
 	  }
 
-	wp.addWindow(invid, object, false, objectType);
+	wp.addWindow(invid, object, false);
       }
     catch (Exception rx)
       {
