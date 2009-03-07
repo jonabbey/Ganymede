@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-November 10, 2008
+March 6, 2009
 CHANGES
 
 Last Commit: $Format:%cd$
@@ -8,7 +8,7 @@ Last Commit: $Format:%cd$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: November 30, 2008
+RELEASE DATE: March 6, 2009
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1450,7 +1450,53 @@ properly whichever method (applet, plugin, webstart) you choose.
 The 'Credits' and 'About Ganymede' dialogs have been folded into one
 expanded 'About Ganymede' dialog.
 
--------------------- Changes from 1.0.11 to 1.0.12 -------------------
+95. [SERVER] Reworked handling for embedded objects
+
+Previously, the schema editor allowed edit-in-place invid fields to be
+configured to point to invid fields in the embedded object other than
+the container field, which is never the right thing to do.
+
+In addition, we discovered some general issues with using symmetric
+links for the container<->embedded object relationship.  We had a case
+in which we wanted to allow a specific embedded object to be embedded
+within multiple container fields in a single container object.  In
+this case, using a symmetric link with a specified target field was
+impossible.
+
+In response to this, we made modifications to the Ganymede server to
+ensure that all edit-in-place fields were bidirectionally
+asymmetrically linked.  The container's edit-in-place field no longer
+supports a designated target field, and neither does the embedded
+object's container field.
+
+Instead, the back-pointer tracking for both ends of the
+container->embedded object relationship is now done through the global
+back pointers structure in DBStore.
+
+When we implemented this, we discovered that the back pointers
+structure had its own problems..
+
+96. [SERVER] Improved asymmetric backlinks tracking
+
+The hashing structure used to track objects pointing to a target
+object through an asymmetric invid link had a number of bugs,
+including a complete failure to track checkpoints and rollbacks, as
+well as a complete lack of proper encapsulation.
+
+I rewrote the backpointers tracking system, placing it in the form of
+the new arlut.csd.ganymede.server.DBLinkTracker class.  The
+DBLinkTracker class features efficient checkpoint/rollback support,
+and performs less unnecessary synchronization than the old manual
+hashtable structure did.
+
+97. [SCHEMA] Additional gasharl DHCP support
+
+The gasharl schema kit's DHCP support is now entirely self contained,
+and uses the refined embedded object support logic to enable flexible
+configuration of the entire dhcpd.conf file generation without need of
+external configuration files.
+
+-------------------- changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
 
