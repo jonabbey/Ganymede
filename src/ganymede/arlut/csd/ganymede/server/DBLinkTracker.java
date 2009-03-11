@@ -777,7 +777,6 @@ public class DBLinkTracker {
       rollupMerge(otherContext);
     }
 
-
     /**
      * Recursive helper function to integrate changes from
      * otherContext.
