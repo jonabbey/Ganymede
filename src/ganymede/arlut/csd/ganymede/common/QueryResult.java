@@ -385,7 +385,7 @@ public class QueryResult implements java.io.Serializable {
     return ((ObjectHandle) handles.elementAt(row)).getInvid();
   }
 
-  public Vector getInvids()
+  public Vector<Invid> getInvids()
   {
     if (forTransport && !unpacked)
       {
@@ -394,7 +394,7 @@ public class QueryResult implements java.io.Serializable {
 
     if (nonEditable)
       {
-        Vector myInvidList = new Vector();
+        Vector<Invid> myInvidList = new Vector<Invid>();
 
         for (int i = 0; i < handles.size(); i++)
           {
@@ -407,7 +407,7 @@ public class QueryResult implements java.io.Serializable {
       {
         if (this.invidList == null)
           {
-            this.invidList = new Vector();
+            this.invidList = new Vector<Invid>();
 
             for (int i = 0; i < handles.size(); i++)
               {

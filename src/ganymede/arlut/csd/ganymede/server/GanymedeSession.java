@@ -3258,31 +3258,27 @@ final public class GanymedeSession implements Session, Unreferenced {
     QueryResultContainer qrc = new QueryResultContainer(rowType);
 
     /* Get the list of fields the user wants returned */
-    Set fieldIDs = q.getFieldSet();
+    Set<Short> fieldIDs = q.getFieldSet();
     
     /* Now add them to the result container */
-    String fieldName;
-    Short fieldID;
-    DBObjectBaseField field;
-    for (Iterator iter = fieldIDs.iterator(); iter.hasNext();)
+
+    for (Short fieldID: fieldIDs)
       {
-      	fieldID = (Short) iter.next();
-      	field = (DBObjectBaseField) Ganymede.db.getObjectBase(q.objectName).getField(fieldID.shortValue());
-      	fieldName = field.getName();
-      	qrc.addField(fieldName, fieldID);
+      	DBObjectBaseField field = 
+	  (DBObjectBaseField) Ganymede.db.getObjectBase(q.objectName).getField(fieldID.shortValue());
+
+      	qrc.addField(field.getName(), fieldID);
       } 
 
     /* Now we'll add a row for each matching object */
-    List invids = qr.getInvids();
-    Invid invid;
-    DBObject object;
+    List<Invid> invids = qr.getInvids();
+
     PermEntry perm;
     boolean editable;
-    Object[] row;
-    for (Iterator iter = invids.iterator(); iter.hasNext();)
+
+    for (Invid invid: invids)
       {
-        invid = (Invid) iter.next();
-        object = Ganymede.db.getObject(invid);
+        DBObject object = Ganymede.db.getObject(invid);
 
         if (supergashMode)
           {
@@ -3293,8 +3289,8 @@ final public class GanymedeSession implements Session, Unreferenced {
             perm = getPerm(object);
           }
 
-        if ((perm == null) || (q.editableOnly && !perm.isEditable())
-            || (!perm.isVisible()))
+        if ((perm == null) ||
+	    (q.editableOnly && !perm.isEditable()) || (!perm.isVisible()))
           {
             editable = false;
           }
@@ -3303,19 +3299,23 @@ final public class GanymedeSession implements Session, Unreferenced {
             editable = perm.isEditable();
           }
 
-        Short key;
         Object value;
-	row = new Object[fieldIDs.size()];
+	Object[] row = new Object[fieldIDs.size()];
         int i = 0;
-        for (Iterator iter2 = fieldIDs.iterator(); iter2.hasNext(); i++)
+
+        for (Short key: fieldIDs)
           {
-            key = (Short) iter2.next();
             value = object.getFieldValueLocal(key.shortValue());
-            row[i] = value;
+            row[i++] = value;
           }
 
-        qrc.addRow(invid, object.getLabel(), row, object.isInactivated(), object
-            .willExpire(), object.willBeRemoved(), editable);
+        qrc.addRow(invid,
+		   object.getLabel(),
+		   row,
+		   object.isInactivated(),
+		   object.willExpire(),
+		   object.willBeRemoved(),
+		   editable);
       }
 
     return qrc;
