@@ -3352,7 +3352,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
                     System.err.println("isRemovalSet()");
                   }
 
-                node.setMenu(objectReactivatePM);
                 node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
               }
             else if (changedHash.containsKey(invid))
