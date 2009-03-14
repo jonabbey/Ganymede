@@ -870,6 +870,21 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     loader = new Loader(session, debug);
     loader.start();
 
+    try
+      {
+	ownerGroups = session.getOwnerGroups().getListHandles();
+
+	if (ownerGroups.size() == 1)
+	  {
+	    chooseDefaultOwner(false); // tells the session our default owner
+	    defaultOwnerMI.setEnabled(false); // we won't allow setting a default owner, we only have one
+	  }
+      }
+    catch (RemoteException ex)
+      {
+	processExceptionRethrow(ex);
+      }
+
     pack();
 
     if (!sizer.restoreSize(this))
@@ -6431,6 +6446,26 @@ class PersonaListener implements ActionListener {
 	    gc.buildTree();
 	    gc.currentPersonaString = newPersona;
 	    gc.defaultOwnerChosen = false; // force a new default owner to be chosen
+
+	    try
+	      {
+		gc.ownerGroups = session.getOwnerGroups().getListHandles();
+
+		if (gc.ownerGroups.size() == 1)
+		  {
+		    gc.chooseDefaultOwner(false);
+		    gc.defaultOwnerMI.setEnabled(false);
+		  }
+		else if (gc.ownerGroups.size() > 1)
+		  {
+		    gc.defaultOwnerMI.setEnabled(true);
+		  }
+	      }
+	    catch (RemoteException ex)
+	      {
+		gc.processExceptionRethrow(ex);
+	      }
+
 	    gc.setNormalCursor();
 
 	    // "Successfully changed persona to {0}."		
