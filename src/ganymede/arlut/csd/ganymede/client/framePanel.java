@@ -1758,33 +1758,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 		gclient.client.deleteObject(getObjectInvid(), false);
 	      }
-	    else
-	      {
-		// "Ok to hide {0}?"
-
-		// "Closing this window will not undo changes made to
-		// it, nor will it make this object available to other
-		// Ganymede users to edit.  If you want to undo
-		// changes to this object, you either will have to
-		// manually undo them, or you will have to cancel this
-		// transaction.\n\nIf this window is closed, you will
-		// be able to re-open it from the tree later if
-		// needed."
-
-		okToKill = new StringDialog(gclient.client,
-					    ts.l("vetoableChange.hide_title", getTitle()),
-					    ts.l("vetoableChange.hide_text"),
-					    ts.l("vetoableChange.hide_button"),
-					    ts.l("global.cancel"),
-					    gclient.client.getQuestionImage());
-
-		Hashtable result = okToKill.showDialog();
-	    
-		if (result == null)
-		  {
-		    throw new PropertyVetoException("Cancelled", null);
-		  }
-	      }
 	  }
       }
   }
