@@ -874,10 +874,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
 	ownerGroups = session.getOwnerGroups().getListHandles();
 
-	if (ownerGroups.size() == 1)
+	if (ownerGroups.size() == 0)
+	  {
+	    defaultOwnerMI.setEnabled(false);
+	  }
+	else if (ownerGroups.size() == 1)
 	  {
 	    chooseDefaultOwner(false); // tells the session our default owner
-	    defaultOwnerMI.setEnabled(false); // we won't allow setting a default owner, we only have one
+	    defaultOwnerMI.setEnabled(false);
 	  }
       }
     catch (RemoteException ex)
@@ -6459,6 +6463,10 @@ class PersonaListener implements ActionListener {
 		else if (gc.ownerGroups.size() > 1)
 		  {
 		    gc.defaultOwnerMI.setEnabled(true);
+		  }
+		else if (gc.ownerGroups.size() == 0)
+		  {
+		    gc.defaultOwnerMI.setEnabled(false);
 		  }
 	      }
 	    catch (RemoteException ex)
