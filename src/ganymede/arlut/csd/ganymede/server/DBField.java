@@ -174,7 +174,7 @@ import arlut.csd.ganymede.rmi.db_field;
  * other objects should themselves be synchronized in any fashion.
  */
 
-public abstract class DBField implements Remote, db_field, FieldType {
+public abstract class DBField implements Remote, db_field, FieldType, Comparable {
 
   /**
    * TranslationService object for handling string localization in
@@ -372,7 +372,7 @@ public abstract class DBField implements Remote, db_field, FieldType {
    * set to newOwner.
    */
 
-  public DBField getCopy(DBObject newOwner)
+  public final DBField getCopy(DBObject newOwner)
   {
     return DBField.copyField(newOwner, this);
   }
@@ -397,6 +397,29 @@ public abstract class DBField implements Remote, db_field, FieldType {
   public final Vector getVectVal()
   {
     return (Vector) value;
+  }
+
+  /**
+   * This method implements the Comparable interface.
+   *
+   * We are comparable in terms of the field id number for this field.
+   *
+   * The o parameter can be a Short, a short (using Java 5
+   * autoboxing), or another DBField.
+   */
+
+  public int compareTo(Object o)
+  {
+    if (o instanceof Number)
+      {
+	return fieldcode - ((Number) o).shortValue();
+      }
+    else
+      {
+	DBField otherField = (DBField) o;
+
+	return fieldcode - otherField.fieldcode;
+      }
   }
 
   /**

@@ -548,7 +548,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     label_id = -1;
     category = null;
     customFields = new Vector();
-    fieldTable = new DBBaseFieldTable(20, (float) 1.0);
+    fieldTable = new DBBaseFieldTable();
     objectTable = new DBObjectTable(4000, (float) 1.0);
     maxid = 0;
     lastChange = new Date();

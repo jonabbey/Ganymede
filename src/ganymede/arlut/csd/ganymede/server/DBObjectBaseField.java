@@ -104,7 +104,7 @@ import arlut.csd.ganymede.rmi.BaseField;
  * DBObjectBaseField's type information in an efficiently retrieved summary.</P>
  */
 
-public final class DBObjectBaseField implements BaseField, FieldType {
+public final class DBObjectBaseField implements BaseField, FieldType, Comparable {
 
   static final boolean debug = false;
 
@@ -3379,6 +3379,29 @@ public final class DBObjectBaseField implements BaseField, FieldType {
   public Short getKey()
   {
     return Short.valueOf(field_code);
+  }
+
+  /**
+   * This method implements the Comparable interface.
+   *
+   * We are comparable in terms of the field id number for this field.
+   *
+   * The o parameter can be a Short, a short (using Java 5
+   * autoboxing), or another DBObjectBaseField.
+   */
+
+  public int compareTo(Object o)
+  {
+    if (o instanceof Number)
+      {
+	return field_code - ((Number) o).shortValue();
+      }
+    else
+      {
+	DBObjectBaseField otherField = (DBObjectBaseField) o;
+
+	return field_code - otherField.field_code;
+      }
   }
 
   /**

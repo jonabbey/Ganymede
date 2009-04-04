@@ -78,7 +78,7 @@ import java.util.NoSuchElementException;
 public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   /**
-   * The hash table data.
+   * Array of DBObjectBaseField objects, sorted in id order.
    */
 
   private transient DBObjectBaseField table[];
@@ -90,68 +90,18 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   private transient int count;
 
   /**
-   * Rehashes the table when count exceeds this threshold.
+   * Constructs a new, empty DBBaseFieldTable.
    */
 
-  private int threshold;
-
-  /**
-   * The load factor for the hashtable.
-   */
-
-  private float loadFactor;
-
-  /**
-   * Constructs a new, empty DBBaseFieldTable with the specified initial 
-   * capacity and the specified load factor. 
-   *
-   * @param      initialCapacity   the initial capacity of the hashtable.
-   * @param      loadFactor        a number between 0.0 and 1.0.
-   * @exception  IllegalArgumentException  if the initial capacity is less
-   *               than or equal to zero, or if the load factor is less than
-   *               or equal to zero.
-   */
-
-  public DBBaseFieldTable(int initialCapacity, float loadFactor) 
+  public DBBaseFieldTable()
   {
-    if ((initialCapacity <= 0) || (loadFactor <= 0.0) || (loadFactor > 1.0)) 
-      {
-	throw new IllegalArgumentException();
-      }
-
-    this.loadFactor = loadFactor;
-    table = new DBObjectBaseField[initialCapacity];
-    threshold = (int)(initialCapacity * loadFactor);
-  }
-
-  /**
-   * Constructs a new, empty DBBaseFieldTable with the specified initial capacity
-   * and default load factor.
-   *
-   * @param   initialCapacity   the initial capacity of the hashtable.
-   */
-
-  public DBBaseFieldTable(int initialCapacity) 
-  {
-    this(initialCapacity, 0.75f);
-  }
-
-  /**
-   * Constructs a new, empty DBBaseFieldTable with a default capacity and load
-   * factor. 
-   *
-   */
-
-  public DBBaseFieldTable() 
-  {
-    this(101, 0.75f);
+    table = new DBObjectBaseField[0];
   }
 
   /**
    * Returns the number of objects in this DBBaseFieldTable.
    *
    * @return  the number of objects in this DBBaseFieldTable.
-   *
    */
 
   public int size() 
@@ -164,7 +114,6 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    *
    * @return  <code>true</code> if this DBBaseFieldTable contains no values;
    *          <code>false</code> otherwise.
-   *
    */
 
   public boolean isEmpty() 
@@ -215,12 +164,14 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public boolean contains(DBObjectBaseField value) 
   {
-    if (value == null) 
+    int index = java.util.Arrays.binarySearch(table, value);
+
+    if (index < 0)
       {
-	throw new NullPointerException();
+	return false;
       }
 
-    return containsKey(value.getID());
+    return table[index].equals(value);
   }
 
   /**
@@ -232,31 +183,23 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public boolean containsKey(Short key) 
   {
-    return containsKey(key.shortValue());
+    return java.util.Arrays.binarySearch(table, key) >= 0;
   }
 
   /**
    * Tests if a DBObjectBaseField with the specified object id is in this DBBaseFieldTable.
    * 
    * @param   key   possible object id.
-   *
    */
 
   public synchronized boolean containsKey(short key) 
   {
-    DBObjectBaseField tab[] = table;
+    return java.util.Arrays.binarySearch(table, key) >= 0;
+  }
 
-    short index = (short) ((key & 0x7FFF) % tab.length);
-
-    for (DBObjectBaseField e = tab[index] ; e != null ; e = e.next) 
-      {
-	if (e.getID() == key)
-	  {
-	    return true;
-	  }
-      }
-    
-    return false;
+  public synchronized DBObjectBaseField[] getIDSortedArray()
+  {
+    return java.util.Arrays.copyOf(table, table.length);
   }
 
   /**
@@ -268,19 +211,14 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public DBObjectBaseField getNoSync(short key) 
   {
-    DBObjectBaseField tab[] = table;
+    int index = java.util.Arrays.binarySearch(table, key);
 
-    short index = (short) ((key & 0x7FFF) % tab.length);
-
-    for (DBObjectBaseField e = tab[index] ; e != null ; e = e.next) 
+    if (index < 0)
       {
-	if (e.getID() == key)
-	  {
-	    return e;
-	  }
+	return null;
       }
 
-    return null;
+    return table[index];
   }
 
   /**
@@ -292,19 +230,14 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public synchronized DBObjectBaseField get(short key) 
   {
-    DBObjectBaseField tab[] = table;
+    int index = java.util.Arrays.binarySearch(table, key);
 
-    short index = (short) ((key & 0x7FFF) % tab.length);
-
-    for (DBObjectBaseField e = tab[index] ; e != null ; e = e.next) 
+    if (index < 0)
       {
-	if (e.getID() == key)
-	  {
-	    return e;
-	  }
+	return null;
       }
 
-    return null;
+    return table[index];
   }
 
   /**
@@ -337,43 +270,6 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   /**
    *
-   * Rehashes the contents of the DBBaseFieldTable into a DBBaseFieldTable
-   * with a larger capacity. This method is called automatically when
-   * the number of keys in the hashtable exceeds this DBBaseFieldTable's
-   * capacity and load factor.
-   * 
-   */
-
-  protected void rehash() 
-  {
-    int oldCapacity = table.length;
-    DBObjectBaseField oldTable[] = table;
-
-    int newCapacity = oldCapacity * 2 + 1;
-    DBObjectBaseField newTable[] = new DBObjectBaseField[newCapacity];
-
-    threshold = (int) (newCapacity * loadFactor);
-    table = newTable;
-
-    //System.out.println("rehash old=" + oldCapacity + ", new=" +
-    //newCapacity + ", thresh=" + threshold + ", count=" + count);
-
-    for (int i = oldCapacity ; i-- > 0 ;) 
-      {
-	for (DBObjectBaseField old = oldTable[i] ; old != null ; ) 
-	  {
-	    DBObjectBaseField e = old;
-	    old = old.next;
-	    
-	    short index = (short) ((e.getID() & 0x7FFF) % newCapacity);
-	    e.next = newTable[index];
-	    newTable[index] = e;
-	  }
-      }
-  }
-
-  /**
-   *
    * Inserts a DBObjectBaseField into this DBBaseFieldTable.
    *
    * This put is not sync'ed, and should only be used with
@@ -390,28 +286,38 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 	throw new NullPointerException();
       }
 
-    // Makes sure the object is not already in the hashtable.
-    
-    removeNoSync(value.getID());
-    
-    DBObjectBaseField tab[] = table;
-    short hash = value.getID();
-    short index = (short) ((hash & 0x7FFF) % tab.length);
+    int index = java.util.Arrays.binarySearch(table, value);
 
-    if (count > threshold) 
+    if (index < 0)
       {
-	rehash();
-	putNoSync(value);
+	// we'll need to expand to make room
+
+	DBObjectBaseField[] newTable = new DBObjectBaseField[table.length + 1];
+
+	boolean found = false;
+
+	for (int j = 0, i = 0; i < table.length; i++)
+	  {
+	    DBObjectBaseField field = table[i];
+
+	    if (!found && value.getID() > field.getID())
+	      {
+		newTable[j++] = value;
+	      }
+	    else
+	      {
+		newTable[j++] = table[i++];
+	      }
+	  }
+
+	table = newTable;
 
 	return;
-      } 
+      }
 
-    // Insert the new entry.
+    // else, we're replacing
 
-    value.next = tab[index];
-    tab[index] = value;
-    count++;
-    return;
+    table[index] = value;
   }
 
   /**
@@ -422,35 +328,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public synchronized void put(DBObjectBaseField value) 
   {
-    // Make sure the value is not null
-
-    if (value == null) 
-      {
-	throw new NullPointerException();
-      }
-
-    // Makes sure the object is not already in the hashtable.
-    // Note that we are sync'ed, so we can use the non-sync'ed
-    // removeNoSync().
-    
-    removeNoSync(value.getID());
-
-    if (count > threshold) 
-      {
-	rehash();
-      }
-
-    DBObjectBaseField tab[] = table;
-    short hash = value.getID();
-    short index = (short) ((hash & 0x7FFF) % tab.length);
-
-    // Insert the new entry.
-    
-    value.next = tab[index];
-    tab[index] = value;
-    count++;
-    
-    return;
+    putNoSync(value);
   }
 
   /**
@@ -464,31 +342,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public void putNoSyncNoRemove(DBObjectBaseField value) 
   {
-    // Make sure the value is not null
-
-    if (value == null) 
-      {
-	throw new NullPointerException();
-      }
-
-    DBObjectBaseField tab[] = table;
-    short hash = value.getID();
-    short index = (short) ((hash & 0x7FFF) % tab.length);
-
-    if (count > threshold) 
-      {
-	rehash();
-	putNoSync(value);
-
-	return;
-      } 
-
-    // Insert the new entry.
-
-    value.next = tab[index];
-    tab[index] = value;
-    count++;
-    return;
+    putNoSync(value);
   }
 
   /**
@@ -499,29 +353,32 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public void removeNoSync(short key) 
   {
-    DBObjectBaseField tab[] = table;
-    short index = (short) ((key & 0x7FFF) % tab.length);
+    int index = java.util.Arrays.binarySearch(table, key);
 
-    for (DBObjectBaseField e = tab[index], prev = null ; e != null ; prev = e, e = e.next) 
+    if (index < 0)
       {
-	if (e.getID() == key)
+	return;
+      }
+
+    // we'll need to shrink by one
+
+    DBObjectBaseField[] newTable = new DBObjectBaseField[table.length - 1];
+
+    for (int j = 0, i = 0; i < table.length; i++)
+      {
+	DBObjectBaseField field = table[i];
+
+	if (i != index)
 	  {
-	    if (prev != null) 
-	      {
-		prev.next = e.next;
-	      } 
-	    else
-	      {
-		tab[index] = e.next;
-	      }
-
-	    count--;
-
-	    return;
+	    newTable[j++] = table[i++];
+	  }
+	else
+	  {
+	    i++;
 	  }
       }
 
-    return;
+    table = newTable;
   }
 
   /**
@@ -532,29 +389,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public synchronized void remove(short key) 
   {
-    DBObjectBaseField tab[] = table;
-    short index = (short) ((key & 0x7FFF) % tab.length);
-
-    for (DBObjectBaseField e = tab[index], prev = null ; e != null ; prev = e, e = e.next) 
-      {
-	if (e.getID() == key)
-	  {
-	    if (prev != null) 
-	      {
-		prev.next = e.next;
-	      } 
-	    else
-	      {
-		tab[index] = e.next;
-	      }
-
-	    count--;
-
-	    return;
-	  }
-      }
-
-    return;
+    removeNoSync(key);
   }
 
   /**
@@ -565,16 +400,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public synchronized void clear() 
   {
-    DBObjectBaseField tab[] = table;
-
-    /* -- */
-
-    for (int index = tab.length; --index >= 0; )
-      {
-	tab[index] = null;
-      }
-
-    count = 0;
+    table = new DBObjectBaseField[0];
   }
 
   /**
@@ -586,18 +412,9 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   {
     for (int i = 0; i < table.length; i++)
       {
-	DBObjectBaseField e = table[i];
-
-	while (e != null)
+	if (table[i].getName().equalsIgnoreCase(name))
 	  {
-	    String eName = e.getName();
-
-	    if (eName != null && eName.equalsIgnoreCase(name))
-	      {
-		return e;
-	      }
-
-	    e = e.next;
+	    return table[i];
 	  }
       }
 
@@ -620,49 +437,23 @@ class DBBaseFieldTableEnumerator implements Enumeration {
 
   short index;
   DBObjectBaseField table[];
-  DBObjectBaseField entry;
 
   /* -- */
 
   DBBaseFieldTableEnumerator(DBObjectBaseField table[]) 
   {
     this.table = table;
-    this.index = (short) table.length;
+    this.index = 0;
   }
 	
   public boolean hasMoreElements() 
   {
-    if (entry != null) 
-      {
-	return true;
-      }
-
-    while (index-- > 0) 
-      {
-	if ((entry = table[index]) != null) 
-	  {
-	    return true;
-	  }
-      }
-
-    return false;
+    return index < table.length;
   }
 
   public Object nextElement() 
   {
-    if (entry == null) 
-      {
-	while ((index-- > 0) && ((entry = table[index]) == null));
-      }
-
-    if (entry != null) 
-      {
-	DBObjectBaseField e = entry;
-	entry = e.next;
-	return e;
-      }
-
-    throw new NoSuchElementException("HashtableEnumerator");
+    return table[index++];
   }
 }
 
@@ -682,49 +473,23 @@ class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
 
   short index;
   DBObjectBaseField table[];
-  DBObjectBaseField entry;
 
   /* -- */
 
   DBBaseFieldTableIterator(DBObjectBaseField table[]) 
   {
     this.table = table;
-    this.index = (short) table.length;
+    this.index = 0;
   }
 	
   public boolean hasNext() 
   {
-    if (entry != null) 
-      {
-	return true;
-      }
-
-    while (index-- > 0) 
-      {
-	if ((entry = table[index]) != null) 
-	  {
-	    return true;
-	  }
-      }
-
-    return false;
+    return index < table.length;
   }
 
   public DBObjectBaseField next() 
   {
-    if (entry == null) 
-      {
-	while ((index-- > 0) && ((entry = table[index]) == null));
-      }
-
-    if (entry != null) 
-      {
-	DBObjectBaseField e = entry;
-	entry = e.next;
-	return e;
-      }
-
-    throw new NoSuchElementException("HashtableEnumerator");
+    return table[index++];
   }
 
   public void remove()

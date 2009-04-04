@@ -214,7 +214,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   protected DBObjectBase objectBase;
 
   /**
-   * <p>Our fields, hashed into an array.</p>
+   * <p>Our fields, ordered by ascending field id.</p>
    *
    * <p>This member variable will be null in the case where we are
    * constructed as a DBEditObject subclass for use as a pseudo-static
@@ -408,8 +408,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		// Making a copy here rather than saving a ref to the
 		// exported field makes a *huge* difference in overall
 		// memory usage on the Ganymede server.
-		
-		saveField(field.getCopy(this));	// safe since we started with an empty fieldAry
+
+		fieldAry[i] = field.getCopy(this); // safe since we started with an empty fieldAry
 	      }
 	  }
       }
@@ -460,10 +460,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    
 	    if (field == null)
 	      {
-		continue;
+		continue;	// this can happen if original is a DBEditObject
 	      }
 
-            DBField tmp = DBField.copyField(this, field);
+            DBField tmp = field.getCopy(this);
 
             if (tmp == null)
               {
@@ -504,6 +504,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	    if (field == null)
 	      {
+		// can happen if exportFields is called on a
+		// DBEditObject
+
 		continue;
 	      }
 
@@ -546,6 +549,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	    if (field == null)
 	      {
+		// can happen if exportFields is called on a
+		// DBEditObject
+
 		continue;
 	      }
 
@@ -1026,7 +1032,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		upgradeSkipCount = in.readInt();
 	      }
 
-	    int count = upgradeSkipCount;
+	    int count = upgradeSkipCount; // our vector count
 
 	    while (count-- > 0)
 	      {
@@ -1043,15 +1049,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	  }
 
         tmp = DBField.readField(this, in, definition);
-
-        if (definition.getType() == INVID && fieldcode == SchemaConstants.BackLinksField)
-          {
-	    // at 1.17 we started ignoring back links field, so we
-	    // don't want to actually retain such in memory if we find
-	    // one.
-
-            continue;	// don't actually put this field in the object
-          }
 
 	if (tmp == null)
 	  {
@@ -1113,14 +1110,27 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	
 	// now add the field to our fields table
 
-	if (tmp.isDefined())
+	if (Ganymede.db.isAtLeast(2, 15))
 	  {
-	    saveField(tmp);	// safe since we started with an empty fieldAry
+	    // starting at DBStore 2.15, we know that the fields are
+	    // coming from the db file ordered by ascending field code
+
+	    fieldAry[i] = tmp;
 	  }
 	else
 	  {
-	    // "%%% Loader skipping empty field {0}"
-	    System.err.println(ts.l("receive.skipping", definition.getName()));
+	    // we have to be more conservative when loading an older
+	    // db or journal block.
+
+	    if (tmp.isDefined())
+	      {
+		saveField(tmp);
+	      }
+	    else
+	      {
+		// "%%% Loader skipping empty field {0}"
+		System.err.println(ts.l("receive.skipping", definition.getName()));
+	      }
 	  }
       }
 
@@ -1295,6 +1305,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
+	// objectBase.customFields() defines the display order
+
 	for (int i = 0; i < objectBase.customFields.size(); i++)
 	  {
 	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
@@ -1326,10 +1338,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * object in a fashion that does not contribute to fieldAry threadlock.</p>
    */
 
-  public final Vector getFieldVect()
+  public final Vector<DBField> getFieldVect()
   {
     DBField field;
-    Vector fieldVect = new Vector(fieldAry.length);
+    Vector<DBField> fieldVect = new Vector<DBField>(fieldAry.length);
 
     synchronized (fieldAry)
       {
@@ -1339,6 +1351,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	    if (field == null)
 	      {
+		// DBEditObject can have null fields, DBObject base
+		// class cannot
+
 		continue;
 	      }
 	    
@@ -1361,14 +1376,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * field id's are not accidentally introduced into the DBObject's
    * fieldAry.</p>
    *
-   * <p>saveField() uses a hashing algorithm to try and speed up field
-   * save and retrieving, but we are optimizing for low memory usage
-   * rather than O(1) saving and retrieving.  Hash collisions are
-   * saved directly in the fieldAry, meaning that any hash collisions
-   * increase the likelihood of further hash collisions, but we don't
-   * need an extra 'next' pointer in the DBField class, saving us 4
-   * bytes of memory for every field of every object in the
-   * database.</p>.
+   * <p>saveField() saves fields in field id order to try and speed up
+   * field retrieving, by allowing us to do boolean search to find
+   * elements.</p>
    */
 
   public final void saveField(DBField field)
@@ -1378,39 +1388,49 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
+    if (field == null)
+      {
+	// "null value passed to saveField"
+	throw new IllegalArgumentException(ts.l("saveField.null"));
+      }
+
     synchronized (fieldAry)
       {
-	if (field == null)
+	int i = 0;
+
+	while (i < fieldAry.length)
 	  {
-	    // "null value passed to saveField"
-	    throw new IllegalArgumentException(ts.l("saveField.null"));
-	  }
-	
-	short hashindex = (short) ((field.getID() & 0x7FFF) % fieldAry.length);
-
-	short index = hashindex;
-
-	while (fieldAry[index] != null)
-	  {
-	    // we don't guarantee that the fieldAry has a prime
-	    // length, so we have to use a linear hashing probe step
-	    // of 1
-
-	    if (++index >= fieldAry.length)
+	    if (fieldAry[i] == null)
 	      {
-		index = 0;
+		fieldAry[i] = field;
+
+		return;
 	      }
 
-	    if (index == hashindex)
+	    if (fieldAry[i].getID() > field.getID())
 	      {
-		// couldn't find it
-		
-		// "full fieldAry hash"
-		throw new ArrayIndexOutOfBoundsException(ts.l("saveField.full"));
+		break;
 	      }
+
+	    i++;
 	  }
-	
-	fieldAry[index] = field;
+
+	if (i == fieldAry.length)
+	  {
+	    throw new ArrayIndexOutOfBoundsException("saveField overran field array length");
+	  }
+
+	DBField currentField = null;
+	DBField bubbleField = field;
+
+	while (i < fieldAry.length)
+	  {
+	    currentField = fieldAry[i];
+	    fieldAry[i] = bubbleField;
+	    bubbleField = currentField;
+
+	    i++;
+	  }
       }
   }
 
@@ -1421,14 +1441,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * id as the field argument for this method, no action will be taken
    * and an IllegalArgumentException will be thrown.</p>
    *
-   * <p>replaceField() uses a hashing algorithm to try and speed up
-   * field save and retrieving, but we are optimizing for low memory
-   * usage rather than O(1) saving and retrieving.  Hash collisions
-   * are saved directly in the fieldAry, meaning that any hash
-   * collisions increase the likelihood of further hash collisions,
-   * but we don't need an extra 'next' pointer in the DBField class,
-   * saving us 4 bytes of memory for every field of every object in
-   * the database.</p>.
+   * <p>replaceField() saves fields in field id order to try and speed
+   * up field retrieving, by allowing us to do boolean search to find
+   * elements.</p>
    */
 
   public final void replaceField(DBField field)
@@ -1446,30 +1461,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    throw new IllegalArgumentException(ts.l("replaceField.null"));
 	  }
 
-	short id = field.getID();
+	int index = java.util.Arrays.binarySearch(fieldAry, field);
 
-	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
-
-	short index = hashindex;
-
-	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
+	if (index < 0)
 	  {
-	    // we don't guarantee that the fieldAry has a prime
-	    // length, so we have to use a linear hashing probe step
-	    // of 1
-
-	    if (++index >= fieldAry.length)
-	      {
-		index = 0;
-	      }
-
-	    if (index == hashindex)
-	      {
-		// couldn't find it
-
-		// "Error, DBObject.replaceField could not find matching field"
-		throw new IllegalArgumentException(ts.l("replaceField.none"));
-	      }
+	    // "Error, DBObject.replaceField could not find matching field"
+	    throw new IllegalArgumentException(ts.l("replaceField.none"));
 	  }
 
 	fieldAry[index] = field;
@@ -1486,15 +1483,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * the argument from this object's fieldAry.  This method will never
    * fail..  if there is no field matching the given field id, the
    * method will return without changing the fieldAry.</p>
-   *
-   * <p>clearField() uses a hashing algorithm to
-   * try and speed up field save and retrieving, but we are optimizing
-   * for low memory usage rather than O(1) saving and retrieving.
-   * Hash collisions are saved directly in the fieldAry, meaning that
-   * any hash collisions increase the likelihood of further hash
-   * collisions, but we don't need an extra 'next' pointer in the
-   * DBField class, saving us 4 bytes of memory for every field of
-   * every object in the database.</p>.
    */
 
   public final void clearField(short id)
@@ -1506,27 +1494,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
+	int index = java.util.Arrays.binarySearch(fieldAry, id);
 
-	short index = hashindex;
-
-	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
+	if (index < 0)
 	  {
-	    // we don't guarantee that the fieldAry has a prime
-	    // length, so we have to use a linear hashing probe step
-	    // of 1
-
-	    if (++index >= fieldAry.length)
-	      {
-		index = 0;
-	      }
-
-	    if (index == hashindex)
-	      {
-		// couldn't find it
-
-		return;
-	      }
+	    // "Error, DBObject.replaceField could not find matching field"
+	    throw new IllegalArgumentException(ts.l("replaceField.none"));
 	  }
 
 	fieldAry[index] = null;
@@ -1554,27 +1527,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
+	int index = java.util.Arrays.binarySearch(fieldAry, id);
 
-	short index = hashindex;
-
-	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
+	if (index < 0)
 	  {
-	    // we don't guarantee that the fieldAry has a prime
-	    // length, so we have to use a linear hashing probe step
-	    // of 1
-
-	    if (++index >= fieldAry.length)
-	      {
-		index = 0;
-	      }
-
-	    if (index == hashindex)
-	      {
-		// couldn't find it
-
-		return null;
-	      }
+	    return null;
 	  }
 
 	return fieldAry[index];
@@ -1625,30 +1582,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
-
-	short index = hashindex;
-
-	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
-	  {
-	    // we don't guarantee that the fieldAry has a prime
-	    // length, so we have to use a linear hashing probe step
-	    // of 1
-
-	    if (++index >= fieldAry.length)
-	      {
-		index = 0;
-	      }
-
-	    if (index == hashindex)
-	      {
-		// couldn't find it
-
-		return -1;
-	      }
-	  }
-
-	return index;
+	return (short) java.util.Arrays.binarySearch(fieldAry, id);
       }
   }
 
@@ -1666,27 +1600,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-	short hashindex = (short) ((id & 0x7FFF) % fieldAry.length);
+	int index = java.util.Arrays.binarySearch(fieldAry, id);
 
-	short index = hashindex;
-
-	while ((fieldAry[index] == null) || (fieldAry[index].getID() != id))
+	if (index < 0)
 	  {
-	    // we don't guarantee that the fieldAry has a prime
-	    // length, so we have to use a linear hashing probe step
-	    // of 1
-
-	    if (++index >= fieldAry.length)
-	      {
-		index = 0;
-	      }
-
-	    if (index == hashindex)
-	      {
-		// couldn't find it
-
-		return;
-	      }
+	    return;
 	  }
 
 	if (permCacheAry != null)
@@ -1777,7 +1695,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * <p>Get complete list of DBFields contained in this object.
-   * The list returned will appear in unsorted order.</p>
+   * The list returned will appear in field id order.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
