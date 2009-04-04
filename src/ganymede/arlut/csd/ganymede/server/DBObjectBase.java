@@ -691,7 +691,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     out.writeShort((short) customFields.size()); // should have no more than 32k fields
 
-    // and write out the field definitions, in order
+    // and write out the custom field definitions, in display order
 
     for (int i = 0; i < customFields.size(); i++)
       {
@@ -795,7 +795,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	System.err.println(ts.l("receive.fieldcount", Integer.valueOf(size)));
       }
 
-    // read in the custom field dictionary for this object
+    // read in the custom field dictionary for this object, in display
+    // order
 
     for (int i = 0; i < size; i++)
       {
@@ -2665,7 +2666,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
 
     // now if we are to return the built-in fields, go ahead and add
-    // them to the end in whatever hashing order we find them
+    // them to the end in field id order
 
     if (includeBuiltIns)
       {
@@ -3701,8 +3702,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>This method is used to put a new user field into both the hashed field
-   * table and the customFields vector.</p>
+   * <p>This method is used to put a new user field into both the
+   * field id ordered field table and the display sorted customFields
+   * vector.</p>
    */
 
   synchronized void addFieldToEnd(DBObjectBaseField field)
