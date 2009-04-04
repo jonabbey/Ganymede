@@ -300,7 +300,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 	  {
 	    DBObjectBaseField field = table[i];
 
-	    if (!found && value.getID() > field.getID())
+	    if (!found && value.getID() < field.getID())
 	      {
 		newTable[j++] = value;
 	      }
