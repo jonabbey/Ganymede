@@ -737,6 +737,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
+	// "DBObjectBase.receive(): enter"
 	System.err.println(ts.l("receive.enter"));
       }
 
@@ -744,6 +745,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
+	// "DBObjectBase.receive(): object base name: {0}"
 	System.err.println(ts.l("receive.basename", object_name));
       }
 
@@ -772,6 +774,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
+	// "DBObjectBase.receive(): class name: {0}"
 	System.err.println(ts.l("receive.classname", classname));
       }
 
