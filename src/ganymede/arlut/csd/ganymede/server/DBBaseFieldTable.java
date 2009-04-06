@@ -97,6 +97,16 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   {
     table = new DBObjectBaseField[0];
   }
+  
+  /**
+   * This method sets the contents of the DBBaseFieldTable.  The
+   * fieldAry array must be sorted in increasing field id order.
+   */
+  
+  public void replaceContents(DBObjectBaseField fieldAry[])
+  {
+    this.table = fieldAry;
+  }
 
   /**
    * Returns the number of objects in this DBBaseFieldTable.
