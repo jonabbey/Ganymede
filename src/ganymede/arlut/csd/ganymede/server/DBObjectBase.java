@@ -801,37 +801,62 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // read in the custom field dictionary for this object, in display
     // order
 
-    for (int i = 0; i < size; i++)
+    if (store.isAtLeast(2,15))
       {
-	field = new DBObjectBaseField(in, this);
+	DBObjectBaseField[] fieldAry = new DBObjectBaseField[size];
 
-	// skip any system standard field definitions, which will
-	// be created in the field table separately
+	// we read our fields in display order
 
-	if (field.getID() <= SchemaConstants.FinalSystemField)
+	for (int i = 0; i < size; i++)
 	  {
-	    continue;		// don't save the db's version of a system standard field
+	    fieldAry[i] = new DBObjectBaseField(in, this);
+
+	    customFields.addElement(fieldAry[i]);
 	  }
 
-	if (type_code == SchemaConstants.OwnerBase && field.getID() == SchemaConstants.OwnerObjectsOwned)
-	  {
-	    continue;		// as of DBStore 2.7, we no longer symmetrically link owner groups to owned objects
-	  }
+	// DBObjectBaseField implements Comparable on the field id, so
+	// we can use java.util.Arrays.sort() to sort into ascending
+	// field order, which the DBBaseFieldTable needs for its
+	// contents.
 
-	if (debug2)
-	  {
-	    System.err.println("DBObjectBaseField.receive(): " + field);
-	  }
+	java.util.Arrays.sort(fieldAry);
 
-	addFieldToEnd(field);
+	fieldTable.replaceContents(fieldAry);
       }
-
-    // if we're reading an old ganymede.db file, sort the customFields
-    // for 2.0 the customFields will have been read in sort order
-
-    if (store.isLessThan(2,0))
+    else
       {
-	new VecQuickSort(customFields, comparator).sort();
+	for (int i = 0; i < size; i++)
+	  {
+	    field = new DBObjectBaseField(in, this);
+
+	    // skip any system standard field definitions, which will
+	    // be created in the field table separately
+
+	    if (field.getID() <= SchemaConstants.FinalSystemField)
+	      {
+		continue;		// don't save the db's version of a system standard field
+	      }
+
+	    if (type_code == SchemaConstants.OwnerBase && field.getID() == SchemaConstants.OwnerObjectsOwned)
+	      {
+		continue;		// as of DBStore 2.7, we no longer symmetrically link owner groups to owned objects
+	      }
+
+	    if (debug2)
+	      {
+		System.err.println("DBObjectBaseField.receive(): " + field);
+	      }
+
+	    addFieldToEnd(field);
+	  }
+
+	// if we're reading an old ganymede.db file, sort the customFields
+	// for 2.0 the customFields will have been read in sort order
+
+	if (store.isLessThan(2,0))
+	  {
+	    new VecQuickSort(customFields, comparator).sort();
+	  }
       }
 
     // at file version 1.1, we introduced label_id's.
