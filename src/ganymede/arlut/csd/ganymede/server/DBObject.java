@@ -382,6 +382,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// to commit back into our DBStore
 	
 	fieldAry = new DBField[count];
+
+	int j = 0;
 	
 	for (short i = 0; i < eObj.fieldAry.length; i++)
 	  {
@@ -409,7 +411,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		// exported field makes a *huge* difference in overall
 		// memory usage on the Ganymede server.
 
-		fieldAry[i] = field.getCopy(this); // safe since we started with an empty fieldAry
+		fieldAry[j++] = field.getCopy(this); // safe since we started with an empty fieldAry
 	      }
 	  }
       }
