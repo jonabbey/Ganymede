@@ -325,18 +325,29 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 	  {
 	    boolean found = false;
 
-	    for (int j = 0, i = 0; i < table.length; i++)
+	    for (int j = 0, i = 0; j < newTable.length; i++)
 	      {
-		DBObjectBaseField field = table[i];
-
-		if (!found && value.getID() < field.getID())
+		if (i < table.length)
 		  {
-		    newTable[j++] = value;
-		    found = true;
+		    DBObjectBaseField field = table[i];
+
+		    if (!found && value.getID() < field.getID())
+		      {
+			// insert into the beginning or middle
+
+			newTable[j++] = value;
+			found = true;
+		      }
+		    else
+		      {
+			newTable[j++] = table[i++];
+		      }
 		  }
 		else
 		  {
-		    newTable[j++] = table[i++];
+		    // append to the end
+
+		    newTable[j++] = value;
 		  }
 	      }
 	  }
