@@ -56,7 +56,7 @@ package arlut.csd.Util;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Vector;
+import java.util.List;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -74,7 +74,7 @@ import java.util.Vector;
 
 public class VecQuickSort implements Comparator {
 
-  Vector objects;
+  List objects;
   Comparator comparator;
 
   /* -- */
@@ -83,13 +83,13 @@ public class VecQuickSort implements Comparator {
    *
    * VecQuickSort constructor.
    *
-   * @param objects Vector of objects to be sorted in place
+   * @param objects List of objects to be sorted in place
    * @param comparator Comparator object.. if null, standard string compare
    * will be done.
    *
    */
 
-  public VecQuickSort(Vector objects, Comparator comparator)
+  public VecQuickSort(List objects, Comparator comparator)
   {
     this.objects = objects;
 
@@ -117,7 +117,7 @@ public class VecQuickSort implements Comparator {
 
 	for (int i = 0; i < ary.length; i++)
 	  {
-	    objects.setElementAt(ary[i], i);
+	    objects.set(i, ary[i]);
 	  }
       }
   }
