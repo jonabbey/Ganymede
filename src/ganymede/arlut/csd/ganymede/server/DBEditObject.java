@@ -390,9 +390,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
 	if (field != null && fieldDef.getID() == field.getID())
 	  {
-	    fieldAry[i++] = DBField.copyField(this, fieldVect.elementAt(j++));
+	    fieldAry[i++] = DBField.copyField(this, field);
 
-	    if (j < fieldVect.size())
+	    if (++j < fieldVect.size())
 	      {
 		field = fieldVect.elementAt(j);
 	      }
