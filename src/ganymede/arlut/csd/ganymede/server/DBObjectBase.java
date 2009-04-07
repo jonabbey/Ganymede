@@ -307,13 +307,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   // runtime data
 
   /**
-   * Custom field dictionary sorted in display order.  This Vector
-   * does *not* include any built-in fields.  Elements of this Vector
-   * are {@link arlut.csd.ganymede.server.DBObjectBaseField
+   * Custom field dictionary sorted in display order.  This List does
+   * *not* include any built-in fields.  Elements of this List are
+   * {@link arlut.csd.ganymede.server.DBObjectBaseField
    * DBObjectBaseFields}.
    */
 
-  private Vector<DBObjectBaseField> customFields;
+  private List<DBObjectBaseField> customFields;
 
   /**
    * <p>Cached template vector</p>
@@ -540,7 +540,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     type_code = -1;
     label_id = -1;
     category = null;
-    customFields = new Vector();
+    customFields = new ArrayList<DBObjectBaseField>();
     fieldTable = new DBBaseFieldTable();
     objectTable = new DBObjectTable(4000, (float) 1.0);
     maxid = 0;
@@ -608,8 +608,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     this(original.store, original.embedded, true);
     this.editor = editor;
 
-    DBObjectBaseField bf;
-
     synchronized (original)
       {
 	object_name = original.object_name;
@@ -624,15 +622,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	// make copies of all the custom field definitions for this
 	// object type, and save them into our own field hash.
     
-	Enumeration en;
-	DBObjectBaseField field;
-    
-	en = original.customFields.elements();
-
-	while (en.hasMoreElements())
+	for (DBObjectBaseField fieldDef: original.customFields)
 	  {
-	    field = (DBObjectBaseField) en.nextElement();
-	    bf = new DBObjectBaseField(field, editor); // copy this base field
+	    DBObjectBaseField bf = new DBObjectBaseField(fieldDef, editor);
 	    bf.base = this;
 
 	    addFieldToEnd(bf);
@@ -686,10 +678,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     // and write out the custom field definitions, in display order
 
-    for (int i = 0; i < customFields.size(); i++)
+    for (DBObjectBaseField fieldDef: customFields)
       {
-	DBObjectBaseField fieldDef = (DBObjectBaseField) customFields.elementAt(i);
-
 	fieldDef.emit(out);
       }
     
@@ -1103,7 +1093,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * This helper method writes out all the field field descriptions
+   * This helper method writes out all the field descriptions
    * for this DBObjectBase, wrapping fields in <tab> container
    * elements that identify the tab that the fields belong to.
    *
@@ -1118,10 +1108,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     synchronized (customFields)
       {
 	String lastTabName = null;
+	boolean first = true;
 
-	for (int i = 0; i < customFields.size(); i++)
+	for (DBObjectBaseField fieldDef: customFields)
 	  {
-	    DBObjectBaseField fieldDef = (DBObjectBaseField) customFields.elementAt(i);
 	    String currentTabName = fieldDef.getTabName();
 
 	    if (currentTabName == null)
@@ -1129,9 +1119,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 		currentTabName = ts.l("global.default_tab"); // "General"
 	      }
 
-	    if (i == 0 || !StringUtils.stringEquals(currentTabName, lastTabName))
+	    if (!StringUtils.stringEquals(currentTabName, lastTabName))
 	      {
-		if (i != 0)
+		if (lastTabName != null)
 		  {
 		    xmlOut.indentIn();
 		    xmlOut.endElementIndent("tab");
@@ -1339,10 +1329,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // setting.. we now need to find out field id's that are missing
     // in the xml, as we'll need to delete these
 
-    for (int i = 0; i < customFields.size(); i++)
+    for (DBObjectBaseField _field: customFields)
       {
-	DBObjectBaseField _field = (DBObjectBaseField) customFields.elementAt(i);
-
 	fieldsInBase.addElement(Integer.valueOf(_field.getID()));
       }
 
@@ -1545,7 +1533,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	err.println(ts.l("setXML.debugsorting"));
       }
 
-    Vector _newCustom = new Vector();
+    List<DBObjectBaseField> _newCustom = new ArrayList<DBObjectBaseField>();
 
     for (int i = 0; i < fieldsInXML.size(); i++)
       {
@@ -1560,7 +1548,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					      ts.l("setXML.mysteryfield", _fieldID));
 	  }
 
-	_newCustom.addElement(_field);
+	_newCustom.add(_field);
       }
 
     // make sure we are consistent like we think we should be
@@ -2410,8 +2398,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (previousFieldName == null || previousFieldName.equals(""))
       {
-	customFields.removeElement(oldField);
-	customFields.insertElementAt(oldField, 0);
+	customFields.remove(oldField);
+	customFields.add(0, oldField);
 	return null;
       }
 
@@ -2424,8 +2412,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					  ts.l("moveFieldAfter.nofield", fieldName, previousFieldName));
       }
 
-    customFields.removeElement(oldField);
-    customFields.insertElementAt(oldField, customFields.indexOf(prevField) + 1);
+    customFields.remove(oldField);
+    customFields.add(customFields.indexOf(prevField) + 1, oldField);
 
     return null;
   }
@@ -2458,8 +2446,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (nextFieldName == null || nextFieldName.equals(""))
       {
-	customFields.removeElement(oldField);
-	customFields.addElement(oldField);
+	customFields.remove(oldField);
+	customFields.add(oldField);
 	return null;
       }
 
@@ -2472,8 +2460,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					  ts.l("moveFieldBefore.nofield", fieldName, nextFieldName));
       }
 
-    customFields.removeElement(oldField);
-    customFields.insertElementAt(oldField, customFields.indexOf(nextField));
+    customFields.remove(oldField);
+    customFields.add(customFields.indexOf(nextField), oldField);
 
     return null;
   }
@@ -3200,7 +3188,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     return new Iterable<DBObjectBaseField>() {
       public Iterator<DBObjectBaseField> iterator()
       {
-	return customFields.iterator();
+	return Collections.unmodifiableList(customFields).iterator();
       }
     };
   }
@@ -3381,7 +3369,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	    for (int i = 0; i <customFields.size(); i++)
 	      {
 		System.err.println("DBObjectBase.clearEditor(): customFields[" + i + "(" + 
-				   this.toString() + ")] = " + customFields.elementAt(i));
+				   this.toString() + ")] = " + customFields.get(i));
 	      }
 	  }
       }
@@ -3763,20 +3751,15 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	// first load our custom fields, in display sorted order
 
-	for (DBObjectBaseField fieldDef: customFields)
+	for (DBObjectBaseField fieldDef: getCustomFields())
 	  {
 	    templateVector.addElement(fieldDef.getTemplate());
 	  }
 
 	// then load our system fields
 
-	for (DBObjectBaseField fieldDef: fieldTable)
+	for (DBObjectBaseField fieldDef: getStandardFields())
 	  {
-	    if (!fieldDef.isBuiltIn())
-	      {
-		continue;
-	      }
-	
 	    templateVector.addElement(fieldDef.getTemplate());
 	  }
       }
@@ -3799,7 +3782,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     fieldTable.put(field);
 
-    customFields.insertElementAt(field,0);
+    customFields.add(0,field);
   }
 
   /**
@@ -3821,11 +3804,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
 	for (int i = 0; i < customFields.size(); i++)
 	  {
-	    DBObjectBaseField myDef = customFields.elementAt(i);
+	    DBObjectBaseField myDef = customFields.get(i);
 
 	    if (myDef.field_code == previousField)
 	      {
-		customFields.insertElementAt(field,i+1);
+		customFields.add(i+1, field);
 
 		fieldTable.put(field);
 
@@ -3854,7 +3837,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     fieldTable.put(field);
 
-    customFields.addElement(field);
+    customFields.add(field);
   }
 
   /**
@@ -3915,7 +3898,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (field.getID() > SchemaConstants.FinalSystemField)
       {
-	customFields.removeElement(field);
+	customFields.remove(field);
       }
   }
 
