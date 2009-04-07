@@ -296,7 +296,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     shadowObject = null;
 
-    myInvid = Invid.createInvid(objectBase.type_code, 0);
+    myInvid = Invid.createInvid(objectBase.getTypeID(), 0);
     gSession = null;
   }
 
@@ -311,7 +311,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   DBObject(DBObjectBase objectBase, int id)
   {
     this(objectBase);
-    myInvid = Invid.createInvid(objectBase.type_code, id);
+    myInvid = Invid.createInvid(objectBase.getTypeID(), id);
     gSession = null;
   }
 
@@ -449,7 +449,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// DBObjectDeltaRec uses this constructor when doing
 	// journal edits to an object
 
-	fieldAry = new DBField[objectBase.fieldTable.size()];
+	fieldAry = new DBField[objectBase.getFieldCount()];
 
 	// put any defined fields into the object we're going
 	// to commit back into our DBStore
@@ -603,7 +603,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final short getTypeID()
   {
-    return objectBase.type_code;
+    return objectBase.getTypeID();
   }
 
   /**
@@ -980,7 +980,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     // get our unique id
 
-    myInvid = Invid.createInvid(objectBase.type_code, in.readInt());
+    myInvid = Invid.createInvid(objectBase.getTypeID(), in.readInt());
 
     // get number of fields
 
@@ -1002,7 +1002,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	fieldcode = in.readShort();
 
-	definition = objectBase.fieldTable.get(fieldcode);
+	definition = objectBase.getFieldDef(fieldcode);
 
 	// we used to have a couple of Invid vector fields that we
 	// have gotten rid of, for the sake of improving Ganymede's
@@ -1241,7 +1241,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	editset.session.GSession.checkOut(); // update session checked out count
       }
 
-    objectBase.store.checkOut(); // update checked out count
+    objectBase.getStore().checkOut(); // update checked out count
 
     return shadowObject;
   }
@@ -1276,7 +1276,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	editset.session.GSession.checkIn();
       }
 
-    objectBase.store.checkIn(); // update checked out count
+    objectBase.getStore().checkIn(); // update checked out count
 
     return true;
   }
@@ -1305,12 +1305,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-	// objectBase.customFields() defines the display order
-
-	for (int i = 0; i < objectBase.customFields.size(); i++)
+	for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
 	  {
-	    DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
-	    
 	    field = retrieveField(fieldDef.getID());
 	    
 	    if (field != null)
@@ -2516,11 +2512,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	if (customOnly)
 	  {
 	    // return the custom fields only, in display order
-	    
-	    for (int i = 0; i < objectBase.customFields.size(); i++)
+
+	    for (DBObjectBaseField fieldDef: objectBase.getCustomFields())	    
 	      {
-		DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
-		
 		field = retrieveField(fieldDef.getID());
 		
 		if (field != null)
@@ -2531,12 +2525,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	  }
 	else			// all fields in this object
 	  {
-	    // first the display fields
-	    
-	    for (int i = 0; i < objectBase.customFields.size(); i++)
+	    // first the display fields, in display order
+
+	    for (DBObjectBaseField fieldDef: objectBase.getCustomFields())	    
 	      {
-		DBObjectBaseField fieldDef = (DBObjectBaseField) objectBase.customFields.elementAt(i);
-		
 		field = retrieveField(fieldDef.getID());
 		
 		if (field != null)
@@ -2962,27 +2954,29 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   private void appendObjectInfo(StringBuffer buffer, String prefix, boolean local)
   {
-    DBObjectBaseField fieldDef;
-    DBField field;
-
-    /* -- */
-
-    // customFields shouldn't be changing unless we are in the middle of
-    // schema editing
-
-    Vector customFields = objectBase.customFields;
-
-    synchronized (customFields)
+    for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
       {
-	for (int i = 0; i < customFields.size(); i++)
+	DBField field = retrieveField(fieldDef.getID());
+
+	if (field != null && field.isDefined() && (local || field.isVisible()))
 	  {
-	    fieldDef = (DBObjectBaseField) customFields.elementAt(i);
-
-	    field = retrieveField(fieldDef.getID());
-
-	    if (field != null && field.isDefined() && (local || field.isVisible()))
+	    if (!field.isEditInPlace())
 	      {
-		if (!field.isEditInPlace())
+		if (prefix != null)
+		  {
+		    buffer.append(prefix);
+		  }
+
+		buffer.append(field.getName());
+		buffer.append(" : ");
+		buffer.append(field.getValueString());
+		buffer.append("\n");
+	      }
+	    else
+	      {
+		InvidDBField invField = (InvidDBField) field;
+
+		for (int j = 0; j < invField.size(); j++)
 		  {
 		    if (prefix != null)
 		      {
@@ -2990,76 +2984,59 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		      }
 
 		    buffer.append(field.getName());
-		    buffer.append(" : ");
-		    buffer.append(field.getValueString());
+		    buffer.append("[");
+		    buffer.append(j);
+		    buffer.append("]");
 		    buffer.append("\n");
-		  }
-		else
-		  {
-		    InvidDBField invField = (InvidDBField) field;
-
-		    for (int j = 0; j < invField.size(); j++)
-		      {
-			if (prefix != null)
-			  {
-			    buffer.append(prefix);
-			  }
-
-			buffer.append(field.getName());
-			buffer.append("[");
-			buffer.append(j);
-			buffer.append("]");
-			buffer.append("\n");
 			
-			Invid x = invField.value(j);
+		    Invid x = invField.value(j);
 
-			DBObject remObj = null;
+		    DBObject remObj = null;
 
-			if (gSession != null)
-			  {
-			    // if this object has been checked out for
-			    // viewing by a session, we'll use
-			    // view_db_object() so that we don't
-			    // reveal fields that should not be seen.
+		    if (gSession != null)
+		      {
+			// if this object has been checked out for
+			// viewing by a session, we'll use
+			// view_db_object() so that we don't
+			// reveal fields that should not be seen.
 			   
-			    try
-			      {
-				ReturnVal retVal = gSession.view_db_object(x);
-				remObj = (DBObject) retVal.getObject();
-			      }
-			    catch (NotLoggedInException ex)
-			      {
-			      }
-			  }
-
-			if (remObj == null)
+			try
 			  {
-			    // we use DBStore's static viewDBObject
-			    // method so that we can call this even
-			    // before the GanymedeServer object is
-			    // initialized
-
-			    remObj = DBStore.viewDBObject(x);
+			    ReturnVal retVal = gSession.view_db_object(x);
+			    remObj = (DBObject) retVal.getObject();
 			  }
-
-			if (remObj instanceof DBEditObject)
+			catch (NotLoggedInException ex)
 			  {
-			    DBEditObject eO = (DBEditObject) remObj;
+			  }
+		      }
+
+		    if (remObj == null)
+		      {
+			// we use DBStore's static viewDBObject
+			// method so that we can call this even
+			// before the GanymedeServer object is
+			// initialized
+
+			remObj = DBStore.viewDBObject(x);
+		      }
+
+		    if (remObj instanceof DBEditObject)
+		      {
+			DBEditObject eO = (DBEditObject) remObj;
 			    
-			    if (eO.getStatus() == ObjectStatus.DELETING)
-			      {
-				remObj = eO.getOriginal();
-			      }
+			if (eO.getStatus() == ObjectStatus.DELETING)
+			  {
+			    remObj = eO.getOriginal();
 			  }
+		      }
 
-			if (prefix != null)
-			  {
-			    remObj.appendObjectInfo(buffer, prefix + "\t", local);
-			  }
-			else
-			  {
-			    remObj.appendObjectInfo(buffer, "\t", local);
-			  }
+		    if (prefix != null)
+		      {
+			remObj.appendObjectInfo(buffer, prefix + "\t", local);
+		      }
+		    else
+		      {
+			remObj.appendObjectInfo(buffer, "\t", local);
 		      }
 		  }
 	      }
@@ -3078,7 +3055,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	
 	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    field = fieldAry[i];
+	    DBField field = fieldAry[i];
 	    
 	    if (field == null || !field.isBuiltIn() || !field.isDefined())
 	      {
@@ -3101,19 +3078,19 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
   }
 
-  /* *************************************************************************
-  *
-  * The following methods are for Jython/Map support
-  *    
-  * For this object, the Map interface allows for indexing based on either
-  * the name or the numeric ID of a DBField. Indexing by numeric id, however,
-  * is only supported for "direct" access to the Map; the numeric id numbers
-  * won't appear in the list of keys for the Map.
-  *
-  * EXAMPLE:
-  * MyDBObject.get("field_x") will return the DBField with the label
-  * of "field_x".
-  */
+  /**************************************************************************
+   *
+   * The following methods are for Jython/Map support
+   *    
+   * For this object, the Map interface allows for indexing based on either
+   * the name or the numeric ID of a DBField. Indexing by numeric id, however,
+   * is only supported for "direct" access to the Map; the numeric id numbers
+   * won't appear in the list of keys for the Map.
+   *
+   * EXAMPLE:
+   * MyDBObject.get("field_x") will return the DBField with the label
+   * of "field_x".
+   */
 
   /**
    * Part of the JythonMap interface.
@@ -3191,11 +3168,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     Set entrySet = new HashSet();
     DBField field;
+
     for (Iterator iter = getFieldVect().iterator(); iter.hasNext();)
       {
         field = (DBField) iter.next();
         entrySet.add(new Entry(field));
       }
+
     return entrySet;
   }
 

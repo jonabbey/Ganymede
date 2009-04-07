@@ -150,6 +150,19 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
+   * Returns an Iterator of the built-in DBObjectBaseField objects in
+   * this DBBaseFieldTable.
+   *
+   * Use the Iterator methods on the returned object to fetch the
+   * elements sequentially.
+   */
+
+  public synchronized Iterator<DBObjectBaseField> builtInIterator()
+  {
+    return new DBBaseFieldTableBuiltInIterator(table);
+  }
+
+  /**
    * Returns an enumeration of the objects in this DBBaseFieldTable.
    * Use the Enumeration methods on the returned object to fetch the elements
    * sequentially.
@@ -507,3 +520,46 @@ class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
     throw new UnsupportedOperationException();
   }
 }
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                 DBBaseFieldTableBuiltInIterator
+
+------------------------------------------------------------------------------*/
+
+/**
+ * A DBBaseFieldTable Iterator class that iterates over the built-in
+ * field definitions in a DBObjectBase, in ascending field id order.
+ *
+ * This class should remain opaque to the client.
+ */
+
+class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
+
+  short index;
+  DBObjectBaseField table[];
+
+  /* -- */
+
+  DBBaseFieldTableBuiltInIterator(DBObjectBaseField table[]) 
+  {
+    this.table = table;
+    this.index = 0;
+  }
+	
+  public boolean hasNext() 
+  {
+    return index < table.length && table[index].isBuiltIn();
+  }
+
+  public DBObjectBaseField next() 
+  {
+    return table[index++];
+  }
+
+  public void remove()
+  {
+    throw new UnsupportedOperationException();
+  }
+}
+

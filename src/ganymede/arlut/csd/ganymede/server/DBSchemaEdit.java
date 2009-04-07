@@ -658,7 +658,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
     
     tmpBase = (DBObjectBase) newBases.get(Short.valueOf(id));
 
-    if (tmpBase.objectTable.size() > 0)
+    if (tmpBase.getObjectCount() > 0)
       {
 	// "Schema Editing Error"
 	// "Deletion Error.\nObject Base "{0}" is currently in use in the Ganymede DBStore."

@@ -374,7 +374,7 @@ public class DBLinkTracker {
 
     for (DBObjectBase base: Ganymede.db.objectBases.values())
       {
-	for (DBObject object: base.getObjectTable())
+	for (DBObject object: base.getObjects())
 	  {
 	    realLinks.registerObject(object.getASymmetricTargets(), object.getInvid());
 	  }

@@ -228,13 +228,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * within.</p>
    */
 
-  DBStore store;
+  private DBStore store;
 
   /**
    * <p>Name of this object type</p>
    */
 
-  String object_name;
+  private String object_name;
 
   /**
    * <p>short type id code for this object type.  This number is
@@ -243,7 +243,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * of this type.</p>
    */
 
-  short type_code;
+  private short type_code;
 
   /**
    * <p>Fully qualified package and class name for a custom 
@@ -260,7 +260,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * this private.</p>
    */
 
-  String classname;
+  private String classname;
 
   /**
    * <p>Class definition for a
@@ -277,7 +277,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * to find the Jython program text for this object base.</p>
    */
 
-  String classOptionString;
+  private String classOptionString;
 
   /**
    * Which field represents our label?  This should always be a field
@@ -288,13 +288,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * yet been set.
    */
 
-  short label_id;
+  private short label_id;
 
   /**
    * what category is this object in?
    */
 
-  Category category;
+  private Category category;
 
   /**
    * <p>If true, this type of object is used as a target for an
@@ -313,13 +313,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * DBObjectBaseFields}.
    */
 
-  Vector<DBObjectBaseField> customFields;
+  private Vector<DBObjectBaseField> customFields;
 
   /**
    * <p>Cached template vector</p>
    */
 
-  Vector templateVector;
+  private Vector templateVector;
 
   /**
    * <p>A copy of the values from the field dictionary, in display
@@ -338,13 +338,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * objects in our objectBase
    */
 
-  DBObjectTable objectTable;
+  private DBObjectTable objectTable;
 
   /**
    * highest invid to date
    */
 
-  int maxid;
+  private int maxid;
 
   /**
    * used only during loading of pre-2.0 format ganymede.db files
@@ -2656,6 +2656,33 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
+   * Returns the number of objects in this object base.
+   */
+  
+  public int getObjectCount()
+  {
+    return objectTable.size();
+  }
+
+  /**
+   * Returns the number of fields in this object base.
+   */
+
+  public int getFieldCount()
+  {
+    return fieldTable.size();
+  }
+
+  /**
+   * Returns the number of custom fields in this object base.
+   */
+
+  public int getCustomFieldCount()
+  {
+    return customFields.size();
+  }
+
+  /**
    * <p>Returns all {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
    * base field definitions for objects of this type, in random order.</p>
    *
@@ -2741,6 +2768,21 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
 
     return this.fieldDefAry;
+  }
+
+  /**
+   * As getField(), but returns DBObjectBaseField rather than the
+   * BaseField interface.
+   *
+   * This is a server-side only method.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.Base
+   */
+
+  public DBObjectBaseField getFieldDef(short id)
+  {
+    return fieldTable.get(id);
   }
 
   /**
@@ -3170,16 +3212,97 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     return objectTable.get(objectID);
   }
 
-  /**
-   * <p>This server-side routing provides a convenient accessor to retrieve
-   * the entire member-object hashtable for this DBObjectBase.</p>
-   * 
-   * @return The internal object table
-   */
-   
-  public final DBObjectTable getObjectTable()
+  public final boolean containsKey(int id)
   {
-    return objectTable;
+    return objectTable.containsKey(id);
+  }
+
+  public synchronized final void put(DBObject newObject)
+  {
+    objectTable.put(newObject);
+
+    if (newObject.getID() > maxid)
+      {
+	maxid = newObject.getID();
+      }
+  }
+
+  public final void remove(int id)
+  {
+    objectTable.remove(id);
+  }
+
+  /**
+   * Returns an Enumeration that loops over DBObjects in this
+   * DBObjectBase.
+   */
+
+  public final Enumeration getObjectsEnum()
+  {
+    return objectTable.elements();
+  }
+
+  /**
+   * Returns an Iterable<DBObject> that loops over DBObjects in this
+   * DBObjectBase.
+   */
+
+  public Iterable<DBObject> getObjects()
+  {
+    return new Iterable<DBObject>() {
+      public Iterator<DBObject> iterator()
+      {
+	return objectTable.iterator();
+      }
+    };
+  }
+
+  /**
+   * Returns an Iterable<DBObjectBaseField> that loops over all custom
+   * DBObjectBaseFields defined in this DBObjectBase, in display
+   * order.
+   */
+
+  public Iterable<DBObjectBaseField> getCustomFields()
+  {
+    return new Iterable<DBObjectBaseField>() {
+      public Iterator<DBObjectBaseField> iterator()
+      {
+	return customFields.iterator();
+      }
+    };
+  }
+
+  /**
+   * Returns an Iterable<DBObjectBaseField> that loops over all
+   * built-in/standard DBObjectBaseFields defined in this
+   * DBObjectBase, in ascending field id order.
+   */
+
+  public Iterable<DBObjectBaseField> getStandardFields()
+  {
+    return new Iterable<DBObjectBaseField>() {
+      public Iterator<DBObjectBaseField> iterator()
+      {
+	return fieldTable.builtInIterator();
+      }
+    };
+  }
+
+  /**
+   * Returns an Iterable<DBObjectBaseField> that loops over all
+   * DBObjectBaseFields defined in this DBObjectBase, in ascending
+   * field id order.
+   */
+
+  public Iterable<DBObjectBaseField> getFieldsInFieldOrder()
+  {
+    return new Iterable<DBObjectBaseField>() {
+      public Iterator<DBObjectBaseField> iterator()
+      {
+	return fieldTable.iterator();
+      }
+    };
   }
 
   /**
@@ -3280,12 +3403,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>This method is used by the DBEditSet commit logic to
-   * replace this DBObjectBase's iterationSet with a new
-   * Vector with the current objectTable's values.  This
-   * method should only be called within the context
-   * of a DBWriteLock being established on this DBObjectBase,
-   * in the DBEditSet.commitTransaction() logic.</p>
+   * <p>This method is used by the DBEditSet commit logic to replace
+   * this DBObjectBase's iterationSet with a new List<DBObject> with
+   * the current objectTable's values.  This method should only be
+   * called within the context of a DBWriteLock being established on
+   * this DBObjectBase, in the DBEditSet.commitTransaction()
+   * logic.</p>
    */
 
   void updateIterationSet()
@@ -3313,11 +3436,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>This method returns a vector containing references to all
-   * objects in this DBObjectBase at the time the vector reference
-   * is accessed.  The vector returned *must not* be modified
-   * by the caller, or else other threads iterating on that copy
-   * of the vector will be disrupted.</p>
+   * <p>This method returns a List containing references to all
+   * objects in this DBObjectBase at the time the vector reference is
+   * accessed.  The List returned *must not* be modified by the
+   * caller, or else other threads iterating on that copy of the List
+   * will be disrupted.</p>
    */
 
   List<DBObject> getIterationSet()
@@ -3836,13 +3959,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   public List items()
   {
     List list = new ArrayList();
-    DBObject obj;
-    Object[] tuple;
     
-    for (Iterator iter = getIterationSet().iterator(); iter.hasNext();)
+    for (DBObject obj: getIterationSet())
       {
-        obj = (DBObject) iter.next();
-        tuple = new Object[2];
+	Object[] tuple = new Object[2];
         tuple[0] = obj.getLabel();
         tuple[1] = obj;
         list.add(tuple);
@@ -3853,12 +3973,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public Set keys()
   {
-    DBObject obj;
     Set keys = new HashSet(objectTable.size());
     
-    for(Iterator iter = getIterationSet().iterator(); iter.hasNext();)
+    for (DBObject obj: getIterationSet())
       {
-        obj = (DBObject) iter.next();
         keys.add(obj.getLabel());
       }
     
@@ -3872,24 +3990,23 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public boolean containsValue(Object value)
   {
-    for(Iterator iter = getIterationSet().iterator(); iter.hasNext();)
+    for (DBObject obj: getIterationSet())
       {
-        if (iter.next().equals(value))
+        if (obj.equals(value))
           {
             return true;
           }
       }
+
     return false;
   }
 
   public Set entrySet()
   {
     Set entrySet = new HashSet(objectTable.size());
-    DBObject obj;
     
-    for (Iterator iter = getIterationSet().iterator(); iter.hasNext();)
+    for (DBObject obj: getIterationSet())
       {
-        obj = (DBObject) iter.next();
         entrySet.add(new Entry(obj));
       }
     
@@ -3916,6 +4033,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
         /* Snag this object's label field */
         String labelFieldName = getLabelFieldName();
+
         if (labelFieldName == null)
           {
             return null;
@@ -3923,12 +4041,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         
         /* Now we'll check to see if there's a namespace on this field */
         DBNameSpace namespace = ((DBObjectBaseField) getField(labelFieldName)).getNameSpace();
+
         if (namespace == null)
           {
             return null;
           }
         
         DBField field = namespace.lookupPersistent(key);
+
         if (field.getObjTypeID() == getTypeID())
           {
             return field.getOwner();

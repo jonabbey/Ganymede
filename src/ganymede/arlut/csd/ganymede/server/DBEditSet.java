@@ -945,7 +945,7 @@ public class DBEditSet {
 	    obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
 
 	    session.GSession.checkIn();	// XXX *synchronized* on GanymedeSession
-	    obj.getBase().store.checkIn(); // update checked out count
+	    obj.getBase().getStore().checkIn(); // update checked out count
 	    break;
 
 	  case ObjectStatus.EDITING:
@@ -2379,7 +2379,7 @@ public class DBEditSet {
 	// note that this new DBObject will not include any
 	// transient fields which self-identify as undefined
 
-	base.objectTable.put(new DBObject(eObj));
+	base.put(new DBObject(eObj));
 
 	// (note that we can't use a no-sync put above, since
 	// we don't prevent asynchronous viewDBObject().
@@ -2389,7 +2389,7 @@ public class DBEditSet {
 	    getGSession().checkIn();
 	  }
 
-	base.store.checkIn(); // update checkout count
+	base.getStore().checkIn(); // update checkout count
 
 	break;
 
@@ -2405,13 +2405,13 @@ public class DBEditSet {
 	// last one allocated in that base, which is unlikely
 	// enough that we don't worry about it here.
 
-	base.objectTable.remove(eObj.getID());
+	base.remove(eObj.getID());
 
 	// (note that we can't use a no-sync remove above, since
 	// we don't prevent asynchronous viewDBObject().
 
 	session.GSession.checkIn(); // *synchronized*
-	base.store.checkIn(); // count it as checked in once it's deleted
+	base.getStore().checkIn(); // count it as checked in once it's deleted
 	break;
 
       case ObjectStatus.DROPPING:
@@ -2426,7 +2426,7 @@ public class DBEditSet {
 	    getGSession().checkIn();
 	  }
 
-	base.store.checkIn(); // count it as checked in once it's deleted
+	base.getStore().checkIn(); // count it as checked in once it's deleted
 	break;
       }
   }
@@ -2558,7 +2558,7 @@ public class DBEditSet {
 		getGSession().checkIn();
 	      }
 
-	    eObj.getBase().store.checkIn(); // update checked out count
+	    eObj.getBase().getStore().checkIn(); // update checked out count
 	    break;
 
 	  case ObjectStatus.EDITING:

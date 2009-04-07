@@ -65,7 +65,6 @@ import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -1392,15 +1391,6 @@ public class GanymedeServer implements Server {
 
   public boolean sweepInvids()
   {
-    Enumeration
-      enum1, enum2, enum3;
-
-    DBObjectBase
-      base;
-
-    DBObject
-      object;
-
     DBField
       field;
 
@@ -1408,11 +1398,7 @@ public class GanymedeServer implements Server {
       iField;
 
     Vector
-      removeVector,
-      tempVector;
-
-    Invid
-      invid;
+      removeVector;
 
     boolean
       vectorEmpty = true,
@@ -1448,24 +1434,12 @@ public class GanymedeServer implements Server {
 
     try
       {
-	// loop 1: iterate over the object bases
-
-	enum1 = Ganymede.db.objectBases.elements();
-
-	while (enum1.hasMoreElements())
+	for (DBObjectBase base: Ganymede.db.objectBases.values())
 	  {
-	    base = (DBObjectBase) enum1.nextElement();
-
 	    Ganymede.debug(ts.l("sweepInvids.sweeping", base.toString()));
 
-	    // loop 2: iterate over the objects in the current object base
-
-	    enum2 = base.objectTable.elements();
-
-	    while (enum2.hasMoreElements())
+	    for (DBObject object: base.getObjects())
 	      {
-		object = (DBObject) enum2.nextElement();
-
 		removeVector = new Vector();
 
 		// loop 3: iterate over the fields present in this object
@@ -1485,7 +1459,7 @@ public class GanymedeServer implements Server {
 
 			if (iField.isVector())
 			  {
-			    tempVector = iField.getVectVal();
+			    Vector<Invid> tempVector = (Vector<Invid>) iField.getVectVal();
 			    vectorEmpty = true;
 
 			    // clear out the invid's held in this field pending
@@ -1493,14 +1467,8 @@ public class GanymedeServer implements Server {
 
 			    iField.value = new Vector(); 
 
-			    // iterate over the invid's held in this vector
-		    
-			    enum3 = tempVector.elements();
-
-			    while (enum3.hasMoreElements())
+			    for (Invid invid: tempVector)
 			      {
-				invid = (Invid) enum3.nextElement();
-
 				if (session.viewDBObject(invid) != null)
 				  {
 				    iField.getVectVal().addElement(invid); // keep this invid
@@ -1528,7 +1496,7 @@ public class GanymedeServer implements Server {
 			  }
 			else
 			  {
-			    invid = (Invid) iField.value;
+			    Invid invid = (Invid) iField.value;
 
 			    if (session.viewDBObject(invid) == null)
 			      {
@@ -1581,15 +1549,6 @@ public class GanymedeServer implements Server {
 
   public boolean checkInvids()
   {
-    Enumeration
-      baseEnum, objectEnum;
-
-    DBObjectBase
-      base;
-
-    DBObject
-      object;
-
     DBField
       field;
 
@@ -1633,20 +1592,12 @@ public class GanymedeServer implements Server {
 	// back pointers or virtual back pointer registrations in the
 	// DBLinkTracker class.
 
-	baseEnum = Ganymede.db.objectBases.elements();
-
-	while (baseEnum.hasMoreElements())
+	for (DBObjectBase base: Ganymede.db.objectBases.values())
 	  {
-	    base = (DBObjectBase) baseEnum.nextElement();
-
 	    Ganymede.debug(ts.l("checkInvids.checking", base.getName()));
 
-	    objectEnum = base.objectTable.elements();
-
-	    while (objectEnum.hasMoreElements())
+	    for (DBObject object: base.getObjects())
 	      {
-		object = (DBObject) objectEnum.nextElement();
-
 		synchronized (object.fieldAry)
 		  {
 		    for (int i = 0; i < object.fieldAry.length; i++)
@@ -1745,7 +1696,7 @@ public class GanymedeServer implements Server {
 
 	    Ganymede.debug(ts.l("checkEmbeddedObjects.checking", base.getName()));
 	
-	    for (DBObject object: base.objectTable)
+	    for (DBObject object: base.getObjects())
 	      {
 		try
 		  {
@@ -1778,15 +1729,6 @@ public class GanymedeServer implements Server {
 
   public ReturnVal sweepEmbeddedObjects()
   {
-    Enumeration
-      enum1, enum2;
-
-    DBObjectBase
-      base;
-
-    DBObject
-      object;
-
     Vector invidsToDelete = new Vector();
 
     // XXX
@@ -1816,14 +1758,8 @@ public class GanymedeServer implements Server {
 
     try
       {
-	// loop over the object bases
-
-	enum1 = Ganymede.db.objectBases.elements();
-
-	while (enum1.hasMoreElements())
+	for (DBObjectBase base: Ganymede.db.objectBases.values())
 	  {
-	    base = (DBObjectBase) enum1.nextElement();
-
 	    if (!base.isEmbedded())
 	      {
 		continue;
@@ -1832,13 +1768,9 @@ public class GanymedeServer implements Server {
 	    // loop over the objects in this base
 
 	    Ganymede.debug(ts.l("sweepEmbeddedObjects.checking", base.getName()));
-	
-	    enum2 = base.objectTable.elements();
 
-	    while (enum2.hasMoreElements())
+	    for (DBObject object: base.getObjects())
 	      {
-		object = (DBObject) enum2.nextElement();
-
 		try
 		  {
 		    gSession.getContainingObj(object);

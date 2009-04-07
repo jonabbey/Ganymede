@@ -1205,7 +1205,7 @@ public final class DBStore implements JythonMap {
 		    continue;
 		  }
 		
-		for (DBObject x: base.objectTable)
+		for (DBObject x: base.getObjects())
 		  {
 		    if (xmlOut.mayInclude(x))
 		      {
@@ -1286,8 +1286,8 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Returns a vector of {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases} currently
-   * defined in this DBStore.
+   * Returns a Vector of {@link arlut.csd.ganymede.server.DBObjectBase
+   * DBObjectBases} currently defined in this DBStore.
    */
 
   public Vector<DBObjectBase> getBases()
@@ -1607,9 +1607,9 @@ public final class DBStore implements JythonMap {
 	// create owner base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Owner Group";
+	b.setName("Owner Group");
 	b.setClassInfo("arlut.csd.ganymede.server.ownerCustom", null);
-	b.type_code = (short) SchemaConstants.OwnerBase; // 0
+	b.setTypeID(SchemaConstants.OwnerBase); // 0
 
 	permCategory.addNodeAfter(b, null);
 
@@ -1673,9 +1673,9 @@ public final class DBStore implements JythonMap {
 	// create persona base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Admin Persona";
+	b.setName("Admin Persona");
 	b.setClassInfo("arlut.csd.ganymede.server.adminPersonaCustom", null);
-	b.type_code = (short) SchemaConstants.PersonaBase; // 1
+	b.setTypeID(SchemaConstants.PersonaBase); // 1
 
 	permCategory.addNodeAfter(b, null); // add it to the end is ok
 
@@ -1772,9 +1772,9 @@ public final class DBStore implements JythonMap {
 	// create Role base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Role";
+	b.setName("Role");
 	b.setClassInfo("arlut.csd.ganymede.server.permCustom", null);
-	b.type_code = (short) SchemaConstants.RoleBase; // 2
+	b.setTypeID(SchemaConstants.RoleBase); // 2
 
 	permCategory.addNodeAfter(b, null); // add it to the end is ok
 
@@ -1835,9 +1835,9 @@ public final class DBStore implements JythonMap {
 	adminCategory.addNodeAfter(eventCategory, null);
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "System Event";
+	b.setName("System Event");
 	b.setClassInfo("arlut.csd.ganymede.server.eventCustom", null);
-	b.type_code = (short) SchemaConstants.EventBase;  
+	b.setTypeID(SchemaConstants.EventBase);
 
 	eventCategory.addNodeAfter(b, null); // add it to the end is ok
 
@@ -1910,9 +1910,9 @@ public final class DBStore implements JythonMap {
 	// create Object Events base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Object Event";
+	b.setName("Object Event");
 	b.setClassInfo("arlut.csd.ganymede.server.objectEventCustom", null);
-	b.type_code = (short) SchemaConstants.ObjectEventBase;  
+	b.setTypeID(SchemaConstants.ObjectEventBase);
 
 	eventCategory.addNodeAfter(b, null); // add it to the end is ok
 
@@ -2006,8 +2006,8 @@ public final class DBStore implements JythonMap {
 	rootCategory.addNodeAfter(userCategory, null);
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "User";
-	b.type_code = (short) SchemaConstants.UserBase; // 2
+	b.setName("User");
+	b.setTypeID(SchemaConstants.UserBase); // 2
 
 	userCategory.addNodeAfter(b, null); // add it to the end is ok
 
@@ -2051,9 +2051,9 @@ public final class DBStore implements JythonMap {
 	// create Task Base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Task";
+	b.setName("Task");
 	b.setClassInfo("arlut.csd.ganymede.server.taskCustom", null);
-	b.type_code = (short) SchemaConstants.TaskBase; // 5
+	b.setTypeID(SchemaConstants.TaskBase); // 5
 
 	adminCategory.addNodeAfter(b, null); // add it to the end is ok
 
@@ -2131,9 +2131,9 @@ public final class DBStore implements JythonMap {
 	// create Sync Channel Base
 
 	b = new DBObjectBase(this, false);
-	b.object_name = "Sync Channel";
+	b.setName("Sync Channel");
 	b.setClassInfo("arlut.csd.ganymede.server.syncChannelCustom", null);
-	b.type_code = (short) SchemaConstants.SyncChannelBase; // 7
+	b.setTypeID(SchemaConstants.SyncChannelBase); // 7
 
 	adminCategory.addNodeAfter(b, null); // add it to the end is ok
 
@@ -2245,9 +2245,9 @@ public final class DBStore implements JythonMap {
 	    // create Sync Channel Base
 
 	    b = new DBObjectBase(this, false);
-	    b.object_name = "Sync Channel";
+	    b.setName("Sync Channel");
 	    b.setClassInfo("arlut.csd.ganymede.server.syncChannelCustom", null);
-	    b.type_code = (short) SchemaConstants.SyncChannelBase; // 7
+	    b.setTypeID(SchemaConstants.SyncChannelBase); // 7
 
 	    DBBaseCategory adminCategory = (DBBaseCategory) getCategoryNode("/Admin-Level Objects");
 
@@ -2429,7 +2429,7 @@ public final class DBStore implements JythonMap {
 
     for (DBObjectBase base: objectBases.values())
       {
-	if (base.label_id == -1)
+	if (base.getLabelField() == -1)
 	  {
 	    // "Error, object base {0} has no label field defined."
 	    System.err.println(ts.l("verify_label_fields.no_label", base.getName()));
@@ -2437,7 +2437,7 @@ public final class DBStore implements JythonMap {
 	  }
 	else
 	  {
-	    DBObjectBaseField labelFieldDef = (DBObjectBaseField) base.getField(base.label_id);
+	    DBObjectBaseField labelFieldDef = (DBObjectBaseField) base.getField(base.getLabelField());
 
 	    if (labelFieldDef.getNameSpace() == null)
 	      {

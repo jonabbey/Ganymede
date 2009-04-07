@@ -672,7 +672,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // we stopped keeping the editable and removable flags in the
     // ganymede.db file at 1.17
 
-    if (base.store.isLessThan(2,0))
+    if (base.getStore().isLessThan(2,0))
       {
 	in.readBoolean();	// skip editable
 	in.readBoolean();	// skip removable
@@ -681,7 +681,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // at file version 2.12, we introduce tab names per object base
     // field
 
-    if (base.store.isAtLeast(2,12))
+    if (base.getStore().isAtLeast(2,12))
       {
 	tabName = in.readUTF();
 
@@ -697,7 +697,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     // at file version 1.6, we introduced field visibility
 
-    if (base.store.isAtLeast(1,6))
+    if (base.getStore().isAtLeast(1,6))
       {
 	visibility = in.readBoolean();
       }
@@ -709,7 +709,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // at file version 1.7, we introduced an explicit built-in flag
     // we took it out at 2.0
 
-    if (base.store.isBetweenRevs(1,7,2,0))
+    if (base.getStore().isBetweenRevs(1,7,2,0))
       {
 	in.readBoolean();	// skip builtIn
       }
@@ -717,7 +717,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // between file versions 1.1 and 1.17, we had a field_order
     // field
 
-    if (base.store.isBetweenRevs(1,1,2,0))
+    if (base.getStore().isBetweenRevs(1,1,2,0))
       {
 	tmp_displayOrder = in.readShort();		// skip field_order
       }
@@ -777,7 +777,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at file version 1.9, we introduced multiLine
 	
-	if (base.store.isAtLeast(1,9))
+	if (base.getStore().isAtLeast(1,9))
 	  {
 	    multiLine = in.readBoolean();
 	  }
@@ -788,7 +788,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at file version 1.14, we introduced regexps for string fields
 	
-	if (base.store.isAtLeast(1,14))
+	if (base.getStore().isAtLeast(1,14))
 	  {
 	    setRegexpPat(in.readUTF());
 	  }
@@ -799,7 +799,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at file version 2.2, we introduced a description field for regexps
 
-	if (base.store.isAtLeast(2,2))
+	if (base.getStore().isAtLeast(2,2))
 	  {
 	    setRegexpDesc(in.readUTF());
 	  }
@@ -816,7 +816,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at 1.8 we introduced namespaces for number fields
 
-	if (base.store.isAtLeast(1,8))
+	if (base.getStore().isAtLeast(1,8))
 	  {
 	    nameSpaceId = in.readUTF();
 	    
@@ -834,7 +834,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at 1.8 we introduced namespaces for IP fields
 
-	if (base.store.isAtLeast(1,8))
+	if (base.getStore().isAtLeast(1,8))
 	  {
 	    nameSpaceId = in.readUTF();
 	    
@@ -897,7 +897,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at 1.16 we introduce md5crypted
 
-	if (base.store.isAtLeast(1,16))
+	if (base.getStore().isAtLeast(1,16))
 	  {
 	    md5crypted = in.readBoolean();
 	  }
@@ -908,7 +908,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at 2.4 we introduce apachemd5crypted
 
-	if (base.store.isAtLeast(2,4))
+	if (base.getStore().isAtLeast(2,4))
 	  {
 	    apachemd5crypted = in.readBoolean();
 	  }
@@ -919,7 +919,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at 2.1 we introduced winHashed
 
-	if (base.store.isAtLeast(2,1))
+	if (base.getStore().isAtLeast(2,1))
 	  {
 	    winHashed = in.readBoolean();
 	  }
@@ -930,7 +930,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at 2.5 we introduced sshaHashed
 
-	if (base.store.isAtLeast(2,5))
+	if (base.getStore().isAtLeast(2,5))
 	  {
 	    sshaHashed = in.readBoolean();
 	  }
@@ -941,7 +941,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at 2.13 we introduce shaUnixCrypted
 
-	if (base.store.isAtLeast(2,13))
+	if (base.getStore().isAtLeast(2,13))
 	  {
 	    shaUnixCrypted = in.readBoolean();
 	    useShaUnixCrypted512 = in.readBoolean();
@@ -956,7 +956,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// at 1.10 we introduced storePlaintext
 
-	if (base.store.isAtLeast(1,10))
+	if (base.getStore().isAtLeast(1,10))
 	  {
 	    storePlaintext = in.readBoolean();
 	  }
@@ -1172,7 +1172,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    else
 	      {
 		String targetObjectName = null;
-		targetObjectBase = base.store.getObjectBase(allowedTarget);
+		targetObjectBase = base.getStore().getObjectBase(allowedTarget);
 
 		if (targetObjectBase != null)
 		  {
@@ -2773,7 +2773,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	// "Not in a schema editing context."
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
@@ -2878,7 +2878,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	// "Not in a schema editing context."
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
@@ -2948,7 +2948,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTabName(String s)
   {
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -2986,7 +2986,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setComment(String s)
   {
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -3048,7 +3048,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setType(short type)
   {
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -3331,7 +3331,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setID(short id)
   {
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4204,7 +4204,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (namespace != null && nameSpaceId != null && !nameSpaceId.equals(""))
       {
-	DBNameSpace matchingSpace = base.store.getNameSpace(nameSpaceId);
+	DBNameSpace matchingSpace = base.getStore().getNameSpace(nameSpaceId);
 
 	if (matchingSpace == namespace)
 	  {
@@ -4255,7 +4255,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	oldNamespace = namespace;
 	
-	values = base.store.nameSpaces.elements();
+	values = base.getStore().nameSpaces.elements();
 	namespace = null;
 
 	while (values.hasMoreElements() && (namespace == null))
@@ -4292,12 +4292,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 		
 		boolean success = true;
                 DBField lastFieldTried = null;
-		Enumeration en = base.objectTable.elements();
 		
-		while (success && en.hasMoreElements())
+		for (DBObject obj: base.getObjects())
 		  {
-		    DBObject obj = (DBObject) en.nextElement();
-
 		    lastFieldTried = (DBField) obj.getField(getID());
 		    
 		    if (lastFieldTried == null)
@@ -4316,23 +4313,27 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 			    success = namespace.schemaEditRegister(lastFieldTried.key(i), lastFieldTried);
 			  }
 		      }
-		  }
-		
-		if (!success)
-		  {
-                    String fieldDesc = lastFieldTried.toString();
-                    String content = lastFieldTried.getValueString();
 
-		    namespace.schemaEditUnregister(base.getTypeID(), getID());
-		    namespace = oldNamespace;
+		    if (!success)
+		      {
+			String fieldDesc = lastFieldTried.toString();
+			String content = lastFieldTried.getValueString();
 
-                    // "Can''t set namespace constraint {0} on field
-                    // {1} without violating namespace uniqueness
-                    // constraint on previously registered
-                    // values.\nField {2} had a conflict.\Value(s) in
-                    // conflict:{3}"
-		    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-						      ts.l("setNameSpace.can_not_apply", nameSpaceId, this.toString(), fieldDesc, content));
+			namespace.schemaEditUnregister(base.getTypeID(), getID());
+			namespace = oldNamespace;
+
+			// "Can''t set namespace constraint {0} on field
+			// {1} without violating namespace uniqueness
+			// constraint on previously registered
+			// values.\nField {2} had a conflict.\Value(s) in
+			// conflict:{3}"
+			return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+							  ts.l("setNameSpace.can_not_apply",
+							       nameSpaceId,
+							       this.toString(),
+							       fieldDesc,
+							       content));
+		      }
 		  }
 	      }
 	  }
@@ -4921,7 +4922,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setCrypted(boolean b)
   {    
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4966,7 +4967,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setMD5Crypted(boolean b)
   {    
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5011,7 +5012,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setApacheMD5Crypted(boolean b)
   {    
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5057,7 +5058,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setWinHashed(boolean b)
   {    
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5102,7 +5103,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setSSHAHashed(boolean b)
   {    
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5150,7 +5151,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCrypted(boolean b)
   {    
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5193,7 +5194,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCrypted512(boolean b)
   {    
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5243,7 +5244,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCryptRounds(int n)
   {    
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5301,7 +5302,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setPlainText(boolean b)
   {    
-    if (!base.store.loading && editor == null)
+    if (!base.getStore().loading && editor == null)
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }

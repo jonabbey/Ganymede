@@ -3655,7 +3655,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		System.err.println("Query: " + username + " : got read lock");
 	      }
 
-	    it = base.objectTable.iterator();
+	    it = base.getObjects().iterator();
 	  }
 	else
 	  {

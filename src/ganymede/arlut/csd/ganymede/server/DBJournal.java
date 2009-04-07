@@ -563,7 +563,7 @@ public class DBJournal implements ObjectStatus {
 			printObject(original);
 		      }
 
-		    if (!base.objectTable.containsKey(obj.getID()))
+		    if (!base.containsKey(obj.getID()))
 		      {
 			// "DBJournal.load(): modified object in the journal does not previously exist in DBStore."
 			System.err.println(ts.l("load.oddmod"));
@@ -591,7 +591,7 @@ public class DBJournal implements ObjectStatus {
 		    if (debug)
 		      {
 			// "Delete: {0}:{1}"
-			System.err.println(ts.l("load.delete", base.object_name, Short.valueOf(obj_id)));
+			System.err.println(ts.l("load.delete", base.getName(), Short.valueOf(obj_id)));
 		      }
 		
 		    entries.addElement(new JournalEntry(base, obj_id, null));
@@ -776,7 +776,7 @@ public class DBJournal implements ObjectStatus {
 	      {
 	      case CREATING:
 		jFile.writeByte(CREATE);
-		jFile.writeShort(eObj.objectBase.type_code);
+		jFile.writeShort(eObj.objectBase.getTypeID());
 		eObj.emit(jFile);
 		
 		if (debug)
@@ -789,7 +789,7 @@ public class DBJournal implements ObjectStatus {
 		
 	      case EDITING:
 		jFile.writeByte(EDIT);
-		jFile.writeShort(eObj.objectBase.type_code);
+		jFile.writeShort(eObj.objectBase.getTypeID());
 		
 		DBObjectDeltaRec delta = new DBObjectDeltaRec(eObj.original, eObj);
 		delta.emit(jFile);
@@ -807,13 +807,13 @@ public class DBJournal implements ObjectStatus {
 		
 	      case DELETING:
 		jFile.writeByte(DELETE);
-		jFile.writeShort(eObj.objectBase.type_code);
+		jFile.writeShort(eObj.objectBase.getTypeID());
 		jFile.writeShort(eObj.getID());
 		
 		if (debug)
 		  {
 		    // "Wrote object deletion record:\n\t{0} : {1}"
-		    System.err.println(ts.l("writeTransaction.wroteobjdel", eObj.objectBase.object_name, Integer.valueOf(eObj.getID())));
+		    System.err.println(ts.l("writeTransaction.wroteobjdel", eObj.objectBase.getName(), Integer.valueOf(eObj.getID())));
 		  }
 		break;
 		
@@ -1131,7 +1131,7 @@ class JournalEntry {
 	      }
 	  }
 
-	base.objectTable.remove(id);
+	base.remove(id);
       }
     else
       {
@@ -1185,19 +1185,11 @@ class JournalEntry {
 	      }
 	  }
 
-	base.objectTable.put(obj);
-
 	// update the backpointers for this object
 
 	obj.registerAsymmetricLinks();
 
-	// keep our base's maxid up to date for
-	// any newly created objects in the journal
-
-	if (id > base.maxid)
-	  {
-	    base.maxid = id;
-	  }
+	base.put(obj);
       }
   }
 

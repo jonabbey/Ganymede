@@ -643,7 +643,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     DBObjectBase base = Ganymede.db.getObjectBase(baseid);
 
-    return base.objectTable.elements();
+    return base.getObjectsEnum();
   }
 
   /**

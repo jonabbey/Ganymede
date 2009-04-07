@@ -487,7 +487,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 		if (store.debug)
 		  {
 		    System.err.println("loaded base " + tempBase.getTypeID() + 
-				       ", obj count loaded = " + tempBase.objectTable.size());
+				       ", obj count loaded = " + tempBase.getObjectCount());
 		  }
 	      }
 	    else

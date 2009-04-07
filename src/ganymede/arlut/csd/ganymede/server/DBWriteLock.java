@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -223,7 +223,7 @@ public class DBWriteLock extends DBLock {
 			    if (debug)
 			      {
 				System.err.println(this.key + ": DBWriteLock.establish(): waiting for dumpers on base " + 
-						   base.object_name);
+						   base.getName());
 				System.err.println(this.key + ": DBWriteLock.establish(): dumperList size: " + 
 						   base.getDumperSize());
 			      }
