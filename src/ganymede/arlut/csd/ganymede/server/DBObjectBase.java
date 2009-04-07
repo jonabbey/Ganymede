@@ -1150,7 +1150,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   synchronized ReturnVal setXML(XMLItem root, boolean resolveInvidLinks, PrintWriter err)
   {
-    XMLItem item;
     String _objectName = null;
     Integer _idInt;
     DBObjectBaseField newField;
@@ -1162,9 +1161,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     boolean _embedded = false;
     boolean classSet = false;
     boolean labelSet = false;
-    Vector fieldsInXML = new Vector(); // order vector of Integer field id's
-    Vector fieldsInBase = new Vector(); // vector of Integer field id's previously in schema
-    Vector _fieldsToDelete; // vector of Integer field id's to be deleted from schema
+
+    List<Integer> fieldsInXML = new ArrayList<Integer>(); // ordered List of field id's
+    List<Integer> fieldsInBase = new ArrayList<Integer>(); // field id's previously in schema
+
     ReturnVal retVal;
 
     /* -- */
@@ -1236,16 +1236,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
      * comes time to actually process the fields, below.
      */
 
-    Vector fieldDefV = new Vector();
+    List<XMLItem> fieldDefV = new ArrayList<XMLItem>();
     XMLItem children[] = root.getChildren();
 
     for (int i = 0; i < children.length; i++)
       {
-	item = children[i];
+	XMLItem item = children[i];
 
 	if (item.matches("tab"))
 	  {
-	    fieldDefV.addElement(item);
+	    fieldDefV.add(item);
 
 	    XMLItem tabChildren[] = item.getChildren();
 
@@ -1255,20 +1255,18 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 		if (item.matches("fielddef"))
 		  {
-		    fieldDefV.addElement(item);
+		    fieldDefV.add(item);
 		  }
 	      }
 	  }
 	else
 	  {
-	    fieldDefV.addElement(item);
+	    fieldDefV.add(item);
 	  }
       }
 
-    for (int i = 0; i < fieldDefV.size(); i++)
+    for (XMLItem item: fieldDefV)
       {
-	item = (XMLItem) fieldDefV.elementAt(i);
-
 	if (item.matches("fielddef"))
 	  {
 	    String _fieldNameStr = XMLUtils.XMLDecode(item.getAttrStr("name"));
@@ -1288,7 +1286,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 						  ts.l("setXML.dupfieldname", root.getTreeString(), _fieldNameStr));
 	      }
 
-	    DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldNameStr);
+	    DBObjectBaseField _field = getFieldDef(_fieldNameStr);
 
 	    if (_field != null && _field.isBuiltIn())
 	      {
@@ -1315,7 +1313,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	    idTable.put(_fieldIDInt, item);
 
-	    fieldsInXML.addElement(_fieldIDInt);
+	    fieldsInXML.add(_fieldIDInt);
 	  }
       }
 
@@ -1331,16 +1329,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (DBObjectBaseField _field: customFields)
       {
-	fieldsInBase.addElement(Integer.valueOf(_field.getID()));
+	fieldsInBase.add(Integer.valueOf(_field.getID()));
       }
 
-    _fieldsToDelete = VectorUtils.difference(fieldsInBase, fieldsInXML);
-
-    for (int i = 0; i < _fieldsToDelete.size(); i++)
+    for (Integer _fieldID: (Vector<Integer>) VectorUtils.difference(fieldsInBase, fieldsInXML))
       {
-	Integer _fieldID = (Integer) _fieldsToDelete.elementAt(i);
-
-	DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldID.shortValue());
+	DBObjectBaseField _field = getFieldDef(_fieldID.shortValue());
 
 	// "\t\tDeleting field {0}"
 	err.println(ts.l("setXML.deleting", _field.getName()));
@@ -1364,7 +1358,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (int i = 0; i < fieldDefV.size(); i++)
       {
-	item = (XMLItem) fieldDefV.elementAt(i);
+	XMLItem item = fieldDefV.get(i);
 
 	if (item.matches("classdef"))
 	  {
@@ -1405,7 +1399,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	  }
 	else if (item.matches("fielddef"))
 	  {
-	    newField = (DBObjectBaseField) getField(item.getAttrInt("id").shortValue());
+	    newField = getFieldDef(item.getAttrInt("id").shortValue());
 
 	    if (newField == null)
 	      {
@@ -1535,11 +1529,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     List<DBObjectBaseField> _newCustom = new ArrayList<DBObjectBaseField>();
 
-    for (int i = 0; i < fieldsInXML.size(); i++)
+    for (Integer _fieldID: fieldsInXML)
       {
-	Integer _fieldID = (Integer) fieldsInXML.elementAt(i);
-
-	DBObjectBaseField _field = (DBObjectBaseField) getField(_fieldID.shortValue());
+	DBObjectBaseField _field = getFieldDef(_fieldID.shortValue());
 
 	if (_field == null)
 	  {
