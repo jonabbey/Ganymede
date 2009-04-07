@@ -1345,6 +1345,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	throw new IllegalArgumentException(ts.l("addField.null"));
       }
 
+    if (retrieveField(field.getID()) != null)
+      {
+	// "Error, field {0} is already present in object {1}."
+	throw new IllegalArgumentException(ts.l("addField.preexisting", field.getID(), this.toString()));
+      }
+
     DBField[] newFieldAry = new DBField[fieldAry.length + 1];
 
     java.lang.System.arraycopy(fieldAry, 0, newFieldAry, 0, fieldAry.length);
