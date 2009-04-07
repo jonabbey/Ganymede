@@ -84,12 +84,6 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   private transient DBObjectBaseField[] table;
 
   /**
-   * The total number of entries in the hash table.
-   */
-
-  private transient int count;
-
-  /**
    * Constructs a new, empty DBBaseFieldTable.
    */
 
@@ -116,7 +110,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public int size() 
   {
-    return count;
+    return table.length;
   }
 
   /**
@@ -128,7 +122,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public boolean isEmpty() 
   {
-    return count == 0;
+    return table.length == 0;
   }
 
   /**
