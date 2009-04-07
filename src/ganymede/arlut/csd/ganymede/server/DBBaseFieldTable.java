@@ -325,7 +325,10 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 	  {
 	    boolean found = false;
 
-	    for (int j = 0, i = 0; j < newTable.length; i++)
+	    int j = 0;
+	    int i = 0;
+
+	    while (j < newTable.length)
 	      {
 		if (i < table.length)
 		  {
