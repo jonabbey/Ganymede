@@ -326,6 +326,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 	    if (!found && value.getID() < field.getID())
 	      {
 		newTable[j++] = value;
+		found = true;
 	      }
 	    else
 	      {
