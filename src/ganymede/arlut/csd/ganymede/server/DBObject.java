@@ -1449,14 +1449,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
+    if (field == null)
+      {
+	// "null value passed to replaceField"
+	throw new IllegalArgumentException(ts.l("replaceField.null"));
+      }
+
     synchronized (fieldAry)
       {
-	if (field == null)
-	  {
-	    // "null value passed to replaceField"
-	    throw new IllegalArgumentException(ts.l("replaceField.null"));
-	  }
-
 	int index = java.util.Arrays.binarySearch(fieldAry, field);
 
 	if (index < 0)
