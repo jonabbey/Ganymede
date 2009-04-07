@@ -2,8 +2,8 @@
 
    VectorUtils.java
 
-   Convenience methods for working with Vectors.. provides efficient Union,
-   Intersection, and Difference methods.
+   Convenience methods for working with Lists.. provides efficient
+   Union, Intersection, and Difference methods.
    
    Created: 21 July 1998
 
@@ -18,7 +18,7 @@
 	    
    Directory Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -55,8 +55,9 @@
 
 package arlut.csd.Util;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -66,23 +67,23 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Convenience methods for working with Vectors.. provides efficient Union,
- * Intersection, and Difference methods.</P>
+ * Convenience methods for working with Vectors.. provides efficient Union,
+ * Intersection, and Difference methods.
  */
 
 public class VectorUtils {
 
   /**
-   * <P>This method returns a Vector containing the union of the objects
+   * This method returns a Vector containing the union of the objects
    * contained in vectA and vectB.  The resulting Vector will not
    * contain any duplicates, even if vectA or vectB themselves contain
-   * repeated items.</P>
+   * repeated items.
    *
-   * <P>This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.</P>
+   * This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.
    */
 
-  public static Vector union(Vector vectA, Vector vectB)
+  public static Vector union(List vectA, List vectB)
   {
     int threshold = vectSize(vectA) + vectSize(vectB);
 
@@ -92,29 +93,24 @@ public class VectorUtils {
 
 	if (vectA != null)
 	  {
-	    for (int i = 0; i < vectA.size(); i++)
+	    for (Object obj: vectA)
 	      {
-		Object obj = vectA.elementAt(i);
-		
-		if (!result.contains(obj))
-		  {
-		    result.addElement(obj);
-		  }
+		result.add(obj);
 	      }
 	  }
 
 	if (vectB != null)
 	  {
-	    for (int i = 0; i < vectB.size(); i++)
+	    for (Object obj: vectB)
 	      {
-		Object obj = vectB.elementAt(i);
-		
 		if (!result.contains(obj))
 		  {
-		    result.addElement(obj);
+		    result.add(obj);
 		  }
 	      }
 	  }
+
+	result.trimToSize();
 
 	return result;
       }
@@ -124,57 +120,30 @@ public class VectorUtils {
 	// temporary hashtable so that we have better scalability for
 	// item lookup.
 
-	HashMap workSet = new HashMap(vectSize(vectA) + vectSize(vectB));
-	Vector result = new Vector(threshold);
-	Iterator iter;
-	Object item;
+	Set workSet = new HashSet(vectSize(vectA) + vectSize(vectB));
 
 	/* -- */
 
 	if (vectA != null)
 	  {
-	    iter = vectA.iterator();
-
-	    while (iter.hasNext())
-	      {
-		item = iter.next();
-		workSet.put(item, item);
-	      }
+	    workSet.addAll(vectA);
 	  }
     
 	if (vectB != null)
 	  {
-	    iter = vectB.iterator();
-
-	    while (iter.hasNext())
-	      {
-		item = iter.next();
-		workSet.put(item, item);
-	      }
+	    workSet.addAll(vectB);
 	  }
 
-	iter = workSet.values().iterator();
-
-	while (iter.hasNext())
-	  {
-	    result.addElement(iter.next());
-	  }
-
-	// we're big enough to be over threshold, so lets go ahead and
-	// take the time to trim to size
-
-	result.trimToSize();
-
-	return result;
+	return new Vector(workSet);
       }
   }
 
   /**
-   * <P>This method adds obj to vect if and only if vect does not
-   * already contain obj.</P>
+   * This method adds obj to vect if and only if vect does not
+   * already contain obj.
    */
 
-  public static void unionAdd(Vector vect, Object obj)
+  public static void unionAdd(List vect, Object obj)
   {
     if (obj == null)
       {
@@ -186,15 +155,15 @@ public class VectorUtils {
 	return;
       }
 
-    vect.addElement(obj);
+    vect.add(obj);
   }
 
   /**
-   * <P>Returns true if vectA and vectB have any elements in
-   * common.</P> 
+   * Returns true if vectA and vectB have any elements in
+   * common. 
    */
 
-  public static boolean overlaps(Vector vectA, Vector vectB)
+  public static boolean overlaps(List vectA, List vectB)
   {
     if (vectA == null || vectB == null || vectA.size() == 0 || vectB.size() == 0)
       {
@@ -203,16 +172,13 @@ public class VectorUtils {
 
     if ((vectA.size() + vectB.size()) > 20)		// ass, again
       {
-	HashMap workSet = new HashMap(vectA.size());
-	
-	for (int i = 0; i < vectA.size(); i++)
-	  {
-	    workSet.put(vectA.elementAt(i), vectA.elementAt(i));
-	  }
+	Set workSet = new HashSet(vectA.size());
+
+	workSet.addAll(vectA);
 	
 	for (int i = 0; i < vectB.size(); i++)
 	  {
-	    if (workSet.containsKey(vectB.elementAt(i)))
+	    if (workSet.contains(vectB.get(i)))
 	      {
 		return true;
 	      }
@@ -224,7 +190,7 @@ public class VectorUtils {
 	  {
 	    for (int i = 0; i < vectA.size(); i++)
 	      {
-		if (vectB.contains(vectA.elementAt(i)))
+		if (vectB.contains(vectA.get(i)))
 		  {
 		    return true;
 		  }
@@ -234,7 +200,7 @@ public class VectorUtils {
 	  {
 	    for (int i = 0; i < vectB.size(); i++)
 	      {
-		if (vectA.contains(vectB.elementAt(i)))
+		if (vectA.contains(vectB.get(i)))
 		  {
 		    return true;
 		  }
@@ -246,94 +212,62 @@ public class VectorUtils {
   }
 
   /**
-   * <P>This method returns a Vector containing the intersection of the
-   * objects contained in vectA and vectB.</P>
+   * This method returns a Vector containing the intersection of the
+   * objects contained in vectA and vectB.
    *
-   * <P>This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.</P>
+   * This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.
    */
 
-  public static Vector intersection(Vector vectA, Vector vectB)
+  public static Vector intersection(List vectA, List vectB)
   {
-    HashMap 
-      workSetA = new HashMap(),
-      workSetB = new HashMap(),
-      resultSet = new HashMap();
-
-    Vector result = new Vector();
-    Iterator iter;
-    Object item;
+    Set
+      workSetA = new HashSet(),
+      workSetB = new HashSet(),
+      resultSet = new HashSet();
 
     /* -- */
 
     if (vectA != null)
       {
-	iter = vectA.iterator();
-
-	while (iter.hasNext())
-	  {
-	    item = iter.next();
-	    workSetA.put(item, item);
-	  }
+	workSetA.addAll(vectA);
       }
     
     if (vectB != null)
       {
-	iter = vectB.iterator();
+	workSetB.addAll(vectB);
+      }
 
-	while (iter.hasNext())
+    for (Object item: workSetA)
+      {
+	if (workSetB.contains(item))
 	  {
-	    item = iter.next();
-	    workSetB.put(item, item);
+	    resultSet.add(item);
 	  }
       }
 
-    iter = workSetA.values().iterator();
-
-    while (iter.hasNext())
+    for (Object item: workSetB)
       {
-	item = iter.next();
-
-	if (workSetB.containsKey(item))
+	if (workSetA.contains(item))
 	  {
-	    resultSet.put(item, item);
+	    resultSet.add(item);
 	  }
       }
 
-    iter = workSetB.values().iterator();
-
-    while (iter.hasNext())
-      {
-	item = iter.next();
-
-	if (workSetA.containsKey(item))
-	  {
-	    resultSet.put(item, item);
-	  }
-      }
-
-    iter = resultSet.values().iterator();
-
-    while (iter.hasNext())
-      {
-	result.addElement(iter.next());
-      }
-
-    return result;
+    return new Vector(resultSet);
   }
 
   /**
-   * <P>This method returns a Vector containing the set of objects
-   * contained in vectA that are not contained in vectB.</P>
+   * This method returns a Vector containing the set of objects
+   * contained in vectA that are not contained in vectB.
    *
-   * <P>This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.</P>
+   * This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.
    */
 
-  public static Vector difference(Vector vectA, Vector vectB)
+  public static Vector difference(List vectA, List vectB)
   {
     Vector result = new Vector();
-    Object item;
 
     /* -- */
 
@@ -344,45 +278,28 @@ public class VectorUtils {
 
     if (vectB == null)
       {
-	return (Vector) vectA.clone();
+	return new Vector(vectA);
       }
 
-    if (vectA.size() + vectB.size() > 10) // ass
+    if (vectA.size() + vectB.size() < 10) // ass
       {
-	HashMap workSetB = new HashMap(vectA.size() + vectB.size());
-	Iterator iter;
-
-	/* -- */
-
-	iter = vectB.iterator();
-    
-	while (iter.hasNext())
+	for (Object item: vectA)
 	  {
-	    item = iter.next();
-	    workSetB.put(item, item);
-	  }
-	
-	iter = vectA.iterator();
-	
-	while (iter.hasNext())
-	  {
-	    item = iter.next();
-	    
-	    if (!workSetB.containsKey(item))
+	    if (!vectB.contains(item))
 	      {
-		result.addElement(item);
+		result.add(item);
 	      }
 	  }
       }
     else
       {
-	for (int i = 0; i < vectA.size(); i++)
-	  {
-	    item = vectA.elementAt(i);
+	Set workSet = new HashSet(vectB);
 
-	    if (!vectB.contains(item))
+	for (Object item: vectA)
+	  {
+	    if (!workSet.contains(item))
 	      {
-		result.addElement(item);
+		result.add(item);
 	      }
 	  }
       }
@@ -391,14 +308,14 @@ public class VectorUtils {
   }
 
   /**
-   * <P>This method returns a Vector of items that appeared in the 
-   * vector parameter more than once.</P>
+   * This method returns a Vector of items that appeared in the 
+   * vector parameter more than once.
    *
-   * <P>If no duplicates are found or if vector is null, this method
+   * If no duplicates are found or if vector is null, this method
    * returns null.
    */
 
-  public static Vector duplicates(Vector vector)
+  public static Vector duplicates(List vector)
   {
     if (vector == null)
       {
@@ -406,13 +323,11 @@ public class VectorUtils {
       }
 
     Vector result = null;
-    HashMap found = new HashMap();
+    Set found = new HashSet();
 
-    for (int i = 0; i < vector.size(); i++)
+    for (Object item: vector)
       {
-	Object item = vector.elementAt(i);
-
-	if (found.containsKey(item))
+	if (found.contains(item))
 	  {
 	    if (result == null)
 	      {
@@ -422,48 +337,35 @@ public class VectorUtils {
 	    unionAdd(result, item);
 	  }
 
-	found.put(item, item);
+	found.add(item);
       }
 
     return result;
   }
 
   /**
-   * <P>This method returns a Vector containing the elements of vectA minus
+   * This method returns a Vector containing the elements of vectA minus
    * the elements of vectB.  If vectA has an element in the Vector 5 times
-   * and vectB has it 3 times, the result will have it two times.</P>
+   * and vectB has it 3 times, the result will have it two times.
    *
-   * <P>This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.</P>
+   * This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.
    */
 
-  public static Vector minus(Vector vectA, Vector vectB)
+  public static Vector minus(List vectA, List vectB)
   {
-    Vector result = new Vector();
-    Iterator iter;
-    Object item;
-
-    /* -- */
-
     if (vectA == null)
       {
-	return result;
+	return new Vector();	// empty
       }
 
-    result = (Vector) vectA.clone();
+    Vector result = new Vector(vectA);
 
     if (vectB != null)
       {
-	iter = vectB.iterator();
-
-	while (iter.hasNext())
+	for (Object item: vectB)
 	  {
-	    item = iter.next();
-
-	    if (result.contains(item))
-	      {
-		result.removeElement(item);
-	      }
+	    result.remove(item);
 	  }
       }
 
@@ -471,21 +373,21 @@ public class VectorUtils {
   }
 
   /**
-   * <P>This method returns a string containing all the elements in vec
-   * concatenated together, comma separated.</P>
+   * This method returns a string containing all the elements in vec
+   * concatenated together, comma separated.
    */
 
-  public static String vectorString(Vector vec)
+  public static String vectorString(List vec)
   {
     return VectorUtils.vectorString(vec, ",");
   }
 
   /**
-   * <P>This method returns a string containing all the elements in vec
-   * concatenated together, comma separated.</P>
+   * This method returns a string containing all the elements in vec
+   * concatenated together, comma separated.
    */
 
-  public static String vectorString(Vector vec, String separator)
+  public static String vectorString(List vec, String separator)
   {
     if (vec == null)
       {
@@ -501,24 +403,24 @@ public class VectorUtils {
 	    temp.append(separator);
 	  }
 
-	temp.append(vec.elementAt(i));
+	temp.append(vec.get(i));
       }
 
     return temp.toString();
   }
 
   /**
-   * <P>This method takes a sepChars-separated string and converts it to
+   * This method takes a sepChars-separated string and converts it to
    * a vector of fields.  i.e., "gomod,jonabbey" -> a vector whose
-   * elements are "gomod" and "jonabbey".</P>
+   * elements are "gomod" and "jonabbey".
    *
-   * <P>NOTE: this method will omit 'degenerate' fields from the output
+   * NOTE: this method will omit 'degenerate' fields from the output
    * vector.  That is, if input is "gomod,,,  jonabbey" and sepChars
    * is ", ", then the result vector will still only have "gomod"
    * and "jonabbey" as elements, even though one might wish to
    * explicitly know about the blanks between commas.  This method
    * is intended mostly for creating email list vectors, rather than
-   * general file-parsing vectors.</P>
+   * general file-parsing vectors.
    *
    * @param input the sepChars-separated string to test.
    *
@@ -562,7 +464,7 @@ public class VectorUtils {
 
 	    // System.err.println("+ " + temp + " +");
 
-	    results.addElement(temp);
+	    results.add(temp);
 	  }
 	else
 	  {
@@ -570,7 +472,7 @@ public class VectorUtils {
 
 	    // System.err.println("* " + temp + " *");
 
-	    results.addElement(temp);
+	    results.add(temp);
 
 	    oldindex = index + 1;
 	  }
@@ -580,12 +482,12 @@ public class VectorUtils {
   }
 
   /**
-   * <P>findNextSep() takes a string, a starting position, and a string of
+   * findNextSep() takes a string, a starting position, and a string of
    * characters to be considered field separators, and returns the
-   * first index after startDex whose char is in sepChars.</P>
+   * first index after startDex whose char is in sepChars.
    *
-   * <P>If there are no chars in sepChars past startdex in input, findNextSep()
-   * returns -1.</P>
+   * If there are no chars in sepChars past startdex in input, findNextSep()
+   * returns -1.
    */
 
   private static int findNextSep(String input, int startDex, String sepChars)
@@ -619,7 +521,7 @@ public class VectorUtils {
       }
   }
 
-  private static int vectSize(Vector x)
+  private static int vectSize(List x)
   {
     if (x == null)
       {
@@ -643,7 +545,7 @@ public class VectorUtils {
 
     for (int i = 0; i < results.size(); i++)
       {
-	System.out.println(i + ": " + results.elementAt(i));
+	System.out.println(i + ": " + results.get(i));
       }
   }
 }
