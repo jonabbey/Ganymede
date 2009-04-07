@@ -1340,7 +1340,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * elements.</p>
    */
 
-  public final void saveField(DBField field)
+  private final void saveField(DBField field)
   {
     if (fieldAry == null)
       {
