@@ -226,7 +226,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   protected DBField[] fieldAry;
 
   /**
-   * Permission cache for our fields, hashed into an array
+   * Permission cache for our fields, in ascending field id order
    * using the same indexing as fieldAry.
    */
 
