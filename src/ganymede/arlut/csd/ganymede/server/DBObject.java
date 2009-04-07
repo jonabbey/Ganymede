@@ -449,28 +449,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// DBObjectDeltaRec uses this constructor when doing
 	// journal edits to an object
 
-	fieldAry = new DBField[objectBase.getFieldCount()];
+	fieldAry = new DBField[original.fieldAry.length];
 
 	// put any defined fields into the object we're going
 	// to commit back into our DBStore
 	
 	for (int i = 0; i < original.fieldAry.length; i++)
 	  {
-	    field = original.fieldAry[i];
-	    
-	    if (field == null)
-	      {
-		continue;	// this can happen if original is a DBEditObject
-	      }
-
-            DBField tmp = field.getCopy(this);
-
-            if (tmp == null)
-              {
-                throw new NullPointerException("Null result from DBField.copyField()");
-              }
-
-            fieldAry[i] = tmp;
+	    fieldAry[i] = original.fieldAry[i].getCopy(this);
 	  }
       }
 
@@ -501,14 +487,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	for (int i = 0; i < fieldAry.length; i++)
 	  {
 	    field = fieldAry[i];
-
-	    if (field == null)
-	      {
-		// can happen if exportFields is called on a
-		// DBEditObject
-
-		continue;
-	      }
 
 	    // export can fail if the object has already
 	    // been exported.. don't worry about it if
@@ -546,14 +524,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	for (int i = 0; i < fieldAry.length; i++)
 	  {
 	    field = fieldAry[i];
-
-	    if (field == null)
-	      {
-		// can happen if exportFields is called on a
-		// DBEditObject
-
-		continue;
-	      }
 
 	    // unexport can fail if the object has already been
 	    // unexported, or if it was never exported.  This should
@@ -1346,17 +1316,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
 	for (int i = 0; i < fieldAry.length; i++)
 	  {
-	    field = fieldAry[i];
-
-	    if (field == null)
-	      {
-		// DBEditObject can have null fields, DBObject base
-		// class cannot
-
-		continue;
-	      }
-	    
-	    fieldVect.addElement(field);
+	    fieldVect.addElement(fieldAry[i]);
 	  }
       }
 
