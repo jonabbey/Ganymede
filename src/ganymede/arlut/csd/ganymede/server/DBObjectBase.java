@@ -2387,7 +2387,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     /* -- */
 
-    oldField = (DBObjectBaseField) getField(fieldName);
+    oldField = getFieldDef(fieldName);
 
     if (oldField == null)
       {
@@ -2403,7 +2403,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	return null;
       }
 
-    prevField = (DBObjectBaseField) getField(previousFieldName);
+    prevField = getFieldDef(previousFieldName);
 
     if (prevField == null || !customFields.contains(prevField))
       {
@@ -2434,7 +2434,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     /* -- */
 
-    oldField = (DBObjectBaseField) getField(fieldName);
+    oldField = getFieldDef(fieldName);
 
     if (oldField == null)
       {
@@ -2451,7 +2451,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	return null;
       }
 
-    nextField = (DBObjectBaseField) getField(nextFieldName);
+    nextField = getFieldDef(nextFieldName);
 
     if (nextField == null || !customFields.contains(nextField))
       {
@@ -2562,7 +2562,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	return null;
       }
     
-    return (DBObjectBaseField) getField(label_id);
+    return getFieldDef(label_id);
   }
 
   /**
@@ -2575,7 +2575,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public String getLabelFieldName()
   {
-    BaseField bf;
+    DBObjectBaseField fieldDef;
 
     /* -- */
 
@@ -2584,21 +2584,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	return null;
       }
     
-    bf = getField(label_id);
+    fieldDef = getFieldDef(label_id);
 
-    if (bf == null)
+    if (fieldDef == null)
       {
 	return null;
       }
 
-    try
-      {
-	return bf.getName();
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException("caught remote: " + ex);
-      }
+    return fieldDef.getName();
   }
 
   /**
@@ -2729,6 +2722,21 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
+   * As getField(), but returns DBObjectBaseField rather than the
+   * BaseField interface.
+   *
+   * This is a server-side only method.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.Base
+   */
+
+  public DBObjectBaseField getFieldDef(String name)
+  {
+    return fieldTable.get(name);
+  }
+
+  /**
    * <p>Returns the field definition for the field matching name,
    * or null if no match found.</p>
    *
@@ -2762,7 +2770,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
-    bF = (DBObjectBaseField) getField(fieldName);
+    bF = getFieldDef(fieldName);
 
     if (bF == null)
       {
@@ -2803,7 +2811,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
-    bF = (DBObjectBaseField) getField(fieldID);
+    bF = getFieldDef(fieldID);
 
     if (bF == null)
       {
@@ -2955,7 +2963,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					  ts.l("deleteField.fieldused", getName(), fieldName));
       }
 
-    field = (DBObjectBaseField) getField(fieldName);
+    field = getFieldDef(fieldName);
 
     if (field == null)
       {
@@ -3029,7 +3037,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     Enumeration en;
     short id;
 
-    DBObjectBaseField fieldDef = (DBObjectBaseField) getField(fieldName);
+    DBObjectBaseField fieldDef = getFieldDef(fieldName);
 
     if (fieldDef == null)
       {
@@ -3296,7 +3304,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	return Ganymede.createErrorDialog(ts.l("checkSchemaState.nolabel", this.getName()));
       }
 
-    DBObjectBaseField labelFieldDef = (DBObjectBaseField) getField(label_id);
+    DBObjectBaseField labelFieldDef = getFieldDef(label_id);
 
     if (labelFieldDef.getNameSpace() == null)
       {
@@ -4006,7 +4014,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
           }
         
         /* Now we'll check to see if there's a namespace on this field */
-        DBNameSpace namespace = ((DBObjectBaseField) getField(labelFieldName)).getNameSpace();
+        DBNameSpace namespace = getFieldDef(labelFieldName).getNameSpace();
 
         if (namespace == null)
           {
