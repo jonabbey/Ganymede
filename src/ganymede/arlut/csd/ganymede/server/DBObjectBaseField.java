@@ -663,7 +663,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // we use setName to filter out any fieldname chars that wouldn't
     // be acceptable as an XML entity name character.
 
-    setName(in.readUTF());	
+    field_name = in.readUTF();
     field_code = in.readShort();
     field_type = in.readShort();
     setClassName(in.readUTF());
