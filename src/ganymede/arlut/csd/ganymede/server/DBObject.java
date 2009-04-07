@@ -1845,13 +1845,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>This method scans through all fields defined in the 
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * for this object type and determines if all required fields have
-   * been filled in.  If everything is ok, this method will return
-   * null.  If any required fields are found not to have been filled
-   * out, this method returns a vector of field names that need to
-   * be filled out.</p>
+   * <p>This method scans through all custom fields defined in the
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} for
+   * this object type and determines if all required fields have been
+   * filled in.  If everything is ok, this method will return null.
+   * If any required fields are found not to have been filled out,
+   * this method returns a vector of field names that need to be
+   * filled out.</p>
    *
    * <p>This method is used by the transaction commit logic to ensure a
    * consistent transaction. If server-local code has called
@@ -1862,7 +1862,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final Vector checkRequiredFields()
   {
     Vector localFields = new Vector();
-    DBField field = null;
 
     /* -- */
 
@@ -1881,12 +1880,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// as the objectbase field table is only altered when the
 	// schema is being edited.
 	
-	Vector fieldTemplates = objectBase.getFieldTemplateVector();
-
-	for (int i = 0; i < fieldTemplates.size(); i++)
+	for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
 	  {
-	    FieldTemplate template = (FieldTemplate) fieldTemplates.elementAt(i);
-	    
 	    try
 	      {
 		// nota bene: calling fieldRequired here could
@@ -1894,13 +1889,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		// on how the fieldRequired method is written.  I
 		// think this is a low-level risk, but not zero.
 
-		if (objectBase.getObjectHook().fieldRequired(this, template.getID()))
+		if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
 		  {
-		    field = retrieveField(template.getID());
+		    DBField field = retrieveField(fieldDef.getID());
 		    
 		    if (field == null || !field.isDefined())
 		      {
-			localFields.addElement(template.getName());
+			localFields.addElement(fieldDef.getName());
 		      }
 		  }
 	      }
