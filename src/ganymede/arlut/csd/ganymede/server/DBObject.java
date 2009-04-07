@@ -1045,7 +1045,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	else if (definition == null)
 	  {
 	    // "What the heck?  Null definition for {0}, fieldcode = {1}, {2}th field in object"
-	    throw new RuntimeException(ts.l("receive.nulldef", this.getTypeName(), Integer.valueOf(fieldcode), Integer.valueOf(i)));
+	    throw new RuntimeException(ts.l("receive.nulldef",
+					    this.getTypeName(),
+					    Integer.valueOf(fieldcode),
+					    Integer.valueOf(i)));
 	  }
 
         tmp = DBField.readField(this, in, definition);
