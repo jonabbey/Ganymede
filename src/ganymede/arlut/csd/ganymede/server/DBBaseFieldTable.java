@@ -565,6 +565,10 @@ class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
 	
   public boolean hasNext() 
   {
+    // we know all the built-ins will come before the custom fields,
+    // because we the table is kept in ascending field id order.  when
+    // we see a non-builtIn() field def, we'll stop.
+
     return index < table.length && table[index].isBuiltIn();
   }
 

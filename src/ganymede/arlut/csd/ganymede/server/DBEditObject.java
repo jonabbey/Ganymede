@@ -288,7 +288,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
 	int count = 0;
 
-	for (DBObjectBaseField fieldDef: objectBase.fieldTable)
+	for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
 	  {
 	    // check for permission to create a particular field
 
@@ -306,7 +306,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	// defintion objects in field id order, which we need to order
 	// the fieldAry elements properly.
 
-	for (DBObjectBaseField fieldDef: objectBase.fieldTable)
+	for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
 	  {
 	    DBField newField = DBField.createTypedField(this, fieldDef);
 
@@ -386,7 +386,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     field = fieldVect.elementAt(j);
 
-    for (DBObjectBaseField fieldDef: objectBase.fieldTable)
+    for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
 	if (field != null && fieldDef.getID() == field.getID())
 	  {
@@ -3655,7 +3655,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public void emitXMLDelta(XMLDumpContext xmlOut) throws IOException
   {
-    DBObjectBaseField fieldDef;
     boolean fieldChanged;
 
     /* -- */
@@ -3679,15 +3678,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     xmlOut.attribute("oid", getInvid().toString());
     xmlOut.indentOut();
 
-    // by using getFieldAry(), we get the fields in display order.  We
-    // just have to be careful not to mess with the array we get back
-
-    DBObjectBaseField[] fieldDefs = objectBase.getFieldAry();
-
-    for (int i = 0; i < fieldDefs.length; i++)
+    for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-	fieldDef = fieldDefs[i];
-
 	DBField myField = (DBField) this.getField(fieldDef.getID());
 	DBField origField = (DBField) original.getField(fieldDef.getID());
 
@@ -3730,10 +3722,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     xmlOut.attribute("oid", getInvid().toString());
     xmlOut.indentOut();
 
-    for (int i = 0; i < fieldDefs.length; i++)
+    for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-	fieldDef = fieldDefs[i];
-
 	DBField myField = (DBField) this.getField(fieldDef.getID());
 	DBField origField = (DBField) original.getField(fieldDef.getID());
 
@@ -3822,7 +3812,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     boolean diffFound = false;
     StringBuffer result = new StringBuffer();
-    DBObjectBaseField fieldDef;
     DBField origField, currentField;
     StringBuffer added = new StringBuffer();
     StringBuffer deleted = new StringBuffer();
@@ -3830,7 +3819,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     /* -- */
 
-    // algorithm: iterate over base.fieldTable to find all fields
+    // algorithm: iterate over base.getFieldsInFieldOrder() to find all fields
     // possibly contained in the object.. for each field, check to
     // see if the value has changed.  if so, emit a before and after
     // diff.  if one has a field and the other does not, indicate
@@ -3849,12 +3838,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	System.err.println("Entering diff for object " + getLabel());
       }
 
-    Enumeration en = objectBase.fieldTable.elements();
-
-    while (en.hasMoreElements())
+    for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-	fieldDef = (DBObjectBaseField) en.nextElement();
-
 	// we don't care if certain fields change
 
 	if (fieldDef.getID() == SchemaConstants.CreationDateField ||
