@@ -5938,7 +5938,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // first, make sure we have a copy of our default role
     // DBObject.. permTimeStamp is used to track this.
 
-    if (permTimeStamp == null || !permTimeStamp.before(permBase.lastChange))
+    if (permTimeStamp == null || !permTimeStamp.before(permBase.getTimeStamp()))
       {
 	defaultObj = session.viewDBObject(SchemaConstants.RoleBase,
 					  SchemaConstants.RoleDefaultObj);
@@ -5981,7 +5981,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // here's where we break out if nothing needs to be updated.. note
     // that we are testing personaTimeStamp here, not permTimeStamp.
  
-    if (personaTimeStamp != null && personaTimeStamp.after(personaBase.lastChange))
+    if (personaTimeStamp != null && personaTimeStamp.after(personaBase.getTimeStamp()))
       {
 	return;
       }

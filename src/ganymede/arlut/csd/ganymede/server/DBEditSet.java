@@ -2157,12 +2157,9 @@ public class DBEditSet {
 	    // and calculate the fields that we touched by losing them
 
 	    DBObject origObj = eObj.getOriginal();
-	    Enumeration en = origObj.objectBase.fieldTable.elements();
 
-	    while (en.hasMoreElements())
+	    for (DBObjectBaseField fieldDef: origObj.objectBase.getFieldsInFieldOrder())
 	      {
-		DBObjectBaseField fieldDef = (DBObjectBaseField) en.nextElement();
-
 		// we don't care if certain fields change
 
 		if (fieldDef.getID() == SchemaConstants.CreationDateField ||

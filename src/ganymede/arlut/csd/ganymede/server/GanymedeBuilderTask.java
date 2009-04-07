@@ -524,13 +524,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
             return false;
           }
 	
-	if (base.lastChange == null)
+	if (base.getTimeStamp() == null)
 	  {
 	    return false;
 	  }
 	else 
 	  {
-	    return base.lastChange.after(oldLastRunTime);
+	    return base.getTimeStamp().after(oldLastRunTime);
 	  }
       }
   }
@@ -583,7 +583,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
     // build, we don't need to worry about looking at the individual
     // fields.
 
-    if (base.lastChange == null || !base.lastChange.after(oldLastRunTime))
+    if (base.getTimeStamp() == null || !base.getTimeStamp().after(oldLastRunTime))
       {
 	return false;
       }
@@ -605,7 +605,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	Short idObj = (Short) iterator.next();
 	fieldDef = (DBObjectBaseField) base.getField(idObj);
 
-	if (fieldDef != null && fieldDef.lastChange.after(oldLastRunTime))
+	if (fieldDef != null && fieldDef.getTimeStamp().after(oldLastRunTime))
 	  {
 	    return true;
 	  }

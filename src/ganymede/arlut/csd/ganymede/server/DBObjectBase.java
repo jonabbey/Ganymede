@@ -325,7 +325,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * field dictionary
    */
 
-  DBBaseFieldTable fieldTable;
+  private DBBaseFieldTable fieldTable;
 
   /**
    * objects in our objectBase
@@ -359,7 +359,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * last change since the Ganymede server was started.</p>
    */
 
-  Date lastChange;
+  private Date lastChange;
 
   /**
    * <p>If this DBObjectBase is locked with an exclusive lock
@@ -448,13 +448,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * Used to keep track of schema editing
    */
 
-  DBSchemaEdit editor;
+  private DBSchemaEdit editor;
 
   /**
-   * <p>This Vector holds the current collection of {@link
+   * <p>This List holds the current collection of {@link
    * arlut.csd.ganymede.server.DBObject DBObject} objects in this
    * DBObjectBase, for enumeration access.  The GanymedeSession query
-   * logic iterates over this Vector so that querying on single bases
+   * logic iterates over this List so that querying on single bases
    * can proceed while commits are under way.</p>
    *
    * <p>This is practicable because assignment to this variable is
@@ -465,7 +465,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * drop reference to it when the iteration is complete.</p>
    */
 
-  private List<DBObject> iterationSet;
+  private List<DBObject> iterationList;
 
   // Customization Management Object
 
@@ -532,7 +532,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     readerList = new Vector();
     dumperList = new Vector();
     dumpLockList = new Vector();
-    iterationSet = Collections.synchronizedList(new ArrayList<DBObject>());
+    iterationList = Collections.unmodifiableList(new ArrayList<DBObject>());
 
     object_name = "";
     classname = "";
@@ -644,7 +644,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	// commits this copy
 
 	objectTable = original.objectTable;
-	iterationSet = original.iterationSet; // this is safe to do only in the schema editing context
+	iterationList = original.iterationList; // this is safe to do only in the schema editing context
 
 	maxid = original.maxid;
     
@@ -898,7 +898,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     	System.err.println(ts.l("receive.reading", Integer.valueOf(object_count)));
       }
 
-    List<DBObject> tmpIterationSet = Collections.synchronizedList(new ArrayList<DBObject>(object_count));
+    List<DBObject> tmpIterationList = new ArrayList<DBObject>(object_count);
 
     if (object_count > 0)
       {
@@ -920,14 +920,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	    maxid = tempObject.getID();
 	  }
 
-	tmpIterationSet.add(tempObject);
+	tmpIterationList.add(tempObject);
 	objectTable.putNoSyncNoRemove(tempObject);
 	tempObject.registerAsymmetricLinks(); // register anonymous invid fields
       }
     
-    // and switch it in
+    // lock and load
 
-    this.iterationSet = tmpIterationSet;
+    this.iterationList = Collections.unmodifiableList(tmpIterationList);
 
     if (debug)
       {
@@ -3388,6 +3388,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
+   * Returns true if this DBObjectBase is being edited by the schema
+   * editor.
+   */
+
+  public boolean isEditing()
+  {
+    return editor != null;
+  }
+
+  /**
    * <p>This method is used by the DBEditSet commit logic to replace
    * this DBObjectBase's iterationSet with a new List<DBObject> with
    * the current objectTable's values.  This method should only be
@@ -3398,26 +3408,19 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   void updateIterationSet()
   {
-    Enumeration en;
-    Vector newIterationSet;
-
-    /* -- */
+    List<DBObject> newIterationList = null;
 
     synchronized (objectTable)
       {
-	newIterationSet = new Vector(objectTable.size());
+	newIterationList = new ArrayList<DBObject>(objectTable.size());
 
-	en = objectTable.elements();
-
-	while (en.hasMoreElements())
+	for (DBObject object: getObjects())
 	  {
-	    newIterationSet.addElement(en.nextElement());
+	    newIterationList.add(object);
 	  }
       }
 
-    // and we do the big swap
-
-    this.iterationSet = newIterationSet;
+    this.iterationList = Collections.unmodifiableList(newIterationList);
   }
 
   /**
@@ -3428,9 +3431,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * will be disrupted.</p>
    */
 
-  List<DBObject> getIterationSet()
+  public List<DBObject> getIterationSet()
   {
-    return iterationSet;
+    return iterationList;
   }
 
   /**

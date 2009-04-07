@@ -4511,7 +4511,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
     
-    b = base.editor.getBase(val);
+    b = editor.getBase(val);
 
     if (b != null)
       {

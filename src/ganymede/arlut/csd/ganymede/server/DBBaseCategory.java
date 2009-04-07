@@ -1344,7 +1344,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 	  {
 	    DBObjectBase base = (DBObjectBase) node;
 
-	    if (base.editor == null)
+	    if (!base.isEditing())
 	      {
 		System.err.println("DBBaseCategory.removeNode(): " + base.getName() + " has a null editor!");
 	      }
@@ -1451,7 +1451,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 	  {
 	    DBObjectBase base = (DBObjectBase) node;
 
-	    if (base.editor == null)
+	    if (!base.isEditing())
 	      {
 		System.err.println("DBBaseCategory.removeNode(2): " + base.getName() + " has a null editor!");
 	      }

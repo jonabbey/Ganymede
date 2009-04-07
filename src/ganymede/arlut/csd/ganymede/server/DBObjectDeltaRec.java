@@ -119,15 +119,14 @@ public final class DBObjectDeltaRec implements FieldType {
     this.invid = oldObj.getInvid();
 
     DBObjectBase objectBase = oldObj.getBase();
-    DBObjectBaseField fieldDef;
     DBField origField, currentField;
 
     /* -- */
 
-    // algorithm: iterate over base.fieldTable to find all fields
-    // possibly contained in the object.. for each field, check to
-    // see if the value has changed.  if so, create a fieldDeltaRec
-    // for it.
+    // algorithm: iterate over base.getFieldsInFieldOrder() to find
+    // all fields possibly contained in the object.. for each field,
+    // check to see if the value has changed.  if so, create a
+    // fieldDeltaRec for it.
 
     // note that we're counting on objectBase.sortedFields not being
     // changed while we're iterating here.. this is an ok assumption,
@@ -140,12 +139,8 @@ public final class DBObjectDeltaRec implements FieldType {
 			   oldObj.getLabel() + " and " + newObj.getLabel());
       }
 
-    Enumeration en = objectBase.fieldTable.elements();
-
-    while (en.hasMoreElements())
+    for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-	fieldDef = (DBObjectBaseField) en.nextElement();
-
 	if (debug)
 	  {
 	    System.err.println("Comparing field " + fieldDef.getName());
