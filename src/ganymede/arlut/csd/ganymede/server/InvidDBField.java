@@ -1479,7 +1479,7 @@ public final class InvidDBField extends DBField implements invid_field {
                     // permissions hereafter.
 
                     newRefField = (InvidDBField) DBField.createTypedField(newRef, fieldDef);
-                    newRef.saveField(newRefField);
+                    newRef.addField(newRefField);
                   }
                 else
                   {

@@ -1324,6 +1324,35 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * This method adds a DBField to this object.  It is generally only
+   * used by InvidDBField.bind(), when anonymously adding an
+   * InvidDBField to an object that the user would not normally have
+   * needs to add a field after the fact.
+   */
+
+  final synchronized void addField(DBField field)
+  {
+    if (fieldAry == null)
+      {
+	throw new NullPointerException(ts.l("global.pseudostatic"));
+      }
+
+    if (field == null)
+      {
+	// "null value passed to addField"
+	throw new IllegalArgumentException(ts.l("addField.null"));
+      }
+
+    DBField[] newFieldAry = new DBField[fieldAry.length + 1];
+
+    java.lang.System.arraycopy(fieldAry, 0, newFieldAry, 0, fieldAry.length);
+
+    fieldAry = newFieldAry;
+
+    saveField(field);
+  }
+
+  /**
    * <p>This method places a DBField into a slot in this object's
    * fieldAry DBField array.  As a (probably reckless) speed
    * optimization, this method makes no checks to ensure that another

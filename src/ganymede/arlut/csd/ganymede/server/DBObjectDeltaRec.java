@@ -688,11 +688,7 @@ public final class DBObjectDeltaRec implements FieldType {
 	  {
 	    fieldRec.scalarValue.setOwner(copy);
 
-	    // we have to clear before saving, as saveField
-	    // just looks for an open slot
-
-	    copy.clearField(fieldRec.fieldcode);
-	    copy.saveField(fieldRec.scalarValue);
+	    copy.replaceField(fieldRec.scalarValue);
 
 	    continue;
 	  }
