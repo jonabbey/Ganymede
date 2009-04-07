@@ -355,12 +355,20 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     DBField field = fieldVect.elementAt(j);
 
-    for (DBObjectBaseField fieldDef: objectBase.fieldTable)
+    for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-	if (fieldDef.getID() == field.getID())
+	if (field != null && fieldDef.getID() == field.getID())
 	  {
 	    count++;
-	    field = fieldVect.elementAt(++j);
+
+	    if (j < fieldVect.size())
+	      {
+		field = fieldVect.elementAt(++j);
+	      }
+	    else
+	      {
+		field = null;	// end of the fields in fieldVect
+	      }
 	  }
 	else
 	  {
@@ -380,11 +388,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.fieldTable)
       {
-	if (fieldDef.getID() == field.getID())
+	if (field != null && fieldDef.getID() == field.getID())
 	  {
 	    fieldAry[i++] = DBField.copyField(this, fieldVect.elementAt(j++));
 
-	    field = fieldVect.elementAt(j);
+	    if (j < fieldVect.size())
+	      {
+		field = fieldVect.elementAt(j);
+	      }
+	    else
+	      {
+		field = null;
+	      }
 	  }
 	else
 	  {
