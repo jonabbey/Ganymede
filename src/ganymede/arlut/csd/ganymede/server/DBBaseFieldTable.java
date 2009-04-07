@@ -81,7 +81,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    * Array of DBObjectBaseField objects, sorted in id order.
    */
 
-  private transient DBObjectBaseField table[];
+  private transient DBObjectBaseField[] table;
 
   /**
    * The total number of entries in the hash table.
@@ -317,20 +317,27 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
 	DBObjectBaseField[] newTable = new DBObjectBaseField[table.length + 1];
 
-	boolean found = false;
-
-	for (int j = 0, i = 0; i < table.length; i++)
+	if (table.length == 0)
 	  {
-	    DBObjectBaseField field = table[i];
+	    newTable[0] = value;
+	  }
+	else
+	  {
+	    boolean found = false;
 
-	    if (!found && value.getID() < field.getID())
+	    for (int j = 0, i = 0; i < table.length; i++)
 	      {
-		newTable[j++] = value;
-		found = true;
-	      }
-	    else
-	      {
-		newTable[j++] = table[i++];
+		DBObjectBaseField field = table[i];
+
+		if (!found && value.getID() < field.getID())
+		  {
+		    newTable[j++] = value;
+		    found = true;
+		  }
+		else
+		  {
+		    newTable[j++] = table[i++];
+		  }
 	      }
 	  }
 
