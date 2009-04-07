@@ -3565,11 +3565,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    field = fieldAry[i];
 
-	    if (field == null)
-	      {
-		continue;
-	      }
-
 	    key = Short.valueOf(field.getID());
 	    value = field.checkpoint();
 
