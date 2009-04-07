@@ -361,9 +361,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  {
 	    count++;
 
-	    if (j < fieldVect.size())
+	    if (++j < fieldVect.size())
 	      {
-		field = fieldVect.elementAt(++j);
+		field = fieldVect.elementAt(j);
 	      }
 	    else
 	      {
