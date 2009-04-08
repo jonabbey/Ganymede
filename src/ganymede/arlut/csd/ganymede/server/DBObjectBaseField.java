@@ -4334,7 +4334,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
 	DBObjectBase b = (DBObjectBase) editor.getBase(val);
 
-	if (b != null)
+	if (b == null)
 	  {
 	    // "Schema Editing Error"
 	    // "Can''t set the target base to base number {0,number,#}.  No such base is defined: {0}."
@@ -4403,36 +4403,34 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
 	DBObjectBase b = (DBObjectBase) editor.getBase(baseName);
 
-	if (b != null)
-	  {
-	    if (b.getTypeID() == allowedTarget)
-	      {
-		return null;	// no change, no harm
-	      }
-
-	    if (isSystemField())
-	      {
-		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-						  ts.l("global.system_field_change_attempt", this.toString()));
-	      }
-
-	    allowedTarget = b.getTypeID();
-
-	    if (isInUse())
-	      {
-		return warning2;
-	      }
-	    else
-	      {
-		return null;
-	      }
-	  }
-	else
+	if (b == null)
 	  {
 	    // "Schema Editing Error"
 	    // "Can''t set the target base for invid field {1} to base {0}.  No such base is defined."
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("setTargetBase.bad_target", baseName, this.toString()));
+	  }
+
+	if (b.getTypeID() == allowedTarget)
+	  {
+	    return null;	// no change, no harm
+	  }
+
+	if (isSystemField())
+	  {
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("global.system_field_change_attempt", this.toString()));
+	  }
+
+	allowedTarget = b.getTypeID();
+
+	if (isInUse())
+	  {
+	    return warning2;
+	  }
+	else
+	  {
+	    return null;
 	  }
       }
     else
@@ -4578,6 +4576,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	  }
       }
 
+    // if we're loading rather than editing, we'll go ahead and set it
+    // regardless of whether the target base and field have been
+    // created yet
+
     targetField = val;
 
     if (isEditing() && isInUse())
@@ -4685,7 +4687,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	// remember, system fields are initialized outside of the
 	// context of the loading system, there should never be a
-	// reason to call setTargetField() on a system field
+	// reason to call setTargetField() on a system field when
+	// editing
 
 	if (isEditing() && isSystemField())
 	  {
