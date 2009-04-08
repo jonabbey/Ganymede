@@ -871,9 +871,9 @@ public class StringDBField extends DBField implements string_field {
 					       s, this.getName(), owner.getLabel(), Integer.valueOf(this.minSize())));
       }
 
-    if (getFieldDef().regexp != null)
+    if (getFieldDef().getRegexp() != null)
       {
-	gnu.regexp.REMatch match = getFieldDef().regexp.getMatch(s);
+	gnu.regexp.REMatch match = getFieldDef().getRegexp().getMatch(s);
 
 	if (match == null)
 	  {

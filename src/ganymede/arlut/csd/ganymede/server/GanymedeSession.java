@@ -2946,7 +2946,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	DBObjectBase base = DBStore.db.getObjectBase(type);
 	DBObjectBaseField labelField = base.getLabelFieldDef();
-	DBNameSpace namespace = labelField.namespace;
+	DBNameSpace namespace = labelField.getNameSpace();
 	DBField targetField = namespace.lookupPersistent(objectName);
 	DBObject targetObject = targetField.getOwner();
 
@@ -3457,7 +3457,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	// direct look up on.  check to see if it has a namespace
 	// index we can use
 
-	if (fieldDef.namespace != null)
+	if (fieldDef.getNameSpace() != null)
 	  {
 	    // aha!  We've got an optimized case!
 	    
@@ -3467,7 +3467,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      }
 
 	    DBObject resultobject;
-	    DBNameSpace ns = fieldDef.namespace;
+	    DBNameSpace ns = fieldDef.getNameSpace();
 
 	    synchronized (ns)
 	      {

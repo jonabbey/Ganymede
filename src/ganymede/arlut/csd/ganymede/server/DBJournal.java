@@ -1104,28 +1104,28 @@ class JournalEntry {
 
 		definition = _field.getFieldDef();
 
-		if (definition.namespace != null)
+		if (definition.getNameSpace() != null)
 		  {
 		    if (_field.isVector())
 		      {
 			for (int j = 0; j < _field.size(); j++)
 			  {
-			    if (definition.namespace.lookupPersistent(_field.key(j)) != _field)
+			    if (definition.getNameSpace().lookupPersistent(_field.key(j)) != _field)
 			      {
 				throw new RuntimeException("Error, namespace mismatch in DBJournal code [" + j + "]");
 			      }
 
-			    definition.namespace.removeHandle(_field.key(j));
+			    definition.getNameSpace().removeHandle(_field.key(j));
 			  }
 		      }
 		    else
 		      {
-			if (definition.namespace.lookupPersistent(_field.key()) != _field)
+			if (definition.getNameSpace().lookupPersistent(_field.key()) != _field)
 			  {
 			    throw new RuntimeException("Error, namespace mismatch in DBJournal code");
 			  }
 
-			definition.namespace.removeHandle(_field.key());
+			definition.getNameSpace().removeHandle(_field.key());
 		      }
 		  }
 	      }
@@ -1163,7 +1163,7 @@ class JournalEntry {
 	    DBField _field = (DBField) tempFields[i];
 	    definition = _field.getFieldDef();
 
-	    if (definition.namespace != null)
+	    if (definition.getNameSpace() != null)
 	      {
 		if (_field.isVector())
 		  {
@@ -1174,13 +1174,13 @@ class JournalEntry {
 
 		    for (int j = 0; j < _field.size(); j++)
 		      {
-			definition.namespace.receiveValue(_field.key(j), _field);
+			definition.getNameSpace().receiveValue(_field.key(j), _field);
 		      }
 		  }
 		else
 		  {
 		    // mark the scalar value in the namespace
-		    definition.namespace.receiveValue(_field.key(), _field);
+		    definition.getNameSpace().receiveValue(_field.key(), _field);
 		  }
 	      }
 	  }

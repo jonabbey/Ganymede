@@ -370,7 +370,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
   public boolean canSeeField(DBSession session, DBField field)
   {
-    if (field.getFieldDef().base != this.objectBase)
+    if (field.getFieldDef().base() != this.objectBase)
       {
 	throw new IllegalArgumentException("field/object mismatch");
       }

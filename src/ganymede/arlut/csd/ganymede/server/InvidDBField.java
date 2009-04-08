@@ -3507,7 +3507,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	return null;
       }
 
-    return getFieldDef().base.getStore().getObjectBase(targetBaseType);
+    return getFieldDef().base().getStore().getObjectBase(targetBaseType);
   }
 
   /**

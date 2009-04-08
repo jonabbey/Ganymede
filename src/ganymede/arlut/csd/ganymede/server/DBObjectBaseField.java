@@ -122,25 +122,25 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * Object type definition for the database object class we are member of
    */
 
-  DBObjectBase base;
+  private DBObjectBase base;
 
   /**
    * name of this field
    */
 
-  String field_name = null;
+  private String field_name = null;
 
   /**
    * id of this field in the current object type
    */
 
-  short field_code = -1;
+  private short field_code = -1;
 
   /**
    * {@link arlut.csd.ganymede.common.FieldType Field Type} for this field
    */
 
-  short field_type = -1;
+  private short field_type = -1;
 
   /**
    * Should this field be displayed to the client?  May be false for
@@ -154,31 +154,25 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * field 2.  Oh, never mind.)
    */
 
-  boolean visibility = true;
+  private boolean visibility = true;
 
   /**
    * string to be displayed in the client as a tooltip explaining this field
    */
 
-  String comment = null;
+  private String comment = null;
 
   /**
    * name of the tab this field should be placed in on the client
    */
 
-  String tabName = null;
+  private String tabName = null;
 
   /**
    * true if this field is an array type
    */
 
-  boolean array = false;
-
-  /**
-   * true if we're in the middle of loading
-   */
-
-  boolean loading = false;
+  private boolean array = false;
 
   // array attributes
 
@@ -186,49 +180,49 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * max length of array
    */
 
-  short limit = Short.MAX_VALUE;
+  private short limit = Short.MAX_VALUE;
 
   // boolean attributes
 
-  boolean labeled = false;
-  String trueLabel = null;
-  String falseLabel = null;
+  private boolean labeled = false;
+  private String trueLabel = null;
+  private String falseLabel = null;
 
   // string attributes
 
-  short minLength = 0;
-  short maxLength = Short.MAX_VALUE;
-  String okChars = null;
-  String badChars = null;
-  DBNameSpace namespace = null;
-  boolean multiLine = false;
+  private short minLength = 0;
+  private short maxLength = Short.MAX_VALUE;
+  private String okChars = null;
+  private String badChars = null;
+  private DBNameSpace namespace = null;
+  private boolean multiLine = false;
 
   /**
    * Regular Expression string for input-filtering
    * in {@link arlut.csd.ganymede.server.StringDBField}s.
    */
 
-  String regexpPat = null;	// introduced in ganymede.db version 1.14
+  private String regexpPat = null;	// introduced in ganymede.db version 1.14
 
   /**
    * Text description of the meaning of the regexpPat,
    * if defined
    */
 
-  String regexpDesc = null;
+  private String regexpDesc = null;
 
   /**
    * Compiled regular expression for input-filtering
    * in {@link arlut.csd.ganymede.server.StringDBField}s.
    */
 
-  gnu.regexp.RE regexp = null;
+  private gnu.regexp.RE regexp = null;
 
   // invid attributes
 
-  boolean editInPlace = false;
-  short allowedTarget = -1;	// no target restrictions
-  short targetField = -1;	// no field symmetry.. we use the DBStore backPointers structure by default
+  private boolean editInPlace = false;
+  private short allowedTarget = -1;	// no target restrictions
+  private short targetField = -1;	// no field symmetry.. we use the DBStore backPointers structure by default
 
   /**
    * If this is not null, then we have gotten information on this
@@ -239,7 +233,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * set to null.
    */
 
-  String allowedTargetStr = null;
+  private String allowedTargetStr = null;
 
   /**
    * If this is not null, then we have gotten information on this
@@ -249,17 +243,17 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * be set properly, and targetFieldStr will be set to null.  
    */
 
-  String targetFieldStr = null;
+  private String targetFieldStr = null;
 
   // password attributes
 
-  boolean crypted = true;	// UNIX encryption is the default.
-  boolean md5crypted = false;	// OpenBSD style md5crypt() is not
-  boolean apachemd5crypted = false;	// Apache style md5crypt() is not
-  boolean winHashed = false;	// Windows NT/Samba hashes are not
-  boolean sshaHashed = false;	// SSHA hash is not either
-  boolean shaUnixCrypted = false;	// SHA Unix Crypt is not either
-  boolean storePlaintext = false; // nor is plaintext
+  private boolean crypted = true;	// UNIX encryption is the default.
+  private boolean md5crypted = false;	// OpenBSD style md5crypt() is not
+  private boolean apachemd5crypted = false;	// Apache style md5crypt() is not
+  private boolean winHashed = false;	// Windows NT/Samba hashes are not
+  private boolean sshaHashed = false;	// SSHA hash is not either
+  private boolean shaUnixCrypted = false;	// SHA Unix Crypt is not either
+  private boolean storePlaintext = false; // nor is plaintext
 
   /**
    * If the password field is to use the shaUnixCrypt algorithm, which
@@ -267,14 +261,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * the SHA512 version, if it is false, we'll use the SHA256 version.
    */
 
-  boolean useShaUnixCrypted512 = false;
+  private boolean useShaUnixCrypted512 = false;
 
   /**
    * If the password field is to use the shaUnixCrypt algorithm, how
    * many rounds shall we specify?
    */
 
-  int shaUnixCryptRounds = 5000;
+  private int shaUnixCryptRounds = 5000;
 
   // schema editing
 
@@ -282,7 +276,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * If we are being edited, this will point to an instance
    * of a server-side schema editing class.  */
 
-  DBSchemaEdit editor;
+  private DBSchemaEdit editor;
 
   /**
    * Downloadable FieldTemplate representing the constant field type
@@ -291,18 +285,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * editing completion.
    */
 
-  FieldTemplate template;
-
-  // for DBBaseFieldTable
-
-  DBObjectBaseField next = null;
+  private FieldTemplate template;
 
   /**
    * <P>A three state flag used by isInUse() to report whether or
    * not a particular field is in use in the loaded database.</P>
    */
 
-  Boolean inUseCache = null;
+  private Boolean inUseCache = null;
 
   /**
    * <p>Timestamp for the last time a field of this type was changed
@@ -317,7 +307,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * particular build or sub-build.</p>
    */
 
-  Date lastChange;
+  private Date lastChange;
 
   /**
    * This field is used to handle field order sorting when
@@ -462,6 +452,18 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
+   * Clears the editor reference from this DBObjectBaseField when
+   * schema editing is completed and updates the saved FieldTemplate.
+   */
+
+  public void clearEditor()
+  {
+    this.editor = null;
+
+    this.template = new FieldTemplate(this);
+  }
+
+  /**
    * <p>This method is used when the database is being dumped, to write
    * out this field definition to disk.  It is mated with receive().</p>
    */
@@ -502,6 +504,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     if (isBoolean())
       {
 	out.writeBoolean(labeled);
+
 	if (labeled)
 	  {
 	    out.writeUTF(trueLabel);
@@ -634,8 +637,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   synchronized void receive(DataInput in) throws IOException
   {
-    loading = true;
-
     // we use setName to filter out any fieldname chars that wouldn't
     // be acceptable as an XML entity name character.
 
@@ -946,8 +947,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    storePlaintext = false;
 	  }
       }
-
-    loading = false;
   }
 
   /**
@@ -2602,8 +2601,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * functioning, because those really have no reason to be edited at
    * all.. even the field names needn't be edited by anyone, since
    * they aren't shown in the client.</p>
-   *
-   * @see arlut.csd.ganymede.rmi.BaseField 
    */
 
   public boolean isEditable()
@@ -2644,6 +2641,16 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   public boolean isVisible()
   {
     return visibility;
+  }
+
+  public void setVisibility(boolean visibility)
+  {
+    if (!isLoading() && !isEditing())
+      {
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+      }
+
+    this.visibility = visibility;
   }
 
   /**
@@ -2732,7 +2739,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	// "Not in a schema editing context."
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
@@ -2740,7 +2747,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     // if we aren't loading, don't allow messing with the global fields
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	// "Schema Editing Error"
 	// "Can''t change the name of a system field."
@@ -2833,11 +2840,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTabName(String s)
   {
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
-
 
     if (s == null || s.equals(""))
       {
@@ -2871,7 +2877,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setComment(String s)
   {
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -2933,7 +2939,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setType(short type)
   {
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -2951,38 +2957,41 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    // don't allow global fields to be messed with
-
-    if (editor != null && !isEditable())
+    if (isEditing())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
-      }
+	// now we need to delineate those fields whose types must not be
+	// changed due to server requirements, even if we don't have an
+	// instance of the field in current use
 
-    // now we need to delineate those fields whose types must not be
-    // changed due to server requirements, even if we don't have an
-    // instance of the field in current use
+	// note that isEditable() checks for one of the universal fields..
+	// isSystemField() checks for non-universal fields in any of the
+	// system mandatory objects that we want to protect
 
-    // note that isEditable() checks for one of the universal fields..
-    // isSystemField() checks for non-universal fields in any of the
-    // system mandatory objects that we want to protect
+	// note that we don't just rule out all type setting on all fields
+	// in these object types, as it is permissible to add fields to
+	// the mandatory types
 
-    // note that we don't just rule out all type setting on all fields
-    // in these object types, as it is permissible to add fields to
-    // the mandatory types
+	// don't allow global fields to be messed with
+	
+	if (!isEditable())
+	  {
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("global.system_field", this.toString()));
+	  }
 
-    if (field_type != -1 && isSystemField())
-      {
-	// "Can''t change the type of a system field: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field_change_attempt", this.toString()));
-      }
+	if (isSystemField())
+	  {
+	    // "Can''t change the type of a system field: {0}"
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("global.system_field_change_attempt", this.toString()));
+	  }
 
-    if (isInUse())
-      {
-	// "Can''t change the type of a field which is in use in the database: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setType.in_use", this.toString()));
+	if (isInUse())
+	  {
+	    // "Can''t change the type of a field which is in use in the database: {0}"
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setType.in_use", this.toString()));
+	  }
       }
 
     if (isInvid())
@@ -3144,7 +3153,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setArray(boolean b)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -3156,27 +3165,30 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
-      }
+	if (!isEditable())
+	  {
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("global.system_field", this.toString()));
+	  }
 
-    // array-ness is way too critical to be edited, even in mildly variable system
-    // fields like username in the user object
+	// array-ness is way too critical to be edited, even in mildly variable system
+	// fields like username in the user object
 
-    if (isSystemField())
-      {
-	// "Can''t change the vector status of a system field: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setArray.any_system_field", this.toString()));
-      }
+	if (isSystemField())
+	  {
+	    // "Can''t change the vector status of a system field: {0}"
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setArray.any_system_field", this.toString()));
+	  }
 
-    if (isInUse())
-      {
-	// "Can''t change the vector status of a field which is in use in the database: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setArray.in_use", this.toString()));
+	if (isInUse())
+	  {
+	    // "Can''t change the vector status of a field which is in use in the database: {0}"
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setArray.in_use", this.toString()));
+	  }
       }
 
     if (b && !(isString() || isInvid() || isIP()))
@@ -3216,7 +3228,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setID(short id)
   {
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -3257,39 +3269,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <p>Returns the type id for this field definition as
-   * a Short, suitable for use in a hash.</p>
-   */
-
-  public Short getKey()
-  {
-    return Short.valueOf(field_code);
-  }
-
-  /**
-   * This method implements the Comparable interface.
-   *
-   * We are comparable in terms of the field id number for this field.
-   *
-   * The o parameter can be a Short, a short (using Java 5
-   * autoboxing), or another DBObjectBaseField.
-   */
-
-  public int compareTo(Object o)
-  {
-    if (o instanceof Number)
-      {
-	return field_code - ((Number) o).shortValue();
-      }
-    else
-      {
-	DBObjectBaseField otherField = (DBObjectBaseField) o;
-
-	return field_code - otherField.field_code;
-      }
-  }
-
-  /**
    * <p>Returns the object definition that this field is defined under.</p>
    */
 
@@ -3300,7 +3279,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   synchronized ReturnVal setBase(DBObjectBase base)
   {
-    if (editor == null)
+    if (!isLoading())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -3338,7 +3317,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMaxArraySize(short limit)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -3355,24 +3334,27 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
-      }
+	if (!isEditable())
+	  {
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("global.system_field", this.toString()));
+	  }
 
-    // array sizes need not be screwed with in the system fields
+	// array sizes need not be screwed with in the system fields
 
-    if (isSystemField())
-      {
-	// "Can''t change the vector limits of a system field: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setMaxArraySize.any_system_field", this.toString()));
+	if (isSystemField())
+	  {
+	    // "Can''t change the vector limits of a system field: {0}"
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setMaxArraySize.any_system_field", this.toString()));
+	  }
       }
 
     this.limit = limit;
 
-    if (isInUse())
+    if (isEditing() && isInUse())
       {
 	return warning1;
       }
@@ -3413,12 +3395,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setLabeled(boolean b)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3465,12 +3447,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTrueLabel(String label)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3519,12 +3501,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setFalseLabel(String label)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3577,7 +3559,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMinLength(short val)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -3594,7 +3576,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3602,7 +3584,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     
     minLength = val;
 
-    if (isInUse())
+    if (isEditing() && isInUse())
       {
 	return warning1;
       }
@@ -3644,7 +3626,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMaxLength(short val)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -3661,7 +3643,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3669,7 +3651,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     
     maxLength = val;
 
-    if (isInUse())
+    if (isEditing() && isInUse())
       {
 	return warning1;
       }
@@ -3711,12 +3693,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setOKChars(String s)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3736,7 +3718,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	okChars = s;
       }
 
-    if (isInUse())
+    if (isEditing() && isInUse())
       {
 	return warning1;
       }
@@ -3779,12 +3761,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setBadChars(String s)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3804,7 +3786,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	badChars = s;
       }
 
-    if (isInUse())
+    if (isEditing() && isInUse())
       {
 	return warning1;
       }
@@ -3846,12 +3828,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMultiLine(boolean b)
   {
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3865,6 +3847,16 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     multiLine = b;
 
     return null;
+  }
+
+  /**
+   * Getter for internal code.  We don't need a matching setter, since
+   * we set the regexp through a regexp string via setRegexpPat().
+   */
+
+  public gnu.regexp.RE getRegexp()
+  {
+    return this.regexp;
   }
 
   /**
@@ -3918,12 +3910,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setRegexpPat(String s)
   {
-    if (editor == null && !loading)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3957,7 +3949,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	regexpPat = s;
 
-	if (isInUse())
+	if (isEditing() && isInUse())
 	  {
 	    return warning1;
 	  }
@@ -3980,12 +3972,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setRegexpDesc(String s)
   {
-    if (editor == null && !loading)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -4060,7 +4052,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setNameSpace(String nameSpaceId)
   {
-    if (editor == null && !loading)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4068,7 +4060,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // if we are not loading, don't allow a built-in universal field
     // to be messed with
 
-    if (editor != null && !isEditable())
+    if (isEditing() && !isEditable())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -4115,7 +4107,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					      ts.l("setNameSpace.need_namespace", this.toString()));
 	  }
 
-	if (!loading)
+	if (isEditing())
 	  {
 	    if (!namespace.isSchemaEditInProgress())
 	      {
@@ -4153,7 +4145,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	      }
 	  }
 
-	if (!loading)
+	if (isEditing())
 	  {
 	    if (oldNamespace != null && oldNamespace != namespace)
 	      {
@@ -4264,6 +4256,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setEditInPlace(boolean b)
   {
+    if (!isLoading() && !isEditing())
+      {
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+      }
+
     if (!isInvid())
       {
 	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
@@ -4275,21 +4272,24 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
 	return null;
       }
-    
-    if (isSystemField())
+
+    if (isEditing())
       {
-	// "Schema Editing Error"
-	// "Can''t change the type of a system field: {0}."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field_change_attempt", this.toString()));
-      }
+	if (isSystemField())
+	  {
+	    // "Schema Editing Error"
+	    // "Can''t change the type of a system field: {0}."
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("global.system_field_change_attempt", this.toString()));
+	  }
     
-    if (isInUse())
-      {
-	// "Schema Editing Error"
-	// "Can''t change the editInPlace status type of an Invid field which is in use in the database: {0}."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setEditInPlace.in_use", this.toString()));
+	if (isInUse())
+	  {
+	    // "Schema Editing Error"
+	    // "Can''t change the editInPlace status type of an Invid field which is in use in the database: {0}."
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setEditInPlace.in_use", this.toString()));
+	  }
       }
     
     editInPlace = b;
@@ -4361,11 +4361,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTargetBase(short val)
   {
-    Base b;
-
-    /* -- */
-
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4382,7 +4378,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isSystemField())
+    if (isEditing() && isSystemField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field_change_attempt", this.toString()));
@@ -4396,7 +4392,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
     
-    b = editor.getBase(val);
+    Base b = editor.getBase(val);
 
     if (b != null)
       {
@@ -4408,7 +4404,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	throw new IllegalArgumentException(ts.l("setTargetBase.bad_target_num", Integer.valueOf(val)));
       }
 
-    if (isInUse())
+    if (isEditing() && isInUse())
       {
 	return warning2;
       }
@@ -4430,11 +4426,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTargetBase(String baseName)
   {
-    Base b;
-
-    /* -- */
-
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4451,7 +4443,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    return null;		// no change, no harm
 	  }
 
-	if (isSystemField())
+	if (isEditing() && isSystemField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -4459,7 +4451,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	allowedTarget = -1;
 
-	if (isInUse())
+	if (isEditing() && isInUse())
 	  {
 	    return warning2;
 	  }
@@ -4469,7 +4461,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	  }
       }
 
-    b = editor.getBase(baseName);
+    Base b = editor.getBase(baseName);
 
     try
       {
@@ -4480,7 +4472,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 		return null;	// no change, no harm
 	      }
 
-	    if (isSystemField())
+	    if (isEditing() && isSystemField())
 	      {
 		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 						  ts.l("global.system_field_change_attempt", this.toString()));
@@ -4501,7 +4493,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	throw new RuntimeException(ex);
       }
 
-    if (isInUse())
+    if (isEditing() && isInUse())
       {
 	return warning2;
       }
@@ -4571,7 +4563,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4592,7 +4584,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;		// no change, no harm
       }
 
-    if (isSystemField())
+    if (isEditing() && isSystemField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field_change_attempt", this.toString()));
@@ -4602,7 +4594,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
 	targetField = val;
 
-	if (isInUse())
+	if (isEditing() && isInUse())
 	  {
 	    return warning2;
 	  }
@@ -4652,7 +4644,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     targetField = val;
 
-    if (isInUse())
+    if (isEditing() && isInUse())
       {
 	return warning2;
       }
@@ -4680,7 +4672,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    if (editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4697,7 +4689,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    return null;		// no change, no harm
 	  }
 
-	if (isSystemField())
+	if (isEditing() && isSystemField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -4705,7 +4697,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
 	targetField = -1;
 
-	if (isInUse())
+	if (isEditing() && isInUse())
 	  {
 	    return warning2;
 	  }
@@ -4755,7 +4747,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// context of the loading system, there should never be a
 	// reason to call setTargetField() on a system field
 
-	if (isSystemField())
+	if (isEditing() && isSystemField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -4768,7 +4760,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	throw new RuntimeException("caught remote: " + ex);
       }
 
-    if (isInUse())
+    if (isEditing() && isInUse())
       {
 	return warning2;
       }
@@ -4807,7 +4799,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setCrypted(boolean b)
   {    
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4852,7 +4844,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setMD5Crypted(boolean b)
   {    
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4897,7 +4889,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setApacheMD5Crypted(boolean b)
   {    
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4943,7 +4935,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setWinHashed(boolean b)
   {    
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -4988,7 +4980,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setSSHAHashed(boolean b)
   {    
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5036,7 +5028,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCrypted(boolean b)
   {    
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5079,7 +5071,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCrypted512(boolean b)
   {    
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5129,7 +5121,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCryptRounds(int n)
   {    
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5187,7 +5179,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setPlainText(boolean b)
   {    
-    if (!base.getStore().loading && editor == null)
+    if (!isLoading() && !isEditing())
       {
 	throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
@@ -5203,6 +5195,40 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   // general convenience methods
+
+  /**
+   * Indicates whether methods on this DBObjectBaseField are being
+   * called in the context of the server being loaded.
+   *
+   * If this method returns false, many of the data setter methods in
+   * this class will only be permitted if this DBObjectBaseField is
+   * connected with a non-null DBSchemaEdit object.
+   *
+   * In general, isLoading() and isEditing() should never be true at
+   * the same time.
+   */
+
+  private boolean isLoading()
+  {
+    return base.getStore().loading;
+  }
+
+  /**
+   * Indicates whether methods on this DBObjectBaseField are being
+   * called in the context of the schema being edited.
+   *
+   * If this method returns false, many of the data setter methods in
+   * this class will only be permitted if the DBStore is in loading
+   * mode.
+   *
+   * In general, isEditing() and isLoading() should never be true at
+   * the same time.
+   */
+
+  private boolean isEditing()
+  {
+    return this.editor != null;
+  }
 
   /**
    * <p>This method checks to see if this DBObjectBaseField corresponds to
@@ -5419,10 +5445,47 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
   }
 
+  // misc object and interface methods
+
   public String toString()
   {
     return base.getName() + ":" + field_name;
   }
+
+  /**
+   * <p>Returns the type id for this field definition as
+   * a Short, suitable for use in a hash.</p>
+   */
+
+  public Short getKey()
+  {
+    return Short.valueOf(field_code);
+  }
+
+  /**
+   * This method implements the Comparable interface.
+   *
+   * We are comparable in terms of the field id number for this field.
+   *
+   * The o parameter can be a Short, a short (using Java 5
+   * autoboxing), or another DBObjectBaseField.
+   */
+
+  public int compareTo(Object o)
+  {
+    if (o instanceof Number)
+      {
+	return field_code - ((Number) o).shortValue();
+      }
+    else
+      {
+	DBObjectBaseField otherField = (DBObjectBaseField) o;
+
+	return field_code - otherField.field_code;
+      }
+  }
+
+  // static warning methods
 
   private static ReturnVal genWarning1()
   {

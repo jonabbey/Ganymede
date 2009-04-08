@@ -1031,7 +1031,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    throw new Error(ts.l("receive.badfieldtype"));
 	  }
 
-	if (!journalProcessing && (definition.namespace != null))
+	if (!journalProcessing && (definition.getNameSpace() != null))
 	  {
 	    if (tmp.isVector())
 	      {
@@ -1042,14 +1042,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 		for (int j = 0; j < tmp.size(); j++)
 		  {
-		    if (definition.namespace.containsKey(tmp.key(j)))
+		    if (definition.getNameSpace().containsKey(tmp.key(j)))
 		      {
 			try
 			  {
 			    // "Non-unique value {0} detected in vector field {1} which is constrained by namespace {2}"
 			    throw new RuntimeException(ts.l("receive.vectornamespace",
 							    GHashtable.keyString(tmp.key(j)),
-							    definition, definition.namespace));
+							    definition, definition.getNameSpace()));
 			  }
 			catch (RuntimeException ex)
 			  {
@@ -1057,21 +1057,21 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 			  }
 		      } 
 
-		    definition.namespace.receiveValue(tmp.key(j), tmp);
+		    definition.getNameSpace().receiveValue(tmp.key(j), tmp);
 		  }
 	      }
 	    else
 	      {
 		// mark the scalar value in the namespace
 		
-		if (definition.namespace.containsKey(tmp.key()))
+		if (definition.getNameSpace().containsKey(tmp.key()))
 		  {
 		    // "Non-unique value {0} detected in scalar field {1} which is constrained by namespace {2}"
 		    try
 		      {
 			throw new RuntimeException(ts.l("receive.scalarnamespace",
 							GHashtable.keyString(tmp.key()),
-							definition, definition.namespace));
+							definition, definition.getNameSpace()));
 		      }
 		    catch (RuntimeException ex)
 		      {
@@ -1079,7 +1079,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		      }
 		  }
 
-		definition.namespace.receiveValue(tmp.key(), tmp);
+		definition.getNameSpace().receiveValue(tmp.key(), tmp);
 	      }
 	  }
 	

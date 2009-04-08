@@ -1089,7 +1089,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     // by default, return the field definition's visibility
 
-    if (field.getFieldDef().base != this.objectBase)
+    if (field.getFieldDef().base() != this.objectBase)
       {
 	// "field/object mismatch"
 	throw new IllegalArgumentException(ts.l("canSeeField.mismatch"));

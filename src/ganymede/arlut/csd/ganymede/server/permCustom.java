@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2004
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -173,7 +173,7 @@ public class permCustom extends DBEditObject implements SchemaConstants {
     // since the default permission object is always delegatable, we
     // won't show the checkbox in this case.
 
-    if (field.getFieldDef().base != this.objectBase)
+    if (field.getFieldDef().base() != this.objectBase)
       {
 	throw new IllegalArgumentException("field/object mismatch");
       }

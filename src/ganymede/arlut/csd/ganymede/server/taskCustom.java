@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -309,7 +309,7 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
 
   public boolean canSeeField(DBSession session, DBField field)
   {
-    if (field.getFieldDef().base != this.objectBase)
+    if (field.getFieldDef().base() != this.objectBase)
       {
 	throw new IllegalArgumentException("field/object mismatch");
       }

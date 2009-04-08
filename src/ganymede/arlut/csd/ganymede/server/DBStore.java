@@ -1614,49 +1614,47 @@ public final class DBStore implements JythonMap {
 	permCategory.addNodeAfter(b, null);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.OwnerNameField;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Name";
-	bf.loading = true;
+	bf.setID(SchemaConstants.OwnerNameField);
+	bf.setType(FieldType.STRING);
+	bf.setName("Name");
 	bf.setNameSpace("ownerbase");
-	bf.loading = false;
-	bf.comment = "The name of this ownership group";
+	bf.setComment("The name of this ownership group");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.OwnerMembersField;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Members";
-	bf.array = true;
-	bf.allowedTarget = SchemaConstants.PersonaBase;
-	bf.targetField = SchemaConstants.PersonaGroupsField;
-	bf.comment = "List of admin personae that are members of this owner set";
+	bf.setID(SchemaConstants.OwnerMembersField);
+	bf.setType(FieldType.INVID);
+	bf.setName("Members");
+	bf.setArray(true);
+	bf.setTargetBase(SchemaConstants.PersonaBase);
+	bf.setTargetField(SchemaConstants.PersonaGroupsField);
+	bf.setComment("List of admin personae that are members of this owner set");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.OwnerCcAdmins;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Cc All Admins";
-	bf.comment = "If checked, mail to this owner group will be sent to the admins";
+	bf.setID(SchemaConstants.OwnerCcAdmins);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Cc All Admins");
+	bf.setComment("If checked, mail to this owner group will be sent to the admins");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.OwnerExternalMail;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "External Mail List";
-	bf.array = true;
-	bf.comment = "What external email addresses should be notified of changes to objects owned?";
+	bf.setID(SchemaConstants.OwnerExternalMail);
+	bf.setType(FieldType.STRING);
+	bf.setName("External Mail List");
+	bf.setArray(true);
+	bf.setComment("What external email addresses should be notified of changes to objects owned?");
 	b.addFieldToEnd(bf);
 
 	/*  XXX As of DBStore 2.7, we don't use this field any more
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.OwnerObjectsOwned;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Objects owned";
-	bf.allowedTarget = -2;	// any
-	bf.targetField = SchemaConstants.OwnerListField;	// owner list field
-	bf.array = true;
-	bf.comment = "What objects are owned by this owner set";
+	bf.setID(SchemaConstants.OwnerObjectsOwned);
+	bf.setType(FieldType.INVID);
+	bf.setName("Objects owned");
+	bf.setTargetBase(-2);	// any
+	bf.setTargetField(SchemaConstants.OwnerListField);
+	bf.setArray(true);
+	bf.setComment("What objects are owned by this owner set");
 	b.addFieldToEnd(bf);
 	*/
 
@@ -1680,83 +1678,83 @@ public final class DBStore implements JythonMap {
 	permCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PersonaNameField;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Name";
-	bf.comment = "Descriptive label for this admin persona";
+	bf.setID(SchemaConstants.PersonaNameField);
+	bf.setType(FieldType.STRING);
+	bf.setName("Name");
+	bf.setComment("Descriptive label for this admin persona");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PersonaPasswordField;
-	bf.field_type = FieldType.PASSWORD;
-	bf.field_name = "Password";
-	bf.maxLength = 32;
-	bf.crypted = true;
-	bf.comment = "Persona password";
+	bf.setID(SchemaConstants.PersonaPasswordField);
+	bf.setType(FieldType.PASSWORD);
+	bf.setName("Password");
+	bf.setMaxLength((short)32);
+	bf.setCrypted(false);
+	bf.setShaUnixCrypted(true);
+	bf.setShaUnixCrypted512(true);
+	bf.setComment("Persona password");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PersonaGroupsField;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Owner Sets";
-	bf.allowedTarget = SchemaConstants.OwnerBase;	// any
-	bf.targetField = SchemaConstants.OwnerMembersField;	// owner list field
-	bf.array = true;
-	bf.comment = "What owner sets are this persona members of?";
+	bf.setID(SchemaConstants.PersonaGroupsField);
+	bf.setType(FieldType.INVID);
+	bf.setName("Owner Sets");
+	bf.setTargetBase(SchemaConstants.OwnerBase);
+	bf.setTargetField(SchemaConstants.OwnerMembersField);
+	bf.setArray(true);
+	bf.setComment("What owner sets are this persona members of?");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PersonaAssocUser;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "User";
-	bf.allowedTarget = SchemaConstants.UserBase;	// any
-	bf.targetField = SchemaConstants.UserAdminPersonae;	// owner list field
-	bf.array = false;
-	bf.comment = "What user is this admin persona associated with?";
+	bf.setID(SchemaConstants.PersonaAssocUser);
+	bf.setType(FieldType.INVID);
+	bf.setName("User");
+	bf.setTargetBase(SchemaConstants.UserBase);
+	bf.setTargetField(SchemaConstants.UserAdminPersonae);
+	bf.setArray(false);
+	bf.setComment("What user is this admin persona associated with?");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PersonaPrivs;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Privilege Sets";
-	bf.allowedTarget = SchemaConstants.RoleBase;
-	bf.targetField = SchemaConstants.RolePersonae;
-	bf.array = true;
-	bf.comment = "What permission matrices are this admin persona associated with?";
+	bf.setID(SchemaConstants.PersonaPrivs);
+	bf.setType(FieldType.INVID);
+	bf.setName("Privilege Sets");
+	bf.setTargetBase(SchemaConstants.RoleBase);
+	bf.setTargetField(SchemaConstants.RolePersonae);
+	bf.setArray(true);
+	bf.setComment("What permission matrices are this admin persona associated with?");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PersonaAdminConsole;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Admin Console";
-	bf.array = false;
-	bf.comment = "If true, this persona can be used to access the admin console";
+	bf.setID(SchemaConstants.PersonaAdminConsole);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Admin Console");
+	bf.setArray(false);
+	bf.setComment("If true, this persona can be used to access the admin console");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PersonaAdminPower;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Full Console";
-	bf.array = false;
-	bf.comment = "If true, this persona can kill users and edit the schema";
+	bf.setID(SchemaConstants.PersonaAdminPower);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Full Console");
+	bf.setArray(false);
+	bf.setComment("If true, this persona can kill users and edit the schema");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PersonaMailAddr;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Email Address";
-	bf.array = false;
-	bf.comment = "Where email to this administrator should be sent";
+	bf.setID(SchemaConstants.PersonaMailAddr);
+	bf.setType(FieldType.STRING);
+	bf.setName("Email Address");
+	bf.setArray(false);
+	bf.setComment("Where email to this administrator should be sent");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.PersonaLabelField;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Label";
-	bf.array = false;
-	bf.loading = true;
+	bf.setID(SchemaConstants.PersonaLabelField);
+	bf.setType(FieldType.STRING);
+	bf.setName("Label");
+	bf.setArray(false);
 	bf.setNameSpace("persona");
-	bf.loading = false;
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.PersonaLabelField);
@@ -1779,44 +1777,42 @@ public final class DBStore implements JythonMap {
 	permCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.RoleName;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Name";
-	bf.loading = true;
+	bf.setID(SchemaConstants.RoleName);
+	bf.setType(FieldType.STRING);
+	bf.setName("Name");
 	bf.setNameSpace("rolespace");
-	bf.loading = false;
-	bf.comment = "The name of this permission matrix";
+	bf.setComment("The name of this permission matrix");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.RoleDelegatable;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Delegatable Role";
-	bf.comment = "If true, this role can be granted to admins created/edited by Personae with this role.";
+	bf.setID(SchemaConstants.RoleDelegatable);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Delegatable Role");
+	bf.setComment("If true, this role can be granted to admins created/edited by Personae with this role.");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.RoleMatrix;
-	bf.field_type = FieldType.PERMISSIONMATRIX;
-	bf.field_name = "Objects Owned Access Bits";
-	bf.comment = "Access bits, by object type for objects owned by admins using this permission object";
+	bf.setID(SchemaConstants.RoleMatrix);
+	bf.setType(FieldType.PERMISSIONMATRIX);
+	bf.setName("Objects Owned Access Bits");
+	bf.setComment("Access bits, by object type for objects owned by admins using this permission object");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.RoleDefaultMatrix;
-	bf.field_type = FieldType.PERMISSIONMATRIX;
-	bf.field_name = "Default Access Bits";
-	bf.comment = "Access bits, by object type for all objects on the part of admins using this permission object";
+	bf.setID(SchemaConstants.RoleDefaultMatrix);
+	bf.setType(FieldType.PERMISSIONMATRIX);
+	bf.setName("Default Access Bits");
+	bf.setComment("Access bits, by object type for all objects on the part of admins using this permission object");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.RolePersonae;
-	bf.field_type = FieldType.INVID;
-	bf.field_name = "Persona entities";
-	bf.allowedTarget = SchemaConstants.PersonaBase;
-	bf.targetField = SchemaConstants.PersonaPrivs;
-	bf.array = true;
-	bf.comment = "What personae are using this permission matrix?";
+	bf.setID(SchemaConstants.RolePersonae);
+	bf.setType(FieldType.INVID);
+	bf.setName("Persona entities");
+	bf.setTargetBase(SchemaConstants.PersonaBase);
+	bf.setTargetField(SchemaConstants.PersonaPrivs);
+	bf.setArray(true);
+	bf.setComment("What personae are using this permission matrix?");
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.RoleName);
@@ -1842,59 +1838,57 @@ public final class DBStore implements JythonMap {
 	eventCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.EventToken;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Event Token";
-	bf.badChars = " :";
-	bf.loading = true;
+	bf.setID(SchemaConstants.EventToken);
+	bf.setType(FieldType.STRING);
+	bf.setName("Event Token");
+	bf.setBadChars(" :");
 	bf.setNameSpace("eventtoken");
-	bf.loading = false;
-	bf.comment = "Single-word token to identify this event type in Ganymede source code";
+	bf.setComment("Single-word token to identify this event type in Ganymede source code");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.EventName;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Event Name";
-	bf.badChars = ":";
-	bf.comment = "Short name for this event class, suitable for an email message title";
+	bf.setID(SchemaConstants.EventName);
+	bf.setType(FieldType.STRING);
+	bf.setName("Event Name");
+	bf.setBadChars(":");
+	bf.setComment("Short name for this event class, suitable for an email message title");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.EventDescription;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Event Description";
-	bf.badChars = ":";
-	bf.comment = "Fuller description for this event class, suitable for an email message body";
+	bf.setID(SchemaConstants.EventDescription);
+	bf.setType(FieldType.STRING);
+	bf.setName("Event Description");
+	bf.setBadChars(":");
+	bf.setComment("Fuller description for this event class, suitable for an email message body");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.EventMailBoolean;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Send Mail";
-	bf.comment = "If true, occurrences of this event will be emailed";
+	bf.setID(SchemaConstants.EventMailBoolean);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Send Mail");
+	bf.setComment("If true, occurrences of this event will be emailed");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.EventMailToSelf;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Cc Admin";
-	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
+	bf.setID(SchemaConstants.EventMailToSelf);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Cc Admin");
+	bf.setComment("If true, mail for this event will always be cc'ed to the admin performing the action");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.EventMailOwners;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Cc Owners";
-	bf.comment = "If true, mail for this event will always be cc'ed to administrators in the owner group";
+	bf.setID(SchemaConstants.EventMailOwners);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Cc Owners");
+	bf.setComment("If true, mail for this event will always be cc'ed to administrators in the owner group");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.EventExternalMail;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Mail List";
-	bf.array = true;
-	bf.comment = "List of email addresses to send this event to";
+	bf.setID(SchemaConstants.EventExternalMail);
+	bf.setType(FieldType.STRING);
+	bf.setName("Mail List");
+	bf.setArray(true);
+	bf.setComment("List of email addresses to send this event to");
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.EventToken);
@@ -1917,75 +1911,73 @@ public final class DBStore implements JythonMap {
 	eventCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventLabel;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Hidden Label";
-	bf.loading = true;
+	bf.setID(SchemaConstants.ObjectEventLabel);
+	bf.setType(FieldType.STRING);
+	bf.setName("Hidden Label");
 	bf.setNameSpace("eventtoken");
-	bf.loading = false;
-	bf.visibility = false;	// hidden
-	bf.comment = "Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.";
+	bf.setVisibility(false);	// hidden
+	bf.setComment("Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventToken;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Event Token";
-	bf.badChars = " :";
-	bf.comment = "Single-word token to identify this event type in Ganymede source code";
+	bf.setID(SchemaConstants.ObjectEventToken);
+	bf.setType(FieldType.STRING);
+	bf.setName("Event Token");
+	bf.setBadChars(" :");
+	bf.setComment("Single-word token to identify this event type in Ganymede source code");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventObjectName;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Object Type Name";
-	bf.comment = "The name of the object that this event is tracking";
+	bf.setID(SchemaConstants.ObjectEventObjectName);
+	bf.setType(FieldType.STRING);
+	bf.setName("Object Type Name");
+	bf.setComment("The name of the object that this event is tracking");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventName;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Event Name";
-	bf.badChars = ":";
-	bf.comment = "Short name for this event class, suitable for an email message title";
+	bf.setID(SchemaConstants.ObjectEventName);
+	bf.setType(FieldType.STRING);
+	bf.setName("Event Name");
+	bf.setBadChars(":");
+	bf.setComment("Short name for this event class, suitable for an email message title");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventDescription;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Event Description";
-	bf.badChars = ":";
-	bf.comment = "Fuller description for this event class, suitable for an email message body";
+	bf.setID(SchemaConstants.ObjectEventDescription);
+	bf.setType(FieldType.STRING);
+	bf.setName("Event Description");
+	bf.setBadChars(":");
+	bf.setComment("Fuller description for this event class, suitable for an email message body");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventMailToSelf;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Cc Admin";
-	bf.comment = "If true, mail for this event will always be cc'ed to the admin performing the action";
+	bf.setID(SchemaConstants.ObjectEventMailToSelf);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Cc Admin");
+	bf.setComment("If true, mail for this event will always be cc'ed to the admin performing the action");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventMailOwners;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Cc Owner Groups";
-	bf.comment = "If true, mail for this event will always be cc'ed to the owner groups owning the object";
+	bf.setID(SchemaConstants.ObjectEventMailOwners);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Cc Owner Groups");
+	bf.setComment("If true, mail for this event will always be cc'ed to the owner groups owning the object");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventExternalMail;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "External Email";
-	bf.array = true;
-	bf.comment = "Email addresses not stored in Ganymede";
+	bf.setID(SchemaConstants.ObjectEventExternalMail);
+	bf.setType(FieldType.STRING);
+	bf.setName("External Email");
+	bf.setArray(true);
+	bf.setComment("Email addresses not stored in Ganymede");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.ObjectEventObjectType;
-	bf.field_type = FieldType.NUMERIC;
-	bf.field_name = "Object Type ID";
-	bf.visibility = false;	// we don't want this to be seen by the client
-	bf.comment = "The type code of the object that this event is tracking";
+	bf.setID(SchemaConstants.ObjectEventObjectType);
+	bf.setType(FieldType.NUMERIC);
+	bf.setName("Object Type ID");
+	bf.setVisibility(false);	// we don't want this to be seen by the client
+	bf.setComment("The type code of the object that this event is tracking");
 	b.addFieldToEnd(bf);
 
 	// set the label field
@@ -2012,36 +2004,33 @@ public final class DBStore implements JythonMap {
 	userCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.UserUserName;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Username";
-	bf.minLength = 2;
-	bf.maxLength = 8;
-	bf.badChars = " :=><|+[]\\/*;:.,?\""; // See p.252, teach yourself WinNT Server 4 in 14 days
-	bf.loading = true;
+	bf.setID(SchemaConstants.UserUserName);
+	bf.setType(FieldType.STRING);
+	bf.setName("Username");
+	bf.setMinLength((short)2);
+	bf.setMaxLength((short)8);
+	bf.setBadChars(" :=><|+[]\\/*;:.,?\""); // See p.252, teach yourself WinNT Server 4 in 14 days
 	bf.setNameSpace("username");
-	bf.loading = false;
-	bf.comment = "User name for an individual privileged to log into Ganymede and/or the network";
+	bf.setComment("User name for an individual privileged to log into Ganymede and/or the network");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.UserPassword;
-	bf.field_type = FieldType.PASSWORD;
-	bf.field_name = "Password";
-	bf.maxLength = 32;
-	bf.crypted = true;
-	bf.isCrypted();
-	bf.comment = "Password for an individual privileged to log into Ganymede and/or the network";
+	bf.setID(SchemaConstants.UserPassword);
+	bf.setType(FieldType.PASSWORD);
+	bf.setName("Password");
+	bf.setMaxLength((short)32);
+	bf.setCrypted(true);
+	bf.setComment("Password for an individual privileged to log into Ganymede and/or the network");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.UserAdminPersonae;
-	bf.field_type = FieldType.INVID;
-	bf.allowedTarget = SchemaConstants.PersonaBase;
-	bf.targetField = SchemaConstants.PersonaAssocUser;
-	bf.field_name = "Admin Personae";
-	bf.array = true;
-	bf.comment = "A list of admin personae this user can assume";
+	bf.setID(SchemaConstants.UserAdminPersonae);
+	bf.setType(FieldType.INVID);
+	bf.setTargetBase(SchemaConstants.PersonaBase);
+	bf.setTargetField(SchemaConstants.PersonaAssocUser);
+	bf.setName("Admin Personae");
+	bf.setArray(true);
+	bf.setComment("A list of admin personae this user can assume");
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.UserUserName);
@@ -2058,64 +2047,62 @@ public final class DBStore implements JythonMap {
 	adminCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.TaskName;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Task Name";
-	bf.loading = true;
+	bf.setID(SchemaConstants.TaskName);
+	bf.setType(FieldType.STRING);
+	bf.setName("Task Name");
 	bf.setNameSpace("buildertask");
-	bf.loading = false;
-	bf.comment = "Name of this task, as shown in task monitor";
+	bf.setComment("Name of this task, as shown in task monitor");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.TaskClass;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Task Class";
-	bf.badChars = "/:";
-	bf.comment = "Name of the plug-in class to load on server restart to handle this task";
+	bf.setID(SchemaConstants.TaskClass);
+	bf.setType(FieldType.STRING);
+	bf.setName("Task Class");
+	bf.setBadChars("/:");
+	bf.setComment("Name of the plug-in class to load on server restart to handle this task");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.TaskRunOnCommit;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Run On Transaction Commit";
-	bf.comment = "If true, this task will be run on transaction commit";
+	bf.setID(SchemaConstants.TaskRunOnCommit);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Run On Transaction Commit");
+	bf.setComment("If true, this task will be run on transaction commit");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.TaskRunPeriodically;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Run Periodically";
-	bf.comment = "If true, this task will be scheduled for periodic execution";
+	bf.setID(SchemaConstants.TaskRunPeriodically);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Run Periodically");
+	bf.setComment("If true, this task will be scheduled for periodic execution");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.TaskPeriodUnit;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Period Unit";
-	bf.comment = "What is the unit of time we're using?";
+	bf.setID(SchemaConstants.TaskPeriodUnit);
+	bf.setType(FieldType.STRING);
+	bf.setName("Period Unit");
+	bf.setComment("What is the unit of time we're using?");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.TaskPeriodCount;
-	bf.field_type = FieldType.NUMERIC;
-	bf.field_name = "Period Count";
-	bf.comment = "How many time units between task runs?";
+	bf.setID(SchemaConstants.TaskPeriodCount);
+	bf.setType(FieldType.NUMERIC);
+	bf.setName("Period Count");
+	bf.setComment("How many time units between task runs?");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.TaskPeriodAnchor;
-	bf.field_type = FieldType.DATE;
-	bf.field_name = "Period Anchor";
-	bf.comment = "When do we start counting period intervals from?";
+	bf.setID(SchemaConstants.TaskPeriodAnchor);
+	bf.setType(FieldType.DATE);
+	bf.setName("Period Anchor");
+	bf.setComment("When do we start counting period intervals from?");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.TaskOptionStrings;
-	bf.field_type = FieldType.STRING;
-	bf.array = true;
-	bf.field_name = "Option Strings";
-	bf.comment = "Optional task parameters, interpreted by specific tasks if needed";
+	bf.setID(SchemaConstants.TaskOptionStrings);
+	bf.setType(FieldType.STRING);
+	bf.setArray(true);
+	bf.setName("Option Strings");
+	bf.setComment("Optional task parameters, interpreted by specific tasks if needed");
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.TaskName);
@@ -2138,59 +2125,57 @@ public final class DBStore implements JythonMap {
 	adminCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.SyncChannelName;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Name";
-	bf.loading = true;
+	bf.setID(SchemaConstants.SyncChannelName);
+	bf.setType(FieldType.STRING);
+	bf.setName("Name");
 	bf.setNameSpace("buildertask");	// same namespace as tasks
-	bf.loading = false;
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.SyncChannelTypeString;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Sync Channel Type";
+	bf.setID(SchemaConstants.SyncChannelTypeString);
+	bf.setType(FieldType.STRING);
+	bf.setName("Sync Channel Type");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.SyncChannelDirectory;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Queue Directory";
-	bf.comment = "Location of the sync channel directory on disk";
+	bf.setID(SchemaConstants.SyncChannelDirectory);
+	bf.setType(FieldType.STRING);
+	bf.setName("Queue Directory");
+	bf.setComment("Location of the sync channel directory on disk");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.SyncChannelFullStateFile;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Full State File";
-	bf.comment = "Path to the file to use for full-state XML dumps";
+	bf.setID(SchemaConstants.SyncChannelFullStateFile);
+	bf.setType(FieldType.STRING);
+	bf.setName("Full State File");
+	bf.setComment("Path to the file to use for full-state XML dumps");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.SyncChannelServicer;
-	bf.field_type = FieldType.STRING;
-	bf.field_name = "Service Program";
-	bf.comment = "The location of the program to service this sync channel";
+	bf.setID(SchemaConstants.SyncChannelServicer);
+	bf.setType(FieldType.STRING);
+	bf.setName("Service Program");
+	bf.setComment("The location of the program to service this sync channel");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.SyncChannelFields;
-	bf.field_type = FieldType.FIELDOPTIONS;
-	bf.field_name = "Sync Data";
-	bf.comment = "The definitions for what object and fields we want to include in this sync channel";
+	bf.setID(SchemaConstants.SyncChannelFields);
+	bf.setType(FieldType.FIELDOPTIONS);
+	bf.setName("Sync Data");
+	bf.setComment("The definitions for what object and fields we want to include in this sync channel");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.SyncChannelPlaintextOK;
-	bf.field_type = FieldType.BOOLEAN;
-	bf.field_name = "Allow Plaintext Passwords";
-	bf.comment = "Allow Plaintext Passwords to be written to this Sync Channel";
+	bf.setID(SchemaConstants.SyncChannelPlaintextOK);
+	bf.setType(FieldType.BOOLEAN);
+	bf.setName("Allow Plaintext Passwords");
+	bf.setComment("Allow Plaintext Passwords to be written to this Sync Channel");
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
-	bf.field_code = SchemaConstants.SyncChannelTypeNum;
-	bf.field_type = FieldType.NUMERIC;
-	bf.field_name = "Channel Type Index";
+	bf.setID(SchemaConstants.SyncChannelTypeNum);
+	bf.setType(FieldType.NUMERIC);
+	bf.setName("Channel Type Index");
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.SyncChannelName);
@@ -2254,59 +2239,57 @@ public final class DBStore implements JythonMap {
 	    adminCategory.addNodeAfter(b, null); // add it to the end is ok
 
 	    bf = new DBObjectBaseField(b);
-	    bf.field_code = SchemaConstants.SyncChannelName;
-	    bf.field_type = FieldType.STRING;
-	    bf.field_name = "Name";
-	    bf.loading = true;
+	    bf.setID(SchemaConstants.SyncChannelName);
+	    bf.setType(FieldType.STRING);
+	    bf.setName("Name");
 	    bf.setNameSpace("buildertask");	// same namespace as tasks
-	    bf.loading = false;
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
-	    bf.field_code = SchemaConstants.SyncChannelTypeString;
-	    bf.field_type = FieldType.STRING;
-	    bf.field_name = "Sync Channel Type";
+	    bf.setID(SchemaConstants.SyncChannelTypeString);
+	    bf.setType(FieldType.STRING);
+	    bf.setName("Sync Channel Type");
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
-	    bf.field_code = SchemaConstants.SyncChannelDirectory;
-	    bf.field_type = FieldType.STRING;
-	    bf.field_name = "Queue Directory";
-	    bf.comment = "Location of the sync channel directory on disk";
+	    bf.setID(SchemaConstants.SyncChannelDirectory);
+	    bf.setType(FieldType.STRING);
+	    bf.setName("Queue Directory");
+	    bf.setComment("Location of the sync channel directory on disk");
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
-	    bf.field_code = SchemaConstants.SyncChannelFullStateFile;
-	    bf.field_type = FieldType.STRING;
-	    bf.field_name = "Full State File";
-	    bf.comment = "Path to the file to use for full-state XML dumps";
+	    bf.setID(SchemaConstants.SyncChannelFullStateFile);
+	    bf.setType(FieldType.STRING);
+	    bf.setName("Full State File");
+	    bf.setComment("Path to the file to use for full-state XML dumps");
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
-	    bf.field_code = SchemaConstants.SyncChannelServicer;
-	    bf.field_type = FieldType.STRING;
-	    bf.field_name = "Service Program";
-	    bf.comment = "The location of the program to service this sync channel";
+	    bf.setID(SchemaConstants.SyncChannelServicer);
+	    bf.setType(FieldType.STRING);
+	    bf.setName("Service Program");
+	    bf.setComment("The location of the program to service this sync channel");
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
-	    bf.field_code = SchemaConstants.SyncChannelFields;
-	    bf.field_type = FieldType.FIELDOPTIONS;
-	    bf.field_name = "Sync Data";
-	    bf.comment = "The definitions for what object and fields we want to include in this sync channel";
+	    bf.setID(SchemaConstants.SyncChannelFields);
+	    bf.setType(FieldType.FIELDOPTIONS);
+	    bf.setName("Sync Data");
+	    bf.setComment("The definitions for what object and fields we want to include in this sync channel");
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
-	    bf.field_code = SchemaConstants.SyncChannelPlaintextOK;
-	    bf.field_type = FieldType.BOOLEAN;
-	    bf.field_name = "Allow Plaintext Passwords";
-	    bf.comment = "Allow Plaintext Passwords to be written to this Sync Channel";
+	    bf.setID(SchemaConstants.SyncChannelPlaintextOK);
+	    bf.setType(FieldType.BOOLEAN);
+	    bf.setName("Allow Plaintext Passwords");
+	    bf.setComment("Allow Plaintext Passwords to be written to this Sync Channel");
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
-	    bf.field_code = SchemaConstants.SyncChannelTypeNum;
-	    bf.field_type = FieldType.NUMERIC;
-	    bf.field_name = "Channel Type Index";
+	    bf.setID(SchemaConstants.SyncChannelTypeNum);
+	    bf.setType(FieldType.NUMERIC);
+	    bf.setName("Channel Type Index");
 	    b.addFieldToEnd(bf);
 
 	    b.setLabelField(SchemaConstants.SyncChannelName);
@@ -2331,28 +2314,28 @@ public final class DBStore implements JythonMap {
 	    if (syncBase.getField(SchemaConstants.SyncChannelTypeString) == null)
 	      {
 		bf = new DBObjectBaseField(syncBase);
-		bf.field_code = SchemaConstants.SyncChannelTypeString;
-		bf.field_type = FieldType.STRING;
-		bf.field_name = "Sync Channel Type";
+		bf.setID(SchemaConstants.SyncChannelTypeString);
+		bf.setType(FieldType.STRING);
+		bf.setName("Sync Channel Type");
 		syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelName);
 	      }
 
 	    if (syncBase.getField(SchemaConstants.SyncChannelFullStateFile) == null)
 	      {
 		bf = new DBObjectBaseField(syncBase);
-		bf.field_code = SchemaConstants.SyncChannelFullStateFile;
-		bf.field_type = FieldType.STRING;
-		bf.field_name = "Full State File";
-		bf.comment = "Path to the file to use for full-state XML dumps";
+		bf.setID(SchemaConstants.SyncChannelFullStateFile);
+		bf.setType(FieldType.STRING);
+		bf.setName("Full State File");
+		bf.setComment("Path to the file to use for full-state XML dumps");
 		syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelDirectory);
 	      }
 
 	    if (syncBase.getField(SchemaConstants.SyncChannelTypeNum) == null)
 	      {
 		bf = new DBObjectBaseField(syncBase);
-		bf.field_code = SchemaConstants.SyncChannelTypeNum;
-		bf.field_type = FieldType.NUMERIC;
-		bf.field_name = "Channel Type Index";
+		bf.setID(SchemaConstants.SyncChannelTypeNum);
+		bf.setType(FieldType.NUMERIC);
+		bf.setName("Channel Type Index");
 		syncBase.addFieldToEnd(bf);
 	      }
 	  }
@@ -2366,11 +2349,11 @@ public final class DBStore implements JythonMap {
 	    Ganymede.debug("Adding TaskOptionStrings to task base");
 
 	    bf = new DBObjectBaseField(taskBase);
-	    bf.field_code = SchemaConstants.TaskOptionStrings;
-	    bf.field_type = FieldType.STRING;
-	    bf.array = true;
-	    bf.field_name = "Option Strings";
-	    bf.comment = "Optional task parameters, interpreted by specific tasks if needed";
+	    bf.setID(SchemaConstants.TaskOptionStrings);
+	    bf.setType(FieldType.STRING);
+	    bf.setArray(true);
+	    bf.setName("Option Strings");
+	    bf.setComment("Optional task parameters, interpreted by specific tasks if needed");
 	    taskBase.addFieldToEnd(bf);
 	  }
 
@@ -2383,14 +2366,12 @@ public final class DBStore implements JythonMap {
 	    Ganymede.debug("Adding ObjectEventLabel to ObjectEvent base");
 
 	    bf = new DBObjectBaseField(objectEventBase);
-	    bf.field_code = SchemaConstants.ObjectEventLabel;
-	    bf.field_name = "Hidden Label";
-	    bf.field_type = FieldType.STRING;
-	    bf.loading = true;
+	    bf.setID(SchemaConstants.ObjectEventLabel);
+	    bf.setName("Hidden Label");
+	    bf.setType(FieldType.STRING);
 	    bf.setNameSpace("eventtoken");
-	    bf.loading = false;
-	    bf.visibility = false;	// hidden
-	    bf.comment = "Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.";
+	    bf.setVisibility(false);	// hidden
+	    bf.setComment("Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.");
 	    objectEventBase.addFieldToStart(bf);
 	  }
 
@@ -2406,9 +2387,7 @@ public final class DBStore implements JythonMap {
 	  {
 	    Ganymede.debug("Applying namespace constraint to task name");
 
-	    bf.loading = true;
 	    bf.setNameSpace("buildertask");
-	    bf.loading = false;
 	  }
       }
     catch (RemoteException ex)

@@ -625,7 +625,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	for (DBObjectBaseField fieldDef: original.customFields)
 	  {
 	    DBObjectBaseField bf = new DBObjectBaseField(fieldDef, editor);
-	    bf.base = this;
+	    bf.setBase(this);
 
 	    addFieldToEnd(bf);
 	  }
@@ -1000,9 +1000,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 			    SchemaConstants.ContainerField,
 			    FieldType.INVID);
 
-	bf.allowedTarget = -1;	// we can point at anything, but there'll be a special
-	bf.targetField = -1;	// procedure for handling deletion and what not..
-	bf.visibility = false;	// we don't want the client to show the owner link
+	bf.setTargetBase((short) -1);	// we can point at anything, but there'll be a special
+	bf.setTargetField((short) -1);	// procedure for handling deletion and what not..
+	bf.setVisibility(false); // we don't want the client to show the owner link
 
 	// note that we won't have an expiration date or removal date
 	// for an embedded object
@@ -1015,9 +1015,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 			    SchemaConstants.OwnerListField,
 			    FieldType.INVID);
 
-	bf.allowedTarget = SchemaConstants.OwnerBase;
-	bf.targetField = -1;
-	bf.array = true;
+	bf.setTargetBase(SchemaConstants.OwnerBase);
+	bf.setTargetField((short) -1);
+	bf.setArray(true);
 
 	addSystemField("Expiration Date",
 		       SchemaConstants.ExpirationField,
@@ -3353,8 +3353,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	while (en.hasMoreElements())
 	  {
 	    fieldDef = (DBObjectBaseField) en.nextElement();
-	    fieldDef.editor = null;
-	    fieldDef.template = new FieldTemplate(fieldDef);
+	    fieldDef.clearEditor();
 	  }
       }
 
@@ -3806,7 +3805,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	  {
 	    DBObjectBaseField myDef = customFields.get(i);
 
-	    if (myDef.field_code == previousField)
+	    if (myDef.getID() == previousField)
 	      {
 		customFields.add(i+1, field);
 
@@ -3860,9 +3859,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // we use direct assignment for these fields to avoid schema
     // editing checks
 
-    bf.field_name = name;
-    bf.field_code = id;
-    bf.field_type = type;
+    bf.setName(name);
+    bf.setID(id);
+    bf.setType(type);
 
     addSystemField(bf);
 

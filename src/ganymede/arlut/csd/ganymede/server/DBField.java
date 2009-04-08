@@ -768,7 +768,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   public final FieldTemplate getFieldTemplate()
   {
-    return getFieldDef().template;
+    return getFieldDef().getTemplate();
   }
 
   /**
@@ -1119,7 +1119,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   public final boolean isVisible()
   {
     return verifyReadPermission() && 
-      getFieldDef().base.getObjectHook().canSeeField(null, this);
+      getFieldDef().base().getObjectHook().canSeeField(null, this);
   }
 
   /**
