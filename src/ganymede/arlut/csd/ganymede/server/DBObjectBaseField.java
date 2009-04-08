@@ -4329,18 +4329,21 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	allowedTarget = val;
 	return null;
       }
-    
-    Base b = editor.getBase(val);
 
-    if (b != null)
+    if (isEditing())
       {
-	allowedTarget = val;
+	DBObjectBase b = (DBObjectBase) editor.getBase(val);
+
+	if (b != null)
+	  {
+	    // "Schema Editing Error"
+	    // "Can''t set the target base to base number {0,number,#}.  No such base is defined: {0}."
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setTargetBase.bad_target_num", Integer.valueOf(val)));
+	  }
       }
-    else
-      {
-	// "Can''t set the target base to base number {0,number,#}.  No such base is defined: {0}."
-	throw new IllegalArgumentException(ts.l("setTargetBase.bad_target_num", Integer.valueOf(val)));
-      }
+
+    allowedTarget = val;
 
     if (isEditing() && isInUse())
       {
@@ -4396,10 +4399,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	  }
       }
 
-    Base b = editor.getBase(baseName);
-
-    try
+    if (isEditing())
       {
+	DBObjectBase b = (DBObjectBase) editor.getBase(baseName);
+
 	if (b != null)
 	  {
 	    if (b.getTypeID() == allowedTarget)
@@ -4407,13 +4410,22 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 		return null;	// no change, no harm
 	      }
 
-	    if (isEditing() && isSystemField())
+	    if (isSystemField())
 	      {
 		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 						  ts.l("global.system_field_change_attempt", this.toString()));
 	      }
 
 	    allowedTarget = b.getTypeID();
+
+	    if (isInUse())
+	      {
+		return warning2;
+	      }
+	    else
+	      {
+		return null;
+	      }
 	  }
 	else
 	  {
@@ -4423,17 +4435,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					      ts.l("setTargetBase.bad_target", baseName, this.toString()));
 	  }
       }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException(ex);
-      }
-
-    if (isEditing() && isInUse())
-      {
-	return warning2;
-      }
     else
       {
+	DBObjectBase b = (DBObjectBase) base.getStore().getObjectBase(baseName);
+
+	allowedTarget = b.getTypeID();
+
 	return null;
       }
   }
@@ -4493,11 +4500,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTargetField(short val)
   {
-    Base b;
-    BaseField bF;
-
-    /* -- */
-
     checkLock();
 
     if (!isInvid())
@@ -4543,9 +4545,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					  ts.l("setTargetField.asymmetry_num", this.toString(), Integer.valueOf(val)));
       }
 
-    try
+    if (isEditing())
       {
-	b = editor.getBase(allowedTarget);
+	DBObjectBase b = (DBObjectBase) editor.getBase(allowedTarget);
 
 	// we're looking up the object that we have pre-selected.. we
 	// should always set a target object before trying to set a
@@ -4559,7 +4561,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 						   this.toString()));
 	  }
 	
-	bF = b.getField(val);
+	DBObjectBaseField bF = b.getFieldDef(val);
 
 	if (bF == null)
 	  {
@@ -4568,10 +4570,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					      ts.l("setTargetField.bad_target_field_num", Integer.valueOf(val),
 						   this.toString()));
 	  }
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException(ex);
       }
 
     targetField = val;
@@ -4646,7 +4644,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					  ts.l("setTargetField.asymmetry", this.toString(), fieldName));
       }
 
-    b = editor.getBase(allowedTarget);
+    if (isEditing())
+      {
+	b = editor.getBase(allowedTarget);
+      }
+    else
+      {
+	b = base.getStore().getObjectBase(allowedTarget);
+      }
 
     try
       {
