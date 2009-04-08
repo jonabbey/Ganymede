@@ -123,12 +123,6 @@ public interface BaseField extends Remote {
   public String getName() throws RemoteException;
 
   /**
-   * <p>Returns the name of the class managing instances of this field</p>
-   */
-
-  public String getClassName() throws RemoteException;
-
-  /**
    * <p>Returns the comment defined in the schema for this field</p>
    */
 
@@ -159,12 +153,6 @@ public interface BaseField extends Remote {
    */
 
   public ReturnVal setName(String name) throws RemoteException;
-
-  /**
-   * <p>Sets the name of the class managing instances of this field</p>
-   */
-
-  public ReturnVal setClassName(String name) throws RemoteException;
 
   /**
    * <p>Sets the comment defined in the schema for this field</p>

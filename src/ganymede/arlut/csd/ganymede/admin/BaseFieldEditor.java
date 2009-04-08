@@ -127,7 +127,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
   JstringField
     nameS,			// all
-    classS,			// all
     trueLabelS,			// boolean
     falseLabelS,		// boolean
     OKCharS,			// string, password
@@ -214,9 +213,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-", 
 			     null);
     nameS.setCallback(this);
-
-    classS = new JstringField(20, 100,  true, false, null, null);
-    classS.setCallback(this);
 
     commentT = new JstringArea(4, 20);
     commentT.setCallback(this);
@@ -320,7 +316,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel.setFixedSizeLabelCells(true);
     editPanel.addFillRow("Field ID:", idN);
     editPanel.addFillRow("Field Name:", nameS);
-    editPanel.addFillRow("Class name:", classS);
     editPanel.addFillRow("Comment:", commentT);
     editPanel.addFillRow("Vector:", vectorCF);
     editPanel.addFillRow("Max Array Size:", maxArrayN);
@@ -367,7 +362,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     commentT.setText("");
 
     nameS.setText("");
-    classS.setText("");
 
     trueLabelS.setText("");
     falseLabelS.setText("");
@@ -1008,7 +1002,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 	idN.setValue(fieldDef.getID());
 	nameS.setText(fieldDef.getName());
-	classS.setText(fieldDef.getClassName());
 	commentT.setText(fieldDef.getComment());
 
         if (fieldDef.isArray())
@@ -1398,7 +1391,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 	commentT.setEditable(true);
 	nameS.setEditable(true);
-	classS.setEditable(true);
 	trueLabelS.setEditable(true);
 	falseLabelS.setEditable(true);
 	regexpS.setEditable(true);
@@ -1530,18 +1522,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		owner.tree.refresh();
 	      }
 	    else
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == classS)
-	  {
-	    if (debug)
-	      {
-		System.out.println("classS");
-	      }
-
-	    if (!handleReturnVal(fieldDef.setClassName((String) v.getValue())))
 	      {
 		refreshFieldEdit(false);
 	      }

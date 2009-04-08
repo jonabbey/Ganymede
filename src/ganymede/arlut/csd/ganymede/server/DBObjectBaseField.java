@@ -157,22 +157,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   boolean visibility = true;
 
   /**
-   * name of class to manage user interactions with this field
-   */
-
-  String classname = "";
-
-  /**
    * string to be displayed in the client as a tooltip explaining this field
    */
 
   String comment = null;
-
-  /**
-   * class object containing the code managing dbfields of this type
-   */
-
-  Class classdef;
 
   /**
    * name of the tab this field should be placed in on the client
@@ -350,7 +338,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     this.base = base;
     field_name = "";
-    classname = "";
     comment = "";
 
     tabName = ts.l("receive.default_tab_name");	 // "General"
@@ -407,9 +394,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     visibility = original.visibility;
 
-    classname = original.classname; // name of class to manage user interactions with this field
     comment = original.comment;
-    classdef = original.classdef; // class object containing the code managing dbfields of this type
     array = original.array;	// true if this field is an array type
     limit = original.limit;
 
@@ -486,15 +471,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     out.writeUTF(field_name);
     out.writeShort(field_code);
     out.writeShort(field_type);
-
-    if (classname == null)
-      {
-	out.writeUTF("");
-      }
-    else
-      {
-	out.writeUTF(classname);
-      }
 
     if (comment == null)
       {
@@ -666,7 +642,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     field_name = in.readUTF();
     field_code = in.readShort();
     field_type = in.readShort();
-    setClassName(in.readUTF());
+
+    if (base.getStore().isLessThan(2,16))
+      {
+	in.readUTF();		// vestigal classname
+      }
+
     comment = in.readUTF();
 
     // we stopped keeping the editable and removable flags in the
@@ -985,13 +966,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     xmlOut.attribute("id", java.lang.Short.toString(field_code));
 
     xmlOut.indentOut();
-
-    if (classname != null && !classname.equals(""))
-      {
-	xmlOut.startElementIndent("classname");
-	xmlOut.attribute("name", classname);
-	xmlOut.endElement("classname");
-      }
 
     if (comment != null && !comment.equals(""))
       {
@@ -1324,7 +1298,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     Integer field_codeInt;
     boolean typeRead = false;
     boolean _visibility = true;
-    String _classname = null;
     String _comment = null;
     ReturnVal retVal = null;
 
@@ -1395,11 +1368,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
 	item = children[i];
 
-	if (item.matches("classname"))
-	  {
-	    _classname = item.getAttrStr("name");
-	  }
-	else if (item.matches("comment"))
+	if (item.matches("comment"))
 	  {
 	    XMLItem commentChildren[] = item.getChildren();
 
@@ -1564,16 +1533,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     // set the options
 
-    retVal = setClassName(_classname);
-
-    if (!ReturnVal.didSucceed(retVal))
-      {
-	// "XML"
-	// "fielddef could not set class name:\n{0}\n{1}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("setXML.failed_field_class", root.getTreeString(), retVal.getDialogText()));
-      }
-    
     retVal = setComment(_comment);
     
     if (!ReturnVal.didSucceed(retVal))
@@ -2853,80 +2812,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     field_name = name;
 
     return null;
-  }
-
-  /**
-   * <p>Returns the name of the class managing instances of this field</p>
-   *
-   * @see arlut.csd.ganymede.rmi.BaseField
-   */
-
-  public String getClassName()
-  {
-    return classname;
-  }
-
-  /**
-   * <p>Sets the name of the class managing instances of this field</p>
-   *
-   * @see arlut.csd.ganymede.rmi.BaseField
-   */
-
-  public synchronized ReturnVal setClassName(String name)
-  {
-    Class newclassdef;
-
-    /* -- */
-
-    if (!base.getStore().loading && editor == null)
-      {
-	// "Not in a schema editing context."
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
-
-    // if we're not loading, don't allow global fields to be messed with
-
-    if (editor != null && !isEditable())
-      {
-	// "Schema Editing Error"
-	// "Can''t change the class name definition of a system field."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setClassName.system_field"));
-      }
-
-    if (name == null || name.equals(""))
-      {
-	classname = "";
-	classdef = null;
-      }
-    else if (!name.equals(classname))
-      {
-	try 
-	  {
-	    newclassdef = Class.forName(name);
-
-	    // won't get here if name was bad
-
-	    classname = name;	
-	    classdef = newclassdef;
-	  }
-	catch (ClassNotFoundException ex)
-	  {
-	    // "DBObjectBaseField.setClassName(): class definition could not be found: {0}"
-	    System.err.println(ts.l("setClassName.noclass_warning", ex));
-	  }
-      }
-
-    return null;
-  }
-
-  /**
-   * <p>Returns the Class object managing instances of this field</p>
-   */
-
-  public Class getClassDef()
-  {
-    return classdef;
   }
 
   /**
