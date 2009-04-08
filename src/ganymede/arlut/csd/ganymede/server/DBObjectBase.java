@@ -167,7 +167,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   static final int GROWTHSPACE = 250;
 
-  static Hashtable upgradeClassMap = null;
+  private static Hashtable upgradeClassMap = null;
 
   public static void setDebug(boolean val)
   {
