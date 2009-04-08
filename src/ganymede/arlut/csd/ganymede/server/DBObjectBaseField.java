@@ -1305,6 +1305,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
+    if (!isEditing())
+      {
+	// "Not in a schema editing context."
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+      }
+
     if (root == null || !root.matches("fielddef"))
       {
 	// "DBObjectBaseField.setXML(): next element != open fielddef: {0}"
@@ -2646,12 +2652,17 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return visibility;
   }
 
+  /**
+   * Method to set the visibility or invisibility of this field.
+   *
+   * Used by the DBStore to mark certain scratch fields as being
+   * permanently hidden without having to set a custom DBEditObject
+   * subclass to declare the non-visibility of the field.
+   */
+
   public void setVisibility(boolean visibility)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     this.visibility = visibility;
   }
@@ -2742,11 +2753,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    if (!isLoading() && !isEditing())
-      {
-	// "Not in a schema editing context."
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     // if we aren't loading, don't allow messing with the global fields
 
@@ -2843,10 +2850,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTabName(String s)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (s == null || s.equals(""))
       {
@@ -2880,10 +2884,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setComment(String s)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (s == null || s.equals(""))
       {
@@ -2942,10 +2943,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setType(short type)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (type < FIRSTFIELD || type > LASTFIELD)
       {
@@ -3156,17 +3154,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setArray(boolean b)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
-
-    // no change, no problem
-
-    if (b == array)
-      {
-	return null;
-      }
+    checkLock();
 
     if (isEditing())
       {
@@ -3186,7 +3174,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					      ts.l("setArray.any_system_field", this.toString()));
 	  }
 
-	if (isInUse())
+	// no change, no problem
+
+	if (b != array && isInUse())
 	  {
 	    // "Can''t change the vector status of a field which is in use in the database: {0}"
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
@@ -3231,10 +3221,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setID(short id)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (id < 0)
       {
@@ -3251,19 +3238,19 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
+    if (field_code >= 0)
+      {
+	// "Can''t change field id number for a previously created field definition: {0}."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setID.already_set", this.toString()));
+      }
+
     if (base.getField(id) != null)
       {
 	// "Can''t set field id number {0,number,#} on field {1}.  That field id number is already in use by another field definition."
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("setID.in_use", Integer.valueOf(id),
 					       this.toString()));
-      }
-
-    if (field_code >= 0)
-      {
-	// "Can''t change field id number for a previously created field definition: {0}."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setID.already_set", this.toString()));
       }
 
     field_code = id;
@@ -3273,23 +3260,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   /**
    * <p>Returns the object definition that this field is defined under.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public DBObjectBase base()
   {
     return base;
-  }
-
-  synchronized ReturnVal setBase(DBObjectBase base)
-  {
-    if (!isLoading())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
-
-    this.base = base;
-
-    return null;
   }
 
   // **
@@ -3320,10 +3297,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMaxArraySize(short limit)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!array)
       {
@@ -3398,10 +3372,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setLabeled(boolean b)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (isEditing() && !isEditable())
       {
@@ -3450,10 +3421,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTrueLabel(String label)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (isEditing() && !isEditable())
       {
@@ -3504,10 +3472,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setFalseLabel(String label)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (isEditing() && !isEditable())
       {
@@ -3562,10 +3527,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMinLength(short val)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isString() && !isPassword())
       {
@@ -3629,10 +3591,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMaxLength(short val)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isString() && !isPassword())
       {
@@ -3696,10 +3655,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setOKChars(String s)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (isEditing() && !isEditable())
       {
@@ -3764,10 +3720,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setBadChars(String s)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (isEditing() && !isEditable())
       {
@@ -3831,10 +3784,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMultiLine(boolean b)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (isEditing() && !isEditable())
       {
@@ -3913,10 +3863,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setRegexpPat(String s)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (isEditing() && !isEditable())
       {
@@ -3975,10 +3922,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setRegexpDesc(String s)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (isEditing() && !isEditable())
       {
@@ -4055,10 +3999,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setNameSpace(String nameSpaceId)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     // if we are not loading, don't allow a built-in universal field
     // to be messed with
@@ -4259,10 +4200,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setEditInPlace(boolean b)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isInvid())
       {
@@ -4364,10 +4302,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTargetBase(short val)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isInvid())
       {
@@ -4429,10 +4364,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTargetBase(String baseName)
   {
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isInvid())
       {
@@ -4566,10 +4498,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isInvid())
       {
@@ -4675,10 +4604,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isInvid())
       {
@@ -4802,10 +4728,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setCrypted(boolean b)
   {    
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isPassword())
       {
@@ -4847,10 +4770,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setMD5Crypted(boolean b)
   {    
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isPassword())
       {
@@ -4891,11 +4811,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    */
 
   public ReturnVal setApacheMD5Crypted(boolean b)
-  {    
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+  {
+    checkLock();
 
     if (!isPassword())
       {
@@ -4937,11 +4854,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    */
 
   public ReturnVal setWinHashed(boolean b)
-  {    
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+  {
+    checkLock();
 
     if (!isPassword())
       {
@@ -4983,10 +4897,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setSSHAHashed(boolean b)
   {    
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isPassword())
       {
@@ -5031,10 +4942,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCrypted(boolean b)
   {    
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+    checkLock();
 
     if (!isPassword())
       {
@@ -5073,11 +4981,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    */
 
   public ReturnVal setShaUnixCrypted512(boolean b)
-  {    
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+  {
+    checkLock();
 
     if (!isPassword())
       {
@@ -5123,11 +5028,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    */
 
   public ReturnVal setShaUnixCryptRounds(int n)
-  {    
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+  {
+    checkLock();
 
     if (!isPassword())
       {
@@ -5181,11 +5083,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    */
 
   public ReturnVal setPlainText(boolean b)
-  {    
-    if (!isLoading() && !isEditing())
-      {
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
-      }
+  {
+    checkLock();
 
     if (!isPassword())
       {
@@ -5231,6 +5130,21 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   private boolean isEditing()
   {
     return this.editor != null;
+  }
+
+  /**
+   * Checks to see if we are in either a loading or editing context.
+   *
+   * If we are in neither, we throw an exception up.
+   */
+
+  private void checkLock()
+  {
+    if (!isLoading() && !isEditing())
+      {
+	// "Not in a schema editing context."
+	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+      }
   }
 
   /**
