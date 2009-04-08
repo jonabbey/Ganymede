@@ -4439,6 +4439,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
 	DBObjectBase b = (DBObjectBase) base.getStore().getObjectBase(baseName);
 
+	// we're loading here.. i don't expect the DBStore
+	// initializeSchema() method to actually use base names, but
+	// if it does for some reason and that base hasn't been
+	// created yet, we're well within our rights to throw a
+	// NullPointerException here. -- jon
+
 	allowedTarget = b.getTypeID();
 
 	return null;
