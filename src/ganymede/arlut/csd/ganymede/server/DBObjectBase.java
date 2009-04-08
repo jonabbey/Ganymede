@@ -624,8 +624,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     
 	for (DBObjectBaseField fieldDef: original.customFields)
 	  {
-	    DBObjectBaseField bf = new DBObjectBaseField(fieldDef, editor);
-	    bf.setBase(this);
+	    DBObjectBaseField bf = new DBObjectBaseField(fieldDef, editor, this);
 
 	    addFieldToEnd(bf);
 	  }

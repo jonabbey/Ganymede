@@ -350,6 +350,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   DBObjectBaseField(DBObjectBase base, DBSchemaEdit editor) throws RemoteException
   {
     this(base);
+
     this.editor = editor;
     inUseCache = Boolean.FALSE;
   }
@@ -363,6 +364,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   DBObjectBaseField(DataInput in, DBObjectBase base) throws IOException, RemoteException
   {
     this(base);
+
     receive(in);
     template = new FieldTemplate(this);
   }
@@ -374,7 +376,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * TO THIS CLASS!</b></p>
    */
 
-  DBObjectBaseField(DBObjectBaseField original, DBSchemaEdit editor) throws RemoteException
+  DBObjectBaseField(DBObjectBaseField original, DBSchemaEdit editor, DBObjectBase newBase) throws RemoteException
   {
     this(original.base);
 
@@ -427,6 +429,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     template = original.template;
     this.editor = editor;
+    this.base = newBase;
   }
 
   /**
