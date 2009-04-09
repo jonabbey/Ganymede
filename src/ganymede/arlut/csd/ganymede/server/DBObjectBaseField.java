@@ -2749,10 +2749,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setName(String name, boolean swapIfNeeded)
   {
-    ReturnVal retVal;
-
-    /* -- */
-
     securityCheck();
 
     // if we aren't loading, don't allow messing with the global fields
@@ -2788,42 +2784,35 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    try
+    DBObjectBaseField otherField = (DBObjectBaseField) ((DBObjectBase) getBase()).getField(name);
+
+    if (otherField != null)
       {
-	DBObjectBaseField otherField = (DBObjectBaseField) getBase().getField(name);
-
-	if (otherField != null)
+	if (!swapIfNeeded)
 	  {
-	    if (!swapIfNeeded)
+	    // "Schema Editing Error"
+	    // "Can''t set a duplicate field name, "{0}" is already taken."
+	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					      ts.l("setName.duplicate_name", name));
+	  }
+	else
+	  {
+	    // the xml schema code is setting this name, and it will have checked
+	    // to make sure the name is unique.. we'll give the field that already
+	    // has the name we want our name in trade, and then take the new name
+	    // ourselves.  the xml schema code will fix it up when it goes to
+	    // set the name on the other.
+
+	    String oldName = this.field_name;
+	    this.field_name = name;
+
+	    ReturnVal retVal = otherField.setName(oldName);
+
+	    if (!ReturnVal.didSucceed(retVal))
 	      {
-		// "Schema Editing Error"
-		// "Can''t set a duplicate field name, "{0}" is already taken."
-		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-						  ts.l("setName.duplicate_name", name));
-	      }
-	    else
-	      {
-		// the xml schema code is setting this name, and it will have checked
-		// to make sure the name is unique.. we'll give the field that already
-		// has the name we want our name in trade, and then take the new name
-		// ourselves.  the xml schema code will fix it up when it goes to
-		// set the name on the other.
-
-		String oldName = this.field_name;
-		this.field_name = name;
-
-		retVal = otherField.setName(oldName);
-
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
+		return retVal;
 	      }
 	  }
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException(ex.getMessage());
       }
 
     field_name = name;
