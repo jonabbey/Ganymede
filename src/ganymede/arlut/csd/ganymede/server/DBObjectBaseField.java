@@ -2995,7 +2995,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     // only strings, invids, and ip fields can be vectors
 
-    if (!((isString() || isInvid() || isIP())))
+    if (!(isString() || isInvid() || isIP()))
       {
 	array = false;
       }
