@@ -2662,7 +2662,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public void setVisibility(boolean visibility)
   {
-    checkLock();
+    securityCheck();
 
     this.visibility = visibility;
   }
@@ -2753,7 +2753,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    checkLock();
+    securityCheck();
 
     // if we aren't loading, don't allow messing with the global fields
 
@@ -2850,7 +2850,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTabName(String s)
   {
-    checkLock();
+    securityCheck();
 
     if (s == null || s.equals(""))
       {
@@ -2884,7 +2884,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setComment(String s)
   {
-    checkLock();
+    securityCheck();
 
     if (s == null || s.equals(""))
       {
@@ -2943,7 +2943,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setType(short type)
   {
-    checkLock();
+    securityCheck();
 
     if (type < FIRSTFIELD || type > LASTFIELD)
       {
@@ -3154,7 +3154,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setArray(boolean b)
   {
-    checkLock();
+    securityCheck();
 
     if (isEditing())
       {
@@ -3221,7 +3221,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setID(short id)
   {
-    checkLock();
+    securityCheck();
 
     if (id < 0)
       {
@@ -3297,7 +3297,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMaxArraySize(short limit)
   {
-    checkLock();
+    securityCheck();
 
     if (!array)
       {
@@ -3372,7 +3372,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setLabeled(boolean b)
   {
-    checkLock();
+    securityCheck();
 
     if (isEditing() && !isEditable())
       {
@@ -3421,7 +3421,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTrueLabel(String label)
   {
-    checkLock();
+    securityCheck();
 
     if (isEditing() && !isEditable())
       {
@@ -3472,7 +3472,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setFalseLabel(String label)
   {
-    checkLock();
+    securityCheck();
 
     if (isEditing() && !isEditable())
       {
@@ -3527,7 +3527,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMinLength(short val)
   {
-    checkLock();
+    securityCheck();
 
     if (!isString() && !isPassword())
       {
@@ -3591,7 +3591,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMaxLength(short val)
   {
-    checkLock();
+    securityCheck();
 
     if (!isString() && !isPassword())
       {
@@ -3655,7 +3655,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setOKChars(String s)
   {
-    checkLock();
+    securityCheck();
 
     if (isEditing() && !isEditable())
       {
@@ -3720,7 +3720,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setBadChars(String s)
   {
-    checkLock();
+    securityCheck();
 
     if (isEditing() && !isEditable())
       {
@@ -3784,7 +3784,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setMultiLine(boolean b)
   {
-    checkLock();
+    securityCheck();
 
     if (isEditing() && !isEditable())
       {
@@ -3863,7 +3863,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setRegexpPat(String s)
   {
-    checkLock();
+    securityCheck();
 
     if (isEditing() && !isEditable())
       {
@@ -3922,7 +3922,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setRegexpDesc(String s)
   {
-    checkLock();
+    securityCheck();
 
     if (isEditing() && !isEditable())
       {
@@ -3999,7 +3999,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setNameSpace(String nameSpaceId)
   {
-    checkLock();
+    securityCheck();
 
     // if we are not loading, don't allow a built-in universal field
     // to be messed with
@@ -4200,7 +4200,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setEditInPlace(boolean b)
   {
-    checkLock();
+    securityCheck();
 
     if (!isInvid())
       {
@@ -4302,7 +4302,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTargetBase(short val)
   {
-    checkLock();
+    securityCheck();
 
     if (!isInvid())
       {
@@ -4367,7 +4367,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTargetBase(String baseName)
   {
-    checkLock();
+    securityCheck();
 
     if (!isInvid())
       {
@@ -4504,7 +4504,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public synchronized ReturnVal setTargetField(short val)
   {
-    checkLock();
+    securityCheck();
 
     if (!isInvid())
       {
@@ -4610,7 +4610,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     /* -- */
 
-    checkLock();
+    securityCheck();
 
     if (!isInvid())
       {
@@ -4742,7 +4742,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setCrypted(boolean b)
   {    
-    checkLock();
+    securityCheck();
 
     if (!isPassword())
       {
@@ -4784,7 +4784,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setMD5Crypted(boolean b)
   {    
-    checkLock();
+    securityCheck();
 
     if (!isPassword())
       {
@@ -4826,7 +4826,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setApacheMD5Crypted(boolean b)
   {
-    checkLock();
+    securityCheck();
 
     if (!isPassword())
       {
@@ -4869,7 +4869,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setWinHashed(boolean b)
   {
-    checkLock();
+    securityCheck();
 
     if (!isPassword())
       {
@@ -4911,7 +4911,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setSSHAHashed(boolean b)
   {    
-    checkLock();
+    securityCheck();
 
     if (!isPassword())
       {
@@ -4956,7 +4956,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCrypted(boolean b)
   {    
-    checkLock();
+    securityCheck();
 
     if (!isPassword())
       {
@@ -4996,7 +4996,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCrypted512(boolean b)
   {
-    checkLock();
+    securityCheck();
 
     if (!isPassword())
       {
@@ -5043,7 +5043,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setShaUnixCryptRounds(int n)
   {
-    checkLock();
+    securityCheck();
 
     if (!isPassword())
       {
@@ -5098,7 +5098,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public ReturnVal setPlainText(boolean b)
   {
-    checkLock();
+    securityCheck();
 
     if (!isPassword())
       {
@@ -5149,10 +5149,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   /**
    * Checks to see if we are in either a loading or editing context.
    *
-   * If we are in neither, we throw an exception up.
+   * If we are in neither, we throw an exception up, so that a
+   * modified client can't screw with our schema without appropriate
+   * authorization.
    */
 
-  private void checkLock()
+  private void securityCheck()
   {
     if (!isLoading() && !isEditing())
       {
