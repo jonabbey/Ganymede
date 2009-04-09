@@ -3693,7 +3693,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
-
     return badChars;
   }
 
