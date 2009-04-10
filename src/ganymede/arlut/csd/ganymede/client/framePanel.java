@@ -471,6 +471,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	      }
 	  }
 
+	// okay, now we we've added the server--side tabs are.  time
+	// to start in on the predefined tabs.
+
         // for user objects, see if we have an image to display
 
         try
@@ -490,17 +493,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
           {
 	    gc.processExceptionRethrow(ex, "Could not check for user image: ");
           }
-
-	// okay, now we we've added the server--side tabs are.  time
-	// to start in on the predefined tabs.
-
-	owner_tab = new ownerTab(this, pane, ts.l("load.owner_tab"));	// "Owner"
-	owner_tab.addToPane(tabList);
-
-	if (stopped.isSet())
-	  {
-	    return;
-	  }
 
 	// Check to see if this gets an objects_owned panel (for Owner
 	// Group objects) or an Admin Personae panel (for User
@@ -549,25 +541,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    gc.processExceptionRethrow(rx, "Could not process object-specific tab: ");
 	  }
-    
-	// Add the notes panel
-
-	if (stopped.isSet())
-	  {
-	    return;
-	  }
-
-	addNotesTab();
-
-	if (stopped.isSet())
-	  {
-	    return;
-	  }
-
-	// Add the history tab
-
-	history_tab = new historyTab(this, pane, ts.l("load.history_tab")); // "History"
-	history_tab.addToPane(tabList);
 
 	// If we're an admin persona, add the admin history tab
 
@@ -608,7 +581,36 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    gc.processExceptionRethrow(rx, "Could not get date fields");
 	  }
-    
+
+	// then the always present tabs.. owner, notes, history.
+
+	if (stopped.isSet())
+	  {
+	    return;
+	  }
+
+	owner_tab = new ownerTab(this, pane, ts.l("load.owner_tab"));	// "Owner"
+	owner_tab.addToPane(tabList);
+   
+	// Add the notes panel
+
+	if (stopped.isSet())
+	  {
+	    return;
+	  }
+
+	addNotesTab();
+
+	// Add the history tab
+
+	if (stopped.isSet())
+	  {
+	    return;
+	  }
+
+	history_tab = new historyTab(this, pane, ts.l("load.history_tab")); // "History"
+	history_tab.addToPane(tabList);
+
 	pane.addChangeListener(this);
 
 	if (stopped.isSet())
