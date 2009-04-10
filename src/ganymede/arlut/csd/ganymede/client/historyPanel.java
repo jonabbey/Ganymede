@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -52,7 +52,6 @@ package arlut.csd.ganymede.client;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
