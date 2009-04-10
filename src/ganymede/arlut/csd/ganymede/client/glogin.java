@@ -149,6 +149,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     serverhost = null,
     server_url = null,
     helpBase = null;
+  
+  public static Integer
+    registryPort = null;
+
+  /**
+   * The default registry port if we don't have one specified in a
+   * property file or in an applet parameter.
+   */
 
   public static int registryPortProperty = 1099;
 
@@ -279,15 +287,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     properties_file = ParseArgs.getArg("properties", args);
 
-    if (properties_file != null)
-      {
-	loadProperties(properties_file);
-      }
-    else
-      {
-	loadProperties();
-      }
-
     // make sure that we start the Ganymede client on the GUI thread
 
     SwingUtilities.invokeLater(new Runnable() {
@@ -322,6 +321,130 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     return WeAreApplet;
   }
 
+
+  /**
+   * Returns a configuration String from a property file or applet
+   * parameter element, depending on whether the Ganymede client is
+   * being run as an application or as an applet.
+   *
+   * If glogin is being run as an application, the static variable
+   * WeAreApplet must be set to false, and properties_file should be
+   * set to point to the Ganymede property file on disk before
+   * getConfigString() is called.
+   *
+   * If glogin is being run as an applet, the static variable my_login
+   * must be set to point to the singleton glogin object before
+   * getConfigString() is called.
+   */
+
+  static public String getConfigString(String configKey)
+  {
+    if (WeAreApplet)
+      {
+	return my_glogin.getParameter(configKey);
+      }
+    else
+      {
+	if (properties_file != null)
+	  {
+	    if (ganymedeProperties == null)
+	      {
+		ganymedeProperties = new Properties();
+	
+		if (debug)
+		  {
+		    System.out.println("Loading properties from: " + properties_file);
+		  }
+
+		if (properties_file != null)
+		  {
+		    try
+		      {
+			ganymedeProperties.load(new BufferedInputStream(new FileInputStream(properties_file)));
+		      }
+		    catch (java.io.FileNotFoundException e)
+		      {
+			throw new RuntimeException("File not found: " + e);
+		      }
+		    catch (java.io.IOException e)
+		      {
+			throw new RuntimeException("Whoa, io exception: " + e);
+		      }
+		  }
+	      }
+
+	    return ganymedeProperties.getProperty(configKey);
+	  }
+	else
+	  {
+	    return java.lang.System.getProperty(configKey);
+	  }
+      }
+  }
+
+  /**
+   * Returns a configuration Integer from a property file or applet
+   * parameter element, depending on whether the Ganymede client is
+   * being run as an application or as an applet.
+   *
+   * If glogin is being run as an application, the static variable
+   * WeAreApplet must be set to false, and properties_file should be
+   * set to point to the Ganymede property file on disk before
+   * getConfigInteger() is called.
+   *
+   * If glogin is being run as an applet, the static variable my_login
+   * must be set to point to the singleton glogin object before
+   * getConfigInteger() is called.
+   *
+   * @throws NumberFormatException if the config value returned for
+   * configKey is not a number.
+   */
+
+  static public Integer getConfigInteger(String configKey)
+  {
+    return java.lang.Integer.parseInt(getConfigString(configKey));
+  }
+
+  /**
+   * Returns a configuration boolean from a property file or applet
+   * parameter element, depending on whether the Ganymede client is
+   * being run as an application or as an applet.
+   *
+   * If glogin is being run as an application, the static variable
+   * WeAreApplet must be set to false, and properties_file should be
+   * set to point to the Ganymede property file on disk before
+   * getConfigBoolean() is called.
+   *
+   * If glogin is being run as an applet, the static variable my_login
+   * must be set to point to the singleton glogin object before
+   * getConfigBoolean() is called.
+   *
+   * @returns defaultValue if there is no property or applet parameter
+   * matching configKey, else returns true if the property/parameter
+   * for configKey is equal to "true".
+   */
+
+  static public boolean getConfigBoolean(String configKey, boolean defaultValue)
+  {
+    String val = getConfigString(configKey);
+
+    if (val == null)
+      {
+	return defaultValue;
+      }
+    else
+      {
+	if (val.equals("true"))
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
+  }
+
   /**
    * Standard applet initialization method.
    */
@@ -341,13 +464,16 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     
     ganymede_logo = PackageResources.getImageResource(this, "ganymede.jpg", getClass());
     ganymede_ssl_logo = PackageResources.getImageResource(this, "ssl_ganymede.jpg", getClass());
-    
+   
     if (WeAreApplet)
       {
 	my_glogin = this;
 	my_frame = new JFrame(); // we need an invisible frame to attach pop-up dialogs to
-	loadParameters();
       }
+
+    serverhost = getConfigString("ganymede.serverhost");
+    registryPort = getConfigInteger("ganymede.registryPort");
+    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add("Center", createLoginPanel());
@@ -495,129 +621,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     _quitButton.addActionListener(this);
 
     return loginBox;
-  }
-
-  /**
-   * Private method to load the Ganymede client's parameters from a
-   * file.  Used when glogin is run from the command line..  {@link
-   * arlut.csd.ganymede.client.glogin#loadParameters()
-   * loadParameters()} is for use in an applet context.
-   */ 
-
-  static private void loadProperties(String properties_file)
-  {
-    ganymedeProperties = new Properties();
-	
-    if (debug)
-      {
-	System.out.println("Starting up in debug mode.");
-	System.out.println("Loading properties from: " + properties_file);
-      }
-
-    try
-      {
-	ganymedeProperties.load(new BufferedInputStream(new FileInputStream(properties_file)));
-      }
-    catch (java.io.FileNotFoundException e)
-      {
-	throw new RuntimeException("File not found: " + e);
-      }
-    catch (java.io.IOException e)
-      {
-	throw new RuntimeException("Whoa, io exception: " + e);
-      }
-
-    serverhost = ganymedeProperties.getProperty("ganymede.serverhost");
-
-    if ((serverhost == null) || (serverhost.equals("")))
-      {
-	throw new RuntimeException("Trouble:  couldn't load server host from " + properties_file);
-      }
-
-    // get the registry port number
-
-    String registryPort = ganymedeProperties.getProperty("ganymede.registryPort");
-
-    if (registryPort != null)
-      {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-			       registryPort);
-	  }
-      }
-
-    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
-  }
-
-  /**
-   * Private method to load the Ganymede client's parameters from the system
-   * property list.  Used when glogin is run as an application from within
-   * Java Web Start.
-   */
-
-  static private void loadProperties()
-  {
-    serverhost = java.lang.System.getProperty("ganymede.serverhost");
-
-    if ((serverhost == null) || (serverhost.equals("")))
-      {
-	throw new RuntimeException("Trouble:  couldn't load server host from system properties.");
-      }
-
-    String registryPort = java.lang.System.getProperty("ganymede.registryPort");
-
-    if (registryPort != null)
-      {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println("Couldn't get a valid registry port number from system properties.");
-	  }
-      }
-
-    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
-  }
-
-  /**
-   * Private method to load the Ganymede client's parameters
-   * from an applet's HTML parameters.  Used when glogin is run as an applet..
-   * {@link arlut.csd.ganymede.client.glogin#loadProperties(java.lang.String) loadProperties()}
-   * is for use in an application context.
-   */ 
-
-  private void loadParameters()
-  {
-    serverhost = getParameter("ganymede.serverhost");
-
-    if (serverhost == null || serverhost.equals(""))
-      {
-	throw new RuntimeException("Trouble:  Couldn't get ganymede.serverhost PARAM");
-      }
-
-    String registryPort = getParameter("ganymede.registryPort");
-
-    if (registryPort != null)
-      {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println("Couldn't get a valid registry port number from Ganymede applet parameters: " + 
-			       registryPort);
-	  }
-      }
-
-    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
   }
 
   /**
