@@ -142,9 +142,6 @@ import arlut.csd.ganymede.rmi.CategoryNode;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.db_object;
 
-import foxtrot.Task;
-import foxtrot.Worker;
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                                          gclient
@@ -3654,38 +3651,17 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	final Invid local_origInvid = origInvid;
 	obj = null;
 	
-	try
+	ReturnVal rv =  (ReturnVal) FoxtrotAdapter.post(new foxtrot.Task()
 	  {
-	    ReturnVal rv;
+	    public Object run() throws Exception
+	    {
+	      return session.clone_db_object(local_origInvid);
+	    }
+	  });
 
-	    try
-	      {
-		/*
-		  Use foxtrot to keep the GUI refreshing while we're waiting
-		  for the server to clone the object for us.
-		*/
+	rv = handleReturnVal(rv);
 
-		rv = (ReturnVal) foxtrot.Worker.post(new foxtrot.Task()
-		  {
-		    public Object run() throws Exception
-		    {
-		      return session.clone_db_object(local_origInvid);
-		    }
-		  });
-	      }
-	    catch (java.security.AccessControlException ex)
-	      {
-		rv = session.clone_db_object(origInvid);
-	      }
-
-	    rv = handleReturnVal(rv);
-	    obj = (db_object) rv.getObject();
-	  }
-	catch (Exception rx)
-	  {
-	    // "Exception creating new object"
-	    processExceptionRethrow(rx, ts.l("cloneObject.exception_txt"));
-	  }
+	obj = (db_object) rv.getObject();
 
 	// we'll depend on handleReturnVal() above showing the user a rejection
 	// dialog if the object create was rejected
@@ -3801,25 +3777,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
 	    ReturnVal rv; 
 
-	    try
-	      {
-		/*
-		  Use foxtrot to keep the GUI refreshing while we're
-		  waiting for the server to create the object for us.
-		*/
+	    /*
+	      Use foxtrot to keep the GUI refreshing while we're
+	      waiting for the server to create the object for us.
+	    */
 
-		rv = (ReturnVal) foxtrot.Worker.post(new foxtrot.Task()
-		  {
-		    public Object run() throws Exception
-		    {
-		      return session.create_db_object(local_type);
-		    }
-		  });
-	      }
-	    catch (java.security.AccessControlException ex)
+	    rv = (ReturnVal) FoxtrotAdapter.post(new foxtrot.Task()
 	      {
-		rv = session.create_db_object(local_type);
-	      }
+		public Object run() throws Exception
+		{
+		  return session.create_db_object(local_type);
+		}
+	      });
 
 	    rv = handleReturnVal(rv);
 	    obj = (db_object) rv.getObject();

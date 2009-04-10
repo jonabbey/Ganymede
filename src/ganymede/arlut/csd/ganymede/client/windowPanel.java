@@ -93,9 +93,6 @@ import arlut.csd.ganymede.rmi.db_field;
 import arlut.csd.ganymede.rmi.db_object;
 import arlut.csd.ganymede.rmi.invid_field;
 
-import foxtrot.Task;
-import foxtrot.Worker;
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                                      windowPanel
@@ -468,49 +465,28 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
 	    gc.logoutMI.setEnabled(false);
 
-	    try
+	    w = (framePanel) FoxtrotAdapter.post(new foxtrot.Task()
 	      {
-		w = (framePanel) foxtrot.Worker.post(new foxtrot.Task()
-		  {
-		    public Object run() throws Exception
+		public Object run() throws Exception
+		{
+		  try
 		    {
-		      try
-			{
-			  framePanel foxFP = new framePanel(localFinalInvid,
-							    localObject, 
-							    localEditable,
-							    localWindowPanel,
-							    localIsNewlyCreated);
+		      framePanel foxFP = new framePanel(localFinalInvid,
+							localObject, 
+							localEditable,
+							localWindowPanel,
+							localIsNewlyCreated);
 
-			  localWindowPanel.setWindowTitle(foxFP, localTitle);
-			  return foxFP;
-			}
-		      catch (Throwable ex)
-			{
-			  gc.processExceptionRethrow(ex);
-			  return null;
-			}
+		      localWindowPanel.setWindowTitle(foxFP, localTitle);
+		      return foxFP;
 		    }
-		  }
-						    );
-	      }
-	    catch (java.security.AccessControlException ex)
-	      {
-		try
-		  {
-		    w = new framePanel(finalInvid,
-				       object, 
-				       editable,
-				       this,
-				       isNewlyCreated);
-
-		    localWindowPanel.setWindowTitle(w, title);
-		  }
-		catch (Exception ex2)
-		  {
-		    gc.processExceptionRethrow(ex);
-		  }
-	      }
+		  catch (Throwable ex)
+		    {
+		      gc.processExceptionRethrow(ex);
+		      return null;
+		    }
+		}
+	      });
 	  }
 	catch (Exception ex)
 	  {

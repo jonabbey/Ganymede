@@ -86,9 +86,6 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.rmi.date_field;
 import arlut.csd.ganymede.rmi.string_field;
 
-import foxtrot.Task;
-import foxtrot.Worker;
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                                     historyPanel
@@ -162,27 +159,13 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     final date_field myCreation_date_field = creation_date_field;
 
-    try
+    createdDate = (Date) FoxtrotAdapter.post(new foxtrot.Task()
       {
-	try
-	  {
-	    createdDate = (Date) foxtrot.Worker.post(new foxtrot.Task()
-	      {
-		public Object run() throws Exception
-		{
-		  return myCreation_date_field.getValue();
-		}
-	      });
-	  }
-	catch (java.security.AccessControlException ex)
-	  {
-	    createdDate = (Date) myCreation_date_field.getValue();
-	  }
-      }
-    catch (Exception rx)
-      {
-        gc.processExceptionRethrow(rx, "Could not get pull object creation date.");
-      }
+	public Object run() throws Exception
+	{
+	  return myCreation_date_field.getValue();
+	}
+      });
 
     selectedDate = createdDate;
 
@@ -317,31 +300,15 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     showWait();
 
-    try
+    historyBuffer = (StringBuffer) FoxtrotAdapter.post(new foxtrot.Task()
       {
-	try
-	  {
-	    historyBuffer = (StringBuffer) foxtrot.Worker.post(new foxtrot.Task()
-	      {
-		public Object run() throws Exception
-		{
-		  return gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
-		}
-	      });
-	  }
-	catch (java.security.AccessControlException ex)
-	  {
-	    historyBuffer = (StringBuffer) gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
-	  }
-      }
-    catch (Exception rx)
-      {
-        gc.processExceptionRethrow(rx, "Could not get object history.");
-      }
-    finally
-      {
-        showText(historyBuffer.toString());
-      }
+	public Object run() throws Exception
+	{
+	  return gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
+	}
+      });
+
+    showText(historyBuffer.toString());
   }
 
   public boolean setValuePerformed(JValueObject e)

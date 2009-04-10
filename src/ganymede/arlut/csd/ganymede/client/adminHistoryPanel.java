@@ -158,26 +158,16 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
     try
       {
-	try
+	createdDate = (Date) FoxtrotAdapter.post(new foxtrot.Task()
 	  {
-	    createdDate = (Date) foxtrot.Worker.post(new foxtrot.Task()
-	      {
-		public Object run() throws Exception
-		{
-		  ReturnVal retVal = myGc.getSession().view_db_object(myInvid);
-		  db_object adminObj = retVal.getObject();
+	    public Object run() throws Exception
+	    {
+	      ReturnVal retVal = myGc.getSession().view_db_object(myInvid);
+	      db_object adminObj = retVal.getObject();
 		  
-		  return adminObj.getFieldValue(SchemaConstants.CreationDateField);
-		}
-	      });
-	  }
-	catch (java.security.AccessControlException ex)
-	  {
-	    ReturnVal retVal = myGc.getSession().view_db_object(myInvid);
-	    db_object adminObj = retVal.getObject();
-
-	    createdDate = (Date) adminObj.getFieldValue(SchemaConstants.CreationDateField);
-	  }
+	      return adminObj.getFieldValue(SchemaConstants.CreationDateField);
+	    }
+	  });
       }
     catch (Exception rx)
       {
@@ -337,20 +327,13 @@ public class adminHistoryPanel extends JPanel implements ActionListener, JsetVal
 
     try
       {
-	try
+	historyBuffer = (StringBuffer) FoxtrotAdapter.post(new foxtrot.Task()
 	  {
-	    historyBuffer = (StringBuffer) foxtrot.Worker.post(new foxtrot.Task()
-	      {
-		public Object run() throws Exception
-		{
-		  return gc.getSession().viewAdminHistory(invid, selectedDate);
-		}
-	      });
-	  }
-	catch (java.security.AccessControlException ex)
-	  {
-	    historyBuffer = gc.getSession().viewAdminHistory(invid, selectedDate);
-	  }
+	    public Object run() throws Exception
+	    {
+	      return gc.getSession().viewAdminHistory(invid, selectedDate);
+	    }
+	  });
       }
     catch (Exception rx)
       {
