@@ -461,8 +461,6 @@ class datesPanel extends JPanel {
     String modifier = null;
     Date mod_date = null;
     
-    SimpleDateFormat dateformat = new SimpleDateFormat();
-
     /* -- */
     
     setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
@@ -521,7 +519,7 @@ class datesPanel extends JPanel {
       }
     else
       {
-	createdOn = new JLabel(dateformat.format(creation_date));
+	createdOn = new JLabel(ts.l("init.time_date_format", creation_date));
       }
 
     // "Created On:"
@@ -547,7 +545,7 @@ class datesPanel extends JPanel {
       }
     else
       {
-	modifiedOn = new JLabel(dateformat.format(mod_date));
+	modifiedOn = new JLabel(ts.l("init.time_date_format", mod_date));
       }
 
     // "Last Modified On:"
