@@ -2,7 +2,8 @@
 
    windowPanel.java
 
-   The window that holds the frames in the client.
+   The Ganymede client's desktopPane which contains and displays
+   object windows for viewing and editing.
    
    Created: 11 July 1997
 
@@ -106,6 +107,7 @@ import foxtrot.Worker;
  * internal {@link arlut.csd.ganymede.client.framePanel} and
  * {@link arlut.csd.ganymede.client.gResultTable gResultTable} windows
  * that are displayed in reaction to actions taken by the user.
+ *
  * windowPanel is responsible for adding these windows, and maintaining
  * the window list in the menubar.
  *
