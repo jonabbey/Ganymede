@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -521,12 +521,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     if (loginPanel.isSSL())
       {
 	// "{0}  [SSL]"
-	hostField = new JTextField(ts.l("init.urlssl", GASHAdmin.url), 60);
+	hostField = new JTextField(ts.l("init.urlssl", GASHAdmin.server_url), 60);
       }
     else
       {
 	// "{0}  [NO SSL]"
-	hostField = new JTextField(ts.l("init.urlnossl", GASHAdmin.url), 60);
+	hostField = new JTextField(ts.l("init.urlnossl", GASHAdmin.server_url), 60);
       }
 
     hostField.setEditable(false);
@@ -1623,7 +1623,7 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
 
     // "Are you sure you want to shut down the Ganymede server\nrunning at {0}?"
 
-    textLabel = new JMultiLineLabel(ts.l("global.question", GASHAdmin.url));
+    textLabel = new JMultiLineLabel(ts.l("global.question", GASHAdmin.server_url));
     
     gbc.gridy = 0;
     gbc.gridx = 1;

@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -133,6 +133,16 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
   public static final boolean hideLoginWhenApplication = true;
 
+  public static String
+    properties_file = null;
+
+  /** 
+   * Client-side properties loaded from the command line or from the
+   * web page which contains the definition for glogin as an applet.
+   */
+
+  public static Properties ganymedeProperties = null;
+
   /**
    * If we are run from the command line, this frame will be used to
    * contain the GASHAdmin applet in an application context.
@@ -153,6 +163,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
   static GASHAdminDispatch adminDispatch = null;
 
+  static GASHAdmin my_GASHAdmin = null;
+
   /**
    * If true, we are running as an applet and are limited by the Java sandbox.
    * A few features of the client will be disabled if this is true (saving query
@@ -162,8 +174,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   static boolean WeAreApplet = true;
 
   static String serverhost = null;
+  static Integer registryPort = null;
+
   static int registryPortProperty = 1099;
-  static String url = null;
+  static String server_url = null;
 
   static Server server = null;	// remote reference
   Image admin_logo = null;
@@ -198,41 +212,13 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
   /* -- */
 
-  // Our primary constructor.  This will always be called, either
-  // from main(), below, or by the environment building our applet.
-
-  public GASHAdmin()
-  {
-  }
-
-  public GASHAdmin(String debugFilename)
-  {
-    this.debugFilename = debugFilename;
-  }
-
   public static void main(String[] argv)
   {
     WeAreApplet = false;
 
-    if (argv.length < 1)
+    if (argv.length >= 1)
       {
-	loadProperties();
-      }
-    else
-      {
-	try
-	  {
-	    loadProperties(argv[0]);
-	  }
-	catch (IOException ex)
-	  {
-	    throw new RuntimeException(ex);
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("Successfully loaded properties from file " + argv[0]);
-	  }
+	properties_file = argv[0];
       }
 
     String debugFilename = null;
@@ -257,13 +243,149 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     my_frame.setVisible(true);
   }
-  
-  public void init()
+
+  /**
+   * Returns a configuration String from a property file or applet
+   * parameter element, depending on whether the Ganymede client is
+   * being run as an application or as an applet.
+   *
+   * If glogin is being run as an application, the static variable
+   * WeAreApplet must be set to false, and properties_file should be
+   * set to point to the Ganymede property file on disk before
+   * getConfigString() is called.
+   *
+   * If glogin is being run as an applet, the static variable my_login
+   * must be set to point to the singleton glogin object before
+   * getConfigString() is called.
+   */
+
+  static public String getConfigString(String configKey)
   {
     if (WeAreApplet)
       {
-	loadParameters();
+	return my_GASHAdmin.getParameter(configKey);
       }
+    else
+      {
+	if (properties_file != null)
+	  {
+	    if (ganymedeProperties == null)
+	      {
+		ganymedeProperties = new Properties();
+	
+		if (debug)
+		  {
+		    System.out.println("Loading properties from: " + properties_file);
+		  }
+
+		if (properties_file != null)
+		  {
+		    try
+		      {
+			ganymedeProperties.load(new BufferedInputStream(new FileInputStream(properties_file)));
+		      }
+		    catch (java.io.FileNotFoundException e)
+		      {
+			throw new RuntimeException("File not found: " + e);
+		      }
+		    catch (java.io.IOException e)
+		      {
+			throw new RuntimeException("Whoa, io exception: " + e);
+		      }
+		  }
+	      }
+
+	    return ganymedeProperties.getProperty(configKey);
+	  }
+	else
+	  {
+	    return java.lang.System.getProperty(configKey);
+	  }
+      }
+  }
+
+  /**
+   * Returns a configuration Integer from a property file or applet
+   * parameter element, depending on whether the Ganymede client is
+   * being run as an application or as an applet.
+   *
+   * If glogin is being run as an application, the static variable
+   * WeAreApplet must be set to false, and properties_file should be
+   * set to point to the Ganymede property file on disk before
+   * getConfigInteger() is called.
+   *
+   * If glogin is being run as an applet, the static variable my_login
+   * must be set to point to the singleton glogin object before
+   * getConfigInteger() is called.
+   *
+   * @throws NumberFormatException if the config value returned for
+   * configKey is not a number.
+   */
+
+  static public Integer getConfigInteger(String configKey)
+  {
+    return java.lang.Integer.parseInt(getConfigString(configKey));
+  }
+
+  /**
+   * Returns a configuration boolean from a property file or applet
+   * parameter element, depending on whether the Ganymede client is
+   * being run as an application or as an applet.
+   *
+   * If glogin is being run as an application, the static variable
+   * WeAreApplet must be set to false, and properties_file should be
+   * set to point to the Ganymede property file on disk before
+   * getConfigBoolean() is called.
+   *
+   * If glogin is being run as an applet, the static variable my_login
+   * must be set to point to the singleton glogin object before
+   * getConfigBoolean() is called.
+   *
+   * @returns defaultValue if there is no property or applet parameter
+   * matching configKey, else returns true if the property/parameter
+   * for configKey is equal to "true".
+   */
+
+  static public boolean getConfigBoolean(String configKey, boolean defaultValue)
+  {
+    String val = getConfigString(configKey);
+
+    if (val == null)
+      {
+	return defaultValue;
+      }
+    else
+      {
+	if (val.equals("true"))
+	  {
+	    return true;
+	  }
+	else
+	  {
+	    return false;
+	  }
+      }
+  }
+  
+  // Our primary constructor.  This will always be called, either from
+  // main(), above, or by the environment building our applet.
+
+  public GASHAdmin()
+  {
+  }
+
+  public GASHAdmin(String debugFilename)
+  {
+    this.debugFilename = debugFilename;
+  }
+
+  public void init()
+  {
+    GASHAdmin.my_GASHAdmin = this;
+
+    serverhost = getConfigString("ganymede.serverhost");
+    registryPort = getConfigInteger("ganymede.registryPort");
+    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
 
     GASHAdminFrame.sizer.restoreLookAndFeel();
 
@@ -472,7 +594,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 	    try
 	      {
-		Remote obj = Naming.lookup(GASHAdmin.url);
+		Remote obj = Naming.lookup(GASHAdmin.server_url);
 		
 		if (obj instanceof Server)
 		  {
@@ -713,135 +835,6 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   public void notifySSLClient(String host, int port, String cipherSuite)
   {
     this.cipherSuite = cipherSuite;
-  }
-
-  /**
-   * Private method to load the Ganymede console's parameters from a
-   * file.  Used when GASHAdmin is run from the command line..  {@link
-   * arlut.csd.ganymede.admin.GASHAdmin#loadParameters()
-   * loadParameters()} is for use in an applet context.
-   */ 
-
-  private static void loadProperties(String filename) throws IOException
-  {
-    Properties props = new Properties();
-
-    /* -- */
-
-    FileInputStream fis = new FileInputStream(filename);
-    BufferedInputStream bis = new BufferedInputStream(fis);
-
-    try
-      {
-        props.load(bis);
-      }
-    finally
-      {
-        bis.close();
-      }
-
-    serverhost = props.getProperty("ganymede.serverhost");
-
-    // get the registry port number
-
-    String registryPort = props.getProperty("ganymede.registryPort");
-
-    if (registryPort != null)
-      {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    throw new RuntimeException("Couldn't get a valid registry port number from the Ganymede properties file: " + 
-				       registryPort);
-	  }
-      }
-
-    if (serverhost == null)
-      {
-	throw new RuntimeException("Couldn't get the server host property from the Ganymede properties file " + filename);
-      }
-    else
-      {
-	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
-      }
-  }
-
-
-  /**
-   * Private method to load the Ganymede console's parameters from
-   * system properties.  Used when GASHAdmin is run from Java Web
-   * Start as an application.
-   */ 
-
-  private static void loadProperties()
-  {
-    serverhost = java.lang.System.getProperty("ganymede.serverhost");
-
-    // get the registry port number
-
-    String registryPort = java.lang.System.getProperty("ganymede.registryPort");
-
-    if (registryPort != null)
-      {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println("Couldn't get a valid registry port number from ganymede properties file: " + 
-			       registryPort);
-	  }
-      }
-
-    if (serverhost == null)
-      {
-	throw new RuntimeException("Couldn't get the server host property");
-      }
-    else
-      {
-	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
-      }
-  }
-
-  /**
-   * Private method to load the Ganymede console's parameters
-   * from an applet's HTML parameters.  Used when GASHAdmin is run as an applet..
-   * {@link arlut.csd.ganymede.admin.GASHAdmin#loadProperties(java.lang.String) loadProperties()}
-   * is for use in an application context.
-   */ 
-
-  private void loadParameters()
-  {
-    serverhost = getParameter("ganymede.serverhost");
-
-    String registryPort = getParameter("ganymede.registryPort");
-    
-    if (registryPort != null)
-      {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println("Couldn't get a valid registry port number from ganymede applet parameters: " + 
-			       registryPort);
-	  }
-      }
-
-    if (serverhost == null)
-      {
-	System.err.println("Couldn't get the server host property");
-	throw new RuntimeException("Couldn't get the server host property");
-      }
-    else
-      {
-	url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
-      }
   }
 
   /**
