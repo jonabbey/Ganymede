@@ -249,14 +249,14 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
    * parameter element, depending on whether the Ganymede client is
    * being run as an application or as an applet.
    *
-   * If glogin is being run as an application, the static variable
+   * If GASHAdmin is being run as an application, the static variable
    * WeAreApplet must be set to false, and properties_file should be
    * set to point to the Ganymede property file on disk before
    * getConfigString() is called.
    *
-   * If glogin is being run as an applet, the static variable my_login
-   * must be set to point to the singleton glogin object before
-   * getConfigString() is called.
+   * If GASHAdmin is being run as an applet, the static variable
+   * my_login must be set to point to the singleton glogin object
+   * before getConfigString() is called.
    */
 
   static public String getConfigString(String configKey)
@@ -309,14 +309,14 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
    * parameter element, depending on whether the Ganymede client is
    * being run as an application or as an applet.
    *
-   * If glogin is being run as an application, the static variable
+   * If GASHAdmin is being run as an application, the static variable
    * WeAreApplet must be set to false, and properties_file should be
    * set to point to the Ganymede property file on disk before
    * getConfigInteger() is called.
    *
-   * If glogin is being run as an applet, the static variable my_login
-   * must be set to point to the singleton glogin object before
-   * getConfigInteger() is called.
+   * If GASHAdmin is being run as an applet, the static variable
+   * my_login must be set to point to the singleton glogin object
+   * before getConfigInteger() is called.
    *
    * @throws NumberFormatException if the config value returned for
    * configKey is not a number.
@@ -332,14 +332,14 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
    * parameter element, depending on whether the Ganymede client is
    * being run as an application or as an applet.
    *
-   * If glogin is being run as an application, the static variable
+   * If GASHAdmin is being run as an application, the static variable
    * WeAreApplet must be set to false, and properties_file should be
    * set to point to the Ganymede property file on disk before
    * getConfigBoolean() is called.
    *
-   * If glogin is being run as an applet, the static variable my_login
-   * must be set to point to the singleton glogin object before
-   * getConfigBoolean() is called.
+   * If GASHAdmin is being run as an applet, the static variable
+   * my_login must be set to point to the singleton glogin object
+   * before getConfigBoolean() is called.
    *
    * @returns defaultValue if there is no property or applet parameter
    * matching configKey, else returns true if the property/parameter
