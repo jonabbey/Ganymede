@@ -321,7 +321,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     return WeAreApplet;
   }
 
-
   /**
    * Returns a configuration String from a property file or applet
    * parameter element, depending on whether the Ganymede client is
