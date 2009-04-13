@@ -2143,10 +2143,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public synchronized ReturnVal setName(String newName)
   {
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException(ts.l("global.notediting"));
-      }
+    securityCheck();
 
     // make sure we strip any chars that would cause this object name
     // to not be a valid XML entity name character.  We make an
@@ -2166,7 +2163,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // check to make sure another object type isn't using the proposed
     // new name
 
-    if (this.editor != null)
+    if (isEditing())
       {
 	if (this.editor.getBase(newName) != null)
 	  {
@@ -2244,18 +2241,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public synchronized ReturnVal setClassInfo(String newClassName, String newOptionString)
   {
+    securityCheck();
+
     /*
-     * Remember the original values we've got, just in case the new values don't
-     * take for whatever reason.
+     * Remember the original values we've got, just in case the new
+     * values don't take for whatever reason.
      */
+
     String originalClassName = classname;
     Class originalClassDef = classdef;
     DBEditObject originalObjectHook = objectHook;
-    
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException(ts.l("global.notediting"));
-      }
 
     /* FindBugs doesn't like me using == here, but it's a test for
        null or identity, and we do the equals() test as well. */
@@ -2374,11 +2369,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public synchronized ReturnVal moveFieldAfter(String fieldName, String previousFieldName)
   {
-    DBObjectBaseField oldField, prevField;
-
-    /* -- */
-
-    oldField = getFieldDef(fieldName);
+    securityCheck();
+    
+    DBObjectBaseField oldField = getFieldDef(fieldName);
 
     if (oldField == null)
       {
@@ -2394,7 +2387,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	return null;
       }
 
-    prevField = getFieldDef(previousFieldName);
+    DBObjectBaseField prevField = getFieldDef(previousFieldName);
 
     if (prevField == null || !customFields.contains(prevField))
       {
@@ -2421,11 +2414,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public synchronized ReturnVal moveFieldBefore(String fieldName, String nextFieldName)
   {
-    DBObjectBaseField oldField, nextField;
+    securityCheck();
 
-    /* -- */
-
-    oldField = getFieldDef(fieldName);
+    DBObjectBaseField oldField = getFieldDef(fieldName);
 
     if (oldField == null)
       {
@@ -2434,7 +2425,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 					  ts.l("moveFieldBefore.nomove", fieldName));
       }
 
-
     if (nextFieldName == null || nextFieldName.equals(""))
       {
 	customFields.remove(oldField);
@@ -2442,7 +2432,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	return null;
       }
 
-    nextField = getFieldDef(nextFieldName);
+    DBObjectBaseField nextField = getFieldDef(nextFieldName);
 
     if (nextField == null || !customFields.contains(nextField))
       {
@@ -2497,14 +2487,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public synchronized ReturnVal setTypeID(short objectId)
   {
+    securityCheck();
+
     if (objectId == type_code)
       {
 	return null;
-      }
-
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
 
     if ((objectId != type_code) && (type_code != -1))
@@ -2752,16 +2739,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public ReturnVal setLabelField(String fieldName)
   {
-    DBObjectBaseField bF;
+    securityCheck();
 
-    /* -- */
-
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException(ts.l("global.notediting"));
-      }
-
-    bF = getFieldDef(fieldName);
+    DBObjectBaseField bF = getFieldDef(fieldName);
 
     if (bF == null)
       {
@@ -2793,16 +2773,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public ReturnVal setLabelField(short fieldID)
   {
-    DBObjectBaseField bF;
+    securityCheck();
 
-    /* -- */
-
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException(ts.l("global.notediting"));
-      }
-
-    bF = getFieldDef(fieldID);
+    DBObjectBaseField bF = getFieldDef(fieldID);
 
     if (bF == null)
       {
@@ -2852,10 +2825,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public void setCategory(Category category)
   {
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException(ts.l("global.notediting"));
-      }
+    securityCheck();
 
     this.category = category;
   }
@@ -2878,10 +2848,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     /* -- */
 
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException(ts.l("global.notediting"));
-      }
+    securityCheck();
 
     id = getNextFieldID();
 
@@ -2942,10 +2909,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     /* -- */
 
-    if (!store.loading && editor == null)
-      {
-	throw new IllegalArgumentException(ts.l("global.notediting"));
-      }
+    securityCheck();
 
     if (fieldInUse(fieldName))
       {
@@ -3327,7 +3291,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	Ganymede.debug(ts.l("clearEditor.clearing", getName()));
       }
 
-    if (this.editor == null)
+    if (!isEditing())
       {
 	throw new IllegalArgumentException(ts.l("global.notediting"));
       }
@@ -3371,16 +3335,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	      }
 	  }
       }
-  }
-
-  /**
-   * Returns true if this DBObjectBase is being edited by the schema
-   * editor.
-   */
-
-  public boolean isEditing()
-  {
-    return editor != null;
   }
 
   /**
@@ -3897,6 +3851,63 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     if (field.getID() > SchemaConstants.FinalSystemField)
       {
 	customFields.remove(field);
+      }
+  }
+  
+  // general convenience methods
+
+  /**
+   * Indicates whether methods on this DBObjectBase are being called
+   * in the context of the server being loaded.
+   *
+   * If this method returns false, many of the data setter methods in
+   * this class will only be permitted if this DBObjectBase is
+   * connected with a non-null DBSchemaEdit object.
+   *
+   * In general, isLoading() and isEditing() should never be true at
+   * the same time.
+   */
+
+  public boolean isLoading()
+  {
+    return this.store.loading;
+  }
+
+  /**
+   * Indicates whether methods on this DBObjectBase are being called
+   * in the context of the schema being edited.
+   *
+   * If this method returns false, many of the data setter methods in
+   * this class will only be permitted if the DBStore is in loading
+   * mode.
+   *
+   * In general, isEditing() and isLoading() should never be true at
+   * the same time.
+   */
+
+  public boolean isEditing()
+  {
+    return this.editor != null;
+  }
+
+  /**
+   * Checks to see if we are in either a loading or editing context.
+   *
+   * If we are in neither, we throw an exception up, so that a
+   * modified client can't screw with our schema without appropriate
+   * authorization.
+   *
+   * This is necessary because we make RMI references to DBObjectBase
+   * objects available to all Ganymede RMI clients, most of which have
+   * not been granted permission to modify our schema.
+   */
+
+  private void securityCheck()
+  {
+    if (!isLoading() && !isEditing())
+      {
+	// "not in a schema editing context"
+	throw new IllegalStateException(ts.l("global.notediting"));
       }
   }
 

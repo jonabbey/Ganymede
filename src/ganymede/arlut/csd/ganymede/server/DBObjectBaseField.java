@@ -5140,6 +5140,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * If we are in neither, we throw an exception up, so that a
    * modified client can't screw with our schema without appropriate
    * authorization.
+   *
+   * This is necessary because we make RMI references to
+   * DBObjectBaseField objects available to all Ganymede RMI clients,
+   * most of which have not been granted permission to modify our
+   * schema.
    */
 
   private void securityCheck()
