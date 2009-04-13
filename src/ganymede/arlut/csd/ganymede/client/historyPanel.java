@@ -1,7 +1,8 @@
 /*
    historyPanel.java
 
-   The tab that holds history information.
+   Tab panel for the Ganymede client that shows historical metadata
+   and allows retrieval of history text for object windows.
    
    Created: 9 September 1997
    Last Commit: $Format:%cd$
