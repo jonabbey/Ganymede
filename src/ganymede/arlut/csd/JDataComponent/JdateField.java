@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -293,6 +293,32 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 
     setDate(my_date);
 
+    invalidate();
+    validate();
+  }
+
+  /**
+   * Can be used to make the calendar popup button visible or not
+   * visible.
+   */
+
+  public void showCalButton(boolean b)
+  {
+    _calendarButton.setVisible(b);
+
+    invalidate();
+    validate();
+  }
+
+  /**
+   * Can be used to make the clear/reset date button visible or not
+   * visible.
+   */
+
+  public void showClearButton(boolean b)
+  {
+    _clearButton.setVisible(b);
+    
     invalidate();
     validate();
   }

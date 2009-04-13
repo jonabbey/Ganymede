@@ -239,7 +239,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   private objectsOwnedTab objects_owned_tab;
   private notesTab notes_tab;
   private historyTab history_tab;
-  private adminHistoryTab admin_history_tab;
   private expirationRemovalTab expiration_tab;
   private expirationRemovalTab removal_tab;
 
@@ -540,14 +539,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	catch (Exception rx)
 	  {
 	    gc.processExceptionRethrow(rx, "Could not process object-specific tab: ");
-	  }
-
-	// If we're an admin persona, add the admin history tab
-
-	if (id == SchemaConstants.PersonaBase)
-	  {
-	    admin_history_tab = new adminHistoryTab(this, pane, ts.l("load.admin_history_tab")); // "Admin History"
-	    admin_history_tab.addToPane(tabList);
 	  }
 
 	// Only add the expiration and removal date panels if the date
@@ -1853,7 +1844,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     objects_owned_tab = null;
     notes_tab = null;
     history_tab = null;
-    admin_history_tab = null;
     expiration_tab = null;
     removal_tab = null;
 

@@ -68,6 +68,7 @@ import java.util.GregorianCalendar;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -83,6 +84,7 @@ import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.rmi.date_field;
 import arlut.csd.ganymede.rmi.string_field;
 
@@ -106,19 +108,20 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.historyPanel");
 
-  JTextArea
+  private JTextArea
     historyText;
 
-  JButton
-    selectDate,
-    showHistory,
-    showFullHistory;
+  private JComboBox
+    choiceBox;
 
-  JPanel
+  private JdateField
+    startDateField;
+
+  private JButton
+    showHistory;
+
+  private JPanel
     historyTextPanel;
-
-  JpopUpCalendar
-    popupCal = null;
 
   /**
    * We use a CardLayout so that we can display a 'man at work'
@@ -127,23 +130,20 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
    * history retrieval operation is complete.
    */
 
-  CardLayout
+  private CardLayout
     historyTextCard = new CardLayout();
 
-  TitledBorder
-    titledBorder;
-
-  Invid
+  private Invid
     invid;
 
-  gclient gc;
+  private gclient gc;
 
-  Date
+  private Date
     createdDate = null,
     selectedDate = null;
 
-  StringBuffer
-    historyBuffer;
+  private StringBuffer
+    historyBuffer = new StringBuffer();
 
   /* -- */
   
@@ -179,33 +179,54 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     gbc.insets = new Insets(0,2,0,2);
     gbc.fill = GridBagConstraints.NONE;
 
+    JPanel fillPanel = new JPanel(new BorderLayout());
+
     JPanel buttonPanel = new JPanel(gbl);
 
-    // "Set starting date"
-    selectDate = new JButton(ts.l("init.start_date_button"));
-    selectDate.setActionCommand("Set starting date");
-    selectDate.addActionListener(this);
-    gbc.gridx = 0;
-    gbl.setConstraints(selectDate, gbc);
-    buttonPanel.add(selectDate);
+    String[] choices = null;
 
-    // "Show history"
+    if (invid.getType() == SchemaConstants.PersonaBase)
+      {
+	choices = new String[3];
+
+	choices[0] = ts.l("global.show_history"); // "Show History"
+	choices[1] = ts.l("global.show_trans_history");	// "Show Transactional History"
+	choices[2] = ts.l("global.show_admin_history");	// "Show Admin History"
+      }
+    else
+      {
+	choices = new String[2];
+
+	choices[0] = ts.l("global.show_history"); // "Show History"
+	choices[1] = ts.l("global.show_trans_history");	// "Show Transactional History"
+      }
+
+    int index = 0;
+
+    choiceBox = new JComboBox(choices);
+    choiceBox.setSelectedIndex(0);
+    gbc.gridx = index++;
+    gbl.setConstraints(choiceBox, gbc);
+    buttonPanel.add(choiceBox);
+
+    // "since:"
+    JLabel startLabel = new JLabel(ts.l("init.since"));
+    gbc.gridx = index++;
+    gbl.setConstraints(startLabel, gbc);
+    buttonPanel.add(startLabel);
+
+    startDateField = new JdateField(createdDate, true, true, createdDate, new Date(), this);
+    startDateField.showClearButton(false);
+    gbc.gridx = index++;
+    gbl.setConstraints(startDateField, gbc);
+    buttonPanel.add(startDateField);
+
+    // "Go"
     showHistory = new JButton(ts.l("init.show_history_button"));
-    // "Show all changes made to this specific object"
-    showHistory.setToolTipText(ts.l("init.show_history_button_tooltip"));
     showHistory.addActionListener(this);
-    gbc.gridx = 1;
+    gbc.gridx = index++;
     gbl.setConstraints(showHistory, gbc);
     buttonPanel.add(showHistory);
-
-    // "Show Transactional History"
-    showFullHistory = new JButton(ts.l("init.show_transactional_button"));
-    // "Show all transactions in which this object was changed"
-    showFullHistory.setToolTipText(ts.l("init.show_transactional_button_tooltip"));
-    showFullHistory.addActionListener(this);
-    gbc.gridx = 2;
-    gbl.setConstraints(showFullHistory, gbc);
-    buttonPanel.add(showFullHistory);
 
     JPanel midPanel = new JPanel(new BorderLayout());
     midPanel.add("West",  new datesPanel(creator_field, creation_date_field, 
@@ -216,10 +237,11 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     topPanel.setBorder(new TitledBorder(ts.l("init.top_panel_border")));
     
     JPanel p = new JPanel(new BorderLayout());
+
     // "Detailed History"
-    titledBorder = new TitledBorder(ts.l("init.bottom_panel_border"));
-    p.setBorder(titledBorder);
-    p.add("North", buttonPanel);
+    p.setBorder(new TitledBorder(ts.l("init.bottom_panel_border")));
+    fillPanel.add("West", buttonPanel);
+    p.add("North", fillPanel);
     
     historyText = new JTextArea();
     historyText.setEditable(false);
@@ -257,67 +279,67 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == showHistory || e.getSource() == showFullHistory)
+    if (e.getSource() == showHistory)
       {
-	loadHistory(e.getSource() == showFullHistory);
-      }
-    else if (e.getActionCommand().equals("Set starting date"))
-      {
-	// show popup
-
-	if (popupCal == null)
-	  {
-            GregorianCalendar cal = new GregorianCalendar();
-            cal.setTime(selectedDate);
-
-	    popupCal = new JpopUpCalendar(gc, cal, this, true);
-	  }
-
-	popupCal.setVisible(true);
+	loadHistory();
       }
   }
 
   public void showWait()
   {
     showHistory.setEnabled(false);
-    showFullHistory.setEnabled(false);
     historyTextCard.show(historyTextPanel, "wait");
   }
 
   public void showText(String text)
   {
     showHistory.setEnabled(true);
-    showFullHistory.setEnabled(true);
     historyTextCard.show(historyTextPanel, "text");
     historyText.setText(text);
   }
 
-  public void loadHistory(boolean fullHistory)
+  public void loadHistory()
   {
-    final boolean showAll = fullHistory;
-
-    /* -- */
-
     showWait();
 
-    historyBuffer = (StringBuffer) FoxtrotAdapter.post(new foxtrot.Task()
+    try
       {
-	public Object run() throws Exception
-	{
-	  return gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
-	}
-      });
+	String choice = (String) choiceBox.getSelectedItem();
 
-    showText(historyBuffer.toString());
+	if (choice.equals(ts.l("global.show_history")) ||
+	    choice.equals(ts.l("global.show_trans_history")))
+	  {
+	    final boolean showAll = choice.equals(ts.l("global.show_trans_history"));
+
+	    historyBuffer = (StringBuffer) FoxtrotAdapter.post(new foxtrot.Task()
+	      {
+		public Object run() throws Exception
+		{
+		  return gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
+		}
+	      });
+
+	    showText(historyBuffer.toString());
+	  }
+	else if (choice.equals(ts.l("global.show_admin_history")))
+	  {
+	    historyBuffer = (StringBuffer) FoxtrotAdapter.post(new foxtrot.Task()
+	      {
+		public Object run() throws Exception
+		{
+		  return gc.getSession().viewAdminHistory(invid, selectedDate);
+		}
+	      });
+	  }
+      }
+    finally
+      {
+	showText(historyBuffer.toString());
+      }
   }
 
   public boolean setValuePerformed(JValueObject e)
   {
-    if (e.getSource() != popupCal)
-      {
-        return true;            // er, sure, whatever
-      }
-
     if (e instanceof JSetValueObject)
       {
 	Date value = (Date)e.getValue();
@@ -355,7 +377,6 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     removeAll();
     historyText = null;
     showHistory = null;
-    showFullHistory = null;
 
     if (historyTextPanel != null)
       {
@@ -363,8 +384,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	historyTextPanel = null;
       }
 
-    selectDate = null;
-    titledBorder = null;
+    startDateField = null;
     invid = null;
     gc = null;
     selectedDate = null;
