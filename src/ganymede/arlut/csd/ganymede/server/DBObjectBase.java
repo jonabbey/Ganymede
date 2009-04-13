@@ -3925,7 +3925,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * of "foo".
    */
 
-  
   public boolean has_key(Object key)
   {
     return keys().contains(key);
