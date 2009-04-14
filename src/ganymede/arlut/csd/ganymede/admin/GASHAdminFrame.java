@@ -88,7 +88,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -96,6 +96,13 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.Position;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 
 import arlut.csd.ganymede.common.windowSizer;
 import arlut.csd.JDataComponent.JSetValueObject;
@@ -247,7 +254,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   JLabel memLabel = null;
   JTextField memField = null;
 
-  JTextArea statusArea = null;
+  JTextPane statusArea = null;
 
   // resources for the users connected table
   
@@ -768,7 +775,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     // set up our middle text area
 
     // "Ganymede Admin Console\n"
-    statusArea = new JTextArea(ts.l("init.start_log_msg"), 6, 50);
+    statusArea = new JTextPane();
+    appendLogText(ts.l("init.start_log_msg"));
     statusArea.setEditable(false);
     JScrollPane statusAreaPane = new JScrollPane(statusArea);
 
@@ -941,6 +949,84 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	  {
 	    System.exit(0);
 	  }
+      }
+  }
+
+  /**
+   * Add text from the server log to the log text pane.
+   *
+   * This method looks for patterns in the Ganymede server's log text,
+   * and will break the text apart to apply coloring to make different
+   * pieces of the log text stand out.
+   */
+
+  public void appendStyledLogText(String text)
+  {
+    String[] lines = text.split("\n");
+
+    for (String line: lines)
+      {
+	if (line.matches(".*\\[.\\d\\].*"))
+	  {
+	    String date = line.substring(0, line.indexOf('['));
+	    String count = line.substring(line.indexOf('[') + 1, line.indexOf(']')).trim();
+	    String remnant = line.substring(line.indexOf(']') + 2);
+
+	    int countVal = 0;
+
+	    try
+	      {
+		countVal = Integer.valueOf(count);
+	      }
+	    catch (NumberFormatException ex)
+	      {
+	      }
+
+	    appendLogText(date, Color.black, Color.white);
+	    appendLogText(" [", Color.black, Color.white);
+
+	    if (countVal == 0)
+	      {
+		appendLogText(count, Color.black, Color.white);
+	      }
+	    else
+	      {
+		appendLogText(count, Color.red, Color.white);
+	      }
+
+	    appendLogText("] ", Color.black, Color.white);
+	    appendLogText(remnant + "\n", Color.black, Color.white);
+	  }
+	else
+	  {
+	    appendLogText(line + "\n", Color.black, Color.white);
+	  }
+      }
+
+    statusArea.setCaretPosition(statusArea.getDocument().getEndPosition().getOffset() - 1);
+  }
+
+  public void appendLogText(String text)
+  {
+    appendLogText(text, Color.black, Color.white);
+  }
+
+  public void appendLogText(String text, Color foreground, Color background)
+  {
+    Document doc = statusArea.getDocument();
+    Position end = doc.getEndPosition();
+    MutableAttributeSet attr = new SimpleAttributeSet();
+
+    StyleConstants.setForeground(attr, foreground);
+    StyleConstants.setBackground(attr, background);
+
+    try
+      {
+	statusArea.getDocument().insertString(end.getOffset() - 1, text, attr);
+      }
+    catch (BadLocationException ex)
+      {
+	throw new RuntimeException(ex);
       }
   }
 

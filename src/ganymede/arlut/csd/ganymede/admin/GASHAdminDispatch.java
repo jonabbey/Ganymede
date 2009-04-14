@@ -488,8 +488,7 @@ class GASHAdminDispatch implements Runnable {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.statusArea.append(lStatus);
-	frame.statusArea.setCaretPosition(frame.statusArea.getText().length());
+	frame.appendStyledLogText(lStatus);
       }
     });
   }
