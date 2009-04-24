@@ -940,7 +940,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     defaultOwnerMI.addActionListener(this);
 
     // "Hide non-editable objects"
-    hideNonEditablesMI = new JCheckBoxMenuItem(ts.l("createMenuBar.file_menu_3"), true);
+    hideNonEditablesMI = new JCheckBoxMenuItem(ts.l("createMenuBar.file_menu_3"), hideNonEditables);
     setMenuMnemonic(hideNonEditablesMI, ts.l("createMenuBar.file_menu_3_key_optional"));
     hideNonEditablesMI.addActionListener(this);
 
