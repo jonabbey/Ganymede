@@ -586,7 +586,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * check box menu item.
    */
 
-  boolean    hideNonEditables = true;
+  boolean    hideNonEditables = prefs.getBoolean("hide_non_editable_objects", true);
 
   boolean defaultOwnerChosen = false;
 
@@ -5274,6 +5274,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     else if (source == hideNonEditablesMI)
       {
 	hideNonEditables = hideNonEditablesMI.getState();
+
+	if (this.prefs != null)
+	  {
+	    prefs.putBoolean("hide_non_editable_objects", hideNonEditables);
+	  }
+
 	clearTree();
       }
     else if (source == logoutMI)
