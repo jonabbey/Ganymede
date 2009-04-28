@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -57,6 +57,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -219,6 +220,13 @@ public class JpanelCalendar extends JPanel implements ActionListener {
    */
 
   private Date previousDate;
+
+  /**
+   * Private flag to inhibit updating while we're modifying
+   * our calendar's state.
+   */
+
+  private boolean inhibitPainting = false;
 
   /* -- */
 
@@ -759,74 +767,88 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
   protected synchronized void writeDates() 
   {
-    updateDate();
+    try
+      {
+	inhibitPainting = true;
 
-    // get a local copy of the calendar object indicating the month and year
-    // shown
+	updateDate();
 
-    GregorianCalendar temp  = (GregorianCalendar) visibleDate_calendar.clone();
+	// get a local copy of the calendar object indicating the month and year
+	// shown
 
-    // find the first day of the month
+	GregorianCalendar temp  = (GregorianCalendar) visibleDate_calendar.clone();
 
-    temp.add(Calendar.DATE,-(temp.get(Calendar.DATE)-1));
+	// find the first day of the month
 
-    // this is presumably here for a bug workaround
+	temp.add(Calendar.DATE,-(temp.get(Calendar.DATE)-1));
+
+	// this is presumably here for a bug workaround
 	
-    temp.setTime(temp.getTime());
+	temp.setTime(temp.getTime());
    
-    int startDay = temp.get(Calendar.DAY_OF_WEEK);
+	int startDay = temp.get(Calendar.DAY_OF_WEEK);
 
-    for (int i = 0; i<startDay-1; i++)
-      {
-	_datebuttonArray[i].hideYourself();
-      }
+	for (int i = 0; i<startDay-1; i++)
+	  {
+	    _datebuttonArray[i].hideYourself();
+	  }
 
-    int numDays;
+	int numDays;
     
-    if (temp.isLeapYear(temp.get(Calendar.YEAR)))
-      {
-	numDays = leapDays[temp.get(Calendar.MONTH)];
-      }
-    else
-      {
-	numDays = monthDays[temp.get(Calendar.MONTH)];
-      }
-
-    int day = 1;
-
-    for (int i = startDay-1; i < (startDay+numDays-1); i++,day++)
-      {
-	if (dateIsSet &&
-	    visibleDate_calendar.get(Calendar.YEAR) == selectedDate_calendar.get(Calendar.YEAR) &&
-	    visibleDate_calendar.get(Calendar.MONTH) == selectedDate_calendar.get(Calendar.MONTH) &&
-	    selectedDate_calendar.get(Calendar.DATE) == day)
+	if (temp.isLeapYear(temp.get(Calendar.YEAR)))
 	  {
-	    _datebuttonArray[i].setText(Integer.toString(day,10));
-	    _datebuttonArray[i].setFont(todayFont);
-	    _datebuttonArray[i].showYourself(Color.red);
+	    numDays = leapDays[temp.get(Calendar.MONTH)];
 	  }
-	else 
+	else
 	  {
-	    _datebuttonArray[i].setText(Integer.toString(day,10));
-	    _datebuttonArray[i].setFont(notTodayFont);
-	    _datebuttonArray[i].showYourself(Color.black);
+	    numDays = monthDays[temp.get(Calendar.MONTH)];
+	  }
+
+	int day = 1;
+
+	for (int i = startDay-1; i < (startDay+numDays-1); i++,day++)
+	  {
+	    if (dateIsSet &&
+		visibleDate_calendar.get(Calendar.YEAR) == selectedDate_calendar.get(Calendar.YEAR) &&
+		visibleDate_calendar.get(Calendar.MONTH) == selectedDate_calendar.get(Calendar.MONTH) &&
+		selectedDate_calendar.get(Calendar.DATE) == day)
+	      {
+		_datebuttonArray[i].setText(Integer.toString(day,10));
+		_datebuttonArray[i].setFont(todayFont);
+		_datebuttonArray[i].showYourself(Color.red);
+	      }
+	    else 
+	      {
+		_datebuttonArray[i].setText(Integer.toString(day,10));
+		_datebuttonArray[i].setFont(notTodayFont);
+		_datebuttonArray[i].showYourself(Color.black);
+	      }
+	  }
+
+	for (int i=startDay+numDays-1;i<37;i++)
+	  {
+	    _datebuttonArray[i].hideYourself();
+	  }
+
+	if (showTime)
+	  {
+	    timePanel.update();
 	  }
       }
-
-    for (int i=startDay+numDays-1;i<37;i++)
+    finally
       {
-	_datebuttonArray[i].hideYourself();
+	inhibitPainting = false;
       }
-
-    if (showTime)
-      {
-	timePanel.update();
-      }
-
-    // By calling repaint here, we give the RepaintManager a chance to
-    // coalesce the drawing for all the buttons we updated!
 
     repaint();
+  }
+
+  public void update(Graphics g)
+  {
+    if (!inhibitPainting)
+      {
+	super.update(g);
+      }
   }
 
   /**
