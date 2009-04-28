@@ -776,7 +776,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
    
     int startDay = temp.get(Calendar.DAY_OF_WEEK);
 
-    for (int i = 0;i<startDay-1;i++)
+    for (int i = 0; i<startDay-1; i++)
       {
 	_datebuttonArray[i].hideYourself();
       }
@@ -794,25 +794,23 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     int day = 1;
 
-    for (int i =startDay-1;i<(startDay+numDays-1);i++,day++)
+    for (int i = startDay-1; i < (startDay+numDays-1); i++,day++)
       {
-	_datebuttonArray[i].showYourself();
-
 	if (dateIsSet &&
 	    visibleDate_calendar.get(Calendar.YEAR) == selectedDate_calendar.get(Calendar.YEAR) &&
 	    visibleDate_calendar.get(Calendar.MONTH) == selectedDate_calendar.get(Calendar.MONTH) &&
 	    selectedDate_calendar.get(Calendar.DATE) == day)
 	  {
-	    _datebuttonArray[i].setForeground(Color.red);
+	    _datebuttonArray[i].setText(Integer.toString(day,10));
 	    _datebuttonArray[i].setFont(todayFont);
+	    _datebuttonArray[i].showYourself(Color.red);
 	  }
 	else 
 	  {
-	    _datebuttonArray[i].setForeground(Color.black);
+	    _datebuttonArray[i].setText(Integer.toString(day,10));
 	    _datebuttonArray[i].setFont(notTodayFont);
+	    _datebuttonArray[i].showYourself(Color.red);
 	  }
-
-	_datebuttonArray[i].setText(Integer.toString(day,10));
       }
 
     for (int i=startDay+numDays-1;i<37;i++)
@@ -1005,8 +1003,6 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
   JpanelCalendar my_parent = null;
 
   Color
-    normalFG = Color.black,
-    highlightFG = Color.darkGray,
     bg;
 
   boolean active;
@@ -1041,13 +1037,12 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
     addMouseListener(this);
 
     bg = getBackground();
-
   }
 
-  public void showYourself()
+  public void showYourself(Color fg)
   {
     setBorderPainted(true);
-    super.setForeground(normalFG);
+    super.setForeground(fg);
     super.setBackground(bg); // reset background
     super.setEnabled(true);
     this.active = true;
@@ -1058,15 +1053,8 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
     setText("  ");
     setBorderPainted(false);
     super.setForeground(getBackground());
-    //    super.setBackground(new Color(200,200,255));  // light blue to match panel background
     super.setEnabled(false);
     this.active = false;
-  }
-
-  public void setForeground(Color fg)
-  {
-    normalFG = fg;
-    super.setForeground(fg);
   }
 
   public void actionPerformed(ActionEvent e)
@@ -1093,7 +1081,6 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
 
   public void mouseExited(MouseEvent e)
   {
-    //super.setForeground(normalFG);
     if (isBorderPainted())
       {
 	super.setBackground(bg);
