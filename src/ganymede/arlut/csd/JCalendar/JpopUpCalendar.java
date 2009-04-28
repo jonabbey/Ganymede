@@ -3,18 +3,13 @@
 
    Created: 11 March 1997
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -83,6 +78,13 @@ public class JpopUpCalendar extends JCenterDialog implements JsetValueCallback {
   JpanelCalendar panelCal = null;
   JsetValueCallback parent;
 
+  /**
+   * We use this to inhibit re-rendering of the panel calendar upon
+   * the initial setVisible() call.
+   */
+
+  private boolean firstAppearance = true;
+  
   /* -- */
 
   public JpopUpCalendar(Frame parentFrame, GregorianCalendar parentCalendar, JsetValueCallback callback, boolean editable) 
@@ -143,6 +145,23 @@ public class JpopUpCalendar extends JCenterDialog implements JsetValueCallback {
       }
 
     return b;
+  }
+  
+  public void setVisible(boolean visibility)
+  {
+    if (visibility)
+      {
+	if (!firstAppearance)
+	  {
+	    panelCal.displaySelectedPage();
+	  }
+	else
+	  {
+	    firstAppearance = false;
+	  }
+      }
+
+    super.setVisible(visibility);
   }
 
   public void update() 
