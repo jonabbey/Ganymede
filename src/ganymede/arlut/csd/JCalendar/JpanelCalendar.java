@@ -809,7 +809,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	  {
 	    _datebuttonArray[i].setText(Integer.toString(day,10));
 	    _datebuttonArray[i].setFont(notTodayFont);
-	    _datebuttonArray[i].showYourself(Color.red);
+	    _datebuttonArray[i].showYourself(Color.black);
 	  }
       }
 
