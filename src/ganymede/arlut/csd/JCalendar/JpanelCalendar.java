@@ -823,7 +823,10 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	timePanel.update();
       }
 
-    validate();
+    // By calling repaint here, we give the RepaintManager a chance to
+    // coalesce the drawing for all the buttons we updated!
+
+    repaint();
   }
 
   /**
