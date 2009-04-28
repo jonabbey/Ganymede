@@ -1005,7 +1005,7 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
   Color
     bg;
 
-  boolean active;
+  private boolean active = true;
   
   /* -- */
 
@@ -1041,20 +1041,53 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
 
   public void showYourself(Color fg)
   {
-    setBorderPainted(true);
-    super.setForeground(fg);
-    super.setBackground(bg); // reset background
-    super.setEnabled(true);
-    this.active = true;
+    if (active)
+      {
+	if (!getForeground().equals(fg))
+	  {
+	    setForeground(fg);
+	  }
+      }
+    else
+      {
+	setBorderPainted(true);
+
+	setForeground(fg);
+
+	if (!getBackground().equals(bg))
+	  {
+	    setBackground(bg); // reset background
+	  }
+	
+	setEnabled(true);
+
+	this.active = true;
+      }
   }
 
   public void hideYourself()
   {
-    setText("  ");
-    setBorderPainted(false);
-    super.setForeground(getBackground());
-    super.setEnabled(false);
-    this.active = false;
+    if (active)
+      {
+	setText("  ");
+
+	if (isBorderPainted())
+	  {
+	    setBorderPainted(false);
+	  }
+
+	if (!getForeground().equals(getBackground()))
+	  {
+	    setForeground(getBackground());
+	  }
+
+	if (isEnabled())
+	  {
+	    setEnabled(false);
+	  }
+
+	this.active = false;
+      }
   }
 
   public void actionPerformed(ActionEvent e)
