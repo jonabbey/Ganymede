@@ -582,7 +582,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     
 	for (DBObjectBaseField fieldDef: original.customFields)
 	  {
-	    DBObjectBaseField bf = new DBObjectBaseField(fieldDef, editor, this);
+	    DBObjectBaseField bf = new DBObjectBaseField(fieldDef, this);
 
 	    addFieldToEnd(bf);
 	  }
@@ -1427,7 +1427,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 		try
 		  {
-		    newField = new DBObjectBaseField(this, editor);
+		    newField = new DBObjectBaseField(this);
+		    newField.setIsInUse(false);
 		  }
 		catch (RemoteException ex)
 		  {
@@ -2116,6 +2117,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   public DBStore getStore()
   {
     return store;
+  }
+
+  /**
+   * Returns the DBSchemaEdit managing changes to this DBObjectBase,
+   * or null if this DBObjectBase is not being edited.
+   */
+
+  public DBSchemaEdit getEditor()
+  {
+    return editor;
   }
 
   /**
@@ -2875,7 +2886,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     try
       {
-	field = new DBObjectBaseField(this, editor);
+	field = new DBObjectBaseField(this);
+	field.setIsInUse(false);
       }
     catch (RemoteException ex)
       {

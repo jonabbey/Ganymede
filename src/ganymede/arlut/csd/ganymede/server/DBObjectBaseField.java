@@ -319,14 +319,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   /* -- */
 
   /**
-   *
    * Generic field constructor.
-   *
    */
 
   DBObjectBaseField(DBObjectBase base) throws RemoteException
   {
     this.base = base;
+    this.editor = base.getEditor();
+    
     field_name = "";
     comment = "";
 
@@ -334,31 +334,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     
     field_code = -1;
     field_type = -1;
-    editor = null;
     lastChange = new Date();
 
     Ganymede.rmi.publishObject(this);
   }
 
   /**
-   *
-   * Editing base constructor.  This constructor is used to create a new
-   * field definition object in an editing context. 
-   *
-   */
-
-  DBObjectBaseField(DBObjectBase base, DBSchemaEdit editor) throws RemoteException
-  {
-    this(base);
-
-    this.editor = editor;
-    inUseCache = Boolean.FALSE;
-  }
-
-  /**
-   *
    * Receive constructor, for binary loading from ganymede.db.
-   *
    */
 
   DBObjectBaseField(DataInput in, DBObjectBase base) throws IOException, RemoteException
@@ -376,9 +358,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * TO THIS CLASS!</b></p>
    */
 
-  DBObjectBaseField(DBObjectBaseField original, DBSchemaEdit editor, DBObjectBase newBase) throws RemoteException
+  DBObjectBaseField(DBObjectBaseField original, DBObjectBase newBase) throws RemoteException
   {
-    this(original.base);
+    this(newBase);
 
     field_name = original.field_name; // name of this field
     field_code = original.field_code; // id of this field in the current object
@@ -428,8 +410,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // FieldTemplate for us.
 
     template = original.template;
-    this.editor = editor;
-    this.base = newBase;
   }
 
   /**
@@ -2665,6 +2645,16 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     securityCheck();
 
     this.visibility = visibility;
+  }
+  
+  /**
+   * Server-side method used to set the status of this field's
+   * isInUseCache.
+   */
+
+  public void setIsInUse(Boolean val)
+  {
+    inUseCache = val;
   }
 
   /**
