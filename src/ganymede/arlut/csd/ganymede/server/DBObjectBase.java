@@ -495,7 +495,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /* -- */
 
   /**
-   * <p>Generic constructor.</p>
+   * Schema initialization constructor.  Used by DBStore when
+   * bootstrapping.
    *
    * @param store The DBStore database this DBObjectBase is being created for.
    * @param embedded If true, objects of this DBObjectBase type will not
@@ -505,77 +506,31 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public DBObjectBase(DBStore store, boolean embedded) throws RemoteException
   {
-    this(store, embedded, true);
+    this(store, embedded, true, null);
   }
 
   /**
-   * <p>This constructor actually does all the work of initializing a new
-   * DBObjectBase.  All other constructors for DBObjectBase will eventually
-   * call this constructor.</p>
+   * Creation constructor.  Used when the schema editor interface is
+   * used to create a new DBObjectBase.
    *
    * @param store The DBStore database this DBObjectBase is being created for.
+   * @param id The id code to be assigned to this new DBObjectBase.
    * @param embedded If true, objects of this DBObjectBase type will not
    * be top-level objects, but rather will be embedded using edit-in-place
-   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBFields}.
-   * @param createFields If true, the standard fields required by the server
-   * for its own operations will be created as part of DBObjectBase creation.  This
-   * should be false if this DBObjectBase is being created in the process of loading
-   * data from a pre-existing database which will presumably already have all
-   * essential fields defined.
+   * @param editor The DBSchemaEdit object controlling the edit.
    */
 
-  public DBObjectBase(DBStore store, boolean embedded, boolean createFields) throws RemoteException
+  public DBObjectBase(DBStore store, short id, boolean embedded, DBSchemaEdit editor) throws RemoteException
   {
-    this.store = store;
+    this(store, embedded, true, editor);
 
-    writerList = new Vector();
-    readerList = new Vector();
-    dumperList = new Vector();
-    dumpLockList = new Vector();
-    iterationList = Collections.unmodifiableList(new ArrayList<DBObject>());
-
-    object_name = "";
-    classname = "";
-    classdef = null;
-    type_code = -1;
-    label_id = -1;
-    category = null;
-    customFields = new ArrayList<DBObjectBaseField>();
-    fieldTable = new DBBaseFieldTable();
-    objectTable = new DBObjectTable(4000, (float) 1.0);
-    maxid = 0;
-    lastChange = new Date();
-
-    editor = null;
-
-    this.embedded = embedded;
-
-    if (createFields)
-      {
-	createBuiltIns(embedded);
-      }
-
-    objectHook = this.createHook();
-
-    Ganymede.rmi.publishObject(this);
-  }
-
-  /**
-   * <p>Creation constructor.  Used when the schema editor interface is
-   * used to create a new DBObjectBase.</p>
-   */
-
-  public DBObjectBase(DBStore store, short id, boolean embedded,
-		      DBSchemaEdit editor) throws RemoteException
-  {
-    this(store, embedded);
-    this.editor = editor;
     setTypeID(id);
   }
 
   /**
-   * <p>receive constructor.  Used to initialize this DBObjectBase from disk
-   * and load the objects of this type in from the standing store.</p>
+   * Receive constructor.  Used to initialize this DBObjectBase from
+   * disk and load the objects of this type in from the standing
+   * store.
    *
    * @param in Input stream to read this object base from.
    * @param store The Ganymede database object we are loading into.
@@ -588,7 +543,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // fields once we know whether the newly loaded object definition
     // is for an embedded object or not.
 
-    this(store, false, false);
+    this(store, false, false, null);
 
     receive(in);
 
@@ -599,14 +554,17 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>copy constructor.  Used to create a copy that we can play with for
-   * schema editing.</p>
+   * Copy constructor.  Used to create a copy that we can play with
+   * for schema editing.
+   *
+   * @param original The original DBObjectBase we're creating a copy
+   * of for modification during a schema edit.
+   * @param editor The DBSchemaEdit object controlling the edit.
    */
 
   public DBObjectBase(DBObjectBase original, DBSchemaEdit editor) throws RemoteException
   {
-    this(original.store, original.embedded, true);
-    this.editor = editor;
+    this(original.store, original.embedded, true, editor);
 
     synchronized (original)
       {
@@ -643,6 +601,69 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	lastChange = new Date();
       }
+  }
+
+  /**
+   * This constructor actually does all the work of initializing a new
+   * DBObjectBase.  All other constructors for DBObjectBase will call
+   * this constructor before doing any other work.
+   *
+   * @param store The DBStore database this DBObjectBase is being created for.
+   * @param embedded If true, objects of this DBObjectBase type will not
+   * be top-level objects, but rather will be embedded using edit-in-place
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBFields}.
+   * @param createFields If true, the standard fields required by the
+   * server for its own operations will be created as part of
+   * DBObjectBase creation.  This should be false if this DBObjectBase
+   * is being created in the process of loading data from a
+   * pre-existing database which will presumably already have all
+   * essential fields defined.
+   * @param editor If this DBObjectBase is being created in the
+   * context of an interactive or xml based schema editor, this
+   * parameter will point to the DBSchemaEdit object controlling the
+   * edit.
+   */
+
+  public DBObjectBase(DBStore store, boolean embedded, boolean createFields, DBSchemaEdit editor) throws RemoteException
+  {
+    if (editor == null && !store.loading)
+      {
+	throw new IllegalStateException("Can't create a DBObjectBase unless loading or editing.");
+      }
+
+    this.store = store;
+    this.editor = editor;
+
+    writerList = new Vector();
+    readerList = new Vector();
+    dumperList = new Vector();
+    dumpLockList = new Vector();
+    iterationList = Collections.unmodifiableList(new ArrayList<DBObject>());
+
+    object_name = "";
+    classname = "";
+    classdef = null;
+    type_code = -1;
+    label_id = -1;
+    category = null;
+    customFields = new ArrayList<DBObjectBaseField>();
+    fieldTable = new DBBaseFieldTable();
+    objectTable = new DBObjectTable(4000, (float) 1.0);
+    maxid = 0;
+    lastChange = new Date();
+
+    editor = null;
+
+    this.embedded = embedded;
+
+    if (createFields)
+      {
+	createBuiltIns(embedded);
+      }
+
+    objectHook = this.createHook();
+
+    Ganymede.rmi.publishObject(this);
   }
 
   synchronized void emit(DataOutput out, boolean dumpObjects) throws IOException
