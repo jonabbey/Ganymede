@@ -21,7 +21,7 @@
 
 JAVA=/usr/bin/java
 PROPERTIES=ganymede.properties
-CLASSPATH=jars/ganymedeServer.jar:jars/gnu-regexp-1.1.4.jar:jars/custom.jar:jython/jython.jar:jython/jython-lib.jar
+CLASSPATH=jars/ganymedeServer.jar:jars/custom.jar:jython/jython.jar:jython/jython-lib.jar
 INSTALLDIR=/var/ganymede
 
 # ------------------------------------------------------------------ #

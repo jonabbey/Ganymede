@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -81,7 +81,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   static final boolean debug = false;
 
-  static gnu.regexp.RE regexp = null;
   // ---
 
   systemCustom sysObj = null;

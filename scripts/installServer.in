@@ -216,7 +216,6 @@ copy("COPYRIGHT", "$installdir/COPYRIGHT"); print ".";
 copy("KNOWNBUGS", "$installdir/KNOWNBUGS"); print ".";
 
 copy("jars/ganymedeServer.jar", "$installdir/jars/ganymedeServer.jar"); print ".";
-copy("jars/gnu-regexp-1.1.4.jar", "$installdir/jars/gnu-regexp-1.1.4.jar"); print ".";
 copy("jars/antlr.jar", "$installdir/jars/antlr.jar"); print ".";
 &copydir("src/jython", "$installdir/jython"); print ".";
 
@@ -292,7 +291,7 @@ $template = "scripts/runServer.template";
 
 %runconvert = ("JAVA" => $vars{"JVM"}."/java",
                "PROPERTIES" => "$installdir/ganymede.properties",
-               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/jars/gnu-regexp-1.1.4.jar:$installdir/schema/custom.jar:$installdir/jars/antlr.jar:$installdir/jython/jython.jar:$installdir/jython/jython-lib.jar",
+               "CLASSPATH" => "$installdir/jars/ganymedeServer.jar:$installdir/schema/custom.jar:$installdir/jars/antlr.jar:$installdir/jython/jython.jar:$installdir/jython/jython-lib.jar",
 	       "RMIPORT" => $vars{"REGISTRYPORT"},
 	       "INSTALLDIR" => $installdir);
 
