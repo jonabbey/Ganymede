@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -98,6 +98,17 @@ public class QueryDataNode extends QueryNode {
   public byte comparator;
   public byte arrayOp;
   public Object value;
+
+  /**
+   * We declare this as a transient generic so that the client doesn't
+   * have to have the class we're using on the server to handle
+   * regular expression matching.. we can choose to use either the gnu
+   * regular expression package or the 1.4 java.util.regex package,
+   * and the client won't care.
+   *
+   * Also, transient because we don't want to transport the compiled
+   * pattern across RMI.
+   */
 
   public transient Object regularExpression = null;
 

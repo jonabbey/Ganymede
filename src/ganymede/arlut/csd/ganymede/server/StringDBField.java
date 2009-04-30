@@ -873,9 +873,7 @@ public class StringDBField extends DBField implements string_field {
 
     if (getFieldDef().getRegexp() != null)
       {
-	gnu.regexp.REMatch match = getFieldDef().getRegexp().getMatch(s);
-
-	if (match == null)
+	if (!getFieldDef().getRegexp().matcher(s).find())
 	  {
 	    String desc = getFieldDef().getRegexpDesc();
 

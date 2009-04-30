@@ -216,7 +216,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * in {@link arlut.csd.ganymede.server.StringDBField}s.
    */
 
-  private gnu.regexp.RE regexp = null;
+  private java.util.regex.Pattern regexp = null;
 
   // invid attributes
 
@@ -3795,7 +3795,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * we set the regexp through a regexp string via setRegexpPat().
    */
 
-  public gnu.regexp.RE getRegexp()
+  public java.util.regex.Pattern getRegexp()
   {
     return this.regexp;
   }
@@ -3875,9 +3875,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
 	try
 	  {
-	    regexp = new gnu.regexp.RE(s);
+	    regexp = java.util.regex.Pattern.compile(s);
 	  }
-	catch (gnu.regexp.REException ex)
+	catch (java.util.regex.PatternSyntaxException ex)
 	  {
 	    // "Schema Editing Error"
 	    // "Bad regular expression syntax: {0}\n{1}"

@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -961,9 +961,9 @@ public class DBQueryHandler {
 	    
 	    try
 	      {
-		n.regularExpression = new gnu.regexp.RE(n.value);
+		n.regularExpression = java.util.regex.Pattern.compile(n.value.toString());
 	      }
-	    catch (gnu.regexp.REException ex)
+	    catch (java.util.regex.PatternSyntaxException ex)
 	      {
 		// "Error, invalid pattern matching regular expression provided.  The Regular Expression parser reported the following error:\n{0}"
 		throw new RegexpException(ts.l("compareString.bad_regexp", ex.getMessage()));
@@ -975,28 +975,14 @@ public class DBQueryHandler {
 	      }
 	  }
 	
-	gnu.regexp.RE regexp = (gnu.regexp.RE) n.regularExpression;
+	java.util.regex.Pattern regexp = (java.util.regex.Pattern) n.regularExpression;
 	
 	if (debug)
 	  {
 	    System.err.println("DBQueryHandler: Trying to match regexp against " + string2);
 	  }
 	
-	gnu.regexp.REMatch match = regexp.getMatch(string2);
-	
-	if (debug)
-	  {
-	    if (match == null)
-	      {
-		System.err.println("DBQueryHandler: Failed match regexp against " + string2);
-	      }
-	    else
-	      {
-		System.err.println("DBQueryHandler: Found match regexp against " + string2);
-	      }
-	  }
-	
-	return (match != null);
+	return regexp.matcher(string2).find();
 
       case QueryDataNode.NOCASEMATCHES:
 
@@ -1014,9 +1000,9 @@ public class DBQueryHandler {
 	    
 	    try
 	      {
-		n.regularExpression = new gnu.regexp.RE(n.value, gnu.regexp.RE.REG_ICASE);
+		n.regularExpression = java.util.regex.Pattern.compile(n.value.toString(), java.util.regex.Pattern.CASE_INSENSITIVE);
 	      }
-	    catch (gnu.regexp.REException ex)
+	    catch (java.util.regex.PatternSyntaxException ex)
 	      {
 		// "Error, invalid pattern matching regular expression provided.  The Regular Expression parser reported the following error:\n{0}"
 		throw new RegexpException(ts.l("compareString.bad_regexp", ex.getMessage()));
@@ -1028,28 +1014,14 @@ public class DBQueryHandler {
 	      }
 	  }
 	
-	gnu.regexp.RE nocaseregexp = (gnu.regexp.RE) n.regularExpression;
+	java.util.regex.Pattern nocaseregexp = (java.util.regex.Pattern) n.regularExpression;
 	
 	if (debug)
 	  {
 	    System.err.println("DBQueryHandler: Trying to match case insensitive regexp against " + string2);
 	  }
 	
-	gnu.regexp.REMatch nocasematch = nocaseregexp.getMatch(string2);
-	
-	if (debug)
-	  {
-	    if (nocasematch == null)
-	      {
-		System.err.println("DBQueryHandler: Failed case insensitive match regexp against " + string2);
-	      }
-	    else
-	      {
-		System.err.println("DBQueryHandler: Found case insensitive match regexp against " + string2);
-	      }
-	  }
-	
-	return (nocasematch != null);
+	return nocaseregexp.matcher(string2).find();
 
       case QueryDataNode.EQUALS:
 

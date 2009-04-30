@@ -1262,13 +1262,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	return;
       }
 
-    gnu.regexp.RE regexp = null;
+    java.util.regex.Pattern regexp = null;
 
     try
       {
-	regexp = new gnu.regexp.RE("(\\d\\d\\d\\d)_(\\d\\d)_(\\d\\d)");
+	regexp = java.util.regex.Pattern.compile("(\\d\\d\\d\\d)_(\\d\\d)_(\\d\\d)");
       }
-    catch (gnu.regexp.REException ex)
+    catch (java.util.regex.PatternSyntaxException ex)
       {
 	// assuming we get the pattern right, this shouldn't happen
 
@@ -1299,9 +1299,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to match " + names[i]);
 	  }
 
-	gnu.regexp.REMatch match = regexp.getMatch(names[i]);
+	java.util.regex.Matcher match = regexp.matcher(names[i]);
 
-	if (match == null)
+	if (match == null || !match.find())
 	  {
 	    continue;
 	  }
@@ -1313,50 +1313,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	String yearString, monthString, dateString;
 
-	if (match.getStartIndex(1) != -1)
-	  {
-	    yearString = names[i].substring(match.getStartIndex(1),
-					    match.getEndIndex(1));
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on year");
-	      }
-
-	    continue;
-	  }
-
-	if (match.getStartIndex(2) != -1)
-	  {
-	    monthString = names[i].substring(match.getStartIndex(2),
-					     match.getEndIndex(2));
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on month");
-	      }
-
-	    continue;
-	  }
-
-	if (match.getStartIndex(3) != -1)
-	  {
-	    dateString = names[i].substring(match.getStartIndex(3),
-					    match.getEndIndex(3));
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): " + names[i] + " could not match on date");
-	      }
-
-	    continue;
-	  }
+	yearString = names[i].substring(match.start(1), match.end(1));
+	monthString = names[i].substring(match.start(2), match.end(2));
+	dateString = names[i].substring(match.start(3), match.end(3));
 
 	if (debug)
 	  {
