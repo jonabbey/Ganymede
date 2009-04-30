@@ -1496,6 +1496,34 @@ and uses the refined embedded object support logic to enable flexible
 configuration of the entire dhcpd.conf file generation without need of
 external configuration files.
 
+98. [CLIENT] Cleaned up, consolidated history panels
+
+I've cleaned up and consolidated the history and admin panels in the
+Ganymede client.  The GUI controls for choosing a time span to view
+history for is now simpler and easier to use.
+
+99. [SERVER] Reworked encapsulation in several server classes
+
+I modified DBObjectBase, DBObjectBaseField, DBField and several other
+server classes to mark all (or most) member variables as private, and
+added accessor methods to set and get these values, with proper
+security controls.
+
+General big clean up to improve encapsulation, honestly.  Things are
+much cleaner now, with less worries about accidental encapsulation
+violation.
+
+Also reworked the data structures in DBObject and DBObjectBase so that
+we now hold our fields and field definitions in a sorted list, rather
+than in a custom hashed data structure.  We now use
+java.util.Arrays.binarySearch() to efficiently find fields in
+DBObjects and DBObjectBases.
+
+100. [SERVER] Converted from using gnu.regexp to java.util.regex.
+
+I took out the use of the old gnu regexp package from the server, to
+reduce the size of the Ganymede download.
+
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
