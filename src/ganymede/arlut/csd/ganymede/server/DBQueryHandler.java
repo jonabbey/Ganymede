@@ -653,8 +653,8 @@ public class DBQueryHandler {
 		    
 		    for (int i = 0; i < values.size(); i++)
 		      {
-			Byte[] ipBytes = (Byte[]) values.elementAt(i)
-;
+			Byte[] ipBytes = (Byte[]) values.elementAt(i);
+
 			if (ipBytes.length == 4)
 			  {
 			    s2 = IPDBField.genIPV4string(ipBytes);
