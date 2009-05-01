@@ -352,15 +352,19 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <p>Copy constructor, used during schema editing.</p>
+   * Copy constructor, used during schema editing.
    *
-   * <p><b>IMPORTANT: BE SURE TO ALWAYS EDIT THIS METHOD IF YOU ADD ANY FIELDS
-   * TO THIS CLASS!</b></p>
+   * <b>IMPORTANT: BE SURE TO ALWAYS EDIT THIS METHOD IF YOU ADD ANY
+   * FIELDS TO THIS CLASS!</b>
    */
 
   DBObjectBaseField(DBObjectBaseField original, DBObjectBase newBase) throws RemoteException
   {
     this(newBase);
+
+    // Note that this method does direct property access for all
+    // copying, rather than using our setters, thereby bypassing the
+    // state checks for permissions, etc.
 
     field_name = original.field_name; // name of this field
     field_code = original.field_code; // id of this field in the current object
@@ -4317,7 +4321,23 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isEditing())
+
+    // isEditing() will return true if we are editing not loading.
+    //
+    // When we're editing, we want to be able to check for the
+    // existence of the target object type, but there is an exception
+    // to this.
+    //
+    // The DBObjectBase.createBuiltIns() method is being called on all
+    // DBObjectBase creation (in lieu of saving the built-in field
+    // definitions in our database file), to create the built-in
+    // fields, including the owner field pointing to object base 0.
+    //
+    // Since we know that object base 0 will always be defined, we'll
+    // skip checking for the existence of the base target base in that
+    // case.
+
+    if (isEditing() && val != 0)
       {
 	DBObjectBase b = (DBObjectBase) editor.getBase(val);
 
