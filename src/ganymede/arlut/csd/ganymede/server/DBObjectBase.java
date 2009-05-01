@@ -304,6 +304,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   private boolean embedded;
 
+  /**
+   * If true, this type of object has been saved in the database after
+   * a schema commit.  If false, 
+   */
+
+  private boolean consolidated = false;
+
   // runtime data
 
   /**
@@ -547,6 +554,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     receive(in);
 
+    consolidated = true;
+
     // need to recreate objectHook now that we have loaded our classdef info
     // from disk.
 
@@ -576,6 +585,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	label_id = original.label_id;
 	category = original.category;
 	embedded = original.embedded;
+	consolidated = original.consolidated;
     
 	// make copies of all the custom field definitions for this
 	// object type, and save them into our own field hash.
@@ -655,6 +665,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     editor = null;
 
     this.embedded = embedded;
+    this.consolidated = false;
 
     if (createFields)
       {
@@ -1623,6 +1634,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   public boolean isRemovable()
   {
     return (getTypeID() > SchemaConstants.FinalBase);
+  }
+
+  /**
+   * Returns true if this object type has previously been committed to
+   * the database, or false if this is a new object type.
+   */
+
+  public boolean isConsolidated()
+  {
+    return consolidated;
   }
 
   /**
@@ -3330,6 +3351,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
     
     this.editor = null;
+    this.consolidated = true;
     this.templateVector = null;
 
     // we need to make sure any objectHook for this class knows that

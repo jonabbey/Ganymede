@@ -2743,7 +2743,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     // if we aren't loading, don't allow messing with the global fields
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	// "Schema Editing Error"
 	// "Can''t change the name of a system field."
@@ -3353,7 +3353,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3402,7 +3402,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3453,7 +3453,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3520,7 +3520,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3584,7 +3584,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3636,7 +3636,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3700,7 +3700,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3764,7 +3764,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3843,7 +3843,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3902,7 +3902,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3982,7 +3982,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // if we are not loading, don't allow a built-in universal field
     // to be messed with
 
-    if (isEditing() && !isEditable())
+    if (isEditingProtectedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -4294,7 +4294,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isEditing() && isSystemField())
+    if (isEditingProtectedSystemField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field_change_attempt", this.toString()));
@@ -5125,6 +5125,27 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
+   * Returns true if we are attempting to edit a field that is
+   * protected and has previously been consolidated into the database.
+   */
+
+  private boolean isEditingProtectedField()
+  {
+    return this.editor != null && !isLoading() && base.isConsolidated() && !isEditable();
+  }
+
+
+  /**
+   * Returns true if we are attempting to edit a field that is
+   * protected and has previously been consolidated into the database.
+   */
+
+  private boolean isEditingProtectedSystemField()
+  {
+    return this.editor != null && !isLoading() && base.isConsolidated() && isSystemField();
+  }
+
+  /**
    * Checks to see if we are in either a loading or editing context.
    *
    * If we are in neither, we throw an exception up, so that a
@@ -5160,8 +5181,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     // wouldn't it be nice if java had decent support for declared data structures?
 
-    // basically we want to identify all fields in the built-in types
-    // that we have to be especially paranoid about.
+    // basically we want to identify all fields in the Ganymede
+    // built-in object types that we have to be especially paranoid
+    // about.
 
     switch (base.getTypeID())
       {
