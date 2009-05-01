@@ -2952,18 +2952,21 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// the mandatory types
 
 	// don't allow global fields to be messed with
-	
-	if (!isEditable())
-	  {
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("global.system_field", this.toString()));
-	  }
 
-	if (isSystemField())
+	if (base.isConsolidated())
 	  {
-	    // "Can''t change the type of a system field: {0}"
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("global.system_field_change_attempt", this.toString()));
+	    if (!isEditable())
+	      {
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("global.system_field", this.toString()));
+	      }
+
+	    if (isSystemField())
+	      {
+		// "Can''t change the type of a system field: {0}"
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("global.system_field_change_attempt", this.toString()));
+	      }
 	  }
 
 	if (isInUse())
@@ -3137,20 +3140,23 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing())
       {
-	if (!isEditable())
+	if (base.isConsolidated())
 	  {
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("global.system_field", this.toString()));
-	  }
+	    if (!isEditable())
+	      {
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("global.system_field", this.toString()));
+	      }
 
-	// array-ness is way too critical to be edited, even in mildly variable system
-	// fields like username in the user object
+	    // array-ness is way too critical to be edited, even in mildly variable system
+	    // fields like username in the user object
 
-	if (isSystemField())
-	  {
-	    // "Can''t change the vector status of a system field: {0}"
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setArray.any_system_field", this.toString()));
+	    if (isSystemField())
+	      {
+		// "Can''t change the vector status of a system field: {0}"
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("setArray.any_system_field", this.toString()));
+	      }
 	  }
 
 	// no change, no problem
@@ -3292,19 +3298,22 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing())
       {
-	if (!isEditable())
+	if (base.isConsolidated())
 	  {
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("global.system_field", this.toString()));
-	  }
+	    if (!isEditable())
+	      {
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("global.system_field", this.toString()));
+	      }
 
-	// array sizes need not be screwed with in the system fields
+	    // array sizes need not be screwed with in the system fields
 
-	if (isSystemField())
-	  {
-	    // "Can''t change the vector limits of a system field: {0}"
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setMaxArraySize.any_system_field", this.toString()));
+	    if (isSystemField())
+	      {
+		// "Can''t change the vector limits of a system field: {0}"
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("setMaxArraySize.any_system_field", this.toString()));
+	      }
 	  }
       }
 
@@ -4194,7 +4203,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing())
       {
-	if (isSystemField())
+	if (base.isConsolidated() && isSystemField())
 	  {
 	    // "Schema Editing Error"
 	    // "Can''t change the type of a system field: {0}."
@@ -4359,7 +4368,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    return null;		// no change, no harm
 	  }
 
-	if (isEditing() && isSystemField())
+	if (isEditing() && base.isConsolidated() && isSystemField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -4394,7 +4403,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    return null;	// no change, no harm
 	  }
 
-	if (isSystemField())
+	if (base.isConsolidated() && isSystemField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -4500,7 +4509,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;		// no change, no harm
       }
 
-    if (isEditing() && isSystemField())
+    if (isEditing() && base.isConsolidated() && isSystemField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field_change_attempt", this.toString()));
@@ -4602,7 +4611,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    return null;		// no change, no harm
 	  }
 
-	if (isEditing() && isSystemField())
+	if (isEditing() && base.isConsolidated() && isSystemField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -4668,7 +4677,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// reason to call setTargetField() on a system field when
 	// editing
 
-	if (isEditing() && isSystemField())
+	if (isEditing() && base.isConsolidated() && isSystemField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
