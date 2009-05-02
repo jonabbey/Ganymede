@@ -224,6 +224,51 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /* - */
 
   /**
+   * Enum of possible editing states for a DBObjectBase to be in.
+   */
+
+  public enum EditingMode
+  { 
+    /**
+     * The object base is locked and may not have any of its object or
+     * field definition parameters changed in any way.
+     */
+
+    LOCKED,
+
+    /**
+     * The object base is being constructed, and any and all object or
+     * field definition parameters may be set.
+     */
+
+    INITIALIZING,
+
+    /**
+     * The object base is being loaded, and any and all object or
+     * field definition parameters may be set.
+     */
+
+    LOADING,
+
+    /**
+     * The object base is being created ex nihilo by a DBSchemaEdit
+     * context, and certain fields that might not be mutable in other
+     * circumstances can have their configuration set.
+     */
+
+    CREATING,
+
+    /**
+     * A pre-existing object base is being edited by a DBSchemaEdit
+     * context.
+     */
+
+    EDITING;
+  }
+
+  /* - */
+
+  /**
    * <p>The central Ganymede database object that this object base is contained
    * within.</p>
    */
@@ -305,11 +350,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   private boolean embedded;
 
   /**
-   * If true, this type of object has been saved in the database after
-   * a schema commit.  If false, 
+   * Controls whether changes to this object base (and its field
+   * definitions) are permitted at the present.
    */
 
-  private boolean consolidated = false;
+  private EditingMode editingMode = EditingMode.INITIALIZING;
 
   // runtime data
 
@@ -514,6 +559,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   public DBObjectBase(DBStore store, boolean embedded) throws RemoteException
   {
     this(store, embedded, true, null);
+
+    // NB: editingMode is left in EditingMode.INITIALIZING for DBStore
+    // initialization.
   }
 
   /**
@@ -532,6 +580,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     this(store, embedded, true, editor);
 
     setTypeID(id);
+
+    editingMode = EditingMode.CREATING;
   }
 
   /**
@@ -552,9 +602,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     this(store, false, false, null);
 
+    editingMode = EditingMode.LOADING;
+
     receive(in);
 
-    consolidated = true;
+    editingMode = EditingMode.LOCKED;
 
     // need to recreate objectHook now that we have loaded our classdef info
     // from disk.
@@ -585,7 +637,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	label_id = original.label_id;
 	category = original.category;
 	embedded = original.embedded;
-	consolidated = original.consolidated;
     
 	// make copies of all the custom field definitions for this
 	// object type, and save them into our own field hash.
@@ -611,6 +662,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	lastChange = new Date();
       }
+
+    editingMode = EditingMode.EDITING;
   }
 
   /**
@@ -634,12 +687,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * edit.
    */
 
-  public DBObjectBase(DBStore store, boolean embedded, boolean createFields, DBSchemaEdit editor) throws RemoteException
+  private DBObjectBase(DBStore store, boolean embedded, boolean createFields, DBSchemaEdit editor) throws RemoteException
   {
     if (editor == null && !store.loading)
       {
 	throw new IllegalStateException("Can't create a DBObjectBase unless loading or editing.");
       }
+
+    editingMode = EditingMode.INITIALIZING;
 
     this.store = store;
     this.editor = editor;
@@ -665,7 +720,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     editor = null;
 
     this.embedded = embedded;
-    this.consolidated = false;
 
     if (createFields)
       {
@@ -1637,13 +1691,23 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * Returns true if this object type has previously been committed to
-   * the database, or false if this is a new object type.
+   * Returns the editing mode that this object base is currently in.
    */
 
-  public boolean isConsolidated()
+  public EditingMode getEditingMode()
   {
-    return consolidated;
+    return editingMode;
+  }
+
+  /**
+   * Sets the editing mode that this object base is currently in.
+   *
+   * Server-side only for security.
+   */
+
+  public void setEditingMode(EditingMode newMode)
+  {
+    editingMode = newMode;
   }
 
   /**
@@ -3351,7 +3415,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
     
     this.editor = null;
-    this.consolidated = true;
+
+    setEditingMode(EditingMode.LOCKED);
+
     this.templateVector = null;
 
     // we need to make sure any objectHook for this class knows that

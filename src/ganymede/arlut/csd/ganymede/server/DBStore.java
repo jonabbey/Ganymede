@@ -1354,6 +1354,8 @@ public final class DBStore implements JythonMap {
 
   public synchronized void setBase(DBObjectBase base)
   {
+    base.setEditingMode(DBObjectBase.EditingMode.LOCKED);
+
     objectBases.put(base.getKey(), base);
   }
 
