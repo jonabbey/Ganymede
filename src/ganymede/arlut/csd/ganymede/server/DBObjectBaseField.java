@@ -446,6 +446,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   public void clearEditor()
   {
     this.editor = null;
+    this.inUseCache = null;
 
     this.template = new FieldTemplate(this);
   }
@@ -2641,22 +2642,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   // ----------------------------------------------------------------------
 
   /**
-   * <p>This method returns true if this field definition can be edited
-   * in the schema editor.</p>
-   *
-   * <p>This method will return false for the built-in universal field
-   * types that the server is dependent on for its own
-   * functioning, because those really have no reason to be edited at
-   * all.. even the field names needn't be edited by anyone, since
-   * they aren't shown in the client.</p>
-   */
-
-  public boolean isEditable()
-  {
-    return getID() > SchemaConstants.FinalSystemField;
-  }
-
-  /**
    * <p>This method returns true if this field is one of the
    * system fields present in all objects.</p>
    */
@@ -2815,7 +2800,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     // if we aren't loading, don't allow messing with the global fields
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	// "Schema Editing Error"
 	// "Can''t change the name of a system field."
@@ -3009,21 +2994,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    // now we need to delineate those fields whose types must not be
-    // changed due to server requirements, even if we don't have an
-    // instance of the field in current use
-
-    // note that isEditable() checks for one of the universal fields..
-    // isSystemField() checks for non-universal fields in any of the
-    // system mandatory objects that we want to protect
-
-    // note that we don't just rule out all type setting on all fields
-    // in these object types, as it is permissible to add fields to
-    // the mandatory types
-
-    // don't allow global fields to be messed with
-
-    if (isEditingProtectedSystemField())
+    if (isEditingProtectedGanymedeDefinedField())
       {
 	// "Can''t change the type of a system field: {0}"
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
@@ -3198,7 +3169,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditingProtectedSystemField())
+    if (isEditingProtectedGanymedeDefinedField())
       {
 	// array-ness is way too critical to be edited, even in mildly variable system
 	// fields like username in the user object
@@ -3342,7 +3313,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isEditingProtectedSystemField())
+    if (isEditingProtectedGanymedeDefinedField())
       {
 	// array sizes need not be screwed with in the system fields
 
@@ -3396,7 +3367,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3445,7 +3416,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3496,7 +3467,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3563,7 +3534,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3627,7 +3598,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3679,7 +3650,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3748,7 +3719,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3812,7 +3783,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3891,7 +3862,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -3950,7 +3921,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -4031,7 +4002,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // if we are not loading, don't allow a built-in universal field
     // to be messed with
 
-    if (isEditingProtectedField())
+    if (isEditingProtectedBuiltInField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field", this.toString()));
@@ -4235,7 +4206,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isEditingProtectedSystemField())
+    if (isEditingProtectedGanymedeDefinedField())
       {
 	// "Schema Editing Error"
 	// "Can''t change the type of a system field: {0}."
@@ -4334,7 +4305,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;
       }
 
-    if (isEditingProtectedSystemField())
+    if (isEditingProtectedGanymedeDefinedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field_change_attempt", this.toString()));
@@ -4408,7 +4379,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    return null;		// no change, no harm
 	  }
 
-	if (isEditingProtectedSystemField())
+	if (isEditingProtectedGanymedeDefinedField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -4443,7 +4414,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    return null;	// no change, no harm
 	  }
 
-	if (isEditingProtectedSystemField())
+	if (isEditingProtectedGanymedeDefinedField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -4549,7 +4520,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return null;		// no change, no harm
       }
 
-    if (isEditingProtectedSystemField())
+    if (isEditingProtectedGanymedeDefinedField())
       {
 	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					  ts.l("global.system_field_change_attempt", this.toString()));
@@ -4651,7 +4622,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    return null;		// no change, no harm
 	  }
 
-	if (isEditingProtectedSystemField())
+	if (isEditingProtectedGanymedeDefinedField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -4717,7 +4688,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// reason to call setTargetField() on a system field when
 	// editing
 
-	if (isEditingProtectedSystemField())
+	if (isEditingProtectedGanymedeDefinedField())
 	  {
 	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
 					      ts.l("global.system_field_change_attempt", this.toString()));
@@ -5170,15 +5141,32 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   private boolean isEditing()
   {
-    return this.editor != null;
+    switch (base.getEditingMode())
+      {
+      case LOCKED:
+      case INITIALIZING:
+      case LOADING:
+	return false;
+
+      case CREATING:
+      case EDITING:
+	return true;
+
+      default:
+	throw new RuntimeException("Unrecognized editing mode");
+      }
   }
 
   /**
-   * Returns true if we are attempting to edit a field that is
-   * protected and has previously been consolidated into the database.
+   * Returns true if we are attempting to edit one of the universal
+   * built-in fields at an inappropriate time.
+   *
+   * If the DBObjectBase is in INITIALIZING, LOADING, or CREATING
+   * mode, we'll allow the built-in fields to be edited, otherwise not
+   * so much.
    */
 
-  private boolean isEditingProtectedField()
+  private boolean isEditingProtectedBuiltInField()
   {
     switch (base.getEditingMode())
       {
@@ -5191,7 +5179,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	return false;
 
       case EDITING:
-	return !isEditable();
+	return getID() <= SchemaConstants.FinalSystemField;
 
       default:
 	throw new RuntimeException("Unrecognized editing mode");
@@ -5199,11 +5187,23 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * Returns true if we are attempting to edit a field that is
-   * protected and has previously been consolidated into the database.
+   * Returns true if we are attempting to edit any of the pre-defined
+   * fields that the Ganymede server depends on for its operation at
+   * an inappropriate time.
+   *
+   * If the DBObjectBase is in INITIALIZING or LOADING mode, we'll
+   * allow the built-in fields to be edited, otherwise not so much.
+   *
+   * Note that this method is more restrictive than
+   * isEditingProtectedBuiltInField(), which only protects the
+   * universal built-in fields.
+   * isEditingProtectedGanymedeDefinedField() protects the universal
+   * built-in fields, as well as the Ganymede defined fields in
+   * specific pre-defined object types (User, Role, Admin Persona,
+   * Task, etc.)
    */
 
-  private boolean isEditingProtectedSystemField()
+  private boolean isEditingProtectedGanymedeDefinedField()
   {
     switch (base.getEditingMode())
       {
