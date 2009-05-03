@@ -226,6 +226,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     typeC = new JComboBox();
 
+    // XXX need to localize these!
+
     typeC.addItem("Boolean");
     typeC.addItem("Numeric");
     typeC.addItem("Field Options");
@@ -769,131 +771,111 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.BOOLEAN)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		booleanShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else if (selectedItem.equalsIgnoreCase("Numeric"))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.NUMERIC)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		numericShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else if (selectedItem.equalsIgnoreCase("Float"))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.FLOAT)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		floatShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else if (selectedItem.equalsIgnoreCase("Field Options"))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.FIELDOPTIONS)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		fieldOptionShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else if (selectedItem.equalsIgnoreCase("Date"))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.DATE)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		dateShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else if (selectedItem.equalsIgnoreCase("String"))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.STRING)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		stringShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else if (selectedItem.equalsIgnoreCase("Object Reference"))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.INVID)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		referenceShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else if (selectedItem.equalsIgnoreCase("Password"))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.PASSWORD)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		passwordShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else if (selectedItem.equalsIgnoreCase("I.P."))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.IP)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		ipShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else if (selectedItem.equalsIgnoreCase("Permission Matrix"))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.PERMISSIONMATRIX)))
 	      {
-		refreshFieldEdit(true);
-		return;
-	      }
-	    else
-	      {
 		clearTypeChoice();
 		permissionShowing = true;
 	      }
+
+	    refreshFieldEdit(true);
+	    return;
 	  }
 	else
 	  {
