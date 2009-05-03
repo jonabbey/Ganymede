@@ -1644,7 +1644,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 		// "XML"
 		// "Unrecognized string typedef entity: {0}\nIn field def:\n{1}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doStringXML.bad_string_typedef_item", child, root.getTreeString()));
+						  ts.l("doStringXML.bad_string_typedef_item",
+						       child,
+						       root.getTreeString()));
 	      }
 	  }
       }
@@ -1658,7 +1660,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_vector_op", Boolean.valueOf(_vect), root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_vector_op",
+					       Boolean.valueOf(_vect),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 		
     if (_vect)
@@ -1670,8 +1675,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    // "XML"
 	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
 	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doStringXML.bad_vector_limit", Integer.valueOf(_maxSize),
-						   root.getTreeString(), retVal.getDialogText()));
+					      ts.l("doStringXML.bad_vector_limit",
+						   Integer.valueOf(_maxSize),
+						   root.getTreeString(),
+						   retVal.getDialogText()));
 	  }
       }
 
@@ -1682,8 +1689,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_min_length", Integer.valueOf(_minlength),
-					       root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_min_length",
+					       Integer.valueOf(_minlength),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     retVal = setMaxLength(_maxlength);
@@ -1693,8 +1702,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_max_length", Integer.valueOf(_maxlength),
-					       root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_max_length",
+					       Integer.valueOf(_maxlength),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     retVal = setOKChars(_okChars);
@@ -1704,7 +1715,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set ok chars: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_ok_chars", _okChars, root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_ok_chars",
+					       _okChars,
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
     
     retVal = setBadChars(_badChars);
@@ -1714,7 +1728,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set bad chars: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_bad_chars", _badChars, root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_bad_chars",
+					       _badChars,
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     retVal = setRegexpPat(_regexp);
@@ -1724,7 +1741,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set regular expression: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_regexp", _regexp, root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_regexp",
+					       _regexp,
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     retVal = setRegexpDesc(_regexp_desc);
@@ -1734,7 +1754,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set regular expression description: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_regexp_desc", _regexp_desc, root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_regexp_desc",
+					       _regexp_desc,
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     retVal = setMultiLine(_multiline);
@@ -1744,7 +1767,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set multiline: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_multiline", Boolean.valueOf(_multiline), root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doStringXML.bad_multiline",
+					       Boolean.valueOf(_multiline),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     retVal = setNameSpace(_namespace);
@@ -1754,7 +1780,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set namespace: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_namespace", _namespace, root.getTreeString(), retVal.getDialogText()));					  
+					  ts.l("doStringXML.bad_namespace",
+					       _namespace,
+					       root.getTreeString(),
+					       retVal.getDialogText()));					  
       }
 
     return null;
@@ -1813,7 +1842,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 		// "XML"
 		// "Unrecognized boolean typedef entity: {0}\nIn field def:\n{1}"
 		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doBooleanXML.bad_boolean_typedef_item", child, root.getTreeString()));
+						  ts.l("doBooleanXML.bad_boolean_typedef_item",
+						       child,
+						       root.getTreeString()));
 	      }
 	  }
       }
@@ -1827,7 +1858,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set labeled bit to {0}:\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doBooleanXML.bad_labeled_bit", Boolean.valueOf(_labeled), root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doBooleanXML.bad_labeled_bit",
+					       Boolean.valueOf(_labeled),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 		
     if (_labeled)
@@ -1839,7 +1873,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    // "XML"
 	    // "fielddef could not set true label to {0}\n{1}\n{2}"
 	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doBooleanXML.bad_true_label", _trueLabel, root.getTreeString(), retVal.getDialogText()));
+					      ts.l("doBooleanXML.bad_true_label",
+						   _trueLabel,
+						   root.getTreeString(),
+						   retVal.getDialogText()));
 	  }
 
 	retVal = setFalseLabel(_falseLabel);
@@ -1849,7 +1886,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    // "XML"
 	    // "fielddef could not set false label to {0}\n{1}\n{2}"
 	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doBooleanXML.bad_false_label", _falseLabel, root.getTreeString(), retVal.getDialogText()));
+					      ts.l("doBooleanXML.bad_false_label",
+						   _falseLabel,
+						   root.getTreeString(),
+						   retVal.getDialogText()));
 	  }
       }
 
@@ -2013,7 +2053,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_min_length", Integer.valueOf(_minlength),
+					  ts.l("doPasswordXML.bad_min_length",
+					       Integer.valueOf(_minlength),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -2079,8 +2120,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_apache_md5_crypted", Boolean.valueOf(_apachemd5crypted),
-					       root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doPasswordXML.bad_apache_md5_crypted",
+					       Boolean.valueOf(_apachemd5crypted),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     retVal = setWinHashed(_winHashed);
@@ -2090,8 +2133,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set windows hashing flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_windows_hashed", Boolean.valueOf(_winHashed),
-					       root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doPasswordXML.bad_windows_hashed",
+					       Boolean.valueOf(_winHashed),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     retVal = setSSHAHashed(_sshaHashed);
@@ -2101,8 +2146,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set SSHA hashing flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_ssha_hashed", Boolean.valueOf(_sshaHashed),
-					       root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doPasswordXML.bad_ssha_hashed",
+					       Boolean.valueOf(_sshaHashed),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     retVal = setShaUnixCrypted(_shaUnixCrypted);
@@ -2148,8 +2195,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set plaintext flag: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_plaintext", Boolean.valueOf(_plaintext),
-					       root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doPasswordXML.bad_plaintext",
+					       Boolean.valueOf(_plaintext),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     return null;
@@ -2233,7 +2282,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  ts.l("doIPXML.bad_vector_op",
-					       Boolean.valueOf(_vect), root.getTreeString(), retVal.getDialogText()));
+					       Boolean.valueOf(_vect),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 		
     if (_vect)
@@ -2245,8 +2296,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    // "XML"
 	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
 	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doIPXML.bad_vector_limit", Integer.valueOf(_maxSize),
-						   root.getTreeString(), retVal.getDialogText()));
+					      ts.l("doIPXML.bad_vector_limit",
+						   Integer.valueOf(_maxSize),
+						   root.getTreeString(),
+						   retVal.getDialogText()));
 	  }
       }
 
@@ -2257,8 +2310,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "XML"
 	// "fielddef could not set namespace: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doIPXML.bad_namespace", _namespace,
-					       root.getTreeString(), retVal.getDialogText()));
+					  ts.l("doIPXML.bad_namespace",
+					       _namespace,
+					       root.getTreeString(),
+					       retVal.getDialogText()));
       }
 
     return null;
