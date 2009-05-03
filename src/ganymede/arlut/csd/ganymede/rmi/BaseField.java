@@ -99,15 +99,6 @@ public interface BaseField extends Remote {
 
   public boolean isVisible() throws RemoteException;
 
-  /**
-   * <P>This method returns true if there are any fields of this type
-   * in the database.  The schema editing system uses this method to
-   * prevent incompatible modifications to fields that are in use
-   * in the database.</P>
-   */
-
-  public boolean isInUse() throws RemoteException;
-
   // general
 
   /**

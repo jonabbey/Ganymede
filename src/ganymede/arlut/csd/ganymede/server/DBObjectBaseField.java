@@ -2717,23 +2717,31 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <P>This method returns true if there are any fields of this type
-   * in the database.  The schema editing system uses this method to
-   * prevent incompatible modifications to fields that are in use
-   * in the database.</P>
+   * This method returns true if there is any concern that there
+   * are fields of this type in use in the database.  The schema
+   * editing system uses this method to prevent incompatible
+   * modifications to fields that are in use in the database.
    *
-   * @see arlut.csd.ganymede.rmi.BaseField
+   * This method will always return false when the DBObjectBase is
+   * newly created, is being initialized, or is being loaded.
+   *
+   * At other times, this method may seek through the entire
+   * collection of objects held in the containing DBObjectBase to see
+   * if any instances of this field exist.
    */
 
-  public boolean isInUse()
+  private boolean isInUse()
   {
+    switch (base.getEditingMode())
+      {
+      case CREATING:
+      case INITIALIZING:
+      case LOADING:
+	return false;
+      }
+
     if (inUseCache == null)
       {
-	if (base.getEditingMode() == DBObjectBase.EditingMode.CREATING)
-	  {
-	    return false;
-	  }
-
 	inUseCache = Boolean.valueOf(((DBObjectBase) this.getBase()).fieldInUse(this));
       }
 
