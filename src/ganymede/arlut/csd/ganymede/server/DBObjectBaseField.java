@@ -5144,10 +5144,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     switch (base.getEditingMode())
       {
       case LOCKED:
-      case INITIALIZING:
       case LOADING:
 	return false;
 
+      case INITIALIZING:
       case CREATING:
       case EDITING:
 	return true;
