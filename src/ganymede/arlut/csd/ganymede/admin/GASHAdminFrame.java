@@ -991,9 +991,20 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	      }
 	    else
 	      {
-		appendLogText(count, Color.red, Color.white);
+		appendLogText(count, Color.blue, Color.white);
 	      }
 
+	    appendLogText("] ", Color.black, Color.white);
+	    appendLogText(remnant + "\n", Color.black, Color.white);
+	  }
+	else if (line.matches(".*\\[\\*\\].*"))
+	  {
+	    String date = line.substring(0, line.indexOf('['));
+	    String remnant = line.substring(line.indexOf(']') + 2);
+
+	    appendLogText(date, Color.black, Color.white);
+	    appendLogText(" [", Color.black, Color.white);
+	    appendLogText("*", Color.red, Color.white);
 	    appendLogText("] ", Color.black, Color.white);
 	    appendLogText(remnant + "\n", Color.black, Color.white);
 	  }
