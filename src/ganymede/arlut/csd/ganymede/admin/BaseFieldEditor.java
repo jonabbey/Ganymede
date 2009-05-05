@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -120,6 +120,11 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   static final String passwordToken = ts.l("global.password");	 // "Password"
   static final String ipToken = ts.l("global.ip");		 // "I.P."
   static final String permissionToken = ts.l("global.permission"); // "Permission Matrix"
+
+  static final String allToken = ts.l("global.all"); // "<all>"
+  static final String anyToken = ts.l("global.any"); // "<any>"
+
+  static final String noneToken = ts.l("global.none"); // "<none>"
 
   // ---
 
@@ -480,7 +485,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	  }
 	else
 	  {
-	    if (((String)targetC.getModel().getSelectedItem()).equalsIgnoreCase("<any>"))
+	    if (((String)targetC.getModel().getSelectedItem()).equalsIgnoreCase(anyToken))
 	      {
 		editPanel.setRowVisible(fieldC, false);
 	      }
@@ -543,7 +548,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	 System.err.println("RemoteException getting namespaces: " + rx);
        }
       
-     namespaceC.addItem("<none>");      
+     namespaceC.addItem(noneToken);      
 
      if (nameSpaces == null || nameSpaces.length == 0)
        {
@@ -612,7 +617,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	throw new IllegalArgumentException("Exception getting Bases: " + rx);
       }
 
-    targetC.addItem("<any>");
+    targetC.addItem(anyToken);
 
     for (int i = 0 ; i < baseList.length ; i++)
       {
@@ -651,7 +656,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     try
       {
-	if (target.equals("<all>"))
+	if (target.equals(allToken))
 	  {
 	    targetBase = owner.getSchemaEdit().getBase((short)0);
 	  }
@@ -688,7 +693,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	System.err.println("refreshFieldChoice(): Swing Bug Bites Again");
       }
 
-    fieldC.addItem("<none>");
+    fieldC.addItem(noneToken);
     
     if (fields == null)
       {
@@ -700,7 +705,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	// By default, the Choice item will keep the
 	// first item added.. the following line is
 	// redundant, at least under JDK 1.1.2
-	//	fieldC.select("<none>");
+	//	fieldC.select(noneToken);
       }
     else
       {
@@ -1040,7 +1045,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 	    if (fieldDef.getNameSpaceLabel() == null)
 	      {
-		namespaceC.getModel().setSelectedItem("<none>");
+		namespaceC.getModel().setSelectedItem(noneToken);
 
 		if (debug)
 		  {
@@ -1109,7 +1114,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 	    if (fieldDef.getNameSpaceLabel() == null)
 	      {
-		namespaceC.getModel().setSelectedItem("<none>");
+		namespaceC.getModel().setSelectedItem(noneToken);
 
 		if (debug)
 		  {
@@ -1177,7 +1182,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		
 		if (updateTargetC)
 		  {
-		    targetC.getModel().setSelectedItem("<any>");
+		    targetC.getModel().setSelectedItem(anyToken);
 		  }
 	      }
 	    else
@@ -1199,11 +1204,11 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		    
 		    if (updateTargetC)
 		      {
-			targetC.addItem("<all>");
-			targetC.getModel().setSelectedItem("<all>");
+			targetC.addItem(allToken);
+			targetC.getModel().setSelectedItem(allToken);
 		      }
 			
-		    string = "<all>";
+		    string = allToken;
 			
 		    targetBase = se.getBase((short) 0);	// assume the field is present in first base
 		  }
@@ -1234,7 +1239,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 			
 			if (updateTargetC)
 			  {
-			    targetC.getModel().setSelectedItem("<any>");
+			    targetC.getModel().setSelectedItem(anyToken);
 			  }
 		      }
 		    else
@@ -1271,7 +1276,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 			System.out.println("unknown target field");
 		      }
 
-		    fieldC.getModel().setSelectedItem("<none>");
+		    fieldC.getModel().setSelectedItem(noneToken);
 		  }
 		else
 		  {
@@ -1323,7 +1328,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 			    throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
 			  }
 			
-			fieldC.getModel().setSelectedItem("<none>");
+			fieldC.getModel().setSelectedItem(noneToken);
 		      }
 		  }
 	      } // else targetB != -1
@@ -1352,7 +1357,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 	    if (fieldDef.getNameSpaceLabel() == null)
 	      {
-		namespaceC.getModel().setSelectedItem("<none>");
+		namespaceC.getModel().setSelectedItem(noneToken);
 
 		if (debug)
 		  {
@@ -2008,11 +2013,14 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    if ((currentFieldName != null) && (currentLabel != null)  &&
 		currentLabel.equals(currentFieldName))
 	      {
+		// "Warning: Changing Object Type"
+		// "Changing the type of this field will invalidate the label for this base.\nAre you sure you want to continue?"
+
 		changeLabelTypeDialog = new StringDialog(owner, 
-							 "Warning: changing object type",
-							 "Changing the type of this field will invalidate the label for this base.  Are you sure you want to continue?",
-							 "Confirm",
-							 "Cancel");
+							 ts.l("itemStateChanged.typeChangeWarningTitle"),
+							 ts.l("itemStateChanged.typeChangeLabelMessage"),
+							 StringDialog.getDefaultOk(),
+							 StringDialog.getDefaultCancel());
 		
 		Hashtable answer = changeLabelTypeDialog.showDialog();
 
@@ -2095,7 +2103,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 	try 
 	  {
-	    if (item.equalsIgnoreCase("<none>"))
+	    if (item.equalsIgnoreCase(noneToken))
 	      {
 		if (!handleReturnVal(fieldDef.setNameSpace(null)))
 		  {
@@ -2134,7 +2142,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    throw new RuntimeException("couldn't get old base name " + ex);
 	  }
 
-	if (item.equalsIgnoreCase("<any>"))
+	if (item.equalsIgnoreCase(anyToken))
 	  {
 	    try
 	      {
@@ -2206,7 +2214,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
 	try
 	  {
-	    if (item.equals("<none>"))
+	    if (item.equals(noneToken))
 	      {
 		if (!handleReturnVal(fieldDef.setTargetField(null)))
 		  {
