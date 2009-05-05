@@ -83,6 +83,7 @@ import arlut.csd.ganymede.rmi.Base;
 import arlut.csd.ganymede.rmi.BaseField;
 import arlut.csd.ganymede.rmi.NameSpace;
 import arlut.csd.ganymede.rmi.SchemaEdit;
+import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -98,6 +99,27 @@ import arlut.csd.ganymede.rmi.SchemaEdit;
 class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemListener {
 
   static final boolean debug = false;
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede admin console.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.BaseFieldEditor");
+
+  // localized strings describing the types of fields we support, to
+  // appear in the field type drop-down.
+
+  static final String booleanToken = ts.l("global.boolean"); // "Boolean"
+  static final String numericToken = ts.l("global.numeric"); // "Numeric"
+  static final String fieldOptionToken = ts.l("global.fieldOption"); // "Field Options"
+  static final String floatToken = ts.l("global.float"); // "Float"
+  static final String dateToken = ts.l("global.date");	 // "Date"
+  static final String stringToken = ts.l("global.string"); // "String"
+  static final String objectRefToken = ts.l("global.objectRef"); // "Object Reference"
+  static final String passwordToken = ts.l("global.password");	 // "Password"
+  static final String ipToken = ts.l("global.ip");		 // "I.P."
+  static final String permissionToken = ts.l("global.permission"); // "Permission Matrix"
 
   // ---
 
@@ -226,18 +248,16 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     typeC = new JComboBox();
 
-    // XXX need to localize these!
-
-    typeC.addItem("Boolean");
-    typeC.addItem("Numeric");
-    typeC.addItem("Field Options");
-    typeC.addItem("Float");
-    typeC.addItem("Date");
-    typeC.addItem("String");
-    typeC.addItem("Object Reference");
-    typeC.addItem("Password");
-    typeC.addItem("I.P.");
-    typeC.addItem("Permission Matrix");
+    typeC.addItem(booleanToken);
+    typeC.addItem(numericToken);
+    typeC.addItem(fieldOptionToken);
+    typeC.addItem(floatToken);
+    typeC.addItem(dateToken);
+    typeC.addItem(stringToken);
+    typeC.addItem(objectRefToken);
+    typeC.addItem(passwordToken);
+    typeC.addItem(ipToken);
+    typeC.addItem(permissionToken);
     typeC.addItemListener(this);
 
     cryptedCF = new JcheckboxField(null, false, true);
@@ -316,35 +336,35 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel = new JLabelPanel();
     editPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
     editPanel.setFixedSizeLabelCells(true);
-    editPanel.addFillRow("Field ID:", idN);
-    editPanel.addFillRow("Field Name:", nameS);
-    editPanel.addFillRow("Comment:", commentT);
-    editPanel.addFillRow("Vector:", vectorCF);
-    editPanel.addFillRow("Max Array Size:", maxArrayN);
-    editPanel.addFillRow("Field Type:", typeC);
-    editPanel.addFillRow("UNIX Crypted:", cryptedCF);
-    editPanel.addFillRow("FreeBSD-style MD5 Crypted:", md5cryptedCF);
-    editPanel.addFillRow("Apache-style MD5 Crypted:", apachemd5cryptedCF);
-    editPanel.addFillRow("Windows/Samba Crypted:", winHashcryptedCF);
-    editPanel.addFillRow("SSHA Crypted:", sshaHashcryptedCF);
-    editPanel.addFillRow("SHA Unix Crypted:", shaUnixCryptedCF);
-    editPanel.addFillRow("SHA Unix Crypt Variant:", shaUnixCryptTypeC);
-    editPanel.addFillRow("SHA Unix Crypt Rounds:", shaUnixCryptRoundsN);
-    editPanel.addFillRow("Store PlainText:", plainTextCF);
-    editPanel.addFillRow("MultiLine Field:", multiLineCF);
-    editPanel.addFillRow("Minimum String Size:", minLengthN);
-    editPanel.addFillRow("Maximum String Size:", maxLengthN);
-    editPanel.addFillRow("Regular Expression:", regexpS);
-    editPanel.addFillRow("RegExp Description:", regexpDescS);
-    editPanel.addFillRow("Allowed Chars:", OKCharS);
-    editPanel.addFillRow("Disallowed Chars:", BadCharS);
-    editPanel.addFillRow("Namespace:", namespaceC);
-    editPanel.addFillRow("Labeled:", labeledCF);
-    editPanel.addFillRow("True Label:", trueLabelS);
-    editPanel.addFillRow("False Label:", falseLabelS);
-    editPanel.addFillRow("Edit In Place:", editInPlaceCF);
-    editPanel.addFillRow("Target Object:", targetC);
-    editPanel.addFillRow("Target Field:", fieldC);
+    editPanel.addFillRow(ts.l("setupEditPanel.fieldIdRow"), idN); // "Field ID:"
+    editPanel.addFillRow(ts.l("setupEditPanel.fieldNameRow"), nameS); // "Field Name:"
+    editPanel.addFillRow(ts.l("setupEditPanel.commentRow"), commentT); // "Comment:"
+    editPanel.addFillRow(ts.l("setupEditPanel.vectorRow"), vectorCF);	// "Vector:"
+    editPanel.addFillRow(ts.l("setupEditPanel.arraySizeRow"), maxArrayN); // "Max Array Size:"
+    editPanel.addFillRow(ts.l("setupEditPanel.fieldTypeRow"), typeC); // "Field Type:"
+    editPanel.addFillRow(ts.l("setupEditPanel.unixCryptRow"), cryptedCF); // "UNIX Crypted:"
+    editPanel.addFillRow(ts.l("setupEditPanel.freeBSDMD5CryptRow"), md5cryptedCF); // "FreeBSD-style MD5 Crypted:"
+    editPanel.addFillRow(ts.l("setupEditPanel.apacheMD5CryptRow"), apachemd5cryptedCF); // "Apache-style MD5 Crypted:"
+    editPanel.addFillRow(ts.l("setupEditPanel.ntCryptRow"), winHashcryptedCF); // "Windows/Samba Crypted:"
+    editPanel.addFillRow(ts.l("setupEditPanel.sshaCryptRow"), sshaHashcryptedCF); // "SSHA Crypted:"
+    editPanel.addFillRow(ts.l("setupEditPanel.shaUnixCryptRow"), shaUnixCryptedCF); // "SHA Unix Crypted:"
+    editPanel.addFillRow(ts.l("setupEditPanel.shaUnixCryptVariantRow"), shaUnixCryptTypeC); // "SHA Unix Crypt Variant:"
+    editPanel.addFillRow(ts.l("setupEditPanel.shaUnixCryptRoundsRow"), shaUnixCryptRoundsN); // "SHA Unix Crypt Rounds:"
+    editPanel.addFillRow(ts.l("setupEditPanel.plaintextRow"), plainTextCF); // "Store PlainText:"
+    editPanel.addFillRow(ts.l("setupEditPanel.multilineRow"), multiLineCF); // "Multiline Field:"
+    editPanel.addFillRow(ts.l("setupEditPanel.minStringSizeRow"), minLengthN); // "Minimum String Size:"
+    editPanel.addFillRow(ts.l("setupEditPanel.maxStringSizeRow"), maxLengthN); // "Maximum String Size:"
+    editPanel.addFillRow(ts.l("setupEditPanel.regexpRow"), regexpS); // "Regular Expression Pattern:"
+    editPanel.addFillRow(ts.l("setupEditPanel.regexpDescRow"), regexpDescS); // "RegExp Description:"
+    editPanel.addFillRow(ts.l("setupEditPanel.allowedCharsRow"), OKCharS); // "Allowed Chars:"
+    editPanel.addFillRow(ts.l("setupEditPanel.disallowedCharsRow"), BadCharS); // "Disallowed Chars:"
+    editPanel.addFillRow(ts.l("setupEditPanel.namespaceRow"), namespaceC); // "Namespace:"
+    editPanel.addFillRow(ts.l("setupEditPanel.labeledBoolRow"), labeledCF); // "Labeled:"
+    editPanel.addFillRow(ts.l("setupEditPanel.trueLabelRow"), trueLabelS); // "True Label:"
+    editPanel.addFillRow(ts.l("setupEditPanel.falseLabelRow"), falseLabelS); // "False Label:"
+    editPanel.addFillRow(ts.l("setupEditPanel.editInPlaceRow"), editInPlaceCF); // "Edit In Place:"
+    editPanel.addFillRow(ts.l("setupEditPanel.targetObjRow"), targetC); // "Target Object:"
+    editPanel.addFillRow(ts.l("setupEditPanel.targetFieldRow"), fieldC); // "Target Field:"
 
     booleanShowing = true;
     numericShowing = false;
@@ -767,7 +787,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     try
       {
-	if (selectedItem.equalsIgnoreCase("Boolean"))
+	if (selectedItem.equalsIgnoreCase(booleanToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.BOOLEAN)))
 	      {
@@ -778,7 +798,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    refreshFieldEdit(true);
 	    return;
 	  }
-	else if (selectedItem.equalsIgnoreCase("Numeric"))
+	else if (selectedItem.equalsIgnoreCase(numericToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.NUMERIC)))
 	      {
@@ -789,7 +809,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    refreshFieldEdit(true);
 	    return;
 	  }
-	else if (selectedItem.equalsIgnoreCase("Float"))
+	else if (selectedItem.equalsIgnoreCase(floatToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.FLOAT)))
 	      {
@@ -800,7 +820,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    refreshFieldEdit(true);
 	    return;
 	  }
-	else if (selectedItem.equalsIgnoreCase("Field Options"))
+	else if (selectedItem.equalsIgnoreCase(fieldOptionToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.FIELDOPTIONS)))
 	      {
@@ -811,7 +831,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    refreshFieldEdit(true);
 	    return;
 	  }
-	else if (selectedItem.equalsIgnoreCase("Date"))
+	else if (selectedItem.equalsIgnoreCase(dateToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.DATE)))
 	      {
@@ -822,7 +842,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    refreshFieldEdit(true);
 	    return;
 	  }
-	else if (selectedItem.equalsIgnoreCase("String"))
+	else if (selectedItem.equalsIgnoreCase(stringToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.STRING)))
 	      {
@@ -833,7 +853,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    refreshFieldEdit(true);
 	    return;
 	  }
-	else if (selectedItem.equalsIgnoreCase("Object Reference"))
+	else if (selectedItem.equalsIgnoreCase(objectRefToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.INVID)))
 	      {
@@ -844,7 +864,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    refreshFieldEdit(true);
 	    return;
 	  }
-	else if (selectedItem.equalsIgnoreCase("Password"))
+	else if (selectedItem.equalsIgnoreCase(passwordToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.PASSWORD)))
 	      {
@@ -855,7 +875,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    refreshFieldEdit(true);
 	    return;
 	  }
-	else if (selectedItem.equalsIgnoreCase("I.P."))
+	else if (selectedItem.equalsIgnoreCase(ipToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.IP)))
 	      {
@@ -866,7 +886,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    refreshFieldEdit(true);
 	    return;
 	  }
-	else if (selectedItem.equalsIgnoreCase("Permission Matrix"))
+	else if (selectedItem.equalsIgnoreCase(permissionToken))
 	  {
 	    if (handleReturnVal(fieldDef.setType(FieldType.PERMISSIONMATRIX)))
 	      {
@@ -1006,7 +1026,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    OKCharS.setText(fieldDef.getOKChars());
 	    BadCharS.setText(fieldDef.getBadChars());
 	    
-	    typeC.getModel().setSelectedItem("String");
+	    typeC.getModel().setSelectedItem(stringToken);
 	    stringShowing = true;
 
 	    // add all defined namespaces here
@@ -1044,7 +1064,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    OKCharS.setText(fieldDef.getOKChars());
 	    BadCharS.setText(fieldDef.getBadChars());
 	    
-	    typeC.getModel().setSelectedItem("Password");
+	    typeC.getModel().setSelectedItem(passwordToken);
 	    passwordShowing = true;
 
 	    cryptedCF.setValue(fieldDef.isCrypted());
@@ -1075,7 +1095,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	  }
 	else if (fieldDef.isIP())
 	  {
-	    typeC.getModel().setSelectedItem("I.P.");
+	    typeC.getModel().setSelectedItem(ipToken);
 	    ipShowing = true;
 
 	    // add all defined namespaces here
@@ -1121,7 +1141,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		falseLabelS.setText("");
 	      }
 
-	    typeC.getModel().setSelectedItem("Boolean");
+	    typeC.getModel().setSelectedItem(booleanToken);
 	    booleanShowing = true;
 	  }
 	else if (fieldDef.isInvid())
@@ -1308,17 +1328,17 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		  }
 	      } // else targetB != -1
 	    
-	    typeC.getModel().setSelectedItem("Object Reference");
+	    typeC.getModel().setSelectedItem(objectRefToken);
 	    referenceShowing = true;
 	  }
 	else if (fieldDef.isDate())
 	  {
-	    typeC.getModel().setSelectedItem("Date");
+	    typeC.getModel().setSelectedItem(dateToken);
 	    dateShowing = true;
 	  }
 	else if (fieldDef.isNumeric())
 	  {
-	    typeC.getModel().setSelectedItem("Numeric");
+	    typeC.getModel().setSelectedItem(numericToken);
 	    numericShowing = true;
 
 	    // add all defined namespaces here
@@ -1351,18 +1371,18 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	  }
  	else if (fieldDef.isFloat())
  	  {
- 	    typeC.getModel().setSelectedItem("Float");
+ 	    typeC.getModel().setSelectedItem(floatToken);
  	    floatShowing = true;
  	  }
  	else if (fieldDef.isFieldOptions())
  	  {
- 	    typeC.getModel().setSelectedItem("Field Options");
+ 	    typeC.getModel().setSelectedItem(fieldOptionToken);
  	    fieldOptionShowing = true;
  	  }
 	else if (fieldDef.isPermMatrix())
 	  {
-	    typeC.addItem("Permission Matrix");
-	    typeC.getModel().setSelectedItem("Permission Matrix");
+	    typeC.addItem(permissionToken);
+	    typeC.getModel().setSelectedItem(permissionToken);
 	  }
 	else
 	  {
@@ -1954,7 +1974,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	boolean okToChange = true;
 	item = (String)typeC.getModel().getSelectedItem();
 
-	if (!item.equals("Numeric") && !item.equals("Float") && !item.equals("String"))
+	if (!item.equals(numericToken) && !item.equals(floatToken) && !item.equals(stringToken))
 	  {
 	    // Now it can't be a label.. was it a label before?
 
@@ -2027,15 +2047,15 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 		      {
 			if (fieldDef.isNumeric())
 			  {
-			    typeC.getModel().setSelectedItem("Numeric");
+			    typeC.getModel().setSelectedItem(numericToken);
 			  }
 			else if (fieldDef.isFloat())
 			  {
-			    typeC.getModel().setSelectedItem("Float");
+			    typeC.getModel().setSelectedItem(floatToken);
 			  }
 			else if (fieldDef.isString())
 			  {
-			    typeC.getModel().setSelectedItem("String");
+			    typeC.getModel().setSelectedItem(stringToken);
 			  }
 			else
 			  {
