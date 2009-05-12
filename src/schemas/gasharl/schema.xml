@@ -468,6 +468,7 @@ xmlclient.</comment>
                 <winHashed/>
                 <sshaHashed/>
                 <shaUnixCrypted type="512" rounds="5000"/>
+                <plaintext/>
               </typedef>
             </fielddef>
             <fielddef name="Account_Category" id="273">
@@ -484,7 +485,7 @@ xmlclient.</comment>
             <fielddef name="Badge" id="276">
               <typedef type="string">
                 <maxlength val="8"/>
-                <regexp val="^AW\d{3}|\d{4,5}$" desc="A Badge must match AWnnn where n is a digit, or a sequence of 4 or 5 digits."/>
+                <regexp val="(^AW\d{3}$)|(^\d{4,5}$)" desc="A Badge must match AWnnn where n is a digit, or a sequence of 4 or 5 digits."/>
               </typedef>
             </fielddef>
             <fielddef name="Division" id="258">
@@ -559,7 +560,6 @@ Limited to 16 for NFS.</comment>
               <typedef type="invid">
                 <vector/>
                 <targetobject name="Embedded_Automounter_Map_Entry"/>
-                <targetfield name="Containing_Object"/>
                 <embedded/>
               </typedef>
             </fielddef>
@@ -704,7 +704,6 @@ virtual overlay on another host.</comment>
               <typedef type="invid">
                 <vector/>
                 <targetobject name="Embedded_System_Interface"/>
-                <targetfield name="Containing_Object"/>
                 <embedded/>
               </typedef>
             </fielddef>
@@ -1329,7 +1328,7 @@ if the client does not explicitly request it.</comment>
           </tab>
         </objectdef>
         <objectdef name="DHCP_Network" id="268">
-          <classdef name="arlut.csd.ganymede.gasharl.dhcpNetworkCustom"/>
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpNetworkCustom" optionString=""/>
           <label fieldid="256"/>
           <tab name="General">
             <fielddef name="Name" id="256">
