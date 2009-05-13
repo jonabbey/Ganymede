@@ -193,27 +193,63 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   Image question = null;
 
   JMenuBar mbar = null;
+
   JMenu controlMenu = null;
+
   JMenuItem forceBuildMI = null;
+  final String FORCEBUILD = "force build";
+
   JMenuItem clearLogMI = null;
+  final String CLEARLOG = "clear log";
+
   JMenuItem quitMI = null;
+  final String QUIT = "quit";
+
   JMenuItem dumpMI = null;
+  final String DUMP = "dump";
+
   JMenuItem killAllMI = null;
+  final String KILLALL = "kill all";
+
   JMenuItem schemaMI = null;
+  final String SCHEMA = "edit schema";
+
   JMenuItem shutdownMI = null;
+  final String SHUTDOWN = "shutdown";
 
   JMenu debugMenu = null;
+
   JMenuItem runInvidTestMI = null;
+  final String TESTINVIDS = "test invids";
+
   JMenuItem runInvidSweepMI = null;
+  final String SWEEPINVIDS = "sweep invids";
+
   JMenuItem runEmbeddedTestMI = null;
+  final String TESTEMBEDDED = "test embedded";
+
   JMenuItem runEmbeddedSweepMI = null;
+  final String REPAIREMBEDDED = "repair embedded";
 
   JMenu helpMenu = null;
+
   JMenuItem showAboutMI = null;
+  final String ABOUT = "about";
+
   JMenuItem showJavaVersionMI = null;
+  final String JAVAVERSION = "java version";
 
   JPopupMenu popMenu = null;
+
   JMenuItem killUserMI = null;
+  final String KILLUSER = "kill user";
+
+  // and some for our task-related popup menus
+
+  final String RUNTASK = "run task";
+  final String STOPTASK = "stop task";
+  final String DISABLETASK = "disable task";
+  final String ENABLETASK = "enable task";
 
   JPanel topPanel = null;
 
@@ -291,11 +327,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 			  ts.l("global.task_col_4")}; // "Interval"
   int taskColWidths[] = {100,100,100,100,100};
 
-  JPopupMenu taskPopMenu = null;
-  JMenuItem runNowMI = null;
-  JMenuItem stopTaskMI = null;
-  JMenuItem disableTaskMI = null;
-  JMenuItem enableTaskMI = null;
   JSplitPane splitterPane = null;
   
   GASHAdmin loginPanel;
@@ -335,6 +366,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Clear Log Panel"
     clearLogMI = new JMenuItem(ts.l("init.control_menu_0"));
+    clearLogMI.setActionCommand(CLEARLOG);
 
     if (ts.hasPattern("init.control_menu_0_key_optional"))
       {
@@ -345,6 +377,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Force Build"
     forceBuildMI = new JMenuItem(ts.l("init.control_menu_1"));
+    forceBuildMI.setActionCommand(FORCEBUILD);
 
     if (ts.hasPattern("init.control_menu_1_key_optional"))
       {
@@ -356,6 +389,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Kill Off All Users"
     killAllMI = new JMenuItem(ts.l("init.control_menu_2"));
+    killAllMI.setActionCommand(KILLALL);
 
     if (ts.hasPattern("init.control_menu_2_key_optional"))
       {
@@ -366,6 +400,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Edit Schema"
     schemaMI = new JMenuItem(ts.l("init.control_menu_3"));
+    schemaMI.setActionCommand(SCHEMA);
 
     if (ts.hasPattern("init.control_menu_3_key_optional"))
       {
@@ -376,6 +411,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Shutdown Ganymede"
     shutdownMI = new JMenuItem(ts.l("init.control_menu_4"));
+    shutdownMI.setActionCommand(SHUTDOWN);
 
     if (ts.hasPattern("init.control_menu_4_key_optional"))
       {
@@ -386,6 +422,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Dump Database"
     dumpMI = new JMenuItem(ts.l("init.control_menu_5"));
+    dumpMI.setActionCommand(DUMP);
 
     if (ts.hasPattern("init.control_menu_5_key_optional"))
       {
@@ -396,6 +433,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Quit Console"
     quitMI = new JMenuItem(ts.l("init.control_menu_6"));
+    quitMI.setActionCommand(QUIT);
 
     if (ts.hasPattern("init.control_menu_6_key_optional"))
       {
@@ -429,6 +467,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Test Invid Integrity"
     runInvidTestMI = new JMenuItem(ts.l("init.debug_menu_0"));
+    runInvidTestMI.setActionCommand(TESTINVIDS);
 
     if (ts.hasPattern("init.debug_menu_0_key_optional"))
       {
@@ -439,6 +478,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Repair Invid Integrity"
     runInvidSweepMI = new JMenuItem(ts.l("init.debug_menu_1"));
+    runInvidSweepMI.setActionCommand(SWEEPINVIDS);
 
     if (ts.hasPattern("init.debug_menu_1_key_optional"))
       {
@@ -449,6 +489,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Test Embedded Integrity"
     runEmbeddedTestMI = new JMenuItem(ts.l("init.debug_menu_2"));
+    runEmbeddedTestMI.setActionCommand(TESTEMBEDDED);
 
     if (ts.hasPattern("init.debug_menu_2_key_optional"))
       {
@@ -459,6 +500,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Repair Embedded Integrity"
     runEmbeddedSweepMI = new JMenuItem(ts.l("init.debug_menu_3"));
+    runEmbeddedSweepMI.setActionCommand(REPAIREMBEDDED);
 
     if (ts.hasPattern("init.debug_menu_3_key_optional"))
       {
@@ -482,6 +524,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "About Ganymede"
     showAboutMI = new JMenuItem(ts.l("init.help_menu_0"));
+    showAboutMI.setActionCommand(ABOUT);
 
     if (ts.hasPattern("init.help_menu_0_key_optional"))
       {
@@ -495,6 +538,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // "Java Version"
     showJavaVersionMI = new JMenuItem(ts.l("init.help_menu_1"));
+    showJavaVersionMI.setActionCommand(JAVAVERSION);
 
     if (ts.hasPattern("init.help_menu_1_key_optional"))
       {
@@ -790,10 +834,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     // create our user table
 
-    popMenu = new JPopupMenu();
+    JPopupMenu popMenu = new JPopupMenu();
 
     // "Kill User"
     killUserMI = new JMenuItem(ts.l("init.killUserPopup"));
+    killUserMI.setActionCommand(KILLUSER);
     popMenu.add(killUserMI);
 
     table = new rowTable(colWidths, headers, this, false, popMenu, false);
@@ -804,28 +849,32 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     // create background task monitor
     //
 
-    taskPopMenu = new JPopupMenu();
+    JPopupMenu syncTaskPopMenu = new JPopupMenu();
 
     // "Run Task Now"
-    runNowMI = new JMenuItem(ts.l("init.runNowPopup"));
+    JMenuItem runNowMI = new JMenuItem(ts.l("init.runNowPopup"));
+    runNowMI.setActionCommand(RUNTASK);
 
     // "Stop Running Task"
-    stopTaskMI = new JMenuItem(ts.l("init.stopTaskPopup"));
+    JMenuItem stopTaskMI = new JMenuItem(ts.l("init.stopTaskPopup"));
+    stopTaskMI.setActionCommand(STOPTASK);
 
     // "Disable Task"
-    disableTaskMI = new JMenuItem(ts.l("init.disableTaskPopup"));
+    JMenuItem disableTaskMI = new JMenuItem(ts.l("init.disableTaskPopup"));
+    disableTaskMI.setActionCommand(DISABLETASK);
 
     // "Enable Task"
-    enableTaskMI = new JMenuItem(ts.l("init.enableTaskPopup"));
+    JMenuItem enableTaskMI = new JMenuItem(ts.l("init.enableTaskPopup"));
+    enableTaskMI.setActionCommand(ENABLETASK);
 
-    taskPopMenu.add(runNowMI);
-    taskPopMenu.add(stopTaskMI);
-    taskPopMenu.add(disableTaskMI);
-    taskPopMenu.add(enableTaskMI);
+    syncTaskPopMenu.add(runNowMI);
+    syncTaskPopMenu.add(stopTaskMI);
+    syncTaskPopMenu.add(disableTaskMI);
+    syncTaskPopMenu.add(enableTaskMI);
 
     // first the sync monitor
 
-    syncTaskTable = new rowTable(syncTaskColWidths, syncTaskHeaders, this, false, taskPopMenu, false);
+    syncTaskTable = new rowTable(syncTaskColWidths, syncTaskHeaders, this, false, syncTaskPopMenu, false);
 
     // 0b5a0e
     syncTaskTable.setHeadBackColor(new java.awt.Color(7,212,16), false);
@@ -834,6 +883,33 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     syncTaskBox.add("Center", syncTaskTable);
 
     // then the miscellaneous task monitor
+
+    JPopupMenu taskPopMenu = new JPopupMenu();
+
+    // we need to create new JMenuItems for the task table,
+    // independent from the sync task table, so we're re-assigning
+    // these variables
+
+    // "Run Task Now"
+    runNowMI = new JMenuItem(ts.l("init.runNowPopup"));
+    runNowMI.setActionCommand(RUNTASK);
+
+    // "Stop Running Task"
+    stopTaskMI = new JMenuItem(ts.l("init.stopTaskPopup"));
+    stopTaskMI.setActionCommand(STOPTASK);
+
+    // "Disable Task"
+    disableTaskMI = new JMenuItem(ts.l("init.disableTaskPopup"));
+    disableTaskMI.setActionCommand(DISABLETASK);
+
+    // "Enable Task"
+    enableTaskMI = new JMenuItem(ts.l("init.enableTaskPopup"));
+    enableTaskMI.setActionCommand(ENABLETASK);
+
+    taskPopMenu.add(runNowMI);
+    taskPopMenu.add(stopTaskMI);
+    taskPopMenu.add(disableTaskMI);
+    taskPopMenu.add(enableTaskMI);
 
     taskTable = new rowTable(taskColWidths, taskHeaders, this, false, taskPopMenu, false);
     taskTable.setHeadBackColor(Color.red, false);
@@ -1045,7 +1121,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   public void actionPerformed(ActionEvent event)
   {
-    if (event.getSource() == forceBuildMI)
+    if (FORCEBUILD.equals(event.getActionCommand()))
       {
 	try
 	  {
@@ -1056,7 +1132,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    exceptionHandler(ex);
 	  }
       }
-    else if (event.getSource() == quitMI)
+    else if (QUIT.equals(event.getActionCommand()))
       {
 	if (debug)
 	  {
@@ -1065,7 +1141,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
 	this.disconnect();
       }
-    else if (event.getSource() == dumpMI)
+    else if (DUMP.equals(event.getActionCommand()))
       {
 	if (dumpDialog == null)
 	  {
@@ -1095,7 +1171,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	      }
 	  }
       }
-    else if (event.getSource() == runInvidTestMI)
+    else if (TESTINVIDS.equals(event.getActionCommand()))
       {
 	// "Invid Test"
 	// "Are you sure you want to trigger a full Invid consistency test?\nIt may take awhile."
@@ -1122,7 +1198,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	      }
 	  }
       }
-    else if (event.getSource() == runInvidSweepMI)
+    else if (SWEEPINVIDS.equals(event.getActionCommand()))
       {
 	// "Invid Sweep"
 	// "Are you sure you want to trigger a full Invid fixup sweep?\nIt may take awhile."
@@ -1148,7 +1224,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	      }
 	  }
       }
-    else if (event.getSource() == runEmbeddedTestMI)
+    else if (TESTEMBEDDED.equals(event.getActionCommand()))
       {
 	// "Embedded Object Consistency Test"
 	// "Are you sure you want to trigger a full embedded object consistency test?"
@@ -1174,7 +1250,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	      }
 	  }
       }
-    else if (event.getSource() == runEmbeddedSweepMI)
+    else if (REPAIREMBEDDED.equals(event.getActionCommand()))
       {
 	// "Embedded Object Sweep"
 	// "Are you sure you want to trigger a full embedded object consistency fixup sweep?"
@@ -1201,7 +1277,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	      }
 	  }
       }
-    else if (event.getSource() == shutdownMI)
+    else if (SHUTDOWN.equals(event.getActionCommand()))
       {
 	boolean waitForUsers=false;
 
@@ -1255,7 +1331,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	      }
 	  }
       }
-    else if (event.getSource() == killAllMI)
+    else if (KILLALL.equals(event.getActionCommand()))
       {
 	DialogRsrc killAllDLGR;
 	StringDialog killAllDLG;
@@ -1284,7 +1360,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    exceptionHandler(ex);
 	  }
       }
-    else if (event.getSource() == schemaMI)
+    else if (SCHEMA.equals(event.getActionCommand()))
       {
 	if (schemaEditor != null)
 	  {
@@ -1309,15 +1385,15 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
               }
           }
       }
-    else if (event.getSource() == showJavaVersionMI)
+    else if (JAVAVERSION.equals(event.getActionCommand()))
       {
         showJavaVersion();
       }
-    else if (event.getSource() == showAboutMI)
+    else if (ABOUT.equals(event.getActionCommand()))
       {
 	showAboutMessage();
       }
-    else if (event.getSource() == clearLogMI)
+    else if (CLEARLOG.equals(event.getActionCommand()))
       {
 	statusArea.setText("");
       }
@@ -1442,7 +1518,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	System.err.println("rowMenuPerformed");
       }
 
-    if (e.getSource() == killUserMI)
+    if (KILLUSER.equals(e.getActionCommand()))
       {
 	if (debug)
 	  {
@@ -1483,10 +1559,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	      {
 		System.err.println("Negative kill request");
 	      }
+
 	    killVictim = null;
 	  }
       }
-    else if (e.getSource() == runNowMI)
+    else if (RUNTASK.equals(e.getActionCommand()))
       {
 	try
 	  {
@@ -1497,7 +1574,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    exceptionHandler(ex);
 	  }
       }
-    else if (e.getSource() == stopTaskMI)
+    else if (STOPTASK.equals(e.getActionCommand()))
       {
 	try
 	  {
@@ -1508,7 +1585,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    exceptionHandler(ex);
 	  }
       }
-    else if (e.getSource() == disableTaskMI)
+    else if (DISABLETASK.equals(e.getActionCommand()))
       {
 	try
 	  {
@@ -1519,7 +1596,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    exceptionHandler(ex);
 	  }
       }
-    else if (e.getSource() == enableTaskMI)
+    else if (ENABLETASK.equals(e.getActionCommand()))
       {
 	try
 	  {
