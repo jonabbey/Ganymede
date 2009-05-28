@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-September 16, 2008
+28 May, 2009
 README.source
 
 ---------------------------------------------
 
 This release of Ganymede includes full sources for everything, with
-the exception of certain classes provided from the ANTLR, GNU regexp,
-and Jython projects.
+the exception of certain freely distributable classes provided from
+the ANTLR and Jython projects.
 
 By default, the Ganymede distribution comes without any of the actual
 Ganymede code compiled into classes and Jar files.  The first time you

@@ -1,8 +1,6 @@
 Ganymede Release 2.0
-October 28, 2008
+28 May, 2009
 CREDITS
-
-Last Commit: $Format:%cd$
 
 ---------------------------------------------
 
@@ -161,15 +159,6 @@ Martin Vogt - bug reports
 Steve Lemons - bug reports
 Fredrik.A.Bergman@ericsson.com - many excellect bug reports for Ganymede 2.0
 Stefan Bier - Ganymede 2.0 bug reports, patches, German localization
-
---
-
-The regular expression class library used in the server to provide
-regexp search support is from the Free Software Foundation, and was
-written by Wes Biggs <wes@cacas.org>.  The gnu-regexp-1.1.4.jar
-archive included in the src/lib directory contains the binary
-distribution of this software.  The GNU Regexp for Java page is at
-http://www.cacas.org/java/gnu/regexp/.
 
 --
 
