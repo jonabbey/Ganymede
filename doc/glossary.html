@@ -1,80 +1,90 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<html>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <title>Ganymede File Glossary</title>
   </head>
 
-  <body BGCOLOR="#FFFFFF">
+  <body bgcolor="#FFFFFF">
 
-<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
-<h1><FONT FACE="Arial, Helvetica">Ganymede File Glossary <br>2.0 - 1 April 2008</FONT></h1>
-<hr>
+<img src="gifs/ganymede_title.gif" height="200" width="560" alt="Ganymede"/>
+
+<h1><font face="Arial, Helvetica">Ganymede File Glossary <br/>2.0 - 1 April 2008</font></h1>
+
+<hr/>
+
     <p>This page contains descriptions of various significant files that are part
     of the Ganymede package.</p>
 
     <ul>
       <li><a href="#installation">Installation Scripts</a>
-      <ul>
-      <li><a href="#configure">configure</a></li>
-      <li><a href="#installServer">installServer</a></li>
-      <li><a href="#installClient">installClient</a></li>
-      <li><a href="#installWeb">installWeb</a></li>
-      <li><a href="#distribclean">distribclean</a></li>
-      <li><a href="#config.sh">config.sh</a></li>
-      </ul></li>
+        <ul>
+	  <li><a href="#configure">configure</a></li>
+	  <li><a href="#installServer">installServer</a></li>
+	  <li><a href="#installClient">installClient</a></li>
+	  <li><a href="#installWeb">installWeb</a></li>
+	  <li><a href="#distribclean">distribclean</a></li>
+	  <li><a href="#config.sh">config.sh</a></li>
+        </ul>
+      </li>
 
       <li><a href="#serverfiles">Server Files</a>
-      <ul>
-      <li><a href="#server.properties">ganymede.properties</a></li>
-      <li><a href="#ganymede.db">ganymede.db</a></li>
-      <li><a href="#journal">journal</a></li>
-      <li><a href="#log">log</a></li>
-      <li><a href="#ganymedeServer.jar">ganymedeServer.jar</a></li>
-      <li><a href="#custom.jar">custom.jar</a></li>
-      <li><a href="#debug.log">debug.log</a></li>
-      </ul></li>
+        <ul>
+          <li><a href="#server.properties">ganymede.properties</a></li>
+          <li><a href="#ganymede.db">ganymede.db</a></li>
+          <li><a href="#journal">journal</a></li>
+          <li><a href="#log">log</a></li>
+          <li><a href="#ganymedeServer.jar">ganymedeServer.jar</a></li>
+          <li><a href="#custom.jar">custom.jar</a></li>
+          <li><a href="#debug.log">debug.log</a></li>
+        </ul>
+      </li>
 
       <li><a href="#serverscripts">Server Scripts</a>
-      <ul>
-      <li><a href="#runServer">runServer</a></li>
-      <li><a href="#stopServer">stopServer</a></li>
-      <li><a href="#xmlclient">xmlclient</a></li>
-      <li><a href="#logscan">logscan.pl</a></li>
-      <li><a href="#ganypass">ganypass.pl</a></li>
-      </ul></li>
+        <ul>
+          <li><a href="#runServer">runServer</a></li>
+          <li><a href="#stopServer">stopServer</a></li>
+          <li><a href="#xmlclient">xmlclient</a></li>
+          <li><a href="#logscan">logscan.pl</a></li>
+          <li><a href="#ganypass">ganypass.pl</a></li>
+        </ul>
+      </li>
 
       <li><a href="#clientfiles">Client Files</a>
-      <ul>
-      <li><a href="#client.properties">client.properties</a></li>
-      <li><a href="#ganymede.jar">ganymede.jar</a></li>
-      <li><a href="#ganymedeAdmin.jar">ganymedeAdmin.jar</a></li>
-      </ul></li>
+        <ul>
+          <li><a href="#client.properties">client.properties</a></li>
+          <li><a href="#ganymede.jar">ganymede.jar</a></li>
+          <li><a href="#ganymedeAdmin.jar">ganymedeAdmin.jar</a></li>
+        </ul>
+      </li>
 
       <li><a href="#clientscripts">Client Scripts</a>
-      <ul>
-      <li><a href="#ganymede">ganymede</a></li>
-      <li><a href="#ganymedeAdmin">ganymedeAdmin</a></li>
-      <li><a href="#xmlclient2">xmlclient</a></li>
-      </ul></li>
+        <ul>
+          <li><a href="#ganymede">ganymede</a></li>
+          <li><a href="#ganymedeAdmin">ganymedeAdmin</a></li>
+          <li><a href="#xmlclient2">xmlclient</a></li>
+        </ul>
+      </li>
 
       <li><a href="#webfiles">Web Files</a>
-      <ul>
-      <li><a href="#client_jnlp">client.jnlp</a></li>
-      <li><a href="#console_jnlp">console.jnlp</a></li>
-      </ul></li>
+	<ul>
+	  <li><a href="#client_jnlp">client.jnlp</a></li>
+	  <li><a href="#console_jnlp">console.jnlp</a></li>
+        </ul>
+      </li>
     </ul>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b><a name="installation">Installation Scripts</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+	<td colspan="1"><h2><b><a name="installation"/>Installation Scripts</b></h2></td>
       </tr>
     </table> 
 
     <p></p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="configure"><b>configure</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="configure"/><b>configure</b></h3></td></tr></table> 
     
     <p><font color="#ff0000"><code><b>configure</b></code></font> is
     the first script that must be run after unpacking the UNIX
@@ -88,8 +98,8 @@
     the server and client software.</p>
     
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="installServer"><b>installServer</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="installServer"/><b>installServer</b></h3></td></tr></table> 
     
     <p><font color="#ff0000"><code><b>installServer</b></code></font>
     is a Bourne shell script generated by the <a
@@ -135,8 +145,8 @@
     rebuild the Ganymede sources at some later time.</p>
     
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="installClient"><b>installClient</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="installClient"/><b>installClient</b></h3></td></tr></table> 
     
     <p><font
       color="#ff0000"><code><b>installClient</b></code></font> is a
@@ -160,8 +170,8 @@
     Ganymede sources at some later time.</p>
     
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="installWeb"><b>installWeb</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="installWeb"/><b>installWeb</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>installWeb</b></code></font> is a
     Bourne shell script generated by the <a
@@ -190,8 +200,8 @@
     earlier versions.</p>
 
     <p>In addition to the Java Plugin, however, you may also want to
-    use the <A href="http://java.sun.com/products/javawebstart/">Java
-    Web Start</A> or the <a
+    use the <a href="http://java.sun.com/products/javawebstart/">Java
+    Web Start</a> or the <a
     href="http://openjnlp.nanode.org/">OpenJNLP Launcher</a> in order
     to support your users running the Ganymede clients from the user's
     desktop.  Java Web Start runs on Windows, Linux, and Solaris,
@@ -213,8 +223,8 @@
     <a href="mailto:ganymede@arlut.utexas.edu">let us know</a>.</p>
     
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="distribclean"><b>distribclean</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="distribclean"/><b>distribclean</b></h3></td></tr></table> 
     
     <p><font color="#ff0000"><code><b>distribclean</b></code></font>
     is a Bourne shell script, used to remove all of the scaffolding
@@ -226,8 +236,8 @@
     for download.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="config.sh"><b>config.sh</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="config.sh"/><b>config.sh</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>config.sh</b></code></font>
     files are generated by the <a href="#configure">configure</a> and
@@ -237,16 +247,16 @@
     get file paths and other customized information.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><a name="serverfiles"><b>Server Files</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+	<td colspan="1"><h2><a name="serverfiles"/><b>Server Files</b></h2></td>
       </tr>
     </table> 
 
     <p></p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="server.properties"><b>ganymede.properties</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="server.properties"/><b>ganymede.properties</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>ganymede.properties</b></code></font> is the server's
     configuration file, located in the top-level directory of the server installation tree.
@@ -280,8 +290,8 @@
     file.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="ganymede.db"><b>ganymede.db</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymede.db"/><b>ganymede.db</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>ganymede.db</b></code></font> is the server's binary database
     file, located in the <code>db</code> subdirectory of the Ganymede server directory.
@@ -307,8 +317,8 @@
     would be a really bad idea, however.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="journal"><b>journal</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="journal"/><b>journal</b></h3></td></tr></table> 
 
     <p>The <font color="#ff0000"><code><b>journal</b></code></font> file is located in the
     <code>db</code> subdirectory of the Ganymede server directory.  
@@ -320,8 +330,8 @@
     of the lost changes.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="log"><b>log</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="log"/><b>log</b></h3></td></tr></table> 
 
     <p>The <font color="#ff0000"><code><b>log</b></code></font> file is located in the
     <code>db</code> subdirectory of the Ganymede server directory, and contains a text
@@ -333,8 +343,8 @@
     structure.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="ganymedeServer.jar"><b>ganymedeServer.jar</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymedeServer.jar"/><b>ganymedeServer.jar</b></h3></td></tr></table> 
 
     <p>The <font color="#ff0000"><code><b>ganymedeServer.jar</b></code></font> contains all of
     the compiled Java code needed by the <a href="#runServer">runServer</a>
@@ -342,8 +352,8 @@
     sub-directory of the Ganymede server installation directory.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="custom.jar"><b>custom.jar</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="custom.jar"/><b>custom.jar</b></h3></td></tr></table> 
 
     <p>The <font color="#ff0000"><code><b>custom.jar</b></code></font>
     contains any custom classes included with the installed schema kit
@@ -355,8 +365,8 @@
     and construction of <font color="#ff0000"><code><b>custom.jar</b></code></font>.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="debug.log"><b>debug.log</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="debug.log"/><b>debug.log</b></h3></td></tr></table> 
 
     <p>The <font color="#ff0000"><code><b>debug.log</b></code></font>
     file in the server directory records an on-going trace of all RMI
@@ -370,16 +380,16 @@
     performance and disk space penalty from logging everything.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><a name="serverscripts"><b>Server Scripts</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+	<td colspan="1"><h2><a name="serverscripts"/><b>Server Scripts</b></h2></td>
       </tr>
     </table> 
 
     <p></p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="runServer"><b>runServer</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="runServer"/><b>runServer</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>runServer</b></code></font> is a
     Bourne shell script, located in the <code>bin</code> directory under the
@@ -392,7 +402,7 @@
     will see that it includes a few shell variables that were
     customized by the <a href="#installServer">installServer</a>
     script.  These include the location of the java executable,
-    CLASSPATH information, and the location of the <A
+    CLASSPATH information, and the location of the <a
     href="#server.properties">ganymede.properties</a> file, which
     contains the configuration information consulted by the server
     during its operation.</p>
@@ -406,14 +416,14 @@
     <p>The Ganymede server will typically emit debugging and status
     information to stderr and stdout.. it is generally helpful to
     capture the output of the server, as in</p>
+
+    <pre>runServer > server.log 2>&amp;1 &amp;</pre>
+
+    if you are using sh, bash, or ksh, or
     
-    <pre>runServer >& server.log &</pre>
+    <pre>runServer >&amp; server.log &amp;</pre>
 
-    if you are using the csh or tcsh shells, or
-
-    <pre>runServer > server.log 2>&1 &</pre>
-
-    if you are using sh, bash, or ksh.
+    if you are using the csh or tcsh shells.
 
     <p>Notice that it is necessary to manually background the 
     <font color="#ff0000"><code><b>runServer</b></code></font>
@@ -434,17 +444,17 @@
     'Shutdown Ganymede' menu item or the <a href="#stopServer">stopServer</a> script.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="stopServer"><b>stopServer</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="stopServer"/><b>stopServer</b></h3></td></tr></table> 
     
     <p><font color="#ff0000"><code><b>stopServer</b></code></font> is
     a Bourne shell script, located in the server's <code>bin</code>
     directory, which when run will connect to the server using RMI and
-    order it to shut down.  It depends on having access to the <A
+    order it to shut down.  It depends on having access to the <a
     href="#server.properties">ganymede.properties</a> file in order to
     determine the address of the running server as well as the
     server's supergash password.  If you have removed the supergash
-    password from the <A
+    password from the <a
     href="#server.properties">ganymede.properties</a> file in order to
     keep the password secret, <font
     color="#ff0000"><code><b>stopServer</b></code></font> will prompt
@@ -472,8 +482,8 @@
     out, the server will automatically shut down.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="xmlclient"><b>xmlclient</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="xmlclient"/><b>xmlclient</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>xmlclient</b></code></font> is a
     Bourne shell script used to do bulk data loading into the Ganymede
@@ -492,8 +502,8 @@
     color="#ff0000"><code><b>xmlclient</b></code></font>.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="logscan"><b>logscan.pl</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="logscan"/><b>logscan.pl</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>logscan.pl</b></code></font> is
     a Perl script that is used to accelerate log searches on behalf of
@@ -503,8 +513,8 @@
     out lines in the <a href="#log">log</a> file that do not match what the server is looking for.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="ganypass"><b>ganypass.pl</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganypass"/><b>ganypass.pl</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>ganypass.pl</b></code></font> is
     a Perl script that uses CGI, xml, and 
@@ -514,16 +524,16 @@
       failure, depending on the configuration of the Ganymede server.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><a name="clientfiles"><b>Client Files</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+	<td colspan="1"><h2><a name="clientfiles"/><b>Client Files</b></h2></td>
       </tr>
     </table> 
 
     <p></p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="client.properties"><b>client.properties</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="client.properties"/><b>client.properties</b></h3></td></tr></table> 
 
     <p><font
     color="#ff0000"><code><b>client.properties</b></code></font> is
@@ -553,8 +563,8 @@
     form of applet parameters, and are self-contained.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="ganymede.jar"><b>ganymede.jar</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymede.jar"/><b>ganymede.jar</b></h3></td></tr></table> 
 
     <p>The <font color="#ff0000"><code><b>ganymede.jar</b></code></font> contains all of
     the compiled Java code needed by the <a href="#runServer">ganymede</a> and
@@ -564,8 +574,8 @@
     and in the install directory specified by <a href="#installWeb">installWeb</a>.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="ganymedeAdmin.jar"><b>ganymedeAdmin.jar</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymedeAdmin.jar"/><b>ganymedeAdmin.jar</b></h3></td></tr></table> 
 
     <p>The <font color="#ff0000"><code><b>ganymedeAdmin.jar</b></code></font> contains all of
     the compiled Java code needed by the <a href="#ganymedeAdmin">ganymedeAdmin</a>
@@ -574,16 +584,16 @@
     and in the install directory specified by <a href="#installWeb">installWeb</a>.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><a name="clientscripts"><b>Client Scripts</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+	<td colspan="1"><h2><a name="clientscripts"/><b>Client Scripts</b></h2></td>
       </tr>
     </table> 
 
     <p></p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="ganymede"><b>ganymede</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymede"/><b>ganymede</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>ganymede</b></code></font> is a
     Bourne shell script used to run the GUI Ganymede client from a
@@ -597,8 +607,8 @@
     the Ganymede server's RMI address.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="ganymedeAdmin"><b>ganymedeAdmin</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="ganymedeAdmin"/><b>ganymedeAdmin</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>ganymedeAdmin</b></code></font> is a
     Bourne shell script used to run the GUI admin console from a
@@ -612,8 +622,8 @@
     the Ganymede server's RMI address.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="xmlclient2"><b>xmlclient</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="xmlclient2"/><b>xmlclient</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>xmlclient</b></code></font> is a
     Bourne shell script used to do bulk data loading into the Ganymede
@@ -632,14 +642,14 @@
     color="#ff0000"><code><b>xmlclient</b></code></font>.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><a name="webfiles"><b>Web Files</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+	<td colspan="1"><h2><a name="webfiles"/><b>Web Files</b></h2></td>
       </tr>
     </table> 
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="client_jnlp"><b>client.jnlp</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="client_jnlp"/><b>client.jnlp</b></h3></td></tr></table> 
     
     <p><font color="#ff0000"><code><b>client.jnlp</b></code></font> is
     an XML file formatted according to the Sun <a
@@ -659,8 +669,8 @@
     </p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><a name="console_jnlp"><b>console.jnlp</b></h3></td></tr></table> 
+      <tr bgcolor="#CCCCFF">
+	<td colspan="1" align="right"><h3><a name="console_jnlp"/><b>console.jnlp</b></h3></td></tr></table> 
 
     <p><font color="#ff0000"><code><b>console.jnlp</b></code></font>
     is an XML file formatted according to the Sun <a
@@ -679,7 +689,8 @@
     admin console.
     </p>
 
-    <hr>
+    <hr/>
+
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
   </body>
 </html>
