@@ -1,12 +1,14 @@
-<HTML>
-  <HEAD>
-    <TITLE>GANYMEDE: Ganymede and XML</TITLE>
-  </HEAD>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>GANYMEDE: Ganymede and XML</title>
+  </head>
 
-  <BODY BGCOLOR="#FFFFFF">
+  <body bgcolor="#FFFFFF">
 
-    <IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt="Ganymede">
-    <H1><FONT FACE="Arial,Helvetica">Ganymede and XML</FONT></H1>
+    <img src="gifs/ganymede_title.gif" height="200" width="560" alt="Ganymede"/>
+    <h1><font face="Arial,Helvetica">Ganymede and XML</font></h1>
 
     <p>
       Starting with the <font color="#008800">1.0</font> series, the
@@ -27,8 +29,8 @@
     </p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b>A Brief Introduction to XML</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+        <td colspan="1"><h2><b>A Brief Introduction to XML</b></h2></td>
       </tr>
     </table>
 
@@ -38,62 +40,62 @@
 
     <ul>
       <li><p>Tags are case-sensitive.  &lt;tag&gt;, &lt;Tag&gt; and &lt;TAG&gt;
-	  are all separate tags, and will not be treated as equivalent by an XML parser.</p></li>
+          are all separate tags, and will not be treated as equivalent by an XML parser.</p></li>
       <li><p>All tags must come in pairs.  HTML browsers can tolerate tags that stand alone,
-	  like &lt;br&gt; and &lt;p&gt;, but XML is more strict, and all elements must
-	  have an open tag (&lt;element&gt;) and a close tag (&lt;/element&gt;).</p></li>
+          like &lt;br&gt; and &lt;p&gt;, but XML is more strict, and all elements must
+          have an open tag (&lt;element&gt;) and a close tag (&lt;/element&gt;).</p></li>
 
       <li><p>The structure of
-	  XML files must be strictly tree-like.  That is, XML structural elements can contain
-	  other XML structural elements, but one XML structural element may not be partially
-	  contained by another.</p>
+          XML files must be strictly tree-like.  That is, XML structural elements can contain
+          other XML structural elements, but one XML structural element may not be partially
+          contained by another.</p>
 
-	<p>In other words,</p>
+        <p>In other words,</p>
 
-	<pre>
+        <pre>
         &lt;element1&gt;
           &lt;element2&gt;
         &lt;/element1&gt;
       &lt;/element2&gt;
-	</pre>
+        </pre>
 
-	<p>is an invalid XML sequence, as the element2 and element1 structural elements are intermingled.</p>
+        <p>is an invalid XML sequence, as the element2 and element1 structural elements are intermingled.</p>
 
-	<p>In contrast,</p>
+        <p>In contrast,</p>
 
-	<pre>
+        <pre>
         &lt;element1&gt;
           &lt;element2&gt;&lt;/element2&gt;
         &lt;/element1&gt;
-	</pre>
+        </pre>
 
-	<p>is perfectly valid, because the entirety of element2 is contained
-	  within element1.</p>
+        <p>is perfectly valid, because the entirety of element2 is contained
+          within element1.</p>
       </li>
 
       <li><p>In cases like the above, where the element2 element's open and close tag are
-	  immediately adjacent, XML supports a special syntax for an <b>Empty Element</b>, that
-	  is, an element which does not contain anything between the open tag and close tag.  The
-	  same legal XML structure shown above could be written as:</p>
-	<pre>
+          immediately adjacent, XML supports a special syntax for an <b>Empty Element</b>, that
+          is, an element which does not contain anything between the open tag and close tag.  The
+          same legal XML structure shown above could be written as:</p>
+        <pre>
         &lt;element1&gt;
           &lt;element2/&gt;
         &lt;/element1&gt;
-	</pre>
+        </pre>
 
-	<p>where the trailing slash in the element2 element indicates that there will be no
-	  matching close tag to come along.  At any other time an element open tag (&lt;element&gt;) is seen,
-	  a compliant XML parser will expect and demand to see the matching close tag (&lt;/element&gt;)
-	  for that element before it sees the close tag for any elements higher up in the
-	  document structure.</p>
+        <p>where the trailing slash in the element2 element indicates that there will be no
+          matching close tag to come along.  At any other time an element open tag (&lt;element&gt;) is seen,
+          a compliant XML parser will expect and demand to see the matching close tag (&lt;/element&gt;)
+          for that element before it sees the close tag for any elements higher up in the
+          document structure.</p>
       </li>
       <li><p>In XML, all XML documents contain a single element (the <b>Document Element</b>, in
-	  XML lingo) which contains in turn any other
-	  elements and character data.  The start tag for the document element will generally
-	  be the first thing in an XML file's content proper, and the matching close tag
-	  for the document element will be the last thing in the XML file.  For this reason, the
-	  following XML fragment could not be an entire XML file:</p>
-	<pre>
+          XML lingo) which contains in turn any other
+          elements and character data.  The start tag for the document element will generally
+          be the first thing in an XML file's content proper, and the matching close tag
+          for the document element will be the last thing in the XML file.  For this reason, the
+          following XML fragment could not be an entire XML file:</p>
+        <pre>
           &lt;element1&gt;
             &lt;element2/&gt;
           &lt;/element1&gt;
@@ -103,79 +105,79 @@
             &lt;/element4&gt;
           &lt;/element3&gt;
         </pre>
-	<p>Because element1 does not contain elements 3, 4, and 5.</p>
+        <p>Because element1 does not contain elements 3, 4, and 5.</p>
       </li>
 
       <li><p>In XML, all attribute data must be quoted, as in</p>
-	<pre>
+        <pre>
           &lt;object label="labeldata"&gt;
         </pre>
-	<p>The following is illegal:</p>
-	<pre>
+        <p>The following is illegal:</p>
+        <pre>
           &lt;object label=labeldata&gt;
         </pre>
       </li>
 
       <li><p>
-	  All possible characters are legal within the double
-	  quotes surrounding an attribute's value except the
-	  <b>'&amp;'</b> character and the double quotation mark itself.
-	  If you need to include a double quotation mark in an attribute's
-	  data field, you have to use <b>&amp;quot;</b></p> <p>For
-	  example, if you wanted the string <b>'He said "hi" &amp; I waved back.'</b> in an XML
-	  tag attribute, you would have to do it this way:</p>
-	<pre>
+          All possible characters are legal within the double
+          quotes surrounding an attribute's value except the
+          <b>'&amp;'</b> character and the double quotation mark itself.
+          If you need to include a double quotation mark in an attribute's
+          data field, you have to use <b>&amp;quot;</b></p> <p>For
+          example, if you wanted the string <b>'He said "hi" &amp; I waved back.'</b> in an XML
+          tag attribute, you would have to do it this way:</p>
+        <pre>
           &lt;sentence text="He said &amp;quot;hi&amp;quot; &amp;amp; I waved back."/&gt;
         </pre>
 
-	<p>
-	  Newlines and other whitespace are explicitly acceptable
-	  within the quoted value of an attribute.
-	</p>
+        <p>
+          Newlines and other whitespace are explicitly acceptable
+          within the quoted value of an attribute.
+        </p>
       </li>
 
       <li><p>
-	  Likewise, if you want to include the <b>'&lt;'</b>,
-	  <b>'&gt;'</b>, or <b>'&amp;'</b> characters anywhere in the body of
-	  an XML document, for anything other than tag or special character
-	  definitions, you need to use <b>'&amp;lt;'</b>,
-	  <b>'&amp;gt;'</b>, and <b>'&amp;amp;'</b> instead, just as with HTML.</p>
+          Likewise, if you want to include the <b>'&lt;'</b>,
+          <b>'&gt;'</b>, or <b>'&amp;'</b> characters anywhere in the body of
+          an XML document, for anything other than tag or special character
+          definitions, you need to use <b>'&amp;lt;'</b>,
+          <b>'&amp;gt;'</b>, and <b>'&amp;amp;'</b> instead, just as with HTML.</p>
       </li>
 
       <li><p>XML files use <a
-	    href="http://www.unicode.org/">Unicode</a>,
-	  with the <b>UTF-8</b> encoding, typically.  American 7-bit ASCII
-	  is a proper subset of Unicode and require no special
-	  handling in <b>UTF-8</b> encoding.  International characters
-	  may be used in XML files, but you must do so in a manner
-	  compliant with <b>UTF-8</b>.  Ganymede will always emit XML files
-	  using the standard UNIX end-of-line character, but as with any
-	  XML parser, Ganymede can also handle DOS/Windows style line
-	  termination when reading XML files.</p>
+            href="http://www.unicode.org/">Unicode</a>,
+          with the <b>UTF-8</b> encoding, typically.  American 7-bit ASCII
+          is a proper subset of Unicode and require no special
+          handling in <b>UTF-8</b> encoding.  International characters
+          may be used in XML files, but you must do so in a manner
+          compliant with <b>UTF-8</b>.  Ganymede will always emit XML files
+          using the standard UNIX end-of-line character, but as with any
+          XML parser, Ganymede can also handle DOS/Windows style line
+          termination when reading XML files.</p>
       </li>
 
       <li><p>There are limitations on what characters you can
-	  use for tag and attribute names.  The rules on this are
-	  somewhat complex, but for the purpose of XML use with
-	  Ganymede at present, only the following characters will ever be
-	  used:</p>
+          use for tag and attribute names.  The rules on this are
+          somewhat complex, but for the purpose of XML use with
+          Ganymede at present, only the following characters will ever be
+          used:</p>
 
-	<pre>
+        <pre>
            abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_
-	</pre>
+        </pre>
 
-	<p>Eventually, Ganymede may be elaborated so that it knows all
-	  of the rules for XML character limitations in the full
-	  Unicode character range, but for now, only the above
-	  characters will ever appear or be used in XML tag and
-	  attribute names for use with Ganymede.</p>
+        <p>Eventually, Ganymede may be elaborated so that it knows all
+          of the rules for XML character limitations in the full
+          Unicode character range, but for now, only the above
+          characters will ever appear or be used in XML tag and
+          attribute names for use with Ganymede.</p>
       </li>
       <li><p>Unlike in HTML, the XML standard does not specify that whitespace
-	  can be ignored or contracted.  For Ganymede's purposes, however,
-	  whitespace between tags is generally ignored, and newlines and
-	  indentation are nice for human readability but not necessary for
-	  Ganymede's input parsing.  More on this as we discuss what Ganymede
-	  does with XML, below.</p>
+          can be ignored or contracted.  For Ganymede's purposes, however,
+          whitespace between tags is generally ignored, and newlines and
+          indentation are nice for human readability but not necessary for
+          Ganymede's input parsing.  More on this as we discuss what Ganymede
+          does with XML, below.</p>
       </li>
     </ul>
 
@@ -189,8 +191,8 @@
     href="http://www.xml.com/">www.XML.com</a>.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b>On Ganymede and XML</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+        <td colspan="1"><h2><b>On Ganymede and XML</b></h2></td>
       </tr>
     </table>
 
@@ -240,8 +242,8 @@
       components of a Ganymede XML file in detail.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b>Ganymede Schema Definition in XML</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+        <td colspan="1"><h2><b>Ganymede Schema Definition in XML</b></h2></td>
       </tr>
     </table>
 
@@ -274,8 +276,8 @@
     </pre>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><b>&lt;namespaces&gt;</b></h3></td></tr></table>
+      <tr bgcolor="#CCCCFF">
+        <td colspan="1" align="right"><h3><b>&lt;namespaces&gt;</b></h3></td></tr></table>
 
     <p>The <b>&lt;namespaces&gt;</b> element contains definition
       elements for all unique namespace structures in the server.  A
@@ -310,8 +312,8 @@
     see shortly.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><b>&lt;object_type_definitions&gt;</b></h3></td></tr></table>
+      <tr bgcolor="#CCCCFF">
+        <td colspan="1" align="right"><h3><b>&lt;object_type_definitions&gt;</b></h3></td></tr></table>
 
     <p>In the Ganymede server, all data stored is stored in the form
     of fields, which are aggregated in objects.  Each object stored in
@@ -383,7 +385,7 @@
     that are opened are properly closed before the close of the
     &lt;object_type_definitions&gt; element.</p>
 
-    <p><a name="underscore">Whenever the Ganymede server refers to object or field names,
+    <p><a name="underscore"/>Whenever the Ganymede server refers to object or field names,
     any spaces in the object or field name is replaced by an
     underscore in the XML file.  This is so that when actual instances
     of objects are recorded in the &lt;ganydata&gt; element, encoded
@@ -392,8 +394,8 @@
     category names do not have spaces converted to underscores.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><b>&lt;objectdef&gt;</b></h3></td></tr></table>
+      <tr bgcolor="#CCCCFF">
+        <td colspan="1" align="right"><h3><b>&lt;objectdef&gt;</b></h3></td></tr></table>
 
     <p>The <b>objectdef</b> element is used to define object types in the
     Ganymede server.  Each object type has a name and a numeric id,
@@ -494,8 +496,8 @@
     below the first.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><b>&lt;tab&gt;</b></h3></td></tr></table>
+      <tr bgcolor="#CCCCFF">
+        <td colspan="1" align="right"><h3><b>&lt;tab&gt;</b></h3></td></tr></table>
 
     <p>The <b>tab</b> element is a container for <b>fielddef</b>
     elements.  It has a single attribute, <b>name</b>, which contains
@@ -515,8 +517,8 @@
     object definition, and not merely unique within a tab.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><b>&lt;fielddef&gt;</b></h3></td></tr></table>
+      <tr bgcolor="#CCCCFF">
+        <td colspan="1" align="right"><h3><b>&lt;fielddef&gt;</b></h3></td></tr></table>
 
     <p>The <b>&lt;fielddef&gt;</b> element is a complex one, with many
     possible component elements.  There are currently 10 different
@@ -581,37 +583,37 @@
 
     <table border="1">
       <tr>
-	<th>Type</th><th>Explanation</th><th>Vector Allowed?</th>
+        <th>Type</th><th>Explanation</th><th>Vector Allowed?</th>
       </tr>
       <tr>
-	<td>string</td><td>Unicode String</td><td>YES</td>
+        <td>string</td><td>Unicode String</td><td>YES</td>
       </tr>
       <tr>
-	<td>ip</td><td>I.P. Address (either IPv4 or IPv6)</td><td>YES</td>
+        <td>ip</td><td>I.P. Address (either IPv4 or IPv6)</td><td>YES</td>
       </tr>
       <tr>
-	<td>invid</td><td>Object Reference</td><td>YES</td>
+        <td>invid</td><td>Object Reference</td><td>YES</td>
       </tr>
       <tr>
-	<td>boolean</td><td>Boolean</td><td>NO</td>
+        <td>boolean</td><td>Boolean</td><td>NO</td>
       </tr>
       <tr>
-	<td>date</td><td>Date/Timestamp</td><td>NO</td>
+        <td>date</td><td>Date/Timestamp</td><td>NO</td>
       </tr>
       <tr>
-	<td>numeric</td><td>Integer Number Field</td><td>NO</td>
+        <td>numeric</td><td>Integer Number Field</td><td>NO</td>
       </tr>
       <tr>
-	<td>float</td><td>Double precision float</td><td>NO</td>
+        <td>float</td><td>Double precision float</td><td>NO</td>
       </tr>
       <tr>
-	<td>password</td><td>Password Field</td><td>NO</td>
+        <td>password</td><td>Password Field</td><td>NO</td>
       </tr>
       <tr>
-	<td>permmatrix</td><td>Ganymede Permissions Matrix</td><td>NO</td>
+        <td>permmatrix</td><td>Ganymede Permissions Matrix</td><td>NO</td>
       </tr>
       <tr>
-	<td>options</td><td>Field Options Matrix</td><td>NO</td>
+        <td>options</td><td>Field Options Matrix</td><td>NO</td>
       </tr>
     </table>
 
@@ -654,213 +656,212 @@
     associated with the <b>invid</b> field type.  I need to link this
     material to a general discussion of invid fields.</p>
 
-    <p>
     <table border="1">
       <tr>
-	<th>field type</th>
-	<th>element name</th>
-	<th>element details</th>
-	<th>example</th>
+        <th>field type</th>
+        <th>element name</th>
+        <th>element details</th>
+        <th>example</th>
       </tr>
       <tr>
-	<td>string</td>
+        <td>string</td>
       </tr>
       <tr>
-	<td></td><td>minlength</td>
-	<td><p>
-	    The <b>minlegth</b> element is an empty element with a single attribute, <b>val</b>,
-	    which contains a numeric value specifying a mandatory minimum number of characters
-	    present in this string field.</p></td>
-	<td>&lt;minlength val="2"/&gt;</td>
+        <td></td><td>minlength</td>
+        <td><p>
+            The <b>minlegth</b> element is an empty element with a single attribute, <b>val</b>,
+            which contains a numeric value specifying a mandatory minimum number of characters
+            present in this string field.</p></td>
+        <td>&lt;minlength val="2"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>maxlength</td>
-	<td>
-	  <p>
-	    The <b>maxlength</b> element is an empty element with a
-	    single attribute, <b>val</b>, which contains a numeric
-	    value specifying the maximum number of characters allowed
-	    in this string field.  The Ganymede server supports string
-	    values of up to 32767 characters in length, and this limit
-	    is present implicitly if the <b>maxlength</b> element is
-	    not present in a string field definition.
-	  </p>
-	</td>
-	<td>&lt;maxlength val="8"/&gt;</td>
+        <td></td><td>maxlength</td>
+        <td>
+          <p>
+            The <b>maxlength</b> element is an empty element with a
+            single attribute, <b>val</b>, which contains a numeric
+            value specifying the maximum number of characters allowed
+            in this string field.  The Ganymede server supports string
+            values of up to 32767 characters in length, and this limit
+            is present implicitly if the <b>maxlength</b> element is
+            not present in a string field definition.
+          </p>
+        </td>
+        <td>&lt;maxlength val="8"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>okchars</td>
-	<td><p>
-	    The <b>okchars</b> element is an empty element with a single attribute, <b>val</b>,
-	    which contains a string value enumerating the characters allowed
-	    in this string field.  If this optional element is defined in a string
-	    <b>typedef</b> element, no characters will be allowed in any field of
-	    this type unless that character is present in the <b>val</b> value.</p></td>
-	<td>&lt;okchars val="0123456789-"/&gt;</td>
+        <td></td><td>okchars</td>
+        <td><p>
+            The <b>okchars</b> element is an empty element with a single attribute, <b>val</b>,
+            which contains a string value enumerating the characters allowed
+            in this string field.  If this optional element is defined in a string
+            <b>typedef</b> element, no characters will be allowed in any field of
+            this type unless that character is present in the <b>val</b> value.</p></td>
+        <td>&lt;okchars val="0123456789-"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>badchars</td>
-	<td><p>
-	    The <b>badchars</b> element is an empty element with a single attribute, <b>val</b>,
-	    which contains a string value enumerating the characters not allowed
-	    in this string field.  If this optional element is defined in a string
-	    <b>typedef</b> element, a character will not be allowed in any field of
-	    this type if that character is present in the <b>val</b> value.</p></td>
-	<td>&lt;badchars val=":"/&gt;</td>
+        <td></td><td>badchars</td>
+        <td><p>
+            The <b>badchars</b> element is an empty element with a single attribute, <b>val</b>,
+            which contains a string value enumerating the characters not allowed
+            in this string field.  If this optional element is defined in a string
+            <b>typedef</b> element, a character will not be allowed in any field of
+            this type if that character is present in the <b>val</b> value.</p></td>
+        <td>&lt;badchars val=":"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>regexp</td>
-	<td>
-	  <p>The <b>regexp</b> element is an optional empty element with a pair of attributes, one
+        <td></td><td>regexp</td>
+        <td>
+          <p>The <b>regexp</b> element is an optional empty element with a pair of attributes, one
             mandatory and one optional.  The mandatory attribute is <b>val</b>,
-	    which contains a string value which defines a Perl-style regular expression.  The
-	    optional attribute is <b>desc</b>, which if present will be used as a textual
-	    description of the meaning of the regexp.  The desc attribute will be provided
-	    to the user in an error dialog if they enter a string in the client which
-	    does not match the regexp.  If no <b>desc</b> attribute is present,
-	    the user will be shown the regexp itself in the error message.</p>
+            which contains a string value which defines a Perl-style regular expression.  The
+            optional attribute is <b>desc</b>, which if present will be used as a textual
+            description of the meaning of the regexp.  The desc attribute will be provided
+            to the user in an error dialog if they enter a string in the client which
+            does not match the regexp.  If no <b>desc</b> attribute is present,
+            the user will be shown the regexp itself in the error message.</p>
 
-	  <p><b>regexp</b> is an optional element in the string <b>typedef</b>
-	    element.  If a <b>regexp</b> element is present, all strings entered
-	    into fields of this type will be checked against the regexp.  The
-	    regexp check is made in addition to any <b>okchars</b> and <b>badchars</b>
-	    constraints that are defined in the same <b>typedef</b>.</p>
-	</td>
-	<td>&lt;regexp val="^[a-z]+[a-z|\d]*$" desc="Usernames may contain letters and numbers, but must begin with a letter."/&gt;</td>
+          <p><b>regexp</b> is an optional element in the string <b>typedef</b>
+            element.  If a <b>regexp</b> element is present, all strings entered
+            into fields of this type will be checked against the regexp.  The
+            regexp check is made in addition to any <b>okchars</b> and <b>badchars</b>
+            constraints that are defined in the same <b>typedef</b>.</p>
+        </td>
+        <td>&lt;regexp val="^[a-z]+[a-z|\d]*$" desc="Usernames may contain letters and numbers, but must begin with a letter."/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>multiline</td>
-	<td><p>
-	    The <b>multiline</b> element is an empty element with no attributes.
-	    This element signifies that this field should be presented in the Ganymede
-	    client as a multiline string area rather than a single line text field.
-	  </p></td>
-	<td>&lt;multiline/&gt;</td>
+        <td></td><td>multiline</td>
+        <td><p>
+            The <b>multiline</b> element is an empty element with no attributes.
+            This element signifies that this field should be presented in the Ganymede
+            client as a multiline string area rather than a single line text field.
+          </p></td>
+        <td>&lt;multiline/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>namespace</td>
-	<td><p>
-	    The <b>namespace</b> element is an empty element with a single attribute, <b>val</b>,
-	    which contains a string naming a namespace defined in the
-	    <b>namespaces</b> element contained in the top-level <b>ganyschema</b> element.
-	    If this optional element is defined in a string <b>typedef</b> element,
-	    all fields associated with the specified namespace
-	    will be constrained to contain unique values across the specified namespace.</p></td>
-	<td>&lt;namespace val="username"/&gt;</td>
+        <td></td><td>namespace</td>
+        <td><p>
+            The <b>namespace</b> element is an empty element with a single attribute, <b>val</b>,
+            which contains a string naming a namespace defined in the
+            <b>namespaces</b> element contained in the top-level <b>ganyschema</b> element.
+            If this optional element is defined in a string <b>typedef</b> element,
+            all fields associated with the specified namespace
+            will be constrained to contain unique values across the specified namespace.</p></td>
+        <td>&lt;namespace val="username"/&gt;</td>
       </tr>
       <tr>
-	<td>ip</td>
+        <td>ip</td>
       </tr>
       <tr>
-	<td></td><td>namespace</td>
-	<td><p>
-	    The <b>namespace</b> element is an empty element with a single attribute, <b>val</b>,
-	    which contains a string naming a namespace defined in the
-	    <b>namespaces</b> element contained in the top-level <b>ganyschema</b> element.
-	    If this optional element is defined in an ip <b>typedef</b> element,
-	    all fields associated with the specified namespace
-	    will be constrained to contain unique values across the specified namespace.</p></td>
-	<td>&lt;namespace val="IPSpace"/&gt;</td>
+        <td></td><td>namespace</td>
+        <td><p>
+            The <b>namespace</b> element is an empty element with a single attribute, <b>val</b>,
+            which contains a string naming a namespace defined in the
+            <b>namespaces</b> element contained in the top-level <b>ganyschema</b> element.
+            If this optional element is defined in an ip <b>typedef</b> element,
+            all fields associated with the specified namespace
+            will be constrained to contain unique values across the specified namespace.</p></td>
+        <td>&lt;namespace val="IPSpace"/&gt;</td>
       </tr>
       <tr>
-	<td>invid</td>
+        <td>invid</td>
       </tr>
       <tr>
-	<td></td><td>targetobject</td>
-	<td>
-	  <p>The <b>targetobject</b> element is an empty element with
-	  a pair of attributes, <b>name</b> and <b>id</b>, which
-	  constrains the type of object this object reference field may
-	  point to in the server.</p>
+        <td></td><td>targetobject</td>
+        <td>
+          <p>The <b>targetobject</b> element is an empty element with
+          a pair of attributes, <b>name</b> and <b>id</b>, which
+          constrains the type of object this object reference field may
+          point to in the server.</p>
 
-	  <p>The <b>name</b> attribute contains a string which has the
-	  encoded (underscores for spaces) name of the object type to
-	  point to, while the <b>id</b> attribute contains the integer
-	  numberic id of the object type pointed to.  Both may be
-	  specified, in which case the Ganymede server will verify
-	  that both the id number and the object name are consistent,
-	  or either one alone may be used.</p>
+          <p>The <b>name</b> attribute contains a string which has the
+          encoded (underscores for spaces) name of the object type to
+          point to, while the <b>id</b> attribute contains the integer
+          numberic id of the object type pointed to.  Both may be
+          specified, in which case the Ganymede server will verify
+          that both the id number and the object name are consistent,
+          or either one alone may be used.</p>
 
-	  <p>If this invid field is intended to be able to point to
-	  any kind of object, this is specified by using the
-	  <b>name</b> attribute alone, with a value of <b>"*any*"</b>.
-	  In this case, no <b>id</b> attribute should be
-	  specified.</p>
-	</td>
-	<td>&lt;targetobject name="User" id="3"/&gt;</td>
+          <p>If this invid field is intended to be able to point to
+          any kind of object, this is specified by using the
+          <b>name</b> attribute alone, with a value of <b>"*any*"</b>.
+          In this case, no <b>id</b> attribute should be
+          specified.</p>
+        </td>
+        <td>&lt;targetobject name="User" id="3"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>targetfield</td>
-	<td>
-	  <p>The <b>targetfield</b> element is an optional empty
-	  element that specifies the field that this invid field is to
-	  be linked with.  If a <b>targetfield</b> is specified, the
-	  Ganymede server will maintain a symmetric link between this
-	  invid field and the target field in objects linked to
-	  this field.  The target field may be identified using either
-	  a <b>name</b> or an <b>id</b> attribute.</p>
+        <td></td><td>targetfield</td>
+        <td>
+          <p>The <b>targetfield</b> element is an optional empty
+          element that specifies the field that this invid field is to
+          be linked with.  If a <b>targetfield</b> is specified, the
+          Ganymede server will maintain a symmetric link between this
+          invid field and the target field in objects linked to
+          this field.  The target field may be identified using either
+          a <b>name</b> or an <b>id</b> attribute.</p>
 
-	  <p>The <b>name</b> attribute contains a string which has the
-	  encoded (underscores for spaces) name of the field to point
-	  to, while the <b>id</b> attribute contains the integer
-	  numberic id of the field pointed to.  Both may be specified,
-	  in which case the Ganymede server will verify that both the
-	  id number and the field name are consistent, or either one
-	  alone may be used.</p>
-	</td>
-	<td>&lt;targetfield name="Username" id="103"/&gt;</td>
+          <p>The <b>name</b> attribute contains a string which has the
+          encoded (underscores for spaces) name of the field to point
+          to, while the <b>id</b> attribute contains the integer
+          numberic id of the field pointed to.  Both may be specified,
+          in which case the Ganymede server will verify that both the
+          id number and the field name are consistent, or either one
+          alone may be used.</p>
+        </td>
+        <td>&lt;targetfield name="Username" id="103"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>embedded</td>
-	<td>
-	  <p>The <b>embedded</b> element is an optional empty element
-	  that specifies that this invid field is to be used as an
-	  edit-in-place field.  That is, that objects linked by this
-	  field will be handled as if contained within the object
-	  which holds this field.</p>
-	</td>
-	<td>&lt;embedded/&gt;</td>
+        <td></td><td>embedded</td>
+        <td>
+          <p>The <b>embedded</b> element is an optional empty element
+          that specifies that this invid field is to be used as an
+          edit-in-place field.  That is, that objects linked by this
+          field will be handled as if contained within the object
+          which holds this field.</p>
+        </td>
+        <td>&lt;embedded/&gt;</td>
       </tr>
       <tr>
-	<td>boolean</td>
+        <td>boolean</td>
       </tr>
       <tr>
-	<td></td><td>labeled</td>
-	<td><p>
-	    The <b>labeled</b> element is an optional empty element with a pair of attributes, <b>true</b>
-	    and <b>false</b>.  If this element is present, the client will present this
-	    boolean field as a pair of radio buttons rather than a single check-box.  This
-	    can be useful when you've got a pair of choices that don't fit naturally
-	    into a yes/no dichotomy.</p>
+        <td></td><td>labeled</td>
+        <td><p>
+            The <b>labeled</b> element is an optional empty element with a pair of attributes, <b>true</b>
+            and <b>false</b>.  If this element is present, the client will present this
+            boolean field as a pair of radio buttons rather than a single check-box.  This
+            can be useful when you've got a pair of choices that don't fit naturally
+            into a yes/no dichotomy.</p>
 
-	  <p>In general, support for this option has not really been
-	  tested, and may not work well.</p>
-	</td>
-	<td>&lt;labeled true="Normal User" false="Custom Account"/&gt;</td>
+          <p>In general, support for this option has not really been
+          tested, and may not work well.</p>
+        </td>
+        <td>&lt;labeled true="Normal User" false="Custom Account"/&gt;</td>
       </tr>
       <tr>
-	<td>numeric</td>
+        <td>numeric</td>
       </tr>
       <tr>
-	<td></td><td>namespace</td> <td><p> The <b>namespace</b>
-	element is an optional, empty element with a single attribute,
-	<b>val</b>, which contains a string naming a namespace defined
-	in the <b>namespaces</b> element contained in the top-level
-	<b>ganyschema</b> element.  If this optional element is
-	defined in a numeric <b>typedef</b> element, all fields
-	associated with the specified namespace will be constrained to
-	contain unique values across the specified namespace.</p></td>
-	<td>&lt;namespace val="uid"/&gt;</td>
+        <td></td><td>namespace</td> <td><p> The <b>namespace</b>
+        element is an optional, empty element with a single attribute,
+        <b>val</b>, which contains a string naming a namespace defined
+        in the <b>namespaces</b> element contained in the top-level
+        <b>ganyschema</b> element.  If this optional element is
+        defined in a numeric <b>typedef</b> element, all fields
+        associated with the specified namespace will be constrained to
+        contain unique values across the specified namespace.</p></td>
+        <td>&lt;namespace val="uid"/&gt;</td>
       </tr>
       <tr>
-	<td>password</td>
+        <td>password</td>
       </tr>
       <tr>
-	<td></td><td>minlength</td>
-	<td><p>
-	    The <b>minlegth</b> element is an empty element with a single attribute, <b>val</b>,
-	    which contains a numeric value specifying a mandatory minimum number of characters
-	    present in this password field.</p>
+        <td></td><td>minlength</td>
+        <td><p>
+            The <b>minlegth</b> element is an empty element with a single attribute, <b>val</b>,
+            which contains a numeric value specifying a mandatory minimum number of characters
+            present in this password field.</p>
 
             <p>This element only takes effect when users provide
             plaintext to the Ganymede server.  If the xmlclient or
@@ -870,42 +871,42 @@
             <td>&lt;minlength val="2"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>maxlength</td>
-	<td>
-	  <p>
-	    The <b>maxlength</b> element is an empty element with a
-	    single attribute, <b>val</b>, which contains a numeric
-	    value specifying the maximum number of characters allowed
-	    in this password field.  The Ganymede server supports string
-	    values of up to 32767 characters in length, and this limit
-	    is present implicitly if the <b>maxlength</b> element is
-	    not present in a password field definition.
-	  </p>
+        <td></td><td>maxlength</td>
+        <td>
+          <p>
+            The <b>maxlength</b> element is an empty element with a
+            single attribute, <b>val</b>, which contains a numeric
+            value specifying the maximum number of characters allowed
+            in this password field.  The Ganymede server supports string
+            values of up to 32767 characters in length, and this limit
+            is present implicitly if the <b>maxlength</b> element is
+            not present in a password field definition.
+          </p>
           <p>
             This element only takes effect when users provide
             plaintext to the Ganymede server.  If the xmlclient or
             custom client code is used to provide some form of
             pre-hashed password, this constraint can not be applied.
           </p>
-	  <p>
-	    The <b>crypt</b> encryption hash method supported by Ganymede
-	    only considers the first 8 characters of the password in
-	    generating the authentication hash, so setting a maxlength
-	    larger than 8 characters will not guarantee that Ganymede
-	    will require the full password length for login authentication
-	    if the <b>crypt</b> method is used.
-	  </p>
-	</td>
-	<td>&lt;maxlength val="8"/&gt;</td>
+          <p>
+            The <b>crypt</b> encryption hash method supported by Ganymede
+            only considers the first 8 characters of the password in
+            generating the authentication hash, so setting a maxlength
+            larger than 8 characters will not guarantee that Ganymede
+            will require the full password length for login authentication
+            if the <b>crypt</b> method is used.
+          </p>
+        </td>
+        <td>&lt;maxlength val="8"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>okchars</td>
-	<td><p>
-	    The <b>okchars</b> element is an empty element with a single attribute, <b>val</b>,
-	    which contains a string value enumerating the characters allowed
-	    in this password field.  If this optional element is defined in a password
-	    <b>typedef</b> element, no characters will be allowed in any field of
-	    this type unless that character is present in the <b>val</b> value.</p>
+        <td></td><td>okchars</td>
+        <td><p>
+            The <b>okchars</b> element is an empty element with a single attribute, <b>val</b>,
+            which contains a string value enumerating the characters allowed
+            in this password field.  If this optional element is defined in a password
+            <b>typedef</b> element, no characters will be allowed in any field of
+            this type unless that character is present in the <b>val</b> value.</p>
           <p>
             This element only takes effect when users provide
             plaintext to the Ganymede server.  If the xmlclient or
@@ -913,16 +914,16 @@
             pre-hashed password, this constraint can not be applied.
           </p>
         </td>
-	<td>&lt;okchars val="0123456789-"/&gt;</td>
+        <td>&lt;okchars val="0123456789-"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>badchars</td>
-	<td><p>
-	    The <b>badchars</b> element is an empty element with a single attribute, <b>val</b>,
-	    which contains a string value enumerating the characters not allowed
-	    in this password field.  If this optional element is defined in a password
-	    <b>typedef</b> element, a character will not be allowed in any field of
-	    this type if that character is present in the <b>val</b> value.</p>
+        <td></td><td>badchars</td>
+        <td><p>
+            The <b>badchars</b> element is an empty element with a single attribute, <b>val</b>,
+            which contains a string value enumerating the characters not allowed
+            in this password field.  If this optional element is defined in a password
+            <b>typedef</b> element, a character will not be allowed in any field of
+            this type if that character is present in the <b>val</b> value.</p>
           <p>
             This element only takes effect when users provide
             plaintext to the Ganymede server.  If the xmlclient or
@@ -930,72 +931,72 @@
             pre-hashed password, this constraint can not be applied.
           </p>
         </td>
-	<td>&lt;badchars val=":"/&gt;</td>
+        <td>&lt;badchars val=":"/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>crypted</td>
-	<td>
-	  <p>The <b>crypted</b> element is an optional, empty element.
-	  If this element is present, the Ganymede server will store
-	  the contents of this password in UNIX crypt() format.</p>
-	</td>
-	<td>&lt;crypted/&gt;</td>
+        <td></td><td>crypted</td>
+        <td>
+          <p>The <b>crypted</b> element is an optional, empty element.
+          If this element is present, the Ganymede server will store
+          the contents of this password in UNIX crypt() format.</p>
+        </td>
+        <td>&lt;crypted/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>md5crypted</td>
-	<td>
-	  <p>The <b>md5crypted</b> element is an optional, empty
-	  element.  If this element is present, the Ganymede server
-	  will store the contents of this password in FreeBSD-style
-	  md5crypt() format.</p>
-	</td>
-	<td>&lt;md5crypted/&gt;</td>
+        <td></td><td>md5crypted</td>
+        <td>
+          <p>The <b>md5crypted</b> element is an optional, empty
+          element.  If this element is present, the Ganymede server
+          will store the contents of this password in FreeBSD-style
+          md5crypt() format.</p>
+        </td>
+        <td>&lt;md5crypted/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>apacheMd5crypted</td>
-	<td>
-	  <p>The <b>apacheMd5crypted</b> element is an optional, empty
-	  element.  If this element is present, the Ganymede server
-	  will store the contents of this password in Apache-style
-	  md5crypt() format.</p>
-	</td>
-	<td>&lt;apacheMd5crypted/&gt;</td>
+        <td></td><td>apacheMd5crypted</td>
+        <td>
+          <p>The <b>apacheMd5crypted</b> element is an optional, empty
+          element.  If this element is present, the Ganymede server
+          will store the contents of this password in Apache-style
+          md5crypt() format.</p>
+        </td>
+        <td>&lt;apacheMd5crypted/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>winHashed</td>
-	<td>
-	  <p>The <b>winHashed</b> element is an optional, empty
-	  element.  If this element is present, the Ganymede server
-	  will store the contents of this password in the two
+        <td></td><td>winHashed</td>
+        <td>
+          <p>The <b>winHashed</b> element is an optional, empty
+          element.  If this element is present, the Ganymede server
+          will store the contents of this password in the two
           Windows NT compatible hash formats used in the Samba
-	  encrypted password file.</p>
-	</td>
-	<td>&lt;winHashed/&gt;</td>
+          encrypted password file.</p>
+        </td>
+        <td>&lt;winHashed/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>sshaHashed</td>
-	<td>
-	  <p>The <b>sshaHashed</b> element is an optional, empty
-	  element.  If this element is present, the Ganymede server
-	  will store the contents of this password in the Salted SHA-1
-	  format used by OpenLDAP.  This is Netscape's salted variant
-	  of the FIPS SHA-1 standard.  SHA-1 is described at <a
-	  href="http://en.wikipedia.org/wiki/SHA-1">http://en.wikipedia.org/wiki/SHA-1</a>,
-	  while SSHA is described at
-	  <a href="http://www.openldap.org/faq/data/cache/347.html">http://www.openldap.org/faq/data/cache/347.html</a>.</p>
-	</td>
-	<td>&lt;sshaHashed/&gt;</td>
+        <td></td><td>sshaHashed</td>
+        <td>
+          <p>The <b>sshaHashed</b> element is an optional, empty
+          element.  If this element is present, the Ganymede server
+          will store the contents of this password in the Salted SHA-1
+          format used by OpenLDAP.  This is Netscape's salted variant
+          of the FIPS SHA-1 standard.  SHA-1 is described at <a
+          href="http://en.wikipedia.org/wiki/SHA-1">http://en.wikipedia.org/wiki/SHA-1</a>,
+          while SSHA is described at
+          <a href="http://www.openldap.org/faq/data/cache/347.html">http://www.openldap.org/faq/data/cache/347.html</a>.</p>
+        </td>
+        <td>&lt;sshaHashed/&gt;</td>
       </tr>
       <tr>
-	<td></td><td>shaUnixCrypted</td>
-	<td>
-	  <p>The <b>shaUnixCrypted</b> element is an optional, empty
-	  element with two optional attributes: <b>type</b> and
-	  <b>rounds</b>.  If this element is present, the Ganymede
-	  server will store the contents of this password in the
-	  scalable SHA256/SHA512 Unix Crypt algorithm recently
-	  implemented by the GNU C Library on Linux (and which is
-	  under consideration for adoption by Sun, IBM, and HP).</p>
+        <td></td><td>shaUnixCrypted</td>
+        <td>
+          <p>The <b>shaUnixCrypted</b> element is an optional, empty
+          element with two optional attributes: <b>type</b> and
+          <b>rounds</b>.  If this element is present, the Ganymede
+          server will store the contents of this password in the
+          scalable SHA256/SHA512 Unix Crypt algorithm recently
+          implemented by the GNU C Library on Linux (and which is
+          under consideration for adoption by Sun, IBM, and HP).</p>
 
           <p>See
           <a href="http://people.redhat.com/drepper/SHA-crypt.html">http://people.redhat.com/drepper/SHA-crypt.html</a>
@@ -1004,7 +1005,7 @@
           <p>Note that this algorithm is only starting to be supported.  It works properly
           on Linux distributions running glibc versions 2.7 and later, such as Fedora 8.</p>
 
-	  <p><b>Attributes:</b></p>
+          <p><b>Attributes:</b></p>
 
           <dl>
             <dt>type</dt>
@@ -1017,7 +1018,7 @@
             cryptographic operations to calculate the hash, which may
             provide some greater measure of security.</p></dd>
 
-	    <dt>rounds</dt>
+            <dt>rounds</dt>
 
             <dd><p>This attribute can take an integer value between 1000
             and 999999999, and controls the number of cryptographic
@@ -1035,42 +1036,43 @@
             <p>The higher the number of rounds, the more computing
             power your attackers will require in order to do a
             time-efficient password guessing attack against your
-            stored password hash.</p>
-	</td>
-	<td>&lt;shaUnixCrypted type="512" rounds="7500"/&gt;</td>
+            stored password hash.</p></dd>
+          </dl>
+        </td>
+        <td>&lt;shaUnixCrypted type="512" rounds="7500"/&gt;</td>
       </tr>
 
       <tr>
-	<td></td><td>plaintext</td>
-	<td>
-	  <p>The <b>plaintext</b> element is an optional, empty
-	  element.  If this element is present, the Ganymede server
-	  will store the plaintext of passwords stored in this field
-	  to disk.  Normally, if the Ganymede server has any of
-	  <b>crypted</b>, <b>md5crypted</b>, <b>apacheMd5crypted</b>,
-	  <b>winHashed</b>, <b>sshaHashed</b>, or
-	  <b>shaUnixCrypted</b> set, the server will never dump the
-	  plaintext of passwords in this field to disk, as it is
-	  capable of authenticating logins against any of the
-	  supported hash formats.  If the <b>plaintext</b> element is
-	  present, the password will be preserved in plaintext form in
-	  the ganymede.db file, regardless of whether or not the
-	  password is also handled via one of the encryption
-	  hashes.</p>
-	</td>
-	<td>&lt;plaintext/&gt;</td>
+        <td></td><td>plaintext</td>
+        <td>
+          <p>The <b>plaintext</b> element is an optional, empty
+          element.  If this element is present, the Ganymede server
+          will store the plaintext of passwords stored in this field
+          to disk.  Normally, if the Ganymede server has any of
+          <b>crypted</b>, <b>md5crypted</b>, <b>apacheMd5crypted</b>,
+          <b>winHashed</b>, <b>sshaHashed</b>, or
+          <b>shaUnixCrypted</b> set, the server will never dump the
+          plaintext of passwords in this field to disk, as it is
+          capable of authenticating logins against any of the
+          supported hash formats.  If the <b>plaintext</b> element is
+          present, the password will be preserved in plaintext form in
+          the ganymede.db file, regardless of whether or not the
+          password is also handled via one of the encryption
+          hashes.</p>
+        </td>
+        <td>&lt;plaintext/&gt;</td>
       </tr>
       <tr>
-        <td>options</td><td>n/a</td><td>The field options field type supports no configurable elements within &lt;typedef&gt;</td><td><td>
+        <td>options</td><td>n/a</td><td>The field options field type supports no configurable elements within &lt;typedef&gt;</td><td/><td/>
       </tr>
-        <td>permmatrix</td><td>n/a</td><td>The permissions matrix field type supports no configurable elements within &lt;typedef&gt;</td><td><td>
+      <tr>
+        <td>permmatrix</td><td>n/a</td><td>The permissions matrix field type supports no configurable elements within &lt;typedef&gt;</td><td/><td/>
       </tr>
     </table>
-    </p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><b>Schema Example Fragment</b></h3></td></tr></table>
+      <tr bgcolor="#CCCCFF">
+        <td colspan="1" align="right"><h3><b>Schema Example Fragment</b></h3></td></tr></table>
 
     <p>The following is a transcript of the User object definition
     from the GASHARL schema kit in use at ARL.  Notable features of
@@ -1228,8 +1230,8 @@ Limited to 16 for NFS.&lt;/comment&gt;
     </pre>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCFFCC">
-	<td colspan="1"><h2><b>Ganymede Object Data Import/Export Definition in XML</b></h2></td>
+      <tr bgcolor="#CCFFCC">
+        <td colspan="1"><h2><b>Ganymede Object Data Import/Export Definition in XML</b></h2></td>
       </tr>
     </table>
 
@@ -1240,13 +1242,13 @@ Limited to 16 for NFS.&lt;/comment&gt;
     section discusses the <b>&lt;ganydata&gt;</b> element that may be
     present in the Ganymede XML file format.</p>
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%" >
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="GANYDATA">&lt;ganydata&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="GANYDATA">&lt;ganydata&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 The <b>&lt;ganydata&gt;</b> element is a container for object data to be updated on the server.  When
 exported, the <b>&lt;ganydata&gt;</b> element contains a complete dump of the server's data state.  When
 imported, the <b>&lt;ganydata&gt;</b> element contains a collection of <b>&lt;object&gt;</b> elements
@@ -1255,8 +1257,8 @@ which specify objects to be created, edited, inactivated, or deleted.
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -1265,17 +1267,15 @@ which specify objects to be created, edited, inactivated, or deleted.
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
+
 <dl>
-
-<p>
-<dt>NONE</dt>
-<dd>&nbsp;</dd>
-
+  <dt>NONE</dt>
+  <dd>&nbsp;</dd>
 </dl>
 </td>
 </tr>
@@ -1289,13 +1289,13 @@ which specify objects to be created, edited, inactivated, or deleted.
     contains possibly four attributes, those being <b>type</b>
     (required), <b>id</b>, <b>num</b>, and <b>action</b>.</p>
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="OBJECT">&lt;object&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="OBJECT">&lt;object&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 The <b>&lt;object&gt;</b> element contains data for a single object.  When exported, the <b>&lt;object&gt;</b>
 element contains a complete dump of the object's state, minus the historical fields (last modification data, etc.).When
 imported, the <b>&lt;object&gt;</b> element contains a collection of field elements
@@ -1305,8 +1305,8 @@ whose contents are to be transmitted to the server to update the object identifi
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -1315,111 +1315,101 @@ whose contents are to be transmitted to the server to update the object identifi
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <dl>
+  <dt><b>type</b></dt>
+  <dd>The name of the type this object belongs to.  This string
+  is case sensitive and must match the <b>name</b> attribute for
+  the type's <b>&lt;objectdef&gt;</b> element, which is the object's
+  type name with <a href="#underscore">underscores substituted for spaces</a>.</dd>
 
-<p>
-<dt><b>type</b></dt>
-<dd>The name of the type this object belongs to.  This string
-is case sensitive and must match the <b>name</b> attribute for
-the type's <b>&lt;objectdef&gt;</b> element, which is the object's
-type name with <a href="#underscore">underscores substituted for spaces</a>.</dd>
+  <dt><b>id</b></dt>
+  <dd>An optional identifier string for this object, unique among
+  objects of this type within the <b>&lt;ganydata&gt;</b> element in
+  this XML file.  If this string is not present, the <b>num</b>
+  attribute becomes mandatory. The <b>id</b> attribute is used for two
+  purposes; the first is to identify an object on the server to be
+  edited, inactivated or deleted if the <b>action</b> attribute
+  specifies these actions.  The second is
+  to act as a target for <b>&lt;invid&gt;</b> elements within the XML
+  file to use to refer to <b>&lt;object&gt;</b> elements that are
+  created during the XML file processing.  Each use is contingent on the
+  id attribute of <b>&lt;object&gt;</b> and <b>&lt;invid&gt;</b>
+  elements matching the server's idea of what the label of the object
+  is.</dd>
 
-<dt><b>id</b></dt>
+  <dt><b>num</b></dt>
 
-<dd>An optional identifier string for this object, unique among
-objects of this type within the <b>&lt;ganydata&gt;</b> element in
-this XML file.  If this string is not present, the <b>num</b>
-attribute becomes mandatory. The <b>id</b> attribute is used for two
-purposes; the first is to identify an object on the server to be
-edited, inactivated or deleted if the <b>action</b> attribute
-specifies these actions.  The second is
-to act as a target for <b>&lt;invid&gt;</b> elements within the XML
-file to use to refer to <b>&lt;object&gt;</b> elements that are
-created during the XML file processing.  Each use is contingent on the
-id attribute of <b>&lt;object&gt;</b> and <b>&lt;invid&gt;</b>
-elements matching the server's idea of what the label of the object
-is.</dd>
+  <dd>An optional object number for this object, unique among objects of
+  this type on the server.  If this number is not present, the <b>id</b>
+  attribute becomes mandatory.  If both the <b>id</b> and <b>num</b>
+  attributes are present, the <b>id</b> attribute takes precedent.  The
+  number contained in this attribute corresponds to the Invid object
+  number for the object designated by this <b>&lt;object&gt;</b>
+  element.  The <b>num</b> attribute is used to select pre-existing
+  objects on the server for editing, inactivation, or deletion.  If this
+  <b>&lt;object&gt;</b> has an <b>action</b> attribute value that would
+  cause a new object to be created on the Ganymede server, the
+  <b>num</b> attribute is simply ignored.  It is an error to specify a <b>num</b>
+  attribute for an object that does not already exist on the server at
+  the time the xml file is processed.</dd>
 
-<dt><b>num</b></dt>
+  <dt><b>oid</b></dt>
 
-<dd>An optional object number for this object, unique among objects of
-this type on the server.  If this number is not present, the <b>id</b>
-attribute becomes mandatory.  If both the <b>id</b> and <b>num</b>
-attributes are present, the <b>id</b> attribute takes precedent.  The
-number contained in this attribute corresponds to the Invid object
-number for the object designated by this <b>&lt;object&gt;</b>
-element.  The <b>num</b> attribute is used to select pre-existing
-objects on the server for editing, inactivation, or deletion.  If this
-<b>&lt;object&gt;</b> has an <b>action</b> attribute value that would
-cause a new object to be created on the Ganymede server, the
-<b>num</b> attribute is simply ignored.  It is an error to specify a <b>num</b>
-attribute for an object that does not already exist on the server at
-the time the xml file is processed.</dd>
+  <dd><p>This attribute is provided when an object is dumped out by a <a
+  href="synchronization/index.html">Sync Channel</a>.  It is a globally
+  unique identifier which encodes both the type of the object and its
+  unique id number.</p>
 
-<dt><b>oid</b></dt>
+  <p>This attribute is disregarded when loading data.</p></dd>
 
-<dd><p>This attribute is provided when an object is dumped out by a <a
-href="synchronization/index.html">Sync Channel</a>.  It is a globally
-unique identifier which encodes both the type of the object and its
-unique id number.</p>
+  <dt><b>action</b></dt>
 
-<p>This attribute is disregarded when loading data.</p></dd>
+  <dd>The <b>action</b> attribute is optional, and plays a role only in
+  XML data importing.  If the <b>action</b> attribute is present, it may
+  contain one of four strings:
 
-<dt><b>action</b></dt>
+  <ul>
+    <li>create</li>
+    <li>edit</li>
+    <li>inactivate</li>
+    <li>delete</li>
+  </ul>
 
-<dd>
-The <b>action</b> attribute is optional, and plays a role only in
-XML data importing.  If the <b>action</b> attribute is present, it may
-contain one of four strings:
+  <p>If there is no <b>action</b> attribute specified at import time, the
+  <b>&lt;object&gt;</b> element will be created if the object has a
+  <b>id</b> attribute and no <b>num</b> attribute and if there is no
+  object already on the server that matches the <b>id</b> attribute.
+  Otherwise, the pre-existing object on the Ganymede server matching the
+  identifying attribute will be checked out for editing.</p>
 
-<ul>
-<li>create</li>
-<li>edit</li>
-<li>inactivate</li>
-<li>delete</li>
-</ul>
+  <p>If the <b>action</b> attribute is present and contains
+  <b>"create"</b>, the <b>&lt;object&gt;</b> element will cause the
+  Ganymede xmlclient to create a new object, even if an object of the
+  same type that matches the given <b>id</b> attribute already exists on
+  the server.  In addition, in such cases all <b>&lt;invid&gt;</b>
+  elements in the XML file with matching <b>type</b> and <b>id</b>
+  attributes will be interpreted to be referring to the newly created
+  <b>&lt;object&gt;</b> element and not any pre-existing object on the
+  server that might match those identifying attributes.</p>
 
-<p>
-If there is no <b>action</b> attribute specified at import time, the
-<b>&lt;object&gt;</b> element will be created if the object has a
-<b>id</b> attribute and no <b>num</b> attribute and if there is no
-object already on the server that matches the <b>id</b> attribute.
-Otherwise, the pre-existing object on the Ganymede server matching the
-identifying attribute will be checked out for editing.
-</p>
+  <p>If the <b>action</b> attribute is present and contains <b>"edit"</b>,
+  the <b>&lt;object&gt;</b> element will cause the Ganymede xmlclient
+  to seek to check the object out for editing from the server.  If no
+  object exists on the server matching the <b>id</b> attribute, an
+  error will be displayed and xmlclient will abort the transaction.</p>
 
-<p>
-If the <b>action</b> attribute is present and contains
-<b>"create"</b>, the <b>&lt;object&gt;</b> element will cause the
-Ganymede xmlclient to create a new object, even if an object of the
-same type that matches the given <b>id</b> attribute already exists on
-the server.  In addition, in such cases all <b>&lt;invid&gt;</b>
-elements in the XML file with matching <b>type</b> and <b>id</b>
-attributes will be interpreted to be referring to the newly created
-<b>&lt;object&gt;</b> element and not any pre-existing object on the
-server that might match those identifying attributes.</p>
-</p>
-
-<p>If the <b>action</b> attribute is present and contains <b>"edit"</b>,
-the <b>&lt;object&gt;</b> element will cause the Ganymede xmlclient
-to seek to check the object out for editing from the server.  If no
-object exists on the server matching the <b>id</b> attribute, an
-error will be displayed and xmlclient will abort the transaction.</p>
-
-<p>In the unspecified, <b>"create"</b>, and <b>"edit"</b> cases, the
-object element will typically contain a set of field elements.  In the
-<b>"inactivate"</b> and <b>"delete"</b> cases, the
-<b>&lt;object&gt;</b> element must be empty, and the xmlclient will
-simply attempt to inactivate or delete the object identified by the
-<b>id</b> or <b>num</b> attributes.</p>
-
+  <p>In the unspecified, <b>"create"</b>, and <b>"edit"</b> cases, the
+  object element will typically contain a set of field elements.  In the
+  <b>"inactivate"</b> and <b>"delete"</b> cases, the
+  <b>&lt;object&gt;</b> element must be empty, and the xmlclient will
+  simply attempt to inactivate or delete the object identified by the
+  <b>id</b> or <b>num</b> attributes.</p>
 </dd>
-
 </dl>
 </td>
 </tr>
@@ -1546,13 +1536,13 @@ to the ten field types.</p>
 
 <!-- STRING -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="STRING">&lt;string&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="STRING">&lt;string&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 The <b>&lt;string&gt;</b> element contains data for Ganymede string fields,
 but is mandatory only for vector string fields.  The
 <b>&lt;string&gt;</b> element is not necessary for scalar string
@@ -1564,8 +1554,8 @@ it must be empty.
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -1574,11 +1564,11 @@ it must be empty.
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <dl>
 
 <dt><b>val</b></dt>
@@ -1592,22 +1582,22 @@ by '<b>&amp;amp;</b>', and anything goes otherwise, including embedded newlines.
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2"><code>&lt;string val="broccol"/&gt;</code></td></tr>
+<tr><td colspan="2"><code>&lt;string val="broccol"/&gt;</code></td></tr>
 
 </table></center>
 
 <!-- BOOLEAN -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="BOOLEAN">&lt;boolean&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="BOOLEAN">&lt;boolean&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <p>The <b>&lt;boolean&gt;</b> element is an optional data element for
 Ganymede boolean fields.  Since Ganymede boolean fields are always
 scalar, you can simply place <b>true</b>, <b>t</b>, <b>false</b> or
@@ -1618,8 +1608,8 @@ data container, the <b>&lt;boolean&gt;</b> element must be empty.</p>
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -1628,11 +1618,11 @@ data container, the <b>&lt;boolean&gt;</b> element must be empty.</p>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <dl>
 
 <dt><b>val</b></dt>
@@ -1651,22 +1641,22 @@ of whatever capitalization.</dd>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2"><code>&lt;boolean val="true"/&gt;</code></td></tr>
+<tr><td colspan="2"><code>&lt;boolean val="true"/&gt;</code></td></tr>
 
 </table></center>
 
 <!-- INT -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="INT">&lt;int&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="INT">&lt;int&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <p>The <b>&lt;int&gt;</b> element is an optional data element for
 Ganymede numeric fields.  Since Ganymede numeric fields are always
 scalar, you can simply place a 32 bit signed integer value between the
@@ -1677,8 +1667,8 @@ element must be empty.</p>
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -1687,11 +1677,11 @@ element must be empty.</p>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <dl>
 
 <dt><b>val</b></dt>
@@ -1707,22 +1697,22 @@ between the start and end tags of the containing field element.</dd>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2"><code>&lt;int val="12042"/&gt;</code></td></tr>
+<tr><td colspan="2"><code>&lt;int val="12042"/&gt;</code></td></tr>
 
 </table></center>
 
 <!-- FLOAT -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="FLOAT">&lt;float&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="FLOAT">&lt;float&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 The <b>&lt;float&gt;</b> element contains a 64 bit floating point
 value, corresponding to the IEEE 754-1985 specification, for use
 with Ganymede float fields.
@@ -1733,8 +1723,8 @@ element.  The <b>&lt;float&gt;</b> element must be empty.
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -1743,11 +1733,11 @@ element.  The <b>&lt;float&gt;</b> element must be empty.
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <dl>
 
 <dt><b>val</b></dt>
@@ -1764,22 +1754,22 @@ number representation, with support for numbers of the form
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2"><code>&lt;float val="3.141596254"/&gt;</code></td></tr>
+<tr><td colspan="2"><code>&lt;float val="3.141596254"/&gt;</code></td></tr>
 
 </table></center>
 
 <!-- IP -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="IP">&lt;ip&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="IP">&lt;ip&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 The <b>&lt;ip&gt;</b> element contains an IPv4 or IPv6 address.  IP
 fields may be scalar or vector in Ganymede. The <b>&lt;ip&gt;</b>
 element must be empty.
@@ -1787,8 +1777,8 @@ element must be empty.
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -1797,11 +1787,11 @@ element must be empty.
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <dl>
 
 <dt><b>val</b></dt> <dd>The contents of the mandatory <b>val</b>
@@ -1817,23 +1807,23 @@ IPv6.</dd>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2"><code>&lt;ip val="127.0.0.1"/&gt;</code>, <code>&lt;ip val="::1"/&gt;</code>, <code>&lt;ip val="::FFFF:127.0.0.1"/&gt;</code>
+<tr><td colspan="2"><code>&lt;ip val="127.0.0.1"/&gt;</code>, <code>&lt;ip val="::1"/&gt;</code>, <code>&lt;ip val="::FFFF:127.0.0.1"/&gt;</code>
 <p>All of these examples encode a loopback address, in either IPv4 or IPv6 form.</p></td></tr>
 
 </table></center>
 
 <!-- DATE -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="DATE">&lt;date&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="DATE">&lt;date&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 The <b>&lt;date&gt;</b> element contains a Java date value, which is effectively a 64 bit
 time stamp with millisecond resolution centered at Midnight, January 1, 1970, UTC.
 As date fields are scalar in Ganymede, only
@@ -1843,8 +1833,8 @@ element.  The <b>&lt;date&gt;</b> element must be empty.
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -1853,11 +1843,11 @@ element.  The <b>&lt;date&gt;</b> element must be empty.
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <dl>
 
 <dt><b>val</b></dt>
@@ -1885,25 +1875,25 @@ multiply a 32 bit timecode by 1,000.</dd>
 
 </dl>
 </td>
+</tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+  <td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2"><code>&lt;date val="Wed 28 Jun 2000 13:13:02" timecode="962215982000"/&gt;</code></td></tr>
+<tr><td colspan="2"><code>&lt;date val="Wed 28 Jun 2000 13:13:02" timecode="962215982000"/&gt;</code></td></tr>
 
-</tr>
 </table></center>
 
 <!-- PASSWORD -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="PASSWORD">&lt;password&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="PASSWORD">&lt;password&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <p>The <b>&lt;password&gt;</b> element contains a Java password value.
 As password fields are scalar in Ganymede, only one
 <b>&lt;password&gt;</b> element at a time may be contained in a field
@@ -1936,8 +1926,8 @@ about the limitations you might run into.</p>
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -1946,11 +1936,11 @@ about the limitations you might run into.</p>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <dl>
 
 <dt><b>plaintext</b></dt>
@@ -2030,22 +2020,22 @@ effect if the <b>plaintext</b> attribute is specified.</p></dd>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2"><code>&lt;password md5crypt="$1$o8/.....$f398vnq51gnzf" shaUnixCrypt="$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5"/&gt;</code></td></tr>
+<tr><td colspan="2"><code>&lt;password md5crypt="$1$o8/.....$f398vnq51gnzf" shaUnixCrypt="$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5"/&gt;</code></td></tr>
 
 </table></center>
 
 <!-- FIELD OPTIONS -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="PASSWORD">&lt;options&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="PASSWORD">&lt;options&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <p>The <b>&lt;options&gt;</b> element is similar to the <a href="#PERMMATRIX"><b>&lt;permmatrix&gt;</b></a> element,
 in that it provides a mapping for object and field types defined in the Ganymede server.  While
 <b>&lt;permmatrix&gt;</b> provides a set of permission bits for each object or field for a Ganymede
@@ -2058,8 +2048,8 @@ an XML queue when a GanymedeBuilderQueue build is triggered.</p>
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -2068,27 +2058,28 @@ an XML queue when a GanymedeBuilderQueue build is triggered.</p>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
-</tr>
-
-</td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+<td/>
 </tr>
 
-<tr><td COLSPAN="2">
-<code>&lt;options&gt;<br>&nbsp;&nbsp;&lt;User option="1"&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Username option="2"/&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;UID option="2"/&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Home_Group option="3"/&gt;
-<br>&nbsp;&nbsp;&lt;/User&gt;
-<br>&nbsp;&nbsp;&lt;Group option="1"&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Group_Name option="2"/&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;GID option="2"/&gt;
-<br>&nbsp;&nbsp;&lt;/Group&gt;
-<br>&lt;/options&gt;</code>
+<tr>
+<td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td colspan="2">
+<code>&lt;options&gt;<br/>&nbsp;&nbsp;&lt;User option="1"&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Username option="2"/&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;UID option="2"/&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Home_Group option="3"/&gt;
+<br/>&nbsp;&nbsp;&lt;/User&gt;
+<br/>&nbsp;&nbsp;&lt;Group option="1"&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Group_Name option="2"/&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;GID option="2"/&gt;
+<br/>&nbsp;&nbsp;&lt;/Group&gt;
+<br/>&lt;/options&gt;</code>
 <p>Remember, <a href="#underscore">as always</a> with Ganymede object
 type and field names in XML, any spaces in an object type name or
 field name will be replaced by underscores when used as an element
@@ -2101,13 +2092,13 @@ object type.</p>
 
 <!-- PERMISSION MATRIX -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="PERMMATRIX">&lt;permmatrix&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="PERMMATRIX">&lt;permmatrix&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 The <b>&lt;permmatrix&gt;</b> element contains a mapping of permission values
 for object and field types defined in the Ganymede server.  The <b>&lt;permmatrix&gt;</b>
 element is present in the Ganymede <b>Role</b> object, and defines what objects
@@ -2120,8 +2111,8 @@ for each object type and field that permissions are set for.
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -2130,28 +2121,29 @@ for each object type and field that permissions are set for.
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
-</tr>
-
-</td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+<td/>
 </tr>
 
-<tr><td COLSPAN="2">
-<tr><td COLSPAN="2"><code>&lt;permmatrix&gt;<br>&nbsp;&nbsp;&lt;User perm="VCED"&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Username perm="VCE"/&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;UID perm="VC"/&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Home_Group perm="VCE"/&gt;
-<br>&nbsp;&nbsp;&lt;/User&gt;
-<br>&nbsp;&nbsp;&lt;Group perm="VCED"&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Group_Name perm="VCE"/&gt;
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;GID perm="VC"/&gt;
-<br>&nbsp;&nbsp;&lt;/Group&gt;
-<br>&lt;/permmatrix&gt;</code>
-<br>
+<tr>
+<td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
+</tr>
+
+<tr><td colspan="2"/></tr>
+<tr><td colspan="2"><code>&lt;permmatrix&gt;<br/>&nbsp;&nbsp;&lt;User perm="VCED"&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Username perm="VCE"/&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;UID perm="VC"/&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Home_Group perm="VCE"/&gt;
+<br/>&nbsp;&nbsp;&lt;/User&gt;
+<br/>&nbsp;&nbsp;&lt;Group perm="VCED"&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Group_Name perm="VCE"/&gt;
+<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;GID perm="VC"/&gt;
+<br/>&nbsp;&nbsp;&lt;/Group&gt;
+<br/>&lt;/permmatrix&gt;</code>
+<br/>
 <p>This simple example sets permission bits on the User object itself, along with the Username and UID fields defined as part of the User object type.  Object and field names contained within a <b>&lt;permmatrix&gt;</b> element are required to have a <b><code>perm</code></b> attribute, which should contain a string with any combination of the following four characters:<code><b>V</b>, <b>C</b>, <b>E</b>, <b>D</b></code>.  V stands for viewable, C stands for creatable, E for editable, and D for deletable.  V, C, and E are allowed on elements corresponding to field names.  Objects (like User in this example) may have V, C, E, and/or D.</p>
 <p>The reason that the D flag is not enabled for fields is that there is no discrete notion of 'deletion' that applies to fields.  Deleting an object is a distinct operation from editing it, but deleting a field and editing a field to set its contents to empty or null amounts to the same thing in Ganymede, so we don't bother tracking delete permissions for fields.
 </p>
@@ -2166,13 +2158,13 @@ object type.</p> </td></tr>
 
 <!-- INVID -->
 
-<center><table BORDER CELLPADDING=5 WIDTH="80%">
+<center><table cellpadding="5" width="80%">
 <tr>
-<td COLSPAN="2" BGCOLOR="#000099"><b><font color="#FFFFCC" size=+1><a name="INVID">&lt;invid&gt;</a></font></b></td>
+<td colspan="2" bgcolor="#000099"><b><font color="#FFFFCC" size="+1"><a name="INVID">&lt;invid&gt;</a></font></b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 The <b>&lt;invid&gt;</b> element contains a Ganymede object reference
 value, which is used to identify an object pointer in an invid
 field on the Ganymede server.  The <b>&lt;invid&gt;</b> element must be empty.
@@ -2180,8 +2172,8 @@ field on the Ganymede server.  The <b>&lt;invid&gt;</b> element must be empty.
 </tr>
 
 <tr>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Parent(s)</b></td>
-<td WIDTH="50%" BGCOLOR="#FFFFCC"><b>Children</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Parent(s)</b></td>
+<td width="50%" bgcolor="#FFFFCC"><b>Children</b></td>
 </tr>
 
 <tr>
@@ -2190,11 +2182,11 @@ field on the Ganymede server.  The <b>&lt;invid&gt;</b> element must be empty.
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Attributes</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Attributes</b></td>
 </tr>
 
 <tr>
-<td COLSPAN="2">
+<td colspan="2">
 <dl>
 
 <dt><b>type</b></dt>
@@ -2246,15 +2238,15 @@ the type of the object target and its specific identity.</dd>
 </tr>
 
 <tr>
-<td COLSPAN="2" BGCOLOR="#FFFFCC"><b>Example</b></td>
+<td colspan="2" bgcolor="#FFFFCC"><b>Example</b></td>
 </tr>
 
-<tr><td COLSPAN="2">&lt;invid type="User" id="broccol"/&gt;</td></tr>
+<tr><td colspan="2">&lt;invid type="User" id="broccol"/&gt;</td></tr>
 
 </table></center>
 
 <table border="1" cellpadding="3" cellspacing="0" width="100%">
-<tr BGCOLOR="#CCCCFF">
+<tr bgcolor="#CCCCFF">
 <td colspan="1" align="right"><h3><b>Embedded Objects</b></h3></td></tr></table>
 
 <p>In addition to the ten field types listed above, there is one
@@ -2262,8 +2254,8 @@ unique case, and that is the case of embedded objects.  I need to
 write about this in exhaustive detail.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
-      <tr BGCOLOR="#CCCCFF">
-	<td colspan="1" align="right"><h3><b>Example</b></h3></td></tr></table>
+      <tr bgcolor="#CCCCFF">
+        <td colspan="1" align="right"><h3><b>Example</b></h3></td></tr></table>
 
     <p>
       For example, a user object from the GASH schema kit might be
@@ -2325,11 +2317,11 @@ write about this in exhaustive detail.</p>
       &lt;/object&gt;
     </pre>
 
-    <HR noshade WIDTH="100%">
+    <hr noshade="noshade" width="100%"/>
 
-    <FONT FACE="Arial,Helvetica">
+    <font face="Arial,Helvetica">
       <i>Last modified: $Date$, Subversion Revision: $Rev$, Author: $Author$</i>
-    </FONT>
+    </font>
 
-  </BODY>
-</HTML>
+  </body>
+</html>
