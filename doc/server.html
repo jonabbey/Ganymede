@@ -1,14 +1,17 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
-<html>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
    <link rel="stylesheet" type="text/css" href="stylesheets/ganymede.css"/>
    <title>Ganymede Server Overview</title>
 </head>
 
-<IMG SRC="gifs/ganymede_title.gif" HEIGHT=200 WIDTH=560 alt = "Ganymede">
+<body>
+<img src="gifs/ganymede_title.gif" height="200" width="560" alt="Ganymede"/>
+
 <h1>Ganymede Server Overview<br/>Release 2.0 - 1 April 2008<br/>$Rev$</h1>
 
-<hr>
+<hr/>
 
 <p>The Ganymede server is the heart of the Ganymede system. The server
 was designed from the ground up to provide high performance, high availability,
@@ -33,7 +36,7 @@ and may be associated with a Java plug-in class to provide intelligent
 management of objects of that type. See the <a
 href="customization/index.html">DBEditObject subclassing guide</a> for
 details on the use of object management plug-ins in customizing the
-Ganymede server.</P>
+Ganymede server.</p>
 
 <p>Because the invid is the <i>sine qua non</i> of the object storage system,
 it defines how many objects can be stored in the Ganymede server. There
@@ -51,23 +54,14 @@ including:</p>
 
 <ul>
 <li>Strings</li>
-
 <li>Integral Numbers</li>
-
 <li>Double-precision Floating Point Numbers</li>
-
 <li>Passwords (with support for passwords encoded in UNIX crypt and md5Crypt formats)</li>
-
 <li>Dates</li>
-
 <li>Booleans</li>
-
 <li>Permission Matrices</li>
-
 <li>IP addresses (in either IPv4 or IPv6 format)</li>
-
 <li>Object References (invid's)</li>
-
 <li>Field Option Matrix (see the <a href="synchronization/index.html">Ganymede 2.0 sync guide</a>) </li>
 </ul>
 
@@ -159,7 +153,7 @@ environment.</p>
 Task objects in the database, under 'Admin-Level Objects'. Each task object
 has the following fields availble:</p>
 
-<table BORDER COLS=3 WIDTH="100%">
+<table border="1" width="100%">
 
 <tr>
 <th width="25%">Field Name</th>
@@ -183,7 +177,7 @@ class named must be available to the server via its CLASSPATH.</td>
 <tr>
 <td>Run On Transaction Commit&nbsp;</td>
 <td>Boolean</td>
-<td>If this box is checked, the server will run this task whenever transactions are committed in the server.<br>
+<td>If this box is checked, the server will run this task whenever transactions are committed in the server.<br/>
 This option is mutually exclusive with the 'Run Periodically' checkbox.</td>
 </tr>
 
@@ -213,9 +207,9 @@ this field is not set, it will be treated as 1.</td>
 <td>Date</td>
 <td>This field is used to set an anchor for periodic tasks.  When the anchor is set, the server will
 first run the registered task at the next even multiple of (period count * period unit) after or before
-the anchor date that occurs after the server's start up.<br><br> In other words, if you have a task set to
+the anchor date that occurs after the server's start up.<br/><br/> In other words, if you have a task set to
 run once a day, and you set the period anchor to noon on some random day, the server will run the
-task every day at noon.<br><br>If the Period Anchor is not set on a periodic task, the anchor is
+task every day at noon.<br/><br/>If the Period Anchor is not set on a periodic task, the anchor is
 set to the server's startup time, and the task will be first run (period count * period unit) after
 startup.</td>
 </tr>
@@ -239,42 +233,43 @@ be formatted.</p>
 </table>
 
 <p>Here is an example of a registered periodic task, set to run every day at midnight:</p>
-<IMG SRC="gifs/task.gif">
+
+<img src="gifs/task.gif" alt="tasks"/>
 
 <p>By default, a Ganymede 2.0 server comes with the following tasks pre-registered:</p>
 
 <ul>
-<li>
-Name: Archive Task</li>
+<li>Name: Archive Task
 
-<br>Class: arlut.csd.ganymede.server.dumpAndArchiveTask
-<li>
-Name: Database Consistency Test</li>
+<br/>Class: arlut.csd.ganymede.server.dumpAndArchiveTask</li>
 
-<br>Class: arlut.csd.ganymede.server.GanymedeValidationTask
-<li>
-Name: Database Dumper Task</li>
+<li>Name: Database Consistency Test
 
-<br>Class: arlut.csd.ganymede.server.dumpTask
-<br>Run Periodically: True
-<br>Period Unit: Hours
-<br>Period Count: 2
-<li>
-Name: Expiration Task</li>
+<br/>Class: arlut.csd.ganymede.server.GanymedeValidationTask</li>
 
-<br>Class: arlut.csd.ganymede.server.GanymedeExpirationTask
-<br>Run Periodically: True
-<br>Period Unit: Days
-<br>Period Count: 1 (or undefined, same thing)
-<br>Period Anchor: Any date, with the time of day set as you like
-<li>
-Name: Warning Task</li>
+<li>Name: Database Dumper Task
 
-<br>Class: arlut.csd.ganymede.server.GanymedeWarningTask
-<br>Run Periodically: True
-<br>Period Unit: Days
-<br>Period Count: 1 (or undefined, same thing)
-<br>Period Anchor: Any date, with the time of day set as you like</ul>
+<br/>Class: arlut.csd.ganymede.server.dumpTask
+<br/>Run Periodically: True
+<br/>Period Unit: Hours
+<br/>Period Count: 2</li>
+
+<li>Name: Expiration Task
+
+<br/>Class: arlut.csd.ganymede.server.GanymedeExpirationTask
+<br/>Run Periodically: True
+<br/>Period Unit: Days
+<br/>Period Count: 1 (or undefined, same thing)
+<br/>Period Anchor: Any date, with the time of day set as you like</li>
+
+<li>Name: Warning Task
+
+<br/>Class: arlut.csd.ganymede.server.GanymedeWarningTask
+<br/>Run Periodically: True
+<br/>Period Unit: Days
+<br/>Period Count: 1 (or undefined, same thing)
+<br/>Period Anchor: Any date, with the time of day set as you like</li>
+</ul>
 
 <p>Note that the 'Run On Transaction Commit' and 'Run Periodically' check
 boxes are mutually exclusive choices. You can choose to select neither,
@@ -296,10 +291,10 @@ server will calculate the task intervals from the server start time. In
 the above list, the Database Dumper Task will first be run 2 hours from
 the server's start, and every 2 hours thereafter.</p>
 
-<br>
-<hr>
-<address>
-<a href="mailto:ganymede@arlut.utexas.edu">Ganymede mailing list</a></address>
+<br/>
+<hr/>
+
+<address><a href="mailto:ganymede@arlut.utexas.edu">Ganymede mailing list</a></address>
 
 </body>
 </html>
