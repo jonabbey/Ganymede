@@ -302,8 +302,10 @@ while (<INPUT>) {
 
   if (!/^([A-Z]*)=/) {
     print OUTPUT $_;
+  } elseif ($1 eq "CLASSPATH") {
+    print "$CLASSPATH 
   } elsif (defined $runconvert{$1}) {
-    print OUTPUT "$1=$runconvert{$1}\n";
+    print OUTPUT "\$$1=\"$runconvert{$1}\";\n";
   } else {
     if ($debug) {
       print "Unrecognized template entry $1 - copying template value\n";
@@ -324,16 +326,20 @@ open OUTPUT, ">$installdir/bin/stopServer" or die "Couldn't write stopServer";
 
 while (<INPUT>) {
 
-  if (!/^([A-Z]*)=/) {
-    print OUTPUT $_;
-  } elsif (defined $runconvert{$1}) {
-    print OUTPUT "$1=$runconvert{$1}\n";
-  } else {
-    if ($debug) {
-      print "Unrecognized template entry $1 - copying template value\n";
+    # xmlclient is now a perl script.  fix up the interpreter path
+
+    s/\/opt\/bin\/perl/$perlname/g;
+
+    if (!/^([A-Z]*)=/) {
+	print OUTPUT $_;
+    } elsif (defined $runconvert{$1}) {
+	print OUTPUT "\$$1=\"$runconvert{$1}\";\n";
+    } else {
+      if ($debug) {
+	print "Unrecognized template entry $1 - copying template value\n";
+      }
+      print OUTPUT $_;
     }
-    print OUTPUT $_;
-  }
 }
 
 close INPUT;
@@ -378,7 +384,7 @@ while (<INPUT>) {
     if (!/^([A-Z]*)=/) {
 	print OUTPUT $_;
     } elsif (defined $runconvert{$1}) {
-	print OUTPUT "\$" . "$1=\"$runconvert{$1}\";\n";
+	print OUTPUT "\$$1=\"$runconvert{$1}\";\n";
     } else {
       if ($debug) {
 	print "Unrecognized template entry $1 - copying template value\n";

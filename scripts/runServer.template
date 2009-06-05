@@ -1,12 +1,7 @@
-#!/bin/sh
+#!/opt/bin/perl
 #
 # Ganymede Server Run Script
 #
-# Last Mod Date: $Date$
-# Last Revision Changed: $Rev$
-# Last Changed By: $Author$
-# SVN URL: $HeadURL$
-# 
 ############################
 
 ########################################
@@ -16,8 +11,10 @@
 ########################################
 
 # These lines should be in the form X=Y, with nothing else on
-# the line.. they are customized by the installServer.perl
-# script
+# the line.. they are customized by the installClient.perl
+# script, and transformed into valid perl.
+#
+# Yes, I know the template doesn't look like valid perl.
 
 JAVA=/usr/bin/java
 PROPERTIES=ganymede.properties
@@ -25,6 +22,17 @@ CLASSPATH=jars/ganymedeServer.jar:jars/custom.jar:jython/jython.jar:jython/jytho
 INSTALLDIR=/var/ganymede
 
 # ------------------------------------------------------------------ #
+
+# Append any custom jar files added by the schema kit
+
+if (opendir(DIR, "$INSTALLDIR/custom/lib")) {
+    @jars = grep { /\.jar$/ } readdir(DIR);
+    closedir(DIR);
+}
+
+foreach $jar (@jars) {
+    $CLASSPATH .= ":$INSTALLDIR/custom/lib/$jar";
+}
 
 ########################################
 #
@@ -39,7 +47,7 @@ INSTALLDIR=/var/ganymede
 # the JVM to run in interpreted mode for some reason, set
 # 'DEBUG=-Xdebug -Xint'.
 
-DEBUG=
+$DEBUG="";
 
 # MINHEAP controls the heap size that the JVM running the Ganymede
 # server will initially allocate on startup, and which will be kept as
@@ -47,13 +55,13 @@ DEBUG=
 # number followed by the letter 'm' for megabyte.  I.e.,
 # 'MINHEAP=32m', or 'MINHEAP=64m'.
 
-MINHEAP=32m
+$MINHEAP="32m";
 
 # MAXHEAP controls the maximum size the Ganymede server's heap can
 # grow to.  It should be expressed as a number followed by the letter
 # 'm' for megabyte.  I.e., 'MAXHEAP=256m', or 'MAXHEAP=2048m'.
 
-MAXHEAP=1024m
+$MAXHEAP="1024m";
 
 # MAXPERMSPACE controls the amount of memory dedicated to class and
 # method storage, and to interned Strings.  The Ganymede server tries
@@ -67,7 +75,7 @@ MAXHEAP=1024m
 # should be expressed as a number followed by the letter 'm' for
 # megabyte.  I.e., 'MAXPERMSPACE=128m'.
 
-MAXPERMSPACE=256m
+$MAXPERMSPACE="256m";
 
 # These options control how frequently the Ganymede server will
 # perform full heap GC to insure release of remote (client-side) RMI
@@ -83,7 +91,7 @@ MAXPERMSPACE=256m
 # hour, letting the lower impact generational garbage collection logic
 # handle clean-up of transient objects
 
-RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000'
+$RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000';
 
 # This option forces the Ganymede server to use 64 bit
 # cryptographically random object id numbers to make it extremely
@@ -110,7 +118,7 @@ RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3
 # See the following URL for more details about RMI security and randomIDs:
 # http://www.essi.fr/~fron/SAR11/security/Building%20Secure%20Java%20RMI%20Servers.html
 
-RMISECURITY='-Djava.rmi.server.randomIDs=true'
+$RMISECURITY='-Djava.rmi.server.randomIDs=true';
 
 # If you want to force the use of a specific language in the server,
 # without respect to the native locale of the Java installation, you
@@ -126,7 +134,7 @@ RMISECURITY='-Djava.rmi.server.randomIDs=true'
 # Java installation being used, which is probably what you usually
 # want.
 
-LANGUAGE=
+$LANGUAGE="";
 
 # ------------------------------------------------------------------ #
 
@@ -208,16 +216,14 @@ LANGUAGE=
 # names to transit unprotected telnet.
 #
 # The -resetadmin, -forcelocalhost, -suppressEmail, -nossl, telnet,
-# and -logrmi or logrmi=XXX parameters should be placed on the
-# invocation line after arlut.csd.ganymede.server.Ganymede.
+# and -logrmi or logrmi=XXX parameters should be placed in the
+# $EXTRAPARAMS variable.
+
+$EXTRAPARAMS = "";
 
 # ------------------------------------------------------------------ #
 
-trap "echo Aborted" 2
-
-echo "Running Ganymede Server"
-
-export CLASSPATH
+print "Running Ganymede Server\n";
 
 # Set a higher upper limit on the number of descriptors so that
 # Ganymede doesn't run out while doing big builds
@@ -237,6 +243,8 @@ export CLASSPATH
 # Ganymede server aggressively interns Strings to avoid redundantly
 # storing Strings in the heap.
 
-SUNSPECIFIC="-server -XX:MaxPermSize=$MAXPERMSPACE"
+$SUNSPECIFIC="-server -XX:MaxPermSize=$MAXPERMSPACE"
 
-$JAVA $SUNSPECIFIC $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP $RMIGC $RMISECURITY $LANGUAGE arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR > $INSTALLDIR/server.log 2>&1 &
+$ENV{'CLASSPATH'} = $CLASSPATH;
+
+exec("$JAVA $SUNSPECIFIC $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP $RMIGC $RMISECURITY $LANGUAGE arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR $EXTRAPARAMS > $INSTALLDIR/server.log 2>&1 &");
