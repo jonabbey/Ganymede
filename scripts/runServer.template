@@ -16,16 +16,17 @@
 #
 # Yes, I know the template doesn't look like valid perl.
 
-JAVA=/usr/bin/java
-PROPERTIES=ganymede.properties
-CLASSPATH=jars/ganymedeServer.jar:jars/custom.jar:jython/jython.jar:jython/jython-lib.jar
-INSTALLDIR=/var/ganymede
+JAVA=
+PROPERTIES=
+CLASSPATH=
+INSTALLDIR=
 
 # ------------------------------------------------------------------ #
 
-# Append any custom jar files added by the schema kit
+# Append any custom jar files added by the schema kit schema/lib, if
+# there are any there.
 
-if (opendir(DIR, "$INSTALLDIR/custom/lib")) {
+if (opendir(DIR, "$INSTALLDIR/schema/lib")) {
     @jars = grep { /\.jar$/ } readdir(DIR);
     closedir(DIR);
 }
