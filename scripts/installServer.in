@@ -2,10 +2,6 @@
 #
 # Install script for Ganymede Server
 #
-# Last Mod Date: $Date$
-# Last Revision Changed: $Rev$
-# Last Changed By: $Author$
-#
 # Jonathan Abbey - jonabbey@arlut.utexas.edu
 #
 ############################################################
@@ -302,8 +298,6 @@ while (<INPUT>) {
 
   if (!/^([A-Z]*)=/) {
     print OUTPUT $_;
-  } elseif ($1 eq "CLASSPATH") {
-    print "$CLASSPATH 
   } elsif (defined $runconvert{$1}) {
     print OUTPUT "\$$1=\"$runconvert{$1}\";\n";
   } else {
