@@ -70,7 +70,7 @@ import com.mchange.v2.c3p0.*;
 
 public class IRISLink {
 
-  static final boolean debug = true;
+  static private boolean debug = false;
   static private ComboPooledDataSource source = null;
 
   /* -- */
@@ -92,6 +92,10 @@ public class IRISLink {
       {
 	throw new RuntimeException(ex);
       }
+
+    String debugProperty = System.getProperty("iris.debug");
+
+    debug = (debugProperty != null);
 
     String hostProperty = System.getProperty("iris.host");
 
@@ -123,9 +127,12 @@ public class IRISLink {
     url.append(":");
     url.append(schemaProperty);
 
-    System.err.println("**** ---- ****");
-    System.err.println("**** URL is " + url + " ****");
-    System.err.println("**** ---- ****");
+    if (debug)
+      {
+	System.err.println("**** ---- ****");
+	System.err.println("**** URL is " + url + " ****");
+	System.err.println("**** ---- ****");
+      }
 
     source.setJdbcUrl(url.toString());
 
@@ -191,7 +198,10 @@ public class IRISLink {
 	      {
 		String archivedBadge = rs.getString(1);
 
-		System.err.println("BADGE_NUMBER is " + archivedBadge + " for NETWORK_USER_ID " + username);
+		if (debug)
+		  {
+		    System.err.println("BADGE_NUMBER is " + archivedBadge + " for NETWORK_USER_ID " + username);
+		  }
 
 		if (!badge.equals(archivedBadge))
 		  {
@@ -204,7 +214,10 @@ public class IRISLink {
 	      }
 	    else
 	      {
-		System.err.println("No record found for NETWORK_USER_ID " + username);
+		if (debug)
+		  {
+		    System.err.println("No record found for NETWORK_USER_ID " + username);
+		  }
 
 		success = true;
 	      }
