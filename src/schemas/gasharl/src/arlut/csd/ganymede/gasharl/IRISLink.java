@@ -50,6 +50,8 @@
 package arlut.csd.ganymede.gasharl;
 
 import java.sql.*;
+import javax.sql.*;
+import com.mchange.v2.c3p0.*;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -69,106 +71,173 @@ import java.sql.*;
 public class IRISLink {
 
   static final boolean debug = true;
-  static private Connection conn = null;
+  static private ComboPooledDataSource source = null;
 
   /* -- */
 
-  private Connection getConnection() throws ClassNotFoundException,
-					    IllegalAccessException,
-					    InstantiationException,
-					    SQLException
+  private synchronized static ComboPooledDataSource getSource()
   {
-    /*
-      XXX need to implement a connection pooling driver here, see
-      http://java.sun.com/developer/onlineTraining/Programming/JDCBook/conpool.html
-    */
-
-    if (IRISLink.conn != null)
+    if (source != null)
       {
-	return IRISLink.conn;
+	return source;
       }
 
-    synchronized (IRISLink.class)
+    source = new ComboPooledDataSource();
+
+    try
       {
-	Class.forName("oracle.jdbc.OracleDriver").newInstance();
-
-	String hostProperty = System.getProperty("iris.host");
-
-	if (hostProperty == null)
-	  {
-	    throw new NullPointerException("iris.host not found");
-	  }
-
-	String portProperty = System.getProperty("iris.port");
-
-	if (portProperty == null)
-	  {
-	    throw new NullPointerException("iris.port not found");
-	  }
-
-	String schemaProperty = System.getProperty("iris.schema");
-
-	if (schemaProperty == null)
-	  {
-	    throw new NullPointerException("iris.schema not found");
-	  }
-
-	String usernameProperty = System.getProperty("iris.username");
-
-	if (usernameProperty == null)
-	  {
-	    throw new NullPointerException("iris.username not found");
-	  }
-
-	String passwordProperty = System.getProperty("iris.password");
-
-	if (passwordProperty == null)
-	  {
-	    throw new NullPointerException("iris.password not found");
-	  }
-
-	StringBuffer url = new StringBuffer("jdbc:oracle:thin:");
-
-	url.append("@");
-	url.append(hostProperty);
-	url.append(":");
-	url.append(portProperty);
-	url.append(":");
-	url.append(schemaProperty);
-
-	IRISLink.conn = DriverManager.getConnection(url,
-						    usernameProperty,
-						    passwordProperty);
+	source.setDriverClass("oracle.jdbc.OracleDriver");
+      }
+    catch (java.beans.PropertyVetoException ex)
+      {
+	throw new RuntimeException(ex);
       }
 
-    return IRISLink.conn;
+    String hostProperty = System.getProperty("iris.host");
+
+    if (hostProperty == null)
+      {
+	throw new NullPointerException("iris.host not found");
+      }
+
+    String portProperty = System.getProperty("iris.port");
+
+    if (portProperty == null)
+      {
+	throw new NullPointerException("iris.port not found");
+      }
+
+    String schemaProperty = System.getProperty("iris.schema");
+
+    if (schemaProperty == null)
+      {
+	throw new NullPointerException("iris.schema not found");
+      }
+
+    StringBuffer url = new StringBuffer("jdbc:oracle:thin:");
+
+    url.append("@");
+    url.append(hostProperty);
+    url.append(":");
+    url.append(portProperty);
+    url.append(":");
+    url.append(schemaProperty);
+
+    System.err.println("**** ---- ****");
+    System.err.println("**** URL is " + url + " ****");
+    System.err.println("**** ---- ****");
+
+    source.setJdbcUrl(url.toString());
+
+    String usernameProperty = System.getProperty("iris.username");
+
+    if (usernameProperty == null)
+      {
+	throw new NullPointerException("iris.username not found");
+      }
+
+    source.setUser(usernameProperty);
+
+    String passwordProperty = System.getProperty("iris.password");
+
+    if (passwordProperty == null)
+      {
+	throw new NullPointerException("iris.password not found");
+      }
+
+    source.setPassword(passwordProperty);
+
+    source.setInitialPoolSize(3);
+    source.setMinPoolSize(3);
+    source.setMaxPoolSize(10);
+    source.setMaxStatements(5);
+
+    return source;
+  }
+
+  private Connection getConnection()
+  {
+    try
+      {
+	return getSource().getConnection();
+      }
+    catch (SQLException ex)
+      {
+	ex.printStackTrace();
+
+	return null;
+      }
   }
 
   public boolean okayToUseName(String username, String badge)
   {
+    Connection myConn = null;
+    boolean success = false;
+
     try
       {
-	Connection myConn = getConnection();
+	myConn = getConnection();
 
-	String queryString = "select badge from arlwfsys where username = ?";
+	String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
 	PreparedStatement queryName = myConn.prepareStatement(queryString);
 
 	queryName.setString(1, username);
 
 	ResultSet rs = queryName.executeQuery();
 
-	if (rs.next())
+	try
 	  {
-	    String archivedBadge = rs.getString(1);
-
-	    if (!badge.equals(archivedBadge))
+	    if (rs.next())
 	      {
+		String archivedBadge = rs.getString(1);
+
+		System.err.println("BADGE_NUMBER is " + archivedBadge + " for NETWORK_USER_ID " + username);
+
+		if (!badge.equals(archivedBadge))
+		  {
+		    success = false;
+		  }
+		else
+		  {
+		    success = true;
+		  }
+	      }
+	    else
+	      {
+		System.err.println("No record found for NETWORK_USER_ID " + username);
+
+		success = true;
 	      }
 	  }
-	else
+	finally
 	  {
-	    return true;
+	    rs.close();
 	  }
       }
+    catch (SQLException ex)
+      {
+	ex.printStackTrace();
+
+	throw new RuntimeException(ex);
+      }
+    finally
+      {
+	try
+	  {
+	    myConn.close();
+	  }
+	catch (SQLException ex)
+	  {
+	  }
+      }
+
+    return success;
+  }
+
+  public static void main(String args[])
+  {
+    IRISLink test = new IRISLink();
+
+    test.okayToUseName(args[0], args[1]);
   }
 }
