@@ -49,9 +49,14 @@
 
 package arlut.csd.ganymede.gasharl;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import java.sql.*;
 import javax.sql.*;
 import com.mchange.v2.c3p0.*;
+
+import arlut.csd.ganymede.server.Ganymede;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -72,6 +77,7 @@ public class IRISLink {
 
   static private boolean debug = false;
   static private ComboPooledDataSource source = null;
+  static private Pattern numericBadgePattern = Pattern.compile("^\\d+$");
 
   /* -- */
 
@@ -95,7 +101,10 @@ public class IRISLink {
 
     String debugProperty = System.getProperty("iris.debug");
 
-    debug = (debugProperty != null);
+    if (debugProperty != null)
+      {
+	debug = true;
+      }
 
     String hostProperty = System.getProperty("iris.host");
 
@@ -162,7 +171,7 @@ public class IRISLink {
     return source;
   }
 
-  private Connection getConnection()
+  private static Connection getConnection()
   {
     try
       {
@@ -176,10 +185,9 @@ public class IRISLink {
       }
   }
 
-  public boolean okayToUseName(String username, String badge)
+  public static String findHistoricalBadge(String username)
   {
     Connection myConn = null;
-    boolean success = false;
 
     try
       {
@@ -196,30 +204,11 @@ public class IRISLink {
 	  {
 	    if (rs.next())
 	      {
-		String archivedBadge = rs.getString(1);
-
-		if (debug)
-		  {
-		    System.err.println("BADGE_NUMBER is " + archivedBadge + " for NETWORK_USER_ID " + username);
-		  }
-
-		if (!badge.equals(archivedBadge))
-		  {
-		    success = false;
-		  }
-		else
-		  {
-		    success = true;
-		  }
+		return rs.getString(1);
 	      }
 	    else
 	      {
-		if (debug)
-		  {
-		    System.err.println("No record found for NETWORK_USER_ID " + username);
-		  }
-
-		success = true;
+		return null;
 	      }
 	  }
 	finally
@@ -243,14 +232,105 @@ public class IRISLink {
 	  {
 	  }
       }
+  }
 
-    return success;
+  public static String findHistoricalUsername(String badge)
+  {
+    Connection myConn = null;
+
+    try
+      {
+	myConn = getConnection();
+
+	String queryString = "select NETWORK_USER_ID from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
+	PreparedStatement queryName = myConn.prepareStatement(queryString);
+
+	queryName.setString(1, badge);
+
+	ResultSet rs = queryName.executeQuery();
+
+	try
+	  {
+	    if (rs.next())
+	      {
+		return rs.getString(1);
+	      }
+	    else
+	      {
+		return null;
+	      }
+	  }
+	finally
+	  {
+	    rs.close();
+	  }
+      }
+    catch (SQLException ex)
+      {
+	ex.printStackTrace();
+
+	throw new RuntimeException(ex);
+      }
+    finally
+      {
+	try
+	  {
+	    myConn.close();
+	  }
+	catch (SQLException ex)
+	  {
+	  }
+      }
+  }
+
+  public static boolean okayToUseName(String username, String badge)
+  {
+    String badgeString = findHistoricalBadge(username);
+
+    if (badgeString == null)
+      {
+	return true;
+      }
+
+    if (badge.equals(badgeString))
+      {
+	return true;
+      }
+
+    // Okay, we don't have a badge string match.  Is this due to one
+    // or more leading 0's?  Convert to integers and see if we have
+    // equal values.
+
+    Matcher m = numericBadgePattern.matcher(badgeString);
+    Matcher m2 = numericBadgePattern.matcher(badge);
+
+    if (m.matches() && m2.matches())
+      {
+	try
+	  {
+	    int historicalInt = Integer.valueOf(badgeString);
+	    int currentInt = Integer.valueOf(badge);
+
+	    if (historicalInt == currentInt)
+	      {
+		return true;
+	      }
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    Ganymede.logError(ex);
+
+	    throw ex;
+	  }
+      }
+
+    return false;
   }
 
   public static void main(String args[])
   {
-    IRISLink test = new IRISLink();
+    debug = true;
 
-    test.okayToUseName(args[0], args[1]);
+    IRISLink.okayToUseName(args[0], args[1]);
   }
 }

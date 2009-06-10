@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashSet;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.Calendar;
@@ -61,6 +62,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 
 import org.doomdark.uuid.EthernetAddress;
@@ -90,6 +92,7 @@ import arlut.csd.ganymede.server.DBLog;
 import arlut.csd.ganymede.server.DBNameSpace;
 import arlut.csd.ganymede.server.DBObject;
 import arlut.csd.ganymede.server.DBObjectBase;
+import arlut.csd.ganymede.server.DBObjectBaseField;
 import arlut.csd.ganymede.server.DBSession;
 import arlut.csd.ganymede.server.DBStore;
 import arlut.csd.ganymede.server.DateDBField;
@@ -432,7 +435,62 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return null;
       }
 
-    return renameEntries(this.getLabel());
+    ReturnVal retVal = renameEntries(this.getLabel());
+
+    if (!ReturnVal.didSucceed(retVal))
+      {
+	return retVal;
+      }
+
+    // now check to make sure that the username/badge combination
+    // doesn't conflict with something in IRIS' history.
+    //
+    // we do this in preCommitHook() so that we can check the final
+    // status of the username and badge information since we need both
+    // to make an intelligent check.
+
+    boolean needBadgeNameCheck = false;
+
+    if (this.getStatus() == ObjectStatus.CREATING)
+      {
+	needBadgeNameCheck = true;
+      }
+    else
+      {
+	Set<DBObjectBaseField> fieldsChanged = new HashSet<DBObjectBaseField>();
+	String ignoreResult = diff(fieldsChanged);
+
+	if (fieldsChanged.contains(getFieldDef(userSchema.USERNAME)) ||
+	    fieldsChanged.contains(getFieldDef(userSchema.BADGE)))
+	  {
+	    needBadgeNameCheck = true;
+	  }
+      }
+
+    if (needBadgeNameCheck)
+      {
+	String username = (String) getFieldValueLocal(userSchema.USERNAME);
+	String badge = (String) getFieldValueLocal(userSchema.BADGE);
+
+	try
+	  {
+	    if (!IRISLink.okayToUseName((String) getFieldValueLocal(userSchema.USERNAME),
+					(String) getFieldValueLocal(userSchema.BADGE)))
+	      {
+		return ReturnVal.merge(retVal, Ganymede.createErrorDialog("Historical username conflict",
+									  "Username " + username + 
+									  " conflicts with an account by that name that is associated with a different badge number in the HR database.\n\n" +
+									  "This is either due to the badge number (" + badge + ") being entered incorrectly, or due to a historical " +
+									  "account whose name is not yet eligible for re-use with a new account."));
+	      }
+	  }
+	catch (Exception ex)
+	  {
+	    Ganymede.logError(ex);
+	  }
+      }
+
+    return retVal;
   }
 
   /**
