@@ -220,6 +220,26 @@ public class IRISLink {
 	  {
 	    if (rs.next())
 	      {
+		String badge = rs.getString(1);
+
+		// strip leading zeros, if any
+
+		if (numericBadgePattern.matcher(badge).matches())
+		  {
+		    try
+		      {
+			return Integer.valueOf(badge).toString();
+		      }
+		    catch (NumberFormatException ex)
+		      {
+			Ganymede.debug("Huh, NumberFormatException from a badge (" + badge + ") that matched numericBadgePattern.  Weird!");
+
+			Ganymede.logError(ex);
+
+			return badge;
+		      }
+		  }
+
 		return rs.getString(1);
 	      }
 	    else
@@ -324,36 +344,32 @@ public class IRISLink {
 
   public static boolean okayToUseName(String username, String badge)
   {
-    String badgeString = findHistoricalBadge(username);
+    String historicalBadgeString = findHistoricalBadge(username);
 
-    if (badgeString == null)
+    if (historicalBadgeString == null)
       {
 	return true;
       }
 
-    if (badge.equals(badgeString))
+    if (badge.equals(historicalBadgeString))
       {
 	return true;
       }
 
-    // Okay, we don't have a badge string match.  Is this due to one
-    // or more leading 0's?  Convert to integers and see if we have
-    // equal values.
+    // Okay, we don't have a badge string match.  Is this due to the
+    // user entering a badge number with a leading 0?
 
-    Matcher m = numericBadgePattern.matcher(badgeString);
-    Matcher m2 = numericBadgePattern.matcher(badge);
+    Matcher m = numericBadgePattern.matcher(badge);
 
-    if (m.matches() && m2.matches())
+    if (m.matches())
       {
 	try
 	  {
-	    int historicalInt = Integer.valueOf(badgeString);
-	    int currentInt = Integer.valueOf(badge);
+	    // strip off 0
 
-	    if (historicalInt == currentInt)
-	      {
-		return true;
-	      }
+	    badge = Integer.valueOf(badge).toString();
+
+	    return (badge.equals(historicalBadgeString));
 	  }
 	catch (NumberFormatException ex)
 	  {
