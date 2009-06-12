@@ -32,7 +32,7 @@ if (opendir(DIR, "$INSTALLDIR/schema/lib")) {
 }
 
 foreach $jar (@jars) {
-    $CLASSPATH .= ":$INSTALLDIR/custom/lib/$jar";
+    $CLASSPATH .= ":$INSTALLDIR/schema/lib/$jar";
 }
 
 ########################################
