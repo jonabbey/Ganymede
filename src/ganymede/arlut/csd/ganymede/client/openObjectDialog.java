@@ -5,7 +5,6 @@
    A Dialog to open an object from the database for a variety of operations.
 
    Created: 31 October 1997
-   Last Commit: $Format:%cd$
 
    Module By: Mike Mulvaney
 
@@ -13,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -519,14 +518,17 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 
 	try
 	  {
-	    invid = client.session.findLabeledObject(string, baseID, true);
+	    invid = client.session.findLabeledObject(string, baseID, false);
 
 	    if (invid != null)
 	      {
-		close(true);
-	      }
+		// "Found object named {0}."
 
-	    return;
+		client.setStatus(ts.l("actionPerformed.found_status", string));
+		close(true);
+
+		return;
+	      }
 	  }
 	catch (java.rmi.RemoteException ex)
 	  {
@@ -556,6 +558,17 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
 	    edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 
 	    edit_invids = edit_query.getListHandles();
+
+	    // and add a direct match of a different type, if it exists
+
+	    invid = client.session.findLabeledObject(string, baseID, true);
+
+	    if (invid != null)
+	      {
+		String matchLabel = client.session.viewObjectLabel(invid);
+
+		edit_invids.add(0, new listHandle("(" + client.getObjectType(invid) + ") " + string, invid));
+	      }
 
 	    if (edit_invids.size() == 1)
 	      {

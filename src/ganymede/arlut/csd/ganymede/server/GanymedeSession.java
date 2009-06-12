@@ -2887,8 +2887,9 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param objectName Label for an object
    * @param type Object type id number.
    * @param allowAliases If true, findLabeledObject will return an
-   * Invid that has name attached to the same namespace as the label
-   * field for the object type sought.
+   * Invid that has objectName attached to the same namespace as the
+   * label field for the object type sought, even if the Invid is of a
+   * different object type.
    */
 
   public Invid findLabeledObject(String objectName, short type, boolean allowAliases) throws NotLoggedInException
