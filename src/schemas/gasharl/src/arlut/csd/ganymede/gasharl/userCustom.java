@@ -484,8 +484,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 									  "' user object (with badge id '" + badge + "') conflicts with an earlier '" + username +
 									  "' account that is still referenced in the HR database.\n\n" +
 									  "The previous account was owned by employee '" + fullNameConflict +
-									  "', with a badge number of '" + badgeConflict +
-									  "'"));
+									  "', with badge id '" + badgeConflict +
+									  "'.\n\n" +
+									  "You must change the username or badge id in the '" + username + "' object in order " +
+									  "to resolve this conflict."));
 	      }
 	  }
 	catch (Exception ex)
