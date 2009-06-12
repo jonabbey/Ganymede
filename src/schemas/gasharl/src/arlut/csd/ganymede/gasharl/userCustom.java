@@ -474,14 +474,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	try
 	  {
-	    if (!IRISLink.okayToUseName((String) getFieldValueLocal(userSchema.USERNAME),
-					(String) getFieldValueLocal(userSchema.BADGE)))
+	    if (!IRISLink.okayToUseName(username, badge))
 	      {
+		String badgeConflict = IRISLink.findHistoricalBadge(username);
+
 		return ReturnVal.merge(retVal, Ganymede.createErrorDialog("Historical username conflict",
 									  "Username " + username + 
 									  " conflicts with an account by that name that is associated with a different badge number in the HR database.\n\n" +
 									  "This is either due to the badge number (" + badge + ") being entered incorrectly, or due to a historical " +
-									  "account whose name is not yet eligible for re-use with a new account."));
+									  "account whose name is not yet eligible for re-use with a new account.\n\n" +
+									  "The conflicting '" + username + "' account was previously associated with badge '" + badgeConflict + "'"));
 	      }
 	  }
 	catch (Exception ex)

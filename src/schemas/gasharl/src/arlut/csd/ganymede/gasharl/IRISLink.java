@@ -70,6 +70,9 @@ import arlut.csd.ganymede.server.Ganymede;
  * user id over historical time, pull biographical details from the HR
  * databases, and etc.
  *
+ * This class is obviously very specific to the ARL:UT environment,
+ * and I don't imagine it would ever be of use to outside parties.
+ *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
 
@@ -185,6 +188,19 @@ public class IRISLink {
       }
   }
 
+  /**
+   * This method returns a badge code for the given username, if that
+   * username is either currently in use or was ever in use over the
+   * period covered by the IRIS database record.
+   *
+   * We expect that truly old user names will eventually be aged out
+   * of the database, but we want to avoid re-using usernames for at
+   * least 5 years.
+   *
+   * If the username was not found in the database, a null value will
+   * be returned.
+   */
+
   public static String findHistoricalBadge(String username)
   {
     Connection myConn = null;
@@ -234,6 +250,20 @@ public class IRISLink {
       }
   }
 
+  /**
+   * This method returns a username for the given badge code, if that
+   * badge code is on record in the IRIS database and has a network id
+   * (a Ganymede username) associated with it.
+   *
+   * We expect that truly old user names will eventually be aged out
+   * of the database, but we want to avoid re-using usernames for at
+   * least 5 years.
+   *
+   * If the badge code was not found in the database, or if no network
+   * id was retained for that badge code, a null value will be
+   * returned.
+   */
+
   public static String findHistoricalUsername(String badge)
   {
     Connection myConn = null;
@@ -282,6 +312,15 @@ public class IRISLink {
 	  }
       }
   }
+
+  /**
+   * This method returns true if the given username is either not
+   * present in the IRIS database, or if it is present and the badge
+   * identifier matches.
+   *
+   * This method will return false if the given username is present in
+   * the database with a different badge code.
+   */
 
   public static boolean okayToUseName(String username, String badge)
   {
