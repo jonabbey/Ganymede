@@ -232,7 +232,7 @@ public class IRISLink {
 	    rs.close();
 	  }
       }
-    catch (SQLException ex)
+    catch (Exception ex)
       {
 	ex.printStackTrace();
 
