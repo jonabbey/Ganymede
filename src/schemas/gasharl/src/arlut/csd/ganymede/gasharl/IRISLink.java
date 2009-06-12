@@ -232,7 +232,7 @@ public class IRISLink {
 	    rs.close();
 	  }
       }
-    catch (Exception ex)
+    catch (Throwable ex)
       {
 	ex.printStackTrace();
 
@@ -295,7 +295,7 @@ public class IRISLink {
 	    rs.close();
 	  }
       }
-    catch (SQLException ex)
+    catch (Throwable ex)
       {
 	ex.printStackTrace();
 
