@@ -477,16 +477,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    if (!IRISLink.okayToUseName(username, badge))
 	      {
 		String badgeConflict = IRISLink.findHistoricalBadge(username);
+		String fullNameConflict = IRISLink.findHistoricalEmployeeName(username);
 
 		return ReturnVal.merge(retVal, Ganymede.createErrorDialog("Historical username conflict",
-									  "The " + username + " user object has a username that " +
-									  "conflicts with a previous account by that name that remains in the HR database, linked to " +
-									  "a different employee.\n\n" +
-									  "This may be due to the badge number for this account ('" + badge +
-									  "') having been entered incorrectly.  The " +
-									  "employee formerly associated with this account name had a badge number of '" + badgeConflict +
-									  "'.\n\n" +
-									  "You will have to choose a different username in order to commit this transaction."));
+									  "The '" + username +
+									  "' user object (with badge id '" + badge + "') conflicts with an earlier '" + username +
+									  "' account that is still referenced in the HR database.\n\n" +
+									  "The previous account was owned by employee '" + fullNameConflict +
+									  "', with a badge number of '" + badgeConflict +
+									  "'"));
 	      }
 	  }
 	catch (Exception ex)

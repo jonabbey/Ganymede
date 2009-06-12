@@ -334,6 +334,64 @@ public class IRISLink {
   }
 
   /**
+   * This method returns a human readable name for the employee who is
+   * associated with the given username in the IRIS database.
+   *
+   * If the username was not found in the database, a null value will
+   * be returned.
+   */
+
+  public static String findHistoricalEmployeeName(String username)
+  {
+    Connection myConn = null;
+
+    try
+      {
+	myConn = getConnection();
+
+	String queryString = "select EMPLOYEE_NAME from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
+	PreparedStatement queryName = myConn.prepareStatement(queryString);
+
+	queryName.setString(1, username);
+
+	ResultSet rs = queryName.executeQuery();
+
+	try
+	  {
+	    if (rs.next())
+	      {
+		return rs.getString(1);
+	      }
+	    else
+	      {
+		return null;
+	      }
+	  }
+	finally
+	  {
+	    rs.close();
+	  }
+      }
+    catch (Throwable ex)
+      {
+	ex.printStackTrace();
+
+	throw new RuntimeException(ex);
+      }
+    finally
+      {
+	try
+	  {
+	    myConn.close();
+	  }
+	catch (SQLException ex)
+	  {
+	  }
+      }
+  }
+
+
+  /**
    * This method returns true if the given username is either not
    * present in the IRIS database, or if it is present and the badge
    * identifier matches.
