@@ -224,7 +224,7 @@ Manager password hashes, that's what you have to use.
 The Unix SHA Crypt algorithms embodied in the
 arlut.csd.crypto.Sha256Crypt and arlut.csd.crypto.Sha512Crypt classes
 come from Ulrich Drepper, who released the algorithms into the public
-domain.  See http://people.redhat.com/drepper/SHA-crypt.txt for a
+domain.  See http://people.redhat.com/drepper/sha-crypt.html for a
 discussion of details.  The port was performed by James Ratcliff,
 falazar@arlut.utexas.edu.
 
