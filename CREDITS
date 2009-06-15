@@ -315,6 +315,22 @@ without expressed or implied warranty.
 
 --
 
+The gasharl schema kit uses Steve Waldman's c3p0 DataSource / Resource
+Pool class library for JDBC to provide connection pooling for internal
+use at the laboratory.  We are including the binary c3p0 jar file
+under src/schemas/gasharl/lib in the public release of Ganymede to
+simplify our revision control and to provide an example of the use of
+external JDBC connections in custom schema code.
+
+The c3p0 home page is at
+
+  http://sourceforge.net/projects/c3p0
+
+The c3p0 package is distributed under the terms of version 2.1 of the
+GNU Lesser General Public License (LGPL).
+
+--
+
 The 'ant validate' task makes use of the Perl Config::Properties
 package, copyright by Randy Jay Yarger, Craig Manley, and Salvador
 Fandiño.  It is free software, licensed under the same terms as Perl
