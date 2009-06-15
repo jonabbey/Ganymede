@@ -32,7 +32,9 @@ development of Ganymede 2.0, including transitioning Ganymede's build
 system from old Perl scripts to using Ant.  Deepak also developed the
 Jython integration, and worked on the new Sync Channel software, both
 in the Ganymede client and especially in the amazing Python Sync
-Channel servicing code framework, known as SyncUtil.
+Channel servicing code framework, known as SyncUtil, which forms the
+basis of the gasharl schema kit's support for efficient sync'ing to
+Active Directory.
 
 Deepak also designed and implemented the Ganymede 2.0 Query Language,
 using Terrance Parr's splendiferously good ANTLR tool.
@@ -97,6 +99,10 @@ classes used in the Ganymede client with a new SmartTable class that
 wraps the javax.swing.JTable class with a compatible interface.  This
 work has made report printing possible in Ganymede.
 
+James also provided the port of Ulrich Drepper's Unix SHA256, SHA512
+crypt algorithms to Java that is used in Ganymede for secure password
+hashing.
+
 --
 
  Erik Grostic
@@ -110,11 +116,14 @@ client into fruition.
 
 Within ARL, Gil Kloepfer provided design assistance on the networking
 issues that Ganymede was designed to address as the lab moved into the
-21st century.  Jay Scott contributed work on the build script
-environment used to propagate data from Ganymede into the laboratory's
-information systems.  GASH admins Glen Kronschnabl, Carrie Woodworth,
-Rich Gramann, Andrew Helyer, Richard Mach, Randy Zagar, and many
-others made helpful reports on gaps and problems with Ganymede.
+21st century.  Marcus Walker and Tania Ayala made very helpful user
+interface recommendations and bug reports.  Marcus also helped
+designed the gasharl schema's support for Active Directory constructs.
+Jay Scott contributed work on the build script environment used to
+propagate data from Ganymede into the laboratory's information
+systems.  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
+Gramann, Andrew Helyer, Richard Mach, Randy Zagar, and many others
+made helpful reports on gaps and problems with Ganymede.
 
 John Knutson has provided bug reports and code contributions in the
 course of evaluating the Ganymede code for use on an SGL
@@ -195,20 +204,34 @@ information was placed on the original code:
 
 The MD4 class used to support Windows NT-compatible cryptographic
 hashes was derived from MD classes written by Harry Mantakos,
-harry@meretrix.com.  The MD classes came from Harry's JOTP project,
-which you can link to at http://www.cs.umd.edu/users/harry/jotp/. The
-actual "LANMAN" and "NT MD4 Unicode" hash support code was written by
-Andrew Tridgell and released under the GPL as part of the Samba source
-code, and was ported to Java by Jonathan Abbey, using Harry's MD4 code
-to perform the fundamental cryptographic hash function.
+harry@meretrix.com, and are here under Harry's "there's code in here
+that you're welcome to steal" license.  The MD classes came from
+Harry's JOTP project, which you can link to at
+http://www.cs.umd.edu/users/harry/jotp/.
+
+The actual "LANMAN" and "NT MD4 Unicode" hash support code was written
+by Andrew Tridgell and released under the GPL as part of the Samba
+source code, and was ported to Java by Jonathan Abbey, using Harry's
+MD4 code to perform the fundamental cryptographic hash function.
+
+Note that Sun has declined to provide support for md4 in the
+java.security.MessageDigest class.  This is because md4 is terribly
+weak by modern standards, but if you want to support old school Lan
+Manager password hashes, that's what you have to use.
 
 --
 
 The Unix SHA Crypt algorithms embodied in the
 arlut.csd.crypto.Sha256Crypt and arlut.csd.crypto.Sha512Crypt classes
 come from Ulrich Drepper, who released the algorithms into the public
-domain.  See http://people.redhat.com/drepper/SHA-crypt.html for a
-discussion of details.
+domain.  See http://people.redhat.com/drepper/SHA-crypt.txt for a
+discussion of details.  The port was performed by James Ratcliff,
+falazar@arlut.utexas.edu.
+
+Unlike md4, the hashing used for the Unix SHA Crypt standard is
+phenomenally strong, and you should probably try to use this if you're
+generating hashed passwords for modern Linux, Solaris, AIX, or HPUX
+systems.
 
 --
 
