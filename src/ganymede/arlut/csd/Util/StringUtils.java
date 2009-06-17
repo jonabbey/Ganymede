@@ -66,6 +66,20 @@ package arlut.csd.Util;
 public class StringUtils {
 
   /**
+   * Simple method to exchange null strings for empty strings.
+   */
+
+  public static String emptyNull(String inputString)
+  {
+    if (inputString == null)
+      {
+	return "";
+      }
+
+    return inputString;
+  }
+
+  /**
    * <P>This method strips out any characters from inputString that are
    * not present in legalChars.</P>
    *
