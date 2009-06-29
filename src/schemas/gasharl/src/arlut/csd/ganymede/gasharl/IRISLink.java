@@ -431,7 +431,7 @@ public class IRISLink {
   }
 
   /**
-   * Returns the registered phone number for a given user name.
+   * Returns the registered phone number for a given badge.
    */
 
   public static String getPhone(String badge)
@@ -457,6 +457,40 @@ public class IRISLink {
 	      }
 	    else
 	      {
+		// Okay, we may not have a badge string match.  Is
+		// this due to the user entering a badge number with a
+		// leading 0?
+
+		Matcher m = numericBadgePattern.matcher(badge);
+
+		if (m.matches())
+		  {
+		    try
+		      {
+			// strip off leading 0
+
+			badge = Integer.valueOf(badge).toString();
+
+			queryName.setString(1, badge);
+			rs = queryName.executeQuery();
+
+			if (rs.next())
+			  {
+			    return rs.getString(1);
+			  }
+			else
+			  {
+			    return null;
+			  }
+		      }
+		    catch (NumberFormatException ex)
+		      {
+			Ganymede.logError(ex);
+
+			throw ex;
+		      }
+		  }
+
 		return null;
 	      }
 	  }
