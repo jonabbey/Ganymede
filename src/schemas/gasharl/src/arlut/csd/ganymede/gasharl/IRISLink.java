@@ -171,6 +171,12 @@ public class IRISLink {
     source.setMaxPoolSize(10);
     source.setMaxStatements(5);
 
+    // we'll test idle connections every five minutes to make sure
+    // that they remain usable.
+
+    source.setIdleConnectionTestPeriod(300);
+    source.setPreferredTestQuery("select count(*) from HR_EMPLOYEES_GA_VW");
+
     return source;
   }
 
@@ -274,11 +280,14 @@ public class IRISLink {
 	    rs.close();
 	  }
       }
-    catch (Throwable ex)
+    catch (SQLException ex)
       {
-	ex.printStackTrace();
+	rethrowException(ex);
 
-	throw new RuntimeException(ex);
+	// the compiler doesn't realize that rethrowException()
+	// always throws an exception..
+
+	return null;
       }
     finally
       {
