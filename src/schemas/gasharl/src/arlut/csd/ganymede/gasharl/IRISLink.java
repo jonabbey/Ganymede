@@ -430,6 +430,62 @@ public class IRISLink {
       }
   }
 
+  /**
+   * Returns the registered phone number for a given user name.
+   */
+
+  public static String getPhone(String badge)
+  {
+    Connection myConn = null;
+
+    try
+      {
+	myConn = getConnection();
+
+	String queryString = "select ARL_PHONE from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
+	PreparedStatement queryName = myConn.prepareStatement(queryString);
+
+	queryName.setString(1, badge);
+
+	ResultSet rs = queryName.executeQuery();
+
+	try
+	  {
+	    if (rs.next())
+	      {
+		return rs.getString(1);
+	      }
+	    else
+	      {
+		return null;
+	      }
+	  }
+	finally
+	  {
+	    rs.close();
+	  }
+      }
+    catch (SQLException ex)
+      {
+	rethrowException(ex);
+
+	// the compiler doesn't realize that rethrowException()
+	// always throws an exception..
+
+	return null;
+      }
+    finally
+      {
+	try
+	  {
+	    myConn.close();
+	  }
+	catch (SQLException ex)
+	  {
+	  }
+      }
+  }
+
 
   /**
    * This method returns true if the given username is either not
