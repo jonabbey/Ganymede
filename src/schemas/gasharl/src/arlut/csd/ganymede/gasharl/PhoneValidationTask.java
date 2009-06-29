@@ -186,6 +186,11 @@ public class PhoneValidationTask implements Runnable {
 	String badge = (String) user.getFieldValueLocal(userSchema.BADGE);
 	String irisPhone = IRISLink.getPhone(badge);
 
+	if (irisPhone == null)
+	  {
+	    continue;
+	  }
+
 	if (!user.isDefined(userSchema.OFFICEPHONE))
 	  {
 	    ReturnVal retVal = mySession.edit_db_object(user.getInvid());
