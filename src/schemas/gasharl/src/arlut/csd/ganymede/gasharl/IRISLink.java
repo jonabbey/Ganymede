@@ -169,7 +169,10 @@ public class IRISLink {
     source.setInitialPoolSize(3);
     source.setMinPoolSize(3);
     source.setMaxPoolSize(10);
-    source.setMaxStatements(5);
+
+    // enable prepared statement caching
+
+    source.setMaxStatements(20);
 
     // we'll test idle connections every five minutes to make sure
     // that they remain usable.
