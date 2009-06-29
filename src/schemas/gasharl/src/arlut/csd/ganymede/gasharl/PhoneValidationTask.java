@@ -158,6 +158,8 @@ public class PhoneValidationTask implements Runnable {
     catch (Throwable ex)
       {
 	Ganymede.debug("Caught " + ex.getMessage());
+
+	ex.printStackTrace();
       }
     finally
       {
