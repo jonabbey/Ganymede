@@ -188,6 +188,28 @@ public class IRISLink {
       }
   }
 
+  private static void rethrowException(SQLException ex)
+  {
+    if (getSource() instanceof PooledDataSource)
+      {
+	PooledDataSource pds = (PooledDataSource) getSource();
+
+	try
+	  {
+	    System.err.println("num_connections: " + pds.getNumConnectionsDefaultUser());
+	    System.err.println("num_busy_connections: " + pds.getNumBusyConnectionsDefaultUser());
+	    System.err.println("num_idle_connections: " + pds.getNumIdleConnectionsDefaultUser());
+	  }
+	catch (SQLException sqlex)
+	  {
+	  }
+      }
+
+    ex.printStackTrace();
+
+    throw new RuntimeException(ex);
+  }
+
   /**
    * This method returns a badge code for the given username, if that
    * username is either currently in use or was ever in use over the
@@ -315,11 +337,14 @@ public class IRISLink {
 	    rs.close();
 	  }
       }
-    catch (Throwable ex)
+    catch (SQLException ex)
       {
-	ex.printStackTrace();
+	rethrowException(ex);
 
-	throw new RuntimeException(ex);
+	// the compiler doesn't realize that rethrowException()
+	// always throws an exception..
+
+	return null;
       }
     finally
       {
@@ -372,11 +397,14 @@ public class IRISLink {
 	    rs.close();
 	  }
       }
-    catch (Throwable ex)
+    catch (SQLException ex)
       {
-	ex.printStackTrace();
+	rethrowException(ex);
 
-	throw new RuntimeException(ex);
+	// the compiler doesn't realize that rethrowException()
+	// always throws an exception..
+
+	return null;
       }
     finally
       {
