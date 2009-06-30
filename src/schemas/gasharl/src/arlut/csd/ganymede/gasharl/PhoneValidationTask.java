@@ -178,6 +178,11 @@ public class PhoneValidationTask implements Runnable {
 
     for (DBObject user: users)
       {
+	if (user.isInactivated())
+	  {
+	    continue;
+	  }
+
 	if (!user.isDefined(userSchema.BADGE))
 	  {
 	    Ganymede.debug("User " + user.getLabel() + " has no badge");
