@@ -211,6 +211,17 @@ public class PhoneValidationTask implements Runnable {
 	    if (!isCompatible(irisPhone, phone))
 	      {
 		Ganymede.debug("User " + user.getLabel() + " has a recorded phone of " + phone + " but IRIS thinks it should be " + irisPhone);
+
+		ReturnVal retVal = mySession.edit_db_object(user.getInvid());
+
+		if (!ReturnVal.didSucceed(retVal))
+		  {
+		    continue;
+		  }
+
+		DBEditObject userObject = (DBEditObject) retVal.getObject();
+
+		userObject.setFieldValueLocal(userSchema.OFFICEPHONE, irisPhone);
 	      }
 	  }
       }
