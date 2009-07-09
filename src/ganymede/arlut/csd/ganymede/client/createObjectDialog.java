@@ -181,14 +181,12 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 		name = thisBase.getName();
 	      }
 		
-	    if (name.startsWith("Embedded:"))
+	    if (thisBase.isEmbedded())
 	      {
-		if (debug)
-		  {
-		    System.err.println("Skipping embedded field: " + name);
-		  }
+		continue;
 	      }
-	    else if (thisBase.canCreate(null))
+
+	    if (thisBase.canCreate(null))
 	      {
 		listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
 		listHandles.addElement(lh);
