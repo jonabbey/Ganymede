@@ -817,6 +817,8 @@ public class rowTable extends baseTable implements ActionListener {
 	    optimizeCols();
 	    refreshTable();
 	  }
+
+	return;
       }
 
     element = findRow(menuRow);
