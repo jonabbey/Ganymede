@@ -2257,8 +2257,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
-    if (field.isEditable() && (field instanceof InvidDBField) &&
-	!field.isEditInPlace())
+    if (field instanceof InvidDBField &&
+	!field.isEditInPlace() && field.isEditable())
       {
 	DBObjectBaseField fieldDef;
 	short baseId;
