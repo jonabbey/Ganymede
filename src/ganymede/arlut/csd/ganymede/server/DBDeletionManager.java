@@ -353,6 +353,14 @@ public class DBDeletionManager {
   {
     Set<Invid> currentSet = sessions.get(session);
 
+    if (currentSet == null)
+      {
+	// we won't necessarily have a Set<Invid> for the session
+	// unless an object has been delete-locked in that session
+
+	return;
+      }
+
     Set<Invid> badItems = new HashSet<Invid>(invidSet); // copy
     badItems.removeAll(currentSet);
 
