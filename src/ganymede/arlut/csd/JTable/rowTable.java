@@ -789,51 +789,54 @@ public class rowTable extends baseTable implements ActionListener {
 	return;
       }
 
-    if (menuRow == -1)
+    try
       {
-	if (e.getSource() == DeleteColMI)
+	if (menuRow == -1)
 	  {
-            callback.colMenuPerformed(menuCol, e);
-	    this.deleteColumn(menuCol, true);
-	    refreshTable();
+	    if (e.getSource() == DeleteColMI)
+	      {
+		callback.colMenuPerformed(menuCol, e);
+		this.deleteColumn(menuCol, true);
+		refreshTable();
+	      }
+	    else if (e.getSource() == SortByMI)
+	      {
+		callback.colMenuPerformed(menuCol, e);
+		sortForward = true;
+		resort(menuCol, true);
+	      }
+	    else if (e.getSource() == RevSortByMI)
+	      {
+		callback.colMenuPerformed(menuCol, e);
+		sortForward = false;
+		resort(menuCol, true);
+	      }
+	    else if (e.getSource() == OptimizeMI)
+	      {
+		callback.colMenuPerformed(menuCol, e);
+		optimizeCols();
+		refreshTable();
+	      }
+
 	    return;
 	  }
 
-	if (e.getSource() == SortByMI)
-	  {
-            callback.colMenuPerformed(menuCol, e);
-	    sortForward = true;
-	    resort(menuCol, true);
-	  }
-	else if (e.getSource() == RevSortByMI)
-	  {
-            callback.colMenuPerformed(menuCol, e);
-	    sortForward = false;
-	    resort(menuCol, true);
-	  }
-	else if (e.getSource() == OptimizeMI)
-	  {
-            callback.colMenuPerformed(menuCol, e);
-	    optimizeCols();
-	    refreshTable();
-	  }
-
-	return;
-      }
-
-    element = findRow(menuRow);
+	element = findRow(menuRow);
     
-    // perform our callback
+	// perform our callback
 
-    if (element != null)
-      {
-	callback.rowMenuPerformed(element.key, e);
+	if (element != null)
+	  {
+	    callback.rowMenuPerformed(element.key, e);
+	  }
       }
+    finally
+      {
+	// clear our lastpopped menu row, col
 
-    // clear our lastpopped menu row, col
-
-    menuRow = -1;
-    menuCol = -1;
+	menuRow = -1;
+	menuCol = -1;
+      }
   }
 
   /**
