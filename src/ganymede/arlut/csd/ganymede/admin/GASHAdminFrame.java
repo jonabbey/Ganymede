@@ -933,13 +933,17 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     // and put the tab pane into our frame with the
     // same constraints that the text area had
 
+    int splitterPos = -1;
+
+    if (prefs != null)
+      {
+	splitterPos = prefs.getInt(SPLITTER_POS, -1);
+      }
+
+    statusBox.setPreferredSize(new Dimension(-1, splitterPos));
+
     splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
     splitterPane.setOneTouchExpandable(true);
-
-    // we want the top component, our log panel, to get almost all of
-    // the extra size when we are resized
-
-    //    splitterPane.setResizeWeight(0.85); 
 
     getContentPane().add(splitterPane, BorderLayout.CENTER);
 
@@ -951,25 +955,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	sizer.saveSize(this);	// save an initial size before the user might maximize
       }
 
-    int splitterPos = -1;
-
-    if (prefs != null)
-      {
-	splitterPos = prefs.getInt(SPLITTER_POS, -1);
-      }
-
     this.setVisible(true);
-
-    if (splitterPos != -1)
-      {
-	splitterPane.setDividerLocation(splitterPos);
-      }
-    else
-      {
-        splitterPane.setDividerLocation(0.75);
-      }
-
-    this.validate();
 
     // along with processWindowEvent(), this method allows us
     // to properly handle window system close events.
