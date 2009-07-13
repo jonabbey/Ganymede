@@ -3,7 +3,7 @@
    JCenterDialog.java
 
    A subclass of JDialog that centers itself when pack() is called.
-   
+
    Created: 17 September 1998
 
    Last Mod Date: $Date$
@@ -14,9 +14,9 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
@@ -87,20 +87,20 @@ public class JCenterDialog extends JDialog {
     this(null, null, false);
   }
 
-  public JCenterDialog(Frame frame) 
+  public JCenterDialog(Frame frame)
   {
     this(frame, null, false);
   }
 
-  public JCenterDialog(Frame frame, String title) 
+  public JCenterDialog(Frame frame, String title)
   {
     this(frame, title, false);
   }
 
-  public JCenterDialog(Frame frame, String title, boolean modal) 
+  public JCenterDialog(Frame frame, String title, boolean modal)
   {
     super(frame, title, modal);
-    
+
     this.frame = frame;
   }
 
@@ -146,12 +146,12 @@ public class JCenterDialog extends JDialog {
     if (frame != null)
       {
 	Rectangle r = frame.getBounds();
-	
+
 	if (debug)
 	  {
 	    System.out.println("Bounds: " + r);
 	  }
-	
+
 	// Sometimes a new JFrame() is passed in, and it won't have
 	// anything interesting for bounds I don't think they are
 	// null, but they are all 0 or something.  Might as well make
