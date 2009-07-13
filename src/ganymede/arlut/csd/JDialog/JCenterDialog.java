@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -54,6 +54,9 @@
 package arlut.csd.JDialog;
 
 import java.awt.Frame;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.GraphicsDevice;
 import java.awt.Rectangle;
 
 import javax.swing.JDialog;
@@ -72,6 +75,8 @@ import javax.swing.JDialog;
 public class JCenterDialog extends JDialog {
 
   private final static boolean debug = false;
+
+  private final static int offset = 40;
 
   Frame frame;
 
@@ -97,56 +102,6 @@ public class JCenterDialog extends JDialog {
     super(frame, title, modal);
     
     this.frame = frame;
-  }
-
-  private void place(int width, int height)
-  {
-    if (frame != null)
-      {
-	Rectangle r = frame.getBounds();
-	
-	if (debug)
-	  {
-	    System.out.println("Bounds: " + r);
-	  }
-	
-	// Sometimes a new JFrame() is passed in, and it won't have
-	// anything interesting for bounds I don't think they are
-	// null, but they are all 0 or something.  Might as well make
-	// sure they are not null anyway.
-
-	if ((r != null) && ((r.width != 0) && (r.height != 0)))
-	  {
-	    if (debug)
-	      {
-		System.out.println("Dialog is " + width + " wide and " + height + " tall.");
-	      }
-
-	    int loc = r.width/2 + r.x - width/2;
-	    int locy = r.height/2 + r.y - height/2;
-
-	    // make sure that we don't put the dialog off screen if
-	    // the dialog is bigger than the frame it's attached to..
-
-	    if ((loc >= 0) && (locy >= 0))
-	      {
-		setLocation(loc, locy);
-
-		if (debug)
-		  {
-		    System.out.println("Setting location to : " + loc + "," + locy);
-		  }
-	      }
-	  }
-	else if (debug)
-	  {
-	    System.out.println("getBounds() returned null.");
-	  }
-      }
-    else if (debug)
-      {
-	System.out.println("Parent frame is null.");
-      }
   }
 
   /**
@@ -180,4 +135,92 @@ public class JCenterDialog extends JDialog {
     place(width, height);
   }
 
+  /**
+   * This method places the dialog in the center of the frame that
+   * this dialog is attached to, unless centering the dialog would
+   * place it outside the bounds of the screen.
+   */
+
+  private void place(int width, int height)
+  {
+    if (frame != null)
+      {
+	Rectangle r = frame.getBounds();
+	
+	if (debug)
+	  {
+	    System.out.println("Bounds: " + r);
+	  }
+	
+	// Sometimes a new JFrame() is passed in, and it won't have
+	// anything interesting for bounds I don't think they are
+	// null, but they are all 0 or something.  Might as well make
+	// sure they are not null anyway.
+
+	if ((r != null) && ((r.width != 0) && (r.height != 0)))
+	  {
+	    if (debug)
+	      {
+		System.out.println("Dialog is " + width + " wide and " + height + " tall.");
+	      }
+
+	    int locx = r.width/2 + r.x - width/2;
+	    int locy = r.height/2 + r.y - height/2;
+
+	    // make sure that we don't put the dialog off screen if
+	    // the dialog is bigger than the frame it's attached to..
+
+	    Rectangle screenSize = getVirtualScreenBounds();
+
+	    if (locx >= (screenSize.x + offset) &&
+		locy >= (screenSize.y + offset) &&
+		locx <= (screenSize.x + screenSize.width - offset) &&
+		locy <= (screenSize.y + screenSize.height - offset))
+	      {
+		setLocation(locx, locy);
+
+		if (debug)
+		  {
+		    System.out.println("Setting location to : " + locx + "," + locy);
+		  }
+	      }
+	  }
+	else if (debug)
+	  {
+	    System.out.println("getBounds() returned null.");
+	  }
+      }
+    else if (debug)
+      {
+	System.out.println("Parent frame is null.");
+      }
+  }
+
+  /**
+   * This method returns the bounds of the screen(s) available in the
+   * environment.
+   *
+   * Taken from the javadoc for java.awt.GraphicsConfiguration
+   */
+
+  private Rectangle getVirtualScreenBounds()
+  {
+    Rectangle virtualBounds = new Rectangle();
+
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+    GraphicsDevice[] gs = ge.getScreenDevices();
+
+    for (GraphicsDevice gd: gs)
+      {
+	GraphicsConfiguration gcs[] = gd.getConfigurations();
+
+	for (GraphicsConfiguration gc: gcs)
+	  {
+	    virtualBounds = virtualBounds.union(gc.getBounds());
+	  }
+      }
+
+    return virtualBounds;
+  }
 }
