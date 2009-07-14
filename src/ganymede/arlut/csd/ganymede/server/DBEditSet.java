@@ -1929,6 +1929,8 @@ public class DBEditSet {
 		try
 		  {
 		    DBObject parentObj = session.getContainingObj(eObj);
+		    
+		    // "{0} {1}''s {2} ''{3}'', <{4}> was modified.\n\n{5}"
 
 		    streamLogEvent("objectchanged",
 				   ts.l("commit_createLogEvent.embedded_modified",
