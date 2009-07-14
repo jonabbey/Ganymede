@@ -449,7 +449,7 @@ public class PasswordAgingTask implements Runnable {
     String titleString = "Password Has Expired For User " + userObject.getLabel() + "!!!";
 
     String messageString = "The password for user account " + userObject.getLabel() + 
-      " expired at " + passwordChangeTime + ".  The password for this user account *must* be changed immediately, or else" +
+      " expired at " + passwordChangeTime + ".\n\nThe password for this user account *must* be changed immediately, or else" +
       " the account will be inactivated.  If this account is inactivated, extension of the password" +
       " expiration deadline will be impossible, and a new password will need to be chosen to re-enable" +
       " this account.\n\n" +
