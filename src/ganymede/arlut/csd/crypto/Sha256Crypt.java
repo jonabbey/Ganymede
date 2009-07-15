@@ -2,9 +2,6 @@
    Sha256Crypt.java
 
    Created: 18 December 2007
-   Last Changed By: $Author: broccol $
-   Version: $Revision: 7921 $
-   Last Mod Date: $Date: 2008-03-11 16:54:03 -0500 (Tue, 11 Mar 2008) $
 
    Java Port By: James Ratcliff, falazar@arlut.utexas.edu
 
@@ -28,7 +25,7 @@
 
    This Java Port is  
 
-     Copyright (c) 2008 The University of Texas at Austin.
+     Copyright (c) 2008, 2009 The University of Texas at Austin.
 
      All rights reserved.
 

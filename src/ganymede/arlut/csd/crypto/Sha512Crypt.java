@@ -2,9 +2,6 @@
    Sha512Crypt.java
 
    Created: 18 December 2007
-   Last Changed By: $Author: broccol $
-   Version: $Revision: 7692 $
-   Last Mod Date: $Date: 2007-12-30 01:55:31 -0600 (Sun, 30 Dec 2007) $
 
    Java Port By: James Ratcliff, falazar@arlut.utexas.edu
 
@@ -28,7 +25,7 @@
 
    This Java Port is  
 
-     Copyright (c) 2008 The University of Texas at Austin.
+     Copyright (c) 2008, 2009 The University of Texas at Austin.
 
      All rights reserved.
 
