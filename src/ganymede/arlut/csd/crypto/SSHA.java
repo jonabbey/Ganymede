@@ -14,18 +14,13 @@
 
    Created: 28 April 2004
 
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   Last Mod Date: $Date$
-   SVN URL: $HeadURL$
-
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -62,6 +57,7 @@
 
 package arlut.csd.crypto;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 
 /*------------------------------------------------------------------------------
@@ -185,7 +181,14 @@ public final class SSHA {
 	System.err.println("Wha!  " + hashText);
       }
 
-    hashBytes = Base64.decode(hashText);
+    try
+      {
+	hashBytes = Base64.decode(hashText);
+      }
+    catch (IOException ex)
+      {
+	return false;
+      }
 
     if (hashBytes.length > 20)
       {

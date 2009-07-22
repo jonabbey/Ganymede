@@ -251,10 +251,10 @@ See http://www.doomdark.org/doomdark/proj/jug/ for more information.
 
 --
 
-The Java Base 64 encoder/decoder (here arlut.csd.crypto.Base64) was
-written by Robert Harder (rob@iharder.net) and placed into the public
-domain as part of his 'xmlizable' package.  More information on this
-class may be found at http://iharder.net/xmlizable.
+The Java Base 64 encoder/decoder (here named arlut.csd.crypto.Base64)
+used to generate LDAP style SSHA password encodings was written by
+Robert Harder (rob@iharder.net) and placed into the public domain.
+See http://iharder.net/base64/ for Robert's Java Base64 page.
 
 --
 
