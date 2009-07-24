@@ -7,18 +7,13 @@
    
    Created: 22 March 2004
 
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   Last Mod Date: $Date$
-   SVN URL: $HeadURL$
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -99,6 +94,8 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
   private static boolean tryKerberos = false;
 
   private static String AppleOptions = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"><plist version=\"1.0\"><dict><key>simultaneous_login_enabled</key><true/></dict></plist>";
+
+  private static String dnBase = "dc=od1,dc=arlut,dc=utexas,dc=edu";
 
 
   // ---
@@ -365,8 +362,8 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	throw new IllegalArgumentException("Wrong entity type");
       }
 
-    writeLDIF(out, "dn", "uid=" + user.getLabel() + ",cn=users,dc=xserve");
-    writeLDIF(out, "apple-generateduid", (String) user.getFieldValueLocal(userSchema.GUID).toString());
+    writeLDIF(out, "dn", "uid=" + user.getLabel() + ",cn=users," + dnBase);
+    writeLDIF(out, "apple-generateduid", (String) user.getFieldValueLocal(userSchema.GUID).toString().toUpperCase());
     writeLDIF(out, "sn", user.getLabel());
 
     if (!tryKerberos)
@@ -452,7 +449,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	throw new IllegalArgumentException("Wrong entity type");
       }
 
-    writeLDIF(out, "dn", "cn=" + group.getLabel() + ",cn=groups,dc=xserve");
+    writeLDIF(out, "dn", "cn=" + group.getLabel() + ",cn=groups," + dnBase);
     writeLDIF(out, "gidNumber", group.getFieldValueLocal(groupSchema.GID).toString());
 
     Vector users = group.getFieldValuesLocal(groupSchema.USERS);
@@ -477,7 +474,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 	  {
 	    DBObject user = getObject((Invid) users.elementAt(i));
 	    
-	    writeLDIF(out, "uniqueMember", "uid=" + user.getLabel() + ",cn=users,dc=xserve");
+	    writeLDIF(out, "uniqueMember", "uid=" + user.getLabel() + ",cn=users," + dnBase);
 	  }
       }
 
@@ -518,7 +515,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
       }
       
     /* Write out the LDIF header for this netgroup. We'll make the CN the netgroup name. */
-    writeLDIF(out, "dn", "cn=" + name + ",cn=netgroups,dc=xserve");
+    writeLDIF(out, "dn", "cn=" + name + ",cn=netgroups," + dnBase);
     writeLDIF(out, "objectclass", "nisNetgroup");
     writeLDIF(out, "cn", name);
     
