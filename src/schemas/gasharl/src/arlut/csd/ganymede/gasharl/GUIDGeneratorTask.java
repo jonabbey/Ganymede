@@ -218,7 +218,7 @@ public class GUIDGeneratorTask implements Runnable {
 	    continue;
 	  }
 
-	if (!group.isValid())
+	if (!user.isValid())
 	  {
 	    Ganymede.debug("Skipping user " + user + " due to pre-existing inconsistency.");
 	    continue;
