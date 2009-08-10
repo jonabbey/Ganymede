@@ -261,7 +261,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return null;
 	  }
 
-	// need to find a uid for this user
+	// need to find a global unique id (guid) for this user
 
 	StringDBField guidField = (StringDBField) getField(GUID);
 
@@ -279,6 +279,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    return retVal;
 	  }
+
+	// need to find a uid for this user
 
 	NumericDBField numField = (NumericDBField) getField(UID);
 

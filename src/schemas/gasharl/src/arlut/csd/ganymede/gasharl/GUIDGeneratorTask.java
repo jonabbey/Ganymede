@@ -237,6 +237,35 @@ public class GUIDGeneratorTask implements Runnable {
 	  }
       }
 
+    List<DBObject> groups = mySession.getObjects((short) 257);
+
+    for (DBObject group: groups)
+      {
+	Invid invid = group.getInvid();
+
+	ReturnVal retVal = mySession.edit_db_object(invid);
+
+	if (retVal != null && retVal.didSucceed())
+	  {
+	    DBEditObject eo = (DBEditObject) retVal.getObject();
+
+	    StringDBField guidField = (StringDBField) eo.getField(groupSchema.GUID);
+
+	    if (!guidField.isDefined())
+	      {
+		org.doomdark.uuid.UUID uuid = gen.generateTimeBasedUUID(myAddress);
+		String uuidString = uuid.toString();
+
+		retVal = guidField.setValueLocal(uuidString);
+
+		if (retVal != null && !retVal.didSucceed())
+		  {
+		    return false;
+		  }
+	      }
+	  }
+      }
+
     return true;
   }
 }

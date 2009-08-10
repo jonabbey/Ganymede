@@ -81,4 +81,6 @@ public interface groupSchema {
   final static short USERS=261;
   final static short HOMEUSERS=262;
   final static short CONTRACTLINK=263;
+  final static short RECEIVEMAIL=264;
+  final static short GUID=265;
 }

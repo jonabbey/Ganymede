@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -56,6 +56,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
 
+import org.doomdark.uuid.EthernetAddress;
+import org.doomdark.uuid.UUIDGenerator;
+
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.VectorUtils;
@@ -77,6 +80,7 @@ import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeSession;
 import arlut.csd.ganymede.server.InvidDBField;
 import arlut.csd.ganymede.server.NumericDBField;
+import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -171,6 +175,25 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
     if (!getGSession().enableOversight)
       {
 	return null;
+      }
+
+    // need to find a global unique id (guid) for this user
+
+    StringDBField guidField = (StringDBField) getField(GUID);
+
+    if (guidField == null)
+      {
+	return Ganymede.createErrorDialog("Group Initialization Failure",
+					  "Couldn't find the guid field.. schema problem?");
+      }
+
+    String guid = generateGUID(); // create a globally unique uid
+
+    retVal = guidField.setValueLocal(guid);
+
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
       }
 
     // need to find a gid for this group
@@ -965,4 +988,18 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
   {
     System.err.println("groupCustom.wizardHook(): " + s);
   }
+
+  /**
+   * <p>Private method to create a globally unique UID value suitable
+   * for certain LDAP applications</p>
+   */
+
+  private String generateGUID()
+  {
+    UUIDGenerator gen = UUIDGenerator.getInstance();
+    org.doomdark.uuid.UUID guid = gen.generateTimeBasedUUID(new EthernetAddress("8:0:20:fd:6b:7")); // csdsun9
+
+    return guid.toString();
+  }
+
 }
