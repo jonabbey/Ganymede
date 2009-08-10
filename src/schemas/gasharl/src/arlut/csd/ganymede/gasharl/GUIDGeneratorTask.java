@@ -154,7 +154,7 @@ public class GUIDGeneratorTask implements Runnable {
 
 	if (!createGUIDs())
 	  {
-	    Ganymede.debug("ConvertNetworks bailed");
+	    Ganymede.debug("Create GUIDs bailed");
 
 	    mySession.abortTransaction();
 	    return;
@@ -207,11 +207,23 @@ public class GUIDGeneratorTask implements Runnable {
     List<DBObject> users = mySession.getObjects(SchemaConstants.UserBase);
     UUIDGenerator gen = UUIDGenerator.getInstance();
     EthernetAddress myAddress = new EthernetAddress("8:0:20:fd:6b:7");
+    boolean success = true;
 
     /* -- */
     
     for (DBObject user: users)
       {
+	if (user.isDefined(userSchema.GUID))
+	  {
+	    continue;
+	  }
+
+	if (!group.isValid())
+	  {
+	    Ganymede.debug("Skipping user " + user + " due to pre-existing inconsistency.");
+	    continue;
+	  }
+
 	Invid invid = user.getInvid();
 
 	ReturnVal retVal = mySession.edit_db_object(invid);
@@ -231,7 +243,7 @@ public class GUIDGeneratorTask implements Runnable {
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
-		    return false;
+		    success = false;
 		  }
 	      }
 	  }
@@ -241,6 +253,17 @@ public class GUIDGeneratorTask implements Runnable {
 
     for (DBObject group: groups)
       {
+	if (group.isDefined(groupSchema.GUID))
+	  {
+	    continue;
+	  }
+
+	if (!group.isValid())
+	  {
+	    Ganymede.debug("Skipping group " + group + " due to pre-existing inconsistency.");
+	    continue;
+	  }
+
 	Invid invid = group.getInvid();
 
 	ReturnVal retVal = mySession.edit_db_object(invid);
@@ -260,13 +283,13 @@ public class GUIDGeneratorTask implements Runnable {
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
-		    return false;
+		    success = false;
 		  }
 	      }
 	  }
       }
 
-    return true;
+    return success;
   }
 }
 
