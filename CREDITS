@@ -247,7 +247,7 @@ The Java UUID Generator code used by ARL custom code to generate RFC
 and DCE-compliant globally unique identifiers for our Macintosh LDAP
 synchronization was written by Tatu Saloranta, tatu.saloranta@iki.fi,
 and is included in Ganymede under the Lesser General Public License.
-See http://www.doomdark.org/doomdark/proj/jug/ for more information.
+See http://jug.safehaus.org/ for more information.
 
 --
 
