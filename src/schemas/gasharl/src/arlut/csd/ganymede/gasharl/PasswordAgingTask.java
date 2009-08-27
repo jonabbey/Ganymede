@@ -401,7 +401,7 @@ public class PasswordAgingTask implements Runnable {
     String messageString = "The password for user account " + userObject.getLabel() + 
       " will expire soon.  You will need to change your password before " + passwordChangeTime +
       " or else your user account will be inactivated.\n\n" +
-      "You can change your password online by visiting http://www.arlut.utexas.edu/password/\n\n" +
+      "You can change your password online by visiting https://www.arlut.utexas.edu/password/\n\n" +
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators.";
 
     Ganymede.log.sendMail(null, titleString, messageString, true, false, objVect);
@@ -425,7 +425,7 @@ public class PasswordAgingTask implements Runnable {
     String messageString = "The password for user account " + userObject.getLabel() + 
       " will expire very soon.  The password for this user account will need to be changed before " + passwordChangeTime +
       " or else the account will be inactivated.\n\n" +
-      "You can change your password online by visiting http://www.arlut.utexas.edu/password/\n\n" +
+      "You can change your password online by visiting https://www.arlut.utexas.edu/password/\n\n" +
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
@@ -453,7 +453,7 @@ public class PasswordAgingTask implements Runnable {
       " the account will be inactivated.  If this account is inactivated, extension of the password" +
       " expiration deadline will be impossible, and a new password will need to be chosen to re-enable" +
       " this account.\n\n" +
-      "You can change your password online by visiting http://www.arlut.utexas.edu/password/\n\n" +
+      "You can change your password online by visiting https://www.arlut.utexas.edu/password/\n\n" +
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
