@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-April 28, 2009
+September 11, 2009
 CHANGES
 
 Last Commit: $Format:%cd$
@@ -8,7 +8,7 @@ Last Commit: $Format:%cd$
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: July ?, 2009
+RELEASE DATE: November ?, 2009
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1158,7 +1158,7 @@ We have added support for the new SHA256 and SHA512-based 'Unix Crypt'
 hash algorithms introduced by Red Hat, Sun, IBM, and HP.  A discussion
 and link to the specification for this algorithm can be found at
 
-http://people.redhat.com/drepper/SHA-crypt.html
+http://people.redhat.com/drepper/sha-crypt.html
 
 These new hash algorithms are intended for widespread adoption in a
 way that OpenBSD's bcrypt hash algorithm never achieved, while
@@ -1523,6 +1523,26 @@ DBObjects and DBObjectBases.
 
 I took out the use of the old gnu regexp package from the server, to
 reduce the size of the Ganymede download.
+
+101. [SERVER, CLIENT] Improved object locating logic
+
+The various open object dialogs (view/edit/delete/inactivate, etc.)
+now have automatic alias handling.  Now that all objects are required
+to have namespace constrained labels, the open object dialogs are able
+to find / display objects that may match the name given in the
+appropriate namespace, even if the name is attached to the namespace
+through a non-label field.
+
+Even more, if the namespace is attached to fields in a different
+object type, requesting an object of a given name might result in a
+object of a different type being returned.
+
+I.e., when using Ganymede to manage accounts for Active Directory,
+users and groups are required to be in the same namespace.  With this
+change, you could ask to view either a user or a group of a given
+name, and if you guessed wrong about the type of the object, the
+client will notify you that the object you asked for is of a different
+type.
 
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 
