@@ -411,8 +411,8 @@ public class DBLinkTracker {
 	  {
 	    for (Invid extraSource: extraReal)
 	      {
-		// "** DBLinkTracker.checkInvids(): DBObject {0} has a forward asymmetric link to invid {1} that is not present in the DBLinkTracker structures!"
-		Ganymede.debug(ts.l("checkInvids.extraLink", extraSource, target));
+		// "** DBLinkTracker.checkInvids(): DBObject {0} ({1}) has a forward asymmetric link to invid {2} ({3}) that is not present in the DBLinkTracker structures!"
+		Ganymede.debug(ts.l("checkInvids.extraLink", extraSource, describe(session, extraSource), target, describe(session, target)));
 
 		ok = false;
 	      }
@@ -422,8 +422,8 @@ public class DBLinkTracker {
 	  {
 	    for (Invid missingSource: extraTracked)
 	      {
-		// "** DBLinkTracker.checkInvids(): DBObject {0} is lacking a forward asymmetric link to invid {1} that the DBLinkTracker thinks should be there!"
-		Ganymede.debug(ts.l("checkInvids.missingLink", missingSource, target));
+		// "** DBLinkTracker.checkInvids(): DBObject {0} ({1}) is lacking a forward asymmetric link to invid {2} ({3}) that the DBLinkTracker thinks should be there!"
+		Ganymede.debug(ts.l("checkInvids.missingLink", missingSource, describe(session, missingSource), target, describe(session, target)));
 
 		ok = false;
 	      }
