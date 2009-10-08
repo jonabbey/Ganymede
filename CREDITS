@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-28 May, 2009
+8 October 2009
 CREDITS
 
 ---------------------------------------------
@@ -371,6 +371,17 @@ profiling tool is called PerfAnal, and it is distributed under the GNU
 General Public License.  See
 http://java.sun.com/developer/technicalArticles/Programming/perfanal/
 for details on PerfAnal.
+
+--
+
+The jarbundler-2.1.0.jar file under src/lib provides Seth
+J. Morabito's Mac OS X JarBundler Ant task, as further developed by
+Will Gilbert.  It was downloaded from
+http://informagen.com/JarBundler/ to provide Macintosh-specific
+application packaging of the Ganymede clients.
+
+The JarBundler project is licensed under the Apache Software License
+v2.0 (ASLv2).
 
 --
 

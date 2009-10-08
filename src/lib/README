@@ -1,9 +1,6 @@
-README -- lib
-
-Last Revision Changed: $Rev$
-Last Changed By: $Author$
-Last Mod Date: $Date$
-SVN URL: $HeadURL$
+Ganymede Release 2.0
+8 October 2009
+src/lib/README
 
 --------------------------------------------------------------------------------
 
@@ -11,7 +8,18 @@ This directory tree contains jar files used by the Ganymede build
 process.  The ant build.xml file will copy these to ../build/lib
 during the build so as to put the jar files in the Ant class path.
 
-No, I'm not sure why this is necessary either.  Deepak?
+antlr.jar is from Terence Parr's ANTLR parser generator, which he has
+placed in the public domain.
+
+See http://www.antlr.org/ for information on ANTLR.
+
+jarbundler-2.1.0.jar provides Seth J. Morabito's Mac OS X JarBundler
+Ant task, as further developed by Will Gilbert.  It was downloaded
+from http://informagen.com/JarBundler/ to provide Macintosh-specific
+application packaging of the Ganymede clients.
+
+The JarBundler project is licensed under the Apache Software License
+v2.0 (ASLv2).
 
 Jonathan Abbey
-14 April 2005
+8 October 2009
