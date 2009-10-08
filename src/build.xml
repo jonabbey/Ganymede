@@ -44,7 +44,6 @@
   <property name="do.signjars" value="true"/>
 
 
-
   <!-- This keystore passphrase must match that in arlut.csd.ganymede.common.RMISSLServerSocketFactory -->
   <property name="priv_key.storepass" value="ganypassphrase"/>
 
@@ -73,6 +72,13 @@
       <equals arg1="${use.ssl}" arg2="true"/>
     </and>
   </condition>
+
+  <!-- Include the JarBundler task so that we can do Mac OS X specific
+  build packaging. -->
+
+  <taskdef name="jarbundler"
+           classpath="${lib.dir}/jarbundler-2.1.0.jar"
+           classname="net.sourceforge.jarbundler.JarBundler"/>
 
   <path id="classpath">
     <fileset dir="${lib.dir}">
