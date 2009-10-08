@@ -704,6 +704,13 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");
       }
 
+    // If we're running on the Mac, let's try to fit in a bit better.
+
+    if (glogin.runningOnMac)
+      {
+	System.setProperty("com.apple.macos.useScreenMenuBar", "true");
+      }
+
     session = s;
     _myglogin = g;
     my_username = g.getUserName();

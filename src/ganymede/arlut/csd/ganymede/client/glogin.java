@@ -231,6 +231,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   protected static DeathWatcherThread deathThread;
 
+  /**
+   * If true, we're running on a mac, and we might tweak our interface
+   * a bit to make things look better.
+   */
+
+  protected static boolean runningOnMac = false;
+
   // ---
 
   /**
@@ -459,7 +466,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     gclient.sizer.restoreLookAndFeel();
 
-    // Dowload the ganymede logo using the appropriate method
+    if (System.getProperty("mrj.version") != null)
+      {
+	glogin.runningOnMac = true;
+      }
+
+    // Retrieve the ganymede logo using the appropriate method
     
     ganymede_logo = PackageResources.getImageResource(this, "ganymede.jpg", getClass());
     ganymede_ssl_logo = PackageResources.getImageResource(this, "ssl_ganymede.jpg", getClass());
