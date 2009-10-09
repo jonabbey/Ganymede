@@ -277,7 +277,9 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 
     if (glogin.isRunningOnMac())
       {
-	gbc.anchor = gbc.EAST;
+	gbc.gridx = 2;
+	gbc.gridwidth = GridBagConstraints.REMAINDER;
+	gbc.anchor = GridBagConstraints.EAST;
       }
 
     gbl.setConstraints(buttonP, gbc);
