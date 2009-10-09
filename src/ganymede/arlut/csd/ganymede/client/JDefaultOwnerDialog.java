@@ -169,14 +169,14 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
     ss.setCallback(this);
     getContentPane().add("Center", ss);
 
+    ok = new JButton(StringDialog.getDefaultOk());
+    ok.addActionListener(this);
+
+    cancel = new JButton(StringDialog.getDefaultCancel());
+    cancel.addActionListener(this);
+    
     if (glogin.isRunningOnMac())
       {
-	ok = new JButton(StringDialog.getDefaultOk());
-	ok.addActionListener(this);
-
-	cancel = new JButton(StringDialog.getDefaultCancel());
-	cancel.addActionListener(this);
-    
 	JPanel p = new JPanel();
 	p.add(cancel);
 	p.add(ok);
@@ -191,12 +191,6 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
       }
     else
       {
-	ok = new JButton(StringDialog.getDefaultOk());
-	ok.addActionListener(this);
-
-	cancel = new JButton(StringDialog.getDefaultCancel());
-	cancel.addActionListener(this);
-    
 	JPanel p = new JPanel();
 	p.add(ok);
 	p.add(cancel);

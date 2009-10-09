@@ -17,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -91,7 +91,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.JFilterDialog");
 
   private final static boolean debug = false;
-  JButton cancel, done;
+  JButton cancel, ok;
   Vector filter, available = null;
   gclient gc;
   boolean changed = false;
@@ -132,17 +132,34 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
     getContentPane().add("Center", ss);
 
-    done = new JButton(StringDialog.getDefaultOk());
-    done.addActionListener(this);
+    ok = new JButton(StringDialog.getDefaultOk());
+    ok.addActionListener(this);
     cancel = new JButton(StringDialog.getDefaultCancel());
     cancel.addActionListener(this);
+
+    if (glogin.isRunningOnMac())
+      {
+	JPanel p = new JPanel();
+	p.add(cancel);
+	p.add(ok);
+
+	JPanel macPanel = new JPanel();
+	macPanel.setLayout(new BorderLayout());
+	macPanel.add(p, BorderLayout.EAST);
+
+	macPanel.setBorder(gc.raisedBorder);
     
-    JPanel p = new JPanel(false);
-    p.setBorder(gc.statusBorderRaised);
-    p.add(done);
-    p.add(cancel);
+	getContentPane().add("South", macPanel);
+      }
+    else
+      {
+	JPanel p = new JPanel();
+	p.add(ok);
+	p.add(cancel);
+	p.setBorder(gc.raisedBorder);
     
-    getContentPane().add("South", p);
+	getContentPane().add("South", p);
+      }
 
     setBounds(50,50,50,50);
     pack();
@@ -209,7 +226,7 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == done)
+    if (e.getSource() == ok)
       {
 	try
 	  {
