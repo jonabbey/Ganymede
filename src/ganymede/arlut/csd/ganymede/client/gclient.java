@@ -977,7 +977,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     viewObjectMI.setActionCommand(view_action);
     viewObjectMI.addActionListener(this);
 
-
     // "Clear Tree"
     clearTreeMI = new JMenuItem(ts.l("createMenuBar.file_menu_0"));
     setMenuMnemonic(clearTreeMI, ts.l("createMenuBar.file_menu_0_key_optional"));
@@ -1015,6 +1014,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
 	fileMenu.add(createObjectMI);
 	fileMenu.add(viewObjectMI);
+	fileMenu.addSeparator();
       }
 
     fileMenu.add(clearTreeMI);
@@ -1023,8 +1023,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     fileMenu.add(hideNonEditablesMI);
     fileMenu.addSeparator();
     fileMenu.add(submitXMLMI);
-    fileMenu.addSeparator();
-    fileMenu.add(logoutMI);
+
+    if (!glogin.isRunningOnMac())
+      {
+	fileMenu.addSeparator();
+	fileMenu.add(logoutMI);
+      }
 
     // Action menu
 
