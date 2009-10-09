@@ -929,6 +929,44 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     fileMenu = new JMenu(ts.l("createMenuBar.file_menu"));
     setMenuMnemonic(fileMenu, ts.l("createMenuBar.file_menu_key_optional"));
 
+    // the "New Object" menu will appear under 'File' on the Mac, but
+    // will be under 'Actions' on other platforms.
+
+    if (glogin.runningOnMac)
+      {
+	// "New Object"
+	createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3_mac")));
+	setAccelerator(createObjectMI, ts.l("createMenuBar.action_menu_3_mac_accelerator_optional"));
+      }
+    else
+      {
+	// "Create Object"
+	createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3")));
+	setMenuMnemonic(createObjectMI, ts.l("createMenuBar.action_menu_3_key_optional"));
+      }
+
+    createObjectMI.setActionCommand(create_action);
+    createObjectMI.addActionListener(this);
+
+    // Ditto "Open Object"
+
+    if (glogin.runningOnMac)
+      {
+	// "Open Object"
+	viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2_mac")));
+	setAccelerator(viewObjectMI, ts.l("createMenuBar.action_menu_2_mac_accelerator_optional"));
+      }
+    else
+      {
+	// "View Object"
+	viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2")));
+	setMenuMnemonic(viewObjectMI, ts.l("createMenuBar.action_menu_2_key_optional"));
+      }
+
+    viewObjectMI.setActionCommand(view_action);
+    viewObjectMI.addActionListener(this);
+
+
     // "Clear Tree"
     clearTreeMI = new JMenuItem(ts.l("createMenuBar.file_menu_0"));
     setMenuMnemonic(clearTreeMI, ts.l("createMenuBar.file_menu_0_key_optional"));
@@ -961,6 +999,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     logoutMI = new JMenuItem(ts.l("createMenuBar.file_menu_4"));
     setMenuMnemonic(logoutMI, ts.l("createMenuBar.file_menu_4_key_optional"));
     logoutMI.addActionListener(this);
+
+    if (glogin.runningOnMac)
+      {
+	fileMenu.add(createObjectMI);
+	fileMenu.add(viewObjectMI);
+      }
 
     fileMenu.add(clearTreeMI);
     fileMenu.add(filterQueryMI);
@@ -1005,37 +1049,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     menubarQueryMI.setActionCommand(query_action);
     menubarQueryMI.addActionListener(this);
 
-    if (glogin.runningOnMac)
-      {
-	// "Open Object"
-	viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2_mac")));
-	setAccelerator(viewObjectMI, ts.l("createMenuBar.action_menu_2_mac_accelerator_optional"));
-      }
-    else
-      {
-	// "View Object"
-	viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2")));
-	setMenuMnemonic(viewObjectMI, ts.l("createMenuBar.action_menu_2_key_optional"));
-      }
-
-    viewObjectMI.setActionCommand(view_action);
-    viewObjectMI.addActionListener(this);
-
-    if (glogin.runningOnMac)
-      {
-	// "New Object"
-	createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3_mac")));
-	setAccelerator(createObjectMI, ts.l("createMenuBar.action_menu_3_mac_accelerator_optional"));
-      }
-    else
-      {
-	// "Create Object"
-	createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3")));
-	setMenuMnemonic(createObjectMI, ts.l("createMenuBar.action_menu_3_key_optional"));
-      }
-
-    createObjectMI.setActionCommand(create_action);
-    createObjectMI.addActionListener(this);
+    // We created "View Object" and "Create Object" above.  If we're
+    // not on a Mac, we'll show them under the ACtions menu.
 
     // "Edit Object"    
     editObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_4")));
@@ -1062,8 +1077,13 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     actionMenu.add(menubarQueryMI);
     actionMenu.addSeparator();
-    actionMenu.add(viewObjectMI);
-    actionMenu.add(createObjectMI);
+
+    if (glogin.runningOnMac)
+      {
+	actionMenu.add(viewObjectMI);
+	actionMenu.add(createObjectMI);
+      }
+
     actionMenu.add(editObjectMI);
     actionMenu.add(deleteObjectMI);
     actionMenu.add(inactivateObjectMI);
