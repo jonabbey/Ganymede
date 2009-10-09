@@ -296,8 +296,17 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
     OkButton.addActionListener(this);
     CancelButton.addActionListener(this);
     Choice_Buttons.setLayout(new FlowLayout (FlowLayout.RIGHT));
-    Choice_Buttons.add(OkButton);
-    Choice_Buttons.add(CancelButton);
+
+    if (glogin.isRunningOnMac())
+      {
+	Choice_Buttons.add(CancelButton);
+	Choice_Buttons.add(OkButton);
+      }
+    else
+      {
+	Choice_Buttons.add(OkButton);
+	Choice_Buttons.add(CancelButton);
+      }
     
     editBox.addItemListener(this);
     editBox.setSelected(false);
