@@ -820,8 +820,19 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     JPanel bottomButtonP = new JPanel(false);
 
-    bottomButtonP.add(commit);
-    bottomButtonP.add(cancel);
+    if (glogin.runningOnMac)
+      {
+	// cancel is to the left of commit on the mac
+
+	bottomButtonP.add(cancel);
+	bottomButtonP.add(commit);
+      }
+    else
+      {
+	bottomButtonP.add(commit);
+	bottomButtonP.add(cancel);
+      }
+
     bottomButtonP.setBorder(loweredBorder);
 
     // Create the pane splitter
