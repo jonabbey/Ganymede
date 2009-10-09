@@ -935,13 +935,13 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     clearTreeMI.addActionListener(this);
 
     // "Set Owner Filter"
-    filterQueryMI = new JMenuItem(ts.l("createMenuBar.file_menu_1"));
+    filterQueryMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.file_menu_1")));
     setMenuMnemonic(filterQueryMI, ts.l("createMenuBar.file_menu_1_key_optional"));
     filterQueryMI.setActionCommand("Set Owner Filter"); 
     filterQueryMI.addActionListener(this);
 
     // "Set Default Owner"
-    defaultOwnerMI = new JMenuItem(ts.l("createMenuBar.file_menu_2"));
+    defaultOwnerMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.file_menu_2")));
     setMenuMnemonic(defaultOwnerMI, ts.l("createMenuBar.file_menu_2_key_optional"));
     defaultOwnerMI.setActionCommand("Set Default Owner");
     defaultOwnerMI.addActionListener(this);
@@ -952,14 +952,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     hideNonEditablesMI.addActionListener(this);
 
     // "Submit XML data"
-    submitXMLMI = new JMenuItem(ts.l("createMenuBar.file_menu_5"));
+    submitXMLMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.file_menu_5")));
     setMenuMnemonic(submitXMLMI, ts.l("createMenuBar.file_menu_5_key_optional"));
     submitXMLMI.setActionCommand("Submit XML"); 
     submitXMLMI.addActionListener(this);
 
     // "Logout"
     logoutMI = new JMenuItem(ts.l("createMenuBar.file_menu_4"));
-    setMenuMnemonic(logoutMI, ts.l("createMenuBar.file_menu_4_key_optional"));    
+    setMenuMnemonic(logoutMI, ts.l("createMenuBar.file_menu_4_key_optional"));
     logoutMI.addActionListener(this);
 
     fileMenu.add(clearTreeMI);
@@ -993,44 +993,64 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     if ((personae != null) && personae.size() > 1)
       {
 	// "Change Persona"
-	changePersonaMI = new JMenuItem(ts.l("createMenuBar.action_menu_0"));
+	changePersonaMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_0")));
 	setMenuMnemonic(changePersonaMI, ts.l("createMenuBar.action_menu_0_key_optional"));
 	changePersonaMI.setActionCommand(persona_action);
 	changePersonaMI.addActionListener(this);
       }
 
     // "Query"
-    menubarQueryMI = new JMenuItem(ts.l("createMenuBar.action_menu_1"));
+    menubarQueryMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_1")));
     setMenuMnemonic(menubarQueryMI, ts.l("createMenuBar.action_menu_1_key_optional"));
     menubarQueryMI.setActionCommand(query_action);
     menubarQueryMI.addActionListener(this);
 
-    // "View Object"
-    viewObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_2"));
-    setMenuMnemonic(viewObjectMI, ts.l("createMenuBar.action_menu_2_key_optional"));
+    if (glogin.runningOnMac)
+      {
+	// "Open Object"
+	viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2_mac")));
+	setAccelerator(viewObjectMI, ts.l("createMenuBar.action_menu_2_mac_accelerator_optional"));
+      }
+    else
+      {
+	// "View Object"
+	viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2")));
+	setMenuMnemonic(viewObjectMI, ts.l("createMenuBar.action_menu_2_key_optional"));
+      }
+
     viewObjectMI.setActionCommand(view_action);
     viewObjectMI.addActionListener(this);
 
-    // "Create Object"    
-    createObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_3"));
-    setMenuMnemonic(createObjectMI, ts.l("createMenuBar.action_menu_3_key_optional"));
+    if (glogin.runningOnMac)
+      {
+	// "New Object"
+	createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3_mac")));
+	setAccelerator(createObjectMI, ts.l("createMenuBar.action_menu_3_mac_accelerator_optional"));
+      }
+    else
+      {
+	// "Create Object"
+	createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3")));
+	setMenuMnemonic(createObjectMI, ts.l("createMenuBar.action_menu_3_key_optional"));
+      }
+
     createObjectMI.setActionCommand(create_action);
     createObjectMI.addActionListener(this);
 
     // "Edit Object"    
-    editObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_4"));
+    editObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_4")));
     setMenuMnemonic(editObjectMI, ts.l("createMenuBar.action_menu_4_key_optional"));
     editObjectMI.setActionCommand(edit_action);
     editObjectMI.addActionListener(this);
 
     // "Delete Object"
-    deleteObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_5"));
+    deleteObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_5")));
     setMenuMnemonic(deleteObjectMI, ts.l("createMenuBar.action_menu_5_key_optional"));
     deleteObjectMI.setActionCommand(delete_action);
     deleteObjectMI.addActionListener(this);
 
     // "Inactivate Object"
-    inactivateObjectMI = new JMenuItem(ts.l("createMenuBar.action_menu_6"));
+    inactivateObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_6")));
     setMenuMnemonic(inactivateObjectMI, ts.l("createMenuBar.action_menu_6_key_optional"));
     inactivateObjectMI.setActionCommand(inactivate_action);
     inactivateObjectMI.addActionListener(this);
@@ -1051,7 +1071,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     if (debug)
       {
 	// "Access Invid"
-	JMenuItem viewAnInvid = new JMenuItem(ts.l("createMenuBar.action_menu_7"));
+	JMenuItem viewAnInvid = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_7")));
 	setMenuMnemonic(viewAnInvid, ts.l("createMenuBar.action_menu_7_key_optional"));
 	viewAnInvid.setActionCommand(access_invid_action);
 	viewAnInvid.addActionListener(this);
@@ -1087,12 +1107,15 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     // These use action commands, so you don't need to globally
     // declare these
 
-    // "About Ganymede"
-    JMenuItem showAboutMI = new JMenuItem(ts.l("createMenuBar.help_menu_0"));
-    setMenuMnemonic(showAboutMI, ts.l("createMenuBar.help_menu_0_key_optional"));
-    showAboutMI.setActionCommand(about_action);
-    showAboutMI.addActionListener(this);
-    helpMenu.add(showAboutMI);
+    if (!glogin.runningOnMac)
+      {
+	// "About Ganymede"
+	JMenuItem showAboutMI = new JMenuItem(ts.l("createMenuBar.help_menu_0"));
+	setMenuMnemonic(showAboutMI, ts.l("createMenuBar.help_menu_0_key_optional"));
+	showAboutMI.setActionCommand(about_action);
+	showAboutMI.addActionListener(this);
+	helpMenu.add(showAboutMI);
+      }
 
     // "Message of the day"
     JMenuItem showMOTDMI = new JMenuItem(ts.l("createMenuBar.help_menu_1"));
@@ -1101,7 +1124,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     showMOTDMI.addActionListener(this);
     helpMenu.add(showMOTDMI);
 
-    helpMenu.addSeparator();
+    if (!glogin.runningOnMac)
+      {
+	helpMenu.addSeparator();
+      }
 
     // "Java Version"
     JMenuItem javaVersionMI = new JMenuItem(ts.l("createMenuBar.help_menu_2"));
@@ -1114,12 +1140,31 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     menubar.add(LandFMenu);
     menubar.add(actionMenu);
     menubar.add(windowMenu);
+
     // we want to force the helpMenu to be on the far right side of
     // the menu bar..
+
     menubar.add(Box.createGlue());
     menubar.add(helpMenu);
 
     return menubar;
+  }
+
+  /**
+   * Generates a Mac-compliant menu item name if we're running on a
+   * Mac, else returns the text unmodified.
+   */
+
+  private String dialogMenuName(String text)
+  {
+    if (glogin.runningOnMac)
+      {
+	return text + "...";
+      }
+    else
+      {
+	return text;
+      }
   }
 
   /**
@@ -1132,10 +1177,29 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   private void setMenuMnemonic(JMenuItem item, String pattern)
   {
-    if (pattern != null)
+    if (!glogin.runningOnMac && pattern != null)
       {
 	item.setMnemonic((int) pattern.charAt(0));
       }
+  }
+
+  /**
+   * Sets a direct access accelerator on a menu item.
+   */
+
+  private void setAccelerator(JMenuItem item, String key)
+  {
+    if (key == null)
+      {
+	return;
+      }
+
+    this.setAccelerator(item, key.toCharArray()[0]);
+  }
+
+  private void setAccelerator(JMenuItem item, char key)
+  {
+    item.setAccelerator(javax.swing.KeyStroke.getKeyStroke(key, java.awt.Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
   }
 
   /**
