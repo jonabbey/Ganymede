@@ -431,7 +431,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
       {
 	JPanel macPanel = new JPanel();
 	macPanel.setLayout(new BorderLayout());
-	macPanel.add(flowPanel, "East"); // right align
+	macPanel.add(flowPanel, BorderLayout.EAST); // right align
 
 	buttonPanel.add(macPanel, "South");
       }

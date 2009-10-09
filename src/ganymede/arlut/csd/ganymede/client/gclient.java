@@ -706,7 +706,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // If we're running on the Mac, let's try to fit in a bit better.
 
-    if (glogin.runningOnMac)
+    if (glogin.isRunningOnMac())
       {
 	System.setProperty("com.apple.macos.useScreenMenuBar", "true");
       }
@@ -820,7 +820,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     JPanel bottomButtonP = new JPanel(false);
 
-    if (glogin.runningOnMac)
+    if (glogin.isRunningOnMac())
       {
 	// cancel is to the left of commit on the mac
 
@@ -943,7 +943,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     // the "New Object" menu will appear under 'File' on the Mac, but
     // will be under 'Actions' on other platforms.
 
-    if (glogin.runningOnMac)
+    if (glogin.isRunningOnMac())
       {
 	// "New Object"
 	createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3_mac")));
@@ -961,7 +961,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // Ditto "Open Object"
 
-    if (glogin.runningOnMac)
+    if (glogin.isRunningOnMac())
       {
 	// "Open Object"
 	viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2_mac")));
@@ -1011,7 +1011,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     setMenuMnemonic(logoutMI, ts.l("createMenuBar.file_menu_4_key_optional"));
     logoutMI.addActionListener(this);
 
-    if (glogin.runningOnMac)
+    if (glogin.isRunningOnMac())
       {
 	fileMenu.add(createObjectMI);
 	fileMenu.add(viewObjectMI);
@@ -1089,7 +1089,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     actionMenu.add(menubarQueryMI);
     actionMenu.addSeparator();
 
-    if (!glogin.runningOnMac)
+    if (!glogin.isRunningOnMac())
       {
 	actionMenu.add(viewObjectMI);
 	actionMenu.add(createObjectMI);
@@ -1138,7 +1138,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     // These use action commands, so you don't need to globally
     // declare these
 
-    if (!glogin.runningOnMac)
+    if (!glogin.isRunningOnMac())
       {
 	// "About Ganymede"
 	JMenuItem showAboutMI = new JMenuItem(ts.l("createMenuBar.help_menu_0"));
@@ -1155,7 +1155,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     showMOTDMI.addActionListener(this);
     helpMenu.add(showMOTDMI);
 
-    if (!glogin.runningOnMac)
+    if (!glogin.isRunningOnMac())
       {
 	helpMenu.addSeparator();
       }
@@ -1188,7 +1188,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   private String dialogMenuName(String text)
   {
-    if (glogin.runningOnMac)
+    if (glogin.isRunningOnMac())
       {
 	return text + "...";
       }
@@ -1208,7 +1208,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   private void setMenuMnemonic(JMenuItem item, String pattern)
   {
-    if (!glogin.runningOnMac && pattern != null)
+    if (!glogin.isRunningOnMac() && pattern != null)
       {
 	item.setMnemonic((int) pattern.charAt(0));
       }

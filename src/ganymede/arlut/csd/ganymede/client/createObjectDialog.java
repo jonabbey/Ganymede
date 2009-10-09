@@ -250,8 +250,17 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
     ok.addActionListener(this);
     cancel = new JButton(StringDialog.getDefaultCancel());
     cancel.addActionListener(this);
-    buttonP.add(ok);
-    buttonP.add(cancel);
+
+    if (glogin.isRunningOnMac())
+      {
+	buttonP.add(cancel);
+	buttonP.add(ok);
+      }
+    else
+      {
+	buttonP.add(ok);
+	buttonP.add(cancel);
+      }
 
     gbc.insets = new Insets(4,4,4,4);
 
@@ -265,8 +274,15 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
 
     gbc.gridy = 4;
     gbc.gridx = 0;
+
+    if (glogin.isRunningOnMac())
+      {
+	gbc.anchor = gbc.EAST;
+      }
+
     gbl.setConstraints(buttonP, gbc);
     p.add(buttonP);
+
     this.setContentPane(p);
 
     pack();

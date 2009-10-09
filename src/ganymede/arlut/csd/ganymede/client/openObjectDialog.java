@@ -350,19 +350,36 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
     gbl.setConstraints(text, gbc);
     middle.add(text);
 
-    JPanel buttonP = new JPanel();
-
     ok = new JButton(StringDialog.getDefaultOk());
     ok.setActionCommand(OPEN_OBJ);
     ok.addActionListener(this);
-    buttonP.add(ok);
 
     JButton neverMind = new JButton(StringDialog.getDefaultCancel());
     neverMind.setActionCommand(CANCEL);
     neverMind.addActionListener(this);
-    buttonP.add(neverMind);
 
-    getContentPane().add(buttonP, BorderLayout.SOUTH);
+    if (glogin.isRunningOnMac())
+      {
+	JPanel macPanel = new JPanel();
+	macPanel.setLayout(new BorderLayout());
+
+	JPanel buttonP = new JPanel();
+
+	buttonP.add(neverMind);
+	buttonP.add(ok);
+
+	macPanel.add(buttonP, BorderLayout.EAST);
+	getContentPane().add(macPanel, BorderLayout.SOUTH);
+      }
+    else
+      {
+	JPanel buttonP = new JPanel();
+
+	buttonP.add(ok);
+	buttonP.add(neverMind);
+
+	getContentPane().add(buttonP, BorderLayout.SOUTH);
+      }
 
     setBounds(150,100, 200,100);
   }

@@ -236,7 +236,17 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
    * a bit to make things look better.
    */
 
-  protected static boolean runningOnMac = false;
+  private static Boolean runningOnMac = null;
+
+  public static boolean isRunningOnMac()
+  {
+    if (runningOnMac == null)
+      {
+	runningOnMac = "Mac OS X".equals(System.getProperty("os.name"));
+      }
+
+    return runningOnMac;
+  }
 
   // ---
 
@@ -465,11 +475,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // Look up our saved look and feel, if any
 
     gclient.sizer.restoreLookAndFeel();
-
-    if ("Mac OS X".equals(System.getProperty("os.name")))
-      {
-	glogin.runningOnMac = true;
-      }
 
     // Retrieve the ganymede logo using the appropriate method
     
