@@ -466,7 +466,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     gclient.sizer.restoreLookAndFeel();
 
-    if (System.getProperty("mrj.version") != null)
+    if ("Mac OS X".equals(System.getProperty("os.name")))
       {
 	glogin.runningOnMac = true;
       }
