@@ -17,7 +17,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -387,15 +387,40 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
     OKButton = new JButton(resource.getOkText());
     OKButton.addActionListener(this);
-    flowPanel.add(OKButton);
 
     // if cancel is null, don't put it on there
+
+    CancelButton = null;
 
     if (resource.getCancelText() != null)
       {
 	CancelButton = new JButton(resource.getCancelText());
 	CancelButton.addActionListener(this);
 	flowPanel.add(CancelButton);
+      }
+
+    if ("Mac OS X".equals(System.getProperty("os.name")))
+      {
+	// On the Mac, we place the Cancel button to the left of the Ok
+	// button.
+
+	if (CancelButton != null)
+	  {
+	    flowPanel.add(CancelButton);
+	  }
+
+	flowPanel.add(OKButton);
+      }
+    else
+      {
+	// otherwise, Ok is to the left.
+
+	flowPanel.add(OKButton);
+
+	if (CancelButton != null)
+	  {
+	    flowPanel.add(CancelButton);
+	  }
       }
 
     buttonPanel.add(new JSeparator(), "North");
