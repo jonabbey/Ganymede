@@ -1078,7 +1078,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     actionMenu.add(menubarQueryMI);
     actionMenu.addSeparator();
 
-    if (glogin.runningOnMac)
+    if (!glogin.runningOnMac)
       {
 	actionMenu.add(viewObjectMI);
 	actionMenu.add(createObjectMI);
