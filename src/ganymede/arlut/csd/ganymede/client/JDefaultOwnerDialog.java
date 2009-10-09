@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -114,7 +114,7 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
 
   // ---
 
-  JButton done;
+  JButton ok, cancel;
 
   Vector
     chosen;
@@ -168,15 +168,42 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
     ss.update(groups, true, null, handleVector, true, null);
     ss.setCallback(this);
     getContentPane().add("Center", ss);
+
+    if (glogin.isRunningOnMac())
+      {
+	ok = new JButton(StringDialog.getDefaultOk());
+	ok.addActionListener(this);
+
+	cancel = new JButton(StringDialog.getDefaultCancel());
+	cancel.addActionListener(this);
     
-    done = new JButton(StringDialog.getDefaultOk());
-    done.addActionListener(this);
+	JPanel p = new JPanel();
+	p.add(cancel);
+	p.add(ok);
+
+	JPanel macPanel = new JPanel();
+	macPanel.setLayout(new BorderLayout());
+	macPanel.add(p, BorderLayout.EAST);
+
+	macPanel.setBorder(gc.raisedBorder);
     
-    JPanel p = new JPanel();
-    p.add(done);
-    p.setBorder(gc.raisedBorder);
+	getContentPane().add("South", macPanel);
+      }
+    else
+      {
+	ok = new JButton(StringDialog.getDefaultOk());
+	ok.addActionListener(this);
+
+	cancel = new JButton(StringDialog.getDefaultCancel());
+	cancel.addActionListener(this);
     
-    getContentPane().add("South", p);
+	JPanel p = new JPanel();
+	p.add(ok);
+	p.add(cancel);
+	p.setBorder(gc.raisedBorder);
+    
+	getContentPane().add("South", p);
+      }
 
     setBounds(50,50,50,50);
     pack();
@@ -220,20 +247,15 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
 	  }
       }
 
+    ok.setEnabled(chosen.size () != 0);
+
     return true;
   }
 
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == done)
+    if (e.getSource() == ok)
       {
-	if (chosen.size() == 0)
-	  {
-	    // "You must choose a default Owner Group."
-	    new JErrorDialog(gc, ts.l("actionPerformed.no_owner_error"));
-	    return;
-	  }
-
 	try
 	  {
 	    retVal = gc.getSession().setDefaultOwner(chosen);
@@ -265,6 +287,10 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
 	  {
 	    throw new RuntimeException("Could not set filter: " + rx);
 	  }
+      }
+    else if (e.getSource() == cancel)
+      {
+	this.setVisible(false);
       }
   }
 
