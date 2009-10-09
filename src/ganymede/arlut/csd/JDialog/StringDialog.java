@@ -399,7 +399,9 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	flowPanel.add(CancelButton);
       }
 
-    if ("Mac OS X".equals(System.getProperty("os.name")))
+    boolean runningOnMac = "Mac OS X".equals(System.getProperty("os.name"));
+
+    if (runningOnMac)
       {
 	// On the Mac, we place the Cancel button to the left of the Ok
 	// button.
@@ -424,7 +426,19 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
       }
 
     buttonPanel.add(new JSeparator(), "North");
-    buttonPanel.add(flowPanel, "South");
+
+    if (runningOnMac)
+      {
+	JPanel macPanel = new JPanel();
+	macPanel.setLayout(new BorderLayout());
+	macPanel.add(flowPanel, "East"); // right align
+
+	buttonPanel.add(macPanel, "South");
+      }
+    else
+      {
+	buttonPanel.add(flowPanel, "South");
+      }
 
     southPanel.add(buttonPanel, "South");
 
