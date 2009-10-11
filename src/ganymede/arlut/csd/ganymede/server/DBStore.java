@@ -2199,6 +2199,13 @@ public final class DBStore implements JythonMap {
 	// and record the base
 
 	setBase(b);
+
+	// and lock in the namespaces
+
+	for (DBNameSpace namespace: nameSpaces)
+	  {
+	    namespace.schemaEditCommit();
+	  }
       }
     catch (RemoteException ex)
       {
