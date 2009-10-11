@@ -273,7 +273,7 @@ public final class DBStore implements JythonMap {
    * set methods will be enabled 
    */
 
-  boolean loading = false;
+  private boolean loading = false;
 
   /**
    * Root of the category tree defined in this database
@@ -420,6 +420,16 @@ public final class DBStore implements JythonMap {
       }
 
     return false;
+  }
+
+  /**
+   * Returns true if we're in the middle of loading our database from
+   * disk.
+   */
+
+  public boolean isLoading()
+  {
+    return loading;
   }
 
   /**

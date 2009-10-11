@@ -5117,7 +5117,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   private boolean isLoading()
   {
-    return base.getStore().loading;
+    return base.getStore().isLoading();
   }
 
   /**

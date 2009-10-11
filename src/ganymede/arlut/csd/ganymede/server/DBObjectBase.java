@@ -689,7 +689,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   private DBObjectBase(DBStore store, boolean embedded, boolean createFields, DBSchemaEdit editor) throws RemoteException
   {
-    if (editor == null && !store.loading)
+    if (editor == null && !store.isLoading())
       {
 	throw new IllegalStateException("Can't create a DBObjectBase unless loading or editing.");
       }
@@ -3991,7 +3991,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public boolean isLoading()
   {
-    return this.store.loading;
+    return this.store.isLoading();
   }
 
   /**
