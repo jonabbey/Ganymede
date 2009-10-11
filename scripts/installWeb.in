@@ -171,7 +171,7 @@ ENDOK
 &copy_file("webforms/ganymede_title.gif", "$installdir/ganymede_title.gif");
 &copy_file("webforms/ganymede_title2_sm.gif", "$installdir/ganymede_title2_sm.gif");
 &copy_file("webforms/arlbw.jpg", "$installdir/arlbw.jpg");
-&copy_file("webforms/icon.gif", "$installdir/icon.gif");
+&copy_file("webforms/ganymede_128.png", "$installdir/ganymede_128.png");
 &copy_file("webforms/ganymede_splash.png", "$installdir/ganymede_splash.png");
 
 # Customize and copy the client web pages
