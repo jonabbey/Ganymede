@@ -4330,7 +4330,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing())
       {
-	DBObjectBase b = (DBObjectBase) editor.getBase(val);
+	DBObjectBase b = findBase(val);
 
 	if (b == null)
 	  {
@@ -4399,7 +4399,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing())
       {
-	DBObjectBase b = (DBObjectBase) editor.getBase(baseName);
+	DBObjectBase b = findBase(baseName);
 
 	if (b == null)
 	  {
@@ -4549,7 +4549,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing())
       {
-	DBObjectBase b = (DBObjectBase) editor.getBase(allowedTarget);
+	DBObjectBase b = findBase(allowedTarget);
 
 	// we're looking up the object that we have pre-selected.. we
 	// should always set a target object before trying to set a
@@ -4650,14 +4650,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					  ts.l("setTargetField.asymmetry", this.toString(), fieldName));
       }
 
-    if (isEditing())
-      {
-	b = editor.getBase(allowedTarget);
-      }
-    else
-      {
-	b = base.getStore().getObjectBase(allowedTarget);
-      }
+    b = findBase(allowedTarget);
 
     try
       {
@@ -5154,6 +5147,40 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
       default:
 	throw new RuntimeException("Unrecognized editing mode");
+      }
+  }
+
+  /**
+   * Finds an object base according to the presence or absence of an
+   * editing context.
+   */
+
+  private DBObjectBase findBase(short num)
+  {
+    if (editor != null)
+      {
+	return (DBObjectBase) editor.getBase(num);
+      }
+    else
+      {
+	return Ganymede.db.getObjectBase(num);
+      }
+  }
+
+  /**
+   * Finds an object base according to the presence or absence of an
+   * editing context.
+   */
+
+  private DBObjectBase findBase(String name)
+  {
+    if (editor != null)
+      {
+	return (DBObjectBase) editor.getBase(name);
+      }
+    else
+      {
+	return Ganymede.db.getObjectBase(name);
       }
   }
 
