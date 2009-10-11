@@ -296,6 +296,8 @@ open OUTPUT, ">$installdir/bin/runServer" or die "Couldn't write runServer";
 
 while (<INPUT>) {
 
+  s/\/opt\/bin\/perl/$perlname/g;
+
   if (!/^([A-Z]*)=/) {
     print OUTPUT $_;
   } elsif (defined $runconvert{$1}) {
@@ -319,8 +321,6 @@ open INPUT, "scripts/stopServer.template" or die "Couldn't open stopServer templ
 open OUTPUT, ">$installdir/bin/stopServer" or die "Couldn't write stopServer";
 
 while (<INPUT>) {
-
-    # xmlclient is now a perl script.  fix up the interpreter path
 
     s/\/opt\/bin\/perl/$perlname/g;
 
