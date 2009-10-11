@@ -308,6 +308,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
 	  {
+	    if (!checkNewField(fieldDef.getID()))
+	      {
+		continue;
+	      }
+
 	    DBField newField = DBField.createTypedField(this, fieldDef);
 
 	    if (newField == null)
