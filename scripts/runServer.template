@@ -244,7 +244,7 @@ print "Running Ganymede Server\n";
 # Ganymede server aggressively interns Strings to avoid redundantly
 # storing Strings in the heap.
 
-$SUNSPECIFIC="-server -XX:MaxPermSize=$MAXPERMSPACE"
+$SUNSPECIFIC="-server -XX:MaxPermSize=$MAXPERMSPACE";
 
 $ENV{'CLASSPATH'} = $CLASSPATH;
 
