@@ -403,6 +403,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	// Now setup the framePanel layout
 
 	pane = new JTabbedPane();
+	pane.setOpaque(true);
 
 	// the client Loader thread should have already downloaded and
 	// cached the field template vector we're getting here.  If not,
@@ -962,7 +963,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   JMenuBar createMenuBar(boolean editable)
   {
     JMenuBar menuBar = new JMenuBar();
-    menuBar.setBorderPainted(true);
     
     // "Object"
     JMenu fileM = new JMenu(ts.l("createMenuBar.object_menu"));

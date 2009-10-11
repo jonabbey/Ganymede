@@ -239,11 +239,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	System.err.println("Initializing windowPanel");
       }
 
-    // This is supposed to give us window outline dragging, instead of
-    // full window dragging.  Should be faster.
-
-    putClientProperty("JDesktopPane.dragMode", "outline");
-
     // "Remove All Windows"
     removeAllMI = new JMenuItem(ts.l("init.windows_menu_0"));
 
@@ -496,8 +491,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	  {
 	    gc.logoutMI.setEnabled(true);
 	  }
-
-	w.setOpaque(true);
 
         if (originalWindow != null)
           {
@@ -860,7 +853,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     // "Query Loading.."
     JInternalFrame frame = new JInternalFrame(ts.l("addWaitWindow.title"));
-    frame.setOpaque(true);
     ImageIcon icon = new ImageIcon(getWaitImage());
     frame.setBounds(10,10,icon.getIconWidth() + 180,icon.getIconHeight() + 35);
     frame.setIconifiable(true);
