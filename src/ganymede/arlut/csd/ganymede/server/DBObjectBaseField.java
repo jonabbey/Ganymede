@@ -4330,14 +4330,17 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing())
       {
-	DBObjectBase b = findBase(val);
-
-	if (b == null)
+	if (editor != null)
 	  {
-	    // "Schema Editing Error"
-	    // "Can''t set the target base to base number {0,number,#}.  No such base is defined: {0}."
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setTargetBase.bad_target_num", Integer.valueOf(val)));
+	    DBObjectBase b = (DBObjectBase) editor.getBase(val);
+
+	    if (b == null)
+	      {
+		// "Schema Editing Error"
+		// "Can''t set the target base to base number {0,number,#}.  No such base is defined: {0}."
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("setTargetBase.bad_target_num", Integer.valueOf(val)));
+	      }
 	  }
       }
 
@@ -4399,7 +4402,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing())
       {
-	DBObjectBase b = findBase(baseName);
+	// we know we're editing with an editor, since the schema
+	// loading / initialization logic never uses names to
+	// reference bases.
+
+	DBObjectBase b = (DBObjectBase) editor.getBase(baseName);
 
 	if (b == null)
 	  {
@@ -4549,28 +4556,31 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing())
       {
-	DBObjectBase b = findBase(allowedTarget);
-
-	// we're looking up the object that we have pre-selected.. we
-	// should always set a target object before trying to set a
-	// field
-
-	if (b == null)
+	if (editor != null)
 	  {
-	    // "Can''t find object type {0,number,#} in order to set target field for {2} to {1,number,#}"
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setTargetField.bad_base_num", Integer.valueOf(allowedTarget), Integer.valueOf(val),
-						   this.toString()));
-	  }
+	    DBObjectBase b = (DBObjectBase) editor.getBase(allowedTarget);
+
+	    // we're looking up the object that we have pre-selected.. we
+	    // should always set a target object before trying to set a
+	    // field
+
+	    if (b == null)
+	      {
+		// "Can''t find object type {0,number,#} in order to set target field for {2} to {1,number,#}"
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("setTargetField.bad_base_num", Integer.valueOf(allowedTarget), Integer.valueOf(val),
+						       this.toString()));
+	      }
 	
-	DBObjectBaseField bF = b.getFieldDef(val);
+	    DBObjectBaseField bF = b.getFieldDef(val);
 
-	if (bF == null)
-	  {
-	    // "Can''t find target field numbered {0,number,#} in order to set target field for {1}."
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setTargetField.bad_target_field_num", Integer.valueOf(val),
-						   this.toString()));
+	    if (bF == null)
+	      {
+		// "Can''t find target field numbered {0,number,#} in order to set target field for {1}."
+		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+						  ts.l("setTargetField.bad_target_field_num", Integer.valueOf(val),
+						       this.toString()));
+	      }
 	  }
       }
 
@@ -4650,7 +4660,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					  ts.l("setTargetField.asymmetry", this.toString(), fieldName));
       }
 
-    b = findBase(allowedTarget);
+    // The schema loading and initializing logic doesn't use field
+    // names, so we know editor should be defined
+
+    b = (DBObjectBase) editor.getBase(allowedTarget);
 
     try
       {
@@ -5147,40 +5160,6 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
       default:
 	throw new RuntimeException("Unrecognized editing mode");
-      }
-  }
-
-  /**
-   * Finds an object base according to the presence or absence of an
-   * editing context.
-   */
-
-  private DBObjectBase findBase(short num)
-  {
-    if (editor != null)
-      {
-	return (DBObjectBase) editor.getBase(num);
-      }
-    else
-      {
-	return Ganymede.db.getObjectBase(num);
-      }
-  }
-
-  /**
-   * Finds an object base according to the presence or absence of an
-   * editing context.
-   */
-
-  private DBObjectBase findBase(String name)
-  {
-    if (editor != null)
-      {
-	return (DBObjectBase) editor.getBase(name);
-      }
-    else
-      {
-	return Ganymede.db.getObjectBase(name);
       }
   }
 
