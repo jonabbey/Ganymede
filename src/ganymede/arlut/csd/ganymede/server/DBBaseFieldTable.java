@@ -214,9 +214,21 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
     return java.util.Arrays.binarySearch(table, key) >= 0;
   }
 
+  /**
+   * Returns a shallow copy of the fields belonging to this
+   * DBBaseFieldTable, in increasing id order.
+   */
+
   public synchronized DBObjectBaseField[] getIDSortedArray()
   {
-    return java.util.Arrays.copyOf(table, table.length);
+    DBObjectBaseField[] copy = new DBObjectBaseField[table.length];
+
+    for (int i = 0; i < copy.length; i++)
+      {
+	copy[i] = table[i];
+      }
+
+    return copy;
   }
 
   /**
