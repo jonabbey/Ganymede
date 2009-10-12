@@ -573,6 +573,10 @@ public class Ganymede {
 	    // ***
 	    debug(ts.l("main.orphan_journal", Ganymede.journalProperty, dbFilename));
 
+	    // "Shutting down."
+
+	    Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
+
 	    System.exit(1);
 	  }
 
@@ -829,18 +833,34 @@ public class Ganymede {
 			Ganymede.debug("\n** " + ts.l("main.error") + " **\n");
 		      }
 
+		    // "Both the system hostname ({0}) and the
+		    // ganymede.serverhost definition ({1}) resolve to
+		    // the 127.0.0.1 loopback address"
+
 		    Ganymede.debug(ts.l("main.error_loopback",
 					java.net.InetAddress.getLocalHost().getHostName(),
 					serverHostProperty));
 		    Ganymede.debug("\n");
+
+		    // "The Ganymede server must have an externally
+		    // accessible IP address or else clients \
+		    // will not be able to communicate with the
+		    // Ganymede server from other than localhost."
+
 		    Ganymede.debug(ts.l("main.error_loopback_explain"));
 
 		    if (!forcelocalhost)
 		      {
+			// "If you really want to be only usable for
+			// localhost, edit the runServer script to use
+			// the -forcelocalhost option"
+
 			Ganymede.debug(ts.l("main.error_loopback_explain2"));
-			
+
+			// "Shutting down."
+
 			Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
-			
+
 			GanymedeServer.shutdown();
 		      }
 		  }
