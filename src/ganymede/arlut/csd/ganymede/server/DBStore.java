@@ -901,18 +901,16 @@ public final class DBStore implements JythonMap {
 	out.close();
 	out = null;
 
-	// ok, we've successfully dumped to ganymede.db.new.. move
-	// the old file to ganymede.db.bak
-
-	if (debug)
+	if (dbFile.exists())
 	  {
-	    System.err.println("DBStore: renaming new db");
-	  }
+	    // ok, we've successfully dumped to ganymede.db.new.. move
+	    // the old file to ganymede.db.bak
 
-	if (!dbFile.renameTo(new File(filename + ".bak")))
-          {
-            throw new IOException("Couldn't rename " + filename + " to " + filename + ".bak");
-          }
+	    if (!dbFile.renameTo(new File(filename + ".bak")))
+	      {
+		throw new IOException("Couldn't rename " + filename + " to " + filename + ".bak");
+	      }
+	  }
 
 	// and move ganymede.db.new to ganymede.db.. note that we do
 	// have a very slight vulnerability here if we are interrupted
@@ -922,6 +920,11 @@ public final class DBStore implements JythonMap {
 
 	// In all other circumstances, the server will be able to come
 	// up and handle things cleanly without loss of data.
+
+	if (debug)
+	  {
+	    System.err.println("DBStore: renaming new db");
+	  }
 
         File newFile = new File(filename + ".new");
 
