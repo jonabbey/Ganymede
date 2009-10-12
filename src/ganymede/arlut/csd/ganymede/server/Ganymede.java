@@ -572,7 +572,8 @@ public class Ganymede {
 	    // *** You need either to restore the {1} file, or to remove the {0} file.
 	    // ***
 	    debug(ts.l("main.orphan_journal", Ganymede.journalProperty, dbFilename));
-	    return;
+
+	    System.exit(1);
 	  }
 
 	firstrun = true;
