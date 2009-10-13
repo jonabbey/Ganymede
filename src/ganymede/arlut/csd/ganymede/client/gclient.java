@@ -810,8 +810,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       }
     else
       {
-	MacUtils.makeWindowLeopardStyle(getRootPane());
-	createMacToolBar();
+	UnifiedToolBar macToolBar = createMacToolBar();
+
+	macToolBar.installWindowDraggerOnWindow(this);
+
+	getContentPane().add("North", macToolBar);
       }
 
     // "Commit"    
