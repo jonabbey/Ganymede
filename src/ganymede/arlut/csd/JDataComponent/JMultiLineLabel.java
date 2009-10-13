@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -124,6 +124,8 @@ public class JMultiLineLabel extends JTextArea {
     setLineWrap(true);
     setWrapStyleWord(true);
 
+    setFont(UIManager.getFont("Label.font"));
+
     setText(label);
 
     setBorder(new EmptyBorder(new Insets(0,0,0,10)));
@@ -141,6 +143,8 @@ public class JMultiLineLabel extends JTextArea {
   public void updateUI()
   {
     super.updateUI();
+
+    setFont(UIManager.getFont("Label.font"));
 
     Color bgColor = getParentBGColor();
 
