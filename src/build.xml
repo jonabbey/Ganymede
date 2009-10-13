@@ -284,6 +284,7 @@ refresh the jar files.
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
 
       <zipfileset src="${lib.dir}/MRJToolkitStubs-1.0.jar"/>
+      <zipfileset src="${lib.dir}/mac_widgets.jar"/>
     </jar>
 
     <!-- Build the admin jar file -->
@@ -319,6 +320,7 @@ refresh the jar files.
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
 
       <zipfileset src="${lib.dir}/MRJToolkitStubs-1.0.jar"/>
+      <zipfileset src="${lib.dir}/mac_widgets.jar"/>
     </jar>
 
     <antcall target="signjars"/>

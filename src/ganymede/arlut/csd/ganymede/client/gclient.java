@@ -143,6 +143,8 @@ import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.db_object;
 
 import com.apple.mrj.*;
+import com.explodingpixels.macwidgets.MacUtils;
+import com.explodingpixels.macwidgets.UnifiedToolBar;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -799,10 +801,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     rightTop = new JPanel(false);
     rightTop.setBorder(statusBorderRaised);
     rightTop.setLayout(new BorderLayout());
-    
-    toolBar = createToolbar();
 
-    getContentPane().add("North", toolBar);
+    if (!glogin.isRunningOnMac())
+      {
+	toolBar = createToolbar();
+
+	getContentPane().add("North", toolBar);
+      }
+    else
+      {
+	MacUtils.makeWindowLeopardStyle(getRootPane());
+	createMacToolBar();
+      }
 
     // "Commit"    
     commit = new JButton(ts.l("init.commit_button"));
@@ -2826,6 +2836,58 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       }
    
     return toolBarTemp;
+  }
+
+  public UnifiedToolBar createMacToolBar()
+  {
+    UnifiedToolBar macToolBar = new UnifiedToolBar();
+
+    // "Create"
+    JButton b = new JButton(ts.l("createToolbar.create_button"), new ImageIcon(newToolbarIcon));
+    b.setActionCommand(create_action);
+    b.addActionListener(this);
+    macToolBar.addComponentToLeft(b);
+
+    // "Edit"
+    b = new JButton(ts.l("createToolbar.edit_button"), new ImageIcon(pencil));
+    b.setActionCommand(edit_action);
+    b.addActionListener(this);
+    macToolBar.addComponentToLeft(b);
+
+    // "Delete"
+    b = new JButton(ts.l("createToolbar.delete_button"), new ImageIcon(trash));
+    b.setActionCommand(delete_action);
+    b.addActionListener(this);
+    macToolBar.addComponentToLeft(b);
+
+    // "Clone"
+    b = new JButton(ts.l("createToolbar.clone_button"), new ImageIcon(cloneIcon));
+    b.setActionCommand(clone_action);
+    b.addActionListener(this);
+    macToolBar.addComponentToLeft(b);
+
+    // "View"
+    b = new JButton(ts.l("createToolbar.view_button"), new ImageIcon(search));
+    b.setActionCommand(view_action);
+    b.addActionListener(this);
+    macToolBar.addComponentToLeft(b);
+
+    // "Query"
+    b = new JButton(ts.l("createToolbar.query_button"), new ImageIcon(queryIcon));
+    b.setActionCommand(query_action);
+    b.addActionListener(this);
+    macToolBar.addComponentToCenter(b);
+
+    if ((personae != null)  && personae.size() > 1)
+      {
+	// "Persona"
+	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));  
+	b.setActionCommand(persona_action);
+	b.addActionListener(this);
+	macToolBar.addComponentToRight(b);
+      }
+
+    return macToolBar;
   }
 
 
