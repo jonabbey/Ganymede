@@ -795,6 +795,17 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   public void logout()
   {
+    this.logout(false);
+  }
+
+  /**
+   * Logout from the server. 
+   *
+   * This is called from the gclient.
+   */
+
+  public void logout(boolean andQuit)
+  {
     try
       {
 	my_client.disconnect();
@@ -813,6 +824,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     finally
       {
 	// clean everything up on the gui thread
+
+	final boolean myAndQuit = andQuit;
 
 	try
 	  {
@@ -834,6 +847,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		    x.setVisible(false);
 		    x.dispose();
 		    x.cleanUp();
+		  }
+
+		if (myAndQuit)
+		  {
+		    System.exit(0);
 		  }
 	      }
 	    });

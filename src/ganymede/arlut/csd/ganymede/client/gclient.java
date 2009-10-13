@@ -4653,12 +4653,23 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   void logout()
   {
+    this.logout(false);
+  }
+
+  /**
+   * Logs out from the client.
+   *
+   * This method does not do any checking, it just logs out.
+   */
+
+  void logout(boolean andQuit)
+  {
     // glogin's logout method will call our cleanUp() method on the
     // GUI thread.
 
     sizer.saveSize(this);
 
-    _myglogin.logout();
+    _myglogin.logout(andQuit);
   }
 
   /**
@@ -7001,7 +7012,7 @@ class MacOSXController implements MRJAboutHandler, MRJQuitHandler  {
   {
     if (gclient.client.OKToProceed())
       {
-	gclient.client.logout();
+	gclient.client.logout(true);
       }
   }
 }
