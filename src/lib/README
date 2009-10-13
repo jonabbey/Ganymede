@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-12 October 2009
+13 October 2009
 src/lib/README
 
 --------------------------------------------------------------------------------
@@ -28,5 +28,24 @@ When running the Ganymede clients on the Mac, the Apple-provided
 classes will override the classes in the MRJToolkitStubs-1.0.jar
 archive, providing Mac OS X specific functionality.
 
+The mac_widgets.jar file provides a very Mac-like appearance when
+running the Ganymede client on the Macintosh.  It was downloaded from
+http://code.google.com/p/macwidgets/.
+
+Mac Widgets is by Kenneth Orr, and is licensed under the Gnu Lesser
+General Public License.
+
+The forms-1.3.0pre4.jar file used to provide support features for
+Kenneth Orr's Mac Widgets.  It was downloaded from
+http://www.jgoodies.com/downloads/libraries.html, using the 'JGoodies
+Forms' link.
+
+JGoodies Forms is by the JGoodies company, Karsten Lentzsch, founder.
+
+JGoodies Forms is licensed under the permissive BSD license.
+
+--
+
+
 Jonathan Abbey
-12 October 2009
+13 October 2009

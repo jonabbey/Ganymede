@@ -385,6 +385,27 @@ v2.0 (ASLv2).
 
 --
 
+The mac_widgets.jar file under src/lib provides a very Mac-like
+appearance when running the Ganymede client on the Macintosh.  It was
+downloaded from http://code.google.com/p/macwidgets/.
+
+Mac Widgets is by Kenneth Orr, and is licensed under the Gnu Lesser
+General Public License.
+
+--
+
+The forms-1.3.0pre4.jar file under src/lib is used to provide support
+features for Kenneth Orr's Mac Widgets.  It was downloaded from
+http://www.jgoodies.com/downloads/libraries.html, using the 'JGoodies
+Forms' link.
+
+JGoodies Forms is by the JGoodies company, Karsten Lentzsch, founder.
+
+JGoodies Forms is licensed under the permissive BSD license.
+
+--
+
+
 The arlut.csd.JTable.TableSorter class which is used to decorate and
 provide sorting for the javax.swing.JTable class is a product of Sun
 Microsystems, and is used under the following license:
