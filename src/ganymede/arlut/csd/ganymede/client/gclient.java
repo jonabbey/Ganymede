@@ -142,6 +142,8 @@ import arlut.csd.ganymede.rmi.CategoryNode;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.db_object;
 
+import com.apple.mrj.*;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                          gclient
@@ -914,6 +916,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       }
 
     tree.requestFocus();
+
+    if (glogin.isRunningOnMac())
+      {
+	MacOSXController controller = new MacOSXController();
+
+	MRJApplicationUtils.registerAboutHandler(controller);
+	MRJApplicationUtils.registerQuitHandler(controller);
+      }
 
     this.setVisible(true);
 
@@ -6966,5 +6976,32 @@ class SecurityLaunderThread extends Thread {
   {
     this.done = true;
     notifyAll();
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+								MacOSXController
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Controller class to handle actions initiated on a Mac from the
+ * Applications menu.
+ */
+
+class MacOSXController implements MRJAboutHandler, MRJQuitHandler  {
+
+  public void handleAbout()
+  {
+    gclient.client.showAboutMessage();
+  }
+
+  public void handleQuit()
+  {
+    if (gclient.client.OKToProceed())
+      {
+	gclient.client.logout();
+      }
   }
 }

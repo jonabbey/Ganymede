@@ -282,6 +282,8 @@ refresh the jar files.
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/common/**"/>
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
+
+      <zipfileset src="${lib.dir}/MRJToolkitStubs-1.0.jar"/>
     </jar>
 
     <!-- Build the admin jar file -->
@@ -315,6 +317,8 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="foxtrot/**/*.class"/>
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
+
+      <zipfileset src="${lib.dir}/MRJToolkitStubs-1.0.jar"/>
     </jar>
 
     <antcall target="signjars"/>

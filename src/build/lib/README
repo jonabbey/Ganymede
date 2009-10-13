@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-8 October 2009
+12 October 2009
 src/lib/README
 
 --------------------------------------------------------------------------------
@@ -21,5 +21,12 @@ application packaging of the Ganymede clients.
 The JarBundler project is licensed under the Apache Software License
 v2.0 (ASLv2).
 
+MRJToolkitStubs-1.0.jar contains a set of stub classes that will
+provide link resolution for the Ganymede clients on non-Mac platforms.
+
+When running the Ganymede clients on the Mac, the Apple-provided
+classes will override the classes in the MRJToolkitStubs-1.0.jar
+archive, providing Mac OS X specific functionality.
+
 Jonathan Abbey
-8 October 2009
+12 October 2009
