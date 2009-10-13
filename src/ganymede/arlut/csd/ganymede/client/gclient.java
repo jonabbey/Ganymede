@@ -814,7 +814,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
 	macToolBar.installWindowDraggerOnWindow(this);
 
-	getContentPane().add("North", macToolBar);
+	getContentPane().add("North", macToolBar.getComponent());
       }
 
     // "Commit"    
