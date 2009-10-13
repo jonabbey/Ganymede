@@ -2905,6 +2905,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));  
 	b.setVerticalTextPosition(b.BOTTOM);
 	b.setHorizontalTextPosition(b.CENTER);
+	b.putClientProperty("JButton.buttonType", "textured");
 	b.setActionCommand(persona_action);
 	b.addActionListener(this);
 	macToolBar.addComponentToRight(b);
