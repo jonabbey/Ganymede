@@ -3,3 +3,7 @@
 *~
 src/build/classes/
 src/build/crypto/
+doc/javadoc/
+installServer
+installWeb
+installClient
