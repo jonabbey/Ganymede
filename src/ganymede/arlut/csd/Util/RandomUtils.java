@@ -50,6 +50,7 @@
 package arlut.csd.Util;
 
 import java.util.Random;
+import java.security.SecureRandom;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -65,14 +66,19 @@ import java.util.Random;
 public class RandomUtils {
 
   private static Random randomizer = new Random();
-
+  private static SecureRandom secureRandomizer = new SecureRandom();
+  
   private static final String charsetA = "abcdefghijklmnopqrstuvwxyz";
   private static final String charsetAN = "0123456789abcdefghijklmnopqrstuvwxyz";
   private static final String charsetC = "!@#$%^&*()0123456789abcdefghijklmnopqrstuvwxyz";
 
   /**
-   * This method returns a random hex string, used to ensure that a
-   * string including it is random.
+   * This method returns a random 32 bit hex string, used to ensure
+   * that a string including it is random.
+   *
+   * The random number generator for this method is low security, and
+   * should not be used for cryptographic purposes where
+   * unpredictability is paramount.
    */
 
   public static String getRandomHex()
@@ -83,6 +89,13 @@ public class RandomUtils {
   /**
    * This method takes a string, adds a random salt to it, and returns
    * it.
+   *
+   * The random number generator for this method is low security, and
+   * should not be used for cryptographic purposes where
+   * unpredictability is paramount.
+   *
+   * Generally, salts need not be unpredictable, as long as they are
+   * not often repeated.
    */
 
   public static String getSaltedString(String in)
@@ -91,17 +104,17 @@ public class RandomUtils {
   }
 
   /**
-   * Get a random string, using all characters from given char set, length chars long
+   * Get a random string, using all characters from given charset,
+   * length chars long
    */
 
   public static String getRandomString(int length, String charset)
   {
-    Random rand = new Random(System.currentTimeMillis());
     StringBuffer sb = new StringBuffer();
 
     for (int i = 0; i < length; i++)
       {
-	int pos = rand.nextInt(charset.length());
+	int pos = secureRandomizer.nextInt(charset.length());
 	sb.append(charset.charAt(pos));
       }
 
@@ -115,10 +128,7 @@ public class RandomUtils {
 
   public static String getRandomUsername()
   {
-    String onechar = getRandomString(1, charsetA);
-    String username = onechar + getRandomString(7, charsetAN);
-
-    return username;
+    return getRandomString(1, charsetA) + getRandomString(7, charsetAN);
   }
 
   /**
@@ -127,9 +137,7 @@ public class RandomUtils {
 
   public static String getRandomPassword(int length)
   {
-    String password = getRandomString(length, charsetC);
-
-    return password;
+    return getRandomString(length, charsetC);
   }
 
   /**
