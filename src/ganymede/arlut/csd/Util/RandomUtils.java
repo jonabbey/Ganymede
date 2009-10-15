@@ -109,18 +109,8 @@ public class RandomUtils {
   }
 
   /**
-   * Get a random password, using all characters, length chars long
-   */
-
-  public static String getRandomPassword(int length)
-  {
-    String password = getRandomString(length, charsetC);
-
-    return password;
-  }
-
-  /**
-   * Get a random username, 8 alpha-numeric, starts with alpha
+   * Get a random username, 8 characters alpha-numeric, starting with
+   * an alphabetic character.
    */
 
   public static String getRandomUsername()
@@ -129,6 +119,17 @@ public class RandomUtils {
     String username = onechar + getRandomString(7, charsetAN);
 
     return username;
+  }
+
+  /**
+   * Get a random password, using all characters, length chars long
+   */
+
+  public static String getRandomPassword(int length)
+  {
+    String password = getRandomString(length, charsetC);
+
+    return password;
   }
 
   /**
