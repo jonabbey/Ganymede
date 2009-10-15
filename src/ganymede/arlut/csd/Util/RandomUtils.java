@@ -2,20 +2,17 @@
 
    RandomUtils.java
 
-   Created: 7 February 2008
-
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
+   Created: 7 February 2008, 
+   Last Modified: 15 October 2009
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+              James Ratcliff, falazar@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -88,4 +85,67 @@ public class RandomUtils {
   {
     return in + " " + getRandomHex();
   }
+
+  private static final String charsetA = "abcdefghijklmnopqrstuvwxyz";
+  private static final String charsetAN = "0123456789abcdefghijklmnopqrstuvwxyz";
+  private static final String charsetC = "!@#$%^&*()0123456789abcdefghijklmnopqrstuvwxyz";
+ 
+
+
+  /* Get a random string, using all characters from given char set, length chars long */ 
+  public static String getRandomString(int length, String charset) 
+  {
+    Random rand = new Random(System.currentTimeMillis());
+    StringBuffer sb = new StringBuffer();
+    for (int i = 0; i < length; i++) 
+    {
+      int pos = rand.nextInt(charset.length());
+      sb.append(charset.charAt(pos));
+    }
+    return sb.toString();
+  }
+
+  /* Get a random password, using all characters, length chars long */ 
+  public static String getRandomPassword(int length) 
+  {
+      String password = getRandomString(length, charsetC);
+      return password;
+  }
+
+  /* Get a random username, 8 alpha-numeric, starts with alhpa */ 
+  public static String getRandomUsername() 
+  {
+      String onechar = getRandomString(1, charsetA);
+      String username = onechar + getRandomString(7, charsetAN);
+      return username;
+  }
+
+
+
+  // Test out the passwords now.
+  public static void test() 
+  {
+    for (int i = 0; i < 10; i++) 
+    {
+      String username = getRandomUsername();
+      String password = getRandomPassword(20);
+
+      System.out.println(username);
+      System.out.println(password);
+      System.out.println("");
+ 
+      try 
+      {
+	// if you generate more than 1 time, you must
+	// put the process to sleep for awhile
+	// otherwise it will return the same random string
+	Thread.sleep(100);
+      } 
+      catch (InterruptedException e) 
+      {
+	e.printStackTrace();
+      }
+    }
+  }
+
 }
