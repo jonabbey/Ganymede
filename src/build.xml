@@ -167,6 +167,7 @@ refresh the jar files.
     <javac destdir="${build.classes}"
            debug="${debug.flag}"
            debuglevel="${debug.level}"
+           encoding="UTF-8"
            target="1.5"
            source="1.5"
            deprecation="on"
