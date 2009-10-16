@@ -259,6 +259,7 @@ refresh the jar files.
 
     <!-- Build the client jar file -->
     <jar jarfile="${build.lib}/ganymede.jar" duplicate="preserve">
+      <fileset dir="${build.classes}" includes="apple/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JCalendar/**/*.class"/>
@@ -293,6 +294,7 @@ refresh the jar files.
 
     <!-- Build the admin jar file -->
     <jar jarfile="${build.lib}/ganymedeAdmin.jar" duplicate="preserve">
+      <fileset dir="${build.classes}" includes="apple/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
