@@ -712,7 +712,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (glogin.isRunningOnMac())
       {
-	System.setProperty("com.apple.macos.useScreenMenuBar", "true");
+	System.setProperty("apple.laf.useScreenMenuBar", "true");
       }
 
     session = s;
