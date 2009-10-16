@@ -71,8 +71,10 @@ public class OSXAdapter implements InvocationHandler {
 
   /**
    * Pass this method an Object and Method equipped to perform
-   * application shutdown logic The method passed should return a
-   * boolean stating whether or not the quit should occur
+   * application shutdown logic
+   *
+   * The method passed should return a boolean stating whether or not
+   * the quit should occur
    */
 
   public static void setQuitHandler(Object target, Method quitHandler)
@@ -81,8 +83,11 @@ public class OSXAdapter implements InvocationHandler {
   }
 
   /**
-   * Pass this method an Object and Method equipped to display application info
-   * They will be called when the About menu item is selected from the application menu
+   * Pass this method an Object and Method equipped to display
+   * application info
+   *
+   * They will be called when the About menu item is selected from the
+   * application menu
    */
 
   public static void setAboutHandler(Object target, Method aboutHandler)
@@ -112,8 +117,10 @@ public class OSXAdapter implements InvocationHandler {
 
   /**
    * Pass this method an Object and a Method equipped to display
-   * application options They will be called when the Preferences menu
-   * item is selected from the application menu
+   * application options
+   *
+   * pThey will be called when the Preferences menu item is selected
+   * from the application menu
    */
 
   public static void setPreferencesHandler(Object target, Method prefsHandler)
@@ -143,9 +150,11 @@ public class OSXAdapter implements InvocationHandler {
 
   /**
    * Pass this method an Object and a Method equipped to handle
-   * document events from the Finder Documents are registered with the
-   * Finder via the CFBundleDocumentTypes dictionary in the
-   * application bundle's Info.plist
+   * document events from the Finder
+   *
+   * Documents are registered with the Finder via the
+   * CFBundleDocumentTypes dictionary in the application bundle's
+   * Info.plist
    */
 
   public static void setFileHandler(Object target, Method fileHandler)
@@ -282,8 +291,10 @@ public class OSXAdapter implements InvocationHandler {
 
   /**
    * It is important to mark the ApplicationEvent as handled and
-   * cancel the default behavior This method checks for a boolean
-   * result from the proxy method and sets the event accordingly
+   * cancel the default behavior
+   *
+   * This method checks for a boolean result from the proxy method and
+   * sets the event accordingly
    */
 
   protected void setApplicationEventHandled(Object event, boolean handled)
