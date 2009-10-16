@@ -57,6 +57,9 @@ package arlut.csd.ganymede.client;
 /**
  * Controller class to handle actions initiated on a Mac from the
  * Applications menu.
+ *
+ * This class (and the methods in it) have to be public so that the
+ * com.apple.eawt.Application class can call these methods.
  */
 
 public class MacOSXController {
