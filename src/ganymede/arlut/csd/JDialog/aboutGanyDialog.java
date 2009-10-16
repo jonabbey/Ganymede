@@ -199,7 +199,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
   {
     super.setVisible(state);
 
-    if (state)
+    if (state && ok != null)
       {
 	ok.requestFocus();
       }
