@@ -2857,6 +2857,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // "Create"
     JButton b = new JButton(ts.l("createToolbar.create_button"), new ImageIcon(newToolbarIcon));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setActionCommand(create_action);
@@ -2865,6 +2866,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // "Edit"
     b = new JButton(ts.l("createToolbar.edit_button"), new ImageIcon(pencil));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setActionCommand(edit_action);
@@ -2873,6 +2875,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // "Delete"
     b = new JButton(ts.l("createToolbar.delete_button"), new ImageIcon(trash));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setActionCommand(delete_action);
@@ -2881,6 +2884,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // "Clone"
     b = new JButton(ts.l("createToolbar.clone_button"), new ImageIcon(cloneIcon));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setActionCommand(clone_action);
@@ -2889,6 +2893,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // "View"
     b = new JButton(ts.l("createToolbar.view_button"), new ImageIcon(search));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setActionCommand(view_action);
@@ -2897,6 +2902,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // "Query"
     b = new JButton(ts.l("createToolbar.query_button"), new ImageIcon(queryIcon));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
     b.setActionCommand(query_action);
@@ -2906,7 +2912,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     if ((personae != null)  && personae.size() > 1)
       {
 	// "Persona"
-	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));  
+	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));
+	b.setBorderPainted(false);
 	b.setVerticalTextPosition(b.BOTTOM);
 	b.setHorizontalTextPosition(b.CENTER);
 	b.setActionCommand(persona_action);
