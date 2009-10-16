@@ -932,7 +932,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (glogin.isRunningOnMac())
       {
-	MacOSXController controller = new MacOSXController();
+	MacOSXController controller = new MacOSXController(this);
 
 	try
 	  {
@@ -7083,32 +7083,5 @@ class SecurityLaunderThread extends Thread {
   {
     this.done = true;
     notifyAll();
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-								MacOSXController
-
-------------------------------------------------------------------------------*/
-
-/**
- * Controller class to handle actions initiated on a Mac from the
- * Applications menu.
- */
-
-class MacOSXController {
-
-  public void handleAbout()
-  {
-    gclient.client.showAboutMessage();
-  }
-
-  public void handleQuit()
-  {
-    if (gclient.client.OKToProceed())
-      {
-	gclient.client.logout(true);
-      }
   }
 }
