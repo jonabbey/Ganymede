@@ -2859,7 +2859,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     JButton b = new JButton(ts.l("createToolbar.create_button"), new ImageIcon(newToolbarIcon));
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(create_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
@@ -2868,7 +2867,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     b = new JButton(ts.l("createToolbar.edit_button"), new ImageIcon(pencil));
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(edit_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
@@ -2877,7 +2875,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     b = new JButton(ts.l("createToolbar.delete_button"), new ImageIcon(trash));
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(delete_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
@@ -2886,7 +2883,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     b = new JButton(ts.l("createToolbar.clone_button"), new ImageIcon(cloneIcon));
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(clone_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
@@ -2895,7 +2891,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     b = new JButton(ts.l("createToolbar.view_button"), new ImageIcon(search));
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(view_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
@@ -2904,7 +2899,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     b = new JButton(ts.l("createToolbar.query_button"), new ImageIcon(queryIcon));
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(query_action);
     b.addActionListener(this);
     macToolBar.addComponentToCenter(b);
@@ -2915,7 +2909,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));  
 	b.setVerticalTextPosition(b.BOTTOM);
 	b.setHorizontalTextPosition(b.CENTER);
-	b.putClientProperty("JButton.buttonType", "textured");
 	b.setActionCommand(persona_action);
 	b.addActionListener(this);
 	macToolBar.addComponentToRight(b);
