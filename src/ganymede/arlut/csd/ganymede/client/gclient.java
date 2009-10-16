@@ -142,7 +142,7 @@ import arlut.csd.ganymede.rmi.CategoryNode;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.db_object;
 
-import com.apple.mrj.*;
+import apple.dts.samplecode.osxadapter.OSXAdapter;
 import com.explodingpixels.macwidgets.MacUtils;
 import com.explodingpixels.macwidgets.UnifiedToolBar;
 
@@ -934,8 +934,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
 	MacOSXController controller = new MacOSXController();
 
-	MRJApplicationUtils.registerAboutHandler(controller);
-	MRJApplicationUtils.registerQuitHandler(controller);
+	try
+	  {
+	    OSXAdapter.setQuitHandler(controller, MacOSXController.class.getMethod("handleQuit", (Class[]) null));
+	    OSXAdapter.setAboutHandler(controller, MacOSXController.class.getMethod("handleAbout", (Class[]) null));
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	    // we shouldn't get an exception here at runtime unless
+	    // we've made a mistake in the MacOSXController class.
+
+	    processExceptionRethrow(ex);
+	  }
       }
 
     this.setVisible(true);
@@ -7087,7 +7097,7 @@ class SecurityLaunderThread extends Thread {
  * Applications menu.
  */
 
-class MacOSXController implements MRJAboutHandler, MRJQuitHandler  {
+class MacOSXController {
 
   public void handleAbout()
   {
