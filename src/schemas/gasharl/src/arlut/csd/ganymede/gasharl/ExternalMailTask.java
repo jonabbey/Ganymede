@@ -315,7 +315,7 @@ public class ExternalMailTask implements Runnable {
       " will be expiring within 24 hours \n"+
       " You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
       "In order to send mail from outside the laboratory, you will need to configure your external email client " +
-      "to send outgoing email through smail.arlut.utexas.edu using SSL-encrypted SMTP.\n" +
+      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n" +
       "You will need to specify your currently assigned user name and password:\n\n" +
       "Username: " + mailUsername + "\n" +
       "Password: " + mailPassword + "\n\n" +
@@ -385,7 +385,7 @@ public class ExternalMailTask implements Runnable {
 	  " have been changed. \n"+
 	  " You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
 	  "In order to send mail from outside the laboratory, you will need to configure your external email client " +
-	  "to send outgoing email through smail.arlut.utexas.edu using SSL-encrypted SMTP.\n" +
+	  "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n" +
 	  "The currently assigned user name and password are:\n\n" +
 	  "Username: " + mailUsername + "\n" +
 	  "Password: " + mailPassword + "\n\n" +

@@ -525,7 +525,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    messageString = "User account " + this.getLabel() + 
 	      " has been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
 	      "In order to send mail from outside the laboratory, you will need to configure your external email client " +
-	      "to send outgoing email through smail.arlut.utexas.edu using SSL-encrypted SMTP.\n" +
+	      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n" +
 	      "You will need to specify the following randomly assigned user name and password:\n\n" +
 	      "Username: " + mailUsername + "\n" +
 	      "Password: " + mailPassword + "\n\n" +
@@ -545,7 +545,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    messageString = "The external mail credentials for user account " + this.getLabel() + 
 	      " have been changed.\n\n" +
 	      "In order to continue send mail from outside the laboratory, you will need to have your external email client " +
-	      "configured to send outgoing email through smail.arlut.utexas.edu with SSL-encrypted SMTP.\n\n" +
+	      "configured to send outgoing email through smail.arlut.utexas.edu with TLS-encrypted SMTP.\n\n" +
 	      "You will need to update your mail client with the following randomly assigned user name and password:\n\n" +
 	      "Username: " + mailUsername + "\n" +
 	      "Password: " + mailPassword + "\n\n" +
