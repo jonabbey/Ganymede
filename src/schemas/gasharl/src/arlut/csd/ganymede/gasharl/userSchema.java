@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -95,4 +95,10 @@ public interface userSchema {
   final static short SIGNATURE=268;
   final static short EMAILTARGET=269;
   final static short PASSWORDCHANGETIME=275;
+  final static short ALLOWEXTERNAL=278;
+  final static short MAILUSER=279;
+  final static short MAILPASSWORD=280;
+  final static short MAILEXPDATE=281;
+  final static short OLDMAILUSER=282;
+  final static short OLDMAILPASSWORD=283;
 }
