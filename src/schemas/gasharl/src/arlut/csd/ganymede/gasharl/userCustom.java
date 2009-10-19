@@ -2587,7 +2587,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		StringDBField passField = (StringDBField) getField(userSchema.MAILPASSWORD);
 		DateDBField dateField = (DateDBField) getField(userSchema.MAILEXPDATE);
 
-		result = usernameField.setValueLocal(RandomUtils.getRandomUsername());
+		ReturnVal.merge(result, usernameField.setValueLocal(RandomUtils.getRandomUsername()));
 
 		if (!ReturnVal.didSucceed(result))
 		  {
