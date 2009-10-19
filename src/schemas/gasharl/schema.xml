@@ -451,13 +451,6 @@ xmlclient.</comment>
                 <namespace val="uid"/>
               </typedef>
             </fielddef>
-            <fielddef name="Global_UID" id="277">
-              <comment>Globally unique ID, for LDAP applications</comment>
-              <typedef type="string">
-                <maxlength val="64"/>
-                <namespace val="GUIDspace"/>
-              </typedef>
-            </fielddef>
             <fielddef name="Password" id="101">
               <comment>Password for an individual privileged to log into Ganymede and/or the network</comment>
               <typedef type="password">
@@ -587,6 +580,15 @@ Limited to 16 for NFS.</comment>
               <typedef type="date"/>
             </fielddef>
           </tab>
+          <tab name="Mac OS X">
+            <fielddef name="Global_UID" id="277">
+              <comment>Globally unique ID, for LDAP applications</comment>
+              <typedef type="string">
+                <maxlength val="64"/>
+                <namespace val="GUIDspace"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="Group" id="257">
           <classdef name="arlut.csd.ganymede.gasharl.groupCustom" optionString=""/>
@@ -642,6 +644,15 @@ Limited to 16 for NFS.</comment>
               <typedef type="invid">
                 <targetobject name="ARL_Contract"/>
                 <targetfield name="Groups"/>
+              </typedef>
+            </fielddef>
+          </tab>
+          <tab name="Mac OS X">
+            <fielddef name="Global_UID" id="265">
+              <comment>Globally unique ID, for LDAP applications</comment>
+              <typedef type="string">
+                <maxlength val="64"/>
+                <namespace val="GUIDspace"/>
               </typedef>
             </fielddef>
           </tab>
