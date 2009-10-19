@@ -2,16 +2,16 @@
 
    RandomUtils.java
 
-   Created: 7 February 2008, 
+   Created: 7 February 2008,
    Last Modified: 15 October 2009
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
               James Ratcliff, falazar@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
@@ -50,6 +50,7 @@
 package arlut.csd.Util;
 
 import java.util.Random;
+import java.security.SecureRandom;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -65,10 +66,19 @@ import java.util.Random;
 public class RandomUtils {
 
   private static Random randomizer = new Random();
+  private static SecureRandom secureRandomizer = new SecureRandom();
+  
+  private static final String charsetA = "abcdefghijklmnopqrstuvwxyz";
+  private static final String charsetAN = "0123456789abcdefghijklmnopqrstuvwxyz";
+  private static final String charsetC = "!@#$%^&*()0123456789abcdefghijklmnopqrstuvwxyz";
 
   /**
-   * This method returns a random hex string, used to ensure that a
-   * string including it is random.
+   * This method returns a random 32 bit hex string, used to ensure
+   * that a string including it is random.
+   *
+   * The random number generator for this method is low security, and
+   * should not be used for cryptographic purposes where
+   * unpredictability is paramount.
    */
 
   public static String getRandomHex()
@@ -79,6 +89,13 @@ public class RandomUtils {
   /**
    * This method takes a string, adds a random salt to it, and returns
    * it.
+   *
+   * The random number generator for this method is low security, and
+   * should not be used for cryptographic purposes where
+   * unpredictability is paramount.
+   *
+   * Generally, salts need not be unpredictable, as long as they are
+   * not often repeated.
    */
 
   public static String getSaltedString(String in)
@@ -86,66 +103,69 @@ public class RandomUtils {
     return in + " " + getRandomHex();
   }
 
-  private static final String charsetA = "abcdefghijklmnopqrstuvwxyz";
-  private static final String charsetAN = "0123456789abcdefghijklmnopqrstuvwxyz";
-  private static final String charsetC = "!@#$%^&*()0123456789abcdefghijklmnopqrstuvwxyz";
- 
+  /**
+   * Get a random string, using all characters from given charset,
+   * length chars long
+   */
 
-
-  /* Get a random string, using all characters from given char set, length chars long */ 
-  public static String getRandomString(int length, String charset) 
+  public static String getRandomString(int length, String charset)
   {
-    Random rand = new Random(System.currentTimeMillis());
     StringBuffer sb = new StringBuffer();
-    for (int i = 0; i < length; i++) 
-    {
-      int pos = rand.nextInt(charset.length());
-      sb.append(charset.charAt(pos));
-    }
+
+    for (int i = 0; i < length; i++)
+      {
+	int pos = secureRandomizer.nextInt(charset.length());
+	sb.append(charset.charAt(pos));
+      }
+
     return sb.toString();
   }
 
-  /* Get a random password, using all characters, length chars long */ 
-  public static String getRandomPassword(int length) 
+  /**
+   * Get a random username, 8 characters alpha-numeric, starting with
+   * an alphabetic character.
+   */
+
+  public static String getRandomUsername()
   {
-      String password = getRandomString(length, charsetC);
-      return password;
+    return getRandomString(1, charsetA) + getRandomString(7, charsetAN);
   }
 
-  /* Get a random username, 8 alpha-numeric, starts with alhpa */ 
-  public static String getRandomUsername() 
+  /**
+   * Get a random password, using all characters, length chars long
+   */
+
+  public static String getRandomPassword(int length)
   {
-      String onechar = getRandomString(1, charsetA);
-      String username = onechar + getRandomString(7, charsetAN);
-      return username;
+    return getRandomString(length, charsetC);
   }
 
+  /**
+   * Test rig
+   */
 
-
-  // Test out the passwords now.
-  public static void test() 
+  public static void main(String args[])
   {
-    for (int i = 0; i < 10; i++) 
-    {
-      String username = getRandomUsername();
-      String password = getRandomPassword(20);
+    for (int i = 0; i < 10; i++)
+      {
+	String username = getRandomUsername();
+	String password = getRandomPassword(20);
 
-      System.out.println(username);
-      System.out.println(password);
-      System.out.println("");
- 
-      try 
-      {
-	// if you generate more than 1 time, you must
-	// put the process to sleep for awhile
-	// otherwise it will return the same random string
-	Thread.sleep(100);
-      } 
-      catch (InterruptedException e) 
-      {
-	e.printStackTrace();
+	System.out.println(username);
+	System.out.println(password);
+	System.out.println("");
+
+	try
+	  {
+	    // if you generate more than 1 time, you must
+	    // put the process to sleep for awhile
+	    // otherwise it will return the same random string
+	    Thread.sleep(100);
+	  }
+	catch (InterruptedException e)
+	  {
+	    e.printStackTrace();
+	  }
       }
-    }
   }
-
 }

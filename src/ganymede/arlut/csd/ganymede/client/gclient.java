@@ -142,7 +142,7 @@ import arlut.csd.ganymede.rmi.CategoryNode;
 import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.db_object;
 
-import com.apple.mrj.*;
+import apple.dts.samplecode.osxadapter.OSXAdapter;
 import com.explodingpixels.macwidgets.MacUtils;
 import com.explodingpixels.macwidgets.UnifiedToolBar;
 
@@ -712,7 +712,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (glogin.isRunningOnMac())
       {
-	System.setProperty("com.apple.macos.useScreenMenuBar", "true");
+	System.setProperty("apple.laf.useScreenMenuBar", "true");
       }
 
     session = s;
@@ -932,10 +932,20 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (glogin.isRunningOnMac())
       {
-	MacOSXController controller = new MacOSXController();
+	MacOSXController controller = new MacOSXController(this);
 
-	MRJApplicationUtils.registerAboutHandler(controller);
-	MRJApplicationUtils.registerQuitHandler(controller);
+	try
+	  {
+	    OSXAdapter.setQuitHandler(controller, MacOSXController.class.getMethod("handleQuit", (Class[]) null));
+	    OSXAdapter.setAboutHandler(controller, MacOSXController.class.getMethod("handleAbout", (Class[]) null));
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	    // we shouldn't get an exception here at runtime unless
+	    // we've made a mistake in the MacOSXController class.
+
+	    processExceptionRethrow(ex);
+	  }
       }
 
     this.setVisible(true);
@@ -2847,54 +2857,54 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // "Create"
     JButton b = new JButton(ts.l("createToolbar.create_button"), new ImageIcon(newToolbarIcon));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(create_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
 
     // "Edit"
     b = new JButton(ts.l("createToolbar.edit_button"), new ImageIcon(pencil));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(edit_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
 
     // "Delete"
     b = new JButton(ts.l("createToolbar.delete_button"), new ImageIcon(trash));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(delete_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
 
     // "Clone"
     b = new JButton(ts.l("createToolbar.clone_button"), new ImageIcon(cloneIcon));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(clone_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
 
     // "View"
     b = new JButton(ts.l("createToolbar.view_button"), new ImageIcon(search));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(view_action);
     b.addActionListener(this);
     macToolBar.addComponentToLeft(b);
 
     // "Query"
     b = new JButton(ts.l("createToolbar.query_button"), new ImageIcon(queryIcon));
+    b.setBorderPainted(false);
     b.setVerticalTextPosition(b.BOTTOM);
     b.setHorizontalTextPosition(b.CENTER);
-    b.putClientProperty("JButton.buttonType", "textured");
     b.setActionCommand(query_action);
     b.addActionListener(this);
     macToolBar.addComponentToCenter(b);
@@ -2902,10 +2912,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     if ((personae != null)  && personae.size() > 1)
       {
 	// "Persona"
-	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));  
+	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));
+	b.setBorderPainted(false);
 	b.setVerticalTextPosition(b.BOTTOM);
 	b.setHorizontalTextPosition(b.CENTER);
-	b.putClientProperty("JButton.buttonType", "textured");
 	b.setActionCommand(persona_action);
 	b.addActionListener(this);
 	macToolBar.addComponentToRight(b);
@@ -7073,32 +7083,5 @@ class SecurityLaunderThread extends Thread {
   {
     this.done = true;
     notifyAll();
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class
-								MacOSXController
-
-------------------------------------------------------------------------------*/
-
-/**
- * Controller class to handle actions initiated on a Mac from the
- * Applications menu.
- */
-
-class MacOSXController implements MRJAboutHandler, MRJQuitHandler  {
-
-  public void handleAbout()
-  {
-    gclient.client.showAboutMessage();
-  }
-
-  public void handleQuit()
-  {
-    if (gclient.client.OKToProceed())
-      {
-	gclient.client.logout(true);
-      }
   }
 }

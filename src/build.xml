@@ -167,6 +167,7 @@ refresh the jar files.
     <javac destdir="${build.classes}"
            debug="${debug.flag}"
            debuglevel="${debug.level}"
+           encoding="UTF-8"
            target="1.5"
            source="1.5"
            deprecation="on"
@@ -258,6 +259,7 @@ refresh the jar files.
 
     <!-- Build the client jar file -->
     <jar jarfile="${build.lib}/ganymede.jar" duplicate="preserve">
+      <fileset dir="${build.classes}" includes="apple/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JCalendar/**/*.class"/>
@@ -283,13 +285,16 @@ refresh the jar files.
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
 
-      <zipfileset src="${lib.dir}/MRJToolkitStubs-1.0.jar"/>
+      <!-- Pull in a couple of jar files that we'll use to provide
+           better GUI support on Mac. -->
+
       <zipfileset src="${lib.dir}/mac_widgets.jar"/>
       <zipfileset src="${lib.dir}/forms-1.3.0pre4.jar"/>
     </jar>
 
     <!-- Build the admin jar file -->
     <jar jarfile="${build.lib}/ganymedeAdmin.jar" duplicate="preserve">
+      <fileset dir="${build.classes}" includes="apple/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/Util/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDataComponent/**/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/JDialog/**/*.class"/>
@@ -320,7 +325,9 @@ refresh the jar files.
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
 
-      <zipfileset src="${lib.dir}/MRJToolkitStubs-1.0.jar"/>
+      <!-- Pull in a couple of jar files that we'll use to provide
+           better GUI support on Mac. -->
+
       <zipfileset src="${lib.dir}/mac_widgets.jar"/>
       <zipfileset src="${lib.dir}/forms-1.3.0pre4.jar"/>
     </jar>

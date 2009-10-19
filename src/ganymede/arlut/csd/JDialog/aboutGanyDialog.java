@@ -7,7 +7,6 @@
    in the Ganymede client.
    
    Created: 4 March 2005
-   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey
 
@@ -15,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -134,9 +133,6 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
 					arlut.csd.Util.SVNVersion.getReleaseString()));
     addTab(ts.l("init.credits_tab"), ts.l("init.creditsText"));
 
-    ok = new JButton(StringDialog.ok); // localized
-    ok.addActionListener(this);
-
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridy = 0;
@@ -155,13 +151,21 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     gbl.setConstraints(tabPane, gbc);
     pane.add(tabPane);
 
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.anchor = GridBagConstraints.SOUTH;    
-    gbc.gridy = 2;
-    gbc.weighty = 0.0;
-    gbc.insets = new Insets(0,0,0,0);
-    gbl.setConstraints(ok, gbc);
-    pane.add(ok);
+    // on macs, we won't put an ok button on our about dialog
+
+    if (!"Mac OS X".equals(System.getProperty("os.name")))
+      {
+	ok = new JButton(StringDialog.ok); // localized
+	ok.addActionListener(this);
+
+	gbc.fill = GridBagConstraints.NONE;
+	gbc.anchor = GridBagConstraints.SOUTH;    
+	gbc.gridy = 2;
+	gbc.weighty = 0.0;
+	gbc.insets = new Insets(0,0,0,0);
+	gbl.setConstraints(ok, gbc);
+	pane.add(ok);
+      }
 
     this.setContentPane(pane);
 
@@ -195,7 +199,7 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
   {
     super.setVisible(state);
 
-    if (state)
+    if (state && ok != null)
       {
 	ok.requestFocus();
       }
