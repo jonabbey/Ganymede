@@ -518,7 +518,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      "your external mail access four weeks before these credentials expire.";
 	  }
 
-	if (originalObject == null)
+	if (originalObject == null || !originalObject.isDefined(userSchema.MAILUSER) || !originalObject.isDefined(userSchema.MAILPASSWORD))
 	  {
 	    titleString = "External Email Credentials Set For User " + this.getLabel();
 
