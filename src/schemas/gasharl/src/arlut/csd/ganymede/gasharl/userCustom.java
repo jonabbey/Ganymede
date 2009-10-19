@@ -2587,14 +2587,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		StringDBField passField = (StringDBField) getField(userSchema.MAILPASSWORD);
 		DateDBField dateField = (DateDBField) getField(userSchema.MAILEXPDATE);
 
-		ReturnVal.merge(result, usernameField.setValueLocal(RandomUtils.getRandomUsername()));
+		result = ReturnVal.merge(result, usernameField.setValueLocal(RandomUtils.getRandomUsername()));
 
 		if (!ReturnVal.didSucceed(result))
 		  {
 		    return result;
 		  }
 
-		ReturnVal.merge(result, passField.setValueLocal(RandomUtils.getRandomPassword(20)));
+		result = ReturnVal.merge(result, passField.setValueLocal(RandomUtils.getRandomPassword(20)));
 
 		if (!ReturnVal.didSucceed(result))
 		  {
@@ -2604,7 +2604,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		Calendar myCal = new GregorianCalendar();
 		myCal.add(Calendar.DATE, 168); // 24 weeks
 
-		ReturnVal.merge(result, dateField.setValueLocal(myCal.getTime()));
+		result = ReturnVal.merge(result, dateField.setValueLocal(myCal.getTime()));
 
 		if (!ReturnVal.didSucceed(result))
 		  {
