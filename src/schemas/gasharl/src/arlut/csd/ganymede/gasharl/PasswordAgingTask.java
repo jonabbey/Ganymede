@@ -237,7 +237,7 @@ public class PasswordAgingTask implements Runnable {
 
 	object = mySession.getSession().viewDBObject(invid);
 
-	if (object.isInactivated())
+	if (object == null || object.isInactivated())
 	  {
 	    continue;
 	  }
