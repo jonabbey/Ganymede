@@ -54,6 +54,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
+import java.util.Random;
 import java.util.Vector;
 
 import arlut.csd.ganymede.common.Invid;
@@ -63,14 +64,18 @@ import arlut.csd.ganymede.common.QueryDataNode;
 import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.DateDBField;
+import arlut.csd.ganymede.server.DBEditObject;
 import arlut.csd.ganymede.server.DBObject;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeServer;
 import arlut.csd.ganymede.server.GanymedeSession;
+import arlut.csd.ganymede.server.StringDBField;
+import arlut.csd.Util.RandomUtils;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                               ExternalMailTask
+                                                                ExternalMailTask
 
 ------------------------------------------------------------------------------*/
 
@@ -78,7 +83,6 @@ import arlut.csd.ganymede.server.GanymedeSession;
  *
  * This task is run nightly to check all user accounts in Ganymede
  * for their External Mail expiration time.
- *
  *
  * @author James Ratcliff falazar@arlut.utexas.edu
  */
@@ -196,6 +200,7 @@ public class ExternalMailTask implements Runnable {
   * If 1 day before, we send a warning letter.
   * If expired, we remove old ones, and reset exp date, 6 months ahead.
   */
+
   private void checkExpiringCredentials() throws InterruptedException, NotLoggedInException
   {
     Query q;
@@ -232,12 +237,10 @@ public class ExternalMailTask implements Runnable {
 
 	object = mySession.getSession().viewDBObject(invid);
 
-	if (object.isInactivated())
+	if (object != null && object.isInactivated())
 	  {
 	    continue;
 	  }
-
-	// get the mail expiration date for this user, if any
 
 	Date mailExpDate = (Date) object.getFieldValueLocal(userSchema.MAILEXPDATE);
 
@@ -246,7 +249,7 @@ public class ExternalMailTask implements Runnable {
 	    continue;
 	  }
 
-	// so, we just go for four weeks of notice
+	// four weeks before expiration, assign new credentials.
 
 	lowerBound.setTime(currentTime);
 	lowerBound.add(Calendar.DATE, 27);
@@ -275,7 +278,7 @@ public class ExternalMailTask implements Runnable {
 	  }
 
 
-	// then we remove old credentials and reset password.
+	// on the expiration day, we remove old credentials.
 
 	lowerBound.setTime(currentTime);
 	lowerBound.add(Calendar.DATE, -1);
@@ -293,26 +296,32 @@ public class ExternalMailTask implements Runnable {
 
 
   /**
-   * <p>Send out a warning that the password is going to expire soon, to the user's
-   * and admin groups' email addresses.</p>
+   * <p>Send out a warning that the old credentials are going to be removed tomorrow, 
+   * to the user's and admin groups' email addresses.</p>
    */
 
   private void warnPasswordExpire(DBObject userObject)
   {
-    Date passwordChangeTime = (Date) userObject.getFieldValueLocal(userSchema.PASSWORDCHANGETIME);
-
     Vector objVect = new Vector();
 
     objVect.addElement(userObject.getInvid());
 
-    String titleString = "Password Expiring Very Soon For User " + userObject.getLabel() + ", at " + passwordChangeTime;
+    String mailUsername = (String) userObject.getFieldValueLocal(userSchema.MAILUSER);
+    String mailPassword = (String) userObject.getFieldValueLocal(userSchema.MAILPASSWORD);
 
-    String messageString = "The External Account " + userObject.getLabel() + 
-      " will expire very soon.  The account will be updated on " + passwordChangeTime +
-      " or else the account will be inactivated.\n\n" +
-      "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
-      "or CSD.";
-
+    String titleString = "External Email Credentials Expiring Very Soon For User " + userObject.getLabel();
+    
+    String messageString = "The old external email credentials from User account " + userObject.getLabel() + 
+      " will be expiring within 24 hours \n"+
+      " You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
+      "In order to send mail from outside the laboratory, you will need to configure your external email client " +
+      "to send outgoing email through smail.arlut.utexas.edu using SSL-encrypted SMTP.\n" +
+      "You will need to specify your currently assigned user name and password:\n\n" +
+      "Username: " + mailUsername + "\n" +
+      "Password: " + mailPassword + "\n\n" +
+      "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
+      "via SSL-protected IMAP.";	   
+        
     Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
   }
 
@@ -322,53 +331,147 @@ public class ExternalMailTask implements Runnable {
    * send email to the user's and admin groups' email addresses.</p>
    */
 
-  private void clearOldCredentials(DBObject userObject)
+  private ReturnVal clearOldCredentials(DBObject userObject)
   {
+    try
+      {
+	ReturnVal result = mySession.edit_db_object(userObject.getInvid());    
 
-    // TODO clear out old user and old password
-    // reset exp date to 6 months ahead
+	if (!ReturnVal.didSucceed(result))
+	  {
+	    return result;
+	  }
 
-    Date passwordChangeTime = (Date) userObject.getFieldValueLocal(userSchema.MAILEXPDATE);
+	DBEditObject editUserObject = (DBEditObject) result.getObject();
 
-    Vector objVect = new Vector();
+	DateDBField mailExpDateField = (DateDBField) editUserObject.getField(userSchema.MAILEXPDATE);
+	StringDBField oldUsernameField = (StringDBField) editUserObject.getField(userSchema.OLDMAILUSER);
+	StringDBField oldPasswordField = (StringDBField) editUserObject.getField(userSchema.OLDMAILPASSWORD);
+    
+	Calendar myCal = new GregorianCalendar();
+	myCal.add(Calendar.DATE, 168); // 24 weeks from today.
 
-    objVect.addElement(userObject.getInvid());
+	result = ReturnVal.merge(result, mailExpDateField.setValueLocal(myCal.getTime()));
 
-    String titleString = "Old External Account Has Expired For User " + userObject.getLabel() + "!!!";
+	if (!ReturnVal.didSucceed(result))
+	  {
+	    return result;
+	  }
+    
+	result = ReturnVal.merge(result, oldUsernameField.setValueLocal(null));
+    
+	if (!ReturnVal.didSucceed(result))
+	  {
+	    return result;
+	  }
+    
+	result = ReturnVal.merge(result, oldPasswordField.setValueLocal(null));
+    
+	if (!ReturnVal.didSucceed(result))
+	  {
+	    return result;
+	  }
 
-    String messageString = "The password for user account " + userObject.getLabel() + 
-      " expired at " + passwordChangeTime + ".\n\n" +
-      "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
-      "or CSD.";
+	Vector objVect = new Vector();
 
-    Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
+	objVect.addElement(userObject.getInvid());
+
+	String mailUsername = (String) userObject.getFieldValueLocal(userSchema.MAILUSER);
+	String mailPassword = (String) userObject.getFieldValueLocal(userSchema.MAILPASSWORD);
+
+	String titleString = "External Email Credentials Changed For User " + userObject.getLabel();
+	
+	String messageString = "The external email credentials from User account " + userObject.getLabel() + 
+	  " have been changed. \n"+
+	  " You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
+	  "In order to send mail from outside the laboratory, you will need to configure your external email client " +
+	  "to send outgoing email through smail.arlut.utexas.edu using SSL-encrypted SMTP.\n" +
+	  "The currently assigned user name and password are:\n\n" +
+	  "Username: " + mailUsername + "\n" +
+	  "Password: " + mailPassword + "\n\n" +
+	  "The previously assigned username and password will no longer function. \n\n" +
+	  "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
+	  "via SSL-protected IMAP.";	           
+
+	Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
+
+	return result;
+
+      }
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.loginError(ex);
+      }
   }
 
 
   /**
-   * <p>Assigns a new set of external credentials,
-   * sends email to the user's and admin groups' email addresses.</p>
+   * <p>Assigns a new set of random external credentials,
+   * Email is sent from server at commit time. </p>
    */
 
-  private void assignNewCredentials(DBObject userObject)
+  private ReturnVal assignNewCredentials(DBObject userObject)
   {
+    try
+      {
+	ReturnVal result = mySession.edit_db_object(userObject.getInvid());    
 
-    // TODO copy over new to old mail user and password, 
-    // create new mail user and password.
+	if (!ReturnVal.didSucceed(result))
+	  {
+	    return result;
+	  }
 
-    Date mailExpDate = (Date) userObject.getFieldValueLocal(userSchema.MAILEXPDATE);
+	DBEditObject editUserObject = (DBEditObject) result.getObject();
+    
+	StringDBField usernameField = (StringDBField) 
+                         editUserObject.getField(userSchema.MAILUSER);
+	StringDBField passwordField = (StringDBField) 
+                         editUserObject.getField(userSchema.MAILPASSWORD);
 
-    Vector objVect = new Vector();
+	if (editUserObject.isDefined(userSchema.MAILUSER) 
+            && editUserObject.isDefined(userSchema.MAILPASSWORD))
+	  {
+	    StringDBField oldUsernameField = (StringDBField) 
+                 editUserObject.getField(userSchema.OLDMAILUSER);
+	    StringDBField oldPasswordField = (StringDBField) 
+                 editUserObject.getField(userSchema.OLDMAILPASSWORD);
 
-    objVect.addElement(userObject.getInvid());
+	    // Copy over old values.
+	    String username = (String) usernameField.getValueLocal();
+	    String password = (String) passwordField.getValueLocal();
 
-    String titleString = "Old External Account Has Expired For User " + userObject.getLabel() + "!!!";
+	    result = ReturnVal.merge(result, oldUsernameField.setValueLocal(username));
 
-    String messageString = "The password for user account " + userObject.getLabel() + 
-      " expired at " + mailExpDate + ".\n\n" +
-      "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
-      "or CSD.";
+	    if (!ReturnVal.didSucceed(result))
+	      {
+		return result;
+	      }
 
-    Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
+	    result = ReturnVal.merge(result, oldPasswordField.setValueLocal(password));
+
+	    if (!ReturnVal.didSucceed(result))
+	      {
+		return result;
+	      }
+	  }
+
+	// Set new values.
+	result = ReturnVal.merge(result, 
+                   usernameField.setValueLocal(RandomUtils.getRandomUsername()));
+    
+	if (!ReturnVal.didSucceed(result))
+	  {
+	    return result;
+	  }
+    
+	result = ReturnVal.merge(result, 
+                   passwordField.setValueLocal(RandomUtils.getRandomPassword(20)));
+    
+	return result;
+      }
+    catch (NotLoggedInException ex)
+      {
+	return Ganymede.loginError(ex);
+      }    
   }
 }
