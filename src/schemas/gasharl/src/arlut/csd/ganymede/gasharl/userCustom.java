@@ -504,9 +504,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	DBObject originalObject = getOriginal();
 	String titleString = null;
 	String messageString = null;
+	String expireString = null;
 
 	String mailUsername = (String) getFieldValueLocal(userSchema.MAILUSER);
 	String mailPassword = (String) getFieldValueLocal(userSchema.MAILPASSWORD);
+	Date mailExpireDate = null;
+
+	if (isDefined(userSchema.MAILEXPDATE))
+	  {
+	    mailExpireDate = (Date) getFieldValueLocal(userSchema.MAILEXPDATE);
+
+	    expireString = "These credentials will expire on " + mailExpireDate.toString() + ".  You will be assigned new credentials for " +
+	      "your external mail access four weeks before these credentials expire.";
+	  }
 
 	if (originalObject == null)
 	  {
@@ -520,7 +530,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      "Username: " + mailUsername + "\n" +
 	      "Password: " + mailPassword + "\n\n" +
 	      "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
-	      "via SSL-protected IMAP.\n\n";
+	      "via SSL-protected IMAP.";
+	    
+	    if (expireString != null)
+	      {
+		messageString = messageString + "\n\n" + expireString;
+	      }
 	  }
 	else if (!mailUsername.equals(originalObject.getFieldValueLocal(userSchema.MAILUSER)) ||
 		 !mailPassword.equals(originalObject.getFieldValueLocal(userSchema.MAILPASSWORD)))
@@ -535,7 +550,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      "Username: " + mailUsername + "\n" +
 	      "Password: " + mailPassword + "\n\n" +
 	      "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
-	      "via SSL-protected IMAP.\n\n";
+	      "via SSL-protected IMAP.";
+
+	    if (expireString != null)
+	      {
+		messageString = messageString + "\n\n" + expireString;
+	      }
 	  }
 
 	if (titleString != null)
