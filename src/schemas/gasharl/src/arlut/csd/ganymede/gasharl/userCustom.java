@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -71,6 +71,7 @@ import org.doomdark.uuid.UUIDGenerator;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.PathComplete;
+import arlut.csd.Util.RandomUtils;
 import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
@@ -583,6 +584,44 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
+   * Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of
+   * {@link arlut.csd.ganymede.server.DBField DBField} will
+   * wind up calling up to here to let us override the normal visibility
+   * process.
+   *
+   * Note that it is permissible for session to be null, in which case
+   * this method will always return the default visiblity for the field
+   * in question.
+   *
+   * If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public boolean canSeeField(DBSession session, DBField field)
+  {
+    short fieldid = field.getID();
+
+    switch (fieldid)
+      {
+      case MAILUSER:
+      case MAILPASSWORD:
+      case MAILEXPDATE:
+	return field.getObject().isSet(ALLOWEXTERNAL);
+
+      case OLDMAILUSER:
+      case OLDMAILPASSWORD:
+	return false;
+      }
+
+    return super.canSeeField(session, field);
+  }
+
+  /**
    * <p>Customization method to verify whether a specific field
    * in object should be cloned using the basic field-clone
    * logic.</p>
@@ -1071,6 +1110,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case userSchema.PASSWORD:
       case userSchema.PASSWORDCHANGETIME:
 	return !object.isInactivated();
+
+      case userSchema.MAILUSER:
+      case userSchema.MAILPASSWORD:
+      case userSchema.MAILEXPDATE:
+	return object.isSet(ALLOWEXTERNAL);
       }
 
     // Whether or not the Badge number field is required depends on
@@ -2525,6 +2569,53 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    result = validatePasswordChoice((String) param1, getGSession().isSuperGash());
 		
+	    return result;
+	  }
+
+	if (field.getID() == ALLOWEXTERNAL)
+	  {
+	    // the second true in the ReturnVal constructor makes the
+	    // Ganymede logic go ahead and complete the operation
+	    // normally, just taking the rescan information as an
+	    // extra to pass back to the client.
+
+	    result = ReturnVal.success();
+
+	    if (Boolean.TRUE.equals(param1))
+	      {
+		StringDBField usernameField = (StringDBField) getField(userSchema.MAILUSER);
+		StringDBField passField = (StringDBField) getField(userSchema.MAILPASSWORD);
+		DateDBField dateField = (DateDBField) getField(userSchema.MAILEXPDATE);
+
+		result = usernameField.setValueLocal(RandomUtils.getRandomUsername());
+
+		if (!ReturnVal.didSucceed(result))
+		  {
+		    return result;
+		  }
+
+		ReturnVal.merge(result, passField.setValueLocal(RandomUtils.getRandomPassword(20)));
+
+		if (!ReturnVal.didSucceed(result))
+		  {
+		    return result;
+		  }
+
+		Calendar myCal = new GregorianCalendar();
+		myCal.add(Calendar.DATE, 168); // 24 weeks
+
+		ReturnVal.merge(result, dateField.setValueLocal(myCal.getTime()));
+
+		if (!ReturnVal.didSucceed(result))
+		  {
+		    return result;
+		  }
+	      }
+
+	    result.addRescanField(this.getInvid(), userSchema.MAILUSER);
+	    result.addRescanField(this.getInvid(), userSchema.MAILPASSWORD);
+	    result.addRescanField(this.getInvid(), userSchema.MAILEXPDATE);
+
 	    return result;
 	  }
 
