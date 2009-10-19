@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -1244,7 +1244,7 @@ public final class DBNameSpace implements NameSpace {
 
 	DBNameSpaceHandle handleCopy = (DBNameSpaceHandle) handle.clone();
 
-	if (!handleCopy.isCheckedOut())
+	if (handleCopy.isCheckedOut())
 	  {
 	    // "Error, non-null handle owner found during copy of namespace {0} for key: {1}."
 	    throw new RuntimeException(ts.l("schemaEditCheckout.non_null_owner",
