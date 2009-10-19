@@ -499,6 +499,55 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
+    if (isSet(userSchema.ALLOWEXTERNAL) && isDefined(userSchema.MAILUSER) && isDefined(userSchema.MAILPASSWORD))
+      {
+	DBObject originalObject = getOriginal();
+	String titleString = null;
+	String messageString = null;
+
+	String mailUsername = (String) getFieldValueLocal(userSchema.MAILUSER);
+	String mailPassword = (String) getFieldValueLocal(userSchema.MAILPASSWORD);
+
+	if (originalObject == null)
+	  {
+	    titleString = "External Email Credentials Set For User " + this.getLabel();
+
+	    messageString = "User account " + this.getLabel() + 
+	      " has been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
+	      "In order to send mail from outside the laboratory, you will need to configure your external email client " +
+	      "to send outgoing email through smail.arlut.utexas.edu using SSL-encrypted SMTP.\n" +
+	      "You will need to specify the following randomly assigned user name and password:\n\n" +
+	      "Username: " + mailUsername + "\n" +
+	      "Password: " + mailPassword + "\n\n" +
+	      "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
+	      "via SSL-protected IMAP.\n\n";
+	  }
+	else if (!mailUsername.equals(originalObject.getFieldValueLocal(userSchema.MAILUSER)) ||
+		 !mailPassword.equals(originalObject.getFieldValueLocal(userSchema.MAILPASSWORD)))
+	  {
+	    titleString = "External Email Credentials Changed For User " + this.getLabel();
+
+	    messageString = "The external mail credentials for user account " + this.getLabel() + 
+	      " have been changed.\n\n" +
+	      "In order to continue send mail from outside the laboratory, you will need to have your external email client " +
+	      "configured to send outgoing email through smail.arlut.utexas.edu with SSL-encrypted SMTP.\n\n" +
+	      "You will need to update your mail client with the following randomly assigned user name and password:\n\n" +
+	      "Username: " + mailUsername + "\n" +
+	      "Password: " + mailPassword + "\n\n" +
+	      "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
+	      "via SSL-protected IMAP.\n\n";
+	  }
+
+	if (titleString != null)
+	  {
+	    Vector objVect = new Vector();
+
+	    objVect.addElement(this.getInvid());
+
+	    Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
+	  }
+      }
+
     return retVal;
   }
 
