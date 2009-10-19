@@ -3169,6 +3169,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     securityCheck();
 
+    if (array == b)
+      {
+	return null;
+      }
+
     if (isEditingProtectedGanymedeDefinedField())
       {
 	// array-ness is way too critical to be edited, even in mildly variable system
