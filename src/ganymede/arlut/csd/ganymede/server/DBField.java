@@ -378,6 +378,15 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
+   * Returns the DBObject that this field is contained within.
+   */
+
+  public final DBObject getObject()
+  {
+    return owner;
+  }
+
+  /**
    * This method is designed to handle casting this field's value into
    * a vector as needed.  We don't bother to check whether value is a Vector
    * here, as the code which would have used the old values field should
