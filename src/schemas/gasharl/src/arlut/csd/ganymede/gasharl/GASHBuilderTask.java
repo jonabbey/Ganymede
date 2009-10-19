@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -247,6 +247,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	writeSambafileVersion2();
 	writeUserSyncFile();
 	writeHTTPfiles();
+	writeExternalMailFiles();
 
 	success = true;
       }
@@ -3198,6 +3199,78 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     return true;
   }
+
+  /**
+   * <p>This method writes out credentials to our external SMTP server.
+   * The credentials file is formatted follows:</p>
+   *
+   * <PRE>
+   * username password
+   * username password
+   * </PRE>
+   */
+
+  private boolean writeExternalMailFiles()
+  {
+    PrintWriter mailCredentials = null;
+    DBObject user;
+    Enumeration users;
+
+    try
+      {
+	mailCredentials = openOutFile(path + "extMailCredentials", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extMailCredentials file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+
+	    if (user.isInactivated() || !user.isSet(userSchema.ALLOWEXTERNAL) || !user.isDefined(userSchema.MAILUSER) || !user.isDefined(userSchema.MAILPASSWORD))
+	      {
+		continue;
+	      }
+
+	    StringDBField usernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+	    String username = (String) usernameField.getValueLocal();
+
+	    StringDBField mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
+	    String mailpass = (String) mailpassField.getValueLocal();
+
+	    mailCredentials.print(username);
+	    mailCredentials.print(" ");
+	    mailCredentials.println(mailpass);
+
+	    if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD))
+	      {
+		usernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+		username = (String) usernameField.getValueLocal();
+
+		mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
+		mailpass = (String) mailpassField.getValueLocal();
+
+		mailCredentials.print(username);
+		mailCredentials.print(" ");
+		mailCredentials.println(mailpass);
+	      }
+	  }
+      }
+    finally
+      {
+	mailCredentials.close();
+      }
+
+    return true;
+  }
+
 
   /**
    * <P>This method generates a transitive closure of the members of a
