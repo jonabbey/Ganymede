@@ -172,6 +172,11 @@ refresh the jar files.
            source="1.5"
            deprecation="on"
            srcdir="${src.dir}">
+<!--
+  We have lots and lots of pre-Java 5 Vector usage, but if you want to turn on linting..
+
+      <compilerarg value="-Xlint:unchecked"/>
+-->
       <src path="${src.dir}"/>
       <classpath refid="classpath"/>
     </javac>
