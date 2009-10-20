@@ -70,7 +70,7 @@ public class RandomUtils {
   
   private static final String charsetA = "abcdefghijklmnopqrstuvwxyz";
   private static final String charsetAN = "0123456789abcdefghijklmnopqrstuvwxyz";
-  private static final String charsetC = "!@#$%^&*()0123456789abcdefghijklmnopqrstuvwxyz";
+  private static final String charsetC = "23456789abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   /**
    * This method returns a random 32 bit hex string, used to ensure
