@@ -3205,14 +3205,23 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * The credentials file is formatted follows:</p>
    *
    * <PRE>
-   * username password
-   * username password
+   * mailusername mailpassword
+   * mailusername mailpassword
+   * </PRE>
+   *
+   * <p>It also out credentials for our internal server.
+   * The credentials file is formatted follows:</p>
+   *
+   * <PRE>
+   * username mailusername mailpassword
+   * username mailusername mailpassword
    * </PRE>
    */
 
   private boolean writeExternalMailFiles()
   {
     PrintWriter mailCredentials = null;
+    PrintWriter extIMAPCredentials = null;
     DBObject user;
     Enumeration users;
 
@@ -3223,6 +3232,16 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     catch (IOException ex)
       {
 	System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extMailCredentials file: " + ex);
+	return false;
+      }
+
+    try
+      {
+	extIMAPCredentials = openOutFile(path + "extIMAPCredentials", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extIMAPCredentials file: " + ex);
 	return false;
       }
 
@@ -3242,30 +3261,46 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    StringDBField usernameField = (StringDBField) user.getField(userSchema.MAILUSER);
 	    String username = (String) usernameField.getValueLocal();
 
+	    StringDBField mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+	    String mailUsername = (String) mailUsernameField.getValueLocal();
+
 	    StringDBField mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
 	    String mailpass = (String) mailpassField.getValueLocal();
 
-	    mailCredentials.print(username);
+	    mailCredentials.print(mailUsername);
 	    mailCredentials.print(" ");
 	    mailCredentials.println(mailpass);
 
+	    extIMAPCredentials.print(username);
+	    extIMAPCredentials.print(" ");
+	    extIMAPCredentials.print(mailUsername);
+	    extIMAPCredentials.print(" ");
+	    extIMAPCredentials.println(mailpass);
+
 	    if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD))
 	      {
-		usernameField = (StringDBField) user.getField(userSchema.MAILUSER);
-		username = (String) usernameField.getValueLocal();
+		mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+		mailUsername = (String) mailUsernameField.getValueLocal();
 
 		mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
 		mailpass = (String) mailpassField.getValueLocal();
 
-		mailCredentials.print(username);
+		mailCredentials.print(mailUsername);
 		mailCredentials.print(" ");
 		mailCredentials.println(mailpass);
+
+		extIMAPCredentials.print(username);
+		extIMAPCredentials.print(" ");
+		extIMAPCredentials.print(mailUsername);
+		extIMAPCredentials.print(" ");
+		extIMAPCredentials.println(mailpass);		
 	      }
 	  }
       }
     finally
       {
 	mailCredentials.close();
+	extIMAPCredentials.close();
       }
 
     return true;
