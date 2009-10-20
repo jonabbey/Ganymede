@@ -3237,54 +3237,37 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	extIMAPCredentials = openOutFile(path + "extIMAPCredentials", "gasharl");
-      }
-    catch (IOException ex)
-      {
-	mailCredentials.close();
-	System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extIMAPCredentials file: " + ex);
-	return false;
-      }
-
-    try
-      {
-	users = enumerateObjects(SchemaConstants.UserBase);
-
-	while (users.hasMoreElements())
+	try
 	  {
-	    user = (DBObject) users.nextElement();
+	    extIMAPCredentials = openOutFile(path + "extIMAPCredentials", "gasharl");
+	  }
+	catch (IOException ex)
+	  {
+	    System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extIMAPCredentials file: " + ex);
+	    return false;
+	  }
 
-	    if (user.isInactivated() || !user.isSet(userSchema.ALLOWEXTERNAL) || !user.isDefined(userSchema.MAILUSER) || !user.isDefined(userSchema.MAILPASSWORD))
+	try
+	  {
+	    users = enumerateObjects(SchemaConstants.UserBase);
+
+	    while (users.hasMoreElements())
 	      {
-		continue;
-	      }
+		user = (DBObject) users.nextElement();
 
-	    StringDBField usernameField = (StringDBField) user.getField(userSchema.MAILUSER);
-	    String username = (String) usernameField.getValueLocal();
+		if (user.isInactivated() || !user.isSet(userSchema.ALLOWEXTERNAL) || !user.isDefined(userSchema.MAILUSER) || !user.isDefined(userSchema.MAILPASSWORD))
+		  {
+		    continue;
+		  }
 
-	    StringDBField mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
-	    String mailUsername = (String) mailUsernameField.getValueLocal();
+		StringDBField usernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+		String username = (String) usernameField.getValueLocal();
 
-	    StringDBField mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
-	    String mailpass = (String) mailpassField.getValueLocal();
+		StringDBField mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+		String mailUsername = (String) mailUsernameField.getValueLocal();
 
-	    mailCredentials.print(mailUsername);
-	    mailCredentials.print(" ");
-	    mailCredentials.println(mailpass);
-
-	    extIMAPCredentials.print(username);
-	    extIMAPCredentials.print(" ");
-	    extIMAPCredentials.print(mailUsername);
-	    extIMAPCredentials.print(" ");
-	    extIMAPCredentials.println(mailpass);
-
-	    if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD))
-	      {
-		mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
-		mailUsername = (String) mailUsernameField.getValueLocal();
-
-		mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
-		mailpass = (String) mailpassField.getValueLocal();
+		StringDBField mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
+		String mailpass = (String) mailpassField.getValueLocal();
 
 		mailCredentials.print(mailUsername);
 		mailCredentials.print(" ");
@@ -3294,14 +3277,36 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		extIMAPCredentials.print(" ");
 		extIMAPCredentials.print(mailUsername);
 		extIMAPCredentials.print(" ");
-		extIMAPCredentials.println(mailpass);		
+		extIMAPCredentials.println(mailpass);
+
+		if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD))
+		  {
+		    mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+		    mailUsername = (String) mailUsernameField.getValueLocal();
+
+		    mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
+		    mailpass = (String) mailpassField.getValueLocal();
+
+		    mailCredentials.print(mailUsername);
+		    mailCredentials.print(" ");
+		    mailCredentials.println(mailpass);
+
+		    extIMAPCredentials.print(username);
+		    extIMAPCredentials.print(" ");
+		    extIMAPCredentials.print(mailUsername);
+		    extIMAPCredentials.print(" ");
+		    extIMAPCredentials.println(mailpass);		
+		  }
 	      }
+	  }
+	finally
+	  {
+	    extIMAPCredentials.close();
 	  }
       }
     finally
       {
 	mailCredentials.close();
-	extIMAPCredentials.close();
       }
 
     return true;
