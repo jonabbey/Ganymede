@@ -3209,7 +3209,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * mailusername mailpassword
    * </PRE>
    *
-   * <p>It also out credentials for our internal server.
+   * <p>It also writes out credentials for our internal server.
    * The credentials file is formatted follows:</p>
    *
    * <PRE>
@@ -3241,6 +3241,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
     catch (IOException ex)
       {
+	mailCredentials.close();
 	System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extIMAPCredentials file: " + ex);
 	return false;
       }
