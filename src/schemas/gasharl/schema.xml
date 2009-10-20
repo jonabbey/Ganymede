@@ -593,6 +593,7 @@ Limited to 16 for NFS.</comment>
             </fielddef>
             <fielddef name="Mail_Password" id="280">
               <typedef type="string">
+                <minlength val="20"/>
                 <maxlength val="20"/>
               </typedef>
             </fielddef>
