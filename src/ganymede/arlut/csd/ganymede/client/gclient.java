@@ -2754,7 +2754,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     JToolBar toolBarTemp = new JToolBar();
 
     toolBarTemp.setBorderPainted(true);
-    toolBarTemp.setFloatable(true);
+    toolBarTemp.setFloatable(false); // let's get rid of the stupid floating toolbar
     toolBarTemp.setMargin(insets);
 
     // "Create"
