@@ -1054,13 +1054,6 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     // and pop up everything
 
-    if (isRunningOnMac())
-      {
-	// we want the gclient window to support a mac unified toolbar
-
-	System.setProperty("apple.awt.brushMetalLook", "true");
-      }
-
     g_client = new gclient(session,this);
 
     passwd.setText("");

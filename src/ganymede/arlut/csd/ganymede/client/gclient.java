@@ -713,6 +713,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     if (glogin.isRunningOnMac())
       {
 	System.setProperty("apple.laf.useScreenMenuBar", "true");
+
+	// we want the gclient window to support a mac unified toolbar
+
+	getRootPane().putClientProperty("apple.awt.brushMetalLook", "true");
       }
 
     session = s;
