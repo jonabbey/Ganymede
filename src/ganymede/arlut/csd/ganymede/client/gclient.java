@@ -948,6 +948,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	  }
       }
 
+    System.setProperty("apple.awt.brushMetalLook", "true");
+
     this.setVisible(true);
 
     setLoginCount(g.getInitialLoginCount());
