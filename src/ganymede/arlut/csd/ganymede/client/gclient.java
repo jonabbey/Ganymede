@@ -761,6 +761,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     mainPanel = new JPanel(true);
     mainPanel.setLayout(new BorderLayout());
 
+    if (glogin.isRunningOnMac())
+      {
+	mainPanel.putClientProperty("apple.awt.brushMetalLook", "false");
+      }
+
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add("Center", mainPanel);
 
