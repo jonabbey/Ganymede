@@ -218,6 +218,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     this.gc = gc;
 
+    if (gc.isRunningOnMac())
+      {
+	putClientProperty("apple.awt.brushMetalLook", "false");
+      }
+
     // are we running the client in debug mode?
 
     if (!debug)
