@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-12 October 2009
+30 October 2009
 README
 
 ---------------------------------------------
@@ -53,10 +53,14 @@ as well as via ftp:
 
   ftp://ftp.arlut.utexas.edu/pub/ganymede/
 
-and you can even get direct access to our Subversion repository.  The
-latest trunk is at:
+and you can even get direct access to our Git repository.  The repository
+can be pulled from
 
-  http://tools.arlut.utexas.edu/svn/ganymede/trunk/ganymede
+  http://git.arlut.utexas.edu/ganymede
+
+or you can browse the repository using gitweb via
+
+  http://git.arlut.utexas.edu/?p=ganymede
 
 --
 
