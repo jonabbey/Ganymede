@@ -475,6 +475,12 @@ public class GanymedeServer implements Server {
 			// recanonicalize
 
 			clientName = user.getLabel();
+
+			if (user.isInactivated())
+			  {
+			    found = false;
+			    user = null;
+			  }
 		      }
 		  }
 	      }
