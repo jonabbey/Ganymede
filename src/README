@@ -1,0 +1,40 @@
+Ganymede Release 2.0
+30 October 2009
+src/README
+
+--------------------------------------------------------------------------------
+
+Contained hereunder:
+
+  The build/ directory contains the class and jar files produced by
+  building Ganymede.
+
+  The build.xml file is the master Ant build file for Ganymede.
+
+  The ganymede/ directory contains all of the source code for the
+  Ganymede server, client, and admin console.
+
+  The jython/ directory contains Jython jar files used to provide
+  interpreted Python support in the Ganymede server.  Not really used
+  for much by us, but if you add 'telnet=<portnum>' to the Ganymede
+  runServer script, Ganymede will support an interactive Python shell
+  via telnet.
+
+  The lib/ directory contains third party open source jar files that
+  are used by the Ganymede software.
+
+  The resources/ directory contains localization and image resources
+  for the Ganymede server, client, and admin console.
+
+  The schemas/ directory contains the customization logic that we use
+  here at ARL:UT for our specific installation of Ganymede.
+  
+  The verification/ directory contains Perl scripts used by the
+  'validate' task in the src/build.xml Ant file.  By running 'ant
+  validate' in this directory, all Ganymede source code will be
+  examined and compared with localization resources under resources/
+  to produce a report as to the correctness and completeness of
+  localization support for all languages present under resourcse/.
+
+Jonathan Abbey
+30 October 2009
