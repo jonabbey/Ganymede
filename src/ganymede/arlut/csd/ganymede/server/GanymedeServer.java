@@ -2,16 +2,13 @@
 
    GanymedeServer.java
 
-   The GanymedeServer object is created by Ganymede at start-up time
-   and published to the net for client logins via RMI.  As such,
-   the GanymedeServer object is the first Ganymede code that a client
-   will directly interact with.
+   The GanymedeServer object is created by the
+   arlut.csd.ganymede.server.Ganymede class at start-up time and
+   published to the net for client logins via RMI.  As such, the
+   GanymedeServer object is the first Ganymede code that a client will
+   directly interact with.
    
    Created: 17 January 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
