@@ -11,18 +11,13 @@
 
    Created: 2 May 2000
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2008
+
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -218,7 +213,7 @@ public final class xmlclient implements ClientListener, Runnable {
               }
             else
               {
-                xc.terminate(1);		
+                xc.terminate(1);
               }
           }
 
@@ -280,7 +275,7 @@ public final class xmlclient implements ClientListener, Runnable {
   {
     StringWriter stringTarget = new StringWriter();
     PrintWriter writer = new PrintWriter(stringTarget);
-    
+
     thing.printStackTrace(writer);
     writer.close();
 
@@ -329,7 +324,7 @@ public final class xmlclient implements ClientListener, Runnable {
   /**
    * This constructor is used to handle XML data submission from the
    * interactive Ganymede client.
-   */  
+   */
 
   private xmlclient(File inFile)
   {
@@ -347,7 +342,7 @@ public final class xmlclient implements ClientListener, Runnable {
   /**
    * This constructor takes care of parsing the command line arguments
    * for xmlclient when run from the command line.
-   */  
+   */
 
   public xmlclient(boolean hasCommandLine, String argv[])
   {
@@ -386,7 +381,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
     // "password"
     password = ParseArgs.getArg(ts.l("global.passArg"), argv);
-    
+
     // "bufsize"
     String bufferString = ParseArgs.getArg(ts.l("global.bufArg"), argv);
 
@@ -429,7 +424,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
 	return;
       }
-    
+
     // "dump"
     if (ParseArgs.switchExists(ts.l("global.dumpArg"), argv))
       {
@@ -585,7 +580,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	while (bytes != null)
 	  {
 	    System.out.write(bytes);
-	    
+
 	    bytes = transmitter.getNextChunk();
 	  }
       }
@@ -762,7 +757,7 @@ public final class xmlclient implements ClientListener, Runnable {
     FileInputStream in = new FileInputStream(queryFilename);
     BufferedInputStream inBuf = new BufferedInputStream(in);
     int c;
-    
+
     /* -- */
 
     // dirt simple buffered read from filename
@@ -1017,7 +1012,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	else
 	  {
 	    // a null ReturnVal signifies a successful result
-	    
+
 	    return true;
 	  }
       }
@@ -1045,11 +1040,11 @@ public final class xmlclient implements ClientListener, Runnable {
     if (this.commandLine)
       {
 	java.io.BufferedReader in;
-	    
+
 	// get an input stream so we can get the password from the user if we have to
-	    
+
 	in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
-	    
+
 	try
 	  {
 	    // Password for "{0}":
@@ -1102,7 +1097,7 @@ public final class xmlclient implements ClientListener, Runnable {
 	      {
 		err.println(message);
 	      }
-	    
+
 	    if (!retVal.didSucceed())
 	      {
 		xSession.abort();
