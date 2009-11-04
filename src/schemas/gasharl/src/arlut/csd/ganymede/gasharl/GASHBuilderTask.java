@@ -3260,7 +3260,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		    continue;
 		  }
 
-		StringDBField usernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+		StringDBField usernameField = (StringDBField) user.getField(userSchema.USERNAME);
 		String username = (String) usernameField.getValueLocal();
 
 		StringDBField mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
