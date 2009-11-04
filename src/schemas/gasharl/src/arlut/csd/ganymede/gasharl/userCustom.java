@@ -524,13 +524,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    messageString = "User account " + this.getLabel() + 
 	      " has been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
-	      "In order to send mail from outside the laboratory, you will need to configure your external email client " +
-	      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587.\n" +
-	      "You will need to specify the following randomly assigned user name and password:\n\n" +
+	      "In order to read and send mail from outside the laboratory, you will need to configure your external email client " +
+	      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
+	      "read incoming mail from mailboxes.arlut.utexas.edu via IMAP over SSL.\n" +
+	      "You will need to specify the following randomly assigned user name and password for both services:\n\n" +
 	      "Username: " + mailUsername + "\n" +
-	      "Password: " + mailPassword + "\n\n" +
-	      "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
-	      "via SSL-protected IMAP.";
+	      "Password: " + mailPassword;
 	    
 	    if (expireString != null)
 	      {
@@ -544,13 +543,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    messageString = "The external mail credentials for user account " + this.getLabel() + 
 	      " have been changed.\n\n" +
-	      "In order to continue send mail from outside the laboratory, you will need to have your external email client " +
-	      "configured to send outgoing email through smail.arlut.utexas.edu with TLS-encrypted SMTP on port 25 or port 587.\n\n" +
-	      "You will need to update your mail client with the following randomly assigned user name and password:\n\n" +
+	      "In order continue to read and send mail from outside the laboratory, you will need to configure your external email client " +
+	      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
+	      "read incoming mail from mailboxes.arlut.utexas.edu via IMAP over SSL.\n" +
+	      "You will need to specify the following randomly assigned user name and password for both services:\n\n" +
 	      "Username: " + mailUsername + "\n" +
-	      "Password: " + mailPassword + "\n\n" +
-	      "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
-	      "via SSL-protected IMAP.";
+	      "Password: " + mailPassword;
 
 	    if (expireString != null)
 	      {
