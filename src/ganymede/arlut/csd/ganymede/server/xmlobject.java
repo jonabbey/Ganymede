@@ -76,9 +76,9 @@ import arlut.csd.ganymede.rmi.db_object;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is a data holding structure that is intended to hold
- * object and field data for an XML object element for
- * {@link arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}.
+ * This class is a data holding structure that is intended to hold
+ * object and field data for an XML object element for {@link
+ * arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}.
  *
  * @author Jonathan Abbey
  */

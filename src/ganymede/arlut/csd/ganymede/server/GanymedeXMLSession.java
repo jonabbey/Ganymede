@@ -2602,7 +2602,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * This helper method takes a short object type id and an
    * underscore-for-space XML encoded field name and returns the
    * FieldTemplate for that field, if known.  If not, null is
-   * returned. */
+   * returned.
+   */
 
   public FieldTemplate getFieldTemplate(short type, String fieldName)
   {
@@ -2613,7 +2614,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * This helper method takes a short object type id and an
    * underscore-for-space XML encoded field name and returns the
    * FieldTemplate for that field, if known.  If not, null is
-   * returned. */
+   * returned.
+   */
 
   public FieldTemplate getFieldTemplate(Short type, String fieldName)
   {
