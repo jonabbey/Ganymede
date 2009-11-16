@@ -19,10 +19,25 @@ package org.solinger.cracklib;
 
 import java.io.*;
 
+import arlut.csd.Util.TranslationService;
+
 public class CrackLib {
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("org.solinger.cracklib.CrackLib");
+
   public static final int MINDIFF = 5;
   public static final int MINLEN = 6;
   public static final int MAXSTEP = 4;
+
+  /**
+   * Array of rules to apply to attempt to strip elementary
+   * conversions away when doing dictionary checks.
+   */
 
   public static final String[] destructors = new String[] {
     ":",                        // noop - must do this to test raw word.
@@ -442,47 +457,104 @@ public class CrackLib {
     return false;
   }
 
+  /**
+   * Returns a message string if the password is considered to be
+   * unacceptable, or null if the submitted password is okay.
+   */
+
   public static final String fascistLook(Packer p, String password) throws IOException
   {
-    int notfound = p.size();
-
     if (password.length() < 4)
       {
-	return ("it's WAY too short");
+	// "It''s WAY too short."
+	return ts.l("fascistLook.wayshort");
       }
 
     if (password.length() < MINLEN)
       {
-	return ("it is too short");
-      }
-
-    String junk = new String(password.substring(0,1));
-
-    for (int i=1; i<password.length();i++)
-      {
-	if (junk.indexOf(password.charAt(i)) == -1)
-	  {
-	    junk = junk+password.charAt(i);
-	  }
-      }
-
-    if (junk.length() < MINDIFF)
-      {
-	return ("it does not contain enough DIFFERENT characters");
+	// "It''s too short."
+	return ts.l("fascistLook.short");
       }
 
     if ((password = password.trim()).length() == 0)
       {
-	return ("it is all whitespace");
+	// "It is all whitespace."
+	return ts.l("fascistLook.whitespace");
       }
+
+    StringBuilder junk = new StringBuilder(password.substring(0,1));
+
+    outer:
+    for (int i=1; i<password.length(); i++)
+      {
+	for (int j=0; j < junk.length(); j++)
+	  {
+	    if (junk.charAt(j) == password.charAt(i))
+	      {
+		continue outer;
+	      }
+	  }
+
+	junk.append(password.charAt(i));
+      }
+
+    if (junk.length() < MINDIFF)
+      {
+	// "It does not contain enough DIFFERENT characters."
+	return ts.l("fascistLook.mindiff");
+      }
+
+    // test for step up / step down patternings
+
+    int complexity = 0;
+    for (int i = 0; i < password.length() - 1; i++)
+      {
+	if (password.charAt(i) == password.charAt(i+1) + 1 ||
+	    password.charAt(i) == password.charAt(i+1) - 1)
+	  {
+	    complexity++;
+	  }
+      }
+
+    if (complexity > MAXSTEP)
+      {
+	// "It is too simplistic / too predictable."
+	return ts.l("fascistLook.complexity");
+      }
+
+    // check for worrisome numbers and such
 
     if (Rules.pMatch("aadddddda", password))
       {
 	// smirk
-	return ("it looks like a National Insurance number.");
+	// "It looks like a National Insurance number."
+	return ts.l("fascistLook.insurance");
       }
 
-    for (int i=0;i<destructors.length; i++)
+    if (Rules.pMatch("ddddddddd", password) || Rules.pMatch("ddd#dd#dddd", password))
+      {
+	// "It looks like a Social Security number."
+	return ts.l("fascistLook.socialsecurity");
+      }
+
+    if (Rules.pMatch("ddddddd", password) || Rules.pMatch("ddd#dddd", password) ||
+	Rules.pMatch("dddddddddd", password) || Rules.pMatch("ddd#ddd#dddd", password) ||
+	Rules.pMatch("#ddd#ddd#dddd", password))
+      {
+	// "It looks like a phone number." (american, that is)
+	return ts.l("fascistLook.phone");
+      }
+
+    if (p.size() == 0)
+      {
+	// No dictionary found, abort
+
+	return null;
+      }
+
+    // check for dictionary matches
+
+    for (int i=0; i<destructors.length; i++)
       {
 	String mp;
 
@@ -493,7 +565,8 @@ public class CrackLib {
 
 	if (p.find(mp) != -1)
 	  {
-	    return ("it is based on the dictionary word :"+mp);
+	    // "It is based on the dictionary word {0}."
+	    return ts.l("fascistLook.dictionary", mp);
 	  }
       }
 
@@ -510,7 +583,8 @@ public class CrackLib {
 
 	if (p.find(mp) != -1)
 	  {
-	    return ("it is based on the dictionary word :"+mp);
+	    // "It is based on the reversed dictionary word {0}."
+	    return ts.l("fascistLook.revdictionary", mp);
 	  }
       }
 
@@ -519,8 +593,7 @@ public class CrackLib {
 
   public static final void usage()
   {
-    System.err.println("Packer -dump <dict> | -make <dict> <wordlist>"
-		       + " | -find <dict> <word>");
+    System.err.println("Packer -dump <dict> | -make <dict> <wordlist> | -find <dict> <word>");
   }
 
   public static void main(String[] args) throws Exception
@@ -532,13 +605,15 @@ public class CrackLib {
 	try
 	  {
 	    String msg = fascistLook(p,args[2]);
+
 	    if (msg != null)
 	      {
 		System.out.println(msg);
 	      }
 	    else
 	      {
-		System.out.println(args[2]+"looks good to me!");
+		// "{0} looks good to me!"
+		System.out.println(ts.l("main.ok", args[2]));
 	      }
 	  }
 	finally
@@ -549,6 +624,7 @@ public class CrackLib {
     else
       {
 	usage();
+
 	System.exit(1);
       }
   }

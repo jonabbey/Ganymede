@@ -4,13 +4,14 @@
    This is a reformatted copy of Justin Chapweske's Artistic Licensed
    Java port of Alec Muffett's cracklib, circa version 0.5.
 
-   All changes to this file relative to that located in the original
+   Most changes to this file relative to that located in the original
    archive from
 
    http://sourceforge.net/projects/solinger/
 
    are for the purpose of keeping with the code formatting rules we
-   use in the Ganymede project.
+   use in the Ganymede project, but some explanatory comments have
+   also been added.
 
 */
 
@@ -121,9 +122,9 @@ public class Rules {
   }
 
   /**
-   * this function takes two inputs, a class identifier and a character, and
-   * returns non-null if the given character is a member of the class, based
-   * upon restrictions set out below
+   * this function takes two inputs, a class identifier and a
+   * character, and returns true if the given character is a member of
+   * the class, based upon restrictions set out below
    */
 
   public static final boolean matchClass(char clazz, char c)
@@ -135,9 +136,17 @@ public class Rules {
 	/* ESCAPE */
 
       case '?':			/* ?? -> ? */
-	if (c == '?') {
-	  retval = true;
-	}
+	if (c == '?')
+	  {
+	    retval = true;
+	  }
+	break;
+
+      case '#':			// ARL:UT added tel rule to support social security / phone number checking
+	if (" -()".indexOf(c) != -1)
+	  {
+	    retval = true;
+	  }
 	break;
 
 	/* ILLOGICAL GROUPINGS (ie: not in ctype.h) */
