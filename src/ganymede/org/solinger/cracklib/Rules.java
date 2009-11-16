@@ -131,85 +131,91 @@ public class Rules {
   {
     boolean retval = false;
 
-    switch (clazz) {
-      /* ESCAPE */
+    switch (clazz)
+      {
+	/* ESCAPE */
 
-    case '?':			/* ?? -> ? */
-      if (c == '?') {
-	retval = true;
-      }
+      case '?':			/* ?? -> ? */
+	if (c == '?') {
+	  retval = true;
+	}
+	break;
+
+	/* ILLOGICAL GROUPINGS (ie: not in ctype.h) */
+
+      case 'V':
+      case 'v':			/* vowels */
+	if ("aeiou".indexOf(Character.toLowerCase(c)) != -1)
+	  {
+	    retval = true;
+	  }
       break;
 
-      /* ILLOGICAL GROUPINGS (ie: not in ctype.h) */
+      case 'C':
+      case 'c':			/* consonants */
+	if ("bcdfghjklmnpqrstvwxyz".indexOf(Character.toLowerCase(c)) != -1)
+	  {
+	    retval = true;
+	  }
+      break;
 
-    case 'V':
-    case 'v':			/* vowels */
-      if ("aeiou".indexOf(Character.toLowerCase(c)) != -1) {
-	retval = true;
+      case 'W':
+      case 'w':			/* whitespace */
+	retval = Character.isWhitespace(c);
+      break;
+
+      case 'P':
+      case 'p':			/* punctuation */
+	if (".`,:;'!?\"".indexOf(Character.toLowerCase(c)) != -1) 
+	  {
+	    retval = true;
+	  }
+      break;
+
+      case 'S':
+      case 's':			/* symbols */
+	if ("$%%^&*()-_+=|\\[]{}#@/~".indexOf(Character.toLowerCase(c)) != -1)
+	  {
+	    retval = true;
+	  }
+      break;
+
+      /* LOGICAL GROUPINGS */
+
+      case 'L':
+      case 'l':			/* lowercase */
+	retval = Character.isLowerCase(c);
+      break;
+
+      case 'U':
+      case 'u':			/* uppercase */
+	retval = Character.isUpperCase(c);
+      break;
+
+      case 'A':
+      case 'a':			/* alphabetic */
+	retval = Character.isLetter(c);
+      break;
+
+      case 'X':
+      case 'x':			/* alphanumeric */
+	retval = Character.isLetterOrDigit(c);
+      break;
+
+      case 'D':
+      case 'd':			/* digits */
+	retval = Character.isDigit(c);
+      break;
+
+      default:
+	throw new IllegalArgumentException("MatchClass: unknown class :" + clazz);
       }
-    break;
-    case 'C':
-    case 'c':			/* consonants */
-      if ("bcdfghjklmnpqrstvwxyz".
-	  indexOf(Character.toLowerCase(c)) != -1) {
-	retval = true;
+
+    if (Character.isUpperCase(clazz))
+      {
+	return retval;
       }
-    break;
-    case 'W':
-    case 'w':			/* whitespace */
-      retval = Character.isWhitespace(c);
-    break;
 
-    case 'P':
-    case 'p':			/* punctuation */
-      if (".`,:;'!?\"".indexOf(Character.toLowerCase(c)) != -1)  {
-	retval = true;
-      }
-    break;
-
-    case 'S':
-    case 's':			/* symbols */
-      if ("$%%^&*()-_+=|\\[]{}#@/~"
-	  .indexOf(Character.toLowerCase(c)) != -1) {
-	retval = true;
-      }
-    break;
-
-    /* LOGICAL GROUPINGS */
-
-    case 'L':
-    case 'l':			/* lowercase */
-      retval = Character.isLowerCase(c);
-    break;
-
-    case 'U':
-    case 'u':			/* uppercase */
-      retval = Character.isUpperCase(c);
-    break;
-
-    case 'A':
-    case 'a':			/* alphabetic */
-      retval = Character.isLetter(c);
-    break;
-
-    case 'X':
-    case 'x':			/* alphanumeric */
-      retval = Character.isLetterOrDigit(c);
-    break;
-
-    case 'D':
-    case 'd':			/* digits */
-      retval = Character.isDigit(c);
-    break;
-
-    default:
-      throw new IllegalArgumentException
-	("MatchClass: unknown class :"+clazz);
-    }
-
-    if (Character.isUpperCase(clazz)) {
-      return retval;
-    }
     return retval;
   }
 
@@ -267,7 +273,6 @@ public class Rules {
 
   public static final int char2Int(char c)
   {
-
     if (Character.isDigit(c))
       {
 	return (c - '0');
@@ -292,40 +297,46 @@ public class Rules {
 	  {
 	  case RULE_NOOP:
 	    break;
+
 	  case RULE_REVERSE:
 	    s = reverse(s);
 	    break;
+
 	  case RULE_UPPERCASE:
 	    s = s.toUpperCase();
 	    break;
+
 	  case RULE_LOWERCASE:
 	    s = s.toLowerCase();
 	    break;
+
 	  case RULE_CAPITALISE:
 	    s = capitalise(s);
 	    break;
+
 	  case RULE_PLURALISE:
 	    s = pluralise(s);
 	    break;
+
 	  case RULE_REFLECT:
 	    s = reverse(s);
 	    break;
+
 	  case RULE_DUPLICATE:
 	    s = s + s;
 	    break;
+
 	  case RULE_GT:
 	    if (i == control.length()-1)
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: '>' missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: '>' missing argument in :" + control);
 	      }
 	    else
 	      {
 		int limit = char2Int(control.charAt(++i));
 		if (limit < 0)
 		  {
-		    throw new IllegalArgumentException
-		      ("mangle: '>' weird argument in :"+control);
+		    throw new IllegalArgumentException("mangle: '>' weird argument in :" + control);
 		  }
 
 		if (s.length() <= limit)
@@ -338,50 +349,49 @@ public class Rules {
 	  case RULE_LT:
 	    if (i == control.length()-1)
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: '<' missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: '<' missing argument in :" + control);
 	      }
 	    else
 	      {
 		int limit = char2Int(control.charAt(++i));
 		if (limit < 0)
 		  {
-		    throw new IllegalArgumentException
-		      ("mangle: '<' weird argument in :"+control);
+		    throw new IllegalArgumentException("mangle: '<' weird argument in :" + control);
 		  }
+
 		if (s.length() >= limit)
 		  {
 		    return null;
 		  }
 	      }
 	    break;
+
 	  case RULE_PREPEND:
 	    if (i == control.length()-1)
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: prepend missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: prepend missing argument in :" + control);
 	      }
 	    else
 	      {
 		s = control.charAt(++i) + s;
 	      }
 	    break;
+
 	  case RULE_APPEND:
 	    if (i == control.length()-1)
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: prepend missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: prepend missing argument in :" + control);
 	      }
 	    else
 	      {
 		s = s + control.charAt(++i);
 	      }
 	    break;
+
 	  case RULE_EXTRACT:
 	    if (i >= control.length()-2)
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: extract missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: extract missing argument in :" + control);
 	      }
 	    else
 	      {
@@ -389,59 +399,52 @@ public class Rules {
 		int length = char2Int(control.charAt(++i));
 		if (start < 0 || length < 0)
 		  {
-		    throw new IllegalArgumentException
-		      ("mangle: extract: weird argument in :"+control);
+		    throw new IllegalArgumentException("mangle: extract: weird argument in :" + control);
 		  }
 		s = s.substring(start,start+length);
 	      }
 	    break;
+
 	  case RULE_OVERSTRIKE:
 	    if (i >= control.length()-2)
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: overstrike missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: overstrike missing argument in :" + control);
 	      }
 	    else
 	      {
 		int pos = char2Int(control.charAt(++i));
 		if (i < 0)
 		  {
-		    throw new IllegalArgumentException
-		      ("mangle: overstrike weird argument in :"+control);
+		    throw new IllegalArgumentException("mangle: overstrike weird argument in :" + control);
 		  }
 		StringBuffer sb = new StringBuffer(s);
 		sb.setCharAt(pos,control.charAt(++i));
 		s = sb.toString();
 	      }
 	    break;
+
 	  case RULE_INSERT:
 	    if (i >= control.length()-2)
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: insert missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: insert missing argument in :" + control);
 	      }
 	    else
 	      {
 		int pos = char2Int(control.charAt(++i));
 		if (i < 0)
 		  {
-		    throw new IllegalArgumentException
-		      ("mangle: insert weird argument in :"+control);
+		    throw new IllegalArgumentException("mangle: insert weird argument in :" + control);
 		  }
-		s = new StringBuffer(s)
-		  .insert(pos,control.charAt(++i)).toString();
+		s = new StringBuffer(s).insert(pos,control.charAt(++i)).toString();
 	      }
 	    break;
 
 	    // THE FOLLOWING RULES REQUIRE CLASS MATCHING
 	  case RULE_PURGE:	/* @x or @?c */
 	    if (i == control.length() ||
-		(control.charAt(i+1) == RULE_CLASS &&
-		 i == control.length()-2))
+		(control.charAt(i+1) == RULE_CLASS && i == control.length()-2))
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: delete missing argument in :"+control);
-
+		throw new IllegalArgumentException("mangle: delete missing argument in :" + control);
 	      }
 	    else if (control.charAt(i+1) != RULE_CLASS)
 	      {
@@ -453,13 +456,12 @@ public class Rules {
 		i += 2;
 	      }
 	    break;
+
 	  case RULE_SUBSTITUTE:	/* sxy || s?cy */
 	    if (i >= control.length()-2 ||
-		(control.charAt(i+1) == RULE_CLASS &&
-		 i == control.length()-3))
+		(control.charAt(i+1) == RULE_CLASS && i == control.length()-3))
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: subst missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: subst missing argument in :" + control);
 	      }
 	    else if (control.charAt(i+1) != RULE_CLASS)
 	      {
@@ -472,13 +474,12 @@ public class Rules {
 		i += 3;
 	      }
 	    break;
+
 	  case RULE_MATCH:	/* /x || /?c */
 	    if (i == control.length() ||
-		(control.charAt(i+1) == RULE_CLASS &&
-		 i == control.length()-2))
+		(control.charAt(i+1) == RULE_CLASS && i == control.length()-2))
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: / missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: / missing argument in :" + control);
 	      }
 	    else if (control.charAt(i+1) != RULE_CLASS)
 	      {
@@ -496,13 +497,12 @@ public class Rules {
 		i += 2;
 	      }
 	    break;
+
 	  case RULE_NOT:		/* !x || !?c */
 	    if (i == control.length() ||
-		(control.charAt(i+1) == RULE_CLASS &&
-		 i == control.length()-2))
+		(control.charAt(i+1) == RULE_CLASS && i == control.length()-2))
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: ! missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: ! missing argument in :" + control);
 	      }
 	    else if (control.charAt(i+1) != RULE_CLASS)
 	      {
@@ -517,9 +517,11 @@ public class Rules {
 		  {
 		    return null;
 		  }
+
 		i += 2;
 	      }
 	    break;
+
 	    /*
 	     * alternative use for a boomerang, number 1: a standard throwing
 	     * boomerang is an ideal thing to use to tuck the sheets under
@@ -531,24 +533,23 @@ public class Rules {
 
 	  case RULE_EQUALS:	/* =nx || =n?c */
 	    if (i >= control.length()-2 ||
-		(control.charAt(i+1) == RULE_CLASS &&
-		 i == control.length()-3))
+		(control.charAt(i+1) == RULE_CLASS && i == control.length()-3))
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: '=' missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: '=' missing argument in :" + control);
 	      }
 	    else
 	      {
 		int pos = char2Int(control.charAt(i+1));
+
 		if (pos < 0)
 		  {
-		    throw new IllegalArgumentException
-		      ("mangle: '='weird argument in :"+control);
+		    throw new IllegalArgumentException("mangle: '='weird argument in :" + control);
 		  }
 
 		if (control.charAt(i+2) != RULE_CLASS)
 		  {
 		    i += 2;
+
 		    if (s.charAt(pos) != control.charAt(i))
 		      {
 			return null;
@@ -557,6 +558,7 @@ public class Rules {
 		else
 		  {
 		    i += 3;
+
 		    if (!matchClass(s.charAt(i), s.charAt(pos)))
 		      {
 			return null;
@@ -575,17 +577,16 @@ public class Rules {
 
 	  case RULE_MFIRST:
 	    if (i == control.length() ||
-		(control.charAt(i+1) == RULE_CLASS &&
-		 i == control.length()-2))
+		(control.charAt(i+1) == RULE_CLASS && i == control.length()-2))
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: '(' missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: '(' missing argument in :" + control);
 	      }
 	    else
 	      {
 		if (control.charAt(i+1) != RULE_CLASS)
 		  {
 		    i++;
+
 		    if (s.charAt(0) != control.charAt(i))
 		      {
 			return null;
@@ -594,19 +595,19 @@ public class Rules {
 		else
 		  {
 		    i += 2;
+
 		    if (!matchClass(control.charAt(i),s.charAt(0)))
 		      {
 			return null;
 		      }
 		  }
 	      }
+
 	  case RULE_MLAST:
 	    if (i == control.length() ||
-		(control.charAt(i+1) == RULE_CLASS &&
-		 i == control.length()-2))
+		(control.charAt(i+1) == RULE_CLASS && i == control.length()-2))
 	      {
-		throw new IllegalArgumentException
-		  ("mangle: ')' missing argument in :"+control);
+		throw new IllegalArgumentException("mangle: ')' missing argument in :" + control);
 	      }
 	    else
 	      {
@@ -630,8 +631,7 @@ public class Rules {
 	      }
 
 	  default:
-	    throw new IllegalArgumentException
-	      ("mangle: unknown command in :"+control);
+	    throw new IllegalArgumentException("mangle: unknown command in :" + control);
 	  }
       }
 
