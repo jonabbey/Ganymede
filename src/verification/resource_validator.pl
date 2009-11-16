@@ -39,11 +39,11 @@ use Config::Properties;
 $| = 1;				# don't buffer stdout, to assist debug
 
 if (defined $ARGV[0]) {
-  $scan_root = "$ARGV[0]/ganymede/arlut/csd/";
+  @scan_roots = ("$ARGV[0]/ganymede/arlut/csd/", "$ARGV[0]/ganymede/org/solinger");
   $properties_root = "$ARGV[0]/resources";
 } else {
-  $scan_root = "/home/broccol/ganymede/ganymede/src/ganymede/arlut/csd";
-  $properties_root = "/home/broccol/ganymede/ganymede/src/resources";
+  @scan_roots = ("/home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/", "/home/broccol/ganymede/src/trunk/src/ganymede/org/solinger/");
+  $properties_root = "/home/broccol/ganymede/src/trunk/src/resources";
 }
 
 $showall_props = 0;
@@ -510,7 +510,9 @@ sub examine_java {
 
 $errors_found = 0;
 
-find_javas($scan_root);
+for $scan_root (@scan_roots) {
+    find_javas($scan_root);
+}
 
 foreach $file (@javafiles) {
   if (examine_java($file)) {
