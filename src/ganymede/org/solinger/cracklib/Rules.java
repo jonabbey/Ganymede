@@ -10,8 +10,7 @@
    http://sourceforge.net/projects/solinger/
 
    are for the purpose of keeping with the code formatting rules we
-   use in the Ganymede project, and to implement Ganymede-compatible
-   localization support for the message strings.
+   use in the Ganymede project.
 
 */
 
