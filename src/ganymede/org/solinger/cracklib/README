@@ -1,0 +1,77 @@
+Java Cracklib v0.5 by Justin F. Chapweske
+
+This is a direct port of the wonderful C cracklib written by Alec Muffett.
+He did all the thinking, I just ported it.
+
+This version contains the following pieces:
+
+Packer   : Compressed dictionary routines
+Rules    : Cracklib regexp type rules routines
+CrackLib : The fascist password checker
+
+Packer can be used to create and read cracklib compressed dictionaries.  Most 
+of this class' utility is derived from its Java interfaces, but there are a 
+couple of useful things you can do from the command line:
+
+1) Dump the contents of a dictionary file to stdout
+
+java org.solinger.cracklib.Packer -dump dict_name
+
+2) Create a new dictionary from a word list.
+
+java org.solinger.cracklib.Packer -make dict_name word_file
+
+3) Find a word in a dictionary
+
+java org.solinger.cracklib.Packer -find dict_name word
+
+On most unix machines that come with cracklib, you can find some dictionary
+files in /usr/lib/cracklib_dict.*.  But if you do not have these files you
+can create your own from the word list included in the file "words" in this 
+distribution.
+
+The packer dictionary format contains three files, an index file, a data file,
+and an index index file :P.  The format of the data file is basically a tree 
+of words in alphabetical order.  So if the first three words were "aarhus", 
+"aaron", and "aarot" it would store the words sort of as follows:
+
+aarhus\03on\04t
+
+and so on so that the tree is compressed due to the fact that similar prefixes
+are simply denoted by an index number.  The other two index file are simply
+there to speed up binary searches through the compressed data file for quick
+word retreival.
+
+Rules is basically useless from the command line but includes a number of 
+routines for string mangling and manipulation.  The meat of this class is a 
+remedial regular expressions parser that allows you to do various basic 
+pattern matching, reversal and substituion operations on a string.  The 
+methods within rules would probably be sufficient to write a simple "speak" 
+engine such as a "l33t speak" or "swedish chef speak" translator.  Cracklib 
+uses the rules methods to try to reverse engineer a potential password back 
+into a dictionary word using various manglings and translations, and it will
+be this that I use as a foundation for my intellegent distributed password 
+cracker for generating my dictionaries.  Basically by applying a set of rules
+to a dictionary you are effectively getting a dictionary that is as large as
+the number of rules times the number of words in the dictionary (assuming no
+duplication).
+
+Cracklib is the whole point of this thing I guess and it can be used from the 
+command line to check potential passwords as so:
+
+java org.solinger.cracklib.CrackLib -check dict_name password
+
+Basically cracklib contains a number of rules to use to try to massage the 
+password into a dictionary word.  So if you tried the word "bangladesh" which 
+is in the default dictionary it will fail.  Likewise if you attempt trivial
+modifications of this word, like reversing it to "hsedalgnab", it will also
+fail.  Just for fun you can even see that the libraries rules tries l33t speak
+interpolation, so if you type "b4ngl4d3sh" it will fail, also appending and 
+prepending different numbers will also fail.
+
+TODO:
+
+Perform a study of the various rules and formulate a way to rate rules.
+Document the basics of the rules regular expressions.
+Incorporate statistical rules generation features (character freqs).
+Write the distributed password cracker.
