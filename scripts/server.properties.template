@@ -53,6 +53,31 @@ ganymede.maillog=
 ganymede.journal=/home/broccol/gash2/code/arlut/csd/ganymede/db/journal
 
 
+# ganymede.usecracklib
+#
+# If true, the Ganymede server will make use of an internal Java port
+# of cracklib to provide quality checks of passwords entered into
+# password fields that are marked to be quality checked in the schema.
+#
+# In order to use cracklib, the ganymede.cracklibDirectory property will
+# also need to be set to an appropriate directory to contain the
+# cracklib_dict.pwd, cracklib_dict.pwi, and cracklib_dict.hwm files.
+
+ganymede.usecracklib=true
+
+
+# ganymede.cracklibDirectory
+#
+# The location of a directory to contain the cracklib data, index, and hash files.
+#
+# If this directory exists and is writeable but does not contain the
+# cracklib_dict.pwd, cracklib_dict.pwi, and cracklib_dict.hwm files,
+# the Ganymede server will initialize new cracklib_dict files from an
+# internal 45,000 long word list.
+
+ganymede.cracklibDirectory=/home/broccol/gash2/code/arlut/csd/ganymede/db/cracklib
+
+
 # ganymede.subjectprefix
 #
 # A single-quote delimited string that is prepended to the subject line

@@ -83,7 +83,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
+import org.solinger.cracklib.Packer;
+
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.ParseArgs;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.BaseListTransport;
@@ -235,6 +238,12 @@ public class Ganymede {
   public static JythonServer jythonServer;
 
   /**
+   * Random access password quality check dictionary.
+   */
+
+  public static Packer crackLibPacker;
+
+  /**
    *
    * The Ganymede object store.
    * 
@@ -314,6 +323,8 @@ public class Ganymede {
   public static int    publishedObjectPortProperty = 55555;
   public static String logHelperProperty = null;
   public static boolean softtimeout = false;
+  public static boolean cracklibEnabled = false;
+  public static String cracklibDirectoryProperty = null;
   public static int timeoutIdleNoObjs = 15;
   public static int timeoutIdleWithObjs = 20;
 
@@ -489,6 +500,32 @@ public class Ganymede {
     else
       {
 	System.out.println(ts.l("main.ok_propload", propFilename));
+      }
+
+    // If we are going to use CrackLib, make sure our password
+    // dictionary exists, creating it if necessary.
+
+    if (cracklibEnabled)
+      {
+	// "CrackLib enabled for password quality checking."
+	System.err.println(ts.l("main.cracklibEnabled"));
+
+	try
+	  {
+	    initializeCrackLib();
+	  }
+	catch (IOException ex)
+	  {
+	    ex.printStackTrace();
+
+	    // "CrackLib disabled, no internal password quality checking available."
+	    System.err.println(ts.l("main.cracklibDisabled"));
+	  }
+      }
+    else
+      {
+	// "CrackLib disabled, no internal password quality checking available."
+	System.err.println(ts.l("main.cracklibDisabled"));
       }
     
     // Create our GanymedeRMIManager to handle RMI exports.  We need
@@ -1532,6 +1569,44 @@ public class Ganymede {
   }
 
   /**
+   * Make sure that we have our random access crack lib dictionary
+   * available to us.
+   */
+
+  static void initializeCrackLib() throws IOException
+  {
+    File crackData = new File(cracklibDirectoryProperty, "cracklib_dict.pwd");
+    File crackIndex = new File(cracklibDirectoryProperty, "cracklib_dict.pwi");
+    File crackHash = new File(cracklibDirectoryProperty, "cracklib_dict.hwm");
+
+    String pathPrefix = cracklibDirectoryProperty + File.separator + "cracklib_dict";
+
+    if (crackData.isFile() && crackData.canRead() &&
+	crackIndex.isFile() && crackIndex.canRead() &&
+	crackHash.isFile() && crackHash.canRead())
+      {
+	// "Loading crack lib dictionary from {0}."
+	System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));
+
+	crackLibPacker = new Packer(pathPrefix, "r");
+      }
+    else
+      {
+	// "Creating random access crack lib dictionary {0}."
+	System.err.println(ts.l("initializeCrackLib.creating_dictionary", pathPrefix));
+
+	Packer.make(PackageResources.getPackageResourceAsStream("org.solinger.cracklib.words", Ganymede.class),
+		    pathPrefix,
+		    false);
+
+	// "Loading crack lib dictionary from {0}."
+	System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));
+
+	crackLibPacker = new Packer(pathPrefix, "r");
+      }
+  }
+
+  /**
    * </P>This method is called by the GanymedeBuilderTask base class to
    * record that the server is processing a build.</P>
    */
@@ -1687,6 +1762,36 @@ public class Ganymede {
     schemaDirectoryProperty = System.getProperty("ganymede.schemaDirectory");
     logHelperProperty = System.getProperty("ganymede.loghelper");
     bugReportAddressProperty = System.getProperty("ganymede.bugsaddress");
+
+    String cracklibEnabledString = System.getProperty("ganymede.usecracklib");
+
+    if (cracklibEnabledString != null && cracklibEnabledString.equalsIgnoreCase("true"))
+      {
+	cracklibDirectoryProperty = System.getProperty("ganymede.cracklibDirectory");
+
+	if (cracklibDirectoryProperty == null)
+	  {
+	    // "No ganymede.cracklibDirectory property specified, can''t enable cracklib processing."
+	    System.err.println(ts.l("loadProperties.no_cracklib_dir"));
+
+	    success = false;
+	  }
+	else
+	  {
+	    File cracklibDir = new File(cracklibDirectoryProperty);
+
+	    if (!cracklibDir.isDirectory() || !cracklibDir.canWrite() || !cracklibDir.canRead())
+	      {
+		// "No usable directory matching the ganymede.cracklibDirectory property ({0}) exists, can''t enable cracklib processing."
+		System.err.println(ts.l("loadProperties.bad_cracklib_dir", cracklibDirectoryProperty));
+		success = false;
+	      }
+	    else
+	      {
+		cracklibEnabled = true;
+	      }
+	  }
+      }
 
     String softtimeoutString = System.getProperty("ganymede.softtimeout");
 
