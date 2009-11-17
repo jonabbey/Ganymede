@@ -247,6 +247,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   // password attributes
 
+  private boolean cracklib_check = false;
   private boolean crypted = true;	// UNIX encryption is the default.
   private boolean md5crypted = false;	// OpenBSD style md5crypt() is not
   private boolean apachemd5crypted = false;	// Apache style md5crypt() is not
@@ -396,6 +397,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     allowedTarget = original.allowedTarget;
     targetField = original.targetField;
 
+    cracklib_check = original.cracklib_check;
     crypted = original.crypted;
     md5crypted = original.md5crypted;
     apachemd5crypted = original.apachemd5crypted;
@@ -602,6 +604,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    out.writeUTF(badChars);
 	  }
 
+	// at 2.17 we introduce cracklib support for password fields
+
+	out.writeBoolean(cracklib_check);
 	out.writeBoolean(crypted);
 	out.writeBoolean(md5crypted);
 	out.writeBoolean(apachemd5crypted);
@@ -861,6 +866,17 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	if (badChars.equals(""))
 	  {
 	    badChars = null;
+	  }
+
+	// at 2.17 we introduce cracklib_check
+
+	if (base.getStore().isAtLeast(2,17))
+	  {
+	    cracklib_check = in.readBoolean();
+	  }
+	else
+	  {
+	    cracklib_check = false;
 	  }
 
 	crypted = in.readBoolean();
@@ -1214,6 +1230,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    xmlOut.startElementIndent("badchars");
 	    xmlOut.attribute("val", badChars);
 	    xmlOut.endElement("badchars");
+	  }
+
+	if (cracklib_check)
+	  {
+	    xmlOut.startElementIndent("cracklib_check");
+	    xmlOut.endElement("cracklib_check");
 	  }
 
 	if (crypted)
@@ -1912,6 +1934,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     short _maxlength = java.lang.Short.MAX_VALUE;
     String _okChars = null;
     String _badChars = null;
+    boolean _cracklib_check = false;
     boolean _crypted = false;
     boolean _plaintext = false;
     boolean _md5crypted = false;
@@ -1974,6 +1997,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    else if (child.matches("badchars"))
 	      {
 		_badChars = child.getAttrStr("val");
+	      }
+	    else if (child.matches("cracklib_check"))
+	      {
+		_cracklib_check = true;
 	      }
 	    else if (child.matches("crypted"))
 	      {
@@ -2089,6 +2116,17 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// "fielddef could not set bad chars: {0}\n{1}\n{2}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
 					  ts.l("doPasswordXML.bad_bad_chars", _badChars,
+					       root.getTreeString(), retVal.getDialogText()));
+      }
+
+    retVal = setCracklibChecked(_cracklib_check);
+
+    if (!ReturnVal.didSucceed(retVal))
+      {
+	// "XML"
+	// "fielddef could not set cracklib_check flag: {0}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doPasswordXML.bad_cracklib", Boolean.valueOf(_cracklib_check),
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -4720,6 +4758,41 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
 	return null;
       }
+  }
+
+  /**
+   * <p>Returns true if this field is a password field that has been
+   * configured to have values submitted be checked against
+   * cracklib.</p>
+   */
+
+  public boolean isCracklibChecked()
+  {
+    return cracklib_check;
+  }
+
+  /**
+   * <p>This method is used to specify that this password field
+   * should check passwords entered with org.solinger.cracklib.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public ReturnVal setCracklibChecked(boolean b)
+  {    
+    securityCheck();
+
+    if (!isPassword())
+      {
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+      }
+
+    cracklib_check = b;
+
+    return null;
   }
 
   /**

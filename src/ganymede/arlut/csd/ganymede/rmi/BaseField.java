@@ -6,10 +6,6 @@
    from a field.
    
    Created: 17 April 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -17,7 +13,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -616,6 +612,25 @@ public interface BaseField extends Remote {
   public ReturnVal setTargetField(String fieldName) throws RemoteException;
 
   // password
+
+  /**
+   * <p>Returns true if this field is a password field that has been
+   * configured to have values submitted be checked against
+   * cracklib.</p>
+   */
+
+  public boolean isCracklibChecked() throws RemoteException;
+
+  /**
+   * <p>This method is used to specify that this password field
+   * should check passwords entered with org.solinger.cracklib.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   */
+
+  public ReturnVal setCracklibChecked(boolean b) throws RemoteException;
+
 
   /**
    * <p>This method returns true if this is a password field that

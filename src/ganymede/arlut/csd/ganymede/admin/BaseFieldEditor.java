@@ -172,6 +172,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     vectorCF,			// invid, string, ip
     labeledCF,			// boolean
     editInPlaceCF,		// invid
+    cracklibCF,			// password
     cryptedCF,			// password
     md5cryptedCF,		// password
     apachemd5cryptedCF,		// password
@@ -265,6 +266,9 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     typeC.addItem(permissionToken);
     typeC.addItemListener(this);
 
+    cracklibCF = new JcheckboxField(null, false, true);
+    cracklibCF.setCallback(this);
+
     cryptedCF = new JcheckboxField(null, false, true);
     cryptedCF.setCallback(this);
 
@@ -347,6 +351,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel.addFillRow(ts.l("setupEditPanel.vectorRow"), vectorCF);	// "Vector:"
     editPanel.addFillRow(ts.l("setupEditPanel.arraySizeRow"), maxArrayN); // "Max Array Size:"
     editPanel.addFillRow(ts.l("setupEditPanel.fieldTypeRow"), typeC); // "Field Type:"
+    editPanel.addFillRow(ts.l("setupEditPanel.cracklibRow"), cracklibCF); // "Cracklib Checked:"
     editPanel.addFillRow(ts.l("setupEditPanel.unixCryptRow"), cryptedCF); // "UNIX Crypted:"
     editPanel.addFillRow(ts.l("setupEditPanel.freeBSDMD5CryptRow"), md5cryptedCF); // "FreeBSD-style MD5 Crypted:"
     editPanel.addFillRow(ts.l("setupEditPanel.apacheMD5CryptRow"), apachemd5cryptedCF); // "Apache-style MD5 Crypted:"
@@ -425,6 +430,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     if (passwordShowing)
       {
+	editPanel.setRowVisible(cracklibCF, true);
 	editPanel.setRowVisible(cryptedCF, true);
 	editPanel.setRowVisible(md5cryptedCF, true);
 	editPanel.setRowVisible(apachemd5cryptedCF, true);
@@ -437,6 +443,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
       }
     else
       {
+	editPanel.setRowVisible(cracklibCF, false);
 	editPanel.setRowVisible(cryptedCF, false);
 	editPanel.setRowVisible(md5cryptedCF, false);
 	editPanel.setRowVisible(apachemd5cryptedCF, false);
@@ -1072,6 +1079,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    typeC.getModel().setSelectedItem(passwordToken);
 	    passwordShowing = true;
 
+	    cracklibCF.setValue(fieldDef.isCracklibChecked());
 	    cryptedCF.setValue(fieldDef.isCrypted());
 	    md5cryptedCF.setValue(fieldDef.isMD5Crypted());
 	    apachemd5cryptedCF.setValue(fieldDef.isApacheMD5Crypted());
@@ -1410,6 +1418,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	idN.setEditable(false);
 
 	multiLineCF.setEnabled(true);
+	cracklibCF.setEnabled(true);
 	cryptedCF.setEnabled(true);
 	md5cryptedCF.setEnabled(true);
 	apachemd5cryptedCF.setEnabled(true);
@@ -1694,6 +1703,18 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    handleReturnVal(fieldDef.setEditInPlace(editInPlaceCF.isSelected()));
 
 	    refreshFieldEdit(true); // we need to refresh on success or failure here
+	  }
+	else if (comp == cracklibCF)
+	  {
+	    if (debug)
+	      {
+		System.out.println("cryptedCF");
+	      }
+
+	    if (handleReturnVal(fieldDef.setCracklibChecked(cracklibCF.isSelected())))
+	      {
+		refreshFieldEdit(false);
+	      }
 	  }
 	else if (comp == cryptedCF)
 	  {
@@ -2289,6 +2310,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     this.vectorCF = null;
     this.labeledCF = null;
     this.editInPlaceCF = null;
+    this.cracklibCF = null;
     this.cryptedCF = null;
     this.md5cryptedCF = null;
     this.apachemd5cryptedCF = null;
