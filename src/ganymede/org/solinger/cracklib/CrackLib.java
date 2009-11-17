@@ -610,18 +610,26 @@ public class CrackLib {
 
   public static final void usage()
   {
-    System.err.println("Packer -dump <dict> | -make <dict> <wordlist> | -find <dict> <word>");
+    System.err.println("CrackLib -check <password> | -check <password> <username> | -dump <dict> | -make <dict> <wordlist> | -find <dict> <word>");
   }
 
   public static void main(String[] args) throws Exception
   {
-    if (args.length == 3 && args[0].equals("-check"))
+    if ((args.length == 3 || args.length == 4) && args[0].equals("-check"))
       {
-	Packer p = new Packer(args[1],"r");
+	Packer p = new Packer(args[1], "r");
 
 	try
 	  {
-	    String msg = fascistLook(p,args[2], null);
+	    String msg = null;
+	    if (args.length == 4)
+	      {
+		msg = fascistLook(p, args[2], args[3]);
+	      }
+	    else 
+	      {
+		msg = fascistLook(p, args[2], null);
+	      }
 
 	    if (msg != null)
 	      {
