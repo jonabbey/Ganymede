@@ -197,6 +197,7 @@ $installdir = $vars{"SERVERINSTALL"};
 &makedir("$installdir/bin", 0750); print ".";
 &makedir("$installdir/db", 0700); print ".";
 &makedir("$installdir/db/text", 0700); print ".";
+&makedir("$installdir/db/cracklib", 0700); print ".";
 &makedir("$installdir/backups", 0700); print ".";
 &makedir("$installdir/jars", 0750); print ".";
 &makedir("$installdir/html", 0750); print ".";
@@ -236,6 +237,7 @@ copy("scripts/signature", "$installdir/db/signature"); print ".";
 		"ganymede.htmldump" => "$installdir/html/schemadump.html",
 		"ganymede.signaturefile" => "$installdir/db/signature",
 		"ganymede.messageDirectory" => "$installdir/db/text",
+		"ganymede.cracklibDirectory" => "$installdir/db/cracklib",
 		"ganymede.mailhost" => $vars{"MAILHOST"},
 		"ganymede.returnaddr" => $vars{"RETURNADDR"},
 		"ganymede.serverhost" => $vars{"SYSTEMNAME"},
