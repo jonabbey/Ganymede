@@ -258,6 +258,7 @@ refresh the jar files.
 
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/server/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/common/**"/>
+      <fileset dir="${resources.dir}" includes="org/solinger/**"/>
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/GanymedeSSLServerKeys"/>
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
