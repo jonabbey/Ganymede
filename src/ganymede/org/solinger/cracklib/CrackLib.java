@@ -610,7 +610,7 @@ public class CrackLib {
 
   public static final void usage()
   {
-    System.err.println("CrackLib -check <password> | CrackLib -check <password> <username>");
+    System.err.println("CrackLib -check <password> | -check <password> <username> | -dump <dict> | -make <dict> <wordlist> | -find <dict> <word>");
   }
 
   public static void main(String[] args) throws Exception
