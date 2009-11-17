@@ -360,8 +360,7 @@ public class Packer {
 
   public static final void usage()
   {
-    System.err.println("Packer -dump <dict> | -make <dict> <wordlist>"
-		       + " | -find <dict> <word>");
+    System.err.println("Packer -dump <dict> | -make <dict> <wordlist> | -find <dict> <word>");
   }
 
   public static final void main(String[] args) throws Exception

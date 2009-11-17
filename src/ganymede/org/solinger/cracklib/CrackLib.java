@@ -638,6 +638,10 @@ public class CrackLib {
 	    p.close();
 	  }
       }
+    else if (args.length == 2 && (args[0].equals("-dump") || args[0].equals("-make") || args[0].equals("-find")))
+      {
+	Packer.main(args);
+      }
     else
       {
 	usage();
