@@ -309,7 +309,7 @@ public class Packer {
     return (data[num % NUMWORDS]);
   }
 
-  public int find(String s) throws IOException
+  public synchronized int find(String s) throws IOException
   {
     if (!mode.equals("r"))
       {
@@ -358,6 +358,45 @@ public class Packer {
     return header.getNumWords();
   }
 
+  // ---
+
+  /**
+   * Reads a word list from in and writes a set of dictionary files
+   * out which are prefixed with outFilename.
+   *
+   * @param in The word list to read in.
+   * @param outFilename The path and filename prefix for the new
+   * on-disk dictionary.
+   * @param log If true, we'll write to stdout as we create load the
+   * words from in.
+   */
+
+  public static final void make(InputStream in, String outFilename, boolean log) throws IOException
+  {
+    Packer p = new Packer(outFilename, "rw");
+
+    try
+      {
+	BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+	String s = null;
+
+	while ((s = br.readLine()) != null)
+	  {
+	    if (log)
+	      {
+		System.out.println("Putting: " + s);
+	      }
+
+	    p.put(s);
+	  }
+      }
+    finally
+      {
+	p.close();
+      }
+  }
+
   public static final void usage()
   {
     System.err.println("Packer -dump <dict> | -make <dict> <wordlist> | -find <dict> <word>");
@@ -383,22 +422,15 @@ public class Packer {
       }
     else if (args.length == 3 && args[0].equals("-make"))
       {
-	Packer p = new Packer(args[1],"rw");
-
 	try
 	  {
-	    BufferedReader br = new BufferedReader(new InputStreamReader
-						   (new FileInputStream(args[2])));
-	    String s = null;
-	    while ((s = br.readLine()) != null)
-	      {
-		System.out.println("Putting : "+s);
-		p.put(s);
-	      }
+	    make(new FileInputStream(args[2]), args[1], true);
 	  }
-	finally
+	catch (IOException ex)
 	  {
-	    p.close();
+	    ex.printStackTrace();
+
+	    System.exit(1);
 	  }
       }
     else if (args.length == 3 && args[0].equals("-find"))
@@ -411,11 +443,11 @@ public class Packer {
 
 	    if (i != -1)
 	      {
-		System.out.println("Found "+p.get(i)+" at "+i);
+		System.out.println("Found " + p.get(i) + " at " + i);
 	      }
 	    else
 	      {
-		System.out.println(args[2]+" not found.");
+		System.out.println(args[2] + " not found.");
 	      }
 	  }
 	finally
