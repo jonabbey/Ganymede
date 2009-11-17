@@ -460,9 +460,14 @@ public class CrackLib {
   /**
    * Returns a message string if the password is considered to be
    * unacceptable, or null if the submitted password is okay.
+   *
+   * @param p A reference to a org.solinger.cracklib.Packer object associated
+   * with a dictionary list
+   * @param password The prospective password to be examined.  Must not be null.
+   * @param username The username that we're approving the password for.  May be null.
    */
 
-  public static final String fascistLook(Packer p, String password) throws IOException
+  public static final String fascistLook(Packer p, String password, String username) throws IOException
   {
     if (password.length() < 4)
       {
@@ -545,14 +550,14 @@ public class CrackLib {
 	return ts.l("fascistLook.phone");
       }
 
-    if (p.size() == 0)
+    // check for dictionary/username matches
+
+    if (p.size() == 0 && username == null)
       {
 	// No dictionary found, abort
 
 	return null;
       }
-
-    // check for dictionary matches
 
     for (int i=0; i<destructors.length; i++)
       {
@@ -561,6 +566,12 @@ public class CrackLib {
 	if ((mp = Rules.mangle(password, destructors[i])) == null)
 	  {
 	    continue;
+	  }
+
+	if (mp.equals(username))
+	  {
+	    // "It is based on your username."
+	    return ts.l("fascistLook.username");
 	  }
 
 	if (p.find(mp) != -1)
@@ -579,6 +590,12 @@ public class CrackLib {
 	if ((mp = Rules.mangle(password, destructors[i])) == null)
 	  {
 	    continue;
+	  }
+
+	if (mp.equals(username))
+	  {
+	    // "It is based on your username."
+	    return ts.l("fascistLook.username");
 	  }
 
 	if (p.find(mp) != -1)
@@ -604,7 +621,7 @@ public class CrackLib {
 
 	try
 	  {
-	    String msg = fascistLook(p,args[2]);
+	    String msg = fascistLook(p,args[2], null);
 
 	    if (msg != null)
 	      {
