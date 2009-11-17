@@ -1595,7 +1595,7 @@ public class Ganymede {
 	// "Creating random access crack lib dictionary {0}."
 	System.err.println(ts.l("initializeCrackLib.creating_dictionary", pathPrefix));
 
-	Packer.make(PackageResources.getPackageResourceAsStream("org.solinger.cracklib.words", Ganymede.class),
+	Packer.make(PackageResources.getPackageResourceAsStream("words", org.solinger.cracklib.CrackLib.class),
 		    pathPrefix,
 		    false);
 
