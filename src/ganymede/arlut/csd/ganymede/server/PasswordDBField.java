@@ -54,6 +54,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import org.solinger.cracklib.CrackLib;
+
 import arlut.csd.Util.TranslationService;
 
 import arlut.csd.crypto.jcrypt;
@@ -2579,6 +2581,24 @@ public class PasswordDBField extends DBField implements pass_field {
 						  ts.l("verifyNewValue.bad_char",
 						       new Character(s.charAt(i))));
 	      }
+	  }
+      }
+
+    if (getFieldDef().isCracklibChecked() && Ganymede.crackLibPacker != null)
+      {
+	try
+	  {
+	    String cracklibCheck = CrackLib.fascistLook(Ganymede.crackLibPacker, s, owner.getLabel());
+
+	    if (cracklibCheck != null)
+	      {
+		// "Password Field Error"
+		return Ganymede.createErrorDialog(ts.l("global.error_subj"), cracklibCheck);
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	    ex.printStackTrace();
 	  }
       }
 
