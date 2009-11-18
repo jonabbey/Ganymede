@@ -4058,6 +4058,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	dhcpFileWriter.println("######################################################################");
 	dhcpFileWriter.println("");
 	dhcpFileWriter.println("authoritative;");
+	dhcpFileWriter.println("ddns-update-style none;");
 	dhcpFileWriter.println("");
 	
 	writeDHCPCustomOptions(dhcpFileWriter);
