@@ -4377,8 +4377,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     for (int i = 0; i < 2; i++)
       {
 	buffer.setLength(0);
+
 	buffer.append("host ");
-	buffer.append(sysname);
+
+	if (i == 0)
+	  {
+	    buffer.append(sysname);
+	  }
+	else
+	  {
+	    buffer.append(sysname + "_roaming");
+	  }
+
 	buffer.append("\n{\n");
 
 	buffer.append("\thardware ethernet\t\t");
