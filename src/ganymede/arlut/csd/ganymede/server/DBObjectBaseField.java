@@ -247,7 +247,41 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   // password attributes
 
+  /**
+   * If true, we'll check passwords entered into this field against cracklib.
+   */
+
   private boolean cracklib_check = false;
+
+  /**
+   * If true, supergash will be allowed to get away with entering
+   * passwords into this field that do not pass cracklib validation.
+   */
+
+  private boolean cracklib_supergash_exception = false;
+
+  /**
+   * If true, passwords will be checked against previous passwords for
+   * this object.
+   */
+
+  private boolean history_check = false;
+
+  /**
+   * If true, supergash will be allowed to get away with entering
+   * passwords into this field that were previously used for this
+   * object.
+   */
+
+  private boolean history_supergash_exception = false;
+
+  /**
+   * How many previous password hashes will be kept to check against
+   * newly entered passwords, if history_check is true.
+   */
+
+  private int history_depth = 0;
+
   private boolean crypted = true;	// UNIX encryption is the default.
   private boolean md5crypted = false;	// OpenBSD style md5crypt() is not
   private boolean apachemd5crypted = false;	// Apache style md5crypt() is not
@@ -398,6 +432,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     targetField = original.targetField;
 
     cracklib_check = original.cracklib_check;
+    cracklib_supergash_exception = original.cracklib_supergash_exception;
+    history_check = original.history_check;
+    history_supergash_exception = original.history_supergash_exception;
+    history_depth = original.history_depth;
     crypted = original.crypted;
     md5crypted = original.md5crypted;
     apachemd5crypted = original.apachemd5crypted;
@@ -607,6 +645,16 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	// at 2.17 we introduce cracklib support for password fields
 
 	out.writeBoolean(cracklib_check);
+
+	// at 2.18 we introduce cracklib_supergash_exception,
+	// history_check, history_supergash_exception, and
+	// history_depth.
+
+	out.writeBoolean(cracklib_supergash_exception);
+	out.writeBoolean(history_check);
+	out.writeBoolean(history_supergash_exception);
+	out.writeInt(history_depth);
+
 	out.writeBoolean(crypted);
 	out.writeBoolean(md5crypted);
 	out.writeBoolean(apachemd5crypted);
@@ -877,6 +925,18 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	else
 	  {
 	    cracklib_check = false;
+	  }
+
+	// at 2.17, we introduce cracklib_supergash_exception,
+	// history_check, history_supergash_exception, and
+	// history_depth
+
+	if (base.getStore().isAtLeast(2,18))
+	  {
+	    cracklib_supergash_exception = in.readBoolean();
+	    history_check = in.readBoolean();
+	    history_supergash_exception = in.readBoolean();
+	    history_depth = in.readInt();
 	  }
 
 	crypted = in.readBoolean();
@@ -1235,7 +1295,30 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	if (cracklib_check)
 	  {
 	    xmlOut.startElementIndent("cracklib_check");
+
+	    if (cracklib_supergash_exception)
+	      {
+		xmlOut.attribute("exception", "supergash");
+	      }
+
 	    xmlOut.endElement("cracklib_check");
+	  }
+
+	if (history_check)
+	  {
+	    xmlOut.startElementIndent("history_check");
+
+	    if (history_supergash_exception)
+	      {
+		xmlOut.attribute("exception", "supergash");
+	      }
+
+	    if (history_depth > 0)
+	      {
+		xmlOut.attribute("depth", Integer.toString(history_depth));
+	      }
+
+	    xmlOut.endElement("history_check");
 	  }
 
 	if (crypted)
@@ -1935,6 +2018,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     String _okChars = null;
     String _badChars = null;
     boolean _cracklib_check = false;
+    boolean _cracklib_supergash_exception = false;
+    boolean _history_check = false;
+    boolean _history_supergash_exception = false;
+    int _history_depth = 0;
     boolean _crypted = false;
     boolean _plaintext = false;
     boolean _md5crypted = false;
@@ -2001,6 +2088,39 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    else if (child.matches("cracklib_check"))
 	      {
 		_cracklib_check = true;
+
+		if ("supergash".equals(child.getAttrStr("exception")))
+		  {
+		    _cracklib_supergash_exception = true;
+		  }
+	      }
+	    else if (child.matches("history_check"))
+	      {
+		_history_check = true;
+
+		if ("supergash".equals(child.getAttrStr("exception")))
+		  {
+		    _history_supergash_exception = true;
+		  }
+		
+		String depthStr = child.getAttrStr("depth");
+
+		if (depthStr != null)
+		  {
+		    try
+		      {
+			_history_depth = Integer.valueOf(depthStr);
+
+			if (_history_depth < 0)
+			  {
+			    _history_depth = 0;
+			  }
+		      }
+		    catch (NumberFormatException ex)
+		      {
+			_history_depth = 0;
+		      }
+		  }
 	      }
 	    else if (child.matches("crypted"))
 	      {
@@ -2119,14 +2239,27 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
-    retVal = setCracklibChecked(_cracklib_check);
+    retVal = setCracklibChecked(_cracklib_check, _cracklib_supergash_exception);
 
     if (!ReturnVal.didSucceed(retVal))
       {
 	// "XML"
-	// "fielddef could not set cracklib_check flag: {0}\n{1}\n{2}"
+	// "fielddef could not set cracklib_check flags: {0}, {1}\n{2}\n{3}"
 	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_cracklib", Boolean.valueOf(_cracklib_check),
+					  ts.l("doPasswordXML.bad_cracklib",
+					       Boolean.valueOf(_cracklib_check), Boolean.valueOf(_cracklib_supergash_exception),
+					       root.getTreeString(), retVal.getDialogText()));
+      }
+
+    retVal = setHistoryChecked(_history_check, _history_supergash_exception, _history_depth);
+
+    if (!ReturnVal.didSucceed(retVal))
+      {
+	// "XML"
+	// "fielddef could not set history_check flags: {0}, {1}, {2}\n{3}\n{4}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doPasswordXML.bad_history_check",
+					       Boolean.valueOf(_history_check), Boolean.valueOf(_history_supergash_exception), _history_depth,
 					       root.getTreeString(), retVal.getDialogText()));
       }
 
@@ -4764,11 +4897,26 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>Returns true if this field is a password field that has been
    * configured to have values submitted be checked against
    * cracklib.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isCracklibChecked()
   {
     return cracklib_check;
+  }
+
+  /**
+   * <p>Returns true if this field is a password field that is
+   * cracklib checked which will allow supergash to disregard warnings
+   * about cracklib.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public boolean hasCracklibCheckException()
+  {
+    return cracklib_supergash_exception;
   }
 
   /**
@@ -4778,10 +4926,16 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
+   * @param use_cracklib Control whether cracklib is applied on this
+   * field at all.
+   * @param supergash_exception If true, supergash-level admins will
+   * be given an info dialog about a cracklib check failure, but will
+   * be allowed to ignore the warning.
+   *
    * @see arlut.csd.ganymede.rmi.BaseField
    */
 
-  public ReturnVal setCracklibChecked(boolean b)
+  public ReturnVal setCracklibChecked(boolean use_cracklib, boolean supergash_exception)
   {    
     securityCheck();
 
@@ -4790,7 +4944,99 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
-    cracklib_check = b;
+    if (use_cracklib)
+      {
+	cracklib_check = true;
+	cracklib_supergash_exception = supergash_exception;
+      }
+    else
+      {
+	cracklib_check = false;
+	cracklib_supergash_exception = false;
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>Returns true if this field is a password field that has been
+   * configured to have values submitted be checked previous password
+   * values linked to this DBObject.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public boolean isHistoryChecked()
+  {
+    return history_check;
+  }
+
+  /**
+   * <p>Returns true if this field is a password field that is history
+   * checked which will allow supergash to disregard warnings about
+   * history repeats.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public boolean hasHistoryCheckException()
+  {
+    return history_supergash_exception;
+  }
+
+  /**
+   * <p>Returns the number of historical password hash values that
+   * will be kept for this field.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public int getHistoryDepth()
+  {
+    return history_depth;
+  }
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * check passwords against previous values associated with this
+   * field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   *
+   * @param use_history Control whether history checks are performed
+   * on this field at all.
+   * @param supergash_exception If true, supergash-level admins will
+   * be given an info dialog about a cracklib check failure, but will
+   * be allowed to ignore the warning.
+   * @param depth An integer greater than or equal to zero which
+   * controls how many previous password hashes should be retained for
+   * history checking.
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   */
+
+  public ReturnVal setHistoryChecked(boolean use_history, boolean supergash_exception, int depth)
+  {    
+    securityCheck();
+
+    if (!isPassword())
+      {
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+      }
+
+    if (use_history)
+      {
+	history_check = true;
+	history_supergash_exception = supergash_exception;
+	history_depth = depth;
+      }
+    else
+      {
+	history_check = false;
+	history_supergash_exception = false;
+	history_depth = 0;
+      }
 
     return null;
   }

@@ -705,8 +705,26 @@
           element.  If this element is present, the Ganymede server
           will use cracklib to perform quality checks on passwords
           entered in this field.</p>
+
+	  <p>If the attribute 'exception' has the value 'supergash',
+	  supergash-level accounts will be given a cracklib warning
+	  but will be allowed to ignore the warning.</p>
         </td>
-        <td>&lt;cracklib_check/&gt;</td>
+        <td>&lt;cracklib_check exception="supergash"/&gt;</td>
+      </tr>
+      <tr>
+        <td></td><td>history_check</td>
+        <td>
+          <p>The <b>history_check</b> element is an optional, empty
+          element.  If this element is present, the Ganymede server
+          will keep a store of 'depth' hashes for previous passwords
+          that the object has held.</p>
+
+	  <p>If the attribute 'exception' has the value 'supergash',
+	  supergash-level accounts will be given a history warning
+	  but will be allowed to ignore the warning.</p>
+        </td>
+        <td>&lt;history_check exception="supergash" depth="3"/&gt;</td>
       </tr>
       <tr>
 	<td></td><td>crypted</td>

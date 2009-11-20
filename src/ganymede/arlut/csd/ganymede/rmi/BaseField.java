@@ -622,15 +622,71 @@ public interface BaseField extends Remote {
   public boolean isCracklibChecked() throws RemoteException;
 
   /**
+   * <p>Returns true if this field is a password field that is
+   * cracklib checked which will allow supergash to disregard warnings
+   * about cracklib.</p>
+   */
+
+  public boolean hasCracklibCheckException() throws RemoteException;
+
+  /**
    * <p>This method is used to specify that this password field
    * should check passwords entered with org.solinger.cracklib.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
+   *
+   * @param use_cracklib Control whether cracklib is applied on this
+   * field at all.
+   * @param supergash_exception If true, supergash-level admins will
+   * be given an info dialog about a cracklib check failure, but will
+   * be allowed to ignore the warning.
    */
 
-  public ReturnVal setCracklibChecked(boolean b) throws RemoteException;
+  public ReturnVal setCracklibChecked(boolean use_cracklib, boolean supergash_exception) throws RemoteException;
 
+  /**
+   * <p>Returns true if this field is a password field that has been
+   * configured to have values submitted be checked previous password
+   * values linked to this DBObject.</p>
+   */
+
+  public boolean isHistoryChecked() throws RemoteException;
+
+  /**
+   * <p>Returns true if this field is a password field that is history
+   * checked which will allow supergash to disregard warnings about
+   * history repeats.</p>
+   */
+
+  public boolean hasHistoryCheckException() throws RemoteException;
+
+  /**
+   * <p>Returns the number of historical password hash values that
+   * will be kept for this field.</p>
+   */
+
+  public int getHistoryDepth() throws RemoteException;
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * check passwords against previous values associated with this
+   * field.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if
+   * this field definition is not a password type.</p>
+   *
+   * @param use_history Control whether history checks are performed
+   * on this field at all.
+   * @param supergash_exception If true, supergash-level admins will
+   * be given an info dialog about a cracklib check failure, but will
+   * be allowed to ignore the warning.
+   * @param depth An integer greater than or equal to zero which
+   * controls how many previous password hashes should be retained for
+   * history checking.
+   */
+
+  public ReturnVal setHistoryChecked(boolean use_history, boolean supergash_exception, int depth) throws RemoteException;
 
   /**
    * <p>This method returns true if this is a password field that

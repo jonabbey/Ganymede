@@ -2592,8 +2592,20 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	    if (cracklibCheck != null)
 	      {
-		// "Password Field Error"
-		return Ganymede.createErrorDialog(ts.l("global.error_subj"), cracklibCheck);
+		if (getFieldDef().hasHistoryCheckException() && getGSession().isSuperGash())
+		  {
+		    // "Password Quality Problem"
+		    // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
+		    return Ganymede.createInfoDialog(ts.l("verifyNewValue.cracklib_failure_title"),
+						     ts.l("verifyNewValue.cracklib_failure_error", cracklibCheck));
+		  }
+		else
+		  {
+		    // "Password Quality Problem"
+		    // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
+		    return Ganymede.createErrorDialog(ts.l("verifyNewValue.cracklib_failure_title"),
+						      ts.l("verifyNewValue.cracklib_failure_error", cracklibCheck));
+		  }
 	      }
 	  }
 	catch (IOException ex)
