@@ -408,7 +408,10 @@ public class PasswordDBField extends DBField implements pass_field {
     lanHash = null;
     sshaHash = null;
     shaUnixCrypt = null;
-    history = null;
+
+    // NB: Don't clear history.. this password field might be set to a
+    // defined value later on and we don't want to forget previous
+    // values
   }
 
   /**
@@ -545,6 +548,8 @@ public class PasswordDBField extends DBField implements pass_field {
     target.uncryptedPass = uncryptedPass;
     target.sshaHash = sshaHash;
     target.shaUnixCrypt = shaUnixCrypt;
+
+    target.history = history;
 
     return null;		// simple success value
   }
@@ -866,15 +871,7 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	int count = in.readInt();
 
-	if (count > 0)
-	  {
-	    history = new passwordHistoryArchive(count, in);
-	    history.setPoolSize(getFieldDef().getHistoryDepth());
-	  }
-	else
-	  {
-	    history = null;
-	  }
+	history = new passwordHistoryArchive(getFieldDef().getHistoryDepth(), count, in);
       }
     else
       {
@@ -2872,17 +2869,17 @@ public class PasswordDBField extends DBField implements pass_field {
      * Receive constructor
      */
 
-    public passwordHistoryArchive(int size, DataInput in) throws IOException
+    public passwordHistoryArchive(int poolSize, int count, DataInput in) throws IOException
     {
-      this.receive(size, in);
+      setPoolSize(poolSize);
+      this.receive(count, in);
     }
 
-    public synchronized void receive(int size, DataInput in) throws IOException
+    public synchronized void receive(int count, DataInput in) throws IOException
     {
-      this.poolSize = size;
-      pool = new ArrayList<passwordHistoryEntry>(poolSize);
+      pool = new ArrayList<passwordHistoryEntry>(count);
 
-      for (int i = 0; i < poolSize; i++)
+      for (int i = 0; i < count; i++)
 	{
 	  pool.add(new passwordHistoryEntry(in));
 	}
