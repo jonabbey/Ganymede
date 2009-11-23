@@ -2887,11 +2887,18 @@ public class PasswordDBField extends DBField implements pass_field {
 
     public synchronized void emit(DataOutput out) throws IOException
     {
-      out.writeInt(pool.size());
-
-      for (passwordHistoryEntry entry: pool)
+      if (pool != null)
 	{
-	  entry.emit(out);
+	  out.writeInt(pool.size());
+
+	  for (passwordHistoryEntry entry: pool)
+	    {
+	      entry.emit(out);
+	    }
+	}
+      else
+	{
+	  out.writeInt(0);
 	}
     }
 
