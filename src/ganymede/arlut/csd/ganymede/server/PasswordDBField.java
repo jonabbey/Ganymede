@@ -869,6 +869,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (count > 0)
 	  {
 	    history = new passwordHistoryArchive(count, in);
+	    history.setPoolSize(getFieldDef.getHistoryDepth());
 	  }
 	else
 	  {
@@ -2889,7 +2890,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     public synchronized void emit(DataOutput out) throws IOException
     {
-      out.writeInt(this.poolSize);
+      out.writeInt(pool.size());
 
       for (passwordHistoryEntry entry: pool)
 	{
