@@ -862,7 +862,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // we added passwordHistoryArchive at 2.19
 
-    if (Ganymede.db.isAtLeast(2,19))
+    if (Ganymede.db.isAtLeast(2,19) && getFieldDef().isHistoryChecked())
       {
 	int count = in.readInt();
 
