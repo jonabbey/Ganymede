@@ -188,7 +188,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   static boolean debug = false;
   final static boolean debugEmit = false;
-  final static boolean debugReceive = true;
+  final static boolean debugReceive = false;
 
   /**
    * <p>TranslationService object for handling string localization in

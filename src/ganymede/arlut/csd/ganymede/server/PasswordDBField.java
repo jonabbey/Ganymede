@@ -867,21 +867,29 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // we added passwordHistoryArchive at 2.19
 
-    if (Ganymede.db.isAtLeast(2,19) && getFieldDef().isHistoryChecked())
+    if (Ganymede.db.isAtLeast(2,19))
       {
 	if (debug)
 	  {
 	    System.err.println("Reading password archive for user " + getOwner().getLabel());
 	  }
 
-	int count = in.readInt();
+	// at 2.19, we always write out the count, even if we were not
+	// history checked.  At 2.20, we only write out an archive
+	// (including the count) if the field is configured for
+	// history archiving/checking.
 
-	if (debug)
+	if (Ganymede.db.isAtRev(2,19) || getFieldDef().isHistoryChecked())
 	  {
-	    System.err.println("Pool count size is " + count);
-	  }
+	    int count = in.readInt();
 
-	history = new passwordHistoryArchive(getFieldDef().getHistoryDepth(), count, in);
+	    if (debug)
+	      {
+		System.err.println("Pool count size is " + count);
+	      }
+
+	    history = new passwordHistoryArchive(getFieldDef().getHistoryDepth(), count, in);
+	  }
       }
     else
       {
