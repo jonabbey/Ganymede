@@ -643,7 +643,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // starting at 2.19, we store a history archive, if defined
 
-    if (history != null && getFieldDef.isHistoryChecked())
+    if (history != null && getFieldDef().isHistoryChecked())
       {
 	if (getFieldDef().getHistoryDepth() > history.getPoolSize())
 	  {
