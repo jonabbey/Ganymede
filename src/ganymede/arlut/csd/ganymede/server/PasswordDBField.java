@@ -142,7 +142,7 @@ import arlut.csd.ganymede.rmi.pass_field;
 
 public class PasswordDBField extends DBField implements pass_field {
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   /**
    * TranslationService object for handling string localization in the
@@ -820,11 +820,6 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if (Ganymede.db.isAtLeast(2,19))
 	  {
-	    if (debug)
-	      {
-		System.err.println("Reading password archive for user " + getOwner().getLabel());
-	      }
-
 	    // at 2.19, we always write out the count, even if we were not
 	    // history checked.  At 2.20, we only write out an archive
 	    // (including the count) if the field is configured for
@@ -834,11 +829,6 @@ public class PasswordDBField extends DBField implements pass_field {
 	      {
 		int count = in.readInt();
 
-		if (debug)
-		  {
-		    System.err.println("Pool count size is " + count);
-		  }
-
 		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth(), count, in);
 	      }
 	  }
@@ -846,20 +836,10 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    if (getFieldDef().isHistoryChecked())
 	      {
-		if (debug)
-		  {
-		    System.err.println("Initializing empty password archive for user " + getOwner().getLabel());
-		  }
-
 		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
 	      }
 	    else
 	      {
-		if (debug)
-		  {
-		    System.err.println("No password archive for user " + getOwner().getLabel());
-		  }
-
 		history = null;
 	      }
 	  }
