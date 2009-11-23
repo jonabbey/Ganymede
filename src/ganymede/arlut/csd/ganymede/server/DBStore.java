@@ -168,7 +168,7 @@ public final class DBStore implements JythonMap {
    * after id_string
    */
 
-  static final byte minor_version = 18;
+  static final byte minor_version = 19;
 
   /**
    * Enable/disable debug in the DBStore methods

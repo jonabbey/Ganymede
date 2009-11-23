@@ -54,6 +54,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.solinger.cracklib.CrackLib;
 
 import arlut.csd.Util.TranslationService;
@@ -242,6 +246,16 @@ public class PasswordDBField extends DBField implements pass_field {
 
   private String shaUnixCrypt;
 
+  /**
+   * History archive of previous password hashes, and the dates that
+   * the previous passwords were committed into the database.
+   *
+   * This variable will only be non-null if the DBObjectBaseField
+   * definition for this field has history_check set.
+   */
+
+  private passwordHistoryArchive history = null;
+
   /* -- */
 
   /**
@@ -273,12 +287,17 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     this.owner = owner;
     this.fieldcode = definition.getID();
+
+    if (definition.isHistoryChecked())
+      {
+	this.history = new passwordHistoryArchive(definition.getHistoryDepth());
+      }
     
     value = null;
   }
 
   /**
-   * Copy constructor.
+   * Copy constructor, used when checking edit objects in and out
    */
 
   public PasswordDBField(DBObject owner, PasswordDBField field)
@@ -294,6 +313,21 @@ public class PasswordDBField extends DBField implements pass_field {
     ntHash = field.ntHash;
     sshaHash = field.sshaHash;
     shaUnixCrypt = field.shaUnixCrypt;
+    history = field.history;
+
+    // If we're keeping history and we're copying from an editable
+    // object to a non-editable object and the field we're copying
+    // from changed during the transaction we're consolidating, we
+    // need to remember the password that is being set with this
+    // commit.
+
+    if (getFieldDef().isHistoryChecked() &&
+	this.uncryptedPass != null &&
+	!(this.owner instanceof DBEditObject) &&
+	field.hasChanged())
+      {
+	history.add(uncryptedPass, new Date());
+      }
   }
 
   /**
@@ -359,6 +393,7 @@ public class PasswordDBField extends DBField implements pass_field {
     lanHash = null;
     sshaHash = null;
     shaUnixCrypt = null;
+    history = null;
   }
 
   /**
@@ -605,6 +640,22 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	out.writeUTF("");
       }
+
+    // starting at 2.19, we store a history archive, if defined
+
+    if (history != null && getFieldDef.isHistoryChecked())
+      {
+	if (getFieldDef().getHistoryDepth() > history.getPoolSize())
+	  {
+	    history.setPoolSize(getFieldDef().getHistoryDepth());
+	  }
+
+	history.emit(out);
+      }
+    else
+      {
+	out.writeInt(0);
+      }
   }
 
   /**
@@ -787,6 +838,33 @@ public class PasswordDBField extends DBField implements pass_field {
     if (!definition.isCrypted() && !definition.isMD5Crypted())
       {
 	uncryptedPass = readUTF(in);
+      }
+
+    // we added passwordHistoryArchive at 2.19
+
+    if (Ganymede.db.isAtLeast(2,19))
+      {
+	int count = in.readInt();
+
+	if (count > 0)
+	  {
+	    history = new passwordHistoryArchive(count, in);
+	  }
+	else
+	  {
+	    history = null;
+	  }
+      }
+    else
+      {
+	if (getFieldDef().isHistoryChecked())
+	  {
+	    history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
+	  }
+	else
+	  {
+	    history = null;
+	  }
       }
   }
 
@@ -2592,7 +2670,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	    if (cracklibCheck != null)
 	      {
-		if (getFieldDef().hasHistoryCheckException() && getGSession().isSuperGash())
+		if (getFieldDef().hasCracklibCheckException() && getGSession().isSuperGash())
 		  {
 		    // "Password Quality Problem"
 		    // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
@@ -2611,6 +2689,32 @@ public class PasswordDBField extends DBField implements pass_field {
 	catch (IOException ex)
 	  {
 	    ex.printStackTrace();
+	  }
+      }
+
+    if (getFieldDef().isHistoryChecked())
+      {
+	if (history != null)
+	  {
+	    Date previousDate = history.contains(s);
+
+	    if (previousDate != null)
+	      {
+		if (getFieldDef().hasHistoryCheckException() && getGSession().isSuperGash())
+		  {
+		    // "Password Used Before"
+		    // "This password has been used too recently with this account."
+		    return Ganymede.createInfoDialog(ts.l("verifyNewValue.history_reuse_title"),
+						     ts.l("verifyNewValue.history_reuse_error"));
+		  }
+		else
+		  {
+		    // "Password Used Before"
+		    // "This password has been used too recently with this account."
+		    return Ganymede.createErrorDialog(ts.l("verifyNewValue.history_reuse_title"),
+						      ts.l("verifyNewValue.history_reuse_error"));
+		  }
+	      }
 	  }
       }
 
@@ -2710,4 +2814,205 @@ public class PasswordDBField extends DBField implements pass_field {
         shaUnixCrypt = getShaUnixCryptText();
       }
   }
+
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                          passwordHistoryArchive
+
+  ----------------------------------------------------------------------------*/
+
+  /**
+   * This inner class holds previous passwords that have been
+   * associated with this account.
+   */
+
+  class passwordHistoryArchive {
+
+    private List<passwordHistoryEntry> pool;
+    private int poolSize;
+
+    /* -- */
+
+    public passwordHistoryArchive(int poolSize)
+    {
+      this.poolSize = poolSize;
+      this.pool = null;
+    }
+
+    /**
+     * Receive constructor
+     */
+
+    public passwordHistoryArchive(int size, DataInput in) throws IOException
+    {
+      this.receive(size, in);
+    }
+
+    public synchronized void receive(int size, DataInput in) throws IOException
+    {
+      this.poolSize = size;
+      pool = new ArrayList<passwordHistoryEntry>(poolSize);
+
+      for (int i = 0; i < poolSize; i++)
+	{
+	  pool.add(new passwordHistoryEntry(in));
+	}
+    }
+
+    public synchronized void emit(DataOutput out) throws IOException
+    {
+      out.writeInt(this.poolSize);
+
+      for (passwordHistoryEntry entry: pool)
+	{
+	  entry.emit(out);
+	}
+    }
+
+    /**
+     * Returns the size of the pool.
+     */
+
+    public synchronized int getPoolSize()
+    {
+      return poolSize;
+    }
+
+    /**
+     * This method changes the size of this archive.  If poolSize is
+     * less than the current size of this archive, older passwords are
+     * trimmed from this archive.
+     *
+     * If poolSize is greater than the current size of this archive,
+     * space is added, but no values are put in the newly available
+     * slots until add() is called.
+     */
+
+    public synchronized void setPoolSize(int poolSize)
+    {
+      this.poolSize = poolSize;
+
+      if (pool != null)
+	{
+	  while (pool.size() > poolSize)
+	    {
+	      pool.remove(pool.size());
+	    }
+	}
+    }
+
+    /**
+     * Add a new password to the password archive.
+     *
+     * @param password The plaintext of the password
+     * @param date The date the password was committed into the
+     * database.
+     */
+
+    public synchronized void add(String password, Date date)
+    {
+      if (pool == null)
+	{
+	  pool = new ArrayList<passwordHistoryEntry>();
+	}
+
+      pool.add(0, new passwordHistoryEntry(password, date));
+
+      if (pool.size() > poolSize)
+	{
+	  pool.remove(pool.size());
+	}
+    }
+
+    /**
+     * This method checks to see if the plaintext password was
+     * previously associated with this passwordHistoryArchive.
+     *
+     * If a previous instance of this password is found in this
+     * archive, the Date of the previous use is returned.
+     *
+     * If not, this method returns null.
+     */
+
+    public synchronized Date contains(String password)
+    {
+      if (pool == null)
+	{
+	  return null;
+	}
+
+      for (passwordHistoryEntry entry: pool)
+	{
+	  if (entry.matches(password))
+	    {
+	      return entry.getDate();
+	    }
+	}
+
+      return null;
+    }
+  }
+
+  /*----------------------------------------------------------------------------
+                                                                     inner class
+                                                            passwordHistoryEntry
+
+  ----------------------------------------------------------------------------*/
+
+  /**
+   * This inner class holds a previous password hash along with the
+   * date that it was committed into this field.
+   */
+
+  class passwordHistoryEntry {
+
+    /**
+     * The date this password history entry was committed to the
+     * Ganymede database.
+     */
+
+    private Date date;
+
+    /**
+     * An unsalted, fast-evalated SSHA hash, LDAP style.
+     */
+
+    private String hash;
+
+    /* -- */
+
+    public passwordHistoryEntry(String plaintext, Date date)
+    {
+      this.hash = SSHA.getLDAPSSHAHash(plaintext, null);
+      this.date = date;
+    }
+
+    public passwordHistoryEntry(DataInput in) throws IOException
+    {
+      this.hash = in.readUTF();
+      this.date = new Date(in.readLong());
+    }
+
+    public void emit(DataOutput out) throws IOException
+    {
+      out.writeUTF(hash);
+      out.writeLong(date.getTime());
+    }
+
+    public Date getDate()
+    {
+      return this.date;
+    }
+
+    public String getHash()
+    {
+      return this.hash;
+    }
+
+    public boolean matches(String plaintext)
+    {
+      return SSHA.matchSHAHash(hash, plaintext);
+    }
+  }
 }
+
