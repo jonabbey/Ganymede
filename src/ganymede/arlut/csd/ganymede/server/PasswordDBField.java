@@ -661,7 +661,11 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (history != null && getFieldDef().isHistoryChecked())
       {
-	if (getFieldDef().getHistoryDepth() > history.getPoolSize())
+	// if this field's pool size has been changed since the last
+	// time the history archive was adjusted, tweak it as a side
+	// effect while we're writing out.
+
+	if (getFieldDef().getHistoryDepth() != history.getPoolSize())
 	  {
 	    history.setPoolSize(getFieldDef().getHistoryDepth());
 	  }
@@ -670,6 +674,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
     else
       {
+	history = null;
 	out.writeInt(0);
       }
   }
