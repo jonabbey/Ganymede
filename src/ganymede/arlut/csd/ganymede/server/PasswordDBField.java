@@ -2703,16 +2703,18 @@ public class PasswordDBField extends DBField implements pass_field {
 		if (getFieldDef().hasHistoryCheckException() && getGSession().isSuperGash())
 		  {
 		    // "Password Used Before"
-		    // "This password has been used too recently with this account."
+		    // "This password has been used too recently with this account.\nIt was last used with this account on {0, date}."
 		    return Ganymede.createInfoDialog(ts.l("verifyNewValue.history_reuse_title"),
-						     ts.l("verifyNewValue.history_reuse_error"));
+						     ts.l("verifyNewValue.history_reuse_error",
+							  previousDate));
 		  }
 		else
 		  {
 		    // "Password Used Before"
-		    // "This password has been used too recently with this account."
+		    // "This password has been used too recently with this account.\nIt was last used with this account on {0, date}."
 		    return Ganymede.createErrorDialog(ts.l("verifyNewValue.history_reuse_title"),
-						      ts.l("verifyNewValue.history_reuse_error"));
+						      ts.l("verifyNewValue.history_reuse_error",
+							   previousDate));
 		  }
 	      }
 	  }
