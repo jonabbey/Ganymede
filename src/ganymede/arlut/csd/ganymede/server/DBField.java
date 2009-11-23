@@ -234,7 +234,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * and attach it to a DBObject, using the appropriate DBField
    * subclass' copy constructor.
    *
-   * Used by the DBEditObject's check-out constructor.
+   * Used by the DBEditObject's check-out and check-in constructor.
    */
 
   static DBField copyField(DBObject object, DBField orig)
@@ -919,6 +919,24 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    */
 
   abstract public String getDiffString(DBField orig);
+
+  /**
+   * This method returns true if this field is owned by an editable
+   * object and its contents differ from the same field in the
+   * DBEditObject's original object.
+   */
+
+  public boolean hasChanged()
+  {
+    if (!(getOwner() instanceof DBEditObject))
+      {
+	return false;
+      }
+
+    DBField origField = (DBField) ((DBEditObject) getOwner()).getField(getID());
+
+    return hasChanged(origField);
+  }
 
   /**
    * This method returns true if this field differs from the orig.
