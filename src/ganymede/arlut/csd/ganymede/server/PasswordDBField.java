@@ -321,17 +321,28 @@ public class PasswordDBField extends DBField implements pass_field {
     // need to remember the password that is being set with this
     // commit.
 
-    if (getFieldDef().isHistoryChecked() &&
-	this.uncryptedPass != null &&
-	!(this.owner instanceof DBEditObject) &&
-	field.hasChanged())
+    if (getFieldDef().isHistoryChecked())
       {
-	if (history == null)
+	if (this.uncryptedPass != null &&
+	    !(this.owner instanceof DBEditObject) &&
+	    field.hasChanged())
 	  {
-	    history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
+	    if (history == null)
+	      {
+		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
+	      }
+	    
+	    history.add(uncryptedPass, new Date());
 	  }
 
-	history.add(uncryptedPass, new Date());
+	if (history.getPoolSize() != getFieldDef().getHistoryDepth())
+	  {
+	    history.setPoolSize(getFieldDef().getHistoryDepth());
+	  }
+      }
+    else
+      {
+	history = null;
       }
   }
 
