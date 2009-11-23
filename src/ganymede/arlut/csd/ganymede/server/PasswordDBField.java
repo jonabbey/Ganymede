@@ -671,7 +671,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	history.emit(out);
       }
-    else
+    else if (getFieldDef().isHistoryChecked())
       {
 	history = null;
 	out.writeInt(0);
