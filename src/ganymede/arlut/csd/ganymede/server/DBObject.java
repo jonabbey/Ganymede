@@ -188,6 +188,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   static boolean debug = false;
   final static boolean debugEmit = false;
+  final static boolean debugReceive = true;
 
   /**
    * <p>TranslationService object for handling string localization in
@@ -954,6 +955,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     myInvid = Invid.createInvid(objectBase.getTypeID(), in.readInt());
 
+    if (debugReceive)
+      {
+	System.err.println("Reading invid " + myInvid);
+      }
+
     // get number of fields
 
     tmp_count = in.readShort();
@@ -1021,6 +1027,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 					    this.getTypeName(),
 					    Integer.valueOf(fieldcode),
 					    Integer.valueOf(i)));
+	  }
+
+	if (debugReceive)
+	  {
+	    System.err.println("Reading field " + definition);
 	  }
 
         tmp = DBField.readField(this, in, definition);
