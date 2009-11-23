@@ -816,6 +816,54 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	uncryptedPass = readUTF(in);
 
+	// we added passwordHistoryArchive at 2.19
+
+	if (Ganymede.db.isAtLeast(2,19))
+	  {
+	    if (debug)
+	      {
+		System.err.println("Reading password archive for user " + getOwner().getLabel());
+	      }
+
+	    // at 2.19, we always write out the count, even if we were not
+	    // history checked.  At 2.20, we only write out an archive
+	    // (including the count) if the field is configured for
+	    // history archiving/checking.
+
+	    if (Ganymede.db.isAtRev(2,19) || getFieldDef().isHistoryChecked())
+	      {
+		int count = in.readInt();
+
+		if (debug)
+		  {
+		    System.err.println("Pool count size is " + count);
+		  }
+
+		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth(), count, in);
+	      }
+	  }
+	else
+	  {
+	    if (getFieldDef().isHistoryChecked())
+	      {
+		if (debug)
+		  {
+		    System.err.println("Initializing empty password archive for user " + getOwner().getLabel());
+		  }
+
+		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
+	      }
+	    else
+	      {
+		if (debug)
+		  {
+		    System.err.println("No password archive for user " + getOwner().getLabel());
+		  }
+
+		history = null;
+	      }
+	  }
+
 	return;
       }
 
@@ -863,54 +911,6 @@ public class PasswordDBField extends DBField implements pass_field {
     if (!definition.isCrypted() && !definition.isMD5Crypted())
       {
 	uncryptedPass = readUTF(in);
-      }
-
-    // we added passwordHistoryArchive at 2.19
-
-    if (Ganymede.db.isAtLeast(2,19))
-      {
-	if (debug)
-	  {
-	    System.err.println("Reading password archive for user " + getOwner().getLabel());
-	  }
-
-	// at 2.19, we always write out the count, even if we were not
-	// history checked.  At 2.20, we only write out an archive
-	// (including the count) if the field is configured for
-	// history archiving/checking.
-
-	if (Ganymede.db.isAtRev(2,19) || getFieldDef().isHistoryChecked())
-	  {
-	    int count = in.readInt();
-
-	    if (debug)
-	      {
-		System.err.println("Pool count size is " + count);
-	      }
-
-	    history = new passwordHistoryArchive(getFieldDef().getHistoryDepth(), count, in);
-	  }
-      }
-    else
-      {
-	if (getFieldDef().isHistoryChecked())
-	  {
-	    if (debug)
-	      {
-		System.err.println("Initializing empty password archive for user " + getOwner().getLabel());
-	      }
-
-	    history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("No password archive for user " + getOwner().getLabel());
-	      }
-
-	    history = null;
-	  }
       }
   }
 
