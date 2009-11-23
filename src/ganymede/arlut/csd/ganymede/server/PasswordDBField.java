@@ -2835,6 +2835,12 @@ public class PasswordDBField extends DBField implements pass_field {
 
   class passwordHistoryArchive {
 
+    /**
+     * Queue of password history entries.  New elements are added to
+     * the beginning of the list, and old elements are removed from
+     * the end after the pool is filled.
+     */
+
     private List<passwordHistoryEntry> pool;
     private int poolSize;
 
