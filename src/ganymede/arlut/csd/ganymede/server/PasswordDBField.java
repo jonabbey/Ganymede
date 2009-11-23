@@ -869,7 +869,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (count > 0)
 	  {
 	    history = new passwordHistoryArchive(count, in);
-	    history.setPoolSize(getFieldDef.getHistoryDepth());
+	    history.setPoolSize(getFieldDef().getHistoryDepth());
 	  }
 	else
 	  {
