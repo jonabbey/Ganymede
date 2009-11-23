@@ -323,21 +323,20 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (getFieldDef().isHistoryChecked())
       {
+	if (history == null)
+	  {
+	    history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
+	  }
+	else if (history.getPoolSize() != getFieldDef().getHistoryDepth())
+	  {
+	    history.setPoolSize(getFieldDef().getHistoryDepth());
+	  }
+
 	if (this.uncryptedPass != null &&
 	    !(this.owner instanceof DBEditObject) &&
 	    field.hasChanged())
 	  {
-	    if (history == null)
-	      {
-		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
-	      }
-	    
 	    history.add(uncryptedPass, new Date());
-	  }
-
-	if (history.getPoolSize() != getFieldDef().getHistoryDepth())
-	  {
-	    history.setPoolSize(getFieldDef().getHistoryDepth());
 	  }
       }
     else
