@@ -326,6 +326,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	!(this.owner instanceof DBEditObject) &&
 	field.hasChanged())
       {
+	if (history == null)
+	  {
+	    history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
+	  }
+
 	history.add(uncryptedPass, new Date());
       }
   }
