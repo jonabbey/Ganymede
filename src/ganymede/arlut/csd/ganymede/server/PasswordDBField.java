@@ -825,18 +825,21 @@ public class PasswordDBField extends DBField implements pass_field {
 	    // (including the count) if the field is configured for
 	    // history archiving/checking.
 
-	    if ((Ganymede.db.isAtRev(2,19) && Ganymede.db.journalLoading) || getFieldDef().isHistoryChecked())
+	    if (Ganymede.db.isAtRev(2,19) || definition.isHistoryChecked())
 	      {
-		int count = in.readInt();
-
-		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth(), count, in);
+		if (Ganymede.db.journalLoading)
+		  {
+		    int count = in.readInt();
+		    
+		    history = new passwordHistoryArchive(definition.getHistoryDepth(), count, in);
+		  }
 	      }
 	  }
 	else
 	  {
 	    if (getFieldDef().isHistoryChecked())
 	      {
-		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
+		history = new passwordHistoryArchive(definition.getHistoryDepth());
 	      }
 	    else
 	      {
