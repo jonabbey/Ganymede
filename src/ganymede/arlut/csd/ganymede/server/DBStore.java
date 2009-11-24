@@ -311,6 +311,8 @@ public final class DBStore implements JythonMap {
 
   // debugging info
 
+  public boolean journalLoading = false;
+
   /**
    * A count of how many database objects in this DBStore are currently
    * checked out for creation, editing, or removal.
@@ -701,6 +703,8 @@ public final class DBStore implements JythonMap {
 	  {
 	    try
 	      {
+		journalLoading = true;
+
 		if (!journal.load())
 		  {
 		    // if the journal wasn't in a totally consistent
@@ -746,6 +750,10 @@ public final class DBStore implements JythonMap {
 
 		Ganymede.logError(ex);
 		throw new RuntimeException("couldn't dump journal");
+	      }
+	    finally
+	      {
+		journalLoading = false;
 	      }
 	  }
       }
