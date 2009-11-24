@@ -683,7 +683,14 @@ public final class DBObjectDeltaRec implements FieldType {
 	  {
 	    fieldRec.scalarValue.setOwner(copy);
 
-	    copy.replaceField(fieldRec.scalarValue);
+	    if (copy.getField(fieldRec.fieldcode) != null)
+	      {
+		copy.replaceField(fieldRec.scalarValue);
+	      }
+	    else
+	      {
+		copy.addField(fieldRec.scalarValue);
+	      }
 
 	    continue;
 	  }
