@@ -2960,6 +2960,18 @@ public class PasswordDBField extends DBField implements pass_field {
 	  pool = new ArrayList<passwordHistoryEntry>();
 	}
 
+      // remove a password if it's already in the pool, so we can add
+      // it back to the start of the queue with our new date.
+
+      for (passwordHistoryEntry entry: pool)
+	{
+	  if (entry.matches(password))
+	    {
+	      pool.remove(entry);
+	      break;
+	    }
+	}
+
       pool.add(0, new passwordHistoryEntry(password, date));
 
       if (pool.size() > poolSize)
