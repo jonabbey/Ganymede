@@ -2632,13 +2632,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     try
       {
-	if (field.getID() == userSchema.PASSWORD && operation == SETPASSPLAIN)
-	  {
-	    result = validatePasswordChoice((String) param1, getGSession().isSuperGash());
-		
-	    return result;
-	  }
-
 	if (field.getID() == ALLOWEXTERNAL)
 	  {
 	    // the second true in the ReturnVal constructor makes the
@@ -3024,196 +3017,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   * This method checks the given plaintext password against an
-   * external password validator library.  validatePasswordChoice
-   * specifies a file name to write the evaluation results to, runs
-   * the validator, and then reads from the file to see if the
-   * operation succeeded.
-   */
-
-  public ReturnVal validatePasswordChoice(String password, boolean asRoot)
-  {
-    // just a safety check in case someone tries to use the xmlclient
-    // to give us an empty/null plaintext password
-
-    if (password == null || password.equals(""))
-      {
-	if (isDeleting())
-	  {
-	    return null;	// okay
-	  }
-
-	return Ganymede.createErrorDialog("Password Error",
-					  "Empty passwords are not allowed in ARL user accounts.");
-      }
-
-    String resultString = null;
-    String validatorName = "/opt/bin/ganypassValidate";
-
-    String username = (String) getFieldValueLocal(USERNAME);
-
-    if (username == null)
-      {
-	return Ganymede.createErrorDialog("Error",
-					  "I need to know the username before I can set the password");
-      }
-
-    File resultFile = userCustom.getNextFileName();
-
-    String validatorCommand = validatorName + " " + username + " " + resultFile.getPath();
-
-    File file = new File(validatorName);
-
-    if (file.exists())
-      {
-	Process process = null;
-
-	/* -- */
-
-	try
-	  {
-	    process = Runtime.getRuntime().exec(validatorCommand);
-
-	    PrintWriter out = new PrintWriter(process.getOutputStream());
-	    out.println(password);
-	    out.close();
-
-	    process.waitFor();
-
-	    if (process.exitValue() != 0)
-	      {
-		try
-		  {
-		    BufferedReader in = new BufferedReader(new FileReader(resultFile));
-		    resultString = in.readLine();
-		    in.close();
-
-		    if (!asRoot)
-		      {
-			return Ganymede.createErrorDialog("Password Rejected",
-							  resultString);
-		      }
-		    else
-		      {
-			return Ganymede.createInfoDialog("Warning: password not secure",
-							 "The password quality checker has not approved this password.  As supergash " +
-							 "you may go ahead and use the password you chose, but it may not be secure.\n\n" +
-							 resultString);
-		      }
-		  }
-		catch (FileNotFoundException ex)
-		  {
-		    ex.printStackTrace();
-		  }
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    Ganymede.debug("Couldn't exec validatorCommand (" + validatorCommand + 
-			   ") due to IOException: " + ex);
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug("Failure during exec of validatorCommand (" + validatorCommand + "): " + ex);
-	  }
-	finally
-	  {
-	    FileOps.cleanupProcess(process);
-
-	    try
-	      {
-		resultFile.delete();
-	      }
-	    catch (Exception ex)
-	      {
-		ex.printStackTrace();
-	      }
-	  }
-      }
-    else
-      {
-	Ganymede.debug(validatorCommand + " doesn't exist, not running external password validation program");
-      }
-
-    return null;
-  }
-
-  /**
-   * This method is used to save the chosen password to npasswd's
-   * on-disk non-reuse history so that npasswd can reject a too-soon
-   * recurrence of this password later.
-   *
-   * If supergash is editing this account, the password might not
-   * be to npasswd's liking, in which case the password save operation
-   * will fail, but we won't worry about that it if it happens.
-   */
-
-  public ReturnVal savePasswordChoice(String password)
-  {
-    String saverName = "/opt/bin/ganypassSave";
-
-    String username = (String) getFieldValueLocal(USERNAME);
-
-    if (username == null)
-      {
-	return Ganymede.createErrorDialog("Error",
-					  "I need to know the username before I can save the password");
-      }
-
-    String saverCommand = saverName + " " + username;
-
-    File file = new File(saverName);
-
-    if (file.exists())
-      {
-	Process process = null;
-
-	/* -- */
-
-	try
-	  {
-	    process = Runtime.getRuntime().exec(saverCommand);
-
-	    PrintWriter out = new PrintWriter(process.getOutputStream());
-	    out.println(password);
-	    out.close();
-
-	    process.waitFor();
-
-	    if (process.exitValue() != 0)
-	      {
-		// the calling code doesn't really care about the
-		// failure to save, but
-		// Ganymede.createErrorDialog() will log this to
-		// stderr.
-		
-		return Ganymede.createErrorDialog("Password History Not Saved",
-						  "External error in npasswd saver");
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    Ganymede.debug("Couldn't exec saverCommand (" + saverCommand + 
-			   ") due to IOException: " + ex);
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug("Failure during exec of saverCommand (" + saverCommand + "): " + ex);
-	  }
-	finally
-	  {
-	    FileOps.cleanupProcess(process);
-	  }
-      }
-    else
-      {
-	Ganymede.debug(saverCommand + " doesn't exist, not saving password history");
-      }
-
-    return null;
-  }
-
-  /**
    *
    * This method is a hook for subclasses to override to
    * pass the phase-two commit command to external processes.<br><br>
@@ -3246,22 +3049,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	createUserExternals();
 
-	// remember the user's initial password for our password history support
-
-	PasswordDBField pField = (PasswordDBField) getField(userSchema.PASSWORD);
-
-	if (pField != null)
-	  {
-	    String pass = pField.getPlainText();
-
-	    if (pass != null)
-	      {
-		savePasswordChoice(pass);
-	      }
-	  }
-
-	break;
-
       case DELETING:
 	deleteUserExternals();
 	break;
@@ -3281,27 +3068,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// did we change home directory volumes?
 
 	handleVolumeChanges();
-
-	// did the user's password change?
-
-	PasswordDBField pField1 = (PasswordDBField) getField(userSchema.PASSWORD);
-	String pass1 = pField1.getPlainText();
-
-	PasswordDBField pField2 = (PasswordDBField) original.getField(userSchema.PASSWORD);
-
-	if (pField2 != null)
-	  {
-	    String pass2 = pField2.getPlainText();
-
-	    if (pass1 != null && !pass1.equals(pass2))
-	      {
-		savePasswordChoice(pass1);
-	      }
-	  }
-	else if (pass1 != null)
-	  {
-	    savePasswordChoice(pass1);
-	  }
       }
 
     return;
