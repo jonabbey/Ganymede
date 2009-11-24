@@ -1337,10 +1337,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * This method adds a DBField to this object.  It is generally only
-   * used by InvidDBField.bind(), when anonymously adding an
-   * InvidDBField to an object that the user would not normally have
-   * needs to add a field after the fact.
+   * This method adds a DBField to this object.  It is used when
+   * loading journal entries that cause new fields to be added, and by
+   * InvidDBField.bind(), when anonymously adding an InvidDBField to
+   * an object that the user would not normally have needs to add a
+   * field after the fact.
    */
 
   final synchronized void addField(DBField field)
