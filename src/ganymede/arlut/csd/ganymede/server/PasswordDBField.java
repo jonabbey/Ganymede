@@ -820,19 +820,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	if (Ganymede.db.isAtLeast(2,19))
 	  {
-	    // at 2.19, we always write out the count, even if we were not
-	    // history checked.  At 2.20, we only write out an archive
-	    // (including the count) if the field is configured for
-	    // history archiving/checking.
+	    // At 2.19, I had things quite broken, so I need some
+	    // special logic for always reading the history pool during journal loading.
+	    //
+	    // At 2.20, we only write out an archive (including the
+	    // count) if the field is configured for history
+	    // archiving/checking, and things are stable and as we
+	    // like it.
 
-	    if (Ganymede.db.isAtRev(2,19) || definition.isHistoryChecked())
+	    if ((Ganymede.db.isAtRev(2,19) && Ganymede.db.journalLoading) || definition.isHistoryChecked())
 	      {
-		if (Ganymede.db.journalLoading)
-		  {
-		    int count = in.readInt();
+		int count = in.readInt();
 		    
-		    history = new passwordHistoryArchive(definition.getHistoryDepth(), count, in);
-		  }
+		history = new passwordHistoryArchive(definition.getHistoryDepth(), count, in);
 	      }
 	  }
 	else
