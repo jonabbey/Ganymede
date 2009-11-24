@@ -337,11 +337,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>This constructor is used to create a non-editable DBObject from a
-   * DBEditObject that we have finished editing.  Whenever a
-   * transaction checks a created or edited shadow back into the
-   * DBStore, it actually does so by creating a new DBObject to
-   * replace any previous version of the object in the DBStore.</p>
+   * <p>This check-in constructor is used to create a non-editable
+   * DBObject from a DBEditObject that we have finished editing.
+   * Whenever a transaction checks a created or edited shadow back
+   * into the DBStore, it actually does so by creating a new DBObject
+   * to replace any previous version of the object in the DBStore.</p>
    *
    * @param eObj The shadow object to copy into the new DBObject
    *
