@@ -933,7 +933,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 	return false;
       }
 
-    DBField origField = (DBField) ((DBEditObject) getOwner()).getField(getID());
+    DBField origField = (DBField) ((DBEditObject) getOwner()).getOriginal().getField(getID());
 
     return hasChanged(origField);
   }
