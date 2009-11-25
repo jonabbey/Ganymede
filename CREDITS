@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-8 October 2009
+25 November 2009
 CREDITS
 
 ---------------------------------------------
@@ -441,5 +441,25 @@ Microsystems, and is used under the following license:
 
 --
 
-Special thanks to authors of Ant, Subversion, and Git for high quality
+The org.solinger.cracklib library used to provide password quality
+checking for password fields was written by Justin F. Chapweske.  It
+is a port of the C cracklib written by Alec Mufett.
+
+It is included in Ganymede under the terms of the Artistic License
+version 2.0, and has been enhanced slightly for use in Ganymede.
+
+You can find the original Java Cracklib port from
+
+  http://sourceforge.net/projects/solinger/
+
+or by downloading it directly from
+
+  http://sourceforge.net/projects/solinger/files/Java%20CrackLib/0.5/cracklib-0.5.tar.gz/download
+
+See src/ganymede/org/solinger/cracklib/README and
+src/ganymede/org/solinger/cracklib/LICENSE for full details.
+
+--
+
+Special thanks to authors of Git, Ant, and Subversion for high quality
 build and version control tools.
