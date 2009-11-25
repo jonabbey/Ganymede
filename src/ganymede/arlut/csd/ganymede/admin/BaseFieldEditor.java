@@ -5,10 +5,6 @@
    Base Field editor component for GASHSchema
    
    Created: 14 August 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey and Michael Mulvaney
 
@@ -1107,11 +1103,20 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	    typeC.getModel().setSelectedItem(passwordToken);
 	    passwordShowing = true;
 
-	    cracklibCF.setValue(fieldDef.isCracklibChecked());
+	    boolean crack_enabled = fieldDef.isCracklibChecked();
+
+	    cracklibCF.setValue(crack_enabled);
+	    editPanel.setRowVisible(cracklib_exceptionCF, crack_enabled);
 	    cracklib_exceptionCF.setValue(fieldDef.hasCracklibCheckException());
-	    historyCF.setValue(fieldDef.isHistoryChecked());
+
+	    boolean history_enabled = fieldDef.isHistoryChecked();
+
+	    historyCF.setValue(history_enabled);
+	    editPanel.setRowVisible(history_exceptionCF, history_enabled);
+	    editPanel.setRowVisible(history_depthN, history_enabled);
 	    history_exceptionCF.setValue(fieldDef.hasHistoryCheckException());
 	    history_depthN.setValue(fieldDef.getHistoryDepth());
+
 	    cryptedCF.setValue(fieldDef.isCrypted());
 	    md5cryptedCF.setValue(fieldDef.isMD5Crypted());
 	    apachemd5cryptedCF.setValue(fieldDef.isApacheMD5Crypted());
