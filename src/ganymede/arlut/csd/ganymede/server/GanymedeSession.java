@@ -2269,6 +2269,36 @@ final public class GanymedeSession implements Session, Unreferenced {
    * file on the server, and the changes will become visible to other
    * clients.
    *
+   * commitTransaction() will return a ReturnVal indicating whether or
+   * not the transaction could be committed, and whether or not the
+   * transaction remains open for further attempts at commit.  If
+   * ReturnVal.doNormalProcessing is set to true, the transaction
+   * remains open and it is up to the client to decide whether to
+   * abort the transaction by calling abortTransaction(), or to
+   * attempt to fix the reported problem and try another call to
+   * commitTransaction().
+   *
+   * @return null if the transaction could be committed without comment, or
+   *         a ReturnVal object if there were problems or a need for comment.
+   *         If the transaction was forcibly terminated due to a major error,
+   *         the doNormalProcessing flag in the returned ReturnVal will be
+   *         set to false.
+   * 
+   * @see arlut.csd.ganymede.rmi.Session 
+   */
+
+  public ReturnVal commitTransaction() throws NotLoggedInException
+  {
+    return commitTransaction(false);
+  }
+
+  /**
+   * This method causes all changes made by the client to be 'locked in'
+   * to the database.  When commitTransaction() is called, the changes
+   * made by the client during this transaction is logged to a journal
+   * file on the server, and the changes will become visible to other
+   * clients.
+   *
    * If the transaction cannot be committed for some reason,
    * commitTransaction() will abort the transaction if abortOnFail is
    * true.  In any case, commitTransaction() will return a ReturnVal
@@ -2297,6 +2327,47 @@ final public class GanymedeSession implements Session, Unreferenced {
    */
 
   public synchronized ReturnVal commitTransaction(boolean abortOnFail) throws NotLoggedInException
+  {
+    return commitTransaction(abortOnFail, null);
+  }
+
+  /**
+   * This method causes all changes made by the client to be 'locked in'
+   * to the database.  When commitTransaction() is called, the changes
+   * made by the client during this transaction is logged to a journal
+   * file on the server, and the changes will become visible to other
+   * clients.
+   *
+   * If the transaction cannot be committed for some reason,
+   * commitTransaction() will abort the transaction if abortOnFail is
+   * true.  In any case, commitTransaction() will return a ReturnVal
+   * indicating whether or not the transaction could be committed, and
+   * whether or not the transaction remains open for further attempts
+   * at commit.  If ReturnVal.doNormalProcessing is set to true, the
+   * transaction remains open and it is up to the client to decide
+   * whether to abort the transaction by calling abortTransaction(),
+   * or to attempt to fix the reported problem and try another call
+   * to commitTransaction().
+   *
+   * This method is synchronized to avoid nested-monitor deadlock in
+   * {@link arlut.csd.ganymede.server.DBSession#commitTransaction() DBSession.commitTransaction()}
+   * .
+   *
+   * @param abortOnFail If true, the transaction will be aborted if it
+   * could not be committed successfully.
+   * @param comment If not null, a comment to attach to logging and
+   * email generated in response to this transaction.
+   *
+   * @return a ReturnVal object if the transaction could not be committed,
+   *         or null if there were no problems.  If the transaction was
+   *         forcibly terminated due to a major error, the 
+   *         doNormalProcessing flag in the returned ReturnVal will be
+   *         set to false.
+   *
+   * @see arlut.csd.ganymede.rmi.Session 
+   */
+
+  public synchronized ReturnVal commitTransaction(boolean abortOnFail, String comment) throws NotLoggedInException
   {
     checklogin();
 
@@ -2361,36 +2432,6 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     return retVal;
-  }
-
-  /**
-   * This method causes all changes made by the client to be 'locked in'
-   * to the database.  When commitTransaction() is called, the changes
-   * made by the client during this transaction is logged to a journal
-   * file on the server, and the changes will become visible to other
-   * clients.
-   *
-   * commitTransaction() will return a ReturnVal indicating whether or
-   * not the transaction could be committed, and whether or not the
-   * transaction remains open for further attempts at commit.  If
-   * ReturnVal.doNormalProcessing is set to true, the transaction
-   * remains open and it is up to the client to decide whether to
-   * abort the transaction by calling abortTransaction(), or to
-   * attempt to fix the reported problem and try another call to
-   * commitTransaction().
-   *
-   * @return null if the transaction could be committed without comment, or
-   *         a ReturnVal object if there were problems or a need for comment.
-   *         If the transaction was forcibly terminated due to a major error,
-   *         the doNormalProcessing flag in the returned ReturnVal will be
-   *         set to false.
-   * 
-   * @see arlut.csd.ganymede.rmi.Session 
-   */
-
-  public ReturnVal commitTransaction() throws NotLoggedInException
-  {
-    return commitTransaction(false);
   }
 
   /**
