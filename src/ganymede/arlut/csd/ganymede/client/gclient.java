@@ -3316,7 +3316,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	      {
 		if (debug)
 		  {
-		    System.err.println("gclient.refreshTreeAfterCommit(): Deleteing node: " + node.getText());
+		    System.err.println("gclient.refreshTreeAfterCommit(): Deleting node: " + node.getText());
 		  }
 		
 		tree.deleteNode(node, false);
@@ -5097,12 +5097,43 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * to prepare the server for further changes by the user. 
    */
 
-  public void commitTransaction()
+  public void commitTransaction(boolean promptForComment)
   {
     ReturnVal retVal = null;
     boolean succeeded = false;
+    String comment = null;
 
     /* -- */
+
+    if (promptForComment)
+      {
+	// "Comment:"
+	String fieldName = ts.l("commitTransaction.comment_dialog_comment_label");
+
+	// "Transaction Commit"
+	// "Commit"
+
+	DialogRsrc r = new DialogRsrc(this, ts.l("commitTransaction.comment_dialog_title"), "",
+				      ts.l("init.commit_button"),
+				      StringDialog.getDefaultCancel(),
+				      getInfoImage());
+	r.addMultiString(fieldName);
+
+	StringDialog d = new StringDialog(r);
+
+	Hashtable result = d.showDialog();
+
+	if (result == null)
+	  {
+	    // the user hit cancel
+
+	    return;
+	  }
+	else
+	  {
+	    comment = (String) result.get(fieldName);
+	  }
+      }
 
     setWaitCursor();
 
@@ -5113,7 +5144,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
 	updateNotePanels();
 	
-	retVal = session.commitTransaction();
+	retVal = session.commitTransaction(false, comment);
 
 	if (retVal != null)
 	  {
@@ -5479,8 +5510,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	  {
 	    System.err.println("commit button clicked");
 	  }
-	
-	commitTransaction();
+
+	if ((event.getModifiers() & ActionEvent.ALT_MASK) != 0)
+	  {
+	    // alt/option was held down when the button was
+	    // pressed.. prompt for transaction comment
+
+	    commitTransaction(true);
+	  }
+	else
+	  {
+	    commitTransaction(false);
+	  }
       }
     else if ((source == menubarQueryMI) || (command.equals(query_action)))
       {
@@ -6566,7 +6607,7 @@ class PersonaListener implements ActionListener {
 	      {
 		// "Committing Transaction"
 		gc.setStatus(ts.l("actionPerformed.committing"));
-		gc.commitTransaction();
+		gc.commitTransaction(false);
 	      }
 	  }
 	
