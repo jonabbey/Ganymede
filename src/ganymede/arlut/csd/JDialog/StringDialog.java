@@ -340,25 +340,21 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     // Text message under title
     //
 
-    textLabel = new JMultiLineLabel(resource.getText());
-
-    JScrollPane pane = new JScrollPane(textLabel,
-				       JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-    pane.getViewport().setOpaque(false);
-    pane.setViewportBorder(null);
-
-    if (resource.getText() != null && !resource.getText().equals(""))
+    if (resource.getText() != null && !resource.getText().trim().equals(""))
       {
+	textLabel = new JMultiLineLabel(resource.getText());
+
+	JScrollPane pane = new JScrollPane(textLabel,
+					   JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+					   JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+	pane.getViewport().setOpaque(false);
+	pane.setViewportBorder(null);
+
 	pane.setBorder(new EmptyBorder(10,10,10,10));
-      }
-    else
-      {
-	pane.setBorder(null);
-      }
 
-    mainPanel.add(pane, "Center");
+	mainPanel.add(pane, "Center");
+      }
 
     // now we need to create our south panel
 
