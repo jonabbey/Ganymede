@@ -5115,8 +5115,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
 	DialogRsrc r = new DialogRsrc(this, ts.l("commitTransaction.comment_dialog_title"), "",
 				      ts.l("init.commit_button"),
-				      StringDialog.getDefaultCancel(),
-				      getInfoImage());
+				      StringDialog.getDefaultCancel());
 	r.addMultiString(fieldName);
 
 	StringDialog d = new StringDialog(r);
