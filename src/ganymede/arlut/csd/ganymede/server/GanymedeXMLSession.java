@@ -983,10 +983,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * Private helper method to process events from
-   * the {@link arlut.csd.Util.XMLReader XMLReader}.  By using
-   * this method, the rest of the code in GanymedeXMLSession doesn't
-   * have to check for error and warning conditions.
+   * Helper method to process events from the {@link
+   * arlut.csd.Util.XMLReader XMLReader}.  By using this method, the
+   * rest of the code in GanymedeXMLSession doesn't have to check for
+   * error and warning conditions.
    */
 
   public XMLItem getNextItem() throws SAXException
@@ -1006,6 +1006,37 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	err.println(ts.l("getNextItem.warning", item));
 	
 	item = reader.getNextItem();
+      }
+
+    return item;
+  }
+
+  /**
+   * Helper method to peek at the next event from the {@link
+   * arlut.csd.Util.XMLReader XMLReader}.  If the peek finds an
+   * XMLError item, a SAXException will be thrown.  If the peek finds
+   * any XMLWarning items, they will be consumed and the contents of
+   * the warning text passed to err.
+   */
+
+  public XMLItem peekNextItem() throws SAXException
+  {
+    XMLItem item = null;
+
+    item = reader.peekNextItem();
+    
+    if (item instanceof XMLError)
+      {
+	throw new SAXException(item.toString());
+      }
+    
+    while (item instanceof XMLWarning)
+      {
+	// "Warning!: {0}"
+	err.println(ts.l("getNextItem.warning", item));
+	
+	reader.getNextItem();	// consume the peeked warning item
+	item = reader.peekNextItem();
       }
 
     return item;
@@ -1995,7 +2026,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    *
    * @return true if the &lt;ganydata&gt; element was successfully
    * processed, or false if a fatal error in the XML stream was
-   * encountered during processing */
+   * encountered during processing
+   */
 
   public boolean processData() throws SAXException
   {
