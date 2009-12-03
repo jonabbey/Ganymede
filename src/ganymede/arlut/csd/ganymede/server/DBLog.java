@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -137,7 +138,7 @@ public class DBLog {
    *
    */
 
-  Map sysEventCodes = Collections.synchronizedMap(new HashMap());
+  Map<String, systemEventType> sysEventCodes = Collections.synchronizedMap(new HashMap<String, systemEventType>());
 
   /**
    *
@@ -159,7 +160,7 @@ public class DBLog {
    *
    */
 
-  Map objEventCodes = Collections.synchronizedMap(new HashMap());
+  Map<String, objectEventType> objEventCodes = Collections.synchronizedMap(new HashMap<String, objectEventType>());
 
   /**
    *
@@ -221,7 +222,7 @@ public class DBLog {
    * worth of email.</p>
    */
 
-  private HashMap transactionMailOuts;
+  private HashMap<String, MailOut> transactionMailOuts;
 
   /**
    * <p>This instance variable is used to track all mail messages that
@@ -232,7 +233,7 @@ public class DBLog {
    * accumulating.</p>
    */
 
-  private HashMap objectOuts;
+  private HashMap<String, HashMap<String, MailOut>> objectOuts;
 
   /**
    * <p>This instance variable is used to track the transaction
@@ -663,8 +664,8 @@ public class DBLog {
 	logController.writeEvent(commentEvent);
       }
 
-    this.transactionMailOuts = new HashMap();
-    this.objectOuts = new HashMap();
+    this.transactionMailOuts = new HashMap<String, MailOut>();
+    this.objectOuts = new HashMap<String, HashMap<String, MailOut>>();
 
     // check out the 'starttransaction' system event object to see if we're going
     // to do mailing for transaction summaries
@@ -709,7 +710,7 @@ public class DBLog {
     if (mailer != null)
       {
 	// if the event doesn't have its own subject set, we'll assume
-	// that it is not a pregenerated mail message, and that we
+	// that it is not a pre-generated mail message, and that we
 	// need to calculate the list of email targets from the
 	// Ganymede server's system and object event control objects.
 
@@ -793,7 +794,7 @@ public class DBLog {
 
 		if (this.transactionComment != null)
 		  {
-		    // "{0}\n----\nComment:\n{1}\n----\n{2}"
+		    // "{0}\n----\nAbout this transaction:\n{1}\n----\n{2}"
 		    message = ts.l("streamEvent.comment_template", message, this.transactionComment, signature);
 		  }
 		else
@@ -895,17 +896,27 @@ public class DBLog {
 
     if (mailer != null && this.transactionControl.mail)
       {
-	iter = this.transactionMailOuts.values().iterator();
-
-	while (iter.hasNext())
+	for (MailOut mailout: transactionMailOuts.values())
 	  {
-	    MailOut mailout = (MailOut) iter.next();
+	    String description = null;
 
-            // "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{2}{3}"
-	    String description = ts.l("endTransactionLog.summary_template",
-				      adminName, this.transactionTimeStamp,
-				      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
-				      signature);
+	    if (this.transactionComment != null)
+	      {
+		// "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\nAbout this transaction:\n{2}\n----\n{3}{4}"
+		description = ts.l("endTransactionLog.summary_comment_template",
+				   adminName, this.transactionTimeStamp,
+				   this.transactionComment,
+				   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+				   signature);
+	      }
+	    else
+	      {
+		// "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{2}{3}"
+		description = ts.l("endTransactionLog.summary_template",
+				   adminName, this.transactionTimeStamp,
+				   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+				   signature);
+	      }
 
 	    // we don't want any \n's between wordwrap and signature above,
 	    // since appendMailOut() adds "\n\n" at the end of each transaction
@@ -947,6 +958,7 @@ public class DBLog {
   {
     this.transactionID = null;
     this.transactionTimeStamp = null;
+    this.transactionComment = null;
     this.transactionMailOuts = null;
     this.objectOuts = null;
     this.transactionControl = null;
@@ -1142,16 +1154,18 @@ public class DBLog {
   }
 
   /**
-   * <P>This sends out the 'auxiliary' type specific log information mail
-   * to designated users, using the object event objects in the Ganymede
-   * database.  This mail is sent for a distinct eventcode/object type pair,
-   * outside of the context of a transaction.</P>
+   * <p>This creates and records a MailOut object for custom Object
+   * Event notifications if necessary for the DBLogEvent passed.  The
+   * MailOut object created, if any, will cause mail to be sent to any
+   * email addresses signed up for Object Event notification in the
+   * Ganymede database.</p>
    *
-   * @return vector of email addresses this event was sent to for 
-   * system event notification
+   * @return Vector of email addresses this event will be sent to for
+   * object event notification, or null if no object event mail is
+   * generated
    */
 
-  private Vector appendObjectMail(DBLogEvent event, HashMap objectOuts,
+  private Vector appendObjectMail(DBLogEvent event, HashMap<String, HashMap<String, MailOut>> objectOuts,
 				  String transdescrip, DBSession transSession)
   {
     if (event == null || event.objects == null || event.objects.size() != 1)
@@ -1161,10 +1175,10 @@ public class DBLog {
 
     // --
 
-    Vector mailList = new Vector();
+    Vector<String> mailList = new Vector<String>();
     Invid objectInvid = (Invid) event.objects.elementAt(0);
     String key = event.eventClassToken + ":" + objectInvid.getType();
-    objectEventType type = (objectEventType) objEventCodes.get(key);
+    objectEventType type = objEventCodes.get(key);
 
     /* -- */
 
@@ -1203,10 +1217,10 @@ public class DBLog {
 
     if (type.ccToOwners)
       {
-	mailList = VectorUtils.union(mailList, calculateOwnerAddresses(event.objects, true, true, transSession));
+	mailList = (Vector<String>) VectorUtils.union(mailList, calculateOwnerAddresses(event.objects, true, true, transSession));
       }
 
-    mailList = VectorUtils.union(mailList, type.addressVect);
+    mailList = (Vector<String>) VectorUtils.union(mailList, type.addressVect);
 
     if (mailList.size() == 0)
       {
@@ -1226,20 +1240,18 @@ public class DBLog {
     // users, in case one transaction involves objects with different
     // owner groups
 
-    HashMap addresses = (HashMap) objectOuts.get(key);
+    HashMap<String, MailOut> addresses = objectOuts.get(key);
 
     if (addresses == null)
       {
-	addresses = new HashMap();
+	addresses = new HashMap<String, MailOut>();
 
 	objectOuts.put(key, addresses);
       }
 
-    for (int i = 0; i < mailList.size(); i++)
+    for (String address: mailList)
       {
-	String address = (String) mailList.elementAt(i);
-
-	MailOut mailout = (MailOut) addresses.get(address);
+	MailOut mailout = addresses.get(address);
 
 	if (mailout == null)
 	  {
@@ -1261,34 +1273,48 @@ public class DBLog {
     return mailList;
   }
 
-  private void sendObjectMail(String returnAddr, String adminName, HashMap objectOuts, Date currentTime)
+  /**
+   * Send out type-specific email notifications to email addresses
+   * that have signed up for per-object-type mail notifications.
+   */
+
+  private void sendObjectMail(String returnAddr, String adminName, HashMap<String, HashMap<String, MailOut>> objectOuts, Date currentTime)
   {
-    Iterator iter = objectOuts.entrySet().iterator();
-
-    while (iter.hasNext())
+    for (Map.Entry<String, HashMap<String, MailOut>> item: objectOuts.entrySet())
       {
-	Map.Entry item = (Map.Entry) iter.next();
-	String key = (String) item.getKey();
-	HashMap addresses = (HashMap) item.getValue();
+	String key = item.getKey();
 
-	Iterator iter2 = addresses.entrySet().iterator();
-
-	while (iter2.hasNext())
+	for (Map.Entry<String, MailOut> item2: item.getValue().entrySet())
 	  {
-	    Map.Entry item2 = (Map.Entry) iter2.next();
-	    String address = (String) item2.getKey();
-	    MailOut mailout = (MailOut) item2.getValue();
+	    String address = item2.getKey();
+	    MailOut mailout = item2.getValue();
 
-	    objectEventType type = (objectEventType) objEventCodes.get(key);
+	    objectEventType type = objEventCodes.get(key);
 
-            // "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{3}{4}"
+	    String description = null;
 
-	    String description = ts.l("sendObjectMail.template",
-				      type.name,
-				      adminName,
-				      currentTime,
-				      arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
-				      signature);
+	    if (this.transactionComment == null)
+	      {
+		// "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{3}{4}"
+		description = ts.l("sendObjectMail.template",
+				   type.name,
+				   adminName,
+				   currentTime,
+				   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+				   signature);
+	      }
+	    else
+	      {
+		// "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\nAbout this transaction:\n{3}\n----\n{4}{5}"
+		description = ts.l("sendObjectMail.comment_template",
+				   type.name,
+				   adminName,
+				   currentTime,
+				   this.transactionComment,
+				   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+				   signature);
+	      }
+
 	    String title;
 
 	    if (mailout.entryCount == 1)
@@ -1420,7 +1446,7 @@ public class DBLog {
 	
 	entry = (Result) eventCodeVector.elementAt(i);
 	
-	sysEventCodes.put(entry.toString(), 
+	sysEventCodes.put(entry.toString(),
 			  new systemEventType(gSession.getSession().viewDBObject(entry.getInvid())));
       }
 
@@ -1643,7 +1669,7 @@ public class DBLog {
    * system event notification
    */
 
-  private Vector appendMailOut(DBLogEvent event, HashMap map, 
+  private Vector appendMailOut(DBLogEvent event, HashMap<String, MailOut> map, 
 			       DBSession session, systemEventType transactionType)
   {
     Iterator iter;
@@ -1774,7 +1800,7 @@ public class DBLog {
     DBObject object;
     Vector vect;
     Vector results = new Vector();
-    HashMap seenOwners = new HashMap();
+    HashSet<Invid> seenOwners = new HashSet<Invid>();
 
     /* -- */
 
@@ -1921,7 +1947,7 @@ public class DBLog {
 	  {
 	    ownerInvid = (Invid) ownersIter.next();
 
-	    if (!seenOwners.containsKey(ownerInvid))
+	    if (!seenOwners.contains(ownerInvid))
 	      {
 		if (debug)
 		  {
@@ -1932,7 +1958,7 @@ public class DBLog {
 		results = VectorUtils.union(results, ownerCustom.getAddresses(ownerInvid, 
 									      session));
 		
-		seenOwners.put(ownerInvid, ownerInvid);
+		seenOwners.add(ownerInvid);
 	      }
 	  }
       }
@@ -2181,7 +2207,7 @@ class objectEventType {
 class MailOut {
 
   StringBuffer description = new StringBuffer();
-  Vector addresses;
+  Vector<String> addresses;
   int entryCount = 0;
   String objName;
 
@@ -2194,7 +2220,7 @@ class MailOut {
 	throw new NullPointerException("bad address");
       }
 
-    addresses = new Vector();
+    addresses = new Vector<String>();
     addresses.addElement(address);
   }
 
