@@ -2209,11 +2209,6 @@ class xPassword {
   String ntmd4;
   String sshatext;
   String shaunixcrypt;
-  boolean cracklib_check;
-  boolean cracklib_supergash_exception;
-  boolean history_check;
-  boolean history_supergash_exception;
-  int history_depth;
 
   /* -- */
 
@@ -2225,6 +2220,13 @@ class xPassword {
 	throw new NullPointerException("Bad item!");
       }
 
+    if (!item.isEmpty())
+      {
+	getXSession().err.println("Error, found a non-empty password element: " + item);
+
+	throw new NullPointerException("Bad item!");
+      }
+
     plaintext = item.getAttrStr("plaintext");
     crypttext = item.getAttrStr("crypt");
     md5text = item.getAttrStr("md5crypt");
@@ -2233,41 +2235,6 @@ class xPassword {
     ntmd4 = item.getAttrStr("ntmd4");
     sshatext = item.getAttrStr("ssha");
     shaunixcrypt = item.getAttrStr("shaUnixCrypt");
-
-    if (!item.isEmpty())
-      {
-	item = getXSession().getNextItem();
-
-	while (!item.matchesClose("password"))
-	  {
-	    if (item.matches("cracklib_check"))
-	      {
-		cracklib_check = true;
-
-		if ("supergash".equals(item.getAttrStr("exception")))
-		  {
-		    cracklib_supergash_exception = true;
-		  }
-	      }
-	    else if (item.matches("history_check"))
-	      {
-		history_check = true;
-
-		if ("supergash".equals(item.getAttrStr("exception")))
-		  {
-		    history_supergash_exception = true;
-		  }
-
-		history_depth = item.getAttrInt("depth");
-	      }
-	    else
-	      {
-		getXSession().err.println("Unrecognized XML item found while parsing password element: " + item);
-	      }
-
-	    item = getXSession().getNextItem();
-	  }
-      }
   }
 
   public String toString()
