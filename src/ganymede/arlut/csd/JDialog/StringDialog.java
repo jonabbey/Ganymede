@@ -96,8 +96,8 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>A simple customizable dialog with support for a variety of data
- * field components.</p>
+ * <p>A simple customizable modal dialog with support for a variety of
+ * data field components.</p>
  *
  * <p>For simple dialogs, use the included constructors.  For more
  * complicated dialogs, including check boxes, choice lists, and text
@@ -204,7 +204,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   public StringDialog(Frame frame, String Title, String Text, boolean ShowCancel)
   {
-    this (frame, Title, Text, ts.l("global.ok"), ShowCancel ? ts.l("global.cancel") : null, null);
+    this(frame, Title, Text, ts.l("global.ok"), ShowCancel ? ts.l("global.cancel") : null, null);
   }
 
   /**
@@ -303,6 +303,10 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 					   new EmptyBorder(10, 10, 10, 10)));
     mainPanel.setLayout(new BorderLayout());
     setContentPane(mainPanel);
+
+    // set it as a modal sheet on the Mac
+
+    getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
 
     //
     // Title at top of dialog
