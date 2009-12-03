@@ -7,7 +7,6 @@
    email..
    
    Created: 31 October 1997
-   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 

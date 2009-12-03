@@ -7,10 +7,6 @@
    storage format.
    
    Created: 18 February 2003
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -18,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -89,7 +85,6 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * the server doc directory at doc/logDesign.html, or on the web at
  * http://www.arlut.utexas.edu/gash2/design/logDesign.html
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
