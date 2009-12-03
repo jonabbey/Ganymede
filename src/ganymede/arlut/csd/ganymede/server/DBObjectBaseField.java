@@ -2102,25 +2102,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 		  {
 		    _history_supergash_exception = true;
 		  }
-		
-		String depthStr = child.getAttrStr("depth");
 
-		if (depthStr != null)
-		  {
-		    try
-		      {
-			_history_depth = Integer.valueOf(depthStr);
-
-			if (_history_depth < 0)
-			  {
-			    _history_depth = 0;
-			  }
-		      }
-		    catch (NumberFormatException ex)
-		      {
-			_history_depth = 0;
-		      }
-		  }
+		_history_depth = child.getAttrInt("depth");
 	      }
 	    else if (child.matches("crypted"))
 	      {
