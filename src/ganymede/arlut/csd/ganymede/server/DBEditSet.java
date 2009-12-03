@@ -6,7 +6,6 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -243,6 +242,13 @@ public class DBEditSet {
    */
 
   private DBJournalTransaction persistedTransaction = null;
+
+  /**
+   * A comment to attach to logging and email generated in response to
+   * this transaction.
+   */
+
+  private String comment = null;
 
   /* -- */
 
@@ -1020,11 +1026,14 @@ public class DBEditSet {
    * DBSession.commitTransaction() method, to avoid the possibility of
    * nested monitor deadlock.</p>
    *
+   * @param comment If not null, a comment to attach to logging and
+   * email generated in response to this transaction.
+   *
    * @return a ReturnVal indicating success or failure, or null on success
    * without comment.
    */
 
-  public synchronized ReturnVal commit()
+  public synchronized ReturnVal commit(String comment)
   {
     if (debug)
       {
@@ -1042,6 +1051,8 @@ public class DBEditSet {
 	return Ganymede.createErrorDialog(ts.l("commit.forced_abort"),
 					  ts.l("commit.forced_abort_text"));
       }
+
+    this.comment = comment;
 
     try
       {
@@ -2292,11 +2303,7 @@ public class DBEditSet {
       {
 	try
 	  {
-	    // exceptions during logging aren't important enough to break a
-	    // transaction commit in progress, but we do want to record any
-	    // such
-
-	    Ganymede.log.startTransactionLog(invids, responsibleName, responsibleInvid, this);
+	    Ganymede.log.startTransactionLog(invids, responsibleName, responsibleInvid, comment, this);
 
 	    // then transmit/log any pre-recorded log events that we
 	    // have accumulated during the user's session/transaction
@@ -2323,6 +2330,10 @@ public class DBEditSet {
 	  }
 	catch (Throwable ex)
 	  {
+	    // exceptions during logging aren't important enough to break a
+	    // transaction commit in progress, but we do want to record any
+	    // such
+
 	    Ganymede.debug(Ganymede.stackTrace(ex));
 	  }
 	finally

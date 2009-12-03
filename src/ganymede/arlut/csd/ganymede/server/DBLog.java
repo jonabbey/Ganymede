@@ -9,7 +9,6 @@
    logfile itself orderly.
    
    Created: 31 October 1997
-   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -205,6 +204,14 @@ public class DBLog {
    */
 
   private Date transactionTimeStamp;
+
+  /**
+   * <p>This instance variable is used to track the comment for a
+   * transaction log across a sequence of startTransactionLog(),
+   * streamLogEvent(), and endTransactionLog() calls.</p>
+   */
+
+  private String transactionComment;
 
   /**
    * <p>This instance variable is used to track all mail messages that we accumulate
@@ -601,10 +608,11 @@ public class DBLog {
    * @param invids a HashMap mapping Invid objects to identity
    * @param adminName Human readable string identifying the admin responsible for this transaction
    * @param admin Invid representing the user or admin responsible for this transaction
+   * @param comment If not null, a comment to attach to logging and email generated in response to this transaction.
    * @param transaction The {@link arlut.csd.ganymede.server.DBEditSet} representing the transaction to be logged
    */
 
-  public synchronized void startTransactionLog(Vector invids, String adminName, Invid admin, DBEditSet transaction)
+  public synchronized void startTransactionLog(Vector invids, String adminName, Invid admin, String comment, DBEditSet transaction)
   {
     if (closed)
       {
@@ -621,6 +629,7 @@ public class DBLog {
 
     this.transactionTimeStamp = new Date(System.currentTimeMillis());
     this.transactionID = adminName + ":" + this.transactionTimeStamp.getTime();
+    this.transactionComment = comment;
 
     // write out a start-of-transaction line to the log
 
@@ -636,6 +645,23 @@ public class DBLog {
     start.setLogTime(this.transactionTimeStamp);
 
     logController.writeEvent(start);
+
+    // write out the comment line to the log
+
+    if (this.transactionComment != null)
+      {
+	DBLogEvent commentEvent = new DBLogEvent("comment",
+						 this.transactionComment,
+						 admin,
+						 adminName,
+						 invids,
+						 null);
+
+	commentEvent.setTransactionID(this.transactionID);
+	commentEvent.setLogTime(this.transactionTimeStamp);
+
+	logController.writeEvent(commentEvent);
+      }
 
     this.transactionMailOuts = new HashMap();
     this.objectOuts = new HashMap();
@@ -765,7 +791,16 @@ public class DBLog {
 
 		message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
-		message = message + "\n" + signature;
+		if (this.transactionComment != null)
+		  {
+		    // "{0}\n----\nComment:\n{1}\n----\n{2}"
+		    message = ts.l("streamEvent.comment_template", message, this.transactionComment, signature);
+		  }
+		else
+		  {
+		    // "{0}\n{1}"
+		    message = ts.l("streamEvent.no_comment_template", message, signature);
+		  }
 
 		// bombs away!
 		

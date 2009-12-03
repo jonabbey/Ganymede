@@ -2391,7 +2391,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     this.status = "";
     setLastEvent("commitTransaction");
 
-    retVal = session.commitTransaction(); // *sync* DBSession DBEditSet
+    retVal = session.commitTransaction(comment); // *sync* DBSession DBEditSet
 
     // if we succeeded, we'll schedule our
     // builder tasks to run

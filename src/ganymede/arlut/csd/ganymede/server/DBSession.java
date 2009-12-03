@@ -5,10 +5,6 @@
    The GANYMEDE object storage system.
 
    Created: 26 August 1996
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -1437,7 +1433,35 @@ final public class DBSession {
    * @see arlut.csd.ganymede.server.DBEditObject
    */
 
-  public synchronized ReturnVal commitTransaction()
+  public ReturnVal commitTransaction()
+  {
+    return commitTransaction(null);
+  }
+
+  /**
+   * <P>commitTransaction causes any changes made during the context of
+   * a current transaction to be performed.  Appropriate portions of the
+   * database are locked, changes are made to the in-memory image of
+   * the database, and a description of the changes is placed in the
+   * {@link arlut.csd.ganymede.server.DBStore DBStore} journal file.  Event
+   * logging / mail notification may take place.</P>
+   *
+   * <P>The session must not hold any locks when commitTransaction is
+   * called.  The symmetrical invid references between related objects
+   * and the atomic namespace management code should guarantee that no
+   * incompatible change is made with respect to any checked out objects
+   * while the Bases are unlocked.</P>
+   *
+   * @param comment If not null, a comment to attach to logging and
+   * email generated in response to this transaction.
+   *
+   * @return null if the transaction was committed successfully,
+   *         a non-null ReturnVal if there was a commit failure.
+   *
+   * @see arlut.csd.ganymede.server.DBEditObject
+   */
+
+  public synchronized ReturnVal commitTransaction(String comment)
   {
     ReturnVal retVal = null;
 
@@ -1473,7 +1497,7 @@ final public class DBSession {
 
     String description = editSet.description; // get before commit() clears it
     
-    retVal = editSet.commit(); // *synchronized*
+    retVal = editSet.commit(comment); // *synchronized*
     
     if (ReturnVal.didSucceed(retVal))
       {
