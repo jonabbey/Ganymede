@@ -53,6 +53,7 @@
 
 package arlut.csd.JDialog;
 
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
@@ -100,6 +101,13 @@ public class JCenterDialog extends JDialog {
   public JCenterDialog(Frame frame, String title, boolean modal)
   {
     super(frame, title, modal);
+
+    this.frame = frame;
+  }
+
+  public JCenterDialog(Frame frame, String title, Dialog.ModalityType modalityType)
+  {
+    super(frame, title, modalityType);
 
     this.frame = frame;
   }

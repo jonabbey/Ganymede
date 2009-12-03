@@ -49,6 +49,7 @@
 package arlut.csd.JDialog;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
@@ -264,7 +265,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   public StringDialog(DialogRsrc Resource)
   {
-    super(Resource.frame, Resource.title, true);
+    super(Resource.frame, Resource.title, Dialog.ModalityType.DOCUMENT_MODAL);
     this.resource = Resource;
 
     create();
