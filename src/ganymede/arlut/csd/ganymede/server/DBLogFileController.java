@@ -481,7 +481,7 @@ public class DBLogFileController implements DBLogController {
 		  }
 		else if (event.eventClassToken.equals("comment"))
 		  {
-		    // "\n\n{0}\n"
+		    // "\n{0}\n\n"
 		    buffer.append(ts.l("retrieveHistory.comment",
 				       WordWrap.wrap(event.description, 78)));
 		  }
