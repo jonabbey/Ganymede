@@ -479,6 +479,12 @@ public class DBLogFileController implements DBLogController {
 		    // "---------- End Transaction {0}: {1} ----------\n\n"
 		    buffer.append(ts.l("retrieveHistory.end_trans", event.time, event.adminName));
 		  }
+		else if (event.eventClassToken.equals("comment"))
+		  {
+		    // "\n\n{1}\n"
+		    buffer.append(ts.l("retrieveHistory.comment",
+				       WordWrap.wrap(event.description, 78)));
+		  }
 		else if (transactionID != null)
 		  {
 		    // "{0}\n{1}\n"
