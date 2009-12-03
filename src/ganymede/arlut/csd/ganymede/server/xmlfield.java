@@ -2189,7 +2189,7 @@ class xInvid {
 
 /**
  * <p>This class is used by the Ganymede XML client to represent
- * a password field value.</p>
+ * a password field data value.</p>
  *
  * <p>This class has five separate value fields, for the
  * possible password formats supported by Ganymede, but in fact
@@ -2233,18 +2233,6 @@ class xPassword {
     ntmd4 = item.getAttrStr("ntmd4");
     sshatext = item.getAttrStr("ssha");
     shaunixcrypt = item.getAttrStr("shaUnixCrypt");
-  }
-
-  public xPassword(String plaintext, String crypttext, String md5text, String apachemd5text, String lanman, String ntmd4, String sshatext, String shaunixcrypt)
-  {
-    this.plaintext = plaintext;
-    this.crypttext = crypttext;
-    this.md5text = md5text;
-    this.apachemd5text = apachemd5text;
-    this.lanman = lanman;
-    this.ntmd4 = ntmd4;
-    this.sshatext = sshatext;
-    this.shaunixcrypt = shaunixcrypt;
   }
 
   public String toString()
