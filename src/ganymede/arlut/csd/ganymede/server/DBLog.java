@@ -630,7 +630,15 @@ public class DBLog {
 
     this.transactionTimeStamp = new Date(System.currentTimeMillis());
     this.transactionID = adminName + ":" + this.transactionTimeStamp.getTime();
-    this.transactionComment = comment;
+
+    if (comment != null && !"".equals(comment.trim()))
+      {
+	this.transactionComment = comment;
+      }
+    else
+      {
+	this.transactionComment = null;
+      }
 
     // write out a start-of-transaction line to the log
 
