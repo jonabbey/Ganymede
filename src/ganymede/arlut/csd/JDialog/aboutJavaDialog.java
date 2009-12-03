@@ -5,7 +5,6 @@
    A dialog class used to display information about the JDK being used.
    
    Created: 7 July 2008
-   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey
 
@@ -13,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -55,8 +54,6 @@ import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -86,7 +83,7 @@ import arlut.csd.Util.TranslationService;
  *
  */
 
-public class aboutJavaDialog extends JCenterDialog implements ActionListener {
+public class aboutJavaDialog extends JCenterDialog {
 
   /**
    * <p>TranslationService object for handling string localization in
@@ -132,7 +129,6 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
   private JScrollPane scrollpane = null;
   private GridBagLayout gbl = null;
   private GridBagConstraints gbc = null;
-  private JButton ok = null;
 
   /* -- */
 
@@ -161,9 +157,6 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
     scrollPane.setViewportBorder(null);
     scrollPane.getViewport().setOpaque(true);
 
-    ok = new JButton(StringDialog.ok);  // localized
-    ok.addActionListener(this);
-
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridy = 0;
@@ -182,14 +175,6 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
     gbl.setConstraints(scrollPane, gbc);
     pane.add(scrollPane);
 
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.anchor = GridBagConstraints.SOUTH;    
-    gbc.gridy = 2;
-    gbc.weighty = 0.0;
-    gbc.insets = new Insets(0,0,0,0);
-    gbl.setConstraints(ok, gbc);
-    pane.add(ok);
-
     this.setContentPane(pane);
 
     textbox.setText(getVersionInfoString());
@@ -200,15 +185,5 @@ public class aboutJavaDialog extends JCenterDialog implements ActionListener {
   public void setVisible(boolean state)
   {
     super.setVisible(state);
-
-    if (state)
-      {
-	ok.requestFocus();
-      }
-  }
-
-  public void actionPerformed(ActionEvent e)
-  {
-    setVisible(false);
   }
 }

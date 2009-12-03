@@ -57,7 +57,6 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -88,7 +87,7 @@ import arlut.csd.Util.TranslationService;
  *
  */
 
-public class aboutGanyDialog extends JCenterDialog implements ActionListener {
+public class aboutGanyDialog extends JCenterDialog {
 
   private final static boolean debug = false;
 
@@ -106,7 +105,6 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
   private JScrollPane scrollpane = null;
   private GridBagLayout gbl = null;
   private GridBagConstraints gbc = null;
-  private JButton ok = null;
   private JTabbedPane tabPane = null;
 
   /* -- */
@@ -151,22 +149,6 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
     gbl.setConstraints(tabPane, gbc);
     pane.add(tabPane);
 
-    // on macs, we won't put an ok button on our about dialog
-
-    if (!"Mac OS X".equals(System.getProperty("os.name")))
-      {
-	ok = new JButton(StringDialog.ok); // localized
-	ok.addActionListener(this);
-
-	gbc.fill = GridBagConstraints.NONE;
-	gbc.anchor = GridBagConstraints.SOUTH;    
-	gbc.gridy = 2;
-	gbc.weighty = 0.0;
-	gbc.insets = new Insets(0,0,0,0);
-	gbl.setConstraints(ok, gbc);
-	pane.add(ok);
-      }
-
     this.setContentPane(pane);
 
     super.pack();
@@ -198,15 +180,5 @@ public class aboutGanyDialog extends JCenterDialog implements ActionListener {
   public void setVisible(boolean state)
   {
     super.setVisible(state);
-
-    if (state && ok != null)
-      {
-	ok.requestFocus();
-      }
-  }
-
-  public void actionPerformed(ActionEvent e)
-  {
-    setVisible(false);
   }
 }
