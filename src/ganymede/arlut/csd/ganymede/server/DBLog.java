@@ -802,7 +802,7 @@ public class DBLog {
 
 		if (this.transactionComment != null)
 		  {
-		    // "{0}\n----\nAbout this transaction:\n{1}\n----\n{2}"
+		    // "{0}\n----\n\n{1}\n\n{2}"
 		    message = ts.l("streamEvent.comment_template", message, this.transactionComment, signature);
 		  }
 		else
@@ -910,7 +910,7 @@ public class DBLog {
 
 	    if (this.transactionComment != null)
 	      {
-		// "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\nAbout this transaction:\n{2}\n----\n{3}{4}"
+		// "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\n\n{2}\n\n{3}{4}"
 		description = ts.l("endTransactionLog.summary_comment_template",
 				   adminName, this.transactionTimeStamp,
 				   this.transactionComment,
@@ -1313,7 +1313,7 @@ public class DBLog {
 	      }
 	    else
 	      {
-		// "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\nAbout this transaction:\n{3}\n----\n{4}{5}"
+		// "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\n\n{3}\n\n{4}{5}"
 		description = ts.l("sendObjectMail.comment_template",
 				   type.name,
 				   adminName,
