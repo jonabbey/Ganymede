@@ -6,11 +6,6 @@
 
    Created: 16 June 1997
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -113,9 +108,9 @@ import arlut.csd.Util.TranslationService;
  * Hashtable of results, which map the label used in the dialog for
  * individual data fields with the value entered into that field.</p>
  *
- * @see DialogRsrc 
+ * @see DialogRsrc
  * @version $Id$
- * @author Mike Mulvaney 
+ * @author Mike Mulvaney
  */
 
 public class StringDialog extends JCenterDialog implements ActionListener, WindowListener {
@@ -166,11 +161,11 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
   JLabel
     imageCanvas;
 
-  JButton 
+  JButton
     OKButton,
     CancelButton;
 
-  JPanel 
+  JPanel
     panel,
     mainPanel,
     dataPanel,
@@ -186,7 +181,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
   GridBagConstraints
     gbc,
     compgbc;
-  
+
   Image image;
 
   Vector objects;
@@ -267,7 +262,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
    *
    */
 
-  public StringDialog(DialogRsrc Resource) 
+  public StringDialog(DialogRsrc Resource)
   {
     super(Resource.frame, Resource.title, true);
     this.resource = Resource;
@@ -302,7 +297,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
       {
 	System.err.println("StringDialog constructor");
       }
-      
+
     mainPanel = new JPanel();
     mainPanel.setBorder(new CompoundBorder(new EtchedBorder(),
 					   new EmptyBorder(10, 10, 10, 10)));
@@ -378,7 +373,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
     buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
-    
+
     JPanel flowPanel = new JPanel();
 
     OKButton = new JButton(resource.getOkText());
@@ -460,8 +455,8 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     components = new Vector(objects.size());
 
     int numberOfObjects = objects.size();
-	
-    if (numberOfObjects == 0) 
+
+    if (numberOfObjects == 0)
       {
 	if (debug)
 	  {
@@ -471,7 +466,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	return panel;
       }
 
-    for (int i = 0; i < numberOfObjects; ++i) 
+    for (int i = 0; i < numberOfObjects; ++i)
       {
 	Object element = objects.elementAt(i);
 
@@ -486,7 +481,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	      {
 		System.err.println("Adding string field(JstringField)");
 	      }
-		    
+
 	    stringThing st = (stringThing) element;
 
 	    if (st.isMultiline())
@@ -496,7 +491,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 		sa.setEditable(true);
 
 		addRow(panel, sa, st.getLabel(), i);
-		    
+
 		componentHash.put(sa, st.getLabel());
 		valueHash.put(st.getLabel(), "");
 	      }
@@ -507,7 +502,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 		sf.setEditable(true);
 
 		addRow(panel, sf, st.getLabel(), i);
-		    
+
 		componentHash.put(sf, st.getLabel());
 		valueHash.put(st.getLabel(), "");
 	      }
@@ -518,7 +513,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	      {
 		System.err.println("Adding date field(JcalendarField)");
 	      }
-		    
+
 	    dateThing dt = (dateThing) element;
 
 	    JcalendarField dateField;
@@ -586,9 +581,9 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 		  }
 
 		JpassField sf = new JpassField(null,10,100,true);
-			
+
 		addRow(panel, sf, pt.getLabel(), i);
-			
+
 		componentHash.put(sf, pt.getLabel());
 	      }
 	    else
@@ -619,7 +614,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	    cb.setSelected(bt.getValue());
 
 	    addRow(panel, cb, bt.getLabel(), i);
-		      
+
 	    componentHash.put(cb, bt.getLabel());
 	    valueHash.put(bt.getLabel(), Boolean.valueOf(bt.getValue()));
 	  }
@@ -704,7 +699,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
       {
 	JComponent c = (JComponent)components.elementAt(i);
 
-	if (i == 0) 
+	if (i == 0)
 	  {
 	    // not sure if this does us any good on X Windows, as
 	    // focus is usually managed by clicking or rolling the
@@ -713,16 +708,16 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	    c.setRequestFocusEnabled(true);
 	    c.requestFocus();
 	  }
-	
+
 	if (debug)
 	  {
 	    System.err.println("Checking component: " + c);
 	  }
-	
+
 	if (c instanceof JstringField)
 	  {
 	    JstringField sf = (JstringField) c;
-	    
+
 	    if (i == components.size() -1) // last one!
 	      {
 		sf.addActionListener
@@ -742,7 +737,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 		   {
 		     public void actionPerformed(ActionEvent e) {
 		       JComponent thisComp = (JComponent)e.getSource();
-		       
+
 		       ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
 		     }
 		   });
@@ -754,9 +749,9 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	      {
 		System.err.println("This is a JpasswordField, number " + i);
 	      }
-	    
+
 	    JpasswordField pf = (JpasswordField) c;
-	    
+
 	    if (i == components.size() -1)
 	      {
 		pf.addActionListener
@@ -776,7 +771,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 		   {
 		     public void actionPerformed(ActionEvent e) {
 		       JComponent thisComp = (JComponent)e.getSource();
-			       
+
 		       ((JComponent)components.elementAt(components.indexOf(thisComp) + 1)).requestFocus();
 		     }
 		   });
@@ -805,7 +800,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
    * user closes the dialog box.</p>
    *
    * <p>Use this instead of Dialog.show().  If Hashtable returned is null,
-   * then the cancel button was clicked.  Otherwise, it will contain a 
+   * then the cancel button was clicked.  Otherwise, it will contain a
    * hash of labels(String) to results (Object).</p>
    *
    * @return HashTable of labels to values
@@ -857,7 +852,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
    * This method is responsible for scanning all of the input fields
    * in this dialog and loading their values into valueHash for
    * showDialog() to return.
-   * 
+   *
    */
 
   private void loadValueHash()
@@ -866,7 +861,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
       {
 	JComponent c = (JComponent)components.elementAt(i);
 	String label = (String) componentHash.get(c);
-	
+
 	if (debug)
 	  {
 	    System.err.println("Loading value for field: " + label);
@@ -889,13 +884,13 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	    else if (c instanceof JpasswordField)
 	      {
 		JpasswordField pf = (JpasswordField) c;
-	    
+
 		valueHash.put(label, pf.getPassword());
 	      }
 	    else if (c instanceof JpassField)
 	      {
 		JpassField pf = (JpassField) c;
-	    
+
 		valueHash.put(label, pf.getPassword());
 	      }
 	    else if (c instanceof JcalendarField)
@@ -920,7 +915,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 	catch (NullPointerException ex)
 	  {
 	  }
-      }    
+      }
   }
 
   /**
@@ -936,7 +931,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
     compgbc.gridwidth = 1;
     compgbc.fill = GridBagConstraints.NONE;
     compgbc.anchor = GridBagConstraints.WEST;
-    
+
     compgbc.gridy = row;
     compgbc.gridx = 0;
     compgbc.weightx = 0.0;
@@ -977,7 +972,7 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
 	// by setting valueHash to null, we're basically treating
 	// this window close as a cancel.
-	
+
 	valueHash = null;
       }
 
