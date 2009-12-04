@@ -115,7 +115,7 @@ import arlut.csd.Util.TranslationService;
  * @author Mike Mulvaney
  */
 
-public class StringDialog extends JDialog implements ActionListener, WindowListener {
+public class StringDialog extends modalDialog implements ActionListener, WindowListener {
 
   static final boolean debug = false;
 
@@ -266,7 +266,7 @@ public class StringDialog extends JDialog implements ActionListener, WindowListe
 
   public StringDialog(DialogRsrc Resource)
   {
-    super(Resource.frame, Resource.title, Dialog.ModalityType.DOCUMENT_MODAL);
+    super(Resource.frame, Resource.title);
     this.resource = Resource;
 
     create();
@@ -812,18 +812,6 @@ public class StringDialog extends JDialog implements ActionListener, WindowListe
   {
     mainPanel.revalidate();
     this.pack();
-
-    if ("Mac OS X".equals(System.getProperty("os.name")))
-      {
-	// set it as a modal sheet on the Mac
-
-	this.setLocationRelativeTo(null);
-	getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
-      }
-    else
-      {
-	this.setLocationRelativeTo(this.resource.frame);
-      }
 
     this.setVisible(true);
 

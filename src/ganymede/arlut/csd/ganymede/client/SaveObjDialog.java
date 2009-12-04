@@ -71,6 +71,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import arlut.csd.JDataComponent.JdateField;
+import arlut.csd.JDialog.modalDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 
@@ -85,7 +86,7 @@ import arlut.csd.Util.TranslationService;
  * including optional history dump.
  */
 
-public class SaveObjDialog extends JDialog implements ActionListener, ItemListener {
+public class SaveObjDialog extends modalDialog implements ActionListener, ItemListener {
 
   private static final boolean debug = false;
 
@@ -144,7 +145,7 @@ public class SaveObjDialog extends JDialog implements ActionListener, ItemListen
 
   SaveObjDialog(Frame owner, String title, boolean forMail, String mailSubj)
   {
-    super(owner, title, true);	// modal
+    super(owner, title);
 
     panel = new JPanel(gbl);
 

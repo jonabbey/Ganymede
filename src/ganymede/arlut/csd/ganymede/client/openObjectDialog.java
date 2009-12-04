@@ -77,6 +77,7 @@ import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
+import arlut.csd.JDialog.modalDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecQuickSort;
@@ -98,7 +99,7 @@ import arlut.csd.ganymede.common.QueryResult;
  *
  */
 
-public class openObjectDialog extends JDialog implements ActionListener, MouseListener {
+public class openObjectDialog extends modalDialog implements ActionListener, MouseListener {
 
   private final static boolean debug = false;
 
@@ -187,7 +188,7 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
 
   public openObjectDialog(gclient client)
   {
-    super(client, ts.l("init.dialog_title"), true); // "Open object"
+    super(client, ts.l("init.dialog_title")); // "Open object"
 
     this.client = client;
 
@@ -388,8 +389,6 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   {
     pack();
     type.requestFocus();
-
-    this.setLocationRelativeTo(client);
 
     setVisible(true);
 

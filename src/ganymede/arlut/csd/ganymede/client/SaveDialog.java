@@ -141,8 +141,6 @@ public class SaveDialog extends JDialog implements ActionListener {
 
     super(owner, forMail ? ts.l("init.mail_title") : ts.l("init.save_title"), true);
 
-    this.setLocationRelativeTo(owner);
-
     panel = new JPanel(gbl);
 
     gbc.insets = new Insets(6,6,6,6);
@@ -226,6 +224,8 @@ public class SaveDialog extends JDialog implements ActionListener {
     setContentPane(panel);
 
     pack();
+
+    this.setLocationRelativeTo(owner);
   }
 
   /**

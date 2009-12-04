@@ -187,6 +187,8 @@ public class messageDialog extends JDialog implements ActionListener {
 
   public void setVisible(boolean state)
   {
+    pack();
+
     setLocationRelativeTo(getOwner());
 
     super.setVisible(state);

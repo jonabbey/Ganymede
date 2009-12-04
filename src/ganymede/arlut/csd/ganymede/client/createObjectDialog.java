@@ -67,6 +67,7 @@ import javax.swing.JPanel;
 import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
+import arlut.csd.JDialog.modalDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.rmi.Base;
@@ -91,7 +92,7 @@ import arlut.csd.ganymede.rmi.Base;
  * @author Mike Mulvaney
  */
 
-public class createObjectDialog extends JDialog implements ActionListener {
+public class createObjectDialog extends modalDialog implements ActionListener {
 
   /**
    * TranslationService object for handling string localization in the
@@ -125,7 +126,7 @@ public class createObjectDialog extends JDialog implements ActionListener {
   public createObjectDialog(gclient client) 
   {
     // "Create Object"
-    super(client, ts.l("init.dialog_title"), true);
+    super(client, ts.l("init.dialog_title"));
 
     this.gc = client;
 
@@ -286,8 +287,6 @@ public class createObjectDialog extends JDialog implements ActionListener {
     this.setContentPane(p);
 
     pack();
-
-    this.setLocationRelativeTo(client);
 
     setVisible(true);
   }

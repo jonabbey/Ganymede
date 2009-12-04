@@ -72,6 +72,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.JMultiLineLabel;
+import arlut.csd.JDialog.modalDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 
@@ -88,7 +89,7 @@ import arlut.csd.Util.TranslationService;
  * @author Brian O'Mara
  */
 
-public class PersonaDialog extends JDialog implements ActionListener {
+public class PersonaDialog extends modalDialog implements ActionListener {
 
   public final static boolean debug = false;
 
@@ -132,7 +133,7 @@ public class PersonaDialog extends JDialog implements ActionListener {
   public PersonaDialog(gclient gc, boolean requirePassword)
   {
     // "Choose Persona"
-    super(gc, ts.l("init.title"), true);
+    super(gc, ts.l("init.title"));
 
     this.requirePassword = requirePassword;
     this.gc = gc;
@@ -248,8 +249,6 @@ public class PersonaDialog extends JDialog implements ActionListener {
     pack();
     pane.revalidate(); // Win95 browser fix??
     updatePassField(currentPersonaString);
-
-    this.setLocationRelativeTo(gc);
   }
 
   public void actionPerformed(ActionEvent e)

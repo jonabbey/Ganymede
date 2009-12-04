@@ -113,6 +113,7 @@ import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.messageDialog;
+import arlut.csd.JDialog.modalDialog;
 import arlut.csd.JDialog.aboutGanyDialog;
 import arlut.csd.JDialog.aboutJavaDialog;
 import arlut.csd.JTable.rowSelectCallback;
@@ -1716,7 +1717,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
  * GUI dialog for presenting server shutdown options in the admin console.
  */
 
-class consoleShutdownDialog extends JDialog implements ActionListener, WindowListener {
+class consoleShutdownDialog extends modalDialog implements ActionListener, WindowListener {
 
   private final static boolean debug = false;
 
@@ -1758,7 +1759,7 @@ class consoleShutdownDialog extends JDialog implements ActionListener, WindowLis
   public consoleShutdownDialog(Frame frame)
   {
     // "Confirm Ganymede Server Shutdown?"
-    super(frame, ts.l("global.title"), true);
+    super(frame, ts.l("global.title"));
 
     this.addWindowListener(this);
 
@@ -1876,18 +1877,6 @@ class consoleShutdownDialog extends JDialog implements ActionListener, WindowLis
   public int showDialog()
   {
     mainPanel.revalidate();
-
-    if ("Mac OS X".equals(System.getProperty("os.name")))
-      {
-	// set it as a modal sheet on the Mac
-
-	this.setLocationRelativeTo(null);
-	getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
-      }
-    else
-      {
-	this.setLocationRelativeTo(getOwner());
-      }
 
     this.setVisible(true);
 
