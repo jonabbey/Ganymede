@@ -53,6 +53,7 @@
 
 package arlut.csd.JDialog;
 
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.Image;
 
@@ -75,24 +76,24 @@ public class JErrorDialog {
 
   StringDialog d;
 
-  public JErrorDialog(Frame parent, String message)
+  public JErrorDialog(Frame parent, String message, Dialog.ModalityType modality)
   {
-    this(parent, ts.l("global.error"), message, null);
+    this(parent, ts.l("global.error"), message, null, modality);
   }
 
-  public JErrorDialog(Frame parent, String message, Image icon)
+  public JErrorDialog(Frame parent, String message, Image icon, Dialog.ModalityType modality)
   {
-    this(parent, ts.l("global.error"), message, icon);
+    this(parent, ts.l("global.error"), message, icon, modality);
   }
 
-  public JErrorDialog(Frame parent, String title, String message)
+  public JErrorDialog(Frame parent, String title, String message, Dialog.ModalityType modality)
   {
-    this(parent, title, message, null);
+    this(parent, title, message, null, modality);
   }
 
-  public JErrorDialog(Frame parent, String title, String message, Image icon)
+  public JErrorDialog(Frame parent, String title, String message, Image icon, Dialog.ModalityType modality)
   {
-    d = new StringDialog(parent, title, message, ts.l("global.ok"), null, icon);
+    d = new StringDialog(parent, title, message, ts.l("global.ok"), null, icon, modality);
     d.showDialog();
   }
 

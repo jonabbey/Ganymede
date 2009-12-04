@@ -6,14 +6,7 @@
    This client has been developed so that it can run as both an applet,
    as well as an application.
 
-   --
-
    Created: 22 Jan 1997
-
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
 
@@ -63,6 +56,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Cursor;
+import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -763,7 +757,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 			     ts.l("run.login_error_text", connectError),
 			     ts.l("global.ok"),
 			     null,
-			     getErrorImage()).showDialog();
+			     getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
 	    EventQueue.invokeLater(new Runnable() 
 	      {
@@ -967,7 +961,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		// "Couldn''t log into server: \n{0}"
 		new JErrorDialog(my_frame,
 				 ts.l("actionPerformed.login_failure", ex.getMessage()),
-				 getErrorImage());
+				 getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL);
 	    
 		enableButtons(true);
 	      }
@@ -1111,7 +1105,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     if (e.getType() == ClientMessage.ERROR)
       {
-	new JErrorDialog(my_frame, e.getMessage(), getErrorImage());
+	new JErrorDialog(my_frame, e.getMessage(), getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL);
       }
     else if (e.getType() == ClientMessage.BUILDSTATUS)
       {
@@ -1272,7 +1266,7 @@ class DeathWatcherThread extends Thread {
     // "The Ganymede Server is disconnecting us:\n\n{0} "
     new JErrorDialog(glogin.g_client,
 		     ts.l("run.kicked_off", message),
-		     glogin.g_client.getErrorImage());
+		     glogin.g_client.getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL);
 
     // if we get here, the dialog has been put down
 

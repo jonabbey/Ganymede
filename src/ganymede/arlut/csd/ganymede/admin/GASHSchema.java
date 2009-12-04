@@ -57,6 +57,7 @@ package arlut.csd.ganymede.admin;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -1173,7 +1174,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 			     ts.l("treeNodeMenuPerformed.mandatory_category"),
 			     ts.l("treeNodeMenuPerformed.root_category_delete"),
 			     ts.l("global.ok"),
-			     null).showDialog();
+			     null, Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 	    return;
 	  }
 
@@ -1187,7 +1188,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				 ts.l("treeNodeMenuPerformed.mandatory_category"),
 				 ts.l("treeNodeMenuPerformed.category_not_empty"),
 				 ts.l("global.ok"),
-				 null).showDialog();
+				 null, Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 		return;
 	      }
 
@@ -1199,7 +1200,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 					    ts.l("treeNodeMenuPerformed.deleteButton"), ts.l("global.cancel"),
 					    questionImage);
 
-	    Hashtable results = new StringDialog(dialogResource).showDialog();
+	    Hashtable results = new StringDialog(dialogResource, Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
 	    if (results != null)
 	      {
@@ -1283,7 +1284,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	dialogResource.addString(ts.l("treeNodeMenuPerformed.namespace_name_field")); // "Namespace:"
 	dialogResource.addBoolean(ts.l("treeNodeMenuPerformed.namespace_case_field")); // "Case Insensitive:"
 
-	Hashtable results = new StringDialog(dialogResource).showDialog();
+	Hashtable results = new StringDialog(dialogResource,Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
 	String newNameSpace = null;
 	Boolean insensitive = null;
@@ -1437,7 +1438,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 						   ts.l("global.cancel"),
 						   questionImage);
 
-	Hashtable results = new StringDialog(dialogResource).showDialog();
+	Hashtable results = new StringDialog(dialogResource, Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
 	if (results != null)
 	  {
@@ -1487,7 +1488,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				 ts.l("treeNodeMenuPerformed.deleteObjectTitle"),
 				 ts.l("treeNodeMenuPerformed.deleteObjectText", node.getText()),
 				 ts.l("treeNodeMenuPerformed.deleteButton"),
-				 ts.l("global.cancel")).showDialog() == null)
+				 ts.l("global.cancel"), Dialog.ModalityType.DOCUMENT_MODAL).showDialog() == null)
 	      {
 		if (debug)
 		  {
@@ -1521,7 +1522,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    new StringDialog(this,
 			     ts.l("treeNodeMenuPerformed.badDeleteObjectTitle"),
 			     ts.l("treeNodeMenuPerformed.badDeleteObjectText", node.getText()),
-			     ts.l("global.ok"), null).showDialog();
+			     ts.l("global.ok"), null, Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 	  }
       }
     else if (event.getSource() == createTabMI)
@@ -1595,7 +1596,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    // "Sorry, you are not allowed to delete the first tab in an object type."
 	    new JErrorDialog(this,
 			     ts.l("treeNodeMenuPerformed.badDeleteTabTitle"),
-			     ts.l("treeNodeMenuPerformed.badDeleteTabText"));
+			     ts.l("treeNodeMenuPerformed.badDeleteTabText"), Dialog.ModalityType.DOCUMENT_MODAL);
 	  }
 	else if (tNode.getChild() != null)
 	  {
@@ -1603,7 +1604,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    // "Error, the {0} tab in the {1} object type still contains fields."
 	    new JErrorDialog(this,
 			     ts.l("treeNodeMenuPerformed.badDeleteTabTitle"),
-			     ts.l("treeNodeMenuPerformed.nonEmptyDeleteTabText", tNode.getText(), bNode.getText()));
+			     ts.l("treeNodeMenuPerformed.nonEmptyDeleteTabText", tNode.getText(), bNode.getText()), Dialog.ModalityType.DOCUMENT_MODAL);
 	  }
 	else
 	  {
@@ -1611,7 +1612,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 				 ts.l("treeNodeMenuPerformed.deleteTabTitle"),
 				 ts.l("treeNodeMenuPerformed.deleteTabText", tNode.getText(), bNode.getText()),
 				 ts.l("treeNodeMenuPerformed.deleteButton"),
-				 ts.l("global.cancel")).showDialog() == null)
+				 ts.l("global.cancel"), Dialog.ModalityType.DOCUMENT_MODAL).showDialog() == null)
 	      {
 		if (debug)
 		  {
@@ -1840,7 +1841,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 						   ts.l("global.cancel"),
 						   questionImage);
 
-	Hashtable results = new StringDialog(dialogResource).showDialog();
+	Hashtable results = new StringDialog(dialogResource, Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
 	if (results != null)
 	  {
@@ -1864,7 +1865,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		// "An exception was caught from the server while trying to delete the {0} field from the {1} object type:\n{2}"
 		new JErrorDialog(this,
 				 ts.l("treeNodeMenuPerformed.badDeleteFieldTitle"),
-				 ts.l("treeNodeMenuPerformed.badDeleteFieldText", label, baseLabel, ex));
+				 ts.l("treeNodeMenuPerformed.badDeleteFieldText", label, baseLabel, ex), Dialog.ModalityType.DOCUMENT_MODAL);
 	      }
 	  }
       }
@@ -2982,7 +2983,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	    System.err.println("GASHSchema.handleReturnVal(): constructing dialog");
 	  }
 
-	StringDialog dialog = new StringDialog(resource);
+	StringDialog dialog = new StringDialog(resource, Dialog.ModalityType.DOCUMENT_MODAL);
 
 	if (debug)
 	  {

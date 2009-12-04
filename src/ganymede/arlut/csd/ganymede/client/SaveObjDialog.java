@@ -48,6 +48,7 @@
 
 package arlut.csd.ganymede.client;
 
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -71,7 +72,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import arlut.csd.JDataComponent.JdateField;
-import arlut.csd.JDialog.modalDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 
@@ -86,7 +87,7 @@ import arlut.csd.Util.TranslationService;
  * including optional history dump.
  */
 
-public class SaveObjDialog extends modalDialog implements ActionListener, ItemListener {
+public class SaveObjDialog extends StandardDialog implements ActionListener, ItemListener {
 
   private static final boolean debug = false;
 
@@ -145,7 +146,7 @@ public class SaveObjDialog extends modalDialog implements ActionListener, ItemLi
 
   SaveObjDialog(Frame owner, String title, boolean forMail, String mailSubj)
   {
-    super(owner, title);
+    super(owner, title, Dialog.ModalityType.DOCUMENT_MODAL);
 
     panel = new JPanel(gbl);
 

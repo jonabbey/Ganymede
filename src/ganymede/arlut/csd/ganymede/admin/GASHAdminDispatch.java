@@ -5,10 +5,6 @@
    Ganymede admin console and the server, bidirectionally.
 
    Created: 28 May 1996
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -16,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -53,6 +49,7 @@
 package arlut.csd.ganymede.admin;
 
 import java.awt.Color;
+import java.awt.Dialog;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.util.Comparator;
@@ -1060,7 +1057,7 @@ class GASHAdminDispatch implements Runnable {
 	    System.err.println("GASHAdminDispatch.handleReturnVal(): constructing dialog");
 	  }
 
-	StringDialog dialog = new StringDialog(resource);
+	StringDialog dialog = new StringDialog(resource, Dialog.ModalityType.DOCUMENT_MODAL);
 
 	if (debug)
 	  {

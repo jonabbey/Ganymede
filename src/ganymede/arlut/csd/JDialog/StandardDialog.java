@@ -1,17 +1,17 @@
 /*
 
-   modalDialog.java
+   StandardDialog.java
 
-   A dialog base class for centered, modal dialogs.
-   
+   A dialog base class for centered, possibly modal dialogs.
+
    Created: 4 December 2009
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2009
    The University of Texas at Austin
 
@@ -55,42 +55,53 @@ import javax.swing.JDialog;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     modalDialog
+                                                                  StandardDialog
 
 ------------------------------------------------------------------------------*/
 
 /**
- * A dialog base class for centered, modal dialogs.  On the Mac, these
- * dialogs will appear as sheets.
- *   
+ * A dialog base class for centered, possibly modal dialogs.  On the
+ * Mac, document-modal StandardDialogs will appear as sheets.
+ *
  * @author Jonathan Abbey
  */
 
-public class modalDialog extends JDialog {
+public class StandardDialog extends JDialog {
 
   private boolean already_shown = false;
   private Frame frame;
+  private Dialog.ModalityType modality;
 
-  public modalDialog(Frame frame, String title)
+  /* -- */
+
+  public StandardDialog(Frame frame, String title, Dialog.ModalityType modality)
   {
-    super(frame, title, Dialog.ModalityType.DOCUMENT_MODAL);
+    super(frame, title, modality);
 
     this.frame = frame;
+    this.modality = modality;
   }
 
   public void setVisible(boolean state)
   {
     if (state && !already_shown)
       {
-	if ("Mac OS X".equals(System.getProperty("os.name")))
+	if (modality == Dialog.ModalityType.DOCUMENT_MODAL && "Mac OS X".equals(System.getProperty("os.name")))
 	  {
 	    // set it as a modal sheet on the Mac
+	    //
+	    // XXX nb: Any document modal StandardDialog on the Mac
+	    // will need to have a button or buttons to close the
+	    // sheet, as sheets on the Mac do not have close controls,
+	    // etc.
 
 	    this.setLocationRelativeTo(null);
 	    getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
 	  }
 	else
 	  {
+	    // center to the frame
+
 	    this.setLocationRelativeTo(frame);
 	  }
 

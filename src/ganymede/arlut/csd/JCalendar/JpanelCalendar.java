@@ -5,11 +5,6 @@
 
    Created: 17 March 1997
 
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   Last Mod Date: $Date$
-   SVN URL: $HeadURL$
-
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
 
    -----------------------------------------------------------------------
@@ -55,6 +50,7 @@ package arlut.csd.JCalendar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -980,7 +976,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	    // "The date you have chosen is out of the acceptable range."
 	    new JErrorDialog(new JFrame(),
 			     ts.l("timeChanged.dateRangeError"), 
-			     ts.l("timeChanged.dateRangeErrorText"));
+			     ts.l("timeChanged.dateRangeErrorText"), Dialog.ModalityType.DOCUMENT_MODAL);
 	    
 	    setDate(previousDate);
 	  }

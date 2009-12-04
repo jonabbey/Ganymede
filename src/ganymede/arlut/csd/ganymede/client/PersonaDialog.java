@@ -51,6 +51,7 @@ package arlut.csd.ganymede.client;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -72,7 +73,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.JMultiLineLabel;
-import arlut.csd.JDialog.modalDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 
@@ -89,7 +90,7 @@ import arlut.csd.Util.TranslationService;
  * @author Brian O'Mara
  */
 
-public class PersonaDialog extends modalDialog implements ActionListener {
+public class PersonaDialog extends StandardDialog implements ActionListener {
 
   public final static boolean debug = false;
 
@@ -133,7 +134,7 @@ public class PersonaDialog extends modalDialog implements ActionListener {
   public PersonaDialog(gclient gc, boolean requirePassword)
   {
     // "Choose Persona"
-    super(gc, ts.l("init.title"));
+    super(gc, ts.l("init.title"), Dialog.ModalityType.DOCUMENT_MODAL);
 
     this.requirePassword = requirePassword;
     this.gc = gc;

@@ -7,18 +7,13 @@
    
    Created: 8 March 2005
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -54,6 +49,7 @@
 
 package arlut.csd.ganymede.client;
 
+import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -110,7 +106,7 @@ public class ExceptionDialog {
 
   public ExceptionDialog(Frame parent, String title, String message, Image icon)
   {
-    d = new StringDialog(parent, title, message, ts.l("init.reportException"), ts.l("init.cancel"), icon);
+    d = new StringDialog(parent, title, message, ts.l("init.reportException"), ts.l("init.cancel"), icon, Dialog.ModalityType.DOCUMENT_MODAL);
     d.setWrapLength(180);	// give a generous wrap length so that
 				// we size our dialog reasonably
 

@@ -50,6 +50,7 @@ package arlut.csd.ganymede.admin;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -113,7 +114,7 @@ import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.messageDialog;
-import arlut.csd.JDialog.modalDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.aboutGanyDialog;
 import arlut.csd.JDialog.aboutJavaDialog;
 import arlut.csd.JTable.rowSelectCallback;
@@ -1134,7 +1135,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    dumpDialog = new StringDialog(this,
 					  ts.l("actionPerformed.dump_title"),
 					  ts.l("actionPerformed.dump_question"),
-					  ts.l("global.yes"), ts.l("global.no"), question);
+					  ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
 	  }
 
 	if (dumpDialog.showDialog() != null)
@@ -1162,7 +1163,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	StringDialog invidTestDialog = new StringDialog(this,
 							ts.l("actionPerformed.invid_title"),
 							ts.l("actionPerformed.invid_question"),
-							ts.l("global.yes"), ts.l("global.no"), question);
+							ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
 
 	if (invidTestDialog.showDialog() != null)
 	  {
@@ -1188,7 +1189,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	StringDialog invidTestDialog = new StringDialog(this,
 							ts.l("actionPerformed.invidsweep_title"),
 							ts.l("actionPerformed.invidsweep_question"),
-							ts.l("global.yes"), ts.l("global.no"), question);
+							ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
 
 	if (invidTestDialog.showDialog() != null)
 	  {
@@ -1214,7 +1215,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	StringDialog invidTestDialog = new StringDialog(this,
 							ts.l("actionPerformed.embedded_title"),
 							ts.l("actionPerformed.embedded_question"),
-							ts.l("global.yes"), ts.l("global.no"), question);
+							ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
 
 	if (invidTestDialog.showDialog() != null)
 	  {
@@ -1241,7 +1242,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	StringDialog invidTestDialog = new StringDialog(this,
 							ts.l("actionPerformed.embedded_sweep_title"),
 							ts.l("actionPerformed.embedded_sweep_question"),
-							ts.l("global.yes"), ts.l("global.no"), question);
+							ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
 
 	if (invidTestDialog.showDialog() != null)
 	  {
@@ -1327,7 +1328,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 				     ts.l("actionPerformed.killall_question"),
 				     ts.l("global.yes"), ts.l("global.no"), question);
     
-	killAllDLG = new StringDialog(killAllDLGR);
+	killAllDLG = new StringDialog(killAllDLGR, Dialog.ModalityType.DOCUMENT_MODAL);
 	
 	if (killAllDLG.showDialog() == null)
 	  {
@@ -1516,7 +1517,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	if (new StringDialog(this,
 			     ts.l("rowMenuPerformed.kill_title"),
 			     ts.l("rowMenuPerformed.kill_question", key),
-			     ts.l("global.yes"), ts.l("global.no"), question).showDialog() != null)
+			     ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL).showDialog() != null)
 	  {
 	    if (debug)
 	      {
@@ -1701,7 +1702,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 			       {
 				 public void run()
 				   {
-				     new JErrorDialog(my_frame, Title, Message, fIcon); // implicit show
+				     new JErrorDialog(my_frame, Title, Message, fIcon, Dialog.ModalityType.DOCUMENT_MODAL); // implicit show
 				   }
 			       });
   }
@@ -1717,7 +1718,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
  * GUI dialog for presenting server shutdown options in the admin console.
  */
 
-class consoleShutdownDialog extends modalDialog implements ActionListener, WindowListener {
+class consoleShutdownDialog extends StandardDialog implements ActionListener, WindowListener {
 
   private final static boolean debug = false;
 
@@ -1759,7 +1760,7 @@ class consoleShutdownDialog extends modalDialog implements ActionListener, Windo
   public consoleShutdownDialog(Frame frame)
   {
     // "Confirm Ganymede Server Shutdown?"
-    super(frame, ts.l("global.title"));
+    super(frame, ts.l("global.title"), Dialog.ModalityType.DOCUMENT_MODAL);
 
     this.addWindowListener(this);
 

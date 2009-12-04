@@ -49,6 +49,7 @@
 package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -77,7 +78,7 @@ import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
-import arlut.csd.JDialog.modalDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecQuickSort;
@@ -99,7 +100,7 @@ import arlut.csd.ganymede.common.QueryResult;
  *
  */
 
-public class openObjectDialog extends modalDialog implements ActionListener, MouseListener {
+public class openObjectDialog extends StandardDialog implements ActionListener, MouseListener {
 
   private final static boolean debug = false;
 
@@ -188,7 +189,7 @@ public class openObjectDialog extends modalDialog implements ActionListener, Mou
 
   public openObjectDialog(gclient client)
   {
-    super(client, ts.l("init.dialog_title")); // "Open object"
+    super(client, ts.l("init.dialog_title"), Dialog.ModalityType.DOCUMENT_MODAL); // "Open object"
 
     this.client = client;
 

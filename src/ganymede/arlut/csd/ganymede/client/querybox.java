@@ -12,13 +12,8 @@
    window displayed as an internal frame in the client display area.
    
    Created: 23 July 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
-   Module By: Erik Grostic
-              Jonathan Abbey
+   Module By: Erik Grostic and Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
@@ -63,6 +58,7 @@ package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -913,7 +909,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 		// "Could not complete query.  Possible memory exhaustion problem.\n\n{0}"
 		new JErrorDialog(gc,
 				 ts.l("doQuery.error_caught",
-				      ex.getMessage()));
+				      ex.getMessage()), Dialog.ModalityType.DOCUMENT_MODAL);
 		throw ex;
 	      }
 	    

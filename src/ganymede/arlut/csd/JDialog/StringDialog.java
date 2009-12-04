@@ -98,8 +98,8 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>A simple customizable modal dialog with support for a variety of
- * data field components.</p>
+ * <p>A simple customizable dialog with support for a variety of data
+ * field components.</p>
  *
  * <p>For simple dialogs, use the included constructors.  For more
  * complicated dialogs, including check boxes, choice lists, and text
@@ -115,7 +115,7 @@ import arlut.csd.Util.TranslationService;
  * @author Mike Mulvaney
  */
 
-public class StringDialog extends modalDialog implements ActionListener, WindowListener {
+public class StringDialog extends StandardDialog implements ActionListener, WindowListener {
 
   static final boolean debug = false;
 
@@ -204,9 +204,9 @@ public class StringDialog extends modalDialog implements ActionListener, WindowL
    *
    */
 
-  public StringDialog(Frame frame, String Title, String Text, boolean ShowCancel)
+  public StringDialog(Frame frame, String Title, String Text, boolean ShowCancel, Dialog.ModalityType modality)
   {
-    this(frame, Title, Text, ts.l("global.ok"), ShowCancel ? ts.l("global.cancel") : null, null);
+    this(frame, Title, Text, ts.l("global.ok"), ShowCancel ? ts.l("global.cancel") : null, null, modality);
   }
 
   /**
@@ -219,9 +219,9 @@ public class StringDialog extends modalDialog implements ActionListener, WindowL
    *
    */
 
-  public StringDialog(Frame frame, String Title, String Text)
+  public StringDialog(Frame frame, String Title, String Text, Dialog.ModalityType modality)
   {
-    this(frame, Title, Text, ts.l("global.ok"), ts.l("global.cancel"), null);
+    this(frame, Title, Text, ts.l("global.ok"), ts.l("global.cancel"), null, modality);
   }
 
   /**
@@ -235,9 +235,9 @@ public class StringDialog extends modalDialog implements ActionListener, WindowL
    *
    */
 
-  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel)
+  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, Dialog.ModalityType modality)
   {
-    this(new DialogRsrc(frame, Title, Text, OK, Cancel, (Image) null));
+    this(new DialogRsrc(frame, Title, Text, OK, Cancel, (Image) null), modality);
   }
 
   /**
@@ -251,9 +251,9 @@ public class StringDialog extends modalDialog implements ActionListener, WindowL
    * @param image Image to display next to text
    */
 
-  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, Image image)
+  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, Image image, Dialog.ModalityType modality)
   {
-    this(new DialogRsrc(frame, Title, Text, OK, Cancel, image));
+    this(new DialogRsrc(frame, Title, Text, OK, Cancel, image), modality);
   }
 
   /**
@@ -264,9 +264,9 @@ public class StringDialog extends modalDialog implements ActionListener, WindowL
    *
    */
 
-  public StringDialog(DialogRsrc Resource)
+  public StringDialog(DialogRsrc Resource, Dialog.ModalityType modality)
   {
-    super(Resource.frame, Resource.title);
+    super(Resource.frame, Resource.title, modality);
     this.resource = Resource;
 
     create();

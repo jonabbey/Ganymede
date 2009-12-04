@@ -49,6 +49,7 @@
 package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.rmi.RemoteException;
@@ -69,7 +70,7 @@ import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDialog.JErrorDialog;
-import arlut.csd.JDialog.modalDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
@@ -81,7 +82,7 @@ import arlut.csd.ganymede.common.ReturnVal;
 
 ------------------------------------------------------------------------------*/
 
-public class JDefaultOwnerDialog extends modalDialog implements ActionListener, JsetValueCallback{
+public class JDefaultOwnerDialog extends StandardDialog implements ActionListener, JsetValueCallback{
 
   private final static boolean debug = false;
 
@@ -126,7 +127,7 @@ public class JDefaultOwnerDialog extends modalDialog implements ActionListener, 
   public JDefaultOwnerDialog(gclient gc, Vector groups)
   {
     // "Select Default Owner"
-    super(gc, ts.l("init.title"));
+    super(gc, ts.l("init.title"), Dialog.ModalityType.DOCUMENT_MODAL);
 
     this.gc = gc;
 

@@ -5,10 +5,6 @@
    a panel for handling User's personae.
    
    Created: 6 October 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Mike Mulvaney
 
@@ -53,6 +49,7 @@
 package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -381,7 +378,8 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 	StringDialog d = new StringDialog(gc,
 					  ts.l("actionPerformed.deletion_title"),
 					  ts.l("actionPerformed.deletion_mesg", middle.getTitleAt(middle.getSelectedIndex())),
-					  true);
+					  true,
+					  Dialog.ModalityType.DOCUMENT_MODAL);
 
 	gc.setNormalCursor();
 

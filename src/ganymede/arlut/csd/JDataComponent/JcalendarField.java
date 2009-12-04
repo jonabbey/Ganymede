@@ -9,18 +9,13 @@
 
    Created: 28 June 2002
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -58,6 +53,7 @@ package arlut.csd.JDataComponent;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -395,7 +391,8 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
 		// "There was an error communicating with the server!\n{0}"
 		new JErrorDialog(new JFrame(),
 				 ts.l("global.error_subj"),
-				 ts.l("global.error_text", re.getMessage()));
+				 ts.l("global.error_text", re.getMessage()),
+				 Dialog.ModalityType.DOCUMENT_MODAL);
 	      }
 
 	    if (!retval)

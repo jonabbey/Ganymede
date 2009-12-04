@@ -6,11 +6,6 @@
    
    Created: 4 September 1997
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -56,6 +51,7 @@ package arlut.csd.ganymede.client;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -875,7 +871,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					  ts.l("save.conflict_warning", file.getName()),
 					  ts.l("save.overwrite_button"),
 					  ts.l("global.cancel"),
-					  null);
+					  null, Dialog.ModalityType.DOCUMENT_MODAL);
 	Hashtable result = d.showDialog();
 
 	if (result == null)
@@ -1729,7 +1725,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					    ts.l("vetoableChange.discard_text"),
 					    ts.l("vetoableChange.discard_button"),
 					    ts.l("global.cancel"),
-					    gclient.client.getQuestionImage());
+					    gclient.client.getQuestionImage(), Dialog.ModalityType.DOCUMENT_MODAL);
 
 		Hashtable result = okToKill.showDialog();
 	    

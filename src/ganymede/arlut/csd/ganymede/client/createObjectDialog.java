@@ -49,6 +49,7 @@
 
 package arlut.csd.ganymede.client;
 
+import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -67,7 +68,7 @@ import javax.swing.JPanel;
 import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
-import arlut.csd.JDialog.modalDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.rmi.Base;
@@ -92,7 +93,7 @@ import arlut.csd.ganymede.rmi.Base;
  * @author Mike Mulvaney
  */
 
-public class createObjectDialog extends modalDialog implements ActionListener {
+public class createObjectDialog extends StandardDialog implements ActionListener {
 
   /**
    * TranslationService object for handling string localization in the
@@ -126,7 +127,7 @@ public class createObjectDialog extends modalDialog implements ActionListener {
   public createObjectDialog(gclient client) 
   {
     // "Create Object"
-    super(client, ts.l("init.dialog_title"));
+    super(client, ts.l("init.dialog_title"), Dialog.ModalityType.DOCUMENT_MODAL);
 
     this.gc = client;
 

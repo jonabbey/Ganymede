@@ -52,6 +52,7 @@ import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -684,7 +685,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("global.loginErrorMsg", connectError), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
 			     ts.l("global.loginErrorOKButton"), // "Ok"
 			     null,
-			     getErrorImage()).showDialog();
+			     getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 	    
 	    SwingUtilities.invokeLater(new Runnable() 
 	      {
@@ -749,7 +750,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("global.loginErrorMsg", rx.getMessage()), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
 			     ts.l("global.loginErrorOKButton"), // "Ok"
 			     null,
-			     getErrorImage()).showDialog();
+			     getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
 	    connected.set(false);
 
@@ -766,7 +767,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("actionPerformed.loginErrorMsg", ex.getMessage()),
 			     ts.l("actionPerformed.loginErrorOKButton"),
 			     null, 
-			     getErrorImage()).showDialog();
+			     getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
 	    
 	    password.setText("");
 	    return;

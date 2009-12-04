@@ -7,11 +7,6 @@
 
    Created: 11 July 1997
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
@@ -56,6 +51,7 @@ package arlut.csd.ganymede.client;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Image;
@@ -783,7 +779,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 									   ts.l("addTableWindow.query_result_subj"),
 									   ts.l("addTableWindow.query_result_txt"),
 									   ts.l("addTableWindow.query_result_try_again"),
-									   StringDialog.getDefaultCancel());
+									   StringDialog.getDefaultCancel(), Dialog.ModalityType.DOCUMENT_MODAL);
 
 					 if (d.showDialog() != null)
 					   {

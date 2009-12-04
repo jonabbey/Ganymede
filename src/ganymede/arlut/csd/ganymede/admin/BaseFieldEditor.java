@@ -49,6 +49,7 @@
 
 package arlut.csd.ganymede.admin;
 
+import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ItemEvent;
@@ -2097,7 +2098,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 							 ts.l("itemStateChanged.typeChangeWarningTitle"),
 							 ts.l("itemStateChanged.typeChangeLabelMessage"),
 							 StringDialog.getDefaultOk(),
-							 StringDialog.getDefaultCancel());
+							 StringDialog.getDefaultCancel(), Dialog.ModalityType.DOCUMENT_MODAL);
 		
 		Hashtable answer = changeLabelTypeDialog.showDialog();
 
