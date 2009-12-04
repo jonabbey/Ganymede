@@ -54,20 +54,13 @@ import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -86,11 +79,7 @@ import javax.swing.JSeparator;
  *
  */
 
-public class messageDialog extends StandardDialog implements ActionListener {
-
-  private final static boolean debug = false;
-
-  // ---
+public class messageDialog extends StandardDialog {
 
   JEditorPane
     text;
@@ -141,11 +130,6 @@ public class messageDialog extends StandardDialog implements ActionListener {
 
   public void setHtmlText(String s)
   {
-    if (debug)
-      {
-	System.out.println("Setting text to: " + s);
-      }
-    
     text.setContentType("text/html");
     text.setText(s);
     this.setPreferredSize(new Dimension(550,400));
@@ -178,10 +162,5 @@ public class messageDialog extends StandardDialog implements ActionListener {
       {
         text.setCaretPosition(0);
       }
-  }
-
-  public void actionPerformed(ActionEvent e)
-  {
-    setVisible(false);
   }
 }
