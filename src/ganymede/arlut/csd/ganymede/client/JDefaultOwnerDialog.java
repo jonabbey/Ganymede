@@ -5,10 +5,6 @@
    A dialog to choose filtering options.
    
    Created: ??
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Mike Mulvaney
 
@@ -72,7 +68,6 @@ import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDataComponent.StringSelector;
-import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
@@ -85,7 +80,7 @@ import arlut.csd.ganymede.common.ReturnVal;
 
 ------------------------------------------------------------------------------*/
 
-public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener, JsetValueCallback{
+public class JDefaultOwnerDialog extends JDialog implements ActionListener, JsetValueCallback{
 
   private final static boolean debug = false;
 
@@ -131,6 +126,8 @@ public class JDefaultOwnerDialog extends JCenterDialog implements ActionListener
   {
     // "Select Default Owner"
     super(gc, ts.l("init.title"), true);
+
+    this.setLocationRelativeTo(gc);
 
     this.gc = gc;
 

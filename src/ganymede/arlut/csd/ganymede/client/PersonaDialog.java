@@ -2,13 +2,9 @@
 
    PersonaDialog.java
 
-   A subclass of JCenterDialog that allows switching among personas
+   A subclass of JDialog that allows switching among personas
    
    Created: 17 February 1999
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Brian O'Mara
 
@@ -16,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2007
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -65,6 +61,7 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -75,7 +72,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.JMultiLineLabel;
-import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 
@@ -92,7 +88,7 @@ import arlut.csd.Util.TranslationService;
  * @author Brian O'Mara
  */
 
-public class PersonaDialog extends JCenterDialog implements ActionListener {
+public class PersonaDialog extends JDialog implements ActionListener {
 
   public final static boolean debug = false;
 
@@ -137,6 +133,8 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
   {
     // "Choose Persona"
     super(gc, ts.l("init.title"), true);
+
+    this.setLocationRelativeTo(gc);
 
     this.requirePassword = requirePassword;
     this.gc = gc;
@@ -317,13 +315,6 @@ public class PersonaDialog extends JCenterDialog implements ActionListener {
     login.setEnabled(bool);
     password.setEnabled(bool);
     this.setVisible(bool);
-  }
-
-  public void layout(int width, int height)
-  {
-    // Uses a special pack in JCenterDialog
-
-    pack(width, height);
   }
 
   public ButtonGroup getButtonGroup() 

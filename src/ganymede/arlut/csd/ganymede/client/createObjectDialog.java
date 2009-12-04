@@ -6,7 +6,6 @@
    create a new object in the client.
    
    Created: 17 September 1998
-   Last Commit: $Format:%cd$
 
    Module By: Mike Mulvaney
 
@@ -61,13 +60,13 @@ import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
-import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.rmi.Base;
@@ -89,11 +88,10 @@ import arlut.csd.ganymede.rmi.Base;
  * This dialog is modal, and will block on the GUI thread until it is
  * closed.
  *
- * @version $Id$
  * @author Mike Mulvaney
  */
 
-public class createObjectDialog extends JCenterDialog implements ActionListener {
+public class createObjectDialog extends JDialog implements ActionListener {
 
   /**
    * TranslationService object for handling string localization in the
@@ -128,6 +126,8 @@ public class createObjectDialog extends JCenterDialog implements ActionListener 
   {
     // "Create Object"
     super(client, ts.l("init.dialog_title"), true);
+
+    this.setLocationRelativeTo(client);
 
     this.gc = client;
 

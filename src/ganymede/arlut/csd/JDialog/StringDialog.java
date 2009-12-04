@@ -71,6 +71,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -114,7 +115,7 @@ import arlut.csd.Util.TranslationService;
  * @author Mike Mulvaney
  */
 
-public class StringDialog extends JCenterDialog implements ActionListener, WindowListener {
+public class StringDialog extends JDialog implements ActionListener, WindowListener {
 
   static final boolean debug = false;
 
@@ -292,6 +293,18 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 
   private void create()
   {
+    if ("Mac OS X".equals(System.getProperty("os.name")))
+      {
+	// set it as a modal sheet on the Mac
+
+	this.setLocationRelativeTo(null);
+	getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
+      }
+    else
+      {
+	this.setLocationRelativeTo(this.resource.frame);
+      }
+
     this.addWindowListener(this);
 
     if (debug)
@@ -304,10 +317,6 @@ public class StringDialog extends JCenterDialog implements ActionListener, Windo
 					   new EmptyBorder(10, 10, 10, 10)));
     mainPanel.setLayout(new BorderLayout());
     setContentPane(mainPanel);
-
-    // set it as a modal sheet on the Mac
-
-    getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
 
     //
     // Title at top of dialog

@@ -50,19 +50,19 @@ import java.awt.Frame;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import javax.swing.JDialog;
+
 import arlut.csd.JDataComponent.JResetDateObject;
 import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
-
-import arlut.csd.JDialog.JCenterDialog;
 
 import arlut.csd.Util.TranslationService;
 
 /**************************************************************/      
 
 
-public class JpopUpCalendar extends JCenterDialog implements JsetValueCallback {
+public class JpopUpCalendar extends JDialog implements JsetValueCallback {
 
   static final boolean debug = false;
 
@@ -92,6 +92,7 @@ public class JpopUpCalendar extends JCenterDialog implements JsetValueCallback {
     // "Please Choose A Date And Time"
     // "Selected Date"
     super(parentFrame, editable ? ts.l("init.chooseTitle") : ts.l("init.displayTitle"), false);
+    this.setLocationRelativeTo(parentFrame);
 
     if (callback == null)
       {

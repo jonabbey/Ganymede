@@ -6,18 +6,13 @@
    
    Created: ??
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -68,13 +63,13 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
-import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 
@@ -88,7 +83,7 @@ import arlut.csd.Util.TranslationService;
  * <p>Client dialog for saving or mailing the results of a query operation.</p>
  */
 
-public class SaveDialog extends JCenterDialog implements ActionListener {
+public class SaveDialog extends JDialog implements ActionListener {
 
   /**
    * TranslationService object for handling string localization in the
@@ -145,6 +140,8 @@ public class SaveDialog extends JCenterDialog implements ActionListener {
     // "Save Query Report"
 
     super(owner, forMail ? ts.l("init.mail_title") : ts.l("init.save_title"), true);
+
+    this.setLocationRelativeTo(owner);
 
     panel = new JPanel(gbl);
 

@@ -65,6 +65,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -76,7 +77,6 @@ import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
-import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecQuickSort;
@@ -98,7 +98,7 @@ import arlut.csd.ganymede.common.QueryResult;
  *
  */
 
-public class openObjectDialog extends JCenterDialog implements ActionListener, MouseListener {
+public class openObjectDialog extends JDialog implements ActionListener, MouseListener {
 
   private final static boolean debug = false;
 
@@ -188,6 +188,8 @@ public class openObjectDialog extends JCenterDialog implements ActionListener, M
   public openObjectDialog(gclient client)
   {
     super(client, ts.l("init.dialog_title"), true); // "Open object"
+
+    this.setLocationRelativeTo(client);
 
     this.client = client;
 

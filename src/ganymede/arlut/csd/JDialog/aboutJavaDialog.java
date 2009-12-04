@@ -57,6 +57,7 @@ import java.awt.Point;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -83,7 +84,7 @@ import arlut.csd.Util.TranslationService;
  *
  */
 
-public class aboutJavaDialog extends JCenterDialog {
+public class aboutJavaDialog extends JDialog {
 
   /**
    * <p>TranslationService object for handling string localization in
@@ -135,6 +136,8 @@ public class aboutJavaDialog extends JCenterDialog {
   public aboutJavaDialog(JFrame frame, String title)
   {
     super(frame, title, false);	// not modal, thanks
+
+    setLocationRelativeTo(frame);
 
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();

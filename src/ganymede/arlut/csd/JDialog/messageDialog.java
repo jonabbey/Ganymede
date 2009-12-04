@@ -7,7 +7,6 @@
    in the Ganymede client.
    
    Created: 16 September 1998
-   Last Commit: $Format:%cd$
 
    Module By: Mike Mulvaney
 
@@ -15,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -52,6 +51,7 @@
 package arlut.csd.JDialog;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -60,6 +60,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -84,7 +85,7 @@ import javax.swing.JSeparator;
  *
  */
 
-public class messageDialog extends JCenterDialog implements ActionListener {
+public class messageDialog extends JDialog implements ActionListener {
 
   private final static boolean debug = false;
 
@@ -104,6 +105,8 @@ public class messageDialog extends JCenterDialog implements ActionListener {
   public messageDialog(JFrame frame, String title, Image image)
   {
     super(frame, title, false);	// not modal
+
+    setLocationRelativeTo(frame);
 
     // There are three panels.  pane will become the content pane, so
     // it is the top container.  It contains two other panels:
@@ -144,8 +147,7 @@ public class messageDialog extends JCenterDialog implements ActionListener {
     pane.add("Center", topPanel);
     pane.add("South", buttonPanel);
     this.setContentPane(pane);
-
-    layout(450,200);
+    this.setPreferredSize(new Dimension(450,200));
   }
 
   /**
@@ -165,7 +167,7 @@ public class messageDialog extends JCenterDialog implements ActionListener {
     
     text.setContentType("text/html");
     text.setText(s);
-    layout(550,400);
+    this.setPreferredSize(new Dimension(550,400));
     text.setCaretPosition(0);
   }
 
@@ -181,7 +183,7 @@ public class messageDialog extends JCenterDialog implements ActionListener {
   {
     text.setContentType("text/plain");
     text.setText(s);
-    layout(550,400);
+    this.setPreferredSize(new Dimension(550,400));
     text.setCaretPosition(0);
   }
 
@@ -199,11 +201,5 @@ public class messageDialog extends JCenterDialog implements ActionListener {
   public void actionPerformed(ActionEvent e)
   {
     setVisible(false);
-  }
-
-  public void layout(int width, int height)
-  {
-    // Uses a special pack in JCenterDialog
-    pack(width, height);
   }
 }

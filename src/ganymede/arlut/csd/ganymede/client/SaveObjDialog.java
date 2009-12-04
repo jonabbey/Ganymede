@@ -5,10 +5,6 @@
    Dialog for saving or mailing a table from dialog.
    
    Created: October 19, 1999
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey
 
@@ -16,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2009
    The University of Texas at Austin
 
    Contact information
@@ -68,13 +64,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
 import arlut.csd.JDataComponent.JdateField;
-import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 
@@ -89,7 +85,7 @@ import arlut.csd.Util.TranslationService;
  * including optional history dump.
  */
 
-public class SaveObjDialog extends JCenterDialog implements ActionListener, ItemListener {
+public class SaveObjDialog extends JDialog implements ActionListener, ItemListener {
 
   private static final boolean debug = false;
 
@@ -149,6 +145,8 @@ public class SaveObjDialog extends JCenterDialog implements ActionListener, Item
   SaveObjDialog(Frame owner, String title, boolean forMail, String mailSubj)
   {
     super(owner, title, true);	// modal
+
+    this.setLocationRelativeTo(owner);
 
     panel = new JPanel(gbl);
 

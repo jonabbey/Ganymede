@@ -4,10 +4,6 @@
    Admin console for the Java RMI Gash Server
 
    Created: 7 September 2003
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -77,6 +73,7 @@ import java.util.prefs.Preferences;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -114,7 +111,6 @@ import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.LAFMenu;
 import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JErrorDialog;
-import arlut.csd.JDialog.JCenterDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.messageDialog;
 import arlut.csd.JDialog.aboutGanyDialog;
@@ -1720,7 +1716,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
  * GUI dialog for presenting server shutdown options in the admin console.
  */
 
-class consoleShutdownDialog extends JCenterDialog implements ActionListener, WindowListener {
+class consoleShutdownDialog extends JDialog implements ActionListener, WindowListener {
 
   private final static boolean debug = false;
 
@@ -1763,6 +1759,18 @@ class consoleShutdownDialog extends JCenterDialog implements ActionListener, Win
   {
     // "Confirm Ganymede Server Shutdown?"
     super(frame, ts.l("global.title"), true);
+
+    if ("Mac OS X".equals(System.getProperty("os.name")))
+      {
+	// set it as a modal sheet on the Mac
+
+	this.setLocationRelativeTo(null);
+	getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
+      }
+    else
+      {
+	this.setLocationRelativeTo(frame);
+      }
 
     this.addWindowListener(this);
 

@@ -60,6 +60,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -87,7 +88,7 @@ import arlut.csd.Util.TranslationService;
  *
  */
 
-public class aboutGanyDialog extends JCenterDialog {
+public class aboutGanyDialog extends JDialog {
 
   private final static boolean debug = false;
 
@@ -112,6 +113,8 @@ public class aboutGanyDialog extends JCenterDialog {
   public aboutGanyDialog(JFrame frame, String title)
   {
     super(frame, title, false);	// not modal, thanks
+
+    setLocationRelativeTo(frame);
 
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
