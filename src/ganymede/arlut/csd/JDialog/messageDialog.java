@@ -5,15 +5,15 @@
    A dialog class used to display text and HTML with an optional
    image on the left side, used for the about.. and motd features
    in the Ganymede client.
-   
+
    Created: 16 September 1998
 
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2009
    The University of Texas at Austin
 
@@ -73,7 +73,7 @@ import javax.swing.JScrollPane;
  * A dialog class used to display text and HTML with an optional
  * image on the left side, used for the about.. and motd features
  * in the Ganymede client.
- *   
+ *
  * @version $Id$
  * @author Mike Mulvaney
  *
@@ -95,7 +95,7 @@ public class messageDialog extends StandardDialog {
 
     JPanel topPanel = new JPanel(new BorderLayout());
     JPanel pane = new JPanel(new BorderLayout());
-    
+
     JLabel picture = null;
 
     if (image == null)
