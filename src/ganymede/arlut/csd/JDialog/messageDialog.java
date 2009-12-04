@@ -91,7 +91,12 @@ public class messageDialog extends StandardDialog {
 
   public messageDialog(JFrame frame, String title, Image image)
   {
-    super(frame, title, Dialog.ModalityType.MODELESS);	// not modal
+    this(frame, title, image, Dialog.ModalityType.MODELESS); // not modal
+  }
+
+  public messageDialog(JFrame frame, String title, Image image, Dialog.ModalityType modality)
+  {
+    super(frame, title, modality);
 
     JPanel topPanel = new JPanel(new BorderLayout());
     JPanel pane = new JPanel(new BorderLayout());
