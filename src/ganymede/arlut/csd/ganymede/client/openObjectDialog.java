@@ -189,8 +189,6 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   {
     super(client, ts.l("init.dialog_title"), true); // "Open object"
 
-    this.setLocationRelativeTo(client);
-
     this.client = client;
 
     InvidNode selectedNode = client.getSelectedObjectNode();
@@ -390,6 +388,8 @@ public class openObjectDialog extends JDialog implements ActionListener, MouseLi
   {
     pack();
     type.requestFocus();
+
+    this.setLocationRelativeTo(client);
 
     setVisible(true);
 

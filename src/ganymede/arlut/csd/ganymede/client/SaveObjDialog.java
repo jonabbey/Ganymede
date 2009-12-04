@@ -146,8 +146,6 @@ public class SaveObjDialog extends JDialog implements ActionListener, ItemListen
   {
     super(owner, title, true);	// modal
 
-    this.setLocationRelativeTo(owner);
-
     panel = new JPanel(gbl);
 
     gbc.insets = new Insets(6,6,6,6);
@@ -228,6 +226,8 @@ public class SaveObjDialog extends JDialog implements ActionListener, ItemListen
 
   public boolean showDialog()
   {
+    this.setLocationRelativeTo(getOwner());
+
     setVisible(true);
 
     if (debug)

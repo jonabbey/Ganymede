@@ -293,18 +293,6 @@ public class StringDialog extends JDialog implements ActionListener, WindowListe
 
   private void create()
   {
-    if ("Mac OS X".equals(System.getProperty("os.name")))
-      {
-	// set it as a modal sheet on the Mac
-
-	this.setLocationRelativeTo(null);
-	getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
-      }
-    else
-      {
-	this.setLocationRelativeTo(this.resource.frame);
-      }
-
     this.addWindowListener(this);
 
     if (debug)
@@ -824,6 +812,19 @@ public class StringDialog extends JDialog implements ActionListener, WindowListe
   {
     mainPanel.revalidate();
     this.pack();
+
+    if ("Mac OS X".equals(System.getProperty("os.name")))
+      {
+	// set it as a modal sheet on the Mac
+
+	this.setLocationRelativeTo(null);
+	getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
+      }
+    else
+      {
+	this.setLocationRelativeTo(this.resource.frame);
+      }
+
     this.setVisible(true);
 
     // at this point we're frozen, since we're a modal dialog.. we'll continue

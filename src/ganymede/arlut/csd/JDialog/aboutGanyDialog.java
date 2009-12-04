@@ -114,8 +114,6 @@ public class aboutGanyDialog extends JDialog {
   {
     super(frame, title, false);	// not modal, thanks
 
-    setLocationRelativeTo(frame);
-
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
 
@@ -161,6 +159,8 @@ public class aboutGanyDialog extends JDialog {
     // whole GPL
 
     addTab(ts.l("init.license_tab"), ts.l("init.licenseText"));
+
+    setLocationRelativeTo(frame);
   }
 
   private void addTab(String title, String text)

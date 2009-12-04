@@ -1760,18 +1760,6 @@ class consoleShutdownDialog extends JDialog implements ActionListener, WindowLis
     // "Confirm Ganymede Server Shutdown?"
     super(frame, ts.l("global.title"), true);
 
-    if ("Mac OS X".equals(System.getProperty("os.name")))
-      {
-	// set it as a modal sheet on the Mac
-
-	this.setLocationRelativeTo(null);
-	getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
-      }
-    else
-      {
-	this.setLocationRelativeTo(frame);
-      }
-
     this.addWindowListener(this);
 
     gbl = new GridBagLayout();
@@ -1888,6 +1876,19 @@ class consoleShutdownDialog extends JDialog implements ActionListener, WindowLis
   public int showDialog()
   {
     mainPanel.revalidate();
+
+    if ("Mac OS X".equals(System.getProperty("os.name")))
+      {
+	// set it as a modal sheet on the Mac
+
+	this.setLocationRelativeTo(null);
+	getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
+      }
+    else
+      {
+	this.setLocationRelativeTo(getOwner());
+      }
+
     this.setVisible(true);
 
     // at this point we're frozen, since we're a modal dialog.. we'll continue

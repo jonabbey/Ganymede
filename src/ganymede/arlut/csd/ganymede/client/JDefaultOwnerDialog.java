@@ -127,8 +127,6 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
     // "Select Default Owner"
     super(gc, ts.l("init.title"), true);
 
-    this.setLocationRelativeTo(gc);
-
     this.gc = gc;
 
     getContentPane().setLayout(new BorderLayout());
@@ -296,6 +294,8 @@ public class JDefaultOwnerDialog extends JDialog implements ActionListener, Jset
   public ReturnVal chooseOwner()
   {
     this.group_chosen = false;
+
+    this.setLocationRelativeTo(gc);
 
     // we're a modal dialog, so we'll block here until our visibility
     // is closed.

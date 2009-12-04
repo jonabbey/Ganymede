@@ -137,8 +137,6 @@ public class aboutJavaDialog extends JDialog {
   {
     super(frame, title, false);	// not modal, thanks
 
-    setLocationRelativeTo(frame);
-
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
 
@@ -183,6 +181,8 @@ public class aboutJavaDialog extends JDialog {
     textbox.setText(getVersionInfoString());
 
     pack();
+
+    setLocationRelativeTo(frame);
   }
 
   public void setVisible(boolean state)

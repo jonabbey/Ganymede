@@ -92,7 +92,6 @@ public class JpopUpCalendar extends JDialog implements JsetValueCallback {
     // "Please Choose A Date And Time"
     // "Selected Date"
     super(parentFrame, editable ? ts.l("init.chooseTitle") : ts.l("init.displayTitle"), false);
-    this.setLocationRelativeTo(parentFrame);
 
     if (callback == null)
       {
@@ -105,6 +104,8 @@ public class JpopUpCalendar extends JDialog implements JsetValueCallback {
 
     getContentPane().add(panelCal);
     pack();
+
+    this.setLocationRelativeTo(parentFrame);
   }
 
   public boolean setValuePerformed(JValueObject vObj)

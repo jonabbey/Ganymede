@@ -134,8 +134,6 @@ public class PersonaDialog extends JDialog implements ActionListener {
     // "Choose Persona"
     super(gc, ts.l("init.title"), true);
 
-    this.setLocationRelativeTo(gc);
-
     this.requirePassword = requirePassword;
     this.gc = gc;
 
@@ -250,6 +248,8 @@ public class PersonaDialog extends JDialog implements ActionListener {
     pack();
     pane.revalidate(); // Win95 browser fix??
     updatePassField(currentPersonaString);
+
+    this.setLocationRelativeTo(gc);
   }
 
   public void actionPerformed(ActionEvent e)

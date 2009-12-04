@@ -106,8 +106,6 @@ public class messageDialog extends JDialog implements ActionListener {
   {
     super(frame, title, false);	// not modal
 
-    setLocationRelativeTo(frame);
-
     // There are three panels.  pane will become the content pane, so
     // it is the top container.  It contains two other panels:
     // topPanel, and buttonPanel.  topPanel contains everything but
@@ -189,6 +187,8 @@ public class messageDialog extends JDialog implements ActionListener {
 
   public void setVisible(boolean state)
   {
+    setLocationRelativeTo(getOwner());
+
     super.setVisible(state);
 
     if (state)

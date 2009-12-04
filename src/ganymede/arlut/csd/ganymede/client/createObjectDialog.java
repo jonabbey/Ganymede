@@ -127,8 +127,6 @@ public class createObjectDialog extends JDialog implements ActionListener {
     // "Create Object"
     super(client, ts.l("init.dialog_title"), true);
 
-    this.setLocationRelativeTo(client);
-
     this.gc = client;
 
     JPanel p = new JPanel(gbl);
@@ -288,6 +286,8 @@ public class createObjectDialog extends JDialog implements ActionListener {
     this.setContentPane(p);
 
     pack();
+
+    this.setLocationRelativeTo(client);
 
     setVisible(true);
   }
