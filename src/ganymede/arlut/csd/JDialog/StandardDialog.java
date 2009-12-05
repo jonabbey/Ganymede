@@ -84,24 +84,33 @@ public class StandardDialog extends JDialog {
   }
 
   /**
+   * Returns true if this dialog is being displayed on a Mac with the
+   * Mac Look and Feel
+   */
+
+  public boolean isRunningOnMac()
+  {
+    try
+      {
+	return ("Mac OS X".equals(System.getProperty("os.name")) &&
+		"Mac OS X".equals(UIManager.getLookAndFeel().getName()));
+      }
+    catch (NullPointerException ex)
+      {
+	return false;
+      }
+  }
+
+  /**
    * Returns true if this dialog is DOCUMENT_MODAL and running on the
    * Mac with the Mac look and feel.
    */
 
   public boolean isMacSheet()
   {
-    try
+    if (modality == Dialog.ModalityType.DOCUMENT_MODAL && isRunningOnMac())
       {
-	if (modality == Dialog.ModalityType.DOCUMENT_MODAL
-	    && "Mac OS X".equals(System.getProperty("os.name"))
-	    && "Mac OS X".equals(UIManager.getLookAndFeel().getName()))
-	  {
-	    return true;
-	  }
-      }
-    catch (NullPointerException ex)
-      {
-	return false;
+	return true;
       }
 
     return false;
