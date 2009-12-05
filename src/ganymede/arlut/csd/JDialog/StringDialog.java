@@ -307,12 +307,14 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
     setContentPane(mainPanel);
 
     //
-    // Title at top of dialog
+    // Title at top of dialog, if we're a sheet on a Mac
     //
 
-    //    JLabel titleLabel = new JLabel(resource.title == null ? "": resource.title, SwingConstants.CENTER);
-    //    titleLabel.setFont(new Font("Helvetica", Font.BOLD, 14));
-    //    mainPanel.add(titleLabel, "North");
+    if (isMacSheet())
+      {
+	JLabel titleLabel = new JLabel(resource.title == null ? "": resource.title, SwingConstants.CENTER);
+	mainPanel.add(titleLabel, BorderLayout.PAGE_START);
+      }
 
     //
     // Image on left hand side
@@ -331,11 +333,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 	imagePanel.add(Box.createGlue());
       }
 
-    mainPanel.add(imagePanel, "West");
-
-    //
-    // Text message under title
-    //
+    mainPanel.add(imagePanel, BorderLayout.LINE_START);
 
     if (resource.getText() != null && !resource.getText().trim().equals(""))
       {
@@ -357,7 +355,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 
     JPanel southPanel = new JPanel();
     southPanel.setLayout(new BorderLayout());
-    mainPanel.add(southPanel, "South");
+    mainPanel.add(southPanel, BorderLayout.PAGE_END);
 
     //
     // Now to build the south panel
@@ -367,7 +365,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
     //
 
     panel = createElementPanel();
-    southPanel.add(panel, "Center");
+    southPanel.add(panel, BorderLayout.CENTER);
 
     //
     // ButtonPanel takes up the bottom of the dialog
@@ -392,9 +390,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 	flowPanel.add(CancelButton);
       }
 
-    boolean runningOnMac = "Mac OS X".equals(System.getProperty("os.name"));
-
-    if (runningOnMac)
+    if (isRunningOnMac())
       {
 	// On the Mac, we place the Cancel button to the left of the Ok
 	// button.
@@ -420,20 +416,20 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 
     buttonPanel.add(new JSeparator(), "North");
 
-    if (runningOnMac)
+    if (isRunningOnMac())
       {
 	JPanel macPanel = new JPanel();
 	macPanel.setLayout(new BorderLayout());
-	macPanel.add(flowPanel, BorderLayout.EAST); // right align
+	macPanel.add(flowPanel, BorderLayout.LINE_END); // right align
 
-	buttonPanel.add(macPanel, "South");
+	buttonPanel.add(macPanel, BorderLayout.PAGE_END);
       }
     else
       {
-	buttonPanel.add(flowPanel, "South");
+	buttonPanel.add(flowPanel, BorderLayout.PAGE_END);
       }
 
-    southPanel.add(buttonPanel, "South");
+    southPanel.add(buttonPanel, BorderLayout.PAGE_END);
 
     registerCallbacks();
     pack();
