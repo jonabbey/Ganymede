@@ -279,7 +279,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
     for (int i = 0; i < bases.size(); i++)
       {
-	thisBase = (BaseDump)bases.elementAt(i);
+	thisBase = (BaseDump) bases.elementAt(i);
 	String name = (String) baseNames.get(thisBase);
 
 	if (!thisBase.isEmbedded())
@@ -360,7 +360,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
     neverMind.setActionCommand(CANCEL);
     neverMind.addActionListener(this);
 
-    if (glogin.isRunningOnMac())
+    if (isRunningOnMac())
       {
 	JPanel macPanel = new JPanel();
 	macPanel.setLayout(new BorderLayout());
