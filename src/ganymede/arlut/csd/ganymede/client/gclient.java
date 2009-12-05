@@ -480,9 +480,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   JDefaultOwnerDialog
     defaultOwnerDialog = null;
 
-  openObjectDialog
-    openDialog;
-
   createObjectDialog
     createDialog = null;
 
@@ -4505,27 +4502,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   void editObjectDialog()
   {
-    if (openDialog == null)
-      {
-	openDialog = new openObjectDialog(this);
-      }
-    else
-      {
-	// if we have a node selected, recreate the dialog so that it
-	// will get re-initialized.
-
-	if (selectedNode != null && selectedNode instanceof InvidNode)
-	  {
-	    openDialog.dispose();
-	    openDialog = new openObjectDialog(this);	    
-	  }
-      }
+    openObjectDialog dialog = new openObjectDialog(this);
 
     // "Open object for editing"
-    openDialog.setText(ts.l("editObjectDialog.dialog_txt"));
-    openDialog.setIcon(new ImageIcon(pencil));
-    openDialog.setReturnEditableOnly(true);
-    Invid invid = openDialog.chooseInvid();
+    dialog.setText(ts.l("editObjectDialog.dialog_txt"));
+    dialog.setIcon(new ImageIcon(pencil));
+    dialog.setReturnEditableOnly(true);
+
+    Invid invid = dialog.chooseInvid();
 
     if (invid == null)
       {
@@ -4536,7 +4520,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       }
     else
       {
-	editObject(invid, openDialog.getTypeString(), null);
+	editObject(invid, dialog.getTypeString(), null);
       }
   }
 
@@ -4550,28 +4534,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   void viewObjectDialog()
   {
-    if (openDialog == null)
-      {
-	openDialog = new openObjectDialog(this);
-      }
-    else
-      {
-	// if we have a node selected, recreate the dialog so that it
-	// will get re-initialized.
-
-	if (selectedNode != null && selectedNode instanceof InvidNode)
-	  {
-	    openDialog.dispose();
-	    openDialog = new openObjectDialog(this);	    
-	  }
-      }
+    openObjectDialog dialog = new openObjectDialog(this);
 
     // "Open object for viewing"
-    openDialog.setText(ts.l("viewObjectDialog.dialog_txt"));
-    openDialog.setIcon(new ImageIcon(search));
-    openDialog.setReturnEditableOnly(false);
+    dialog.setText(ts.l("viewObjectDialog.dialog_txt"));
+    dialog.setIcon(new ImageIcon(search));
+    dialog.setReturnEditableOnly(false);
 
-    Invid invid = openDialog.chooseInvid();
+    Invid invid = dialog.chooseInvid();
 
     if (invid == null)
       {
@@ -4596,28 +4566,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   void inactivateObjectDialog()
   {
-    if (openDialog == null)
-      {
-	openDialog = new openObjectDialog(this);
-      }
-    else
-      {
-	// if we have a node selected, recreate the dialog so that it
-	// will get re-initialized.
-
-	if (selectedNode != null && selectedNode instanceof InvidNode)
-	  {
-	    openDialog.dispose();
-	    openDialog = new openObjectDialog(this);	    
-	  }
-      }
+    openObjectDialog dialog = new openObjectDialog(this);
 
     // "Choose object to be inactivated"
-    openDialog.setText(ts.l("inactivateObjectDialog.dialog_txt"));
-    openDialog.setIcon(null);
-    openDialog.setReturnEditableOnly(true);
+    dialog.setText(ts.l("inactivateObjectDialog.dialog_txt"));
+    dialog.setIcon(null);
+    dialog.setReturnEditableOnly(true);
 
-    Invid invid = openDialog.chooseInvid();
+    Invid invid = dialog.chooseInvid();
     
     inactivateObject(invid);
   }
@@ -4632,28 +4588,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   void deleteObjectDialog()
   {
-    if (openDialog == null)
-      {
-	openDialog = new openObjectDialog(this);
-      }
-    else
-      {
-	// if we have a node selected, recreate the dialog so that it
-	// will get re-initialized.
-
-	if (selectedNode != null && selectedNode instanceof InvidNode)
-	  {
-	    openDialog.dispose();
-	    openDialog = new openObjectDialog(this);	    
-	  }
-      }
+    openObjectDialog dialog = new openObjectDialog(this);
 
     // "Choose object to be deleted"
-    openDialog.setText(ts.l("deleteObjectDialog.dialog_txt"));
-    openDialog.setIcon(new ImageIcon(trash));
-    openDialog.setReturnEditableOnly(true);
+    dialog.setText(ts.l("deleteObjectDialog.dialog_txt"));
+    dialog.setIcon(new ImageIcon(trash));
+    dialog.setReturnEditableOnly(true);
 
-    Invid invid = openDialog.chooseInvid();
+    Invid invid = dialog.chooseInvid();
 
     if (invid == null)
       {
@@ -4678,28 +4620,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   void cloneObjectDialog()
   {
-    if (openDialog == null)
-      {
-	openDialog = new openObjectDialog(this);
-      }
-    else
-      {
-	// if we have a node selected, recreate the dialog so that it
-	// will get re-initialized.
-
-	if (selectedNode != null && selectedNode instanceof InvidNode)
-	  {
-	    openDialog.dispose();
-	    openDialog = new openObjectDialog(this);	    
-	  }
-      }
+    openObjectDialog dialog = new openObjectDialog(this);
 
     // "Choose object to be cloned"
-    openDialog.setText(ts.l("cloneObjectDialog.dialog_txt"));
-    openDialog.setIcon(new ImageIcon(cloneIcon));
-    openDialog.setReturnEditableOnly(false);
+    dialog.setText(ts.l("cloneObjectDialog.dialog_txt"));
+    dialog.setIcon(new ImageIcon(cloneIcon));
+    dialog.setReturnEditableOnly(false);
 
-    Invid invid = openDialog.chooseInvid();
+    Invid invid = dialog.chooseInvid();
 
     if (invid == null)
       {
@@ -5787,11 +5715,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	    SwingUtilities.updateComponentTreeUI(filterDialog);
 	  }
 
-	if (openDialog != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(openDialog);
-	  }
-
 	if (createDialog != null)
 	  {
 	    SwingUtilities.updateComponentTreeUI(createDialog);
@@ -6374,12 +6297,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
 	defaultOwnerDialog.dispose();
 	defaultOwnerDialog = null;
-      }
-
-    if (openDialog != null)
-      {
-	openDialog.dispose();
-	openDialog = null;
       }
 
     if (createDialog != null)
