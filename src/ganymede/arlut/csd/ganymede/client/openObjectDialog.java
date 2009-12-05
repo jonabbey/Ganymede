@@ -388,7 +388,10 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
   public Invid chooseInvid()
   {
+    invalidate();
+    validate();
     pack();
+
     type.requestFocus();
 
     setVisible(true);
