@@ -52,6 +52,7 @@ import java.awt.Dialog;
 import java.awt.Frame;
 
 import javax.swing.JDialog;
+import javax.swing.UIManager;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -82,11 +83,35 @@ public class StandardDialog extends JDialog {
     this.modality = modality;
   }
 
+  /**
+   * Returns true if this dialog is DOCUMENT_MODAL and running on the
+   * Mac with the Mac look and feel.
+   */
+
+  public boolean isMacSheet()
+  {
+    try
+      {
+	if (modality == Dialog.ModalityType.DOCUMENT_MODAL
+	    && "Mac OS X".equals(System.getProperty("os.name"))
+	    && "Mac OS X".equals(UIManager.getLookAndFeel().getName()))
+	  {
+	    return true;
+	  }
+      }
+    catch (NullPointerException ex)
+      {
+	return false;
+      }
+
+    return false;
+  }
+
   public void setVisible(boolean state)
   {
     if (state && !already_shown)
       {
-	if (modality == Dialog.ModalityType.DOCUMENT_MODAL && "Mac OS X".equals(System.getProperty("os.name")))
+	if (isMacSheet())
 	  {
 	    // set it as a modal sheet on the Mac
 	    //
