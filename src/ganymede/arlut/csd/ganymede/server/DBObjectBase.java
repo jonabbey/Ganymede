@@ -6,10 +6,6 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -86,6 +82,7 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VecQuickSort;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLItem;
+import arlut.csd.Util.XMLNameValidator;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.ganymede.common.BaseListTransport;
@@ -2262,19 +2259,19 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     securityCheck();
 
-    // make sure we strip any chars that would cause this object name
-    // to not be a valid XML entity name character.  We make an
-    // exception for spaces, which we will replace with underscores as
-    // an XML char.
-
-    newName = StringUtils.strip(newName,
-				"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-").trim();
-
     // no change, no harm
 
     if (newName.equals(object_name))
       {
 	return null;
+      }
+
+    if (!XMLNameValidator.isValidGanymedeName(newName))
+      {
+	// "Schema Editing Error"
+	// ""{0}" is not an acceptable Ganymede type name.\n\nAll Ganymede type names must be acceptable XML element names, save that spaces are allowed and underscores are not."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setName.invalid_ganymede_name", newName));
       }
 
     // check to make sure another object type isn't using the proposed

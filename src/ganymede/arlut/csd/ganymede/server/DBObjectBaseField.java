@@ -6,10 +6,6 @@
    The GANYMEDE object storage system.
 
    Created: 27 August 1996
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -66,6 +62,7 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.XMLItem;
+import arlut.csd.Util.XMLNameValidator;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.FieldType;
@@ -2975,19 +2972,19 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					  ts.l("setName.null_name"));
       }
 
-    // make sure we strip any chars that would cause this object name
-    // to not be a valid XML entity name character.  We make an
-    // exception for spaces, which we will replace with underscores as
-    // an XML char.
-
-    name = StringUtils.strip(name,
-			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-").trim();
-    
     // no change, no problem
 
     if (name.equals(field_name))
       {
 	return null;
+      }
+
+    if (!XMLNameValidator.isValidGanymedeName(name))
+      {
+	// "Schema Editing Error"
+	// ""{0}" is not an acceptable Ganymede field name.\n\nAll Ganymede field names must be acceptable XML element names, save that spaces are allowed and underscores are not."
+	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+					  ts.l("setName.invalid_ganymede_name", name));
       }
 
     DBObjectBaseField otherField = (DBObjectBaseField) ((DBObjectBase) getBase()).getField(name);
