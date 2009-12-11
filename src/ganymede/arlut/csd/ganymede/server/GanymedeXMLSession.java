@@ -2058,21 +2058,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	while (!item.matchesClose("ganydata") && !(item instanceof XMLEndDocument))
 	  {
-	    if (item.matches("comment"))
+	    if (item.matches("comment") && reader.isNextCharData())
 	      {
-		if (item.isEmpty() || item.getChildren().length != 1)
-		  {
-		    this.comment = null;
-		  }
-		else
-		  {
-		    this.comment = item.getChildren()[0].getCleanString();
-
-		    if ("".equals(this.comment))
-		      {
-			this.comment = null;
-		      }
-		  }
+		this.comment = reader.getFollowingString(item, true);
 	      }
 	    else if (item.matches("object"))
 	      {
