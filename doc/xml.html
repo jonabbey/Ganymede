@@ -156,21 +156,17 @@
           termination when reading XML files.</p>
       </li>
 
-      <li><p>There are limitations on what characters you can
-          use for tag and attribute names.  The rules on this are
-          somewhat complex, but for the purpose of XML use with
-          Ganymede at present, only the following characters will ever be
-          used:</p>
+      <li><p>Ganymede allows any string that is valid for XML 1.1 /
+          XML 1.0 (version 5) element names for object type and field
+          names, but spaces in object type / field names are
+          represented in XML as underscore ('_') characters.  Because
+          the Ganymede XML layer uses underscore as a stand-in for
+          space characters in Ganymede object type and field names,
+          you are not allowed to use underscores in Ganymede object
+          type and field names.</p>
 
-        <pre>
-           abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_
-        </pre>
-
-        <p>Eventually, Ganymede may be elaborated so that it knows all
-          of the rules for XML character limitations in the full
-          Unicode character range, but for now, only the above
-          characters will ever appear or be used in XML tag and
-          attribute names for use with Ganymede.</p>
+	  <p>This means that a field named 'Home Directory' will be
+	  represented in XML as an element named <Home_Directory>.</p>
       </li>
       <li><p>Unlike in HTML, the XML standard does not specify that whitespace
           can be ignored or contracted.  For Ganymede's purposes, however,
