@@ -398,6 +398,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   private XMLItem categoryTree = null;
 
   /**
+   * Comment for the <ganydata> transaction commit, if any is
+   * provided.
+   */
+
+  private String comment = null;
+
+  /**
    * Semaphore to gate the cleanup() method.
    */
 
@@ -2051,7 +2058,23 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
 	while (!item.matchesClose("ganydata") && !(item instanceof XMLEndDocument))
 	  {
-	    if (item.matches("object"))
+	    if (item.matches("comment"))
+	      {
+		if (item.isEmpty() || item.getChildren().length != 1)
+		  {
+		    this.comment = null;
+		  }
+		else
+		  {
+		    this.comment = item.getChildren()[0].getCleanString();
+
+		    if ("".equals(this.comment))
+		      {
+			this.comment = null;
+		      }
+		  }
+	      }
+	    else if (item.matches("object"))
 	      {
 		xmlobject objectRecord = null;
 
@@ -3095,7 +3118,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	err.println(ts.l("integrateXMLTransaction.committing"));
 	err.println();
 
-	retVal = session.commitTransaction(true);
+	retVal = session.commitTransaction(true, this.comment);
 
 	if (!ReturnVal.didSucceed(retVal))
 	  {
