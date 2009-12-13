@@ -173,19 +173,29 @@ public class XMLNameValidator {
       {
 	int codePoint = text.codePointAt(offset);
 
-	if (offset == 0 && codePoint == ' ')
+	if (offset == 0)
 	  {
-	    return false;
-	  }
+	    if (codePoint == ' ' || codePoint == '_' || codePoint == ':')
+	      {
+		return false;
+	      }
 
-	if (codePoint == '_' || codePoint == ':')
-	  {
-	    return false;
+	    if (!XMLNameValidator.isValidNameStartChar(codePoint))
+	      {
+		return false;
+	      }
 	  }
-
-	if (codePoint != ' ' && !XMLNameValidator.isValidNameChar(codePoint))
+	else
 	  {
-	    return false;
+	    if (codePoint == '_' || codePoint == ':')
+	      {
+		return false;
+	      }
+
+	    if (codePoint != ' ' && !XMLNameValidator.isValidNameChar(codePoint))
+	      {
+		return false;
+	      }
 	  }
 
 	offset += Character.charCount(codePoint);
