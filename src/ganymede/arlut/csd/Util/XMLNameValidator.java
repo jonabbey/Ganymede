@@ -156,9 +156,10 @@ public class XMLNameValidator {
    *
    * Ganymede names differ from XML names in that underscores are not
    * allowed (because they are used as the representation of spaces),
-   * and spaces are.
+   * and spaces are, after the first character in the name.
    *
-   * We're also not going to use colons to avoid
+   * We're also not going to permit colons to avoid confusion about
+   * XML namespaces.
    */
 
   public static boolean isValidGanymedeName(String text)
@@ -177,22 +178,17 @@ public class XMLNameValidator {
 	    return false;
 	  }
 
-	offset += Character.charCount(codePoint);
-
-	if (codePoint == ' ')
-	  {
-	    continue;
-	  }
-
 	if (codePoint == '_' || codePoint == ':')
 	  {
 	    return false;
 	  }
 
-	if (!XMLNameValidator.isValidNameChar(codePoint))
+	if (codePoint != ' ' && !XMLNameValidator.isValidNameChar(codePoint))
 	  {
 	    return false;
 	  }
+
+	offset += Character.charCount(codePoint);
       }
 
     // XML names that begin with xml are reserved, so we don't want to
