@@ -125,17 +125,26 @@ public class XMLNameValidator {
 	return false;
       }
 
-    if (!XMLNameValidator.isValidNameStartChar(text.codePointAt(0)))
+    for (int offset = 0; offset < text.length();)
       {
-	return false;
-      }
+	int codePoint = text.codePointAt(offset);
 
-    for (int i = 1; i < text.codePointCount(0, text.length()); i++)
-      {
-	if (!XMLNameValidator.isValidNameChar(text.codePointAt(i)))
+	if (offset == 0)
 	  {
-	    return false;
+	    if (!XMLNameValidator.isValidNameStartChar(codePoint))
+	      {
+		return false;
+	      }
 	  }
+	else
+	  {
+	    if (!XMLNameValidator.isValidNameChar(codePoint))
+	      {
+		return false;
+	      }
+	  }
+
+	offset += Character.charCount(codePoint);
       }
 
     return true;
@@ -159,19 +168,28 @@ public class XMLNameValidator {
 	return false;
       }
 
-    int firstCodePoint = text.codePointAt(0);
-
-    if (firstCodePoint == ' ' || firstCodePoint == '_' || firstCodePoint == ':' ||
-	!XMLNameValidator.isValidNameStartChar(text.codePointAt(0)))
+    for (int offset = 0; offset < text.length();)
       {
-	return false;
-      }
+	int codePoint = text.codePointAt(offset);
 
-    for (int i = 1; i < text.codePointCount(0, text.length()); i++)
-      {
-	int codePoint = text.codePointAt(i);
+	if (offset == 0 && codePoint == ' ')
+	  {
+	    return false;
+	  }
 
-	if (codePoint == '_' || (codePoint != ' ' && codePoint != ':' && !XMLNameValidator.isValidNameChar(text.codePointAt(i))))
+	offset += Character.charCount(codePoint);
+
+	if (codePoint == ' ')
+	  {
+	    continue;
+	  }
+
+	if (codePoint == '_' || codePoint == ':')
+	  {
+	    return false;
+	  }
+
+	if (!XMLNameValidator.isValidNameChar(codePoint))
 	  {
 	    return false;
 	  }
