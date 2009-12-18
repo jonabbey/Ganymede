@@ -109,8 +109,8 @@ public class StandardDialog extends JDialog {
     this.modality = modality;
 
     // this bletcherousness is to make the call to Java 6's enhanced
-    // setModalityType() method in a way that won't prevent loading
-    // and execution on Java 5.
+    // setModality() method in a way that won't prevent loading and
+    // execution on Java 5.
 
     boolean success = false;
 
