@@ -72,6 +72,7 @@ import arlut.csd.JDataComponent.JstringArea;
 import arlut.csd.JDataComponent.JstringField;
 import arlut.csd.JDataComponent.JLabelPanel;
 import arlut.csd.JDataComponent.JStretchPanel;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -2098,7 +2099,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 							 ts.l("itemStateChanged.typeChangeWarningTitle"),
 							 ts.l("itemStateChanged.typeChangeLabelMessage"),
 							 StringDialog.getDefaultOk(),
-							 StringDialog.getDefaultCancel(), Dialog.ModalityType.DOCUMENT_MODAL);
+							 StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 		
 		Hashtable answer = changeLabelTypeDialog.showDialog();
 

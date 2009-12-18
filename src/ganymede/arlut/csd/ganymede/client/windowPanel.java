@@ -76,6 +76,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
@@ -779,7 +780,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 									   ts.l("addTableWindow.query_result_subj"),
 									   ts.l("addTableWindow.query_result_txt"),
 									   ts.l("addTableWindow.query_result_try_again"),
-									   StringDialog.getDefaultCancel(), Dialog.ModalityType.DOCUMENT_MODAL);
+									   StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 					 if (d.showDialog() != null)
 					   {

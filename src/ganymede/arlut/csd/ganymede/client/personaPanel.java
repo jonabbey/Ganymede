@@ -65,6 +65,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
@@ -379,7 +380,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 					  ts.l("actionPerformed.deletion_title"),
 					  ts.l("actionPerformed.deletion_mesg", middle.getTitleAt(middle.getSelectedIndex())),
 					  true,
-					  Dialog.ModalityType.DOCUMENT_MODAL);
+					  StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	gc.setNormalCursor();
 

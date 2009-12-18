@@ -70,6 +70,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import arlut.csd.JCalendar.JpopUpCalendar;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
@@ -376,7 +377,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 	    
 	   new JErrorDialog(new JFrame(),
 			    ts.l("global.error_subj"),
-			    ts.l("global.error_text", re.getMessage()), Dialog.ModalityType.DOCUMENT_MODAL);
+			    ts.l("global.error_text", re.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
 	  }
 
 	if (retval == true)
@@ -571,7 +572,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		// "The date you have typed is invalid!\n\nProper format: MM/DD/YYYY 10/01/1997"
 		new JErrorDialog(new JFrame(),
 				 ts.l("global.error_subj"),
-				 ts.l("setValuePerformed.bad_format"), Dialog.ModalityType.DOCUMENT_MODAL);
+				 ts.l("setValuePerformed.bad_format"), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 		return retval;
 	      }
@@ -592,7 +593,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 			// "The date you have entered is out of range!\n\nValid Range: {0} to {1}"
 			new JErrorDialog(new JFrame(),
 					 ts.l("global.error_subj"),
-					 ts.l("setValuePerformed.out_of_range", minDate, maxDate), Dialog.ModalityType.DOCUMENT_MODAL);
+					 ts.l("setValuePerformed.out_of_range", minDate, maxDate), StandardDialog.ModalityType.DOCUMENT_MODAL);
 			return retval;
 		      }
 		  }
@@ -641,7 +642,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		// "There was an error communicating with the server!\n{0}"
 		new JErrorDialog(new JFrame(),
 				 ts.l("global.error_subj"),
-				 ts.l("global.error_text", e.getMessage()), Dialog.ModalityType.DOCUMENT_MODAL);
+				 ts.l("global.error_text", e.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
 	      }
 
 	    // if setValuePerformed() didn't work, revert the date,
@@ -714,7 +715,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		// "There was an error communicating with the server!\n{0}"
 		new JErrorDialog(new JFrame(),
 				 ts.l("global.error_subj"),
-				 ts.l("global.error_text", re.getMessage()), Dialog.ModalityType.DOCUMENT_MODAL);
+				 ts.l("global.error_text", re.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
 	      }
 
 	    // if setValuePerformed() didn't work, revert the date,
@@ -789,7 +790,7 @@ public class JdateField extends JPanel implements JsetValueCallback, ActionListe
 		// "There was an error communicating with the server!\n{0}"
 		new JErrorDialog(new JFrame(),
 				 ts.l("global.error_subj"),
-				 ts.l("global.error_text", re.getMessage()), Dialog.ModalityType.DOCUMENT_MODAL);
+				 ts.l("global.error_text", re.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
 	      }
 	  }
 	

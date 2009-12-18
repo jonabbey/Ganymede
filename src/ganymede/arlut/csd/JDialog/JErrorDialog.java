@@ -6,18 +6,13 @@
 
    Created: 5 October 1998
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2009
    The University of Texas at Austin
 
    Contact information
@@ -76,22 +71,22 @@ public class JErrorDialog {
 
   StringDialog d;
 
-  public JErrorDialog(Frame parent, String message, Dialog.ModalityType modality)
+  public JErrorDialog(Frame parent, String message, StandardDialog.ModalityType modality)
   {
     this(parent, ts.l("global.error"), message, null, modality);
   }
 
-  public JErrorDialog(Frame parent, String message, Image icon, Dialog.ModalityType modality)
+  public JErrorDialog(Frame parent, String message, Image icon, StandardDialog.ModalityType modality)
   {
     this(parent, ts.l("global.error"), message, icon, modality);
   }
 
-  public JErrorDialog(Frame parent, String title, String message, Dialog.ModalityType modality)
+  public JErrorDialog(Frame parent, String title, String message, StandardDialog.ModalityType modality)
   {
     this(parent, title, message, null, modality);
   }
 
-  public JErrorDialog(Frame parent, String title, String message, Image icon, Dialog.ModalityType modality)
+  public JErrorDialog(Frame parent, String title, String message, Image icon, StandardDialog.ModalityType modality)
   {
     d = new StringDialog(parent, title, message, ts.l("global.ok"), null, icon, modality);
     d.showDialog();

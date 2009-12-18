@@ -127,7 +127,7 @@ public class createObjectDialog extends StandardDialog implements ActionListener
   public createObjectDialog(gclient client) 
   {
     // "Create Object"
-    super(client, ts.l("init.dialog_title"), Dialog.ModalityType.DOCUMENT_MODAL);
+    super(client, ts.l("init.dialog_title"), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
     this.gc = client;
 

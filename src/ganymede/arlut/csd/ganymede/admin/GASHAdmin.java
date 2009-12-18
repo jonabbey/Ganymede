@@ -4,7 +4,6 @@
    Admin console for the Java RMI Gash Server
 
    Created: 28 May 1996
-   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -80,6 +79,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.PackageResources;
@@ -685,7 +685,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("global.loginErrorMsg", connectError), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
 			     ts.l("global.loginErrorOKButton"), // "Ok"
 			     null,
-			     getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
+			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 	    
 	    SwingUtilities.invokeLater(new Runnable() 
 	      {
@@ -750,7 +750,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("global.loginErrorMsg", rx.getMessage()), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
 			     ts.l("global.loginErrorOKButton"), // "Ok"
 			     null,
-			     getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
+			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
 	    connected.set(false);
 
@@ -767,7 +767,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("actionPerformed.loginErrorMsg", ex.getMessage()),
 			     ts.l("actionPerformed.loginErrorOKButton"),
 			     null, 
-			     getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL).showDialog();
+			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 	    
 	    password.setText("");
 	    return;

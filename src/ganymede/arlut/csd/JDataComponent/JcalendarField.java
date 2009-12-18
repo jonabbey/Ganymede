@@ -66,6 +66,7 @@ import javax.swing.JPanel;
 
 import arlut.csd.JCalendar.JpanelCalendar;
 import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
@@ -392,7 +393,7 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
 		new JErrorDialog(new JFrame(),
 				 ts.l("global.error_subj"),
 				 ts.l("global.error_text", re.getMessage()),
-				 Dialog.ModalityType.DOCUMENT_MODAL);
+				 StandardDialog.ModalityType.DOCUMENT_MODAL);
 	      }
 
 	    if (!retval)

@@ -51,6 +51,9 @@ package arlut.csd.JDialog;
 import java.awt.Dialog;
 import java.awt.Frame;
 
+import java.lang.Class;
+import java.lang.reflect.Method;
+
 import javax.swing.JDialog;
 import javax.swing.UIManager;
 
@@ -69,18 +72,77 @@ import javax.swing.UIManager;
 
 public class StandardDialog extends JDialog {
 
+  /**
+   * Enum that we're using to allow subclasses to tell us what type of
+   * modality, if any, they want to use.
+   *
+   * We in turn will use either Java 1.5 or Java 1.6 based methods to
+   * tell our superclasses what modality to use.
+   *
+   * This is a hack so that we can operate successfully on Java 5
+   * while taking advantage of the richer modality controls when
+   * running on Java 6.
+   */
+
+  public static enum ModalityType {
+    MODELESS,
+    DOCUMENT_MODAL,
+    APPLICATION_MODAL,
+    TOOLKIT_MODAL
+  };
+
   private boolean already_shown = false;
   private Frame frame;
-  private Dialog.ModalityType modality;
+  private ModalityType modality;
 
   /* -- */
 
-  public StandardDialog(Frame frame, String title, Dialog.ModalityType modality)
+  public StandardDialog(Frame frame, String title, ModalityType modality)
   {
-    super(frame, title, modality);
-
+    super(frame, title, modality!=ModalityType.MODELESS);
+    setModality(modality);
     this.frame = frame;
+  }
+
+  public void setModality(ModalityType modality)
+  {
     this.modality = modality;
+
+    // this bletcherousness is to make the call to Java 6's enhanced
+    // setModalityType() method in a way that won't prevent loading
+    // and execution on Java 5.
+
+    boolean success = false;
+
+    try
+      {
+	Class modalityClass = Class.forName("java.awt.Dialog.ModalityType");
+
+	Class[] paramTypes = new Class[] {modalityClass};
+	Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModality", paramTypes);
+
+	Class[] paramTypes2 = new Class[] {modalityClass, java.lang.String.class};
+	Method valueMethod = modalityClass.getDeclaredMethod("valueOf", paramTypes2);
+
+	Object enumValue = valueMethod.invoke(null, modality.name());
+	modalityMethod.invoke(this, enumValue);
+
+	success = true;
+      }
+    catch (Exception ex)
+      {
+	// expecting ClassNotFoundException if we are running on Java
+	// 5, but NoSuchMethodException, InvocationTargetException,
+	// IllegalAccessException are also checked exceptions that
+	// reflection operations can generate
+
+	ex.printStackTrace();
+      }
+
+    if (!success)
+      {
+	setModal(modality != ModalityType.MODELESS);
+      }
   }
 
   /**
@@ -108,7 +170,7 @@ public class StandardDialog extends JDialog {
 
   public boolean isMacSheet()
   {
-    if (modality == Dialog.ModalityType.DOCUMENT_MODAL && isRunningOnMac())
+    if (modality == ModalityType.DOCUMENT_MODAL && isRunningOnMac())
       {
 	return true;
       }

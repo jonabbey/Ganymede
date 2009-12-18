@@ -127,7 +127,7 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
   public JDefaultOwnerDialog(gclient gc, Vector groups)
   {
     // "Select Default Owner"
-    super(gc, ts.l("init.title"), Dialog.ModalityType.DOCUMENT_MODAL);
+    super(gc, ts.l("init.title"), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
     this.gc = gc;
 

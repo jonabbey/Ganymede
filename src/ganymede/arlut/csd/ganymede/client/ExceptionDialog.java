@@ -61,6 +61,7 @@ import java.awt.event.ActionListener;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
 
@@ -106,7 +107,7 @@ public class ExceptionDialog {
 
   public ExceptionDialog(Frame parent, String title, String message, Image icon)
   {
-    d = new StringDialog(parent, title, message, ts.l("init.reportException"), ts.l("init.cancel"), icon, Dialog.ModalityType.DOCUMENT_MODAL);
+    d = new StringDialog(parent, title, message, ts.l("init.reportException"), ts.l("init.cancel"), icon, StandardDialog.ModalityType.DOCUMENT_MODAL);
     d.setWrapLength(180);	// give a generous wrap length so that
 				// we size our dialog reasonably
 

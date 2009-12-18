@@ -204,7 +204,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
    *
    */
 
-  public StringDialog(Frame frame, String Title, String Text, boolean ShowCancel, Dialog.ModalityType modality)
+  public StringDialog(Frame frame, String Title, String Text, boolean ShowCancel, StandardDialog.ModalityType modality)
   {
     this(frame, Title, Text, ts.l("global.ok"), ShowCancel ? ts.l("global.cancel") : null, null, modality);
   }
@@ -219,7 +219,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
    *
    */
 
-  public StringDialog(Frame frame, String Title, String Text, Dialog.ModalityType modality)
+  public StringDialog(Frame frame, String Title, String Text, StandardDialog.ModalityType modality)
   {
     this(frame, Title, Text, ts.l("global.ok"), ts.l("global.cancel"), null, modality);
   }
@@ -235,7 +235,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
    *
    */
 
-  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, Dialog.ModalityType modality)
+  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, StandardDialog.ModalityType modality)
   {
     this(new DialogRsrc(frame, Title, Text, OK, Cancel, (Image) null), modality);
   }
@@ -251,7 +251,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
    * @param image Image to display next to text
    */
 
-  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, Image image, Dialog.ModalityType modality)
+  public StringDialog(Frame frame, String Title, String Text, String OK, String Cancel, Image image, StandardDialog.ModalityType modality)
   {
     this(new DialogRsrc(frame, Title, Text, OK, Cancel, image), modality);
   }
@@ -264,7 +264,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
    *
    */
 
-  public StringDialog(DialogRsrc Resource, Dialog.ModalityType modality)
+  public StringDialog(DialogRsrc Resource, StandardDialog.ModalityType modality)
   {
     super(Resource.frame, Resource.title, modality);
     this.resource = Resource;

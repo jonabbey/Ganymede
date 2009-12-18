@@ -83,6 +83,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.PackageResources;
@@ -871,7 +872,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					  ts.l("save.conflict_warning", file.getName()),
 					  ts.l("save.overwrite_button"),
 					  ts.l("global.cancel"),
-					  null, Dialog.ModalityType.DOCUMENT_MODAL);
+					  null, StandardDialog.ModalityType.DOCUMENT_MODAL);
 	Hashtable result = d.showDialog();
 
 	if (result == null)
@@ -1725,7 +1726,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					    ts.l("vetoableChange.discard_text"),
 					    ts.l("vetoableChange.discard_button"),
 					    ts.l("global.cancel"),
-					    gclient.client.getQuestionImage(), Dialog.ModalityType.DOCUMENT_MODAL);
+					    gclient.client.getQuestionImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 		Hashtable result = okToKill.showDialog();
 	    

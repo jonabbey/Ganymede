@@ -134,7 +134,7 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
   public PersonaDialog(gclient gc, boolean requirePassword)
   {
     // "Choose Persona"
-    super(gc, ts.l("init.title"), Dialog.ModalityType.DOCUMENT_MODAL);
+    super(gc, ts.l("init.title"), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
     this.requirePassword = requirePassword;
     this.gc = gc;

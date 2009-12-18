@@ -189,7 +189,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
   public openObjectDialog(gclient client)
   {
-    super(client, ts.l("init.dialog_title"), Dialog.ModalityType.DOCUMENT_MODAL); // "Open object"
+    super(client, ts.l("init.dialog_title"), StandardDialog.ModalityType.DOCUMENT_MODAL); // "Open object"
 
     this.client = client;
 

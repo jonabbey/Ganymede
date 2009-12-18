@@ -104,6 +104,7 @@ import arlut.csd.JDataComponent.StringSelector;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.Util.FixedListCompare;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.StringUtils;
@@ -909,7 +910,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 		// "Could not complete query.  Possible memory exhaustion problem.\n\n{0}"
 		new JErrorDialog(gc,
 				 ts.l("doQuery.error_caught",
-				      ex.getMessage()), Dialog.ModalityType.DOCUMENT_MODAL);
+				      ex.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
 		throw ex;
 	      }
 	    

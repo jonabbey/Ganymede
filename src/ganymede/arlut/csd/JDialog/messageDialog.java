@@ -91,10 +91,10 @@ public class messageDialog extends StandardDialog {
 
   public messageDialog(JFrame frame, String title, Image image)
   {
-    this(frame, title, image, Dialog.ModalityType.MODELESS); // not modal
+    this(frame, title, image, StandardDialog.ModalityType.MODELESS); // not modal
   }
 
-  public messageDialog(JFrame frame, String title, Image image, Dialog.ModalityType modality)
+  public messageDialog(JFrame frame, String title, Image image, StandardDialog.ModalityType modality)
   {
     super(frame, title, modality);
 

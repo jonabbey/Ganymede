@@ -1135,7 +1135,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    dumpDialog = new StringDialog(this,
 					  ts.l("actionPerformed.dump_title"),
 					  ts.l("actionPerformed.dump_question"),
-					  ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
+					  ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
 	  }
 
 	if (dumpDialog.showDialog() != null)
@@ -1163,7 +1163,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	StringDialog invidTestDialog = new StringDialog(this,
 							ts.l("actionPerformed.invid_title"),
 							ts.l("actionPerformed.invid_question"),
-							ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
+							ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	if (invidTestDialog.showDialog() != null)
 	  {
@@ -1189,7 +1189,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	StringDialog invidTestDialog = new StringDialog(this,
 							ts.l("actionPerformed.invidsweep_title"),
 							ts.l("actionPerformed.invidsweep_question"),
-							ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
+							ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	if (invidTestDialog.showDialog() != null)
 	  {
@@ -1215,7 +1215,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	StringDialog invidTestDialog = new StringDialog(this,
 							ts.l("actionPerformed.embedded_title"),
 							ts.l("actionPerformed.embedded_question"),
-							ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
+							ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	if (invidTestDialog.showDialog() != null)
 	  {
@@ -1242,7 +1242,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	StringDialog invidTestDialog = new StringDialog(this,
 							ts.l("actionPerformed.embedded_sweep_title"),
 							ts.l("actionPerformed.embedded_sweep_question"),
-							ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL);
+							ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	if (invidTestDialog.showDialog() != null)
 	  {
@@ -1328,7 +1328,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 				     ts.l("actionPerformed.killall_question"),
 				     ts.l("global.yes"), ts.l("global.no"), question);
     
-	killAllDLG = new StringDialog(killAllDLGR, Dialog.ModalityType.DOCUMENT_MODAL);
+	killAllDLG = new StringDialog(killAllDLGR, StandardDialog.ModalityType.DOCUMENT_MODAL);
 	
 	if (killAllDLG.showDialog() == null)
 	  {
@@ -1517,7 +1517,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	if (new StringDialog(this,
 			     ts.l("rowMenuPerformed.kill_title"),
 			     ts.l("rowMenuPerformed.kill_question", key),
-			     ts.l("global.yes"), ts.l("global.no"), question, Dialog.ModalityType.DOCUMENT_MODAL).showDialog() != null)
+			     ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog() != null)
 	  {
 	    if (debug)
 	      {
@@ -1702,7 +1702,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 			       {
 				 public void run()
 				   {
-				     new JErrorDialog(my_frame, Title, Message, fIcon, Dialog.ModalityType.DOCUMENT_MODAL); // implicit show
+				     new JErrorDialog(my_frame, Title, Message, fIcon, StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
 				   }
 			       });
   }
@@ -1760,7 +1760,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
   public consoleShutdownDialog(Frame frame)
   {
     // "Confirm Ganymede Server Shutdown?"
-    super(frame, ts.l("global.title"), Dialog.ModalityType.DOCUMENT_MODAL);
+    super(frame, ts.l("global.title"), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
     this.addWindowListener(this);
 

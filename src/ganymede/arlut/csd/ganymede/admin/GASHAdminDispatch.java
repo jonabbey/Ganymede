@@ -64,6 +64,7 @@ import javax.swing.SwingUtilities;
 
 import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JDialogBuff;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.TranslationService;
@@ -1057,7 +1058,7 @@ class GASHAdminDispatch implements Runnable {
 	    System.err.println("GASHAdminDispatch.handleReturnVal(): constructing dialog");
 	  }
 
-	StringDialog dialog = new StringDialog(resource, Dialog.ModalityType.DOCUMENT_MODAL);
+	StringDialog dialog = new StringDialog(resource, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	if (debug)
 	  {

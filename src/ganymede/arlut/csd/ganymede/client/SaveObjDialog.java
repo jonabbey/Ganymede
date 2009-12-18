@@ -146,7 +146,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 
   SaveObjDialog(Frame owner, String title, boolean forMail, String mailSubj)
   {
-    super(owner, title, Dialog.ModalityType.DOCUMENT_MODAL);
+    super(owner, title, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
     panel = new JPanel(gbl);
 

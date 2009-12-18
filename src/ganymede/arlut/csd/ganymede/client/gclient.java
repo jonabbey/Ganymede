@@ -110,6 +110,7 @@ import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JDialog.messageDialog;
 import arlut.csd.JDialog.aboutGanyDialog;
@@ -2397,7 +2398,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 					     new JErrorDialog(gc,
 							      ts.l("showExceptionMessage.exception_reported"),
 							      ts.l("showExceptionMessage.thank_you"),
-							      getInfoImage(), Dialog.ModalityType.DOCUMENT_MODAL); // implicit show
+							      getInfoImage(), StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
 					   }
 					 else
 					   {
@@ -2412,7 +2413,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 					     new JErrorDialog(gc,
 							      ts.l("showExceptionMessage.failure_reporting"),
 							      ts.l("showExceptionMessage.failure_explanation"),
-							      getErrorImage(), Dialog.ModalityType.DOCUMENT_MODAL); // implicit show
+							      getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
 					   }
 				       }
 				   }
@@ -2477,7 +2478,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 			       {
 				 public void run()
 				   {
-				     new JErrorDialog(gc, Title, Message, fIcon, Dialog.ModalityType.DOCUMENT_MODAL); // implicit show
+				     new JErrorDialog(gc, Title, Message, fIcon, StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
 				   }
 			       });
 
@@ -2610,7 +2611,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 		System.err.println("gclient.handleReturnVal(): constructing dialog");
 	      }
 
-	    StringDialog dialog = new StringDialog(resource, Dialog.ModalityType.DOCUMENT_MODAL);
+	    StringDialog dialog = new StringDialog(resource, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	    if (debug)
 	      {
@@ -3654,7 +3655,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
         StringDialog resultDialog = new StringDialog(this,
                                                      ts.l("processXMLSubmission.results_title"),  // "XML Submission Results"
                                                      result,
-                                                     false, Dialog.ModalityType.DOCUMENT_MODAL);
+                                                     false, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
         resultDialog.showDialog();
       }
@@ -3774,7 +3775,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 					 ts.l("editObject.reactivate_no"),
 					 "question.gif", null);
 
-	StringDialog verifyDialog = new StringDialog(rsrc, Dialog.ModalityType.DOCUMENT_MODAL);
+	StringDialog verifyDialog = new StringDialog(rsrc, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	dialogResults = verifyDialog.showDialog();
 
@@ -4200,7 +4201,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 					  ts.l("deleteObject.verify_txt", getObjectDesignation(invid)),
 					  StringDialog.getDefaultOk(),
 					  StringDialog.getDefaultCancel(),
-					  getQuestionImage(), Dialog.ModalityType.DOCUMENT_MODAL);
+					  getQuestionImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 	Hashtable result = d.showDialog();
 	
 	if (result == null)
@@ -4938,7 +4939,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 					       ts.l("OKToProceed.changes_warning_subj"),
 					       ts.l("OKToProceed.changes_warning_txt"),
 					       ts.l("OKToProceed.yes"),
-					       StringDialog.getDefaultCancel(), Dialog.ModalityType.DOCUMENT_MODAL);
+					       StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	// if showDialog is null, cancel was clicked So return will be
 	// false if cancel was clicked
@@ -5046,7 +5047,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 				      StringDialog.getDefaultCancel());
 	r.addMultiString(fieldName);
 
-	StringDialog d = new StringDialog(r, Dialog.ModalityType.DOCUMENT_MODAL);
+	StringDialog d = new StringDialog(r, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	Hashtable result = d.showDialog();
 
@@ -5606,7 +5607,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 				  "debugging purposes only.  Invid's have the format " +
 				  "number:number, like 21:423");
     r.addString("Invid number:");
-    StringDialog d = new StringDialog(r, Dialog.ModalityType.DOCUMENT_MODAL);
+    StringDialog d = new StringDialog(r, StandardDialog.ModalityType.DOCUMENT_MODAL);
     
     Hashtable result = d.showDialog();
 
@@ -5922,7 +5923,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 		      {
 			// "Could not complete query.  We may have run out of memory in the client.\n\n{0}"
 			new JErrorDialog(thisGclient,
-					 ts.l("treeNodeMenuPerformed.error", ex.getMessage()), Dialog.ModalityType.DOCUMENT_MODAL);
+					 ts.l("treeNodeMenuPerformed.error", ex.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
 			throw ex;
 		      }
 		    
@@ -6510,7 +6511,7 @@ class PersonaListener implements ActionListener {
 					      ts.l("actionPerformed.commit_dialog_subj"),
 					      ts.l("actionPerformed.commit_dialog_txt"),
 					      ts.l("actionPerformed.commit_dialog_yes"),
-					      ts.l("actionPerformed.commit_dialog_no"), Dialog.ModalityType.DOCUMENT_MODAL);
+					      ts.l("actionPerformed.commit_dialog_no"), StandardDialog.ModalityType.DOCUMENT_MODAL);
 	    Hashtable result = d.showDialog();
 	    
 	    if (result == null)

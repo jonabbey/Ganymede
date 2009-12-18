@@ -89,6 +89,7 @@ import arlut.csd.JDataComponent.JResetDateObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDialog.JErrorDialog;
+import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
 
@@ -976,7 +977,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 	    // "The date you have chosen is out of the acceptable range."
 	    new JErrorDialog(new JFrame(),
 			     ts.l("timeChanged.dateRangeError"), 
-			     ts.l("timeChanged.dateRangeErrorText"), Dialog.ModalityType.DOCUMENT_MODAL);
+			     ts.l("timeChanged.dateRangeErrorText"), StandardDialog.ModalityType.DOCUMENT_MODAL);
 	    
 	    setDate(previousDate);
 	  }
