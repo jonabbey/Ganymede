@@ -121,9 +121,7 @@ public class StandardDialog extends JDialog {
 
 	for (Class cl: classMembers)
 	  {
-	    System.err.println("setModality(): cl = " + cl.getName());
-
-	    if ("ModalityType".equals(cl.getName()) && cl.isEnum())
+	    if ("java.awt.Dialog$ModalityType".equals(cl.getName()) && cl.isEnum())
 	      {
 		enumClass = cl;
 	      }
