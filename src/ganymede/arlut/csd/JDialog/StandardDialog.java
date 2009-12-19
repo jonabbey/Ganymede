@@ -109,7 +109,7 @@ public class StandardDialog extends JDialog {
     this.modality = modality;
 
     // this bletcherousness is to make the call to Java 6's enhanced
-    // setModality() method in a way that won't prevent loading and
+    // setModalityType() method in a way that won't prevent loading and
     // execution on Java 5.
 
     boolean success = false;
@@ -128,7 +128,7 @@ public class StandardDialog extends JDialog {
 	  }
 
 	Class[] paramTypes = new Class[] {enumClass};
-	Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModality", paramTypes);
+	Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
 
 	Class[] paramTypes2 = new Class[] {enumClass, java.lang.String.class};
 	Method valueMethod = enumClass.getDeclaredMethod("valueOf", paramTypes2);
