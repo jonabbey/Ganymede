@@ -91,6 +91,11 @@ public class StandardDialog extends JDialog {
     TOOLKIT_MODAL
   };
 
+  private static Object lock = new Object();
+  private static Class enumClass = null;
+  private static Method modalityMethod = null;
+  private boolean useReflection = true;
+
   private boolean already_shown = false;
   private Frame frame;
   private ModalityType modality;
@@ -112,35 +117,66 @@ public class StandardDialog extends JDialog {
     // setModalityType() method in a way that won't prevent loading and
     // execution on Java 5.
 
-    boolean success = false;
-
-    try
+    synchronized (lock)
       {
-	Class[] classMembers = java.awt.Dialog.class.getDeclaredClasses();
-	Class enumClass = null;
-
-	for (Class cl: classMembers)
+	if (useReflection && enumClass == null)
 	  {
-	    if ("java.awt.Dialog$ModalityType".equals(cl.getName()) && cl.isEnum())
+	    try
 	      {
-		enumClass = cl;
+		Class[] classMembers = java.awt.Dialog.class.getDeclaredClasses();
+
+		for (Class cl: classMembers)
+		  {
+		    if ("java.awt.Dialog$ModalityType".equals(cl.getName()) && cl.isEnum())
+		      {
+			enumClass = cl;
+		      }
+		  }
+
+		Class[] paramTypes = new Class[] {enumClass};
+		modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
+	      }
+	    catch (Exception ex)
+	      {
+		// expecting ClassNotFoundException if we are running on Java
+		// 1.5, but NoSuchMethodException, InvocationTargetException,
+		// IllegalAccessException, SecurityException are also checked
+		// exceptions that reflection operations can generate
+
+		// We're on 1.5 or earlier, don't bother looking
+
+		enumClass = null;
+		modalityMethod = null;
+		useReflection = false;
 	      }
 	  }
-
-	Class[] paramTypes = new Class[] {enumClass};
-	Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
-
-	Object enumValue = Enum.valueOf(enumClass, modality.name());
-	modalityMethod.invoke(this, enumValue);
-
-	success = true;
       }
-    catch (Exception ex)
+
+    boolean success = false;
+
+    if (useReflection)
       {
-	// expecting ClassNotFoundException if we are running on Java
-	// 1.5, but NoSuchMethodException, InvocationTargetException,
-	// IllegalAccessException, SecurityExceptionare also checked
-	// exceptions that reflection operations can generate
+	try
+	  {
+	    modalityMethod.invoke(this, Enum.valueOf(enumClass, modality.name()));
+	    
+	    success = true;
+	  }
+	catch (java.lang.reflect.InvocationTargetException ex)
+	  {
+	  }
+	catch (IllegalAccessException ex)
+	  {
+	  }
+	finally
+	  {
+	    if (!success)
+	      {
+		enumClass = null;
+		modalityMethod = null;
+		useReflection = false;
+	      }
+	  }
       }
 
     if (!success)
