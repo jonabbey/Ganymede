@@ -141,8 +141,6 @@ public class StandardDialog extends JDialog {
 	// 1.5, but NoSuchMethodException, InvocationTargetException,
 	// IllegalAccessException, SecurityExceptionare also checked
 	// exceptions that reflection operations can generate
-
-	ex.printStackTrace();
       }
 
     if (!success)
