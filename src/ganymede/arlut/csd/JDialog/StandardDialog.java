@@ -130,10 +130,7 @@ public class StandardDialog extends JDialog {
 	Class[] paramTypes = new Class[] {enumClass};
 	Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
 
-	Class[] paramTypes2 = new Class[] {enumClass, java.lang.String.class};
-	Method valueMethod = enumClass.getDeclaredMethod("valueOf", paramTypes2);
-
-	Object enumValue = valueMethod.invoke(null, modality.name());
+	Object enumValue = Enum.valueOf(enumClass, modality.name());
 	modalityMethod.invoke(this, enumValue);
 
 	success = true;
