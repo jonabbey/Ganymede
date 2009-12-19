@@ -116,13 +116,22 @@ public class StandardDialog extends JDialog {
 
     try
       {
-	Class modalityClass = Class.forName("java.awt.Dialog.ModalityType");
+	Class[] classMembers = java.awt.Dialog.class.getDeclaredClasses();
+	Class enumClass = null;
 
-	Class[] paramTypes = new Class[] {modalityClass};
+	for (Class cl: classMembers)
+	  {
+	    if ("ModalityType".equals(cl.getName()) && cl.isEnum())
+	      {
+		enumClass = cl;
+	      }
+	  }
+
+	Class[] paramTypes = new Class[] {enumClass};
 	Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModality", paramTypes);
 
-	Class[] paramTypes2 = new Class[] {modalityClass, java.lang.String.class};
-	Method valueMethod = modalityClass.getDeclaredMethod("valueOf", paramTypes2);
+	Class[] paramTypes2 = new Class[] {enumClass, java.lang.String.class};
+	Method valueMethod = enumClass.getDeclaredMethod("valueOf", paramTypes2);
 
 	Object enumValue = valueMethod.invoke(null, modality.name());
 	modalityMethod.invoke(this, enumValue);
@@ -132,9 +141,9 @@ public class StandardDialog extends JDialog {
     catch (Exception ex)
       {
 	// expecting ClassNotFoundException if we are running on Java
-	// 5, but NoSuchMethodException, InvocationTargetException,
-	// IllegalAccessException are also checked exceptions that
-	// reflection operations can generate
+	// 1.5, but NoSuchMethodException, InvocationTargetException,
+	// IllegalAccessException, SecurityExceptionare also checked
+	// exceptions that reflection operations can generate
 
 	ex.printStackTrace();
       }
