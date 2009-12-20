@@ -123,15 +123,7 @@ public class StandardDialog extends JDialog {
 	  {
 	    try
 	      {
-		Class[] classMembers = java.awt.Dialog.class.getDeclaredClasses();
-
-		for (Class cl: classMembers)
-		  {
-		    if ("java.awt.Dialog$ModalityType".equals(cl.getName()) && cl.isEnum())
-		      {
-			enumClass = cl;
-		      }
-		  }
+		enumClass = Class.forName("java.awt.Dialog$ModalityType");
 
 		Class[] paramTypes = new Class[] {enumClass};
 		modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
