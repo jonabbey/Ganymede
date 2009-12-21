@@ -91,11 +91,6 @@ public class StandardDialog extends JDialog {
     TOOLKIT_MODAL
   };
 
-  private static Object lock = new Object();
-  private static Class enumClass = null;
-  private static Method modalityMethod = null;
-  private boolean useReflection = true;
-
   private boolean already_shown = false;
   private Frame frame;
   private ModalityType modality;
@@ -117,58 +112,25 @@ public class StandardDialog extends JDialog {
     // setModalityType() method in a way that won't prevent loading and
     // execution on Java 5.
 
-    synchronized (lock)
-      {
-	if (useReflection && enumClass == null)
-	  {
-	    try
-	      {
-		enumClass = Class.forName("java.awt.Dialog$ModalityType");
-
-		Class[] paramTypes = new Class[] {enumClass};
-		modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
-	      }
-	    catch (Exception ex)
-	      {
-		// expecting ClassNotFoundException if we are running on Java
-		// 1.5, but NoSuchMethodException, InvocationTargetException,
-		// IllegalAccessException, SecurityException are also checked
-		// exceptions that reflection operations can generate
-
-		// We're on 1.5 or earlier, don't bother looking
-
-		enumClass = null;
-		modalityMethod = null;
-		useReflection = false;
-	      }
-	  }
-      }
-
     boolean success = false;
 
-    if (useReflection)
+    try
       {
-	try
-	  {
-	    modalityMethod.invoke(this, Enum.valueOf(enumClass, modality.name()));
+	Class enumClass = Class.forName("java.awt.Dialog$ModalityType");
+
+	Class[] paramTypes = new Class[] {enumClass};
+	Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
+
+	modalityMethod.invoke(this, Enum.valueOf(enumClass, modality.name()));
 	    
-	    success = true;
-	  }
-	catch (java.lang.reflect.InvocationTargetException ex)
-	  {
-	  }
-	catch (IllegalAccessException ex)
-	  {
-	  }
-	finally
-	  {
-	    if (!success)
-	      {
-		enumClass = null;
-		modalityMethod = null;
-		useReflection = false;
-	      }
-	  }
+	success = true;
+      }
+    catch (Exception ex)
+      {
+	// expecting ClassNotFoundException if we are running on Java
+	// 1.5, but NoSuchMethodException, InvocationTargetException,
+	// IllegalAccessException, SecurityException are also checked
+	// exceptions that reflection operations can generate
       }
 
     if (!success)
