@@ -82,6 +82,10 @@ public class StandardDialog extends JDialog {
    * This is a hack so that we can operate successfully on Java 5
    * while taking advantage of the richer modality controls when
    * running on Java 6.
+   *
+   * The use of drop-down sheets requires the new modality controls on
+   * Java 6 for Mac OS X, incidentally, which is motivating this whole
+   * class.
    */
 
   public static enum ModalityType {
