@@ -663,23 +663,25 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // starting at 2.19, we store a history archive, if defined
 
-    if (history != null && getFieldDef().isHistoryChecked())
+    if (getFieldDef().isHistoryChecked())
       {
-	// if this field's pool size has been changed since the last
-	// time the history archive was adjusted, tweak it as a side
-	// effect while we're writing out.
-
-	if (getFieldDef().getHistoryDepth() != history.getPoolSize())
+	if (history != null)
 	  {
-	    history.setPoolSize(getFieldDef().getHistoryDepth());
-	  }
+	    // if this field's pool size has been changed since the last
+	    // time the history archive was adjusted, tweak it as a side
+	    // effect while we're writing out.
 
-	history.emit(out);
-      }
-    else if (getFieldDef().isHistoryChecked())
-      {
-	history = null;
-	out.writeInt(0);
+	    if (getFieldDef().getHistoryDepth() != history.getPoolSize())
+	      {
+		history.setPoolSize(getFieldDef().getHistoryDepth());
+	      }
+
+	    history.emit(out);
+	  }
+	else
+	  {
+	    out.writeInt(0);
+	  }
       }
   }
 
