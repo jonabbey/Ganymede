@@ -34,7 +34,7 @@ Contained hereunder:
   validate' in this directory, all Ganymede source code will be
   examined and compared with localization resources under resources/
   to produce a report as to the correctness and completeness of
-  localization support for all languages present under resourcse/.
+  localization support for all languages present under resources/.
 
 Jonathan Abbey
 30 October 2009
