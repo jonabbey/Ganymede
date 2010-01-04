@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -1829,10 +1829,12 @@ public class GanymedeServer implements Server {
 
 	    if (!ReturnVal.didSucceed(retVal))
 	      {
+		// "Couldn''t delete object {0}"
 		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_failure", gSession.viewObjectLabel(objInvid)));
 	      }
 	    else
 	      {
+		// "Deleted object {0}"
 		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_ok", gSession.viewObjectLabel(objInvid)));
 	      }
 	  }
