@@ -15,10 +15,11 @@ Contained hereunder:
   The lib directory contains the jar files produced by the ant jars
   target.
 
-  The lib directory will also contain the antlr.jar file used to
-  support the ANTLR-derived parser Deepak wrote as a tool for Jython
-  use.  It is copied from ../lib by the Ant build.xml file during
-  builds.
+  The lib directory will also contain the third party jar files used
+  to support the Ganymede build.  These jars are copied from ../lib by
+  the Ant build.xml file during builds, and will need to be copied to
+  the jars directory of the top level Ganymede distribution for
+  installation by installServer, installClient, and installWeb.
 
   The doc directory is where the ant javadoc target will put the
   javadoc tree when built.
