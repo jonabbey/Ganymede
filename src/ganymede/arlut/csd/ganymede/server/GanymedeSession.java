@@ -805,6 +805,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	try
 	  {
+	    // "Ganymede session for {0} has a checkIn() cause objectsCheckedOut to go negative"
 	    throw new RuntimeException(ts.l("checkIn.exception", sessionName));
 	  }
 	catch (RuntimeException ex)
