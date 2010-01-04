@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -2095,11 +2095,24 @@ public class DBEditSet {
 
 	if (eObj.isEmbedded())
 	  {
-	    DBObject container = session.getContainingObj(eObj);
-
-	    if (container != null)
+	    try
 	      {
-		invids.addElement(container.getInvid());
+		DBObject container = session.getContainingObj(eObj);
+
+		if (container != null)
+		  {
+		    invids.addElement(container.getInvid());
+		  }
+	      }
+	    catch (IntegrityConstraintException ex)
+	      {
+		// GanymedeServer.sweepEmbeddedObjects() may need to
+		// delete an embedded object with no container
+		// registered if an error condition elsewhere in the
+		// Ganymede server left a dangling embedded object.
+
+		// So we'll ignore this here for the sake of getting
+		// the dangling embedded object properly flushed.
 	      }
 	  }
 
