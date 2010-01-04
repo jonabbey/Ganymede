@@ -923,7 +923,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   /**
    * This method returns true if this field is owned by an editable
    * object and its contents differ from the same field in the
-   * DBEditObject's original object.
+   * DBEditObject's original object.  If this field belongs to a newly
+   * created DBEditObject, hasChanged() will always return true.
    */
 
   public boolean hasChanged()
@@ -933,9 +934,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 	return false;
       }
 
-    DBField origField = (DBField) ((DBEditObject) getOwner()).getOriginal().getField(getID());
+    DBObject orig = ((DBEditObject) getOwner()).getOriginal();
 
-    return hasChanged(origField);
+    if (orig == null)
+      {
+	return true;
+      }
+
+    return hasChanged((DBField) orig.getField(getID()));
   }
 
   /**
