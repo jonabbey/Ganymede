@@ -54,11 +54,6 @@ Modified the code to use the 1.1 io and text formatting classes.
 
 Added javadocs (9 June 1999).
 
-Last Mod Date: $Date$
-Last Revision Changed: $Rev$
-Last Changed By: $Author$
-SVN URL: $HeadURL$
-
 ***********************************************************************/
 
 package Qsmtp;
@@ -542,7 +537,7 @@ public class Qsmtp implements Runnable {
    * otherwise.
    */
 
-  private synchronized boolean dispatchMessage(messageObject msgObj)
+  private boolean dispatchMessage(messageObject msgObj)
   {
     String rstr;
     String sstr;
