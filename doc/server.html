@@ -22,11 +22,13 @@ server.</p>
 
 <h2 id="objectdatabase">Object Store</h2>
 
-<p>The Ganymede server has a built-in object database implemented
-using Java hashtables. This gives the server high performance and
-multi-threaded safety at the cost of a potentially large RAM
-footprint. All objects managed by Ganymede are kept in memory while
-the Ganymede server is running.</p>
+<p>The Ganymede server has a built-in RAM-based object database with
+transactional support, unique value allocation, checkpoint/rollback,
+multithreaded referential integrity checking, (lightly) optimizing
+query engine, and an ANTLR-based query language.  The server enjoys
+high performance and multi-threaded safety at the cost of a
+potentially significant RAM footprint. All objects managed by Ganymede
+are kept in memory while the Ganymede server is running.</p>
 
 <p>All objects in the database are identified by a type number/object
 number pair called an invid, for Invariant ID. All objects in the
@@ -105,14 +107,14 @@ occurring due to a power failure or server crash.</p>
 custom code to connect transactions issued in Ganymede to external databases
 to maintain cross-database consistency.</p>
 
-<p>When transactions are committed, the Ganymede scheduler schedules the
-external build process for execution. If multiple transactions are committed
-while the Ganymede scheduler is still executing the previous external build,
-the Ganymede scheduler will simply initiate another external build when
-the first build completes. Thus, multiple transactions made by users may
-be propagated to the external environment in bulk, depending on the rate
-that transactions are committed and the time necessary to complete an external
-build.</p>
+<p>When transactions are committed, the Ganymede scheduler schedules
+external build processes for execution. If multiple transactions are
+committed while the Ganymede scheduler is still executing previous
+external builds, the Ganymede scheduler will simply initiate another
+round of external builds when the first build completes. Thus,
+multiple transactions made by users may be propagated to the external
+environment in bulk, depending on the rate that transactions are
+committed and the time necessary to complete an external build.</p>
 
 <h2 id="permissions">Permissions and ownership management</h2>
 
