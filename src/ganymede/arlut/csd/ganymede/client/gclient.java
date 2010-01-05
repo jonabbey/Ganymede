@@ -455,6 +455,13 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   private int
     buildPhase = -1;		// unknown
+
+  /**
+   * A custom KeyEventDispatcher we use to toggle the commit button's
+   * text when the alt/option key is held down.
+   */
+
+  private KeyEventDispatcher altKeyListener;
   
   helpPanel
     help = null;
@@ -583,6 +590,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     submitXMLMI;
 
   JCheckBoxMenuItem
+    promptForCommentsMI,
     hideNonEditablesMI;
 
   /**
@@ -594,7 +602,23 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * check box menu item.
    */
 
-  boolean    hideNonEditables = prefs.getBoolean("hide_non_editable_objects", true);
+  boolean hideNonEditables = prefs.getBoolean("hide_non_editable_objects", true);
+
+  /**
+   * If true, the client will prompt for comments at commit time by
+   * default.  If false, the user will need to hold down the
+   * alt/option key in order to cause the comment prompt dialog to be
+   * shown.
+   */
+
+  boolean promptForComments = prefs.getBoolean("prompt_for_comments", false);
+
+  /**
+   * Will be set to true by the AltKeyListener if the user has the alt
+   * or option key held down.
+   */
+
+  boolean altKeyDown = false;
 
   boolean defaultOwnerChosen = false;
 
@@ -821,7 +845,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	getContentPane().add("North", macToolBar.getComponent());
       }
 
-    commit = new JButton(commitButtonText);
+    commit = new JButton("");
+    refreshCommitLabel();
     commit.setEnabled(false);
     commit.setOpaque(true);
     commit.setToolTipText(ts.l("init.commit_tooltip")); // "Click this to commit your transaction to the database"
@@ -951,7 +976,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	  }
       }
 
-    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new AltKeyListener());
+    altKeyListener = new AltKeyListener();
+
+    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(altKeyListener);
 
     this.setVisible(true);
 
@@ -1032,6 +1059,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     defaultOwnerMI.setActionCommand("Set Default Owner");
     defaultOwnerMI.addActionListener(this);
 
+    // "Prompt for Comments on Commit"
+    promptForCommentsMI = new JCheckBoxMenuItem(ts.l("createMenuBar.file_menu_6"), promptForComments);
+    setMenuMnemonic(promptForCommentsMI, ts.l("createMenuBar.file_menu_6_key_optional"));
+    promptForCommentsMI.setActionCommand("Prompt For Comments");
+    promptForCommentsMI.addActionListener(this);
+
     // "Hide non-editable objects"
     hideNonEditablesMI = new JCheckBoxMenuItem(ts.l("createMenuBar.file_menu_3"), hideNonEditables);
     setMenuMnemonic(hideNonEditablesMI, ts.l("createMenuBar.file_menu_3_key_optional"));
@@ -1058,6 +1091,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     fileMenu.add(clearTreeMI);
     fileMenu.add(filterQueryMI);
     fileMenu.add(defaultOwnerMI);
+    fileMenu.add(promptForCommentsMI);
     fileMenu.add(hideNonEditablesMI);
     fileMenu.addSeparator();
     fileMenu.add(submitXMLMI);
@@ -5446,17 +5480,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	    System.err.println("commit button clicked");
 	  }
 
-	if ((event.getModifiers() & ActionEvent.ALT_MASK) != 0)
-	  {
-	    // alt/option was held down when the button was
-	    // pressed.. prompt for transaction comment
-
-	    commitTransaction(true);
-	  }
-	else
-	  {
-	    commitTransaction(false);
-	  }
+	commitTransaction(promptForComments ^ altKeyDown);
       }
     else if ((source == menubarQueryMI) || (command.equals(query_action)))
       {
@@ -5469,6 +5493,17 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     else if (source == submitXMLMI)
       {
         processXMLSubmission();
+      }
+    else if (source == promptForCommentsMI)
+      {
+	promptForComments = promptForCommentsMI.getState();
+
+	if (this.prefs != null)
+	  {
+	    prefs.putBoolean("prompt_for_comments", promptForComments);
+	  }
+
+	refreshCommitLabel();
       }
     else if (source == hideNonEditablesMI)
       {
@@ -6194,6 +6229,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   }
 
   /**
+   * This method updates the commit button's label, with the text set
+   * according to whether the user has the 'Prompt for Comments on
+   * Commit' menu item checked and whether or not the Alt/Option key
+   * is held down.
+   */
+
+  public void refreshCommitLabel()
+  {
+    commit.setText(promptForComments ^ altKeyDown ? commitCommentButtonText : commitButtonText);
+  }
+
+  /**
    * This method does all the clean up required to let garbage
    * collection tear everything completely down.
    *
@@ -6206,6 +6253,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
 	System.err.println("gclient.cleanUp()");
       }
+
+    KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(altKeyListener);
+    altKeyListener = null;
 
     this.removeAll();
 
@@ -6469,21 +6519,17 @@ class AltKeyListener implements KeyEventDispatcher {
 
   public boolean dispatchKeyEvent(KeyEvent e)
   {
-    if (e.getID() == KeyEvent.KEY_PRESSED)
+    if (e.getID() == KeyEvent.KEY_PRESSED && (e.getKeyCode() == KeyEvent.VK_ALT || e.getKeyCode() == KeyEvent.VK_META))
       {
-	if (e.getKeyCode() == KeyEvent.VK_ALT || e.getKeyCode() == KeyEvent.VK_META)
-	  {
-	    gclient.client.commit.setText(gclient.client.commitCommentButtonText);
-	  }
+	gclient.client.altKeyDown = true;
       }
-    else if (e.getID() == KeyEvent.KEY_RELEASED)
+    else if (e.getID() == KeyEvent.KEY_RELEASED && (e.getKeyCode() == KeyEvent.VK_ALT || e.getKeyCode() == KeyEvent.VK_META))
       {
-	if (e.getKeyCode() == KeyEvent.VK_ALT || e.getKeyCode() == KeyEvent.VK_META)
-	  {
-	    gclient.client.commit.setText(gclient.client.commitButtonText);
-	  }
+	gclient.client.altKeyDown = false;
       }
 
+    gclient.client.refreshCommitLabel();
+    
     return false;
   }
 }
