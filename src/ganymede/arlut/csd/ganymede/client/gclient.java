@@ -59,9 +59,12 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.KeyboardFocusManager;
+import java.awt.KeyEventDispatcher;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -293,6 +296,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     about_action = "About Ganymede",
     java_version_action = "Java Version",
     motd_action = "Message of the day";
+
+  final String commitButtonText = ts.l("init.commit_button"); // "Commit"
+  final String commitCommentButtonText = ts.l("init.commit_comment_button"); // "Commit with Comments"
 
   /**
    * This is a convenience method used by the server to get a
@@ -815,8 +821,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	getContentPane().add("North", macToolBar.getComponent());
       }
 
-    // "Commit"    
-    commit = new JButton(ts.l("init.commit_button"));
+    commit = new JButton(commitButtonText);
     commit.setEnabled(false);
     commit.setOpaque(true);
     commit.setToolTipText(ts.l("init.commit_tooltip")); // "Click this to commit your transaction to the database"
@@ -945,6 +950,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	    processExceptionRethrow(ex);
 	  }
       }
+
+    KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new AltKeyListener());
 
     this.setVisible(true);
 
@@ -6444,6 +6451,40 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
 	securityThread = null;
       }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                  AltKeyListener
+
+------------------------------------------------------------------------------*/
+
+/**
+ * KeyEventDispatcher class to relabel the Ganymede client's commit
+ * button when alt/option is pressed.
+ */
+
+class AltKeyListener implements KeyEventDispatcher {
+
+  public boolean dispatchKeyEvent(KeyEvent e)
+  {
+    if (e.getID() == KeyEvent.KEY_PRESSED)
+      {
+	if (e.getKeyCode() == KeyEvent.VK_ALT || e.getKeyCode() == KeyEvent.VK_META)
+	  {
+	    gclient.client.commit.setText(gclient.client.commitCommentButtonText);
+	  }
+      }
+    else if (e.getID() == KeyEvent.KEY_RELEASED)
+      {
+	if (e.getKeyCode() == KeyEvent.VK_ALT || e.getKeyCode() == KeyEvent.VK_META)
+	  {
+	    gclient.client.commit.setText(gclient.client.commitButtonText);
+	  }
+      }
+
+    return false;
   }
 }
 
