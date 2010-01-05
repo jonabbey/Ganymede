@@ -849,7 +849,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     refreshCommitLabel();
     commit.setEnabled(false);
     commit.setOpaque(true);
-    commit.setToolTipText(ts.l("init.commit_tooltip")); // "Click this to commit your transaction to the database"
+    commit.setToolTipText(ts.l("init.commit_tooltip")); // "Hold Alt/Option to toggle comments"
     commit.addActionListener(this);
 
     // "Cancel"
