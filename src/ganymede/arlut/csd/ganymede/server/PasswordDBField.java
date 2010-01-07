@@ -2942,7 +2942,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	{
 	  while (pool.size() > poolSize)
 	    {
-	      pool.remove(pool.size());
+	      pool.remove(pool.size() - 1);
 	    }
 	}
     }
@@ -2978,7 +2978,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
       if (pool.size() > poolSize)
 	{
-	  pool.remove(pool.size());
+	  pool.remove(pool.size() - 1);
 	}
     }
 
