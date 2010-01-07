@@ -130,8 +130,6 @@ public class Qsmtp implements Runnable {
   private volatile boolean threaded = false;
   private volatile Thread backgroundThread;
 
-  private Socket sock = null;
-
   /* -- */
 
   public Qsmtp(String hostid)
@@ -554,6 +552,8 @@ public class Qsmtp implements Runnable {
     BufferedReader reply = null;
     PrintWriter send = null;
 
+    Socket sock = null;
+
     /* -- */
 
     if (to_addresses == null ||
@@ -814,8 +814,6 @@ public class Qsmtp implements Runnable {
               {
                 // shrug
               }
-
-            sock = null;
           }
       }
     catch (Throwable ex)
