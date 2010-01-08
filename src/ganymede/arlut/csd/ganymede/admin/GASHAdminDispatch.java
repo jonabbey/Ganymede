@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -692,7 +692,8 @@ class GASHAdminDispatch implements Runnable {
       }
 
     Vector syncTasks = new Vector();
-    Vector miscTasks = new Vector();
+    Vector scheduledTasks = new Vector();
+    Vector manualTasks = new Vector();
 
     for (int i = 0; i < tasks.length; i++)
       {
@@ -702,14 +703,19 @@ class GASHAdminDispatch implements Runnable {
 	  {
 	    syncTasks.addElement(handle);
 	  }
+	else if (handle.startTime != null)
+	  {
+	    scheduledTasks.addElement(handle);
+	  }
 	else
 	  {
-	    miscTasks.addElement(handle);
+	    manualTasks.addElement(handle);
 	  }
       }
 
     updateTaskTable(frame.syncTaskTable, syncTasks);
-    updateTaskTable(frame.taskTable, miscTasks);
+    updateTaskTable(frame.taskTable, scheduledTasks);
+    updateTaskTable(frame.manualTaskTable, manualTasks);
   }
 
   private void updateTaskTable(rowTable table, Vector tasks)
@@ -775,17 +781,20 @@ class GASHAdminDispatch implements Runnable {
 	    table.setCellText(handle.name, 2, handle.lastTime.toString(), false);
 	  }
 
-	if (handle.startTime != null)
+	if (table.getColCount() > 3)
 	  {
-	    table.setCellText(handle.name, 3, handle.startTime.toString(), false);
-	  }
-	else
-	  {
-	    // "On Demand"
-	    table.setCellText(handle.name, 3, ts.l("changeTasks.onDemandState"), false);
-	  }
+	    if (handle.startTime != null)
+	      {
+		table.setCellText(handle.name, 3, handle.startTime.toString(), false);
+	      }
+	    else
+	      {
+		// "On Demand"
+		table.setCellText(handle.name, 3, ts.l("changeTasks.onDemandState"), false);
+	      }
 
-	table.setCellText(handle.name, 4, handle.intervalString, false);
+	    table.setCellText(handle.name, 4, handle.intervalString, false);
+	  }
       }
 
     // and take any rows out that are gone

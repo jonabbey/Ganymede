@@ -11,7 +11,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -309,12 +309,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   String syncTaskHeaders[] = {ts.l("global.task_col_0"), // "Task"
 			      ts.l("global.task_col_1"), // "Status"
-			      ts.l("global.task_col_2"), // "Last Run"
-			      ts.l("global.task_col_3"), // "Next Run"
-			      ts.l("global.task_col_4")}; // "Interval"
-  int syncTaskColWidths[] = {100,100,100,100,100};
+			      ts.l("global.task_col_2")}; // "Last Run"
+  int syncTaskColWidths[] = {100,100,100};
 
-  // resources for the task monitor table
+  // resources for the scheduled task monitor table
 
   rowTable taskTable = null;
 
@@ -324,6 +322,15 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 			  ts.l("global.task_col_3"), // "Next Run"
 			  ts.l("global.task_col_4")}; // "Interval"
   int taskColWidths[] = {100,100,100,100,100};
+
+  // resources for the manual task monitor table
+
+  rowTable manualTaskTable = null;
+
+  String manualTaskHeaders[] = {ts.l("global.task_col_0"), // "Task"
+				ts.l("global.task_col_1"), // "Status"
+				ts.l("global.task_col_2")}; // "Last Run"
+  int manualTaskColWidths[] = {100,100,100};
 
   JSplitPane splitterPane = null;
   
@@ -880,7 +887,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     JPanel syncTaskBox = new JPanel(new java.awt.BorderLayout());
     syncTaskBox.add("Center", syncTaskTable);
 
-    // then the miscellaneous task monitor
+    // then the scheduled task monitor
 
     JPopupMenu taskPopMenu = new JPopupMenu();
 
@@ -915,6 +922,27 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     JPanel taskBox = new JPanel(new java.awt.BorderLayout());
     taskBox.add("Center", taskTable);
 
+    // then the manual task monitor
+
+    JPopupMenu manualTaskPopMenu = new JPopupMenu();
+
+    // "Run Task Now"
+    runNowMI = new JMenuItem(ts.l("init.runNowPopup"));
+    runNowMI.setActionCommand(RUNTASK);
+
+    // "Stop Running Task"
+    stopTaskMI = new JMenuItem(ts.l("init.stopTaskPopup"));
+    stopTaskMI.setActionCommand(STOPTASK);
+
+    manualTaskPopMenu.add(runNowMI);
+    manualTaskPopMenu.add(stopTaskMI);
+
+    manualTaskTable = new rowTable(manualTaskColWidths, manualTaskHeaders, this, false, manualTaskPopMenu, false);
+    manualTaskTable.setHeadBackColor(Color.gray, false);
+			  
+    JPanel manualTaskBox = new JPanel(new java.awt.BorderLayout());
+    manualTaskBox.add("Center", manualTaskTable);
+
     // and put them into our tab pane
 
     tabPane = new JTabbedPane();
@@ -925,8 +953,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     // "Sync Monitor"
     tabPane.addTab(ts.l("init.sync_title"), syncTaskBox);
 
-    // "Task Monitor"
+    // "Scheduled Task Monitor"
     tabPane.addTab(ts.l("init.task_title"), taskBox);
+
+    // "Manual Task Monitor"
+    tabPane.addTab(ts.l("init.manual_task_title"), manualTaskBox);
 
     // and put the tab pane into our frame with the
     // same constraints that the text area had
