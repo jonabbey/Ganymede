@@ -1398,7 +1398,12 @@ public class Ganymede {
 
     for (scheduleHandle handle: scheduler.getTasksByClass(SyncRunner.class))
       {
-	scheduler.demandTask(handle.getName());
+	SyncRunner runner = (SyncRunner) handle.task;
+
+	if (runner.isIncremental() || runner.isFullState())
+	  {
+	    scheduler.demandTask(handle.getName());
+	  }
       }
   }
 
