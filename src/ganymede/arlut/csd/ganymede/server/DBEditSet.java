@@ -1565,8 +1565,7 @@ public class DBEditSet {
       }
     catch (Throwable ex)
       {
-	// If we throw up here, we've got real problems, and our
-	// database may be in an inconsistent state
+	// If we throw up here, we've got real problems
 
 	throw new CommitError("Critical error: Intolerable exception during commit_integrateChanges().", ex);
       }
