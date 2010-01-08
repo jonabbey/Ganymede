@@ -841,8 +841,8 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * <p>This method returns a List of handles of the given type known
-   * to the scheduler.
+   * <p>This method returns a List of handles known to the scheduler
+   * of the given type.</p>
    */
 
   public synchronized List<scheduleHandle> getTasksByType(scheduleHandle.TaskType type)
@@ -852,6 +852,26 @@ public class GanymedeScheduler extends Thread {
     for (scheduleHandle handle: taskList)
       {
 	if (handle.getTaskType() == type)
+	  {
+	    results.add(handle);
+	  }
+      }
+
+    return results;
+  }
+
+  /**
+   * <p>This method returns a List of handles known to the scheduler
+   * whose Runnable inherits from classObj.</p>
+   */
+
+  public synchronized List<scheduleHandle> getTasksByClass(Class classObj)
+  {
+    ArrayList<scheduleHandle> results = new ArrayList<scheduleHandle>();
+
+    for (scheduleHandle handle: taskList)
+      {
+	if (classObj.isInstance(handle.task))
 	  {
 	    results.add(handle);
 	  }
