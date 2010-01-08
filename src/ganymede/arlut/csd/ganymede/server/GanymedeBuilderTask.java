@@ -279,6 +279,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   protected Invid taskDefObjInvid = null;
 
+  /**
+   * Will be true if this builder task should be scheduled when a
+   * transaction is committed.
+   */
+
+  private boolean runOnCommit;
+
   /* -- */
 
   /**
@@ -878,6 +885,26 @@ public abstract class GanymedeBuilderTask implements Runnable {
       }
 
     return null;
+  }
+
+  /**
+   * Returns true if this builder task should be scheduled when a
+   * transaction commits.
+   */
+
+  public final boolean runsOnCommit()
+  {
+    return this.runOnCommit;
+  }
+
+  /**
+   * Call this method to control whether or not this builder task
+   * should be run when the Ganymede server commits a transaction.
+   */
+
+  public void runOnCommit(boolean state)
+  {
+    this.runOnCommit = state;
   }
 
   /**
