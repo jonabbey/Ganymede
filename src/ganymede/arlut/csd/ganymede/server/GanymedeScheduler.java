@@ -179,10 +179,8 @@ public class GanymedeScheduler extends Thread {
   private boolean taskListInitialized = false;
 
   /**
-   *
    * if true, the scheduler will attempt to notify the GanymedeAdmin class when
    * tasks are scheduled and/or completed.
-   *
    */
 
   private boolean reportTasks;
@@ -449,6 +447,8 @@ public class GanymedeScheduler extends Thread {
       }
 
     onDemand.put(handle.name, handle);
+
+    updateTaskInfo(true);
   }
 
   /**
@@ -491,6 +491,8 @@ public class GanymedeScheduler extends Thread {
       {
 	Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for execution at " + time);
       }
+
+    updateTaskInfo(true);
   }
 
   /**
@@ -550,6 +552,8 @@ public class GanymedeScheduler extends Thread {
       {
 	Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for daily execution at " + time);
       }
+
+    updateTaskInfo(true);
   }
 
   /**
@@ -598,6 +602,8 @@ public class GanymedeScheduler extends Thread {
 	Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for periodic execution at " + firstTime);
 	Ganymede.debug("                    Task will repeat every " + intervalMinutes + " minutes");
       }
+
+    updateTaskInfo(true);
   }
 
   /**
@@ -632,6 +638,8 @@ public class GanymedeScheduler extends Thread {
       {
 	oldHandle.unregister();
       }
+
+    updateTaskInfo(true);
 
     return oldHandle;
   }
