@@ -296,7 +296,7 @@ public class GanymedeScheduler extends Thread {
       {
 	GanymedeBuilderTask builder = (GanymedeBuilderTask) task;
 
-	builder.runsOnCommit(true);
+	builder.runOnCommit(true);
       }
 
     // if we're not doing a periodic task, just add the task to our
@@ -403,41 +403,41 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addActionOnDemand()");
       }
 
+    scheduleHandle.TaskType type = scheduleHandle.TaskType.MANUAL;
+
+    if (task instanceof GanymedeBuilderTask)
+      {
+	if (((GanymedeBuilderTask) task).runsOnCommit())
+	  {
+	    type = scheduleHandle.TaskType.BUILDER;
+	  }
+	else
+	  {
+	    type = scheduleHandle.TaskType.UNSCHEDULEDBUILDER;
+	  }
+      }
+    else if (task instanceof SyncRunner)
+      {
+	SyncRunner runner = (SyncRunner) task;
+
+	if (runner.isFullState())
+	  {
+	    type = scheduleHandle.TaskType.SYNCFULLSTATE;
+	  }
+	else if (runner.isIncremental())
+	  {
+	    type = scheduleHandle.TaskType.SYNCINCREMENTAL;
+	  }
+	else
+	  {
+	    type = scheduleHandle.TaskType.SYNCMANUAL;
+	  }
+      }
+
     handle = unregisterTask(name);
 
     if (handle == null)
       {
-	scheduleHandle.TaskType type = scheduleHandle.TaskType.MANUAL;
-
-	if (task instanceof GanymedeBuilderTask)
-	  {
-	    if (((GanymedeBuilderTask) task).runsOnCommit())
-	      {
-		type = scheduleHandle.TaskType.BUILDER;
-	      }
-	    else
-	      {
-		type = scheduleHandle.TaskType.UNSCHEDULEDBUILDER;
-	      }
-	  }
-	else if (task instanceof SyncRunner)
-	  {
-	    SyncRunner runner = (SyncRunner) task;
-
-	    if (runner.isFullState())
-	      {
-		type = scheduleHandle.TaskType.SYNCFULLSTATE;
-	      }
-	    else if (runner.isIncremental())
-	      {
-		type = scheduleHandle.TaskType.SYNCINCREMENTAL;
-	      }
-	    else
-	      {
-		type = scheduleHandle.TaskType.SYNCMANUAL;
-	      }
-	  }
-
 	handle = new scheduleHandle(this, null, 0, task, name, type);
       }
     else
@@ -445,6 +445,7 @@ public class GanymedeScheduler extends Thread {
 	handle.startTime = null;
 	handle.setInterval(0);
 	handle.task = task;
+	handle.tasktype = type;
       }
 
     onDemand.put(handle.name, handle);

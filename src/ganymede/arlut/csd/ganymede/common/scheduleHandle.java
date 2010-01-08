@@ -161,7 +161,7 @@ public class scheduleHandle implements java.io.Serializable {
    * the Ganymede admin console.
    */
 
-  private TaskType tasktype;
+  public TaskType tasktype;
 
   /**
    * This booleanSemaphore will be set to true if we are doing a
