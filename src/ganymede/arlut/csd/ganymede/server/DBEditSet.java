@@ -1549,18 +1549,23 @@ public class DBEditSet {
     // we've successfully persisted the transaction, written the
     // transaction to the sync channels, and finalized the
     // transaction.. we can proceed
-
-    // Note that we still have our write lock established, even though
+    //
+    // note that we still have our write lock established, even though
     // we are giving up synchronization on the journal.
 
     try
       {
+	// we sync on Ganymede global objects in the following, but we
+	// don't keep external sync for more than one step, so
+	// multiple transactions on non-overlapping DBObjectBases can
+	// proceed through this section concurrently
+
 	commit_handlePhase2();
-	commit_logTransaction(fieldsTouched); // *sync*
+	commit_logTransaction(fieldsTouched); // *sync* Ganymede.log
 	commit_replace_objects();
-	commit_updateNamespaces(); // *sync*
-	DBDeletionManager.releaseSession(session); 
-	Ganymede.db.aSymLinkTracker.commit(session); // *sync*
+	commit_updateNamespaces(); // *sync* over each namespace in Ganymede.db.nameSpaces
+	DBDeletionManager.releaseSession(session);   // *sync* static DBDeletionManager
+	Ganymede.db.aSymLinkTracker.commit(session); // *sync* Ganymede.db.aSymLinkTracker
 	commit_updateBases(fieldsTouched);
       }
     catch (Throwable ex)
@@ -1669,7 +1674,7 @@ public class DBEditSet {
 	    catch (IOException inex)
 	      {
 		// This *really* shouldn't happen, since there's no writes involved
-		// in truncating the log.  If it did, we're kind of screwed, though.
+		// in truncating the journal.  If it did, we're kind of screwed, though.
 
 		// ***
 		// *** Error in commit_writeSyncChannels()!  Couldn''t undo a transaction in the
@@ -1765,7 +1770,7 @@ public class DBEditSet {
 	catch (IOException inex)
 	  {
 	    // This *really* shouldn't happen, since there's no writes involved
-	    // in truncating the log.  If it did, we're kind of screwed, though.
+	    // in truncating the journal.  If it did, we're kind of screwed, though.
 
 	    // ***
 	    // *** Error in commit_finalizeTransaction()!  Couldn''t undo a transaction in the
