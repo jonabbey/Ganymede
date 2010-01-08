@@ -114,6 +114,7 @@ public class scheduleHandle implements java.io.Serializable {
     SCHEDULED       (ts.l("taskType.scheduledTask")), // "Scheduled Task"
     MANUAL          (ts.l("taskType.manualTask")),    // "On Demand Task"
     BUILDER         (ts.l("taskType.builderTask")),   // "Ganymede Builder Task"
+    UNSCHEDULEDBUILDER (ts.l("taskType.unscheduledBuilderTask")), // "Unscheduled Ganymede Builder Task"
     SYNCINCREMENTAL (ts.l("taskType.incrementalSync")), // "Incremental Sync Channel"
     SYNCFULLSTATE   (ts.l("taskType.fullstateSync")),	// "Full State Sync Channel"
     SYNCMANUAL      (ts.l("taskType.manualSync"));	// "Manual Sync Channel"
@@ -260,11 +261,13 @@ public class scheduleHandle implements java.io.Serializable {
    * @param interval Number of seconds between runs of this task
    * @param task Java Runnable object to be run in a thread
    * @param name Name to report for this task
+   * @param tasktype Task type category for this handle
    */
 
   public scheduleHandle(GanymedeScheduler scheduler,
 			Date time, int interval, 
-			Runnable task, String name)
+			Runnable task, String name,
+			TaskType tasktype)
   {
     if (scheduler == null)
       {
@@ -276,36 +279,7 @@ public class scheduleHandle implements java.io.Serializable {
     this.startTime = time;
     this.task = task;
     this.name = name;
-
-    if (task instanceof arlut.csd.ganymede.server.GanymedeBuilderTask)
-      {
-	this.tasktype = TaskType.BUILDER;
-      }
-    else if (task instanceof arlut.csd.ganymede.server.SyncRunner)
-      {
-	arlut.csd.ganymede.server.SyncRunner syncTask = (arlut.csd.ganymede.server.SyncRunner) task;
-
-	if (syncTask.isFullState())
-	  {
-	    this.tasktype = TaskType.SYNCFULLSTATE;
-	  }
-	else if (syncTask.isIncremental())
-	  {
-	    this.tasktype = TaskType.SYNCINCREMENTAL;
-	  }
-	else
-	  {
-	    this.tasktype = TaskType.SYNCMANUAL;
-	  }
-      }
-    else if (startTime == null && interval == 0)
-      {
-	this.tasktype = TaskType.MANUAL;
-      }
-    else
-      {
-	this.tasktype = TaskType.SCHEDULED;
-      }
+    this.tasktype = tasktype;
 
     setInterval(interval);
 

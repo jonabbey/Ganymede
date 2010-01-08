@@ -6,10 +6,6 @@
    to register tasks to be run on a periodic basis.
    
    Created: 26 January 1998
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -17,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -301,6 +297,7 @@ public class GanymedeScheduler extends Thread {
     if (!object.isSet(SchemaConstants.TaskRunPeriodically))
       {
 	addActionOnDemand(task, taskName);
+
 	return;
       }
 
@@ -400,7 +397,38 @@ public class GanymedeScheduler extends Thread {
 
     if (handle == null)
       {
-	handle = new scheduleHandle(this, null, 0, task, name);
+	scheduleHandle.TaskType type = scheduleHandle.TaskType.MANUAL;
+
+	if (task instanceof GanymedeBuilderTask)
+	  {
+	    if (((GanymedeBuilderTask) task).runsOnCommit())
+	      {
+		type = scheduleHandle.TaskType.BUILDER;
+	      }
+	    else
+	      {
+		type = scheduleHandle.TaskType.UNSCHEDULEDBUILDER;
+	      }
+	  }
+	else if (task instanceof SyncRunner)
+	  {
+	    SyncRunner runner = (SyncRunner) task;
+
+	    if (runner.isFullState())
+	      {
+		type = scheduleHandle.TaskType.SYNCFULLSTATE;
+	      }
+	    else if (runner.isIncremental())
+	      {
+		type = scheduleHandle.TaskType.SYNCINCREMENTAL;
+	      }
+	    else
+	      {
+		type = scheduleHandle.TaskType.SYNCMANUAL;
+	      }
+	  }
+
+	handle = new scheduleHandle(this, null, 0, task, name, type);
       }
     else
       {
@@ -437,7 +465,7 @@ public class GanymedeScheduler extends Thread {
 
     if (handle == null)
       {
-	handle = new scheduleHandle(this, time, 0, task, name);
+	handle = new scheduleHandle(this, time, 0, task, name, scheduleHandle.TaskType.SCHEDULED);
       }
     else
       {
@@ -496,7 +524,7 @@ public class GanymedeScheduler extends Thread {
 
     if (handle == null)
       {
-	handle = new scheduleHandle(this, time, minsPerDay, task, name);
+	handle = new scheduleHandle(this, time, minsPerDay, task, name, scheduleHandle.TaskType.SCHEDULED);
       }
     else
       {
@@ -543,7 +571,7 @@ public class GanymedeScheduler extends Thread {
 
     if (handle == null)
       {
-	handle = new scheduleHandle(this, firstTime, intervalMinutes, task, name);
+	handle = new scheduleHandle(this, firstTime, intervalMinutes, task, name, scheduleHandle.TaskType.SCHEDULED);
       }
     else
       {
