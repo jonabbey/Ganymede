@@ -710,6 +710,7 @@ class GASHAdminDispatch implements Runnable {
 	    break;
 
 	  case BUILDER:
+	  case UNSCHEDULEDBUILDER:
 	  case SYNCINCREMENTAL:
 	  case SYNCFULLSTATE:
 	  case SYNCMANUAL:
