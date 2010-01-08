@@ -6,10 +6,6 @@
    Ganymede Server.  It is also used to pass data to the admin console.
    
    Created: 3 February 1998
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -17,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -101,7 +97,7 @@ import arlut.csd.ganymede.server.taskMonitor;
 
 public class scheduleHandle implements java.io.Serializable {
 
-  static final long serialVersionUID = 2408115703212284629L;
+  static final long serialVersionUID = -6856660271549184765L;
 
   static final boolean debug = false;
 
@@ -113,6 +109,27 @@ public class scheduleHandle implements java.io.Serializable {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.scheduleHandle");
 
   // ---
+
+  public enum TaskType {
+    SCHEDULED       (ts.l("taskType.scheduledTask")), // "Scheduled Task"
+    MANUAL          (ts.l("taskType.manualTask")),    // "On Demand Task"
+    BUILDER         (ts.l("taskType.builderTask")),   // "Ganymede Builder Task"
+    SYNCINCREMENTAL (ts.l("taskType.incrementalSync")), // "Incremental Sync Channel"
+    SYNCFULLSTATE   (ts.l("taskType.fullstateSync")),	// "Full State Sync Channel"
+    SYNCMANUAL      (ts.l("taskType.manualSync"));	// "Manual Sync Channel"
+
+    private final String name;
+
+    TaskType(String name)
+    {
+      this.name = name;
+    }
+
+    public String toString()
+    {
+      return this.name;
+    }
+  }
 
   // we pass these attributes along to the admin console for it to display
 
@@ -139,12 +156,11 @@ public class scheduleHandle implements java.io.Serializable {
   private booleanSemaphore suspend = new booleanSemaphore(false);
 
   /**
-   * isSyncTask will be true if the task in question is instanceof
-   * either arlut.csd.ganymede.server.GanymedeBuilderTask or
-   * arlut.csd.ganymede.server.SyncRunner.
+   * What kind of task is this?  Used to provide type information to
+   * the Ganymede admin console.
    */
 
-  public boolean isSyncTask;
+  private TaskType tasktype;
 
   /**
    * This booleanSemaphore will be set to true if we are doing a
@@ -261,10 +277,34 @@ public class scheduleHandle implements java.io.Serializable {
     this.task = task;
     this.name = name;
 
-    if (task instanceof arlut.csd.ganymede.server.GanymedeBuilderTask ||
-	task instanceof arlut.csd.ganymede.server.SyncRunner)
+    if (task instanceof arlut.csd.ganymede.server.GanymedeBuilderTask)
       {
-	this.isSyncTask = true;
+	this.tasktype = TaskType.BUILDER;
+      }
+    else if (task instanceof arlut.csd.ganymede.server.SyncRunner)
+      {
+	arlut.csd.ganymede.server.SyncRunner syncTask = (arlut.csd.ganymede.server.SyncRunner) task;
+
+	if (syncTask.isFullState())
+	  {
+	    this.tasktype = TaskType.SYNCFULLSTATE;
+	  }
+	else if (syncTask.isIncremental())
+	  {
+	    this.tasktype = TaskType.SYNCINCREMENTAL;
+	  }
+	else
+	  {
+	    this.tasktype = TaskType.SYNCMANUAL;
+	  }
+      }
+    else if (startTime == null && interval == 0)
+      {
+	this.tasktype = TaskType.MANUAL;
+      }
+    else
+      {
+	this.tasktype = TaskType.SCHEDULED;
       }
 
     setInterval(interval);
@@ -423,6 +463,16 @@ public class scheduleHandle implements java.io.Serializable {
 	startTime.setTime(startTime.getTime() + (60000L * interval));
 	return true;
       }
+  }
+
+  /**
+   * Returns an enum value indicating what type of Ganymede task this
+   * scheduleHandle is pertaining to.
+   */
+
+  public TaskType getTaskType()
+  {
+    return this.tasktype;
   }
 
   /**
