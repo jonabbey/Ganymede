@@ -1550,15 +1550,26 @@ public class DBEditSet {
     // transaction to the sync channels, and finalized the
     // transaction.. we can proceed
 
-    // and we had better not see any exceptions from this point on
+    // Note that we still have our write lock established, even though
+    // we are giving up synchronization on the journal.
 
-    commit_handlePhase2();
-    commit_logTransaction(fieldsTouched);
-    commit_replace_objects();
-    commit_updateNamespaces();
-    DBDeletionManager.releaseSession(session);
-    Ganymede.db.aSymLinkTracker.commit(session);
-    commit_updateBases(fieldsTouched);
+    try
+      {
+	commit_handlePhase2();
+	commit_logTransaction(fieldsTouched); // *sync*
+	commit_replace_objects();
+	commit_updateNamespaces(); // *sync*
+	DBDeletionManager.releaseSession(session); 
+	Ganymede.db.aSymLinkTracker.commit(session); // *sync*
+	commit_updateBases(fieldsTouched);
+      }
+    catch (Throwable ex)
+      {
+	// If we throw up here, we've got real problems, and our
+	// database may be in an inconsistent state
+
+	throw new CommitError("Critical error: Intolerable exception during commit_integrateChanges().", ex);
+      }
   }
 
   /**
@@ -2805,5 +2816,36 @@ class CommitFatalException extends CommitException {
   public ReturnVal getReturnVal()
   {
     return retVal;
+  }
+}
+
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                     CommitError
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>This is a Ganymede-specific Error that can be thrown by code in
+ * the server during a transactional commit, signifying that a commit
+ * failed in a possibly non-recoverable way.</p>
+ */
+
+class CommitError extends Error {
+
+  public CommitError()
+  {
+    super();
+  }
+
+  public CommitError(String s)
+  {
+    super(s);
+  }
+
+  public CommitError(String s, Throwable t)
+  {
+    super(s, t);
   }
 }
