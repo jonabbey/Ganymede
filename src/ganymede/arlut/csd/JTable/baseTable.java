@@ -4,7 +4,7 @@
 
   A JDK 1.1 table Swing component.
 
-  Copyright (C) 1996-2009
+  Copyright (C) 1996-2010
   The University of Texas at Austin
 
   This program is free software; you can redistribute it and/or modify
@@ -23,8 +23,6 @@
   02111-1307, USA
 
   Created: 29 May 1996
-
-  Last Commit: $Format:%cd$
 
   Module By: Jonathan Abbey -- jonabbey@arlut.utexas.edu
   Applied Research Laboratories, The University of Texas at Austin
@@ -1771,14 +1769,21 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   }
 
   /**
-   *
    * This method returns the number of rows in the table.
-   *
    */
 
   public synchronized int getRowCount()
   {
     return rows.size();
+  }
+
+  /**
+   * This method returns the number of columns in the table.
+   */
+
+  public synchronized int getColCount()
+  {
+    return cols.size();
   }
 
   /**
