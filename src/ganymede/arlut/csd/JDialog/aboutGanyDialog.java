@@ -2,9 +2,7 @@
 
    aboutGanyDialog.java
 
-   A dialog class used to display text and HTML with an optional
-   image on the left side, used for the about.. and motd features
-   in the Ganymede client.
+   A dialog class used to display information about Ganymede
    
    Created: 4 March 2005
 
@@ -14,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -83,7 +81,6 @@ import arlut.csd.Util.TranslationService;
  *
  * A dialog class used to display information about Ganymede
  *   
- * @version $Id$
  * @author Jonathan Abbey
  *
  */
