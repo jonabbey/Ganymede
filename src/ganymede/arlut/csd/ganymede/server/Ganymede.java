@@ -274,13 +274,6 @@ public class Ganymede {
   public static BaseListTransport baseTransport = null;
 
   /**
-   * <p>A vector of {@link arlut.csd.ganymede.server.SyncRunner SyncRunner}
-   * objects initialized on database load.</p>
-   */
-
-  public static Vector syncRunners = new Vector();
-
-  /**
    * The Thread that we have registered to handle cleanup if we get a
    * kill/quit signal.
    *
@@ -782,9 +775,9 @@ public class Ganymede {
 
 	if (incompleteTransaction != null)
 	  {
-	    for (int i = 0; i < syncRunners.size(); i++)
+	    for (scheduleHandle handle: scheduler.getTasksByClass(SyncRunner.class))
 	      {
-		SyncRunner channel = getSyncChannel((String) syncRunners.elementAt(i));
+		SyncRunner channel = (SyncRunner) handle.task;
 
 		try
 		  {
@@ -1403,12 +1396,9 @@ public class Ganymede {
 	scheduler.demandTask(handle.getName());
       }
 
-    synchronized (syncRunners)
+    for (scheduleHandle handle: scheduler.getTasksByClass(SyncRunner.class))
       {
-	for (int i = 0; i < syncRunners.size(); i++)
-	  {
-	    scheduler.demandTask((String) syncRunners.elementAt(i));
-	  }
+	scheduler.demandTask(handle.getName());
       }
   }
 
@@ -1434,7 +1424,7 @@ public class Ganymede {
 
   /**
    * This method scans the database for valid SyncChannel entries and
-   * adds them to the syncRunners vector.
+   * adds them to the scheduler.
    */
 
   static private void registerSyncChannels() throws NotLoggedInException
@@ -1481,11 +1471,7 @@ public class Ganymede {
 	System.err.println(ts.l("registerSyncChannel.debug_register", channel.getName()));
       }
 
-    synchronized (syncRunners)
-      {
-	Ganymede.scheduler.addActionOnDemand(channel, channel.getName());
-	arlut.csd.Util.VectorUtils.unionAdd(syncRunners, channel.getName());
-      }
+    Ganymede.scheduler.addActionOnDemand(channel, channel.getName());
   }
 
   /**
@@ -1501,11 +1487,7 @@ public class Ganymede {
 	System.err.println(ts.l("unregisterSyncChannel.debug_unregister", channelName));
       }
 
-    synchronized (syncRunners)
-      {
-	Ganymede.scheduler.unregisterTask(channelName);
-	syncRunners.removeElement(channelName);
-      }
+    Ganymede.scheduler.unregisterTask(channelName);
   }
 
   /**

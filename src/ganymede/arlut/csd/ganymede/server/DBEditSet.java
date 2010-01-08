@@ -70,6 +70,7 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
@@ -1628,86 +1629,81 @@ public class DBEditSet {
   {
     DBEditObject[] objectList = getObjectList();
 
-    synchronized (Ganymede.syncRunners)
+    try
       {
-	int i = 0;
-
-	try
+	for (scheduleHandle handle: Ganymede.scheduler.getTasksByClass(SyncRunner.class))
 	  {
-	    for (i = 0; i < Ganymede.syncRunners.size(); i++)
-	      {
-		SyncRunner sync = Ganymede.getSyncChannel((String)Ganymede.syncRunners.elementAt(i));
-
-                try
-                  {
-                    if (sync.isIncremental())
-                      {
-                        sync.writeSync(persistedTransaction, objectList, this);
-                      }
-                    else if (sync.isFullState())
-                      {
-                        sync.checkBuildNeeded(persistedTransaction, objectList, this);
-                      }
-                  }
-                catch (java.io.FileNotFoundException in_ex)
-                  {
-                    // "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
-                    // "Couldn''t write transaction to sync channel {0} due to a FileNotFoundException.
-                    //
-                    // This sync channel is configured to write to {1}, but this directory does not exist or is not writable.
-                    //
-                    // Transaction Cancelled."
-
-                    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
-                                                                              ts.l("commit_writeSyncChannels.no_sync_found", sync.getName(), sync.getDirectory())));
-                  }
-	      }
-	  }
-	catch (Throwable ex)
-	  {
-	    undoSyncChannels();
+	    SyncRunner sync = (SyncRunner) handle.task;
 
 	    try
 	      {
-		dbStore.journal.undoTransaction(persistedTransaction);
+		if (sync.isIncremental())
+		  {
+		    sync.writeSync(persistedTransaction, objectList, this);
+		  }
+		else if (sync.isFullState())
+		  {
+		    sync.checkBuildNeeded(persistedTransaction, objectList, this);
+		  }
 	      }
-	    catch (IOException inex)
+	    catch (java.io.FileNotFoundException in_ex)
 	      {
-		// This *really* shouldn't happen, since there's no writes involved
-		// in truncating the journal.  If it did, we're kind of screwed, though.
-
-		// ***
-		// *** Error in commit_writeSyncChannels()!  Couldn''t undo a transaction in the
-		// *** journal file after catching an exception!
-		// ***
-		// *** The journal may not be completely recoverable!
-		// ***
+		// "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
+		// "Couldn''t write transaction to sync channel {0} due to a FileNotFoundException.
 		//
-		// {0}
-
-		Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", Ganymede.stackTrace(ex)));
-	      }
-
-            if (ex instanceof CommitFatalException)
-              {
-                throw (CommitFatalException) ex;
-              }
-            else if (ex instanceof IOException)
-	      {
-		// "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
-		// "Couldn''t write transaction to sync channels due to an IOException.   The server may have run out of disk space.\n\n{0}"
+		// This sync channel is configured to write to {1}, but this directory does not exist or is not writable.
+		//
+		// Transaction Cancelled."
+		
 		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
-									  ts.l("commit_writeSyncChannels.ioexception_text",
-									       Ganymede.stackTrace(ex))));
+									  ts.l("commit_writeSyncChannels.no_sync_found", sync.getName(), sync.getDirectory())));
 	      }
-	    else
-	      {
-		// "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
-		// "Exception caught while writing to sync channels.  Sync channels write aborted.\n\n{0}"
-		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
-									  ts.l("commit_writeSyncChannels.exception_text",
-									       Ganymede.stackTrace(ex))));
-	      }
+	  }
+      }
+    catch (Throwable ex)
+      {
+	undoSyncChannels();
+
+	try
+	  {
+	    dbStore.journal.undoTransaction(persistedTransaction);
+	  }
+	catch (IOException inex)
+	  {
+	    // This *really* shouldn't happen, since there's no writes involved
+	    // in truncating the journal.  If it did, we're kind of screwed, though.
+
+	    // ***
+	    // *** Error in commit_writeSyncChannels()!  Couldn''t undo a transaction in the
+	    // *** journal file after catching an exception!
+	    // ***
+	    // *** The journal may not be completely recoverable!
+	    // ***
+	    //
+	    // {0}
+
+	    Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", Ganymede.stackTrace(ex)));
+	  }
+
+	if (ex instanceof CommitFatalException)
+	  {
+	    throw (CommitFatalException) ex;
+	  }
+	else if (ex instanceof IOException)
+	  {
+	    // "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
+	    // "Couldn''t write transaction to sync channels due to an IOException.   The server may have run out of disk space.\n\n{0}"
+	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+								      ts.l("commit_writeSyncChannels.ioexception_text",
+									   Ganymede.stackTrace(ex))));
+	  }
+	else
+	  {
+	    // "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
+	    // "Exception caught while writing to sync channels.  Sync channels write aborted.\n\n{0}"
+	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+								      ts.l("commit_writeSyncChannels.exception_text",
+									   Ganymede.stackTrace(ex))));
 	  }
       }
   }
@@ -1721,25 +1717,22 @@ public class DBEditSet {
 
   private final void undoSyncChannels()
   {
-    synchronized (Ganymede.syncRunners)
+    for (scheduleHandle handle: Ganymede.scheduler.getTasksByClass(SyncRunner.class))
       {
-	for (int i = 0; i < Ganymede.syncRunners.size(); i++)
+	SyncRunner sync = (SyncRunner) handle.task;
+
+	if (sync.isIncremental())
 	  {
-	    SyncRunner sync = Ganymede.getSyncChannel((String) Ganymede.syncRunners.elementAt(i));
-
-	    if (sync.isIncremental())
+	    try
 	      {
-		try
-		  {
-		    sync.unSync(persistedTransaction);
-		  }
-		catch (Throwable inex)
-		  {
-		    // what can we do?  keep clearing them out as best we
-		    // can
+		sync.unSync(persistedTransaction);
+	      }
+	    catch (Throwable inex)
+	      {
+		// what can we do?  keep clearing them out as best we
+		// can
 
-                    Ganymede.logError(inex);
-		  }
+		Ganymede.logError(inex);
 	      }
 	  }
       }
