@@ -5,10 +5,6 @@
    This file is a management class for task records in Ganymede.
    
    Created: 5 February 1999
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -16,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -372,11 +368,6 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
       case DELETING:
 	Ganymede.scheduler.unregisterTask(origName);
 
-	if (original.isSet(SchemaConstants.TaskRunOnCommit))
-	  {
-	    Ganymede.unregisterBuilderTask(origName);
-	  }
-
 	break;
 
       case EDITING:
@@ -386,47 +377,20 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
 
 	    Ganymede.scheduler.unregisterTask(origName);
 
-	    if (original.isSet(SchemaConstants.TaskRunOnCommit))
-	      {
-		Ganymede.unregisterBuilderTask(origName);
-	      }
-
 	    // and re-register ourselves appropriately
 
 	    Ganymede.scheduler.registerTaskObject(this);
-
-	    if (isSet(SchemaConstants.TaskRunOnCommit))
-	      {
-		Ganymede.registerBuilderTask(taskName);
-	      }
 	  }
 	else
 	  {
 	    // no name change, go ahead and reschedule ourselves
 
 	    Ganymede.scheduler.registerTaskObject(this);
-
-	    // get the buildertask list updated to handle this task
-	    // on transaction commit appropriately
-
-	    if (original.isSet(SchemaConstants.TaskRunOnCommit) && !isSet(SchemaConstants.TaskRunOnCommit))
-	      {
-		Ganymede.unregisterBuilderTask(origName);
-	      }
-	    else if (isSet(SchemaConstants.TaskRunOnCommit) && !original.isSet(SchemaConstants.TaskRunOnCommit))
-	      {
-		Ganymede.registerBuilderTask(taskName);
-	      }
 	  }
 	break;
 
       case CREATING:
 	Ganymede.scheduler.registerTaskObject(this);
-
-	if (isSet(SchemaConstants.TaskRunOnCommit))
-	  {
-	    Ganymede.registerBuilderTask(taskName);
-	  }
       }
   }
 

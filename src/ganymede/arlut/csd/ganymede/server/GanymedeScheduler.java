@@ -50,10 +50,12 @@
 package arlut.csd.ganymede.server;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
@@ -169,11 +171,11 @@ public class GanymedeScheduler extends Thread {
   // --- end statics
 
   Date nextAction = null;
-  private Hashtable currentlyScheduled = new Hashtable();
-  private Hashtable currentlyRunning = new Hashtable();
-  private Hashtable onDemand = new Hashtable();
+  private Hashtable<String, scheduleHandle> currentlyScheduled = new Hashtable<String, scheduleHandle>();
+  private Hashtable<String, scheduleHandle> currentlyRunning = new Hashtable<String, scheduleHandle>();
+  private Hashtable<String, scheduleHandle> onDemand = new Hashtable<String, scheduleHandle>();
 
-  private Vector taskList = new Vector();	// for reporting to admin consoles
+  private Vector<scheduleHandle> taskList = new Vector<scheduleHandle>(); // for reporting to admin consoles
   private boolean taskListInitialized = false;
 
   /**
@@ -839,6 +841,26 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
+   * <p>This method returns a List of handles of the given type known
+   * to the scheduler.
+   */
+
+  public synchronized List<scheduleHandle> getTasksByType(scheduleHandle.TaskType type)
+  {
+    ArrayList<scheduleHandle> results = new ArrayList<scheduleHandle>();
+
+    for (scheduleHandle handle: taskList)
+      {
+	if (handle.getTaskType() == type)
+	  {
+	    results.add(handle);
+	  }
+      }
+
+    return results;
+  }
+
+  /**
    * <p>Private helper to find a given handle by name amongst the
    * various internal structures.  Unsynchronized, so call from
    * a synchronized method if you care.</p>
@@ -1208,39 +1230,36 @@ public class GanymedeScheduler extends Thread {
 
   private synchronized void updateTaskInfo(boolean updateConsoles)
   {
-    Enumeration en;
+    Enumeration<scheduleHandle> en;
 
     /* -- */
 
-    if (reportTasks)
-      {    
-	taskList.setSize(0);
+    taskList.setSize(0);
 
-	en = currentlyScheduled.elements();
+    en = currentlyScheduled.elements();
 
-	while (en.hasMoreElements())
-	  {
-	    VectorUtils.unionAdd(taskList, en.nextElement());
-	  }
+    while (en.hasMoreElements())
+      {
+	VectorUtils.unionAdd(taskList, en.nextElement());
+      }
     
-	en = currentlyRunning.elements();
-	while (en.hasMoreElements())
-	  {
-	    VectorUtils.unionAdd(taskList, en.nextElement());
-	  }
+    en = currentlyRunning.elements();
+    while (en.hasMoreElements())
+      {
+	VectorUtils.unionAdd(taskList, en.nextElement());
+      }
 
-	en = onDemand.elements();
-	while (en.hasMoreElements())
-	  {
-	    VectorUtils.unionAdd(taskList, en.nextElement());
-	  }
+    en = onDemand.elements();
+    while (en.hasMoreElements())
+      {
+	VectorUtils.unionAdd(taskList, en.nextElement());
+      }
 
-	taskListInitialized = true;
+    taskListInitialized = true;
 
-	if (updateConsoles)
-	  {
-	    GanymedeAdmin.refreshTasks();
-	  }
+    if (reportTasks && updateConsoles)
+      {    
+	GanymedeAdmin.refreshTasks();
       }
   }
 

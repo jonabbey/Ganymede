@@ -13,18 +13,13 @@
 
    Created: 17 January 1997
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -96,6 +91,7 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.InvidPool;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.rmi.Server;
 
@@ -276,13 +272,6 @@ public class Ganymede {
    */
 
   public static BaseListTransport baseTransport = null;
-
-  /**
-   * <p>A vector of {@link arlut.csd.ganymede.server.GanymedeBuilderTask GanymedeBuilderTask}
-   * objects initialized on database load.</p>
-   */
-
-  public static Vector builderTasks = new Vector();
 
   /**
    * <p>A vector of {@link arlut.csd.ganymede.server.SyncRunner SyncRunner}
@@ -1310,8 +1299,8 @@ public class Ganymede {
   }
 
   /**
-   * This method scans the database for valid BuilderTask entries and 
-   * adds them to the builderTasks vector.
+   * This method scans the database for valid task entries and adds
+   * them to the scheduler.
    */
 
   static private void registerTasks() throws NotLoggedInException
@@ -1365,11 +1354,6 @@ public class Ganymede {
 	      }
 
 	    scheduler.registerTaskObject(object);
-
-	    if (object.isSet(SchemaConstants.TaskRunOnCommit))
-	      {
-		registerBuilderTask((String) object.getFieldValueLocal(SchemaConstants.TaskName));
-	      }
 	  }
       }
     else
@@ -1404,29 +1388,6 @@ public class Ganymede {
 				ts.l("registerTasks.validation_task"));
   }
 
-  static void registerBuilderTask(String taskName)
-  {
-    if (debug)
-      {
-	System.err.println(ts.l("registerBuilderTask.debug_register", taskName));
-      }
-
-    synchronized (builderTasks)
-      {
-	arlut.csd.Util.VectorUtils.unionAdd(builderTasks, taskName);
-      }
-  }
-
-  static void unregisterBuilderTask(String taskName)
-  {
-    if (debug)
-      {
-	System.err.println(ts.l("unregisterBuilderTask.debug_unregister", taskName));
-      }
-
-    builderTasks.removeElement(taskName); // sync'ed on builderTasks vector method
-  }
-
   /**
    * This method schedules all registered builder tasks and Sync
    * Runners for execution.  This method will be called when a user
@@ -1437,12 +1398,9 @@ public class Ganymede {
 
   static void runBuilderTasks()
   {
-    synchronized (builderTasks)
+    for (scheduleHandle handle: scheduler.getTasksByType(scheduleHandle.TaskType.BUILDER))
       {
-	for (int i = 0; i < builderTasks.size(); i++)
-	  {
-	    scheduler.demandTask((String) builderTasks.elementAt(i));
-	  }
+	scheduler.demandTask(handle.getName());
       }
 
     synchronized (syncRunners)
@@ -1465,12 +1423,9 @@ public class Ganymede {
   {
     String[] options = {"forcebuild"};
 
-    synchronized (builderTasks)
+    for (scheduleHandle handle: scheduler.getTasksByType(scheduleHandle.TaskType.BUILDER))
       {
-	for (int i = 0; i < builderTasks.size(); i++)
-	  {
-	    scheduler.demandTask((String) builderTasks.elementAt(i), options);
-	  }
+	scheduler.demandTask(handle.getName(), options);
       }
 
     // XXX do we want to do something about forcing sync channels
