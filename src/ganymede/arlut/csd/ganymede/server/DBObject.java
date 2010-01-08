@@ -394,8 +394,24 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	      {
 		// clean up any cached data the field was holding during
 		// editing
-		
-		field.cleanup();
+
+		try
+		  {
+		    field.cleanup();
+		  }
+		catch (Exception ex)
+		  {
+		    // we don't want to throw an uncaught exception in
+		    // the check-in constructor, because we'll break
+		    // the transaction commit in a really bad way if
+		    // that happens.
+		    //
+		    // field cleanup should be a
+		    // fail-without-consequence kind of thing, so
+		    // we'll just carry on if it happens
+
+		    ex.printStackTrace();
+		  }
 		
 		// Create a new copy and save it in the new DBObject.  We
 		// *must not* directly save the field from the DBEditObject,

@@ -235,6 +235,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * subclass' copy constructor.
    *
    * Used by the DBEditObject's check-out and check-in constructor.
+   *
+   * Note that it is essential that this method never throw an
+   * uncaught exception, because that will break commits in a very
+   * ugly way.
    */
 
   static DBField copyField(DBObject object, DBField orig)

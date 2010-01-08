@@ -1550,6 +1550,8 @@ public class DBEditSet {
     // transaction to the sync channels, and finalized the
     // transaction.. we can proceed
 
+    // and we had better not see any exceptions from this point on
+
     commit_handlePhase2();
     commit_logTransaction(fieldsTouched);
     commit_replace_objects();
@@ -2378,6 +2380,12 @@ public class DBEditSet {
   /**
    * <p>Private helper method for commit() that integrates committed
    * objects back into the DBStore hashes.</p>
+   *
+   * <p>If this method throws an exception, we will be pretty screwed,
+   * as it means we're not able to replace an object that we've
+   * already committed to our logs.  This essentially boils down to
+   * meaning that we're screwed if we can't create a new DBObject with
+   * a copy constructor from a DBEditObject.</p>
    */
 
   private final void commit_replace_object(DBEditObject eObj)

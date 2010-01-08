@@ -297,7 +297,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * Copy constructor, used when checking edit objects in and out
+   * Copy constructor, used when checking edit objects in and out.
+   *
+   * As a field copy constructor, this method must not throw an
+   * exception, or else commits can be seriously broken.
    */
 
   public PasswordDBField(DBObject owner, PasswordDBField field)
@@ -315,33 +318,43 @@ public class PasswordDBField extends DBField implements pass_field {
     shaUnixCrypt = field.shaUnixCrypt;
     history = field.history;
 
-    // If we're keeping history and we're copying from an editable
-    // object to a non-editable object and the field we're copying
-    // from changed during the transaction we're consolidating, we
-    // need to remember the password that is being set with this
-    // commit.
-
-    if (getFieldDef().isHistoryChecked())
+    try
       {
-	if (history == null)
-	  {
-	    history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
-	  }
-	else if (history.getPoolSize() != getFieldDef().getHistoryDepth())
-	  {
-	    history.setPoolSize(getFieldDef().getHistoryDepth());
-	  }
+	// If we're keeping history and we're copying from an editable
+	// object to a non-editable object and the field we're copying
+	// from changed during the transaction we're consolidating, we
+	// need to remember the password that is being set with this
+	// commit.
 
-	if (this.uncryptedPass != null &&
-	    !(this.owner instanceof DBEditObject) &&
-	    field.hasChanged())
+	if (getFieldDef().isHistoryChecked())
 	  {
-	    history.add(uncryptedPass, new Date());
+	    if (history == null)
+	      {
+		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
+	      }
+	    else if (history.getPoolSize() != getFieldDef().getHistoryDepth())
+	      {
+		history.setPoolSize(getFieldDef().getHistoryDepth());
+	      }
+
+	    if (this.uncryptedPass != null &&
+		!(this.owner instanceof DBEditObject) &&
+		field.hasChanged())
+	      {
+		history.add(uncryptedPass, new Date());
+	      }
+	  }
+	else
+	  {
+	    history = null;
 	  }
       }
-    else
+    catch (Throwable ex)
       {
-	history = null;
+	// we're *not* going to allow an exception to be thrown here
+	// for the sake of the password history tracking
+
+	ex.printStackTrace();
       }
   }
 
