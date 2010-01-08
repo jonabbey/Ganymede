@@ -291,6 +291,14 @@ public class GanymedeScheduler extends Thread {
 	return;
       }
 
+    if (task instanceof GanymedeBuilderTask &&
+	object.isSet(SchemaConstants.TaskRunOnCommit))
+      {
+	GanymedeBuilderTask builder = (GanymedeBuilderTask) task;
+
+	builder.runsOnCommit(true);
+      }
+
     // if we're not doing a periodic task, just add the task to our
     // demand queue and let the Ganymede initialization code take
     // care of associating the task with the transaction commit
