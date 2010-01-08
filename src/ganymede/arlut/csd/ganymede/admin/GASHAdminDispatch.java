@@ -691,46 +691,47 @@ class GASHAdminDispatch implements Runnable {
 			      );
       }
 
-    Vector syncTasks = new Vector();
-    Vector scheduledTasks = new Vector();
-    Vector manualTasks = new Vector();
+    Vector<scheduleHandle> syncTasks = new Vector<scheduleHandle>();
+    Vector<scheduleHandle> scheduledTasks = new Vector<scheduleHandle>();
+    Vector<scheduleHandle> manualTasks = new Vector<scheduleHandle>();
 
     for (int i = 0; i < tasks.length; i++)
       {
 	handle = (scheduleHandle) tasks[i];
 
-	if (handle.isSyncTask)
+	switch (handle.getTaskType())
 	  {
-	    syncTasks.addElement(handle);
-	  }
-	else if (handle.startTime != null)
-	  {
+	  case SCHEDULED:
 	    scheduledTasks.addElement(handle);
-	  }
-	else
-	  {
+	    break;
+
+	  case MANUAL:
 	    manualTasks.addElement(handle);
+	    break;
+
+	  case BUILDER:
+	  case SYNCINCREMENTAL:
+	  case SYNCFULLSTATE:
+	  case SYNCMANUAL:
+	    syncTasks.addElement(handle);
 	  }
       }
 
-    updateTaskTable(frame.syncTaskTable, syncTasks);
+    updateSyncTaskTable(frame.syncTaskTable, syncTasks);
     updateTaskTable(frame.taskTable, scheduledTasks);
     updateTaskTable(frame.manualTaskTable, manualTasks);
   }
 
-  private void updateTaskTable(rowTable table, Vector tasks)
+  private void updateTaskTable(rowTable table, Vector<scheduleHandle> tasks)
   {
-    scheduleHandle handle = null;
     Vector taskNames = new Vector();
 
     /* -- */
 
     // now reload the table with the current stats
 
-    for (int i = 0; i < tasks.size(); i++)
+    for (scheduleHandle handle: tasks)
       {
-	handle = (scheduleHandle) tasks.elementAt(i);
-
 	taskNames.addElement(handle.name);
 
 	if (!table.containsKey(handle.name))
@@ -794,6 +795,110 @@ class GASHAdminDispatch implements Runnable {
 	      }
 
 	    table.setCellText(handle.name, 4, handle.intervalString, false);
+	  }
+      }
+
+    // and take any rows out that are gone
+
+    Vector tasksKnown = new Vector();
+    Enumeration en = table.keys();
+
+    while (en.hasMoreElements())
+      {
+	tasksKnown.addElement(en.nextElement());
+      }
+
+    Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
+    
+    for (int i = 0; i < removedTasks.size(); i++)
+      {
+	table.deleteRow(removedTasks.elementAt(i), false);
+      }
+
+    // And refresh our table.. we'll wait until this succeeds so we
+    // don't get the server sending us more updates before the table
+    // finishes drawing
+
+    final rowTable localTableRef = table;
+
+    try
+      {
+	SwingUtilities.invokeAndWait(new Runnable() {
+	  public void run() {
+	    localTableRef.refreshTable();
+	  }
+	});
+      }
+    catch (InvocationTargetException ite)
+      {
+	ite.printStackTrace();
+      }
+    catch (InterruptedException ie)
+      {
+	ie.printStackTrace();
+      }
+  }
+
+  private void updateSyncTaskTable(rowTable table, Vector<scheduleHandle> tasks)
+  {
+    Vector taskNames = new Vector();
+
+    /* -- */
+
+    // now reload the table with the current stats
+
+    for (scheduleHandle handle: tasks)
+      {
+	taskNames.addElement(handle.name);
+
+	if (!table.containsKey(handle.name))
+	  {
+	    table.newRow(handle.name);
+	  }
+
+	table.setCellText(handle.name, 0, handle.name, false); // task name
+
+	table.setCellText(handle.name, 1, handle.getTaskType().toString(), false);
+
+	if (handle.isRunning() && handle.isSuspended())
+	  {
+	    // "Suspended upon completion"
+	    table.setCellText(handle.name, 2, ts.l("changeTasks.runningSuspendedState"), false);
+	    table.setCellColor(handle.name, 2, Color.red, false);
+	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	  }
+	else if (handle.isRunning())
+	  {
+	    // "Running"
+	    table.setCellText(handle.name, 2, ts.l("changeTasks.runningState"), false);
+	    table.setCellColor(handle.name, 2, Color.blue, false);
+	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	  }
+	else if (handle.isSuspended())
+	  {
+	    // "Suspended"
+	    table.setCellText(handle.name, 2, ts.l("changeTasks.suspendedState"), false);
+	    table.setCellColor(handle.name, 2, Color.red, false);
+	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	  }
+	else if (handle.startTime != null)
+	  {
+	    // "Scheduled"
+	    table.setCellText(handle.name, 2, ts.l("changeTasks.scheduledState"), false);
+	    table.setCellColor(handle.name, 2, Color.black, false);
+	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	  }
+	else
+	  {
+	    // "Waiting"
+	    table.setCellText(handle.name, 2, ts.l("changeTasks.waitingState"), false);
+	    table.setCellColor(handle.name, 2, Color.black, false);
+	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	  }
+
+	if (handle.lastTime != null)
+	  {
+	    table.setCellText(handle.name, 3, handle.lastTime.toString(), false);
 	  }
       }
 

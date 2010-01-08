@@ -308,9 +308,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   rowTable syncTaskTable = null;
 
   String syncTaskHeaders[] = {ts.l("global.task_col_0"), // "Task"
+			      ts.l("global.task_col_5"), // "Type"
 			      ts.l("global.task_col_1"), // "Status"
 			      ts.l("global.task_col_2")}; // "Last Run"
-  int syncTaskColWidths[] = {100,100,100};
+  int syncTaskColWidths[] = {100,100,100,100};
 
   // resources for the scheduled task monitor table
 
@@ -851,8 +852,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     tableBox.add("Center", table);
 
     //
-    // create background task monitor
+    // create task monitors
     //
+
+    // first the sync monitor
 
     JPopupMenu syncTaskPopMenu = new JPopupMenu();
 
@@ -876,8 +879,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     syncTaskPopMenu.add(stopTaskMI);
     syncTaskPopMenu.add(disableTaskMI);
     syncTaskPopMenu.add(enableTaskMI);
-
-    // first the sync monitor
 
     syncTaskTable = new rowTable(syncTaskColWidths, syncTaskHeaders, this, false, syncTaskPopMenu, false);
 
