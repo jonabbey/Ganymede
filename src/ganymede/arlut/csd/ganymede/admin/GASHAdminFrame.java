@@ -122,6 +122,8 @@ import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
 
+import apple.dts.samplecode.osxadapter.OSXAdapter;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                   GASHAdminFrame
@@ -360,6 +362,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     this.loginPanel = loginPanel;
 
+    // If we're running on the Mac, let's try to fit in a bit better.
+
+    if (GASHAdmin.isRunningOnMac())
+      {
+	System.setProperty("apple.laf.useScreenMenuBar", "true");
+      }
+
     mbar = new JMenuBar();
 
     // "Control"
@@ -437,13 +446,16 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     dumpMI.addActionListener(this);
 
-    // "Quit Console"
-    quitMI = new JMenuItem(ts.l("init.control_menu_6"));
-    quitMI.setActionCommand(QUIT);
-
-    if (ts.hasPattern("init.control_menu_6_key_optional"))
+    if (!GASHAdmin.isRunningOnMac())
       {
-	quitMI.setMnemonic((int) ts.l("init.control_menu_6_key_optional").charAt(0));
+	// "Quit Console"
+	quitMI = new JMenuItem(ts.l("init.control_menu_6"));
+	quitMI.setActionCommand(QUIT);
+
+	if (ts.hasPattern("init.control_menu_6_key_optional"))
+	  {
+	    quitMI.setMnemonic((int) ts.l("init.control_menu_6_key_optional").charAt(0));
+	  }
       }
 
     quitMI.addActionListener(this);
@@ -461,7 +473,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     LandFMenu.setCallback(this);
 
     controlMenu.add(LandFMenu);
-    controlMenu.add(quitMI);
+
+    if (!GASHAdmin.isRunningOnMac())
+      {
+	controlMenu.add(quitMI);
+      }
 
     // "Debug"
     debugMenu = new JMenu(ts.l("init.debug_menu"), false); // no tear-off
@@ -528,19 +544,22 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	helpMenu.setMnemonic((int) ts.l("init.help_menu_key_optional").charAt(0));
       }
 
-    // "About Ganymede"
-    showAboutMI = new JMenuItem(ts.l("init.help_menu_0"));
-    showAboutMI.setActionCommand(ABOUT);
-
-    if (ts.hasPattern("init.help_menu_0_key_optional"))
+    if (!GASHAdmin.isRunningOnMac())
       {
-	showAboutMI.setMnemonic((int) ts.l("init.help_menu_0_key_optional").charAt(0));
+	// "About Ganymede"
+	showAboutMI = new JMenuItem(ts.l("init.help_menu_0"));
+	showAboutMI.setActionCommand(ABOUT);
+
+	if (ts.hasPattern("init.help_menu_0_key_optional"))
+	  {
+	    showAboutMI.setMnemonic((int) ts.l("init.help_menu_0_key_optional").charAt(0));
+	  }
+
+	showAboutMI.addActionListener(this);
+	helpMenu.add(showAboutMI);
+
+	helpMenu.addSeparator();
       }
-
-    showAboutMI.addActionListener(this);
-    helpMenu.add(showAboutMI);
-
-    helpMenu.addSeparator();
 
     // "Java Version"
     showJavaVersionMI = new JMenuItem(ts.l("init.help_menu_1"));
@@ -976,6 +995,22 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     splitterPane.setOneTouchExpandable(true);
 
     getContentPane().add(splitterPane, BorderLayout.CENTER);
+
+    if (GASHAdmin.isRunningOnMac())
+      {
+	MacOSXController controller = new MacOSXController(this);
+
+	try
+	  {
+	    OSXAdapter.setQuitHandler(controller, MacOSXController.class.getMethod("handleQuit", (Class[]) null));
+	    OSXAdapter.setAboutHandler(controller, MacOSXController.class.getMethod("handleAbout", (Class[]) null));
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	    // we shouldn't get an exception here at runtime unless
+	    // we've made a mistake in the MacOSXController class.
+	  }
+      }
 
     pack();
 

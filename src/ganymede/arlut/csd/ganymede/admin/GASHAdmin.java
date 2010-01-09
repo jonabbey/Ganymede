@@ -11,7 +11,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -181,6 +181,14 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   static String server_url = null;
 
   static Server server = null;	// remote reference
+
+  /**
+   * If true, we're running on a mac, and we might tweak our interface
+   * a bit to make things look better.
+   */
+
+  private static Boolean runningOnMac = null;
+
   Image admin_logo = null;
   Image admin_ssl_logo = null;
 
@@ -367,6 +375,18 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	  }
       }
   }
+
+  public static boolean isRunningOnMac()
+  {
+    if (runningOnMac == null)
+      {
+	runningOnMac = "Mac OS X".equals(System.getProperty("os.name"));
+      }
+
+    return runningOnMac;
+  }
+
+  // ---
   
   // Our primary constructor.  This will always be called, either from
   // main(), above, or by the environment building our applet.
