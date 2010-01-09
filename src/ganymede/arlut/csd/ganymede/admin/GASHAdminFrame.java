@@ -456,9 +456,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	  {
 	    quitMI.setMnemonic((int) ts.l("init.control_menu_6_key_optional").charAt(0));
 	  }
-      }
 
-    quitMI.addActionListener(this);
+	quitMI.addActionListener(this);
+      }
 
     controlMenu.add(clearLogMI);
     controlMenu.add(forceBuildMI);
