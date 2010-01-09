@@ -11,7 +11,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -147,7 +147,6 @@ import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.db_object;
 
 import apple.dts.samplecode.osxadapter.OSXAdapter;
-import com.explodingpixels.macwidgets.MacUtils;
 import com.explodingpixels.macwidgets.UnifiedToolBar;
 
 /*------------------------------------------------------------------------------
