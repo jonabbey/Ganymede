@@ -7,18 +7,13 @@
    
    Created: 9 September 1997
 
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   Last Mod Date: $Date$
-   SVN URL: $HeadURL$
-
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2010
    The University of Texas at Austin
 
    Contact information
@@ -350,6 +345,7 @@ public final class datePanel extends JPanel implements ActionListener, JsetValue
 
 	if (ok)
 	  {
+	    setDate(null);
 	    cal.clear();
 	    fp.wp.getgclient().somethingChanged();
 	  }
