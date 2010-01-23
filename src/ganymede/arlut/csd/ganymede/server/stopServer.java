@@ -8,10 +8,6 @@
    drawn from a properties file.
 
    Created: 28 April 1999
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -19,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -245,13 +241,30 @@ public class stopServer {
 
     /* -- */
 
+    BufferedInputStream in = null;
+
     try
       {
-	props.load(new BufferedInputStream(new FileInputStream(filename)));
+	in = new BufferedInputStream(new FileInputStream(filename));
+	props.load(in);
       }
     catch (IOException ex)
       {
 	return false;
+      }
+    finally
+      {
+	if (in != null)
+	  {
+	    try
+	      {
+		in.close();
+	      }
+	    catch (IOException ex)
+	      {
+		throw new RuntimeException(ex);
+	      }
+	  }
       }
 
     // make the combined properties file accessible throughout our server
