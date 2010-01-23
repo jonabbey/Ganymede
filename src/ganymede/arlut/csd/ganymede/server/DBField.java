@@ -540,9 +540,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   public int hashCode()
   {
-    assert false : "hashCode not designed";
-
-    return 42;
+    throw new UnsupportedOperationException();
   }
 
   /**

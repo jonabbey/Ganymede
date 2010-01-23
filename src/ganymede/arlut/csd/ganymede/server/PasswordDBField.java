@@ -472,9 +472,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   public int hashCode()
   {
-    assert false : "hashCode not designed";
-
-    return 42;
+    throw new UnsupportedOperationException();
   }
 
   /**

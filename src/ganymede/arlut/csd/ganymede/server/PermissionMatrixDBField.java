@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
  
-   Copyright (C) 1996-20010
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -565,9 +565,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public int hashCode()
   {
-    assert false : "hashCode not designed";
-
-    return 42;
+    throw new UnsupportedOperationException();
   }
 
   /**

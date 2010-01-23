@@ -572,9 +572,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public int hashCode()
   {
-    assert false : "hashCode not designed";
-
-    return 42;
+    throw new UnsupportedOperationException();
   }
 
   /**
