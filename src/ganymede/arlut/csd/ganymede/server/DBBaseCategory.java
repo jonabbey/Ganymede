@@ -810,6 +810,11 @@ public class DBBaseCategory implements Category, CategoryNode {
     return name;
   }
 
+  public int hashCode()
+  {
+    return this.getPath().hashCode();
+  }
+
   public boolean equals(Object operand)
   {
     if (!(operand instanceof Category))

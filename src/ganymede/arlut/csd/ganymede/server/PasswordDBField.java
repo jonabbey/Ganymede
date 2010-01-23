@@ -467,6 +467,17 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
+   * We don't expect these fields to ever be stored in a hash.
+   */
+
+  public int hashCode()
+  {
+    assert false : "hashCode not designed";
+
+    return 42;
+  }
+
+  /**
    * Returns true if obj is a field with the same value(s) as
    * this one.
    *

@@ -6,10 +6,6 @@
    'Role' DBObjectBase class.
    
    Created: 27 June 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -17,7 +13,7 @@
 
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-20010
    The University of Texas at Austin
 
    Contact information
@@ -561,6 +557,17 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     return Ganymede.createErrorDialog("Permission Matrix Field Error",
 				      "setValue() not allowed on PermissionMatrixDBField.");
+  }
+
+  /**
+   * We don't expect these fields to ever be stored in a hash.
+   */
+
+  public int hashCode()
+  {
+    assert false : "hashCode not designed";
+
+    return 42;
   }
 
   /**

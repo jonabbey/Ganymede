@@ -10,10 +10,6 @@
    specific SyncChannel.
    
    Created: 25 January 2005
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -21,7 +17,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -568,6 +564,17 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     // "Error.. verifyNewValue() method not supported on FieldOptionDBField."
     return Ganymede.createErrorDialog(ts.l("global.error_title"),
 				      ts.l("verifyNewValue.error_text"));
+  }
+
+  /**
+   * We don't expect these fields to ever be stored in a hash.
+   */
+
+  public int hashCode()
+  {
+    assert false : "hashCode not designed";
+
+    return 42;
   }
 
   /**

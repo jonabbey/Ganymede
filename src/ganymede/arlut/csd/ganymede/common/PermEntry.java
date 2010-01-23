@@ -5,10 +5,6 @@
    This class holds the basic per-object / per-field access control bits.
    
    Created: 27 June 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -16,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -235,6 +231,11 @@ public class PermEntry implements java.io.Serializable {
 
     calcIndex();
     indexSet = true;
+  }
+
+  public int hashCode()
+  {
+    return (visible ? 1 : 0) + (editable ? 2 : 0) + (create ? 4: 0) + (delete ? 8 : 0);
   }
 
   public boolean equals(Object obj)

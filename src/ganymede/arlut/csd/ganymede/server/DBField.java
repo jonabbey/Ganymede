@@ -7,11 +7,6 @@
 
    Created: 2 July 1996
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -538,6 +533,17 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    */
 
   abstract void emitXML(XMLDumpContext dump) throws IOException;
+
+  /**
+   * We don't expect these fields to ever be stored in a hash.
+   */
+
+  public int hashCode()
+  {
+    assert false : "hashCode not designed";
+
+    return 42;
+  }
 
   /**
    * Returns true if obj is a field with the same value(s) as
