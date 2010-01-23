@@ -16,10 +16,6 @@
    running behind a system-level firewall.
    
    Created: 4 September 2003
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -27,7 +23,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -322,8 +318,8 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   {
     Object[] parmAry = new Object[2];
 
-    parmAry[0] = new Long(freeMem);
-    parmAry[1] = new Long(totalMem);
+    parmAry[0] = Long.valueOf(freeMem);
+    parmAry[1] = Long.valueOf(totalMem);
 
     adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETMEMORYSTATE, parmAry);
 

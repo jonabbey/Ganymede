@@ -6,10 +6,6 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -17,7 +13,7 @@
 
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -915,7 +911,7 @@ public class StringDBField extends DBField implements string_field {
 		// "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
 		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
 						  ts.l("verifyBasicConstraints.bad_char",
-						       s, new Character(s.charAt(i)), this.getName(), owner.getLabel()));
+						       s, Character.valueOf(s.charAt(i)), this.getName(), owner.getLabel()));
 	      }
 	  }
       }
@@ -931,7 +927,7 @@ public class StringDBField extends DBField implements string_field {
 		// "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
 		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
 						  ts.l("verifyBasicConstraints.bad_char",
-						       s, new Character(s.charAt(i)), this.getName(), owner.getLabel()));
+						       s, Character.valueOf(s.charAt(i)), this.getName(), owner.getLabel()));
 	      }
 	  }
       }

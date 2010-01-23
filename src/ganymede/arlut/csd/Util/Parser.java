@@ -22,7 +22,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2009
+   Copyright (C) 1996 - 2010
    The University of Texas at Austin
 
    Contact information
@@ -336,7 +336,7 @@ public class Parser {
 
 	if (tokens.ttype == StreamTokenizer.TT_NUMBER)
 	  {
-	    result = Integer.toString(new Double(tokens.nval).intValue());
+	    result = Integer.toString((int) tokens.nval);
 
 	    return result;
 	  }

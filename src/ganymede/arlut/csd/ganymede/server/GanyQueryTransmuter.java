@@ -8,10 +8,6 @@
    it.
    
    Created: 31 August 2004
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Deepak Giridharagopal, Jonathan Abbey
 
@@ -19,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -123,26 +119,26 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     // initialize op_scalar_mapping
 
     op_scalar_mapping = new HashMap();
-    op_scalar_mapping.put("=~", new Byte(QueryDataNode.MATCHES));
-    op_scalar_mapping.put("=~_ci", new Byte(QueryDataNode.NOCASEMATCHES));
-    op_scalar_mapping.put("==", new Byte(QueryDataNode.EQUALS));
-    op_scalar_mapping.put("==_ci", new Byte(QueryDataNode.NOCASEEQ));
-    op_scalar_mapping.put("<", new Byte(QueryDataNode.LESS));
-    op_scalar_mapping.put("<=", new Byte(QueryDataNode.LESSEQ));
-    op_scalar_mapping.put(">", new Byte(QueryDataNode.GREAT));
-    op_scalar_mapping.put(">=", new Byte(QueryDataNode.GREATEQ));
-    op_scalar_mapping.put("starts", new Byte(QueryDataNode.STARTSWITH));
-    op_scalar_mapping.put("ends", new Byte(QueryDataNode.ENDSWITH));
-    op_scalar_mapping.put("defined", new Byte(QueryDataNode.DEFINED));
+    op_scalar_mapping.put("=~", Byte.valueOf(QueryDataNode.MATCHES));
+    op_scalar_mapping.put("=~_ci", Byte.valueOf(QueryDataNode.NOCASEMATCHES));
+    op_scalar_mapping.put("==", Byte.valueOf(QueryDataNode.EQUALS));
+    op_scalar_mapping.put("==_ci", Byte.valueOf(QueryDataNode.NOCASEEQ));
+    op_scalar_mapping.put("<", Byte.valueOf(QueryDataNode.LESS));
+    op_scalar_mapping.put("<=", Byte.valueOf(QueryDataNode.LESSEQ));
+    op_scalar_mapping.put(">", Byte.valueOf(QueryDataNode.GREAT));
+    op_scalar_mapping.put(">=", Byte.valueOf(QueryDataNode.GREATEQ));
+    op_scalar_mapping.put("starts", Byte.valueOf(QueryDataNode.STARTSWITH));
+    op_scalar_mapping.put("ends", Byte.valueOf(QueryDataNode.ENDSWITH));
+    op_scalar_mapping.put("defined", Byte.valueOf(QueryDataNode.DEFINED));
 
     // initialize op_vector_mapping
 
     op_vector_mapping = new HashMap();
-    op_vector_mapping.put("len<", new Byte(QueryDataNode.LENGTHLE));
-    op_vector_mapping.put("len<=", new Byte(QueryDataNode.LENGTHLEEQ));
-    op_vector_mapping.put("len>", new Byte(QueryDataNode.LENGTHGR));
-    op_vector_mapping.put("len>=", new Byte(QueryDataNode.LENGTHGREQ));
-    op_vector_mapping.put("len==", new Byte(QueryDataNode.LENGTHEQ));
+    op_vector_mapping.put("len<", Byte.valueOf(QueryDataNode.LENGTHLE));
+    op_vector_mapping.put("len<=", Byte.valueOf(QueryDataNode.LENGTHLEEQ));
+    op_vector_mapping.put("len>", Byte.valueOf(QueryDataNode.LENGTHGR));
+    op_vector_mapping.put("len>=", Byte.valueOf(QueryDataNode.LENGTHGREQ));
+    op_vector_mapping.put("len==", Byte.valueOf(QueryDataNode.LENGTHEQ));
 
     validity_mapping = new HashMap();
     validity_mapping.put(Integer.valueOf(FieldType.DATE), new String[] {"<", ">", "<=", ">=", "==", "defined"});

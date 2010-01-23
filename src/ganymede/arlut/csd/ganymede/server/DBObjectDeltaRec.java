@@ -9,10 +9,6 @@
    changes made to objects in the Ganymede journal file.
    
    Created: 11 June 1998
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -20,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -389,7 +385,7 @@ public final class DBObjectDeltaRec implements FieldType {
 		    
 			for (int k = 0; k < bytelength; k++)
 			  {
-			    bytes[k] = new Byte(in.readByte());
+			    bytes[k] = Byte.valueOf(in.readByte());
 			  }
 
 			value = bytes;
@@ -440,7 +436,7 @@ public final class DBObjectDeltaRec implements FieldType {
 		    
 			for (int k = 0; k < bytelength; k++)
 			  {
-			    bytes[k] = new Byte(in.readByte());
+			    bytes[k] = Byte.valueOf(in.readByte());
 			  }
 
 			value = bytes;

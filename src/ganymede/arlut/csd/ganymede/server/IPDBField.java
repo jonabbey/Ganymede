@@ -6,10 +6,6 @@
    The GANYMEDE object storage system.
 
    Created: 4 Sep 1997
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -17,7 +13,7 @@
 
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -281,7 +277,7 @@ public class IPDBField extends DBField implements ip_field {
 	    
 	    for (int j = 0; j < length; j++)
 	      {
-		element[j] = new Byte(in.readByte());
+		element[j] = Byte.valueOf(in.readByte());
 	      }
 
 	    values.addElement(element);
@@ -295,7 +291,7 @@ public class IPDBField extends DBField implements ip_field {
 	    
 	for (int j = 0; j < length; j++)
 	  {
-	    element[j] = new Byte(in.readByte());
+	    element[j] = Byte.valueOf(in.readByte());
 	  }
 
 	value = element;
@@ -1660,7 +1656,7 @@ public class IPDBField extends DBField implements ip_field {
 
     for (int i = 0; i < 4; i++)
       {
-	result[i] = new Byte(u2s(0));
+	result[i] = Byte.valueOf(u2s(0));
       }
 
     input = input.trim();
@@ -1706,7 +1702,7 @@ public class IPDBField extends DBField implements ip_field {
 
     for (int i = 0; i < octets.size(); i++)
       {
-	result[i] = new Byte(u2s(Integer.parseInt((String) octets.elementAt(i))));
+	result[i] = Byte.valueOf(u2s(Integer.parseInt((String) octets.elementAt(i))));
       }
 
     return result;
@@ -1807,7 +1803,7 @@ public class IPDBField extends DBField implements ip_field {
 
     for (int i = 0; i < 16; i++)
       {
-	result[i] = new Byte(u2s(0));
+	result[i] = Byte.valueOf(u2s(0));
       }
 
     // trim the input
@@ -1872,8 +1868,8 @@ public class IPDBField extends DBField implements ip_field {
 
 	ipv4bytes = genIPV4bytes(input);
 
-	result[10] = new Byte(u2s(255));
-	result[11] = new Byte(u2s(255));
+	result[10] = Byte.valueOf(u2s(255));
+	result[11] = Byte.valueOf(u2s(255));
 	result[12] = ipv4bytes[0];
 	result[13] = ipv4bytes[1];
 	result[14] = ipv4bytes[2];
@@ -1997,8 +1993,8 @@ public class IPDBField extends DBField implements ip_field {
 	    throw new Error("logic error");
 	  }
 
-	result[i * 2] = new Byte(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
-	result[(i * 2) + 1] = new Byte(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
+	result[i * 2] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
+	result[(i * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
 
 	if (debug)
 	  {
@@ -2029,8 +2025,8 @@ public class IPDBField extends DBField implements ip_field {
 	    throw new Error("logic error");
 	  }
 
-	result[tailOffset + (x * 2)] = new Byte(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
-	result[tailOffset + (x * 2) + 1] = new Byte(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
+	result[tailOffset + (x * 2)] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
+	result[tailOffset + (x * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
 
 	if (debug)
 	  {
@@ -2232,12 +2228,12 @@ public class IPDBField extends DBField implements ip_field {
 
     for (int i = 0; i < 16; i++)
       {
-	octets[i] = new Byte((byte) -128);
+	octets[i] = Byte.valueOf((byte) -128);
       }
 
     System.out.println("All zero v6 string: " + genIPV6string(octets));
 
-    octets[15] = new Byte((byte) -127);
+    octets[15] = Byte.valueOf((byte) -127);
 
     System.out.println("Trailing 1 string: " + genIPV6string(octets));
 
@@ -2247,14 +2243,14 @@ public class IPDBField extends DBField implements ip_field {
 
     for (int i = 4; i < 16; i++)
       {
-	octets[i] = new Byte(randbytes[i]);
+	octets[i] = Byte.valueOf(randbytes[i]);
       }
 
     System.out.println("4 Leading zero rand string: " + genIPV6string(octets));
 
     for (int i = 0; i < 16; i++)
       {
-	octets[i] = new Byte((byte) -128);
+	octets[i] = Byte.valueOf((byte) -128);
       }
 
     rand.nextBytes(randbytes);
@@ -2263,8 +2259,8 @@ public class IPDBField extends DBField implements ip_field {
       {
 	if (rand.nextInt() > 0)
 	  {
-	    octets[i*2] = new Byte(randbytes[i]);
-	    octets[(i*2)+1] = new Byte(randbytes[i]);
+	    octets[i*2] = Byte.valueOf(randbytes[i]);
+	    octets[(i*2)+1] = Byte.valueOf(randbytes[i]);
 
 	    System.out.print("**");
 	  }
@@ -2280,31 +2276,31 @@ public class IPDBField extends DBField implements ip_field {
 
     for (int i = 0; i < 12; i++)
       {
-	octets[i] = new Byte((byte) -128);
+	octets[i] = Byte.valueOf((byte) -128);
       }
 
     rand.nextBytes(randbytes);
 
     for (int i = 12; i < 16; i++)
       {
-	octets[i] = new Byte(randbytes[i]);
+	octets[i] = Byte.valueOf(randbytes[i]);
       }
 
     System.out.println("IPv4 compatible string (A): " + genIPV6string(octets));
 
     for (int i = 0; i < 10; i++)
       {
-	octets[i] = new Byte((byte) -128);
+	octets[i] = Byte.valueOf((byte) -128);
       }
 
-    octets[10] = new Byte((byte) 127);
-    octets[11] = new Byte((byte) 127);
+    octets[10] = Byte.valueOf((byte) 127);
+    octets[11] = Byte.valueOf((byte) 127);
 
     rand.nextBytes(randbytes);
 
     for (int i = 12; i < 16; i++)
       {
-	octets[i] = new Byte(randbytes[i]);
+	octets[i] = Byte.valueOf(randbytes[i]);
       }
 
     System.out.println("IPv4 compatible string (B): " + genIPV6string(octets));

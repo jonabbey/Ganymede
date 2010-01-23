@@ -8,18 +8,13 @@
 
    Created: 20 May 2004
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2004
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -135,9 +130,9 @@ class memoryStatusTask implements Runnable, silentTask {
 	    // ">> [ {0} ] memory status dump: in use = {1}, free = {2}, total = {3}"
 	    Ganymede.debug(ts.l("status_dump",
 				new Date(),
-				new Long(rt.totalMemory() - rt.freeMemory()),
-				new Long(rt.freeMemory()),
-				new Long(rt.totalMemory())));
+				Long.valueOf(rt.totalMemory() - rt.freeMemory()),
+				Long.valueOf(rt.freeMemory()),
+				Long.valueOf(rt.totalMemory())));
 	  }
       }
 

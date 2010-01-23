@@ -2693,7 +2693,7 @@ public class PasswordDBField extends DBField implements pass_field {
 		// "Submitted password contains an unacceptable character ('{0}')."
 		return Ganymede.createErrorDialog(ts.l("global.error_subj"),
 						  ts.l("verifyNewValue.bad_char",
-						       new Character(s.charAt(i))));
+						       Character.valueOf(s.charAt(i))));
 	      }
 	  }
       }
@@ -2710,7 +2710,7 @@ public class PasswordDBField extends DBField implements pass_field {
 		// "Submitted password contains an unacceptable character ('{0}')."
 		return Ganymede.createErrorDialog(ts.l("global.error_subj"),
 						  ts.l("verifyNewValue.bad_char",
-						       new Character(s.charAt(i))));
+						       Character.valueOf(s.charAt(i))));
 	      }
 	  }
       }
