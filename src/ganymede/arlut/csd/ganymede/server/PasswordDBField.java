@@ -2871,17 +2871,17 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /*----------------------------------------------------------------------------
-                                                                     inner class
+                                                                    nested class
                                                           passwordHistoryArchive
 
   ----------------------------------------------------------------------------*/
 
   /**
-   * This inner class holds previous passwords that have been
+   * This nested class holds previous passwords that have been
    * associated with this account.
    */
 
-  class passwordHistoryArchive {
+  static class passwordHistoryArchive {
 
     /**
      * Queue of password history entries.  New elements are added to
@@ -3034,17 +3034,17 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /*----------------------------------------------------------------------------
-                                                                     inner class
+                                                                    nested class
                                                             passwordHistoryEntry
 
   ----------------------------------------------------------------------------*/
 
   /**
-   * This inner class holds a previous password hash along with the
+   * This nested class holds a previous password hash along with the
    * date that it was committed into this field.
    */
 
-  class passwordHistoryEntry {
+  static class passwordHistoryEntry {
 
     /**
      * The date this password history entry was committed to the
