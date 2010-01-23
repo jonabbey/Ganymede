@@ -6,10 +6,6 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -17,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -2173,11 +2169,6 @@ public final class InvidDBField extends DBField implements invid_field {
 	for (int i = 0; i < values.size(); i++)
 	  {
 	    temp = (Invid) values.elementAt(i);
-
-	    if (temp == null)
-	      {
-		Ganymede.debug("HEEEEEYYYYY!!!!!");
-	      }
 
 	    if (asymBackPointer)
 	      {

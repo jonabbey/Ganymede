@@ -490,7 +490,11 @@ public class GanymedeWarningTask implements Runnable {
 	    // we'll get here if this task's thread is stopped early
 
 	    Ganymede.debug("Warning Task: Forced to terminate early, aborting.");
-	    mySession.logout();
+
+	    if (mySession != null)
+	      {
+		mySession.logout();
+	      }
 	  }
 	else
 	  {

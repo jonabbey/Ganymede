@@ -351,14 +351,17 @@ public class GanymedeExpirationTask implements Runnable {
 	    
 	    Ganymede.debug("Expiration Task: Forced to terminate early, aborting transaction");
 
-	    try
+	    if (mySession != null)
 	      {
-		mySession.abortTransaction();
-		Ganymede.debug("Expiration Task: Transaction aborted");
-		mySession.logout();
-	      }
-	    catch (NotLoggedInException ex)
-	      {
+		try
+		  {
+		    mySession.abortTransaction();
+		    Ganymede.debug("Expiration Task: Transaction aborted");
+		    mySession.logout();
+		  }
+		catch (NotLoggedInException ex)
+		  {
+		  }
 	      }
 	  }
       }
