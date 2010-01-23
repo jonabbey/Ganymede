@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2009
+   Copyright (C) 1996 - 2010
    The University of Texas at Austin
 
    Contact information
@@ -5791,6 +5791,29 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   public Short getKey()
   {
     return Short.valueOf(field_code);
+  }
+
+  /**
+   * We support hashCode based on field id number, not on value.
+   */
+
+  public int hashCode()
+  {
+    return field_code;
+  }
+
+  /**
+   * We support equals based on field id number, not on value.
+   */
+
+  public boolean equals(Object o)
+  {
+    if (o instanceof DBObjectBaseField)
+      {
+	return field_code == ((DBObjectBaseField) o).field_code;
+      }
+
+    return false;
   }
 
   /**
