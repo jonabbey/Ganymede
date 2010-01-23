@@ -7,10 +7,6 @@
    sort of status information to the client.  
    
    Created: 27 January 1998
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -18,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -57,6 +53,7 @@ package arlut.csd.ganymede.common;
 import java.rmi.Remote;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -1035,19 +1032,20 @@ public final class ReturnVal implements java.io.Serializable {
 	rescanList.setLength(0);
       }
 
-    for (Invid invid: rescanTable.keySet())
+    for (Map.Entry<Invid, Vector<Short>> entry: rescanTable.entrySet())
       {
+	Invid invid = entry.getKey();
+	Vector<Short> fields = entry.getValue();
+
 	rescanList.append(invid.toString());
 	rescanList.append("|");
 	
-	if (rescanTable.get(invid) == all)
+	if (fields == all)
 	  {
 	    rescanList.append("all|");
 	  }
 	else
 	  {
-	    Vector<Short> fields = rescanTable.get(invid);
-
 	    for (Short field: fields)
 	      {
 		rescanList.append(field.toString());
