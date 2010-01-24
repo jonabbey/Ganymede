@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -1393,11 +1393,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     wp.gc.setStatus(status,seconds);
   }
 
-  private final void setStatus(String status)
-  {
-    wp.gc.setStatus(status);
-  }
-
   String getObjectType()
   {
     String result = null;
@@ -1438,15 +1433,6 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   private void println(String s)
   {
     System.out.println(s);
-  }
-
-  /**
-   * Give the gclient an error message.
-   */
-
-  private void showErrorMessage(String message)
-  {
-    showErrorMessage("Error", message);
   }
 
   private void showErrorMessage(String title, String message)

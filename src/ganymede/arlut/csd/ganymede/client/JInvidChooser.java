@@ -5,10 +5,6 @@
    A fancy custom JComboBox thing for Scalar Invid fields.
    
    Created: 26 October 1999
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Michael Mulvaney, Jonathan Abbey
 
@@ -16,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2005
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -395,10 +391,6 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   
   private final void  showErrorMessage(String message) {
     cp.getgclient().showErrorMessage(message);
-  }
-
-  private final void  showErrorMessage(String title, String message) {
-    cp.getgclient().showErrorMessage(title,message);
   }
 }
 
