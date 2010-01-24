@@ -5,7 +5,6 @@
    right click menus to sort and remove columns
 
    Created: 14 December 2005
-   Last Commit: $Format:%cd$
 
    Module By: James Ratcliff, falazar@arlut.utexas.edu
 
@@ -13,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996 - 2009
+   Copyright (C) 1996 - 2010
    The University of Texas at Austin
 
    Contact information
@@ -309,7 +308,7 @@ public class SmartTable extends JPanel implements ActionListener
   {
     int colCount = table.getColumnCount();
 
-    if (colCount == 0) 
+    if (colCount == 0)
       {
 	return;
       }
@@ -350,7 +349,7 @@ public class SmartTable extends JPanel implements ActionListener
     int nominalWidth[];
     float totalOver, spareSpace;
 
-    float 
+    float
       percentSpace,
       shrinkFactor,
       percentOver,
@@ -494,13 +493,13 @@ public class SmartTable extends JPanel implements ActionListener
 	      {
 		// what percentage of the overage goes to this col?
 
-		percentOver = (nominalWidth[i] - col.getWidth()) / totalOver; 
+		percentOver = (nominalWidth[i] - col.getWidth()) / totalOver;
 		growthFactor = redistribute * percentOver;
 
 		if (debug)
 		  {
-		    System.err.println("Column " + i + ": percentOver = " + percentOver + 
-				       " , growing by " + growthFactor + ", new width = " + 
+		    System.err.println("Column " + i + ": percentOver = " + percentOver +
+				       " , growing by " + growthFactor + ", new width = " +
 				       (col.getWidth() + growthFactor));
 		  }
 
@@ -954,7 +953,6 @@ public class SmartTable extends JPanel implements ActionListener
     // pass in and set entire array of column names, or column headers
     public void setColumnNames(int columnCnt, String[] columns)
     {
-      columnNames = new String[columnCnt];
       columnNames = columns;
     }
 
@@ -1091,7 +1089,7 @@ public class SmartTable extends JPanel implements ActionListener
   }
 
   /*----------------------------------------------------------------------------
-                                                                     inner class
+                                                                    nested class
                                                                 DateCellRenderer
 
   ----------------------------------------------------------------------------*/
@@ -1100,7 +1098,7 @@ public class SmartTable extends JPanel implements ActionListener
    * A cell renderer for Date values.
    */
 
-  private class DateCellRenderer extends TextAreaRenderer
+  private static class DateCellRenderer extends TextAreaRenderer
   {
     /**
      * Cached FontMetrics object, used to calculate the necessary width
@@ -1135,7 +1133,7 @@ public class SmartTable extends JPanel implements ActionListener
       if (value instanceof Date)
         {
           Date dateValue = (Date) value;
-	  
+
 	  setText(getString(dateValue));
         }
 
