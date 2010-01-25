@@ -7,10 +7,6 @@
    hash system.
    
    Created: 20 May 1998
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -18,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2010
    The University of Texas at Austin
 
    Contact information
@@ -141,11 +137,7 @@ public class IPwrap {
 	return false;
       }
 
-    if (value instanceof Byte[])
-      {
-	foreignBytes = (Byte[]) value;
-      }
-    else if (value instanceof IPwrap)
+    if (value instanceof IPwrap)
       {
 	foreignBytes = ((IPwrap) value).address;
       }
