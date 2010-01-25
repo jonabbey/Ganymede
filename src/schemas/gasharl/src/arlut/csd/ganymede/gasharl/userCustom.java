@@ -3374,6 +3374,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     // get the volumes defined for the user on auto.home.default
 
+    DBObject obj = getOriginal();
+
     InvidDBField mapEntries = (InvidDBField) obj.getField(userSchema.VOLUMES);
     Vector entries = mapEntries.getValuesLocal();
 
