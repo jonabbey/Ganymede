@@ -6,10 +6,6 @@
    The GANYMEDE object storage system.
 
    Created: 2 July 1996
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -17,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -3051,7 +3047,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    return retVal;	// finalizeRemove() will rollback
 	  }
       }
-
 
     return retVal;
   }
