@@ -5,7 +5,6 @@
    This file is a management class for user objects in Ganymede.
    
    Created: 30 July 1997
-   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -13,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -3048,6 +3047,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// up their mail spool, etc., etc.
 
 	createUserExternals();
+	break;
 
       case DELETING:
 	deleteUserExternals();
@@ -3373,13 +3373,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     handleUserDelete(getLabel());
 
     // get the volumes defined for the user on auto.home.default
-
-    DBObject obj = getOriginal();
-
-    if (obj == null)
-      {
-	return;
-      }
 
     InvidDBField mapEntries = (InvidDBField) obj.getField(userSchema.VOLUMES);
     Vector entries = mapEntries.getValuesLocal();
