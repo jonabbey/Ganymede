@@ -5,7 +5,6 @@
    and allows retrieval of history text for object windows.
    
    Created: 9 September 1997
-   Last Commit: $Format:%cd$
 
    Module By: Michael Mulvaney
 
@@ -13,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -42,9 +41,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 

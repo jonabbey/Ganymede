@@ -1,56 +1,53 @@
 /*
 
-JythonTask.java
+   JythonTask.java
 
-This class acts as a proxy for a separate Builder Task (a class that handles 
-processing Ganymede's data for use in DNS/LDAP/Mail server/etc.) that's written
-in Jython. This task takes one parameter, a URI that points to the actual Jython
-code. The code is downloaded, loaded, and executed as if it was any other 
-Ganymede native-Java task.
+   This class acts as a proxy for a separate Builder Task (a class that handles 
+   processing Ganymede's data for use in DNS/LDAP/Mail server/etc.) that's written
+   in Jython. This task takes one parameter, a URI that points to the actual Jython
+   code. The code is downloaded, loaded, and executed as if it was any other 
+   Ganymede native-Java task.
 
-Created: 22 July 2004
-Last Mod Date: $Date$
-Last Revision Changed: $Rev$
-Last Changed By: $Author$
-SVN URL: $HeadURL$
+   Created: 22 July 2004
 
-Module By: Deepak Giridharagopal <deepak@arlut.utexas.edu>
+   Module By: Deepak Giridharagopal <deepak@arlut.utexas.edu>
 
------------------------------------------------------------------------
+   -----------------------------------------------------------------------
       
-Ganymede Directory Management System
+   Ganymede Directory Management System
 
-Copyright (C) 1996-2004
-The University of Texas at Austin
+   Copyright (C) 1996-2010
+   The University of Texas at Austin
 
-Contact information
+   Contact information
 
-Author Email: ganymede_author@arlut.utexas.edu
-Email mailing list: ganymede@arlut.utexas.edu
+   Author Email: ganymede_author@arlut.utexas.edu
+   Email mailing list: ganymede@arlut.utexas.edu
 
-US Mail:
+   US Mail:
 
-Computer Science Division
-Applied Research Laboratories
-The University of Texas at Austin
-PO Box 8029, Austin TX 78713-8029
+   Computer Science Division
+   Applied Research Laboratories
+   The University of Texas at Austin
+   PO Box 8029, Austin TX 78713-8029
 
-Telephone: (512) 835-3200
+   Telephone: (512) 835-3200
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
+
 package arlut.csd.ganymede.server;
 
 import java.util.Vector;
