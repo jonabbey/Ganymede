@@ -7,8 +7,6 @@
    the file to the server for server-side integration into the Ganymede
    database.
 
-   --
-
    Created: 2 May 2000
 
    Module By: Jonathan Abbey
@@ -17,7 +15,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -1228,13 +1226,29 @@ public final class xmlclient implements ClientListener, Runnable {
 
     /* -- */
 
+    BufferedInputStream bis = null;
+
     try
       {
-	props.load(new BufferedInputStream(new FileInputStream(filename)));
+	bis = new BufferedInputStream(new FileInputStream(filename));
+	props.load(bis);
       }
     catch (IOException ex)
       {
 	return false;
+      }
+    finally
+      {
+	if (bis != null)
+	  {
+	    try
+	      {
+		bis.close();
+	      }
+	    catch (IOException e)
+	      {
+	      }
+	  }
       }
 
     // make the combined properties file accessible throughout our

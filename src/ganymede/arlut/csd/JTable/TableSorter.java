@@ -5,7 +5,6 @@
    functionality to a supplied TableModel.
 
    Created: 27 February 2004
-   Last Commit: $Format:%cd$
 
 */
 
@@ -424,6 +423,11 @@ public class TableSorter extends AbstractTableModel {
     {
       this.modelIndex = index;
     }
+
+    /**
+     * Note: this class has a natural ordering that is inconsistent
+     * with equals.
+     */
 
     public int compareTo(Object o)
     {

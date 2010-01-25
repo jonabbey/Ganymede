@@ -4,14 +4,7 @@
    TreeTable GUI component dialog used by the client to present and edit synchronization
    options for the new Ganymede 2.0 sync channels.
 
-   --
-
    Created: 2 February 2005
-
-   Last Mod Date: $Date: 2005-01-14 16:36:46 -0600 (Fri, 14 Jan 2005) $
-   Last Revision Changed: $Rev: 6062 $
-   Last Changed By: $Author: broccol $
-   SVN URL: $HeadURL: http://db1.arlut.utexas.edu/svn/ganymede/trunk/ganymede/src/ganymede/arlut/csd/ganymede/client/glogin.java $
 
    Module By: Deepak Giridharagopal
 
@@ -19,7 +12,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -88,9 +81,9 @@ public class fieldoption_editor extends JFrame
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.fieldoption_editor");
 
-  public static String labels[] = {ts.l("global.never"), // "Never"
-				   ts.l("global.changed"), // "When Changed"
-				   ts.l("global.always")}; // "Always"
+  static final String labels[] = {ts.l("global.never"), // "Never"
+				  ts.l("global.changed"), // "When Changed"
+				  ts.l("global.always")}; // "Always"
 
   public static boolean debug = false;
 

@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -369,9 +369,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 		if (properties_file != null)
 		  {
+		    BufferedInputStream bis = null;
+
 		    try
 		      {
-			ganymedeProperties.load(new BufferedInputStream(new FileInputStream(properties_file)));
+			bis = new BufferedInputStream(new FileInputStream(properties_file));
+			ganymedeProperties.load(bis);
 		      }
 		    catch (java.io.FileNotFoundException e)
 		      {
@@ -380,6 +383,19 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		    catch (java.io.IOException e)
 		      {
 			throw new RuntimeException("Whoa, io exception: " + e);
+		      }
+		    finally
+		      {
+			if (bis != null)
+			  {
+			    try
+			      {
+				bis.close();
+			      }
+			    catch (java.io.IOException ex)
+			      {
+			      }
+			  }
 		      }
 		  }
 	      }
@@ -606,7 +622,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     // "Connecting... {0}"
     connector = new JButton(ts.l("global.connecting_text",
-				 new Character(spinAry[spindex])));
+				 Character.valueOf(spinAry[spindex])));
     connector.setOpaque(true);
     connector.addActionListener(this);
 
@@ -668,7 +684,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		    {
 		      // "Connecting... {0}"
 		      connector.setText(ts.l("global.connecting_text",
-					     new Character(spinAry[spindex])));
+					     Character.valueOf(spinAry[spindex])));
 		    }
 		  });
 	      }

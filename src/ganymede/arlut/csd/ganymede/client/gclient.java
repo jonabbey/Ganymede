@@ -3729,11 +3729,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   public void editObject(Invid invid)
   {
-    editObject(invid, null, null);
+    editObject(invid, null);
   }
 
-  /** 
-   * Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel} 
+  /**
+   * Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel}
    * window to allow the user to edit an object.
    *
    * Use this to edit objects, so gclient can keep track of the
@@ -3749,28 +3749,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   public void editObject(Invid invid, framePanel originalWindow)
   {
-    editObject(invid, null, originalWindow);
-  }
-
-  /**
-   * Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel}
-   * window to allow the user to edit an object.
-   *
-   * Use this to edit objects, so gclient can keep track of the
-   * caches, tree nodes, and all the other dirty work.  This should be
-   * the only place windowPanel.addWindow() is called for editing
-   * purposes.
-   *
-   * @param invid id for the object to be edited in the new window.
-   * @param objectType String describing the kind of object being edited,
-   * used in the titlebar of the window created.
-   * @param originalWindow The framePanel that we are replacing with
-   * the editing version.  If null, we won't do any frame
-   * replacement.. we'll just create a new frame.
-   */
-
-  public void editObject(Invid invid, String objectType, framePanel originalWindow)
-  {
     if (deleteHash.containsKey(invid))
       {
 	// "{0} has already been deleted.\n\nCancel this transaction if you do not wish to delete this object, after all."
@@ -3785,11 +3763,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	showErrorMessage(ts.l("editObject.already_editing_subj"),
 			 ts.l("editObject.already_editing_txt", getObjectDesignation(invid)));
 	return;
-      }
-
-    if (objectType == null || objectType.equals(""))
-      {
-	objectType = getObjectType(invid);
       }
 
     ObjectHandle handle = getObjectHandle(invid);
@@ -4132,21 +4105,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    */
 
   public void viewObject(Invid invid)
-  {
-    viewObject(invid, null);
-  }
-
-  /**
-   * Opens a new {@link arlut.csd.ganymede.client.framePanel framePanel}
-   * window to view the object corresponding to the given invid.
-   *
-   * @param objectType Type of the object to be viewed.. if this is
-   * null, the server will be queried to determine the type of object
-   * for the title-bar of the view object window.  By providing it
-   * here from a local cache, and server-call can be saved.
-   */
-
-  public void viewObject(Invid invid, String objectType)
   {
     if (deleteHash.containsKey(invid))
       {
@@ -4561,7 +4519,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       }
     else
       {
-	editObject(invid, dialog.getTypeString(), null);
+	editObject(invid, null);
       }
   }
 
@@ -6088,7 +6046,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	  {
 	    InvidNode invidN = (InvidNode)node;
 
-	    viewObject(invidN.getInvid(), invidN.getTypeText());
+	    viewObject(invidN.getInvid());
 	  }
       }
     else if (event.getActionCommand().equals(edit_pop_action))
@@ -6102,7 +6060,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	  {
 	    InvidNode invidN = (InvidNode)node;
 
-	    editObject(invidN.getInvid(), invidN.getTypeText(), null);
+	    editObject(invidN.getInvid(), null);
 	  }
       }
     else if (event.getActionCommand().equals(clone_pop_action))
