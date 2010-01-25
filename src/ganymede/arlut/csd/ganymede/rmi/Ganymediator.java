@@ -10,10 +10,6 @@
    felipe@uts.cc.utexas.edu
    
    Created: 27 January 1998
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -49,9 +45,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
