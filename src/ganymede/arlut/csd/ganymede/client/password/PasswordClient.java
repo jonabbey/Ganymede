@@ -6,18 +6,13 @@
    
    Created: 28 January 1998
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2008
+   Copyright (C) 1996 - 2010
    The University of Texas at Austin
 
    Contact information
@@ -498,13 +493,30 @@ public class PasswordClient implements ClientListener {
 
     /* -- */
 
+    BufferedInputStream bis = null;
+
     try
       {
-	props.load(new BufferedInputStream(new FileInputStream(filename)));
+	bis = new BufferedInputStream(new FileInputStream(filename));
+
+	props.load(bis);
       }
     catch (IOException ex)
       {
 	return false;
+      }
+    finally
+      {
+	if (bis != null)
+	  {
+	    try
+	      {
+		bis.close();
+	      }
+	    catch (IOException e)
+	      {
+	      }
+	  }
       }
 
     serverhost = props.getProperty("ganymede.serverhost");

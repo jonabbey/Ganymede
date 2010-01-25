@@ -289,9 +289,12 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 		if (properties_file != null)
 		  {
+		    BufferedInputStream bis = null;
+
 		    try
 		      {
-			ganymedeProperties.load(new BufferedInputStream(new FileInputStream(properties_file)));
+			bis = new BufferedInputStream(new FileInputStream(properties_file));
+			ganymedeProperties.load(bis);
 		      }
 		    catch (java.io.FileNotFoundException e)
 		      {
@@ -300,6 +303,19 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 		    catch (java.io.IOException e)
 		      {
 			throw new RuntimeException("Whoa, io exception: " + e);
+		      }
+		    finally
+		      {
+			if (bis != null)
+			  {
+			    try
+			      {
+				bis.close();
+			      }
+			    catch (IOException ex)
+			      {
+			      }
+			  }
 		      }
 		  }
 	      }
