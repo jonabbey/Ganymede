@@ -564,7 +564,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     gbl.setConstraints(buttonPanel, gbc);
     panel.add(buttonPanel);
 
-    loginButton = new JButton(ts.l("global.connectingButtonMsg", new Character(spinAry[spindex])));
+    loginButton = new JButton(ts.l("global.connectingButtonMsg", Character.valueOf(spinAry[spindex])));
     loginButton.setOpaque(true);
     loginButton.setEnabled(true);
     loginButton.addActionListener(this);
@@ -648,7 +648,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 		      {
 			public void run()
 			{
-			  localLoginBox.loginButton.setText(ts.l("global.connectingButtonMsg", new Character(spinAry[spindex])));
+			  localLoginBox.loginButton.setText(ts.l("global.connectingButtonMsg", Character.valueOf(spinAry[spindex])));
 			}
 		      });
 		  }
@@ -774,7 +774,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 	    connected.set(false);
 
-	    loginButton.setText(ts.l("global.connectingButtonMsg", new Character(spinAry[spindex])));
+	    loginButton.setText(ts.l("global.connectingButtonMsg", Character.valueOf(spinAry[spindex])));
 	    new Thread(this).start();
 	    return;
 	  }

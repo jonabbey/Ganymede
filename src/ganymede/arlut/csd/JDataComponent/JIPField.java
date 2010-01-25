@@ -6,18 +6,13 @@
    
    Created: 13 October 1997
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2006
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -475,7 +470,7 @@ public class JIPField extends JentryField {
 
     for (int i = 0; i < 4; i++)
       {
-	result[i] = new Byte(u2s(0));
+	result[i] = Byte.valueOf(u2s(0));
       }
 
     input = input.trim();
@@ -527,7 +522,7 @@ public class JIPField extends JentryField {
 			       (String) octets.elementAt(i));
 	  }
 
-	result[i] = new Byte(u2s(Integer.parseInt((String) octets.elementAt(i))));
+	result[i] = Byte.valueOf(u2s(Integer.parseInt((String) octets.elementAt(i))));
       }
 
     return result;
@@ -557,7 +552,7 @@ public class JIPField extends JentryField {
 
     for (int i = 0; i < octets.length; i++)
       {
-	absoctets[i] = new Short((short) (octets[i].shortValue() + 128)); // don't want negative values
+	absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
 
 	if (i > 0)
 	  {
@@ -627,7 +622,7 @@ public class JIPField extends JentryField {
 
     for (int i = 0; i < 16; i++)
       {
-	result[i] = new Byte(u2s(0));
+	result[i] = Byte.valueOf(u2s(0));
       }
 
     // trim the input
@@ -692,8 +687,8 @@ public class JIPField extends JentryField {
 
 	ipv4bytes = genIPV4bytes(input);
 
-	result[10] = new Byte(u2s(255));
-	result[11] = new Byte(u2s(255));
+	result[10] = Byte.valueOf(u2s(255));
+	result[11] = Byte.valueOf(u2s(255));
 
 	result[12] = ipv4bytes[0];
 	result[13] = ipv4bytes[1];
@@ -818,8 +813,8 @@ public class JIPField extends JentryField {
 	    throw new Error("logic error");
 	  }
 
-	result[i * 2] = new Byte(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
-	result[(i * 2) + 1] = new Byte(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
+	result[i * 2] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
+	result[(i * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
 
 	if (debug)
 	  {
@@ -850,8 +845,8 @@ public class JIPField extends JentryField {
 	    throw new Error("logic error");
 	  }
 
-	result[tailOffset + (x * 2)] = new Byte(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
-	result[tailOffset + (x * 2) + 1] = new Byte(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
+	result[tailOffset + (x * 2)] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
+	result[tailOffset + (x * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
 
 	if (debug)
 	  {
@@ -886,7 +881,7 @@ public class JIPField extends JentryField {
 
     for (i = 0; i < octets.length; i++)
       {
-	absoctets[i] = new Short((short) (octets[i].shortValue() + 128)); // don't want negative values
+	absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
 
 	//	System.err.println("Converting byte " + octets[i].intValue() + " to abs " + absoctets[i].intValue());
       }

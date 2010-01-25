@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -1541,7 +1541,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 	      }
 	    else
 	      {
-		name = ts.l("treeNodeMenuPerformed.newTabNumName", new Integer(i)); // "New Tab {0}"
+		name = ts.l("treeNodeMenuPerformed.newTabNumName", Integer.valueOf(i)); // "New Tab {0}"
 	      }
 
 	    TabNode tabNode = (TabNode) bNode.getChild();
