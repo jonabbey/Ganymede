@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -560,10 +560,6 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
 	// no direct match, let's look for a prefix match
 
-	QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, string);
-	QueryResult edit_query = null;
-	Vector edit_invids = null;
-
 	try
 	  {
 	    if (debug)
@@ -574,12 +570,10 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 	    // "Searching for objects whose names begin with {0}."
 	    client.setStatus(ts.l("actionPerformed.searching_prefix_status", string));
 
-	    node = new QueryDataNode(QueryDataNode.STARTSWITH, string);
-	    edit_query = null;
+	    QueryDataNode node = new QueryDataNode(QueryDataNode.STARTSWITH, string);
+	    QueryResult edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 
-	    edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
-
-	    edit_invids = edit_query.getListHandles();
+	    Vector edit_invids = edit_query.getListHandles();
 
 	    // and add a direct match of a different type, if it exists
 
