@@ -9,18 +9,13 @@
 
    Created: 17 Oct 1996
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Navin Manohar, Mike Mulvaney, Jonathan Abbey
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2009
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -543,18 +538,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 		  }
 		
 		db_object object = retVal.getObject();
-		
-		if (local_debug)
-		  {
-		    if (object == null)
-		      {
-			System.err.println("XX** Could not get edit handle on new embedded object");
-		      }
-		    else
-		      {
-			System.err.println("XX** Got edit handle on new embedded object");
-		      }
-		  }
 
 		// create and load the new containerPanel.  Note that we are going to
 		// immediately show the new element open to the user, so we go ahead
