@@ -12,13 +12,12 @@
    both 'drag-tween' and 'drag on' drag supported.
 
    Created: 3 March 1997
-   Last Commit: $Format:%cd$
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 
-   Copyright (C) 1996-2008
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -47,9 +46,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
