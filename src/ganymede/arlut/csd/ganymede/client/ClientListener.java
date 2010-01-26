@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -43,6 +43,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
 
 package arlut.csd.ganymede.client;
 
