@@ -5665,11 +5665,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	  {
 	    System.err.println("No log out!");
 	  }
+
+	return;
       }
-    else
+
+    if (e.getID() == WindowEvent.WINDOW_ACTIVATED ||
+	e.getID() == WindowEvent.WINDOW_DEACTIVATED)
       {
-	super.processWindowEvent(e);
+	altKeyDown = false;
+	refreshCommitLabel();
       }
+
+    super.processWindowEvent(e);
   }
 
   // Callbacks
@@ -6192,7 +6199,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   public void refreshCommitLabel()
   {
-    commit.setText(promptForComments ^ altKeyDown ? commitCommentButtonText : commitButtonText);
+    if (commit != null)
+      {
+	commit.setText(promptForComments ^ altKeyDown ? commitCommentButtonText : commitButtonText);
+      }
   }
 
   /**
