@@ -14,12 +14,13 @@ from xml.dom.minidom import parse, parseString
 
 xmlclient='/home/broccol/ganymede-client/bin/xmlclient'
 query_string= '\'select "Owner list", "Username" from "User"\''
-username='broccol:supergash'
+
+print 'Enter the user / persona name to query Ganymede with.\n> ',
+username=sys.stdin.readline()
+sys.stdout.write('') # print an empty string to make python not indent our next print
 
 print 'Enter the password for', username, '\n> ',
 password=sys.stdin.readline()
-
-# print an empty string to make python not indent our next print
 sys.stdout.write('')
 
 args=[xmlclient, 'username='+username,'-query', query_string]
