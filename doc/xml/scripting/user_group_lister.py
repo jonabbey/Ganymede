@@ -23,9 +23,9 @@ print 'Enter the password for', username, '\n> ',
 password=sys.stdin.readline()
 sys.stdout.write('')
 
-args=[xmlclient, 'username='+username,'-query', query_string]
+args=[xmlclient, 'username='+username, '-query', query_string]
 
-p1=Popen(args,stderr=PIPE,stdin=PIPE,stdout=PIPE)
+p1=Popen(args,stderr=PIPE, stdin=PIPE, stdout=PIPE)
 xmloutput=p1.communicate(input=password)[0]
 
 dom=parseString(xmloutput)
@@ -40,5 +40,5 @@ for node in objectnodes:
     invidNodes = node.getElementsByTagName('invid')
     for inode in invidNodes:
         owners.append(inode.getAttribute('id'))
-    print "User", username , "=", ', '.join(owners).encode('us-ascii')
+    print "User", username, "=", ', '.join(owners).encode('us-ascii')
 
