@@ -89,7 +89,6 @@ import arlut.csd.ganymede.rmi.XMLSession;
  * the file to the server for server-side integration into the Ganymede
  * database.
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
@@ -220,6 +219,11 @@ public final class xmlclient implements ClientListener, Runnable {
           }
         else if (xc.queryString != null)
           {
+	    if (debug)
+	      {
+		System.err.println("xmlclient: xc.queryString = " + xc.queryString);
+	      }
+
             if (xc.doQuery(xc.queryString))
               {
                 xc.terminate(0);
