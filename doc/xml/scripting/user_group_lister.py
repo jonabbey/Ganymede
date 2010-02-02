@@ -1,4 +1,4 @@
-#!/usr/bin/python
+0#!/usr/bin/python
 #
 # This script runs a query against a Ganymede server to get a list of
 # users and the owner groups they belong to.
@@ -12,6 +12,7 @@ import os
 from subprocess import *
 from xml.dom.minidom import parse, parseString
 
+debug=False
 xmlclient='/home/broccol/ganymede-client/bin/xmlclient'
 
 def perform_query(query_string, username, password):
@@ -20,7 +21,8 @@ def perform_query(query_string, username, password):
     (xmloutput, xmlerror)=p1.communicate(input=password)
     try:
         dom = parseString(xmloutput)
-        print dom.toxml()
+        if debug:
+            print dom.toxml()
     except:
         print xmlerror
         raise
