@@ -128,7 +128,7 @@ public class IRISLink {
 	throw new NullPointerException("iris.schema not found");
       }
 
-    StringBuffer url = new StringBuffer("jdbc:oracle:thin:");
+    StringBuilder url = new StringBuilder("jdbc:oracle:thin:");
 
     url.append("@");
     url.append(hostProperty);

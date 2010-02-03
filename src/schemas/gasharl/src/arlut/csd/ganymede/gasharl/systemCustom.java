@@ -305,7 +305,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       {
 	boolean problem = false;
 	ReturnVal tmpVal;
-	StringBuffer resultBuf = new StringBuffer();
+	StringBuilder resultBuf = new StringBuilder();
 	ReturnVal retVal = super.cloneFromObject(session, origObj, local);
 
 	if (retVal != null)

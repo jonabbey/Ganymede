@@ -383,7 +383,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 	plaintext = passField.getPlainText();
       }
 
-    StringBuffer output = new StringBuffer();
+    StringBuilder output = new StringBuilder();
 
     output.append(escapeString(username));
     output.append("|");
@@ -411,7 +411,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 	return "";
       }
 
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     char[] ary = in.toCharArray();
 
     /* -- */

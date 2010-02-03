@@ -1239,7 +1239,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private void writeUserNetgroup(DBObject object, PrintWriter writer)
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     String name;
     Vector users;
@@ -1298,7 +1298,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		buffer.append(" ");
 		buffer.append(subname);
 		writer.println(buffer.toString());
-		buffer = new StringBuffer();
+		buffer = new StringBuilder();
 		buffer.append(subname);
 		subgroup++;
 	      }
@@ -1329,7 +1329,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		buffer.append(" ");
 		buffer.append(subname);
 		writer.println(buffer.toString());
-		buffer = new StringBuffer();
+		buffer = new StringBuilder();
 		buffer.append(subname);
 		subgroup++;
 	      }
@@ -1355,7 +1355,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private void writeSystemNetgroup(DBObject object, PrintWriter writer)
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     String name;
     Vector systems;
@@ -1415,7 +1415,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		buffer.append(" ");
 		buffer.append(subname);
 		writer.println(buffer.toString());
-		buffer = new StringBuffer();
+		buffer = new StringBuilder();
 		buffer.append(subname);
 		subgroup++;
 	      }
@@ -1447,7 +1447,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		buffer.append(" ");
 		buffer.append(subname);
 		writer.println(buffer.toString());
-		buffer = new StringBuffer();
+		buffer = new StringBuilder();
 		buffer.append(subname);
 		subgroup++;
 	      }
@@ -2912,7 +2912,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	throw new IllegalArgumentException("Time code has overflowed");
       }
 
-    StringBuffer timeString = new StringBuffer();
+    StringBuilder timeString = new StringBuilder();
 
     timeString.append(java.lang.Integer.toHexString((int) timecode));
 
@@ -3387,7 +3387,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	return "";
       }
 
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     char[] ary = in.toCharArray();
 
     /* -- */
@@ -3422,7 +3422,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	return "";
       }
 
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     char[] ary = in.toCharArray();
 
     /* -- */
@@ -4299,7 +4299,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     HashMap options = new HashMap(); 
 
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     /* -- */
 
@@ -4501,8 +4501,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     
     if (forcedOptions.size() > 0)
       {
-	StringBuffer hexOptionCodes = new StringBuffer();
-	StringBuffer concatPrefix = new StringBuffer();
+	StringBuilder hexOptionCodes = new StringBuilder();
+	StringBuilder concatPrefix = new StringBuilder();
 	
 	values = forcedOptions.iterator();
 	

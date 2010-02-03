@@ -358,7 +358,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
   {
     InvidDBField typeField;
     StringDBField valueField;
-    StringBuffer buff = new StringBuffer();
+    StringBuilder buff = new StringBuilder();
 
     /* -- */
 

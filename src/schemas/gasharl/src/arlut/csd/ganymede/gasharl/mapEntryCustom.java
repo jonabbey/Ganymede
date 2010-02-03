@@ -329,7 +329,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
   public final String getEmbeddedObjectDisplayLabelHook(DBObject object)
   {
     InvidDBField field, field2;
-    StringBuffer buff = new StringBuffer();
+    StringBuilder buff = new StringBuilder();
 
     /* -- */
 

@@ -352,7 +352,7 @@ public class IPv4Range {
 
   public synchronized String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 
@@ -828,7 +828,7 @@ public class IPv4Range {
     char[] cAry;
     int length = 0;
     int dotCount = 0;
-    StringBuffer temp = new StringBuffer();
+    StringBuilder temp = new StringBuilder();
 
     /* -- */
 
@@ -910,7 +910,7 @@ public class IPv4Range {
 
   public static String genIPV4string(Byte[] octets)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     Short absoctets[];
 
     /* -- */

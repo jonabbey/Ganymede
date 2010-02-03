@@ -185,7 +185,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   private final String genLabel(String interfaceName, String ipString, String macAddress)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     boolean openIP = false;
     boolean openMAC = false;
 
@@ -871,7 +871,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	// address, whatever the separators may or may not be. Go
 	// through and extract them and generate a new string.
 
-	StringBuffer result = new StringBuffer();
+	StringBuilder result = new StringBuilder();
 
 	digit_count = 0;
 
@@ -914,7 +914,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	throw new MACAddressException();
       }
 
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     for (int i = 0; i < pieces.length; i++)
       {

@@ -233,7 +233,7 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
       {
 	boolean problem = false;
 	ReturnVal tmpVal;
-	StringBuffer resultBuf = new StringBuffer();
+	StringBuilder resultBuf = new StringBuilder();
 	ReturnVal retVal = super.cloneFromObject(session, origObj, local);
 
 	if (retVal != null)

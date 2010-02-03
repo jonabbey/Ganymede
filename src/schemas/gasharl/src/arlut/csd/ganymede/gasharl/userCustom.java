@@ -771,7 +771,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	boolean problem = false;
 	ReturnVal tmpVal;
-	StringBuffer resultBuf = new StringBuffer();
+	StringBuilder resultBuf = new StringBuilder();
 
         // clone all of the fields that we don't inhibit in canCloneField().
 
@@ -3278,7 +3278,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return;
       }
 
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     DBObject entryObj = getSession().viewDBObject(entryInvid);
 
@@ -3405,7 +3405,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return;
       }
 
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     DBObject entryObj = getSession().viewDBObject(entryInvid, true);
 
@@ -3553,7 +3553,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	Vector objects = new Vector();
 	objects.addElement(getInvid());
 
-	StringBuffer buffer = new StringBuffer();
+	StringBuilder buffer = new StringBuilder();
 
 	buffer.append("User ");
 	buffer.append(name);
@@ -3784,7 +3784,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     Vector objects = new Vector();
 
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     /* -- */
 
@@ -3951,7 +3951,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	Vector objects = new Vector();
 	objects.addElement(getInvid());
 
-	StringBuffer buffer = new StringBuffer();
+	StringBuilder buffer = new StringBuilder();
 
 	buffer.append("User ");
 	buffer.append(orig);

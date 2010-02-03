@@ -253,63 +253,63 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
   {
-	boolean problem = false;
-	StringBuffer resultBuf = new StringBuffer();
-	ReturnVal retVal = super.cloneFromObject(session, origObj, local);
+    boolean problem = false;
+    StringBuilder resultBuf = new StringBuilder();
+    ReturnVal retVal = super.cloneFromObject(session, origObj, local);
 
-	if (retVal != null)
-          {
-            if (!retVal.didSucceed())
-              {
-                return retVal;
-              }
+    if (retVal != null)
+      {
+	if (!retVal.didSucceed())
+	  {
+	    return retVal;
+	  }
             
-            if (retVal.getDialog() != null)
-              {
-                resultBuf.append("\n\n");
-                resultBuf.append(retVal.getDialog().getText());
-
-                problem = true;
-              }
-          }
-
-	// and clone the embedded objects.
-        //
-        // Remember, dhcpNetworkCustom.initializeNewObject() will create
-        // a single embedded option object as part of the normal dhcp
-        // network creation process.  We'll put this (single)
-        // automatically created embedded object into the newOnes
-        // vector, then create any new embedded options necessary when
-        // cloning a multiple option dhcp network.
-
-	InvidDBField oldOptions = (InvidDBField) origObj.getField(dhcpNetworkSchema.OPTIONS);
-	InvidDBField newOptions = (InvidDBField) getField(dhcpNetworkSchema.OPTIONS);
-
-	retVal = CopyOptions(session, oldOptions, newOptions, local);
-	if (retVal != null && !retVal.didSucceed())
+	if (retVal.getDialog() != null)
 	  {
-	    return retVal;
+	    resultBuf.append("\n\n");
+	    resultBuf.append(retVal.getDialog().getText());
+
+	    problem = true;
 	  }
+      }
 
-	oldOptions = (InvidDBField) origObj.getField(dhcpNetworkSchema.GUEST_OPTIONS);
-	newOptions = (InvidDBField) getField(dhcpNetworkSchema.GUEST_OPTIONS);
+    // and clone the embedded objects.
+    //
+    // Remember, dhcpNetworkCustom.initializeNewObject() will create
+    // a single embedded option object as part of the normal dhcp
+    // network creation process.  We'll put this (single)
+    // automatically created embedded object into the newOnes
+    // vector, then create any new embedded options necessary when
+    // cloning a multiple option dhcp network.
 
-	retVal = CopyOptions(session, oldOptions, newOptions, local);
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    return retVal;
-	  }
+    InvidDBField oldOptions = (InvidDBField) origObj.getField(dhcpNetworkSchema.OPTIONS);
+    InvidDBField newOptions = (InvidDBField) getField(dhcpNetworkSchema.OPTIONS);
 
-
-	retVal = new ReturnVal(true, !problem);
-
-	if (problem)
-	  {
-	    retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
-					     "Ok", null, "ok.gif"));
-	  }
-
+    retVal = CopyOptions(session, oldOptions, newOptions, local);
+    if (retVal != null && !retVal.didSucceed())
+      {
 	return retVal;
+      }
+
+    oldOptions = (InvidDBField) origObj.getField(dhcpNetworkSchema.GUEST_OPTIONS);
+    newOptions = (InvidDBField) getField(dhcpNetworkSchema.GUEST_OPTIONS);
+
+    retVal = CopyOptions(session, oldOptions, newOptions, local);
+    if (retVal != null && !retVal.didSucceed())
+      {
+	return retVal;
+      }
+
+
+    retVal = new ReturnVal(true, !problem);
+
+    if (problem)
+      {
+	retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
+					 "Ok", null, "ok.gif"));
+      }
+
+    return retVal;
   }
 
 
@@ -325,69 +325,68 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
     
     boolean problem = false;
     ReturnVal tmpVal;
-    StringBuffer resultBuf = new StringBuffer();
+    StringBuilder resultBuf = new StringBuilder();
     
     try
       {
-    for (i = 0; i < newOnes.size(); i++)
-      {
-	workingOption = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
-	origOption = session.viewDBObject((Invid) oldOnes.elementAt(i));
-	tmpVal = workingOption.cloneFromObject(session, origOption, local);
-	
-	if (tmpVal != null && tmpVal.getDialog() != null)
+	for (i = 0; i < newOnes.size(); i++)
 	  {
-	    resultBuf.append("\n\n");
-	    resultBuf.append(tmpVal.getDialog().getText());
-	    
-	    problem = true;
-	  }
-      }
-    
-    Invid newInvid;
-    
-    if (i < oldOnes.size())
-      {
-	for (; i < oldOnes.size(); i++)
-	  {
-	    try
-	      {
-		tmpVal = newOptions.createNewEmbedded(local);
-	      }
-	    catch (GanyPermissionsException ex)
-	      {
-		tmpVal = Ganymede.createErrorDialog("permissions",
-						    "permissions failure creating embedded option " + ex);
-	      }
-	    
-	    if (!tmpVal.didSucceed())
-	      {
-		if (tmpVal != null && tmpVal.getDialog() != null)
-		  {
-		    resultBuf.append("\n\n");
-		    resultBuf.append(tmpVal.getDialog().getText());
-		    
-		    problem = true;
-		  }
-		continue;
-	      }
-	    
-	    newInvid = tmpVal.getInvid();
-	    
-	    workingOption = (DBEditObject) session.editDBObject(newInvid);
+	    workingOption = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
 	    origOption = session.viewDBObject((Invid) oldOnes.elementAt(i));
 	    tmpVal = workingOption.cloneFromObject(session, origOption, local);
-	    
+	
 	    if (tmpVal != null && tmpVal.getDialog() != null)
 	      {
 		resultBuf.append("\n\n");
 		resultBuf.append(tmpVal.getDialog().getText());
-		
+	    
 		problem = true;
 	      }
 	  }
-      }
     
+	Invid newInvid;
+    
+	if (i < oldOnes.size())
+	  {
+	    for (; i < oldOnes.size(); i++)
+	      {
+		try
+		  {
+		    tmpVal = newOptions.createNewEmbedded(local);
+		  }
+		catch (GanyPermissionsException ex)
+		  {
+		    tmpVal = Ganymede.createErrorDialog("permissions",
+							"permissions failure creating embedded option " + ex);
+		  }
+	    
+		if (!tmpVal.didSucceed())
+		  {
+		    if (tmpVal != null && tmpVal.getDialog() != null)
+		      {
+			resultBuf.append("\n\n");
+			resultBuf.append(tmpVal.getDialog().getText());
+		    
+			problem = true;
+		      }
+		    continue;
+		  }
+	    
+		newInvid = tmpVal.getInvid();
+	    
+		workingOption = (DBEditObject) session.editDBObject(newInvid);
+		origOption = session.viewDBObject((Invid) oldOnes.elementAt(i));
+		tmpVal = workingOption.cloneFromObject(session, origOption, local);
+	    
+		if (tmpVal != null && tmpVal.getDialog() != null)
+		  {
+		    resultBuf.append("\n\n");
+		    resultBuf.append(tmpVal.getDialog().getText());
+		
+		    problem = true;
+		  }
+	      }
+	  }
       }
     catch (NotLoggedInException ex)
       {
@@ -400,13 +399,10 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
       {
 	retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
 					 "Ok", null, "ok.gif"));
-    }
+      }
+
     return retVal;
   }
-  
-
-
-
 
   /**
    * Customization method to verify whether the user should be able to
@@ -430,6 +426,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
   public boolean canSeeField(DBSession session, DBField field)
   {
     String name = (String) field.getOwner().getFieldValueLocal(dhcpNetworkSchema.NAME);
+
     if (name != null && name.equals("_GLOBAL_"))
       {
 	if ( field.getID() == dhcpNetworkSchema.NETWORK_NUMBER ||
@@ -437,24 +434,24 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 	     field.getID() == dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS ||
 	     field.getID() == dhcpNetworkSchema.GUEST_RANGE ||
 	     field.getID() == dhcpNetworkSchema.GUEST_OPTIONS  
-	   )
+	     )
 	  {
 	    return false;
 	  }
       }
     
     Boolean allow_registered_guests = (Boolean) field.getOwner().getFieldValueLocal(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
+
     if (allow_registered_guests == null || !allow_registered_guests.booleanValue())
       {
 	if ( field.getID() == dhcpNetworkSchema.GUEST_RANGE ||
 	     field.getID() == dhcpNetworkSchema.GUEST_OPTIONS  
-	   )
+	     )
 	  {
 	    return false;
 	  }
       }
     
-
     return super.canSeeField(session, field);
   }
 
