@@ -25,7 +25,7 @@
 
    This Java Port is  
 
-     Copyright (c) 2008, 2009 The University of Texas at Austin.
+     Copyright (c) 2008-2010 The University of Texas at Austin.
 
      All rights reserved.
 
@@ -126,7 +126,7 @@ public final class Sha256Crypt
     byte[] s_bytes = null;
     int cnt, cnt2;
     int rounds = ROUNDS_DEFAULT;  // Default number of rounds.
-    StringBuffer buffer;
+    StringBuilder buffer;
 
     /* -- */
 
@@ -153,7 +153,7 @@ public final class Sha256Crypt
     else
       {
 	java.util.Random randgen = new java.util.Random();
-	StringBuffer saltBuf = new StringBuffer();
+	StringBuilder saltBuf = new StringBuilder();
 
 	while (saltBuf.length() < 16)
 	  {
@@ -280,7 +280,7 @@ public final class Sha256Crypt
 	alt_result = ctx.digest();
       }
 
-    buffer = new StringBuffer(sha256_salt_prefix);
+    buffer = new StringBuilder(sha256_salt_prefix);
 
     if (rounds != 5000)
       {
@@ -317,7 +317,7 @@ public final class Sha256Crypt
   {
     int v = ((((int) B2) & 0xFF) << 16) | ((((int) B1) & 0xFF) << 8) | ((int)B0 & 0xff);
 
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     while (--size >= 0)
       {
