@@ -928,7 +928,6 @@ public final class ReturnVal implements java.io.Serializable {
     if (rescanList != null)
       {
 	result.append(", rescan set");
-	result = result + ", rescan set";
       }
     else
       {
