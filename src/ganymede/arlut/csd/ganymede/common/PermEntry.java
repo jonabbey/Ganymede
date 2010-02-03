@@ -410,7 +410,7 @@ public class PermEntry implements java.io.Serializable {
 
   public final String difference(PermEntry p)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     if (visible && (p == null || !p.visible))
       {
@@ -455,7 +455,7 @@ public class PermEntry implements java.io.Serializable {
     return result.toString();
   }
 
-  private void addString(StringBuffer x, String y)
+  private void addString(StringBuilder x, String y)
   {
     if (x.length() > 0)
       {
@@ -473,7 +473,7 @@ public class PermEntry implements java.io.Serializable {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     if (visible)
       {
@@ -500,7 +500,7 @@ public class PermEntry implements java.io.Serializable {
 
   public String getXMLCode()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     if (visible)
       {

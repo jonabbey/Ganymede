@@ -364,7 +364,7 @@ public class Query implements java.io.Serializable {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     if (objectType != -1)
       {

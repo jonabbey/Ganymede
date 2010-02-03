@@ -541,7 +541,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 

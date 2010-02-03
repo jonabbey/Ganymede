@@ -93,7 +93,7 @@ public class Result implements java.io.Serializable {
 
   public String resultDump()
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     char[] chars;
 
     /* -- */

@@ -438,7 +438,7 @@ public class CategoryDump implements Category, CategoryNode {
 
   private String getChunk(char[] chars, int startDex)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 

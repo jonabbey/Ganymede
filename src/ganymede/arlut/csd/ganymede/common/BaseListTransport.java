@@ -181,7 +181,7 @@ public class BaseListTransport implements java.io.Serializable {
 
   private String getChunk(char[] chars, int startDex)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 

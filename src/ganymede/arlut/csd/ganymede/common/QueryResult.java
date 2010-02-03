@@ -666,7 +666,7 @@ public class QueryResult implements java.io.Serializable {
   {
     char[] chars;
     String results = buffer.toString();
-    StringBuffer tempString = new StringBuffer();
+    StringBuilder tempString = new StringBuilder();
     int index = 0;
     int rows = 0;
 

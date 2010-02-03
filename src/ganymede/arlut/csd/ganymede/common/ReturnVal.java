@@ -742,7 +742,7 @@ public final class ReturnVal implements java.io.Serializable {
 
   public String dumpRescanInfo()
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     /* -- */
 
@@ -865,76 +865,79 @@ public final class ReturnVal implements java.io.Serializable {
 
   public String toString()
   {
-    String result = "ReturnVal [";
+    StringBuilder result = new StringBuilder("ReturnVal [");
 
     /* -- */
 
     if (dialog != null)
       {
-	result = result + "\"" + dialog.getText() + "\"";
+	result.append("\"");
+	result.append(dialog.getText());
+	result.append("\"");
       }
     else
       {
-	result = result + "\"\"";
+	result.append("\"\"");
       }
 
     if (didSucceed())
       {
-	result = result + ", success";
+	result.append(", success");
       }
     else
       {
-	result = result + ", failure";
+	result.append(", failure");
       }
 
     if (doNormalProcessing)
       {
-	result = result + ", normal";
+	result.append(", normal");
       }
     else
       {
-	result = result + ", abnormal";
+	result.append(", abnormal");
       }
 
     if (newObjectInvid != null)
       {
-	result = result + ", invid set";
+	result.append(", invid set");
       }
     else
       {
-	result = result + ", invid not set";
+	result.append(", invid not set");
       }
 
     if (remoteObjectRef != null)
       {
-	result = result + ", remote obj set";
+	result.append(", remote obj set");
       }
     else
       {
-	result = result + ", remote obj not set";
+	result.append(", remote obj not set");
       }
 
     if (callback != null)
       {
-	result = result + ", callback set";
+	result.append(", callback set");
       }
     else
       {
-	result = result + ", callback not set";
+	result.append(", callback not set");
       }
 
     if (rescanList != null)
       {
+	result.append(", rescan set");
 	result = result + ", rescan set";
       }
     else
       {
-	result = result + ", rescan not set";
+	result.append(", rescan not set");
       }
 
-    result = result + "]";
+    result.append("]");
 
-    return result;
+    return result.toString();
   }
 
   // ---------------------------------------------------------------------------

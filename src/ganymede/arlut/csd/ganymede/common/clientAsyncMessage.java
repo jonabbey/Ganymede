@@ -114,7 +114,7 @@ public class clientAsyncMessage implements java.io.Serializable {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     switch (method)
       {

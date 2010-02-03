@@ -617,7 +617,7 @@ public class scheduleHandle implements java.io.Serializable {
     // ok, we need to calculate a description for how long
     // between invocations of this task
 
-    StringBuffer buff = new StringBuffer();
+    StringBuilder buff = new StringBuilder();
 
     int minutes = 0;
     int hours = 0;

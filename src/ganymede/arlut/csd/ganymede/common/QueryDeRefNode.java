@@ -95,7 +95,7 @@ public class QueryDeRefNode extends QueryNode {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     if (fieldname != null)
       {

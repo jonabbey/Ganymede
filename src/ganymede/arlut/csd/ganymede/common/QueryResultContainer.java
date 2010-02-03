@@ -765,7 +765,7 @@ public class QueryResultContainer implements List, Serializable {
    */
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     
     for (Iterator iter = headers.iterator(); iter.hasNext();)
       {

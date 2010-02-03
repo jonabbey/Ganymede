@@ -373,7 +373,7 @@ public class BaseDump implements Base, CategoryNode {
 
   private String getChunk(char[] chars, int startDex)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 

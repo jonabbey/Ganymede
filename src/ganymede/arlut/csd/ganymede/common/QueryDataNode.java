@@ -259,7 +259,7 @@ public class QueryDataNode extends QueryNode {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 

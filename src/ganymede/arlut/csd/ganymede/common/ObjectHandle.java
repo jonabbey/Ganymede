@@ -195,7 +195,7 @@ public class ObjectHandle implements Cloneable {
 
   public String debugDump()
   {
-    StringBuffer tmpBuf = new StringBuffer();
+    StringBuilder tmpBuf = new StringBuilder();
 
     tmpBuf.append(label);
     tmpBuf.append(": ");
