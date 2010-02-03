@@ -165,7 +165,7 @@ public class GanymedeWarningTask implements Runnable {
 	Enumeration baseEnum, en;
 	QueryNode expireNode, removeNode;
 	String title;
-	StringBuffer tempString = new StringBuffer();
+	StringBuilder tempString = new StringBuilder();
 	Vector objects = new Vector();
 	DBObject obj;
         DBEditObject objectHook;

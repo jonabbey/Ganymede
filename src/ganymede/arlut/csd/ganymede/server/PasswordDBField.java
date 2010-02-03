@@ -1075,7 +1075,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (this.isDefined())
       {
-	StringBuffer result = new StringBuffer();
+	StringBuilder result = new StringBuilder();
 
 	result.append("< ");
 

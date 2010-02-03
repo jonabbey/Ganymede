@@ -244,7 +244,7 @@ public class NumericDBField extends DBField implements num_field {
   public String getDiffString(DBField orig)
   {
     NumericDBField origN;
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 

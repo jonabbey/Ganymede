@@ -2390,7 +2390,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     // type and in identity.  if copyFieldMode, we won't complain
     // unless none of the submitted values are acceptable
 
-    StringBuffer errorBuf = new StringBuffer();
+    StringBuilder errorBuf = new StringBuilder();
 
     for (int i = 0; i < submittedValues.size(); i++)
       {

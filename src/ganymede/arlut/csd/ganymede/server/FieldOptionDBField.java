@@ -407,7 +407,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   static public String debugdecode(Hashtable matrix)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     Enumeration en;
     String key;
     String option;
@@ -914,7 +914,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public synchronized String getValueString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     String key = null;
     String option = null;
 
@@ -975,7 +975,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public String getDiffString(DBField orig)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     FieldOptionDBField origFO;
 
     /* -- */

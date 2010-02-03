@@ -509,7 +509,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
   private void throwOverflow() throws RemoteException
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     synchronized (eventBuffer)
       {

@@ -1626,7 +1626,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     DBField origField;
     DBField newField;
     boolean problem = false;
-    StringBuffer resultBuf = new StringBuffer();
+    StringBuilder resultBuf = new StringBuilder();
 
     /* -- */
 
@@ -3804,11 +3804,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public synchronized String diff(Set<DBObjectBaseField> changedFieldDefs)
   {
     boolean diffFound = false;
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     DBField origField, currentField;
-    StringBuffer added = new StringBuffer();
-    StringBuffer deleted = new StringBuffer();
-    StringBuffer changed = new StringBuffer();
+    StringBuilder added = new StringBuilder();
+    StringBuilder deleted = new StringBuilder();
+    StringBuilder changed = new StringBuilder();
 
     /* -- */
 

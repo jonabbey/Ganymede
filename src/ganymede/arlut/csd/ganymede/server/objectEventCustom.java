@@ -345,7 +345,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 	return setFieldValueLocal(SchemaConstants.ObjectEventLabel, null);
       }
 
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     result.append(typeName);
     result.append(":");

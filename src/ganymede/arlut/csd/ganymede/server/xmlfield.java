@@ -1875,7 +1875,7 @@ public class xmlfield implements FieldType {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 
@@ -2138,7 +2138,7 @@ class xInvid {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 
@@ -2236,7 +2236,7 @@ class xPassword {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 

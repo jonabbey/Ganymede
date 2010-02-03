@@ -641,7 +641,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	java.util.Arrays.sort(entries, null);
 
-	StringBuffer result = new StringBuffer();
+	StringBuilder result = new StringBuilder();
 
 	for (int i = 0; i < entries.length; i++)
 	  {
@@ -755,7 +755,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public synchronized String getDiffString(DBField orig)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     InvidDBField origI;
     GanymedeSession gsession = null;
 
@@ -863,7 +863,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	  {
 	    if (deleted.size() != 0)
 	      {
-		StringBuffer deleteString = new StringBuffer();
+		StringBuilder deleteString = new StringBuilder();
 	    
 		for (int i = 0; i < deleted.size(); i++)
 		  {
@@ -883,7 +883,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    if (added.size() != 0)
 	      {
-		StringBuffer addString = new StringBuffer();
+		StringBuilder addString = new StringBuilder();
 
 		for (int i = 0; i < added.size(); i++)
 		  {
@@ -2958,7 +2958,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // type and in identity.  if partialSuccessOk, we won't complain
     // unless none of the submitted values are acceptable
 
-    StringBuffer errorBuf = new StringBuffer();
+    StringBuilder errorBuf = new StringBuilder();
 
     for (int i = 0; i < submittedValues.size(); i++)
       {

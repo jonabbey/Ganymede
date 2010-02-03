@@ -402,7 +402,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   static public String debugdecode(Hashtable matrix)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     Enumeration en;
     String key;
     PermEntry entry;
@@ -906,7 +906,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public synchronized String getValueString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     PermEntry entry = null;
     String key = null;
 
@@ -967,7 +967,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public String getDiffString(DBField orig)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     PermissionMatrixDBField origP;
 
     /* -- */

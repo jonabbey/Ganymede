@@ -737,7 +737,7 @@ public final class DBObjectDeltaRec implements FieldType {
 
   public String toString()
   {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
 
     buf.append("DBObjectDeltaRec: invid ");
     buf.append(invid);

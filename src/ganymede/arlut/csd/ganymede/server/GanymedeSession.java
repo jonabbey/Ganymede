@@ -2513,7 +2513,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     Qsmtp mailer;
     String returnAddr;
     String mailsuffix;
-    StringBuffer signature = new StringBuffer();
+    StringBuilder signature = new StringBuilder();
     Vector addresses = new Vector();
     StringTokenizer tokens = new StringTokenizer(address, ", ", false);
 
@@ -2613,8 +2613,8 @@ final public class GanymedeSession implements Session, Unreferenced {
     Qsmtp mailer;
     String returnAddr;
     String mailsuffix;
-    StringBuffer asciiContent = new StringBuffer();
-    StringBuffer signature = new StringBuffer();
+    StringBuilder asciiContent = new StringBuilder();
+    StringBuilder signature = new StringBuilder();
     Vector addresses = new Vector();
     StringTokenizer tokens = new StringTokenizer(address, ", ", false);
 

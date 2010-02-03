@@ -197,7 +197,7 @@ class fieldDeltaRec {
 	return "<field: " + fieldcode + ", new val = " + scalarValue.getValueString() + ">";
       }
 
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     result.append("<field: ");
     result.append(fieldcode);

@@ -88,10 +88,8 @@ import arlut.csd.Util.TranslationService;
  * and for scanning through a Ganymede log file for events pertaining to
  * a designated object invid.</p>
  *
- * <p>Most of the methods in this class must be synchronized, both to keep the
- * logfile itself orderly, and to allow the various log-processing methods
- * in {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvent} to re-use the
- * 'multibuffer' StringBuffer.</p>
+ * <p>Most of the methods in this class must be synchronized to keep
+ * the logfile orderly.</p>
  */
 
 public class DBLog {
@@ -1727,7 +1725,7 @@ public class DBLog {
 
   private void loadSignature() throws IOException
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     FileInputStream in = new FileInputStream(Ganymede.signatureFileProperty);
     BufferedInputStream inBuf = new BufferedInputStream(in);
     int c;
@@ -2212,7 +2210,7 @@ class objectEventType {
 
 class MailOut {
 
-  StringBuffer description = new StringBuffer();
+  StringBuilder description = new StringBuilder();
   Vector<String> addresses;
   int entryCount = 0;
   String objName;
@@ -2240,7 +2238,7 @@ class MailOut {
     entryCount++;
   }
 
-  void append(DBLogEvent event)
+  synchronized void append(DBLogEvent event)
   {
     entryCount++;
     description.append("------------------------------------------------------------\n\n");

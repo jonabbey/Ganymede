@@ -347,7 +347,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
 
   private void throwOverflow() throws RemoteException
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     synchronized (eventBuffer)
       {

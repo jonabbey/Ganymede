@@ -631,7 +631,7 @@ public class DBLogFileController implements DBLogController {
 
     if (event.notifyVect != null)
       {
-	StringBuffer buf2 = new StringBuffer();
+	StringBuilder buf2 = new StringBuilder();
 
 	for (int k = 0; k < event.notifyVect.size(); k++)
 	  {
@@ -686,7 +686,7 @@ public class DBLogFileController implements DBLogController {
 
     /* -- */
 
-    StringBuffer buf = new StringBuffer(ary.length);
+    StringBuilder buf = new StringBuilder(ary.length);
 
     // do it
 
@@ -742,7 +742,7 @@ public class DBLogFileController implements DBLogController {
 
   private String readNextField(char[] line, int startIndex)
   {
-    StringBuffer buf = new StringBuffer(line.length);
+    StringBuilder buf = new StringBuilder(line.length);
 
     for (int i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
@@ -782,7 +782,7 @@ public class DBLogFileController implements DBLogController {
 
     /* -- */
 
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
 
     for (i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
@@ -796,7 +796,7 @@ public class DBLogFileController implements DBLogController {
 	    if (buf.length() != 0)
 	      {
 		result.addElement(Invid.createInvid(buf.toString()));
-		buf = new StringBuffer();
+		buf = new StringBuilder();
 	      }
 	  }
 	else
@@ -842,7 +842,7 @@ public class DBLogFileController implements DBLogController {
 
     /* -- */
 
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
 
     for (i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
@@ -856,7 +856,7 @@ public class DBLogFileController implements DBLogController {
 	    if (buf.length() != 0)
 	      {
 		result.addElement(buf.toString());
-		buf = new StringBuffer();
+		buf = new StringBuilder();
 	      }
 	  }
 	else

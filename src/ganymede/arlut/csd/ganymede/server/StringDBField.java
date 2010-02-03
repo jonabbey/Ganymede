@@ -386,7 +386,7 @@ public class StringDBField extends DBField implements string_field {
 			  }
 			  );
     
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     
     for (int i = 0; i < entries.length; i++)
       {
@@ -424,7 +424,7 @@ public class StringDBField extends DBField implements string_field {
 
   public synchronized String getDiffString(DBField orig)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     StringDBField origS;
 
     /* -- */
@@ -515,7 +515,7 @@ public class StringDBField extends DBField implements string_field {
 	  {
 	    if (deleted.size() != 0)
 	      {
-		StringBuffer itemList = new StringBuffer();
+		StringBuilder itemList = new StringBuilder();
 	    
 		for (int i = 0; i < deleted.size(); i++)
 		  {
@@ -533,7 +533,7 @@ public class StringDBField extends DBField implements string_field {
 
 	    if (added.size() != 0)
 	      {
-		StringBuffer itemList = new StringBuffer();
+		StringBuilder itemList = new StringBuilder();
 
 		for (int i = 0; i < added.size(); i++)
 		  {

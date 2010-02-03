@@ -174,7 +174,7 @@ public class DumpResultBuilder {
 
   public void addRow(DBObject object, GanymedeSession owner)
   {
-    StringBuffer localBuffer = new StringBuffer();
+    StringBuilder localBuffer = new StringBuilder();
     DBObjectBaseField fieldDef;
     DBField field;
     char[] chars;

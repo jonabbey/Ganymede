@@ -2399,7 +2399,7 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
 
   public String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     if (editingTransaction != null)
       {

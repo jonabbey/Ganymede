@@ -635,7 +635,7 @@ public class xmlobject {
 
   public String toString(boolean showAll)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     result.append("<object type=\"");
     result.append(typeString);

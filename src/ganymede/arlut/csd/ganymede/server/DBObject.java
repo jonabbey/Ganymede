@@ -1797,7 +1797,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final ReturnVal validateFieldIntegrity()
   {
     DBField field = null;
-    StringBuffer resultBuffer = new StringBuffer();
+    StringBuilder resultBuffer = new StringBuilder();
 
     /* -- */
 

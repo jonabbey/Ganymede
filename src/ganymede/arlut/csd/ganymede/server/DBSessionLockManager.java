@@ -231,7 +231,7 @@ public class DBSessionLockManager {
 
     if (lockHash.size() != 0)
       {
-	StringBuffer resultBuffer = new StringBuffer();
+	StringBuilder resultBuffer = new StringBuilder();
 
 	Enumeration en = lockHash.keys();
 

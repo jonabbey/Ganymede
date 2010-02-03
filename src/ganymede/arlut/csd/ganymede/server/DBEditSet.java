@@ -1413,7 +1413,7 @@ public class DBEditSet {
 
     if (missingFields != null && missingFields.size() > 0)
       {
-	StringBuffer errorBuf = new StringBuffer();
+	StringBuilder errorBuf = new StringBuilder();
 
 	errorBuf.append(ts.l("commit_checkObjectMissingFields.missing_fields_text",
 			     eObj.getTypeName(),

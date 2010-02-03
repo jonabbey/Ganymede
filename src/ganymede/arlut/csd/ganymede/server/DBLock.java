@@ -295,7 +295,7 @@ public abstract class DBLock {
 
   public String toString()
   {
-    StringBuffer returnString = new StringBuffer();
+    StringBuilder returnString = new StringBuilder();
 
     // get the object's type and ID
 

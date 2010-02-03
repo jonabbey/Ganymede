@@ -930,7 +930,7 @@ public class IPDBField extends DBField implements ip_field {
     // type and in identity.  if copyFieldMode, we won't complain
     // unless none of the submitted values are acceptable.
 
-    StringBuffer errorBuf = new StringBuffer();
+    StringBuilder errorBuf = new StringBuilder();
 
     for (int i = 0; i < submittedValues.size(); i++)
       {
@@ -1114,7 +1114,7 @@ public class IPDBField extends DBField implements ip_field {
 
     Vector values = getVectVal();
 
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     for (int i = 0; i < size(); i++)
       {
@@ -1154,7 +1154,7 @@ public class IPDBField extends DBField implements ip_field {
 
   public synchronized String getDiffString(DBField orig)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     IPDBField origI;
 
     /* -- */
@@ -1634,7 +1634,7 @@ public class IPDBField extends DBField implements ip_field {
     char[] cAry;
     int length = 0;
     int dotCount = 0;
-    StringBuffer temp = new StringBuffer();
+    StringBuilder temp = new StringBuilder();
 
     /* -- */
 
@@ -1716,7 +1716,7 @@ public class IPDBField extends DBField implements ip_field {
 
   public static String genIPV4string(Byte[] octets)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     Short absoctets[];
 
     /* -- */
@@ -1767,7 +1767,7 @@ public class IPDBField extends DBField implements ip_field {
       tailBytes = 0,		// how many trailing bytes do we have?
       v4v6boundary = 0;		// what is the index of the last char of the v6 portion?
 
-    StringBuffer temp = new StringBuffer();
+    StringBuilder temp = new StringBuilder();
 
     /* -- */
 
@@ -2046,7 +2046,7 @@ public class IPDBField extends DBField implements ip_field {
 
   public static String genIPV6string(Byte[] octets)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     int[] stanzas;
     String[] stanzaStrings;
     int i, j;

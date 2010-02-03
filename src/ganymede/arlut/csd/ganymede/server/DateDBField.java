@@ -281,7 +281,7 @@ public class DateDBField extends DBField implements date_field {
   public String getDiffString(DBField orig)
   {
     DateDBField origD;
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 
