@@ -712,7 +712,7 @@ public class smbencrypt {
 
     E_P16(input, output);
 
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     for (i = 0; i < 16; i++)
       {

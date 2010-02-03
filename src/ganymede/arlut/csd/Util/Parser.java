@@ -195,7 +195,7 @@ public class Parser {
   
   public String getNextLongBit() throws IOException
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     /* -- */
 

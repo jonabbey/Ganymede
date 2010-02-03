@@ -89,7 +89,7 @@ public class XMLUtils {
 
   public static String XMLEncode(String name)
   {
-    StringBuffer buffer = new StringBuffer(name.length());
+    StringBuilder buffer = new StringBuilder(name.length());
 
     for (int i = 0; i < name.length(); i++)
       {
@@ -128,7 +128,7 @@ public class XMLUtils {
 	return null;
       }
 
-    StringBuffer buffer = new StringBuffer(name.length());
+    StringBuilder buffer = new StringBuilder(name.length());
 
     int i = 0;
 

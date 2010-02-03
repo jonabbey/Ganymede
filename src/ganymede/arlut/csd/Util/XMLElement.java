@@ -312,7 +312,7 @@ public class XMLElement extends XMLItem {
 
   public String toString()
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     /* -- */
 

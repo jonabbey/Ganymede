@@ -227,7 +227,7 @@ final public class NamedStack<E> {
 
   public synchronized String toString()
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     /* -- */
 

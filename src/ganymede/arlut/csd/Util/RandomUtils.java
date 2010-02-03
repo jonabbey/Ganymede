@@ -108,7 +108,7 @@ public class RandomUtils {
 
   public static String getRandomString(int length, String charset)
   {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     for (int i = 0; i < length; i++)
       {

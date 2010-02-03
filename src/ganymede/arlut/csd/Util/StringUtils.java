@@ -87,7 +87,7 @@ public class StringUtils {
 	return "";
       }
 
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     for (int i = 0; i < inputString.length(); i++)
       {
@@ -178,7 +178,7 @@ public class StringUtils {
 
   public static String escape(String inputString)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     char[] inAry = inputString.toCharArray();
 
     /* -- */
@@ -345,7 +345,7 @@ public class StringUtils {
 
   public static String replaceStr(String inputString, String splitString, String joinString)
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     String[] elems = split(inputString, splitString);
 
     for (int i = 0; i < elems.length; i++)

@@ -388,7 +388,7 @@ public class VectorUtils {
 	return "";
       }
 
-    StringBuffer temp = new StringBuffer();
+    StringBuilder temp = new StringBuilder();
 
     for (int i = 0; i < vec.size(); i++)
       {

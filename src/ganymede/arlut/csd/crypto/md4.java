@@ -78,7 +78,7 @@ public class md4 {
 
   static String tohex(int i)
   {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
 
     for (int b = 0; b < 4; b++)
       {

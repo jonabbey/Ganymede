@@ -753,7 +753,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
   public boolean doQueryFile(String queryFilename) throws IOException, NotBoundException, RemoteException
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     FileInputStream in = new FileInputStream(queryFilename);
     BufferedInputStream inBuf = new BufferedInputStream(in);
     int c;

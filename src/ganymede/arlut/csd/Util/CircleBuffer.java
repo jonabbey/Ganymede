@@ -130,9 +130,9 @@ public class CircleBuffer {
       }
 
     // okay, we know there is at least one item in the buffer.. create
-    // a StringBuffer and add information for it to the StringBuffer
+    // a StringBuilder and add information for it to the StringBuilder
 
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     sb.append(count++);
     sb.append(":");

@@ -396,8 +396,8 @@ class tableCell {
       p2,
       marker;
 
-    StringBuffer
-      result = new StringBuffer();
+    StringBuilder
+      result = new StringBuilder();
 
     FontMetrics
       fm;

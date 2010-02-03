@@ -90,8 +90,8 @@ public class WordWrap {
       offset = 0,
       marker;
 
-    StringBuffer
-      result = new StringBuffer();
+    StringBuilder
+      result = new StringBuilder();
 
     /* -- */
 
@@ -283,7 +283,7 @@ public class WordWrap {
 
   public static String deTabify(String input)
   {
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
     char characters[] = input.toCharArray();
     int j = 0;
 

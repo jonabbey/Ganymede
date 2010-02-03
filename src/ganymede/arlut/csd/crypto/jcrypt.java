@@ -593,7 +593,7 @@ public class jcrypt
 	 System.err.println("salt = " + salt + ", plaintext = " + original);
        }
 
-      StringBuffer buffer = new StringBuffer("             ");
+      StringBuilder buffer = new StringBuilder("             ");
 
       char charZero = salt.charAt(0);
       char charOne  = salt.charAt(1);
