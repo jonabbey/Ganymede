@@ -3,10 +3,9 @@
    MD5Crypt.java
 
    Created: 3 November 1999
-   Release: $Name:  $
-   Version: $Revision: 7678 $
-   Last Mod Date: $Date: 2007-12-28 11:51:49 -0600 (Fri, 28 Dec 2007) $
+
    Java Port By: Jonathan Abbey, jonabbey@arlut.utexas.edu
+
    Original C Version:
    ----------------------------------------------------------------------------
    "THE BEER-WARE LICENSE" (Revision 42):
@@ -17,7 +16,7 @@
 
    This Java Port is  
 
-     Copyright (c) 1999-2008 The University of Texas at Austin.
+     Copyright (c) 1999-2010 The University of Texas at Austin.
 
      All rights reserved.
 
