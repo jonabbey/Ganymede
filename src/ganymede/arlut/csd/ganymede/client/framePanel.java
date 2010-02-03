@@ -934,6 +934,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	    // "\nHistory:\n\n"
 	    buffer.append(ts.l("encodeObjectToStringBuffer.history_header"));
 	  }
+
 	try
 	  {
 	    buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(), 

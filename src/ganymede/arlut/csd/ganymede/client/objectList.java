@@ -540,7 +540,7 @@ public class objectList {
 
   public synchronized String toString()
   {
-    StringBuffer tempBuf = new StringBuffer();
+    StringBuilder tempBuf = new StringBuilder();
 
     for (int i = 0; handles != null && i < handles.size(); i++)
       {

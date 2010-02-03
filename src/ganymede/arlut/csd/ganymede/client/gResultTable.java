@@ -914,7 +914,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   String escapeString(String string, char sepChar)
   {
     char[] chars;
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     chars = string.toCharArray();
 
@@ -954,7 +954,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   String escapeHTML(String string)
   {
     char[] chars;
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     chars = string.toCharArray();
 
