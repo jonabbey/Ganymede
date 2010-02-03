@@ -318,7 +318,7 @@ public class Qsmtp implements Runnable {
   {
     Vector MIMEheaders = new Vector();
     String separator = generateRandomBoundary();
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     /* -- */
 
@@ -687,7 +687,7 @@ public class Qsmtp implements Runnable {
             send.print("From: " + from_address);
             send.print(EOL);
 
-            StringBuffer targetString = new StringBuffer();
+            StringBuilder targetString = new StringBuilder();
 
             for (int i = 0; i < to_addresses.size(); i++)
               {
@@ -877,7 +877,7 @@ class messageObject {
 
   public String toString()
   {
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
 
     buffer.append("From: ");
     buffer.append(from_address);

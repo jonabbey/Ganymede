@@ -64,7 +64,7 @@ public class Rules {
 
   public static final String reverse(String s)
   {
-    return new StringBuffer(s).reverse().toString();
+    return new StringBuilder(s).reverse().toString();
   }
 
   public static final String capitalise(String s)
@@ -108,7 +108,7 @@ public class Rules {
 
   public static final String purge(String s, char c)
   {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     for (int i=0;i<s.length();i++)
       {
@@ -242,7 +242,7 @@ public class Rules {
 
   public static final String replace(String s, char clazz, char newChar)
   {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     for (int i=0; i<s.length(); i++)
       {
@@ -262,7 +262,7 @@ public class Rules {
 
   public static final String polyPurge(String s, char clazz)
   {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
 
     for (int i=0; i<s.length(); i++)
       {
@@ -425,7 +425,7 @@ public class Rules {
 		  {
 		    throw new IllegalArgumentException("mangle: overstrike weird argument in :" + control);
 		  }
-		StringBuffer sb = new StringBuffer(s);
+		StringBuilder sb = new StringBuilder(s);
 		sb.setCharAt(pos,control.charAt(++i));
 		s = sb.toString();
 	      }
@@ -443,7 +443,7 @@ public class Rules {
 		  {
 		    throw new IllegalArgumentException("mangle: insert weird argument in :" + control);
 		  }
-		s = new StringBuffer(s).insert(pos,control.charAt(++i)).toString();
+		s = new StringBuilder(s).insert(pos,control.charAt(++i)).toString();
 	      }
 	    break;
 
