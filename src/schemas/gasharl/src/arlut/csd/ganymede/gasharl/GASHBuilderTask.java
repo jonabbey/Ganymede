@@ -176,7 +176,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
  
 	if (path == null)
 	  {
-	    throw new RuntimeException("GASHBuilder not able to determine output directory.");
+	    throw new RuntimeException("GASHBuilder not able to determine output directory.. need to set the ganymede.builder.output property in ganymede.properties.");
 	  }
 
 	path = PathComplete.completePath(path);
