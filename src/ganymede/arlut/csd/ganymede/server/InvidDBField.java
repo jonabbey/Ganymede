@@ -364,17 +364,11 @@ public final class InvidDBField extends DBField implements invid_field {
 	return;
       }
 
-    // if we are an edit-in-place field, we won't write out an invid
-    // reference for our target, but instead we will actually write
-    // out the object in-place.
-
-    boolean asEmbedded = isEditInPlace() && !xmlOut.isDeltaSyncing();
-
     xmlOut.startElementIndent(this.getXMLName());
 
     if (!isVector())
       {
-	emitInvidXML(xmlOut, value(), asEmbedded);
+	emitInvidXML(xmlOut, value(), isEditInPlace());
       }
     else
       {
@@ -382,14 +376,14 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	for (int i = 0; i < values.size(); i++)
 	  {
-	    if (!asEmbedded)
+	    if (!isEditInPlace())
 	      {
 		xmlOut.indentOut();
 		xmlOut.indent();
 		xmlOut.indentIn();
 	      }
 
-	    emitInvidXML(xmlOut, (Invid) values.elementAt(i), asEmbedded);
+	    emitInvidXML(xmlOut, (Invid) values.elementAt(i), isEditInPlace());
 	  }
 
 	xmlOut.indent();
