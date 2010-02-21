@@ -160,8 +160,17 @@ public class fieldoption_editor extends JFrame
       {
         Choice_Buttons.setLayout(new GridLayout(1,2));
         Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
-        Choice_Buttons.add(OkButton);
-        Choice_Buttons.add(CancelButton);
+
+	if (glogin.isRunningOnMac())
+	  {
+	    Choice_Buttons.add(CancelButton);
+	    Choice_Buttons.add(OkButton);
+	  }
+	else
+	  {
+	    Choice_Buttons.add(OkButton);
+	    Choice_Buttons.add(CancelButton);
+	  }
       }
     else
       {
