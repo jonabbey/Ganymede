@@ -425,10 +425,12 @@ public class SyncRunner implements Runnable {
 
   /**
    * <p>This method writes out the differential transaction record to
-   * the sync channel defined by this SyncRunner object.  The
+   * the delta Sync Channel defined by this SyncRunner object.  The
    * transaction record will only include those objects and fields
    * that are specified in the Sync Channel database object that this
-   * SyncRunner was initialized with.</p>
+   * SyncRunner was initialized with, or which are included by a
+   * SyncMaster class referenced by name in the SyncChannel DBObject
+   * used to create this SyncRunners.</p>
    *
    * @param transRecord A transaction description record describing the transaction we are writing
    * @param objectList An array of DBEditObjects that the transaction has checked out at commit time
