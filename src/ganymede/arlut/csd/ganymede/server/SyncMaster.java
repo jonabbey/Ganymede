@@ -58,6 +58,8 @@ package arlut.csd.ganymede.server;
 import java.util.Map;
 import java.util.Set;
 
+import arlut.csd.ganymede.common.Invid;
+
 /*------------------------------------------------------------------------------
 									   class
 								      SyncMaster
