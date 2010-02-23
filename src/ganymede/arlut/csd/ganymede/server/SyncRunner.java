@@ -65,6 +65,7 @@ import java.io.File;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.rmi.RemoteException;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -288,6 +289,17 @@ public class SyncRunner implements Runnable {
 
   private booleanSemaphore active = new booleanSemaphore(true);
 
+  /**
+   * If the Sync Channel object in the Ganymede server had a class
+   * name defined, and we can load it successfully, master will
+   * contain a reference to the {@link
+   * arlut.csd.ganymede.server.SyncMaster} used to provide
+   * augmentation to the delta sync records produced by this
+   * SyncRunner.
+   */
+
+  private SyncMaster master;
+
   /* -- */
 
   public SyncRunner(DBObject syncChannel)
@@ -299,7 +311,7 @@ public class SyncRunner implements Runnable {
     updateInfo(syncChannel);
   }
 
-  public synchronized void updateInfo(DBObject syncChannel)
+  private synchronized void updateInfo(DBObject syncChannel)
   {
     if (syncChannel.getTypeID() != SchemaConstants.SyncChannelBase)
       {
@@ -312,6 +324,40 @@ public class SyncRunner implements Runnable {
     this.fullStateFile = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFullStateFile);
     this.serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
     this.includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
+
+    String className = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelClassName);
+
+    if (className != null)
+      {
+	Class classdef;
+
+	try
+	  {
+	    classdef = Class.forName(className);
+
+	    Constructor c;
+	    Class[] cParams = new Class[0];
+	    Object[] params = new Object[0];
+
+	    c = classdef.getDeclaredConstructor(cParams); // no param constructor
+	    master = (SyncMaster) c.newInstance(params);
+	  }
+	catch (ClassNotFoundException ex)
+	  {
+	    // "Couldn''t load SyncMaster class {0} for Sync Channel {1}"
+	    Ganymede.debug(ts.l("updateInfo.nosuchclass", className, name));
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	    // "Couldn''t find no-param constructor for SyncMaster class {0} for Sync Channel {1}"
+	    Ganymede.debug(ts.l("updateInfo.missingconstructor", className, name));
+	  }
+	catch (Exception ex)
+	  {
+	    // "Exception calling no-param constructor for SyncMaster class {0} for Sync Channel {1}: {2}"
+	    Ganymede.debug(ts.l("updateInfo.constructorerror", className, name, ex.toString()));
+	  }
+      }
 
     int type = 0;
 
