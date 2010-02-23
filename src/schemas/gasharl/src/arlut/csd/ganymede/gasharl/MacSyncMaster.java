@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.Set;
 
 import arlut.csd.ganymede.server.SyncMaster;
+import arlut.csd.ganymede.common.Invid;
 
 
 /*------------------------------------------------------------------------------
@@ -65,6 +66,10 @@ import arlut.csd.ganymede.server.SyncMaster;
  */
 
 public class MacSyncMaster implements SyncMaster {
+
+  public MacSyncMaster()
+  {
+  }
 
   /**
    * Returns a Map of Invids to Sets of Shorts indicating objects and
