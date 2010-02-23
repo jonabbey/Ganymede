@@ -2155,6 +2155,12 @@ public final class DBStore implements JythonMap {
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
+	bf.setID(SchemaConstants.SyncChannelClassName);
+	bf.setType(FieldType.STRING);
+	bf.setName("Sync Master Classname");
+	b.addFieldToEnd(bf);
+
+	bf = new DBObjectBaseField(b);
 	bf.setID(SchemaConstants.SyncChannelDirectory);
 	bf.setType(FieldType.STRING);
 	bf.setName("Queue Directory");
@@ -2276,6 +2282,12 @@ public final class DBStore implements JythonMap {
 	    b.addFieldToEnd(bf);
 
 	    bf = new DBObjectBaseField(b);
+	    bf.setID(SchemaConstants.SyncChannelClassName);
+	    bf.setType(FieldType.STRING);
+	    bf.setName("Sync Master Classname");
+	    b.addFieldToEnd(bf);
+
+	    bf = new DBObjectBaseField(b);
 	    bf.setID(SchemaConstants.SyncChannelDirectory);
 	    bf.setType(FieldType.STRING);
 	    bf.setName("Queue Directory");
@@ -2342,6 +2354,15 @@ public final class DBStore implements JythonMap {
 		bf.setType(FieldType.STRING);
 		bf.setName("Sync Channel Type");
 		syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelName);
+	      }
+
+	    if (syncBase.getField(SchemaConstants.SyncChannelClassName) == null)
+	      {
+		bf = new DBObjectBaseField(b);
+		bf.setID(SchemaConstants.SyncChannelClassName);
+		bf.setType(FieldType.STRING);
+		bf.setName("Sync Master Classname");
+		b.addFieldAfter(bf, SchemaConstants.SyncChannelTypeString);
 	      }
 
 	    if (syncBase.getField(SchemaConstants.SyncChannelFullStateFile) == null)
