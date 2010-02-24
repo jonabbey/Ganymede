@@ -329,7 +329,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 	//	the postfix versions of those files.
 	//	jgs, 15 feb 2010
-	if (writeHashAliasesFile() && writeEmailLists())
+	if ( writeHashAliasesFile() )
 	  {
 	    success = true;
 	  }
@@ -1927,7 +1927,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
 
 	// and the external mail addresses
-    
+ 
 	externals = enumerateObjects((short) 275);
 
 	while (externals.hasMoreElements())
@@ -1939,6 +1939,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	// add in Mailman Lists now.
     
+/*
+	*	ahem, ahem, ahem.
+	*	this routine does do what it's supposed to do.
+	*	the output of this matches (w/in reason)
+	*	what write....MailmanListAlias
+	*        (vs.writeHashMailmanListAlias)
+	*	produces.  the output of this was fed into
+	*	gash2alias.pl.  gash2alias.pl rejected ALL
+	*	of the output as ERRORS.
+	*	so, we won't be calling the writeHashMailmanListAlias
+	*	flavor.
+	*	ie, the purpose of this routine is, AFAICT, to
+	*	supply gash2alias.pl with errors it can throw out.
+	*	if there's another use, i don't know what it is.
+	*	i'm going to let the old one run.
+	*	jgs, 16 feb 2010
 	MailmanLists = enumerateObjects((short) 260);
 
 	while (MailmanLists.hasMoreElements())
@@ -1947,6 +1963,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	
 	    writeMailmanListAlias(MailmanList, aliases_info);
 	  }
+*/
 
       }
     finally
@@ -2111,6 +2128,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     writer.println(result.toString());
+
   }
 
   /**
@@ -2608,10 +2626,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 //------------------------------------------------------------------------------
   /**
    *
-   * This method generates an JJJ_info file.  This method must be run during
+   * This method generates a 
+   *	postfix-compatible aliases (name undetermined so far)
+   * file.  This method must be run during
    * builderPhase1 so that it has access to the enumerateObjects() method
    * from our superclass.
-	*	AHEM!!!  where you see "writeHash*" below...  what that
+	*	AHEM!!!  where you see "write Hash*" below...  what that
 	*	really means is:
 	*	write the flat file that postfix (through postalias or
 	*	postmap) will turn into a hash file.
@@ -2622,9 +2642,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private boolean writeHashAliasesFile()
   {
-    PrintWriter JJJ_info = null;
+    PrintWriter pfmalias = null;
+    PrintWriter pfgenerics = null;
     DBObject user, group, external, MailmanList;
     Enumeration users, mailgroups, externals, MailmanLists;
+
 
     /* -- */
             /*        the old issue of 1024 character limit on NIS maps
@@ -2635,28 +2657,38 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
              *        is now gone.
              */
 
+
     try
       {
-	JJJ_info = openOutFile(path + "JJJ_info", "gasharl");
+	pfgenerics = openOutFile(path + "pfgenerics", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeHashAliasesFile(): couldn't open JJJ_info file: " + ex);
+	System.err.println("GASHBuilderTask.writeHashAliasesFile(): couldn't open pfgenerics file: " + ex);
       }
 
     try
       {
+	pfmalias = openOutFile(path + "pfmalias", "gasharl");
+      }
+    catch (IOException ex)
+      {
+	System.err.println("GASHBuilderTask.writeHashAliasesFile(): couldn't open pfmalias file: " + ex);
+      }
+
+    try
+      {
+
+	users = enumerateObjects(SchemaConstants.UserBase);
+
+	while (users.hasMoreElements())
+	  {
+	    user = (DBObject) users.nextElement();
+	    writeHashGenerics(user, pfgenerics);
+	  }
+
 	// our email aliases database is spread across three separate object
 	// bases.
-        result.setLength(0);
-        result.append("=========================================1");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("writeHashUserAlias");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
 
 	users = enumerateObjects(SchemaConstants.UserBase);
 
@@ -2664,21 +2696,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    user = (DBObject) users.nextElement();
 	
-//	see below	1	half done
-//	the stuff that becomes "generics" omitted from this routine.
-	    writeHashUserAlias(user, JJJ_info);
+	    writeHashUserAlias(user, pfmalias);
 	  }
 
 	// now the mail lists
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("writeHashGroupAlias");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
     
 	mailgroups = enumerateObjects((short) 274);
 
@@ -2686,20 +2707,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    group = (DBObject) mailgroups.nextElement();
 	
-//	see below	2	done?
-	    writeHashGroupAlias(group, JJJ_info);
+	    writeHashGroupAlias(group, pfmalias);
 	  }
 
         // add in emailable account groups 
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("writeHashAccountGroupAlias");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
 
 	mailgroups = enumerateObjects((short) 257);
 
@@ -2707,20 +2718,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    group = (DBObject) mailgroups.nextElement();
 	
-//	see below	3	done?
-	    writeHashAccountGroupAlias(group, JJJ_info);
+	    writeHashAccountGroupAlias(group, pfmalias);
 	  }
 
         // add in emailable user netgroups
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("writeHashUserNetgroupAlias");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
 
 	mailgroups = enumerateObjects((short) 270);
 
@@ -2728,20 +2729,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    group = (DBObject) mailgroups.nextElement();
 	
-//	see below	4	done?
-	    writeHashUserNetgroupAlias(group, JJJ_info);
+	    writeHashUserNetgroupAlias(group, pfmalias);
 	  }
 
 	// and the external mail addresses
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("writeHashExternalAlias");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
     
 	externals = enumerateObjects((short) 275);
 
@@ -2749,35 +2740,38 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    external = (DBObject) externals.nextElement();
 	
-//	see below	5	half done
-	    writeHashExternalAlias(external, JJJ_info);
+	    writeHashExternalAlias(external, pfmalias);
 	  }
 
 	// add in Mailman Lists now.
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("writeHashMailmanListAlias");
-        JJJ_info.println(result.toString());
-        result.setLength(0);
-        result.append("=========================================");
-        JJJ_info.println(result.toString());
     
+/*
+ *
+	*	ahem, ahem, ahem.
+	*	this routine does do what it's supposed to do.
+	*	the output of this matches (w/in reason)
+	*	what write....MailmanListAlias
+	*        (vs.writeHashMailmanListAlias)
+	*	produces.  the output of this was fed into
+	*	gash2alias.pl.  gash2alias.pl rejected ALL
+	*	of the output as ERRORS.
+	*	so, let's not call it.
+	*	jgs, 16 feb 2010
 	MailmanLists = enumerateObjects((short) 260);
 
 	while (MailmanLists.hasMoreElements())
 	  {
 	    MailmanList = (DBObject) MailmanLists.nextElement();
 	
-//	see below	6
-	    writeHashMailmanListAlias(MailmanList, JJJ_info);
+	    writeHashMailmanListAlias(MailmanList, pfmalias);
 	  }
+ */
 
       }
     finally
       {
-	JJJ_info.close();
+	pfmalias.close();
+	pfgenerics.close();
       }
 
     return true;
@@ -2785,31 +2779,48 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   
 
   /**
-   * This method writes out a mailman alias line to the JJJ_info file.<br/><br/>
+   * This method writes out a mailman alias line to the pfmalias file.<br/><br/>
    *
    * The mailman alias lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
-   * test:test@arlut.utexas.edu
+   * aliasthing: real1, real2, real3
    *
    * </pre>
    *
-   * Where listname is the name of the mailman list, owneremail is the 
-   * email of the owner, and password is the password for the mailing list.
+   * Where aliasthing is the name of an alias, and
+   * real<n> are actual email addresses to deliver to (but, as you know,
+   * those things can be aliases themselves).
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
    * 
-	*	AHEM!!!  where you see "writeHashMailmanListAlias" below...
+	*	AHEM!!!  where you see "write HashMailmanListAlias" below...
 	*	what that really means is:
 	*	write the flat file that postfix (through postalias or
 	*	postmap) will turn into a hash file.
 	*	the file has to get flung over via ssh and then
 	*	something has to run postmap/postalias on the file.
+
+	*	ahem, ahem, ahem.
+	*	this routine produces what the old routine produces,
+	*	while(1) sigh();
+	*	but, and this is very important,
+	*	the output, which previously was fed into a script
+	*	called gash2alias.pl, is ENTIRELY REJECTED AS ERRORS.
+	*	so it's better to do NOTHING here.
+	*	jgs, 16 feb 2010
+
+ #####    ####   #    #   #####   ####     ##    #       #
+ #    #  #    #  ##   #     #    #    #   #  #   #       #
+ #    #  #    #  # #  #     #    #       #    #  #       #
+ #    #  #    #  #  # #     #    #       ######  #       #
+ #    #  #    #  #   ##     #    #    #  #    #  #       #
+ #####    ####   #    #     #     ####   #    #  ######  ######
+
    */
 
-//	called above	6
   private void writeHashMailmanListAlias(DBObject object, PrintWriter writer)
   {
     String name = (String) object.getFieldValueLocal(MailmanListSchema.NAME);
@@ -2819,7 +2830,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     result.setLength(0);
     result.append(name);
-    result.append(":");
+    result.append(": ");
     result.append(name);
     result.append("@");
     result.append(hostname);
@@ -2829,68 +2840,58 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 //ahhhh
     // Loop over aliases target.    
-//    Vector aliases = object.getFieldValuesLocal(MailmanListSchema.ALIASES);
-//
-//    if (aliases == null)
-//      {
-//	System.err.println("GASHBuilder.writeMailmanAliases(): null alias list for mailman list name " + name);
-//      }
-//    else
-//      {
-//	for (int i = 0; i < aliases.size(); i++)
-//	  {
-//	    String aliasName = (String) aliases.elementAt(i);	    
-//
-//	    if (aliasName != null)
-//	      {
-//	        result.setLength(0);
-//	        result.append(aliasName);
-//	        result.append(":");
-//	        result.append(aliasName);
-//		result.append("@");
-//	        result.append(hostname);
-//		result.append(".arlut.utexas.edu");
-//	        writer.println(result.toString());
-//	      }
-//	  }
-//      }
+    Vector aliases = object.getFieldValuesLocal(MailmanListSchema.ALIASES);
+
+    if (aliases == null)
+      {
+	System.err.println("GASHBuilder.writeHashMailmanAliases(): null alias list for mailman list name " + name);
+      }
+    else
+      {
+	for (int i = 0; i < aliases.size(); i++)
+	  {
+	    String aliasName = (String) aliases.elementAt(i);	    
+
+	    if (aliasName != null)
+	      {
+	        result.setLength(0);
+	        result.append(aliasName);
+	        result.append(":");
+	        result.append(aliasName);
+		result.append("@");
+	        result.append(hostname);
+		result.append(".arlut.utexas.edu");
+	        writer.println(result.toString());
+	      }
+	  }
+      }
   }
 
   /**
-   * This method writes out a user alias line to the JJJ_info file.<br/><br/>
+   * This method writes out a user alias line to the pfmalias file.<br/><br/>
    *
    * The user alias lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
-   * broccol:jonabbey, abbey, broccol, rust-admin:broccol@arlut.utexas.edu, broccol@csdsun4.arlut.utexas.edu
+   * aliasthing: real1, real2, real3
    *
    * </pre>
    *
-   * The first item in the second field (jonabbey, above) is the 'signature'
-   * alias, which the GASH makefile configures sendmail to rewrite as the
-   * From: line.
+   * Where aliasthing is the name of an alias, and
+   * real<n> are actual email addresses to deliver to (but, as you know,
+   * those things can be aliases themselves).
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-	*	AHEM!!!  where you see "writeHashUserAlias" below...
+	*	AHEM!!!  where you see "write HashUserAlias" below...
 	*	what that really means is:
 	*	write the flat file that postfix (through postalias or
 	*	postmap) will turn into a hash file.
 	*	the file has to get flung over via ssh and then
 	*	something has to run postmap/postalias on the file.
    */
-/*
- *	but now we're going to spit the aliases file out directly.
- *
- *
- *
- *
- *
- *
- */
 
-//	called by above.	1
   private void writeHashUserAlias(DBObject object, PrintWriter writer)
   {
     String username;
@@ -2900,6 +2901,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector addresses;
     String target;
 
+    String aliaslo;
+    String userlo;
+    String targetlo;
+    String siglo;
     /* -- */
 
     result.setLength(0);
@@ -2909,49 +2914,209 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     aliases = object.getFieldValuesLocal(userSchema.ALIASES);
     addresses = object.getFieldValuesLocal(userSchema.EMAILTARGET);
 
-	// and if it is null, it just means there's no aliases for the user.
+
+    if (addresses != null)
+      {
+        result.setLength(0);
+        siglo = signature.toLowerCase();
+        result.append(siglo);
+        result.append(": ");
+//result.append("\t");
+        for (int i = 0; i < addresses.size(); i++)
+          {
+            if (i > 0)
+              {
+                result.append(", ");
+              }
+
+            target = (String) addresses.elementAt(i);
+	    targetlo = target.toLowerCase();
+            //	if the target has @arlut.utexas.edu
+	    //	change it to @arlmail.arlut.utexas.edu.  sigh.
+            if( targetlo.endsWith("@arlut.utexas.edu") )
+              {
+                int kk,n=0;
+                String anewst;
+                kk=targetlo.length();
+                while( kk-- > 0 )
+	                n = targetlo.indexOf('@');
+                anewst = targetlo.substring(0,n);
+                result.append(anewst);
+                result.append("@arlmail.arlut.utexas.edu");
+              }
+            else
+              {
+                result.append(targetlo);
+              }
+          }
+    	  writer.println(result.toString());
+      }
+
+
     if (aliases != null)
       {
 	for (int i = 0; i < aliases.size(); i++)
 	  {
-	    //	we're spitting a line for each alias.
-    	    result.setLength(0);
 	    alias = (String) aliases.elementAt(i);
-	    if (!alias.equals(username))
-	  	{
-	    	result.append(alias);
-    		result.append(":");
-		//	do we need some space after that colon?
-    		result.append(" ");
-    		result.append(username);
-	  	}
-    	    writer.println(result.toString());
-	  }
+	    
+	    if (alias.equals(signature))
+	      {
+		continue;
+	      }
+
+            result.setLength(0);
+            result.append(alias);
+            result.append(": ");
+//result.append("\t");
+            result.append(signature);
+            writer.println(result.toString());
+          }
       }
+
+    if ((aliases != null) && (addresses != null) )
+      {
+        for (int i = 0; i < aliases.size(); i++)
+          {
+            alias = (String) aliases.elementAt(i);
+            if (!alias.equals(signature))
+              {
+                continue;
+              }
+
+            result.setLength(0);
+            result.append(username);
+            result.append(": ");
+//result.append("\t");
+
+            for (int j = 0; j < addresses.size(); j++)
+              {
+                if (j > 0)
+                  {
+                    result.append(", ");
+                  }
+    
+                target = (String) addresses.elementAt(j);
+                targetlo = target.toLowerCase();
+                //        if the target has @arlut.utexas.edu
+                //        change it to @arlmail.arlut.utexas.edu.  sigh.
+                if( targetlo.endsWith("@arlut.utexas.edu") )
+                  {
+                    int kk,n=0;
+                    String anewst;
+                    kk=targetlo.length();
+                    while( kk-- > 0 )
+                            n = targetlo.indexOf('@');
+                    anewst = targetlo.substring(0,n);
+                    result.append(anewst);
+                    result.append("@arlmail.arlut.utexas.edu");
+                  }
+                else
+                  {
+                    result.append(targetlo);
+                  }
+              }
+            writer.println(result.toString());
+          }  // end loop over alias
+      }	// end check both null
+  }
+  /**
+   * This method writes out a user alias line to the pfmalias file.<br/><br/>
+	*	AHEM!!!  where you see "write Hash Generics" below...
+	*	what that really means is:
+	*	write the flat file that postfix (through postalias or
+	*	postmap) will turn into a hash file.
+	*	the file has to get flung over via ssh and then
+	*	something has to run postmap/postalias on the file.
+   */
+  private void writeHashGenerics(DBObject object, PrintWriter writer)
+  {
+    String username;
+    String signature;
+    Vector aliases;
+    String alias;
+    Vector addresses;
+    String target;
+
+    String aliaslo;
+    String userlo;
+    String targetlo;
+    String siglo;
+    /* -- */
+
+
+    username = (String) object.getFieldValueLocal(userSchema.USERNAME);
+    signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
+    aliases = object.getFieldValuesLocal(userSchema.ALIASES);
+    addresses = object.getFieldValuesLocal(userSchema.EMAILTARGET);
+
+    result.setLength(0);
+    siglo = signature.toLowerCase();
+    result.append(siglo);
+    result.append("@arlut.utexas.edu");
+    result.append(": ");
+    result.append(siglo);
+    result.append("@arlut.utexas.edu.");
+    writer.println(result.toString());
+
+
+    if (aliases != null)
+      {
+	for (int i = 0; i < aliases.size(); i++)
+	  {
+	    alias = (String) aliases.elementAt(i);
+            aliaslo = alias.toLowerCase();
+	    
+	    if (alias.equals(signature))
+	      {
+                result.setLength(0);
+                result.append(username);
+                result.append("@arlut.utexas.edu");
+
+                result.append(": ");
+
+                siglo = signature.toLowerCase();
+                result.append(siglo);
+                result.append("@arlut.utexas.edu.");
+                writer.println(result.toString());
+	      }
+            else
+
+	      {
+                result.setLength(0);
+                result.append(aliaslo);
+                result.append("@arlut.utexas.edu");
+
+                result.append(": ");
+
+                siglo = signature.toLowerCase();
+                result.append(siglo);
+                result.append("@arlut.utexas.edu.");
+                writer.println(result.toString());
+	      }
+          }
+      }
+
   }
 
   /**
    *
-   * This method writes out a mail list alias line to the JJJ_info file.<br/><br/>
+   * This method writes out a mail list alias line to the pfmalias file.<br/><br/>
    *
    * The mail list lines in this file look like the following:<br/><br/>
    *
    * <pre>
    *
-   * :csd-news-dist-omg:alias, alias, alias:csd_staff, granger, iselt, lemma, jonabbey@eden.com
+   * aliasthing: real1, real2, real3
    *
    * </pre>
    *
-   * Where the leading colon identifies to the GASH makefile that it is a group
-   * line.
-   *
-   * NB: I've modified this method in 2008 to add the aliases field,
-   * above.  This is a modification of the classic GASH JJJ_info
-   * file, which did not support aliases for email lists.
+   * Where aliasthing is the name of an alias, and
+   * real<n> are actual email addresses to deliver to (but, as you know,
+   * those things can be aliases themselves).
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-	*	AHEM!!!  where you see "writeHashGroupAlias" below...
+	*	AHEM!!!  where you see "write HashGroupAlias" below...
 	*	what that really means is:
 	*	write the flat file that postfix (through postalias or
 	*	postmap) will turn into a hash file.
@@ -2959,7 +3124,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	*	something has to run postmap/postalias on the file.
    */
 
-//	called by above		2
   private void writeHashGroupAlias(DBObject object, PrintWriter writer)
   {
     String groupname;
@@ -2973,41 +3137,48 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     int subgroup = 1;
     String subname;
 
+    String grlo;
+    String aliaslo;
+    String targetlo;
     /* -- */
 
-    result.setLength(0);
 
     groupname = (String) object.getFieldValueLocal(emailListSchema.LISTNAME);
     group_aliases = object.getFieldValuesLocal(emailListSchema.ALIASES);
     group_targets = object.getFieldValuesLocal(emailListSchema.MEMBERS);
     external_targets = object.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
 
+    grlo = groupname.toLowerCase();
+
+    /*  if the idea is to write each group out as the full list, then,
+     *  okay, i guess we can do that.  actually, that is a chore,
+     *  isn't it?  so let's spit out each alias and the groupname,
+     *  then just do the groupname once.
+     */
     if (group_aliases != null)
       {
-	for (int i = 0; i < group_aliases.size(); i++)
-	  {
-    	    result.setLength(0);
-	    String alias = (String) group_aliases.elementAt(i);
-
-
-	    result.append(alias);
-	    result.append(": ");
-	    result.append(groupname);
-    	    writer.println(result.toString());
-	  }
+        for (int i = 0; i < group_aliases.size(); i++)
+          {
+            result.setLength(0);
+            String alias = (String) group_aliases.elementAt(i);
+            aliaslo= alias.toLowerCase();
+            result.append(aliaslo);
+            result.append(": ");
+//            result.append("\t");
+		//	grlo == lower case groupname
+            result.append(grlo);
+            writer.println(result.toString());
+          }
       }
 
-
-	/*
-	 *	now, we have groupname: rest of this....
-	 */
-
-	//	whoops.  need to know that we have something to spit out.
-    if ((group_targets != null) &&  (external_targets != null))
+    //        whoops.  need to know that we have something to spit out.
+    if ((group_targets != null) || (external_targets != null))
       {
         result.setLength(0);
-        result.append(groupname);
+	//	grlo == lower case groupname
+        result.append(grlo);
         result.append(": ");
+//        result.append("\t");
     
         if (group_targets != null)
           {
@@ -3026,7 +3197,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                   }
     
                 target = getLabel(memberInvid);
-                result.append(target);
+                targetlo = target.toLowerCase();
+                result.append(targetlo);
               }
           }
     
@@ -3036,11 +3208,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               {
                 if ((i > 0) || (group_targets != null && group_targets.size() > 0))
                   {
-            result.append(", ");
+                    result.append(", ");
                   }
             
                 target = (String) external_targets.elementAt(i);
-                result.append(target);
+                targetlo = target.toLowerCase();
+                result.append(targetlo);
               }
           }
     
@@ -3050,23 +3223,24 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a mail list alias line to the JJJ_info
+   * This method writes out a mail list alias line to the pfmalias
    * file, as sourced from a gasharl account
    * group.<br/><br/>
    *
-   * The mail list lines in this file look like the following:<br/><br/>
-   *
    * <pre>
    *
-   * :xxx:csd-news-dist-omg:csd_staff, granger, iselt, lemma, jonabbey@eden.com
+   * aliasthing: real1, real2, real3
    *
    * </pre>
    *
+   * Where aliasthing is the name of an alias, and
+   * real<n> are actual email addresses to deliver to (but, as you know,
+   * those things can be aliases themselves).
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
    *
-	*	AHEM!!!  where you see "writeHashAccountGroupAlias" below...
+	*	AHEM!!!  where you see "write HashAccountGroupAlias" below...
 	*	what that really means is:
 	*	write the flat file that postfix (through postalias or
 	*	postmap) will turn into a hash file.
@@ -3074,7 +3248,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	*	something has to run postmap/postalias on the file.
    */
 
-//	called above	3
   private void writeHashAccountGroupAlias(DBObject object, PrintWriter writer)
   {
     String groupname;
@@ -3086,6 +3259,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     int subgroup = 1;
     String subname;
 
+    String grouplo;
+    String targetlo;
+
     /* -- */
 
     if (!object.isSet(groupSchema.EMAILOK))
@@ -3094,13 +3270,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
+    grouplo = groupname.toLowerCase();
     group_targets = object.getFieldValuesLocal(groupSchema.USERS);
 
     //  if it is null, then there's nothing to do.
     if (group_targets != null)
       {
         result.setLength(0);
-        result.append(groupname);
+        result.append(grouplo);
         result.append(": ");
 	for (int i = 0; i < group_targets.size(); i++)
 	  {
@@ -3117,7 +3294,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      }
 
             target = getLabel(userInvid);
-	    result.append(target);
+            targetlo = target.toLowerCase();
+	    result.append(targetlo);
 	  }
         writer.println(result.toString());
       }
@@ -3126,26 +3304,24 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    *
-   * This method writes out a mail list alias line to the JJJ_info
+   * This method writes out a mail list alias line to the pfmalias
    * file, as sourced from a gasharl user netgroup object.<br/><br/>
    *
    * The mail list lines in this file look like the following:<br/><br/>
-   *
    * <pre>
    *
-   * :oms:csd-news-dist-omg:csd_staff, granger, iselt, lemma, jonabbey@eden.com
+   * aliasthing: real1, real2, real3
    *
    * </pre>
    *
-   * Where the leading colon identifies to the GASH makefile that it is a group
-   * line and 'oms' is the GASH ownership code.  Ganymede won't try to emit
-   * a GASH ownership code that could be used to load the JJJ_info file
-   * back into GASH.
+   * Where aliasthing is the name of an alias, and
+   * real<n> are actual email addresses to deliver to (but, as you know,
+   * those things can be aliases themselves).
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
    *
-	*	AHEM!!!  where you see "writeHashUserNetgroupAlias" below...
+	*	AHEM!!!  where you see "write HashUserNetgroupAlias" below...
 	*	what that really means is:
 	*	write the flat file that postfix (through postalias or
 	*	postmap) will turn into a hash file.
@@ -3153,7 +3329,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	*	something has to run postmap/postalias on the file.
    */
 
-//	called above	4
   private void writeHashUserNetgroupAlias(DBObject object, PrintWriter writer)
   {
     String groupname;
@@ -3181,79 +3356,73 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     targets = new Vector();
 
-    // if both null, nothing to do.
-    if( (group_targets != null) && (sub_netgroups != null))
+    if (group_targets != null)
       {
-        if (group_targets != null)
+        for (int i = 0; i < group_targets.size(); i++)
           {
-            for (int i = 0; i < group_targets.size(); i++)
+            Invid targetInvid = (Invid) group_targets.elementAt(i);
+
+            if (isVeryDeadUser(targetInvid))
               {
-                Invid targetInvid = (Invid) group_targets.elementAt(i);
-    
-                if (isVeryDeadUser(targetInvid))
-                  {
-                    continue;
-                  }
-    
-                targets.addElement(getLabel(targetInvid));
+                continue;
               }
+
+            targets.addElement(getLabel(targetInvid));
           }
-    
-        if (sub_netgroups != null)
-          {
-            for (int i = 0; i < sub_netgroups.size(); i++)
-              {
-                DBObject subnetgroup = getObject((Invid) sub_netgroups.elementAt(i));
-    
-                if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
-                  {
-                    targets.addElement(subnetgroup.getLabel());
-                  }
-              }
-          }
-    
-        result.setLength(0);
-        result.append(groupname);
-        result.append(":");
-    
-        for (int i = 0; i < targets.size(); i++)
-          {
-            if (i > 0)
-              {
-                result.append(", ");
-              }
-    
-            target = (String) targets.elementAt(i);
-            result.append(target);
-          }
-    
-        writer.println(result.toString());
       }
+
+    if (sub_netgroups != null)
+      {
+        for (int i = 0; i < sub_netgroups.size(); i++)
+          {
+            DBObject subnetgroup = getObject((Invid) sub_netgroups.elementAt(i));
+
+            if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
+              {
+                targets.addElement(subnetgroup.getLabel());
+              }
+          }
+      }
+
+    result.setLength(0);
+    result.append(groupname);
+    result.append(": ");
+
+    for (int i = 0; i < targets.size(); i++)
+      {
+        if (i > 0)
+          {
+            result.append(", ");
+          }
+
+        target = (String) targets.elementAt(i);
+        result.append(target);
+      }
+
+    writer.println(result.toString());
   }
 
   /**
    *
-   * This method writes out a mail list alias line to the JJJ_info
+   * This method writes out a mail list alias line to the pfmalias
    * file, as sourced from an emailable user
    * netgroup.<br/><br/>
    *
    * The mail list lines in this file look like the following:<br/><br/>
-   *
    * <pre>
    *
-   * &lt;omj&gt;abuse:abuse, postmaster:postmaster@ns1.arlut.utexas.edu
+   * aliasthing: real1, real2, real3
    *
    * </pre>
    *
-   * Where the leading < identifies to GASH and the GASH makefile that
-   * it is an external user line and 'omj' is the GASH ownership code.
-   * Ganymede won't try to emit a GASH ownership code that could be
-   * used to load the JJJ_info file back into GASH.
+   * Where aliasthing is the name of an alias, and
+   * real<n> are actual email addresses to deliver to (but, as you know,
+   * those things can be aliases themselves).
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
    * 
-	*	AHEM!!!  where you see "writeHashExternalAlias" below...
+	*	AHEM!!!  where you see "write HashExternalAlias" below...
 	*	what that really means is:
 	*	write the flat file that postfix (through postalias or
 	*	postmap) will turn into a hash file.
@@ -3261,7 +3430,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	*	something has to run postmap/postalias on the file.
    */
 
-//	called above	5
   private void writeHashExternalAlias(DBObject object, PrintWriter writer)
   {
     String name;
@@ -3270,6 +3438,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector targets;
     String target;
 
+    String namelo;
+    String aliaslo;
+    String targetlo;
+
     /* -- */
 
 
@@ -3277,46 +3449,61 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     targets = object.getFieldValuesLocal(emailRedirectSchema.TARGETS);
     aliases = object.getFieldValuesLocal(emailRedirectSchema.ALIASES);
 
+    namelo = name.toLowerCase();
 
-    if( (aliases != null) &&  (targets != null) )
+    if (aliases != null)
+      {
+        for (int i = 0; i < aliases.size(); i++)
+          {
+	    //  but don't do this at all if the alias == name.
+            alias = (String) aliases.elementAt(i);
+            aliaslo = alias.toLowerCase();
+	    if (!aliaslo.equals(namelo))
+              {
+              result.setLength(0);
+              result.append(aliaslo);
+              result.append(": ");
+              result.append(namelo);
+              writer.println(result.toString());
+              }
+          }
+      }
+
+
+
+    //  if targets is null, we mustn't put out a stub line.
+    if (targets != null)
       {
         result.setLength(0);
-        result.append(name);
-        result.append(":");
-        if (aliases != null)
+        result.append(namelo);
+        result.append(": ");
+        for (int i = 0; i < targets.size(); i++)
           {
-            for (int i = 0; i < aliases.size(); i++)
+            if (i > 0)
               {
                 result.append(", ");
-    
-                alias = (String) aliases.elementAt(i);
-                
-                result.append(alias);
+              }
+            target = (String) targets.elementAt(i);
+            targetlo = target.toLowerCase();
+            //	if the target has @arlut.utexas.edu
+	    //	change it to @arlmail.arlut.utexas.edu.  sigh.
+            if( targetlo.endsWith("@arlut.utexas.edu") )
+              {
+                int kk,n=0;
+                String newst;
+                kk=targetlo.length();
+                while( kk-- > 0 )
+	                n = targetlo.indexOf('@');
+                newst = targetlo.substring(0,n);
+                result.append(newst);
+                result.append("@arlmail.arlut.utexas.edu");
+              }
+            else
+              {
+                result.append(targetlo);
               }
           }
         writer.println(result.toString());
-    
-    
-        // targets shouldn't ever be null, but i'm tired of having
-        // NullPointerExceptions pop up then having to recompile to
-        // fix.
-    
-//        result.setLength(0);
-//        result.append(name);
-//        result.append(":");
-//        if (targets != null)
-//          {
-//            for (int i = 0; i < targets.size(); i++)
-//              {
-//                if (i > 0)
-//                  {
-//                    result.append(", ");
-//                  }
-//                target = (String) targets.elementAt(i);
-//                result.append(target);
-//              }
-//          }
-//        writer.println(result.toString());
       }
   }
 
