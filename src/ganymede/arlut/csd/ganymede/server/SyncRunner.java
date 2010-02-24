@@ -312,6 +312,11 @@ public class SyncRunner implements Runnable {
     updateInfo(syncChannel);
   }
 
+  /**
+   * Configure this SyncRunner from the corresponding Ganymede Sync
+   * Channel DBObject.
+   */
+
   private synchronized void updateInfo(DBObject syncChannel)
   {
     if (syncChannel.getTypeID() != SchemaConstants.SyncChannelBase)
@@ -320,11 +325,11 @@ public class SyncRunner implements Runnable {
 	throw new IllegalArgumentException(ts.l("updateInfo.typeError"));
       }
 
-    this.name = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelName);
-    this.directory = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelDirectory);
-    this.fullStateFile = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFullStateFile);
-    this.serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
-    this.includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
+    name = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelName);
+    directory = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelDirectory);
+    fullStateFile = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFullStateFile);
+    serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
+    includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
 
     String className = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelClassName);
 
@@ -417,8 +422,8 @@ public class SyncRunner implements Runnable {
   /**
    * This method is used to enable or disable this sync channel's
    * writing of transactions to disk.  Turning this channel's output
-   * off may be useful when the sync channel is manually disabled in
-   * the admin console.
+   * off may be useful when the sync channel's external service
+   * program is manually disabled in the admin console.
    */
 
   public void setActive(boolean state)
@@ -469,6 +474,11 @@ public class SyncRunner implements Runnable {
   {
     return this.fullStateFile;
   }
+
+  /**
+   * Returns the name of the external service program for this Sync
+   * Channel.
+   */
 
   public String getServiceProgram()
   {
@@ -573,9 +583,11 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This method checks this full state SyncRunner against the objects involved in the provided
-   * transaction.  If this SyncRunner's Sync Channel definition matches against the transaction,
-   * a flag will be set causing a full state build to be executed upon the next run of this Sync Runner.
+   * This method checks this Full State SyncRunner against the objects
+   * involved in the provided transaction.  If this SyncRunner's Sync
+   * Channel definition matches against the transaction, a flag will
+   * be set causing a Full State build to be executed upon the next
+   * run of this Sync Runner.
    *
    * @param transRecord A transaction description record describing the transaction we are checking
    * @param objectList An array of DBEditObjects that the transaction has checked out at commit time
@@ -585,10 +597,8 @@ public class SyncRunner implements Runnable {
   public void checkBuildNeeded(DBJournalTransaction transRecord, DBEditObject[] objectList,
 			       DBEditSet transaction) throws IOException
   {
-    for (int i = 0; i < objectList.length; i++)
+    for (DBEditObject syncObject: objectList)
       {
-	DBEditObject syncObject = objectList[i];
-
 	if (shouldInclude(syncObject))
 	  {
 	    this.needBuild.set(true);
