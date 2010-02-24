@@ -46,14 +46,10 @@
 
 package arlut.csd.ganymede.gasharl;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import arlut.csd.ganymede.server.SyncMaster;
+import arlut.csd.ganymede.common.FieldBook;
 import arlut.csd.ganymede.common.Invid;
 
+import arlut.csd.ganymede.server.SyncMaster;
 
 /*------------------------------------------------------------------------------
 									   class
@@ -72,25 +68,13 @@ public class MacSyncMaster implements SyncMaster {
   }
 
   /**
-   * Returns a Map of Invids to Sets of Shorts indicating objects and
-   * fields that need to be added to the delta sync output for the
-   * Sync Channel associated with this SyncMaster.
-   *
-   * The getAugmentation() method will be called on each object that
-   * was created, edited, or deleted during the transaction we are
-   * writing, and will return a Map whose keys are the Invids that we
-   * need to have added to the delta sync channel output, and whose
-   * values are a List of fields to be added to the output of the
-   * delta sync channel, or null if all fields are to be transmitted.
-   *
-   * The SyncRunner is responsible for making sure that each DBObject
-   * whose Invid is returned as a key in a Map from getAugmentation()
-   * is emitted in the delta sync only once, and any field ids that
-   * are required by getAugmentation() will be merged together into a
-   * single object record in the generated XML.
+   * The augment() method optionally adds DBObject and DBField
+   * identifiers to the FieldBook book parameter if the SyncMaster
+   * decides that the additional DBObject/DBFields need to be written
+   * to a delta sync channel in response to the changes made to obj.
    */
 
-  public Map<Invid, Set<Short>> getAugmentation(DBEditObject obj)
+  public void augment(FieldBook book, DBEditObject obj)
   {
   }
 }
