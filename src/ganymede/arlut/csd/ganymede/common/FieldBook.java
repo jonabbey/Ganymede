@@ -49,6 +49,7 @@
 package arlut.csd.ganymede.common;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -142,6 +143,10 @@ public class FieldBook {
 	map.put(invid, set);
       }
   }
+  
+  /**
+   * Adds all DBObject and field identifiers from parameter book to this FieldBook.
+   */
 
   public void merge(FieldBook book)
   {
@@ -158,5 +163,67 @@ public class FieldBook {
 	    add(invid, set);
 	  }
       }
+  }
+
+  /**
+   * Returns a set of Invids for objects that this FieldBook contains.
+   */
+
+  public Set<Invid> objects()
+  {
+    return Collections.unmodifiableSet(map.keySet());
+  }
+
+  /**
+   * Returns true if this FieldBook has any records for Invid invid.
+   */
+
+  public boolean has(Invid invid)
+  {
+    return map.containsKey(invid);
+  }
+
+  /**
+   * Returns true if this FieldBook includes field fieldId in the DBObject
+   * corresponding to invid.
+   */
+
+  public boolean has(Invid invid, short fieldId)
+  {
+    if (!map.containsKey(invid))
+      {
+	return false;
+      }
+
+    Set<Short> set = map.get(invid);
+
+    if (set == null)
+      {
+	return true;
+      }
+
+    return set.contains(fieldId);
+  }
+
+  /**
+   * Returns a set of field ids for fields for Invid invid that are
+   * part of this FieldBook.
+   */
+
+  public Set<Short> fields(Invid invid)
+  {
+    if (!map.containsKey(invid))
+      {
+	throw new IllegalArgumentException("No fields for invid " + invid);
+      }
+
+    Set<Short> set = map.get(invid);
+
+    if (set == null)
+      {
+	return null;
+      }
+
+    return Collections.unmodifiableSet(set);
   }
 }
