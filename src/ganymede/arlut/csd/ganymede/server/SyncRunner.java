@@ -50,6 +50,7 @@
 
 package arlut.csd.ganymede.server;
 
+import arlut.csd.ganymede.common.FieldBook;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -357,6 +358,11 @@ public class SyncRunner implements Runnable {
 	    // "Exception calling no-param constructor for SyncMaster class {0} for Sync Channel {1}: {2}"
 	    Ganymede.debug(ts.l("updateInfo.constructorerror", className, name, ex.toString()));
 	  }
+      }
+
+    if (master == null)
+      {
+	master = new NoopSyncMaster();
       }
 
     int type = 0;
@@ -1373,5 +1379,37 @@ public class SyncRunner implements Runnable {
   public String toString()
   {
     return this.getName();
+  }
+}
+
+/*------------------------------------------------------------------------------
+									   class
+								  NoopSyncMaster
+
+------------------------------------------------------------------------------*/
+
+/**
+ * No-op SyncMaster class used in cases where no SyncMaster is defined
+ * for a delta Sync Channel object.
+ *
+ * By using a No-op Sync Master, we simplify the logic in the
+ * SyncRunner's shouldInclude() method.
+ */
+
+class NoopSyncMaster implements SyncMaster {
+
+  public NoopSyncMaster()
+  {
+  }
+
+  /**
+   * The augment() method optionally adds DBObject and DBField
+   * identifiers to the FieldBook book parameter if the SyncMaster
+   * decides that the additional DBObject/DBFields need to be written
+   * to a delta sync channel in response to the changes made to obj.
+   */
+
+  public void augment(FieldBook book, DBEditObject obj)
+  {
   }
 }
