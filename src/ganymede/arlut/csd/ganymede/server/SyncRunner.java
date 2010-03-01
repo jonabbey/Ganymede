@@ -218,7 +218,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * full state dump, and undertake a more lengthy and computationally
  * expensive process of reconciliation to bring the directory service
  * target into compliance with the data in the Ganymede server.</p>
- * 
+ *
  * <p>See the Ganymede synchronization guide for more details on all
  * of this.</p>
  */
@@ -538,7 +538,7 @@ public class SyncRunner implements Runnable {
 		syncObject.emitXML(xmlOut);
 		xmlOut.indentIn();
 		xmlOut.endElementIndent("after");
-		
+
 		xmlOut.indentIn();
 		xmlOut.endElementIndent("object_delta");
 
@@ -557,7 +557,7 @@ public class SyncRunner implements Runnable {
 
 		xmlOut.startElementIndent("after");
 		xmlOut.endElement("after");
-		
+
 		xmlOut.indentIn();
 		xmlOut.endElementIndent("object_delta");
 		break;
@@ -1053,7 +1053,7 @@ public class SyncRunner implements Runnable {
 	    // will start at sync:0 and work our way up as we go along
 	    // during the server's lifetime
 
-	    synchronized (SyncRunner.class) 
+	    synchronized (SyncRunner.class)
 	      {
 		// "sync channel: {0,number,#}"
 		label = ts.l("runFullState.label_pattern", Integer.valueOf(id++));
@@ -1146,7 +1146,7 @@ public class SyncRunner implements Runnable {
     // object that matches this SyncRunner's criteria shouldn't hurt
     // anything significantly.
 
-    this.needBuild.set(false); 
+    this.needBuild.set(false);
 
     ReturnVal retVal = session.getDataXML(this.name, false, true); // don't include history fields, do include oid's
     FileTransmitter transmitter = retVal.getFileTransmitter();
