@@ -1033,7 +1033,7 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
-    String shutdownState = GanymedeServer.shutdownSemaphore.checkEnabled();
+    String shutdownState = GanymedeServer.shutdownSemaphore.increment();
 
     if (shutdownState != null)
       {
@@ -1098,7 +1098,7 @@ public class SyncRunner implements Runnable {
 		lock = null;
 	      }
 	  }
-	
+
 	if (currentThread.isInterrupted())
 	  {
 	    // "Full state sync channel {0} interrupted, not doing network build."
@@ -1111,25 +1111,7 @@ public class SyncRunner implements Runnable {
 	  {
 	    GanymedeBuilderTask.incPhase2(true);
 
-	    // tell the server not to shut down while we are running our external build
-
-            shutdownState = GanymedeServer.shutdownSemaphore.increment();
-
-            if (shutdownState != null)
-              {
-                // "Aborting full state sync channel {0} for shutdown condition: {1}"
-                Ganymede.debug(ts.l("runFullState.shutting_down", this.getClass().getName(), shutdownState));
-                return;
-              }
-		
-	    try
-	      {
-		runFullStateService();
-	      }
-	    finally
-	      {
-		GanymedeServer.shutdownSemaphore.decrement();
-	      }
+	    runFullStateService();
 	  }
 	finally
 	  {
@@ -1138,20 +1120,7 @@ public class SyncRunner implements Runnable {
       }
     finally
       {
-	// we need the finally in case our thread is stopped
-
-	if (session != null)
-	  {
-	    try
-	      {
-		session.logout();	// this will clear the dump lock if need be.
-	      }
-	    finally
-	      {
-		session = null;
-		lock = null;
-	      }
-	  }
+	GanymedeServer.shutdownSemaphore.decrement();
       }
   }
 
