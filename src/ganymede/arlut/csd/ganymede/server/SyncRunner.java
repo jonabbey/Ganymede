@@ -1076,7 +1076,7 @@ public class SyncRunner implements Runnable {
 	  }
 	catch (Exception ex)
 	  {
-	    GanymedeBuilderTask.decPhase1(true);
+	    GanymedeBuilderTask.decPhase1(true); // successful completion
 	    alreadyDecdCount = true;
 
 	    Ganymede.debug(Ganymede.stackTrace(ex));
