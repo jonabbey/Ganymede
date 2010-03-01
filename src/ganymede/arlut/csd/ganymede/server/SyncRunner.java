@@ -1076,7 +1076,7 @@ public class SyncRunner implements Runnable {
 	  }
 	catch (Exception ex)
 	  {
-	    GanymedeBuilderTask.decPhase1(true); // successful completion
+	    GanymedeBuilderTask.decPhase1(true); // failed completion
 	    alreadyDecdCount = true;
 
 	    Ganymede.debug(Ganymede.stackTrace(ex));
@@ -1086,7 +1086,7 @@ public class SyncRunner implements Runnable {
 	  {
 	    if (!alreadyDecdCount)
 	      {
-		GanymedeBuilderTask.decPhase1(false); // false since we don't want to force stat update yet
+		GanymedeBuilderTask.decPhase1(false); // we'll roll into phase 2 on the admin consoles, etc.
 	      }
 
 	    // release the lock, and so on
