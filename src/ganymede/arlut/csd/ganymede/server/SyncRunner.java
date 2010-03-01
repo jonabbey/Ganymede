@@ -674,6 +674,105 @@ public class SyncRunner implements Runnable {
   }
 
   /**
+   * This method creates an initial internal FieldBook for this
+   * SyncRunner, based on the parameters defined in the Sync Channel
+   * DBObject that this SyncRunner is configured from.
+   */
+
+  private void initializeFieldBook(DBEditObject[] objectList, FieldBook book)
+  {
+    for (DBEditObject syncObject: objectList)
+      {
+	if (!mayInclude(syncObject))
+	  {
+	    continue;
+	  }
+
+	if (syncObject.getStatus() == ObjectStatus.DROPPING)
+	  {
+	    continue;
+	  }
+
+	Set<Short> fieldSet = new HashSet<Short>();
+
+	DBObject origObj = syncObject.getOriginal();
+
+	// we know that checked-out DBEditObjects have a copy of all
+	// defined fields, so we don't need to also loop over
+	// origObj.getFieldVect() looking for fields that were deleted
+	// from syncObject.
+
+	for (DBField memberField: syncObject.getFieldVect())
+	  {
+	    DBField origField;
+
+	    if (origObj == null)
+	      {
+		origField = null;
+	      }
+	    else
+	      {
+		origField = (DBField) origObj.getField(memberField.getID());
+	      }
+
+	    // created
+
+	    if (origField == null && memberField.isDefined())
+	      {
+		String fieldOption = getOption(memberField);
+
+		if (fieldOption != null && !fieldOption.equals("0"))
+		  {
+		    fieldSet.add(memberField.getID());
+		    continue;
+		  }
+	      }
+
+	    // deleted
+
+	    if (!memberField.isDefined() && origField != null)
+	      {
+		String fieldOption = getOption(memberField);
+
+		if (fieldOption != null && !fieldOption.equals("0"))
+		  {
+		    fieldSet.add(memberField.getID());
+		    continue;
+		  }
+	      }
+
+	    // changed
+
+	    if (memberField.isDefined() && origField != null)
+	      {
+		// check to see if the field has changed and whether we
+		// should include it.  The 'hasChanged()' check is
+		// required because this shouldInclude() call will always
+		// return true if memberField is defined as an 'always
+		// include' field, whereas in this object-level
+		// shouldInclude() check loop, we are looking to see
+		// whether a field that we care about was changed.
+
+		// Basically the hasChanged() call checks to see if the
+		// field changed, and the shouldInclude() call checks to
+		// see if it's a field that we care about.
+
+		if (memberField.hasChanged(origField) && shouldInclude(memberField, origField))
+		  {
+		    fieldSet.add(memberField.getID());
+		    continue;
+		  }
+	      }
+	  }
+
+	if (fieldSet.size() > 0)
+	  {
+	    book.add(syncObject.getInvid(), fieldSet);
+	  }
+      }
+  }
+
+  /**
    * <p>Returns true if the Sync Channel attached to this SyncRunner
    * is configured to write plain text passwords.</p>
    */
