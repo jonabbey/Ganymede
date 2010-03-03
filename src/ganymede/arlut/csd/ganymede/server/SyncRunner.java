@@ -68,7 +68,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.rmi.RemoteException;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Vector;
 
 import com.jclark.xml.output.UTF8XMLWriter;
@@ -248,6 +250,57 @@ public class SyncRunner implements Runnable {
 
   // ---
 
+  /**
+   * Enum of possible modalities for a SyncRunner
+   */
+
+  public enum SyncType
+  { 
+    /**
+     * The SyncRunner is not triggered automatically, but may be
+     * manually fired from the admin console, or used for filtering
+     * the output of an xmlclient dump.
+     */
+
+    MANUAL,
+
+    /**
+     * The SyncRunner is triggered automatically on Ganymede commits,
+     * and writes out a filtered set of all data, regardless of
+     * whether or not the data objects were modified recently.
+     */
+
+    FULLSTATE,
+
+    /**
+     * The SyncRunner is triggered automatically, and writes out an
+     * XML file with before-and-after context describing a transaction
+     * that is committed in the Ganymede data store.
+     */
+
+    INCREMENTAL;
+
+    /* -- */
+
+    public static SyncType get(int objectVal)
+      {
+	switch (objectVal)
+	  {
+	  case 0:
+	    return SyncType.MANUAL;
+
+	  case 1:
+	    return SyncType.INCREMENTAL;
+
+	  case 2:
+	    return SyncType.FULLSTATE;
+
+	  default:
+	    throw new IllegalArgumentException("Unrecognized integral value");
+	  }
+      }
+  }
+
   private String name;
   private String directory;
   private String fullStateFile;
@@ -257,20 +310,10 @@ public class SyncRunner implements Runnable {
   private Hashtable matrix;
 
   /**
-   * This variable will be true if this SyncRunner is configured to run as a
-   * full state, buildertask-style thingy.  May not be set if incremental is
-   * set.
+   * Controls what type of Sync Channel we're handling.
    */
 
-  private boolean fullState;
-
-  /**
-   * This variable will be true if this SyncRunner is configured to run as a
-   * synchronous, incremental XML build channel.  May not be set if fullState
-   * is set.
-   */
-
-  private boolean incremental;
+  private SyncType mode;
 
   /**
    * This variable is true if we've seen a transaction that requires
@@ -370,19 +413,14 @@ public class SyncRunner implements Runnable {
 	master = new NoopSyncMaster();
       }
 
-    int type = 0;
-
     try
       {
-	type = ((Integer) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+	this.mode = SyncType.get((Integer) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum));
       }
     catch (NullPointerException ex)
       {
-	type = 1;		// the default old behavior
+	this.mode = SyncType.INCREMENTAL; // the default old behavior
       }
-
-    this.fullState = (type == 2);
-    this.incremental = (type == 1);
 
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
@@ -443,7 +481,7 @@ public class SyncRunner implements Runnable {
 
   public boolean isFullState()
   {
-    return this.fullState;
+    return this.mode == SyncType.FULLSTATE;
   }
 
   /**
@@ -453,7 +491,7 @@ public class SyncRunner implements Runnable {
 
   public boolean isIncremental()
   {
-    return this.incremental;
+    return this.mode == SyncType.INCREMENTAL;
   }
 
   /**
@@ -1090,7 +1128,7 @@ public class SyncRunner implements Runnable {
 
   public void run()
   {
-    if (this.fullState)
+    if (this.mode == SyncType.FULLSTATE)
       {
 	if (this.needBuild.isSet())
 	  {
@@ -1102,7 +1140,7 @@ public class SyncRunner implements Runnable {
 	    Ganymede.debug(ts.l("run.skipping_full", this.getName()));
 	  }
       }
-    else if (this.incremental)
+    else if (this.mode == SyncType.INCREMENTAL)
       {
 	if (this.needBuild.isSet())
 	  {
