@@ -537,8 +537,8 @@ public class SyncRunner implements Runnable {
    * @param transaction The DBEditSet that is being committed.
    */
 
-  public void writeSync(DBJournalTransaction transRecord, DBEditObject[] objectList,
-			DBEditSet transaction) throws IOException
+  public void writeIncrementalSync(DBJournalTransaction transRecord, DBEditObject[] objectList,
+				   DBEditSet transaction) throws IOException
   {
     if (!this.active.isSet())
       {
@@ -674,7 +674,7 @@ public class SyncRunner implements Runnable {
 
   /**
    * <p>This private helper method creates the {@link
-   * arlut.csd.ganymede.server.XMLDumpContext} that writeSync() will
+   * arlut.csd.ganymede.server.XMLDumpContext} that writeIncrementalSync() will
    * write to.</p>
    *
    * @param transRecord A transaction description record describing the transaction we are writing
