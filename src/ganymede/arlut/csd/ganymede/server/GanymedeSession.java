@@ -3366,9 +3366,9 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @return A Vector of {@link arlut.csd.ganymede.common.Result Result} objects
    */
 
-  public Vector internalQuery(Query query)
+  public Vector<Result> internalQuery(Query query)
   {
-    Vector result = new Vector();
+    Vector<Result> result = new Vector<Result>();
     QueryResult internalResult = queryDispatch(query, true, false, null, null);
     Invid key;
     String val;
@@ -3382,7 +3382,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    key = (Invid) internalResult.getInvid(i);
 	    val = (String) internalResult.getLabel(i);
 
-	    result.addElement(new Result(key, val));
+	    result.add(new Result(key, val));
 	  }
       }
 
