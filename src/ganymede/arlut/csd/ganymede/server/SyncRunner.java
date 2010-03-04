@@ -622,11 +622,11 @@ public class SyncRunner implements Runnable {
 	    // this DBObject was added to the FieldBook in order to
 	    // provide data for context to the sync channel handler..
 
-	    xmlOut.startElementIndent("object_ref");
+	    xmlOut.startElementIndent("context_object");
 	    xmlOut.indentOut();
 	    refObject.emitXML(xmlOut);
 	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("object_ref");
+	    xmlOut.endElementIndent("context_object");
 	  }
       }
 
