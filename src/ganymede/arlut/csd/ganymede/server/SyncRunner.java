@@ -549,16 +549,20 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
-    for (int i = 0; i < objectList.length; i++)
-      {
-	DBEditObject syncObject = objectList[i];
+    FieldBook book = new FieldBook();
 
-	if (shouldInclude(syncObject))
+    initializeFieldBook(objectList, book);
+
+    for (Invid invid: book.objects())
+      {
+	if (transaction.isEditingObject(invid))
 	  {
+	    DBEditObject syncObject = transaction.findObject(invid);
+
 	    if (xmlOut == null)
 	      {
 		xmlOut = createXMLSync(transRecord);
-		xmlOut.setDeltaSyncing(true);
+		xmlOut.setDeltaFieldBook(book);
 	      }
 
 	    switch (syncObject.getStatus())
@@ -604,6 +608,25 @@ public class SyncRunner implements Runnable {
 		syncObject.emitXMLDelta(xmlOut);
 		break;
 	      }
+	  }
+	else
+	  {
+	    DBObject refObject = transaction.getSession().viewDBObject(invid);
+
+	    if (xmlOut == null)
+	      {
+		xmlOut = createXMLSync(transRecord);
+		xmlOut.setDeltaFieldBook(book);
+	      }
+
+	    // this DBObject was added to the FieldBook in order to
+	    // provide data for context to the sync channel handler..
+
+	    xmlOut.startElementIndent("object_ref");
+	    xmlOut.indentOut();
+	    refObject.emitXML(xmlOut);
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("object_ref");
 	  }
       }
 
@@ -795,7 +818,7 @@ public class SyncRunner implements Runnable {
 		// field changed, and the shouldInclude() call checks to
 		// see if it's a field that we care about.
 
-		if (memberField.hasChanged(origField) && shouldInclude(memberField, origField))
+		if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
 		  {
 		    fieldSet.add(memberField.getID());
 		    continue;
@@ -807,6 +830,11 @@ public class SyncRunner implements Runnable {
 	  {
 	    book.add(syncObject.getInvid(), fieldSet);
 	  }
+
+	// give our plug-in management class the chance to extend the
+	// FieldBook that we're assembling with reference objects, etc.
+
+	master.augment(book, syncObject);
       }
   }
 
@@ -919,7 +947,7 @@ public class SyncRunner implements Runnable {
 	    // field changed, and the shouldInclude() call checks to
 	    // see if it's a field that we care about.
 
-	    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField))
+	    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
 	      {
 		return true;
 	      }
@@ -935,7 +963,7 @@ public class SyncRunner implements Runnable {
    * only if both field and origField are not null and isDefined().</p>
    */
 
-  public boolean shouldInclude(DBField newField, DBField origField)
+  public boolean shouldInclude(DBField newField, DBField origField, FieldBook book)
   {
     String fieldOption;
 
@@ -966,6 +994,11 @@ public class SyncRunner implements Runnable {
 
     if (fieldOption == null || fieldOption.equals("0"))
       {
+	if (book != null)
+	  {
+	    return book.has(newField.getOwner().getInvid(), newField.getID());
+	  }
+
 	return false;
       }
     else if (fieldOption.equals("2"))
