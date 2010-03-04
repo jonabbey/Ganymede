@@ -2939,7 +2939,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 				 new QueryDataNode(QueryDataNode.EQUALS, objectName),
 				 false);
 
-    Vector results = internalQuery(localquery);
+    List<Result> results = internalQuery(localquery);
 
     if (debug)
       {
@@ -2948,7 +2948,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (results != null && results.size() == 1)
       {
-	Result tmp = (Result) results.elementAt(0);
+	Result tmp = results.get(0);
 
 	value = tmp.getInvid();
 
