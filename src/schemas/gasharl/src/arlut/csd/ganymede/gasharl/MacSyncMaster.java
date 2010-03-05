@@ -46,10 +46,11 @@
 
 package arlut.csd.ganymede.gasharl;
 
-import arlut.csd.ganymede.common.FieldBook;
-import arlut.csd.ganymede.common.Invid;
+import java.util.ArrayList;
+import java.util.List;
 
-import arlut.csd.ganymede.server.SyncMaster;
+import arlut.csd.ganymede.common.*;
+import arlut.csd.ganymede.server.*;
 
 /*------------------------------------------------------------------------------
 									   class
@@ -76,5 +77,151 @@ public class MacSyncMaster implements SyncMaster {
 
   public void augment(FieldBook book, DBEditObject obj)
   {
+    DBSession session = obj.getSession();
+
+    /* -- */
+
+    switch (obj.getTypeID())
+      {
+      case SchemaConstants.UserBase:
+	includeUser(book, obj);
+	return;
+
+      case volumeSchema.BASE:
+	includeVolume(book, obj);
+	return;
+
+      case systemSchema.BASE:
+	includeSystem(book, obj);
+	return;
+      }
+  }
+
+  /**
+   * If a user is being modified, we need to make sure we link in
+   * the edit-in-place object definition for their auto.home.default
+   * map entry, the volume object, and the system object, so that
+   * the external mac sync channel scripting can resolve the nfs
+   * home directory.
+   */
+
+  private void includeUser(FieldBook book, DBObject user)
+  {
+    DBSession session = user.getSession();
+
+    if (!(user instanceof DBEditObject))
+      {
+	includeUserFields(book, user);
+      }
+
+    List<Invid> maps = (List<Invid>) user.getFieldValuesLocal(userSchema.HOMEDIR);
+
+    for (Invid invid: maps)
+      {
+	DBObject automounterMap = session.viewDBObject(invid);
+
+	Invid volumeInvid = (Invid) automounterMap.getFieldValueLocal(mapEntrySchema.VOLUME);
+
+	DBObject volumeObject = session.viewDBObject(volumeInvid);
+
+	Invid hostInvid = (Invid) volumeObject.getFieldValueLocal(volumeSchema.HOST);
+
+	book.add(invid);
+	book.add(volumeInvid);
+	book.add(hostInvid, systemSchema.SYSTEMNAME);
+      }
+
+    return;
+  }
+
+  /**
+   * If a volume is being modified, we need to scan to see if any
+   * users have that volume as a home directory in automounter, and
+   * if so we need to include those user objects and linked volume
+   * and system objects.
+   */
+
+  private void includeVolume(FieldBook book, DBObject volume)
+  {
+    try
+      {
+	DBSession session = volume.getSession();
+	GanymedeSession gSession = session.getGSession();
+
+	String label = volume.getLabel();
+
+	String queryString = "select object from 'User' where 'Directory Volume'->('NFS Volume'->('Volume Label' == '" + label + "'))";
+	Query query = new GanyQueryTransmuter().transmuteQueryString(queryString);
+
+	List<Result> results = gSession.internalQuery(query);
+	
+	for (Result result: results)
+	  {
+	    includeUser(book, session.viewDBObject(result.getInvid()));
+	  }
+      }
+    catch (GanyParseException ex)
+      {
+	throw new RuntimeException(ex);
+      }
+  }
+
+  /**
+   * If a system is being modified such that its host name is being
+   * changed, we need to scan to see if any volumes are linked to
+   * that system, and if any users have their home directories on
+   * that volume, we need to include those user objects
+   */
+
+  private void includeSystem(FieldBook book, DBObject system)
+  {
+    try
+      {
+	DBSession session = system.getSession();
+	GanymedeSession gSession = session.getGSession();
+
+	String label = system.getLabel();
+
+	String queryString = "select object from 'User' where 'Directory Volume'->('NFS Volume'->('Host' == '" + label + "'))";
+	Query query = new GanyQueryTransmuter().transmuteQueryString(queryString);
+
+	List<Result> results = gSession.internalQuery(query);
+	
+	for (Result result: results)
+	  {
+	    includeUser(book, session.viewDBObject(result.getInvid()));
+	  }
+      }
+    catch (GanyParseException ex)
+      {
+	throw new RuntimeException(ex);
+      }
+  }
+
+  /**
+   * This method is called when includeVolume() or includeSystem()
+   * triggers the inclusion of a user.
+   */
+
+  private void includeUserFields(FieldBook book, DBObject user)
+  {
+    Invid userInvid = user.getInvid();
+
+    if (book.has(userInvid))
+      {
+	// the user is already in the field book, we won't add
+	// anything
+
+	return;
+      }
+
+    ArrayList<Short> fieldList = new ArrayList<Short>();
+
+    fieldList.add(userSchema.USERNAME);
+    fieldList.add(userSchema.UID);
+    fieldList.add(userSchema.GUID); // mac global uid
+    fieldList.add(userSchema.VOLUMES);
+
+    book.add(userInvid, fieldList);
   }
 }
