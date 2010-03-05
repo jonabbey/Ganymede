@@ -553,10 +553,36 @@ public class SyncRunner implements Runnable {
 
     initializeFieldBook(objectList, book);
 
+    int context_count = 0;
+
+    // we want to group the objects we write out by invid type
+
+    Set<Short> typeSet = new HashSet<Short>();
+
     for (Invid invid: book.objects())
       {
-	if (transaction.isEditingObject(invid))
+	typeSet.add(invid.getType());
+      }
+
+    // first write out the objects that we actually changed this
+    // transaction
+
+    for (Short type: typeSet)
+      {
+	for (Invid invid: book.objects())
 	  {
+	    if (!transaction.isEditingObject(invid))
+	      {
+		context_count++;
+
+		continue;
+	      }
+
+	    if (!type.equals(invid.getType()))
+	      {
+		continue;
+	      }
+
 	    DBEditObject syncObject = transaction.findObject(invid);
 
 	    if (xmlOut == null)
@@ -610,26 +636,45 @@ public class SyncRunner implements Runnable {
 		break;
 	      }
 	  }
-	else
+      }
+
+    // then write out any objects that the SyncMaster has thrown in
+    // for context
+
+    if (context_count > 0)
+      {
+	xmlOut.startElementIndent("context_objects");
+	xmlOut.indentOut();
+
+	if (xmlOut == null)
 	  {
-	    DBObject refObject = transaction.getSession().viewDBObject(invid);
-
-	    if (xmlOut == null)
-	      {
-		xmlOut = createXMLSync(transRecord);
-		xmlOut.setDeltaFieldBook(book);
-		xmlOut.setDBSession(transaction.getSession());
-	      }
-
-	    // this DBObject was added to the FieldBook in order to
-	    // provide data for context to the sync channel handler..
-
-	    xmlOut.startElementIndent("context_object");
-	    xmlOut.indentOut();
-	    refObject.emitXML(xmlOut);
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("context_object");
+	    xmlOut = createXMLSync(transRecord);
+	    xmlOut.setDeltaFieldBook(book);
+	    xmlOut.setDBSession(transaction.getSession());
 	  }
+
+	for (Short type: typeSet)
+	  {
+	    for (Invid invid: book.objects())
+	      {
+		if (transaction.isEditingObject(invid))
+		  {
+		    continue;	// skip
+		  }
+
+		if (!type.equals(invid.getType()))
+		  {
+		    continue;	// skip
+		  }
+
+		DBObject refObject = transaction.getSession().viewDBObject(invid);
+
+		refObject.emitXML(xmlOut);
+	      }
+	  }
+
+	xmlOut.indentIn();
+	xmlOut.endElementIndent("context_objects");
       }
 
     if (xmlOut != null)
