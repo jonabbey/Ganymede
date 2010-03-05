@@ -2362,7 +2362,7 @@ public final class DBStore implements JythonMap {
 		bf.setID(SchemaConstants.SyncChannelClassName);
 		bf.setType(FieldType.STRING);
 		bf.setName("Sync Master Classname");
-		b.addFieldAfter(bf, SchemaConstants.SyncChannelTypeString);
+		syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelTypeString);
 	      }
 
 	    if (syncBase.getField(SchemaConstants.SyncChannelFullStateFile) == null)
