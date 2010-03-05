@@ -64,6 +64,10 @@ import arlut.csd.ganymede.server.*;
 
 public class MacSyncMaster implements SyncMaster {
 
+  private DBSession session;
+
+  /* -- */
+
   public MacSyncMaster()
   {
   }
@@ -75,25 +79,30 @@ public class MacSyncMaster implements SyncMaster {
    * to a delta sync channel in response to the changes made to obj.
    */
 
-  public void augment(FieldBook book, DBEditObject obj)
+  public synchronized void augment(FieldBook book, DBEditObject obj)
   {
-    DBSession session = obj.getSession();
+    this.session = obj.getSession();
 
-    /* -- */
-
-    switch (obj.getTypeID())
+    try
       {
-      case SchemaConstants.UserBase:
-	includeUser(book, obj);
-	return;
+	switch (obj.getTypeID())
+	  {
+	  case SchemaConstants.UserBase:
+	    includeUser(book, obj);
+	    return;
 
-      case volumeSchema.BASE:
-	includeVolume(book, obj);
-	return;
+	  case volumeSchema.BASE:
+	    includeVolume(book, obj);
+	    return;
 
-      case systemSchema.BASE:
-	includeSystem(book, obj);
-	return;
+	  case systemSchema.BASE:
+	    includeSystem(book, obj);
+	    return;
+	  }
+      }
+    finally
+      {
+	this.session = null;
       }
   }
 
@@ -107,16 +116,14 @@ public class MacSyncMaster implements SyncMaster {
 
   private void includeUser(FieldBook book, DBObject user)
   {
-    DBSession session = user.getSession();
-
     if (!(user instanceof DBEditObject))
       {
 	includeUserFields(book, user);
       }
 
-    List<Invid> maps = (List<Invid>) user.getFieldValuesLocal(userSchema.HOMEDIR);
+    List<Invid> mapEntries = (List<Invid>) user.getFieldValuesLocal(userSchema.VOLUMES);
 
-    for (Invid invid: maps)
+    for (Invid invid: mapEntries)
       {
 	DBObject automounterMap = session.viewDBObject(invid);
 
@@ -126,8 +133,8 @@ public class MacSyncMaster implements SyncMaster {
 
 	Invid hostInvid = (Invid) volumeObject.getFieldValueLocal(volumeSchema.HOST);
 
-	book.add(invid);
-	book.add(volumeInvid);
+	book.add(volumeInvid, volumeSchema.HOST);
+	book.add(volumeInvid, volumeSchema.PATH);
 	book.add(hostInvid, systemSchema.SYSTEMNAME);
       }
 
@@ -145,7 +152,6 @@ public class MacSyncMaster implements SyncMaster {
   {
     try
       {
-	DBSession session = volume.getSession();
 	GanymedeSession gSession = session.getGSession();
 
 	String label = volume.getLabel();
@@ -177,7 +183,6 @@ public class MacSyncMaster implements SyncMaster {
   {
     try
       {
-	DBSession session = system.getSession();
 	GanymedeSession gSession = session.getGSession();
 
 	String label = system.getLabel();
@@ -215,13 +220,9 @@ public class MacSyncMaster implements SyncMaster {
 	return;
       }
 
-    ArrayList<Short> fieldList = new ArrayList<Short>();
-
-    fieldList.add(userSchema.USERNAME);
-    fieldList.add(userSchema.UID);
-    fieldList.add(userSchema.GUID); // mac global uid
-    fieldList.add(userSchema.VOLUMES);
-
-    book.add(userInvid, fieldList);
+    book.add(userInvid, userSchema.USERNAME);
+    book.add(userInvid, userSchema.UID);
+    book.add(userInvid, userSchema.GUID);
+    book.add(userInvid, userSchema.VOLUMES);
   }
 }
