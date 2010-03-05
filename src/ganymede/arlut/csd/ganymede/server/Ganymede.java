@@ -879,6 +879,8 @@ public class Ganymede {
 			Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
 
 			GanymedeServer.shutdown();
+
+			System.exit(1);
 		      }
 		  }
 		else
