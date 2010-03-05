@@ -5694,6 +5694,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	  case SchemaConstants.SyncChannelServicer:
 	  case SchemaConstants.SyncChannelFields:
 	  case SchemaConstants.SyncChannelPlaintextOK:
+	  case SchemaConstants.SyncChannelTypeString:
+	  case SchemaConstants.SyncChannelFullStateFile:
+	  case SchemaConstants.SyncChannelTypeNum:
+	  case SchemaConstants.SyncChannelClassName:
 	    return true;
 	  }
       }

@@ -2346,42 +2346,50 @@ public final class DBStore implements JythonMap {
 	    // these fields in DBStore version 2.11.
 
 	    DBObjectBase syncBase = (DBObjectBase) getObjectBase(SchemaConstants.SyncChannelBase);
+	    syncBase.setEditingMode(DBObjectBase.EditingMode.LOADING);
 
-	    if (syncBase.getField(SchemaConstants.SyncChannelTypeString) == null)
+	    try
 	      {
-		bf = new DBObjectBaseField(syncBase);
-		bf.setID(SchemaConstants.SyncChannelTypeString);
-		bf.setType(FieldType.STRING);
-		bf.setName("Sync Channel Type");
-		syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelName);
+		if (syncBase.getField(SchemaConstants.SyncChannelTypeString) == null)
+		  {
+		    bf = new DBObjectBaseField(syncBase);
+		    bf.setID(SchemaConstants.SyncChannelTypeString);
+		    bf.setType(FieldType.STRING);
+		    bf.setName("Sync Channel Type");
+		    syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelName);
+		  }
+
+		if (syncBase.getField(SchemaConstants.SyncChannelClassName) == null)
+		  {
+		    bf = new DBObjectBaseField(syncBase);
+		    bf.setID(SchemaConstants.SyncChannelClassName);
+		    bf.setType(FieldType.STRING);
+		    bf.setName("Sync Master Classname");
+		    syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelTypeString);
+		  }
+
+		if (syncBase.getField(SchemaConstants.SyncChannelFullStateFile) == null)
+		  {
+		    bf = new DBObjectBaseField(syncBase);
+		    bf.setID(SchemaConstants.SyncChannelFullStateFile);
+		    bf.setType(FieldType.STRING);
+		    bf.setName("Full State File");
+		    bf.setComment("Path to the file to use for full-state XML dumps");
+		    syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelDirectory);
+		  }
+
+		if (syncBase.getField(SchemaConstants.SyncChannelTypeNum) == null)
+		  {
+		    bf = new DBObjectBaseField(syncBase);
+		    bf.setID(SchemaConstants.SyncChannelTypeNum);
+		    bf.setType(FieldType.NUMERIC);
+		    bf.setName("Channel Type Index");
+		    syncBase.addFieldToEnd(bf);
+		  }
 	      }
-
-	    if (syncBase.getField(SchemaConstants.SyncChannelClassName) == null)
+	    finally
 	      {
-		bf = new DBObjectBaseField(syncBase);
-		bf.setID(SchemaConstants.SyncChannelClassName);
-		bf.setType(FieldType.STRING);
-		bf.setName("Sync Master Classname");
-		syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelTypeString);
-	      }
-
-	    if (syncBase.getField(SchemaConstants.SyncChannelFullStateFile) == null)
-	      {
-		bf = new DBObjectBaseField(syncBase);
-		bf.setID(SchemaConstants.SyncChannelFullStateFile);
-		bf.setType(FieldType.STRING);
-		bf.setName("Full State File");
-		bf.setComment("Path to the file to use for full-state XML dumps");
-		syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelDirectory);
-	      }
-
-	    if (syncBase.getField(SchemaConstants.SyncChannelTypeNum) == null)
-	      {
-		bf = new DBObjectBaseField(syncBase);
-		bf.setID(SchemaConstants.SyncChannelTypeNum);
-		bf.setType(FieldType.NUMERIC);
-		bf.setName("Channel Type Index");
-		syncBase.addFieldToEnd(bf);
+		syncBase.setEditingMode(DBObjectBase.EditingMode.LOCKED);
 	      }
 	  }
 
