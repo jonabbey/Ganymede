@@ -1165,20 +1165,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     for (int i = 0; i < fieldVec.size(); i++)
       {
 	DBField field = (DBField) fieldVec.elementAt(i);
-	    
+
 	if (field.isDefined())
 	  {
-	    // if we are writing an embedded object out during delta
-	    // syncing, we want to be sure and include the container
-	    // field, even though the Ganymede GUI doesn't provide
-	    // that as an option in the Field Options editing dialog.
-	    // This is because the ContainerField is an intrinsic part
-	    // of an embedded object if we are not writing the
-	    // embedded object out directly embedded in a container
-	    // object as we would do in a non-delta syncing case.
-
-	    if ((this.isEmbedded() && field.getID() == SchemaConstants.ContainerField && xmlOut.isDeltaSyncing()) ||
-		xmlOut.mayInclude(field))
+	    if (xmlOut.mayInclude(field))
 	      {
 		field.emitXML(xmlOut);
 	      }
@@ -2217,14 +2207,56 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject lookupInvid(Invid target, boolean forceOriginal)
   {
+    return lookupInvid(target, forceOriginal, null);
+  }
+
+  /**
+   * <P>This helper method is for use on the server, so that custom
+   * code subclasses can call a simple method to look up an Invid and
+   * get the appropriate DBObject, taking into account whether the
+   * lookup is being done within a transaction or no.</P>
+   *
+   * <P>Note that unless the object has been checked out by the current session,
+   * this method will return access to the object as it is stored directly
+   * in the main datastore hashes.  This means that the object will be
+   * read-only and will grant all accesses, as it will have no notion of
+   * what session or transaction owns it.  If you need to have access to the
+   * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
+   * view_db_object()} method to get the object.</P>
+   *
+   * <P>This method will return null if the Invid provided does not
+   * exist in the session or the persistent store.</P>
+   *
+   * @param target The Invid to retrieve.
+   * @param forceOriginal If true and the lookup is being done in the
+   * middle of an editing session, we'll return a reference to the
+   * original read-only DBObject from the persistent datastore, rather
+   * than the checked out DBEditObject version being edited in the
+   * transaction.
+   * @param session Should be set if the invid needs to be looked up
+   * in a session context even when this DBObject has not been checked
+   * out for viewing in a GanymedeSession.  As in InvidDBField.emitInvidXML().
+   */
+
+  public DBObject lookupInvid(Invid target, boolean forceOriginal, DBSession session)
+  {
     if (target == null)
       {
         return null;
       }
 
-    if (this.gSession != null)
+    if (session == null)
       {
-	DBObject retObj = this.gSession.getSession().viewDBObject(target);
+	if (this.gSession != null)
+	  {
+	    session = this.gSession.getSession();
+	  }
+      }
+
+    if (session != null)
+      {
+	DBObject retObj = session.viewDBObject(target);
 
 	if (retObj == null)
 	  {

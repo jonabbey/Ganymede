@@ -563,6 +563,7 @@ public class SyncRunner implements Runnable {
 	      {
 		xmlOut = createXMLSync(transRecord);
 		xmlOut.setDeltaFieldBook(book);
+		xmlOut.setDBSession(transaction.getSession());
 	      }
 
 	    switch (syncObject.getStatus())
@@ -617,6 +618,7 @@ public class SyncRunner implements Runnable {
 	      {
 		xmlOut = createXMLSync(transRecord);
 		xmlOut.setDeltaFieldBook(book);
+		xmlOut.setDBSession(transaction.getSession());
 	      }
 
 	    // this DBObject was added to the FieldBook in order to
@@ -744,91 +746,82 @@ public class SyncRunner implements Runnable {
   {
     for (DBEditObject syncObject: objectList)
       {
-	if (!mayInclude(syncObject))
-	  {
-	    continue;
-	  }
-
 	if (syncObject.getStatus() == ObjectStatus.DROPPING)
 	  {
 	    continue;
 	  }
 
-	Set<Short> fieldSet = new HashSet<Short>();
-
-	DBObject origObj = syncObject.getOriginal();
-
-	// we know that checked-out DBEditObjects have a copy of all
-	// defined fields, so we don't need to also loop over
-	// origObj.getFieldVect() looking for fields that were deleted
-	// from syncObject.
-
-	for (DBField memberField: syncObject.getFieldVect())
+	if (mayInclude(syncObject))
 	  {
-	    DBField origField;
+	    DBObject origObj = syncObject.getOriginal();
 
-	    if (origObj == null)
+	    // we know that checked-out DBEditObjects have a copy of all
+	    // defined fields, so we don't need to also loop over
+	    // origObj.getFieldVect() looking for fields that were deleted
+	    // from syncObject.
+
+	    for (DBField memberField: syncObject.getFieldVect())
 	      {
-		origField = null;
-	      }
-	    else
-	      {
-		origField = (DBField) origObj.getField(memberField.getID());
-	      }
+		DBField origField;
 
-	    // created
-
-	    if (origField == null && memberField.isDefined())
-	      {
-		String fieldOption = getOption(memberField);
-
-		if (fieldOption != null && !fieldOption.equals("0"))
+		if (origObj == null)
 		  {
-		    fieldSet.add(memberField.getID());
-		    continue;
+		    origField = null;
+		  }
+		else
+		  {
+		    origField = (DBField) origObj.getField(memberField.getID());
+		  }
+
+		// created
+
+		if (origField == null && memberField.isDefined())
+		  {
+		    String fieldOption = getOption(memberField);
+
+		    if (fieldOption != null && !fieldOption.equals("0"))
+		      {
+			book.add(syncObject.getInvid(), memberField.getID());
+			continue;
+		      }
+		  }
+
+		// deleted
+
+		if (!memberField.isDefined() && origField != null)
+		  {
+		    String fieldOption = getOption(memberField);
+
+		    if (fieldOption != null && !fieldOption.equals("0"))
+		      {
+			book.add(syncObject.getInvid(), memberField.getID());
+			continue;
+		      }
+		  }
+
+		// changed
+
+		if (memberField.isDefined() && origField != null)
+		  {
+		    // check to see if the field has changed and whether we
+		    // should include it.  The 'hasChanged()' check is
+		    // required because this shouldInclude() call will always
+		    // return true if memberField is defined as an 'always
+		    // include' field, whereas in this object-level
+		    // shouldInclude() check loop, we are looking to see
+		    // whether a field that we care about was changed.
+
+		    // Basically the hasChanged() call checks to see if the
+		    // field changed, and the shouldInclude() call checks to
+		    // see if it's a field that we care about.
+
+		    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
+		      {
+			book.add(syncObject.getInvid(), memberField.getID());
+			continue;
+		      }
 		  }
 	      }
-
-	    // deleted
-
-	    if (!memberField.isDefined() && origField != null)
-	      {
-		String fieldOption = getOption(memberField);
-
-		if (fieldOption != null && !fieldOption.equals("0"))
-		  {
-		    fieldSet.add(memberField.getID());
-		    continue;
-		  }
-	      }
-
-	    // changed
-
-	    if (memberField.isDefined() && origField != null)
-	      {
-		// check to see if the field has changed and whether we
-		// should include it.  The 'hasChanged()' check is
-		// required because this shouldInclude() call will always
-		// return true if memberField is defined as an 'always
-		// include' field, whereas in this object-level
-		// shouldInclude() check loop, we are looking to see
-		// whether a field that we care about was changed.
-
-		// Basically the hasChanged() call checks to see if the
-		// field changed, and the shouldInclude() call checks to
-		// see if it's a field that we care about.
-
-		if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
-		  {
-		    fieldSet.add(memberField.getID());
-		    continue;
-		  }
-	      }
-	  }
-
-	if (fieldSet.size() > 0)
-	  {
-	    book.add(syncObject.getInvid(), fieldSet);
 	  }
 
 	// give our plug-in management class the chance to extend the
@@ -990,15 +983,18 @@ public class SyncRunner implements Runnable {
 	return false;
       }
 
+    if (book != null)
+      {
+	if (book.has(newField.getOwner().getInvid(), newField.getID()))
+	  {
+	    return true;
+	  }
+      }
+
     fieldOption = getOption(newField);
 
     if (fieldOption == null || fieldOption.equals("0"))
       {
-	if (book != null)
-	  {
-	    return book.has(newField.getOwner().getInvid(), newField.getID());
-	  }
-
 	return false;
       }
     else if (fieldOption.equals("2"))

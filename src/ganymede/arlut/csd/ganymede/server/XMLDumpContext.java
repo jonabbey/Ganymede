@@ -113,6 +113,14 @@ public class XMLDumpContext {
   private FieldBook book = null;
 
   /**
+   * Reference to a DBSesssion that is used to provide a DBSession
+   * context when emitting XML from InvidDBFields from DBObjects that
+   * were not edited by a DBSesssion.
+   */
+
+  private DBSession session = null;
+
+  /**
    * If true, this XMLDumpContext is currently writing out the
    * before state of a transaction incremental dump.  We'll keep hold
    * of this information so server-side code can decide whether to
@@ -232,6 +240,16 @@ public class XMLDumpContext {
     this.book = book;
   }
 
+  public void setDBSession(DBSession session)
+  {
+    this.session = session;
+  }
+
+  public DBSession getDBSession()
+  {
+    return this.session;
+  }
+
   /**
    * Returns true if this XMLDumpContext was created to write to a
    * delta sync channel.
@@ -346,10 +364,9 @@ public class XMLDumpContext {
 
   public boolean shouldInclude(DBField newField, DBField oldField)
   {
-    // if we are doing anything other than a delta sync, we won't want
-    // to include the container field in embedded objects
+    // never write out the container field for embedded objects
 
-    if (!isDeltaSyncing() && newField.getOwner().isEmbedded() && newField.getID() == SchemaConstants.ContainerField)
+    if (newField.getOwner().isEmbedded() && newField.getID() == SchemaConstants.ContainerField)
       {
 	return false;
       }
@@ -387,6 +404,11 @@ public class XMLDumpContext {
 	return false;
       }
 
+    if (book != null)
+      {
+	return book.has(field.getOwner().getInvid(), field.getID());
+      }
+
     if (query != null)
       {
 	return query.returnField(field.getID());
@@ -422,9 +444,9 @@ public class XMLDumpContext {
 	return false;
       }
 
-    if (book != null && book.has(field.getOwner().getInvid(), field.getID()))
+    if (book != null)
       {
-	return true;
+	return book.has(field.getOwner().getInvid(), field.getID());
       }
 
     return syncConstraints == null || syncConstraints.mayInclude(field, hasChanged);
@@ -698,8 +720,18 @@ public class XMLDumpContext {
     xmlOut.flush();
   }
 
+  /**
+   * Closes the output stream and clears any DBSession, FieldBook,
+   * SyncRunner, or Query linked to this XMLDumpContext.
+   */
+
   public void close() throws IOException
   {
+    session = null;
+    book = null;
+    syncConstraints = null;
+    query = null;
+
     xmlOut.close();
   }
 }
