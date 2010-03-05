@@ -66,7 +66,9 @@ public interface mapEntrySchema {
   // you change the schema for the automounter map, you'll want to change
   // this file to match.
 
-  final static short CONTAININGUSER = 0;
+  final static short BASE=278;
+
+  final static short CONTAININGUSER=0;
   final static short MAP=256;
   final static short VOLUME=257;
   final static short XMLLABEL=258;
