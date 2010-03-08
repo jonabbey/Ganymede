@@ -3042,6 +3042,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String targetlo;
     String siglo;
     /* -- */
+                int kk,n=0;
+                String newst;
 
 
     username = (String) object.getFieldValueLocal(userSchema.USERNAME);
@@ -3051,8 +3053,25 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     result.setLength(0);
     siglo = signature.toLowerCase();
-    result.append(siglo);
-    result.append("@arlut.utexas.edu");
+//    result.append(siglo);
+//	kkk
+//	ahem.  outm is insisting that the name be "local".
+//	haven't investigated fully, but this'll work around it.
+//    result.append("@arlut.utexas.edu");
+//	well.  hmmph.  some of the siglo's already have @ in them.
+                kk=siglo.length();
+                while( kk-- > 0 )
+	                n = siglo.indexOf('@');
+                if( n < 0 )
+                  {
+                    result.append(siglo);
+                  }
+                else
+                  {
+                    newst = siglo.substring(0,n);
+                    result.append(newst);
+//    Ganymede.debug(newst);
+                  }
     result.append(": ");
     result.append(siglo);
     result.append("@arlut.utexas.edu.");
@@ -3070,7 +3089,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
                 result.setLength(0);
                 result.append(username);
-                result.append("@arlut.utexas.edu");
+//	postfix no likey @... stuff on lhs.
+//                result.append("@arlut.utexas.edu");
 
                 result.append(": ");
 
@@ -3084,7 +3104,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
                 result.setLength(0);
                 result.append(aliaslo);
-                result.append("@arlut.utexas.edu");
+//	postfix no likey @... stuff on lhs.
+//                result.append("@arlut.utexas.edu");
 
                 result.append(": ");
 
