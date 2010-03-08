@@ -125,6 +125,9 @@ public class MacSyncMaster implements SyncMaster {
 
     for (Invid invid: mapEntries)
       {
+	book.add(invid, mapEntrySchema.MAP);
+	book.add(invid, mapEntrySchema.VOLUME);
+
 	DBObject automounterMap = session.viewDBObject(invid);
 
 	Invid volumeInvid = (Invid) automounterMap.getFieldValueLocal(mapEntrySchema.VOLUME);
