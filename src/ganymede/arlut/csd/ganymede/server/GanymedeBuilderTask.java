@@ -649,6 +649,39 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   /**
    * This method is used by subclasses of GanymedeBuilderTask to
+   * obtain a list of DBObject references of the requested
+   * type.
+   *
+   * Note that the Iterable returned by this method MUST NOT
+   * be used after builderPhase1() returns.  This Iterable is
+   * only valid while the base in question is locked with the
+   * global dumpLock obtained before builderPhase1() is run and
+   * which is released after builderPhase1() returns.
+   *
+   * @param baseid The id number of the base to be listed
+   *
+   * @return An Iterable of {@link arlut.csd.ganymede.server.DBObject
+   * DBObject} references
+   */
+
+  protected final Iterable<DBObject> getObjects(short baseid)
+  {
+    // this works only because we've already got our lock
+    // established..  otherwise, we'd have to use the query system.
+
+    if (lock == null)
+      {
+	// "Can''t call enumerateObjects without a lock."
+	throw new IllegalArgumentException(ts.l("enumerateObjects.no_lock"));
+      }
+
+    DBObjectBase base = Ganymede.db.getObjectBase(baseid);
+
+    return base.getObjects();
+  }
+
+  /**
+   * This method is used by subclasses of GanymedeBuilderTask to
    * obtain a reference to a {@link arlut.csd.ganymede.server.DBObject DBObject}
    * matching a given invid.
    *
