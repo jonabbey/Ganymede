@@ -5305,24 +5305,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private void scanCategories()
   {
-    Enumeration categories = enumerateObjects(279);
-
-    while (categories.hasMoreElements() &&
-	   (this.normalCategory == null || this.agencyCategory == null))
-      {
-	DBObject category = (DBObject) categories.nextElement();
-	Invid categoryInvid = category.getInvid();
-	String label = getLabel(categoryInvid);
-
-	if (normalCategoryLabel.equals(label))
-	  {
-	    this.normalCategory = categoryInvid;
-	  }
-	else if (agencyCategoryLabel.equals(label))
-	  {
-	    this.agencyCategory = categoryInvid;
-	  }
-      }
+    this.normalCategory = findLabeledObject(normalCategoryLabel, userCategorySchema.BASE);
+    this.agencyCategory = findLabeledObject(agencyCategoryLabel, userCategorySchema.BASE);
 
     if (this.normalCategory == null)
       {
