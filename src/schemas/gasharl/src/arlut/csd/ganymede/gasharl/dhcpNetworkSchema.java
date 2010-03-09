@@ -60,6 +60,9 @@ package arlut.csd.ganymede.gasharl;
  */
 
 public interface dhcpNetworkSchema {
+
+  final static short BASE=268;
+
   final static short NAME=256;
   final static short NETWORK_NUMBER=257;
   final static short NETWORK_MASK=258;

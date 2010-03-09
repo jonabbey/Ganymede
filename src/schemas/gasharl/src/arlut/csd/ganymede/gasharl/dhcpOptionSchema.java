@@ -60,6 +60,9 @@ package arlut.csd.ganymede.gasharl;
  */
 
 public interface dhcpOptionSchema {
+
+  final static short BASE=264;
+
   final static short OPTIONNAME=256;
   final static short BUILTIN=260;
   final static short CUSTOMOPTION=259;

@@ -60,6 +60,9 @@ package arlut.csd.ganymede.gasharl;
  */
 
 public interface networkSchema {
+
+  final static short BASE=267;
+
   final static short NETNUMBER=256;
   final static short BROADCAST=257;
   final static short NETMASK=258;

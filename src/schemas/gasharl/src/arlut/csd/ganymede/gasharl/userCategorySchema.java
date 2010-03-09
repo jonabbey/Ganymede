@@ -66,6 +66,8 @@ public interface userCategorySchema {
   // you change the schema for the user, you'll want to change
   // this file to match.
 
+  final static short BASE=279;
+
   final static short TITLE=256;
   final static short SUMMARY=263;
   final static short DESCRIPTION=261;

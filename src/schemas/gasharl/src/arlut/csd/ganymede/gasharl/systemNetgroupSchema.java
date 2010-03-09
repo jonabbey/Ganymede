@@ -66,6 +66,8 @@ public interface systemNetgroupSchema {
   // you change the schema for the system netgroup, you'll want to change
   // this file to match.
 
+  final static short BASE=271;
+
   final static short NETGROUPNAME=256;
   final static short SYSTEMS=257;
   final static short MEMBERGROUPS=258;

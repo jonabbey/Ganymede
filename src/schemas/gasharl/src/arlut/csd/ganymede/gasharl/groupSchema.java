@@ -66,6 +66,8 @@ public interface groupSchema {
   // you change the schema for the group, you'll want to change
   // this file to match.
 
+  final static short BASE=257;
+
   final static short GROUPNAME=256;
   final static short PASSWORD=257;
   final static short GID=258;

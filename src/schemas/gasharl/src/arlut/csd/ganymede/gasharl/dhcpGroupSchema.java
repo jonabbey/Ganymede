@@ -60,6 +60,9 @@ package arlut.csd.ganymede.gasharl;
  */
 
 public interface dhcpGroupSchema {
+
+  final static short BASE=262;
+
   final static short NAME=256;
   final static short MEMBERS=257;
   final static short OPTIONS=258;

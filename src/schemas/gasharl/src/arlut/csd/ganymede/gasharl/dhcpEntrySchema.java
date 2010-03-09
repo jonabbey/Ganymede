@@ -60,6 +60,8 @@ package arlut.csd.ganymede.gasharl;
 
 public interface dhcpEntrySchema {
 
+  final static short BASE=266;
+
   // field id's for an option entry in the DHCP Group or system
   // objects.  These should match the current specs in the Ganymede
   // schema file precisely.  If you change the schema for the DHCP

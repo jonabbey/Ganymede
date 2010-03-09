@@ -70,6 +70,8 @@ public interface MailmanListSchema {
   // you change the schema for the MailmanList, you'll want to change
   // this file to match.
 
+  final static short BASE=260;
+
   final static short NAME=256;   // TODO CHANGE THESE
   final static short OWNEREMAIL=257;
   final static short PASSWORD=258;

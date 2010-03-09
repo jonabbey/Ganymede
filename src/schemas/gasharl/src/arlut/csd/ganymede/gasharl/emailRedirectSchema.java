@@ -66,6 +66,8 @@ public interface emailRedirectSchema {
   // you change the schema for the email redirect, you'll want to change
   // this file to match.
 
+  final static short BASE=275;
+
   final static short NAME=256;
   final static short TARGETS=257;
   final static short ALIASES=258;

@@ -66,6 +66,8 @@ public interface emailListSchema {
   // you change the schema for the email list, you'll want to change
   // this file to match.
 
+  final static short BASE=274;
+
   final static short LISTNAME=256;
   final static short ALIASES=259;
   final static short MEMBERS=257;

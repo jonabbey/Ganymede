@@ -66,6 +66,8 @@ public interface volumeSchema {
   // you change the schema for the volume, you'll want to change
   // this file to match.
 
+  final static short BASE=276;
+
   final static short LABEL=256;
   final static short HOST=257;
   final static short PATH=258;
