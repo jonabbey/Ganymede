@@ -70,6 +70,7 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.zipIt;
 import arlut.csd.ganymede.common.ClientMessage;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
@@ -851,6 +852,22 @@ public abstract class GanymedeBuilderTask implements Runnable {
   protected final String getLabel(Invid invid)
   {
     return session.viewObjectLabel(invid);
+  }
+
+  /**
+   * Finds an invid by title.
+   */
+
+  protected final Invid findLabeledObject(String label, short type)
+  {
+    try
+      {
+	return session.findLabeledObject(label, type);
+      }
+    catch (NotLoggedInException ex)
+      {
+	throw new RuntimeException(ex);
+      }
   }
 
   /**
