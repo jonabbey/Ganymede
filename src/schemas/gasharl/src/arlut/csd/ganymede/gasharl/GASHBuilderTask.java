@@ -251,7 +251,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // group
 
-    if (baseChanged((short) 257) ||
+    if (baseChanged(257) ||
         baseChanged(SchemaConstants.UserBase)) // in case a user was renamed
       {
         Ganymede.debug("Need to build group map");
@@ -281,7 +281,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         try
           {
             DBObject group;
-            Enumeration groups = enumerateObjects((short) 257);
+            Enumeration groups = enumerateObjects(257);
 
             while (groups.hasMoreElements())
               {
@@ -315,11 +315,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     if (baseChanged(SchemaConstants.UserBase) || // users
-        baseChanged((short) 257) ||  // account groups
-        baseChanged((short) 270) || // user netgroups
-        baseChanged((short) 274) || // mail lists
-        baseChanged((short) 275) || // external mail addresses
-        baseChanged((short) 260)) // mailman lists
+        baseChanged(257) ||  // account groups
+        baseChanged(270) || // user netgroups
+        baseChanged(274) || // mail lists
+        baseChanged(275) || // external mail addresses
+        baseChanged(260)) // mailman lists
       {
         Ganymede.debug("Need to build aliases map");
 
@@ -344,7 +344,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  }
       }
 
-    if (baseChanged((short) 260)) // mailman lists
+    if (baseChanged(260)) // mailman lists
       {
         Ganymede.debug("Need to call mailman ns8 sync script");
 
@@ -354,10 +354,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           }
       }
 
-    if (baseChanged((short) 271) || // system netgroups
-        baseChanged((short) 270) || // user netgroups
+    if (baseChanged(271) || // system netgroups
+        baseChanged(270) || // user netgroups
         baseChanged(SchemaConstants.UserBase) || // in case users were renamed
-        baseChanged((short) 263)) // in case systems were renamed
+        baseChanged(263)) // in case systems were renamed
       {
         Ganymede.debug("Need to build netgroup map");
 
@@ -372,11 +372,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           }
       }
 
-    if (baseChanged((short) 277) || // automounter maps
-        baseChanged((short) 276) || // nfs volumes
-        baseChanged((short) 263) || // in case systems were renamed
+    if (baseChanged(277) || // automounter maps
+        baseChanged(276) || // nfs volumes
+        baseChanged(263) || // in case systems were renamed
         baseChanged(SchemaConstants.UserBase) || // in case users were renamed
-        baseChanged((short) 278)) // automounter map entries
+        baseChanged(278)) // automounter map entries
       {
         Ganymede.debug("Need to build automounter maps");
 
@@ -386,9 +386,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           }
       }
 
-    if (baseChanged((short) 263) || // system base
-        baseChanged((short) 267) || // I.P. Network base
-        baseChanged((short) 265)) // system interface base
+    if (baseChanged(263) || // system base
+        baseChanged(267) || // I.P. Network base
+        baseChanged(265)) // system interface base
       {
         Ganymede.debug("Need to build DNS tables");
         writeSysFile();
@@ -396,13 +396,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         success = true;
       }
 
-    if (baseChanged((short) 263) || // system base
-        baseChanged((short) 267) || // I.P. Network base
-        baseChanged((short) 265) || // system interface base
-        baseChanged((short) 262) || // DHCP Group
-        baseChanged((short) 264) || // Embedded DHCP Option Value
-        baseChanged((short) 266) || // DHCP Option definition
-        baseChanged((short) 268))   // DHCP Network object
+    if (baseChanged(263) || // system base
+        baseChanged(267) || // I.P. Network base
+        baseChanged(265) || // system interface base
+        baseChanged(262) || // DHCP Group
+        baseChanged(264) || // Embedded DHCP Option Value
+        baseChanged(266) || // DHCP Option definition
+        baseChanged(268))   // DHCP Network object
       {
         Ganymede.debug("Need to build DHCP configuration file");
         writeDHCPFile();
@@ -1215,7 +1215,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         // first the user netgroups
 
-        netgroups = enumerateObjects((short) 270);
+        netgroups = enumerateObjects(270);
 
         while (netgroups.hasMoreElements())
           {
@@ -1226,7 +1226,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         // now the system netgroups
 
-        netgroups = enumerateObjects((short) 271);
+        netgroups = enumerateObjects(271);
 
         while (netgroups.hasMoreElements())
           {
@@ -1512,7 +1512,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         // first the user netgroups
 
-        netgroups = enumerateObjects((short) 270);
+        netgroups = enumerateObjects(270);
 
         while (netgroups.hasMoreElements())
           {
@@ -1627,7 +1627,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         // find the volume definitions
 
-        vols = enumerateObjects((short) 276);
+        vols = enumerateObjects(276);
 
         while (vols.hasMoreElements())
           {
@@ -1689,7 +1689,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // auto.home/auto.vol info rather than forcing it to be done
     // after-the-fact via perl.
 
-    maps = enumerateObjects((short) 277);
+    maps = enumerateObjects(277);
 
     while (maps.hasMoreElements())
       {
@@ -1794,7 +1794,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         // and the mailman mail lists
 
-        mailmanLists = enumerateObjects((short) 260);
+        mailmanLists = enumerateObjects(260);
 
         while (mailmanLists.hasMoreElements())
           {
@@ -1904,7 +1904,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         // now the mail lists
 
-        mailgroups = enumerateObjects((short) 274);
+        mailgroups = enumerateObjects(274);
 
         while (mailgroups.hasMoreElements())
           {
@@ -1915,7 +1915,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         // add in emailable account groups
 
-        mailgroups = enumerateObjects((short) 257);
+        mailgroups = enumerateObjects(257);
 
         while (mailgroups.hasMoreElements())
           {
@@ -1926,7 +1926,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         // add in emailable user netgroups
 
-        mailgroups = enumerateObjects((short) 270);
+        mailgroups = enumerateObjects(270);
 
         while (mailgroups.hasMoreElements())
           {
@@ -1937,7 +1937,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         // and the external mail addresses
 
-        externals = enumerateObjects((short) 275);
+        externals = enumerateObjects(275);
 
         while (externals.hasMoreElements())
           {
@@ -2636,28 +2636,28 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    // mail lists
 
-	    for (DBObject group: getObjects((short) 274))
+	    for (DBObject group: getObjects(274))
 	      {
                 writeHashGroupAlias(group, pfmalias);
 	      }
 
 	    // emailable account groups
 
-	    for (DBObject group: getObjects((short) 257))
+	    for (DBObject group: getObjects(257))
 	      {
                 writeHashAccountGroupAlias(group, pfmalias);
 	      }
 
 	    // emailable user netgroups
 
-            for (DBObject group: getObjects((short) 270))
+            for (DBObject group: getObjects(270))
               {
                 writeHashUserNetgroupAlias(group, pfmalias);
               }
 
 	    // external mail addresses
 
-            for (DBObject external: getObjects((short) 275))
+            for (DBObject external: getObjects(275))
               {
                 writeHashExternalAlias(external, pfmalias);
               }
@@ -3724,7 +3724,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	// first we write out UNIX account groups
 
-	groups = enumerateObjects((short) 257);
+	groups = enumerateObjects(257);
 
 	while (groups.hasMoreElements())
 	  {
@@ -3760,7 +3760,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	// second we write out user netgroups
 
-	groups = enumerateObjects((short) 270);
+	groups = enumerateObjects(270);
 
 	while (groups.hasMoreElements())
 	  {
@@ -4077,7 +4077,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	// the system lines first, followed by all of the interface
 	// lines.
 
-	systems = enumerateObjects((short) 263);
+	systems = enumerateObjects(263);
 
 	while (systems.hasMoreElements())
 	  {
@@ -4269,7 +4269,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	// the system lines first, followed by all of the interface
 	// lines.
 
-	systems = enumerateObjects((short) 263);
+	systems = enumerateObjects(263);
 
 	while (systems.hasMoreElements())
 	  {
@@ -4280,7 +4280,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	// now the interfaces
 
-	interfaces = enumerateObjects((short) 265);
+	interfaces = enumerateObjects(265);
 
 	while (interfaces.hasMoreElements())
 	  {
@@ -4610,7 +4610,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     this.customOptions = new HashSet();
 
-    networks = (List<DBObject>) java.util.Collections.list(enumerateObjects((short) 268));
+    networks = (List<DBObject>) java.util.Collections.list(enumerateObjects(268));
     java.util.Collections.sort(networks, new NetworkSortByName());
 
     for (DBObject networkObject: networks)
@@ -4618,7 +4618,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	writeDHCPNetwork(networkObject, nullWriter);
       }
 
-    systems = enumerateObjects((short) 263);
+    systems = enumerateObjects(263);
 
     while (systems.hasMoreElements())
       {
@@ -4665,7 +4665,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	// we're going to sort the DHCPNetwork objects by name so that
 	// we are sure to write out the _GLOBAL_ record first.
 
-	networks = (List<DBObject>) java.util.Collections.list(enumerateObjects((short) 268));
+	networks = (List<DBObject>) java.util.Collections.list(enumerateObjects(268));
 	java.util.Collections.sort(networks, new NetworkSortByName());
 
 	for (DBObject networkObject: networks)
@@ -4677,7 +4677,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	dhcpFileWriter.println("# Per System Data");
 	dhcpFileWriter.println("#===============================================================================");
 
-	systems = enumerateObjects((short) 263);
+	systems = enumerateObjects(263);
 
 	while (systems.hasMoreElements())
 	  {
@@ -5305,7 +5305,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private void scanCategories()
   {
-    Enumeration categories = enumerateObjects((short) 279);
+    Enumeration categories = enumerateObjects(279);
 
     while (categories.hasMoreElements() &&
 	   (this.normalCategory == null || this.agencyCategory == null))
