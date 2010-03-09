@@ -538,6 +538,45 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   /**
    * This method is used by subclasses of GanymedeBuilderTask to
+   * determine whether a particular base has had any modifications
+   * made to it since the last time this builder task was run.  This
+   * method works because each GanymedeBuilderTask object keeps a
+   * timestamp which records the last time the builder task ran.
+   * baseChanged() just compares that time stamp against the {@link
+   * arlut.csd.ganymede.server.DBObjectBase#lastChange} time stamp
+   * that the {@link arlut.csd.ganymede.server.DBObjectBase} class
+   * maintains at transaction commit.  Note that this method will
+   * always return true the first time a particular builder task is
+   * run after the server is started.  This means that the first time
+   * a transaction is committed when you start your server, your
+   * builder task will wind up doing a full build.
+   *
+   * See also the {@link
+   * arlut.csd.ganymede.server.GanymedeBuilderTask#baseChanged(short,
+   * java.util.List)} version of this method, which allows you to
+   * specify a list of fields that you are interested in testing.
+   *
+   * Note: This variant of baseChanged() takes an int and casts it to
+   * a short to remove the need from casting literals on the caller's
+   * behalf.  If the baseid does not fit in the 16 bit two's
+   * complement short range, an IllegalArgumentExceptio will be
+   * thrown.
+   *
+   * @param baseid The id number of the base to be checked
+   */
+
+  protected final boolean baseChanged(int baseid)
+  {
+    if (baseid < 0 || baseid > Short.MAX_VALUE)
+      {
+	throw new IllegalArgumentException("Out of range value: " + baseid);
+      }
+
+    return this.baseChanged((short) baseid);
+  }
+
+  /**
+   * This method is used by subclasses of GanymedeBuilderTask to
    * determine whether a particular field of a particular base has had
    * any modifications made to it since the last time this builder
    * task was run.  This method works because each GanymedeBuilderTask
@@ -617,6 +656,50 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   /**
    * This method is used by subclasses of GanymedeBuilderTask to
+   * determine whether a particular field of a particular base has had
+   * any modifications made to it since the last time this builder
+   * task was run.  This method works because each GanymedeBuilderTask
+   * object keeps a set of timestamp which records the last time the
+   * builder task ran.  baseChanged() just compares that time stamp
+   * against the {@link
+   * arlut.csd.ganymede.server.DBObjectBaseField#lastChange} time
+   * stamp that the {@link
+   * arlut.csd.ganymede.server.DBObjectBaseField} class maintains at
+   * transaction commit.  Note that this method will always return
+   * true the first time a particular builder task is run after the
+   * server is started.  This means that the first time a transaction
+   * is committed when you start your server, your builder task will
+   * wind up doing a full build.
+   *
+   * Otherwise, if none of the fields listed have changed since
+   * this GanymedeBuilderTask was last run, baseChanged() will return
+   * false.  If any of the fields in the fieldIds list have changed
+   * since this GanymedeBuilderTask last ran, baseChanged() will
+   * return true.
+   *
+   * Note: This variant of baseChanged() takes an int and casts it
+   * to a short to remove the need from casting literals on the
+   * caller's behalf.  If the baseid does not fit in the 16 bit two's
+   * complement short range, an IllegalArgumentExceptio will be
+   * thrown.
+   *
+   * @param baseid The id number of the base to be checked
+   * @param fieldIds A list of java.lang.Short's containing the
+   * id numbers of the fields to examine.
+   */
+
+  protected final boolean baseChanged(int baseid, List fieldIds)
+  {
+    if (baseid < 0 || baseid > Short.MAX_VALUE)
+      {
+	throw new IllegalArgumentException("Out of range value: " + baseid);
+      }
+
+    return this.baseChanged((short) baseid, fieldIds);
+  }
+
+  /**
+   * This method is used by subclasses of GanymedeBuilderTask to
    * obtain a list of DBObject references of the requested
    * type.
    *
@@ -652,6 +735,38 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * obtain a list of DBObject references of the requested
    * type.
    *
+   * Note that the Enumeration returned by this method MUST NOT
+   * be used after builderPhase1() returns.  This Enumeration is
+   * only valid while the base in question is locked with the
+   * global dumpLock obtained before builderPhase1() is run and
+   * which is released after builderPhase1() returns.
+   *
+   * Note: This variant of enumerateObjects takes an int and casts it
+   * to a short to remove the need from casting constants on the
+   * caller's behalf.  If the baseid does not fit in the 16 bit two's
+   * complement short range, an IllegalArgumentExceptio will be
+   * thrown.
+   *
+   * @param baseid The id number of the base to be listed
+   *
+   * @return An Enumeration of {@link arlut.csd.ganymede.server.DBObject DBObject} references
+   */
+
+  protected final Enumeration enumerateObjects(int baseid)
+  {
+    if (baseid < 0 || baseid > Short.MAX_VALUE)
+      {
+	throw new IllegalArgumentException("Out of range value: " + baseid);
+      }
+
+    return this.enumerateObjects((short) baseid);
+  }
+
+  /**
+   * This method is used by subclasses of GanymedeBuilderTask to
+   * obtain a list of DBObject references of the requested
+   * type.
+   *
    * Note that the Iterable returned by this method MUST NOT
    * be used after builderPhase1() returns.  This Iterable is
    * only valid while the base in question is locked with the
@@ -678,6 +793,39 @@ public abstract class GanymedeBuilderTask implements Runnable {
     DBObjectBase base = Ganymede.db.getObjectBase(baseid);
 
     return base.getObjects();
+  }
+
+  /**
+   * This method is used by subclasses of GanymedeBuilderTask to
+   * obtain a list of DBObject references of the requested
+   * type.
+   *
+   * Note that the Iterable returned by this method MUST NOT
+   * be used after builderPhase1() returns.  This Iterable is
+   * only valid while the base in question is locked with the
+   * global dumpLock obtained before builderPhase1() is run and
+   * which is released after builderPhase1() returns.
+   *
+   * Note: This variant of getObjects() takes an int and casts it
+   * to a short to remove the need from casting constants on the
+   * caller's behalf.  If the baseid does not fit in the 16 bit two's
+   * complement short range, an IllegalArgumentExceptio will be
+   * thrown.
+   *
+   * @param baseid The id number of the base to be listed
+   *
+   * @return An Iterable of {@link arlut.csd.ganymede.server.DBObject
+   * DBObject} references
+   */
+
+  protected final Iterable<DBObject> getObjects(int baseid)
+  {
+    if (baseid < 0 || baseid > Short.MAX_VALUE)
+      {
+	throw new IllegalArgumentException("Out of range value: " + baseid);
+      }
+
+    return this.getObjects((short) baseid);
   }
 
   /**
