@@ -3,15 +3,15 @@
    GASHBuilderTask.java
 
    This class is intended to dump the Ganymede datastore to GASH.
-   
+
    Created: 21 May 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -172,31 +172,31 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (path == null)
       {
-	path = System.getProperty("ganymede.builder.output");
- 
-	if (path == null)
-	  {
-	    throw new RuntimeException("GASHBuilder not able to determine output directory.. need to set the ganymede.builder.output property in ganymede.properties.");
-	  }
+        path = System.getProperty("ganymede.builder.output");
 
-	path = PathComplete.completePath(path);
+        if (path == null)
+          {
+            throw new RuntimeException("GASHBuilder not able to determine output directory.. need to set the ganymede.builder.output property in ganymede.properties.");
+          }
+
+        path = PathComplete.completePath(path);
       }
 
     if (dnsdomain == null)
       {
-	dnsdomain = System.getProperty("ganymede.gash.dnsdomain");
+        dnsdomain = System.getProperty("ganymede.gash.dnsdomain");
 
-	if (dnsdomain == null)
-	  {
-	    throw new RuntimeException("GASHBuilder not able to determine DNS domain.");
-	  }
+        if (dnsdomain == null)
+          {
+            throw new RuntimeException("GASHBuilder not able to determine DNS domain.");
+          }
 
-	// prepend a dot if we need to
+        // prepend a dot if we need to
 
-	if (dnsdomain.indexOf('.') != 0)
-	  {
-	    dnsdomain = "." + dnsdomain;
-	  }
+        if (dnsdomain.indexOf('.') != 0)
+          {
+            dnsdomain = "." + dnsdomain;
+          }
       }
 
     now = null;
@@ -205,199 +205,208 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (baseChanged(SchemaConstants.UserBase))
       {
-	Ganymede.debug("Need to build user map");
+        Ganymede.debug("Need to build user map");
 
-	out = null;
+        out = null;
 
-	try
-	  {
-	    out = openOutFile(path + "user_info", "gasharl");
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open user_info file: " + ex);
-	  }
-	
-	if (out != null)
-	  {
-	    try
-	      {
-		DBObject user;
-		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-		
-		while (users.hasMoreElements())
-		  {
-		    user = (DBObject) users.nextElement();
-		    
-		    writeUserLine(user, out);
-		  }
-	      }
-	    finally
-	      {
-		out.close();
-	      }
-	  }
+        try
+          {
+            out = openOutFile(path + "user_info", "gasharl");
+          }
+        catch (IOException ex)
+          {
+            System.err.println("GASHBuilderTask.builderPhase1(): couldn't open user_info file: " + ex);
+          }
 
-	writeMailDirect2();
-	writeMailDirect3();	// the new gany_iris_export.txt file for Carrie
-	writeSambafileVersion1();
-	writeSambafileVersion2();
-	writeUserSyncFile();
-	writeHTTPfiles();
-	writeExternalMailFiles();
+        if (out != null)
+          {
+            try
+              {
+                DBObject user;
+                Enumeration users = enumerateObjects(SchemaConstants.UserBase);
 
-	success = true;
+                while (users.hasMoreElements())
+                  {
+                    user = (DBObject) users.nextElement();
+
+                    writeUserLine(user, out);
+                  }
+              }
+            finally
+              {
+                out.close();
+              }
+          }
+
+        writeMailDirect2();
+        writeMailDirect3();     // the new gany_iris_export.txt file for Carrie
+        writeSambafileVersion1();
+        writeSambafileVersion2();
+        writeUserSyncFile();
+        writeHTTPfiles();
+        writeExternalMailFiles();
+
+        success = true;
       }
 
     // group
 
     if (baseChanged((short) 257) ||
-	baseChanged(SchemaConstants.UserBase)) // in case a user was renamed
+        baseChanged(SchemaConstants.UserBase)) // in case a user was renamed
       {
-	Ganymede.debug("Need to build group map");
+        Ganymede.debug("Need to build group map");
 
-	out = null;
+        out = null;
 
-	try
-	  {
-	    out = openOutFile(path + "group_info", "gasharl");
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open group_info file: " + ex);
-	  }
-	
-	PrintWriter out2 = null;
+        try
+          {
+            out = openOutFile(path + "group_info", "gasharl");
+          }
+        catch (IOException ex)
+          {
+            System.err.println("GASHBuilderTask.builderPhase1(): couldn't open group_info file: " + ex);
+          }
 
-	try
-	  {
-	    out2 = openOutFile(path + "group.owner", "gasharl");
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("GASHBuilderTask.builderPhase1(): couldn't open group.owner file: " + ex);
-	  }
+        PrintWriter out2 = null;
 
-	try
-	  {
-	    DBObject group;
-	    Enumeration groups = enumerateObjects((short) 257);
-		
-	    while (groups.hasMoreElements())
-	      {
-		group = (DBObject) groups.nextElement();
-		
-		if (out != null)
-		  {
-		    writeGroupLine(group, out);
-		  }
+        try
+          {
+            out2 = openOutFile(path + "group.owner", "gasharl");
+          }
+        catch (IOException ex)
+          {
+            System.err.println("GASHBuilderTask.builderPhase1(): couldn't open group.owner file: " + ex);
+          }
 
-		if (out2 != null)
-		  {
-		    writeGroupOwnerLine(group, out2);
-		  }
-	      }
-	  }
-	finally
-	  {
-	    if (out != null)
-	      {
-		out.close();
-	      }
+        try
+          {
+            DBObject group;
+            Enumeration groups = enumerateObjects((short) 257);
 
-	    if (out2 != null)
-	      {
-		out2.close();
-	      }
-	  }
+            while (groups.hasMoreElements())
+              {
+                group = (DBObject) groups.nextElement();
 
-	success = true;
+                if (out != null)
+                  {
+                    writeGroupLine(group, out);
+                  }
+
+                if (out2 != null)
+                  {
+                    writeGroupOwnerLine(group, out2);
+                  }
+              }
+          }
+        finally
+          {
+            if (out != null)
+              {
+                out.close();
+              }
+
+            if (out2 != null)
+              {
+                out2.close();
+              }
+          }
+
+        success = true;
       }
 
     if (baseChanged(SchemaConstants.UserBase) || // users
         baseChanged((short) 257) ||  // account groups
         baseChanged((short) 270) || // user netgroups
-	baseChanged((short) 274) || // mail lists
-	baseChanged((short) 275) || // external mail addresses
-	baseChanged((short) 260)) // mailman lists  
+        baseChanged((short) 274) || // mail lists
+        baseChanged((short) 275) || // external mail addresses
+        baseChanged((short) 260)) // mailman lists
       {
-	Ganymede.debug("Need to build aliases map");
+        Ganymede.debug("Need to build aliases map");
 
-	if (writeAliasesFile() && writeEmailLists())
+        if (writeAliasesFile() && writeEmailLists())
+          {
+            success = true;
+          }
+
+        // the postfix versions of those files.
+        // jgs, 15 feb 2010
+
+	try
 	  {
-	    success = true;
+	    if (writeHashAliasesFile())
+	      {
+		success = true;
+	      }
 	  }
-	//	the postfix versions of those files.
-	//	jgs, 15 feb 2010
-	if ( writeHashAliasesFile() )
+	catch (IOException ex)
 	  {
-	    success = true;
+	    throw new RuntimeException(ex);
 	  }
       }
 
-    if (baseChanged((short) 260)) // mailman lists  
+    if (baseChanged((short) 260)) // mailman lists
       {
-	Ganymede.debug("Need to call mailman ns8 sync script");
+        Ganymede.debug("Need to call mailman ns8 sync script");
 
-	if (writeMailmanListsFile())
-	  {
-	    success = true;
-	  }
+        if (writeMailmanListsFile())
+          {
+            success = true;
+          }
       }
 
     if (baseChanged((short) 271) || // system netgroups
-	baseChanged((short) 270) || // user netgroups
-	baseChanged(SchemaConstants.UserBase) || // in case users were renamed
-	baseChanged((short) 263)) // in case systems were renamed
+        baseChanged((short) 270) || // user netgroups
+        baseChanged(SchemaConstants.UserBase) || // in case users were renamed
+        baseChanged((short) 263)) // in case systems were renamed
       {
-	Ganymede.debug("Need to build netgroup map");
+        Ganymede.debug("Need to build netgroup map");
 
-	if (writeNetgroupFile())
-	  {
-	    success = true;
-	  }
+        if (writeNetgroupFile())
+          {
+            success = true;
+          }
 
-	if (writeUserNetgroupFile())
-	  {
-	    success = true;
-	  }
+        if (writeUserNetgroupFile())
+          {
+            success = true;
+          }
       }
 
     if (baseChanged((short) 277) || // automounter maps
-	baseChanged((short) 276) || // nfs volumes
-	baseChanged((short) 263) || // in case systems were renamed
-	baseChanged(SchemaConstants.UserBase) || // in case users were renamed
-	baseChanged((short) 278)) // automounter map entries
+        baseChanged((short) 276) || // nfs volumes
+        baseChanged((short) 263) || // in case systems were renamed
+        baseChanged(SchemaConstants.UserBase) || // in case users were renamed
+        baseChanged((short) 278)) // automounter map entries
       {
-	Ganymede.debug("Need to build automounter maps");
+        Ganymede.debug("Need to build automounter maps");
 
-	if (writeAutoMounterFiles())
-	  {
-	    success = true;
-	  }
+        if (writeAutoMounterFiles())
+          {
+            success = true;
+          }
       }
 
     if (baseChanged((short) 263) || // system base
-	baseChanged((short) 267) || // I.P. Network base
-	baseChanged((short) 265)) // system interface base
+        baseChanged((short) 267) || // I.P. Network base
+        baseChanged((short) 265)) // system interface base
       {
-	Ganymede.debug("Need to build DNS tables");
-	writeSysFile();
-	writeSysDataFile();
-	success = true;
+        Ganymede.debug("Need to build DNS tables");
+        writeSysFile();
+        writeSysDataFile();
+        success = true;
       }
 
     if (baseChanged((short) 263) || // system base
-	baseChanged((short) 267) || // I.P. Network base
-	baseChanged((short) 265) || // system interface base
+        baseChanged((short) 267) || // I.P. Network base
+        baseChanged((short) 265) || // system interface base
         baseChanged((short) 262) || // DHCP Group
         baseChanged((short) 264) || // Embedded DHCP Option Value
         baseChanged((short) 266) || // DHCP Option definition
         baseChanged((short) 268))   // DHCP Network object
       {
-	Ganymede.debug("Need to build DHCP configuration file");
+        Ganymede.debug("Need to build DHCP configuration file");
         writeDHCPFile();
-	success = true;
+        success = true;
       }
 
     Ganymede.debug("GASHBuilderTask builderPhase1 completed");
@@ -427,7 +436,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (buildScript == null)
       {
-	buildScript = System.getProperty("ganymede.builder.scriptlocation");
+        buildScript = System.getProperty("ganymede.builder.scriptlocation");
 
         if (buildScript == null)
           {
@@ -436,8 +445,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             return false;
           }
 
-	buildScript = PathComplete.completePath(buildScript);
-	buildScript = buildScript + "gashbuilder";
+        buildScript = PathComplete.completePath(buildScript);
+        buildScript = buildScript + "gashbuilder";
       }
 
     int resultCode = -999;      // a resultCode of 0 is success
@@ -446,23 +455,23 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (file.exists())
       {
-	try
-	  {
-	    resultCode = FileOps.runProcess(buildScript);
-	  }
-	catch (IOException ex)
-	  {
-	    Ganymede.debug("Couldn't exec buildScript (" + buildScript + 
-			   ") due to IOException: " + ex);
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
-	  }
+        try
+          {
+            resultCode = FileOps.runProcess(buildScript);
+          }
+        catch (IOException ex)
+          {
+            Ganymede.debug("Couldn't exec buildScript (" + buildScript +
+                           ") due to IOException: " + ex);
+          }
+        catch (InterruptedException ex)
+          {
+            Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
+          }
       }
     else
       {
-	Ganymede.debug(buildScript + " doesn't exist, not running external GASH build script");
+        Ganymede.debug(buildScript + " doesn't exist, not running external GASH build script");
       }
 
     if (resultCode != 0)
@@ -542,14 +551,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (passField != null)
       {
-	cryptedPass = passField.getUNIXCryptText();
+        cryptedPass = passField.getUNIXCryptText();
       }
     else
       {
-	inactivated = true;
+        inactivated = true;
 
-	// System.err.println("GASHBuilder.writeUserLine(): null password for user " + username);
-	cryptedPass = "**Nopass**";
+        // System.err.println("GASHBuilder.writeUserLine(): null password for user " + username);
+        cryptedPass = "**Nopass**";
       }
 
     uid = ((Integer) object.getFieldValueLocal(userSchema.UID)).intValue();
@@ -558,23 +567,23 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (uid == 0)
       {
-	Ganymede.debug("GASHBuilder.writeUserLine(): *** root uid in user " + username + ", skipping!! ***");
-	return;			// no writeLine
+        Ganymede.debug("GASHBuilder.writeUserLine(): *** root uid in user " + username + ", skipping!! ***");
+        return;                 // no writeLine
       }
 
     // get the gid
-    
+
     groupInvid = (Invid) object.getFieldValueLocal(userSchema.HOMEGROUP); // home group
 
     if (groupInvid == null)
       {
-	System.err.println("GASHBuilder.writeUserLine(): null gid for user " + username);
-	gid = -1;
+        System.err.println("GASHBuilder.writeUserLine(): null gid for user " + username);
+        gid = -1;
       }
     else
       {
-	group = getObject(groupInvid);
-	gid = ((Integer) group.getFieldValueLocal(groupSchema.GID)).intValue();
+        group = getObject(groupInvid);
+        gid = ((Integer) group.getFieldValueLocal(groupSchema.GID)).intValue();
       }
 
     name = (String) object.getFieldValueLocal(userSchema.FULLNAME);
@@ -588,11 +597,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (inactivated)
       {
-	shell = "/bin/false";
+        shell = "/bin/false";
       }
     else
       {
-	shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
+        shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
       }
 
     // now build our output line
@@ -615,8 +624,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (homePhone != null && !homePhone.equals(""))
       {
-	result.append(",");
-	result.append(homePhone);
+        result.append(",");
+        result.append(homePhone);
       }
 
     result.append(":");
@@ -629,8 +638,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (categoryInvid != null)
       {
-	category = getLabel(categoryInvid);
-	result.append(category);
+        category = getLabel(categoryInvid);
+        result.append(category);
       }
 
     result.append(":");
@@ -639,18 +648,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (expDate != null)
       {
-	long timecode = expDate.getTime();
+        long timecode = expDate.getTime();
 
-	// we want to emit a UNIX timecode, which is one thousandth the
-	// value of the Java timecode.  We will overflow here if the
-	// expiration date is past 2038, but this will make Steve happy.
+        // we want to emit a UNIX timecode, which is one thousandth the
+        // value of the Java timecode.  We will overflow here if the
+        // expiration date is past 2038, but this will make Steve happy.
 
-	int mytimecode = (int) (timecode/1000);
-	result.append(mytimecode);
+        int mytimecode = (int) (timecode/1000);
+        result.append(mytimecode);
       }
     else
       {
-	result.append("0");
+        result.append("0");
       }
 
     // Back in the GASH days, we appended the name of the admin who
@@ -662,8 +671,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("GASHBuilder.writeUserLine(): Warning!  user " + 
-			   username + " overflows the GASH line length!");
+        System.err.println("GASHBuilder.writeUserLine(): Warning!  user " +
+                           username + " overflows the GASH line length!");
       }
 
     writer.println(result.toString());
@@ -692,73 +701,73 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	out = openOutFile(path + "maildirect2", "gasharl");
+        out = openOutFile(path + "maildirect2", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open maildirect2 file: " + ex);
-	return;
+        System.err.println("GASHBuilderTask.builderPhase1(): couldn't open maildirect2 file: " + ex);
+        return;
       }
-	
+
     try
       {
-	DBObject user;
-	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-		
-	while (users.hasMoreElements())
-	  {
-	    user = (DBObject) users.nextElement();
+        DBObject user;
+        Enumeration users = enumerateObjects(SchemaConstants.UserBase);
 
-	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
-	    String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
-	    String badgeNum = (String) user.getFieldValueLocal(userSchema.BADGE);
-	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
+        while (users.hasMoreElements())
+          {
+            user = (DBObject) users.nextElement();
 
-	    if (username != null && signature != null && badgeNum != null && 
-		category != null && category.equals(getNormalCategory()) && !user.isInactivated())
-	      {
-		if (map.containsKey(badgeNum))
-		  {
-		    // we've got more than one entry with the same
-		    // badge number.. that should only
-		    // happen if one of the users is an GASH admin, or
-		    // if one is inactivated.
+            String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
+            String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
+            String badgeNum = (String) user.getFieldValueLocal(userSchema.BADGE);
+            Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
 
-		    DBObject oldUser = (DBObject) map.get(badgeNum);
+            if (username != null && signature != null && badgeNum != null &&
+                category != null && category.equals(getNormalCategory()) && !user.isInactivated())
+              {
+                if (map.containsKey(badgeNum))
+                  {
+                    // we've got more than one entry with the same
+                    // badge number.. that should only
+                    // happen if one of the users is an GASH admin, or
+                    // if one is inactivated.
 
-		    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+                    DBObject oldUser = (DBObject) map.get(badgeNum);
 
-		    if (field != null && field.isDefined())
-		      {
-			continue; // we've already got an admin record for this badge number
-		      }
-		  }
+                    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
 
-		result.setLength(0);
+                    if (field != null && field.isDefined())
+                      {
+                        continue; // we've already got an admin record for this badge number
+                      }
+                  }
 
-		result.append(badgeNum);
-		result.append(" ");
-		result.append(signature);
-		result.append("@");
-		result.append(dnsdomain.substring(1)); // skip leading .
-		result.append(" ");
-		result.append(username);
+                result.setLength(0);
 
-		map.put(badgeNum, user);
-		results.put(badgeNum, result.toString());
-	      }
-	  }
+                result.append(badgeNum);
+                result.append(" ");
+                result.append(signature);
+                result.append("@");
+                result.append(dnsdomain.substring(1)); // skip leading .
+                result.append(" ");
+                result.append(username);
 
-	Enumeration lines = results.elements();
+                map.put(badgeNum, user);
+                results.put(badgeNum, result.toString());
+              }
+          }
 
-	while (lines.hasMoreElements())
-	  {
-	    out.println((String) lines.nextElement());
-	  }
+        Enumeration lines = results.elements();
+
+        while (lines.hasMoreElements())
+          {
+            out.println((String) lines.nextElement());
+          }
       }
     finally
       {
-	out.close();
+        out.close();
       }
   }
 
@@ -792,94 +801,94 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	out = openOutFile(path + "gany_iris_export.txt", "gasharl");
+        out = openOutFile(path + "gany_iris_export.txt", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open gany_iris_export.txt file: " + ex);
-	return;
+        System.err.println("GASHBuilderTask.builderPhase1(): couldn't open gany_iris_export.txt file: " + ex);
+        return;
       }
-	
+
     try
       {
-	DBObject user;
-	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+        DBObject user;
+        Enumeration users = enumerateObjects(SchemaConstants.UserBase);
 
-	while (users.hasMoreElements())
-	  {
-	    user = (DBObject) users.nextElement();
+        while (users.hasMoreElements())
+          {
+            user = (DBObject) users.nextElement();
 
-	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
-	    String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
-	    String badgeNum = (String) user.getFieldValueLocal(userSchema.BADGE);
-	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
+            String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
+            String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
+            String badgeNum = (String) user.getFieldValueLocal(userSchema.BADGE);
+            Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
 
-	    if (username != null && signature != null && badgeNum != null && 
-		category != null &&
-		(category.equals(getNormalCategory()) || category.equals(getAgencyCategory())) &&
-		!user.isInactivated())
-	      {
-		if (map.containsKey(badgeNum))
-		  {
-		    // we've got more than one entry with the same
-		    // badge number.. that should only
-		    // happen if one of the users is an GASH admin, or
-		    // if one is inactivated.
+            if (username != null && signature != null && badgeNum != null &&
+                category != null &&
+                (category.equals(getNormalCategory()) || category.equals(getAgencyCategory())) &&
+                !user.isInactivated())
+              {
+                if (map.containsKey(badgeNum))
+                  {
+                    // we've got more than one entry with the same
+                    // badge number.. that should only
+                    // happen if one of the users is an GASH admin, or
+                    // if one is inactivated.
 
-		    DBObject oldUser = map.get(badgeNum);
+                    DBObject oldUser = map.get(badgeNum);
 
-		    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
+                    DBField field = (DBField) oldUser.getField(userSchema.PERSONAE);
 
-		    if (field != null && field.isDefined())
-		      {
-			continue; // we've already got an admin record for this badge number
-		      }
-		  }
+                    if (field != null && field.isDefined())
+                      {
+                        continue; // we've already got an admin record for this badge number
+                      }
+                  }
 
-		result.setLength(0);
+                result.setLength(0);
 
-		result.append(badgeNum);
+                result.append(badgeNum);
 
-		int length = 6 - badgeNum.length();
+                int length = 6 - badgeNum.length();
 
-		for (int i = 0; i < length; i++)
-		  {
-		    result.append(" ");
-		  }
+                for (int i = 0; i < length; i++)
+                  {
+                    result.append(" ");
+                  }
 
-		result.append(username);
+                result.append(username);
 
-		length = 8 - username.length();
+                length = 8 - username.length();
 
-		for (int i = 0; i < length; i++)
-		  {
-		    result.append(" ");
-		  }
+                for (int i = 0; i < length; i++)
+                  {
+                    result.append(" ");
+                  }
 
-		String emailAddr = signature + "@" + dnsdomain.substring(1);
+                String emailAddr = signature + "@" + dnsdomain.substring(1);
 
-		result.append(emailAddr);
+                result.append(emailAddr);
 
-		length = 50 - emailAddr.length();
+                length = 50 - emailAddr.length();
 
-		for (int i = 0; i < length; i++)
-		  {
-		    result.append(" ");
-		  }
+                for (int i = 0; i < length; i++)
+                  {
+                    result.append(" ");
+                  }
 
-		map.put(badgeNum, user);
-		results.put(badgeNum, result.toString());
-	      }
-	  }
+                map.put(badgeNum, user);
+                results.put(badgeNum, result.toString());
+              }
+          }
 
-	for (String line: results.values())
-	  {
-	    out.println(line);
-	  }
+        for (String line: results.values())
+          {
+            out.println(line);
+          }
       }
     finally
       {
-	out.close();
+        out.close();
       }
   }
 
@@ -891,7 +900,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * The file is simple, and contains one user name per line.
    *
    * We take the trouble in this method to eliminate redundant
-   * mailings that would come to the same person if 
+   * mailings that would come to the same person if
    */
 
   private boolean writeEmailLists()
@@ -904,24 +913,24 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	out = openOutFile(path + "all_users.txt", "gasharl");
+        out = openOutFile(path + "all_users.txt", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open all_users.txt file: " + ex);
-	return false;
+        System.err.println("GASHBuilderTask.builderPhase1(): couldn't open all_users.txt file: " + ex);
+        return false;
       }
 
     try
       {
-	out2 = openOutFile(path + "all_employees.txt", "gasharl");
+        out2 = openOutFile(path + "all_employees.txt", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open all_employees.txt file: " + ex);
+        System.err.println("GASHBuilderTask.builderPhase1(): couldn't open all_employees.txt file: " + ex);
 
-	out.close();
-	return false;
+        out.close();
+        return false;
       }
 
     try
@@ -942,85 +951,85 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         out2.println("# " + (new Date()).toString());
         out2.println();
 
-	DBObject user;
-	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-		
+        DBObject user;
+        Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+
         while (users.hasMoreElements())
-	  {
-	    user = (DBObject) users.nextElement();
+          {
+            user = (DBObject) users.nextElement();
 
             if (user.isInactivated())
               {
                 continue;
               }
 
-	    Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
+            Invid category = (Invid) user.getFieldValueLocal(userSchema.CATEGORY);
 
-	    if (category == null ||
-		(!category.equals(getNormalCategory()) && !category.equals(getAgencyCategory())))
-	      {
-		continue;
-	      }
+            if (category == null ||
+                (!category.equals(getNormalCategory()) && !category.equals(getAgencyCategory())))
+              {
+                continue;
+              }
 
-	    String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
-	    Vector deliveryAddresses = user.getFieldValuesLocal(userSchema.EMAILTARGET);
+            String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
+            Vector deliveryAddresses = user.getFieldValuesLocal(userSchema.EMAILTARGET);
 
-	    // first all users
+            // first all users
 
-	    if (!targets.contains(username) && (category.equals(getNormalCategory()) || category.equals(getAgencyCategory())))
-	      {
-		boolean allSeen = true;
+            if (!targets.contains(username) && (category.equals(getNormalCategory()) || category.equals(getAgencyCategory())))
+              {
+                boolean allSeen = true;
 
-		for (int i = 0; i < deliveryAddresses.size(); i++)
-		  {
-		    if (!targets.contains(deliveryAddresses.elementAt(i)))
-		      {
-			allSeen = false;
-			targets.add(deliveryAddresses.elementAt(i));
-		      }
-		  }
+                for (int i = 0; i < deliveryAddresses.size(); i++)
+                  {
+                    if (!targets.contains(deliveryAddresses.elementAt(i)))
+                      {
+                        allSeen = false;
+                        targets.add(deliveryAddresses.elementAt(i));
+                      }
+                  }
 
-		if (!allSeen)
-		  {
-		    targets.add(username);
+                if (!allSeen)
+                  {
+                    targets.add(username);
 
-		    out.println(username);
-		  }
-	      }
+                    out.println(username);
+                  }
+              }
 
-	    // then employees only
+            // then employees only
 
-	    if (!targets2.contains(username) && category.equals(getNormalCategory()))
-	      {
-		boolean allSeen = true;
+            if (!targets2.contains(username) && category.equals(getNormalCategory()))
+              {
+                boolean allSeen = true;
 
-		for (int i = 0; i < deliveryAddresses.size(); i++)
-		  {
-		    if (!targets2.contains(deliveryAddresses.elementAt(i)))
-		      {
-			allSeen = false;
-			targets2.add(deliveryAddresses.elementAt(i));
-		      }
-		  }
+                for (int i = 0; i < deliveryAddresses.size(); i++)
+                  {
+                    if (!targets2.contains(deliveryAddresses.elementAt(i)))
+                      {
+                        allSeen = false;
+                        targets2.add(deliveryAddresses.elementAt(i));
+                      }
+                  }
 
-		if (!allSeen)
-		  {
-		    targets2.add(username);
+                if (!allSeen)
+                  {
+                    targets2.add(username);
 
-		    out2.println(username);
-		  }
-	      }
+                    out2.println(username);
+                  }
+              }
           }
       }
     finally
       {
-	out.close();
-	out2.close();
+        out.close();
+        out2.close();
       }
 
     return true;
   }
-  
+
   /**
    *
    * This method writes out a line to the group_info GASH source file.
@@ -1056,26 +1065,26 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // currently in the GASH schema, we skip group passwords
 
     gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
-    
+
     invids = object.getFieldValuesLocal(groupSchema.USERS);
 
     if (invids == null)
       {
-	// System.err.println("GASHBuilder.writeGroupLine(): null user list for group " + groupname);
+        // System.err.println("GASHBuilder.writeGroupLine(): null user list for group " + groupname);
       }
     else
       {
-	for (int i = 0; i < invids.size(); i++)
-	  {
-	    userInvid = (Invid) invids.elementAt(i);
-	    
-	    userName = getLabel(userInvid);
+        for (int i = 0; i < invids.size(); i++)
+          {
+            userInvid = (Invid) invids.elementAt(i);
 
-	    if (userName != null)
-	      {
-		users.addElement(userName);
-	      }
-	  }
+            userName = getLabel(userInvid);
+
+            if (userName != null)
+              {
+                users.addElement(userName);
+              }
+          }
       }
 
     // now build our output line
@@ -1087,12 +1096,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < users.size(); i++)
       {
-	if (i > 0)
-	  {
-	    result.append(",");
-	  }
+        if (i > 0)
+          {
+            result.append(",");
+          }
 
-	result.append((String) users.elementAt(i));
+        result.append((String) users.elementAt(i));
       }
 
     // okay, this marks the end of what we care about for the NIS
@@ -1102,8 +1111,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("GASHBuilder.writeGroupLine(): Warning!  group " + 
-			   groupname + " overflows the GASH line length!");
+        System.err.println("GASHBuilder.writeGroupLine(): Warning!  group " +
+                           groupname + " overflows the GASH line length!");
       }
 
     description = (String) object.getFieldValueLocal(groupSchema.DESCRIPTION);
@@ -1112,11 +1121,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (contractLink != null)
       {
-	contract = getLabel(contractLink);
+        contract = getLabel(contractLink);
       }
     else
       {
-	contract = (String) object.getFieldValueLocal(groupSchema.CONTRACT);
+        contract = (String) object.getFieldValueLocal(groupSchema.CONTRACT);
       }
 
     result.append(":");
@@ -1145,7 +1154,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String groupname;
     Vector ownerList;
     Vector ownerStringList = new Vector();
-    
+
     /* -- */
 
     result.setLength(0);
@@ -1155,25 +1164,25 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (ownerList != null)
       {
-	for (int i = 0; i < ownerList.size(); i++)
-	  {
-	    ownerStringList.addElement(getLabel((Invid) ownerList.elementAt(i)));
-	  }
+        for (int i = 0; i < ownerList.size(); i++)
+          {
+            ownerStringList.addElement(getLabel((Invid) ownerList.elementAt(i)));
+          }
       }
 
     // now build our output line
 
     result.append(groupname);
     result.append(":");
-    
+
     for (int i = 0; i < ownerStringList.size(); i++)
       {
-	if (i != 0)
-	  {
-	    result.append(",");
-	  }
+        if (i != 0)
+          {
+            result.append(",");
+          }
 
-	result.append((String) ownerStringList.elementAt(i));
+        result.append((String) ownerStringList.elementAt(i));
       }
 
     writer.println(result.toString());
@@ -1195,40 +1204,40 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	netgroupFile = openOutFile(path + "netgroup", "gasharl");
+        netgroupFile = openOutFile(path + "netgroup", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeNetgroup(): couldn't open netgroup file: " + ex);
+        System.err.println("GASHBuilderTask.writeNetgroup(): couldn't open netgroup file: " + ex);
       }
 
     try
       {
-	// first the user netgroups
+        // first the user netgroups
 
-	netgroups = enumerateObjects((short) 270);
+        netgroups = enumerateObjects((short) 270);
 
-	while (netgroups.hasMoreElements())
-	  {
-	    netgroup = (DBObject) netgroups.nextElement();
-	
-	    writeUserNetgroup(netgroup, netgroupFile);
-	  }
+        while (netgroups.hasMoreElements())
+          {
+            netgroup = (DBObject) netgroups.nextElement();
 
-	// now the system netgroups
-    
-	netgroups = enumerateObjects((short) 271);
+            writeUserNetgroup(netgroup, netgroupFile);
+          }
 
-	while (netgroups.hasMoreElements())
-	  {
-	    netgroup = (DBObject) netgroups.nextElement();
-	
-	    writeSystemNetgroup(netgroup, netgroupFile);
-	  }
+        // now the system netgroups
+
+        netgroups = enumerateObjects((short) 271);
+
+        while (netgroups.hasMoreElements())
+          {
+            netgroup = (DBObject) netgroups.nextElement();
+
+            writeSystemNetgroup(netgroup, netgroupFile);
+          }
       }
     finally
       {
-	netgroupFile.close();
+        netgroupFile.close();
       }
 
     return true;
@@ -1239,7 +1248,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * This method writes out a single user netgroup out to disk,
    * wrapping the netgroup if it gets too long.
    *
-   * omg-u	csd-u (-,broccol,) (-,gomod,) (-,etcrh,)
+   * omg-u      csd-u (-,broccol,) (-,gomod,) (-,etcrh,)
    *
    */
 
@@ -1285,66 +1294,66 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (memberNetgroups != null)
       {
-	for (int i = 0; i < memberNetgroups.size(); i++)
-	  {
-	    ref = (Invid) memberNetgroups.elementAt(i);
-	    refLabel = getLabel(ref);
-	    
-	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {
-		if (subgroup > 1)
-		  {
-		    subname = name + "-ext" + subgroup;
-		  }
-		else
-		  {
-		    subname = name + "-ext";
-		  }
-		
-		buffer.append(" ");
-		buffer.append(subname);
-		writer.println(buffer.toString());
-		buffer = new StringBuilder();
-		buffer.append(subname);
-		subgroup++;
-	      }
-	    
-	    buffer.append(" ");
-	    buffer.append(refLabel);
-	  }
+        for (int i = 0; i < memberNetgroups.size(); i++)
+          {
+            ref = (Invid) memberNetgroups.elementAt(i);
+            refLabel = getLabel(ref);
+
+            if (buffer.length() + refLabel.length() > lengthlimit)
+              {
+                if (subgroup > 1)
+                  {
+                    subname = name + "-ext" + subgroup;
+                  }
+                else
+                  {
+                    subname = name + "-ext";
+                  }
+
+                buffer.append(" ");
+                buffer.append(subname);
+                writer.println(buffer.toString());
+                buffer = new StringBuilder();
+                buffer.append(subname);
+                subgroup++;
+              }
+
+            buffer.append(" ");
+            buffer.append(refLabel);
+          }
       }
 
     if (users != null)
       {
-	for (int i = 0; i < users.size(); i++)
-	  {
-	    ref = (Invid) users.elementAt(i);
-	    refLabel = getLabel(ref);
+        for (int i = 0; i < users.size(); i++)
+          {
+            ref = (Invid) users.elementAt(i);
+            refLabel = getLabel(ref);
 
-	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {
-		if (subgroup > 1)
-		  {
-		    subname = name + "-ext" + subgroup;
-		  }
-		else
-		  {
-		    subname = name + "-ext";
-		  }
-		
-		buffer.append(" ");
-		buffer.append(subname);
-		writer.println(buffer.toString());
-		buffer = new StringBuilder();
-		buffer.append(subname);
-		subgroup++;
-	      }
+            if (buffer.length() + refLabel.length() > lengthlimit)
+              {
+                if (subgroup > 1)
+                  {
+                    subname = name + "-ext" + subgroup;
+                  }
+                else
+                  {
+                    subname = name + "-ext";
+                  }
 
-	    buffer.append(" ");
-	    buffer.append("(-,");
-	    buffer.append(refLabel);
-	    buffer.append(",)");
-	  }
+                buffer.append(" ");
+                buffer.append(subname);
+                writer.println(buffer.toString());
+                buffer = new StringBuilder();
+                buffer.append(subname);
+                subgroup++;
+              }
+
+            buffer.append(" ");
+            buffer.append("(-,");
+            buffer.append(refLabel);
+            buffer.append(",)");
+          }
       }
 
     writer.println(buffer.toString());
@@ -1355,7 +1364,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * This method writes out a single system netgroup out to disk,
    * wrapping the netgroup if it gets too long.
    *
-   * omg-s	csd-s (csdsun1.arlut.utexas.edu,-,) (ns1.arlut.utexas.edu,-,)
+   * omg-s      csd-s (csdsun1.arlut.utexas.edu,-,) (ns1.arlut.utexas.edu,-,)
    *
    */
 
@@ -1402,67 +1411,67 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (memberNetgroups != null)
       {
-	for (int i = 0; i < memberNetgroups.size(); i++)
-	  {
-	    ref = (Invid) memberNetgroups.elementAt(i);
-	    refLabel = getLabel(ref);
+        for (int i = 0; i < memberNetgroups.size(); i++)
+          {
+            ref = (Invid) memberNetgroups.elementAt(i);
+            refLabel = getLabel(ref);
 
-	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {
-		if (subgroup > 1)
-		  {
-		    subname = name + "-ext" + subgroup;
-		  }
-		else
-		  {
-		    subname = name + "-ext";
-		  }
-		
-		buffer.append(" ");
-		buffer.append(subname);
-		writer.println(buffer.toString());
-		buffer = new StringBuilder();
-		buffer.append(subname);
-		subgroup++;
-	      }
+            if (buffer.length() + refLabel.length() > lengthlimit)
+              {
+                if (subgroup > 1)
+                  {
+                    subname = name + "-ext" + subgroup;
+                  }
+                else
+                  {
+                    subname = name + "-ext";
+                  }
 
-	    buffer.append(" ");
-	    buffer.append(refLabel);
-	  }
+                buffer.append(" ");
+                buffer.append(subname);
+                writer.println(buffer.toString());
+                buffer = new StringBuilder();
+                buffer.append(subname);
+                subgroup++;
+              }
+
+            buffer.append(" ");
+            buffer.append(refLabel);
+          }
       }
 
     if (systems != null)
       {
-	for (int i = 0; i < systems.size(); i++)
-	  {
-	    ref = (Invid) systems.elementAt(i);
-	    refLabel = getLabel(ref);
-	    refLabel += dnsdomain;
+        for (int i = 0; i < systems.size(); i++)
+          {
+            ref = (Invid) systems.elementAt(i);
+            refLabel = getLabel(ref);
+            refLabel += dnsdomain;
 
-	    if (buffer.length() + refLabel.length() > lengthlimit)
-	      {
-		if (subgroup > 1)
-		  {
-		    subname = name + "-ext" + subgroup;
-		  }
-		else
-		  {
-		    subname = name + "-ext";
-		  }
-		
-		buffer.append(" ");
-		buffer.append(subname);
-		writer.println(buffer.toString());
-		buffer = new StringBuilder();
-		buffer.append(subname);
-		subgroup++;
-	      }
+            if (buffer.length() + refLabel.length() > lengthlimit)
+              {
+                if (subgroup > 1)
+                  {
+                    subname = name + "-ext" + subgroup;
+                  }
+                else
+                  {
+                    subname = name + "-ext";
+                  }
 
-	    buffer.append(" ");
-	    buffer.append("(");
-	    buffer.append(refLabel);
-	    buffer.append(",-,)");
-	  }
+                buffer.append(" ");
+                buffer.append(subname);
+                writer.println(buffer.toString());
+                buffer = new StringBuilder();
+                buffer.append(subname);
+                subgroup++;
+              }
+
+            buffer.append(" ");
+            buffer.append("(");
+            buffer.append(refLabel);
+            buffer.append(",-,)");
+          }
       }
 
     writer.println(buffer.toString());
@@ -1492,49 +1501,49 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	writer = openOutFile(path + "netgroup.users", "gasharl");
+        writer = openOutFile(path + "netgroup.users", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeUserNetgroup(): couldn't open netgroup file: " + ex);
+        System.err.println("GASHBuilderTask.writeUserNetgroup(): couldn't open netgroup file: " + ex);
       }
 
     try
       {
-	// first the user netgroups
+        // first the user netgroups
 
-	netgroups = enumerateObjects((short) 270);
+        netgroups = enumerateObjects((short) 270);
 
-	while (netgroups.hasMoreElements())
-	  {
-	    netgroup = (DBObject) netgroups.nextElement();
+        while (netgroups.hasMoreElements())
+          {
+            netgroup = (DBObject) netgroups.nextElement();
 
-	    name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+            name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
 
-	    members.clear();
-	    unionizeMembers(netgroup, members);
+            members.clear();
+            unionizeMembers(netgroup, members);
 
-	    if (members.size() > 0)
-	      {
-		writer.print(name);
+            if (members.size() > 0)
+              {
+                writer.print(name);
 
-		users = members.elements();
+                users = members.elements();
 
-		while (users.hasMoreElements())
-		  {
-		    name = (String) users.nextElement();
-		    
-		    writer.print(" ");
-		    writer.print(name);
-		  }
-		
-		writer.println();
-	      }
-	  }
+                while (users.hasMoreElements())
+                  {
+                    name = (String) users.nextElement();
+
+                    writer.print(" ");
+                    writer.print(name);
+                  }
+
+                writer.println();
+              }
+          }
       }
     finally
       {
-	writer.close();
+        writer.close();
       }
 
     return true;
@@ -1565,21 +1574,21 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (users != null)
       {
-	for (int i = 0; i < users.size(); i++)
-	  {
-	    ref = (Invid) users.elementAt(i);
-	    member = getLabel(ref);
-	    hash.put(member, member);
-	  }
+        for (int i = 0; i < users.size(); i++)
+          {
+            ref = (Invid) users.elementAt(i);
+            member = getLabel(ref);
+            hash.put(member, member);
+          }
       }
 
     if (memberNetgroups != null)
       {
-	for (int i = 0; i < memberNetgroups.size(); i++)
-	  {
-	    subNetgroup = getObject((Invid)memberNetgroups.elementAt(i));
-	    unionizeMembers(subNetgroup, hash);
-	  }
+        for (int i = 0; i < memberNetgroups.size(); i++)
+          {
+            subNetgroup = getObject((Invid)memberNetgroups.elementAt(i));
+            unionizeMembers(subNetgroup, hash);
+          }
       }
   }
 
@@ -1607,70 +1616,70 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	autoFile = openOutFile(path + "auto.vol", "gasharl");
+        autoFile = openOutFile(path + "auto.vol", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open auto.vol: " + ex);
+        System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open auto.vol: " + ex);
       }
 
     try
       {
-	// find the volume definitions
+        // find the volume definitions
 
-	vols = enumerateObjects((short) 276);
+        vols = enumerateObjects((short) 276);
 
-	while (vols.hasMoreElements())
-	  {
-	    obj = (DBObject) vols.nextElement();
+        while (vols.hasMoreElements())
+          {
+            obj = (DBObject) vols.nextElement();
 
-	    buf.setLength(0);
+            buf.setLength(0);
 
-	    volName = (String) obj.getFieldValueLocal(volumeSchema.LABEL);
+            volName = (String) obj.getFieldValueLocal(volumeSchema.LABEL);
 
-	    if (volName == null)
-	      {
-		Ganymede.debug("Couldn't emit a volume definition.. null label");
-		continue;
-	      }
+            if (volName == null)
+              {
+                Ganymede.debug("Couldn't emit a volume definition.. null label");
+                continue;
+              }
 
-	    buf.append(volName); // volume label
-	    buf.append("\t\t");
+            buf.append(volName); // volume label
+            buf.append("\t\t");
 
-	    // mount options.. NeXT's like this.  Ugh.
+            // mount options.. NeXT's like this.  Ugh.
 
-	    mountopts = (String) obj.getFieldValueLocal(volumeSchema.MOUNTOPTIONS); 
+            mountopts = (String) obj.getFieldValueLocal(volumeSchema.MOUNTOPTIONS);
 
-	    if (mountopts != null && !mountopts.equals(""))
-	      {
-		buf.append(mountopts);
-		buf.append(" ");
-	      }
+            if (mountopts != null && !mountopts.equals(""))
+              {
+                buf.append(mountopts);
+                buf.append(" ");
+              }
 
-	    sysName = getLabel((Invid) obj.getFieldValueLocal(volumeSchema.HOST));
+            sysName = getLabel((Invid) obj.getFieldValueLocal(volumeSchema.HOST));
 
-	    if (sysName == null)
-	      {
-		Ganymede.debug("Couldn't emit proper volume definition for " + 
-			       volName + ", no system found");
-		continue;
-	      }
+            if (sysName == null)
+              {
+                Ganymede.debug("Couldn't emit proper volume definition for " +
+                               volName + ", no system found");
+                continue;
+              }
 
-	    buf.append(sysName);
-	    buf.append(dnsdomain);
+            buf.append(sysName);
+            buf.append(dnsdomain);
 
-	    buf.append(":");
+            buf.append(":");
 
-	    // mount path
+            // mount path
 
-	    buf.append((String) obj.getFieldValueLocal(volumeSchema.PATH)); 
+            buf.append((String) obj.getFieldValueLocal(volumeSchema.PATH));
 
-	    autoFile.println(buf.toString());
-	  }
+            autoFile.println(buf.toString());
+          }
       }
     finally
       {
-	autoFile.close();
+        autoFile.close();
       }
 
     // second, write out all the auto.home.* files mapping user name
@@ -1684,72 +1693,72 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     while (maps.hasMoreElements())
       {
-	map = (DBObject) maps.nextElement();
+        map = (DBObject) maps.nextElement();
 
-	mapname = (String) map.getFieldValueLocal(mapSchema.MAPNAME);
+        mapname = (String) map.getFieldValueLocal(mapSchema.MAPNAME);
 
-	try
-	  {
-	    autoFile = openOutFile(path + mapname, "gasharl");
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open " + 
-			       mapname + ": " + ex);
-	  }
+        try
+          {
+            autoFile = openOutFile(path + mapname, "gasharl");
+          }
+        catch (IOException ex)
+          {
+            System.err.println("GASHBuilderTask.writeAutoMounterFiles(): couldn't open " +
+                               mapname + ": " + ex);
+          }
 
-	try
-	  {
-	    tempVect = map.getFieldValuesLocal(mapSchema.ENTRIES);
+        try
+          {
+            tempVect = map.getFieldValuesLocal(mapSchema.ENTRIES);
 
-	    if (tempVect == null)
-	      {
-		autoFile.close();
-		continue;
-	      }
+            if (tempVect == null)
+              {
+                autoFile.close();
+                continue;
+              }
 
-	    entries = tempVect.elements();
+            entries = tempVect.elements();
 
-	    while (entries.hasMoreElements())
-	      {
-		ref = (Invid) entries.nextElement();
-		obj = getObject(ref);
+            while (entries.hasMoreElements())
+              {
+                ref = (Invid) entries.nextElement();
+                obj = getObject(ref);
 
-		// the entry is embedded in the user's record.. get
-		// the user' id and label
+                // the entry is embedded in the user's record.. get
+                // the user' id and label
 
-		userRef = (Invid) obj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
+                userRef = (Invid) obj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
 
-		if (userRef.getType() != SchemaConstants.UserBase)
-		  {
-		    throw new RuntimeException("Schema and/or database error");
-		  }
+                if (userRef.getType() != SchemaConstants.UserBase)
+                  {
+                    throw new RuntimeException("Schema and/or database error");
+                  }
 
-		buf.setLength(0);
-	    
-		buf.append(getLabel(userRef)); // the user's name
-		buf.append("\t");
+                buf.setLength(0);
 
-		// nfs volume for this entry
+                buf.append(getLabel(userRef)); // the user's name
+                buf.append("\t");
 
-		ref = (Invid) obj.getFieldValueLocal(mapEntrySchema.VOLUME); 
+                // nfs volume for this entry
 
-		if (ref == null || ref.getType() != (short) 276)
-		  {
-		    Ganymede.debug("Error, can't find a volume entry for user " + getLabel(userRef) +
-				   " on automounter map " + mapname);
-		    continue;
-		  }
+                ref = (Invid) obj.getFieldValueLocal(mapEntrySchema.VOLUME);
 
-		buf.append(getLabel(ref));
+                if (ref == null || ref.getType() != (short) 276)
+                  {
+                    Ganymede.debug("Error, can't find a volume entry for user " + getLabel(userRef) +
+                                   " on automounter map " + mapname);
+                    continue;
+                  }
 
-		autoFile.println(buf.toString());
-	      }
-	  }
-	finally
-	  {
-	    autoFile.close();
-	  }
+                buf.append(getLabel(ref));
+
+                autoFile.println(buf.toString());
+              }
+          }
+        finally
+          {
+            autoFile.close();
+          }
       }
 
     return true;
@@ -1774,34 +1783,34 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	mailman_sync_file = openOutFile(path + "ganymede_mailman_lists", "gasharl"); 
+        mailman_sync_file = openOutFile(path + "ganymede_mailman_lists", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeMailmanListsFile(): couldn't open mailman_sync_file file: " + ex);
+        System.err.println("GASHBuilderTask.writeMailmanListsFile(): couldn't open mailman_sync_file file: " + ex);
       }
 
     try
       {
-	// and the mailman mail lists
-    
-	mailmanLists = enumerateObjects((short) 260);  
+        // and the mailman mail lists
 
-	while (mailmanLists.hasMoreElements())
-	  {
-	    mailmanList = (DBObject) mailmanLists.nextElement();	
-	    writeMailmanList(mailmanList, mailman_sync_file);
-	  }
+        mailmanLists = enumerateObjects((short) 260);
+
+        while (mailmanLists.hasMoreElements())
+          {
+            mailmanList = (DBObject) mailmanLists.nextElement();
+            writeMailmanList(mailmanList, mailman_sync_file);
+          }
       }
     finally
       {
-	mailman_sync_file.close();
+        mailman_sync_file.close();
       }
 
     return true;
   }
 
-  
+
 
   /**
    *
@@ -1815,12 +1824,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * </pre>
    *
-   * Where listname is the name of the mailman list, owneremail is the 
+   * Where listname is the name of the mailman list, owneremail is the
    * email of the owner, and password is the password for the mailing list.
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-   * 
+   *
    */
 
   private void writeMailmanList(DBObject object, PrintWriter writer)
@@ -1833,8 +1842,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String password = (String) passField.getPlainText();
 
     Invid serverInvid = (Invid) object.getFieldValueLocal(MailmanListSchema.SERVER);
-    DBObject server = getObject(serverInvid);    
-    String hostname = getLabel((Invid) server.getFieldValueLocal(MailmanServerSchema.HOST));    
+    DBObject server = getObject(serverInvid);
+    String hostname = getLabel((Invid) server.getFieldValueLocal(MailmanServerSchema.HOST));
 
     result.append(hostname);
     result.append("\t");
@@ -1843,7 +1852,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(ownerEmail);
     result.append("\t");
     result.append(password);
-	
+
     writer.println(result.toString());
   }
 
@@ -1872,108 +1881,79 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	aliases_info = openOutFile(path + "aliases_info", "gasharl");
+        aliases_info = openOutFile(path + "aliases_info", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeAliasesFile(): couldn't open aliases_info file: " + ex);
+        System.err.println("GASHBuilderTask.writeAliasesFile(): couldn't open aliases_info file: " + ex);
       }
 
     try
       {
-	// our email aliases database is spread across three separate object
-	// bases.
+        // our email aliases database is spread across three separate object
+        // bases.
 
-	users = enumerateObjects(SchemaConstants.UserBase);
+        users = enumerateObjects(SchemaConstants.UserBase);
 
-	while (users.hasMoreElements())
-	  {
-	    user = (DBObject) users.nextElement();
-	
-	    writeUserAlias(user, aliases_info);
-	  }
+        while (users.hasMoreElements())
+          {
+            user = (DBObject) users.nextElement();
 
-	// now the mail lists
-    
-	mailgroups = enumerateObjects((short) 274);
+            writeUserAlias(user, aliases_info);
+          }
 
-	while (mailgroups.hasMoreElements())
-	  {
-	    group = (DBObject) mailgroups.nextElement();
-	
-	    writeGroupAlias(group, aliases_info);
-	  }
+        // now the mail lists
 
-        // add in emailable account groups 
+        mailgroups = enumerateObjects((short) 274);
 
-	mailgroups = enumerateObjects((short) 257);
+        while (mailgroups.hasMoreElements())
+          {
+            group = (DBObject) mailgroups.nextElement();
 
-	while (mailgroups.hasMoreElements())
-	  {
-	    group = (DBObject) mailgroups.nextElement();
-	
-	    writeAccountGroupAlias(group, aliases_info);
-	  }
+            writeGroupAlias(group, aliases_info);
+          }
+
+        // add in emailable account groups
+
+        mailgroups = enumerateObjects((short) 257);
+
+        while (mailgroups.hasMoreElements())
+          {
+            group = (DBObject) mailgroups.nextElement();
+
+            writeAccountGroupAlias(group, aliases_info);
+          }
 
         // add in emailable user netgroups
 
-	mailgroups = enumerateObjects((short) 270);
+        mailgroups = enumerateObjects((short) 270);
 
-	while (mailgroups.hasMoreElements())
-	  {
-	    group = (DBObject) mailgroups.nextElement();
-	
-	    writeUserNetgroupAlias(group, aliases_info);
-	  }
+        while (mailgroups.hasMoreElements())
+          {
+            group = (DBObject) mailgroups.nextElement();
 
-	// and the external mail addresses
- 
-	externals = enumerateObjects((short) 275);
+            writeUserNetgroupAlias(group, aliases_info);
+          }
 
-	while (externals.hasMoreElements())
-	  {
-	    external = (DBObject) externals.nextElement();
-	
-	    writeExternalAlias(external, aliases_info);
-	  }
+        // and the external mail addresses
 
-	// add in Mailman Lists now.
-    
-/*
-	*	ahem, ahem, ahem.
-	*	this routine does do what it's supposed to do.
-	*	the output of this matches (w/in reason)
-	*	what write....MailmanListAlias
-	*        (vs.writeHashMailmanListAlias)
-	*	produces.  the output of this was fed into
-	*	gash2alias.pl.  gash2alias.pl rejected ALL
-	*	of the output as ERRORS.
-	*	so, we won't be calling the writeHashMailmanListAlias
-	*	flavor.
-	*	ie, the purpose of this routine is, AFAICT, to
-	*	supply gash2alias.pl with errors it can throw out.
-	*	if there's another use, i don't know what it is.
-	*	i'm going to let the old one run.
-	*	jgs, 16 feb 2010
-	MailmanLists = enumerateObjects((short) 260);
+        externals = enumerateObjects((short) 275);
 
-	while (MailmanLists.hasMoreElements())
-	  {
-	    MailmanList = (DBObject) MailmanLists.nextElement();
-	
-	    writeMailmanListAlias(MailmanList, aliases_info);
-	  }
-*/
+        while (externals.hasMoreElements())
+          {
+            external = (DBObject) externals.nextElement();
 
+            writeExternalAlias(external, aliases_info);
+          }
       }
     finally
       {
-	aliases_info.close();
+        aliases_info.close();
       }
 
     return true;
   }
-  
+
 
   /**
    * This method writes out a mailman alias line to the aliases_info GASH source file.<br/><br/>
@@ -1986,20 +1966,21 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * </pre>
    *
-   * Where listname is the name of the mailman list, owneremail is the 
+   * Where listname is the name of the mailman list, owneremail is the
    * email of the owner, and password is the password for the mailing list.
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-   * 
+   *
+   * XXX unused XXX
    */
 
   private void writeMailmanListAlias(DBObject object, PrintWriter writer)
   {
     String name = (String) object.getFieldValueLocal(MailmanListSchema.NAME);
     Invid serverInvid = (Invid) object.getFieldValueLocal(MailmanListSchema.SERVER);
-    DBObject server = getObject(serverInvid);    
-    String hostname = getLabel((Invid) server.getFieldValueLocal(MailmanServerSchema.HOST));    
+    DBObject server = getObject(serverInvid);
+    String hostname = getLabel((Invid) server.getFieldValueLocal(MailmanServerSchema.HOST));
 
     result.setLength(0);
     result.append("<xxx>");
@@ -2011,33 +1992,32 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(".arlut.utexas.edu");
     writer.println(result.toString());
 
-
-    // Loop over aliases target.    
+    // Loop over aliases target.
     Vector aliases = object.getFieldValuesLocal(MailmanListSchema.ALIASES);
 
     if (aliases == null)
       {
-	System.err.println("GASHBuilder.writeMailmanAliases(): null alias list for mailman list name " + name);
+        System.err.println("GASHBuilder.writeMailmanAliases(): null alias list for mailman list name " + name);
       }
     else
       {
-	for (int i = 0; i < aliases.size(); i++)
-	  {
-	    String aliasName = (String) aliases.elementAt(i);	    
+        for (int i = 0; i < aliases.size(); i++)
+          {
+            String aliasName = (String) aliases.elementAt(i);
 
-	    if (aliasName != null)
-	      {
-	        result.setLength(0);
-	        result.append("<xxx>");
-	        result.append(aliasName);
-	        result.append(":");
-	        result.append(aliasName);
-		result.append("@");
-	        result.append(hostname);
-		result.append(".arlut.utexas.edu");
-	        writer.println(result.toString());
-	      }
-	  }
+            if (aliasName != null)
+              {
+                result.setLength(0);
+                result.append("<xxx>");
+                result.append(aliasName);
+                result.append(":");
+                result.append(aliasName);
+                result.append("@");
+                result.append(hostname);
+                result.append(".arlut.utexas.edu");
+                writer.println(result.toString());
+              }
+          }
       }
   }
 
@@ -2084,47 +2064,47 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (aliases != null)
       {
-	// we don't include the username in the list of aliases,
-	// but the build/gash stuff requires that it be included
-	// in aliases_info, so if we didn't write it out as the
-	// signature, make it the second alias.  The ordering
-	// doesn't matter past the first, so this is ok.
+        // we don't include the username in the list of aliases,
+        // but the build/gash stuff requires that it be included
+        // in aliases_info, so if we didn't write it out as the
+        // signature, make it the second alias.  The ordering
+        // doesn't matter past the first, so this is ok.
 
-	if (!signature.equals(username))
-	  {
-	    result.append(", ");
-	    result.append(username);
-	  }
+        if (!signature.equals(username))
+          {
+            result.append(", ");
+            result.append(username);
+          }
 
-	for (int i = 0; i < aliases.size(); i++)
-	  {
-	    alias = (String) aliases.elementAt(i);
-	    
-	    if (alias.equals(signature))
-	      {
-		continue;
-	      }
+        for (int i = 0; i < aliases.size(); i++)
+          {
+            alias = (String) aliases.elementAt(i);
 
-	    result.append(", ");
-	    result.append(alias);
-	  }
+            if (alias.equals(signature))
+              {
+                continue;
+              }
+
+            result.append(", ");
+            result.append(alias);
+          }
       }
 
     result.append(":");
 
     if (addresses != null)
       {
-	for (int i = 0; i < addresses.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
+        for (int i = 0; i < addresses.size(); i++)
+          {
+            if (i > 0)
+              {
+                result.append(", ");
+              }
 
-	    target = (String) addresses.elementAt(i);
+            target = (String) addresses.elementAt(i);
 
-	    result.append(target);
-	  }
+            result.append(target);
+          }
       }
 
     writer.println(result.toString());
@@ -2182,17 +2162,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (group_aliases != null)
       {
-	for (int i = 0; i < group_aliases.size(); i++)
-	  {
-	    String alias = (String) group_aliases.elementAt(i);
+        for (int i = 0; i < group_aliases.size(); i++)
+          {
+            String alias = (String) group_aliases.elementAt(i);
 
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
+            if (i > 0)
+              {
+                result.append(", ");
+              }
 
-	    result.append(alias);
-	  }
+            result.append(alias);
+          }
       }
 
     result.append(":");
@@ -2206,32 +2186,32 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (group_targets != null)
       {
-	for (int i = 0; i < group_targets.size(); i++)
-	  {
-	    memberInvid = (Invid) group_targets.elementAt(i);
+        for (int i = 0; i < group_targets.size(); i++)
+          {
+            memberInvid = (Invid) group_targets.elementAt(i);
 
             if (isVeryDeadUser(memberInvid))
               {
                 continue;
               }
 
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
+            if (i > 0)
+              {
+                result.append(", ");
+              }
 
             target = getLabel(memberInvid);
 
             if (2 + target.length() > lengthlimit_remaining)
               {
-		if (subgroup > 1)
-		  {
-		    subname = groupname + "-gext" + subgroup;
-		  }
-		else
-		  {
-		    subname = groupname + "-gext";
-		  }
+                if (subgroup > 1)
+                  {
+                    subname = groupname + "-gext" + subgroup;
+                  }
+                else
+                  {
+                    subname = groupname + "-gext";
+                  }
 
                 // point to the linked sublist, terminate this entry
                 // line
@@ -2248,32 +2228,32 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 lengthlimit_remaining = 900 - subname.length() - 6;
               }
 
-	    result.append(target);
+            result.append(target);
             lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
-	  }
+          }
       }
 
     if (external_targets != null)
       {
-	for (int i = 0; i < external_targets.size(); i++)
-	  {
-	    if ((i > 0) || (group_targets != null && group_targets.size() > 0))
-	      {
-		result.append(", ");
-	      }
+        for (int i = 0; i < external_targets.size(); i++)
+          {
+            if ((i > 0) || (group_targets != null && group_targets.size() > 0))
+              {
+                result.append(", ");
+              }
 
-	    target = (String) external_targets.elementAt(i);
+            target = (String) external_targets.elementAt(i);
 
             if (2 + target.length() > lengthlimit_remaining)
               {
-		if (subgroup > 1)
-		  {
-		    subname = groupname + "-gext" + subgroup;
-		  }
-		else
-		  {
-		    subname = groupname + "-gext";
-		  }
+                if (subgroup > 1)
+                  {
+                    subname = groupname + "-gext" + subgroup;
+                  }
+                else
+                  {
+                    subname = groupname + "-gext";
+                  }
 
                 // point to the linked sublist, terminate this entry
                 // line
@@ -2290,9 +2270,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 lengthlimit_remaining = 900 - subname.length() - 6;
               }
 
-	    result.append(target);
+            result.append(target);
             lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
-	  }
+          }
       }
 
     writer.println(result.toString());
@@ -2358,32 +2338,32 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (group_targets != null)
       {
-	for (int i = 0; i < group_targets.size(); i++)
-	  {
-	    userInvid = (Invid) group_targets.elementAt(i);
+        for (int i = 0; i < group_targets.size(); i++)
+          {
+            userInvid = (Invid) group_targets.elementAt(i);
 
             if (isVeryDeadUser(userInvid))
               {
                 continue;
               }
 
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
+            if (i > 0)
+              {
+                result.append(", ");
+              }
 
             target = getLabel(userInvid);
 
             if (2 + target.length() > lengthlimit_remaining)
               {
-		if (subgroup > 1)
-		  {
-		    subname = groupname + "-gext" + subgroup;
-		  }
-		else
-		  {
-		    subname = groupname + "-gext";
-		  }
+                if (subgroup > 1)
+                  {
+                    subname = groupname + "-gext" + subgroup;
+                  }
+                else
+                  {
+                    subname = groupname + "-gext";
+                  }
 
                 // point to the linked sublist, terminate this entry
                 // line
@@ -2400,9 +2380,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 lengthlimit_remaining = 900 - subname.length() - 6;
               }
 
-	    result.append(target);
+            result.append(target);
             lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
-	  }
+          }
       }
 
     writer.println(result.toString());
@@ -2462,8 +2442,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (group_targets != null)
       {
-	for (int i = 0; i < group_targets.size(); i++)
-	  {
+        for (int i = 0; i < group_targets.size(); i++)
+          {
             Invid targetInvid = (Invid) group_targets.elementAt(i);
 
             if (isVeryDeadUser(targetInvid))
@@ -2477,8 +2457,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (sub_netgroups != null)
       {
-	for (int i = 0; i < sub_netgroups.size(); i++)
-	  {
+        for (int i = 0; i < sub_netgroups.size(); i++)
+          {
             DBObject subnetgroup = getObject((Invid) sub_netgroups.elementAt(i));
 
             if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
@@ -2562,7 +2542,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-   * 
+   *
    */
 
   private void writeExternalAlias(DBObject object, PrintWriter writer)
@@ -2584,18 +2564,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append("<xxx>");
     result.append(name);
     result.append(":");
-    result.append(name);	// the name is one of the aliases
-	
+    result.append(name);        // the name is one of the aliases
+
     if (aliases != null)
       {
-	for (int i = 0; i < aliases.size(); i++)
-	  {
-	    result.append(", ");
+        for (int i = 0; i < aliases.size(); i++)
+          {
+            result.append(", ");
 
-	    alias = (String) aliases.elementAt(i);
-	    
-	    result.append(alias);
-	  }
+            alias = (String) aliases.elementAt(i);
+
+            result.append(alias);
+          }
       }
 
     result.append(":");
@@ -2606,265 +2586,93 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (targets != null)
       {
-	for (int i = 0; i < targets.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
-	    
-	    target = (String) targets.elementAt(i);
-	    
-	    result.append(target);
-	  }
+        for (int i = 0; i < targets.size(); i++)
+          {
+            if (i > 0)
+              {
+                result.append(", ");
+              }
+
+            target = (String) targets.elementAt(i);
+
+            result.append(target);
+          }
       }
 
     writer.println(result.toString());
   }
 
-
-//------------------------------------------------------------------------------
   /**
+   * This method generates a postfix-compatible aliases (name
+   * undetermined so far) file.  This method must be run during
+   * builderPhase1 so that it has access to the enumerateObjects()
+   * method from our superclass.
    *
-   * This method generates a 
-   *	postfix-compatible aliases (name undetermined so far)
-   * file.  This method must be run during
-   * builderPhase1 so that it has access to the enumerateObjects() method
-   * from our superclass.
-	*	AHEM!!!  where you see "write Hash*" below...  what that
-	*	really means is:
-	*	write the flat file that postfix (through postalias or
-	*	postmap) will turn into a hash file.
-	*	the file has to get flung over via ssh and then
-	*	something has to run postmap/postalias on the file.
+   *    AHEM!!!  where you see "write Hash*" below...  what that
+   *    really means is:
+   *    write the flat file that postfix (through postalias or
+   *    postmap) will turn into a hash file.
+   *    the file has to get flung over via ssh and then
+   *    something has to run postmap/postalias on the file.
    *
+   * jgs
    */
 
-  private boolean writeHashAliasesFile()
+  private boolean writeHashAliasesFile() throws IOException
   {
-    PrintWriter pfmalias = null;
-    PrintWriter pfgenerics = null;
-    DBObject user, group, external, MailmanList;
-    Enumeration users, mailgroups, externals, MailmanLists;
-
-
-    /* -- */
-            /*        the old issue of 1024 character limit on NIS maps
-             *        will be "worked around" on the postfix side.
-             *        we won't use NIS maps.  partly because they
-             *        want NIS to go away long term.
-             *        so the code that was here to avoid that limit
-             *        is now gone.
-             */
-
+    PrintWriter pfgenerics = openOutFile(path + "pfgenerics", "gasharl");
 
     try
       {
-	pfgenerics = openOutFile(path + "pfgenerics", "gasharl");
-      }
-    catch (IOException ex)
-      {
-	System.err.println("GASHBuilderTask.writeHashAliasesFile(): couldn't open pfgenerics file: " + ex);
-      }
+	PrintWriter pfmalias = openOutFile(path + "pfmalias", "gasharl");
 
-    try
-      {
-	pfmalias = openOutFile(path + "pfmalias", "gasharl");
-      }
-    catch (IOException ex)
-      {
-	System.err.println("GASHBuilderTask.writeHashAliasesFile(): couldn't open pfmalias file: " + ex);
-      }
+        try
+          {
+	    for (DBObject user: getObjects(SchemaConstants.UserBase))
+	      {
+                writeHashGenerics(user, pfgenerics);
+                writeHashUserAlias(user, pfmalias);
+	      }
 
-    try
-      {
+	    // mail lists
 
-	users = enumerateObjects(SchemaConstants.UserBase);
+	    for (DBObject group: getObjects((short) 274))
+	      {
+                writeHashGroupAlias(group, pfmalias);
+	      }
 
-	while (users.hasMoreElements())
-	  {
-	    user = (DBObject) users.nextElement();
-	    writeHashGenerics(user, pfgenerics);
-	  }
+	    // emailable account groups
 
-	// our email aliases database is spread across three separate object
-	// bases.
+	    for (DBObject group: getObjects((short) 257))
+	      {
+                writeHashAccountGroupAlias(group, pfmalias);
+	      }
 
-	users = enumerateObjects(SchemaConstants.UserBase);
+	    // emailable user netgroups
 
-	while (users.hasMoreElements())
-	  {
-	    user = (DBObject) users.nextElement();
-	
-	    writeHashUserAlias(user, pfmalias);
-	  }
+            for (DBObject group: getObjects((short) 270))
+              {
+                writeHashUserNetgroupAlias(group, pfmalias);
+              }
 
-	// now the mail lists
-    
-	mailgroups = enumerateObjects((short) 274);
+	    // external mail addresses
 
-	while (mailgroups.hasMoreElements())
-	  {
-	    group = (DBObject) mailgroups.nextElement();
-	
-	    writeHashGroupAlias(group, pfmalias);
-	  }
-
-        // add in emailable account groups 
-
-	mailgroups = enumerateObjects((short) 257);
-
-	while (mailgroups.hasMoreElements())
-	  {
-	    group = (DBObject) mailgroups.nextElement();
-	
-	    writeHashAccountGroupAlias(group, pfmalias);
-	  }
-
-        // add in emailable user netgroups
-
-	mailgroups = enumerateObjects((short) 270);
-
-	while (mailgroups.hasMoreElements())
-	  {
-	    group = (DBObject) mailgroups.nextElement();
-	
-	    writeHashUserNetgroupAlias(group, pfmalias);
-	  }
-
-	// and the external mail addresses
-    
-	externals = enumerateObjects((short) 275);
-
-	while (externals.hasMoreElements())
-	  {
-	    external = (DBObject) externals.nextElement();
-	
-	    writeHashExternalAlias(external, pfmalias);
-	  }
-
-	// add in Mailman Lists now.
-    
-/*
- *
-	*	ahem, ahem, ahem.
-	*	this routine does do what it's supposed to do.
-	*	the output of this matches (w/in reason)
-	*	what write....MailmanListAlias
-	*        (vs.writeHashMailmanListAlias)
-	*	produces.  the output of this was fed into
-	*	gash2alias.pl.  gash2alias.pl rejected ALL
-	*	of the output as ERRORS.
-	*	so, let's not call it.
-	*	jgs, 16 feb 2010
-	MailmanLists = enumerateObjects((short) 260);
-
-	while (MailmanLists.hasMoreElements())
-	  {
-	    MailmanList = (DBObject) MailmanLists.nextElement();
-	
-	    writeHashMailmanListAlias(MailmanList, pfmalias);
-	  }
- */
-
+            for (DBObject external: getObjects((short) 275))
+              {
+                writeHashExternalAlias(external, pfmalias);
+              }
+          }
+        finally
+          {
+            pfmalias.close();
+          }
       }
     finally
       {
-	pfmalias.close();
-	pfgenerics.close();
+        pfgenerics.close();
       }
 
     return true;
-  }
-  
-
-  /**
-   * This method writes out a mailman alias line to the pfmalias file.<br/><br/>
-   *
-   * The mailman alias lines in this file look like the following:<br/><br/>
-   *
-   * <pre>
-   *
-   * aliasthing: real1, real2, real3
-   *
-   * </pre>
-   *
-   * Where aliasthing is the name of an alias, and
-   * real<n> are actual email addresses to deliver to (but, as you know,
-   * those things can be aliases themselves).
-   *
-   * @param object An object from the Ganymede user object base
-   * @param writer The destination for this alias line
-   * 
-	*	AHEM!!!  where you see "write HashMailmanListAlias" below...
-	*	what that really means is:
-	*	write the flat file that postfix (through postalias or
-	*	postmap) will turn into a hash file.
-	*	the file has to get flung over via ssh and then
-	*	something has to run postmap/postalias on the file.
-
-	*	ahem, ahem, ahem.
-	*	this routine produces what the old routine produces,
-	*	while(1) sigh();
-	*	but, and this is very important,
-	*	the output, which previously was fed into a script
-	*	called gash2alias.pl, is ENTIRELY REJECTED AS ERRORS.
-	*	so it's better to do NOTHING here.
-	*	jgs, 16 feb 2010
-
- #####    ####   #    #   #####   ####     ##    #       #
- #    #  #    #  ##   #     #    #    #   #  #   #       #
- #    #  #    #  # #  #     #    #       #    #  #       #
- #    #  #    #  #  # #     #    #       ######  #       #
- #    #  #    #  #   ##     #    #    #  #    #  #       #
- #####    ####   #    #     #     ####   #    #  ######  ######
-
-   */
-
-  private void writeHashMailmanListAlias(DBObject object, PrintWriter writer)
-  {
-    String name = (String) object.getFieldValueLocal(MailmanListSchema.NAME);
-    Invid serverInvid = (Invid) object.getFieldValueLocal(MailmanListSchema.SERVER);
-    DBObject server = getObject(serverInvid);    
-    String hostname = getLabel((Invid) server.getFieldValueLocal(MailmanServerSchema.HOST));    
-
-    result.setLength(0);
-    result.append(name);
-    result.append(": ");
-    result.append(name);
-    result.append("@");
-    result.append(hostname);
-    result.append(".arlut.utexas.edu");
-    writer.println(result.toString());
-
-
-//ahhhh
-    // Loop over aliases target.    
-    Vector aliases = object.getFieldValuesLocal(MailmanListSchema.ALIASES);
-
-    if (aliases == null)
-      {
-	System.err.println("GASHBuilder.writeHashMailmanAliases(): null alias list for mailman list name " + name);
-      }
-    else
-      {
-	for (int i = 0; i < aliases.size(); i++)
-	  {
-	    String aliasName = (String) aliases.elementAt(i);	    
-
-	    if (aliasName != null)
-	      {
-	        result.setLength(0);
-	        result.append(aliasName);
-	        result.append(":");
-	        result.append(aliasName);
-		result.append("@");
-	        result.append(hostname);
-		result.append(".arlut.utexas.edu");
-	        writer.println(result.toString());
-	      }
-	  }
-      }
   }
 
   /**
@@ -2884,44 +2692,32 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-	*	AHEM!!!  where you see "write HashUserAlias" below...
-	*	what that really means is:
-	*	write the flat file that postfix (through postalias or
-	*	postmap) will turn into a hash file.
-	*	the file has to get flung over via ssh and then
-	*	something has to run postmap/postalias on the file.
+   *
+   *    AHEM!!!  where you see "write HashUserAlias" below...
+   *    what that really means is:
+   *    write the flat file that postfix (through postalias or
+   *    postmap) will turn into a hash file.
+   *    the file has to get flung over via ssh and then
+   *    something has to run postmap/postalias on the file.
+   *
+   * jgs
    */
 
   private void writeHashUserAlias(DBObject object, PrintWriter writer)
   {
-    String username;
-    String signature;
-    Vector aliases;
-    String alias;
-    Vector addresses;
-    String target;
-
-    String aliaslo;
-    String userlo;
-    String targetlo;
-    String siglo;
-    /* -- */
+    String username = (String) object.getFieldValueLocal(userSchema.USERNAME);
+    String signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
+    Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(userSchema.ALIASES);
+    Vector<String> addresses = (Vector<String>) object.getFieldValuesLocal(userSchema.EMAILTARGET);
 
     result.setLength(0);
 
-    username = (String) object.getFieldValueLocal(userSchema.USERNAME);
-    signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
-    aliases = object.getFieldValuesLocal(userSchema.ALIASES);
-    addresses = object.getFieldValuesLocal(userSchema.EMAILTARGET);
-
-
-    if (addresses != null)
+    if (!empty(addresses))
       {
         result.setLength(0);
-        siglo = signature.toLowerCase();
-        result.append(siglo);
+        result.append(signature);
         result.append(": ");
-//result.append("\t");
+
         for (int i = 0; i < addresses.size(); i++)
           {
             if (i > 0)
@@ -2929,55 +2725,33 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(", ");
               }
 
-            target = (String) addresses.elementAt(i);
-	    targetlo = target.toLowerCase();
-            //	if the target has @arlut.utexas.edu
-	    //	change it to @arlmail.arlut.utexas.edu.  sigh.
-            if( targetlo.endsWith("@arlut.utexas.edu") )
-              {
-                int kk,n=0;
-                String anewst;
-                kk=targetlo.length();
-                while( kk-- > 0 )
-	                n = targetlo.indexOf('@');
-                anewst = targetlo.substring(0,n);
-                result.append(anewst);
-                result.append("@arlmail.arlut.utexas.edu");
-              }
-            else
-              {
-                result.append(targetlo);
-              }
+	    result.append(fixup(addresses.get(i)));
           }
-    	  writer.println(result.toString());
+
+        writer.println(result.toString().toLowerCase());
       }
 
-
-    if (aliases != null)
+    if (!empty(aliases))
       {
-	for (int i = 0; i < aliases.size(); i++)
-	  {
-	    alias = (String) aliases.elementAt(i);
-	    
-	    if (alias.equals(signature))
-	      {
-		continue;
-	      }
+	for (String alias: aliases)
+          {
+            if (alias.equals(signature))
+              {
+                continue;
+              }
 
             result.setLength(0);
             result.append(alias);
             result.append(": ");
-//result.append("\t");
             result.append(signature);
-            writer.println(result.toString());
+            writer.println(result.toString().toLowerCase());
           }
       }
 
-    if ((aliases != null) && (addresses != null) )
+    if (!empty(aliases) && !empty(addresses))
       {
-        for (int i = 0; i < aliases.size(); i++)
+	for (String alias: aliases)
           {
-            alias = (String) aliases.elementAt(i);
             if (!alias.equals(signature))
               {
                 continue;
@@ -2986,141 +2760,96 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             result.setLength(0);
             result.append(username);
             result.append(": ");
-//result.append("\t");
 
-            for (int j = 0; j < addresses.size(); j++)
+            for (int i = 0; i < addresses.size(); i++)
               {
-                if (j > 0)
+                if (i > 0)
                   {
                     result.append(", ");
                   }
-    
-                target = (String) addresses.elementAt(j);
-                targetlo = target.toLowerCase();
-                //        if the target has @arlut.utexas.edu
-                //        change it to @arlmail.arlut.utexas.edu.  sigh.
-                if( targetlo.endsWith("@arlut.utexas.edu") )
-                  {
-                    int kk,n=0;
-                    String anewst;
-                    kk=targetlo.length();
-                    while( kk-- > 0 )
-                            n = targetlo.indexOf('@');
-                    anewst = targetlo.substring(0,n);
-                    result.append(anewst);
-                    result.append("@arlmail.arlut.utexas.edu");
-                  }
-                else
-                  {
-                    result.append(targetlo);
-                  }
+
+		result.append(fixup(addresses.get(i)));
               }
-            writer.println(result.toString());
-          }  // end loop over alias
-      }	// end check both null
-  }
-  /**
-   * This method writes out a user alias line to the pfmalias file.<br/><br/>
-	*	AHEM!!!  where you see "write Hash Generics" below...
-	*	what that really means is:
-	*	write the flat file that postfix (through postalias or
-	*	postmap) will turn into a hash file.
-	*	the file has to get flung over via ssh and then
-	*	something has to run postmap/postalias on the file.
-   */
-  private void writeHashGenerics(DBObject object, PrintWriter writer)
-  {
-    String username;
-    String signature;
-    Vector aliases;
-    String alias;
-    Vector addresses;
-    String target;
 
-    String aliaslo;
-    String userlo;
-    String targetlo;
-    String siglo;
-    /* -- */
-                int kk,n=0;
-                String newst;
-
-
-    username = (String) object.getFieldValueLocal(userSchema.USERNAME);
-    signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
-    aliases = object.getFieldValuesLocal(userSchema.ALIASES);
-    addresses = object.getFieldValuesLocal(userSchema.EMAILTARGET);
-
-    result.setLength(0);
-    siglo = signature.toLowerCase();
-//    result.append(siglo);
-//	kkk
-//	ahem.  outm is insisting that the name be "local".
-//	haven't investigated fully, but this'll work around it.
-//    result.append("@arlut.utexas.edu");
-//	well.  hmmph.  some of the siglo's already have @ in them.
-                kk=siglo.length();
-                while( kk-- > 0 )
-	                n = siglo.indexOf('@');
-                if( n < 0 )
-                  {
-                    result.append(siglo);
-                  }
-                else
-                  {
-                    newst = siglo.substring(0,n);
-                    result.append(newst);
-//    Ganymede.debug(newst);
-                  }
-    result.append(": ");
-    result.append(siglo);
-    result.append("@arlut.utexas.edu.");
-    writer.println(result.toString());
-
-
-    if (aliases != null)
-      {
-	for (int i = 0; i < aliases.size(); i++)
-	  {
-	    alias = (String) aliases.elementAt(i);
-            aliaslo = alias.toLowerCase();
-	    
-	    if (alias.equals(signature))
-	      {
-                result.setLength(0);
-                result.append(username);
-//	postfix no likey @... stuff on lhs.
-//                result.append("@arlut.utexas.edu");
-
-                result.append(": ");
-
-                siglo = signature.toLowerCase();
-                result.append(siglo);
-                result.append("@arlut.utexas.edu.");
-                writer.println(result.toString());
-	      }
-            else
-
-	      {
-                result.setLength(0);
-                result.append(aliaslo);
-//	postfix no likey @... stuff on lhs.
-//                result.append("@arlut.utexas.edu");
-
-                result.append(": ");
-
-                siglo = signature.toLowerCase();
-                result.append(siglo);
-                result.append("@arlut.utexas.edu.");
-                writer.println(result.toString());
-	      }
+            writer.println(result.toString().toLowerCase());
           }
       }
-
   }
 
   /**
+   * This method writes out a user alias line to the pfmalias file.<br/><br/>
    *
+   * AHEM!!!  where you see "write Hash Generics" below...
+   * what that really means is:
+   * write the flat file that postfix (through postalias or
+   * postmap) will turn into a hash file.
+   * the file has to get flung over via ssh and then
+   * something has to run postmap/postalias on the file.
+   *
+   * jgs
+   */
+
+  private void writeHashGenerics(DBObject object, PrintWriter writer)
+  {
+    String username = (String) object.getFieldValueLocal(userSchema.USERNAME);
+    String signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
+    Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(userSchema.ALIASES);
+    Vector<String> addresses = (Vector<String>) object.getFieldValuesLocal(userSchema.EMAILTARGET);
+
+    result.setLength(0);
+
+    // we should never have @ chars in signature aliases, but if we
+    // do, trim
+
+    if (signature.indexOf('@') != -1)
+      {
+	try
+	  {
+	    throw new RuntimeException("Warning, @ in signature alias!");
+	  }
+	catch (RuntimeException ex)
+	  {
+	    Ganymede.logError(ex);
+	  }
+
+	signature = signature.substring(0, signature.indexOf('@'));
+      }
+
+    result.append(signature);
+    result.append(": ");
+    result.append(signature);
+    result.append("@arlut.utexas.edu.");
+    writer.println(result.toString().toLowerCase());
+
+    if (!empty(aliases))
+      {
+	for (String alias: aliases)
+          {
+            if (alias.equals(signature))
+              {
+                result.setLength(0);
+                result.append(username);
+                result.append(": ");
+                result.append(signature);
+                result.append("@arlut.utexas.edu.");
+
+                writer.println(result.toString().toLowerCase());
+              }
+            else
+              {
+                result.setLength(0);
+                result.append(alias);
+                result.append(": ");
+                result.append(signature);
+                result.append("@arlut.utexas.edu.");
+
+                writer.println(result.toString().toLowerCase());
+              }
+          }
+      }
+  }
+
+  /**
    * This method writes out a mail list alias line to the pfmalias file.<br/><br/>
    *
    * The mail list lines in this file look like the following:<br/><br/>
@@ -3137,113 +2866,87 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-	*	AHEM!!!  where you see "write HashGroupAlias" below...
-	*	what that really means is:
-	*	write the flat file that postfix (through postalias or
-	*	postmap) will turn into a hash file.
-	*	the file has to get flung over via ssh and then
-	*	something has to run postmap/postalias on the file.
+   *
+   * AHEM!!!  where you see "write HashGroupAlias" below...
+   * what that really means is:
+   * write the flat file that postfix (through postalias or
+   * postmap) will turn into a hash file.
+   * the file has to get flung over via ssh and then
+   * something has to run postmap/postalias on the file.
+   *
+   * jgs
    */
 
   private void writeHashGroupAlias(DBObject object, PrintWriter writer)
   {
-    String groupname;
-    Vector group_targets;
-    Vector group_aliases;
-    Vector external_targets;
-    Invid memberInvid;
-    String target;
+    String groupname = (String) object.getFieldValueLocal(emailListSchema.LISTNAME);
+    Vector<String> group_aliases = (Vector<String>) object.getFieldValuesLocal(emailListSchema.ALIASES);
+    Vector<Invid> group_targets = (Vector<Invid>) object.getFieldValuesLocal(emailListSchema.MEMBERS);
+    Vector<String> external_targets = (Vector<String>) object.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
 
-    int lengthlimit_remaining;
-    int subgroup = 1;
-    String subname;
+    //  if the idea is to write each group out as the full list, then,
+    //  okay, i guess we can do that.  actually, that is a chore,
+    //  isn't it?  so let's spit out each alias and the groupname,
+    //  then just do the groupname once.
 
-    String grlo;
-    String aliaslo;
-    String targetlo;
-    /* -- */
-
-
-    groupname = (String) object.getFieldValueLocal(emailListSchema.LISTNAME);
-    group_aliases = object.getFieldValuesLocal(emailListSchema.ALIASES);
-    group_targets = object.getFieldValuesLocal(emailListSchema.MEMBERS);
-    external_targets = object.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
-
-    grlo = groupname.toLowerCase();
-
-    /*  if the idea is to write each group out as the full list, then,
-     *  okay, i guess we can do that.  actually, that is a chore,
-     *  isn't it?  so let's spit out each alias and the groupname,
-     *  then just do the groupname once.
-     */
-    if (group_aliases != null)
+    if (!empty(group_aliases))
       {
-        for (int i = 0; i < group_aliases.size(); i++)
+	for (String alias: group_aliases)
           {
             result.setLength(0);
-            String alias = (String) group_aliases.elementAt(i);
-            aliaslo= alias.toLowerCase();
-            result.append(aliaslo);
+            result.append(alias);
             result.append(": ");
-//            result.append("\t");
-		//	grlo == lower case groupname
-            result.append(grlo);
-            writer.println(result.toString());
+            result.append(groupname);
+            writer.println(result.toString().toLowerCase());
           }
       }
 
-    //        whoops.  need to know that we have something to spit out.
-    if ((group_targets != null) || (external_targets != null))
+    // whoops.  need to know that we have something to spit out.
+
+    if (!empty(group_targets) || !empty(external_targets))
       {
         result.setLength(0);
-	//	grlo == lower case groupname
-        result.append(grlo);
+        result.append(groupname);
         result.append(": ");
-//        result.append("\t");
-    
-        if (group_targets != null)
+
+        if (!empty(group_targets))
           {
             for (int i = 0; i < group_targets.size(); i++)
               {
-                memberInvid = (Invid) group_targets.elementAt(i);
-            
+                Invid memberInvid = (Invid) group_targets.get(i);
+
                 if (isVeryDeadUser(memberInvid))
                   {
                     continue;
                   }
-    
+
                 if (i > 0)
                   {
                     result.append(", ");
                   }
-    
-                target = getLabel(memberInvid);
-                targetlo = target.toLowerCase();
-                result.append(targetlo);
+
+                result.append(getLabel(memberInvid));
               }
           }
-    
-        if (external_targets != null)
+
+        if (!empty(external_targets))
           {
             for (int i = 0; i < external_targets.size(); i++)
               {
-                if ((i > 0) || (group_targets != null && group_targets.size() > 0))
+                if (i > 0 || !empty(group_targets))
                   {
                     result.append(", ");
                   }
-            
-                target = (String) external_targets.elementAt(i);
-                targetlo = target.toLowerCase();
-                result.append(targetlo);
+
+                result.append(external_targets.get(i));
               }
           }
-    
-        writer.println(result.toString());
+
+        writer.println(result.toString().toLowerCase());
       }
   }
 
   /**
-   *
    * This method writes out a mail list alias line to the pfmalias
    * file, as sourced from a gasharl account
    * group.<br/><br/>
@@ -3261,67 +2964,52 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
    *
-	*	AHEM!!!  where you see "write HashAccountGroupAlias" below...
-	*	what that really means is:
-	*	write the flat file that postfix (through postalias or
-	*	postmap) will turn into a hash file.
-	*	the file has to get flung over via ssh and then
-	*	something has to run postmap/postalias on the file.
+   * AHEM!!!  where you see "write HashAccountGroupAlias" below...
+   * what that really means is:
+   * write the flat file that postfix (through postalias or
+   * postmap) will turn into a hash file.
+   * the file has to get flung over via ssh and then
+   * something has to run postmap/postalias on the file.
+   *
+   * jgs
    */
 
   private void writeHashAccountGroupAlias(DBObject object, PrintWriter writer)
   {
-    String groupname;
-    Vector group_targets;
-    Invid userInvid;
-    String target;
-
-    int lengthlimit_remaining;
-    int subgroup = 1;
-    String subname;
-
-    String grouplo;
-    String targetlo;
-
-    /* -- */
-
     if (!object.isSet(groupSchema.EMAILOK))
       {
         return;
       }
 
-    groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
-    grouplo = groupname.toLowerCase();
-    group_targets = object.getFieldValuesLocal(groupSchema.USERS);
+    String groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
+    Vector<Invid> group_targets = (Vector<Invid>) object.getFieldValuesLocal(groupSchema.USERS);
 
-    //  if it is null, then there's nothing to do.
-    if (group_targets != null)
+    if (!empty(group_targets))
       {
         result.setLength(0);
-        result.append(grouplo);
+        result.append(groupname);
         result.append(": ");
-	for (int i = 0; i < group_targets.size(); i++)
-	  {
-	    userInvid = (Invid) group_targets.elementAt(i);
+
+        for (int i = 0; i < group_targets.size(); i++)
+          {
+            Invid userInvid = group_targets.get(i);
 
             if (isVeryDeadUser(userInvid))
               {
                 continue;
               }
 
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
+            if (i > 0)
+              {
+                result.append(", ");
+              }
 
-            target = getLabel(userInvid);
-            targetlo = target.toLowerCase();
-	    result.append(targetlo);
-	  }
-        writer.println(result.toString());
+            result.append(getLabel(userInvid));
+          }
+
+        writer.println(result.toString().toLowerCase());
       }
   }
-
 
   /**
    *
@@ -3342,65 +3030,51 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
    *
-	*	AHEM!!!  where you see "write HashUserNetgroupAlias" below...
-	*	what that really means is:
-	*	write the flat file that postfix (through postalias or
-	*	postmap) will turn into a hash file.
-	*	the file has to get flung over via ssh and then
-	*	something has to run postmap/postalias on the file.
+   *       AHEM!!!  where you see "write HashUserNetgroupAlias" below...
+   *       what that really means is:
+   *       write the flat file that postfix (through postalias or
+   *       postmap) will turn into a hash file.
+   *       the file has to get flung over via ssh and then
+   *       something has to run postmap/postalias on the file.
+   *
+   * jgs
    */
 
   private void writeHashUserNetgroupAlias(DBObject object, PrintWriter writer)
   {
-    String groupname;
-    Vector group_targets;
-    Vector sub_netgroups;
-    Vector targets;
-
-    String target;
-
-    int lengthlimit_remaining;
-    int subgroup = 1;
-    String subname;
-
-    /* -- */
-
     if (!object.isSet(userNetgroupSchema.EMAILOK))
       {
         return;
       }
 
+    String groupname = (String) object.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+    Vector<Invid> group_targets = (Vector<Invid>) object.getFieldValuesLocal(userNetgroupSchema.USERS);
+    Vector<Invid> sub_netgroups = (Vector<Invid>) object.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
 
-    groupname = (String) object.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
-    group_targets = object.getFieldValuesLocal(userNetgroupSchema.USERS);
-    sub_netgroups = object.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+    Vector<String> targets = new Vector<String>();
 
-    targets = new Vector();
-
-    if (group_targets != null)
+    if (!empty(group_targets))
       {
-        for (int i = 0; i < group_targets.size(); i++)
+	for (Invid targetInvid: group_targets)
           {
-            Invid targetInvid = (Invid) group_targets.elementAt(i);
-
             if (isVeryDeadUser(targetInvid))
               {
                 continue;
               }
 
-            targets.addElement(getLabel(targetInvid));
+            targets.add(getLabel(targetInvid));
           }
       }
 
-    if (sub_netgroups != null)
+    if (!empty(sub_netgroups))
       {
-        for (int i = 0; i < sub_netgroups.size(); i++)
+	for (Invid subNetGroup: sub_netgroups)
           {
-            DBObject subnetgroup = getObject((Invid) sub_netgroups.elementAt(i));
+            DBObject subnetgroup = getObject(subNetGroup);
 
             if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
               {
-                targets.addElement(subnetgroup.getLabel());
+                targets.add(subnetgroup.getLabel());
               }
           }
       }
@@ -3416,15 +3090,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             result.append(", ");
           }
 
-        target = (String) targets.elementAt(i);
-        result.append(target);
+	result.append(targets.get(i));
       }
 
-    writer.println(result.toString());
+    writer.println(result.toString().toLowerCase());
   }
 
   /**
-   *
    * This method writes out a mail list alias line to the pfmalias
    * file, as sourced from an emailable user
    * netgroup.<br/><br/>
@@ -3442,90 +3114,83 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-   * 
-	*	AHEM!!!  where you see "write HashExternalAlias" below...
-	*	what that really means is:
-	*	write the flat file that postfix (through postalias or
-	*	postmap) will turn into a hash file.
-	*	the file has to get flung over via ssh and then
-	*	something has to run postmap/postalias on the file.
+   *
+   *       AHEM!!!  where you see "write HashExternalAlias" below...
+   *       what that really means is:
+   *       write the flat file that postfix (through postalias or
+   *       postmap) will turn into a hash file.
+   *       the file has to get flung over via ssh and then
+   *       something has to run postmap/postalias on the file.
+   *
+   * jgs
    */
 
   private void writeHashExternalAlias(DBObject object, PrintWriter writer)
   {
-    String name;
-    Vector aliases;
-    String alias;
-    Vector targets;
-    String target;
+    String name = (String) object.getFieldValueLocal(emailRedirectSchema.NAME);
+    Vector<String> targets = (Vector<String>) object.getFieldValuesLocal(emailRedirectSchema.TARGETS);
+    Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(emailRedirectSchema.ALIASES);
 
-    String namelo;
-    String aliaslo;
-    String targetlo;
-
-    /* -- */
-
-
-    name = (String) object.getFieldValueLocal(emailRedirectSchema.NAME);
-    targets = object.getFieldValuesLocal(emailRedirectSchema.TARGETS);
-    aliases = object.getFieldValuesLocal(emailRedirectSchema.ALIASES);
-
-    namelo = name.toLowerCase();
-
-    if (aliases != null)
+    if (!empty(aliases))
       {
-        for (int i = 0; i < aliases.size(); i++)
-          {
-	    //  but don't do this at all if the alias == name.
-            alias = (String) aliases.elementAt(i);
-            aliaslo = alias.toLowerCase();
-	    if (!aliaslo.equals(namelo))
+	for (String alias: aliases)
+	  {
+            if (!alias.equals(name))
               {
-              result.setLength(0);
-              result.append(aliaslo);
-              result.append(": ");
-              result.append(namelo);
-              writer.println(result.toString());
+		result.setLength(0);
+		result.append(alias);
+		result.append(": ");
+		result.append(name);
+		writer.println(result.toString().toLowerCase());
               }
-          }
+	  }
       }
 
-
-
     //  if targets is null, we mustn't put out a stub line.
-    if (targets != null)
+
+    if (!empty(targets))
       {
         result.setLength(0);
-        result.append(namelo);
+        result.append(name);
         result.append(": ");
+
         for (int i = 0; i < targets.size(); i++)
           {
             if (i > 0)
               {
                 result.append(", ");
               }
-            target = (String) targets.elementAt(i);
-            targetlo = target.toLowerCase();
-            //	if the target has @arlut.utexas.edu
-	    //	change it to @arlmail.arlut.utexas.edu.  sigh.
-            if( targetlo.endsWith("@arlut.utexas.edu") )
-              {
-                int kk,n=0;
-                String newst;
-                kk=targetlo.length();
-                while( kk-- > 0 )
-	                n = targetlo.indexOf('@');
-                newst = targetlo.substring(0,n);
-                result.append(newst);
-                result.append("@arlmail.arlut.utexas.edu");
-              }
-            else
-              {
-                result.append(targetlo);
-              }
+
+	    result.append(fixup(targets.get(i)));
           }
-        writer.println(result.toString());
+
+        writer.println(result.toString().toLowerCase());
       }
+  }
+
+  /**
+   * Cleans up / fixes up address for our use in generating Postfix
+   * email input files.
+   *
+   * jon/jgs
+   */
+
+  private String fixup(Object in)
+  {
+    // if the target has @arlut.utexas.edu
+    // change it to @arlmail.arlut.utexas.edu.  sigh.
+
+    return in.toString().replace("@arlut.utexas.edu",
+				 "@arlmail.arlut.utexas.edu");
+  }
+
+  /**
+   * Convenience method, returns true if in is null or empty.
+   */
+
+  private boolean empty(Vector in)
+  {
+    return in == null || in.size() == 0;
   }
 
 //------------------------------------------------------------------------------
@@ -3651,7 +3316,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
 		continue;
 	      }
-	    
+
 	    String hash1 = passField.getLANMANCryptText();
 
 	    if (hash1 == null || hash1.equals(""))
@@ -3680,11 +3345,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    String homephone = cleanString((String) user.getFieldValueLocal(userSchema.HOMEPHONE));
 	    String homedir = cleanString((String) user.getFieldValueLocal(userSchema.HOMEDIR));
 	    String shell = cleanString((String) user.getFieldValueLocal(userSchema.LOGINSHELL));
-	    String composite = cleanString(fullname + "," + 
-					   room + " " + div + "," + 
+	    String composite = cleanString(fullname + "," +
+					   room + " " + div + "," +
 					   workphone + "," + homephone);
 
-	    sambaFile.println(username + ":" + uid.intValue() + ":" + 
+	    sambaFile.println(username + ":" + uid.intValue() + ":" +
 			      hash1 + ":" + hash2 + ":" +
 			      composite + ":" + homedir + ":" + shell);
 	  }
@@ -3729,7 +3394,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    DBObject user = (DBObject) users.nextElement();
 
 	    boolean inactivated = user.isInactivated();
-	    
+
 	    String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
 
 	    if (username == null || username.equals(""))
@@ -3743,7 +3408,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
 		inactivated = true;
 	      }
-	    
+
 	    if (!inactivated)
 	      {
 		hash1 = passField.getLANMANCryptText();
@@ -3755,7 +3420,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		else
 		  {
 		    hash2 = passField.getNTUNICODECryptText();
-		    
+
 		    if (hash2 == null || hash2.equals(""))
 		      {
 			inactivated = true;
@@ -3809,7 +3474,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 	    String dateString = "LCT-" + dateToSMBHex(System.currentTimeMillis());
 
-	    sambaFile.println(username + ":" + uid.intValue() + ":" + 
+	    sambaFile.println(username + ":" + uid.intValue() + ":" +
 			      hash1 + ":" + hash2 + ":" +
 			      flagString + ":" + dateString);
 	  }
@@ -3909,17 +3574,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
 	DBObject user;
 	Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-	
+
 	String username;
 	Invid invid;
 	String cryptText;
 	String signature;
 	String fullname;
-	
+
 	while (users.hasMoreElements())
 	  {
 	    user = (DBObject) users.nextElement();
-	    
+
 	    username = user.getLabel();
 	    invid = user.getInvid();
 	    signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
@@ -3929,7 +3594,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    if (!user.isInactivated())
 	      {
 		PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
-		
+
 		if (passField != null)
 		  {
 		    cryptText = passField.getMD5CryptText();
@@ -4024,7 +3689,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
 		continue;
 	      }
-	    
+
 	    String password = passField.getUNIXCryptText();
 
 	    if (password == null)
@@ -4069,9 +3734,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
 		continue;
 	      }
-	    
+
 	    InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
-	    
+
 	    if (usersField == null)
 	      {
 		continue;
@@ -4225,7 +3890,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		    extIMAPCredentials.print(" ");
 		    extIMAPCredentials.print(mailUsername);
 		    extIMAPCredentials.print(" ");
-		    extIMAPCredentials.println(mailpass);		
+		    extIMAPCredentials.println(mailpass);
 		  }
 	      }
 	  }
@@ -4246,7 +3911,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   /**
    * <P>This method generates a transitive closure of the members of a
    * user netgroup, including all users in all member netgroups,
-   * recursively.</P> 
+   * recursively.</P>
    */
 
   private Vector netgroupMembers(DBObject object)
@@ -4284,7 +3949,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (users != null)
       {
-	oldMembers = VectorUtils.union(oldMembers, 
+	oldMembers = VectorUtils.union(oldMembers,
 				       VectorUtils.stringVector(users.getValueString(), ", "));
       }
 
@@ -4297,7 +3962,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	for (int i = 0; i < subGroups.size(); i++)
 	  {
 	    DBObject subGroup = getObject(subGroups.value(i));
-	    
+
 	    if (!subGroup.isInactivated())
 	      {
 		oldMembers = netgroupMembers(subGroup, oldMembers, graphCheck);
@@ -4308,7 +3973,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     return oldMembers;
   }
 
-  /** 
+  /**
    * We can't have any : characters in the Samba password file other than
    * as field separators, so we strip any we find out.
    */
@@ -4342,7 +4007,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     return buffer.toString();
   }
 
-  /** 
+  /**
    * We can't have any : characters in passwords in the rshNT.txt
    * file we generate, since we use : chars as field separators in
    * this file.  Make sure that we backslash any such chars.
@@ -4417,7 +4082,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	while (systems.hasMoreElements())
 	  {
 	    system = (DBObject) systems.nextElement();
-	
+
 	    writeSysDataLine(system, sys_dataFile);
 	  }
       }
@@ -4438,7 +4103,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * <code>129.116.224.12|01:02:03:04:05:06|sysname|room|username</code>
    *
-   */ 
+   */
 
   private void writeSysDataLine(DBObject object, PrintWriter writer)
   {
@@ -4474,7 +4139,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    interfaceObj = getObject((Invid) interfaceInvids.elementAt(i));
 
 	    interfaceName = getInterfaceHostname(interfaceObj);
-	    
+
 	    if (interfaceName != null)
 	      {
 		local_sysname = interfaceName;
@@ -4485,7 +4150,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      }
 
 	    roomInvid = (Invid) object.getFieldValueLocal(systemSchema.ROOM);
-	    
+
 	    if (roomInvid != null)
 	      {
 		room = getLabel(roomInvid);
@@ -4496,7 +4161,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      }
 
 	    primaryUserInvid = (Invid) object.getFieldValueLocal(systemSchema.PRIMARYUSER);
-	    
+
 	    if (primaryUserInvid != null)
 	      {
 		primaryUser = getLabel(primaryUserInvid);
@@ -4548,7 +4213,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    result.append("|");
 	    result.append(local_sysname);
 	    result.append("|");
-	    
+
 	    if (ownerString == null || ownerString.equals(""))
 	      {
 		result.append("supergash");
@@ -4577,7 +4242,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * This method generates a hosts_info file.  This method must be run during
    * builderPhase1 so that it has access to the enumerateObjects() method
    * from our superclass.
-   * 
+   *
    */
 
   private boolean writeSysFile()
@@ -4609,18 +4274,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	while (systems.hasMoreElements())
 	  {
 	    system = (DBObject) systems.nextElement();
-	
+
 	    writeSystem(system, hosts_info);
 	  }
 
 	// now the interfaces
-    
+
 	interfaces = enumerateObjects((short) 265);
 
 	while (interfaces.hasMoreElements())
 	  {
 	    interfaceObj = (DBObject) interfaces.nextElement();
-	
+
 	    writeInterface(interfaceObj, hosts_info);
 	  }
       }
@@ -4642,7 +4307,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * ns1.arlut.utexas.edu, ns1b ns1d ns1f ns1e ns1z ns1g ns1h ns1i ns1j ns1k ns1l ns1a ns1c ns1m , \
    * news imap-server arlvs1 mail-firewall mail mailhost pop-server ftp sunos sunos2 wais fs1 gopher \
-   * cso www2 ldap-server www : gl, halls, gil, broccol : S219 : Servers : Sun : SparcCenter 2000 : 2.5.1 : 
+   * cso www2 ldap-server www : gl, halls, gil, broccol : S219 : Servers : Sun : SparcCenter 2000 : 2.5.1 :
    *
    * </pre>
    *
@@ -4682,7 +4347,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	for (int i = 0; i < interfaceInvids.size(); i++)
 	  {
 	    interfaceName = getInterfaceHostname(getObject((Invid) interfaceInvids.elementAt(i)));
-	    
+
 	    if (interfaceName != null)
 	      {
 		interfaceNames.addElement(interfaceName);
@@ -4739,7 +4404,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	result.append((String) interfaceNames.elementAt(i));
 	result.append(" ");
       }
-    
+
     result.append(", ");
 
     if (sysAliases != null)
@@ -4770,7 +4435,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("GASHBuilder.writeSystem(): Warning!  hosts_info line " + 
+	System.err.println("GASHBuilder.writeSystem(): Warning!  hosts_info line " +
 			   sysname + " overflows the GASH line length!");
       }
 
@@ -4789,7 +4454,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * </pre>
    *
-   * for a multi-host system, or 
+   * for a multi-host system, or
    *
    * <pre>
    *
@@ -4850,14 +4515,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (ipField == null)
       {
-	System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname + 
+	System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname +
 			   " has no IP address!  Skipping!");
 	return;
       }
 
     if (!ipField.isIPV4())
       {
-	System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname + 
+	System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname +
 			   " has an IPV6 record!  This isn't compatible with the GASH makefiles!  Skipping!");
 	return;
       }
@@ -4901,7 +4566,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("GASHBuilder.writeInterface(): Warning!  hosts_info type 2 line " + 
+	System.err.println("GASHBuilder.writeInterface(): Warning!  hosts_info type 2 line " +
 			   ((hostname == null) ? sysname : hostname) +
 			   " overflows the GASH line length!");
       }
@@ -4990,7 +4655,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	dhcpFileWriter.println("authoritative;");
 	dhcpFileWriter.println("ddns-update-style none;");
 	dhcpFileWriter.println("");
-	
+
 	writeDHCPCustomOptions(dhcpFileWriter);
 
         dhcpFileWriter.println("\n#===============================================================================");
@@ -5041,62 +4706,62 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    */
 
   private boolean writeDHCPCustomOptions(PrintWriter writer)
-  {    
+  {
     if (this.customOptions.size() == 0)
       {
 	return true;
       }
-    
+
     writer.println("# Custom Option Declarations");
     writer.println("#===============================================================================");
-	    
+
     Iterator it = this.customOptions.iterator();
-	    
+
     // loop once to find custom option spaces
-	    
+
     HashSet foundOptions = new HashSet();
-	    
+
     while (it.hasNext())
       {
 	Invid optionInvid = (Invid) it.next();
 	DBObject obj = getObject(optionInvid);
-		
+
 	if (obj != null)
 	  {
 	    String name = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
-		    
+
 	    if (name.indexOf('.') != -1)
 	      {
 		String optionSpace = name.substring(0, name.indexOf('.'));
-			
+
 		if (!foundOptions.contains(optionSpace))
 		  {
 		    writer.println("option space " + optionSpace + ";");
 		    foundOptions.add(optionSpace);
 		  }
 	      }
-		    
+
 	  }
       }
-	    
+
     // loop again to declare our custom options
-	    
+
     it = this.customOptions.iterator();
-	    
+
     while (it.hasNext())
       {
 	Invid optionInvid = (Invid) it.next();
 	DBObject obj = getObject(optionInvid);
-		
+
 	if (obj != null)
 	  {
 	    String name = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
 	    String type = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
 	    Integer code = (Integer) obj.getFieldValueLocal(dhcpOptionSchema.CUSTOMCODE);
-		    
+
 	    // we need to use the expanded syntax for the
 	    // option types for the ISC DHCP server
-		    
+
 	    if (type.equals("uint8"))
 	      {
 		type = "unsigned integer 8";
@@ -5121,11 +4786,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      {
 		type = "signed integer 16";
 	      }
-		    
+
 	    writer.println("option " + name + " code " + code + " = " + type + ";");
 	  }
       }
-	    
+
     writer.println("#===============================================================================");
 
     return true;
@@ -5144,7 +4809,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     IPDBField ipField = null;
     String network_number = "";
     String network_mask = "";
-    HashMap options = new HashMap(); 
+    HashMap options = new HashMap();
 
     name = (String) object.getFieldValueLocal(dhcpNetworkSchema.NAME);
 
@@ -5157,53 +4822,53 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	return;
       }
 
-    try 
+    try
       {
 	writer.write("\n#===============================================================================\n");
 	writer.write("shared-network " + name + "\n");
-	
+
 	ipField = (IPDBField) object.getField(dhcpNetworkSchema.NETWORK_NUMBER);
-	
+
 	if (ipField != null)
 	  {
 	    network_number = (String) ipField.getEncodingString();
 	  }
-	
+
 	ipField = (IPDBField) object.getField(dhcpNetworkSchema.NETWORK_MASK);
-	
+
 	if (ipField != null)
 	  {
 	    network_mask = (String) ipField.getEncodingString();
 	  }
-	
+
 	writer.write("{\n");
 	writer.write("\tsubnet\t" + network_number + "\tnetmask\t\t" + network_mask + "\n");
 	writer.write("\t{ \n");
-	
+
 	if (object.isDefined(dhcpNetworkSchema.OPTIONS))
 	  {
 	    findDHCPOptions(options, object.getFieldValuesLocal(dhcpNetworkSchema.OPTIONS));
 	    writeDHCPOptionList(options, object, writer, "\t\t");
 	  }
-	
+
 	if (object.isSet(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS))
 	  {
 	    writer.write("\t\tpool\n");
 	    writer.write("\t\t{\n");
 	    String guest_range = (String) object.getFieldValueLocal(dhcpNetworkSchema.GUEST_RANGE);
-	    HashMap options2 = new HashMap(); 
+	    HashMap options2 = new HashMap();
 	    writer.write("\t\t\trange\t" + guest_range + ";\n");
-	    
+
 	    if (object.isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
 	      {
 		findDHCPOptions(options2, object.getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS));
 		writeDHCPOptionList(options2, object, writer, "\t\t\t");
 	      }
-	    
+
 	    writer.write("\t\t\tallow known clients;\n");
 	    writer.write("\t\t}\n");
 	  }
-	
+
 	writer.write("\t} # END SUBNET " + network_number + "\n");
 	writer.write("} # END SHARED-NETWORK " + name + "\n");
       }
@@ -5230,7 +4895,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     StringDBField macField = null;
     String macAddress = null;
 
-    HashMap options = new HashMap(); 
+    HashMap options = new HashMap();
 
     StringBuilder buffer = new StringBuilder();
 
@@ -5338,13 +5003,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	buffer.append("\toption host-name\t\t");
 	buffer.append(quote(sysname));
 	buffer.append(";\n");
-	
+
 	try
 	  {
 	    writer.write(buffer.toString());
-	    
+
 	    writeDHCPOptionList(options, object, writer, "\t");
-	    
+
 	    if (i == 0)
 	      {
 		writer.write("} # END host\n\n");
@@ -5359,7 +5024,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    System.err.println("GASHBuilderTask.writeDHCPSystem(): couldn't write to file: " + ex);
 	  }
 
-	    
+
 	if (options.size() == 0)
 	  {
 	    // no custom dhcp, so we don't need to create a roaming
@@ -5377,29 +5042,29 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    */
 
   private void writeDHCPOptionList(HashMap options, DBObject object, Writer writer, String tabs)
-  {    
+  {
     Iterator values = options.values().iterator();
 
     result.setLength(0);
-    
+
     // first make sure we've declared any site-option-space that
     // we'll need to use
-    
+
     HashSet spaces = new HashSet();
-    
+
     while (values.hasNext())
       {
 	dhcp_entry entry = (dhcp_entry) values.next();
-	
+
 	if (entry.builtin)
 	  {
 	    continue;
 	  }
-	
+
 	if (entry.name.indexOf('.') != -1)
 	  {
 	    String spaceName = entry.name.substring(0, entry.name.indexOf('.'));
-	    
+
 	    if (spaces.size() == 0)
 	      {
 		result.append(tabs+"site-option-space\t\t\"" + spaceName + "\";\n");
@@ -5415,34 +5080,34 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	      }
 	  }
       }
-    
+
     // second make sure that we've forced any mandatory options
-    
+
     HashSet forcedOptions = new HashSet();
-    
+
     values = options.values().iterator();
-    
+
     while (values.hasNext())
       {
 	dhcp_entry entry = (dhcp_entry) values.next();
-	
+
 	if (entry.forced)
 	  {
 	    forcedOptions.add(entry);
 	  }
       }
-    
+
     if (forcedOptions.size() > 0)
       {
 	StringBuilder hexOptionCodes = new StringBuilder();
 	StringBuilder concatPrefix = new StringBuilder();
-	
+
 	values = forcedOptions.iterator();
-	
+
 	while (values.hasNext())
 	  {
 	    dhcp_entry entry = (dhcp_entry) values.next();
-	    
+
 	    if (entry.forced && entry.code != 0)
 	      {
 		if (hexOptionCodes.length() == 0)
@@ -5453,7 +5118,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		  {
 		    hexOptionCodes.append("),");
 		  }
-		
+
 		if (concatPrefix.length () == 0)
 		  {
 		    concatPrefix.append("concat(option dhcp-parameter-request-list");
@@ -5462,15 +5127,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		  {
 		    concatPrefix.insert(0, "concat(");
 		  }
-		
+
 		hexOptionCodes.append(java.lang.Integer.toHexString(entry.code));
 	      }
 	  }
-	
+
 	if (hexOptionCodes.length() != 0)
 	  {
 	    hexOptionCodes.append(");\n");
-	    
+
 	    result.append(tabs+"if exists dhcp-parameter-request-list {\n");
 	    result.append(tabs+"\t# Ganymede forced dhcp options\n");
 	    result.append(tabs+"\toption dhcp-parameter-request-list = ");
@@ -5479,17 +5144,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	    result.append(tabs+"}\n");
 	  }
       }
-    
+
     // third, let's write out the actual options for this host
-    
+
     values = options.values().iterator();
-    
+
     while (values.hasNext())
       {
 	dhcp_entry entry = (dhcp_entry) values.next();
-	
+
 	int length = 0;
-	
+
 	result.append(tabs);
 
 	if (!entry.builtin)
@@ -5501,7 +5166,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    length = 0;
 	  }
-	
+
 	result.append(entry.name);
 
 	if (length + entry.name.length() < 16)
