@@ -581,6 +581,13 @@ public interface SchemaConstants {
 
   final static short SyncChannelTypeNum = 107;
 
+  /**
+   * If we're going to have a SyncMaster object injecting extra
+   * information into the delta sync records produced for this Sync
+   * Channel, we'll have a class name in this field.
+   */
+
+  final static short SyncChannelClassName = 108;
 
   // ======================================================================
   // ======================================================================

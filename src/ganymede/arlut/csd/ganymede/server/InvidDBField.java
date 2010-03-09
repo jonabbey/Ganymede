@@ -428,7 +428,12 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    target = getOwner().lookupInvid(invid, xmlOut.isBeforeStateDumping());
+    // we provide a DBSession from the XMLDumpContext so that we can
+    // emit the 'after' label of the target invid if the target was
+    // modified in the session, even if our owner was never checked
+    // out for editing or viewing in the session.
+
+    target = getOwner().lookupInvid(invid, xmlOut.isBeforeStateDumping(), xmlOut.getDBSession());
 
     if (target == null)
       {

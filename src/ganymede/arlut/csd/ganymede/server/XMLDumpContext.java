@@ -48,6 +48,7 @@
 
 package arlut.csd.ganymede.server;
 
+import arlut.csd.ganymede.common.FieldBook;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.Util.XMLUtils;
@@ -87,18 +88,37 @@ public class XMLDumpContext {
   /**
    * If non-null, this SyncRunner will be consulted to answer the
    * mayInclude and shouldInclude questions.
+   *
+   * syncConstraints will be null if we are doing a non-sync channel
+   * filtered dump from the DBStore using the xmlclient.
+   *
+   * If we're using this XMLDumpContext to do a sync, or we're using
+   * xmlclient with a channel specified, syncConstraints will help us
+   * figure out what specific data we need to dump.
    */
 
   private SyncRunner syncConstraints;
 
   /**
-   * If true, this XMLDumpContext is being used to transmit a
-   * transaction delta, in which case we'll want to let callers know
-   * so that they can decide to handle certain things (such as
-   * embedded objects) differently.
+   * If we're doing an incremental sync, we'll use a FieldBook to
+   * denote what objects and fields we need to write to this
+   * XMLDumpContext.
+   *
+   * If book is non-null, this XMLDumpContext is being used to
+   * transmit a transaction delta, in which case we'll want to let
+   * callers know so that they can decide to handle certain things
+   * (such as embedded objects) differently.
    */
 
-  private boolean deltaSyncing = false;
+  private FieldBook book = null;
+
+  /**
+   * Reference to a DBSesssion that is used to provide a DBSession
+   * context when emitting XML from InvidDBFields from DBObjects that
+   * were not edited by a DBSesssion.
+   */
+
+  private DBSession session = null;
 
   /**
    * If true, this XMLDumpContext is currently writing out the
@@ -206,13 +226,28 @@ public class XMLDumpContext {
   }
 
   /**
-   * Sets whether or not this XMLDumpContext was created to write to a
-   * delta sync channel.
+   * Associates a FieldBook with this XMLDumpContext.
+   *
+   * If the book param is non-null, we will use it to decide what
+   * objects and fields need to be written out.
+   *
+   * A non-null book parameter will configure this XMLDumpContext for
+   * delta syncing, and isDeltaSyncing() will return true thereafter.
    */
 
-  public void setDeltaSyncing(boolean param)
+  public void setDeltaFieldBook(FieldBook book)
   {
-    this.deltaSyncing = param;
+    this.book = book;
+  }
+
+  public void setDBSession(DBSession session)
+  {
+    this.session = session;
+  }
+
+  public DBSession getDBSession()
+  {
+    return this.session;
   }
 
   /**
@@ -222,7 +257,7 @@ public class XMLDumpContext {
 
   public boolean isDeltaSyncing()
   {
-    return this.deltaSyncing;
+    return this.book != null;
   }
 
   /**
@@ -287,6 +322,11 @@ public class XMLDumpContext {
 
   public boolean mayInclude(DBObject object)
   {
+    if (book != null)
+      {
+	return book.has(object.getInvid());
+      }
+
     return syncConstraints == null || syncConstraints.mayInclude(object);
   }
 
@@ -305,6 +345,11 @@ public class XMLDumpContext {
 
   public boolean shouldInclude(DBEditObject object)
   {
+    if (book != null)
+      {
+	return book.has(object.getInvid());
+      }
+
     return syncConstraints == null || syncConstraints.shouldInclude(object);
   }
 
@@ -319,15 +364,19 @@ public class XMLDumpContext {
 
   public boolean shouldInclude(DBField newField, DBField oldField)
   {
-    // if we are doing anything other than a delta sync, we won't want
-    // to include the container field in embedded objects
+    // never write out the container field for embedded objects
 
-    if (!isDeltaSyncing() && newField.getOwner().isEmbedded() && newField.getID() == SchemaConstants.ContainerField)
+    if (newField.getOwner().isEmbedded() && newField.getID() == SchemaConstants.ContainerField)
       {
 	return false;
       }
 
-    return syncConstraints == null || syncConstraints.shouldInclude(newField, oldField);
+    if (syncConstraints == null)
+      {
+	return true;
+      }
+
+    return syncConstraints.shouldInclude(newField, oldField, book);
   }
 
   /**
@@ -353,6 +402,11 @@ public class XMLDumpContext {
 	!doDumpHistoryInfo())
       {
 	return false;
+      }
+
+    if (book != null)
+      {
+	return book.has(field.getOwner().getInvid(), field.getID());
       }
 
     if (query != null)
@@ -388,6 +442,11 @@ public class XMLDumpContext {
 	!doDumpHistoryInfo())
       {
 	return false;
+      }
+
+    if (book != null)
+      {
+	return book.has(field.getOwner().getInvid(), field.getID());
       }
 
     return syncConstraints == null || syncConstraints.mayInclude(field, hasChanged);
@@ -661,8 +720,18 @@ public class XMLDumpContext {
     xmlOut.flush();
   }
 
+  /**
+   * Closes the output stream and clears any DBSession, FieldBook,
+   * SyncRunner, or Query linked to this XMLDumpContext.
+   */
+
   public void close() throws IOException
   {
+    session = null;
+    book = null;
+    syncConstraints = null;
+    query = null;
+
     xmlOut.close();
   }
 }

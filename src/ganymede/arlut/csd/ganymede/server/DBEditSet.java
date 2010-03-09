@@ -1637,7 +1637,7 @@ public class DBEditSet {
 	      {
 		if (sync.isIncremental())
 		  {
-		    sync.writeSync(persistedTransaction, objectList, this);
+		    sync.writeIncrementalSync(persistedTransaction, objectList, this);
 		  }
 		else if (sync.isFullState())
 		  {

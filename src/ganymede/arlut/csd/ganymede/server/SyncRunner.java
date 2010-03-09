@@ -50,6 +50,7 @@
 
 package arlut.csd.ganymede.server;
 
+import arlut.csd.ganymede.common.FieldBook;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -65,8 +66,11 @@ import java.io.File;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.rmi.RemoteException;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Vector;
 
 import com.jclark.xml.output.UTF8XMLWriter;
@@ -216,7 +220,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * full state dump, and undertake a more lengthy and computationally
  * expensive process of reconciliation to bring the directory service
  * target into compliance with the data in the Ganymede server.</p>
- * 
+ *
  * <p>See the Ganymede synchronization guide for more details on all
  * of this.</p>
  */
@@ -246,6 +250,57 @@ public class SyncRunner implements Runnable {
 
   // ---
 
+  /**
+   * Enum of possible modalities for a SyncRunner
+   */
+
+  public enum SyncType
+  { 
+    /**
+     * The SyncRunner is not triggered automatically, but may be
+     * manually fired from the admin console, or used for filtering
+     * the output of an xmlclient dump.
+     */
+
+    MANUAL,
+
+    /**
+     * The SyncRunner is triggered automatically on Ganymede commits,
+     * and writes out a filtered set of all data, regardless of
+     * whether or not the data objects were modified recently.
+     */
+
+    FULLSTATE,
+
+    /**
+     * The SyncRunner is triggered automatically, and writes out an
+     * XML file with before-and-after context describing a transaction
+     * that is committed in the Ganymede data store.
+     */
+
+    INCREMENTAL;
+
+    /* -- */
+
+    public static SyncType get(int objectVal)
+      {
+	switch (objectVal)
+	  {
+	  case 0:
+	    return SyncType.MANUAL;
+
+	  case 1:
+	    return SyncType.INCREMENTAL;
+
+	  case 2:
+	    return SyncType.FULLSTATE;
+
+	  default:
+	    throw new IllegalArgumentException("Unrecognized integral value");
+	  }
+      }
+  }
+
   private String name;
   private String directory;
   private String fullStateFile;
@@ -255,20 +310,10 @@ public class SyncRunner implements Runnable {
   private Hashtable matrix;
 
   /**
-   * This variable will be true if this SyncRunner is configured to run as a
-   * full state, buildertask-style thingy.  May not be set if incremental is
-   * set.
+   * Controls what type of Sync Channel we're handling.
    */
 
-  private boolean fullState;
-
-  /**
-   * This variable will be true if this SyncRunner is configured to run as a
-   * synchronous, incremental XML build channel.  May not be set if fullState
-   * is set.
-   */
-
-  private boolean incremental;
+  private SyncType mode;
 
   /**
    * This variable is true if we've seen a transaction that requires
@@ -288,6 +333,17 @@ public class SyncRunner implements Runnable {
 
   private booleanSemaphore active = new booleanSemaphore(true);
 
+  /**
+   * If the Sync Channel object in the Ganymede server had a class
+   * name defined, and we can load it successfully, master will
+   * contain a reference to the {@link
+   * arlut.csd.ganymede.server.SyncMaster} used to provide
+   * augmentation to the delta sync records produced by this
+   * SyncRunner.
+   */
+
+  private SyncMaster master;
+
   /* -- */
 
   public SyncRunner(DBObject syncChannel)
@@ -299,7 +355,12 @@ public class SyncRunner implements Runnable {
     updateInfo(syncChannel);
   }
 
-  public synchronized void updateInfo(DBObject syncChannel)
+  /**
+   * Configure this SyncRunner from the corresponding Ganymede Sync
+   * Channel DBObject.
+   */
+
+  private synchronized void updateInfo(DBObject syncChannel)
   {
     if (syncChannel.getTypeID() != SchemaConstants.SyncChannelBase)
       {
@@ -307,25 +368,59 @@ public class SyncRunner implements Runnable {
 	throw new IllegalArgumentException(ts.l("updateInfo.typeError"));
       }
 
-    this.name = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelName);
-    this.directory = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelDirectory);
-    this.fullStateFile = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFullStateFile);
-    this.serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
-    this.includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
+    name = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelName);
+    directory = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelDirectory);
+    fullStateFile = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelFullStateFile);
+    serviceProgram = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelServicer);
+    includePlaintextPasswords = syncChannel.isSet(SchemaConstants.SyncChannelPlaintextOK);
 
-    int type = 0;
+    String className = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelClassName);
+
+    if (className != null)
+      {
+	Class classdef;
+
+	try
+	  {
+	    classdef = Class.forName(className);
+
+	    Constructor c;
+	    Class[] cParams = new Class[0];
+	    Object[] params = new Object[0];
+
+	    c = classdef.getDeclaredConstructor(cParams); // no param constructor
+	    master = (SyncMaster) c.newInstance(params);
+	  }
+	catch (ClassNotFoundException ex)
+	  {
+	    // "Couldn''t load SyncMaster class {0} for Sync Channel {1}"
+	    Ganymede.debug(ts.l("updateInfo.nosuchclass", className, name));
+	  }
+	catch (NoSuchMethodException ex)
+	  {
+	    // "Couldn''t find no-param constructor for SyncMaster class {0} for Sync Channel {1}"
+	    Ganymede.debug(ts.l("updateInfo.missingconstructor", className, name));
+	  }
+	catch (Exception ex)
+	  {
+	    // "Exception calling no-param constructor for SyncMaster class {0} for Sync Channel {1}: {2}"
+	    Ganymede.debug(ts.l("updateInfo.constructorerror", className, name, ex.toString()));
+	  }
+      }
+
+    if (master == null)
+      {
+	master = new NoopSyncMaster();
+      }
 
     try
       {
-	type = ((Integer) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+	this.mode = SyncType.get((Integer) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum));
       }
     catch (NullPointerException ex)
       {
-	type = 1;		// the default old behavior
+	this.mode = SyncType.INCREMENTAL; // the default old behavior
       }
-
-    this.fullState = (type == 2);
-    this.incremental = (type == 1);
 
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
@@ -365,8 +460,8 @@ public class SyncRunner implements Runnable {
   /**
    * This method is used to enable or disable this sync channel's
    * writing of transactions to disk.  Turning this channel's output
-   * off may be useful when the sync channel is manually disabled in
-   * the admin console.
+   * off may be useful when the sync channel's external service
+   * program is manually disabled in the admin console.
    */
 
   public void setActive(boolean state)
@@ -386,7 +481,7 @@ public class SyncRunner implements Runnable {
 
   public boolean isFullState()
   {
-    return this.fullState;
+    return this.mode == SyncType.FULLSTATE;
   }
 
   /**
@@ -396,7 +491,7 @@ public class SyncRunner implements Runnable {
 
   public boolean isIncremental()
   {
-    return this.incremental;
+    return this.mode == SyncType.INCREMENTAL;
   }
 
   /**
@@ -418,6 +513,11 @@ public class SyncRunner implements Runnable {
     return this.fullStateFile;
   }
 
+  /**
+   * Returns the name of the external service program for this Sync
+   * Channel.
+   */
+
   public String getServiceProgram()
   {
     return serviceProgram;
@@ -425,18 +525,20 @@ public class SyncRunner implements Runnable {
 
   /**
    * <p>This method writes out the differential transaction record to
-   * the sync channel defined by this SyncRunner object.  The
+   * the delta Sync Channel defined by this SyncRunner object.  The
    * transaction record will only include those objects and fields
    * that are specified in the Sync Channel database object that this
-   * SyncRunner was initialized with.</p>
+   * SyncRunner was initialized with, or which are included by a
+   * SyncMaster class referenced by name in the SyncChannel DBObject
+   * used to create this SyncRunners.</p>
    *
    * @param transRecord A transaction description record describing the transaction we are writing
    * @param objectList An array of DBEditObjects that the transaction has checked out at commit time
    * @param transaction The DBEditSet that is being committed.
    */
 
-  public void writeSync(DBJournalTransaction transRecord, DBEditObject[] objectList,
-			DBEditSet transaction) throws IOException
+  public void writeIncrementalSync(DBJournalTransaction transRecord, DBEditObject[] objectList,
+				   DBEditSet transaction) throws IOException
   {
     if (!this.active.isSet())
       {
@@ -447,16 +549,47 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
-    for (int i = 0; i < objectList.length; i++)
-      {
-	DBEditObject syncObject = objectList[i];
+    FieldBook book = new FieldBook();
 
-	if (shouldInclude(syncObject))
+    initializeFieldBook(objectList, book);
+
+    int context_count = 0;
+
+    // we want to group the objects we write out by invid type
+
+    Set<Short> typeSet = new HashSet<Short>();
+
+    for (Invid invid: book.objects())
+      {
+	typeSet.add(invid.getType());
+      }
+
+    // first write out the objects that we actually changed this
+    // transaction
+
+    for (Short type: typeSet)
+      {
+	for (Invid invid: book.objects())
 	  {
+	    if (!transaction.isEditingObject(invid))
+	      {
+		context_count++;
+
+		continue;
+	      }
+
+	    if (!type.equals(invid.getType()))
+	      {
+		continue;
+	      }
+
+	    DBEditObject syncObject = transaction.findObject(invid);
+
 	    if (xmlOut == null)
 	      {
 		xmlOut = createXMLSync(transRecord);
-		xmlOut.setDeltaSyncing(true);
+		xmlOut.setDeltaFieldBook(book);
+		xmlOut.setDBSession(transaction.getSession());
 	      }
 
 	    switch (syncObject.getStatus())
@@ -474,7 +607,7 @@ public class SyncRunner implements Runnable {
 		syncObject.emitXML(xmlOut);
 		xmlOut.indentIn();
 		xmlOut.endElementIndent("after");
-		
+
 		xmlOut.indentIn();
 		xmlOut.endElementIndent("object_delta");
 
@@ -493,7 +626,7 @@ public class SyncRunner implements Runnable {
 
 		xmlOut.startElementIndent("after");
 		xmlOut.endElement("after");
-		
+
 		xmlOut.indentIn();
 		xmlOut.endElementIndent("object_delta");
 		break;
@@ -503,6 +636,45 @@ public class SyncRunner implements Runnable {
 		break;
 	      }
 	  }
+      }
+
+    // then write out any objects that the SyncMaster has thrown in
+    // for context
+
+    if (context_count > 0)
+      {
+	xmlOut.startElementIndent("context_objects");
+	xmlOut.indentOut();
+
+	if (xmlOut == null)
+	  {
+	    xmlOut = createXMLSync(transRecord);
+	    xmlOut.setDeltaFieldBook(book);
+	    xmlOut.setDBSession(transaction.getSession());
+	  }
+
+	for (Short type: typeSet)
+	  {
+	    for (Invid invid: book.objects())
+	      {
+		if (transaction.isEditingObject(invid))
+		  {
+		    continue;	// skip
+		  }
+
+		if (!type.equals(invid.getType()))
+		  {
+		    continue;	// skip
+		  }
+
+		DBObject refObject = transaction.getSession().viewDBObject(invid);
+
+		refObject.emitXML(xmlOut);
+	      }
+	  }
+
+	xmlOut.indentIn();
+	xmlOut.endElementIndent("context_objects");
       }
 
     if (xmlOut != null)
@@ -519,9 +691,11 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This method checks this full state SyncRunner against the objects involved in the provided
-   * transaction.  If this SyncRunner's Sync Channel definition matches against the transaction,
-   * a flag will be set causing a full state build to be executed upon the next run of this Sync Runner.
+   * This method checks this Full State SyncRunner against the objects
+   * involved in the provided transaction.  If this SyncRunner's Sync
+   * Channel definition matches against the transaction, a flag will
+   * be set causing a Full State build to be executed upon the next
+   * run of this Sync Runner.
    *
    * @param transRecord A transaction description record describing the transaction we are checking
    * @param objectList An array of DBEditObjects that the transaction has checked out at commit time
@@ -531,10 +705,8 @@ public class SyncRunner implements Runnable {
   public void checkBuildNeeded(DBJournalTransaction transRecord, DBEditObject[] objectList,
 			       DBEditSet transaction) throws IOException
   {
-    for (int i = 0; i < objectList.length; i++)
+    for (DBEditObject syncObject: objectList)
       {
-	DBEditObject syncObject = objectList[i];
-
 	if (shouldInclude(syncObject))
 	  {
 	    this.needBuild.set(true);
@@ -572,7 +744,7 @@ public class SyncRunner implements Runnable {
 
   /**
    * <p>This private helper method creates the {@link
-   * arlut.csd.ganymede.server.XMLDumpContext} that writeSync() will
+   * arlut.csd.ganymede.server.XMLDumpContext} that writeIncrementalSync() will
    * write to.</p>
    *
    * @param transRecord A transaction description record describing the transaction we are writing
@@ -607,6 +779,101 @@ public class SyncRunner implements Runnable {
     xmlOut.indentOut();
 
     return xmlOut;
+  }
+
+  /**
+   * This method creates an initial internal FieldBook for this
+   * SyncRunner, based on the parameters defined in the Sync Channel
+   * DBObject that this SyncRunner is configured from.
+   */
+
+  private void initializeFieldBook(DBEditObject[] objectList, FieldBook book)
+  {
+    for (DBEditObject syncObject: objectList)
+      {
+	if (syncObject.getStatus() == ObjectStatus.DROPPING)
+	  {
+	    continue;
+	  }
+
+	if (mayInclude(syncObject))
+	  {
+	    DBObject origObj = syncObject.getOriginal();
+
+	    // we know that checked-out DBEditObjects have a copy of all
+	    // defined fields, so we don't need to also loop over
+	    // origObj.getFieldVect() looking for fields that were deleted
+	    // from syncObject.
+
+	    for (DBField memberField: syncObject.getFieldVect())
+	      {
+		DBField origField;
+
+		if (origObj == null)
+		  {
+		    origField = null;
+		  }
+		else
+		  {
+		    origField = (DBField) origObj.getField(memberField.getID());
+		  }
+
+		// created
+
+		if (origField == null && memberField.isDefined())
+		  {
+		    String fieldOption = getOption(memberField);
+
+		    if (fieldOption != null && !fieldOption.equals("0"))
+		      {
+			book.add(syncObject.getInvid(), memberField.getID());
+			continue;
+		      }
+		  }
+
+		// deleted
+
+		if (!memberField.isDefined() && origField != null)
+		  {
+		    String fieldOption = getOption(memberField);
+
+		    if (fieldOption != null && !fieldOption.equals("0"))
+		      {
+			book.add(syncObject.getInvid(), memberField.getID());
+			continue;
+		      }
+		  }
+
+		// changed
+
+		if (memberField.isDefined() && origField != null)
+		  {
+		    // check to see if the field has changed and whether we
+		    // should include it.  The 'hasChanged()' check is
+		    // required because this shouldInclude() call will always
+		    // return true if memberField is defined as an 'always
+		    // include' field, whereas in this object-level
+		    // shouldInclude() check loop, we are looking to see
+		    // whether a field that we care about was changed.
+
+		    // Basically the hasChanged() call checks to see if the
+		    // field changed, and the shouldInclude() call checks to
+		    // see if it's a field that we care about.
+
+		    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
+		      {
+			book.add(syncObject.getInvid(), memberField.getID());
+			continue;
+		      }
+		  }
+	      }
+	  }
+
+	// give our plug-in management class the chance to extend the
+	// FieldBook that we're assembling with reference objects, etc.
+
+	master.augment(book, syncObject);
+      }
   }
 
   /**
@@ -718,7 +985,7 @@ public class SyncRunner implements Runnable {
 	    // field changed, and the shouldInclude() call checks to
 	    // see if it's a field that we care about.
 
-	    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField))
+	    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
 	      {
 		return true;
 	      }
@@ -734,7 +1001,7 @@ public class SyncRunner implements Runnable {
    * only if both field and origField are not null and isDefined().</p>
    */
 
-  public boolean shouldInclude(DBField newField, DBField origField)
+  public boolean shouldInclude(DBField newField, DBField origField, FieldBook book)
   {
     String fieldOption;
 
@@ -759,6 +1026,14 @@ public class SyncRunner implements Runnable {
       case SchemaConstants.ModificationDateField:
       case SchemaConstants.ModifierField:
 	return false;
+      }
+
+    if (book != null)
+      {
+	if (book.has(newField.getOwner().getInvid(), newField.getID()))
+	  {
+	    return true;
+	  }
       }
 
     fieldOption = getOption(newField);
@@ -927,7 +1202,7 @@ public class SyncRunner implements Runnable {
 
   public void run()
   {
-    if (this.fullState)
+    if (this.mode == SyncType.FULLSTATE)
       {
 	if (this.needBuild.isSet())
 	  {
@@ -939,7 +1214,7 @@ public class SyncRunner implements Runnable {
 	    Ganymede.debug(ts.l("run.skipping_full", this.getName()));
 	  }
       }
-    else if (this.incremental)
+    else if (this.mode == SyncType.INCREMENTAL)
       {
 	if (this.needBuild.isSet())
 	  {
@@ -969,7 +1244,7 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
-    String shutdownState = GanymedeServer.shutdownSemaphore.checkEnabled();
+    String shutdownState = GanymedeServer.shutdownSemaphore.increment();
 
     if (shutdownState != null)
       {
@@ -989,7 +1264,7 @@ public class SyncRunner implements Runnable {
 	    // will start at sync:0 and work our way up as we go along
 	    // during the server's lifetime
 
-	    synchronized (SyncRunner.class) 
+	    synchronized (SyncRunner.class)
 	      {
 		// "sync channel: {0,number,#}"
 		label = ts.l("runFullState.label_pattern", Integer.valueOf(id++));
@@ -1012,7 +1287,7 @@ public class SyncRunner implements Runnable {
 	  }
 	catch (Exception ex)
 	  {
-	    GanymedeBuilderTask.decPhase1(true);
+	    GanymedeBuilderTask.decPhase1(true); // we're aborting, notify the consoles
 	    alreadyDecdCount = true;
 
 	    Ganymede.debug(Ganymede.stackTrace(ex));
@@ -1022,7 +1297,7 @@ public class SyncRunner implements Runnable {
 	  {
 	    if (!alreadyDecdCount)
 	      {
-		GanymedeBuilderTask.decPhase1(false); // false since we don't want to force stat update yet
+		GanymedeBuilderTask.decPhase1(false); // we'll roll directly into phase 2 on the admin consoles, etc.
 	      }
 
 	    // release the lock, and so on
@@ -1034,7 +1309,7 @@ public class SyncRunner implements Runnable {
 		lock = null;
 	      }
 	  }
-	
+
 	if (currentThread.isInterrupted())
 	  {
 	    // "Full state sync channel {0} interrupted, not doing network build."
@@ -1047,25 +1322,7 @@ public class SyncRunner implements Runnable {
 	  {
 	    GanymedeBuilderTask.incPhase2(true);
 
-	    // tell the server not to shut down while we are running our external build
-
-            shutdownState = GanymedeServer.shutdownSemaphore.increment();
-
-            if (shutdownState != null)
-              {
-                // "Aborting full state sync channel {0} for shutdown condition: {1}"
-                Ganymede.debug(ts.l("runFullState.shutting_down", this.getClass().getName(), shutdownState));
-                return;
-              }
-		
-	    try
-	      {
-		runFullStateService();
-	      }
-	    finally
-	      {
-		GanymedeServer.shutdownSemaphore.decrement();
-	      }
+	    runFullStateService();
 	  }
 	finally
 	  {
@@ -1074,20 +1331,7 @@ public class SyncRunner implements Runnable {
       }
     finally
       {
-	// we need the finally in case our thread is stopped
-
-	if (session != null)
-	  {
-	    try
-	      {
-		session.logout();	// this will clear the dump lock if need be.
-	      }
-	    finally
-	      {
-		session = null;
-		lock = null;
-	      }
-	  }
+	GanymedeServer.shutdownSemaphore.decrement();
       }
   }
 
@@ -1113,7 +1357,7 @@ public class SyncRunner implements Runnable {
     // object that matches this SyncRunner's criteria shouldn't hurt
     // anything significantly.
 
-    this.needBuild.set(false); 
+    this.needBuild.set(false);
 
     ReturnVal retVal = session.getDataXML(this.name, false, true); // don't include history fields, do include oid's
     FileTransmitter transmitter = retVal.getFileTransmitter();
@@ -1325,5 +1569,37 @@ public class SyncRunner implements Runnable {
   public String toString()
   {
     return this.getName();
+  }
+}
+
+/*------------------------------------------------------------------------------
+									   class
+								  NoopSyncMaster
+
+------------------------------------------------------------------------------*/
+
+/**
+ * No-op SyncMaster class used in cases where no SyncMaster is defined
+ * for a delta Sync Channel object.
+ *
+ * By using a No-op Sync Master, we simplify the logic in the
+ * SyncRunner's shouldInclude() method.
+ */
+
+class NoopSyncMaster implements SyncMaster {
+
+  public NoopSyncMaster()
+  {
+  }
+
+  /**
+   * The augment() method optionally adds DBObject and DBField
+   * identifiers to the FieldBook book parameter if the SyncMaster
+   * decides that the additional DBObject/DBFields need to be written
+   * to a delta sync channel in response to the changes made to obj.
+   */
+
+  public void augment(FieldBook book, DBEditObject obj)
+  {
   }
 }

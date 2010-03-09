@@ -3,16 +3,16 @@
    perm_editor.java
 
    perm_editor is a JTable-based permissions editor for Ganymede.
-   
+
    Created: 18 November 1998
 
 
    Module By: Brian O'Mara omara@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -98,7 +98,7 @@ import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.perm_field;
 
 /*------------------------------------------------------------------------------
-                                                                           class 
+                                                                           class
                                                                      perm_editor
 
 ------------------------------------------------------------------------------*/
@@ -132,7 +132,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
   JButton CancelButton = new JButton(StringDialog.getDefaultCancel());
   JButton ExpandButton = new JButton(ts.l("global.expand_all_button"));  // "Expand All"
   JButton CollapseButton = new JButton(ts.l("global.collapse_all_button")); // "Collapse All"
- 
+
   boolean keepLoading = true;
 
   JProgressBar progressBar;
@@ -142,8 +142,8 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
   JTreeTable treeTable;
   JTree tree;
 
-  // Layout Stuff 
-  JPanel 
+  // Layout Stuff
+  JPanel
     Base_Panel,
     Bordered_Panel,
     Choice_Buttons,
@@ -165,13 +165,13 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
    *
    */
 
-  public perm_editor (perm_field permField, 
-		      boolean enabled, gclient gc,
-		      Frame parent, String DialogTitle)
+  public perm_editor (perm_field permField,
+                      boolean enabled, gclient gc,
+                      Frame parent, String DialogTitle)
   {
     super(parent, DialogTitle, false); // the boolean value is to make the dialog nonmodal
 
-    // Main constructor for the perm_editor window      
+    // Main constructor for the perm_editor window
 
     this.permField = permField;
     this.enabled = enabled;
@@ -181,16 +181,16 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
     if (!debug)
       {
-	this.debug = gc.debug;
+        this.debug = gc.debug;
       }
 
     this.addWindowListener(new WindowAdapter()
-			   {
-			     public void windowClosing(WindowEvent e)
-			       {
-				 myshow(false);
-			       }
-			   });
+                           {
+                             public void windowClosing(WindowEvent e)
+                               {
+                                 myshow(false);
+                               }
+                           });
 
     // Change the tree icons/font to match the gclient. -Better place to put this?
     UIManager.put("Tree.leafIcon", new ImageIcon(PackageResources.getImageResource(this, "i043.gif", getClass())));
@@ -219,15 +219,15 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     progressDialog = new JDialog(gc, ts.l("init.dialog_title"), false);
     progressDialog.getContentPane().setLayout(new BorderLayout(5, 5));
     progressDialog.getContentPane().add("Center", waitPanel);
-    
+
     cancelLoadingButton = new JButton(StringDialog.getDefaultCancel());
     cancelLoadingButton.addActionListener(new ActionListener()
-					  {
-					    public void actionPerformed(ActionEvent e)
-					      {
-						keepLoading = false;
-					      }
-					  });
+                                          {
+                                            public void actionPerformed(ActionEvent e)
+                                              {
+                                                keepLoading = false;
+                                              }
+                                          });
 
     JPanel cancelButtonPanel = new JPanel();
     cancelButtonPanel.add(cancelLoadingButton);
@@ -239,7 +239,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     progressDialog.getContentPane().add("North", loadingLabel);
 
     /*    Rectangle b = gc.getBounds();
-	  progressDialog.setLocation(b.width/2 + b.x - 75, b.height/2 + b.y - 50);*/
+          progressDialog.setLocation(b.width/2 + b.x - 75, b.height/2 + b.y - 50);*/
     progressDialog.pack();
     progressDialog.setLocationRelativeTo(parent); // center with respect to parent frame
     progressDialog.setVisible(true);
@@ -249,28 +249,28 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     t.start();
   }
 
-  public void run() 
+  public void run()
   {
     if (debug)
       {
-	System.out.println("Starting thread");
+        System.out.println("Starting thread");
       }
 
     // Get a quick dump of the permission field's state
 
     try
       {
-	this.matrix = permField.getMatrix();
-	this.templateMatrix = permField.getTemplateMatrix();
+        this.matrix = permField.getMatrix();
+        this.templateMatrix = permField.getTemplateMatrix();
       }
     catch (Exception ex)
       {
-	gc.processExceptionRethrow(ex);
+        gc.processExceptionRethrow(ex);
       }
-    
+
     if (debug)
       {
-	System.out.println("Starting Permissions Editor Initialization");
+        System.out.println("Starting Permissions Editor Initialization");
       }
 
     // OK/Cancel buttons
@@ -279,28 +279,28 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
       {
         OkButton.addActionListener(this);
         CancelButton.addActionListener(this);
- 
-        Choice_Buttons = new JPanel(); 
+
+        Choice_Buttons = new JPanel();
         Choice_Buttons.setLayout(new GridLayout(1,2));
         Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
 
-	if (glogin.isRunningOnMac())
-	  {
-	    Choice_Buttons.add(CancelButton);
-	    Choice_Buttons.add(OkButton);
-	  }
-	else
-	  {
-	    Choice_Buttons.add(OkButton);
-	    Choice_Buttons.add(CancelButton);
-	  }
+        if (glogin.isRunningOnMac())
+          {
+            Choice_Buttons.add(CancelButton);
+            Choice_Buttons.add(OkButton);
+          }
+        else
+          {
+            Choice_Buttons.add(OkButton);
+            Choice_Buttons.add(CancelButton);
+          }
       }
     else
       {
         OkButton.setText(ts.l("global.closeButton"));
         OkButton.addActionListener(this);
- 
-        Choice_Buttons = new JPanel(); 
+
+        Choice_Buttons = new JPanel();
         Choice_Buttons.setLayout(new GridLayout(1,1));
         Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
         Choice_Buttons.add(OkButton);
@@ -309,32 +309,32 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     // Expand/Collapse Buttons
 
     ExpandButton.addActionListener(new ActionListener()
-				   {
-				     public void actionPerformed(ActionEvent e)
-				       {
-					 for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
-					   {
-					     DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
-					     TreePath path = new TreePath(node.getPath());
-					     tree.expandPath(path);
-					   } 
-				       }
-				   });
- 
+                                   {
+                                     public void actionPerformed(ActionEvent e)
+                                       {
+                                         for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();)
+                                           {
+                                             DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
+                                             TreePath path = new TreePath(node.getPath());
+                                             tree.expandPath(path);
+                                           }
+                                       }
+                                   });
+
     CollapseButton.addActionListener(new ActionListener()
-				     {
-				       public void actionPerformed(ActionEvent e)
-					 {
-					   for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
-					     {
-					       DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
-					       TreePath path = new TreePath(node.getPath());
-					       tree.collapsePath(path);
-					     } 
-					 }
-				     });
-    
-    Expansion_Buttons = new JPanel(); 
+                                     {
+                                       public void actionPerformed(ActionEvent e)
+                                         {
+                                           for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();)
+                                             {
+                                               DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
+                                               TreePath path = new TreePath(node.getPath());
+                                               tree.collapsePath(path);
+                                             }
+                                         }
+                                     });
+
+    Expansion_Buttons = new JPanel();
     Expansion_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
     Expansion_Buttons.setLayout(new GridLayout(1,2));
     Expansion_Buttons.add(ExpandButton);
@@ -348,25 +348,25 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     All_Buttons.add("East", Choice_Buttons);
 
     progressBar.setValue(2);
-    
+
     // Set up the TreeTable
 
-    try 
+    try
       {
-	// Build the tree structure, returning rowRootNode as root
-	rowRootNode = initRowTree();
+        // Build the tree structure, returning rowRootNode as root
+        rowRootNode = initRowTree();
 
-	if (rowRootNode == null)
-	  {
-	    this.dispose();
-	    return;
-	  }
+        if (rowRootNode == null)
+          {
+            this.dispose();
+            return;
+          }
       }
     catch (Exception ex)
       {
-	gc.processExceptionRethrow(ex);
+        gc.processExceptionRethrow(ex);
       }
-    
+
     getContentPane().remove(waitPanel);
     getContentPane().setLayout(new BorderLayout());
 
@@ -383,60 +383,60 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     // for built-in fields
 
     tree.setCellRenderer(new permEditorTreeRenderer(this));
-    
-    // Expand all visible base nodes on startup 
-    
+
+    // Expand all visible base nodes on startup
+
     for (Enumeration e = (rowRootNode.children()); e.hasMoreElements();) {
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)e.nextElement();
       PermRow myRow = (PermRow)node.getUserObject();
       if (myRow.isVisible()) {
-	TreePath path = new TreePath(node.getPath());
-	tree.expandPath(path);
+        TreePath path = new TreePath(node.getPath());
+        tree.expandPath(path);
       }
-    } 
+    }
 
     // Set default column widths
- 
+
     TableColumn column = null;
 
-    for (int i = 0; i < 5; i++) 
+    for (int i = 0; i < 5; i++)
       {
-	column = treeTable.getColumnModel().getColumn(i);
+        column = treeTable.getColumnModel().getColumn(i);
 
-	if (i == 0) 
-	  {
-	    column.setPreferredWidth(205); 
-	  } 
-	else 
-	  {
-	    column.setPreferredWidth(10);
-	  }
+        if (i == 0)
+          {
+            column.setPreferredWidth(205);
+          }
+        else
+          {
+            column.setPreferredWidth(10);
+          }
       }
 
     // Uses custom renderer for Booleans
 
-    treeTable.setDefaultRenderer(Boolean.class, new BoolRenderer((TreeTableModelAdapter)treeTable.getModel(), viewOnly)); 
+    treeTable.setDefaultRenderer(Boolean.class, new BoolRenderer((TreeTableModelAdapter)treeTable.getModel(), viewOnly));
 
     // leave column reordering enabled for now to make sure all is well...
-    // Can disable it later- it's not really useful in this 
+    // Can disable it later- it's not really useful in this
     // application.
-    
-    //    table.getTableHeader().setReorderingAllowed(false); 
-    
+
+    //    table.getTableHeader().setReorderingAllowed(false);
+
     edit_pane = new JScrollPane(treeTable);
     edit_pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     edit_pane.getViewport().setOpaque(true);
     edit_pane.getViewport().setBackground(Color.white);
 
-    Base_Panel = new JPanel(); 
+    Base_Panel = new JPanel();
     Base_Panel.setLayout(new BorderLayout());
     Base_Panel.add("Center", edit_pane);
     Base_Panel.add("South", All_Buttons);
 
-    // Bordered_Panel is necessary for consistency between the 
+    // Bordered_Panel is necessary for consistency between the
     // white background of the main part and the gray of the surrounding
     // elements.
-    
+
     TitledBorder border = new TitledBorder(new EtchedBorder(), this.DialogTitle);
     border.setTitlePosition(TitledBorder.TOP);
     border.setTitleJustification(TitledBorder.LEFT);
@@ -448,21 +448,21 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
     getContentPane().add("Center", Bordered_Panel);
     gc.setWaitCursor();
-    
-    progressDialog.setVisible(false);    
+
+    progressDialog.setVisible(false);
     progressDialog.dispose();
-    
+
     this.myshow(true);
     gc.setNormalCursor();
   }
-  
+
   /**
    * This method will create a tree of row info that will be used
    * to store the permissions values for the base and basefields.
    * It returns a DefaultMutableTreeNode as the root of the tree structure
    */
-  
-  private DefaultMutableTreeNode initRowTree() throws RemoteException 
+
+  private DefaultMutableTreeNode initRowTree() throws RemoteException
   {
     PermEntry entry, templateEntry;
     BaseDump base;
@@ -481,7 +481,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     boolean[] rootPermAry = {false,false,false,false};
     boolean[] rootPermOKAry = {false,false,false,false};
 
-    rootNode = 
+    rootNode =
       new DefaultMutableTreeNode(new PermRow(null, null, rootPermAry, rootPermOKAry, false));
 
     /* -- */
@@ -498,186 +498,186 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
     while (en.hasMoreElements())
       {
-	if (! keepLoading)
-	  {
-	    // Cancel was pushed.
-	    stopLoading();
-	    return (DefaultMutableTreeNode)null;
-	  }
+        if (! keepLoading)
+          {
+            // Cancel was pushed.
+            stopLoading();
+            return (DefaultMutableTreeNode)null;
+          }
 
-	progressBar.setValue(i++);
+        progressBar.setValue(i++);
 
-	base = (BaseDump) en.nextElement();
+        base = (BaseDump) en.nextElement();
 
-	id = base.getTypeID();
-	name = base.getName();
+        id = base.getTypeID();
+        name = base.getName();
 
-	if (debug)
-	  {
-	    System.err.println("init_hash: processing " + name);
-	  }
+        if (debug)
+          {
+            System.err.println("init_hash: processing " + name);
+          }
 
-	// retrieve the current permissions for this object type 
-	// (The following logic is unchanged from the original perm editor)
+        // retrieve the current permissions for this object type
+        // (The following logic is unchanged from the original perm editor)
 
-	entry = matrix.getPerm(id);
-	
-	if (entry == null)
-	  {
-	    baseCreate = baseView = baseEdit = baseDelete = false;
-	  }
-	else
-	  {
-	    baseCreate = entry.isCreatable();
-	    baseView = entry.isVisible();
-	    baseEdit = entry.isEditable();
-	    baseDelete = entry.isDeletable();
-	  }
+        entry = matrix.getPerm(id);
 
-	if (templateMatrix != null)
-	  {
-	    templateEntry = templateMatrix.getPerm(id);
+        if (entry == null)
+          {
+            baseCreate = baseView = baseEdit = baseDelete = false;
+          }
+        else
+          {
+            baseCreate = entry.isCreatable();
+            baseView = entry.isVisible();
+            baseEdit = entry.isEditable();
+            baseDelete = entry.isDeletable();
+          }
 
-	    // if permissions already exist on an entry, we'll allow
-	    // it to be reduced.. it's conceivable that an admin might
-	    // have authority to edit a role that he or she wouldn't
-	    // normally have the authority to delegate.. of course,
-	    // this wouldn't make a lot of sense since in theory the
-	    // admin could just click on the delegatable checkbox and
-	    // give him/herself the ability to delegate these perms,
-	    // but we might conceivably give an admin permission to
-	    // edit this perm field but not the delegatable checkbox
-	    // in this object.
+        if (templateMatrix != null)
+          {
+            templateEntry = templateMatrix.getPerm(id);
 
-	    if (templateEntry == null)
-	      {
-		createOK = baseCreate;
-		viewOK = baseView;
-		editOK = baseEdit;
-		deleteOK = baseDelete;
-	      }
-	    else
-	      {
-		createOK = templateEntry.isCreatable() || baseCreate;
-		viewOK = templateEntry.isVisible() || baseView;
-		editOK = templateEntry.isEditable() || baseEdit;
-		deleteOK = templateEntry.isDeletable() || baseDelete;
-	      }
-	  }
-	else
-	  {
-	    createOK = viewOK = editOK = deleteOK = true;
-	  }
+            // if permissions already exist on an entry, we'll allow
+            // it to be reduced.. it's conceivable that an admin might
+            // have authority to edit a role that he or she wouldn't
+            // normally have the authority to delegate.. of course,
+            // this wouldn't make a lot of sense since in theory the
+            // admin could just click on the delegatable checkbox and
+            // give him/herself the ability to delegate these perms,
+            // but we might conceivably give an admin permission to
+            // edit this perm field but not the delegatable checkbox
+            // in this object.
 
-	// Initialize a PermRow object for this base and
-	// add it to the tree structure 
+            if (templateEntry == null)
+              {
+                createOK = baseCreate;
+                viewOK = baseView;
+                editOK = baseEdit;
+                deleteOK = baseDelete;
+              }
+            else
+              {
+                createOK = templateEntry.isCreatable() || baseCreate;
+                viewOK = templateEntry.isVisible() || baseView;
+                editOK = templateEntry.isEditable() || baseEdit;
+                deleteOK = templateEntry.isDeletable() || baseDelete;
+              }
+          }
+        else
+          {
+            createOK = viewOK = editOK = deleteOK = true;
+          }
 
-	boolean[] basePermBitsAry = {baseView, baseCreate, baseEdit, baseDelete};
- 	boolean[] basePermBitsOKAry = {viewOK, createOK, editOK, deleteOK};
+        // Initialize a PermRow object for this base and
+        // add it to the tree structure
 
-	PermRow	basePermRow = new PermRow(base, null, basePermBitsAry, basePermBitsOKAry, enabled);
+        boolean[] basePermBitsAry = {baseView, baseCreate, baseEdit, baseDelete};
+        boolean[] basePermBitsOKAry = {viewOK, createOK, editOK, deleteOK};
 
-	baseNode= new DefaultMutableTreeNode(basePermRow);
-	rootNode.add(baseNode);
+        PermRow basePermRow = new PermRow(base, null, basePermBitsAry, basePermBitsOKAry, enabled);
 
-	// Now go through the fields
+        baseNode= new DefaultMutableTreeNode(basePermRow);
+        rootNode.add(baseNode);
 
-	visibleField = baseView;
+        // Now go through the fields
 
-	fields = (Vector) gc.getTemplateVector(id);
-	
-	for (int j=0; fields != null && (j < fields.size()); j++) 
-	  {
-	    template = (FieldTemplate) fields.elementAt(j);
+        visibleField = baseView;
 
-	    // don't show fields the user doesn't need to know about
+        fields = (Vector) gc.getTemplateVector(id);
 
-	    if (base.isEmbedded() && template.getID() == SchemaConstants.ContainerField)
-	      {
-		continue;
-	      }
+        for (int j=0; fields != null && (j < fields.size()); j++)
+          {
+            template = (FieldTemplate) fields.elementAt(j);
 
-	    if (template.getID() == SchemaConstants.CreationDateField ||
-		template.getID() == SchemaConstants.CreatorField ||
-		template.getID() == SchemaConstants.ModificationDateField ||
-		template.getID() == SchemaConstants.ModifierField)
-	      {
-		continue;
-	      }
+            // don't show fields the user doesn't need to know about
 
-	    // get the permission set for this field
-	    // (The following logic is unchanged from the original perm editor)
+            if (base.isEmbedded() && template.getID() == SchemaConstants.ContainerField)
+              {
+                continue;
+              }
 
-	    entry = matrix.getPerm(id, template.getID());
+            if (template.getID() == SchemaConstants.CreationDateField ||
+                template.getID() == SchemaConstants.CreatorField ||
+                template.getID() == SchemaConstants.ModificationDateField ||
+                template.getID() == SchemaConstants.ModifierField)
+              {
+                continue;
+              }
 
-	    if (entry == null)
-	      {
-		// if no permission is explicitly recorded for this
-		// field, use the record for the base
+            // get the permission set for this field
+            // (The following logic is unchanged from the original perm editor)
 
-		create = baseCreate;
-		view = baseView;
-		edit = baseEdit;
-		delete = baseDelete;
-	      }
-	    else 
-	      {
-		create = entry.isCreatable();
-		view = entry.isVisible();
-		edit = entry.isEditable();
-		delete = entry.isDeletable();
-	      }
+            entry = matrix.getPerm(id, template.getID());
 
-	    if (templateMatrix != null)
-	      {
-		templateEntry = templateMatrix.getPerm(id, template.getID());
+            if (entry == null)
+              {
+                // if no permission is explicitly recorded for this
+                // field, use the record for the base
 
-		// if permissions already exist on an entry, we'll allow
-		// it to be reduced.. it's conceivable that an admin might
-		// have authority to edit a role that he or she wouldn't
-		// normally have the authority to delegate.. of course,
-		// this wouldn't make a lot of sense since in theory the
-		// admin could just click on the delegatable checkbox and
-		// give him/herself the ability to delegate these perms,
-		// but we might conceivably give an admin permission to
-		// edit this perm field but not the delegatable checkbox
-		// in this object.
-		
-		if (templateEntry == null)
-		  {
-		    createOK = create;
-		    viewOK = view;
-		    editOK = edit;
-		    deleteOK = delete;
-		  }
-		else
-		  {
-		    createOK = templateEntry.isCreatable() || create;
-		    viewOK = templateEntry.isVisible() || view;
-		    editOK = templateEntry.isEditable() || edit;
-		    deleteOK = templateEntry.isDeletable() || delete;
-		  }
-	      }
-	    else
-	      {
-		createOK = viewOK = editOK = deleteOK = true;
-	      }
+                create = baseCreate;
+                view = baseView;
+                edit = baseEdit;
+                delete = baseDelete;
+              }
+            else
+              {
+                create = entry.isCreatable();
+                view = entry.isVisible();
+                edit = entry.isEditable();
+                delete = entry.isDeletable();
+              }
+
+            if (templateMatrix != null)
+              {
+                templateEntry = templateMatrix.getPerm(id, template.getID());
+
+                // if permissions already exist on an entry, we'll allow
+                // it to be reduced.. it's conceivable that an admin might
+                // have authority to edit a role that he or she wouldn't
+                // normally have the authority to delegate.. of course,
+                // this wouldn't make a lot of sense since in theory the
+                // admin could just click on the delegatable checkbox and
+                // give him/herself the ability to delegate these perms,
+                // but we might conceivably give an admin permission to
+                // edit this perm field but not the delegatable checkbox
+                // in this object.
+
+                if (templateEntry == null)
+                  {
+                    createOK = create;
+                    viewOK = view;
+                    editOK = edit;
+                    deleteOK = delete;
+                  }
+                else
+                  {
+                    createOK = templateEntry.isCreatable() || create;
+                    viewOK = templateEntry.isVisible() || view;
+                    editOK = templateEntry.isEditable() || edit;
+                    deleteOK = templateEntry.isDeletable() || delete;
+                  }
+              }
+            else
+              {
+                createOK = viewOK = editOK = deleteOK = true;
+              }
 
 
-	    // Initialize a PermRow object for this field and
-	    // add it to the tree structure 
+            // Initialize a PermRow object for this field and
+            // add it to the tree structure
 
-	    boolean[] fieldPermBitsAry = {view, create, edit, delete};
-	    boolean[] fieldPermBitsOKAry = {viewOK, createOK, editOK, deleteOK};
+            boolean[] fieldPermBitsAry = {view, create, edit, delete};
+            boolean[] fieldPermBitsOKAry = {viewOK, createOK, editOK, deleteOK};
 
-	    PermRow templatePermRow = new PermRow(base, template, fieldPermBitsAry, fieldPermBitsOKAry, visibleField);
-	    templatePermRow.setBuiltIn(template.isBuiltIn());
-	    
-	    fieldNode = new DefaultMutableTreeNode(templatePermRow);
-	    baseNode.add(fieldNode);
-	  }
+            PermRow templatePermRow = new PermRow(base, template, fieldPermBitsAry, fieldPermBitsOKAry, visibleField);
+            templatePermRow.setBuiltIn(template.isBuiltIn());
+
+            fieldNode = new DefaultMutableTreeNode(templatePermRow);
+            baseNode.add(fieldNode);
+          }
       }
-    
+
     return rootNode;
   }
 
@@ -685,8 +685,8 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
   {
     if (progressDialog != null)
       {
-	progressDialog.setVisible(false);
-	progressDialog.dispose();
+        progressDialog.setVisible(false);
+        progressDialog.dispose();
       }
 
     this.dispose();
@@ -697,26 +697,26 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
    * Method to pop-up/pop-down the perm_editor
    *
    */
-  
+
   public void myshow(boolean truth_value)
   {
     if (truth_value)
       {
-	setSize(550,550);
-	setVisible(true);
-      } 
-    else 
+        setSize(550,550);
+        setVisible(true);
+      }
+    else
       {
-	isActive = false;
-	cleanUp();
+        isActive = false;
+        cleanUp();
       }
   }
 
-  public boolean isActiveEditor() 
+  public boolean isActiveEditor()
   {
     return isActive;
   }
-  
+
   public void actionPerformed(ActionEvent e)
   {
     PermRow ref;
@@ -725,108 +725,108 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
     String baseName, templateName;
     FieldTemplate template;
     boolean view, edit, create, delete;
-   
+
     /* -- */
 
-    /* This method will either simply exit the perm_editor [if "ok" is 
+    /* This method will either simply exit the perm_editor [if "ok" is
      * the source], or will retore the original permission values [if the
      * "cancel" button is pushed]
      */
-	
-    if (e.getSource() == OkButton) 
+
+    if (e.getSource() == OkButton)
       {
-	if (debug)
-	  {
-	    System.out.println("Ok was pushed");
-	  }
-	
-	Enumeration en = rowRootNode.preorderEnumeration();
-	
-	while (en.hasMoreElements()) 
-	  {
-	    DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
-	    ref = (PermRow)node.getUserObject();
-	  
-	    if (!ref.isChanged()) 
-	      {
-		continue;
-	      } 
-	    else 
-	      {
-		gc.somethingChanged();	    
-	    
-		if (ref.isBase()) 
-		  {
-		    bd = (BaseDump) ref.getReference();
-		    baseid = bd.getTypeID();
-		    baseName = bd.getName();
-	      
-		    view = ref.isVisible();
-		    create = ref.isCreatable();
-		    edit = ref.isEditable();
-		    delete = ref.isDeletable();
-	      
-		    if (debug)
-		      {
-			System.err.println("setting base perms for " + baseName+ " ("+baseid+")");
-		      }
-	      
-		    try
-		      { 
-			// note that PermEntry bit order (V,E,C,D) is different from that used 
-			// everywhere else (V,C,E,D). Should see if PermEntry can be changed for consistency
-		  
-			gc.handleReturnVal(permField.setPerm(baseid, new PermEntry (view, edit, create, delete)));
-		      }
-		    catch (Exception ex)
-		      {
-			gc.processExceptionRethrow(ex);
-		      }
-		  } 
-		else 
-		  {
-		    template = (FieldTemplate) ref.getReference();
-		    templateName = template.getName();
-	      
-		    view = ref.isVisible();
-		    create = ref.isCreatable();
-		    edit = ref.isEditable();
-		    delete = false; // fields may not be deleted
-	      
-		    if (debug)
-		      {
-			System.err.println("setting basefield perms for field " + templateName);
-		      }
-	      
-		    try
-		      {
-			// note that PermEntry bit order (V,E,C,D) is different from that used 
-			// everywhere else (V,C,E,D). Should see if PermEntry can be changed for consistency
-		  
-			gc.handleReturnVal(permField.setPerm(template.getBaseID(), template.getID(), 
-							     new PermEntry (view, edit, create, delete)));
-		      }
-		    catch (Exception ex)
-		      {
-			gc.processExceptionRethrow(ex);
-		      }
-		  }
-	      }
-	  }	      
-	
-	myshow(false);
-	return;
+        if (debug)
+          {
+            System.out.println("Ok was pushed");
+          }
+
+        Enumeration en = rowRootNode.preorderEnumeration();
+
+        while (en.hasMoreElements())
+          {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
+            ref = (PermRow)node.getUserObject();
+
+            if (!ref.isChanged())
+              {
+                continue;
+              }
+            else
+              {
+                gc.somethingChanged();
+
+                if (ref.isBase())
+                  {
+                    bd = (BaseDump) ref.getReference();
+                    baseid = bd.getTypeID();
+                    baseName = bd.getName();
+
+                    view = ref.isVisible();
+                    create = ref.isCreatable();
+                    edit = ref.isEditable();
+                    delete = ref.isDeletable();
+
+                    if (debug)
+                      {
+                        System.err.println("setting base perms for " + baseName+ " ("+baseid+")");
+                      }
+
+                    try
+                      {
+                        // note that PermEntry bit order (V,E,C,D) is different from that used
+                        // everywhere else (V,C,E,D). Should see if PermEntry can be changed for consistency
+
+                        gc.handleReturnVal(permField.setPerm(baseid, new PermEntry (view, edit, create, delete)));
+                      }
+                    catch (Exception ex)
+                      {
+                        gc.processExceptionRethrow(ex);
+                      }
+                  }
+                else
+                  {
+                    template = (FieldTemplate) ref.getReference();
+                    templateName = template.getName();
+
+                    view = ref.isVisible();
+                    create = ref.isCreatable();
+                    edit = ref.isEditable();
+                    delete = false; // fields may not be deleted
+
+                    if (debug)
+                      {
+                        System.err.println("setting basefield perms for field " + templateName);
+                      }
+
+                    try
+                      {
+                        // note that PermEntry bit order (V,E,C,D) is different from that used
+                        // everywhere else (V,C,E,D). Should see if PermEntry can be changed for consistency
+
+                        gc.handleReturnVal(permField.setPerm(template.getBaseID(), template.getID(),
+                                                             new PermEntry (view, edit, create, delete)));
+                      }
+                    catch (Exception ex)
+                      {
+                        gc.processExceptionRethrow(ex);
+                      }
+                  }
+              }
+          }
+
+        myshow(false);
+        return;
       }
-    else 
+    else
       {
-	if (debug)
-	  {
-	    System.out.println("Cancel was pushed");
-	  }
-	
-	myshow(false);
-	return;
-      } 
+        if (debug)
+          {
+            System.out.println("Cancel was pushed");
+          }
+
+        myshow(false);
+        return;
+      }
   }
 
   /**
@@ -850,709 +850,713 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
 
     stopLoading();
   }
-} 
 
-/*------------------------------------------------------------------------------
-                                                                           class 
-                                                                    BoolRenderer
+  /*------------------------------------------------------------------------------
+                                                                      nested class
+                                                                      BoolRenderer
 
-------------------------------------------------------------------------------*/
+  ------------------------------------------------------------------------------*/
 
-/**
- * BoolRenderer is a custom TableCellRenderer class used in conjunction with the
- * Ganymede client's {@link arlut.csd.ganymede.client.perm_editor perm_editor},
- * to provide a checkbox that can be graphically disabled if a permissions
- * item may not be edited for some reason .
- */
+  /**
+   * BoolRenderer is a custom TableCellRenderer class used in conjunction with the
+   * Ganymede client's {@link arlut.csd.ganymede.client.perm_editor perm_editor},
+   * to provide a checkbox that can be graphically disabled if a permissions
+   * item may not be edited for some reason .
+   */
 
-class BoolRenderer extends JCheckBox implements TableCellRenderer {
-  
-  TreeTableModelAdapter tntModel;
-  boolean viewOnly;
+  static class BoolRenderer extends JCheckBox implements TableCellRenderer {
 
-  // This is the "-" which replaces the checkbox
-  ImageIcon noAccess = 
-    new ImageIcon(PackageResources.getImageResource(this, "noaccess.gif", getClass()));
+    TreeTableModelAdapter tntModel;
+    boolean viewOnly;
 
-  public BoolRenderer(TreeTableModelAdapter tntModel, boolean viewOnly) 
-  {
-    super();
-    this.tntModel = tntModel;
-    this.viewOnly = viewOnly;
-    setOpaque(true); //do this for background to show up.
+    // This is the "-" which replaces the checkbox
+    ImageIcon noAccess =
+      new ImageIcon(PackageResources.getImageResource(this, "noaccess.gif", getClass()));
+
+    public BoolRenderer(TreeTableModelAdapter tntModel, boolean viewOnly)
+    {
+      super();
+      this.tntModel = tntModel;
+      this.viewOnly = viewOnly;
+      setOpaque(true); //do this for background to show up.
+    }
+
+    public Component getTableCellRendererComponent(JTable table, Object value,
+                                                   boolean isSelected, boolean hasFocus,
+                                                   int row, int column)
+    {
+      setBackground(Color.white);
+
+      DefaultMutableTreeNode node = (DefaultMutableTreeNode)tntModel.nodeForRow(row);
+      PermRow myRow = (PermRow)node.getUserObject();
+      Boolean selected = (Boolean)table.getValueAt(row,column);
+      boolean enabled = myRow.isEnabled();
+
+      String columnName = table.getColumnName(column);
+
+      /* -- */
+
+      // Check if viewOK, etc. If not, put
+      // noAccess icon ("-") instead of checkbox
+
+      // Note that this just shows what to display. Whether you can select the box or not
+      // is controlled in the isCellEditable() method of PermEditorModel.
+
+      if (columnName.equals(PermEditorModel.visible))
+        {
+          if (myRow.canSeeView())
+            {
+              setIcon(null);
+              setEnabled(viewOnly ? false : enabled);
+              setSelected(selected.booleanValue());
+            }
+          else
+            {
+              setIcon(noAccess);
+              setEnabled(true);
+            }
+        }
+      else if (columnName.equals(PermEditorModel.creatable))
+        {
+          if (myRow.canSeeCreate())
+            {
+              setIcon(null);
+              setEnabled((viewOnly || !myRow.isVisible()) ? false : enabled);
+              setSelected(selected.booleanValue());
+            }
+          else
+            {
+              setIcon(noAccess);
+              setEnabled(true);
+            }
+        }
+      else if (columnName.equals(PermEditorModel.editable))
+        {
+          if (myRow.canSeeEdit())
+            {
+              setIcon(null);
+              setEnabled((viewOnly || !myRow.isVisible()) ? false : enabled);
+              setSelected(selected.booleanValue());
+            }
+          else
+            {
+              setIcon(noAccess);
+              setEnabled(true);
+            }
+        }
+      else if (columnName.equals(PermEditorModel.deletable))
+        {
+          if (myRow.canSeeDelete() && myRow.isBase())
+            {
+              setIcon(null);
+              setEnabled((viewOnly || !myRow.isVisible()) ? false : enabled);
+              setSelected(selected.booleanValue());
+            }
+          else
+            {
+              setIcon(noAccess);
+              setEnabled(true);
+            }
+        }
+
+      // Center checkbox
+      setHorizontalAlignment(CENTER);
+
+      return this;
+    }
   }
-  
-  public Component getTableCellRendererComponent(JTable table, Object value, 
-						 boolean isSelected, boolean hasFocus,
-						 int row, int column) 
-  {
-    setBackground(Color.white);
 
-    DefaultMutableTreeNode node = (DefaultMutableTreeNode)tntModel.nodeForRow(row);
-    PermRow myRow = (PermRow)node.getUserObject(); 
-    Boolean selected = (Boolean)table.getValueAt(row,column);
-    boolean enabled = myRow.isEnabled();
-    
-    String columnName = table.getColumnName(column);
+  /*------------------------------------------------------------------------------
+                                                                      nested class
+                                                                           PermRow
+
+  ------------------------------------------------------------------------------*/
+
+  /**
+   * Data-carrying class for the Ganymede client's {@link arlut.csd.ganymede.client.perm_editor perm_editor}
+   * permissions editor dialog.
+   */
+
+  static class PermRow {
+
+    static final int VISIBLE = 0;
+    static final int CREATABLE = 1;
+    static final int EDITABLE = 2;
+    static final int DELETABLE = 3;
+
+    private Object reference;
+    private boolean[] permBitsAry;
+    private boolean[] permBitsOKAry;
+    private boolean enabled;
+    private boolean changed;
+    private String name;
+    private boolean builtIn;
+
+    //
+    // Constructor
+    //
+
+    public PermRow(BaseDump base, FieldTemplate field, boolean[] permBitsAry, boolean[] permBitsOKAry, boolean enabled)
+    {
+      this.permBitsAry = permBitsAry;
+      this.permBitsOKAry = permBitsOKAry;
+      this.enabled = enabled;
+
+      // set up initial values for name and reference type
+
+      if (base == null)
+        {
+          reference = null;
+          name = "Root";
+        }
+      else
+        {
+          if (field == null)
+            {
+              reference = base;
+              name = base.getName();
+            }
+          else
+            {
+              reference = field;
+              name = field.getName();
+            }
+        }
+    }
+
+    //
+    // Methods to check and set if row enabled
+    //
+
+    public boolean isEnabled()
+    {
+      return enabled;
+    }
+
+    public void setEnabled(Boolean value)
+    {
+      enabled = value.booleanValue();
+    }
+
+    public String toString()
+    {
+      return name;
+    }
+
+    //
+    // Methods to check and set if row has changed
+    //
+
+    public boolean isChanged()
+    {
+      return changed;
+    }
+
+    public void setChanged(boolean value)
+    {
+      changed = value;
+    }
+
+    //
+    // Methods to check and set values of perm bits
+    //
+
+    public boolean isBuiltIn()
+    {
+      return builtIn;
+    }
+
+    public void setBuiltIn(boolean builtIn)
+    {
+      this.builtIn = builtIn;
+    }
+
+    public boolean isVisible()
+    {
+      return permBitsAry[VISIBLE];
+    }
+
+    public boolean isCreatable()
+    {
+      return permBitsAry[CREATABLE];
+    }
+
+    public boolean isEditable()
+    {
+      return permBitsAry[EDITABLE];
+    }
+
+    public boolean isDeletable()
+    {
+      return permBitsAry[DELETABLE];
+    }
+
+    public void setVisible(Boolean value)
+    {
+      permBitsAry[VISIBLE] = value.booleanValue();
+    }
+
+    public void setCreatable(Boolean value)
+    {
+      permBitsAry[CREATABLE] = value.booleanValue();
+    }
+
+    public void setEditable(Boolean value)
+    {
+      permBitsAry[EDITABLE] = value.booleanValue();
+    }
+
+    public void setDeletable(Boolean value)
+    {
+      permBitsAry[DELETABLE] = value.booleanValue();
+    }
+
+    //
+    // Methods to determine if you see checkbox or "X"
+    //
+    public boolean canSeeView()
+    {
+      return permBitsOKAry[VISIBLE];
+    }
+
+    public boolean canSeeCreate()
+    {
+      return permBitsOKAry[CREATABLE];
+    }
+
+    public boolean canSeeEdit()
+    {
+      return permBitsOKAry[EDITABLE];
+    }
+
+    public boolean canSeeDelete()
+    {
+      return permBitsOKAry[DELETABLE];
+    }
+
+    /**
+     * Returns the current base or field object
+     */
+
+    public Object getReference()
+    {
+      return reference;
+    }
+
+    /**
+     * Returns if the current row is dealing w/ base or field
+     */
+
+    public boolean isBase()
+    {
+      if (reference instanceof BaseDump)
+        {
+          return true;
+        }
+      else
+        {
+          return false;
+        }
+    }
+  }
+
+  /*------------------------------------------------------------------------------
+                                                                      nested class
+                                                                   PermEditorModel
+
+  ------------------------------------------------------------------------------*/
+
+  /**
+   * Custom TreeTableModel model for use with the Ganymede client's
+   * {@link arlut.csd.ganymede.client.perm_editor perm_editor} permissions
+   * editor dialog.
+   */
+
+  static class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
+
+    /**
+     * TranslationService object for handling string localization in the
+     * Ganymede client.
+     */
+
+    static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.PermEditorModel");
+
+    public static final String
+      name = ts.l("global.name"),               // "Name"
+      visible = ts.l("global.visible"), // "Visible"
+      creatable = ts.l("global.creatable"), // "Creatable"
+      editable = ts.l("global.editable"),       // "Editable"
+      deletable = ts.l("global.deletable"); // "Deletable"
+
+    static final int NAME = 0;
+    static final int VISIBLE = 1;
+    static final int CREATABLE = 2;
+    static final int EDITABLE = 3;
+    static final int DELETABLE = 4;
+    boolean viewOnly;
+
+    /**
+     * Names of the columns.
+     */
+
+    static protected String[]  cNames =  {name,
+                                          visible,
+                                          creatable,
+                                          editable,
+                                          deletable};
+
+    /**
+     * Types of the columns.
+     */
+
+    static protected Class[]  cTypes = {TreeTableModel.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class};
+
+    public PermEditorModel(DefaultMutableTreeNode root, boolean viewOnly)
+    {
+      super(root);
+      this.viewOnly = viewOnly;
+    }
+
+    //
+    // The TreeModel interface
+    //
+
+    public int getChildCount(Object node)
+    {
+      return ((DefaultMutableTreeNode)node).getChildCount();
+    }
+
+    public Object getChild(Object node, int i)
+    {
+      return ((DefaultMutableTreeNode)node).getChildAt(i);
+    }
+
+    public boolean isLeaf(Object node)
+    {
+      return ((DefaultMutableTreeNode)node).isLeaf();
+    }
+
+    //
+    //  The TreeTableNode interface.
+    //
+
+    public int getColumnCount()
+    {
+      return cNames.length;
+    }
+
+    public String getColumnName(int column)
+    {
+      return cNames[column];
+    }
+
+    public Class getColumnClass(int column)
+    {
+      return cTypes[column];
+    }
+
+    public Object getValueAt(Object node, int column)
+    {
+      PermRow myRow = (PermRow)((DefaultMutableTreeNode)node).getUserObject();
+
+      switch(column)
+        {
+        case 1:
+          return Boolean.valueOf(myRow.isVisible());
+        case 2:
+          return Boolean.valueOf(myRow.isCreatable());
+        case 3:
+          return Boolean.valueOf(myRow.isEditable());
+        case 4:
+          return Boolean.valueOf(myRow.isDeletable());
+        }
+
+      return null;
+    }
+
+    public boolean isCellEditable(Object node, int col)
+    {
+      PermRow myRow = (PermRow)((DefaultMutableTreeNode)node).getUserObject();
+
+      // tree column is never editable.  we'll depend on the JTreeTable
+      // editCellAt method being overridden to handle expansion and
+      // contraction.
+
+      if (getColumnClass(col) == TreeTableModel.class)
+        {
+          return false;
+        }
+
+      // If we entered from gclient "View Permissions" button, then can't edit
+
+      if (viewOnly)
+        {
+          return false;
+        }
+
+      // disabled checkbox is not editable, also bases if Visible base not checked
+
+      if (!myRow.isEnabled() || ((myRow.isBase()) && (!myRow.isVisible()) && (col != VISIBLE)))
+        {
+          return false;
+        }
+      else                      // otherwise, if it's not a "-", it is editable
+        {
+          switch(col)
+            {
+            case NAME:
+
+              return true;
+
+            case VISIBLE:
+
+              if (myRow.canSeeView())
+                {
+                  return true;
+                }
+              break;
+
+            case CREATABLE:
+
+              if (myRow.canSeeCreate())
+                {
+                  return true;
+                }
+              break;
+
+            case EDITABLE:
+
+              if (myRow.canSeeEdit())
+                {
+                  return true;
+                }
+              break;
+
+            case DELETABLE:
+
+              if (myRow.canSeeDelete() && myRow.isBase())
+                {
+                  return true;
+                }
+              break;
+            }
+          return false;
+        }
+    }
+
+    public void setValueAt(Object value, Object node, int col)
+    {
+      PermRow myRow = (PermRow)((DefaultMutableTreeNode)node).getUserObject();
+
+      switch(col)
+        {
+        case VISIBLE:
+
+          myRow.setVisible((Boolean)value);
+
+          // Turning off base Visible turns off all other bases too.
+
+          if (((Boolean)value).booleanValue() == false)
+            {
+              // We don't want to programmatically modify a checkbox
+              // that we can't manually modify (noaccess fields).
+
+              if (myRow.canSeeCreate())
+                {
+                  myRow.setCreatable((Boolean)value);
+                }
+
+              if (myRow.canSeeEdit())
+                {
+                  myRow.setEditable((Boolean)value);
+                }
+
+              if (myRow.canSeeDelete())
+                {
+                  myRow.setDeletable((Boolean)value);
+                }
+            }
+
+          myRow.setChanged(true);
+
+          // If making a base selection
+          // update children too
+
+          if (myRow.isBase())
+            {
+              setBaseChildren(node, VISIBLE, value);
+
+              // Take care of visibility of creatable
+              // and editable children too
+
+              if (myRow.isCreatable())
+                {
+                  setBaseChildren(node, CREATABLE, value);
+                }
+
+              if (myRow.isEditable())
+                {
+                  setBaseChildren(node, EDITABLE, value);
+                }
+            }
+          break;
+
+        case CREATABLE:
+
+          myRow.setCreatable((Boolean)value);
+          myRow.setChanged(true);
+
+          // If base, update children too
+
+          if ((myRow.isBase()) && (myRow.isVisible()))
+            {
+              setBaseChildren(node, CREATABLE, value);
+            }
+          break;
+
+        case EDITABLE:
+
+          myRow.setEditable((Boolean)value);
+          myRow.setChanged(true);
+
+          // If base, update children too
+
+          if ((myRow.isBase()) && (myRow.isVisible()))
+            {
+              setBaseChildren(node, EDITABLE, value);
+            }
+          break;
+
+        case DELETABLE:
+
+          myRow.setDeletable((Boolean)value);
+          myRow.setChanged(true);
+
+          // No update of children for deletable
+          break;
+        }
+
+      // Update table to reflect these changes
+
+      TreeNode[] path = ((DefaultMutableTreeNode)node).getPath();
+      fireTreeNodesChanged(PermEditorModel.this, path, null, null);
+    }
+
+    public void setBaseChildren(Object node, int col, Object value)
+    {
+      for (Enumeration e = ((DefaultMutableTreeNode)node).children(); e.hasMoreElements();)
+        {
+          PermRow myRow = (PermRow)((DefaultMutableTreeNode)e.nextElement()).getUserObject();
+
+          switch(col)
+            {
+            case VISIBLE:
+
+              // If checkbox not an "X", update it
+
+              if (myRow.canSeeView())
+                {
+                  myRow.setVisible((Boolean)value);
+                  myRow.setEnabled((Boolean)value);
+
+                  // If View base was toggled to false
+                  // then all children in each col are set to false
+
+                  if (!myRow.isEnabled())
+                    {
+                      Boolean toFalse = Boolean.FALSE;
+
+                      myRow.setVisible(toFalse);
+                      myRow.setCreatable(toFalse);
+                      myRow.setEditable(toFalse);
+                      myRow.setDeletable(toFalse);
+                    }
+
+                  // Lets us know we need to write this row out
+                  // when we're finished
+
+                  myRow.setChanged(true);
+                }
+              break;
+
+            case CREATABLE:
+
+              if (myRow.canSeeCreate())
+                {
+                  myRow.setCreatable((Boolean)value);
+                  myRow.setChanged(true);
+                }
+              break;
+
+            case EDITABLE:
+
+              if (myRow.canSeeEdit())
+                {
+                  myRow.setEditable((Boolean)value);
+                  myRow.setChanged(true);
+                }
+              break;
+
+            case DELETABLE:
+
+              if (myRow.canSeeDelete())
+                {
+                  myRow.setDeletable((Boolean)value);
+                  myRow.setChanged(true);
+                }
+              break;
+            }
+        }
+    }
+  }
+
+
+  /*------------------------------------------------------------------------------
+                                                                      nested class
+                                                            permEditorTreeRenderer
+
+  ------------------------------------------------------------------------------*/
+
+  /**
+   * Custom tree renderer for the Ganymede client's permissions
+   * editor treeTable.
+   */
+
+  class permEditorTreeRenderer extends DefaultTreeCellRenderer {
+    ImageIcon builtInIcon;
+    ImageIcon standardIcon;
 
     /* -- */
 
-    // Check if viewOK, etc. If not, put
-    // noAccess icon ("-") instead of checkbox
+    public permEditorTreeRenderer(perm_editor parent)
+    {
+      builtInIcon = new ImageIcon(PackageResources.getImageResource(parent, "list.gif", getClass()));
+      standardIcon = new ImageIcon(PackageResources.getImageResource(parent, "i043.gif", getClass()));
+    }
 
-    // Note that this just shows what to display. Whether you can select the box or not
-    // is controlled in the isCellEditable() method of PermEditorModel.
+    public Component getTreeCellRendererComponent(JTree tree, Object value,
+                                                  boolean selected,
+                                                  boolean expanded,
+                                                  boolean leaf,
+                                                  int row,
+                                                  boolean hasFocus)
+    {
+      if (leaf)
+        {
+          DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+          PermRow myRow = (PermRow) node.getUserObject();
 
-    if (columnName.equals(PermEditorModel.visible)) 
-      {
-	if (myRow.canSeeView()) 
-	  {
-	    setIcon(null);
-	    setEnabled(viewOnly ? false : enabled);
-	    setSelected(selected.booleanValue());	
-	  } 
-	else
-	  {
-	    setIcon(noAccess);
-	    setEnabled(true);
-	  }
-      }
-    else if (columnName.equals(PermEditorModel.creatable))
-      {
-	if (myRow.canSeeCreate()) 
-	  {
-	    setIcon(null);
-	    setEnabled((viewOnly || !myRow.isVisible()) ? false : enabled);
-	    setSelected(selected.booleanValue());	
-	  } 
-	else 
-	  {
-	    setIcon(noAccess);
-	    setEnabled(true);
-	  }
-      }
-    else if (columnName.equals(PermEditorModel.editable))
-      {
-	if (myRow.canSeeEdit()) 
-	  {
-	    setIcon(null);
-	    setEnabled((viewOnly || !myRow.isVisible()) ? false : enabled);
-	    setSelected(selected.booleanValue());	
-	  } 
-	else 
-	  {
-	    setIcon(noAccess);
-	    setEnabled(true);
-	  }
-      }
-    else if (columnName.equals(PermEditorModel.deletable))
-      {
-	if (myRow.canSeeDelete() && myRow.isBase()) 
-	  {
-	    setIcon(null);
-	    setEnabled((viewOnly || !myRow.isVisible()) ? false : enabled);
-	    setSelected(selected.booleanValue());	
-	  } 
-	else 
-	  {
-	    setIcon(noAccess);
-	    setEnabled(true);
-	  }
-      }
-  
-    // Center checkbox
-    setHorizontalAlignment(CENTER);   
+          if (myRow.isBuiltIn())
+            {
+              setLeafIcon(builtInIcon);
+            }
+          else
+            {
+              setLeafIcon(standardIcon);
+            }
+        }
 
-    return this;
-  }
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class 
-                                                                         PermRow
-
-------------------------------------------------------------------------------*/
-
-/**
- * Data-carrying class for the Ganymede client's {@link arlut.csd.ganymede.client.perm_editor perm_editor}
- * permissions editor dialog.
- */
-
-class PermRow {
-
-  static final int VISIBLE = 0;
-  static final int CREATABLE = 1;
-  static final int EDITABLE = 2;
-  static final int DELETABLE = 3;
-
-  private Object reference;
-  private boolean[] permBitsAry;
-  private boolean[] permBitsOKAry;
-  private boolean enabled;
-  private boolean changed;
-  private String name;
-  private boolean builtIn;
-
-  //
-  // Constructor  
-  //
-
-  public PermRow(BaseDump base, FieldTemplate field, boolean[] permBitsAry, boolean[] permBitsOKAry, boolean enabled) 
-  {
-    this.permBitsAry = permBitsAry;
-    this.permBitsOKAry = permBitsOKAry;
-    this.enabled = enabled;
-
-    // set up initial values for name and reference type 
-
-    if (base == null) 
-      {
-	reference = null;
-	name = "Root";
-      }
-    else
-      {
-	if (field == null) 
-	  {
-	    reference = base;
-	    name = base.getName();
-	  } 
-	else 
-	  {
-	    reference = field;
-	    name = field.getName();
-	  }
-      }
-  }
-  
-  //
-  // Methods to check and set if row enabled
-  //
-
-  public boolean isEnabled() 
-  {
-    return enabled;
-  }
-  
-  public void setEnabled(Boolean value) 
-  {
-    enabled = value.booleanValue();
-  }
-
-  public String toString() 
-  {
-    return name;
-  } 
-
-  //
-  // Methods to check and set if row has changed
-  //
-
-  public boolean isChanged() 
-  {
-    return changed;
-  }
-  
-  public void setChanged(boolean value) 
-  {
-    changed = value;
-  }
-  
-  //
-  // Methods to check and set values of perm bits
-  //
-
-  public boolean isBuiltIn()
-  {
-    return builtIn;
-  }
-
-  public void setBuiltIn(boolean builtIn)
-  {
-    this.builtIn = builtIn;
-  }
-
-  public boolean isVisible() 
-  {
-    return permBitsAry[VISIBLE];
-  }
-
-  public boolean isCreatable() 
-  {
-    return permBitsAry[CREATABLE];
-  }
-
-  public boolean isEditable()
-  {
-    return permBitsAry[EDITABLE];
-  }
-
-  public boolean isDeletable() 
-  {
-    return permBitsAry[DELETABLE];
-  }
-  
-  public void setVisible(Boolean value) 
-  {
-    permBitsAry[VISIBLE] = value.booleanValue();
-  }
-  
-  public void setCreatable(Boolean value) 
-  {
-    permBitsAry[CREATABLE] = value.booleanValue();
-  }
-  
-  public void setEditable(Boolean value) 
-  {
-    permBitsAry[EDITABLE] = value.booleanValue();
-  }
-
-  public void setDeletable(Boolean value) 
-  {
-    permBitsAry[DELETABLE] = value.booleanValue();
-  }
-
-  //
-  // Methods to determine if you see checkbox or "X"
-  //
-  public boolean canSeeView() 
-  {
-    return permBitsOKAry[VISIBLE];
-  }
-
-  public boolean canSeeCreate() 
-  {
-    return permBitsOKAry[CREATABLE];
-  }
-
-  public boolean canSeeEdit() 
-  {
-    return permBitsOKAry[EDITABLE];
-  }
-
-  public boolean canSeeDelete() 
-  {
-    return permBitsOKAry[DELETABLE];
-  }
-
-  /**
-   * Returns the current base or field object
-   */
-
-  public Object getReference() 
-  {
-    return reference;
-  }
-
-  /**
-   * Returns if the current row is dealing w/ base or field
-   */
-
-  public boolean isBase() 
-  {
-    if (reference instanceof BaseDump)
-      {
-	return true;
-      }
-    else
-      {
-	return false;
-      }
-  }
-
-}
-
-/*------------------------------------------------------------------------------
-                                                                           class 
-                                                                 PermEditorModel
-
-------------------------------------------------------------------------------*/
-
-/**
- * Custom TreeTableModel model for use with the Ganymede client's
- * {@link arlut.csd.ganymede.client.perm_editor perm_editor} permissions
- * editor dialog.
- */
-
-class PermEditorModel extends AbstractTreeTableModel implements TreeTableModel {
-  
-  /**
-   * TranslationService object for handling string localization in the
-   * Ganymede client.
-   */
-
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.PermEditorModel");
-
-  public static final String
-    name = ts.l("global.name"),		// "Name"
-    visible = ts.l("global.visible"),	// "Visible"
-    creatable = ts.l("global.creatable"), // "Creatable"
-    editable = ts.l("global.editable"),	// "Editable"
-    deletable = ts.l("global.deletable"); // "Deletable"
-
-  static final int NAME = 0;
-  static final int VISIBLE = 1;
-  static final int CREATABLE = 2;
-  static final int EDITABLE = 3;
-  static final int DELETABLE = 4;
-  boolean viewOnly;
-  
-  /**
-   * Names of the columns.
-   */
-
-  static protected String[]  cNames =  {name,
-					visible,
-					creatable,
-					editable,
-					deletable};
-  
-  /**
-   * Types of the columns.
-   */
-
-  static protected Class[]  cTypes = {TreeTableModel.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class};
-  
-  public PermEditorModel(DefaultMutableTreeNode root, boolean viewOnly)
-  {
-    super(root); 
-    this.viewOnly = viewOnly;
-  }
-  
-  //
-  // The TreeModel interface
-  //
-
-  public int getChildCount(Object node)
-  {
-    return ((DefaultMutableTreeNode)node).getChildCount();
-  }
-  
-  public Object getChild(Object node, int i)
-  { 
-    return ((DefaultMutableTreeNode)node).getChildAt(i);
-  }
-  
-  public boolean isLeaf(Object node)
-  { 
-    return ((DefaultMutableTreeNode)node).isLeaf();
-  }
-  
-  //
-  //  The TreeTableNode interface.
-  //
-
-  public int getColumnCount()
-  {
-    return cNames.length;
-  }
-  
-  public String getColumnName(int column)
-  {
-    return cNames[column];
-  }
-  
-  public Class getColumnClass(int column)
-  {
-    return cTypes[column];
-  }
-  
-  public Object getValueAt(Object node, int column) 
-  {
-    PermRow myRow = (PermRow)((DefaultMutableTreeNode)node).getUserObject(); 
-    
-    switch(column) 
-      {
-      case 1:
-	return Boolean.valueOf(myRow.isVisible());
-      case 2:
-	return Boolean.valueOf(myRow.isCreatable());
-      case 3:
-	return Boolean.valueOf(myRow.isEditable());
-      case 4:
-	return Boolean.valueOf(myRow.isDeletable());
-      }
-
-    return null;
-  }
-  
-  public boolean isCellEditable(Object node, int col) 
-  {
-    PermRow myRow = (PermRow)((DefaultMutableTreeNode)node).getUserObject(); 
-    
-    // tree column is never editable.  we'll depend on the JTreeTable
-    // editCellAt method being overridden to handle expansion and
-    // contraction.
-
-    if (getColumnClass(col) == TreeTableModel.class)
-      {
-	return false;
-      }
-    
-    // If we entered from gclient "View Permissions" button, then can't edit
-
-    if (viewOnly) 
-      {
-	return false;
-      }
-    
-    // disabled checkbox is not editable, also bases if Visible base not checked
-
-    if (!myRow.isEnabled() || ((myRow.isBase()) && (!myRow.isVisible()) && (col != VISIBLE)))
-      {
-	return false;
-      }
-    else			// otherwise, if it's not a "-", it is editable  
-      { 
-	switch(col) 
-	  {
-	  case NAME:
-
-	    return true;
-	
-	  case VISIBLE:
-
-	    if (myRow.canSeeView())
-	      {
-		return true;
-	      }
-	    break;
-	
-	  case CREATABLE:
-
-	    if (myRow.canSeeCreate())
-	      {
-		return true;
-	      }
-	    break;	  
-	
-	  case EDITABLE:
-
-	    if (myRow.canSeeEdit()) 
-	      {
-		return true;
-	      }
-	    break;
-	
-	  case DELETABLE:
-
-	    if (myRow.canSeeDelete() && myRow.isBase())
-	      {
-		return true;
-	      }
-	    break;
-	  }
-      return false;
+      return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
     }
   }
-  
-  public void setValueAt(Object value, Object node, int col) 
-  {
-    PermRow myRow = (PermRow)((DefaultMutableTreeNode)node).getUserObject(); 
-    
-    switch(col) 
-      {
-      case VISIBLE:
-
-	myRow.setVisible((Boolean)value);
-
-	// Turning off base Visible turns off all other bases too. 
-
-	if (((Boolean)value).booleanValue() == false) 
-	  {
-	    // We don't want to programmatically modify a checkbox 
-	    // that we can't manually modify (noaccess fields). 
-
-	    if (myRow.canSeeCreate())
-	      {
-		myRow.setCreatable((Boolean)value);
-	      }
-
-	    if (myRow.canSeeEdit())
-	      {
-		myRow.setEditable((Boolean)value);
-	      }
-
-	    if (myRow.canSeeDelete())
-	      {
-		myRow.setDeletable((Boolean)value);
-	      }
-	  }
-
-	myRow.setChanged(true);
-      
-	// If making a base selection
-	// update children too 
-      
-	if (myRow.isBase()) 
-	  {
-	    setBaseChildren(node, VISIBLE, value);
-	    
-	    // Take care of visibility of creatable
-	    // and editable children too
-	
-	    if (myRow.isCreatable()) 
-	      {
-		setBaseChildren(node, CREATABLE, value);
-	      }
-	
-	    if (myRow.isEditable()) 
-	      {
-		setBaseChildren(node, EDITABLE, value);
-	      }
-	  }
-	break;
-      
-      case CREATABLE:
-
-	myRow.setCreatable((Boolean)value);
-	myRow.setChanged(true);
- 
-	// If base, update children too
-
-	if ((myRow.isBase()) && (myRow.isVisible())) 
-	  {
-	    setBaseChildren(node, CREATABLE, value);
-	  }
-	break;
-      
-      case EDITABLE:
-
-	myRow.setEditable((Boolean)value);
-	myRow.setChanged(true);
-
-	// If base, update children too
-
-	if ((myRow.isBase()) && (myRow.isVisible())) 
-	  {
-	    setBaseChildren(node, EDITABLE, value);
-	  }
-	break;
-      
-      case DELETABLE:
-
-	myRow.setDeletable((Boolean)value);
-	myRow.setChanged(true);
-      
-	// No update of children for deletable
-	break;
-      }
-    
-    // Update table to reflect these changes
-    
-    TreeNode[] path = ((DefaultMutableTreeNode)node).getPath();
-    fireTreeNodesChanged(PermEditorModel.this, path, null, null);    
-  }
-  
-  public void setBaseChildren(Object node, int col, Object value) 
-  {
-    for (Enumeration e = ((DefaultMutableTreeNode)node).children(); e.hasMoreElements();) 
-      {
-	PermRow myRow = (PermRow)((DefaultMutableTreeNode)e.nextElement()).getUserObject(); 
-      
-	switch(col) 
-	  {
-	  case VISIBLE:
-	
-	    // If checkbox not an "X", update it
-
-	    if (myRow.canSeeView()) 
-	      {
-		myRow.setVisible((Boolean)value);	    
-		myRow.setEnabled((Boolean)value);
-	  
-		// If View base was toggled to false
-		// then all children in each col are set to false
-
-		if (!myRow.isEnabled()) 
-		  {
-		    Boolean toFalse = Boolean.FALSE;
-	    
-		    myRow.setVisible(toFalse);
-		    myRow.setCreatable(toFalse);
-		    myRow.setEditable(toFalse);
-		    myRow.setDeletable(toFalse);
-		  }
-	  
-		// Lets us know we need to write this row out
-		// when we're finished
-
-		myRow.setChanged(true);
-	      }
-	    break;
-	
-	  case CREATABLE:
-
-	    if (myRow.canSeeCreate()) 
-	      {
-		myRow.setCreatable((Boolean)value);
-		myRow.setChanged(true);
-	      }
-	    break;
-	
-	  case EDITABLE:
-
-	    if (myRow.canSeeEdit()) 
-	      {
-		myRow.setEditable((Boolean)value);
-		myRow.setChanged(true);
-	      }
-	    break;
-	
-	  case DELETABLE:
-
-	    if (myRow.canSeeDelete())
-	      {
-		myRow.setDeletable((Boolean)value);
-		myRow.setChanged(true);
-	      }
-	    break;
-	  }
-      }
-  }
 }
-
-/**
- * Custom tree renderer for the Ganymede client's permissions
- * editor treeTable.
- */
-
-class permEditorTreeRenderer extends DefaultTreeCellRenderer
-{
-  ImageIcon builtInIcon;
-  ImageIcon standardIcon;
-
-  /* -- */
-
-  public permEditorTreeRenderer(perm_editor parent)
-  {
-    builtInIcon = new ImageIcon(PackageResources.getImageResource(parent, "list.gif", getClass()));
-    standardIcon = new ImageIcon(PackageResources.getImageResource(parent, "i043.gif", getClass()));
-  }
-
-  public Component getTreeCellRendererComponent(JTree tree, Object value,
-						boolean selected,
-						boolean expanded,
-						boolean leaf,
-						int row,
-						boolean hasFocus)
-  {
-    if (leaf)
-      {
-	DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-	PermRow myRow = (PermRow) node.getUserObject();
-
-	if (myRow.isBuiltIn())
-	  {
-	    setLeafIcon(builtInIcon);
-	  }
-	else
-	  {
-	    setLeafIcon(standardIcon);
-	  }
-      }
-
-    return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-  }
-}
-
