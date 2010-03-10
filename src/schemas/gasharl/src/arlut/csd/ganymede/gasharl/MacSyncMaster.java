@@ -118,6 +118,10 @@ public class MacSyncMaster implements SyncMaster {
   {
     if (!(user instanceof DBEditObject))
       {
+	// if we're putting in a user as a non-edited context object
+	// for a host or volume redefinition, force the necessary
+	// fields to make sense of that.
+
 	includeUserFields(book, user);
       }
 
