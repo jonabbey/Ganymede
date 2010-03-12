@@ -318,6 +318,10 @@
               <typedef type="string">
               </typedef>
             </fielddef>
+            <fielddef name="Sync_Master_Classname" id="108">
+              <typedef type="string">
+              </typedef>
+            </fielddef>
             <fielddef name="Queue_Directory" id="101">
               <comment>Location of the sync channel directory on disk</comment>
               <typedef type="string">
@@ -455,8 +459,11 @@ xmlclient.</comment>
             <fielddef name="Password" id="101">
               <comment>Password for an individual privileged to log into Ganymede and/or the network</comment>
               <typedef type="password">
+                <minlength val="6"/>
                 <maxlength val="14"/>
                 <badchars val=",&quot;@&amp;"/>
+                <cracklib_check exception="supergash"/>
+                <history_check exception="supergash" depth="5"/>
                 <crypted/>
                 <md5crypted/>
                 <winHashed/>
