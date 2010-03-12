@@ -1124,7 +1124,7 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	if (debug)
+	if (false)
 	  {
 	    System.err.println("DBStore.dumpXML(): got dump lock");
 	  }
@@ -1149,8 +1149,8 @@ public final class DBStore implements JythonMap {
 				    includeHistory,
 				    syncConstraint,
 				    includeOid);
-	    
-	if (debug)
+
+	if (false)
 	  {
 	    System.err.println("DBStore.dumpXML(): created XMLDumpContext");
 	  }
@@ -1242,7 +1242,7 @@ public final class DBStore implements JythonMap {
       }
     finally
       {
-	if (debug)
+	if (false)
 	  {
 	    System.err.println("DBStore.dumpXML(): finally!");
 	  }
