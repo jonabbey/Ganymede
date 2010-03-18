@@ -2158,41 +2158,42 @@ public final class DBStore implements JythonMap {
 	bf.setID(SchemaConstants.SyncChannelClassName);
 	bf.setType(FieldType.STRING);
 	bf.setName("Sync Master Classname");
+	bf.setComment(ts.l("initializeSchema.syncmaster_comment")); // "Added a descriptive comment for the new Sync Master Classname field in the Sync Channel object definition."
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.setID(SchemaConstants.SyncChannelDirectory);
 	bf.setType(FieldType.STRING);
 	bf.setName("Queue Directory");
-	bf.setComment("Location of the sync channel directory on disk");
+	bf.setComment(ts.l("initializeSchema.syncqueuedir_comment")); // "Location of the sync channel directory on disk."
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.setID(SchemaConstants.SyncChannelFullStateFile);
 	bf.setType(FieldType.STRING);
 	bf.setName("Full State File");
-	bf.setComment("Path to the file to use for full-state XML dumps");
+	bf.setComment(ts.l("initializeSchema.syncfullstatefile_comment")); // "Path to the file to use for full-state XML dumps."
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.setID(SchemaConstants.SyncChannelServicer);
 	bf.setType(FieldType.STRING);
 	bf.setName("Service Program");
-	bf.setComment("The location of the program to service this sync channel");
+	bf.setComment(ts.l("initializeSchema.syncprogram_comment")); // "The location of the program to service this sync channel."
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.setID(SchemaConstants.SyncChannelFields);
 	bf.setType(FieldType.FIELDOPTIONS);
 	bf.setName("Sync Data");
-	bf.setComment("The definitions for what object and fields we want to include in this sync channel");
+	bf.setComment(ts.l("initializeSchema.syncdata_comment")); // "The definitions for what object and fields we want to include in this sync channel."
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
 	bf.setID(SchemaConstants.SyncChannelPlaintextOK);
 	bf.setType(FieldType.BOOLEAN);
 	bf.setName("Allow Plaintext Passwords");
-	bf.setComment("Allow Plaintext Passwords to be written to this Sync Channel");
+	bf.setComment(ts.l("initializeSchema.syncplaintext_comment")); // "Allow Plaintext Passwords to be written to this Sync Channel."
 	b.addFieldToEnd(bf);
 
 	bf = new DBObjectBaseField(b);
