@@ -319,6 +319,7 @@
               </typedef>
             </fielddef>
             <fielddef name="Sync_Master_Classname" id="108">
+              <comment>Name of a custom SyncMaster class for elaborating incremental sync files for this Sync Channel.</comment>
               <typedef type="string">
               </typedef>
             </fielddef>
