@@ -66,6 +66,8 @@ public interface userSchema {
   // you change the schema for the user, you'll want to change
   // this file to match.
 
+  final static short BASE=3;
+
   final static short USERNAME=100;
   final static short UID=256;
   final static short GUID=277;
