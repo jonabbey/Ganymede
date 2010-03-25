@@ -238,10 +238,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         writeSambafileVersion1();
         writeSambafileVersion2();
         writeUserSyncFile();
-        writeHTTPfiles();
         writeExternalMailFiles();
 
         success = true;
+      }
+
+    if (baseChanged(userSchema.BASE) ||
+	baseChanged(groupSchema.BASE) || // in case of rename
+	baseChanged(userNetgroupSchema.BASE)) // ditto
+      {
+        writeHTTPfiles();
+
+	success = true;
       }
 
     // group
