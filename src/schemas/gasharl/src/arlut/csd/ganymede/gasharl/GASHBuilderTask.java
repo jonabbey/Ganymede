@@ -2528,39 +2528,65 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         try
           {
-	    for (DBObject user: getObjects(SchemaConstants.UserBase))
-	      {
-                writeHashGenerics(user, pfgenerics);
-                writeHashUserAlias(user, pfmalias);
-	      }
 
-	    // mail lists
+          PrintWriter pftransport = openOutFile(path + "pftransport","gasharl");
 
-	    for (DBObject group: getObjects(emailListSchema.BASE))
-	      {
-                writeHashGroupAlias(group, pfmalias);
-	      }
+          try
+            {
 
-	    // emailable account groups
+            PrintWriter pfknownu = openOutFile(path + "known_users","gasharl");
 
-	    for (DBObject group: getObjects(groupSchema.BASE))
-	      {
-                writeHashAccountGroupAlias(group, pfmalias);
-	      }
-
-	    // emailable user netgroups
-
-            for (DBObject group: getObjects(userNetgroupSchema.BASE))
+            try
               {
-                writeHashUserNetgroupAlias(group, pfmalias);
-              }
+String ignored = "ignored";
+                //	we don't want to loop over this.
+                //	loop inside this
+                writeHashTransport(pftransport);
+                writeHashKnownuser(pfknownu);
 
-	    // external mail addresses
-
-            for (DBObject external: getObjects(emailRedirectSchema.BASE))
+    	        for (DBObject user: getObjects(SchemaConstants.UserBase))
+    	          {
+                    writeHashGenerics(user, pfgenerics);
+                    writeHashUserAlias(user, pfmalias);
+    	          }
+    
+    	        // mail lists
+    
+    	        for (DBObject group: getObjects(emailListSchema.BASE))
+    	          {
+                    writeHashGroupAlias(group, pfmalias);
+    	          }
+    
+    	        // emailable account groups
+    
+    	        for (DBObject group: getObjects(groupSchema.BASE))
+    	          {
+                    writeHashAccountGroupAlias(group, pfmalias);
+    	          }
+    
+    	        // emailable user netgroups
+    
+                for (DBObject group: getObjects(userNetgroupSchema.BASE))
+                  {
+                    writeHashUserNetgroupAlias(group, pfmalias);
+                  }
+    
+    	        // external mail addresses
+    
+                for (DBObject external: getObjects(emailRedirectSchema.BASE))
+                  {
+                    writeHashExternalAlias(external, pfmalias);
+                  }
+               }
+            finally
               {
-                writeHashExternalAlias(external, pfmalias);
+                pfknownu.close();
               }
+            }
+          finally
+            {
+              pftransport.close();
+            }
           }
         finally
           {
@@ -2574,6 +2600,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     return true;
   }
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
 
   /**
    * This method writes out a user alias line to the pfmalias file.<br/><br/>
@@ -2637,7 +2667,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             if (alias.equals(signature))
               {
-                continue;
+               continue;
               }
 
             result.setLength(0);
@@ -3067,6 +3097,444 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         writer.println(result.toString().toLowerCase());
       }
   }
+  /**
+   * This method writes out a transport file for use by postfix.<br/><br/>
+   *
+   * The lines look like this:<br/><br/>
+   *
+   * <pre>
+   *
+   * thingy.arlut.utexas.edu	smtp:[thingy.arlut.utexas.edu]
+   *
+   * </pre>
+   *
+   * Where thingy is a mail server that does local delivery.
+   *
+   *
+   *    AHEM!!!  where you see "write HashSomething" below...
+   *    what that really means is:
+   *    write the flat file that postfix (through postalias or
+   *    postmap) will turn into a hash file.
+   *    the file has to get flung over via ssh and then
+   *    something has to run postmap/postalias on the file.
+   *
+   * jgs
+   */
+
+  private void writeHashTransport(PrintWriter writer)
+  {
+    Vector<String> outtargs = new Vector();
+
+    String seekat;
+
+    //	some things in here will NOT be found by the loop following
+    //	this one.  so you do have to do this.
+    for (DBObject loluser: getObjects(SchemaConstants.UserBase))
+      {
+      Vector<String> addresses = (Vector<String>) loluser.getFieldValuesLocal(userSchema.EMAILTARGET);
+
+      if (!empty(addresses))
+        {
+
+          for (int i = 0; i < addresses.size(); i++)
+            {
+              seekat = fixup(addresses.get(i));
+              int posonly = seekat.indexOf('@');
+              int found=0;
+              if( posonly >= 0 )
+                {
+                String atleft = seekat.substring(1+posonly).toLowerCase();
+                for (int jj=0; jj < outtargs.size(); jj++)
+                  {
+                  if( atleft.equals(outtargs.get(jj)) )
+		    {
+                    found=1;
+                    }
+                  }
+                if( found == 0 )
+                  {
+                  String onlyus = "arlut.utexas.edu";
+                  int tag = atleft.indexOf(onlyus);
+                  if( tag >= 0 )
+                    {
+                    if( !atleft.equals("arlut.utexas.edu") )
+                      {
+                      outtargs.addElement(atleft);
+                      }
+                    }
+                  }
+                }
+            }//end loop over addrs
+        }// end of empty addrs
+    }// end of for
+
+//--------------------------------------
+    for (DBObject external: getObjects(emailRedirectSchema.BASE))
+      {
+      Vector targets;
+      String target;
+
+
+      targets = external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
+
+
+      // targets shouldn't ever be null, but i'm tired of having
+      // NullPointerExceptions pop up then having to recompile to
+      // fix.
+
+      if (targets != null)
+        {
+          for (int i = 0; i < targets.size(); i++)
+            {
+              target = (String) targets.elementAt(i);
+              int posonly = target.indexOf('@');
+              int found=0;
+              if( posonly >= 0 )
+                {
+                String atleft = target.substring(1+posonly).toLowerCase();
+                for (int jj=0; jj < outtargs.size(); jj++)
+                  {
+                  if( atleft.equals(outtargs.get(jj)) )
+		    {
+                    found=1;
+                    }
+                  }// end jj
+                if( found == 0 )
+                  {
+                  String onlyus = "arlut.utexas.edu";
+                  int tag = atleft.indexOf(onlyus);
+                  if( tag >= 0 )
+                    {
+                    if( !atleft.equals("arlut.utexas.edu") )
+                      {
+                      outtargs.addElement(atleft);
+                      }
+                    }// end tag>=0
+                  }// end found==0
+                }// end posonly >=0
+              }// end i loop
+          }//end targets not null
+
+      }// end for external loop.
+//--------------------------------------
+//	the output we need.
+    for (int jj=0; jj < outtargs.size(); jj++)
+      {
+      result.setLength(0);
+      result.append(outtargs.get(jj));
+      result.append("\tsmtp:[");
+      result.append(outtargs.get(jj));
+      result.append("]");
+      writer.println(result.toString());
+      }
+  }
+
+//------------------------------------------------------------------------------
+  /**
+   * This method writes out a list of the users allowed to use mail;
+   * the list is for use by postfix.<br/><br/>
+   *
+   * The lines look like this:<br/><br/>
+   *
+   * <pre>
+   *
+   * user	OK
+   *
+   * </pre>
+   *
+   * jgs
+   */
+
+  private void writeHashKnownuser(PrintWriter writer)
+  {
+    Vector<String> gulist = new Vector();
+    int sofar;
+//------------------------------------------------------------------------------
+    for (DBObject user: getObjects(SchemaConstants.UserBase))
+      {
+        String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
+        String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
+        Vector<String> aliases = (Vector<String>) user.getFieldValuesLocal(userSchema.ALIASES);
+        Vector<String> addresses = (Vector<String>) user.getFieldValuesLocal(userSchema.EMAILTARGET);
+
+
+	// username, sig, and at least one alias usually the same.
+	// and addresses, too.
+	addIfNew( gulist, username );
+
+
+
+	//	efficiency only
+	if( !username.equals(signature) )
+	    {
+		addIfNew( gulist, signature );
+	    }
+
+	/*	aliases
+	 */
+	if (!empty(aliases))
+	    {
+	      for (String alias: aliases)
+		{
+		// efficiency only
+		if( !alias.equals(username) && !alias.equals(signature) )
+		  {
+		     addIfNew( gulist, alias );
+		  }
+		}
+	    }
+
+
+	//			could add this in... you know.
+	//			    !ha.equals("no_longer_employed") )
+	// often these match up w/ user, sig, alias
+	/*	addresses
+	 */
+	if (!empty(addresses))
+	    {
+		for (int i = 0; i < addresses.size(); i++)
+		    {
+			String ha;
+			ha = chopFromAt( addresses.get(i).toString() );
+			// efficiency only
+			if( !ha.equals(username) &&
+			    !ha.equals(signature) )
+			    {
+				addIfNew( gulist, ha );
+			    }
+		    }
+
+	    }
+
+      }//end for user: getObjects(SchemaConstants.UserBase)
+    /*
+      sofar = gulist.size();
+      result.setLength(0);
+      result.append("end of user, req'd, gulist size is\t");
+      result.append(sofar);
+      writer.println(result.toString());
+    */
+//------------------------------------------------------------------------------
+
+    for (DBObject group: getObjects(emailListSchema.BASE))
+	{
+	    String groupname = (String) group.getFieldValueLocal(emailListSchema.LISTNAME);
+	    Vector<String> group_aliases = (Vector<String>) group.getFieldValuesLocal(emailListSchema.ALIASES);
+	    Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(emailListSchema.MEMBERS);
+	    //	there's an external targets field in there, but we
+	    //	don't care about it:  we're constructing a list of INTERNAL
+	    //	names to get email.  we expressly don't want and it would be
+	    //	poisonous to list external names here.
+
+
+	    addIfNew( gulist, groupname );
+	    
+	    if (!empty(group_aliases))
+		{
+		    for (String alias: group_aliases)
+			{
+			    //	we do need these
+			    addIfNew( gulist, alias );
+			}
+		}
+
+
+
+	    //	any others?
+	    //	we pick up only a handful from here.  so, okay.
+	    if (!empty(group_targets))
+		{
+		    for (int i = 0; i < group_targets.size(); i++)
+			{
+			    String somebody;
+			    Invid memberInvid = (Invid) group_targets.get(i);
+			    if (isVeryDeadUser(memberInvid))
+				{
+				    continue;
+				}
+			    somebody = getLabel(memberInvid).toString();
+			    addIfNew( gulist, somebody );
+			}
+		}
+
+	}//end for group: getObjects(emailListSchema.BASE)
+    /*
+      sofar = gulist.size();
+      result.setLength(0);
+      result.append("end of 1st group, gulist size is\t");
+      result.append(sofar);
+      writer.println(result.toString());
+    */
+//------------------------------------------------------------------------------
+    for (DBObject group: getObjects(groupSchema.BASE))
+	{
+	    if (group.isSet(groupSchema.EMAILOK))
+		{
+
+		    String groupname = (String) group.getFieldValueLocal(groupSchema.GROUPNAME);
+		    Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(groupSchema.USERS);
+
+		    //	this picks up a handful, just barely.
+		    addIfNew(gulist,groupname);
+
+		    //	this chunk likely won't add anything.
+		    //	it didn't.
+		    /*
+		      if (!empty(group_targets))
+		      {
+
+		      for (int i = 0; i < group_targets.size(); i++)
+		      {
+		      String ha;
+		      Invid userInvid = group_targets.get(i);
+		      if (isVeryDeadUser(userInvid))
+		      {
+		      continue;
+		      }
+		      ha = getLabel(userInvid).toLowerCase();
+		      addIfNew(gulist,ha);
+		      }
+		      }// end !empty
+		    */
+
+		}//end	EMAILOK
+	}//end for group: getObjects(groupSchema.BASE)
+    /*
+      sofar = gulist.size();
+      result.setLength(0);
+      result.append("end of 2nd group, gulist size is\t");
+      result.append(sofar);
+      writer.println(result.toString());
+    */
+//------------------------------------------------------------------------------
+    for (DBObject group: getObjects(userNetgroupSchema.BASE))
+	{
+	    if (group.isSet(userNetgroupSchema.EMAILOK))
+		{
+
+		    String groupname = (String) group.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+		    Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(userNetgroupSchema.USERS);
+		    Vector<Invid> sub_netgroups = (Vector<Invid>) group.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+		    
+		    Vector<String> targets = new Vector<String>();
+
+
+		    //	this does get some.
+		    addIfNew( gulist, groupname );
+
+		    //	the targets don't add anything.
+		    // make the list of targets.
+/*
+		    if (!empty(group_targets))
+		      {
+		        for (Invid targetInvid: group_targets)
+		        {
+		        if (isVeryDeadUser(targetInvid))
+		          {
+   		          continue;
+  		          }
+		        targets.add(getLabel(targetInvid));
+		        }
+		      }
+
+                    if (!empty(sub_netgroups))
+                      {
+                	for (Invid subNetGroup: sub_netgroups)
+                          {
+                          DBObject subnetgroup = getObject(subNetGroup);
+
+                          if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
+                            {
+                            targets.add(subnetgroup.getLabel());
+                            }
+                          }
+                      }
+
+                    if( !empty(targets) )
+                      {
+                      for (int i = 0; i < targets.size(); i++)
+                        {
+                        String ha;
+                        ha = targets.get(i);
+                        addIfNew( gulist, ha );
+                        }
+                      }//end targets
+*/
+
+		}//end isSet(userNetgroupSchema.EMAILOK)
+	}//end group: getObjects(userNetgroupSchema.BASE)
+    /*
+      sofar = gulist.size();
+      result.setLength(0);
+      result.append("end of 3rd group, gulist size is\t");
+      result.append(sofar);
+      writer.println(result.toString());
+    */
+//------------------------------------------------------------------------------
+    for (DBObject external: getObjects(emailRedirectSchema.BASE))
+	{
+	    String name = (String) external.getFieldValueLocal(emailRedirectSchema.NAME);
+	    Vector<String> targets = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
+	    Vector<String> aliases = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.ALIASES);
+
+	    //	do need these in the output.
+	    addIfNew( gulist, name );
+
+	    //	this adds a few.  need these.
+	    if (!empty(aliases))
+		{
+		    for (String alias: aliases)
+			{
+			    if (!alias.equals(name))
+				{
+				    addIfNew( gulist , alias);
+				}
+			}
+		}
+
+	    //	this adds one.  so...  i guess we keep it.
+	    //  if targets is null, we mustn't put out a stub line.
+	    if (!empty(targets))
+		{
+		    for (int i = 0; i < targets.size(); i++)
+			{
+			    String oh;
+			    if ( targets.get(i).endsWith("arlut.utexas.edu"))
+				{
+				    oh = chopFromAt(targets.get(i));
+				    addIfNew(gulist,oh);
+				}//end endsWith
+			}
+		}
+
+	}//end external: getObjects(emailRedirectSchema.BASE)
+
+    /*
+      sofar = gulist.size();
+      result.setLength(0);
+      result.append("end of external, gulist size is\t");
+      result.append(sofar);
+      writer.println(result.toString());
+    */
+    /*
+      sofar = gulist.size();
+      result.setLength(0);
+      result.append("TOTAL gulist size is\t");
+      result.append(sofar);
+      writer.println(result.toString());
+    */
+//------------------------------------------------------------------------------
+//	here's the big deal output we've always wanted.
+    for( int jj=0;jj<gulist.size();jj++)
+	{
+	    result.setLength(0);
+	    result.append(gulist.get(jj) );
+	    result.append(" OK");
+	    writer.println(result.toString());
+	}
+//------------------------------------------------------------------------------
+    return;
+  }// end writeHashKnownUser
 
   /**
    * Cleans up / fixes up address for our use in generating Postfix
@@ -3082,6 +3550,56 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     return in.toString().replace("@arlut.utexas.edu",
 				 "@arlmail.arlut.utexas.edu");
+  }
+
+  private void showDirty(String object, PrintWriter writer)
+  {
+result.setLength(0);
+result.append(object);
+writer.println(result.toString());
+  }
+
+  /**
+   *  adds a String to a vector of Strings iff the String is not
+   * in the vector already.
+   * LOWER CASE ONLY !!
+   * jgs
+   */
+  private boolean addIfNew( Vector<String> slist, String maybe )
+  {
+  String lower = maybe.toLowerCase();
+  for( int kk=0; kk < slist.size(); kk++ )
+    {
+      if( lower.equals(slist.get(kk)) )
+        {
+          return false;
+        }
+    }//end for
+      // not in there.
+      slist.addElement(lower);
+      return true;
+  }
+
+  /**
+   *	chop off everything after (and including) an '@' in a string.
+   *	just because i need this a lot.
+   *	is that a convenience method?
+   *                          -----
+   *	and i only care about lower case.
+   *                          -----
+   *	returns true if it needed to chop it off.
+   */
+  private String chopFromAt( String ins )
+  {
+  String outs;
+  outs = ins;
+
+  int posonly = ins.indexOf('@');
+  if( posonly >= 0 )
+    {
+    outs = ins.substring(0,posonly).toLowerCase();
+    }
+  return outs;
   }
 
   /**
