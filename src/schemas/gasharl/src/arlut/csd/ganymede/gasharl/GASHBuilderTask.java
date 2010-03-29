@@ -2538,7 +2538,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
             try
               {
-String ignored = "ignored";
                 //	we don't want to loop over this.
                 //	loop inside this
                 writeHashTransport(pftransport);
