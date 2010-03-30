@@ -222,7 +222,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             try
               {
-		for (DBObject user: getObjects(SchemaConstants.UserBase))
+                for (DBObject user: getObjects(SchemaConstants.UserBase))
                   {
                     writeUserLine(user, out);
                   }
@@ -244,12 +244,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
 
     if (baseChanged(userSchema.BASE) ||
-	baseChanged(groupSchema.BASE) || // in case of rename
-	baseChanged(userNetgroupSchema.BASE)) // ditto
+        baseChanged(groupSchema.BASE) || // in case of rename
+        baseChanged(userNetgroupSchema.BASE)) // ditto
       {
         writeHTTPfiles();
 
-	success = true;
+        success = true;
       }
 
     // group
@@ -283,8 +283,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         try
           {
-	    for (DBObject group: getObjects(groupSchema.BASE))
-	      {
+            for (DBObject group: getObjects(groupSchema.BASE))
+              {
                 if (out != null)
                   {
                     writeGroupLine(group, out);
@@ -329,17 +329,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         // the postfix versions of those files.
         // jgs, 15 feb 2010
 
-	try
-	  {
-	    if (writeHashAliasesFile())
-	      {
-		success = true;
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    throw new RuntimeException(ex);
-	  }
+        try
+          {
+            if (writeHashAliasesFile())
+              {
+                success = true;
+              }
+          }
+        catch (IOException ex)
+          {
+            throw new RuntimeException(ex);
+          }
       }
 
     if (baseChanged(MailmanListSchema.BASE)) // mailman lists
@@ -709,7 +709,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	for (DBObject user: getObjects(SchemaConstants.UserBase))
+        for (DBObject user: getObjects(SchemaConstants.UserBase))
           {
             String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
             String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
@@ -804,7 +804,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	for (DBObject user: getObjects(SchemaConstants.UserBase))
+        for (DBObject user: getObjects(SchemaConstants.UserBase))
           {
             String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
             String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
@@ -939,7 +939,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         out2.println("# " + (new Date()).toString());
         out2.println();
 
-	for (DBObject user: getObjects(SchemaConstants.UserBase))
+        for (DBObject user: getObjects(SchemaConstants.UserBase))
           {
             if (user.isInactivated())
               {
@@ -1196,15 +1196,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         // first the user netgroups
 
-	for (DBObject netgroup: getObjects(userNetgroupSchema.BASE))
-	  {
+        for (DBObject netgroup: getObjects(userNetgroupSchema.BASE))
+          {
             writeUserNetgroup(netgroup, netgroupFile);
           }
 
         // now the system netgroups
 
-	for (DBObject netgroup: getObjects(systemNetgroupSchema.BASE))
-	  {
+        for (DBObject netgroup: getObjects(systemNetgroupSchema.BASE))
+          {
             writeSystemNetgroup(netgroup, netgroupFile);
           }
       }
@@ -1480,7 +1480,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         // first the user netgroups
 
-	for (DBObject netgroup: getObjects(userNetgroupSchema.BASE))
+        for (DBObject netgroup: getObjects(userNetgroupSchema.BASE))
           {
             name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
 
@@ -1585,7 +1585,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         // find the volume definitions
 
-	for (DBObject obj: getObjects(volumeSchema.BASE))
+        for (DBObject obj: getObjects(volumeSchema.BASE))
           {
             buf.setLength(0);
 
@@ -1667,7 +1667,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-	    for (Invid ref: tempVect)
+            for (Invid ref: tempVect)
               {
                 DBObject obj = getObject(ref);
 
@@ -1738,8 +1738,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         // and the mailman mail lists
 
-	for (DBObject mailmanList: getObjects(MailmanListSchema.BASE))
-	  {
+        for (DBObject mailmanList: getObjects(MailmanListSchema.BASE))
+          {
             writeMailmanList(mailmanList, mailman_sync_file);
           }
       }
@@ -1830,35 +1830,35 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         // our email aliases database is spread across three separate object
         // bases.
 
-	for (DBObject user: getObjects(SchemaConstants.UserBase))
+        for (DBObject user: getObjects(SchemaConstants.UserBase))
           {
             writeUserAlias(user, aliases_info);
           }
 
         // now the mail lists
 
-	for (DBObject group: getObjects(emailListSchema.BASE))
-	  {
+        for (DBObject group: getObjects(emailListSchema.BASE))
+          {
             writeGroupAlias(group, aliases_info);
-	  }
+          }
 
         // add in emailable account groups
 
-	for (DBObject group: getObjects(groupSchema.BASE))
-	  {
+        for (DBObject group: getObjects(groupSchema.BASE))
+          {
             writeAccountGroupAlias(group, aliases_info);
-	  }
+          }
 
         // add in emailable user netgroups
 
-	for (DBObject group: getObjects(userNetgroupSchema.BASE))
+        for (DBObject group: getObjects(userNetgroupSchema.BASE))
           {
             writeUserNetgroupAlias(group, aliases_info);
           }
 
         // and the external mail addresses
 
-	for (DBObject external: getObjects(emailRedirectSchema.BASE))
+        for (DBObject external: getObjects(emailRedirectSchema.BASE))
           {
             writeExternalAlias(external, aliases_info);
           }
@@ -1918,7 +1918,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
     else
       {
-	for (String aliasName: aliases)
+        for (String aliasName: aliases)
           {
             if (aliasName != null)
               {
@@ -1989,7 +1989,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             result.append(username);
           }
 
-	for (String alias: aliases)
+        for (String alias: aliases)
           {
             if (alias.equals(signature))
               {
@@ -2534,68 +2534,68 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	PrintWriter pfmalias = openOutFile(path + "pfmalias", "gasharl");
+        PrintWriter pfmalias = openOutFile(path + "pfmalias", "gasharl");
 
         try
           {
-	    PrintWriter pftransport = openOutFile(path + "pftransport","gasharl");
+            PrintWriter pftransport = openOutFile(path + "pftransport","gasharl");
 
-	    try
-	      {
-		PrintWriter pfknownu = openOutFile(path + "known_users","gasharl");
+            try
+              {
+                PrintWriter pfknownu = openOutFile(path + "known_users","gasharl");
 
-		try
-		  {
-		    //	we don't want to loop over this.
-		    //	loop inside this
-		    writeHashTransport(pftransport);
-		    writeHashKnownuser(pfknownu);
+                try
+                  {
+                    //  we don't want to loop over this.
+                    //  loop inside this
+                    writeHashTransport(pftransport);
+                    writeHashKnownuser(pfknownu);
 
-		    for (DBObject user: getObjects(SchemaConstants.UserBase))
-		      {
-			writeHashGenerics(user, pfgenerics);
-			writeHashUserAlias(user, pfmalias);
-		      }
+                    for (DBObject user: getObjects(SchemaConstants.UserBase))
+                      {
+                        writeHashGenerics(user, pfgenerics);
+                        writeHashUserAlias(user, pfmalias);
+                      }
     
-		    // mail lists
+                    // mail lists
     
-		    for (DBObject group: getObjects(emailListSchema.BASE))
-		      {
-			writeHashGroupAlias(group, pfmalias);
-		      }
+                    for (DBObject group: getObjects(emailListSchema.BASE))
+                      {
+                        writeHashGroupAlias(group, pfmalias);
+                      }
     
-		    // emailable account groups
+                    // emailable account groups
     
-		    for (DBObject group: getObjects(groupSchema.BASE))
-		      {
-			writeHashAccountGroupAlias(group, pfmalias);
-		      }
+                    for (DBObject group: getObjects(groupSchema.BASE))
+                      {
+                        writeHashAccountGroupAlias(group, pfmalias);
+                      }
     
-		    // emailable user netgroups
+                    // emailable user netgroups
     
-		    for (DBObject group: getObjects(userNetgroupSchema.BASE))
-		      {
-			writeHashUserNetgroupAlias(group, pfmalias);
-		      }
+                    for (DBObject group: getObjects(userNetgroupSchema.BASE))
+                      {
+                        writeHashUserNetgroupAlias(group, pfmalias);
+                      }
     
-		    // external mail addresses
+                    // external mail addresses
     
-		    for (DBObject external: getObjects(emailRedirectSchema.BASE))
-		      {
-			writeHashExternalAlias(external, pfmalias);
-		      }
+                    for (DBObject external: getObjects(emailRedirectSchema.BASE))
+                      {
+                        writeHashExternalAlias(external, pfmalias);
+                      }
 
-		    success = true;
-		  }
-		finally
-		  {
-		    pfknownu.close();
-		  }
-	      }
-	    finally
-	      {
-		pftransport.close();
-	      }
+                    success = true;
+                  }
+                finally
+                  {
+                    pfknownu.close();
+                  }
+              }
+            finally
+              {
+                pftransport.close();
+              }
           }
         finally
           {
@@ -2664,7 +2664,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(", ");
               }
 
-	    result.append(fixup(addresses.get(i)));
+            result.append(fixup(addresses.get(i)));
           }
 
         writer.println(result.toString().toLowerCase());
@@ -2672,7 +2672,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (!empty(aliases))
       {
-	for (String alias: aliases)
+        for (String alias: aliases)
           {
             if (alias.equals(signature))
               {
@@ -2689,7 +2689,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (!empty(aliases) && !empty(addresses))
       {
-	for (String alias: aliases)
+        for (String alias: aliases)
           {
             if (!alias.equals(signature))
               {
@@ -2707,7 +2707,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                     result.append(", ");
                   }
 
-		result.append(fixup(addresses.get(i)));
+                result.append(fixup(addresses.get(i)));
               }
 
             writer.println(result.toString().toLowerCase());
@@ -2742,16 +2742,16 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (signature.indexOf('@') != -1)
       {
-	try
-	  {
-	    throw new RuntimeException("Warning, @ in signature alias!");
-	  }
-	catch (RuntimeException ex)
-	  {
-	    Ganymede.logError(ex);
-	  }
+        try
+          {
+            throw new RuntimeException("Warning, @ in signature alias!");
+          }
+        catch (RuntimeException ex)
+          {
+            Ganymede.logError(ex);
+          }
 
-	signature = signature.substring(0, signature.indexOf('@'));
+        signature = signature.substring(0, signature.indexOf('@'));
       }
 
     result.append(signature);
@@ -2762,7 +2762,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (!empty(aliases))
       {
-	for (String alias: aliases)
+        for (String alias: aliases)
           {
             if (alias.equals(signature))
               {
@@ -2830,7 +2830,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (!empty(group_aliases))
       {
-	for (String alias: group_aliases)
+        for (String alias: group_aliases)
           {
             result.setLength(0);
             result.append(alias);
@@ -2994,7 +2994,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (!empty(group_targets))
       {
-	for (Invid targetInvid: group_targets)
+        for (Invid targetInvid: group_targets)
           {
             if (isVeryDeadUser(targetInvid))
               {
@@ -3007,7 +3007,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (!empty(sub_netgroups))
       {
-	for (Invid subNetGroup: sub_netgroups)
+        for (Invid subNetGroup: sub_netgroups)
           {
             DBObject subnetgroup = getObject(subNetGroup);
 
@@ -3029,7 +3029,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             result.append(", ");
           }
 
-	result.append(targets.get(i));
+        result.append(targets.get(i));
       }
 
     writer.println(result.toString().toLowerCase());
@@ -3072,17 +3072,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (!empty(aliases))
       {
-	for (String alias: aliases)
-	  {
+        for (String alias: aliases)
+          {
             if (!alias.equals(name))
               {
-		result.setLength(0);
-		result.append(alias);
-		result.append(": ");
-		result.append(name);
-		writer.println(result.toString().toLowerCase());
+                result.setLength(0);
+                result.append(alias);
+                result.append(": ");
+                result.append(name);
+                writer.println(result.toString().toLowerCase());
               }
-	  }
+          }
       }
 
     //  if targets is null, we mustn't put out a stub line.
@@ -3100,7 +3100,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(", ");
               }
 
-	    result.append(fixup(targets.get(i)));
+            result.append(fixup(targets.get(i)));
           }
 
         writer.println(result.toString().toLowerCase());
@@ -3113,7 +3113,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * <pre>
    *
-   * thingy.arlut.utexas.edu	smtp:[thingy.arlut.utexas.edu]
+   * thingy.arlut.utexas.edu    smtp:[thingy.arlut.utexas.edu]
    *
    * </pre>
    *
@@ -3136,105 +3136,105 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     String seekat;
 
-    //	some things in here will NOT be found by the loop following
-    //	this one.  so you do have to do this.
+    //  some things in here will NOT be found by the loop following
+    //  this one.  so you do have to do this.
     for (DBObject loluser: getObjects(SchemaConstants.UserBase))
       {
-	Vector<String> addresses = (Vector<String>) loluser.getFieldValuesLocal(userSchema.EMAILTARGET);
+        Vector<String> addresses = (Vector<String>) loluser.getFieldValuesLocal(userSchema.EMAILTARGET);
 
-	if (!empty(addresses))
-	  {
+        if (!empty(addresses))
+          {
 
-	    for (int i = 0; i < addresses.size(); i++)
-	      {
-		seekat = fixup(addresses.get(i));
-		int posonly = seekat.indexOf('@');
-		int found=0;
-		if( posonly >= 0 )
-		  {
-		    String atleft = seekat.substring(1+posonly).toLowerCase();
-		    for (int jj=0; jj < outtargs.size(); jj++)
-		      {
-			if( atleft.equals(outtargs.get(jj)) )
-			  {
-			    found=1;
-			  }
-		      }
-		    if( found == 0 )
-		      {
-			String onlyus = "arlut.utexas.edu";
-			int tag = atleft.indexOf(onlyus);
-			if( tag >= 0 )
-			  {
-			    if( !atleft.equals("arlut.utexas.edu") )
-			      {
-				outtargs.addElement(atleft);
-			      }
-			  }
-		      }
-		  }
-	      }//end loop over addrs
-	  }// end of empty addrs
+            for (int i = 0; i < addresses.size(); i++)
+              {
+                seekat = fixup(addresses.get(i));
+                int posonly = seekat.indexOf('@');
+                int found=0;
+                if( posonly >= 0 )
+                  {
+                    String atleft = seekat.substring(1+posonly).toLowerCase();
+                    for (int jj=0; jj < outtargs.size(); jj++)
+                      {
+                        if( atleft.equals(outtargs.get(jj)) )
+                          {
+                            found=1;
+                          }
+                      }
+                    if( found == 0 )
+                      {
+                        String onlyus = "arlut.utexas.edu";
+                        int tag = atleft.indexOf(onlyus);
+                        if( tag >= 0 )
+                          {
+                            if( !atleft.equals("arlut.utexas.edu") )
+                              {
+                                outtargs.addElement(atleft);
+                              }
+                          }
+                      }
+                  }
+              }//end loop over addrs
+          }// end of empty addrs
       }// end of for
 
     //--------------------------------------
     for (DBObject external: getObjects(emailRedirectSchema.BASE))
       {
-	Vector targets;
-	String target;
+        Vector targets;
+        String target;
 
 
-	targets = external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
+        targets = external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
 
 
-	// targets shouldn't ever be null, but i'm tired of having
-	// NullPointerExceptions pop up then having to recompile to
-	// fix.
+        // targets shouldn't ever be null, but i'm tired of having
+        // NullPointerExceptions pop up then having to recompile to
+        // fix.
 
-	if (targets != null)
-	  {
-	    for (int i = 0; i < targets.size(); i++)
-	      {
-		target = (String) targets.elementAt(i);
-		int posonly = target.indexOf('@');
-		int found=0;
-		if( posonly >= 0 )
-		  {
-		    String atleft = target.substring(1+posonly).toLowerCase();
-		    for (int jj=0; jj < outtargs.size(); jj++)
-		      {
-			if( atleft.equals(outtargs.get(jj)) )
-			  {
-			    found=1;
-			  }
-		      }// end jj
-		    if( found == 0 )
-		      {
-			String onlyus = "arlut.utexas.edu";
-			int tag = atleft.indexOf(onlyus);
-			if( tag >= 0 )
-			  {
-			    if( !atleft.equals("arlut.utexas.edu") )
-			      {
-				outtargs.addElement(atleft);
-			      }
-			  }// end tag>=0
-		      }// end found==0
-		  }// end posonly >=0
+        if (targets != null)
+          {
+            for (int i = 0; i < targets.size(); i++)
+              {
+                target = (String) targets.elementAt(i);
+                int posonly = target.indexOf('@');
+                int found=0;
+                if( posonly >= 0 )
+                  {
+                    String atleft = target.substring(1+posonly).toLowerCase();
+                    for (int jj=0; jj < outtargs.size(); jj++)
+                      {
+                        if( atleft.equals(outtargs.get(jj)) )
+                          {
+                            found=1;
+                          }
+                      }// end jj
+                    if( found == 0 )
+                      {
+                        String onlyus = "arlut.utexas.edu";
+                        int tag = atleft.indexOf(onlyus);
+                        if( tag >= 0 )
+                          {
+                            if( !atleft.equals("arlut.utexas.edu") )
+                              {
+                                outtargs.addElement(atleft);
+                              }
+                          }// end tag>=0
+                      }// end found==0
+                  }// end posonly >=0
               }// end i loop
           }//end targets not null
 
       }// end for external loop.
     //--------------------------------------
-    //	the output we need.
+    //  the output we need.
     for (int jj=0; jj < outtargs.size(); jj++)
       {
-	result.setLength(0);
-	result.append(outtargs.get(jj));
-	result.append("\tsmtp:[");
-	result.append(outtargs.get(jj));
-	result.append("]");
-	writer.println(result.toString());
+        result.setLength(0);
+        result.append(outtargs.get(jj));
+        result.append("\tsmtp:[");
+        result.append(outtargs.get(jj));
+        result.append("]");
+        writer.println(result.toString());
       }
   }
 
@@ -3247,7 +3247,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * <pre>
    *
-   * user	OK
+   * user       OK
    *
    * </pre>
    *
@@ -3267,53 +3267,53 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         Vector<String> addresses = (Vector<String>) user.getFieldValuesLocal(userSchema.EMAILTARGET);
 
 
-	// username, sig, and at least one alias usually the same.
-	// and addresses, too.
-	addIfNew( gulist, username );
+        // username, sig, and at least one alias usually the same.
+        // and addresses, too.
+        addIfNew( gulist, username );
 
 
 
-	//	efficiency only
-	if( !username.equals(signature) )
-	  {
-	    addIfNew( gulist, signature );
-	  }
+        //      efficiency only
+        if( !username.equals(signature) )
+          {
+            addIfNew( gulist, signature );
+          }
 
-	/*	aliases
-	 */
-	if (!empty(aliases))
-	  {
-	    for (String alias: aliases)
-	      {
-		// efficiency only
-		if( !alias.equals(username) && !alias.equals(signature) )
-		  {
-		    addIfNew( gulist, alias );
-		  }
-	      }
-	  }
+        /*      aliases
+         */
+        if (!empty(aliases))
+          {
+            for (String alias: aliases)
+              {
+                // efficiency only
+                if( !alias.equals(username) && !alias.equals(signature) )
+                  {
+                    addIfNew( gulist, alias );
+                  }
+              }
+          }
 
 
-	//			could add this in... you know.
-	//			    !ha.equals("no_longer_employed") )
-	// often these match up w/ user, sig, alias
-	/*	addresses
-	 */
-	if (!empty(addresses))
-	  {
-	    for (int i = 0; i < addresses.size(); i++)
-	      {
-		String ha;
-		ha = chopFromAt( addresses.get(i).toString() );
-		// efficiency only
-		if( !ha.equals(username) &&
-		    !ha.equals(signature) )
-		  {
-		    addIfNew( gulist, ha );
-		  }
-	      }
+        //                      could add this in... you know.
+        //                          !ha.equals("no_longer_employed") )
+        // often these match up w/ user, sig, alias
+        /*      addresses
+         */
+        if (!empty(addresses))
+          {
+            for (int i = 0; i < addresses.size(); i++)
+              {
+                String ha;
+                ha = chopFromAt( addresses.get(i).toString() );
+                // efficiency only
+                if( !ha.equals(username) &&
+                    !ha.equals(signature) )
+                  {
+                    addIfNew( gulist, ha );
+                  }
+              }
 
-	  }
+          }
 
       }//end for user: getObjects(SchemaConstants.UserBase)
     /*
@@ -3327,44 +3327,44 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (DBObject group: getObjects(emailListSchema.BASE))
       {
-	String groupname = (String) group.getFieldValueLocal(emailListSchema.LISTNAME);
-	Vector<String> group_aliases = (Vector<String>) group.getFieldValuesLocal(emailListSchema.ALIASES);
-	Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(emailListSchema.MEMBERS);
-	//	there's an external targets field in there, but we
-	//	don't care about it:  we're constructing a list of INTERNAL
-	//	names to get email.  we expressly don't want and it would be
-	//	poisonous to list external names here.
+        String groupname = (String) group.getFieldValueLocal(emailListSchema.LISTNAME);
+        Vector<String> group_aliases = (Vector<String>) group.getFieldValuesLocal(emailListSchema.ALIASES);
+        Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(emailListSchema.MEMBERS);
+        //      there's an external targets field in there, but we
+        //      don't care about it:  we're constructing a list of INTERNAL
+        //      names to get email.  we expressly don't want and it would be
+        //      poisonous to list external names here.
 
 
-	addIfNew( gulist, groupname );
-	    
-	if (!empty(group_aliases))
-	  {
-	    for (String alias: group_aliases)
-	      {
-		//	we do need these
-		addIfNew( gulist, alias );
-	      }
-	  }
+        addIfNew( gulist, groupname );
+            
+        if (!empty(group_aliases))
+          {
+            for (String alias: group_aliases)
+              {
+                //      we do need these
+                addIfNew( gulist, alias );
+              }
+          }
 
 
 
-	//	any others?
-	//	we pick up only a handful from here.  so, okay.
-	if (!empty(group_targets))
-	  {
-	    for (int i = 0; i < group_targets.size(); i++)
-	      {
-		String somebody;
-		Invid memberInvid = (Invid) group_targets.get(i);
-		if (isVeryDeadUser(memberInvid))
-		  {
-		    continue;
-		  }
-		somebody = getLabel(memberInvid).toString();
-		addIfNew( gulist, somebody );
-	      }
-	  }
+        //      any others?
+        //      we pick up only a handful from here.  so, okay.
+        if (!empty(group_targets))
+          {
+            for (int i = 0; i < group_targets.size(); i++)
+              {
+                String somebody;
+                Invid memberInvid = (Invid) group_targets.get(i);
+                if (isVeryDeadUser(memberInvid))
+                  {
+                    continue;
+                  }
+                somebody = getLabel(memberInvid).toString();
+                addIfNew( gulist, somebody );
+              }
+          }
 
       }//end for group: getObjects(emailListSchema.BASE)
     /*
@@ -3377,36 +3377,36 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     //------------------------------------------------------------------------------
     for (DBObject group: getObjects(groupSchema.BASE))
       {
-	if (group.isSet(groupSchema.EMAILOK))
-	  {
+        if (group.isSet(groupSchema.EMAILOK))
+          {
 
-	    String groupname = (String) group.getFieldValueLocal(groupSchema.GROUPNAME);
-	    Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(groupSchema.USERS);
+            String groupname = (String) group.getFieldValueLocal(groupSchema.GROUPNAME);
+            Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(groupSchema.USERS);
 
-	    //	this picks up a handful, just barely.
-	    addIfNew(gulist,groupname);
+            //  this picks up a handful, just barely.
+            addIfNew(gulist,groupname);
 
-	    //	this chunk likely won't add anything.
-	    //	it didn't.
-	    /*
-	      if (!empty(group_targets))
-	      {
+            //  this chunk likely won't add anything.
+            //  it didn't.
+            /*
+              if (!empty(group_targets))
+              {
 
-	      for (int i = 0; i < group_targets.size(); i++)
-	      {
-	      String ha;
-	      Invid userInvid = group_targets.get(i);
-	      if (isVeryDeadUser(userInvid))
-	      {
-	      continue;
-	      }
-	      ha = getLabel(userInvid).toLowerCase();
-	      addIfNew(gulist,ha);
-	      }
-	      }// end !empty
-	    */
+              for (int i = 0; i < group_targets.size(); i++)
+              {
+              String ha;
+              Invid userInvid = group_targets.get(i);
+              if (isVeryDeadUser(userInvid))
+              {
+              continue;
+              }
+              ha = getLabel(userInvid).toLowerCase();
+              addIfNew(gulist,ha);
+              }
+              }// end !empty
+            */
 
-	  }//end	EMAILOK
+          }//end        EMAILOK
       }//end for group: getObjects(groupSchema.BASE)
     /*
       sofar = gulist.size();
@@ -3418,59 +3418,59 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     //------------------------------------------------------------------------------
     for (DBObject group: getObjects(userNetgroupSchema.BASE))
       {
-	if (group.isSet(userNetgroupSchema.EMAILOK))
-	  {
+        if (group.isSet(userNetgroupSchema.EMAILOK))
+          {
 
-	    String groupname = (String) group.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
-	    Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(userNetgroupSchema.USERS);
-	    Vector<Invid> sub_netgroups = (Vector<Invid>) group.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
-		    
-	    Vector<String> targets = new Vector<String>();
+            String groupname = (String) group.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+            Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(userNetgroupSchema.USERS);
+            Vector<Invid> sub_netgroups = (Vector<Invid>) group.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+                    
+            Vector<String> targets = new Vector<String>();
 
 
-	    //	this does get some.
-	    addIfNew( gulist, groupname );
+            //  this does get some.
+            addIfNew( gulist, groupname );
 
-	    //	the targets don't add anything.
-	    // make the list of targets.
-	    /*
-	      if (!empty(group_targets))
-	      {
-	      for (Invid targetInvid: group_targets)
-	      {
-	      if (isVeryDeadUser(targetInvid))
-	      {
-	      continue;
-	      }
-	      targets.add(getLabel(targetInvid));
-	      }
-	      }
+            //  the targets don't add anything.
+            // make the list of targets.
+            /*
+              if (!empty(group_targets))
+              {
+              for (Invid targetInvid: group_targets)
+              {
+              if (isVeryDeadUser(targetInvid))
+              {
+              continue;
+              }
+              targets.add(getLabel(targetInvid));
+              }
+              }
 
-	      if (!empty(sub_netgroups))
-	      {
-	      for (Invid subNetGroup: sub_netgroups)
-	      {
-	      DBObject subnetgroup = getObject(subNetGroup);
+              if (!empty(sub_netgroups))
+              {
+              for (Invid subNetGroup: sub_netgroups)
+              {
+              DBObject subnetgroup = getObject(subNetGroup);
 
-	      if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
-	      {
-	      targets.add(subnetgroup.getLabel());
-	      }
-	      }
-	      }
+              if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
+              {
+              targets.add(subnetgroup.getLabel());
+              }
+              }
+              }
 
-	      if( !empty(targets) )
-	      {
-	      for (int i = 0; i < targets.size(); i++)
-	      {
-	      String ha;
-	      ha = targets.get(i);
-	      addIfNew( gulist, ha );
-	      }
-	      }//end targets
-	    */
+              if( !empty(targets) )
+              {
+              for (int i = 0; i < targets.size(); i++)
+              {
+              String ha;
+              ha = targets.get(i);
+              addIfNew( gulist, ha );
+              }
+              }//end targets
+            */
 
-	  }//end isSet(userNetgroupSchema.EMAILOK)
+          }//end isSet(userNetgroupSchema.EMAILOK)
       }//end group: getObjects(userNetgroupSchema.BASE)
     /*
       sofar = gulist.size();
@@ -3482,39 +3482,39 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     //------------------------------------------------------------------------------
     for (DBObject external: getObjects(emailRedirectSchema.BASE))
       {
-	String name = (String) external.getFieldValueLocal(emailRedirectSchema.NAME);
-	Vector<String> targets = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
-	Vector<String> aliases = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.ALIASES);
+        String name = (String) external.getFieldValueLocal(emailRedirectSchema.NAME);
+        Vector<String> targets = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
+        Vector<String> aliases = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.ALIASES);
 
-	//	do need these in the output.
-	addIfNew( gulist, name );
+        //      do need these in the output.
+        addIfNew( gulist, name );
 
-	//	this adds a few.  need these.
-	if (!empty(aliases))
-	  {
-	    for (String alias: aliases)
-	      {
-		if (!alias.equals(name))
-		  {
-		    addIfNew( gulist , alias);
-		  }
-	      }
-	  }
+        //      this adds a few.  need these.
+        if (!empty(aliases))
+          {
+            for (String alias: aliases)
+              {
+                if (!alias.equals(name))
+                  {
+                    addIfNew( gulist , alias);
+                  }
+              }
+          }
 
-	//	this adds one.  so...  i guess we keep it.
-	//  if targets is null, we mustn't put out a stub line.
-	if (!empty(targets))
-	  {
-	    for (int i = 0; i < targets.size(); i++)
-	      {
-		String oh;
-		if ( targets.get(i).endsWith("arlut.utexas.edu"))
-		  {
-		    oh = chopFromAt(targets.get(i));
-		    addIfNew(gulist,oh);
-		  }//end endsWith
-	      }
-	  }
+        //      this adds one.  so...  i guess we keep it.
+        //  if targets is null, we mustn't put out a stub line.
+        if (!empty(targets))
+          {
+            for (int i = 0; i < targets.size(); i++)
+              {
+                String oh;
+                if ( targets.get(i).endsWith("arlut.utexas.edu"))
+                  {
+                    oh = chopFromAt(targets.get(i));
+                    addIfNew(gulist,oh);
+                  }//end endsWith
+              }
+          }
 
       }//end external: getObjects(emailRedirectSchema.BASE)
 
@@ -3533,13 +3533,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       writer.println(result.toString());
     */
     //------------------------------------------------------------------------------
-    //	here's the big deal output we've always wanted.
+    //  here's the big deal output we've always wanted.
     for( int jj=0;jj<gulist.size();jj++)
       {
-	result.setLength(0);
-	result.append(gulist.get(jj) );
-	result.append(" OK");
-	writer.println(result.toString());
+        result.setLength(0);
+        result.append(gulist.get(jj) );
+        result.append(" OK");
+        writer.println(result.toString());
       }
     //------------------------------------------------------------------------------
     return;
@@ -3558,7 +3558,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // change it to @arlmail.arlut.utexas.edu.  sigh.
 
     return in.toString().replace("@arlut.utexas.edu",
-				 "@arlmail.arlut.utexas.edu");
+                                 "@arlmail.arlut.utexas.edu");
   }
 
   private void showDirty(String object, PrintWriter writer)
@@ -3579,10 +3579,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String lower = maybe.toLowerCase();
     for( int kk=0; kk < slist.size(); kk++ )
       {
-	if( lower.equals(slist.get(kk)) )
-	  {
-	    return false;
-	  }
+        if( lower.equals(slist.get(kk)) )
+          {
+            return false;
+          }
       }//end for
     // not in there.
     slist.addElement(lower);
@@ -3590,13 +3590,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   *	chop off everything after (and including) an '@' in a string.
-   *	just because i need this a lot.
-   *	is that a convenience method?
+   *    chop off everything after (and including) an '@' in a string.
+   *    just because i need this a lot.
+   *    is that a convenience method?
    *                          -----
-   *	and i only care about lower case.
+   *    and i only care about lower case.
    *                          -----
-   *	returns true if it needed to chop it off.
+   *    returns true if it needed to chop it off.
    */
   private String chopFromAt( String ins )
   {
@@ -3606,7 +3606,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     int posonly = ins.indexOf('@');
     if( posonly >= 0 )
       {
-	outs = ins.substring(0,posonly).toLowerCase();
+        outs = ins.substring(0,posonly).toLowerCase();
       }
     return outs;
   }
@@ -3711,75 +3711,75 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	sambaFile = openOutFile(path + "smb.passwd", "gasharl");
+        sambaFile = openOutFile(path + "smb.passwd", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeSambaFileVersion1(): couldn't open smb.passwd file: " + ex);
-	return false;
+        System.err.println("GASHBuilderTask.writeSambaFileVersion1(): couldn't open smb.passwd file: " + ex);
+        return false;
       }
 
     try
       {
-	for (DBObject user: getObjects(SchemaConstants.UserBase))
-	  {
-	    if (user.isInactivated())
-	      {
-		// we just leave inactivated users out of a Version 1
-		// Samba password file
+        for (DBObject user: getObjects(SchemaConstants.UserBase))
+          {
+            if (user.isInactivated())
+              {
+                // we just leave inactivated users out of a Version 1
+                // Samba password file
 
-		continue;
-	      }
+                continue;
+              }
 
-	    String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
+            String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
 
-	    PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
+            PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
 
-	    if (passField == null)
-	      {
-		continue;
-	      }
+            if (passField == null)
+              {
+                continue;
+              }
 
-	    String hash1 = passField.getLANMANCryptText();
+            String hash1 = passField.getLANMANCryptText();
 
-	    if (hash1 == null || hash1.equals(""))
-	      {
-		continue;
-	      }
+            if (hash1 == null || hash1.equals(""))
+              {
+                continue;
+              }
 
-	    String hash2 = passField.getNTUNICODECryptText();
+            String hash2 = passField.getNTUNICODECryptText();
 
-	    if (hash2 == null || hash2.equals(""))
-	      {
-		continue;
-	      }
+            if (hash2 == null || hash2.equals(""))
+              {
+                continue;
+              }
 
-	    Integer uid = (Integer) user.getFieldValueLocal(userSchema.UID);
+            Integer uid = (Integer) user.getFieldValueLocal(userSchema.UID);
 
-	    if (uid == null)
-	      {
-		continue;
-	      }
+            if (uid == null)
+              {
+                continue;
+              }
 
-	    String fullname = cleanString((String) user.getFieldValueLocal(userSchema.FULLNAME));
-	    String room = cleanString((String) user.getFieldValueLocal(userSchema.ROOM));
-	    String div = cleanString((String) user.getFieldValueLocal(userSchema.DIVISION));
-	    String workphone = cleanString((String) user.getFieldValueLocal(userSchema.OFFICEPHONE));
-	    String homephone = cleanString((String) user.getFieldValueLocal(userSchema.HOMEPHONE));
-	    String homedir = cleanString((String) user.getFieldValueLocal(userSchema.HOMEDIR));
-	    String shell = cleanString((String) user.getFieldValueLocal(userSchema.LOGINSHELL));
-	    String composite = cleanString(fullname + "," +
-					   room + " " + div + "," +
-					   workphone + "," + homephone);
+            String fullname = cleanString((String) user.getFieldValueLocal(userSchema.FULLNAME));
+            String room = cleanString((String) user.getFieldValueLocal(userSchema.ROOM));
+            String div = cleanString((String) user.getFieldValueLocal(userSchema.DIVISION));
+            String workphone = cleanString((String) user.getFieldValueLocal(userSchema.OFFICEPHONE));
+            String homephone = cleanString((String) user.getFieldValueLocal(userSchema.HOMEPHONE));
+            String homedir = cleanString((String) user.getFieldValueLocal(userSchema.HOMEDIR));
+            String shell = cleanString((String) user.getFieldValueLocal(userSchema.LOGINSHELL));
+            String composite = cleanString(fullname + "," +
+                                           room + " " + div + "," +
+                                           workphone + "," + homephone);
 
-	    sambaFile.println(username + ":" + uid.intValue() + ":" +
-			      hash1 + ":" + hash2 + ":" +
-			      composite + ":" + homedir + ":" + shell);
-	  }
+            sambaFile.println(username + ":" + uid.intValue() + ":" +
+                              hash1 + ":" + hash2 + ":" +
+                              composite + ":" + homedir + ":" + shell);
+          }
       }
     finally
       {
-	sambaFile.close();
+        sambaFile.close();
       }
 
     return true;
@@ -3800,107 +3800,107 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	sambaFile = openOutFile(path + "smb.passwd2", "gasharl");
+        sambaFile = openOutFile(path + "smb.passwd2", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeSambaFileVersion2(): couldn't open smb.passwd2 file: " + ex);
-	return false;
+        System.err.println("GASHBuilderTask.writeSambaFileVersion2(): couldn't open smb.passwd2 file: " + ex);
+        return false;
       }
 
     try
       {
-	for (DBObject user: getObjects(SchemaConstants.UserBase))
-	  {
-	    boolean inactivated = user.isInactivated();
+        for (DBObject user: getObjects(SchemaConstants.UserBase))
+          {
+            boolean inactivated = user.isInactivated();
 
-	    String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
+            String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
 
-	    if (username == null || username.equals(""))
-	      {
-		continue;
-	      }
+            if (username == null || username.equals(""))
+              {
+                continue;
+              }
 
-	    PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
+            PasswordDBField passField = (PasswordDBField) user.getField(userSchema.PASSWORD);
 
-	    if (passField == null)
-	      {
-		inactivated = true;
-	      }
+            if (passField == null)
+              {
+                inactivated = true;
+              }
 
-	    if (!inactivated)
-	      {
-		hash1 = passField.getLANMANCryptText();
+            if (!inactivated)
+              {
+                hash1 = passField.getLANMANCryptText();
 
-		if (hash1 == null || hash1.equals(""))
-		  {
-		    inactivated = true;
-		  }
-		else
-		  {
-		    hash2 = passField.getNTUNICODECryptText();
+                if (hash1 == null || hash1.equals(""))
+                  {
+                    inactivated = true;
+                  }
+                else
+                  {
+                    hash2 = passField.getNTUNICODECryptText();
 
-		    if (hash2 == null || hash2.equals(""))
-		      {
-			inactivated = true;
-		      }
-		  }
-	      }
+                    if (hash2 == null || hash2.equals(""))
+                      {
+                        inactivated = true;
+                      }
+                  }
+              }
 
-	    if (inactivated)
-	      {
-		hash1 = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-		hash2 = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
-	      }
+            if (inactivated)
+              {
+                hash1 = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+                hash2 = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+              }
 
-	    Integer uid = (Integer) user.getFieldValueLocal(userSchema.UID);
+            Integer uid = (Integer) user.getFieldValueLocal(userSchema.UID);
 
-	    if (uid == null)
-	      {
-		continue;
-	      }
+            if (uid == null)
+              {
+                continue;
+              }
 
-	    // Samba 2.0 uses a flag string with 11 spaces and/or flag chars
-	    // between a pair of brackets.
+            // Samba 2.0 uses a flag string with 11 spaces and/or flag chars
+            // between a pair of brackets.
 
-	    String flagString;
+            String flagString;
 
-	    if (inactivated)
-	      {
-		flagString = "[UD         ]";
-	      }
-	    else
-	      {
-		flagString = "[U          ]";
-	      }
+            if (inactivated)
+              {
+                flagString = "[UD         ]";
+              }
+            else
+              {
+                flagString = "[U          ]";
+              }
 
-	    // sanity checking
+            // sanity checking
 
-	    if (hash1 == null || hash1.length() != 32)
-	      {
-		throw new RuntimeException("bad LANMAN hash string: " + hash1);
-	      }
+            if (hash1 == null || hash1.length() != 32)
+              {
+                throw new RuntimeException("bad LANMAN hash string: " + hash1);
+              }
 
-	    if (hash2 == null || hash2.length() != 32)
-	      {
-		throw new RuntimeException("bad LANMAN hash string: " + hash1);
-	      }
+            if (hash2 == null || hash2.length() != 32)
+              {
+                throw new RuntimeException("bad LANMAN hash string: " + hash1);
+              }
 
-	    if (flagString.length() != 13)
-	      {
-		throw new RuntimeException("bad flag string");
-	      }
+            if (flagString.length() != 13)
+              {
+                throw new RuntimeException("bad flag string");
+              }
 
-	    String dateString = "LCT-" + dateToSMBHex(System.currentTimeMillis());
+            String dateString = "LCT-" + dateToSMBHex(System.currentTimeMillis());
 
-	    sambaFile.println(username + ":" + uid.intValue() + ":" +
-			      hash1 + ":" + hash2 + ":" +
-			      flagString + ":" + dateString);
-	  }
+            sambaFile.println(username + ":" + uid.intValue() + ":" +
+                              hash1 + ":" + hash2 + ":" +
+                              flagString + ":" + dateString);
+          }
       }
     finally
       {
-	sambaFile.close();
+        sambaFile.close();
       }
 
     return true;
@@ -3921,12 +3921,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (timecode < 0)
       {
-	throw new IllegalArgumentException("Time code is out of range from before the epoch");
+        throw new IllegalArgumentException("Time code is out of range from before the epoch");
       }
 
     if (timecode > java.lang.Integer.MAX_VALUE)
       {
-	throw new IllegalArgumentException("Time code has overflowed");
+        throw new IllegalArgumentException("Time code has overflowed");
       }
 
     StringBuilder timeString = new StringBuilder();
@@ -3937,10 +3937,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (timeString.length() < 8)
       {
-	for (int i = timeString.length(); i < 8; i++)
-	  {
-	    timeString.insert(0, "0");
-	  }
+        for (int i = timeString.length(); i < 8; i++)
+          {
+            timeString.insert(0, "0");
+          }
       }
 
     return timeString.toString().toUpperCase();
@@ -3981,57 +3981,57 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	out = openOutFile(path + "userSync.txt", "gasharl");
+        out = openOutFile(path + "userSync.txt", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.builderPhase1(): couldn't open userSync.txt file: " + ex);
-	return false;
+        System.err.println("GASHBuilderTask.builderPhase1(): couldn't open userSync.txt file: " + ex);
+        return false;
       }
 
     try
       {
-	for (DBObject user: getObjects(SchemaConstants.UserBase))
-	  {
-	    String username = user.getLabel();
-	    Invid invid = user.getInvid();
-	    String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
-	    String fullname = (String) user.getFieldValueLocal(userSchema.FULLNAME);
-	    String cryptText = null;
+        for (DBObject user: getObjects(SchemaConstants.UserBase))
+          {
+            String username = user.getLabel();
+            Invid invid = user.getInvid();
+            String signature = (String) user.getFieldValueLocal(userSchema.SIGNATURE);
+            String fullname = (String) user.getFieldValueLocal(userSchema.FULLNAME);
+            String cryptText = null;
 
-	    if (!user.isInactivated())
-	      {
-		PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+            if (!user.isInactivated())
+              {
+                PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 
-		if (passField != null)
-		  {
-		    cryptText = passField.getMD5CryptText();
-		  }
-	      }
+                if (passField != null)
+                  {
+                    cryptText = passField.getMD5CryptText();
+                  }
+              }
 
-	    // ok, we've got a user with valid cryptText password
-	    // info.  Write it.
+            // ok, we've got a user with valid cryptText password
+            // info.  Write it.
 
-	    out.print(username);
-	    out.print("|");
+            out.print(username);
+            out.print("|");
 
-	    if (cryptText != null)
-	      {
-		out.print(cryptText);
-	      }
+            if (cryptText != null)
+              {
+                out.print(cryptText);
+              }
 
-	    out.print("|");
-	    out.print(invid);
-	    out.print("|");
-	    out.print(signature);
-	    out.print("@arlut.utexas.edu");
-	    out.print("|");
-	    out.println(fullname);
-	  }
+            out.print("|");
+            out.print(invid);
+            out.print("|");
+            out.print(signature);
+            out.print("@arlut.utexas.edu");
+            out.print("|");
+            out.println(fullname);
+          }
       }
     finally
       {
-	out.close();
+        out.close();
       }
 
     return true;
@@ -4066,122 +4066,122 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	webPassword = openOutFile(path + "httpd.pass", "gasharl");
+        webPassword = openOutFile(path + "httpd.pass", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeHTTPfiles(): couldn't open httpd.pass file: " + ex);
-	return false;
+        System.err.println("GASHBuilderTask.writeHTTPfiles(): couldn't open httpd.pass file: " + ex);
+        return false;
       }
 
     try
       {
-	for (DBObject user: getObjects(SchemaConstants.UserBase))
-	  {
-	    if (user.isInactivated())
-	      {
-		continue;
-	      }
+        for (DBObject user: getObjects(SchemaConstants.UserBase))
+          {
+            if (user.isInactivated())
+              {
+                continue;
+              }
 
-	    PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+            PasswordDBField passField = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 
-	    if (passField == null)
-	      {
-		continue;
-	      }
+            if (passField == null)
+              {
+                continue;
+              }
 
-	    String password = passField.getUNIXCryptText();
+            String password = passField.getUNIXCryptText();
 
-	    if (password == null)
-	      {
-		continue;
-	      }
+            if (password == null)
+              {
+                continue;
+              }
 
-	    // ok, we've got a user with valid UNIXCrypt password
-	    // info.  Write it.
+            // ok, we've got a user with valid UNIXCrypt password
+            // info.  Write it.
 
-	    webPassword.print(user.getLabel());
-	    webPassword.print(":");
-	    webPassword.println(password);
-	  }
+            webPassword.print(user.getLabel());
+            webPassword.print(":");
+            webPassword.println(password);
+          }
       }
     finally
       {
-	webPassword.close();
+        webPassword.close();
       }
 
     try
       {
-	webGroups = openOutFile(path + "httpd.groups", "gasharl");
+        webGroups = openOutFile(path + "httpd.groups", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeHTTPfiles(): couldn't open httpd.groups file: " + ex);
-	return false;
+        System.err.println("GASHBuilderTask.writeHTTPfiles(): couldn't open httpd.groups file: " + ex);
+        return false;
       }
 
     try
       {
-	// first we write out UNIX account groups
+        // first we write out UNIX account groups
 
-	for (DBObject group: getObjects(groupSchema.BASE))
-	  {
-	    if (group.isInactivated())
-	      {
-		continue;
-	      }
+        for (DBObject group: getObjects(groupSchema.BASE))
+          {
+            if (group.isInactivated())
+              {
+                continue;
+              }
 
-	    InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
+            InvidDBField usersField = (InvidDBField) group.getField(groupSchema.USERS);
 
-	    if (usersField == null)
-	      {
-		continue;
-	      }
+            if (usersField == null)
+              {
+                continue;
+              }
 
-	    String usersList = usersField.getValueString();
+            String usersList = usersField.getValueString();
 
-	    if (usersList == null || usersList.equals(""))
-	      {
-		continue;
-	      }
+            if (usersList == null || usersList.equals(""))
+              {
+                continue;
+              }
 
-	    webGroups.print(group.getLabel());
-	    webGroups.print(": ");
+            webGroups.print(group.getLabel());
+            webGroups.print(": ");
 
-	    // InvidDBField.getValueString() returns a comma separated
-	    // list..  we want a space separated list for Apache
+            // InvidDBField.getValueString() returns a comma separated
+            // list..  we want a space separated list for Apache
 
-	    webGroups.println(usersList.replace(',',' '));
-	  }
+            webGroups.println(usersList.replace(',',' '));
+          }
 
-	// second we write out user netgroups
+        // second we write out user netgroups
 
-	for (DBObject group: getObjects(userNetgroupSchema.BASE))
-	  {
-	    if (group.isInactivated())
-	      {
-		continue;
-	      }
+        for (DBObject group: getObjects(userNetgroupSchema.BASE))
+          {
+            if (group.isInactivated())
+              {
+                continue;
+              }
 
-	    String usersList = VectorUtils.vectorString(netgroupMembers(group));
+            String usersList = VectorUtils.vectorString(netgroupMembers(group));
 
-	    if (usersList == null || usersList.equals(""))
-	      {
-		continue;
-	      }
+            if (usersList == null || usersList.equals(""))
+              {
+                continue;
+              }
 
-	    webGroups.print(group.getLabel());
-	    webGroups.print(": ");
+            webGroups.print(group.getLabel());
+            webGroups.print(": ");
 
-	    // VectorUtils.vectorString() returns a comma separated
-	    // list..  we want a space separated list for Apache
+            // VectorUtils.vectorString() returns a comma separated
+            // list..  we want a space separated list for Apache
 
-	    webGroups.println(usersList.replace(',',' '));
-	  }
+            webGroups.println(usersList.replace(',',' '));
+          }
       }
     finally
       {
-	webGroups.close();
+        webGroups.close();
       }
 
     return true;
@@ -4212,85 +4212,85 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	mailCredentials = openOutFile(path + "extMailCredentials", "gasharl");
+        mailCredentials = openOutFile(path + "extMailCredentials", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extMailCredentials file: " + ex);
-	return false;
+        System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extMailCredentials file: " + ex);
+        return false;
       }
 
     try
       {
-	try
-	  {
-	    extIMAPCredentials = openOutFile(path + "extIMAPCredentials", "gasharl");
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extIMAPCredentials file: " + ex);
-	    return false;
-	  }
+        try
+          {
+            extIMAPCredentials = openOutFile(path + "extIMAPCredentials", "gasharl");
+          }
+        catch (IOException ex)
+          {
+            System.err.println("GASHBuilderTask.writeExternalMailFiles(): couldn't open extIMAPCredentials file: " + ex);
+            return false;
+          }
 
-	try
-	  {
-	    for (DBObject user: getObjects(SchemaConstants.UserBase))
-	      {
-		if (user.isInactivated() ||
-		    !user.isSet(userSchema.ALLOWEXTERNAL) ||
-		    !user.isDefined(userSchema.MAILUSER) ||
-		    !user.isDefined(userSchema.MAILPASSWORD))
-		  {
-		    continue;
-		  }
+        try
+          {
+            for (DBObject user: getObjects(SchemaConstants.UserBase))
+              {
+                if (user.isInactivated() ||
+                    !user.isSet(userSchema.ALLOWEXTERNAL) ||
+                    !user.isDefined(userSchema.MAILUSER) ||
+                    !user.isDefined(userSchema.MAILPASSWORD))
+                  {
+                    continue;
+                  }
 
-		StringDBField usernameField = (StringDBField) user.getField(userSchema.USERNAME);
-		String username = (String) usernameField.getValueLocal();
+                StringDBField usernameField = (StringDBField) user.getField(userSchema.USERNAME);
+                String username = (String) usernameField.getValueLocal();
 
-		StringDBField mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
-		String mailUsername = (String) mailUsernameField.getValueLocal();
+                StringDBField mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+                String mailUsername = (String) mailUsernameField.getValueLocal();
 
-		StringDBField mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
-		String mailpass = (String) mailpassField.getValueLocal();
+                StringDBField mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
+                String mailpass = (String) mailpassField.getValueLocal();
 
-		mailCredentials.print(mailUsername);
-		mailCredentials.print(" ");
-		mailCredentials.println(mailpass);
+                mailCredentials.print(mailUsername);
+                mailCredentials.print(" ");
+                mailCredentials.println(mailpass);
 
-		extIMAPCredentials.print(username);
-		extIMAPCredentials.print(" ");
-		extIMAPCredentials.print(mailUsername);
-		extIMAPCredentials.print(" ");
-		extIMAPCredentials.println(mailpass);
+                extIMAPCredentials.print(username);
+                extIMAPCredentials.print(" ");
+                extIMAPCredentials.print(mailUsername);
+                extIMAPCredentials.print(" ");
+                extIMAPCredentials.println(mailpass);
 
-		if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD))
-		  {
-		    mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
-		    mailUsername = (String) mailUsernameField.getValueLocal();
+                if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD))
+                  {
+                    mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+                    mailUsername = (String) mailUsernameField.getValueLocal();
 
-		    mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
-		    mailpass = (String) mailpassField.getValueLocal();
+                    mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
+                    mailpass = (String) mailpassField.getValueLocal();
 
-		    mailCredentials.print(mailUsername);
-		    mailCredentials.print(" ");
-		    mailCredentials.println(mailpass);
+                    mailCredentials.print(mailUsername);
+                    mailCredentials.print(" ");
+                    mailCredentials.println(mailpass);
 
-		    extIMAPCredentials.print(username);
-		    extIMAPCredentials.print(" ");
-		    extIMAPCredentials.print(mailUsername);
-		    extIMAPCredentials.print(" ");
-		    extIMAPCredentials.println(mailpass);
-		  }
-	      }
-	  }
-	finally
-	  {
-	    extIMAPCredentials.close();
-	  }
+                    extIMAPCredentials.print(username);
+                    extIMAPCredentials.print(" ");
+                    extIMAPCredentials.print(mailUsername);
+                    extIMAPCredentials.print(" ");
+                    extIMAPCredentials.println(mailpass);
+                  }
+              }
+          }
+        finally
+          {
+            extIMAPCredentials.close();
+          }
       }
     finally
       {
-	mailCredentials.close();
+        mailCredentials.close();
       }
 
     return true;
@@ -4312,12 +4312,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   {
     if (oldMembers == null)
       {
-	oldMembers = new Vector();
+        oldMembers = new Vector();
       }
 
     if (graphCheck == null)
       {
-	graphCheck = new Hashtable();
+        graphCheck = new Hashtable();
       }
 
     // make sure we don't get into an infinite loop if someone made
@@ -4325,11 +4325,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (graphCheck.containsKey(object.getInvid()))
       {
-	return oldMembers;
+        return oldMembers;
       }
     else
       {
-	graphCheck.put(object.getInvid(), object.getInvid());
+        graphCheck.put(object.getInvid(), object.getInvid());
       }
 
     // add users in this Netgroup to oldMembers
@@ -4338,8 +4338,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (users != null)
       {
-	oldMembers = VectorUtils.union(oldMembers,
-				       VectorUtils.stringVector(users.getValueString(), ", "));
+        oldMembers = VectorUtils.union(oldMembers,
+                                       VectorUtils.stringVector(users.getValueString(), ", "));
       }
 
     // recursively add in users in any netgroups in this netgroup
@@ -4348,15 +4348,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (subGroups != null)
       {
-	for (int i = 0; i < subGroups.size(); i++)
-	  {
-	    DBObject subGroup = getObject(subGroups.value(i));
+        for (int i = 0; i < subGroups.size(); i++)
+          {
+            DBObject subGroup = getObject(subGroups.value(i));
 
-	    if (!subGroup.isInactivated())
-	      {
-		oldMembers = netgroupMembers(subGroup, oldMembers, graphCheck);
-	      }
-	  }
+            if (!subGroup.isInactivated())
+              {
+                oldMembers = netgroupMembers(subGroup, oldMembers, graphCheck);
+              }
+          }
       }
 
     return oldMembers;
@@ -4371,7 +4371,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   {
     if (in == null)
       {
-	return "";
+        return "";
       }
 
     StringBuilder buffer = new StringBuilder();
@@ -4383,14 +4383,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < ary.length; i++)
       {
-	if (ary[i] == ':')
-	  {
-	    continue;
-	  }
-	else
-	  {
-	    buffer.append(ary[i]);
-	  }
+        if (ary[i] == ':')
+          {
+            continue;
+          }
+        else
+          {
+            buffer.append(ary[i]);
+          }
       }
 
     return buffer.toString();
@@ -4406,7 +4406,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   {
     if (in == null)
       {
-	return "";
+        return "";
       }
 
     StringBuilder buffer = new StringBuilder();
@@ -4418,18 +4418,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < ary.length; i++)
       {
-	if (ary[i] == ':')
-	  {
-	    buffer.append("\\:");
-	  }
-	else if (ary[i] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(ary[i]);
-	  }
+        if (ary[i] == ':')
+          {
+            buffer.append("\\:");
+          }
+        else if (ary[i] == '\\')
+          {
+            buffer.append("\\\\");
+          }
+        else
+          {
+            buffer.append(ary[i]);
+          }
       }
 
     return buffer.toString();
@@ -4450,28 +4450,28 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	sys_dataFile = openOutFile(path + "sysdata_info", "gasharl");
+        sys_dataFile = openOutFile(path + "sysdata_info", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeSysFile(): couldn't open sysdata_info file: " + ex);
-	return false;
+        System.err.println("GASHBuilderTask.writeSysFile(): couldn't open sysdata_info file: " + ex);
+        return false;
       }
 
     try
       {
-	// the hosts_info file is kind of squirrely.  We emit all of
-	// the system lines first, followed by all of the interface
-	// lines.
+        // the hosts_info file is kind of squirrely.  We emit all of
+        // the system lines first, followed by all of the interface
+        // lines.
 
-	for (DBObject system: getObjects(systemSchema.BASE))
-	  {
-	    writeSysDataLine(system, sys_dataFile);
-	  }
+        for (DBObject system: getObjects(systemSchema.BASE))
+          {
+            writeSysDataLine(system, sys_dataFile);
+          }
       }
     finally
       {
-	sys_dataFile.close();
+        sys_dataFile.close();
       }
 
     return true;
@@ -4510,113 +4510,113 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (interfaceInvids != null)
       {
-	for (int i = 0; i < interfaceInvids.size(); i++)
-	  {
-	    String local_sysname;
-	    DBObject interfaceObj;
+        for (int i = 0; i < interfaceInvids.size(); i++)
+          {
+            String local_sysname;
+            DBObject interfaceObj;
 
-	    /* -- */
+            /* -- */
 
-	    result.setLength(0);
+            result.setLength(0);
 
-	    interfaceObj = getObject((Invid) interfaceInvids.elementAt(i));
+            interfaceObj = getObject((Invid) interfaceInvids.elementAt(i));
 
-	    interfaceName = getInterfaceHostname(interfaceObj);
+            interfaceName = getInterfaceHostname(interfaceObj);
 
-	    if (interfaceName != null)
-	      {
-		local_sysname = interfaceName;
-	      }
-	    else
-	      {
-		local_sysname = sysname;
-	      }
+            if (interfaceName != null)
+              {
+                local_sysname = interfaceName;
+              }
+            else
+              {
+                local_sysname = sysname;
+              }
 
-	    roomInvid = (Invid) object.getFieldValueLocal(systemSchema.ROOM);
+            roomInvid = (Invid) object.getFieldValueLocal(systemSchema.ROOM);
 
-	    if (roomInvid != null)
-	      {
-		room = getLabel(roomInvid);
-	      }
-	    else
-	      {
-		room = "<unknown>";
-	      }
+            if (roomInvid != null)
+              {
+                room = getLabel(roomInvid);
+              }
+            else
+              {
+                room = "<unknown>";
+              }
 
-	    primaryUserInvid = (Invid) object.getFieldValueLocal(systemSchema.PRIMARYUSER);
+            primaryUserInvid = (Invid) object.getFieldValueLocal(systemSchema.PRIMARYUSER);
 
-	    if (primaryUserInvid != null)
-	      {
-		primaryUser = getLabel(primaryUserInvid);
-	      }
+            if (primaryUserInvid != null)
+              {
+                primaryUser = getLabel(primaryUserInvid);
+              }
 
-	    try
-	      {
-		IPstring = interfaceObj.getField(interfaceSchema.ADDRESS).getValueString();
-	      }
-	    catch (RemoteException ex)
-	      {
-	      }
-	    catch (NullPointerException ex)
-	      {
-	      }
+            try
+              {
+                IPstring = interfaceObj.getField(interfaceSchema.ADDRESS).getValueString();
+              }
+            catch (RemoteException ex)
+              {
+              }
+            catch (NullPointerException ex)
+              {
+              }
 
-	    try
-	      {
-		MACstring = interfaceObj.getField(interfaceSchema.ETHERNETINFO).getValueString();
+            try
+              {
+                MACstring = interfaceObj.getField(interfaceSchema.ETHERNETINFO).getValueString();
 
-		MACstring = MACstring.replace('-',':');
-	      }
-	    catch (RemoteException ex)
-	      {
-	      }
-	    catch (NullPointerException ex)
-	      {
-	      }
+                MACstring = MACstring.replace('-',':');
+              }
+            catch (RemoteException ex)
+              {
+              }
+            catch (NullPointerException ex)
+              {
+              }
 
-	    if (IPstring == null || MACstring == null)
-	      {
-		continue;
-	      }
+            if (IPstring == null || MACstring == null)
+              {
+                continue;
+              }
 
-	    try
-	      {
-		ownerString = object.getField(SchemaConstants.OwnerListField).getValueString();
-	      }
-	    catch (RemoteException ex)
-	      {
-	      }
-	    catch (NullPointerException ex)
-	      {
-	      }
+            try
+              {
+                ownerString = object.getField(SchemaConstants.OwnerListField).getValueString();
+              }
+            catch (RemoteException ex)
+              {
+              }
+            catch (NullPointerException ex)
+              {
+              }
 
-	    result.append(IPstring);
-	    result.append("|");
-	    result.append(MACstring);
-	    result.append("|");
-	    result.append(local_sysname);
-	    result.append("|");
+            result.append(IPstring);
+            result.append("|");
+            result.append(MACstring);
+            result.append("|");
+            result.append(local_sysname);
+            result.append("|");
 
-	    if (ownerString == null || ownerString.equals(""))
-	      {
-		result.append("supergash");
-	      }
-	    else
-	      {
-		result.append(ownerString);
-	      }
+            if (ownerString == null || ownerString.equals(""))
+              {
+                result.append("supergash");
+              }
+            else
+              {
+                result.append(ownerString);
+              }
 
-	    result.append("|");
-	    result.append(room);
-	    result.append("|");
+            result.append("|");
+            result.append(room);
+            result.append("|");
 
-	    if (primaryUser != null)
-	      {
-		result.append(primaryUser);
-	      }
+            if (primaryUser != null)
+              {
+                result.append(primaryUser);
+              }
 
-	    writer.println(result.toString());
-	  }
+            writer.println(result.toString());
+          }
       }
   }
 
@@ -4636,35 +4636,35 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     try
       {
-	hosts_info = openOutFile(path + "hosts_info", "gasharl");
+        hosts_info = openOutFile(path + "hosts_info", "gasharl");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeSysFile(): couldn't open hosts_info file: " + ex);
-	return false;
+        System.err.println("GASHBuilderTask.writeSysFile(): couldn't open hosts_info file: " + ex);
+        return false;
       }
 
     try
       {
-	// the hosts_info file is kind of squirrely.  We emit all of
-	// the system lines first, followed by all of the interface
-	// lines.
+        // the hosts_info file is kind of squirrely.  We emit all of
+        // the system lines first, followed by all of the interface
+        // lines.
 
-	for (DBObject system: getObjects(systemSchema.BASE))
-	  {
-	    writeSystem(system, hosts_info);
-	  }
+        for (DBObject system: getObjects(systemSchema.BASE))
+          {
+            writeSystem(system, hosts_info);
+          }
 
-	// now the interfaces
+        // now the interfaces
 
-	for (DBObject interfaceObj: getObjects(interfaceSchema.BASE))
-	  {
-	    writeInterface(interfaceObj, hosts_info);
-	  }
+        for (DBObject interfaceObj: getObjects(interfaceSchema.BASE))
+          {
+            writeInterface(interfaceObj, hosts_info);
+          }
       }
     finally
       {
-	hosts_info.close();
+        hosts_info.close();
       }
 
     return true;
@@ -4717,15 +4717,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (interfaceInvids != null)
       {
-	for (int i = 0; i < interfaceInvids.size(); i++)
-	  {
-	    interfaceName = getInterfaceHostname(getObject((Invid) interfaceInvids.elementAt(i)));
+        for (int i = 0; i < interfaceInvids.size(); i++)
+          {
+            interfaceName = getInterfaceHostname(getObject((Invid) interfaceInvids.elementAt(i)));
 
-	    if (interfaceName != null)
-	      {
-		interfaceNames.addElement(interfaceName);
-	      }
-	  }
+            if (interfaceName != null)
+              {
+                interfaceNames.addElement(interfaceName);
+              }
+          }
       }
 
     sysAliases = object.getFieldValuesLocal(systemSchema.SYSTEMALIASES);
@@ -4734,22 +4734,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (roomInvid != null)
       {
-	room = getLabel(roomInvid);
+        room = getLabel(roomInvid);
       }
     else
       {
-	room = "<unknown>";
+        room = "<unknown>";
       }
 
     typeInvid = (Invid) object.getFieldValueLocal(systemSchema.SYSTEMTYPE);
 
     if (typeInvid != null)
       {
-	type = getLabel(typeInvid);
+        type = getLabel(typeInvid);
       }
     else
       {
-	type = "<unknown>";
+        type = "<unknown>";
       }
 
     manufacturer = (String) object.getFieldValueLocal(systemSchema.MANUFACTURER);
@@ -4762,7 +4762,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (primaryUserInvid != null)
       {
-	primaryUser = getLabel(primaryUserInvid);
+        primaryUser = getLabel(primaryUserInvid);
       }
 
     // now build our output line
@@ -4774,22 +4774,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < interfaceNames.size(); i++)
       {
-	result.append((String) interfaceNames.elementAt(i));
-	result.append(" ");
+        result.append((String) interfaceNames.elementAt(i));
+        result.append(" ");
       }
 
     result.append(", ");
 
     if (sysAliases != null)
       {
-	for (int i = 0; i < sysAliases.size(); i++)
-	  {
-	    result.append((String) sysAliases.elementAt(i));
-	    result.append(" ");
-	  }
+        for (int i = 0; i < sysAliases.size(); i++)
+          {
+            result.append((String) sysAliases.elementAt(i));
+            result.append(" ");
+          }
       }
 
-    result.append(": : ");	// no admins
+    result.append(": : ");      // no admins
     result.append(room);
     result.append(" : ");
     result.append(type);
@@ -4803,13 +4803,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (primaryUser != null)
       {
-	result.append(primaryUser);
+        result.append(primaryUser);
       }
 
     if (result.length() > 1024)
       {
-	System.err.println("GASHBuilder.writeSystem(): Warning!  hosts_info line " +
-			   sysname + " overflows the GASH line length!");
+        System.err.println("GASHBuilder.writeSystem(): Warning!  hosts_info line " +
+                           sysname + " overflows the GASH line length!");
       }
 
     writer.println(result.toString());
@@ -4888,16 +4888,16 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (ipField == null)
       {
-	System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname +
-			   " has no IP address!  Skipping!");
-	return;
+        System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname +
+                           " has no IP address!  Skipping!");
+        return;
       }
 
     if (!ipField.isIPV4())
       {
-	System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname +
-			   " has an IPV6 record!  This isn't compatible with the GASH makefiles!  Skipping!");
-	return;
+        System.err.println("GASHBuilder.writeInterface(): WARNING!  Interface for " + sysname +
+                           " has an IPV6 record!  This isn't compatible with the GASH makefiles!  Skipping!");
+        return;
       }
 
     IPString = ipField.getValueString();
@@ -4914,7 +4914,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (hostname != null)
       {
-	result.append(hostname);
+        result.append(hostname);
       }
 
     result.append(", ");
@@ -4925,11 +4925,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (hostAliases != null)
       {
-	for (int i = 0; i < hostAliases.size(); i++)
-	  {
-	    result.append(" ");
-	    result.append((String) hostAliases.elementAt(i));
-	  }
+        for (int i = 0; i < hostAliases.size(); i++)
+          {
+            result.append(" ");
+            result.append((String) hostAliases.elementAt(i));
+          }
       }
 
     result.append(" : ");
@@ -4939,9 +4939,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (result.length() > 1024)
       {
-	System.err.println("GASHBuilder.writeInterface(): Warning!  hosts_info type 2 line " +
-			   ((hostname == null) ? sysname : hostname) +
-			   " overflows the GASH line length!");
+        System.err.println("GASHBuilder.writeInterface(): Warning!  hosts_info type 2 line " +
+                           ((hostname == null) ? sysname : hostname) +
+                           " overflows the GASH line length!");
       }
 
     writer.println(result.toString());
@@ -4987,12 +4987,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (DBObject networkObject: networks)
       {
-	writeDHCPNetwork(networkObject, nullWriter);
+        writeDHCPNetwork(networkObject, nullWriter);
       }
 
     for (DBObject systemObject: getObjects(systemSchema.BASE))
       {
-	writeDHCPSystem(systemObject, nullWriter);
+        writeDHCPSystem(systemObject, nullWriter);
       }
 
     // okay, we've got our custom options, we can go ahead and write
@@ -5010,58 +5010,58 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             return false;
           }
 
-	dhcpFileWriter.println("# Generated by Ganymede GASHBuilderTask, revision $Rev$");
-	dhcpFileWriter.println("# " + new Date().toString());
-	dhcpFileWriter.println("#");
-	dhcpFileWriter.println("# NOTE: This file, in its entirety, is now being generated by Ganymede.");
-	dhcpFileWriter.println("#");
-	dhcpFileWriter.println("#       To reconfigure global or shared network dhcp options, edit the");
-	dhcpFileWriter.println("#       DHCP Network objects in Ganymede under the Configuration section.");
-	dhcpFileWriter.println("#");
-	dhcpFileWriter.println("#       -- James and Jon");
-	dhcpFileWriter.println("#");
-	dhcpFileWriter.println("######################################################################");
-	dhcpFileWriter.println("");
-	dhcpFileWriter.println("authoritative;");
-	dhcpFileWriter.println("ddns-update-style none;");
-	dhcpFileWriter.println("");
+        dhcpFileWriter.println("# Generated by Ganymede GASHBuilderTask, revision $Rev$");
+        dhcpFileWriter.println("# " + new Date().toString());
+        dhcpFileWriter.println("#");
+        dhcpFileWriter.println("# NOTE: This file, in its entirety, is now being generated by Ganymede.");
+        dhcpFileWriter.println("#");
+        dhcpFileWriter.println("#       To reconfigure global or shared network dhcp options, edit the");
+        dhcpFileWriter.println("#       DHCP Network objects in Ganymede under the Configuration section.");
+        dhcpFileWriter.println("#");
+        dhcpFileWriter.println("#       -- James and Jon");
+        dhcpFileWriter.println("#");
+        dhcpFileWriter.println("######################################################################");
+        dhcpFileWriter.println("");
+        dhcpFileWriter.println("authoritative;");
+        dhcpFileWriter.println("ddns-update-style none;");
+        dhcpFileWriter.println("");
 
-	writeDHCPCustomOptions(dhcpFileWriter);
+        writeDHCPCustomOptions(dhcpFileWriter);
 
         dhcpFileWriter.println("\n#===============================================================================");
         dhcpFileWriter.println("# Shared Networks Data");
         dhcpFileWriter.println("#===============================================================================");
 
-	// we're going to sort the DHCPNetwork objects by name so that
-	// we are sure to write out the _GLOBAL_ record first.
+        // we're going to sort the DHCPNetwork objects by name so that
+        // we are sure to write out the _GLOBAL_ record first.
 
-	networks = (List<DBObject>) java.util.Collections.list(enumerateObjects(dhcpNetworkSchema.BASE));
-	java.util.Collections.sort(networks, new NetworkSortByName());
+        networks = (List<DBObject>) java.util.Collections.list(enumerateObjects(dhcpNetworkSchema.BASE));
+        java.util.Collections.sort(networks, new NetworkSortByName());
 
-	for (DBObject networkObject: networks)
-	  {
-	    writeDHCPNetwork(networkObject, dhcpFileWriter);
-	  }
+        for (DBObject networkObject: networks)
+          {
+            writeDHCPNetwork(networkObject, dhcpFileWriter);
+          }
 
-	dhcpFileWriter.println("\n#===============================================================================");
-	dhcpFileWriter.println("# Per System Data");
-	dhcpFileWriter.println("#===============================================================================");
+        dhcpFileWriter.println("\n#===============================================================================");
+        dhcpFileWriter.println("# Per System Data");
+        dhcpFileWriter.println("#===============================================================================");
 
-	for (DBObject systemObject: getObjects(systemSchema.BASE))
-	  {
-	    writeDHCPSystem(systemObject, dhcpFileWriter);
-	  }
+        for (DBObject systemObject: getObjects(systemSchema.BASE))
+          {
+            writeDHCPSystem(systemObject, dhcpFileWriter);
+          }
 
-	return true;
+        return true;
       }
     finally
       {
         this.customOptions = null;
 
-	if (dhcpFileWriter != null)
-	  {
-	    dhcpFileWriter.close();
-	  }
+        if (dhcpFileWriter != null)
+          {
+            dhcpFileWriter.close();
+          }
       }
   }
 
@@ -5077,7 +5077,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   {
     if (this.customOptions.size() == 0)
       {
-	return true;
+        return true;
       }
 
     writer.println("# Custom Option Declarations");
@@ -5091,25 +5091,25 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     while (it.hasNext())
       {
-	Invid optionInvid = (Invid) it.next();
-	DBObject obj = getObject(optionInvid);
+        Invid optionInvid = (Invid) it.next();
+        DBObject obj = getObject(optionInvid);
 
-	if (obj != null)
-	  {
-	    String name = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
+        if (obj != null)
+          {
+            String name = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
 
-	    if (name.indexOf('.') != -1)
-	      {
-		String optionSpace = name.substring(0, name.indexOf('.'));
+            if (name.indexOf('.') != -1)
+              {
+                String optionSpace = name.substring(0, name.indexOf('.'));
 
-		if (!foundOptions.contains(optionSpace))
-		  {
-		    writer.println("option space " + optionSpace + ";");
-		    foundOptions.add(optionSpace);
-		  }
-	      }
+                if (!foundOptions.contains(optionSpace))
+                  {
+                    writer.println("option space " + optionSpace + ";");
+                    foundOptions.add(optionSpace);
+                  }
+              }
 
-	  }
+          }
       }
 
     // loop again to declare our custom options
@@ -5118,45 +5118,45 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     while (it.hasNext())
       {
-	Invid optionInvid = (Invid) it.next();
-	DBObject obj = getObject(optionInvid);
+        Invid optionInvid = (Invid) it.next();
+        DBObject obj = getObject(optionInvid);
 
-	if (obj != null)
-	  {
-	    String name = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
-	    String type = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
-	    Integer code = (Integer) obj.getFieldValueLocal(dhcpOptionSchema.CUSTOMCODE);
+        if (obj != null)
+          {
+            String name = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
+            String type = (String) obj.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
+            Integer code = (Integer) obj.getFieldValueLocal(dhcpOptionSchema.CUSTOMCODE);
 
-	    // we need to use the expanded syntax for the
-	    // option types for the ISC DHCP server
+            // we need to use the expanded syntax for the
+            // option types for the ISC DHCP server
 
-	    if (type.equals("uint8"))
-	      {
-		type = "unsigned integer 8";
-	      }
-	    else if (type.equals("int8"))
-	      {
-		type = "signed integer 8";
-	      }
-	    else if (type.equals("uint16"))
-	      {
-		type = "unsigned integer 16";
-	      }
-	    else if (type.equals("int16"))
-	      {
-		type = "signed integer 16";
-	      }
-	    else if (type.equals("uint32"))
-	      {
-		type = "unsigned integer 16";
-	      }
-	    else if (type.equals("int32"))
-	      {
-		type = "signed integer 16";
-	      }
+            if (type.equals("uint8"))
+              {
+                type = "unsigned integer 8";
+              }
+            else if (type.equals("int8"))
+              {
+                type = "signed integer 8";
+              }
+            else if (type.equals("uint16"))
+              {
+                type = "unsigned integer 16";
+              }
+            else if (type.equals("int16"))
+              {
+                type = "signed integer 16";
+              }
+            else if (type.equals("uint32"))
+              {
+                type = "unsigned integer 16";
+              }
+            else if (type.equals("int32"))
+              {
+                type = "signed integer 16";
+              }
 
-	    writer.println("option " + name + " code " + code + " = " + type + ";");
-	  }
+            writer.println("option " + name + " code " + code + " = " + type + ";");
+          }
       }
 
     writer.println("#===============================================================================");
@@ -5185,64 +5185,64 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (name.equals("_GLOBAL_") && object.isDefined(dhcpNetworkSchema.OPTIONS))
       {
-	findDHCPOptions(options, object.getFieldValuesLocal(dhcpNetworkSchema.OPTIONS));
-	writeDHCPOptionList(options, object, writer, "");
-	return;
+        findDHCPOptions(options, object.getFieldValuesLocal(dhcpNetworkSchema.OPTIONS));
+        writeDHCPOptionList(options, object, writer, "");
+        return;
       }
 
     try
       {
-	writer.write("\n#===============================================================================\n");
-	writer.write("shared-network " + name + "\n");
+        writer.write("\n#===============================================================================\n");
+        writer.write("shared-network " + name + "\n");
 
-	ipField = (IPDBField) object.getField(dhcpNetworkSchema.NETWORK_NUMBER);
+        ipField = (IPDBField) object.getField(dhcpNetworkSchema.NETWORK_NUMBER);
 
-	if (ipField != null)
-	  {
-	    network_number = (String) ipField.getEncodingString();
-	  }
+        if (ipField != null)
+          {
+            network_number = (String) ipField.getEncodingString();
+          }
 
-	ipField = (IPDBField) object.getField(dhcpNetworkSchema.NETWORK_MASK);
+        ipField = (IPDBField) object.getField(dhcpNetworkSchema.NETWORK_MASK);
 
-	if (ipField != null)
-	  {
-	    network_mask = (String) ipField.getEncodingString();
-	  }
+        if (ipField != null)
+          {
+            network_mask = (String) ipField.getEncodingString();
+          }
 
-	writer.write("{\n");
-	writer.write("\tsubnet\t" + network_number + "\tnetmask\t\t" + network_mask + "\n");
-	writer.write("\t{ \n");
+        writer.write("{\n");
+        writer.write("\tsubnet\t" + network_number + "\tnetmask\t\t" + network_mask + "\n");
+        writer.write("\t{ \n");
 
-	if (object.isDefined(dhcpNetworkSchema.OPTIONS))
-	  {
-	    findDHCPOptions(options, object.getFieldValuesLocal(dhcpNetworkSchema.OPTIONS));
-	    writeDHCPOptionList(options, object, writer, "\t\t");
-	  }
+        if (object.isDefined(dhcpNetworkSchema.OPTIONS))
+          {
+            findDHCPOptions(options, object.getFieldValuesLocal(dhcpNetworkSchema.OPTIONS));
+            writeDHCPOptionList(options, object, writer, "\t\t");
+          }
 
-	if (object.isSet(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS))
-	  {
-	    writer.write("\t\tpool\n");
-	    writer.write("\t\t{\n");
-	    String guest_range = (String) object.getFieldValueLocal(dhcpNetworkSchema.GUEST_RANGE);
-	    HashMap options2 = new HashMap();
-	    writer.write("\t\t\trange\t" + guest_range + ";\n");
+        if (object.isSet(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS))
+          {
+            writer.write("\t\tpool\n");
+            writer.write("\t\t{\n");
+            String guest_range = (String) object.getFieldValueLocal(dhcpNetworkSchema.GUEST_RANGE);
+            HashMap options2 = new HashMap();
+            writer.write("\t\t\trange\t" + guest_range + ";\n");
 
-	    if (object.isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
-	      {
-		findDHCPOptions(options2, object.getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS));
-		writeDHCPOptionList(options2, object, writer, "\t\t\t");
-	      }
+            if (object.isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
+              {
+                findDHCPOptions(options2, object.getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS));
+                writeDHCPOptionList(options2, object, writer, "\t\t\t");
+              }
 
-	    writer.write("\t\t\tallow known clients;\n");
-	    writer.write("\t\t}\n");
-	  }
+            writer.write("\t\t\tallow known clients;\n");
+            writer.write("\t\t}\n");
+          }
 
-	writer.write("\t} # END SUBNET " + network_number + "\n");
-	writer.write("} # END SHARED-NETWORK " + name + "\n");
+        writer.write("\t} # END SUBNET " + network_number + "\n");
+        writer.write("} # END SHARED-NETWORK " + name + "\n");
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeDHCPNetwork(): couldn't write to file: " + ex);
+        System.err.println("GASHBuilderTask.writeDHCPNetwork(): couldn't write to file: " + ex);
       }
   }
 
@@ -5340,66 +5340,66 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < 2; i++)
       {
-	buffer.setLength(0);
+        buffer.setLength(0);
 
-	buffer.append("host ");
+        buffer.append("host ");
 
-	if (i == 0)
-	  {
-	    buffer.append(sysname);
-	  }
-	else
-	  {
-	    buffer.append(sysname + "_roaming");
-	  }
+        if (i == 0)
+          {
+            buffer.append(sysname);
+          }
+        else
+          {
+            buffer.append(sysname + "_roaming");
+          }
 
-	buffer.append("\n{\n");
+        buffer.append("\n{\n");
 
-	buffer.append("\thardware ethernet\t\t");
-	buffer.append(macAddress);
-	buffer.append(";\n");
+        buffer.append("\thardware ethernet\t\t");
+        buffer.append(macAddress);
+        buffer.append(";\n");
 
-	if (i == 0)
-	  {
-	    // we'll skip this the second time for our roaming entry
+        if (i == 0)
+          {
+            // we'll skip this the second time for our roaming entry
 
-	    buffer.append("\tfixed-address\t\t\t");
-	    buffer.append(ipAddress);
-	    buffer.append(";\n");
-	  }
+            buffer.append("\tfixed-address\t\t\t");
+            buffer.append(ipAddress);
+            buffer.append(";\n");
+          }
 
-	buffer.append("\toption host-name\t\t");
-	buffer.append(quote(sysname));
-	buffer.append(";\n");
+        buffer.append("\toption host-name\t\t");
+        buffer.append(quote(sysname));
+        buffer.append(";\n");
 
-	try
-	  {
-	    writer.write(buffer.toString());
+        try
+          {
+            writer.write(buffer.toString());
 
-	    writeDHCPOptionList(options, object, writer, "\t");
+            writeDHCPOptionList(options, object, writer, "\t");
 
-	    if (i == 0)
-	      {
-		writer.write("} # END host\n\n");
-	      }
-	    else
-	      {
-		writer.write("} # END roaming host entry\n\n");
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("GASHBuilderTask.writeDHCPSystem(): couldn't write to file: " + ex);
-	  }
+            if (i == 0)
+              {
+                writer.write("} # END host\n\n");
+              }
+            else
+              {
+                writer.write("} # END roaming host entry\n\n");
+              }
+          }
+        catch (IOException ex)
+          {
+            System.err.println("GASHBuilderTask.writeDHCPSystem(): couldn't write to file: " + ex);
+          }
 
 
-	if (options.size() == 0)
-	  {
-	    // no custom dhcp, so we don't need to create a roaming
-	    // entry, just break out
+        if (options.size() == 0)
+          {
+            // no custom dhcp, so we don't need to create a roaming
+            // entry, just break out
 
-	    break;
-	  }
+            break;
+          }
       }
   }
 
@@ -5422,31 +5422,31 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     while (values.hasNext())
       {
-	dhcp_entry entry = (dhcp_entry) values.next();
+        dhcp_entry entry = (dhcp_entry) values.next();
 
-	if (entry.builtin)
-	  {
-	    continue;
-	  }
+        if (entry.builtin)
+          {
+            continue;
+          }
 
-	if (entry.name.indexOf('.') != -1)
-	  {
-	    String spaceName = entry.name.substring(0, entry.name.indexOf('.'));
+        if (entry.name.indexOf('.') != -1)
+          {
+            String spaceName = entry.name.substring(0, entry.name.indexOf('.'));
 
-	    if (spaces.size() == 0)
-	      {
-		result.append(tabs+"site-option-space\t\t\"" + spaceName + "\";\n");
-		spaces.add(spaceName);
-	      }
-	    else
-	      {
-		if (!spaces.contains(spaceName))
-		  {
-		    Ganymede.debug("GASHBuilderTask: writeDHCPSystem() ran into problems with " +
-				   object.getLabel() + " due to conflicting DHCP option spaces.");
-		  }
-	      }
-	  }
+            if (spaces.size() == 0)
+              {
+                result.append(tabs+"site-option-space\t\t\"" + spaceName + "\";\n");
+                spaces.add(spaceName);
+              }
+            else
+              {
+                if (!spaces.contains(spaceName))
+                  {
+                    Ganymede.debug("GASHBuilderTask: writeDHCPSystem() ran into problems with " +
+                                   object.getLabel() + " due to conflicting DHCP option spaces.");
+                  }
+              }
+          }
       }
 
     // second make sure that we've forced any mandatory options
@@ -5457,60 +5457,60 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     while (values.hasNext())
       {
-	dhcp_entry entry = (dhcp_entry) values.next();
+        dhcp_entry entry = (dhcp_entry) values.next();
 
-	if (entry.forced)
-	  {
-	    forcedOptions.add(entry);
-	  }
+        if (entry.forced)
+          {
+            forcedOptions.add(entry);
+          }
       }
 
     if (forcedOptions.size() > 0)
       {
-	StringBuilder hexOptionCodes = new StringBuilder();
-	StringBuilder concatPrefix = new StringBuilder();
+        StringBuilder hexOptionCodes = new StringBuilder();
+        StringBuilder concatPrefix = new StringBuilder();
 
-	values = forcedOptions.iterator();
+        values = forcedOptions.iterator();
 
-	while (values.hasNext())
-	  {
-	    dhcp_entry entry = (dhcp_entry) values.next();
+        while (values.hasNext())
+          {
+            dhcp_entry entry = (dhcp_entry) values.next();
 
-	    if (entry.forced && entry.code != 0)
-	      {
-		if (hexOptionCodes.length() == 0)
-		  {
-		    hexOptionCodes.append(",");
-		  }
-		else
-		  {
-		    hexOptionCodes.append("),");
-		  }
+            if (entry.forced && entry.code != 0)
+              {
+                if (hexOptionCodes.length() == 0)
+                  {
+                    hexOptionCodes.append(",");
+                  }
+                else
+                  {
+                    hexOptionCodes.append("),");
+                  }
 
-		if (concatPrefix.length () == 0)
-		  {
-		    concatPrefix.append("concat(option dhcp-parameter-request-list");
-		  }
-		else
-		  {
-		    concatPrefix.insert(0, "concat(");
-		  }
+                if (concatPrefix.length () == 0)
+                  {
+                    concatPrefix.append("concat(option dhcp-parameter-request-list");
+                  }
+                else
+                  {
+                    concatPrefix.insert(0, "concat(");
+                  }
 
-		hexOptionCodes.append(java.lang.Integer.toHexString(entry.code));
-	      }
-	  }
+                hexOptionCodes.append(java.lang.Integer.toHexString(entry.code));
+              }
+          }
 
-	if (hexOptionCodes.length() != 0)
-	  {
-	    hexOptionCodes.append(");\n");
+        if (hexOptionCodes.length() != 0)
+          {
+            hexOptionCodes.append(");\n");
 
-	    result.append(tabs+"if exists dhcp-parameter-request-list {\n");
-	    result.append(tabs+"\t# Ganymede forced dhcp options\n");
-	    result.append(tabs+"\toption dhcp-parameter-request-list = ");
-	    result.append(concatPrefix);
-	    result.append(hexOptionCodes);
-	    result.append(tabs+"}\n");
-	  }
+            result.append(tabs+"if exists dhcp-parameter-request-list {\n");
+            result.append(tabs+"\t# Ganymede forced dhcp options\n");
+            result.append(tabs+"\toption dhcp-parameter-request-list = ");
+            result.append(concatPrefix);
+            result.append(hexOptionCodes);
+            result.append(tabs+"}\n");
+          }
       }
 
     // third, let's write out the actual options for this host
@@ -5519,56 +5519,56 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     while (values.hasNext())
       {
-	dhcp_entry entry = (dhcp_entry) values.next();
+        dhcp_entry entry = (dhcp_entry) values.next();
 
-	int length = 0;
+        int length = 0;
 
-	result.append(tabs);
+        result.append(tabs);
 
-	if (!entry.builtin)
-	  {
-	    result.append("option ");
-	    length = 7;
-	  }
-	else
-	  {
-	    length = 0;
-	  }
+        if (!entry.builtin)
+          {
+            result.append("option ");
+            length = 7;
+          }
+        else
+          {
+            length = 0;
+          }
 
-	result.append(entry.name);
+        result.append(entry.name);
 
-	if (length + entry.name.length() < 16)
-	  {
-	    result.append("\t\t\t");
-	  }
-	else if (length + entry.name.length() < 24)
-	  {
-	    result.append("\t\t");
-	  }
-	else
-	  {
-	    result.append("\t");
-	  }
+        if (length + entry.name.length() < 16)
+          {
+            result.append("\t\t\t");
+          }
+        else if (length + entry.name.length() < 24)
+          {
+            result.append("\t\t");
+          }
+        else
+          {
+            result.append("\t");
+          }
 
-	if (entry.type.equals("string") || entry.type.equals("text"))
-	  {
-	    result.append(quote(entry.value));
-	    result.append(";\n");
-	  }
-	else
-	  {
-	    result.append(entry.value);
-	    result.append(";\n");
-	  }
+        if (entry.type.equals("string") || entry.type.equals("text"))
+          {
+            result.append(quote(entry.value));
+            result.append(";\n");
+          }
+        else
+          {
+            result.append(entry.value);
+            result.append(";\n");
+          }
       }
 
     try
       {
-	writer.write(result.toString());
+        writer.write(result.toString());
       }
     catch (IOException ex)
       {
-	System.err.println("GASHBuilderTask.writeDHCPOptionList(): couldn't write to file: " + ex);
+        System.err.println("GASHBuilderTask.writeDHCPOptionList(): couldn't write to file: " + ex);
       }
   }
 
@@ -5608,14 +5608,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           }
 
         resultMap.put(typeName, new dhcp_entry(typeName,
-					       typeString,
-					       value,
-					       optionObject.isSet(dhcpOptionSchema.BUILTIN),
-					       typecode,
-					       optionObject.isSet(dhcpOptionSchema.FORCESEND)));
+                                               typeString,
+                                               value,
+                                               optionObject.isSet(dhcpOptionSchema.BUILTIN),
+                                               typecode,
+                                               optionObject.isSet(dhcpOptionSchema.FORCESEND)));
 
         if (!optionObject.isSet(dhcpOptionSchema.BUILTIN) &&
-	    optionObject.isSet(dhcpOptionSchema.CUSTOMOPTION))
+            optionObject.isSet(dhcpOptionSchema.CUSTOMOPTION))
           {
             this.customOptions.add(optionInvid);
           }
@@ -5635,7 +5635,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   {
     if (this.normalCategory != null)
       {
-	return this.normalCategory;
+        return this.normalCategory;
       }
 
     scanCategories();
@@ -5657,7 +5657,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   {
     if (this.agencyCategory != null)
       {
-	return this.agencyCategory;
+        return this.agencyCategory;
       }
 
     scanCategories();
@@ -5678,12 +5678,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (this.normalCategory == null)
       {
-	Ganymede.debug("ERROR: GASHBuilderTask.scanCategories() couldn't find the " + normalCategoryLabel + " user category!");
+        Ganymede.debug("ERROR: GASHBuilderTask.scanCategories() couldn't find the " + normalCategoryLabel + " user category!");
       }
 
     if (this.agencyCategory == null)
       {
-	Ganymede.debug("ERROR: GASHBuilderTask.scanCategories() couldn't find the " + agencyCategoryLabel + " user category!");
+        Ganymede.debug("ERROR: GASHBuilderTask.scanCategories() couldn't find the " + agencyCategoryLabel + " user category!");
       }
   }
 }
