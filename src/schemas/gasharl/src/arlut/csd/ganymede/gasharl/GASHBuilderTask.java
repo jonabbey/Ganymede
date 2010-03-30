@@ -3145,11 +3145,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
 	    for (String address: addresses)
 	      {
-		address = fixup(address).toLowerCase();
+		String host = getEmailHost(fixup(address).toLowerCase());
 		
-		if (address.endsWith(".arlut.utexas.edu"))
+		if (host.endsWith(".arlut.utexas.edu"))
 		  {
-		    outargs.add(getEmailHost(address));
+		    outargs.add(host);
 		  }
 	      }
 	  }
@@ -3163,11 +3163,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 	  {
 	    for (String target: targets)
 	      {
-		target = fixup(target).toLowerCase();
+		String host = getEmailHost(fixup(target).toLowerCase());
 
-		if (target.endsWith(".arlut.utexas.edu"))
+		if (host.endsWith(".arlut.utexas.edu"))
 		  {
-		    outargs.add(getEmailHost(target));
+		    outargs.add(host);
 		  }
 	      }
 	  }
@@ -3516,12 +3516,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    * Returns a String containing everything after the @ sign in
-   * address, or the entire string if no @ was found.
+   * address, or the empty string if no @ was found in the address
+   * parameter.
    */
 
   private String getEmailHost(String address)
   {
-    return address.substring(address.indexOf('@') + 1);
+    if (address.indexOf('@') != -1)
+      {
+	return address.substring(address.indexOf('@') + 1);
+      }
+
+    return "";
   }
 
   private void showDirty(String object, PrintWriter writer)
