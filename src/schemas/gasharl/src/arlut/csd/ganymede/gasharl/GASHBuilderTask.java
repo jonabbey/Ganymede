@@ -3388,6 +3388,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         throw new IllegalArgumentException();
       }
 
+    if (address.indexOf('@') == -1)
+      {
+	return address.toLowerCase();
+      }
+
     return address.substring(0, address.indexOf('@')).toLowerCase();
   }
 
