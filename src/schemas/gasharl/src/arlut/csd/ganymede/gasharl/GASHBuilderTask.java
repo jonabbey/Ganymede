@@ -2673,12 +2673,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             if (alias.equals(signature))
               {
-		continue;
+                continue;
               }
 
-	    writer.print(alias.toLowerCase());
-	    writer.print(": ");
-	    writer.println(signature.toLowerCase());
+            writer.print(alias.toLowerCase());
+            writer.print(": ");
+            writer.println(signature.toLowerCase());
           }
       }
 
@@ -3139,16 +3139,16 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         if (!empty(addresses))
           {
-	    for (String address: addresses)
-	      {
-		String host = getEmailHost(fixup(address));
-		
-		if (host.endsWith("arlut.utexas.edu"))
-		  {
-		    set.add(host);
-		  }
-	      }
-	  }
+            for (String address: addresses)
+              {
+                String host = getEmailHost(fixup(address));
+                
+                if (host.endsWith("arlut.utexas.edu"))
+                  {
+                    set.add(host);
+                  }
+              }
+          }
       }
 
     for (DBObject external: getObjects(emailRedirectSchema.BASE))
@@ -3156,17 +3156,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         Vector<String> targets = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
 
         if (!empty(targets))
-	  {
-	    for (String target: targets)
-	      {
-		String host = getEmailHost(fixup(target));
+          {
+            for (String target: targets)
+              {
+                String host = getEmailHost(fixup(target));
 
-		if (host.endsWith("arlut.utexas.edu"))
-		  {
-		    set.add(host);
-		  }
-	      }
-	  }
+                if (host.endsWith("arlut.utexas.edu"))
+                  {
+                    set.add(host);
+                  }
+              }
+          }
       }
 
     // XXX
@@ -3205,9 +3205,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (DBObject user: getObjects(SchemaConstants.UserBase))
       {
-	String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
+        String username = (String) user.getFieldValueLocal(userSchema.USERNAME);
 
-	set.add(username);
+        set.add(username);
 
         Vector<String> aliases = (Vector<String>) user.getFieldValuesLocal(userSchema.ALIASES);
 
@@ -3215,7 +3215,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             for (String alias: aliases)
               {
-		set.add(alias);
+                set.add(alias);
               }
           }
 
@@ -3223,23 +3223,23 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         if (targets != null)
           {
-	    for (String target: targets)
-	      {
-		String account = getEmailAccount(target);
-		String host = getEmailHost(target);
+            for (String target: targets)
+              {
+                String account = getEmailAccount(target);
+                String host = getEmailHost(target);
 
-		if (host.endsWith("arlut.utexas.edu"))
-		  {
-		    // account could be the user's name or any of his
-		    // aliases, above, but set.add() will check that
-		    // for us efficiently
-		    //
-		    // we could check for whether account is equals to
-		    // "no_longer_employed" here..
+                if (host.endsWith("arlut.utexas.edu"))
+                  {
+                    // account could be the user's name or any of his
+                    // aliases, above, but set.add() will check that
+                    // for us efficiently
+                    //
+                    // we could check for whether account is equals to
+                    // "no_longer_employed" here..
 
-		    set.add(account);
-		  }
-	      }
+                    set.add(account);
+                  }
+              }
           }
       }
 
@@ -3252,7 +3252,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         // names to get email.  we expressly don't want and it would be
         // poisonous to list external names here.
 
-	set.add(groupname);
+        set.add(groupname);
 
         Vector<String> group_aliases = (Vector<String>) group.getFieldValuesLocal(emailListSchema.ALIASES);
 
@@ -3260,7 +3260,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             for (String alias: group_aliases)
               {
-		set.add(alias);
+                set.add(alias);
               }
           }
 
@@ -3270,10 +3270,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             for (Invid memberInvid: group_targets)
               {
-		if (!isVeryDeadUser(memberInvid))
-		  {
-		    set.add(getLabel(memberInvid));
-		  }
+                if (!isVeryDeadUser(memberInvid))
+                  {
+                    set.add(getLabel(memberInvid));
+                  }
               }
           }
       }
@@ -3284,7 +3284,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             String groupname = (String) group.getFieldValueLocal(groupSchema.GROUPNAME);
 
-	    set.add(groupname);
+            set.add(groupname);
           }
       }
 
@@ -3302,7 +3302,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         String name = (String) external.getFieldValueLocal(emailRedirectSchema.NAME);
 
-	set.add(name);
+        set.add(name);
 
         Vector<String> aliases = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.ALIASES);
 
@@ -3312,7 +3312,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               {
                 if (!alias.equals(name))
                   {
-		    set.add(alias);
+                    set.add(alias);
                   }
               }
           }
@@ -3321,23 +3321,23 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         if (!empty(targets))
           {
-	    for (String target: targets)
-	      {
-		String host = getEmailHost(target);
-		String user = getEmailAccount(target);
+            for (String target: targets)
+              {
+                String host = getEmailHost(target);
+                String user = getEmailAccount(target);
 
-		if (host.endsWith("arlut.utexas.edu"))
-		  {
-		    set.add(user);
-		  }
-	      }
+                if (host.endsWith("arlut.utexas.edu"))
+                  {
+                    set.add(user);
+                  }
+              }
           }
       }
 
     for (String account: set)
       {
-	writer.print(account);
-	writer.println(" OK");
+        writer.print(account);
+        writer.println(" OK");
       }
 
     return;
@@ -3369,7 +3369,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   {
     if (address.indexOf('@') != -1)
       {
-	return address.substring(address.indexOf('@') + 1).toLowerCase();
+        return address.substring(address.indexOf('@') + 1).toLowerCase();
       }
 
     return "";
@@ -3385,7 +3385,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   {
     if (address == null || "".equals(address))
       {
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       }
 
     return address.substring(0, address.indexOf('@')).toLowerCase();
