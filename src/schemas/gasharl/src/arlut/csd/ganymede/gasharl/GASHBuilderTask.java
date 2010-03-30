@@ -3132,108 +3132,61 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private void writeHashTransport(PrintWriter writer)
   {
-    Vector<String> outtargs = new Vector();
-
-    String seekat;
+    Set<String> outargs = new HashSet<String>();
 
     //  some things in here will NOT be found by the loop following
     //  this one.  so you do have to do this.
+
     for (DBObject loluser: getObjects(SchemaConstants.UserBase))
       {
         Vector<String> addresses = (Vector<String>) loluser.getFieldValuesLocal(userSchema.EMAILTARGET);
 
         if (!empty(addresses))
           {
+	    for (String address: addresses)
+	      {
+		address = fixup(address).toLowerCase();
+		
+		if (address.endsWith(".arlut.utexas.edu"))
+		  {
+		    outargs.add(getEmailHost(address));
+		  }
+	      }
+	  }
+      }
 
-            for (int i = 0; i < addresses.size(); i++)
-              {
-                seekat = fixup(addresses.get(i));
-                int posonly = seekat.indexOf('@');
-                int found=0;
-                if( posonly >= 0 )
-                  {
-                    String atleft = seekat.substring(1+posonly).toLowerCase();
-                    for (int jj=0; jj < outtargs.size(); jj++)
-                      {
-                        if( atleft.equals(outtargs.get(jj)) )
-                          {
-                            found=1;
-                          }
-                      }
-                    if( found == 0 )
-                      {
-                        String onlyus = "arlut.utexas.edu";
-                        int tag = atleft.indexOf(onlyus);
-                        if( tag >= 0 )
-                          {
-                            if( !atleft.equals("arlut.utexas.edu") )
-                              {
-                                outtargs.addElement(atleft);
-                              }
-                          }
-                      }
-                  }
-              }//end loop over addrs
-          }// end of empty addrs
-      }// end of for
-
-    //--------------------------------------
     for (DBObject external: getObjects(emailRedirectSchema.BASE))
       {
-        Vector targets;
-        String target;
+        Vector<String> targets = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
 
+        if (!empty(targets))
+	  {
+	    for (String target: targets)
+	      {
+		target = fixup(target).toLowerCase();
 
-        targets = external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
+		if (target.endsWith(".arlut.utexas.edu"))
+		  {
+		    outargs.add(getEmailHost(target));
+		  }
+	      }
+	  }
+      }
 
+    // XXX
+    //
+    // No emailListSchema checking here?
+    //
+    // XXX
 
-        // targets shouldn't ever be null, but i'm tired of having
-        // NullPointerExceptions pop up then having to recompile to
-        // fix.
-
-        if (targets != null)
-          {
-            for (int i = 0; i < targets.size(); i++)
-              {
-                target = (String) targets.elementAt(i);
-                int posonly = target.indexOf('@');
-                int found=0;
-                if( posonly >= 0 )
-                  {
-                    String atleft = target.substring(1+posonly).toLowerCase();
-                    for (int jj=0; jj < outtargs.size(); jj++)
-                      {
-                        if( atleft.equals(outtargs.get(jj)) )
-                          {
-                            found=1;
-                          }
-                      }// end jj
-                    if( found == 0 )
-                      {
-                        String onlyus = "arlut.utexas.edu";
-                        int tag = atleft.indexOf(onlyus);
-                        if( tag >= 0 )
-                          {
-                            if( !atleft.equals("arlut.utexas.edu") )
-                              {
-                                outtargs.addElement(atleft);
-                              }
-                          }// end tag>=0
-                      }// end found==0
-                  }// end posonly >=0
-              }// end i loop
-          }//end targets not null
-
-      }// end for external loop.
-    //--------------------------------------
-    //  the output we need.
-    for (int jj=0; jj < outtargs.size(); jj++)
+    for (String host: outargs)
       {
         result.setLength(0);
-        result.append(outtargs.get(jj));
+        result.append(host);
         result.append("\tsmtp:[");
-        result.append(outtargs.get(jj));
+        result.append(host);
         result.append("]");
+
         writer.println(result.toString());
       }
   }
@@ -3559,6 +3512,16 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     return in.toString().replace("@arlut.utexas.edu",
                                  "@arlmail.arlut.utexas.edu");
+  }
+
+  /**
+   * Returns a String containing everything after the @ sign in
+   * address, or the entire string if no @ was found.
+   */
+
+  private String getEmailHost(String address)
+  {
+    return address.substring(address.indexOf('@') + 1);
   }
 
   private void showDirty(String object, PrintWriter writer)
