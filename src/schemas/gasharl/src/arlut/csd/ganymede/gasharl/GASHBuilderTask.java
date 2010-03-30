@@ -2536,64 +2536,62 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         try
           {
+	    PrintWriter pftransport = openOutFile(path + "pftransport","gasharl");
 
-          PrintWriter pftransport = openOutFile(path + "pftransport","gasharl");
+	    try
+	      {
+		PrintWriter pfknownu = openOutFile(path + "known_users","gasharl");
 
-          try
-            {
+		try
+		  {
+		    //	we don't want to loop over this.
+		    //	loop inside this
+		    writeHashTransport(pftransport);
+		    writeHashKnownuser(pfknownu);
 
-            PrintWriter pfknownu = openOutFile(path + "known_users","gasharl");
-
-            try
-              {
-                //	we don't want to loop over this.
-                //	loop inside this
-                writeHashTransport(pftransport);
-                writeHashKnownuser(pfknownu);
-
-    	        for (DBObject user: getObjects(SchemaConstants.UserBase))
-    	          {
-                    writeHashGenerics(user, pfgenerics);
-                    writeHashUserAlias(user, pfmalias);
-    	          }
+		    for (DBObject user: getObjects(SchemaConstants.UserBase))
+		      {
+			writeHashGenerics(user, pfgenerics);
+			writeHashUserAlias(user, pfmalias);
+		      }
     
-    	        // mail lists
+		    // mail lists
     
-    	        for (DBObject group: getObjects(emailListSchema.BASE))
-    	          {
-                    writeHashGroupAlias(group, pfmalias);
-    	          }
+		    for (DBObject group: getObjects(emailListSchema.BASE))
+		      {
+			writeHashGroupAlias(group, pfmalias);
+		      }
     
-    	        // emailable account groups
+		    // emailable account groups
     
-    	        for (DBObject group: getObjects(groupSchema.BASE))
-    	          {
-                    writeHashAccountGroupAlias(group, pfmalias);
-    	          }
+		    for (DBObject group: getObjects(groupSchema.BASE))
+		      {
+			writeHashAccountGroupAlias(group, pfmalias);
+		      }
     
-    	        // emailable user netgroups
+		    // emailable user netgroups
     
-                for (DBObject group: getObjects(userNetgroupSchema.BASE))
-                  {
-                    writeHashUserNetgroupAlias(group, pfmalias);
-                  }
+		    for (DBObject group: getObjects(userNetgroupSchema.BASE))
+		      {
+			writeHashUserNetgroupAlias(group, pfmalias);
+		      }
     
-    	        // external mail addresses
+		    // external mail addresses
     
-                for (DBObject external: getObjects(emailRedirectSchema.BASE))
-                  {
-                    writeHashExternalAlias(external, pfmalias);
-                  }
-               }
-            finally
-              {
-                pfknownu.close();
-              }
-            }
-          finally
-            {
-              pftransport.close();
-            }
+		    for (DBObject external: getObjects(emailRedirectSchema.BASE))
+		      {
+			writeHashExternalAlias(external, pfmalias);
+		      }
+		  }
+		finally
+		  {
+		    pfknownu.close();
+		  }
+	      }
+	    finally
+	      {
+		pftransport.close();
+	      }
           }
         finally
           {
