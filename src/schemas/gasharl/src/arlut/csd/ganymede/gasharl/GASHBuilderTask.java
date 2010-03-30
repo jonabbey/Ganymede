@@ -2528,6 +2528,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private boolean writeHashAliasesFile() throws IOException
   {
+    boolean success = false;
+
     PrintWriter pfgenerics = openOutFile(path + "pfgenerics", "gasharl");
 
     try
@@ -2582,6 +2584,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 		      {
 			writeHashExternalAlias(external, pfmalias);
 		      }
+
+		    success = true;
 		  }
 		finally
 		  {
@@ -2603,7 +2607,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         pfgenerics.close();
       }
 
-    return true;
+    return success;
   }
 
 //------------------------------------------------------------------------------
