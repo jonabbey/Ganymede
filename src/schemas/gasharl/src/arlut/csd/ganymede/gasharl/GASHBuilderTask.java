@@ -3537,19 +3537,19 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * LOWER CASE ONLY !!
    * jgs
    */
-  private boolean addIfNew( Vector<String> slist, String maybe )
+
+  private boolean addIfNew(Vector<String> slist, String maybe)
   {
     String lower = maybe.toLowerCase();
-    for( int kk=0; kk < slist.size(); kk++ )
+
+    if (!slist.contains(lower))
       {
-        if( lower.equals(slist.get(kk)) )
-          {
-            return false;
-          }
-      }//end for
-    // not in there.
-    slist.addElement(lower);
-    return true;
+	slist.add(lower);
+
+	return true;
+      }
+
+    return false;
   }
 
   /**
