@@ -5473,6 +5473,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                      dhcp_entry
+
+------------------------------------------------------------------------------*/
+
 /**
  * Non-public data carrying "struct" class used to make things easier
  * for us as we assemble our DHCP output in the GASHBuilderTask.
@@ -5486,6 +5492,8 @@ class dhcp_entry {
   public boolean builtin;
   public int code;
   public boolean forced;
+  
+  /* -- */
 
   public dhcp_entry(String name, String type, String value, boolean builtin, int code, boolean forced)
   {
@@ -5498,12 +5506,22 @@ class dhcp_entry {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                               NetworkSortByName
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Comparator to aid in sorting DHCPNetwork objects in the Ganymede server.
+ */
 
 class NetworkSortByName implements Comparator<DBObject>
 {
-    public int compare(DBObject o1, DBObject o2) {
-      String s1 = (String) o1.getFieldValueLocal(dhcpNetworkSchema.NAME);
-      String s2 = (String) o2.getFieldValueLocal(dhcpNetworkSchema.NAME);
-      return s1.compareTo(s2);
-    }
+  public int compare(DBObject o1, DBObject o2)
+  {
+    String s1 = (String) o1.getFieldValueLocal(dhcpNetworkSchema.NAME);
+    String s2 = (String) o2.getFieldValueLocal(dhcpNetworkSchema.NAME);
+    return s1.compareTo(s2);
+  }
 }
