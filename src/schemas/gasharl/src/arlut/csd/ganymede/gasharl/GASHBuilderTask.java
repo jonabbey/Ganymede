@@ -3396,13 +3396,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     return address.substring(0, address.indexOf('@')).toLowerCase();
   }
 
-  private void showDirty(String object, PrintWriter writer)
-  {
-    result.setLength(0);
-    result.append(object);
-    writer.println(result.toString());
-  }
-
   /**
    * Convenience method, returns true if in is null or empty.
    */
