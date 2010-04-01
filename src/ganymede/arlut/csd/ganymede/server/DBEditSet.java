@@ -2312,13 +2312,7 @@ public class DBEditSet {
     // collect the list of invids that we know were touched in this
     // transaction for the start transaction log record
 
-    Vector invids = new Vector(objects.size());
-    Iterator iter = objects.keySet().iterator();
-
-    while (iter.hasNext())
-      {
-	invids.add((Invid) iter.next());
-      }
+    Vector<Invid> invids = new Vector<Invid>(objects.keySet());
 
     synchronized (Ganymede.log)
       {
@@ -2347,7 +2341,7 @@ public class DBEditSet {
 	    // finish the transaction to disk and send out any email
 	    // that we need to send
 
-	    Ganymede.log.endTransactionLog(responsibleName, responsibleInvid, this);
+	    Ganymede.log.endTransactionLog(invids, responsibleName, responsibleInvid, this);
 	  }
 	catch (Throwable ex)
 	  {
