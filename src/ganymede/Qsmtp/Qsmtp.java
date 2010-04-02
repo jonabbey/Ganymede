@@ -69,9 +69,10 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -90,9 +91,9 @@ import java.util.Vector;
  *
  * Once created, a Qsmtp object can be used to send any number of messages
  * through that mail server.  Each call to 
- * {@link Qsmtp#sendmsg(java.lang.String, java.util.Vector, java.lang.String, 
+ * {@link Qsmtp#sendmsg(java.lang.String, java.util.List, java.lang.String, 
  * java.lang.String) sendmsg} or
- * {@link Qsmtp#sendHTMLmsg(java.lang.String, java.util.Vector, java.lang.String, 
+ * {@link Qsmtp#sendHTMLmsg(java.lang.String, java.util.List, java.lang.String, 
  * java.lang.String, java.lang.String, java.lang.String) sendHTMLmsg} opens a
  * separate SMTP connection to the designated mail server and transmits a
  * single message.
@@ -126,7 +127,7 @@ public class Qsmtp implements Runnable {
   private InetAddress address = null;
   private int port = DEFAULT_PORT;
 
-  private Vector queuedMessages = new Vector();
+  private List<messageObject> queuedMessages = new ArrayList<messageObject>();
   private volatile boolean threaded = false;
   private volatile Thread backgroundThread;
 
@@ -280,7 +281,7 @@ public class Qsmtp implements Runnable {
    * <P>Sends a plain ASCII mail message</P>
    *
    * @param from_address Who is sending this message?
-   * @param to_addresses Vector of string addresses to send this message to
+   * @param to_addresses List of string addresses to send this message to
    * @param subject Subject for this message
    * @param message The text for the mail message
    *
@@ -288,7 +289,7 @@ public class Qsmtp implements Runnable {
    * mailhost, false otherwise.
    */
 
-  public synchronized boolean sendmsg(String from_address, Vector to_addresses,
+  public synchronized boolean sendmsg(String from_address, List<String> to_addresses,
                                       String subject, String message) throws IOException
   {
     return sendmsg(from_address, to_addresses, subject, message, null);
@@ -301,7 +302,7 @@ public class Qsmtp implements Runnable {
    * as it is, we only support HTML.</p>
    *
    * @param from_address Who is sending this message?
-   * @param to_addresses Vector of string addresses to send this message to
+   * @param to_addresses List of string addresses to send this message to
    * @param subject Subject for this message
    * @param htmlBody A string containing the HTML document to be sent
    * @param htmlFilename The name to label the HTML document with, will
@@ -312,18 +313,18 @@ public class Qsmtp implements Runnable {
    * mailhost, false otherwise.
    */
 
-  public synchronized boolean sendHTMLmsg(String from_address, Vector to_addresses,
+  public synchronized boolean sendHTMLmsg(String from_address, List<String> to_addresses,
                                           String subject, String htmlBody, String htmlFilename,
                                           String textBody) throws IOException
   {
-    Vector MIMEheaders = new Vector();
+    List<String> MIMEheaders = new ArrayList<String>();
     String separator = generateRandomBoundary();
     StringBuilder buffer = new StringBuilder();
 
     /* -- */
 
-    MIMEheaders.addElement("MIME-Version: 1.0");
-    MIMEheaders.addElement("Content-Type: multipart/mixed; boundary=\"" + separator + "\"");
+    MIMEheaders.add("MIME-Version: 1.0");
+    MIMEheaders.add("Content-Type: multipart/mixed; boundary=\"" + separator + "\"");
 
     buffer.append("This is a multi-part message in MIME format.\n");
     
@@ -381,19 +382,20 @@ public class Qsmtp implements Runnable {
    * internally by the other Qsmtp sendmsg and sendHTMLmsg methods.</P>
    *
    * @param from_address Who is sending this message?
-   * @param to_addresses Vector of string addresses to send this message to
+   * @param to_addresses List of string addresses to send this message to
    * @param subject Subject for this message
    * @param message The text for the mail message
-   * @param extraHeaders Vector of string headers to include in the message's
+   * @param extraHeaders List of string headers to include in the message's
    * envelope
    *
    * @return True if the message was successfully sent to the
    * mailhost, false otherwise.
    */
 
-  public synchronized boolean sendmsg(String from_address, Vector to_addresses, 
+  public synchronized boolean sendmsg(String from_address,
+				      List<String> to_addresses,
                                       String subject, String message,
-                                      Vector extraHeaders)
+                                      List<String> extraHeaders)
   {
     messageObject msgObj = new messageObject(from_address, to_addresses,
 					     subject, message, extraHeaders);
@@ -402,7 +404,7 @@ public class Qsmtp implements Runnable {
       {
 	synchronized (queuedMessages)
 	  {
-	    queuedMessages.addElement(msgObj);
+	    queuedMessages.add(msgObj);
 	    queuedMessages.notify();
 	  }
 
@@ -439,8 +441,7 @@ public class Qsmtp implements Runnable {
 	      {
 		if (queuedMessages.size() > 0)
 		  {
-		    message = (messageObject) queuedMessages.firstElement();
-		    queuedMessages.removeElementAt(0);
+		    message = queuedMessages.remove(0);
 		  }
 		else
 		  {
@@ -504,8 +505,7 @@ public class Qsmtp implements Runnable {
 		  {
 		    while (queuedMessages.size() > 0)
 		      {
-			message = (messageObject) queuedMessages.firstElement();
-			queuedMessages.removeElementAt(0);
+			message = queuedMessages.remove(0);
 
                         if (debug)
                           {
@@ -543,10 +543,10 @@ public class Qsmtp implements Runnable {
     InetAddress local;
 
     String from_address = msgObj.from_address;
-    Vector to_addresses = msgObj.to_addresses;
+    List<String> to_addresses = msgObj.to_addresses;
     String subject = msgObj.subject;
     String message = msgObj.message;
-    Vector extraHeaders = msgObj.extraHeaders;
+    List<String> extraHeaders = msgObj.extraHeaders;
 
     DataInputStream replyStream = null;
     BufferedReader reply = null;
@@ -639,9 +639,9 @@ public class Qsmtp implements Runnable {
 
             boolean successRcpt = false;
 
-            for (int i = 0; i < to_addresses.size(); i++)
+	    for (String address: to_addresses)
               {
-                sstr = "RCPT TO: " + (String) to_addresses.elementAt(i);
+                sstr = "RCPT TO: " + address;
                 send.print(sstr);
                 send.print(EOL);
                 send.flush();
@@ -653,8 +653,7 @@ public class Qsmtp implements Runnable {
                     // don't throw an exception here.. we're in a loop and
                     // we want to get the mail sent to others.
 
-                    System.err.println("Qsmtp.dispatchMessage(): " + rstr + " received for address " +
-                                       (String) to_addresses.elementAt(i));
+                    System.err.println("Qsmtp.dispatchMessage(): " + rstr + " received for address " + address);
                   }
                 else
                   {
@@ -696,7 +695,7 @@ public class Qsmtp implements Runnable {
                     targetString.append(", ");
                   }
 
-                targetString.append((String) to_addresses.elementAt(i));
+                targetString.append(to_addresses.get(i));
               }
 
             send.print("To: " + targetString.toString());
@@ -720,11 +719,8 @@ public class Qsmtp implements Runnable {
 
             if (extraHeaders != null)
               {
-                String header;
-
-                for (int i = 0; i < extraHeaders.size(); i++)
+		for (String header: extraHeaders)
                   {
-                    header = (String) extraHeaders.elementAt(i);
                     send.print(header);
                     send.print(EOL);
                     send.flush();
@@ -857,16 +853,16 @@ public class Qsmtp implements Runnable {
 class messageObject {
   
   String from_address;
-  Vector to_addresses;
+  List<String> to_addresses;
   String subject;
   String message;
-  Vector extraHeaders;
+  List<String> extraHeaders;
 
   /* -- */
 
-  messageObject(String from_address, Vector to_addresses, 
+  messageObject(String from_address, List<String> to_addresses, 
 		String subject, String message,
-		Vector extraHeaders)
+		List<String> extraHeaders)
   {
     this.from_address = from_address;
     this.to_addresses = to_addresses;
@@ -894,7 +890,7 @@ class messageObject {
 		buffer.append(", ");
 	      }
 
-	    buffer.append(to_addresses.elementAt(i));
+	    buffer.append(to_addresses.get(i));
 	  }
       }
 
@@ -904,9 +900,9 @@ class messageObject {
 
     if (extraHeaders != null)
       {
-	for (int i = 0; i < extraHeaders.size(); i++)
+	for (String header: extraHeaders)
 	  {
-	    buffer.append(extraHeaders.elementAt(i));
+	    buffer.append(header);
 	    buffer.append("\n");
 	  }
       }
