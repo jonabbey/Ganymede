@@ -54,10 +54,12 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
@@ -3295,9 +3297,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     DBObject sysObj = getSession().viewDBObject(sysInvid);
     String sysName = sysObj.getLabel();
 
-    Vector objects = new Vector();
-    objects.addElement(sysInvid);
-    Vector addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    List<Invid> objects = new ArrayList<Invid>();
+    objects.add(sysInvid);
+    List<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
 
     String subject = null;
 
@@ -3423,9 +3425,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     DBObject sysObj = getSession().viewDBObject(sysInvid, true);
     String sysName = sysObj.getLabel();
 
-    Vector objects = new Vector();
-    objects.addElement(sysInvid);
-    Vector addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    List<Invid> objects = new ArrayList<Invid>();
+    objects.add(sysInvid);
+    List<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
 
     String subject = null;
 
@@ -3550,8 +3552,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	Invid admin = getGSession().getPersonaInvid();
 	String adminName = getGSession().getMyUserName();
-	Vector objects = new Vector();
-	objects.addElement(getInvid());
+	List<Invid> objects = new ArrayList<Invid>();
+	objects.add(getInvid());
 
 	StringBuilder buffer = new StringBuilder();
 
@@ -3806,7 +3808,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     sysObj = getSession().viewDBObject(newSysInvid);
     newSysName = sysObj.getLabel();    
 
-    Vector addresses = DBLog.calculateOwnerAddresses(objects, getSession());    
+    List<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
 
     buffer.append("Hi.  User ");
     buffer.append(getLabel());
