@@ -81,7 +81,7 @@ public class DBLogEvent {
   Invid admin;
 
   private List<Invid> objects;
-  private List<String> notifyList;
+  private List<String> notifyList = new ArrayList<String>();
   
   /**
    * Will be true if this log event has already had its email
@@ -182,6 +182,10 @@ public class DBLogEvent {
       {
 	this.notifyList = new ArrayList<String>(mailTargets);
       }
+    else
+      {
+	this.notifyList = new ArrayList<String>();
+      }
   }
 
   /**
@@ -200,7 +204,7 @@ public class DBLogEvent {
 
   public List<String> getMailTargets()
   {
-    return notifyList;
+    return this.notifyList;
   }
 
   /**
@@ -210,11 +214,6 @@ public class DBLogEvent {
 
   public String getToString()
   {
-    if (notifyList == null)
-      {
-	return "";
-      }
-
     StringBuffer buffer = new StringBuffer();
 
     for (int i = 0; i < notifyList.size(); i++)
