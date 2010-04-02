@@ -742,7 +742,7 @@ public class DBLog {
 	    // we may have a system event instead, in which case we handle
 	    // mailing it here
 
-	    sentTo.add(sendSysEventMail(event, transaction.description));
+	    sentTo.addAll(sendSysEventMail(event, transaction.description));
 
 	    // now, go ahead and add to the mail buffers we are prepping
 	    // to describe this whole transaction
@@ -759,15 +759,16 @@ public class DBLog {
 	    // calculating who needs to receive owner-group related
 	    // generic email about this event.
 
-	    sentTo.add(appendMailOut(event, this.transactionMailOuts,
-				     transaction.session,
-				     this.transactionControl));
+	    sentTo.addAll(appendMailOut(event,
+					this.transactionMailOuts,
+					transaction.session,
+					this.transactionControl));
 
 	    // and we want to make sure and send this event to any
 	    // addresses listed in the starttransaction system event
 	    // object.
 
-	    sentTo.add(this.transactionControl.addressList);
+	    sentTo.addAll(this.transactionControl.addressList);
 
 	    // now we record in the event who we actually sent the
 	    // mail to, so it is logged properly
@@ -815,7 +816,7 @@ public class DBLog {
 		// bombs away!
 
 		mailer.sendmsg(returnAddr,
-			       event.getEmailTargets(),
+			       event.getMailTargets(),
 			       Ganymede.subjectPrefixProperty + event.subject,
 			       message);
 	      }
@@ -1312,7 +1313,7 @@ public class DBLog {
 
     type = (systemEventType) sysEventCodes.get(event.eventClassToken);
 
-    if (type == null || !type.email)
+    if (type == null || !type.mail)
       {
 	return emailList;
       }
@@ -1352,9 +1353,9 @@ public class DBLog {
 	addressSet.addAll(event.getMailTargets());
       }
 
-    if (type.getMailTargets() != null)
+    if (type.addressList != null)
       {
-	addressSet.addAll(type.getMailTargets());
+	addressSet.addAll(type.addressList);
       }
 
     if (type.ccToSelf)
@@ -1403,7 +1404,7 @@ public class DBLog {
 
     // and now..
 
-    emailList.add(addressSet);
+    emailList.addAll(addressSet);
 
     try
       {
@@ -1659,8 +1660,7 @@ public class DBLog {
 
   private void updateSysEventCodeHash()
   {
-    Vector eventCodeVector;
-    Result entry;
+    List<Result> eventCodeList;
 
     /* -- */
 
@@ -1710,23 +1710,16 @@ public class DBLog {
 
     // this query would lock if eventBase is already locked on this thread
 
-    eventCodeVector = gSession.internalQuery(new Query(SchemaConstants.EventBase));
+    eventCodeList = gSession.internalQuery(new Query(SchemaConstants.EventBase));
 
-    if (eventCodeVector == null)
+    if (eventCodeList == null)
       {
 	Ganymede.debug("DBLog.updateSysEventCodeHash(): no event records found in database");
 	return;
       }
 
-    for (int i = 0; i < eventCodeVector.size(); i++)
+    for (Result entry: eventCodeList)
       {
-	if (debug)
-	  {
-	    System.err.println("Processing sysEvent object # " + i);
-	  }
-
-	entry = (Result) eventCodeVector.elementAt(i);
-
 	sysEventCodes.put(entry.toString(),
 			  new systemEventType(gSession.getSession().viewDBObject(entry.getInvid())));
       }
@@ -1755,8 +1748,7 @@ public class DBLog {
 
   private void updateObjEventCodeHash()
   {
-    Vector eventCodeVector;
-    Result entry;
+    List<Result> eventCodeList;
     DBObject objEventobj;
     objectEventType objEventItem;
 
@@ -1808,23 +1800,16 @@ public class DBLog {
 
     // would deadlock here if eventBase was locked on this thread
 
-    eventCodeVector = gSession.internalQuery(new Query(SchemaConstants.ObjectEventBase));
+    eventCodeList = gSession.internalQuery(new Query(SchemaConstants.ObjectEventBase));
 
-    if (eventCodeVector == null)
+    if (eventCodeList == null)
       {
 	Ganymede.debug("DBLog.updateObjEventCodeHash(): no event records found in database");
 	return;
       }
 
-    for (int i = 0; i < eventCodeVector.size(); i++)
+    for (Result entry: eventCodeList)
       {
-	if (debug)
-	  {
-	    System.err.println("Processing objEvent object # " + i);
-	  }
-
-	entry = (Result) eventCodeVector.elementAt(i);
-
 	objEventobj = (DBObject) gSession.getSession().viewDBObject(entry.getInvid());
 	objEventItem = new objectEventType(objEventobj);
 	objEventCodes.put(objEventItem.hashKey, objEventItem);
@@ -1888,7 +1873,7 @@ public class DBLog {
 
     if (eventType == null)
       {
-	mailSet.addAll(event.getEmailTargets());
+	mailSet.addAll(event.getMailTargets());
 	mailSet.addAll(calculateOwnerAddresses(event.getInvids(),
 					    mailToObjects,
 					    mailToOwners,
@@ -1896,7 +1881,7 @@ public class DBLog {
       }
     else if (eventType.ccToOwners)
       {
-	mailSet.addAll(event.getEmailTargets());
+	mailSet.addAll(event.getMailTargets());
 	mailSet.addAll(calculateOwnerAddresses(event.getInvids(),
 					    true, true,
 					    session));
@@ -1962,7 +1947,7 @@ public class DBLog {
 			     transactionType.ccToOwners);
       }
 
-    for (String str: event.getEmailTargets())
+    for (String str: event.getMailTargets())
       {
 	if (debug)
 	  {
@@ -1980,7 +1965,7 @@ public class DBLog {
 	mailout.append(event);
       }
 
-    return event.getEmailTargets();
+    return event.getMailTargets();
   }
 
   /**
@@ -2065,8 +2050,6 @@ public class DBLog {
   static public List<String> calculateOwnerAddresses(List<Invid> objects, boolean mailToObjects,
 						     boolean mailToOwners, DBSession session)
   {
-    Iterator objectsIter, ownersIter;
-    Invid invid, ownerInvid;
     InvidDBField ownersField;
     DBObject object;
     Set<String> addresses = new HashSet<String>();
@@ -2109,14 +2092,14 @@ public class DBLog {
 
 	if (mailToObjects && object.hasEmailTarget())
 	  {
-	    addresses.add(object.getEmailTargets());
+	    addresses.addAll(object.getEmailTargets());
 	  }
 
 	// okay, now we've got to see about notifying the owners..
 
 	if (!mailToOwners)
 	  {
-	    results.add(addresses);
+	    results.addAll(addresses);
 	    return results;
 	  }
 
@@ -2220,7 +2203,7 @@ public class DBLog {
 				       session.getGSession().viewObjectLabel(ownerInvid));
 		  }
 
-		addresses.add(ownerCustom.getAddresses(ownerInvid, session));
+		addresses.addAll(ownerCustom.getAddresses(ownerInvid, session));
 		seenOwners.add(ownerInvid);
 	      }
 	  }
@@ -2228,7 +2211,7 @@ public class DBLog {
 
     // our addresses set is complete, convert it to a List
 
-    results.add(addresses);
+    results.addAll(addresses);
 
     if (debug)
       {

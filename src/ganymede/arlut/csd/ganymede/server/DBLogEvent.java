@@ -163,6 +163,15 @@ public class DBLogEvent {
   }
 
   /**
+   * Sets the List of Invids affected by this DBLogEvent.
+   */
+
+  public void setInvids(Collection<Invid> invids)
+  {
+    this.objects = new ArrayList<Invid>(invids);
+  }
+
+  /**
    * This method is used by DBLog to set the list of email targets
    * that this event will need to be mailed to.
    */
@@ -189,6 +198,28 @@ public class DBLogEvent {
   public List<String> getMailTargets()
   {
     return notifyList;
+  }
+
+  /**
+   * Returns a comma-separated String of addresses that need to
+   * receive notification of this log event.
+   */
+
+  public String getToString()
+  {
+    StringBuffer buffer = new StringBuffer();
+
+    for (int i = 0; i < notifyList.size(); i++)
+      {
+	if (i > 0)
+	  {
+	    buffer.append(",");
+	  }
+
+	buffer.append(notifyList.get(i));
+      }
+
+    return buffer.toString();
   }
 
   public String toString()

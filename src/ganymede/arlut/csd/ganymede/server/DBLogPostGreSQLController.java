@@ -55,8 +55,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.Util.WordWrap;
@@ -128,7 +130,6 @@ public class DBLogPostGreSQLController implements DBLogController {
    */
 
   String transactionID = null;
-  Vector transInvids = null;
 
   /**
    * <p>Private constructor for DBLogPostGreSQLController.  Use the
@@ -323,7 +324,6 @@ public class DBLogPostGreSQLController implements DBLogController {
 	if (event.eventClassToken.equals("starttransaction"))
 	  {
 	    transactionID = event.transactionID;
-	    transInvids = (Vector) event.objects.clone();
 	  }
 
 	primaryKey++;
@@ -370,18 +370,18 @@ public class DBLogPostGreSQLController implements DBLogController {
 
 	statement.addBatch();
 
-	for (int i = 0; event.notifyVect != null && i < event.notifyVect.size(); i++)
+	for (String address: event.getMailTargets())
 	  {
 	    statement.addBatch("insert into email (event_id, address) values(" +
 			       primaryKey + ", '" + 
-			       (String) event.notifyVect.elementAt(i) +
+			       address +
 			       "')");
 	  }
 
-	for (int i = 0; event.objects != null && i < event.objects.size(); i++)
+	for (Invid invid: event.getInvids())
 	  {
 	    statement.addBatch("insert into invids (invid, event_id) values('" +
-			       event.objects.elementAt(i).toString() + "'," + 
+			       invid.toString() + "'," + 
 			       primaryKey + ")");
 	  }
 
@@ -392,30 +392,21 @@ public class DBLogPostGreSQLController implements DBLogController {
 	//
 	// if we get a transactionID mismatch we won't record anything
 	//
-	// we reset the transactionID and transInvids vector
+	// we reset the transactionID and transInvids List
 	// pointer in any event
 		
 	if (event.eventClassToken.equals("finishtransaction"))
 	  {
 	    if (transactionID != null && transactionID.equals(event.transactionID))
 	      {
-		for (int i = 0; i < transInvids.size(); i++)
+		for (Invid invid: event.getInvids())
 		  {
-		    Invid z = (Invid) transInvids.elementAt(i);
-			    
 		    statement.addBatch("insert into transactions (invid, trans_id) values('" +
-				       z.toString() + "','" + transactionID + "')");
+				       invid.toString() + "','" + transactionID + "')");
 		  }
 	      }
 		    
 	    transactionID = null;
-
-	    if (transInvids != null)
-	      {
-		transInvids.removeAllElements();
-	      }
-
-	    transInvids = null;
 	  }
 
 	statement.executeBatch();

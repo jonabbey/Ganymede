@@ -56,7 +56,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.Util.ArrayUtils;
@@ -172,16 +174,16 @@ public class DBLogFileController implements DBLogController {
 
     writeSep(logWriter);
 
-    if (event.objects != null)
+    if (event.getInvids() != null)
       {
-	for (int i = 0; i < event.objects.size(); i++)
+	for (int i = 0; i < event.getInvids().size(); i++)
 	  {
 	    if (i > 0)
 	      {
 		logWriter.print(',');
 	      }
 
-	    writeStr(logWriter, event.objects.elementAt(i).toString());
+	    writeStr(logWriter, event.getInvids().get(i).toString());
 	  }
       }
 
@@ -194,7 +196,7 @@ public class DBLogFileController implements DBLogController {
 
     writeSep(logWriter);
 
-    logWriter.println(event.notifyList);
+    logWriter.println(event.getToString());
   }
 
   /**
@@ -441,9 +443,9 @@ public class DBLogFileController implements DBLogController {
 	      }
 	    else
 	      {
-		for (int i = 0; !found && i < event.objects.size(); i++)
+		for (int i = 0; !found && i < event.getInvids().size(); i++)
 		  {
-		    if (invid.equals((Invid) event.objects.elementAt(i)))
+		    if (invid.equals(event.getInvids().get(i)))
 		      {
 			found = true;
 		      }
@@ -615,7 +617,7 @@ public class DBLogFileController implements DBLogController {
     // read the object invid list.. re-use event.objects if it already
     // exists
 
-    event.objects = readObjectVect(cary, j);
+    event.setInvids((List<Invid>) readObjectVect(cary, j));
 
     j = i+1;
     i = scanSep(cary, j);
@@ -627,25 +629,7 @@ public class DBLogFileController implements DBLogController {
 
     // read the email address list..
 
-    event.notifyVect = readNotifyVect(cary, j);
-
-    if (event.notifyVect != null)
-      {
-	StringBuilder buf2 = new StringBuilder();
-
-	for (int k = 0; k < event.notifyVect.size(); k++)
-	  {
-	    if (k > 0)
-	      {
-		buf2.append(", ");
-	      }
-	    
-	    buf2.append((String) event.notifyVect.elementAt(k));
-	  }
-
-	event.notifyList = buf2.toString();
-      }
-
+    event.setMailTargets((List<String>) readNotifyVect(cary, j));
     event.augmented = true;
 
     return event;
