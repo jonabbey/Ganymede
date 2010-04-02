@@ -178,7 +178,10 @@ public class DBLogEvent {
 
   public void setMailTargets(Collection<String> mailTargets)
   {
-    this.notifyList = new ArrayList<String>(mailTargets);
+    if (mailTargets != null)
+      {
+	this.notifyList = new ArrayList<String>(mailTargets);
+      }
   }
 
   /**
@@ -207,6 +210,11 @@ public class DBLogEvent {
 
   public String getToString()
   {
+    if (notifyList == null)
+      {
+	return "";
+      }
+
     StringBuffer buffer = new StringBuffer();
 
     for (int i = 0; i < notifyList.size(); i++)
