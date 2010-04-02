@@ -2543,7 +2543,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
             try
               {
-                PrintWriter pfknownu = openOutFile(path + "known_users", "gasharl");
+                PrintWriter pfknownu = openOutFile(path + "pfknown_users", "gasharl");
 
                 try
                   {
@@ -3246,15 +3246,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     for (DBObject group: getObjects(emailListSchema.BASE))
       {
         String groupname = (String) group.getFieldValueLocal(emailListSchema.LISTNAME);
-
-        // there's an external targets field in there, but we
-        // don't care about it:  we're constructing a list of INTERNAL
-        // names to get email.  we expressly don't want and it would be
-        // poisonous to list external names here.
-
-        set.add(groupname);
-
         Vector<String> group_aliases = (Vector<String>) group.getFieldValuesLocal(emailListSchema.ALIASES);
+        Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(emailListSchema.MEMBERS);
+        Vector external_targets = group.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
+
+        if( !empty(group_aliases) || !empty(group_targets) || !empty(external_targets))
+          {
+          set.add(groupname);
+          }
 
         if (!empty(group_aliases))
           {
@@ -3264,7 +3263,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
           }
 
-        Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(emailListSchema.MEMBERS);
 
         if (!empty(group_targets))
           {
