@@ -476,14 +476,14 @@ public class DBEditSet {
    * @param description Descriptive text to be entered in the record of the event
    * @param admin Invid pointing to the adminPersona that fired the event, if any
    * @param adminName String containing the name of the adminPersona that fired the event, if any
-   * @param objects A vector of invids of objects involved in this event.
-   * @param notifyList A vector of Strings listing email addresses to send notification
+   * @param objects A List of invids of objects involved in this event.
+   * @param notifyList A List of Strings listing email addresses to send notification
    * of this event to.
    */
 
   public void logEvent(String eventClassToken, String description,
 		       Invid admin, String adminName,
-		       Vector objects, Vector notifyList)
+		       List<Invid> objects, List<String> notifyList)
   {
     DBLogEvent event = new DBLogEvent(eventClassToken, description,
 				      admin, adminName,
@@ -517,7 +517,7 @@ public class DBEditSet {
    * @param objects A vector of invids of objects involved in the mail
    */
 
-  public void logMail(Vector addresses, String subject, String message,
+  public void logMail(List<String> addresses, String subject, String message,
 		      Invid admin, String adminName, Vector objects)
   {
     logEvents.add(new DBLogEvent(addresses, subject, message, admin, adminName, objects));
@@ -532,7 +532,7 @@ public class DBEditSet {
    * @param message The body of the message
    */
 
-  public void logMail(Vector addresses, String subject, String message)
+  public void logMail(List<String> addresses, String subject, String message)
   {
     logEvents.add(new DBLogEvent(addresses, subject, message, null, null, null));
   }
