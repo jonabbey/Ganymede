@@ -47,6 +47,8 @@
 package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.ganymede.common.Invid;
@@ -111,14 +113,14 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     admin = session.viewDBObject(adminInvid);
 
-    Vector addresses = admin.getEmailTargets();
+    List<String> addresses = admin.getEmailTargets();
 
     if (addresses == null || addresses.size() == 0)
       {
 	return null;
       }
 
-    return (String) addresses.elementAt(0);
+    return addresses.get(0);
   }
 
   /**
@@ -181,9 +183,9 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public Vector getEmailTargets(DBObject object)
+  public List<String> getEmailTargets(DBObject object)
   {
-    Vector x = new Vector();
+    List<String> x = new ArrayList<String>();
 
     String address = (String) object.getFieldValueLocal(SchemaConstants.PersonaMailAddr);
 
@@ -212,7 +214,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (x != null)
       {
-	x.addElement(address);
+	x.add(address);
       }
 
     return x;

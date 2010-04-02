@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2010
    The University of Texas at Austin
 
    Contact information
@@ -47,6 +47,10 @@
 package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
@@ -229,7 +233,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
   /**
    * <p>This method provides a hook to allow custom DBEditObject subclasses to
-   * return a Vector of Strings comprising a list of addresses to be
+   * return a List of Strings comprising a list of addresses to be
    * notified above and beyond the normal owner group notification when
    * the given object is changed in a transaction.  Used for letting end-users
    * be notified of changes to their account, etc.</p>
@@ -237,9 +241,9 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public Vector getEmailTargets(DBObject object)
+  public List<String> getEmailTargets(DBObject object)
   {
-    Vector x = new Vector();
+    Set<String> set = new HashSet<String>();
     DBSession session;
     Boolean cc = (Boolean) object.getFieldValueLocal(SchemaConstants.OwnerCcAdmins);
 
@@ -253,27 +257,25 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
       {
 	session = Ganymede.internalSession.getSession();
       }
-    
+
     if (cc != null && cc.booleanValue())
       {
-	Vector members = object.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+	List<Invid> members = (List<Invid>) object.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
 	if (members != null)
 	  {
-	    for (int i = 0; i < members.size(); i++)
+	    for (Invid admin: members)
 	      {
-		Invid admin = (Invid) members.elementAt(i);
-		
 		DBObject adminObj = session.viewDBObject(admin, true);
-		
-		x = VectorUtils.union(x, adminObj.getEmailTargets());
+
+		set.addAll((List<String>)adminObj.getEmailTargets());
 	      }
 	  }
       }
 
-    x = VectorUtils.union(x, object.getFieldValuesLocal(SchemaConstants.OwnerExternalMail));
+    set.addAll((List<String>) object.getFieldValuesLocal(SchemaConstants.OwnerExternalMail));
     
-    return x;
+    return new ArrayList<String>(set);
   }
 
   /**

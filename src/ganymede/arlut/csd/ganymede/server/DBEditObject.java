@@ -1325,7 +1325,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * <b>*PSEUDOSTATIC*</b>
    */
 
-  public Vector getEmailTargets(DBObject object)
+  public List<String> getEmailTargets(DBObject object)
   {
     return null;
   }
