@@ -65,7 +65,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Vector;
 
 import Qsmtp.Qsmtp;
 import arlut.csd.Util.VectorUtils;
@@ -230,6 +229,8 @@ public class DBLog {
    * endTransactionLog(), by mapping objevent tags to HashMaps which
    * in turn map email addresses to the MailOut objects that we are
    * accumulating.</p>
+   *
+   * <p>Note that this only works because we serialize log commit.</p>
    */
 
   private HashMap<String, HashMap<String, MailOut>> objectOuts;
@@ -312,7 +313,7 @@ public class DBLog {
   /**
    * This method sends out a generic mail message that will not be logged.
    *
-   * @param recipients a Vector of email addresses to send this
+   * @param recipients a List of email addresses to send this
    * message to.  Should never be null or empty.
    *
    * @param title The email subject for this message, will have the
@@ -321,7 +322,7 @@ public class DBLog {
    * @param description The message itself
    */
 
-  public void sendMail(Vector recipients, String title, String description)
+  public void sendMail(List<String> recipients, String title, String description)
   {
     this.sendMail(recipients, title, description, false, false, null);
   }
@@ -329,10 +330,10 @@ public class DBLog {
   /**
    * <p>This method sends out a generic mail message that will not be logged.
    * If mailToObjects and/or mailToObjects are true, mail may be sent
-   * to email addresses associated with the objects in the invids Vector,
+   * to email addresses associated with the objects in the invids List,
    * in addition to the recipients list.</p>
    *
-   * @param recipients a Vector of email addresses to send this message
+   * @param recipients a List of email addresses to send this message
    * to.  May legally be null or empty, in which case mail will be sent
    * to anyone needed according to the mailToObjects and mailToOwners
    * parameters
@@ -343,11 +344,11 @@ public class DBLog {
    * email addresses associated with objects referenced by event.
    * @param mailToOwners If true, this event's mail will go to the owners
    * of any objects referenced by event.
-   * @param invids A vector of Invids to consult for possible mail targetting
+   * @param invids A List of Invids to consult for possible mail targeting
    */
 
-  public void sendMail(Vector recipients, String title, String description,
-		       boolean mailToObjects, boolean mailToOwners, Vector invids)
+  public void sendMail(List<String> recipients, String title, String description,
+		       boolean mailToObjects, boolean mailToOwners, List<Invid> invids)
   {
     DBLogEvent event;
 
@@ -509,15 +510,18 @@ public class DBLog {
         // get our list of recipients from the event's enumerated list of recipients
         // and the event code's address list.
 
-        Vector emailList;
+        List<String> emailList;
 
         if (type == null)
           {
-    	    emailList = event.notifyVect;
+    	    emailList = event.getMailTargets();
           }
         else
           {
-    	    emailList = VectorUtils.union(event.notifyVect, type.addressVect);
+    	    Set<String> addressSet = new HashSet<String>(event.getMailTargets());
+	    addressSet.addAll(type.addressList);
+
+	    emailList = new ArrayList<String>(addressSet);
           }
 
         String titleString;
@@ -605,14 +609,14 @@ public class DBLog {
    * synchronized log calls from being initiated during a
    * transaction's commit.</p>
    *
-   * @param invids a Vector of Invid objects modified by this transaction
+   * @param invids a List of Invid objects modified by this transaction
    * @param adminName Human readable string identifying the admin responsible for this transaction
    * @param admin Invid representing the user or admin responsible for this transaction
    * @param comment If not null, a comment to attach to logging and email generated in response to this transaction.
    * @param transaction The {@link arlut.csd.ganymede.server.DBEditSet} representing the transaction to be logged
    */
 
-  public synchronized void startTransactionLog(Vector<Invid> invids, String adminName, Invid admin, String comment, DBEditSet transaction)
+  public synchronized void startTransactionLog(List<Invid> invids, String adminName, Invid admin, String comment, DBEditSet transaction)
   {
     if (closed)
       {
@@ -727,20 +731,18 @@ public class DBLog {
 	    // response to this particular event so that we can record
 	    // in the log who got told about this
 
-	    Vector sentTo = new Vector();
-
 	    // first, if we have a recognizable object-specific event
 	    // happening, queue up notification for it to any interested
 	    // parties, for later transmission with sendObjectMail().
 
-	    sentTo = VectorUtils.union(sentTo, appendObjectMail(event, this.objectOuts,
-								transaction.description,
-								transaction.session));
+	    Set<String> sentTo = new HashSet<String>(appendObjectMail(event, this.objectOuts,
+								      transaction.description,
+								      transaction.session));
 
 	    // we may have a system event instead, in which case we handle
 	    // mailing it here
 
-	    sentTo = VectorUtils.union(sentTo, sendSysEventMail(event, transaction.description));
+	    sentTo.add(sendSysEventMail(event, transaction.description));
 
 	    // now, go ahead and add to the mail buffers we are prepping
 	    // to describe this whole transaction
@@ -757,15 +759,15 @@ public class DBLog {
 	    // calculating who needs to receive owner-group related
 	    // generic email about this event.
 
-	    sentTo = VectorUtils.union(sentTo, appendMailOut(event, this.transactionMailOuts,
-							     transaction.session,
-							     this.transactionControl));
+	    sentTo.add(appendMailOut(event, this.transactionMailOuts,
+				     transaction.session,
+				     this.transactionControl));
 
 	    // and we want to make sure and send this event to any
 	    // addresses listed in the starttransaction system event
 	    // object.
 
-	    sentTo = VectorUtils.union(sentTo, this.transactionControl.addressVect);
+	    sentTo.add(this.transactionControl.addressList);
 
 	    // now we record in the event who we actually sent the
 	    // mail to, so it is logged properly
@@ -813,7 +815,7 @@ public class DBLog {
 		// bombs away!
 
 		mailer.sendmsg(returnAddr,
-			       event.notifyVect,
+			       event.getEmailTargets(),
 			       Ganymede.subjectPrefixProperty + event.subject,
 			       message);
 	      }
@@ -843,13 +845,13 @@ public class DBLog {
    * synchronized log calls from being initiated during a
    * transaction's commit, when calling this function</p>
    *
-   * @param invids a Vector of Invid objects modified by this transaction
+   * @param invids a List of Invid objects modified by this transaction
    * @param adminName Human readable string identifying the admin responsible for this transaction
    * @param admin Invid representing the user or admin responsible for this transaction
    * @param transaction The {@link arlut.csd.ganymede.server.DBEditSet} representing the transaction to be logged
    */
 
-  public synchronized void endTransactionLog(Vector<Invid> invids, String adminName, Invid admin, DBEditSet transaction)
+  public synchronized void endTransactionLog(List<Invid> invids, String adminName, Invid admin, DBEditSet transaction)
   {
     Iterator iter;
 
@@ -932,7 +934,7 @@ public class DBLog {
 
 	    if (debug)
 	      {
-		System.err.println("Sending mail to " + (String) mailout.addresses.elementAt(0));
+		System.err.println("Sending mail to " + mailout.addresses.get(0));
 	      }
 
 	    try
@@ -1287,15 +1289,15 @@ public class DBLog {
    * <P>This sends out system event mail to the appropriate users,
    * based on the system event record's flags.</P>
    *
-   * @return vector of email addresses this event was sent to for
+   * @return List of email addresses this event was sent to for
    * system event notification
    */
 
-  private Vector sendSysEventMail(DBLogEvent event, String transdescrip)
+  private List<String> sendSysEventMail(DBLogEvent event, String transdescrip)
   {
     systemEventType type;
     String returnAddr;
-    Vector emailList = new Vector();
+    List<String> emailList = new ArrayList<String>();
 
     /* -- */
 
@@ -1310,124 +1312,119 @@ public class DBLog {
 
     type = (systemEventType) sysEventCodes.get(event.eventClassToken);
 
-    if (type == null)
+    if (type == null || !type.email)
       {
 	return emailList;
       }
 
-    if (type.mail)
+    Set<String> addressSet = new HashSet<String>();
+
+    if (debug)
       {
-	if (debug)
-	  {
-	    System.err.println("Attempting to email log event " + event.eventClassToken);
-	  }
+	System.err.println("Attempting to email log event " + event.eventClassToken);
+      }
 
-	// prepare our message, word wrap it
+    // prepare our message, word wrap it
 
-	String message;
+    String message;
 
-	if (transdescrip != null && (!transdescrip.equals("null")))
-	  {
-	    message = transdescrip + "\n\n" + type.description + "\n\n" + event.description + "\n\n";
-	  }
-	else if (type.description != null && (!type.description.equals("")))
-	  {
-	    message = type.description + "\n\n" + event.description + "\n\n";
-	  }
-	else
-	  {
-	    message = event.description + "\n\n";
-	  }
+    if (transdescrip != null && (!transdescrip.equals("null")))
+      {
+	message = transdescrip + "\n\n" + type.description + "\n\n" + event.description + "\n\n";
+      }
+    else if (type.description != null && (!type.description.equals("")))
+      {
+	message = type.description + "\n\n" + event.description + "\n\n";
+      }
+    else
+      {
+	message = event.description + "\n\n";
+      }
 
-	message = arlut.csd.Util.WordWrap.wrap(message, 78);
+    message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
-	message = message + signature;
+    message = message + signature;
 
-	// get our list of recipients
+    // get our list of recipients
 
-	if (event.notifyVect != null)
-	  {
-	    for (int i = 0; i < event.notifyVect.size(); i++)
-	      {
-		VectorUtils.unionAdd(emailList, event.notifyVect.elementAt(i));
-	      }
-	  }
+    if (event.getInvids() != null)
+      {
+	addressSet.addAll(event.getMailTargets());
+      }
 
-	if (type.addressVect != null)
-	  {
-	    for (int i = 0; i < type.addressVect.size(); i++)
-	      {
-		VectorUtils.unionAdd(emailList, type.addressVect.elementAt(i));
-	      }
-	  }
+    if (type.getMailTargets() != null)
+      {
+	addressSet.addAll(type.getMailTargets());
+      }
 
-	if (type.ccToSelf)
-	  {
-	    String name = null;
-
-	    if (event.admin != null)
-	      {
-		name = adminPersonaCustom.convertAdminInvidToString(event.admin, gSession.getSession());
-	      }
-	    else
-	      {
-		name = event.adminName;	// hopefully this will be a valid email target.. used for bad login attempts
-
-		// skip any persona info after a colon in case the
-		// user tried logging in with admin privileges
-
-		if (name != null && name.indexOf(':') != -1)
-		  {
-		    name = name.substring(0, name.indexOf(':'));
-		  }
-	      }
-
-	    if (name != null)
-	      {
-		VectorUtils.unionAdd(emailList, name);
-	      }
-	  }
-
-	if (type.ccToOwners)
-	  {
-	    emailList = VectorUtils.union(emailList, calculateOwnerAddresses(event.objects, true, true));
-	  }
-
-	// who should we say the mail is from?
+    if (type.ccToSelf)
+      {
+	String name = null;
 
 	if (event.admin != null)
 	  {
-	    returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
-								      gSession.getSession());
+	    name = adminPersonaCustom.convertAdminInvidToString(event.admin, gSession.getSession());
 	  }
 	else
 	  {
-	    returnAddr = Ganymede.returnaddrProperty;
+	    name = event.adminName;	// hopefully this will be a valid email target.. used for bad login attempts
+
+	    // skip any persona info after a colon in case the
+	    // user tried logging in with admin privileges
+
+	    if (name != null && name.indexOf(':') != -1)
+	      {
+		name = name.substring(0, name.indexOf(':'));
+	      }
 	  }
 
-	// and now..
-
-	try
+	if (name != null)
 	  {
-	    // bombs away!
+	    addressSet.add(name);
+	  }
+      }
 
-	    mailer.sendmsg(returnAddr,
-			   emailList,
-			   Ganymede.subjectPrefixProperty + type.name,
-			   message);
-	  }
-	catch (IOException ex)
-	  {
-	    // "DBLog.sendSysEventMail(): mailer error:\n{0}\n\nwhile processing: {1}"
-	    Ganymede.debug(ts.l("sendSysEventMail.mailer_error",
-				Ganymede.stackTrace(ex),
-				event));
-	  }
+    if (type.ccToOwners)
+      {
+	addressSet.addAll(calculateOwnerAddresses(event.getInvids(), true, true));
+      }
 
-	if (debug)
-	  {
-	    System.err.println("Completed emailing log event " + event.eventClassToken);
-	  }
+    // who should we say the mail is from?
+
+    if (event.admin != null)
+      {
+	returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
+								  gSession.getSession());
+      }
+    else
+      {
+	returnAddr = Ganymede.returnaddrProperty;
+      }
+
+    // and now..
+
+    emailList.add(addressSet);
+
+    try
+      {
+	// bombs away!
+
+	mailer.sendmsg(returnAddr,
+		       emailList,
+		       Ganymede.subjectPrefixProperty + type.name,
+		       message);
+      }
+    catch (IOException ex)
+      {
+	// "DBLog.sendSysEventMail(): mailer error:\n{0}\n\nwhile processing: {1}"
+	Ganymede.debug(ts.l("sendSysEventMail.mailer_error",
+			    Ganymede.stackTrace(ex),
+			    event));
+      }
+
+    if (debug)
+      {
+	System.err.println("Completed emailing log event " + event.eventClassToken);
       }
 
     return emailList;
@@ -1440,23 +1437,27 @@ public class DBLog {
    * email addresses signed up for Object Event notification in the
    * Ganymede database.</p>
    *
-   * @return Vector of email addresses this event will be sent to for
+   * @return List of email addresses this event will be sent to for
    * object event notification, or null if no object event mail is
    * generated
    */
 
-  private Vector appendObjectMail(DBLogEvent event, HashMap<String, HashMap<String, MailOut>> objectOuts,
-				  String transdescrip, DBSession transSession)
+  private List<String> appendObjectMail(DBLogEvent event,
+					HashMap<String, HashMap<String, MailOut>> objectOuts,
+					String transdescrip,
+					DBSession transSession)
   {
-    if (event == null || event.objects == null || event.objects.size() != 1)
+    if (event == null || event.getInvids() == null || event.getInvids().size() != 1)
       {
 	return null;
       }
 
     // --
 
-    Vector<String> mailList = new Vector<String>();
-    Invid objectInvid = (Invid) event.objects.elementAt(0);
+    Set<String> mailSet = new HashSet<String>();
+
+    List<String> mailList = new ArrayList<String>();
+    Invid objectInvid = event.getInvids().get(0);
     String key = event.eventClassToken + ":" + objectInvid.getType();
     objectEventType type = objEventCodes.get(key);
 
@@ -1490,19 +1491,19 @@ public class DBLog {
 
 	    if (name != null)
 	      {
-		mailList.addElement(name);
+		mailSet.add(name);
 	      }
 	  }
       }
 
     if (type.ccToOwners)
       {
-	mailList = (Vector<String>) VectorUtils.union(mailList, calculateOwnerAddresses(event.objects, true, true, transSession));
+	mailSet.addAll(calculateOwnerAddresses(event.getInvids(), true, true, transSession));
       }
 
-    mailList = (Vector<String>) VectorUtils.union(mailList, type.addressVect);
+    mailSet.addAll(type.addressList);
 
-    if (mailList.size() == 0)
+    if (mailSet.size() == 0)
       {
 	return null;
       }
@@ -1550,7 +1551,7 @@ public class DBLog {
 	mailout.append(event);
       }
 
-    return mailList;
+    return new ArrayList<String>(mailSet);
   }
 
   /**
@@ -1862,8 +1863,7 @@ public class DBLog {
 				    boolean mailToObjects,
 				    boolean mailToOwners)
   {
-    Vector
-      notifyVect;
+    Set<String> mailSet = new HashSet<String>();
 
     /* -- */
 
@@ -1888,22 +1888,18 @@ public class DBLog {
 
     if (eventType == null)
       {
-	notifyVect = VectorUtils.union(event.notifyVect,
-				       calculateOwnerAddresses(event.objects,
-							       mailToObjects,
-							       mailToOwners,
-                                                               session));
+	mailSet.addAll(event.getEmailTargets());
+	mailSet.addAll(calculateOwnerAddresses(event.getInvids(),
+					    mailToObjects,
+					    mailToOwners,
+					    session));
       }
     else if (eventType.ccToOwners)
       {
-	notifyVect = VectorUtils.union(event.notifyVect,
-				       calculateOwnerAddresses(event.objects,
-							       true, true,
-                                                               session));
-      }
-    else
-      {
-	notifyVect = new Vector();
+	mailSet.addAll(event.getEmailTargets());
+	mailSet.addAll(calculateOwnerAddresses(event.getInvids(),
+					    true, true,
+					    session));
       }
 
     if (eventType == null || eventType.ccToSelf)
@@ -1913,13 +1909,12 @@ public class DBLog {
 
 	if (event.admin != null)
 	  {
-	    VectorUtils.unionAdd(notifyVect,
-				 adminPersonaCustom.convertAdminInvidToString(event.admin,
-									      session));
+	    mailSet.add(adminPersonaCustom.convertAdminInvidToString(event.admin,
+								     session));
 	  }
       }
 
-    event.setMailTargets(notifyVect);
+    event.setMailTargets(mailSet);
 
     // The DBLogEvent needs to remember that we've already expanded
     // its email list.
@@ -1945,15 +1940,14 @@ public class DBLog {
    * text that will be mailed to that recipient when the
    * transaction's records are mailed out.</P>
    *
-   * @return vector of email addresses this event was sent to for
+   * @return List of email addresses this event was sent to for
    * system event notification
    */
 
-  private Vector appendMailOut(DBLogEvent event, HashMap<String, MailOut> map,
-			       DBSession session, systemEventType transactionType)
+  private List<String> appendMailOut(DBLogEvent event, HashMap<String, MailOut> map,
+				     DBSession session, systemEventType transactionType)
   {
     Iterator iter;
-    String str;
     MailOut mailout;
 
     /* -- */
@@ -1968,12 +1962,8 @@ public class DBLog {
 			     transactionType.ccToOwners);
       }
 
-    iter = event.notifyVect.iterator();
-
-    while (iter.hasNext())
+    for (String str: event.getEmailTargets())
       {
-	str = (String) iter.next();
-
 	if (debug)
 	  {
 	    System.err.println("Going to be mailing to " + str);
@@ -1990,7 +1980,7 @@ public class DBLog {
 	mailout.append(event);
       }
 
-    return event.notifyVect;
+    return event.getEmailTargets();
   }
 
   /**
@@ -2030,14 +2020,14 @@ public class DBLog {
   }
 
   /**
-   * <P>This method takes a vector of {@link arlut.csd.ganymede.common.Invid Invid}'s
+   * <P>This method takes a List of {@link arlut.csd.ganymede.common.Invid Invid}'s
    * representing objects touched
-   * during a transaction, and returns a Vector of email addresses that
+   * during a transaction, and returns a List of email addresses that
    * should be notified of operations affecting the objects in the
    * &lt;objects&gt; list.</P>
    */
 
-  public Vector calculateOwnerAddresses(Vector objects, boolean mailToObjects, boolean mailToOwners)
+  public List<String> calculateOwnerAddresses(List<Invid> objects, boolean mailToObjects, boolean mailToOwners)
   {
     return DBLog.calculateOwnerAddresses(objects, mailToObjects, mailToOwners, gSession.getSession());
   }
@@ -2052,34 +2042,35 @@ public class DBLog {
 
 
   /**
-   * <P>This method takes a vector of {@link arlut.csd.ganymede.common.Invid Invid}'s
-   * representing objects touched
-   * during a transaction, and returns a Vector of email addresses that
-   * should be notified of operations affecting the objects in the
-   * &lt;objects&gt; list.</P>
+   * <P>This method takes a List of {@link
+   * arlut.csd.ganymede.common.Invid Invid}'s representing objects
+   * touched during a transaction, and returns a List of email
+   * addresses that should be notified of operations affecting the
+   * objects in the &lt;objects&gt; list.</P>
    */
 
-  static public Vector calculateOwnerAddresses(Vector objects, DBSession session)
+  static public List<String> calculateOwnerAddresses(List<Invid> objects, DBSession session)
   {
     return calculateOwnerAddresses(objects, true, true, session);
   }
 
   /**
-   * <P>This method takes a vector of {@link arlut.csd.ganymede.common.Invid Invid}'s
+   * <P>This method takes a List of {@link arlut.csd.ganymede.common.Invid Invid}'s
    * representing objects touched
-   * during a transaction, and returns a Vector of email addresses that
+   * during a transaction, and returns a List of email addresses that
    * should be notified of operations affecting the objects in the
    * &lt;objects&gt; list.</P>
    */
 
-  static public Vector calculateOwnerAddresses(Vector objects, boolean mailToObjects, boolean mailToOwners, DBSession session)
+  static public List<String> calculateOwnerAddresses(List<Invid> objects, boolean mailToObjects,
+						     boolean mailToOwners, DBSession session)
   {
     Iterator objectsIter, ownersIter;
     Invid invid, ownerInvid;
     InvidDBField ownersField;
     DBObject object;
-    Vector vect;
-    Vector results = new Vector();
+    Set<String> addresses = new HashSet<String>();
+    List<String> results = new ArrayList<String>();
     HashSet<Invid> seenOwners = new HashSet<Invid>();
 
     /* -- */
@@ -2094,11 +2085,8 @@ public class DBLog {
 	return results;
       }
 
-    objectsIter = objects.iterator();
-
-    while (objectsIter.hasNext())
+    for (Invid invid: objects)
       {
-	invid = (Invid) objectsIter.next();
 	object = session.viewDBObject(invid);
 
 	if (object == null)
@@ -2121,13 +2109,14 @@ public class DBLog {
 
 	if (mailToObjects && object.hasEmailTarget())
 	  {
-	    results = VectorUtils.union(results, object.getEmailTargets());
+	    addresses.add(object.getEmailTargets());
 	  }
 
 	// okay, now we've got to see about notifying the owners..
 
 	if (!mailToOwners)
 	  {
+	    results.add(addresses);
 	    return results;
 	  }
 
@@ -2200,7 +2189,7 @@ public class DBLog {
 	    continue;
 	  }
 
-	vect = ownersField.getValuesLocal();
+	List<Invid> vect = (List<Invid>) ownersField.getValuesLocal();
 
 	// *** Caution!  getValuesLocal() does not clone the field's contents..
 	//
@@ -2221,12 +2210,8 @@ public class DBLog {
 	// of these owners, we need to see what email lists and addresses are
 	// to receive notification
 
-	ownersIter = vect.iterator(); // this object's owner list
-
-	while (ownersIter.hasNext())
+	for (Invid ownerInvid: vect)
 	  {
-	    ownerInvid = (Invid) ownersIter.next();
-
 	    if (!seenOwners.contains(ownerInvid))
 	      {
 		if (debug)
@@ -2235,13 +2220,15 @@ public class DBLog {
 				       session.getGSession().viewObjectLabel(ownerInvid));
 		  }
 
-		results = VectorUtils.union(results, ownerCustom.getAddresses(ownerInvid,
-									      session));
-
+		addresses.add(ownerCustom.getAddresses(ownerInvid, session));
 		seenOwners.add(ownerInvid);
 	      }
 	  }
       }
+
+    // our addresses set is complete, convert it to a List
+
+    results.add(addresses);
 
     if (debug)
       {
@@ -2254,7 +2241,7 @@ public class DBLog {
 		System.err.print(", ");
 	      }
 
-	    System.err.print(results.elementAt(i));
+	    System.err.print(results.get(i));
 	  }
 
 	System.err.println();
@@ -2281,7 +2268,7 @@ class systemEventType {
   String name;
   String description;
   boolean mail;
-  Vector addressVect;
+  List<String> addressList;
   boolean ccToSelf;
   boolean ccToOwners;
 
@@ -2301,7 +2288,7 @@ class systemEventType {
     // and calculate the addresses that always need to be notified
     // of this type of system event
 
-    addressVect = getAddresses(obj);
+    addressList = getAddresses(obj);
   }
 
   private String getString(DBObject obj, short fieldId)
@@ -2334,34 +2321,26 @@ class systemEventType {
    * an event of this type is logged.</P>
    */
 
-  private Vector getAddresses(DBObject obj)
+  private List<String> getAddresses(DBObject obj)
   {
     StringDBField strF;
+    Set<String> set = new HashSet<String>();
 
     /* -- */
 
-    Vector addressVect = new Vector();
-
     // Get the list of addresses from the object's external email
-    // string list.. we use union here so that we don't get
+    // string list.. we use a Set here so that we don't get
     // duplicates.
 
     strF = (StringDBField) obj.getField(SchemaConstants.EventExternalMail);
 
     if (strF != null)
       {
-	// we don't have to clone strF.getValuesLocal()
-	// since union() will copy the elements rather than just
-	// setting addressVect to the vector returned by
-	// strF.getValuesLocal() if addressVect is currently
-	// null.
-
-	addressVect = VectorUtils.union(addressVect, strF.getValuesLocal());
+	set.addAll((List<String>)strF.getValuesLocal());
       }
 
-    return addressVect;
+    return new ArrayList<String>(set);
   }
-
 }
 
 /*------------------------------------------------------------------------------
@@ -2381,7 +2360,7 @@ class objectEventType {
   short objType;
   String name;
   String description;
-  Vector addressVect;
+  List<String> addressList;
   boolean ccToSelf;
   boolean ccToOwners;
   String hashKey;
@@ -2395,7 +2374,7 @@ class objectEventType {
     token = getString(obj, SchemaConstants.ObjectEventToken);
     name = getString(obj, SchemaConstants.ObjectEventName);
     description = getString(obj, SchemaConstants.ObjectEventDescription);
-    addressVect = getAddresses(obj);
+    addressList = getAddresses(obj);
     ccToSelf = getBoolean(obj, SchemaConstants.ObjectEventMailToSelf);
     ccToOwners = getBoolean(obj, SchemaConstants.ObjectEventMailOwners);
     objType = (short) getInt(obj, SchemaConstants.ObjectEventObjectType);
@@ -2443,34 +2422,25 @@ class objectEventType {
    * an event of this type is logged.</P>
    */
 
-  private Vector getAddresses(DBObject obj)
+  private List<String> getAddresses(DBObject obj)
   {
     StringDBField strF;
+    Set<String> set = new HashSet<String>();
 
     /* -- */
 
-    Vector addressVect = new Vector();
-
     // Get the list of addresses from the object's external email
-    // string list.. we use union here so that we don't get
-    // duplicates.
+    // string list.. we a Set here so that we don't get duplicates.
 
     strF = (StringDBField) obj.getField(SchemaConstants.ObjectEventExternalMail);
 
     if (strF != null)
       {
-	// we don't have to clone strF.getValuesLocal()
-	// since union() will copy the elements rather than just
-	// setting addressVect to the vector returned by
-	// strF.getValuesLocal() if addressVect is currently
-	// null.
-
-	addressVect = VectorUtils.union(addressVect, strF.getValuesLocal());
+	set.addAll((List<String>)strF.getValuesLocal());
       }
 
-    return addressVect;
+    return new ArrayList<String>(set);
   }
-
 }
 
 /*------------------------------------------------------------------------------
@@ -2487,7 +2457,7 @@ class objectEventType {
 class MailOut {
 
   StringBuilder description = new StringBuilder();
-  Vector<String> addresses;
+  List<String> addresses;
   int entryCount = 0;
   String objName;
 
@@ -2500,8 +2470,8 @@ class MailOut {
 	throw new NullPointerException("bad address");
       }
 
-    addresses = new Vector<String>();
-    addresses.addElement(address);
+    addresses = new ArrayList<String>();
+    addresses.add(address);
   }
 
   void setObjectName(String objName)

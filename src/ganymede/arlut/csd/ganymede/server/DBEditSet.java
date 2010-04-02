@@ -573,7 +573,7 @@ public class DBEditSet {
 
   private void streamLogEvent(String eventClassToken, String description,
 			      Invid admin, String adminName,
-			      Vector objects, Vector notifyList)
+			      List<Invid> objects, List<String> notifyList)
   {
     DBLogEvent event = new DBLogEvent(eventClassToken, description,
 				      admin, adminName,
@@ -1879,7 +1879,7 @@ public class DBEditSet {
 	return;
       }
 
-    Vector invids;
+    Vector<Invid> invids;
     String diff;
     Invid responsibleInvid = null;
     String responsibleName = null;
@@ -1907,8 +1907,8 @@ public class DBEditSet {
       {
       case ObjectStatus.EDITING:
 
-	invids = new Vector();
-	invids.addElement(eObj.getInvid());
+	invids = new Vector<Invid>();
+	invids.add(eObj.getInvid());
 
 	// if we changed an embedded object, make a
 	// note that the containing object was
@@ -1922,7 +1922,7 @@ public class DBEditSet {
 
 	    if (container != null)
 	      {
-		invids.addElement(container.getInvid());
+		invids.add(container.getInvid());
 	      }
 	  }
 
@@ -1960,7 +1960,7 @@ public class DBEditSet {
 					eObj.getInvid(),
 					diff),
 				   responsibleInvid, responsibleName,
-				   invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+				   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
 		    logNormal = false;
 		  }
@@ -1986,7 +1986,7 @@ public class DBEditSet {
 				    String.valueOf(eObj.getInvid()),
 				    diff),
 			       responsibleInvid, responsibleName,
-			       invids, eObj.getEmailTargets());
+			       invids, (List<String>) eObj.getEmailTargets());
 	      }
 	  }
 
@@ -1994,8 +1994,8 @@ public class DBEditSet {
 
       case ObjectStatus.CREATING:
 
-	invids = new Vector();
-	invids.addElement(eObj.getInvid());
+	invids = new Vector<Invid>();
+	invids.add(eObj.getInvid());
 
 	// if we created an embedded object, make a
 	// note that the containing object was
@@ -2009,7 +2009,7 @@ public class DBEditSet {
 
 	    if (container != null)
 	      {
-		invids.addElement(container.getInvid());
+		invids.add(container.getInvid());
 	      }
 	  }
 
@@ -2057,7 +2057,7 @@ public class DBEditSet {
 					eObj.getInvid(),
 					diff),
 				   responsibleInvid, responsibleName,
-				   invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+				   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
 		    logNormal = false;
 		  }
@@ -2092,8 +2092,8 @@ public class DBEditSet {
 
       case ObjectStatus.DELETING:
 
-	invids = new Vector();
-	invids.addElement(eObj.getInvid());
+	invids = new Vector<Invid>();
+	invids.add(eObj.getInvid());
 
 	// if we deleted an embedded object, make a
 	// note that the containing object was
@@ -2109,7 +2109,7 @@ public class DBEditSet {
 
 		if (container != null)
 		  {
-		    invids.addElement(container.getInvid());
+		    invids.add(container.getInvid());
 		  }
 	      }
 	    catch (IntegrityConstraintException ex)
@@ -2159,7 +2159,7 @@ public class DBEditSet {
 					eObj.getInvid(),
 					oldVals),
 				   responsibleInvid, responsibleName,
-				   invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+				   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
 		    logNormal = false;
 		  }
@@ -2230,7 +2230,7 @@ public class DBEditSet {
 					eObj.getLabel(),
 					eObj.getInvid()),
 				   responsibleInvid, responsibleName,
-				   invids, VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+				   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
 		    logNormal = false;
 		  }

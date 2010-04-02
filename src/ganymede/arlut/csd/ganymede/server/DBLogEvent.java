@@ -51,8 +51,10 @@ package arlut.csd.ganymede.server;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.Vector;
+import java.util.List;
 
 import arlut.csd.ganymede.common.Invid;
 
@@ -77,9 +79,14 @@ public class DBLogEvent {
   String subject = null;
   String adminName;
   Invid admin;
-  Vector objects;
-  Vector notifyVect;
-  String notifyList;
+
+  private List<Invid> objects;
+  private List<String> notifyList;
+  
+  /**
+   * Will be true if this log event has already had its email
+   * recipient list expanded in keeping with systemic logging rules.
+   */
 
   boolean augmented = false;
 
@@ -95,19 +102,19 @@ public class DBLogEvent {
    * course of a transaction, and transmitted if and only if the
    * transaction is successfully committed.
    *
-   * @param addresses A vector of Strings listing email addresses to send notification
+   * @param addresses A List of Strings listing email addresses to send notification
    * of this event to.
    * @param subject a short string specifying a DBObject
    * record describing the general category for the event
    * @param description Descriptive text to be entered in the record of the event
    * @param admin Invid pointing to the adminPersona that fired the event, if any
    * @param adminName String containing the name of the adminPersona that fired the event, if any
-   * @param objects A vector of invids of objects involved in this event.
+   * @param objects A List of Invids of objects involved in this event.
    */
 
-  public DBLogEvent(Vector addresses, String subject, String description,
+  public DBLogEvent(List<String> addresses, String subject, String description,
 		    Invid admin, String adminName,
-		    Vector objects)
+		    List<Invid> objects)
   {
     this("mailout", description, admin, adminName, objects, addresses);
 
@@ -115,21 +122,21 @@ public class DBLogEvent {
   }
 
   /**
+   * Constructor
    *
    * @param eventClassToken a short string specifying a DBObject
    * record describing the general category for the event
    * @param description Descriptive text to be entered in the record of the event
    * @param admin Invid pointing to the adminPersona that fired the event, if any
    * @param adminName String containing the name of the adminPersona that fired the event, if any
-   * @param objects A vector of invids of objects involved in this event.
-   * @param notifyVec A vector of Strings listing email addresses to send notification
+   * @param objects A List of Invids of objects involved in this event.
+   * @param notifyVec A List of Strings listing email addresses to send notification
    * of this event to.
-   * 
    */
 
   public DBLogEvent(String eventClassToken, String description,
 		    Invid admin, String adminName,
-		    Vector objects, Vector notifyVec)
+		    List<Invid> objects, List<String> notifyList)
   {
     this.eventClassToken = eventClassToken;
     this.description = description;
@@ -137,7 +144,7 @@ public class DBLogEvent {
     this.adminName = adminName;
     this.objects = objects;
 
-    setMailTargets(notifyVec);
+    setMailTargets(notifyList);
   }
 
   public void setTransactionID(String transID)
@@ -156,48 +163,32 @@ public class DBLogEvent {
   }
 
   /**
-   *
    * This method is used by DBLog to set the list of email targets
    * that this event will need to be mailed to.
-   * 
    */
 
-  public void setMailTargets(Vector mailTargets)
+  public void setMailTargets(Collection<String> mailTargets)
   {
-    this.notifyVect = mailTargets;
-
-    if (mailTargets == null)
-      {
-	notifyList = "";
-	return;
-      }
-
-    // we want to set the notifyList String as well as the
-    // notifyVect vector..
-
-    StringBuffer buf = new StringBuffer();
-    
-    for (int i = 0; i < notifyVect.size(); i++)
-      {
-	if (i > 0)
-	  {
-	    buf.append(", ");
-	  }
-	    
-	buf.append((String) notifyVect.elementAt(i));
-      }
-    
-    this.notifyList = buf.toString();
+    this.notifyList = new ArrayList<String>(mailTargets);
   }
 
   /**
-   *
-   * Debug rig.. this will scan a log file and attempt to parse lines out of it
-   *
+   * Return the List of Invids affected by this DBLogEvent.
    */
 
-  static public void main(String argv[])
+  public List<Invid> getInvids()
   {
+    return objects;
+  }
+
+  /**
+   * Return the List of email recipients that this DBLogEvent should
+   * be directed to.
+   */
+
+  public List<String> getMailTargets()
+  {
+    return notifyList;
   }
 
   public String toString()

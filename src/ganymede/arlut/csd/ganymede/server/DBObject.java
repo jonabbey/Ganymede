@@ -2009,9 +2009,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * 'in-care-of' email for this object.</p>
    */
 
-  public final Vector getEmailTargets()
+  public final List<String> getEmailTargets()
   {
-    return objectBase.getObjectHook().getEmailTargets(this);
+    return (List<String>) objectBase.getObjectHook().getEmailTargets(this);
   }
 
   /**
