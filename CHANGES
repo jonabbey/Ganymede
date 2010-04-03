@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-December 11, 2009
+30 April, 2010
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: December 11, 2009
+RELEASE DATE: 30 April, 2010
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1587,6 +1587,19 @@ XML 1.0 version 5 element or attribute name.
 Unlike XML element names, Ganymede object type and field names *can*
 include a space character, which is represented as an underscore in
 Ganymede's XML dialect, and *can not* include an underscore character.
+
+106. [SERVER] Incorporated the Java genericized Collections API
+
+The logging system has been revised internally to use List instead of
+Vector, and Set rather than my old home-spun
+arlut.csd.Util.VectorUnion stuff.
+
+This has had some changes on method definitions that customizers may
+run into when compiling their code against the Ganymede server from
+this point on.
+
+In particular, DBEditObject.getEmailTargets() must now return a
+List<String> instead of a Vector.
 
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 
