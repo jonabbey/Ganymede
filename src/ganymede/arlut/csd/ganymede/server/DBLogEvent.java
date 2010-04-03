@@ -53,6 +53,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class DBLogEvent {
   Invid admin;
 
   private List<Invid> objects;
-  private List<String> notifyList = new ArrayList<String>();
+  private List<String> notifyList = Collections.emptyList();
   
   /**
    * Will be true if this log event has already had its email
@@ -184,7 +185,7 @@ public class DBLogEvent {
       }
     else
       {
-	this.notifyList = new ArrayList<String>();
+	this.notifyList = Collections.emptyList();
       }
   }
 
