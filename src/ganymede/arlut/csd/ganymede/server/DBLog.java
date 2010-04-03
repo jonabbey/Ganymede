@@ -980,7 +980,7 @@ public class DBLog {
 	types.add(base.getName());
       }
 
-    if (types.size() < 2)
+    if (types.size() <= 3)
       {
 	// prepare a count of create, edit, delete for each type
 	
