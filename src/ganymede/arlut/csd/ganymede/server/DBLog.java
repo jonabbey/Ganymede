@@ -1450,7 +1450,7 @@ public class DBLog {
   {
     if (event == null || event.getInvids() == null || event.getInvids().size() != 1)
       {
-	return null;
+	return Collections.emptyList();
       }
 
     // --
@@ -1476,7 +1476,7 @@ public class DBLog {
 	    System.err.println("DBLog.appendObjectMail(): couldn't find objectEventType " + key);
 	  }
 
-	return null;
+	return Collections.emptyList();
       }
 
     // ok.  now we've got an objectEventType, so check to see if we
@@ -1506,7 +1506,7 @@ public class DBLog {
 
     if (mailSet.size() == 0)
       {
-	return null;
+	return Collections.emptyList();
       }
 
     // looking up the object name can be pricey, so we wait until we
