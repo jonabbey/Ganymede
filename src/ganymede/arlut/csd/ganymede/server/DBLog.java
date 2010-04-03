@@ -942,7 +942,7 @@ public class DBLog {
 	      {
 		mailer.sendmsg(returnAddr,
 			       mailout.addresses,
-			       Ganymede.subjectPrefixProperty + describeTransaction(invids, transaction),
+			       Ganymede.subjectPrefixProperty + describeTransaction(mailout, transaction),
 			       description);
 	      }
 	    catch (IOException ex)
@@ -963,12 +963,12 @@ public class DBLog {
    * Synthesize a descriptive subject for transaction summary email.
    */
 
-  private String describeTransaction(List<Invid> invids, DBEditSet transaction)
+  private String describeTransaction(MailOut mailOut, DBEditSet transaction)
   {
     String subject = null;
     Set<String> types = new TreeSet<String>();
 
-    for (Invid invid: invids)
+    for (Invid invid: mailOut.getInvids())
       {
 	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
 
@@ -991,7 +991,7 @@ public class DBLog {
 	    int edit = 0;
 	    int delete = 0;
 	    
-	    for (Invid invid: invids)
+	    for (Invid invid: mailOut.getInvids())
 	      {
 		if (invid.getType() == base.getTypeID())
 		  {
@@ -1117,7 +1117,7 @@ public class DBLog {
 	int edit = 0;
 	int delete = 0;
 
-	for (Invid invid: invids)
+	for (Invid invid: mailOut.getInvids())
 	  {
 	    DBEditObject object = transaction.findObject(invid);
 
@@ -2441,6 +2441,7 @@ class MailOut {
 
   StringBuilder description = new StringBuilder();
   List<String> addresses;
+  Set<Invid> invids = new HashSet<Invid>();
   int entryCount = 0;
   String objName;
 
@@ -2481,6 +2482,13 @@ class MailOut {
 
     description.append("\n\n");
     description.append(event.description);
+
+    invids.addAll(event.getInvids());
+  }
+
+  public Set<Invid> getInvids()
+  {
+    return invids;
   }
 
   public String toString()
