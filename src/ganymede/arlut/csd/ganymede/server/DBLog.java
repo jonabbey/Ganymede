@@ -977,7 +977,7 @@ public class DBLog {
 	    continue;
 	  }
 	
-	types.add(base.getName());
+	types.add(base.getName().toLowerCase());
       }
 
     if (types.size() <= 3)
@@ -1020,19 +1020,19 @@ public class DBLog {
 
 	    if (create > 0)
 	      {
-		// "Created {0,number}"
+		// "created {0,number}"
 		createString = ts.l("describeTransaction.typed_create", create);
 	      }
 
 	    if (edit > 0)
 	      {
-		// "Edited {0, number}"
+		// "edited {0, number}"
 		editString = ts.l("describeTransaction.typed_edit", edit);
 	      }
 
 	    if (delete > 0)
 	      {
-		// "Deleted {0, number}"
+		// "deleted {0, number}"
 		editString = ts.l("describeTransaction.typed_delete", delete);
 	      }
 
