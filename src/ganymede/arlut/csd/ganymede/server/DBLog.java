@@ -977,7 +977,7 @@ public class DBLog {
 	    continue;
 	  }
 	
-	types.add(base.getName().toLowerCase());
+	types.add(base.getName());
       }
 
     if (types.size() <= 3)
@@ -1048,17 +1048,17 @@ public class DBLog {
 		if (createString != null)
 		  {
 		    // "{0} {1} objects"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template", createString, type);
+		    objectSummary = ts.l("describeTransaction.typed_subject_template", createString, type.toLowerCase());
 		  }
 		else if (editString != null)
 		  {
 		    // "{0} {1} objects"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template", editString, type);
+		    objectSummary = ts.l("describeTransaction.typed_subject_template", editString, type.toLowerCase());
 		  }
 		else if (deleteString != null)
 		  {
 		    // "{0} {1} objects"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template", deleteString, type);
+		    objectSummary = ts.l("describeTransaction.typed_subject_template", deleteString, type.toLowerCase());
 		  }
 
 		break;
@@ -1070,7 +1070,7 @@ public class DBLog {
 		    // "{0}, {1}"
 		    objectSummary = ts.l("describeTransaction.typed_subject_template",
 					 ts.l("describeTransaction.typed_subject_duplex_pattern", editString, deleteString),
-					 type);
+					 type.toLowerCase());
 		  }
 		else if (editString == null)
 		  {
@@ -1078,7 +1078,7 @@ public class DBLog {
 		    // "{0}, {1}"
 		    objectSummary = ts.l("describeTransaction.typed_subject_template",
 					 ts.l("describeTransaction.typed_subject_duplex_pattern", createString, deleteString),
-					 type);
+					 type.toLowerCase());
 		  }
 		else if (deleteString == null)
 		  {
@@ -1086,7 +1086,7 @@ public class DBLog {
 		    // "{0}, {1}"
 		    objectSummary = ts.l("describeTransaction.typed_subject_template",
 					 ts.l("describeTransaction.typed_subject_duplex_pattern", createString, editString),
-					 type);
+					 type.toLowerCase());
 		  }
 
 		break;
@@ -1096,7 +1096,7 @@ public class DBLog {
 		// "{0}, {1}, {2}"
 		objectSummary = ts.l("describeTransaction.typed_subject_template",
 				     ts.l("describeTransaction.typed_subject_triplex_pattern", createString, editString, deleteString),
-				     type);
+				     type.toLowerCase());
 	      }
 
 	    if (subject == null)
