@@ -958,7 +958,7 @@ public class DBLog {
     this.transactionMailOuts.clear();
     this.transactionMailOuts = null;
   }
-  
+
   /**
    * Synthesize a descriptive subject for transaction summary email.
    */
@@ -976,21 +976,21 @@ public class DBLog {
 	  {
 	    continue;
 	  }
-	
+
 	types.add(base.getName());
       }
 
     if (types.size() <= 3)
       {
 	// prepare a count of create, edit, delete for each type
-	
+
 	for (String type: types)
 	  {
 	    DBObjectBase base = Ganymede.db.getObjectBase(type);
 	    int create = 0;
 	    int edit = 0;
 	    int delete = 0;
-	    
+
 	    for (Invid invid: mailOut.getInvids())
 	      {
 		if (invid.getType() == base.getTypeID())
@@ -1146,7 +1146,7 @@ public class DBLog {
 	    // "Created {0,number}"
 	    createString = ts.l("describeTransaction.create", create);
 	  }
-	
+
 	if (edit > 0)
 	  {
 	    // "Edited {0, number}"
