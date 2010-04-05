@@ -3250,9 +3250,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         Vector<Invid> group_targets = (Vector<Invid>) group.getFieldValuesLocal(emailListSchema.MEMBERS);
         Vector external_targets = group.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
 
-        if( !empty(group_aliases) || !empty(group_targets) || !empty(external_targets))
+        if (!empty(group_aliases) || !empty(group_targets) || !empty(external_targets))
           {
-          set.add(groupname);
+	    set.add(groupname);
           }
 
         if (!empty(group_aliases))
