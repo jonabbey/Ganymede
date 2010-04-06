@@ -111,6 +111,12 @@ public class FieldInfo implements java.io.Serializable {
 
     try
       {
+	defined = field.isDefined();
+	editable = field.isEditable();
+	visible = field.isVisible();
+	
+	ID = field.getID();
+
 	if (field instanceof PasswordDBField)
 	  {
 	    value = field.getValueString(); // this doesn't check permissions!
@@ -123,12 +129,6 @@ public class FieldInfo implements java.io.Serializable {
 	  {
 	    value = field.getValues();// can throw IllegalArgumentException on perms failure
 	  }
-	
-	defined = field.isDefined();
-	editable = field.isEditable();
-	visible = field.isVisible();
-	
-	ID = field.getID();
       }
     catch (RemoteException ex)
       {
