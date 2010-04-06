@@ -1304,7 +1304,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		  {
 		    results.addElement(new FieldInfo(field));
 		  }
-		catch (RuntimeException ex)
+		catch (GanyPermissionsException ex)
+		  {
+		  }
+		catch (RemoteException ex)
 		  {
                     // scream a bit about this exception so someone
                     // can take a look at it.

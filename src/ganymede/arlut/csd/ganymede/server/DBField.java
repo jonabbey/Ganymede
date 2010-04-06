@@ -793,7 +793,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public final FieldInfo getFieldInfo()
+  public final FieldInfo getFieldInfo() throws GanyPermissionsException
   {
     return new FieldInfo(this);
   }

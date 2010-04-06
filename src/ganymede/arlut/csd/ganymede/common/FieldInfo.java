@@ -105,7 +105,7 @@ public class FieldInfo implements java.io.Serializable {
    * we will create FieldInfo objects from DBFields on the server side.</p>
    */
 
-  public FieldInfo(db_field field)
+  public FieldInfo(db_field field) throws GanyPermissionsException
   {
     this.field = field;
 
@@ -129,6 +129,10 @@ public class FieldInfo implements java.io.Serializable {
 	  {
 	    value = field.getValues();// can throw IllegalArgumentException on perms failure
 	  }
+      }
+    catch (GanyPermissionsException ex)
+      {
+	throw ex;
       }
     catch (RemoteException ex)
       {
