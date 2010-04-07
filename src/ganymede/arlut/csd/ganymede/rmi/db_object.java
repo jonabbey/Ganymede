@@ -51,6 +51,7 @@ import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Vector;
 
+import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ReturnVal;
 
@@ -99,10 +100,16 @@ public interface db_object extends java.rmi.Remote {
   /**
    * <p>Returns a vector of custom field information records, in display order.</p>
    *
+   * <p>This method is called by the client so as to download all of
+   * the field values in an object in a single remote method call.</p>
+   *
+   * <p>If the client does not have permission to view a field, that
+   * field will be left out of the resulting Vector.</p>
+   *
    * @see arlut.csd.ganymede.common.FieldInfo
    */
 
-  public Vector getFieldInfoVector() throws RemoteException;
+  public Vector<FieldInfo> getFieldInfoVector() throws RemoteException;
 
   /**
    * <p>Get access to a field from this object.</p>

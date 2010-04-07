@@ -1277,10 +1277,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method is called by the client so as to download all of
    * the field values in an object in a single remote method call.</p>
    *
+   * <p>If the client does not have permission to view a field, that
+   * field will be left out of the resulting Vector.</p>
+   *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public Vector getFieldInfoVector()
+  public Vector<FieldInfo> getFieldInfoVector()
   {
     Vector results = new Vector();
     DBField field;
@@ -1306,6 +1309,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		  }
 		catch (GanyPermissionsException ex)
 		  {
+		    // swallow the exception without comment, we'll
+		    // just leave the field out of the vector
 		  }
 		catch (RemoteException ex)
 		  {
