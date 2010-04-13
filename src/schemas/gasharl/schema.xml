@@ -605,6 +605,14 @@ Limited to 16 for NFS.</comment>
                 <maxlength val="20"/>
               </typedef>
             </fielddef>
+            <fielddef name="Mail_Password_2" id="284">
+              <typedef type="password">
+                <minlength val="10"/>
+                <maxlength val="20"/>
+                <md5crypted/>
+                <plaintext/>
+              </typedef>
+            </fielddef>
             <fielddef name="Mail_Exp_Date" id="281">
               <typedef type="date"/>
             </fielddef>
@@ -617,6 +625,14 @@ Limited to 16 for NFS.</comment>
             <fielddef name="Old_Mail_Password" id="283">
               <typedef type="string">
                 <maxlength val="20"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Old_Mail_Password_2" id="285">
+              <typedef type="password">
+                <minlength val="10"/>
+                <maxlength val="20"/>
+                <md5crypted/>
+                <plaintext/>
               </typedef>
             </fielddef>
           </tab>
