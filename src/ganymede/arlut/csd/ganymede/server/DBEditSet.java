@@ -1103,7 +1103,7 @@ public class DBEditSet {
    * indicating the problem.
    */
 
-  private final void commit_run_precommit_hooks() throws CommitNonFatalException
+  private final void commit_run_precommit_hooks() throws CommitException
   {
     Iterator iter;
     ReturnVal retVal;
@@ -1121,7 +1121,7 @@ public class DBEditSet {
     // those new objects will not have their preCommitHook() run.
     //
     // this shouldn't be a big concern since the main purpose of
-    // preCommitHook() is to update hidden label fields.
+    // preCommitHook() is to update hidden label fields. /XXX
 
     DBEditObject[] myObjects = getObjectList();
 
@@ -1155,8 +1155,12 @@ public class DBEditSet {
       }
     catch (CommitNonFatalException ex)
       {
-        rollback(checkpointKey);
-        throw ex;
+	if (!rollback(checkpointKey))
+	  {
+	    throw new CommitFatalException(ex.getReturnVal());
+	  }
+
+	throw ex;
       }
 
     popCheckpoint(checkpointKey);
