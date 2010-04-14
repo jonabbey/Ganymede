@@ -415,11 +415,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
 	if (i != index)
 	  {
-	    newTable[j++] = table[i++];
-	  }
-	else
-	  {
-	    i++;
+	    newTable[j++] = table[i];
 	  }
       }
 
