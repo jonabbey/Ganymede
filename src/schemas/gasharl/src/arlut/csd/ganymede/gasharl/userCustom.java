@@ -498,7 +498,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
-    if (isSet(userSchema.ALLOWEXTERNAL) && isDefined(userSchema.MAILUSER) && isDefined(userSchema.MAILPASSWORD))
+    // Send out mail describing the external credentials for this
+    // user, if such are defined
+
+    if (isSet(userSchema.ALLOWEXTERNAL) && isDefined(userSchema.MAILUSER) && isDefined(userSchema.MAILPASSWORD2))
       {
 	DBObject originalObject = getOriginal();
 	String titleString = null;
@@ -506,7 +509,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	String expireString = null;
 
 	String mailUsername = (String) getFieldValueLocal(userSchema.MAILUSER);
-	String mailPassword = (String) getFieldValueLocal(userSchema.MAILPASSWORD);
+	PasswordDBField mailPasswordField = (PasswordDBField) getField(userSchema.MAILPASSWORD2);
+	String mailPassword = mailPasswordField.getPlainText();
+
+	if (mailPassword == null)
+	  {
+	    mailPassword = "";	// shouldn't need this
+	  }
+
 	Date mailExpireDate = null;
 
 	if (isDefined(userSchema.MAILEXPDATE))
@@ -517,7 +527,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      "your external mail access four weeks before these credentials expire.";
 	  }
 
-	if (originalObject == null || !originalObject.isDefined(userSchema.MAILUSER) || !originalObject.isDefined(userSchema.MAILPASSWORD))
+	if (originalObject == null || !originalObject.isDefined(userSchema.MAILUSER) || !originalObject.isDefined(userSchema.MAILPASSWORD2))
 	  {
 	    titleString = "External Email Credentials Set For User " + this.getLabel();
 
@@ -535,23 +545,29 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		messageString = messageString + "\n\n" + expireString;
 	      }
 	  }
-	else if (!mailUsername.equals(originalObject.getFieldValueLocal(userSchema.MAILUSER)) ||
-		 !mailPassword.equals(originalObject.getFieldValueLocal(userSchema.MAILPASSWORD)))
+	else
 	  {
-	    titleString = "External Email Credentials Changed For User " + this.getLabel();
+	    PasswordDBField oldMailPasswordField = (PasswordDBField) originalObject.getField(userSchema.MAILPASSWORD2);
+	    String oldPassword = oldMailPasswordField.getPlainText();
 
-	    messageString = "The external mail credentials for user account " + this.getLabel() + 
-	      " have been changed.\n\n" +
-	      "In order continue to read and send mail from outside the laboratory, you will need to configure your external email client " +
-	      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
-	      "read incoming mail from mailboxes.arlut.utexas.edu via IMAP over SSL.\n" +
-	      "You will need to specify the following randomly assigned user name and password for both services:\n\n" +
-	      "Username: " + mailUsername + "\n" +
-	      "Password: " + mailPassword;
-
-	    if (expireString != null)
+	    if (!mailUsername.equals(originalObject.getFieldValueLocal(userSchema.MAILUSER)) ||
+		!mailPassword.equals(oldPassword))
 	      {
-		messageString = messageString + "\n\n" + expireString;
+		titleString = "External Email Credentials Changed For User " + this.getLabel();
+
+		messageString = "The external mail credentials for user account " + this.getLabel() + 
+		  " have been changed.\n\n" +
+		  "In order continue to read and send mail from outside the laboratory, you will need to configure your external email client " +
+		  "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
+		  "read incoming mail from mailboxes.arlut.utexas.edu via IMAP over SSL.\n" +
+		  "You will need to specify the following randomly assigned user name and password for both services:\n\n" +
+		  "Username: " + mailUsername + "\n" +
+		  "Password: " + mailPassword;
+
+		if (expireString != null)
+		  {
+		    messageString = messageString + "\n\n" + expireString;
+		  }
 	      }
 	  }
 
@@ -675,12 +691,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     switch (fieldid)
       {
       case MAILUSER:
-      case MAILPASSWORD:
+      case MAILPASSWORD2:
       case MAILEXPDATE:
 	return field.getObject().isSet(ALLOWEXTERNAL);
 
+      case MAILPASSWORD:
       case OLDMAILUSER:
       case OLDMAILPASSWORD:
+      case OLDMAILPASSWORD2:
 	return false;
       }
 
@@ -713,6 +731,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case SIGNATURE:
       case EMAILTARGET:
       case PASSWORDCHANGETIME:
+      case MAILUSER:
+      case MAILPASSWORD:
+      case MAILPASSWORD2:
+      case OLDMAILUSER:
+      case OLDMAILPASSWORD:
+      case OLDMAILPASSWORD2:
 	return false;
       }
 
@@ -1178,7 +1202,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return !object.isInactivated();
 
       case userSchema.MAILUSER:
-      case userSchema.MAILPASSWORD:
+      case userSchema.MAILPASSWORD2:
       case userSchema.MAILEXPDATE:
 	return object.isSet(ALLOWEXTERNAL);
       }
@@ -2633,9 +2657,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	if (field.getID() == ALLOWEXTERNAL)
 	  {
-	    // the second true in the ReturnVal constructor makes the
-	    // Ganymede logic go ahead and complete the operation
-	    // normally, just taking the rescan information as an
+	    // a success ReturnVal is used to tell the Ganymede logic
+	    // to go ahead and complete the operation normally.  In
+	    // this case, it will take the rescan information as an
 	    // extra to pass back to the client.
 
 	    result = ReturnVal.success();
@@ -2643,7 +2667,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    if (Boolean.TRUE.equals(param1))
 	      {
 		StringDBField usernameField = (StringDBField) getField(userSchema.MAILUSER);
-		StringDBField passField = (StringDBField) getField(userSchema.MAILPASSWORD);
+		PasswordDBField passField = (PasswordDBField) getField(userSchema.MAILPASSWORD2);
 		DateDBField dateField = (DateDBField) getField(userSchema.MAILEXPDATE);
 
 		result = ReturnVal.merge(result, usernameField.setValueLocal(RandomUtils.getRandomUsername()));
@@ -2653,7 +2677,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    return result;
 		  }
 
-		result = ReturnVal.merge(result, passField.setValueLocal(RandomUtils.getRandomPassword(20)));
+		result = ReturnVal.merge(result, passField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
 
 		if (!ReturnVal.didSucceed(result))
 		  {
@@ -2672,7 +2696,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      }
 
 	    result.addRescanField(this.getInvid(), userSchema.MAILUSER);
-	    result.addRescanField(this.getInvid(), userSchema.MAILPASSWORD);
+	    result.addRescanField(this.getInvid(), userSchema.MAILPASSWORD2);
 	    result.addRescanField(this.getInvid(), userSchema.MAILEXPDATE);
 
 	    return result;

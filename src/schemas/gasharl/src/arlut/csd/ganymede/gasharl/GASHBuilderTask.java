@@ -4022,7 +4022,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 if (user.isInactivated() ||
                     !user.isSet(userSchema.ALLOWEXTERNAL) ||
                     !user.isDefined(userSchema.MAILUSER) ||
-                    !user.isDefined(userSchema.MAILPASSWORD))
+                    !user.isDefined(userSchema.MAILPASSWORD2))
                   {
                     continue;
                   }
@@ -4033,8 +4033,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 StringDBField mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
                 String mailUsername = (String) mailUsernameField.getValueLocal();
 
-                StringDBField mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
-                String mailpass = (String) mailpassField.getValueLocal();
+                PasswordDBField mailpassField = (PasswordDBField) user.getField(userSchema.MAILPASSWORD2);
+                String mailpass = mailpassField.getPlainText();
 
                 mailCredentials.print(mailUsername);
                 mailCredentials.print(" ");
@@ -4046,13 +4046,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 extIMAPCredentials.print(" ");
                 extIMAPCredentials.println(mailpass);
 
-                if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD))
+                if (user.isDefined(userSchema.OLDMAILUSER) && user.isDefined(userSchema.OLDMAILPASSWORD2))
                   {
-                    mailUsernameField = (StringDBField) user.getField(userSchema.MAILUSER);
+                    mailUsernameField = (StringDBField) user.getField(userSchema.OLDMAILUSER);
                     mailUsername = (String) mailUsernameField.getValueLocal();
 
-                    mailpassField = (StringDBField) user.getField(userSchema.MAILPASSWORD);
-                    mailpass = (String) mailpassField.getValueLocal();
+                    mailpassField = (PasswordDBField) user.getField(userSchema.OLDMAILPASSWORD2);
+                    mailpass = mailpassField.getPlainText();
 
                     mailCredentials.print(mailUsername);
                     mailCredentials.print(" ");

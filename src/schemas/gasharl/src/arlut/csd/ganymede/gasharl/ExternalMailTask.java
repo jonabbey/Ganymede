@@ -69,6 +69,7 @@ import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeServer;
 import arlut.csd.ganymede.server.GanymedeSession;
 import arlut.csd.ganymede.server.StringDBField;
+import arlut.csd.ganymede.server.PasswordDBField;
 import arlut.csd.Util.RandomUtils;
 
 /*------------------------------------------------------------------------------
@@ -261,7 +262,6 @@ public class ExternalMailTask implements Runnable {
 	    continue;
 	  }
 
-
 	// then one day before, we send a warning.
 
 	lowerBound.setTime(currentTime);
@@ -275,7 +275,6 @@ public class ExternalMailTask implements Runnable {
 	    continue;
 	  }
 
-
 	// on the expiration day, we remove old credentials.
 
 	lowerBound.setTime(currentTime);
@@ -288,7 +287,6 @@ public class ExternalMailTask implements Runnable {
 	    clearOldCredentials(object);
 	    continue;
 	  }
-
       }
   }
 
@@ -305,7 +303,8 @@ public class ExternalMailTask implements Runnable {
     objVect.addElement(userObject.getInvid());
 
     String mailUsername = (String) userObject.getFieldValueLocal(userSchema.MAILUSER);
-    String mailPassword = (String) userObject.getFieldValueLocal(userSchema.MAILPASSWORD);
+    PasswordDBField mailPasswordField = (PasswordDBField) userObject.getField(userSchema.MAILPASSWORD2);
+    String mailPassword = mailPasswordField.getPlainText();
 
     String titleString = "External Email Credentials Expiring Very Soon For User " + userObject.getLabel();
     
@@ -344,7 +343,7 @@ public class ExternalMailTask implements Runnable {
 
 	DateDBField mailExpDateField = (DateDBField) editUserObject.getField(userSchema.MAILEXPDATE);
 	StringDBField oldUsernameField = (StringDBField) editUserObject.getField(userSchema.OLDMAILUSER);
-	StringDBField oldPasswordField = (StringDBField) editUserObject.getField(userSchema.OLDMAILPASSWORD);
+	PasswordDBField oldPasswordField = (PasswordDBField) editUserObject.getField(userSchema.OLDMAILPASSWORD2);
     
 	Calendar myCal = new GregorianCalendar();
 	myCal.add(Calendar.DATE, 168); // 24 weeks from today.
@@ -363,7 +362,7 @@ public class ExternalMailTask implements Runnable {
 	    return result;
 	  }
     
-	result = ReturnVal.merge(result, oldPasswordField.setValueLocal(null));
+	result = ReturnVal.merge(result, oldPasswordField.setUndefined(true));
     
 	if (!ReturnVal.didSucceed(result))
 	  {
@@ -375,7 +374,8 @@ public class ExternalMailTask implements Runnable {
 	objVect.addElement(userObject.getInvid());
 
 	String mailUsername = (String) userObject.getFieldValueLocal(userSchema.MAILUSER);
-	String mailPassword = (String) userObject.getFieldValueLocal(userSchema.MAILPASSWORD);
+	PasswordDBField newPasswordField = (PasswordDBField) userObject.getField(userSchema.MAILPASSWORD2);
+	String mailPassword = newPasswordField.getPlainText();
 
 	String titleString = "External Email Credentials Changed For User " + userObject.getLabel();
 	
@@ -404,8 +404,9 @@ public class ExternalMailTask implements Runnable {
 
 
   /**
-   * <p>Assigns a new set of random external credentials,
-   * Email is sent from server at commit time. </p>
+   * <p>Assigns a new set of random external credentials, Email is
+   * sent from server at commit time by the userCustom.preCommitHook()
+   * method.</p>
    */
 
   private ReturnVal assignNewCredentials(DBObject userObject)
@@ -420,23 +421,23 @@ public class ExternalMailTask implements Runnable {
 	  }
 
 	DBEditObject editUserObject = (DBEditObject) result.getObject();
-    
-	StringDBField usernameField = (StringDBField) 
-                         editUserObject.getField(userSchema.MAILUSER);
-	StringDBField passwordField = (StringDBField) 
-                         editUserObject.getField(userSchema.MAILPASSWORD);
+
+	StringDBField usernameField = (StringDBField) editUserObject.getField(userSchema.MAILUSER);
+	PasswordDBField passwordField = (PasswordDBField) editUserObject.getField(userSchema.MAILPASSWORD2);
 
 	if (editUserObject.isDefined(userSchema.MAILUSER) 
-            && editUserObject.isDefined(userSchema.MAILPASSWORD))
+            && editUserObject.isDefined(userSchema.MAILPASSWORD2))
 	  {
-	    StringDBField oldUsernameField = (StringDBField) 
-                 editUserObject.getField(userSchema.OLDMAILUSER);
-	    StringDBField oldPasswordField = (StringDBField) 
-                 editUserObject.getField(userSchema.OLDMAILPASSWORD);
+	    StringDBField oldUsernameField = (StringDBField)
+	      editUserObject.getField(userSchema.OLDMAILUSER);
+	    PasswordDBField oldPasswordField = (PasswordDBField)
+	      editUserObject.getField(userSchema.OLDMAILPASSWORD2);
 
-	    // Copy over old values.
+	    // Copy the (now deprecated) values to the
+	    // oldUsernameField and oldPasswordField fields
+
 	    String username = (String) usernameField.getValueLocal();
-	    String password = (String) passwordField.getValueLocal();
+	    String password = passwordField.getPlainText();
 
 	    result = ReturnVal.merge(result, oldUsernameField.setValueLocal(username));
 
@@ -445,7 +446,7 @@ public class ExternalMailTask implements Runnable {
 		return result;
 	      }
 
-	    result = ReturnVal.merge(result, oldPasswordField.setValueLocal(password));
+	    result = ReturnVal.merge(result, oldPasswordField.setPlainTextPass(password));
 
 	    if (!ReturnVal.didSucceed(result))
 	      {
@@ -455,7 +456,7 @@ public class ExternalMailTask implements Runnable {
 
 	// Set new values.
 	result = ReturnVal.merge(result, 
-                   usernameField.setValueLocal(RandomUtils.getRandomUsername()));
+				 usernameField.setValueLocal(RandomUtils.getRandomUsername()));
     
 	if (!ReturnVal.didSucceed(result))
 	  {
@@ -463,7 +464,7 @@ public class ExternalMailTask implements Runnable {
 	  }
     
 	result = ReturnVal.merge(result, 
-                   passwordField.setValueLocal(RandomUtils.getRandomPassword(20)));
+                   passwordField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
     
 	return result;
       }
