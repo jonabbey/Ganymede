@@ -396,7 +396,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    *
    */
 
-  public void removeNoSync(short key) 
+  private void removeNoSync(short key) 
   {
     int index = java.util.Arrays.binarySearch(table, key);
 
@@ -411,8 +411,6 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
     for (int j = 0, i = 0; i < table.length; i++)
       {
-	DBObjectBaseField field = table[i];
-
 	if (i != index)
 	  {
 	    newTable[j++] = table[i];
