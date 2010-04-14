@@ -577,7 +577,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    objVect.addElement(this.getInvid());
 
-	    Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
+	    // the true causes us to send to the user
+	    // the false causes us not to send to the owners and admins
+
+	    Ganymede.log.sendMail(null, titleString, messageString, true, false, objVect);
 	  }
       }
 
