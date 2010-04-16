@@ -2092,7 +2092,12 @@ public class DBLog {
 
 	if (mailToObjects && object.hasEmailTarget())
 	  {
-	    addresses.addAll(object.getEmailTargets());
+	    List<String> targets = (List<String>) object.getEmailTargets();
+
+	    if (targets != null)
+	      {
+		addresses.addAll(targets);
+	      }
 	  }
 
 	// okay, now we've got to see about notifying the owners..
