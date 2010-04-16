@@ -1014,13 +1014,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     Vector x = new Vector();
 
-    /* -- */
+    x.add(object.getLabel());	// let our mail system handle routing.
 
-    // do a union so that we clone the raw DBField vector, and so that
-    // we handle any null result
-    
-    x = VectorUtils.union(x, object.getFieldValuesLocal(userSchema.EMAILTARGET));
-    
     return x;
   }
 
