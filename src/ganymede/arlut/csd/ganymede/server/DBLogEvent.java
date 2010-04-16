@@ -113,7 +113,7 @@ public class DBLogEvent {
    * @param objects A List of Invids of objects involved in this event.
    */
 
-  public DBLogEvent(List<String> addresses, String subject, String description,
+  public DBLogEvent(Collection<String> addresses, String subject, String description,
 		    Invid admin, String adminName,
 		    List<Invid> objects)
   {
@@ -137,7 +137,7 @@ public class DBLogEvent {
 
   public DBLogEvent(String eventClassToken, String description,
 		    Invid admin, String adminName,
-		    List<Invid> objects, List<String> notifyList)
+		    List<Invid> objects, Collection<String> notifyList)
   {
     this.eventClassToken = eventClassToken;
     this.description = description;

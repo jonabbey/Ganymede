@@ -50,6 +50,7 @@ package arlut.csd.ganymede.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -517,7 +518,7 @@ public class DBEditSet {
    * @param objects A vector of invids of objects involved in the mail
    */
 
-  public void logMail(List<String> addresses, String subject, String message,
+  public void logMail(Collection<String> addresses, String subject, String message,
 		      Invid admin, String adminName, Vector objects)
   {
     logEvents.add(new DBLogEvent(addresses, subject, message, admin, adminName, objects));
@@ -532,7 +533,7 @@ public class DBEditSet {
    * @param message The body of the message
    */
 
-  public void logMail(List<String> addresses, String subject, String message)
+  public void logMail(Collection<String> addresses, String subject, String message)
   {
     logEvents.add(new DBLogEvent(addresses, subject, message, null, null, null));
   }
