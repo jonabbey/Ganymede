@@ -62,6 +62,7 @@ import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.DBLog;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeServer;
 import arlut.csd.ganymede.server.GanymedeSession;
@@ -398,7 +399,7 @@ public class PasswordAgingTask implements Runnable {
       "You can change your password online by visiting https://www.arlut.utexas.edu/password/\n\n" +
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators.";
 
-    Ganymede.log.sendMail(null, titleString, messageString, true, false, objVect);
+    Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.USERS, objVect);
   }
 
   /**
@@ -423,7 +424,7 @@ public class PasswordAgingTask implements Runnable {
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
-    Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
+    Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.BOTH, objVect);
   }
 
   /**
@@ -451,6 +452,6 @@ public class PasswordAgingTask implements Runnable {
       "If you need assistance with this matter, please contact one of your lab unit's Ganymede administrators, " +
       "or CSD.";
 
-    Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
+    Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.BOTH, objVect);
   }
 }

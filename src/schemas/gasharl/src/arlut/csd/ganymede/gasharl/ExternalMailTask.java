@@ -65,6 +65,7 @@ import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.server.DateDBField;
 import arlut.csd.ganymede.server.DBEditObject;
 import arlut.csd.ganymede.server.DBObject;
+import arlut.csd.ganymede.server.DBLog;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeServer;
 import arlut.csd.ganymede.server.GanymedeSession;
@@ -319,7 +320,7 @@ public class ExternalMailTask implements Runnable {
       "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
       "via SSL-protected IMAP.";	   
         
-    Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
+    Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.BOTH, objVect);
   }
 
 
@@ -391,7 +392,7 @@ public class ExternalMailTask implements Runnable {
 	  "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
 	  "via SSL-protected IMAP.";	           
 
-	Ganymede.log.sendMail(null, titleString, messageString, true, true, objVect);
+	Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.BOTH, objVect);
 
 	return result;
 
