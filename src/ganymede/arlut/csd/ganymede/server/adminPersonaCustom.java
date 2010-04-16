@@ -189,7 +189,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     String address = (String) object.getFieldValueLocal(SchemaConstants.PersonaMailAddr);
 
-    if (address == null)
+    if (address == null || address.equals(""))
       {
 	// okay, we got no address pre-registered for this
 	// admin.. we need now to try to guess at one, by looking
