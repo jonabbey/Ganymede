@@ -3325,7 +3325,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     List<Invid> objects = new ArrayList<Invid>();
     objects.add(sysInvid);
-    List<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
 
     String subject = null;
 
@@ -3453,7 +3453,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     List<Invid> objects = new ArrayList<Invid>();
     objects.add(sysInvid);
-    List<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
 
     String subject = null;
 
@@ -3834,7 +3834,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     sysObj = getSession().viewDBObject(newSysInvid);
     newSysName = sysObj.getLabel();    
 
-    List<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
 
     buffer.append("Hi.  User ");
     buffer.append(getLabel());
