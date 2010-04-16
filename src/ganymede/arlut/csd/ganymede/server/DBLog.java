@@ -2025,14 +2025,14 @@ public class DBLog {
   }
 
   /**
-   * <P>This method takes a List of {@link arlut.csd.ganymede.common.Invid Invid}'s
-   * representing objects touched
-   * during a transaction, and returns a List of email addresses that
-   * should be notified of operations affecting the objects in the
-   * &lt;objects&gt; list.</P>
+   * <P>This method takes a List of {@link
+   * arlut.csd.ganymede.common.Invid Invid}'s representing objects
+   * touched during a transaction, and returns a Set of email
+   * addresses that should be notified of operations affecting the
+   * objects in the &lt;objects&gt; list.</P>
    */
 
-  public List<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode)
+  public Set<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode)
   {
     return DBLog.calculateOwnerAddresses(objects, mode, gSession.getSession());
   }
@@ -2049,31 +2049,31 @@ public class DBLog {
   /**
    * <P>This method takes a List of {@link
    * arlut.csd.ganymede.common.Invid Invid}'s representing objects
-   * touched during a transaction, and returns a List of email
+   * touched during a transaction, and returns a Set of email
    * addresses that should be notified of operations affecting the
    * objects in the &lt;objects&gt; list.</P>
    */
 
-  static public List<String> calculateOwnerAddresses(List<Invid> objects, DBSession session)
+  static public Set<String> calculateOwnerAddresses(List<Invid> objects, DBSession session)
   {
     return calculateOwnerAddresses(objects, MailMode.BOTH, session);
   }
 
   /**
-   * <P>This method takes a List of {@link arlut.csd.ganymede.common.Invid Invid}'s
-   * representing objects touched
-   * during a transaction, and returns a List of email addresses that
-   * should be notified of operations affecting the objects in the
-   * &lt;objects&gt; list.</P>
+   * <P>This method takes a List of {@link
+   * arlut.csd.ganymede.common.Invid Invid}'s representing objects
+   * touched during a transaction, and returns a Set of email
+   * addresses that should be notified of operations affecting the
+   * objects in the &lt;objects&gt; list.</P>
    */
 
-  static public List<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode, DBSession session)
+  static public Set<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode, DBSession session)
   {
     InvidDBField ownersField;
     DBObject object;
     Set<String> addresses = new HashSet<String>();
-    List<String> results = new ArrayList<String>();
-    HashSet<Invid> seenOwners = new HashSet<Invid>();
+    Set<String> results = new HashSet<String>();
+    Set<Invid> seenOwners = new HashSet<Invid>();
 
     /* -- */
 
@@ -2119,10 +2119,12 @@ public class DBLog {
 	      }
 	  }
 
-	// okay, now we've got to see about notifying the owners..
+	// Do we need to notify the owners?
 
 	if (mode != MailMode.OWNERS && mode != MailMode.BOTH)
 	  {
+	    // Nope
+
 	    results.addAll(addresses);
 	    return results;
 	  }
@@ -2238,23 +2240,6 @@ public class DBLog {
     // our addresses set is complete, convert it to a List
 
     results.addAll(addresses);
-
-    if (debug)
-      {
-	System.err.print("DBLog.calculateOwnerAddresses(): returning ");
-
-	for (int i = 0; i < results.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		System.err.print(", ");
-	      }
-
-	    System.err.print(results.get(i));
-	  }
-
-	System.err.println();
-      }
 
     return results;
   }
