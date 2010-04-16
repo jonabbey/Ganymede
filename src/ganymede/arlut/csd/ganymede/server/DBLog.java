@@ -1875,16 +1875,16 @@ public class DBLog {
       {
 	mailSet.addAll(event.getMailTargets());
 	mailSet.addAll(calculateOwnerAddresses(event.getInvids(),
-					    mailToObjects,
-					    mailToOwners,
-					    session));
+					       mailToObjects,
+					       mailToOwners,
+					       session));
       }
     else if (eventType.ccToOwners)
       {
 	mailSet.addAll(event.getMailTargets());
 	mailSet.addAll(calculateOwnerAddresses(event.getInvids(),
-					    true, true,
-					    session));
+					       true, true,
+					       session));
       }
 
     if (eventType == null || eventType.ccToSelf)
