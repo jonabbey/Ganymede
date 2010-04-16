@@ -107,6 +107,58 @@ public class DBLog {
 
   // --
 
+  /**
+   * Enum used to specify whether the logging system should calculate
+   * additional addresses to send an event to.
+   *
+   * Logging methods that receive a mode of NONE will not calculate
+   * any additional email addresses to send an event to.
+   *
+   * Logging methods that receive a mode of USERS will include any addresses
+   * returned by DBEditObject.getEmailTargets() for a given Invid.
+   *
+   * Logging methods that receive a mode of OWNERS will calculate and
+   * include the addresses for any administrative owners of the
+   * objects referenced by Invid.
+   *
+   * Logging methods that receive a mode of BOTH will do both of the above.
+   */
+
+  public enum MailMode
+  {
+    /**
+     * No addresses are derived from Invids passed to sendMail().
+     */
+
+    NONE,
+
+    /**
+     * Email will be sent to any email addresses associated with the
+     * Invids passed to sendMail().. i.e., to the email addresses for
+     * Users modified in this transaction.
+     */
+
+    USERS,
+
+    /**
+     * Email will be sent to the admins and notification lists
+     * associated with the owners of the Invids passed.
+     */
+
+    OWNERS,
+
+    /**
+     * Email will be sent to both email addresses associated with the
+     * objects corresponding to the Invids passed as well as to the
+     * admins and notification lists associated with the owners of the
+     * Invids.
+     */
+
+    BOTH;
+  }
+
+  // --
+
   DBLogController logController;
   DBLogController mailController;
 
@@ -324,31 +376,30 @@ public class DBLog {
 
   public void sendMail(List<String> recipients, String title, String description)
   {
-    this.sendMail(recipients, title, description, false, false, null);
+    this.sendMail(recipients, title, description, MailMode.NONE, null);
   }
 
   /**
-   * <p>This method sends out a generic mail message that will not be logged.
-   * If mailToObjects and/or mailToObjects are true, mail may be sent
-   * to email addresses associated with the objects in the invids List,
+   * <p>This method sends out a generic mail message that will not be
+   * logged.  According to the mode enum value, mail may be sent to
+   * email addresses associated with the objects in the invids List,
    * in addition to the recipients list.</p>
    *
    * @param recipients a List of email addresses to send this message
    * to.  May legally be null or empty, in which case mail will be sent
-   * to anyone needed according to the mailToObjects and mailToOwners
-   * parameters
+   * to anyone needed according to the mode parameter.
    * @param title The email subject for this message, will have the
    * Ganymede.subjectPrefixProperty prepended to it.
    * @param description The message itself
-   * @param mailToObjects If true, this event's mail will go to any
-   * email addresses associated with objects referenced by event.
-   * @param mailToOwners If true, this event's mail will go to the owners
-   * of any objects referenced by event.
+   * @param mode Enum value controlling whether and how to send email
+   * to parties connected to the objects referenced by the contents of
+   * invids.
    * @param invids A List of Invids to consult for possible mail targeting
    */
 
-  public void sendMail(List<String> recipients, String title, String description,
-		       boolean mailToObjects, boolean mailToOwners, List<Invid> invids)
+  public void sendMail(List<String> recipients,
+		       String title, String description,
+		       MailMode mode, List<Invid> invids)
   {
     DBLogEvent event;
 
@@ -361,7 +412,7 @@ public class DBLog {
     // we've already put the description in the event, don't need
     // to provide a separate description string to mailNotify
 
-    this.mailNotify(title, null, event, mailToObjects, mailToOwners, null);
+    this.mailNotify(title, null, event, mode, null);
   }
 
   /**
@@ -370,45 +421,22 @@ public class DBLog {
    * event, and extra descriptive information is to be sent out.</P>
    *
    * <P>mailNotify() will send the message to the owners of any objects
-   * referenced by event if mailToOwners is true.</P>
+   * referenced by event if mode so specifies.</P>
    *
    * <P>description and/or title may be null, in which case the proper
    * strings will be extracted from the event's database record</P>
    *
+   * @param title The email subject for this message, will have the
+   * Ganymede.subjectPrefixProperty prepended to it.
+   * @param description The message itself
    * @param event A single event to be logged, with its own timestamp.
-   * @param mailToOwners If true, this event's mail will go to the owners
-   * of any objects referenced by event.
-   */
-
-  public void mailNotify(String title, String description,
-			 DBLogEvent event,
-			 boolean mailToOwners,
-			 DBSession session)
-  {
-    this.mailNotify(title, description, event, true, mailToOwners, session);
-  }
-
-  /**
-   * <P>This method is used to handle an email notification event, where
-   * the mail title should reflect detailed information about the
-   * event, and extra descriptive information is to be sent out.</P>
-   *
-   * <P>mailNotify() will send the message to the owners of any objects
-   * referenced by event if mailToOwners is true.</P>
-   *
-   * <P>description and/or title may be null, in which case the proper
-   * strings will be extracted from the event's database record</P>
-   *
-   * @param event A single event to be logged, with its own timestamp.
-   * @param mailToObjects If true, this event's mail will go to any
-   * email addresses associated with objects referenced by event.
-   * @param mailToOwners If true, this event's mail will go to the owners
-   * of any objects referenced by event.
+   * @param mode Enum value controlling whether and how to send email
+   * to parties connected to the objects referenced by this transaction.
+   * @param session The DBSession used to reference this transaction.
    */
 
   public synchronized void mailNotify(String title, String description,
-				      DBLogEvent event, boolean mailToObjects,
-				      boolean mailToOwners,
+				      DBLogEvent event, MailMode mode,
 				      DBSession session)
   {
     systemEventType type = null;
@@ -433,7 +461,7 @@ public class DBLog {
     // logController so that the log will record who the mail was sent
     // to.
 
-    calculateMailTargets(event, session, null, mailToObjects, mailToOwners);
+    calculateMailTargets(event, session, null, mode);
 
     event.setLogTime(System.currentTimeMillis());
 
@@ -1387,7 +1415,7 @@ public class DBLog {
 
     if (type.ccToOwners)
       {
-	addressSet.addAll(calculateOwnerAddresses(event.getInvids(), true, true));
+	addressSet.addAll(calculateOwnerAddresses(event.getInvids(), MailMode.BOTH));
       }
 
     // who should we say the mail is from?
@@ -1499,7 +1527,7 @@ public class DBLog {
 
     if (type.ccToOwners)
       {
-	mailSet.addAll(calculateOwnerAddresses(event.getInvids(), true, true, transSession));
+	mailSet.addAll(calculateOwnerAddresses(event.getInvids(), MailMode.BOTH, transSession));
       }
 
     mailSet.addAll(type.addressList);
@@ -1844,9 +1872,7 @@ public class DBLog {
    */
 
   private void calculateMailTargets(DBLogEvent event, DBSession session,
-				    systemEventType eventType,
-				    boolean mailToObjects,
-				    boolean mailToOwners)
+				    systemEventType eventType, MailMode mode)
   {
     Set<String> mailSet = new HashSet<String>();
 
@@ -1874,17 +1900,12 @@ public class DBLog {
     if (eventType == null)
       {
 	mailSet.addAll(event.getMailTargets());
-	mailSet.addAll(calculateOwnerAddresses(event.getInvids(),
-					       mailToObjects,
-					       mailToOwners,
-					       session));
+	mailSet.addAll(calculateOwnerAddresses(event.getInvids(), mode, session));
       }
     else if (eventType.ccToOwners)
       {
 	mailSet.addAll(event.getMailTargets());
-	mailSet.addAll(calculateOwnerAddresses(event.getInvids(),
-					       true, true,
-					       session));
+	mailSet.addAll(calculateOwnerAddresses(event.getInvids(), MailMode.BOTH, session));
       }
 
     if (eventType == null || eventType.ccToSelf)
@@ -1937,14 +1958,13 @@ public class DBLog {
 
     /* -- */
 
-    if (transactionType == null)
+    if (transactionType == null || transactionType.ccToOwners)
       {
-	calculateMailTargets(event, session, null, true, true);  // null explicitly to quiet FindBugs
+	calculateMailTargets(event, session, transactionType, MailMode.BOTH);
       }
     else
       {
-	calculateMailTargets(event, session, transactionType, transactionType.ccToOwners,
-			     transactionType.ccToOwners);
+	calculateMailTargets(event, session, transactionType, MailMode.NONE);
       }
 
     for (String str: event.getMailTargets())
@@ -2012,9 +2032,9 @@ public class DBLog {
    * &lt;objects&gt; list.</P>
    */
 
-  public List<String> calculateOwnerAddresses(List<Invid> objects, boolean mailToObjects, boolean mailToOwners)
+  public List<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode)
   {
-    return DBLog.calculateOwnerAddresses(objects, mailToObjects, mailToOwners, gSession.getSession());
+    return DBLog.calculateOwnerAddresses(objects, mode, gSession.getSession());
   }
 
   //
@@ -2036,7 +2056,7 @@ public class DBLog {
 
   static public List<String> calculateOwnerAddresses(List<Invid> objects, DBSession session)
   {
-    return calculateOwnerAddresses(objects, true, true, session);
+    return calculateOwnerAddresses(objects, MailMode.BOTH, session);
   }
 
   /**
@@ -2047,8 +2067,7 @@ public class DBLog {
    * &lt;objects&gt; list.</P>
    */
 
-  static public List<String> calculateOwnerAddresses(List<Invid> objects, boolean mailToObjects,
-						     boolean mailToOwners, DBSession session)
+  static public List<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode, DBSession session)
   {
     InvidDBField ownersField;
     DBObject object;
@@ -2090,7 +2109,7 @@ public class DBLog {
 
 	// first off, does the object itself have anyone it wants to notify?
 
-	if (mailToObjects && object.hasEmailTarget())
+	if ((mode == MailMode.USERS || mode == MailMode.BOTH) && object.hasEmailTarget())
 	  {
 	    List<String> targets = (List<String>) object.getEmailTargets();
 
@@ -2102,11 +2121,13 @@ public class DBLog {
 
 	// okay, now we've got to see about notifying the owners..
 
-	if (!mailToOwners)
+	if (mode != MailMode.OWNERS && mode != MailMode.BOTH)
 	  {
 	    results.addAll(addresses);
 	    return results;
 	  }
+
+	// yep, we need to notify the owners
 
 	if (object.isEmbedded())
 	  {

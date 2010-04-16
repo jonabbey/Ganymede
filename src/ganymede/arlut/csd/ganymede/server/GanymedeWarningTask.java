@@ -510,7 +510,7 @@ public class GanymedeWarningTask implements Runnable {
     // we've already put the description in the event, don't need
     // to provide a separate description string to mailNotify
     
-    Ganymede.log.mailNotify(title, null, event, true, null);
+    Ganymede.log.mailNotify(title, null, event, DBLog.MailMode.BOTH, null);
 
     // Ganymede.debug(description);
   }
