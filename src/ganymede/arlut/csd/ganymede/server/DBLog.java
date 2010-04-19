@@ -133,7 +133,8 @@ public class DBLog {
     NONE,
 
     /**
-     * Email will be sent to any email addresses associated with the
+     * Email will be sent to any email addresses provided by a custom
+     * DBEditObject.getEmailTargets() method associated with the
      * Invids passed to sendMail().. i.e., to the email addresses for
      * Users modified in this transaction.
      */
