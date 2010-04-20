@@ -160,7 +160,18 @@ public class DBLog {
 
   // --
 
+  /**
+   * The log controller responsible for logging events to disk or to a
+   * database.
+   */
+
   DBLogController logController;
+
+  /**
+   * The log controller responsible for logging 'mailout' events to
+   * disk or to a database.
+   */
+
   DBLogController mailController;
 
   /**
@@ -239,7 +250,7 @@ public class DBLog {
    *
    */
 
-  GanymedeSession gSession = null;
+  private GanymedeSession gSession = null;
 
   /**
    * <p>This instance variable is used to track the transaction identifier
