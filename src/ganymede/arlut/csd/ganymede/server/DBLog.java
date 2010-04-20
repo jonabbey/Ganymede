@@ -2045,7 +2045,7 @@ public class DBLog {
 			      {
 				if (subject.length() > 0)
 				  {
-				    // ", "
+				    // ". "
 				    subject.append(ts.l("describeSmallTransaction.append"));
 				  }
 
@@ -2072,7 +2072,7 @@ public class DBLog {
 			      {
 				if (subject.length() > 0)
 				  {
-				    // ", "
+				    // ". "
 				    subject.append(ts.l("describeSmallTransaction.append"));
 				  }
 
@@ -2099,7 +2099,7 @@ public class DBLog {
 			      {
 				if (subject.length() > 0)
 				  {
-				    // ", "
+				    // ". "
 				    subject.append(ts.l("describeSmallTransaction.append"));
 				  }
 
@@ -2122,6 +2122,12 @@ public class DBLog {
 		  }
 	      }
 	  }
+      }
+
+    if (subject.length() != 0)
+      {
+	// "."
+	subject.append(ts.l("describeSmallTransaction.end_subject"));
       }
 
     return subject.toString();
