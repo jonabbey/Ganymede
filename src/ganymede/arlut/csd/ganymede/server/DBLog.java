@@ -989,278 +989,6 @@ public class DBLog {
   }
 
   /**
-   * Synthesize a descriptive subject for transaction summary email.
-   */
-
-  private String describeTransaction(MailOut mailOut, DBEditSet transaction)
-  {
-    String subject = null;
-    Set<String> types = new TreeSet<String>();
-
-    for (Invid invid: mailOut.getInvids())
-      {
-	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
-
-	if (base.isEmbedded())
-	  {
-	    continue;
-	  }
-
-	types.add(base.getName());
-      }
-
-    if (types.size() <= 3)
-      {
-	// prepare a count of create, edit, delete for each type
-
-	for (String type: types)
-	  {
-	    DBObjectBase base = Ganymede.db.getObjectBase(type);
-	    int create = 0;
-	    int edit = 0;
-	    int delete = 0;
-
-	    for (Invid invid: mailOut.getInvids())
-	      {
-		if (invid.getType() == base.getTypeID())
-		  {
-		    DBEditObject object = transaction.findObject(invid);
-
-		    switch (object.getStatus())
-		      {
-		      case ObjectStatus.CREATING:
-			create++;
-			break;
-
-		      case ObjectStatus.EDITING:
-			edit++;
-			break;
-
-		      case ObjectStatus.DELETING:
-			delete++;
-			break;
-		      }
-		  }
-	      }
-
-	    String createString = null;
-	    String editString = null;
-	    String deleteString = null;
-
-	    if (create > 0)
-	      {
-		// "created {0,number}"
-		createString = ts.l("describeTransaction.typed_create", create);
-	      }
-
-	    if (edit > 0)
-	      {
-		// "edited {0, number}"
-		editString = ts.l("describeTransaction.typed_edit", edit);
-	      }
-
-	    if (delete > 0)
-	      {
-		// "deleted {0, number}"
-		editString = ts.l("describeTransaction.typed_delete", delete);
-	      }
-
-	    int paramCount = (createString != null ? 1 : 0) +
-	      (editString != null ? 1 : 0) +
-	      (deleteString != null ? 1 : 0);
-
-	    String objectSummary = null;
-
-	    switch (paramCount)
-	      {
-	      case 1:
-		if (createString != null)
-		  {
-		    // "{0} {1} objects"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template", createString, type.toLowerCase());
-		  }
-		else if (editString != null)
-		  {
-		    // "{0} {1} objects"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template", editString, type.toLowerCase());
-		  }
-		else if (deleteString != null)
-		  {
-		    // "{0} {1} objects"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template", deleteString, type.toLowerCase());
-		  }
-
-		break;
-
-	      case 2:
-		if (createString == null)
-		  {
-		    // "{0} {1} objects"
-		    // "{0}, {1}"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template",
-					 ts.l("describeTransaction.typed_subject_duplex_pattern", editString, deleteString),
-					 type.toLowerCase());
-		  }
-		else if (editString == null)
-		  {
-		    // "{0} {1} objects"
-		    // "{0}, {1}"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template",
-					 ts.l("describeTransaction.typed_subject_duplex_pattern", createString, deleteString),
-					 type.toLowerCase());
-		  }
-		else if (deleteString == null)
-		  {
-		    // "{0} {1} objects"
-		    // "{0}, {1}"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template",
-					 ts.l("describeTransaction.typed_subject_duplex_pattern", createString, editString),
-					 type.toLowerCase());
-		  }
-
-		break;
-
-	      case 3:
-		// "{0} {1} objects"
-		// "{0}, {1}, {2}"
-		objectSummary = ts.l("describeTransaction.typed_subject_template",
-				     ts.l("describeTransaction.typed_subject_triplex_pattern", createString, editString, deleteString),
-				     type.toLowerCase());
-	      }
-
-	    if (subject == null)
-	      {
-		subject = objectSummary;
-	      }
-	    else
-	      {
-		subject = ts.l("describeTransaction.concatenation", subject, objectSummary);
-	      }
-	  }
-      }
-    else
-      {
-	// prepare a count of create, edit, delete
-
-	int create = 0;
-	int edit = 0;
-	int delete = 0;
-
-	for (Invid invid: mailOut.getInvids())
-	  {
-	    DBEditObject object = transaction.findObject(invid);
-
-	    switch (object.getStatus())
-	      {
-	      case ObjectStatus.CREATING:
-		create++;
-		break;
-
-	      case ObjectStatus.EDITING:
-		edit++;
-		break;
-
-	      case ObjectStatus.DELETING:
-		delete++;
-		break;
-	      }
-	  }
-
-	String createString = null;
-	String editString = null;
-	String deleteString = null;
-
-	if (create > 0)
-	  {
-	    // "Created {0,number}"
-	    createString = ts.l("describeTransaction.create", create);
-	  }
-
-	if (edit > 0)
-	  {
-	    // "Edited {0, number}"
-	    editString = ts.l("describeTransaction.edit", edit);
-	  }
-
-	if (delete > 0)
-	  {
-	    // "Deleted {0, number}"
-	    editString = ts.l("describeTransaction.delete", delete);
-	  }
-
-	int paramCount = (createString != null ? 1 : 0) +
-	  (editString != null ? 1 : 0) +
-	  (deleteString != null ? 1 : 0);
-
-	String objectSummary = null;
-
-	switch (paramCount)
-	  {
-	  case 1:
-	    if (createString != null)
-	      {
-		// "{0} {1} objects"
-		objectSummary = ts.l("describeTransaction.subject_template", createString);
-	      }
-	    else if (editString != null)
-	      {
-		// "{0} {1} objects"
-		objectSummary = ts.l("describeTransaction.subject_template", editString);
-	      }
-	    else if (deleteString != null)
-	      {
-		// "{0} {1} objects"
-		objectSummary = ts.l("describeTransaction.subject_template", deleteString);
-	      }
-
-	    break;
-
-	  case 2:
-	    if (createString == null)
-	      {
-		// "{0} objects"
-		// "{0}, {1}"
-		objectSummary = ts.l("describeTransaction.subject_template",
-				     ts.l("describeTransaction.subject_duplex_pattern", editString, deleteString));
-	      }
-	    else if (editString == null)
-	      {
-		// "{0} objects"
-		// "{0}, {1}"
-		objectSummary = ts.l("describeTransaction.subject_template",
-				     ts.l("describeTransaction.subject_duplex_pattern", createString, deleteString));
-	      }
-	    else if (deleteString == null)
-	      {
-		// "{0} objects"
-		// "{0}, {1}"
-		objectSummary = ts.l("describeTransaction.subject_template",
-				     ts.l("describeTransaction.subject_duplex_pattern", createString, editString));
-	      }
-
-	    break;
-
-	  case 3:
-	    // "{0} objects"
-	    // "{0}, {1}, {2}"
-	    objectSummary = ts.l("describeTransaction.subject_template",
-				 ts.l("describeTransaction.subject_triplex_pattern", createString, editString, deleteString));
-	  }
-
-	if (subject == null)
-	  {
-	    subject = objectSummary;
-	  }
-	else
-	  {
-	    subject = ts.l("describeTransaction.concatenation", subject, objectSummary);
-	  }
-      }
-
-    return subject;
-  }
-
-  /**
    * <p>Emergency cleanup function called by {@link
    * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)} in
    * the event of a problem during logging.</p>
@@ -2046,7 +1774,6 @@ public class DBLog {
   //
   //
 
-
   /**
    * <P>This method takes a List of {@link
    * arlut.csd.ganymede.common.Invid Invid}'s representing objects
@@ -2243,6 +1970,278 @@ public class DBLog {
     results.addAll(addresses);
 
     return results;
+  }
+
+  /**
+   * Synthesize a descriptive subject for transaction summary email.
+   */
+
+  private static String describeTransaction(MailOut mailOut, DBEditSet transaction)
+  {
+    String subject = null;
+    Set<String> types = new TreeSet<String>();
+
+    for (Invid invid: mailOut.getInvids())
+      {
+	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+
+	if (base.isEmbedded())
+	  {
+	    continue;
+	  }
+
+	types.add(base.getName());
+      }
+
+    if (types.size() <= 3)
+      {
+	// prepare a count of create, edit, delete for each type
+
+	for (String type: types)
+	  {
+	    DBObjectBase base = Ganymede.db.getObjectBase(type);
+	    int create = 0;
+	    int edit = 0;
+	    int delete = 0;
+
+	    for (Invid invid: mailOut.getInvids())
+	      {
+		if (invid.getType() == base.getTypeID())
+		  {
+		    DBEditObject object = transaction.findObject(invid);
+
+		    switch (object.getStatus())
+		      {
+		      case ObjectStatus.CREATING:
+			create++;
+			break;
+
+		      case ObjectStatus.EDITING:
+			edit++;
+			break;
+
+		      case ObjectStatus.DELETING:
+			delete++;
+			break;
+		      }
+		  }
+	      }
+
+	    String createString = null;
+	    String editString = null;
+	    String deleteString = null;
+
+	    if (create > 0)
+	      {
+		// "created {0,number}"
+		createString = ts.l("describeTransaction.typed_create", create);
+	      }
+
+	    if (edit > 0)
+	      {
+		// "edited {0, number}"
+		editString = ts.l("describeTransaction.typed_edit", edit);
+	      }
+
+	    if (delete > 0)
+	      {
+		// "deleted {0, number}"
+		editString = ts.l("describeTransaction.typed_delete", delete);
+	      }
+
+	    int paramCount = (createString != null ? 1 : 0) +
+	      (editString != null ? 1 : 0) +
+	      (deleteString != null ? 1 : 0);
+
+	    String objectSummary = null;
+
+	    switch (paramCount)
+	      {
+	      case 1:
+		if (createString != null)
+		  {
+		    // "{0} {1} objects"
+		    objectSummary = ts.l("describeTransaction.typed_subject_template", createString, type.toLowerCase());
+		  }
+		else if (editString != null)
+		  {
+		    // "{0} {1} objects"
+		    objectSummary = ts.l("describeTransaction.typed_subject_template", editString, type.toLowerCase());
+		  }
+		else if (deleteString != null)
+		  {
+		    // "{0} {1} objects"
+		    objectSummary = ts.l("describeTransaction.typed_subject_template", deleteString, type.toLowerCase());
+		  }
+
+		break;
+
+	      case 2:
+		if (createString == null)
+		  {
+		    // "{0} {1} objects"
+		    // "{0}, {1}"
+		    objectSummary = ts.l("describeTransaction.typed_subject_template",
+					 ts.l("describeTransaction.typed_subject_duplex_pattern", editString, deleteString),
+					 type.toLowerCase());
+		  }
+		else if (editString == null)
+		  {
+		    // "{0} {1} objects"
+		    // "{0}, {1}"
+		    objectSummary = ts.l("describeTransaction.typed_subject_template",
+					 ts.l("describeTransaction.typed_subject_duplex_pattern", createString, deleteString),
+					 type.toLowerCase());
+		  }
+		else if (deleteString == null)
+		  {
+		    // "{0} {1} objects"
+		    // "{0}, {1}"
+		    objectSummary = ts.l("describeTransaction.typed_subject_template",
+					 ts.l("describeTransaction.typed_subject_duplex_pattern", createString, editString),
+					 type.toLowerCase());
+		  }
+
+		break;
+
+	      case 3:
+		// "{0} {1} objects"
+		// "{0}, {1}, {2}"
+		objectSummary = ts.l("describeTransaction.typed_subject_template",
+				     ts.l("describeTransaction.typed_subject_triplex_pattern", createString, editString, deleteString),
+				     type.toLowerCase());
+	      }
+
+	    if (subject == null)
+	      {
+		subject = objectSummary;
+	      }
+	    else
+	      {
+		subject = ts.l("describeTransaction.concatenation", subject, objectSummary);
+	      }
+	  }
+      }
+    else
+      {
+	// prepare a count of create, edit, delete
+
+	int create = 0;
+	int edit = 0;
+	int delete = 0;
+
+	for (Invid invid: mailOut.getInvids())
+	  {
+	    DBEditObject object = transaction.findObject(invid);
+
+	    switch (object.getStatus())
+	      {
+	      case ObjectStatus.CREATING:
+		create++;
+		break;
+
+	      case ObjectStatus.EDITING:
+		edit++;
+		break;
+
+	      case ObjectStatus.DELETING:
+		delete++;
+		break;
+	      }
+	  }
+
+	String createString = null;
+	String editString = null;
+	String deleteString = null;
+
+	if (create > 0)
+	  {
+	    // "Created {0,number}"
+	    createString = ts.l("describeTransaction.create", create);
+	  }
+
+	if (edit > 0)
+	  {
+	    // "Edited {0, number}"
+	    editString = ts.l("describeTransaction.edit", edit);
+	  }
+
+	if (delete > 0)
+	  {
+	    // "Deleted {0, number}"
+	    editString = ts.l("describeTransaction.delete", delete);
+	  }
+
+	int paramCount = (createString != null ? 1 : 0) +
+	  (editString != null ? 1 : 0) +
+	  (deleteString != null ? 1 : 0);
+
+	String objectSummary = null;
+
+	switch (paramCount)
+	  {
+	  case 1:
+	    if (createString != null)
+	      {
+		// "{0} {1} objects"
+		objectSummary = ts.l("describeTransaction.subject_template", createString);
+	      }
+	    else if (editString != null)
+	      {
+		// "{0} {1} objects"
+		objectSummary = ts.l("describeTransaction.subject_template", editString);
+	      }
+	    else if (deleteString != null)
+	      {
+		// "{0} {1} objects"
+		objectSummary = ts.l("describeTransaction.subject_template", deleteString);
+	      }
+
+	    break;
+
+	  case 2:
+	    if (createString == null)
+	      {
+		// "{0} objects"
+		// "{0}, {1}"
+		objectSummary = ts.l("describeTransaction.subject_template",
+				     ts.l("describeTransaction.subject_duplex_pattern", editString, deleteString));
+	      }
+	    else if (editString == null)
+	      {
+		// "{0} objects"
+		// "{0}, {1}"
+		objectSummary = ts.l("describeTransaction.subject_template",
+				     ts.l("describeTransaction.subject_duplex_pattern", createString, deleteString));
+	      }
+	    else if (deleteString == null)
+	      {
+		// "{0} objects"
+		// "{0}, {1}"
+		objectSummary = ts.l("describeTransaction.subject_template",
+				     ts.l("describeTransaction.subject_duplex_pattern", createString, editString));
+	      }
+
+	    break;
+
+	  case 3:
+	    // "{0} objects"
+	    // "{0}, {1}, {2}"
+	    objectSummary = ts.l("describeTransaction.subject_template",
+				 ts.l("describeTransaction.subject_triplex_pattern", createString, editString, deleteString));
+	  }
+
+	if (subject == null)
+	  {
+	    subject = objectSummary;
+	  }
+	else
+	  {
+	    subject = ts.l("describeTransaction.concatenation", subject, objectSummary);
+	  }
+      }
+
+    return subject;
   }
 }
 
