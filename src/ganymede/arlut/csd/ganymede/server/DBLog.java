@@ -870,7 +870,9 @@ public class DBLog {
 	  }
       }
 
-    // and write it to our log
+    // and write it to our log.  NB this has to happen last so that we
+    // can record in the event the list of email addresses the event
+    // was sent to in our log.
 
     logController.writeEvent(event);
   }
@@ -932,7 +934,7 @@ public class DBLog {
 	returnAddr = Ganymede.returnaddrProperty;
       }
 
-    // send out object event mail to anyone who has signed up for it
+    // send out object event reporting mail to anyone who has signed up for it
 
     if (mailer != null)
       {
@@ -1016,7 +1018,7 @@ public class DBLog {
   }
 
   /**
-   * <P>This method is used to scan the log file for log events that match
+   * <P>This method is used to scan the log for log events that match
    * invid and that have occurred since sinceTime.</P>
    *
    * @param invid If not null, retrieveHistory() will only return events involving
@@ -1055,8 +1057,8 @@ public class DBLog {
   // -----
 
   /**
-   * <P>This sends out system event mail to the appropriate users,
-   * based on the system event record's flags.</P>
+   * <P>This sends out system ("global") event mail to the appropriate
+   * users, based on the system event record's flags.</P>
    *
    * @return List of email addresses this event was sent to for
    * system event notification
