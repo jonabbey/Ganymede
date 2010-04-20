@@ -2021,12 +2021,6 @@ public class DBLog {
       {
 	boolean declared_action = false;
 
-	if (subject.length() > 0)
-	  {
-	    // ", "
-	    subject.append(ts.l("describeSmallTransaction.append"));
-	  }
-
 	// group by type
 
 	for (String type: types)
@@ -2049,7 +2043,13 @@ public class DBLog {
 			  {
 			    if (!declared_action)
 			      {
-				// "Created {0} ""{1}"""
+				if (subject.length() > 0)
+				  {
+				    // ", "
+				    subject.append(ts.l("describeSmallTransaction.append"));
+				  }
+
+				// "Created {0} "{1}"
 				subject.append(ts.l("describeSmallTransaction.creation_first",
 						    base.getName(),
 						    object.getLabel()));
@@ -2057,7 +2057,7 @@ public class DBLog {
 			      }
 			    else
 			      {
-				// ", {0} ""{1}"""
+				// ", {0} "{1}"
 				subject.append(ts.l("describeSmallTransaction.creation_later",
 						    base.getName(),
 						    object.getLabel()));
@@ -2070,7 +2070,13 @@ public class DBLog {
 			  {
 			    if (!declared_action)
 			      {
-				// "Edited {0} ""{1}"""
+				if (subject.length() > 0)
+				  {
+				    // ", "
+				    subject.append(ts.l("describeSmallTransaction.append"));
+				  }
+
+				// "Edited {0} "{1}"
 				subject.append(ts.l("describeSmallTransaction.editing_first",
 						    base.getName(),
 						    object.getLabel()));
@@ -2078,7 +2084,7 @@ public class DBLog {
 			      }
 			    else
 			      {
-				// ", {0} ""{1}"""
+				// ", {0} "{1}"
 				subject.append(ts.l("describeSmallTransaction.editing_later",
 						    base.getName(),
 						    object.getLabel()));
@@ -2091,7 +2097,13 @@ public class DBLog {
 			  {
 			    if (!declared_action)
 			      {
-				// "Deleted {0} ""{1}"""
+				if (subject.length() > 0)
+				  {
+				    // ", "
+				    subject.append(ts.l("describeSmallTransaction.append"));
+				  }
+
+				// "Deleted {0} "{1}"
 				subject.append(ts.l("describeSmallTransaction.deletion_first",
 						    base.getName(),
 						    object.getLabel()));
@@ -2099,7 +2111,7 @@ public class DBLog {
 			      }
 			    else
 			      {
-				// ", {0} ""{1}"""
+				// ", {0} "{1}"
 				subject.append(ts.l("describeSmallTransaction.deletion_later",
 						    base.getName(),
 						    object.getLabel()));
