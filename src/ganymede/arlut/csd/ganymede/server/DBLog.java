@@ -2021,6 +2021,12 @@ public class DBLog {
       {
 	boolean declared_action = false;
 
+	if (subject.length() > 0)
+	  {
+	    // ", "
+	    subject.append(ts.l("describeSmallTransaction.append"));
+	  }
+
 	// group by type
 
 	for (String type: types)
@@ -2034,12 +2040,6 @@ public class DBLog {
 	      {
 		if (invid.getType() == base.getTypeID())
 		  {
-		    if (subject.length() > 0)
-		      {
-			// ", "
-			subject.append(ts.l("describeSmallTransaction.append"));
-		      }
-
 		    DBEditObject object = transaction.findObject(invid);
 
 		    switch (object.getStatus())
