@@ -1209,8 +1209,7 @@ public class DBLog {
    * Ganymede database.</p>
    *
    * @return List of email addresses this event will be sent to for
-   * object event notification, or null if no object event mail is
-   * generated
+   * object event notification.
    */
 
   private List<String> appendObjectMail(DBLogEvent event,
@@ -1254,11 +1253,9 @@ public class DBLog {
 
     if (type.ccToSelf)
       {
-	String name = null;
-
 	if (event.admin != null)
 	  {
-	    name = adminPersonaCustom.convertAdminInvidToString(event.admin, transSession);
+	    String name = adminPersonaCustom.convertAdminInvidToString(event.admin, transSession);
 
 	    if (name != null)
 	      {
@@ -1990,6 +1987,132 @@ public class DBLog {
    */
 
   private static String describeTransaction(MailOut mailOut, DBEditSet transaction)
+  {
+    if (mailOut.getInvids().size() > 4)
+      {
+	return describeLargeTransaction(mailOut, transaction);
+      }
+    else
+      {
+	return describeSmallTransaction(mailOut, transaction);
+      }
+  }
+
+  private static String describeSmallTransaction(MailOut mailOut, DBEditSet transaction)
+  {
+    StringBuilder subject = new StringBuilder();
+    Set<String> types = new TreeSet<String>();
+
+    for (Invid invid: mailOut.getInvids())
+      {
+	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+
+	if (base.isEmbedded())
+	  {
+	    continue;
+	  }
+
+	types.add(base.getName());
+      }
+
+    // group by edit mode (0 = creating, 1 = editing, 2 = deleting)
+
+    for (int mode = 0; mode < 3; mode++)
+      {
+	boolean declared_action = false;
+
+	// group by type
+
+	for (String type: types)
+	  {
+	    DBObjectBase base = Ganymede.db.getObjectBase(type);
+
+	    // finally loop over the actual invids, which we'll
+	    // include or disinclude based on the outer loops
+
+	    for (Invid invid: mailOut.getInvids())
+	      {
+		if (invid.getType() == base.getTypeID())
+		  {
+		    if (subject.length() > 0)
+		      {
+			subject.append(", ");
+		      }
+
+		    DBEditObject object = transaction.findObject(invid);
+
+		    switch (object.getStatus())
+		      {
+		      case ObjectStatus.CREATING:
+			if (mode == 0)
+			  {
+			    if (!declared_action)
+			      {
+				subject.append("Created ");
+				declared_action = true;
+			      }
+			    else
+			      {
+				subject.append(", ");
+			      }
+
+			    subject.append(base.getName());
+			    subject.append(" \"");
+			    subject.append(object.getLabel());
+			    subject.append("\"");
+			  }
+			break;
+
+		      case ObjectStatus.EDITING:
+			if (mode == 1)
+			  {
+			    if (!declared_action)
+			      {
+				subject.append("Edited ");
+				declared_action = true;
+			      }
+			    else
+			      {
+				subject.append(", ");
+			      }
+
+			    subject.append("Edited ");
+			    subject.append(base.getName());
+			    subject.append(" \"");
+			    subject.append(object.getLabel());
+			    subject.append("\"");
+			  }
+			break;
+
+		      case ObjectStatus.DELETING:
+			if (mode == 2)
+			  {
+			    if (!declared_action)
+			      {
+				subject.append("Deleted ");
+				declared_action = true;
+			      }
+			    else
+			      {
+				subject.append(", ");
+			      }
+
+			    subject.append(base.getName());
+			    subject.append(" \"");
+			    subject.append(object.getLabel());
+			    subject.append("\"");
+			  }
+			break;
+		      }
+		  }
+	      }
+	  }
+      }
+
+    return subject.toString();
+  }
+
+  private static String describeLargeTransaction(MailOut mailOut, DBEditSet transaction)
   {
     String subject = null;
     Set<String> types = new TreeSet<String>();
