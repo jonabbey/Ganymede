@@ -2036,7 +2036,8 @@ public class DBLog {
 		  {
 		    if (subject.length() > 0)
 		      {
-			subject.append(", ");
+			// ", "
+			subject.append(ts.l("describeSmallTransaction.append"));
 		      }
 
 		    DBEditObject object = transaction.findObject(invid);
@@ -2048,18 +2049,19 @@ public class DBLog {
 			  {
 			    if (!declared_action)
 			      {
-				subject.append("Created ");
+				// "Created {0} ""{1}"""
+				subject.append(ts.l("describeSmallTransaction.creation_first",
+						    base.getName(),
+						    object.getLabel()));
 				declared_action = true;
 			      }
 			    else
 			      {
-				subject.append(", ");
+				// ", {0} ""{1}"""
+				subject.append(ts.l("describeSmallTransaction.creation_later",
+						    base.getName(),
+						    object.getLabel()));
 			      }
-
-			    subject.append(base.getName());
-			    subject.append(" \"");
-			    subject.append(object.getLabel());
-			    subject.append("\"");
 			  }
 			break;
 
@@ -2068,19 +2070,19 @@ public class DBLog {
 			  {
 			    if (!declared_action)
 			      {
-				subject.append("Edited ");
+				// "Edited {0} ""{1}"""
+				subject.append(ts.l("describeSmallTransaction.editing_first",
+						    base.getName(),
+						    object.getLabel()));
 				declared_action = true;
 			      }
 			    else
 			      {
-				subject.append(", ");
+				// ", {0} ""{1}"""
+				subject.append(ts.l("describeSmallTransaction.editing_later",
+						    base.getName(),
+						    object.getLabel()));
 			      }
-
-			    subject.append("Edited ");
-			    subject.append(base.getName());
-			    subject.append(" \"");
-			    subject.append(object.getLabel());
-			    subject.append("\"");
 			  }
 			break;
 
@@ -2089,18 +2091,19 @@ public class DBLog {
 			  {
 			    if (!declared_action)
 			      {
-				subject.append("Deleted ");
+				// "Deleted {0} ""{1}"""
+				subject.append(ts.l("describeSmallTransaction.deletion_first",
+						    base.getName(),
+						    object.getLabel()));
 				declared_action = true;
 			      }
 			    else
 			      {
-				subject.append(", ");
+				// ", {0} ""{1}"""
+				subject.append(ts.l("describeSmallTransaction.deletion_later",
+						    base.getName(),
+						    object.getLabel()));
 			      }
-
-			    subject.append(base.getName());
-			    subject.append(" \"");
-			    subject.append(object.getLabel());
-			    subject.append("\"");
 			  }
 			break;
 		      }
