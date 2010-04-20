@@ -165,14 +165,14 @@ public class DBLog {
    * database.
    */
 
-  DBLogController logController;
+  private DBLogController logController;
 
   /**
    * The log controller responsible for logging 'mailout' events to
    * disk or to a database.
    */
 
-  DBLogController mailController;
+  private DBLogController mailController;
 
   /**
    *
@@ -180,7 +180,7 @@ public class DBLog {
    *
    */
 
-  String signature = null;
+  private String signature = null;
 
   /**
    *
@@ -189,7 +189,7 @@ public class DBLog {
    *
    */
 
-  boolean closed = false;
+  private boolean closed = false;
 
   /**
    *
@@ -200,7 +200,7 @@ public class DBLog {
    *
    */
 
-  Map<String, systemEventType> sysEventCodes = Collections.synchronizedMap(new HashMap<String, systemEventType>());
+  private Map<String, systemEventType> sysEventCodes = Collections.synchronizedMap(new HashMap<String, systemEventType>());
 
   /**
    *
@@ -211,7 +211,7 @@ public class DBLog {
    *
    */
 
-  Date sysEventCodesTimeStamp = null;
+  private Date sysEventCodesTimeStamp = null;
 
   /**
    *
@@ -222,7 +222,7 @@ public class DBLog {
    *
    */
 
-  Map<String, objectEventType> objEventCodes = Collections.synchronizedMap(new HashMap<String, objectEventType>());
+  private Map<String, objectEventType> objEventCodes = Collections.synchronizedMap(new HashMap<String, objectEventType>());
 
   /**
    *
@@ -233,7 +233,7 @@ public class DBLog {
    *
    */
 
-  Date objEventCodesTimeStamp = null;
+  private Date objEventCodesTimeStamp = null;
 
   /**
    *
@@ -241,7 +241,7 @@ public class DBLog {
    *
    */
 
-  Qsmtp mailer = null;
+  private Qsmtp mailer = null;
 
   /**
    *
