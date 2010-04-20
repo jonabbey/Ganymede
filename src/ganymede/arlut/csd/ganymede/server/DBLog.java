@@ -2170,19 +2170,19 @@ public class DBLog {
 	    if (create > 0)
 	      {
 		// "created {0,number}"
-		createString = ts.l("describeTransaction.typed_create", create);
+		createString = ts.l("describeLargeTransaction.typed_create", create);
 	      }
 
 	    if (edit > 0)
 	      {
 		// "edited {0, number}"
-		editString = ts.l("describeTransaction.typed_edit", edit);
+		editString = ts.l("describeLargeTransaction.typed_edit", edit);
 	      }
 
 	    if (delete > 0)
 	      {
 		// "deleted {0, number}"
-		editString = ts.l("describeTransaction.typed_delete", delete);
+		editString = ts.l("describeLargeTransaction.typed_delete", delete);
 	      }
 
 	    int paramCount = (createString != null ? 1 : 0) +
@@ -2197,17 +2197,17 @@ public class DBLog {
 		if (createString != null)
 		  {
 		    // "{0} {1} objects"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template", createString, type.toLowerCase());
+		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template", createString, type.toLowerCase());
 		  }
 		else if (editString != null)
 		  {
 		    // "{0} {1} objects"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template", editString, type.toLowerCase());
+		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template", editString, type.toLowerCase());
 		  }
 		else if (deleteString != null)
 		  {
 		    // "{0} {1} objects"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template", deleteString, type.toLowerCase());
+		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template", deleteString, type.toLowerCase());
 		  }
 
 		break;
@@ -2217,24 +2217,24 @@ public class DBLog {
 		  {
 		    // "{0} {1} objects"
 		    // "{0}, {1}"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template",
-					 ts.l("describeTransaction.typed_subject_duplex_pattern", editString, deleteString),
+		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
+					 ts.l("describeLargeTransaction.typed_subject_duplex_pattern", editString, deleteString),
 					 type.toLowerCase());
 		  }
 		else if (editString == null)
 		  {
 		    // "{0} {1} objects"
 		    // "{0}, {1}"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template",
-					 ts.l("describeTransaction.typed_subject_duplex_pattern", createString, deleteString),
+		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
+					 ts.l("describeLargeTransaction.typed_subject_duplex_pattern", createString, deleteString),
 					 type.toLowerCase());
 		  }
 		else if (deleteString == null)
 		  {
 		    // "{0} {1} objects"
 		    // "{0}, {1}"
-		    objectSummary = ts.l("describeTransaction.typed_subject_template",
-					 ts.l("describeTransaction.typed_subject_duplex_pattern", createString, editString),
+		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
+					 ts.l("describeLargeTransaction.typed_subject_duplex_pattern", createString, editString),
 					 type.toLowerCase());
 		  }
 
@@ -2243,8 +2243,8 @@ public class DBLog {
 	      case 3:
 		// "{0} {1} objects"
 		// "{0}, {1}, {2}"
-		objectSummary = ts.l("describeTransaction.typed_subject_template",
-				     ts.l("describeTransaction.typed_subject_triplex_pattern", createString, editString, deleteString),
+		objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
+				     ts.l("describeLargeTransaction.typed_subject_triplex_pattern", createString, editString, deleteString),
 				     type.toLowerCase());
 	      }
 
@@ -2254,7 +2254,7 @@ public class DBLog {
 	      }
 	    else
 	      {
-		subject = ts.l("describeTransaction.concatenation", subject, objectSummary);
+		subject = ts.l("describeLargeTransaction.concatenation", subject, objectSummary);
 	      }
 	  }
       }
@@ -2293,19 +2293,19 @@ public class DBLog {
 	if (create > 0)
 	  {
 	    // "Created {0,number}"
-	    createString = ts.l("describeTransaction.create", create);
+	    createString = ts.l("describeLargeTransaction.create", create);
 	  }
 
 	if (edit > 0)
 	  {
 	    // "Edited {0, number}"
-	    editString = ts.l("describeTransaction.edit", edit);
+	    editString = ts.l("describeLargeTransaction.edit", edit);
 	  }
 
 	if (delete > 0)
 	  {
 	    // "Deleted {0, number}"
-	    editString = ts.l("describeTransaction.delete", delete);
+	    editString = ts.l("describeLargeTransaction.delete", delete);
 	  }
 
 	int paramCount = (createString != null ? 1 : 0) +
@@ -2320,17 +2320,17 @@ public class DBLog {
 	    if (createString != null)
 	      {
 		// "{0} {1} objects"
-		objectSummary = ts.l("describeTransaction.subject_template", createString);
+		objectSummary = ts.l("describeLargeTransaction.subject_template", createString);
 	      }
 	    else if (editString != null)
 	      {
 		// "{0} {1} objects"
-		objectSummary = ts.l("describeTransaction.subject_template", editString);
+		objectSummary = ts.l("describeLargeTransaction.subject_template", editString);
 	      }
 	    else if (deleteString != null)
 	      {
 		// "{0} {1} objects"
-		objectSummary = ts.l("describeTransaction.subject_template", deleteString);
+		objectSummary = ts.l("describeLargeTransaction.subject_template", deleteString);
 	      }
 
 	    break;
@@ -2340,22 +2340,22 @@ public class DBLog {
 	      {
 		// "{0} objects"
 		// "{0}, {1}"
-		objectSummary = ts.l("describeTransaction.subject_template",
-				     ts.l("describeTransaction.subject_duplex_pattern", editString, deleteString));
+		objectSummary = ts.l("describeLargeTransaction.subject_template",
+				     ts.l("describeLargeTransaction.subject_duplex_pattern", editString, deleteString));
 	      }
 	    else if (editString == null)
 	      {
 		// "{0} objects"
 		// "{0}, {1}"
-		objectSummary = ts.l("describeTransaction.subject_template",
-				     ts.l("describeTransaction.subject_duplex_pattern", createString, deleteString));
+		objectSummary = ts.l("describeLargeTransaction.subject_template",
+				     ts.l("describeLargeTransaction.subject_duplex_pattern", createString, deleteString));
 	      }
 	    else if (deleteString == null)
 	      {
 		// "{0} objects"
 		// "{0}, {1}"
-		objectSummary = ts.l("describeTransaction.subject_template",
-				     ts.l("describeTransaction.subject_duplex_pattern", createString, editString));
+		objectSummary = ts.l("describeLargeTransaction.subject_template",
+				     ts.l("describeLargeTransaction.subject_duplex_pattern", createString, editString));
 	      }
 
 	    break;
@@ -2363,8 +2363,8 @@ public class DBLog {
 	  case 3:
 	    // "{0} objects"
 	    // "{0}, {1}, {2}"
-	    objectSummary = ts.l("describeTransaction.subject_template",
-				 ts.l("describeTransaction.subject_triplex_pattern", createString, editString, deleteString));
+	    objectSummary = ts.l("describeLargeTransaction.subject_template",
+				 ts.l("describeLargeTransaction.subject_triplex_pattern", createString, editString, deleteString));
 	  }
 
 	if (subject == null)
@@ -2373,7 +2373,7 @@ public class DBLog {
 	  }
 	else
 	  {
-	    subject = ts.l("describeTransaction.concatenation", subject, objectSummary);
+	    subject = ts.l("describeLargeTransaction.concatenation", subject, objectSummary);
 	  }
       }
 
