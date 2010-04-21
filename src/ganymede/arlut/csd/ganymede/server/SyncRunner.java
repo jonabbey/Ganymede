@@ -643,15 +643,15 @@ public class SyncRunner implements Runnable {
 
     if (context_count > 0)
       {
-	xmlOut.startElementIndent("context_objects");
-	xmlOut.indentOut();
-
 	if (xmlOut == null)
 	  {
 	    xmlOut = createXMLSync(transRecord);
 	    xmlOut.setDeltaFieldBook(book);
 	    xmlOut.setDBSession(transaction.getSession());
 	  }
+
+	xmlOut.startElementIndent("context_objects");
+	xmlOut.indentOut();
 
 	for (Short type: typeSet)
 	  {
