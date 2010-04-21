@@ -89,6 +89,10 @@ public class BrowserLauncher {
 
 	    desktopObject = getDesktopMethod.invoke(null, (Object[]) null);
 	  }
+	catch (RuntimeException ex)
+	  {
+	    // to make FindBugs happier
+	  }
 	catch (Exception ex)
 	  {
 	  }
@@ -119,8 +123,15 @@ public class BrowserLauncher {
 
 	browseMethod.invoke(desktopObject, new Object [] {urlObj});
       }
+    catch (RuntimeException ex)
+      {
+	// catch RuntimeException separately to make FindBugs
+	// happier.. in fact, if we can't get the browser going on
+	// this platform, we don't really care all that much.
+      }
     catch (Exception ex)
       {
+	// Ditto for any non-RuntimeExceptions.
       }
   }
 }

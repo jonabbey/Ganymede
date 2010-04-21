@@ -130,6 +130,10 @@ public class StandardDialog extends JDialog {
 	    success = true;
 	  }
       }
+    catch (RuntimeException ex)
+      {
+	// to make FindBugs happier
+      }
     catch (Exception ex)
       {
 	// expecting ClassNotFoundException if we are running on Java

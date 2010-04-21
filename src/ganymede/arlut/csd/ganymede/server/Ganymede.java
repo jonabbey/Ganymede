@@ -897,10 +897,20 @@ public class Ganymede {
 	Naming.bind("rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server", 
 		      server);
       }
+    catch (RuntimeException ex)
+      {
+	// We're catching RuntimeException separately to placate
+	// FindBugs.
+
+	debug(ts.l("main.error_no_binding") + ex);
+
+	throw ex;
+      }
     catch (Exception ex)
       {
 	debug(ts.l("main.error_no_binding") + ex);
-	throw new RuntimeException(ex.getMessage());
+
+	throw new RuntimeException(ex);
       }
 
     // at this point clients can log in to the server.. the RMI system
