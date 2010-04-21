@@ -2388,14 +2388,7 @@ public class DBLog {
 				 ts.l("describeLargeTransaction.subject_triplex_pattern", createString, editString, deleteString));
 	  }
 
-	if (subject == null)
-	  {
-	    subject = objectSummary;
-	  }
-	else
-	  {
-	    subject = ts.l("describeLargeTransaction.concatenation", subject, objectSummary);
-	  }
+	subject = objectSummary;
       }
 
     return subject;
