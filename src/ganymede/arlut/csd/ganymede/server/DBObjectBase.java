@@ -3537,7 +3537,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public Date getTimeStamp()
   {
-    return lastChange;
+    return new Date(lastChange.getTime());
   }
 
   //

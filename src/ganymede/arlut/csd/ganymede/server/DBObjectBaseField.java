@@ -470,7 +470,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   public Date getTimeStamp()
   {
-    return lastChange;
+    return new Date(lastChange.getTime());
   }
 
   /**
