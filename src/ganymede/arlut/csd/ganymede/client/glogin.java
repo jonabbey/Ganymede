@@ -358,7 +358,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	    if (ganymedeProperties == null)
 	      {
-		ganymedeProperties = new Properties();
+		// declare a local Properties object while we're
+		// initializing it so that the static
+		// ganymedeProperties field is not visible externally
+		// in mid-configuration.  FindBugs.
+
+		Properties myGanymedeProperties = new Properties();
 	
 		if (debug)
 		  {
@@ -372,7 +377,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		    try
 		      {
 			bis = new BufferedInputStream(new FileInputStream(properties_file));
-			ganymedeProperties.load(bis);
+			myGanymedeProperties.load(bis);
 		      }
 		    catch (java.io.FileNotFoundException e)
 		      {
@@ -396,6 +401,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 			  }
 		      }
 		  }
+
+		ganymedeProperties = myGanymedeProperties;
 	      }
 
 	    return ganymedeProperties.getProperty(configKey);

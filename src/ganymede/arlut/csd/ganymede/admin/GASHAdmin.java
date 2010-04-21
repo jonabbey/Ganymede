@@ -278,8 +278,13 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	  {
 	    if (ganymedeProperties == null)
 	      {
-		ganymedeProperties = new Properties();
-	
+		// declare a local Properties object while we're
+		// initializing it so that the static
+		// ganymedeProperties field is not visible externally
+		// in mid-configuration.  FindBugs.
+
+		Properties myGanymedeProperties = new Properties();
+
 		if (debug)
 		  {
 		    System.out.println("Loading properties from: " + properties_file);
@@ -292,7 +297,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 		    try
 		      {
 			bis = new BufferedInputStream(new FileInputStream(properties_file));
-			ganymedeProperties.load(bis);
+			myGanymedeProperties.load(bis);
 		      }
 		    catch (java.io.FileNotFoundException e)
 		      {
@@ -316,6 +321,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			  }
 		      }
 		  }
+
+		ganymedeProperties = myGanymedeProperties;
 	      }
 
 	    return ganymedeProperties.getProperty(configKey);
