@@ -1522,7 +1522,7 @@ class perm_editor extends JDialog implements ActionListener, Runnable {
    * editor treeTable.
    */
 
-  class permEditorTreeRenderer extends DefaultTreeCellRenderer {
+  static class permEditorTreeRenderer extends DefaultTreeCellRenderer {
     ImageIcon builtInIcon;
     ImageIcon standardIcon;
 
