@@ -3751,7 +3751,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * GUI thread.
    */
 
-  public synchronized final void cleanUp()
+  public synchronized final void cleanup()
   {
     Enumeration en;
 

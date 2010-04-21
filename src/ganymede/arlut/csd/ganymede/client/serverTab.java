@@ -132,7 +132,7 @@ public class serverTab extends clientTab {
   {
     if (cp != null)
       {
-	cp.cleanUp();
+	cp.cleanup();
 	cp = null;
       }
 

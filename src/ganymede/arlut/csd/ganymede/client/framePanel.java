@@ -1834,7 +1834,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	for (int i = 0; i < containerPanels.size(); i++)
 	  {
 	    containerPanel cp = (containerPanel)containerPanels.elementAt(i);
-	    cp.cleanUp();
+	    cp.cleanup();
 	  }
 
 	containerPanels = null;
