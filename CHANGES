@@ -1601,6 +1601,21 @@ this point on.
 In particular, DBEditObject.getEmailTargets() must now return a
 List<String> instead of a Vector.
 
+107. [SERVER] Improved email sent by logging system
+
+Formerly, the Ganymede logging system sent out a lot of mail with a
+generic 'Transaction Log' message.
+
+The logging subsystem has been improved so that the subject line is
+much more descriptive.  This change includes logic for both small and
+large transactions.. small transactions will have the object types and
+names included in the subject line, along with whether they were
+created, edited, or deleted.
+
+Large transactions will have a summary report that includes a count of
+objects created, edited, or deleted, and their types, if a reasonably
+small number of object types were affected.
+
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
