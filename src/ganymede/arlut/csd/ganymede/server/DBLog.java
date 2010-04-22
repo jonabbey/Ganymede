@@ -2018,12 +2018,13 @@ public class DBLog {
     for (int mode = 0; mode < 3; mode++)
       {
 	boolean declared_action = false;
-
+	
 	// group by type
 
 	for (String type: types)
 	  {
 	    DBObjectBase base = Ganymede.db.getObjectBase(type);
+	    boolean declared_type = false;
 
 	    // finally loop over the actual invids, which we'll
 	    // include or disinclude based on the outer loops
@@ -2052,13 +2053,24 @@ public class DBLog {
 						    base.getName(),
 						    object.getLabel()));
 				declared_action = true;
+				declared_type = true;
 			      }
 			    else
 			      {
-				// ", {0} "{1}"
-				subject.append(ts.l("describeSmallTransaction.creation_later",
-						    base.getName(),
-						    object.getLabel()));
+				if (!declared_type)
+				  {
+				    // ", {0} "{1}"
+				    subject.append(ts.l("describeSmallTransaction.creation_later",
+							base.getName(),
+							object.getLabel()));
+				    declared_type = true;
+				  }
+				else
+				  {
+				    // ", "{0}"
+				    subject.append(ts.l("describeSmallTransaction.creation_later_sametype",
+							object.getLabel()));
+				  }
 			      }
 			  }
 			break;
@@ -2079,13 +2091,24 @@ public class DBLog {
 						    base.getName(),
 						    object.getLabel()));
 				declared_action = true;
+				declared_type = true;
 			      }
 			    else
 			      {
-				// ", {0} "{1}"
-				subject.append(ts.l("describeSmallTransaction.editing_later",
-						    base.getName(),
-						    object.getLabel()));
+				if (!declared_type)
+				  {
+				    // ", {0} "{1}"
+				    subject.append(ts.l("describeSmallTransaction.editing_later",
+							base.getName(),
+							object.getLabel()));
+				    declared_type = true;
+				  }
+				else
+				  {
+				    // ", "{0}"
+				    subject.append(ts.l("describeSmallTransaction.editing_later_sametype",
+							object.getLabel()));
+				  }
 			      }
 			  }
 			break;
@@ -2106,13 +2129,24 @@ public class DBLog {
 						    base.getName(),
 						    object.getLabel()));
 				declared_action = true;
+				declared_type = true;
 			      }
 			    else
 			      {
-				// ", {0} "{1}"
-				subject.append(ts.l("describeSmallTransaction.deletion_later",
-						    base.getName(),
-						    object.getLabel()));
+				if (!declared_type)
+				  {
+				    // ", {0} "{1}"
+				    subject.append(ts.l("describeSmallTransaction.deletion_later",
+							base.getName(),
+							object.getLabel()));
+				    declared_type = true;
+				  }
+				else
+				  {
+				    // ", "{0}"
+				    subject.append(ts.l("describeSmallTransaction.deletion_later_sametype",
+							object.getLabel()));
+				  }
 			      }
 			  }
 			break;
