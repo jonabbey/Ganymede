@@ -1225,8 +1225,6 @@ public class DBLog {
     // --
 
     Set<String> mailSet = new HashSet<String>();
-
-    List<String> mailList = new ArrayList<String>();
     Invid objectInvid = event.getInvids().get(0);
     String key = event.eventClassToken + ":" + objectInvid.getType();
     objectEventType type = objEventCodes.get(key);
@@ -1298,7 +1296,7 @@ public class DBLog {
 	objectOuts.put(key, addresses);
       }
 
-    for (String address: mailList)
+    for (String address: mailSet)
       {
 	MailOut mailout = addresses.get(address);
 
