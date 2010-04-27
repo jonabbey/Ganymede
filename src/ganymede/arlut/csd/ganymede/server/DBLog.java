@@ -2248,7 +2248,7 @@ public class DBLog {
 	    if (delete > 0)
 	      {
 		// "deleted {0, number}"
-		editString = ts.l("describeLargeTransaction.typed_delete", delete);
+		deleteString = ts.l("describeLargeTransaction.typed_delete", delete);
 	      }
 
 	    int paramCount = (createString != null ? 1 : 0) +
@@ -2371,7 +2371,7 @@ public class DBLog {
 	if (delete > 0)
 	  {
 	    // "Deleted {0, number}"
-	    editString = ts.l("describeLargeTransaction.delete", delete);
+	    deleteString = ts.l("describeLargeTransaction.delete", delete);
 	  }
 
 	int paramCount = (createString != null ? 1 : 0) +
