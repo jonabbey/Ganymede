@@ -2019,7 +2019,14 @@ public class DBLog {
 	types.add(base.getName());
       }
 
-    // group by edit mode (0 = creating, 1 = editing, 2 = deleting)
+    // in describeSmallTransaction we have three loops, over the
+    // action done to the objects, over their types, and finally over
+    // the items themselves
+    //
+    // group by edit mode (0 = creating, 1 = deleting, 2 = editing)
+    //
+    // we try to sort these with the most significant/unusual up front
+    // on the subject line
 
     for (int mode = 0; mode < 3; mode++)
       {
@@ -2081,8 +2088,46 @@ public class DBLog {
 			  }
 			break;
 
-		      case ObjectStatus.EDITING:
+		      case ObjectStatus.DELETING:
 			if (mode == 1)
+			  {
+			    if (!declared_action)
+			      {
+				if (subject.length() > 0)
+				  {
+				    // ". "
+				    subject.append(ts.l("describeSmallTransaction.append"));
+				  }
+
+				// "Deleted {0} "{1}"
+				subject.append(ts.l("describeSmallTransaction.deletion_first",
+						    base.getName(),
+						    object.getLabel()));
+				declared_action = true;
+				declared_type = true;
+			      }
+			    else
+			      {
+				if (!declared_type)
+				  {
+				    // ", {0} "{1}"
+				    subject.append(ts.l("describeSmallTransaction.deletion_later",
+							base.getName(),
+							object.getLabel()));
+				    declared_type = true;
+				  }
+				else
+				  {
+				    // ", "{0}"
+				    subject.append(ts.l("describeSmallTransaction.deletion_later_sametype",
+							object.getLabel()));
+				  }
+			      }
+			  }
+			break;
+
+		      case ObjectStatus.EDITING:
+			if (mode == 2)
 			  {
 			    if (!declared_action)
 			      {
@@ -2119,43 +2164,6 @@ public class DBLog {
 			  }
 			break;
 
-		      case ObjectStatus.DELETING:
-			if (mode == 2)
-			  {
-			    if (!declared_action)
-			      {
-				if (subject.length() > 0)
-				  {
-				    // ". "
-				    subject.append(ts.l("describeSmallTransaction.append"));
-				  }
-
-				// "Deleted {0} "{1}"
-				subject.append(ts.l("describeSmallTransaction.deletion_first",
-						    base.getName(),
-						    object.getLabel()));
-				declared_action = true;
-				declared_type = true;
-			      }
-			    else
-			      {
-				if (!declared_type)
-				  {
-				    // ", {0} "{1}"
-				    subject.append(ts.l("describeSmallTransaction.deletion_later",
-							base.getName(),
-							object.getLabel()));
-				    declared_type = true;
-				  }
-				else
-				  {
-				    // ", "{0}"
-				    subject.append(ts.l("describeSmallTransaction.deletion_later_sametype",
-							object.getLabel()));
-				  }
-			      }
-			  }
-			break;
 		      }
 		  }
 	      }
@@ -2284,7 +2292,7 @@ public class DBLog {
 		    // "{0} {1} objects."
 		    // "{0}, {1}"
 		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
-					 ts.l("describeLargeTransaction.typed_subject_duplex_pattern", editString, deleteString),
+					 ts.l("describeLargeTransaction.typed_subject_duplex_pattern", deleteString, editString),
 					 type.toLowerCase());
 		  }
 		else if (editString == null)
@@ -2310,7 +2318,7 @@ public class DBLog {
 		// "{0} {1} objects."
 		// "{0}, {1}, {2}"
 		objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
-				     ts.l("describeLargeTransaction.typed_subject_triplex_pattern", createString, editString, deleteString),
+				     ts.l("describeLargeTransaction.typed_subject_triplex_pattern", createString, deleteString, editString),
 				     type.toLowerCase());
 	      }
 
@@ -2320,6 +2328,8 @@ public class DBLog {
 	      }
 	    else
 	      {
+		// concatenation between object types
+
 		subject = ts.l("describeLargeTransaction.concatenation", subject, objectSummary);
 	      }
 	  }
