@@ -1996,6 +1996,12 @@ public class DBLog {
       }
   }
 
+  /**
+   * describeSmallTransaction provides a subject line with the types
+   * and names of the objects created, modified, or deleted by
+   * transaction.
+   */
+
   private static String describeSmallTransaction(MailOut mailOut, DBEditSet transaction)
   {
     StringBuilder subject = new StringBuilder();
@@ -2164,6 +2170,13 @@ public class DBLog {
 
     return subject.toString();
   }
+
+  /**
+   * describeLargeTransaction provides a subject line with the types
+   * and count of objects created, modified, or deleted by
+   * transaction, but without the names of the objects that
+   * describeSmallTransaction provides.
+   */
 
   private static String describeLargeTransaction(MailOut mailOut, DBEditSet transaction)
   {
