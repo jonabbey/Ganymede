@@ -359,15 +359,25 @@ public class DBLog {
 
   synchronized void close() throws IOException
   {
-    logController.close();
-
-    if (mailController != null)
+    try
       {
-	mailController.close();
-
-	if (mailer != null)
+	logController.close();
+      }
+    finally
+      {
+	if (mailController != null)
 	  {
-            mailer.close(); // we'll block here while the mailer's email thread drains
+	    try
+	      {
+		mailController.close();
+	      }
+	    finally
+	      {
+		if (mailer != null)
+		  {
+		    mailer.close(); // we'll block here while the mailer's email thread drains
+		  }
+	      }
 	  }
       }
 
