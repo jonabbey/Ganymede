@@ -361,27 +361,32 @@ public class DBLog {
   {
     try
       {
-	logController.close();
-      }
-    finally
-      {
-	if (mailController != null)
+	try
 	  {
-	    try
+	    logController.close();
+	  }
+	finally
+	  {
+	    if (mailController != null)
 	      {
-		mailController.close();
-	      }
-	    finally
-	      {
-		if (mailer != null)
+		try
 		  {
-		    mailer.close(); // we'll block here while the mailer's email thread drains
+		    mailController.close();
+		  }
+		finally
+		  {
+		    if (mailer != null)
+		      {
+			mailer.close(); // we'll block here while the mailer's email thread drains
+		      }
 		  }
 	      }
 	  }
       }
-
-    closed = true;
+    finally
+      {
+	closed = true;
+      }
   }
 
   /**
