@@ -1106,10 +1106,8 @@ public class DBEditSet {
 
   private final void commit_run_precommit_hooks() throws CommitException
   {
-    Iterator iter;
     ReturnVal retVal;
     String checkpointKey = description + " precommit hook";
-    DBEditObject eObj;
 
     /* -- */
 
@@ -1130,10 +1128,8 @@ public class DBEditSet {
 
     try
       {
-        for (int i = 0; i < myObjects.length; i++)
+	for (DBEditObject eObj: myObjects)
           {
-            eObj = myObjects[i];
-
             try
               {
                 retVal = eObj.preCommitHook();
