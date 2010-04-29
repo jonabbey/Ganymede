@@ -75,6 +75,7 @@ import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.SchemaConstants;
 
 import arlut.csd.Util.TranslationService;
+import arlut.csd.Util.VectorUtils;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -953,7 +954,7 @@ public class DBLog {
 
     if (mailer != null)
       {
-      	sendObjectMail(returnAddr, adminName, this.objectOuts, this.transactionTimeStamp);
+      	sendObjectMail(returnAddr, adminName, this.objectOuts, this.transactionTimeStamp, transaction);
       }
 
     this.objectOuts.clear();
@@ -1340,7 +1341,7 @@ public class DBLog {
    * that have signed up for per-object-type mail notifications.
    */
 
-  private void sendObjectMail(String returnAddr, String adminName, HashMap<String, HashMap<String, MailOut>> objectOuts, Date currentTime)
+  private void sendObjectMail(String returnAddr, String adminName, HashMap<String, HashMap<String, MailOut>> objectOuts, Date currentTime, DBEditSet transaction)
   {
     for (Map.Entry<String, HashMap<String, MailOut>> item: objectOuts.entrySet())
       {
@@ -1379,7 +1380,7 @@ public class DBLog {
 
 	    String title;
 
-	    if (mailout.entryCount == 1)
+	    if (mailout.entryCount < 5)
 	      {
 		if (type.name != null)
 		  {
@@ -1390,9 +1391,18 @@ public class DBLog {
 		    title = Ganymede.subjectPrefixProperty + type.token;
 		  }
 
-		if (mailout.objName != null)
+		List<String> name_list = new ArrayList<String>();
+
+		for (Invid invid: mailout.getInvids())
 		  {
-		    title = title + " (\"" + mailout.objName + "\")";
+		    DBEditObject object = transaction.findObject(invid);
+
+		    name_list.add(object.getLabel());
+		  }
+
+		if (name_list.size() > 0)
+		  {
+		    title = title + " (\"" + VectorUtils.vectorString(name_list) + "\")";
 		  }
 	      }
 	    else
