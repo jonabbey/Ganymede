@@ -1242,8 +1242,8 @@ public class DBLog {
 
     Set<String> mailSet = new HashSet<String>();
     Invid objectInvid = event.getInvids().get(0);
-    String key = event.eventClassToken + ":" + objectInvid.getType();
-    objectEventType type = objEventCodes.get(key);
+    String key = event.eventClassToken + ":" + objectInvid.getType(); // pattern to match
+    objectEventType type = objEventCodes.get(key); // does anyone care about this pattern?
 
     /* -- */
 
@@ -1262,8 +1262,8 @@ public class DBLog {
 	return Collections.emptyList();
       }
 
-    // ok.  now we've got an objectEventType, so check to see if we
-    // want to send out mail for this event.
+    // ok.  now we've got an objectEventType, so check to see who we
+    // want to send mail to for this event.
 
     if (type.ccToSelf)
       {
@@ -1320,14 +1320,6 @@ public class DBLog {
 	  {
 	    mailout = new MailOut(address);
 	    addresses.put(address, mailout);
-
-	    // we always create an object event MailOut with the name
-	    // of the object that inspired us to create
-	    // it.. sendObjectMail will include this information on
-	    // the subject mail if the MailOut winds up with only one
-	    // object
-
-	    mailout.setObjectName(objectName);
 	  }
 
 	mailout.append(event);
@@ -2684,7 +2676,6 @@ class MailOut {
   List<String> addresses;
   Set<Invid> invids = new HashSet<Invid>();
   int entryCount = 0;
-  String objName;
 
   /* -- */
 
@@ -2697,11 +2688,6 @@ class MailOut {
 
     addresses = new ArrayList<String>();
     addresses.add(address);
-  }
-
-  void setObjectName(String objName)
-  {
-    this.objName = objName;
   }
 
   void addEntryCount()
