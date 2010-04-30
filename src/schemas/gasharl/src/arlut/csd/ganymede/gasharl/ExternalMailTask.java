@@ -58,6 +58,8 @@ import java.util.Vector;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryNode;
+import arlut.csd.ganymede.common.QueryAndNode;
 import arlut.csd.ganymede.common.QueryDataNode;
 import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -213,9 +215,12 @@ public class ExternalMailTask implements Runnable {
     Calendar upperBound = new GregorianCalendar();
     Enumeration en;
 
-    QueryDataNode matchNode = new QueryDataNode(userSchema.MAILEXPDATE,
-						QueryDataNode.DEFINED,
-						null);
+    QueryNode matchNode = new QueryAndNode(new QueryDataNode(userSchema.MAILEXPDATE,
+							     QueryDataNode.DEFINED,
+							     null),
+					   new QueryDataNode(userSchema.ALLOWEXTERNAL,
+							     QueryDataNode.DEFINED,
+							     null));
     /* -- */
     
     q = new Query(SchemaConstants.UserBase, matchNode, false);
