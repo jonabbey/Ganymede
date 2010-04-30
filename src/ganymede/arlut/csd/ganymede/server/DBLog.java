@@ -1394,7 +1394,7 @@ public class DBLog {
 
 		if (name_list.size() > 0)
 		  {
-		    title = title + " (\"" + VectorUtils.vectorString(name_list) + "\")";
+		    title = title + " (\"" + VectorUtils.vectorString(name_list, ", ") + "\")";
 		  }
 	      }
 	    else
