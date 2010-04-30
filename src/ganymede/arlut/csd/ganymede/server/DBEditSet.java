@@ -1391,7 +1391,12 @@ public class DBEditSet {
 
     if (isOversightOn())
       {
-	missingFields.addAll(eObj.checkRequiredFields());
+	Vector<String> missingRequiredFields = eObj.checkRequiredFields();
+
+	if (missingRequiredFields != null)
+	  {
+	    missingFields.addAll(missingRequiredFields);
+	  }
       }
 
     if (missingFields != null && missingFields.size() > 0)
