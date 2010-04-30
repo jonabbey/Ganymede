@@ -100,7 +100,7 @@ class DBDumpLock extends DBLock {
    *
    */
 
-  public DBDumpLock(DBStore store, Vector baseSet)
+  public DBDumpLock(DBStore store, Vector<DBObjectBase> baseSet)
   {
     this.lockSync = store.lockSync;
     this.baseSet = baseSet;

@@ -115,7 +115,7 @@ public class DBSessionLockManager {
    * will be made to those ObjectBases until the read lock is released.</p>
    */
 
-  public synchronized DBReadLock openReadLock(Vector bases) throws InterruptedException
+  public synchronized DBReadLock openReadLock(Vector<DBObjectBase> bases) throws InterruptedException
   {
     DBReadLock lock;
 
@@ -217,7 +217,7 @@ public class DBSessionLockManager {
    * will block until the lock can be acquired.</p>
    */
 
-  public synchronized DBWriteLock openWriteLock(Vector bases) throws InterruptedException
+  public synchronized DBWriteLock openWriteLock(Vector<DBObjectBase> bases) throws InterruptedException
   {
     DBWriteLock lock;
 

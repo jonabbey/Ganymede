@@ -105,7 +105,7 @@ public class DBWriteLock extends DBLock {
    *
    */
 
-  public DBWriteLock(DBStore store, Vector baseSet)
+  public DBWriteLock(DBStore store, Vector<DBObjectBase> baseSet)
   {
     this.key = null;
     this.lockSync = store.lockSync;

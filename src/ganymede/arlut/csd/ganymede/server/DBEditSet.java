@@ -1170,9 +1170,9 @@ public class DBEditSet {
    * <p>Throws a CommitNonFatalException if we can't get the lock.</p>
    */
 
-  private final Vector commit_lockBases() throws CommitNonFatalException
+  private final Vector<DBObjectBase> commit_lockBases() throws CommitNonFatalException
   {
-    Vector baseSet = new Vector();
+    Vector<DBObjectBase> baseSet = new Vector();
 
     /* -- */
 

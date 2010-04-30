@@ -1284,7 +1284,7 @@ final public class DBSession {
    * will be made to those ObjectBases until the read lock is released.</p>
    */
 
-  public DBReadLock openReadLock(Vector bases) throws InterruptedException
+  public DBReadLock openReadLock(Vector<DBObjectBase> bases) throws InterruptedException
   {
     return lockManager.openReadLock(bases);
   }
@@ -1323,7 +1323,7 @@ final public class DBSession {
    * will block until the lock can be acquired.</p>
    */
 
-  public DBWriteLock openWriteLock(Vector bases) throws InterruptedException
+  public DBWriteLock openWriteLock(Vector<DBObjectBase> bases) throws InterruptedException
   {
     return lockManager.openWriteLock(bases);
   }

@@ -136,7 +136,7 @@ public abstract class DBLock {
    * DBObjectBases that this DBLock is/will be locked on.
    */
 
-  Vector baseSet;
+  Vector<DBObjectBase> baseSet;
 
   /**
    * Will be true if a DBLock is successfully locked.
@@ -210,7 +210,7 @@ public abstract class DBLock {
    * objects in the provided Vector locked.
    */
 
-  boolean isLocked(Vector bases)
+  boolean isLocked(Vector<DBObjectBase> bases)
   {
     synchronized (lockSync)
       {
@@ -224,7 +224,7 @@ public abstract class DBLock {
    * objects in the provided Vector locked.
    */
 
-  boolean overlaps(Vector bases)
+  boolean overlaps(Vector<DBObjectBase> bases)
   {
     synchronized (lockSync)
       {
