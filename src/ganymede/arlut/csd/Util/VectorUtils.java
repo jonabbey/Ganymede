@@ -49,6 +49,7 @@
 
 package arlut.csd.Util;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -371,7 +372,7 @@ public class VectorUtils {
    * concatenated together, comma separated.
    */
 
-  public static String vectorString(List vec)
+  public static String vectorString(Collection vec)
   {
     return VectorUtils.vectorString(vec, ",");
   }
@@ -381,7 +382,7 @@ public class VectorUtils {
    * concatenated together, comma separated.
    */
 
-  public static String vectorString(List vec, String separator)
+  public static String vectorString(Collection vec, String separator)
   {
     if (vec == null)
       {
@@ -390,14 +391,18 @@ public class VectorUtils {
 
     StringBuilder temp = new StringBuilder();
 
-    for (int i = 0; i < vec.size(); i++)
+    boolean first = true;
+
+    for (Object elem: vec)
       {
-	if (i > 0)
+	if (!first)
 	  {
 	    temp.append(separator);
 	  }
 
-	temp.append(vec.get(i));
+	temp.append(elem);
+
+	first = false;
       }
 
     return temp.toString();
