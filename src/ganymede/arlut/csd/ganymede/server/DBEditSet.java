@@ -404,7 +404,7 @@ public class DBEditSet {
 
   public DBEditObject findObject(Invid invid)
   {
-    return (DBEditObject) objects.get(invid);
+    return objects.get(invid);
   }
 
   /**
