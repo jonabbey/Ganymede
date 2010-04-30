@@ -1882,7 +1882,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * this method will not be called at transaction commit time.</p>
    */
 
-  public final Vector checkRequiredFields()
+  public final Vector<String> checkRequiredFields()
   {
     Vector localFields = new Vector();
 
