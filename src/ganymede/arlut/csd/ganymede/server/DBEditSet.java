@@ -57,10 +57,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import arlut.csd.Util.NamedStack;
@@ -924,12 +924,8 @@ public class DBEditSet {
 
     ArrayList<DBEditObject> drop = new ArrayList<DBEditObject>();
 
-    Iterator iter = objects.values().iterator();
-
-    while (iter.hasNext())
+    for (DBEditObject eobjRef: objects.values())
       {
-	DBEditObject eobjRef = (DBEditObject) iter.next();
-
 	Invid tmpvid = eobjRef.getInvid();
 
 	if (!oldvalues.contains(tmpvid))
@@ -1177,7 +1173,6 @@ public class DBEditSet {
   private final Vector commit_lockBases() throws CommitNonFatalException
   {
     Vector baseSet = new Vector();
-    Iterator iter;
 
     /* -- */
 
@@ -1251,22 +1246,19 @@ public class DBEditSet {
     // in the middle of a transaction, since that is only done during
     // schema editing
 
-    Vector conflicts = null;
-    Vector totalConflicts = null;
+    Set<String> totalConflicts = new TreeSet<String>();
 
-    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+    for (DBNameSpace space: dbStore.nameSpaces)
       {
-	DBNameSpace space = (DBNameSpace) dbStore.nameSpaces.elementAt(i);
-
-	conflicts = space.verify_noninteractive(this);
+	List<String> conflicts = space.verify_noninteractive(this);
 
 	if (conflicts != null)
 	  {
-	    totalConflicts = VectorUtils.union(conflicts, totalConflicts);
+	    totalConflicts.addAll(conflicts);
 	  }
       }
 
-    if (totalConflicts != null)
+    if (totalConflicts.size() > 0)
       {
 	// "Error, namespace conflicts remaining at transaction commit time.
 	// The following values are in namespace conflict:\n\t{0}"
@@ -1287,21 +1279,13 @@ public class DBEditSet {
 
   private final void commit_handlePhase1() throws CommitNonFatalException
   {
-    Vector committedObjects;
-    Iterator iter;
-    DBEditObject eObj, eObj2;
     ReturnVal retVal;
+    List<DBEditObject> committedObjects = new ArrayList<DBEditObject>();
 
     /* -- */
 
-    committedObjects = new Vector();
-
-    iter = this.objects.values().iterator();
-
-    while (iter.hasNext())
+    for (DBEditObject eObj: this.objects.values())
       {
-	eObj = (DBEditObject) iter.next();
-
 	try
 	  {
 	    retVal = eObj.commitPhase1();
@@ -1313,9 +1297,8 @@ public class DBEditSet {
 
 	    eObj.release(false);
 
-	    for (int i = 0; i < committedObjects.size(); i++)
+	    for (DBEditObject eObj2: committedObjects)
 	      {
-		eObj2 = (DBEditObject) committedObjects.elementAt(i);
 		eObj2.release(false); // unlock commit mode
 	      }
 
@@ -1349,9 +1332,8 @@ public class DBEditSet {
 	  {
 	    eObj.release(false);
 
-	    for (int i = 0; i < committedObjects.size(); i++)
+	    for (DBEditObject eObj2: committedObjects)
 	      {
-		eObj2 = (DBEditObject) committedObjects.elementAt(i);
 		eObj2.release(false); // unlock commit mode
 	      }
 
@@ -1361,7 +1343,7 @@ public class DBEditSet {
 	  }
 	else
 	  {
-	    committedObjects.addElement(eObj);
+	    committedObjects.add(eObj);
 	  }
       }
   }
@@ -1378,7 +1360,7 @@ public class DBEditSet {
   private final void commit_checkObjectMissingFields(DBEditObject eObj) throws CommitNonFatalException
   {
     ReturnVal retVal;
-    Vector missingFields = null;
+    Set<String> missingFields = null;
 
     /* -- */
 
@@ -1398,18 +1380,18 @@ public class DBEditSet {
 
     if (labelField == null || !labelField.isDefined())
       {
-	missingFields = new Vector();
+	missingFields = new TreeSet<String>();
 
 	// the label field is missing.  look it up.
 
 	DBObjectBaseField fieldDef = (DBObjectBaseField) eObj.getBase().getField(eObj.getLabelFieldID());
 
-	missingFields.addElement(fieldDef.getName());
+	missingFields.add(fieldDef.getName());
       }
 
     if (isOversightOn())
       {
-	missingFields = VectorUtils.union(missingFields, eObj.checkRequiredFields());
+	missingFields.addAll(eObj.checkRequiredFields());
       }
 
     if (missingFields != null && missingFields.size() > 0)
@@ -1420,9 +1402,9 @@ public class DBEditSet {
 			     eObj.getTypeName(),
 			     eObj.getLabel()));
 
-	for (int j = 0; j < missingFields.size(); j++)
+	for (String fieldName: missingFields)
 	  {
-	    errorBuf.append((String) missingFields.elementAt(j));
+	    errorBuf.append(fieldName);
 	    errorBuf.append("\n");
 	  }
 
@@ -1446,7 +1428,6 @@ public class DBEditSet {
     DateDBField df;
     StringDBField sf;
     String result = this.session.getID() + " [" + this.description + "]";
-    DBEditObject eObj;
     Date modDate = new Date();
 
     /* -- */
@@ -1456,12 +1437,8 @@ public class DBEditSet {
 
     result = result.intern();
 
-    Iterator iter = objects.values().iterator();
-
-    while (iter.hasNext())
+    for (DBEditObject eObj: objects.values())
       {
-	eObj = (DBEditObject) iter.next();
-
 	// force a change of date and modifier information
 	// into the object without using the normal field
 	// modification methods.. this lets us set field
@@ -1797,16 +1774,8 @@ public class DBEditSet {
 
   private final void commit_handlePhase2()
   {
-    DBEditObject eObj;
-
-    /* -- */
-
-    Iterator iter = objects.values().iterator();
-
-    while (iter.hasNext())
+    for (DBEditObject eObj: objects.values())
       {
-	eObj = (DBEditObject) iter.next();
-
 	// tell the object to go ahead and do any external
 	// commit actions.
 
@@ -1839,12 +1808,8 @@ public class DBEditSet {
 
   private final void commit_log_events(Set<DBObjectBaseField> fieldsTouched)
   {
-    Iterator iter = objects.values().iterator();
-
-    while (iter.hasNext())
+    for (DBEditObject eObj: objects.values())
       {
-	DBEditObject eObj = (DBEditObject) iter.next();
-
 	try
 	  {
 	    commit_log_event(eObj, fieldsTouched);
@@ -2368,11 +2333,9 @@ public class DBEditSet {
 
   private final void commit_replace_objects()
   {
-    Iterator iter = objects.values().iterator();
-
-    while (iter.hasNext())
+    for (DBEditObject eObj: objects.values())
       {
-	commit_replace_object((DBEditObject) iter.next());
+	commit_replace_object(eObj);
       }
 
     objects.clear();
@@ -2612,9 +2575,9 @@ public class DBEditSet {
     // namespace will be created or deleted while we are in the middle
     // of a transaction, since that is only done during schema editing
 
-    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+    for (DBNameSpace space: dbStore.nameSpaces)
       {
-	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).abort(this);
+	space.abort(this);
       }
 
     // release any deletion locks we have asserted
