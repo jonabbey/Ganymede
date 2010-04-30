@@ -1012,10 +1012,11 @@ public final class DBNameSpace implements NameSpace {
    * xmlclient) can run into.
    *
    * If we have such conflicts, we return a vector of namespace values
-   * that are in conflict at transaction commit time.
+   * that are in conflict at transaction commit time, else we return
+   * null, which indicates that this namespace has been verified.
    */
 
-  public synchronized Vector verify_noninteractive(DBEditSet editSet)
+  public synchronized Vector<String> verify_noninteractive(DBEditSet editSet)
   {
     DBNameSpaceTransaction tRecord;
     Enumeration en;
