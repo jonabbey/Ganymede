@@ -670,9 +670,9 @@ public class DBEditSet {
     // namespace will be created or deleted while we are in the middle
     // of a transaction, since that is only done during schema editing
 
-    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+    for (DBNameSpace space: dbStore.nameSpaces)
       {
-	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).checkpoint(this, name);
+	space.checkpoint(this, name);
       }
 
     Ganymede.db.aSymLinkTracker.checkpoint(session, name);
@@ -768,9 +768,9 @@ public class DBEditSet {
 	// namespace will be created or deleted while we are in the middle
 	// of a transaction.  Go ahead and clear out the namespace checkpoint.
 
-	for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+	for (DBNameSpace space: dbStore.nameSpaces)
 	  {
-	    ((DBNameSpace) dbStore.nameSpaces.elementAt(i)).popCheckpoint(this, name);
+	    space.popCheckpoint(this, name);
 	  }
       }
 
@@ -985,9 +985,9 @@ public class DBEditSet {
     // namespace will be created or deleted while we are in the middle
     // of a transaction, since that is only done during schema editing
 
-    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+    for (DBNameSpace space: dbStore.nameSpaces)
       {
-	if (!((DBNameSpace) dbStore.nameSpaces.elementAt(i)).rollback(this, name))
+	if (!space.rollback(this, name))
 	  {
 	    success = false;
 	  }
@@ -2443,9 +2443,9 @@ public class DBEditSet {
     // in the middle of a transaction, since that is only done during
     // schema editing
 
-    for (int i = 0; i < dbStore.nameSpaces.size(); i++)
+    for (DBNameSpace space: dbStore.nameSpaces)
       {
-	((DBNameSpace) dbStore.nameSpaces.elementAt(i)).commit(this);
+	space.commit(this);
       }
   }
 
