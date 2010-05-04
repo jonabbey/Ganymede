@@ -1360,7 +1360,7 @@ public class DBEditSet {
   private final void commit_checkObjectMissingFields(DBEditObject eObj) throws CommitNonFatalException
   {
     ReturnVal retVal;
-    Set<String> missingFields = null;
+    Set<String> missingFields = new TreeSet<String>();
 
     /* -- */
 
@@ -1380,8 +1380,6 @@ public class DBEditSet {
 
     if (labelField == null || !labelField.isDefined())
       {
-	missingFields = new TreeSet<String>();
-
 	// the label field is missing.  look it up.
 
 	DBObjectBaseField fieldDef = (DBObjectBaseField) eObj.getBase().getField(eObj.getLabelFieldID());
@@ -1399,7 +1397,7 @@ public class DBEditSet {
 	  }
       }
 
-    if (missingFields != null && missingFields.size() > 0)
+    if (missingFields.size() > 0)
       {
 	StringBuilder errorBuf = new StringBuilder();
 
