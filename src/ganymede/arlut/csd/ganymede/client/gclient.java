@@ -5062,6 +5062,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	else
 	  {
 	    this.comment = (String) result.get(fieldName);
+
+	    if (this.comment != null && this.comment.trim().equals(""))
+	      {
+		this.comment = null;
+	      }
 	  }
       }
 
