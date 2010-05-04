@@ -171,6 +171,7 @@ refresh the jar files.
            target="1.5"
            source="1.5"
            deprecation="on"
+           includeantruntime="false"
            srcdir="${src.dir}">
 <!--
   We have lots and lots of pre-Java 5 Vector usage, but if you want to turn on linting..
