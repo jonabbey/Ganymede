@@ -2434,7 +2434,7 @@ public class DBLog {
 		// "{0} objects."
 		// "{0}, {1}"
 		objectSummary = ts.l("describeLargeTransaction.subject_template",
-				     ts.l("describeLargeTransaction.subject_duplex_pattern", editString, deleteString));
+				     ts.l("describeLargeTransaction.subject_duplex_pattern", deleteString, editString));
 	      }
 	    else if (editString == null)
 	      {
@@ -2457,7 +2457,7 @@ public class DBLog {
 	    // "{0} objects."
 	    // "{0}, {1}, {2}"
 	    objectSummary = ts.l("describeLargeTransaction.subject_template",
-				 ts.l("describeLargeTransaction.subject_triplex_pattern", createString, editString, deleteString));
+				 ts.l("describeLargeTransaction.subject_triplex_pattern", createString, deleteString, editString));
 	  }
 
 	subject = objectSummary;
