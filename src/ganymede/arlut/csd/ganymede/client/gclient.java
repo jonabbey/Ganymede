@@ -478,7 +478,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   // Dialog and GUI objects
 
-
   JToolBar 
     toolBar;
     
@@ -609,6 +608,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    */
 
   boolean promptForComments = prefs.getBoolean("prompt_for_comments", false);
+
+  /**
+   * Variable used to track commit comment text.  We have this as an
+   * object-level member variable so that we can present it to the
+   * user for his convenience if a commit fails to complete.
+   */
+
+  private String comment = null;
 
   /**
    * Will be set to true by the AltKeyListener if the user has the alt
@@ -5026,11 +5033,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     ReturnVal retVal = null;
     boolean succeeded = false;
-    String comment = null;
 
     /* -- */
 
-    if (promptForComment)
+    if (promptForComment || this.comment != null)
       {
 	// "Comment:"
 	String fieldName = ts.l("commitTransaction.comment_dialog_comment_label");
@@ -5041,8 +5047,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	DialogRsrc r = new DialogRsrc(this, ts.l("commitTransaction.comment_dialog_title"), "",
 				      ts.l("init.commit_button"),
 				      StringDialog.getDefaultCancel());
-	r.addMultiString(fieldName);
-
+	r.addMultiString(fieldName, this.comment);
+	
 	StringDialog d = new StringDialog(r, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 	Hashtable result = d.showDialog();
@@ -5055,7 +5061,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	  }
 	else
 	  {
-	    comment = (String) result.get(fieldName);
+	    this.comment = (String) result.get(fieldName);
 	  }
       }
 
@@ -5068,7 +5074,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
 	updateNotePanels();
 	
-	retVal = session.commitTransaction(false, comment);
+	retVal = session.commitTransaction(false, this.comment);
 
 	if (retVal != null)
 	  {
@@ -5344,6 +5350,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   private void openNewTransaction()
   {
+    this.comment = null;
+
     try
       {
 	// "Ganymede GUI Client"
