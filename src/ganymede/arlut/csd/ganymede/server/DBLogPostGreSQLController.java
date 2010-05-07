@@ -77,7 +77,6 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * arlut.csd.ganymede.server.DBLog DBLog} class, using a PostGreSQL database
  * for the storage format.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

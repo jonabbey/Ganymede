@@ -85,7 +85,6 @@ import arlut.csd.Util.TranslationService;
  * server code uses to communicate information to any admin consoles
  * that are attached to the server at any given time.
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

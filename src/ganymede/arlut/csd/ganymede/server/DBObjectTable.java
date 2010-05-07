@@ -64,7 +64,6 @@ import java.util.NoSuchElementException;
  * tuned for use in managing {@link arlut.csd.ganymede.server.DBObject DBObject}s
  * in a Ganymede {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.</P>
  * 
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

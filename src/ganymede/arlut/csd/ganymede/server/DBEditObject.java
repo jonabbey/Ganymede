@@ -133,7 +133,6 @@ import arlut.csd.Util.TranslationService;
  * call synchronized methods in DBSession, as there is a strong possibility
  * of nested monitor deadlocking.
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

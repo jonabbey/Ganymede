@@ -63,7 +63,6 @@ import arlut.csd.ganymede.common.Invid;
  * {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvents} for the {@link
  * arlut.csd.ganymede.server.DBLog DBLog} class.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

@@ -24,7 +24,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2009
+   Copyright (C) 1996 - 2010
    The University of Texas at Austin
 
    Contact information
@@ -157,7 +157,6 @@ import arlut.csd.ganymede.rmi.Ganymediator;
  * @see arlut.csd.ganymede.common.ReturnVal
  * @see arlut.csd.ganymede.rmi.Ganymediator
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 

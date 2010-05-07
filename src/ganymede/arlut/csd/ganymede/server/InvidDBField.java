@@ -102,7 +102,6 @@ import arlut.csd.ganymede.rmi.invid_field;
  * through the server's in-memory {@link arlut.csd.ganymede.server.DBStore#aSymLinkTracker aSymLinkTracker}
  * hash structure.
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

@@ -85,7 +85,6 @@ import arlut.csd.Util.TranslationService;
  * @see arlut.csd.ganymede.common.QueryNode
  * @see arlut.csd.ganymede.common.Query
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 

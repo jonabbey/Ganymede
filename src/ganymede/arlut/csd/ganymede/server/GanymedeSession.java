@@ -164,7 +164,6 @@ import arlut.csd.ganymede.rmi.db_object;
  * Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.
  * 
- * @version $Id: 8f55f943f9918cf38ee2f98051e581bfdc98cb39 $
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 

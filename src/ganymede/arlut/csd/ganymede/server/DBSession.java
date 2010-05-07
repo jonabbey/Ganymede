@@ -95,7 +95,6 @@ import arlut.csd.ganymede.rmi.db_field;
  * class, as well as the database locking handled by the
  * {@link arlut.csd.ganymede.server.DBLock DBLock} class.</P>
  * 
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

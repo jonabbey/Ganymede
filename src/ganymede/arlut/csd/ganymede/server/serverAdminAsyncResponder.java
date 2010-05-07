@@ -86,7 +86,6 @@ import arlut.csd.ganymede.rmi.AdminAsyncResponder;
  *
  * @see arlut.csd.ganymede.common.clientAsyncMessage
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

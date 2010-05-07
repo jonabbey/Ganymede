@@ -170,7 +170,6 @@ import com.explodingpixels.macwidgets.UnifiedToolBar;
  * component displaying object categories, types, and instances for
  * the user to browse and edit.
  *
- * @version $Id$
  * @author Mike Mulvaney, Jonathan Abbey, and Navin Manohar
  */
 

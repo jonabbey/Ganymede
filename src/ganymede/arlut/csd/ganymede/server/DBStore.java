@@ -136,7 +136,6 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * {@link arlut.csd.ganymede.server.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
 

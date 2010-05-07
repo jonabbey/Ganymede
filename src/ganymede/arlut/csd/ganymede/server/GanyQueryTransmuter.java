@@ -94,7 +94,6 @@ import java.util.HashMap;
  * @see arlut.csd.ganymede.common.QueryNode
  * @see arlut.csd.ganymede.common.Query
  *
- * @version $Id$
  * @author Deepak Giridharagopal, deepak@arlut.utexas.edu
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
