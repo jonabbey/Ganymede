@@ -162,7 +162,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
   public ReturnVal initializeNewObject()
   {
     ReturnVal retVal;
-    Integer gidVal = new Integer(1001);
+    Integer gidVal = new Integer(2000);
 
     /* -- */
 

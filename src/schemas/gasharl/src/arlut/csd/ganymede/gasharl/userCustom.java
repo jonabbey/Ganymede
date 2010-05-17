@@ -143,7 +143,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   static String deleteFilename = null;
   static File deleteHandler = null;
 
-  static final int lowUID = 1001;
+  static final int lowUID = 2001;
 
   static int file_identifier = 0;
 
