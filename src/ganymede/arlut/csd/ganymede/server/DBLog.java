@@ -2017,13 +2017,13 @@ public class DBLog {
 	count++;
       }
 
-    if (count > 4)
+    if (count < 5)
       {
-	return describeLargeTransaction(mailOut, transaction);
+	return describeSmallTransaction(mailOut, transaction);
       }
     else
       {
-	return describeSmallTransaction(mailOut, transaction);
+	return describeLargeTransaction(mailOut, transaction);
       }
   }
 
