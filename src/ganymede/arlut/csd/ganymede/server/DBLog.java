@@ -2003,7 +2003,21 @@ public class DBLog {
 
   private static String describeTransaction(MailOut mailOut, DBEditSet transaction)
   {
-    if (mailOut.getInvids().size() > 4)
+    int count = 0;
+
+    for (Invid invid: mailOut.getInvids())
+      {
+	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+
+	if (base.isEmbedded())
+	  {
+	    continue;
+	  }
+
+	count++;
+      }
+
+    if (count > 4)
       {
 	return describeLargeTransaction(mailOut, transaction);
       }
