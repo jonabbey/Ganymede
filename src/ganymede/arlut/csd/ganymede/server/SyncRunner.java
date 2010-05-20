@@ -469,6 +469,11 @@ public class SyncRunner implements Runnable {
     this.active.set(state);
   }
 
+  /**
+   * Returns the name of the Sync Channel that this SyncRunner was
+   * configured from.
+   */
+
   public String getName()
   {
     return name;
