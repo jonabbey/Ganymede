@@ -1530,22 +1530,22 @@ public class SyncRunner implements Runnable {
 
             if (resultCode != 0)
               {
-                String path = "";
+                String scriptPath = "";
 
                 try
                   {
-                    path = file.getCanonicalPath();
+                    scriptPath = file.getCanonicalPath();
                   }
                 catch (IOException ex)
                   {
-                    path = getServiceProgram();
+                    scriptPath = getServiceProgram();
                   }
 
                 // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
                 //
                 // I got a result code of {2} when I tried to run it.
 
-                String message = ts.l("runIncremental.externalerror", path, this.getName(), Integer.valueOf(resultCode));
+                String message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), Integer.valueOf(resultCode));
 
                 DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
