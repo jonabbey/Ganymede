@@ -474,7 +474,8 @@ public class GanymedeScheduler extends Thread {
 
     if (handle == null)
       {
-	handle = new scheduleHandle(this, time, 0, task, name, scheduleHandle.TaskType.SCHEDULED);
+	handle = new scheduleHandle(this, time, 0, task, name,
+				    scheduleHandle.TaskType.SCHEDULED);
       }
     else
       {
@@ -535,7 +536,8 @@ public class GanymedeScheduler extends Thread {
 
     if (handle == null)
       {
-	handle = new scheduleHandle(this, time, minsPerDay, task, name, scheduleHandle.TaskType.SCHEDULED);
+	handle = new scheduleHandle(this, time, minsPerDay, task, name,
+				    scheduleHandle.TaskType.SCHEDULED);
       }
     else
       {
@@ -584,7 +586,8 @@ public class GanymedeScheduler extends Thread {
 
     if (handle == null)
       {
-	handle = new scheduleHandle(this, firstTime, intervalMinutes, task, name, scheduleHandle.TaskType.SCHEDULED);
+	handle = new scheduleHandle(this, firstTime, intervalMinutes, task, name,
+				    scheduleHandle.TaskType.SCHEDULED);
       }
     else
       {

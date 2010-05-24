@@ -130,6 +130,141 @@ public class scheduleHandle implements java.io.Serializable {
     }
   }
 
+  public enum TaskStatus {
+
+    /**
+     * OK used for scheduled, manual, builder, unscheduled builder,
+     * syncfullstate, syncmanual TaskTypes.
+     *
+     * Indicates an uneventful condition, with everything as it should
+     * be.
+     */
+
+    OK()
+      {
+	@Override public String getMessage(int queueSize, String condition)
+	  {
+	    // "Good"
+	    return ts.l("taskStatus.ok");
+	  }
+      },
+
+    /**
+     * EMPTYQUEUE only used for SYNCINCREMENTAL.  Has the connotation
+     * of OK, but specifically indicates that the queue is empty for
+     * an incremental sync channel.
+     */
+
+    EMPTYQUEUE()
+      {
+	@Override public String getMessage(int queueSize, String condition)
+	  {
+	    // "Good, Queue is empty"
+	    return ts.l("taskStatus.emptyQueue");
+	  }
+      },
+
+    /**
+     * NONEMPTYQUEUE only used for SYNCINCREMENTAL.  Has the
+     * connotation of OK, but specifically indicates that the queue is
+     * not empty for an incremental sync channel.
+     */
+
+    NONEMPTYQUEUE()
+      {
+	@Override public String getMessage(int queueSize, String condition)
+	  {
+	    // "Good, Queue size is {0,number,#}"
+	    return ts.l("taskStatus.nonEmptyQueue", queueSize);
+	  }
+      },
+
+    /**
+     * STUCKQUEUE only used for SYNCINCREMENTAL.  Has the connotation
+     * of SERVICEERROR, SERVICEFAIL, or FAIL, but specifically
+     * indicates that the queue is not being successfully serviced,
+     * meaning that the lowest numbered transaction in the queue
+     * remained in the queue after the service was last run.
+     */
+
+    STUCKQUEUE()
+      {
+	@Override public String getMessage(int queueSize, String condition)
+	  {
+	    // "Stuck, Queue size is {0,number,#}. {1}"
+	    return ts.l("taskStatus.stuckQueue", queueSize, condition);
+	  }
+      },
+
+    /**
+     * SERVICEERROR is used for BUILDER, UNSCHEDULEDBUILDER,
+     * SYNCFULLSTATE, SYNCMANUAL, and indicates that the service
+     * program associated with this task could not be successfully
+     * started, due to a missing service program or a permissions
+     * error.
+     */
+
+    SERVICEERROR()
+      {
+	@Override public String getMessage(int queueSize, String condition)
+	  {
+	    // "Service program could not be run: {0}"
+	    return ts.l("taskStatus.serviceError", condition);
+	  }
+      },
+
+    /**
+     * SERVICEFAIL is used for BUILDER, UNSCHEDULEDBUILDER,
+     * SYNCFULLSTATE, SYNCMANUAL, and indicates that the service
+     * program associated with this task was able to be started, but
+     * exited with a failure code.
+     */
+
+    SERVICEFAIL()
+      {
+	@Override public String getMessage(int queueSize, String condition)
+	  {
+	    // "Service program failure: {0}"
+	    return ts.l("taskStatus.serviceFail", condition);
+	  }
+      },
+
+    /**
+     * FAIL can be used for any task type, and indicates some kind of
+     * unexpected exception was thrown.
+     */
+
+    FAIL()
+      {
+	@Override public String getMessage(int queueSize, String condition)
+	  {
+	    // "Error: {0}"
+	    return ts.l("taskStatus.fail", condition);
+	  }
+      };
+
+    TaskStatus()
+    {
+    }
+
+    public String getMessage()
+    {
+      return getMessage(0, "");
+    }
+
+    public String getMessage(int queueSize)
+    {
+      return getMessage(queueSize, "");
+    }
+
+    public String getMessage(String condition)
+    {
+      return getMessage(0, condition);
+    }
+
+    abstract public String getMessage(int queueSize, String condition);
+  }
+
   // we pass these attributes along to the admin console for it to display
 
   /**
@@ -153,6 +288,13 @@ public class scheduleHandle implements java.io.Serializable {
    */
 
   private booleanSemaphore suspend = new booleanSemaphore(false);
+
+  /**
+   * Expanded status for the task corresponding to this
+   * scheduleHandle.
+   */
+
+  public TaskStatus status;
 
   /**
    * What kind of task is this?  Used to provide type information to
@@ -204,6 +346,20 @@ public class scheduleHandle implements java.io.Serializable {
    */
 
   public String name;
+
+  /**
+   * For reporting our queue size (for incremental sync channels) to
+   * the admin console
+   */
+
+  public int queueSize;
+
+  /**
+   * For reporting the details of a fault condition of some kind to
+   * the admin console
+   */
+
+  public String condition;
 
   //
   // non-serializable, for use on the server only
@@ -278,6 +434,7 @@ public class scheduleHandle implements java.io.Serializable {
     this.task = task;
     this.name = name;
     this.tasktype = tasktype;
+    this.status = TaskStatus.OK;
 
     setInterval(interval);
 
@@ -445,6 +602,27 @@ public class scheduleHandle implements java.io.Serializable {
   public TaskType getTaskType()
   {
     return this.tasktype;
+  }
+
+  /**
+   * Returns an expanded status for the task associated with this
+   * handle.
+   */
+
+  public TaskStatus getTaskStatus()
+  {
+    return this.status;
+  }
+
+  /**
+   * Updates the task status for this scheduleHandle.
+   */
+
+  public void setTaskStatus(TaskStatus newStatus, int queueSize, String condition)
+  {
+    this.status = newStatus;
+    this.queueSize = queueSize;
+    this.condition = condition;
   }
 
   /**
