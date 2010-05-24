@@ -8,7 +8,6 @@
 
    Created: 7 May 2004
 
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
