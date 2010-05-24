@@ -862,42 +862,59 @@ class GASHAdminDispatch implements Runnable {
 	if (handle.isRunning() && handle.isSuspended())
 	  {
 	    // "Suspended upon completion"
-	    table.setCellText(handle.name, 2, ts.l("changeTasks.runningSuspendedState"), false);
-	    table.setCellColor(handle.name, 2, Color.red, false);
-	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	    table.setCellText(handle.name, 3, ts.l("changeTasks.runningSuspendedState"), false);
+	    table.setCellColor(handle.name, 3, Color.red, false);
+	    table.setCellBackColor(handle.name, 3, Color.white, false);
 	  }
 	else if (handle.isRunning())
 	  {
 	    // "Running"
-	    table.setCellText(handle.name, 2, ts.l("changeTasks.runningState"), false);
-	    table.setCellColor(handle.name, 2, Color.blue, false);
-	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	    table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
+	    table.setCellColor(handle.name, 3, Color.blue, false);
+	    table.setCellBackColor(handle.name, 3, Color.white, false);
 	  }
 	else if (handle.isSuspended())
 	  {
 	    // "Suspended"
-	    table.setCellText(handle.name, 2, ts.l("changeTasks.suspendedState"), false);
-	    table.setCellColor(handle.name, 2, Color.red, false);
-	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	    table.setCellText(handle.name, 3, ts.l("changeTasks.suspendedState"), false);
+	    table.setCellColor(handle.name, 3, Color.red, false);
+	    table.setCellBackColor(handle.name, 3, Color.white, false);
 	  }
 	else if (handle.startTime != null)
 	  {
 	    // "Scheduled"
-	    table.setCellText(handle.name, 2, ts.l("changeTasks.scheduledState"), false);
-	    table.setCellColor(handle.name, 2, Color.black, false);
-	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	    table.setCellText(handle.name, 3, ts.l("changeTasks.scheduledState"), false);
+	    table.setCellColor(handle.name, 3, Color.black, false);
+	    table.setCellBackColor(handle.name, 3, Color.white, false);
 	  }
 	else
 	  {
 	    // "Waiting"
-	    table.setCellText(handle.name, 2, ts.l("changeTasks.waitingState"), false);
-	    table.setCellColor(handle.name, 2, Color.black, false);
-	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	    table.setCellText(handle.name, 3, ts.l("changeTasks.waitingState"), false);
+	    table.setCellColor(handle.name, 3, Color.black, false);
+	    table.setCellBackColor(handle.name, 3, Color.white, false);
 	  }
+
+	table.setCellText(handle.name, 3, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
+
+	switch (handle.getTaskStatus())
+	  {
+	  case OK:
+	  case EMPTYQUEUE:
+	  case NONEMPTYQUEUE:
+	    table.setCellColor(handle.name, 3, Color.black, false);
+	    table.setCellBackColor(handle.name, 3, Color.white, false);
+	    break;
+	    
+	  default:
+	    table.setCellColor(handle.name, 3, Color.white, false);
+	    table.setCellBackColor(handle.name, 3, Color.red, false);
+	  }
+
 
 	if (handle.lastTime != null)
 	  {
-	    table.setCellText(handle.name, 3, handle.lastTime.toString(), false);
+	    table.setCellText(handle.name, 5, handle.lastTime.toString(), false);
 	  }
       }
 

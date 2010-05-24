@@ -53,6 +53,7 @@ package arlut.csd.ganymede.server;
 import arlut.csd.ganymede.common.FieldBook;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -72,6 +73,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.jclark.xml.output.UTF8XMLWriter;
 
@@ -344,6 +347,30 @@ public class SyncRunner implements Runnable {
 
   private SyncMaster master;
 
+  /**
+   * A reference to the scheduleHandle for this sync channel.  We use
+   * this handle to set the status for propagation to the admin
+   * console(s).
+   */
+
+  private scheduleHandle handle;
+
+  /**
+   * If we're an incremental sync channel, we'll save the size of the
+   * queue before we run the sync channel service program, and if the
+   * size doesn't go down, we'll claim the channel is stuck.
+   *
+   * Note that this is not a foolproof algorithm, as new transactions
+   * can be written to the sync channel while a channel service
+   * program is running.  If transactions written out during the
+   * service program's execution equals the transactions consumed by
+   * the service program, the queue will appear 'stuck', but this will
+   * be cleared up by the next run of the service program which should
+   * happen immediately after the last run completes.
+   */
+
+  private int lastQueueSize = 0;
+
   /* -- */
 
   public SyncRunner(DBObject syncChannel)
@@ -420,6 +447,12 @@ public class SyncRunner implements Runnable {
     catch (NullPointerException ex)
       {
 	this.mode = SyncType.INCREMENTAL; // the default old behavior
+      }
+
+    if (this.mode == SyncType.INCREMENTAL)
+      {
+	updateAdminConsole();
+	lastQueueSize = getQueueSize();
       }
 
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
@@ -526,6 +559,16 @@ public class SyncRunner implements Runnable {
   public String getServiceProgram()
   {
     return serviceProgram;
+  }
+
+  /**
+   * Sets a reference to the scheduleHandle that this sync channel
+   * will use to communicate its status to the admin consoles.
+   */
+
+  public void setScheduleHandle(scheduleHandle handle)
+  {
+    this.handle = handle;
   }
 
   /**
@@ -693,6 +736,10 @@ public class SyncRunner implements Runnable {
       }
 
     setTransactionNumber(transRecord.getTransactionNumber());
+
+    lastQueueSize = lastQueueSize + 1; // count the one that we just wrote out
+
+    updateAdminConsole();
   }
 
   /**
@@ -1224,6 +1271,7 @@ public class SyncRunner implements Runnable {
 	if (this.needBuild.isSet())
 	  {
 	    runIncremental();
+	    updateAdminConsole();
 	  }
 	else
 	  {
@@ -1468,6 +1516,8 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
+    lastQueueSize = getQueueSize();
+
     synchronized (this)
       {
 	myName = getName();
@@ -1569,6 +1619,45 @@ public class SyncRunner implements Runnable {
 
     // "SyncRunner {0} finished"
     Ganymede.debug(ts.l("runIncremental.done", myName));
+
+    updateAdminConsole();
+    lastQueueSize = getQueueSize();
+  }
+
+  /**
+   * Performs a readdir loop on the queue directory for this sync
+   * channel (if incremental) to see how many entries are currently in
+   * the queue.
+   */
+
+  public int getQueueSize()
+  {
+    return new File(this.getDirectory()).list(new QueueDirFilter()).length;
+  }
+
+  /**
+   * Updates the queue status in the admin consoles
+   */
+
+  private void updateAdminConsole()
+  {
+    int currentQueueSize = getQueueSize();
+
+    if (currentQueueSize == 0)
+      {
+	handle.setTaskStatus(scheduleHandle.TaskStatus.EMPTYQUEUE, 0, "");
+      }
+    else
+      {
+	if (currentQueueSize < lastQueueSize)
+	  {
+	    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+	  }
+	else
+	  {
+	    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
+	  }
+      }
   }
 
   public String toString()
@@ -1576,6 +1665,32 @@ public class SyncRunner implements Runnable {
     return this.getName();
   }
 }
+
+/*------------------------------------------------------------------------------
+									   class
+								  QueueDirFilter
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Filename pattern matcher for our incremental sync channel queue
+ * files.
+ */
+
+class QueueDirFilter implements java.io.FilenameFilter {
+
+  static private Pattern p = Pattern.compile("^\\d+$");
+
+  public QueueDirFilter()
+  {
+  }
+
+  public boolean accept(File dir, String name)
+  {
+    return p.matcher(name).matches();
+  }
+}
+
 
 /*------------------------------------------------------------------------------
 									   class

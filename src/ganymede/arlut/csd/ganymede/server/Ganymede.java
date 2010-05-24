@@ -1486,7 +1486,9 @@ public class Ganymede {
 	System.err.println(ts.l("registerSyncChannel.debug_register", channel.getName()));
       }
 
-    Ganymede.scheduler.addActionOnDemand(channel, channel.getName());
+    scheduleHandle handle = Ganymede.scheduler.addActionOnDemand(channel, channel.getName());
+
+    channel.setScheduleHandle(handle);
   }
 
   /**

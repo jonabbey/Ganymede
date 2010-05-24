@@ -385,10 +385,16 @@ public class GanymedeScheduler extends Thread {
    * If a task with the given name is already registered with the
    * scheduler, that task will be removed from the scheduling queue
    * and registered anew as an on-demand task.
+   *
+   * @return A reference to the schedulers scheduleHandle for this
+   * task.  Modify with extreme caution from outside the scheduler.
+   * Generally the task status can be tweaked by the caller, but all
+   * other fields should be viewed as private to the scheduler, or at
+   * best read-only.
    */
 
-  public synchronized void addActionOnDemand(Runnable task,
-					     String name)
+  public synchronized scheduleHandle addActionOnDemand(Runnable task,
+						       String name)
   {
     scheduleHandle handle;
 
@@ -442,11 +448,14 @@ public class GanymedeScheduler extends Thread {
 	handle.setInterval(0);
 	handle.task = task;
 	handle.tasktype = type;
+	handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
       }
 
     onDemand.put(handle.name, handle);
 
     updateTaskInfo(true);
+
+    return handle;
   }
 
   /**
@@ -455,11 +464,17 @@ public class GanymedeScheduler extends Thread {
    * If a task with the given name is already registered with the
    * scheduler, that task will be removed from the scheduling queue
    * and registered anew as a single-execution task.
+   *
+   * @return A reference to the schedulers scheduleHandle for this
+   * task.  Modify with extreme caution from outside the scheduler.
+   * Generally the task status can be tweaked by the caller, but all
+   * other fields should be viewed as private to the scheduler, or at
+   * best read-only.
    */
 
-  public synchronized void addTimedAction(Date time, 
-					  Runnable task,
-					  String name)
+  public synchronized scheduleHandle addTimedAction(Date time, 
+						    Runnable task,
+						    String name)
   {
     scheduleHandle handle;
 
@@ -482,6 +497,7 @@ public class GanymedeScheduler extends Thread {
 	handle.startTime = time;
 	handle.setInterval(0);
 	handle.task = task;
+	handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
       }
 
     scheduleTask(handle);
@@ -492,6 +508,8 @@ public class GanymedeScheduler extends Thread {
       }
 
     updateTaskInfo(true);
+
+    return handle;
   }
 
   /**
@@ -500,10 +518,16 @@ public class GanymedeScheduler extends Thread {
    * If a task with the given name is already registered with the
    * scheduler, that task will be removed from the scheduling queue
    * and registered anew as a periodic task.
+   *
+   * @return A reference to the schedulers scheduleHandle for this
+   * task.  Modify with extreme caution from outside the scheduler.
+   * Generally the task status can be tweaked by the caller, but all
+   * other fields should be viewed as private to the scheduler, or at
+   * best read-only.
    */
 
-  public synchronized void addDailyAction(int hour, int minute, 
-					  Runnable task, String name)
+  public synchronized scheduleHandle addDailyAction(int hour, int minute, 
+						    Runnable task, String name)
   {
     scheduleHandle handle;
     Date time, currentTime;
@@ -544,6 +568,7 @@ public class GanymedeScheduler extends Thread {
 	handle.startTime = time;
 	handle.setInterval(minsPerDay);
 	handle.task = task;
+	handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
       }
 
     scheduleTask(handle);
@@ -554,6 +579,8 @@ public class GanymedeScheduler extends Thread {
       }
 
     updateTaskInfo(true);
+
+    return handle;
   }
 
   /**
@@ -566,12 +593,18 @@ public class GanymedeScheduler extends Thread {
    * If a task with the given name is already registered with the
    * scheduler, that task will be removed from the scheduling queue
    * and registered anew as a periodic task.
+   *
+   * @return A reference to the schedulers scheduleHandle for this
+   * task.  Modify with extreme caution from outside the scheduler.
+   * Generally the task status can be tweaked by the caller, but all
+   * other fields should be viewed as private to the scheduler, or at
+   * best read-only.
    */
 
-  public synchronized void addPeriodicAction(Date firstTime,
-					     int intervalMinutes, 
-					     Runnable task,
-					     String name)
+  public synchronized scheduleHandle addPeriodicAction(Date firstTime,
+						       int intervalMinutes, 
+						       Runnable task,
+						       String name)
   {
     scheduleHandle handle;
 
@@ -594,6 +627,7 @@ public class GanymedeScheduler extends Thread {
 	handle.startTime = firstTime;
 	handle.setInterval(intervalMinutes);
 	handle.task = task;
+	handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
       }
 
     scheduleTask(handle);
@@ -605,6 +639,8 @@ public class GanymedeScheduler extends Thread {
       }
 
     updateTaskInfo(true);
+
+    return handle;
   }
 
   /**

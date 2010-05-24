@@ -309,7 +309,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   String syncTaskHeaders[] = {ts.l("global.task_col_0"), // "Task"
 			      ts.l("global.task_col_5"), // "Type"
-			      ts.l("global.task_col_1"), // "Status"
+			      ts.l("global.task_col_6"), // "Status"
+			      ts.l("global.task_col_1"), // "Scheduling Status"
 			      ts.l("global.task_col_2")}; // "Last Run"
   int syncTaskColWidths[] = {100,100,100,100};
 
