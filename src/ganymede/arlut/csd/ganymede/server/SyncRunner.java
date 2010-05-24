@@ -1641,6 +1641,11 @@ public class SyncRunner implements Runnable {
 
   private void updateAdminConsole()
   {
+    if (handle == null)
+      {
+	return;
+      }
+
     int currentQueueSize = getQueueSize();
 
     if (currentQueueSize == 0)
