@@ -449,12 +449,6 @@ public class SyncRunner implements Runnable {
 	this.mode = SyncType.INCREMENTAL; // the default old behavior
       }
 
-    if (this.mode == SyncType.INCREMENTAL)
-      {
-	updateAdminConsole();
-	lastQueueSize = getQueueSize();
-      }
-
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
     this.matrix = (Hashtable) f.matrix.clone();
@@ -569,6 +563,12 @@ public class SyncRunner implements Runnable {
   public void setScheduleHandle(scheduleHandle handle)
   {
     this.handle = handle;
+
+    if (this.mode == SyncType.INCREMENTAL)
+      {
+	updateAdminConsole();
+	lastQueueSize = getQueueSize();
+      }
   }
 
   /**
