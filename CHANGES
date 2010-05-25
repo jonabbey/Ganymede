@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-30 April, 2010
+31 May, 2010
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 30 April, 2010
+RELEASE DATE: 31 May, 2010
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1615,6 +1615,24 @@ created, edited, or deleted.
 Large transactions will have a summary report that includes a count of
 objects created, edited, or deleted, and their types, if a reasonably
 small number of object types were affected.
+
+108. [SERVER, ADMIN CONSOLE] Added monitoring of build / queue status to admin console
+
+The Ganymede server now monitors queue size for incremental sync
+channels and provides that information to the admin console.  For
+incremental sync channels, the Ganymede server now distinguishes
+between an empty sync queue, a non-empty sync queue that is being
+properly serviced, and a stuck queue resulting from a sync channel
+service program that could not be run successfully.
+
+The server also provides build success information for non-incremental
+sync channels and GanymedeBuilderTasks to the admin console, based on
+the exit code returned by the service program.
+
+The Sync Monitor tab on the Admin Console now has a 'Status' column
+that displays this build status information.  The older 'Status'
+column has been renamed 'Scheduling Status' to distinguish it from the
+build status that is now being carried in the 'Status' column.
 
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 
