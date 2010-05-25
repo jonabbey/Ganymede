@@ -1,8 +1,8 @@
 /*
 
-   ResourceInitializationException.java
+   ServiceFailedException.java
  
-   Created: 4 March 2003
+   Created: 24 May 2010
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
@@ -48,25 +48,24 @@ package arlut.csd.ganymede.server;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                 ResourceInitializationException
+                                                          ServiceFailedException
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This is a Ganymede-specific Exception that can be thrown by the
- * server if a piece of the server's code encounters a condition that
- * violates the fundamental integrity constraint guarantees of the
- * Ganymede database.</p>
+ * <p>This is a Ganymede-specific RuntimeException that is designed to be
+ * thrown by GanymedeBuilderTask subclasses to communicate build
+ * status information to the admin console.</p>
  */
 
-public class ResourceInitializationException extends Exception {
+public class ServiceFailedException extends RuntimeException {
 
-  public ResourceInitializationException()
+  public ServiceFailedException()
   {
     super();
   }
 
-  public ResourceInitializationException(String s)
+  public ServiceFailedException(String s)
   {
     super(s);
   }

@@ -302,7 +302,12 @@ public class GanymedeScheduler extends Thread {
 
     if (!object.isSet(SchemaConstants.TaskRunPeriodically))
       {
-	addActionOnDemand(task, taskName);
+	scheduleHandle handle = addActionOnDemand(task, taskName);
+
+	if (task instanceof GanymedeBuilderTask)
+	  {
+	    ((GanymedeBuilderTask) task).setScheduleHandle(handle);
+	  }
 
 	return;
       }

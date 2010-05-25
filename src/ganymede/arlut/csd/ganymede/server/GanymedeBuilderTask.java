@@ -71,6 +71,7 @@ import arlut.csd.Util.zipIt;
 import arlut.csd.ganymede.common.ClientMessage;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
@@ -281,7 +282,24 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   private boolean runOnCommit;
 
+  /**
+   * A scheduleHandle that we can use to update the admin consoles as
+   * to our build status.
+   */
+
+  private scheduleHandle handle;
+
   /* -- */
+
+  /**
+   * Method used by the Ganymede scheduler to pass us a handle that we
+   * can use to signal the admin console as to our success or failure.
+   */
+
+  public void setScheduleHandle(scheduleHandle handle)
+  {
+    this.handle = handle;
+  }
 
   /**
    * This method is the main entry point for the GanymedeBuilderTask.  It
@@ -451,6 +469,18 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		try
 		  {
 		    this.builderPhase2();
+		  }
+		catch (ServiceNotFoundException ex)
+		  {
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.SERVICEERROR, 0, ex.getMessage());
+		  }
+		catch (ServiceFailedException ex)
+		  {
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.SERVICEFAIL, 0, ex.getMessage());
+		  }
+		catch (Exception ex)
+		  {
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.FAIL, 0, ex.getMessage());
 		  }
 		finally
 		  {
@@ -928,6 +958,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
    *
    * As a result of having dropped the dumpLock, enumerateObjects()
    * cannot be called by this method.
+   *
+   * builderPhase2() can throw a ServiceNotFoundException or
+   * ServiceFailedException to indicate to the admin console that the
+   * build failed, or it can simply return a boolean result to
+   * indicate the same in a less specific fashion.
    *
    * builderPhase2 is only run if builderPhase1 returns true.
    */
