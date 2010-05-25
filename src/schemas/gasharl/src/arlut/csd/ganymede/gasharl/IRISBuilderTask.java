@@ -55,6 +55,8 @@ import arlut.csd.ganymede.server.DBObject;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeBuilderTask;
 import arlut.csd.ganymede.server.PasswordDBField;
+import arlut.csd.ganymede.server.ServiceNotFoundException;
+import arlut.csd.ganymede.server.ServiceFailedException;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.Util.PathComplete;
 import arlut.csd.Util.SharedStringBuffer;
@@ -225,6 +227,8 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     file = new File(buildScript);
 
+    boolean startedOk = false;
+
     if (file.exists())
       {
 	if (runtime == null)
@@ -239,6 +243,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 	try
 	  {
 	    resultCode = FileOps.runProcess(buildScript);
+	    startedOk = true;
 	  }
 	catch (IOException ex)
 	  {
@@ -274,6 +279,22 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
         DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
         Ganymede.log.logSystemEvent(event);
+
+	if (startedOk)
+	  {
+	    throw new ServiceFailedException("gashbuilder returned a failure code: " + resultCode);
+	  }
+	else
+	  {
+	    if (!file.exists())
+	      {
+		throw new ServiceNotFoundException("Couldn't find " + path);
+	      }
+	    else
+	      {
+		throw new ServiceNotFoundException("Couldn't run " + path);
+	      }
+	  }
       }
 
     Ganymede.debug("IRISBuilderTask builderPhase2 completed");

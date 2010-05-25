@@ -83,8 +83,8 @@ import arlut.csd.ganymede.server.IPDBField;
 import arlut.csd.ganymede.server.InvidDBField;
 import arlut.csd.ganymede.server.PasswordDBField;
 import arlut.csd.ganymede.server.StringDBField;
-
-
+import arlut.csd.ganymede.server.ServiceNotFoundException;
+import arlut.csd.ganymede.server.ServiceFailedException;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -452,11 +452,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     file = new File(buildScript);
 
+    boolean startedOk = false;
+
     if (file.exists())
       {
         try
           {
             resultCode = FileOps.runProcess(buildScript);
+
+	    startedOk = true;
           }
         catch (IOException ex)
           {
@@ -492,6 +496,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
         Ganymede.log.logSystemEvent(event);
+
+	if (startedOk)
+	  {
+	    throw new ServiceFailedException("gashbuilder returned a failure code: " + resultCode);
+	  }
+	else
+	  {
+	    if (!file.exists())
+	      {
+		throw new ServiceNotFoundException("Couldn't find " + path);
+	      }
+	    else
+	      {
+		throw new ServiceNotFoundException("Couldn't run " + path);
+	      }
+	  }
       }
 
     Ganymede.debug("GASHBuilderTask builderPhase2 completed");
