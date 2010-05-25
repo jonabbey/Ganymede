@@ -312,7 +312,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 			      ts.l("global.task_col_6"), // "Status"
 			      ts.l("global.task_col_1"), // "Scheduling Status"
 			      ts.l("global.task_col_2")}; // "Last Run"
-  int syncTaskColWidths[] = {100,100,100,200,100};
+  int syncTaskColWidths[] = {100,100,200,100,100};
 
   // resources for the scheduled task monitor table
 

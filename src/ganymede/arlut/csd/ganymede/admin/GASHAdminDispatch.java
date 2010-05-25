@@ -895,26 +895,25 @@ class GASHAdminDispatch implements Runnable {
 	    table.setCellBackColor(handle.name, 3, Color.white, false);
 	  }
 
-	table.setCellText(handle.name, 3, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
+	table.setCellText(handle.name, 2, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
 
 	switch (handle.getTaskStatus())
 	  {
 	  case OK:
 	  case EMPTYQUEUE:
 	  case NONEMPTYQUEUE:
-	    table.setCellColor(handle.name, 3, Color.black, false);
-	    table.setCellBackColor(handle.name, 3, Color.white, false);
+	    table.setCellColor(handle.name, 2, Color.black, false);
+	    table.setCellBackColor(handle.name, 2, Color.white, false);
 	    break;
 	    
 	  default:
-	    table.setCellColor(handle.name, 3, Color.white, false);
-	    table.setCellBackColor(handle.name, 3, Color.red, false);
+	    table.setCellColor(handle.name, 2, Color.white, false);
+	    table.setCellBackColor(handle.name, 2, Color.red, false);
 	  }
-
 
 	if (handle.lastTime != null)
 	  {
-	    table.setCellText(handle.name, 5, handle.lastTime.toString(), false);
+	    table.setCellText(handle.name, 4, handle.lastTime.toString(), false);
 	  }
       }
 
