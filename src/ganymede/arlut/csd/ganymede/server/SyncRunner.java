@@ -566,7 +566,7 @@ public class SyncRunner implements Runnable {
 
     if (this.mode == SyncType.INCREMENTAL)
       {
-	updateAdminConsole();
+	updateAdminConsole(false);
 	lastQueueSize = getQueueSize();
       }
   }
@@ -739,7 +739,7 @@ public class SyncRunner implements Runnable {
 
     lastQueueSize = lastQueueSize + 1; // count the one that we just wrote out
 
-    updateAdminConsole();
+    updateAdminConsole(false);
   }
 
   /**
@@ -1271,7 +1271,6 @@ public class SyncRunner implements Runnable {
 	if (this.needBuild.isSet())
 	  {
 	    runIncremental();
-	    updateAdminConsole();
 	  }
 	else
 	  {
@@ -1620,7 +1619,8 @@ public class SyncRunner implements Runnable {
     // "SyncRunner {0} finished"
     Ganymede.debug(ts.l("runIncremental.done", myName));
 
-    updateAdminConsole();
+    updateAdminConsole(true);
+
     lastQueueSize = getQueueSize();
   }
 
@@ -1639,7 +1639,7 @@ public class SyncRunner implements Runnable {
    * Updates the queue status in the admin consoles
    */
 
-  private void updateAdminConsole()
+  private void updateAdminConsole(boolean justRanQueue)
   {
     if (handle == null)
       {
@@ -1654,13 +1654,27 @@ public class SyncRunner implements Runnable {
       }
     else
       {
-	if (currentQueueSize < lastQueueSize)
+	if (justRanQueue)
 	  {
-	    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+	    if (currentQueueSize < lastQueueSize)
+	      {
+		handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+	      }
+	    else
+	      {
+		handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
+	      }
 	  }
 	else
 	  {
-	    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
+	    if (currentQueueSize <= lastQueueSize)
+	      {
+		handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+	      }
+	    else
+	      {
+		handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
+	      }
 	  }
       }
   }
