@@ -469,6 +469,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		try
 		  {
 		    this.builderPhase2();
+
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
 		  }
 		catch (ServiceNotFoundException ex)
 		  {
