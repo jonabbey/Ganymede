@@ -356,20 +356,19 @@ public class SyncRunner implements Runnable {
   private scheduleHandle handle;
 
   /**
-   * If we're an incremental sync channel, we'll save the size of the
-   * queue before we run the sync channel service program, and if the
-   * size doesn't go down, we'll claim the channel is stuck.
-   *
-   * Note that this is not a foolproof algorithm, as new transactions
-   * can be written to the sync channel while a channel service
-   * program is running.  If transactions written out during the
-   * service program's execution equals the transactions consumed by
-   * the service program, the queue will appear 'stuck', but this will
-   * be cleared up by the next run of the service program which should
-   * happen immediately after the last run completes.
+   * If we're an incremental sync channel, we'll track the size of
+   * what we add to the queue during runs of the service program, so
+   * we can determine whether the service program cleared the queue
+   * (minus the new entries) during its run.
    */
 
-  private int lastQueueSize = 0;
+  private int queueGrowthSize = 0;
+
+  /**
+   * The lock object we're using for the queueGrowthSize management.
+   */
+
+  private Object queueGrowthLock = new Object();
 
   /* -- */
 
@@ -567,7 +566,6 @@ public class SyncRunner implements Runnable {
     if (this.mode == SyncType.INCREMENTAL)
       {
 	updateAdminConsole(false);
-	lastQueueSize = getQueueSize();
       }
   }
 
@@ -597,42 +595,102 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
-    FieldBook book = new FieldBook();
-
-    initializeFieldBook(objectList, book);
-
-    int context_count = 0;
-
-    // we want to group the objects we write out by invid type
-
-    Set<Short> typeSet = new HashSet<Short>();
-
-    for (Invid invid: book.objects())
+    synchronized (queueGrowthLock)
       {
-	typeSet.add(invid.getType());
-      }
+	FieldBook book = new FieldBook();
 
-    // first write out the objects that we actually changed this
-    // transaction
+	initializeFieldBook(objectList, book);
 
-    for (Short type: typeSet)
-      {
+	int context_count = 0;
+
+	// we want to group the objects we write out by invid type
+
+	Set<Short> typeSet = new HashSet<Short>();
+
 	for (Invid invid: book.objects())
 	  {
-	    if (!transaction.isEditingObject(invid))
+	    typeSet.add(invid.getType());
+	  }
+
+	// first write out the objects that we actually changed this
+	// transaction
+
+	for (Short type: typeSet)
+	  {
+	    for (Invid invid: book.objects())
 	      {
-		context_count++;
+		if (!transaction.isEditingObject(invid))
+		  {
+		    context_count++;
 
-		continue;
+		    continue;
+		  }
+
+		if (!type.equals(invid.getType()))
+		  {
+		    continue;
+		  }
+
+		DBEditObject syncObject = transaction.findObject(invid);
+
+		if (xmlOut == null)
+		  {
+		    xmlOut = createXMLSync(transRecord);
+		    xmlOut.setDeltaFieldBook(book);
+		    xmlOut.setDBSession(transaction.getSession());
+		  }
+
+		switch (syncObject.getStatus())
+		  {
+		  case ObjectStatus.CREATING:
+		    xmlOut.startElementIndent("object_delta");
+
+		    xmlOut.indentOut();
+
+		    xmlOut.startElementIndent("before");
+		    xmlOut.endElement("before");
+
+		    xmlOut.startElementIndent("after");
+		    xmlOut.indentOut();
+		    syncObject.emitXML(xmlOut);
+		    xmlOut.indentIn();
+		    xmlOut.endElementIndent("after");
+
+		    xmlOut.indentIn();
+		    xmlOut.endElementIndent("object_delta");
+
+		    break;
+
+		  case ObjectStatus.DELETING:
+		    xmlOut.startElementIndent("object_delta");
+
+		    xmlOut.indentOut();
+
+		    xmlOut.startElementIndent("before");
+		    xmlOut.indentOut();
+		    syncObject.getOriginal().emitXML(xmlOut);
+		    xmlOut.indentIn();
+		    xmlOut.endElementIndent("before");
+
+		    xmlOut.startElementIndent("after");
+		    xmlOut.endElement("after");
+
+		    xmlOut.indentIn();
+		    xmlOut.endElementIndent("object_delta");
+		    break;
+
+		  case ObjectStatus.EDITING:
+		    syncObject.emitXMLDelta(xmlOut);
+		    break;
+		  }
 	      }
+	  }
 
-	    if (!type.equals(invid.getType()))
-	      {
-		continue;
-	      }
+	// then write out any objects that the SyncMaster has thrown in
+	// for context
 
-	    DBEditObject syncObject = transaction.findObject(invid);
-
+	if (context_count > 0)
+	  {
 	    if (xmlOut == null)
 	      {
 		xmlOut = createXMLSync(transRecord);
@@ -640,104 +698,47 @@ public class SyncRunner implements Runnable {
 		xmlOut.setDBSession(transaction.getSession());
 	      }
 
-	    switch (syncObject.getStatus())
+	    xmlOut.startElementIndent("context_objects");
+	    xmlOut.indentOut();
+
+	    for (Short type: typeSet)
 	      {
-	      case ObjectStatus.CREATING:
-		xmlOut.startElementIndent("object_delta");
-
-		xmlOut.indentOut();
-
-		xmlOut.startElementIndent("before");
-		xmlOut.endElement("before");
-
-		xmlOut.startElementIndent("after");
-		xmlOut.indentOut();
-		syncObject.emitXML(xmlOut);
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("after");
-
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("object_delta");
-
-		break;
-
-	      case ObjectStatus.DELETING:
-		xmlOut.startElementIndent("object_delta");
-
-		xmlOut.indentOut();
-
-		xmlOut.startElementIndent("before");
-		xmlOut.indentOut();
-		syncObject.getOriginal().emitXML(xmlOut);
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("before");
-
-		xmlOut.startElementIndent("after");
-		xmlOut.endElement("after");
-
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("object_delta");
-		break;
-
-	      case ObjectStatus.EDITING:
-		syncObject.emitXMLDelta(xmlOut);
-		break;
-	      }
-	  }
-      }
-
-    // then write out any objects that the SyncMaster has thrown in
-    // for context
-
-    if (context_count > 0)
-      {
-	if (xmlOut == null)
-	  {
-	    xmlOut = createXMLSync(transRecord);
-	    xmlOut.setDeltaFieldBook(book);
-	    xmlOut.setDBSession(transaction.getSession());
-	  }
-
-	xmlOut.startElementIndent("context_objects");
-	xmlOut.indentOut();
-
-	for (Short type: typeSet)
-	  {
-	    for (Invid invid: book.objects())
-	      {
-		if (transaction.isEditingObject(invid))
+		for (Invid invid: book.objects())
 		  {
-		    continue;	// skip
+		    if (transaction.isEditingObject(invid))
+		      {
+			continue;	// skip
+		      }
+
+		    if (!type.equals(invid.getType()))
+		      {
+			continue;	// skip
+		      }
+
+		    DBObject refObject = transaction.getSession().viewDBObject(invid);
+
+		    refObject.emitXML(xmlOut);
 		  }
-
-		if (!type.equals(invid.getType()))
-		  {
-		    continue;	// skip
-		  }
-
-		DBObject refObject = transaction.getSession().viewDBObject(invid);
-
-		refObject.emitXML(xmlOut);
 	      }
+
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("context_objects");
 	  }
 
-	xmlOut.indentIn();
-	xmlOut.endElementIndent("context_objects");
+	if (xmlOut != null)
+	  {
+	    xmlOut.indentIn();
+	    xmlOut.endElementIndent("transaction");
+	    xmlOut.skipLine();
+	    xmlOut.close();		// close() automatically flushes before closing
+
+	    needBuild.set(true);
+	  }
+
+	setTransactionNumber(transRecord.getTransactionNumber());
+
+	queueGrowthSize = queueGrowthSize + 1; // count the one that we just wrote out
       }
-
-    if (xmlOut != null)
-      {
-	xmlOut.indentIn();
-	xmlOut.endElementIndent("transaction");
-	xmlOut.skipLine();
-	xmlOut.close();		// close() automatically flushes before closing
-
-	needBuild.set(true);
-      }
-
-    setTransactionNumber(transRecord.getTransactionNumber());
-
-    lastQueueSize = lastQueueSize + 1; // count the one that we just wrote out
 
     updateAdminConsole(false);
   }
@@ -1515,8 +1516,6 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
-    lastQueueSize = getQueueSize();
-
     synchronized (this)
       {
 	myName = getName();
@@ -1620,8 +1619,6 @@ public class SyncRunner implements Runnable {
     Ganymede.debug(ts.l("runIncremental.done", myName));
 
     updateAdminConsole(true);
-
-    lastQueueSize = getQueueSize();
   }
 
   /**
@@ -1646,34 +1643,43 @@ public class SyncRunner implements Runnable {
 	return;
       }
 
-    int currentQueueSize = getQueueSize();
+    synchronized (queueGrowthLock)
+      {
+	int currentQueueSize = getQueueSize();
 
-    if (currentQueueSize == 0)
-      {
-	handle.setTaskStatus(scheduleHandle.TaskStatus.EMPTYQUEUE, 0, "");
-      }
-    else
-      {
-	if (justRanQueue)
+	if (currentQueueSize == 0)
 	  {
-	    if (currentQueueSize < lastQueueSize)
-	      {
-		handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
-	      }
-	    else
-	      {
-		handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
-	      }
+	    handle.setTaskStatus(scheduleHandle.TaskStatus.EMPTYQUEUE, 0, "");
 	  }
 	else
 	  {
-	    if (currentQueueSize <= lastQueueSize)
+	    if (justRanQueue)
 	      {
-		handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+		if (currentQueueSize <= queueGrowthSize)
+		  {
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+		  }
+		else
+		  {
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
+		  }
+
+		queueGrowthSize = 0;
 	      }
 	    else
 	      {
-		handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
+		// if we got set to STUCKQUEUE after running the service
+		// program, we'll stay stuck until runIncremental() says
+		// otherwise.
+
+		if (handle.getTaskStatus() == scheduleHandle.TaskStatus.STUCKQUEUE)
+		  {
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
+		  }
+		else
+		  {
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+		  }
 	      }
 	  }
       }
