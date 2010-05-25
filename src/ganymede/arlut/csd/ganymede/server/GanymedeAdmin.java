@@ -530,9 +530,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This static method is used to update the list of connnected
-   * users that appears in any admin consoles attached to the Ganymede
-   * server.
+   * This static method is used to update the list of tasks that
+   * appears in any admin consoles attached to the Ganymede server.
    */
 
   public static void refreshTasks()
