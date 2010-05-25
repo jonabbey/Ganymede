@@ -1668,9 +1668,9 @@ public class SyncRunner implements Runnable {
 	      }
 	    else
 	      {
-		// if we got set to STUCKQUEUE after running the service
-		// program, we'll stay stuck until runIncremental() says
-		// otherwise.
+		// if we got set to STUCKQUEUE after running the
+		// service program, we'll stay stuck until
+		// updateAdminConsole(true) says otherwise.
 
 		if (handle.getTaskStatus() == scheduleHandle.TaskStatus.STUCKQUEUE)
 		  {
