@@ -200,7 +200,7 @@ public class GUIDGeneratorTask implements Runnable {
   {
     List<DBObject> users = mySession.getObjects(SchemaConstants.UserBase);
     UUIDGenerator gen = UUIDGenerator.getInstance();
-    EthernetAddress myAddress = new EthernetAddress("8:0:20:fd:6b:7");
+    EthernetAddress myAddress = new EthernetAddress("00:11:43:D5:F7:F8");
     boolean success = true;
 
     /* -- */
