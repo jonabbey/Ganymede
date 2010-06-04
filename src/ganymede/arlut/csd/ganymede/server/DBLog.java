@@ -1822,11 +1822,8 @@ public class DBLog {
 
   static public Set<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode, DBSession session)
   {
-    InvidDBField ownersField;
-    DBObject object;
+    Set<Invid> ownerGroupInvids = new HashSet<Invid>();
     Set<String> addresses = new HashSet<String>();
-    Set<String> results = new HashSet<String>();
-    Set<Invid> seenOwners = new HashSet<Invid>();
 
     /* -- */
 
@@ -1837,12 +1834,12 @@ public class DBLog {
 
     if (objects == null)
       {
-	return results;
+	return addresses;
       }
 
     for (Invid invid: objects)
       {
-	object = session.viewDBObject(invid);
+	DBObject object = session.viewDBObject(invid);
 
 	if (object == null)
 	  {
@@ -1876,125 +1873,106 @@ public class DBLog {
 
 	if (mode != MailMode.OWNERS && mode != MailMode.BOTH)
 	  {
-	    // Nope
-
-	    results.addAll(addresses);
-	    return results;
+	    continue;		// Nope
 	  }
 
 	// yep, we need to notify the owners
 
-	if (object.isEmbedded())
+	Set<DBObject> objectVersions = new HashSet<DBObject>();
+
+	// if we're working with a DBEditObject, we may need to
+	// consider the original version of the object, the modified
+	// version of the object, both, or neither.
+
+	if (object instanceof DBEditObject)
 	  {
-	    if (debug)
+	    DBEditObject eObject = (DBEditObject) object;
+
+	    switch (eObject.getStatus())
 	      {
-		System.err.println("calculateOwnerAddresses(): Looking up owner for Embeded invid " +
-				   invid.toString());
+	      case ObjectStatus.CREATING:
+		objectVersions.add(eObject);
+		break;
+
+	      case ObjectStatus.DELETING:
+		objectVersions.add(eObject.getOriginal());
+		break;
+
+	      case ObjectStatus.EDITING:
+		objectVersions.add(eObject);
+		objectVersions.add(eObject.getOriginal());
+		break;
+
+	      case ObjectStatus.DROPPING:
+		// no point in logging a transient object
+		break;
 	      }
+	  }
+	else
+	  {
+	    objectVersions.add(object);
+	  }
 
-	    DBObject refObj = object;
+	DBObject[] versionArray = objectVersions.toArray(new DBObject[0]);
 
-	    // if we have are getting rid of an embedded object, we'll need to look
-	    // at the original version of the object to get its parent.
-
-	    if (refObj instanceof DBEditObject)
+	for (int i = 0; i < versionArray.length; i++)
+	  {
+	    if (versionArray[i].isEmbedded())
 	      {
-		DBEditObject refEObj = (DBEditObject) refObj;
+		objectVersions.remove(versionArray[i]);
 
-		if (refEObj.getStatus()== ObjectStatus.DELETING)
+		try
 		  {
-		    refObj = refEObj.getOriginal();
+		    objectVersions.add(session.getGSession().getContainingObj(versionArray[i]));
+		  }
+		catch (IntegrityConstraintException ex)
+		  {
+		    Ganymede.debug("Couldn't find container for " + versionArray[i].getLabel());
+
+		    continue;
 		  }
 	      }
+	  }
 
-	    try
+	for (DBObject versionOfObject: objectVersions)
+	  {
+	    // get a list of owner invids for this object
+
+	    InvidDBField ownersField = (InvidDBField) versionOfObject.getField(SchemaConstants.OwnerListField);
+
+	    if (ownersField == null)
 	      {
-		refObj = session.getGSession().getContainingObj(refObj);
-	      }
-	    catch (IntegrityConstraintException ex)
-	      {
-		Ganymede.debug("Couldn't find container for " + refObj.getLabel());
+		if (debug)
+		  {
+		    System.err.println("calculateOwnerAddresses(): disregarding supergash-owned invid " +
+				       invid.toString());
+		  }
 
 		continue;
 	      }
 
-	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
-	  }
-	else
-	  {
-	    // get a list of owners invid's for this object
+	    // *** Caution!  getValuesLocal() does not clone the field's contents..
 
-	    DBObject refObj = object;
-
-	    // if we are deleting an object, we'll need to look at the
-	    // original to get the list of owners for it
-
-	    if (refObj instanceof DBEditObject)
-	      {
-		DBEditObject refEObj = (DBEditObject) refObj;
-
-		if (refEObj.getStatus()== ObjectStatus.DELETING)
-		  {
-		    refObj = refEObj.getOriginal();
-		  }
-	      }
-
-	    ownersField = (InvidDBField) refObj.getField(SchemaConstants.OwnerListField);
-	  }
-
-	if (ownersField == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("calculateOwnerAddresses(): disregarding supergash-owned invid " +
-				   invid.toString());
-	      }
-
-	    continue;
-	  }
-
-	List<Invid> vect = (List<Invid>) ownersField.getValuesLocal();
-
-	// *** Caution!  getValuesLocal() does not clone the field's contents..
-	//
-	// DO NOT modify vect here!
-
-	if (vect == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("calculateOwnerAddresses(): Empty owner list for invid " +
-				   invid.toString());
-	      }
-
-	    continue;
-	  }
-
-	// okay, we have the list of owner invid's for this object.  For each
-	// of these owners, we need to see what email lists and addresses are
-	// to receive notification
-
-	for (Invid ownerInvid: vect)
-	  {
-	    if (!seenOwners.contains(ownerInvid))
-	      {
-		if (debug)
-		  {
-		    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " +
-				       session.getGSession().viewObjectLabel(ownerInvid));
-		  }
-
-		addresses.addAll(ownerCustom.getAddresses(ownerInvid, session));
-		seenOwners.add(ownerInvid);
-	      }
+	    ownerGroupInvids.addAll((List<Invid>) ownersField.getValuesLocal());
 	  }
       }
 
-    // our addresses set is complete, convert it to a List
+    // okay, we have a set of owner invids for all of the objects.
+    // For each of these owners, we need to see what email lists and
+    // addresses are to receive notification
 
-    results.addAll(addresses);
+    for (Invid ownerInvid: ownerGroupInvids)
+      {
+	if (debug)
+	  {
+	    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " +
+			       session.getGSession().viewObjectLabel(ownerInvid));
+	  }
+	
+	addresses.addAll(ownerCustom.getAddresses(ownerInvid, session));
+      }
 
-    return results;
+    return addresses;
   }
 
   /**
