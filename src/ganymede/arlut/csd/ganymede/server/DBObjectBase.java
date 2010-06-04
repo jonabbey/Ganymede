@@ -934,7 +934,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
-	// "Loading {0,number,#} {1} objects"
+	// "DBObjectBase.receive(): Loading {0,number,#} {1} objects"
 	System.err.println(ts.l("receive.debug", Integer.valueOf(object_count), object_name));
       }
 
