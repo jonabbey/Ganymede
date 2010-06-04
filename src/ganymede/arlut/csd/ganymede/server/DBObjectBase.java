@@ -798,20 +798,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     /* -- */
 
-    if (debug)
-      {
-	// "DBObjectBase.receive(): enter"
-	System.err.println(ts.l("receive.enter"));
-      }
-
     setName(in.readUTF());	// we use setName to filter out any bad chars in transition to 1.0
-
-    if (debug)
-      {
-	// "DBObjectBase.receive(): object base name: {0}"
-	System.err.println(ts.l("receive.basename", object_name));
-      }
-
     classname = in.readUTF();
 
     // if we're reading a ganymede.db file from before the DBStore 2.7
@@ -827,18 +814,15 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
 	    if (debug)
 	      {
+		// "DBObjectBase.receive(): loading {0}"
+		System.err.print(ts.l("receive.basename", object_name));
+
 		// "DBObjectBase.receive(): Rewriting old system class name: {0} as {1}"
 		System.err.println(ts.l("receive.rewritingClassname", classname, newclassname));
 	      }
 
 	    classname = newclassname;
 	  }
-      }
-
-    if (debug)
-      {
-	// "DBObjectBase.receive(): class name: {0}"
-	System.err.println(ts.l("receive.classname", classname));
       }
 
     if (store.isAtLeast(2,6))
@@ -855,11 +839,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // how many field definitions?
 
     size = in.readShort();
-
-    if (debug)
-      {
-	System.err.println(ts.l("receive.fieldcount", Integer.valueOf(size)));
-      }
 
     // read in the custom field dictionary for this object, in display
     // order
@@ -879,11 +858,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	if (type_code == SchemaConstants.OwnerBase && field.getID() == SchemaConstants.OwnerObjectsOwned)
 	  {
 	    continue;		// as of DBStore 2.7, we no longer symmetrically link owner groups to owned objects
-	  }
-
-	if (debug2)
-	  {
-	    System.err.println("DBObjectBaseField.receive(): " + field);
 	  }
 
 	addFieldToEnd(field);
@@ -906,11 +880,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     else
       {
 	label_id = -1;
-      }
-
-    if (debug)
-      {
-	System.err.println(ts.l("receive.label", Integer.valueOf(label_id)));
       }
 
     // at file version 1.3, we introduced object base categories's.
@@ -965,7 +934,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
-    	System.err.println(ts.l("receive.reading", Integer.valueOf(object_count)));
+	// "Loading {0,number,#} {1} objects"
+	System.err.println(ts.l("receive.debug", Integer.valueOf(object_count), object_name));
       }
 
     List<DBObject> tmpIterationList = new ArrayList<DBObject>(object_count);
@@ -998,11 +968,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // lock and load
 
     this.iterationList = Collections.unmodifiableList(tmpIterationList);
-
-    if (debug)
-      {
-	System.err.println(ts.l("receive.maxid", object_name, Integer.valueOf(maxid)));
-      }
   }
 
   /**

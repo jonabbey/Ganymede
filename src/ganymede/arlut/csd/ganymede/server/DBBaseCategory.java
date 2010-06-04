@@ -477,12 +477,6 @@ public class DBBaseCategory implements Category, CategoryNode {
 		// category, since we are reading them in order.
 
 		addNodeAfter(tempBase, null);
-
-		if (store.debug)
-		  {
-		    System.err.println("loaded base " + tempBase.getTypeID() + 
-				       ", obj count loaded = " + tempBase.getObjectCount());
-		  }
 	      }
 	    else
 	      {
