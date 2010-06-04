@@ -1746,9 +1746,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /** 
    * <p>This method is used to create a DBEditObject subclass handle
-   * ({@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook}),
-   * to allow various classes to make calls to overridden static
-   * methods for DBEditObject subclasses.</p> 
+   * ({@link arlut.csd.ganymede.server.DBObjectBase#objectHook
+   * objectHook}), to allow various classes to make calls to
+   * overridden methods for DBEditObject subclasses.</p>
    */
 
   DBEditObject createHook() throws RemoteException
