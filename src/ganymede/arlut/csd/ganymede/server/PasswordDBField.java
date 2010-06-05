@@ -2714,6 +2714,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	  }
       }
 
+    ReturnVal returnValInProgress = ReturnVal.success();
+
     if (getFieldDef().isCracklibChecked() && Ganymede.crackLibPacker != null)
       {
 	try
@@ -2726,8 +2728,8 @@ public class PasswordDBField extends DBField implements pass_field {
 		  {
 		    // "Password Quality Problem"
 		    // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
-		    return Ganymede.createInfoDialog(ts.l("verifyNewValue.cracklib_failure_title"),
-						     ts.l("verifyNewValue.cracklib_failure_error", cracklibCheck));
+		    returnValInProgress = Ganymede.createInfoDialog(ts.l("verifyNewValue.cracklib_failure_title"),
+								    ts.l("verifyNewValue.cracklib_failure_error", cracklibCheck));
 		  }
 		else
 		  {
@@ -2756,9 +2758,10 @@ public class PasswordDBField extends DBField implements pass_field {
 		  {
 		    // "Password Used Before"
 		    // "This password has been used too recently with this account.\n\nIt was last used with this account at {0, time} on {0, date, full}."
-		    return Ganymede.createInfoDialog(ts.l("verifyNewValue.history_reuse_title"),
-						     ts.l("verifyNewValue.history_reuse_error",
-							  previousDate));
+		    returnValInProgress = ReturnVal.merge(returnValInProgress,
+							  Ganymede.createInfoDialog(ts.l("verifyNewValue.history_reuse_title"),
+										    ts.l("verifyNewValue.history_reuse_error",
+											 previousDate)));
 		  }
 		else
 		  {
@@ -2774,7 +2777,8 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // have our parent make the final ok on the value
 
-    return eObj.verifyNewValue(this, s);
+    return ReturnVal.merge(returnValInProgress,
+			   eObj.verifyNewValue(this, s));
   }
 
   /**
