@@ -177,6 +177,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBField");
 
   /**
+   * Counter field we use to display loading statistics at server start time.
+   */
+
+  static public int fieldCount = 0;
+
+  /**
    * This method acts as a factory class to create a typed DBField
    * subclass and attach it to a DBObject.
    *
@@ -283,6 +289,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   static DBField readField(DBObject object, DataInput in, DBObjectBaseField definition) throws IOException
   {
+    DBField.fieldCount++;
+
     switch (definition.getType())
       {
       case BOOLEAN:

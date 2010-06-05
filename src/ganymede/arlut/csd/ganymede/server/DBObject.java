@@ -194,6 +194,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBObject");
 
+  /**
+   * Counter field we use to display loading statistics at server start time.
+   */
+
+  static public int objectCount = 0;
+
   // ---
 
   public static void setDebug(boolean val)
@@ -331,6 +337,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     shadowObject = null;
     receive(in, journalProcessing);
     gSession = null;
+
+    DBObject.objectCount++;
   }
 
   /**

@@ -566,7 +566,8 @@ public final class DBStore implements JythonMap {
 
 	if (debug)
 	  {
-	    System.err.println("DBStore load(): loading " + namespaceCount + " namespaces");
+	    // "DBStore.load(): loading {0,number,#} namespaces"
+	    System.err.println(ts.l("load.namespaces", Integer.valueOf(namespaceCount)));
 	  }
 
 	for (int i = 0; i < namespaceCount; i++)
@@ -578,8 +579,12 @@ public final class DBStore implements JythonMap {
 
 	if (debug)
 	  {
-	    System.err.println("DBStore load(): loading  category definitions");
+	    // "DBStore.load(): loading category definitions"
+	    System.err.println(ts.l("load.categories"));
 	  }
+
+	DBField.fieldCount = 0;
+	DBObject.objectCount = 0;
 
 	if (isAtLeast(1,3))
 	  {
@@ -627,6 +632,14 @@ public final class DBStore implements JythonMap {
 	    // use.
 
 	    rootCategory.resort();
+	  }
+
+	// print out loading statistics
+
+	if (debug)
+	  {
+	    // "DBStore.load(): Loaded {0,number,#} fields in {1,number,#} objects"
+	    System.err.println(ts.l("load.statistics", Integer.valueOf(DBField.fieldCount), Integer.valueOf(DBObject.objectCount)));
 	  }
 
 	// make sure that we have the new object bases and fields
