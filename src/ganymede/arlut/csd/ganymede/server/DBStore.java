@@ -182,6 +182,13 @@ public final class DBStore implements JythonMap {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBStore");
 
+  /**
+   * Translated string for normal operation.
+   *
+   * One of the values that can be shown as 'Server State' on the
+   * admin console.
+   */
+
   public static final String normal_state = ts.l("init.okaystate"); // "Normal Operation"
 
   /**
@@ -189,6 +196,12 @@ public final class DBStore implements JythonMap {
    */
 
   private int transactionNumber = 0;
+
+  /**
+   * Object we're using as a monitor for atomically increasing
+   * transactionNumber.
+   */
+
   private Object transactionNumberLock = new Object();
 
   /**
@@ -302,7 +315,10 @@ public final class DBStore implements JythonMap {
 
   public DBLockSync lockSync = new DBLockSync();
 
-  // debugging info
+  /**
+   * We use this boolean to work around a design flaw in password
+   * field storage in DBStore revision 2.19.
+   */
 
   public boolean journalLoading = false;
 
@@ -368,7 +384,6 @@ public final class DBStore implements JythonMap {
     return (this.file_major > major || 
 	    (this.file_major == major && this.file_minor >= minor));
   }
-
 
   /**
    * This method returns true if the disk file being loaded by this DBStore

@@ -843,7 +843,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (Ganymede.db.isAtLeast(2,19))
 	  {
 	    // At 2.19, I had things quite broken, so I need some
-	    // special logic for always reading the history pool during journal loading.
+	    // special logic for reading the history pool during
+	    // journal loading when treating that db version.
 	    //
 	    // At 2.20, we only write out an archive (including the
 	    // count) if the field is configured for history
