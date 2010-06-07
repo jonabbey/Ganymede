@@ -108,7 +108,7 @@ public class scheduleHandle implements java.io.Serializable {
 
   // ---
 
-  public enum TaskType {
+  static public enum TaskType {
     SCHEDULED       (ts.l("taskType.scheduledTask")), // "Scheduled Task"
     MANUAL          (ts.l("taskType.manualTask")),    // "On Demand Task"
     BUILDER         (ts.l("taskType.builderTask")),   // "Ganymede Builder Task"
@@ -130,7 +130,7 @@ public class scheduleHandle implements java.io.Serializable {
     }
   }
 
-  public enum TaskStatus {
+  static public enum TaskStatus {
 
     /**
      * OK used for scheduled, manual, builder, unscheduled builder,
