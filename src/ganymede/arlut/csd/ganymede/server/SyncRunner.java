@@ -370,6 +370,12 @@ public class SyncRunner implements Runnable {
 
   private Object queueGrowthLock = new Object();
 
+  /**
+   * A filter we use to find transaction files in the queue directory.
+   */
+
+  private QueueDirFilter dirFilter = new QueueDirFilter();
+
   /* -- */
 
   public SyncRunner(DBObject syncChannel)
@@ -1629,7 +1635,7 @@ public class SyncRunner implements Runnable {
 
   public int getQueueSize()
   {
-    return new File(this.getDirectory()).list(new QueueDirFilter()).length;
+    return new File(this.getDirectory()).list(dirFilter).length;
   }
 
   /**
