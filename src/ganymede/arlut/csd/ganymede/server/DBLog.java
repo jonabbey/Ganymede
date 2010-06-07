@@ -1859,13 +1859,42 @@ public class DBLog {
 
 	// first off, does the object itself have anyone it wants to notify?
 
-	if ((mode == MailMode.USERS || mode == MailMode.BOTH) && object.hasEmailTarget())
+	if (mode == MailMode.USERS || mode == MailMode.BOTH)
 	  {
-	    List<String> targets = (List<String>) object.getEmailTargets();
-
-	    if (targets != null)
+	    if (object.hasEmailTarget())
 	      {
-		addresses.addAll(targets);
+		List<String> targets = (List<String>) object.getEmailTargets();
+
+		if (targets != null)
+		  {
+		    addresses.addAll(targets);
+		  }
+	      }
+
+	    // get the email targets from the original version of the
+	    // object, if present, in case our transaction changed the
+	    // object's list of addressees along the way
+
+	    if (object instanceof DBEditObject)
+	      {
+		DBEditObject eObject = (DBEditObject) object;
+
+		switch (eObject.getStatus())
+		  {
+		  case ObjectStatus.DELETING:
+		  case ObjectStatus.EDITING:
+		    DBObject originalObject = eObject.getOriginal();
+
+		    if (originalObject.hasEmailTarget())
+		      {
+			List<String> targets = (List<String>) originalObject.getEmailTargets();
+
+			if (targets != null)
+			  {
+			    addresses.addAll(targets);
+			  }
+		      }
+		  }
 	      }
 	  }
 
