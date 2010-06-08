@@ -412,7 +412,7 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addActionOnDemand()");
       }
 
-    TaskType type = TaskType.MANUAL;
+    int type = TaskType.MANUAL;
 
     if (task instanceof GanymedeBuilderTask)
       {
@@ -496,8 +496,7 @@ public class GanymedeScheduler extends Thread {
 
     if (handle == null)
       {
-	handle = new scheduleHandle(this, time, 0, task, name,
-				    TaskType.SCHEDULED);
+	handle = new scheduleHandle(this, time, 0, task, name, TaskType.SCHEDULED);
       }
     else
       {
@@ -906,7 +905,7 @@ public class GanymedeScheduler extends Thread {
    * of the given type.</p>
    */
 
-  public synchronized List<scheduleHandle> getTasksByType(TaskType type)
+  public synchronized List<scheduleHandle> getTasksByType(int type)
   {
     ArrayList<scheduleHandle> results = new ArrayList<scheduleHandle>();
 

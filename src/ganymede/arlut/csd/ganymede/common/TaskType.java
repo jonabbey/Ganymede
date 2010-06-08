@@ -52,76 +52,15 @@ import arlut.csd.Util.TranslationService;
 
 ------------------------------------------------------------------------------*/
 
-public enum TaskType {
+/**
+ * Data carrier used for conveying the type of a Task in the
+ * Ganymede scheduler.
+ *
+ * Note that we don't use a Java 5 enum because they don't work so hot
+ * in the presence of serialization / RMI usage.
+ */
 
-  // Java Enum classes don't allow us to declare static fields at the
-  // top of the declaration.
-  //
-  // The following comment line is required for 'ant validate' to work
-  // in the Ganymede build system, even though we don't declare ts
-  // until the end of the enum.
-  //
-  // TranslationService.getTranslationService("arlut.csd.ganymede.common.TaskType");
-
-  SCHEDULED()
-    {
-      @Override public String toString()
-	{
-	  return ts.l("scheduledTask"); // "Scheduled Task"
-	}
-    },
-
-  MANUAL()
-    {
-      @Override public String toString()
-	{
-	  return ts.l("manualTask"); // "On Demand Task"
-	}
-    },
-
-  BUILDER()
-    {
-      @Override public String toString()
-	{
-	  return ts.l("builderTask"); // "Ganymede Builder Task"
-	}
-    },
-
-  UNSCHEDULEDBUILDER()
-    {
-      @Override public String toString()
-	{
-	  return ts.l("unscheduledBuilderTask"); // "Unscheduled Ganymede Builder Task"
-	}
-    },
-
-  SYNCINCREMENTAL()
-    {
-      @Override public String toString()
-	{
-	  return ts.l("incrementalSync"); // "Incremental Sync Channel"
-	}
-    },
-
-  SYNCFULLSTATE()
-    {
-      @Override public String toString()
-	{
-	  return ts.l("fullstateSync"); // "Full State Sync Channel"
-	}
-    },
-
-  SYNCMANUAL()
-    {
-      @Override public String toString()
-	{
-	  return ts.l("manualSync"); // "Manual Sync Channel"
-	}
-    };
-
-  TaskType()
-  {
-  }
+public class TaskType implements java.io.Serializable {
 
   /**
    * TranslationService object for handling string localization in the
@@ -129,4 +68,96 @@ public enum TaskType {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.TaskType");
+
+  static public final int SCHEDULED = 0;
+  static public final int MANUAL = 1;
+  static public final int BUILDER = 2;
+  static public final int UNSCHEDULEDBUILDER = 3;
+  static public final int SYNCINCREMENTAL = 4;
+  static public final int SYNCFULLSTATE = 5;
+  static public final int SYNCMANUAL = 6;
+  static public final int LAST = 6;
+
+  static private final TaskType scheduled = new TaskType(SCHEDULED);
+  static private final TaskType manual = new TaskType(MANUAL);
+  static private final TaskType builder = new TaskType(BUILDER);
+  static private final TaskType unscheduled = new TaskType(UNSCHEDULEDBUILDER);
+  static private final TaskType syncincremental = new TaskType(SYNCINCREMENTAL);
+  static private final TaskType syncfullstate = new TaskType(SYNCFULLSTATE);
+  static private final TaskType last = new TaskType(SYNCMANUAL);
+
+  static public TaskType get(int type)
+  {
+    switch (type)
+    {
+    case SCHEDULED:
+      return scheduled;
+
+    case MANUAL:
+      return manual;
+
+    case BUILDER:
+      return builder;
+
+    case UNSCHEDULEDBUILDER:
+      return unscheduled;
+
+    case SYNCINCREMENTAL:
+      return syncincremental;
+
+    case SYNCFULLSTATE:
+      return syncfullstate;
+
+    case SYNCMANUAL:
+      return last;
+    }
+
+    throw new IllegalArgumentException();
+  }
+
+  private int type;
+
+  private TaskType(int type)
+  {
+    if (type < 0 || type > LAST)
+      {
+	throw new IllegalArgumentException();
+      }
+
+    this.type = type;
+  }
+
+  public int getID()
+  {
+    return type;
+  }
+
+  public String toString()
+  {
+    switch (type)
+      {
+      case SCHEDULED:
+	return ts.l("scheduledTask"); // "Scheduled Task"
+
+      case MANUAL:
+	return ts.l("manualTask"); // "On Demand Task"
+
+      case BUILDER:
+	return ts.l("builderTask"); // "Ganymede Builder Task"
+
+      case UNSCHEDULEDBUILDER:
+	return ts.l("unscheduledBuilderTask"); // "Unscheduled Ganymede Builder Task"
+
+      case SYNCINCREMENTAL:
+	return ts.l("incrementalSync"); // "Incremental Sync Channel"
+
+      case SYNCFULLSTATE:
+	return ts.l("fullstateSync"); // "Full State Sync Channel"
+
+      case SYNCMANUAL:
+	return ts.l("manualSync"); // "Manual Sync Channel"
+      }
+
+    throw new IllegalArgumentException();
+  }
 }

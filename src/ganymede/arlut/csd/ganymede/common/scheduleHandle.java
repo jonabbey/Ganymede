@@ -131,18 +131,18 @@ public class scheduleHandle implements java.io.Serializable {
   private booleanSemaphore suspend = new booleanSemaphore(false);
 
   /**
-   * Expanded status for the task corresponding to this
+   * What type of TaskStatus object corresponds to this
    * scheduleHandle.
    */
 
-  public TaskStatus status;
+  public int status;
 
   /**
    * What kind of task is this?  Used to provide type information to
    * the Ganymede admin console.
    */
 
-  public TaskType tasktype;
+  public int tasktype;
 
   /**
    * This booleanSemaphore will be set to true if we are doing a
@@ -262,7 +262,7 @@ public class scheduleHandle implements java.io.Serializable {
   public scheduleHandle(GanymedeScheduler scheduler,
 			Date time, int interval, 
 			Runnable task, String name,
-			TaskType tasktype)
+			int tasktype)
   {
     if (scheduler == null)
       {
@@ -440,7 +440,7 @@ public class scheduleHandle implements java.io.Serializable {
    * scheduleHandle is pertaining to.
    */
 
-  public TaskType getTaskType()
+  public int getTaskType()
   {
     return this.tasktype;
   }
@@ -450,7 +450,7 @@ public class scheduleHandle implements java.io.Serializable {
    * handle.
    */
 
-  public TaskStatus getTaskStatus()
+  public int getTaskStatus()
   {
     return this.status;
   }
@@ -459,7 +459,7 @@ public class scheduleHandle implements java.io.Serializable {
    * Updates the task status for this scheduleHandle.
    */
 
-  public void setTaskStatus(TaskStatus newStatus, int queueSize, String condition)
+  public void setTaskStatus(int newStatus, int queueSize, String condition)
   {
     this.status = newStatus;
     this.queueSize = queueSize;

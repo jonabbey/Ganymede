@@ -52,16 +52,17 @@ import arlut.csd.Util.TranslationService;
 
 ------------------------------------------------------------------------------*/
 
-public enum TaskStatus {
+/**
+ * Data carrier used for conveying the status of a Task in the
+ * Ganymede scheduler.
+ *
+ * Note that we don't use a Java 5 enum because they don't work so hot
+ * in the presence of serialization / RMI usage.
+ */
 
-  // Java Enum classes don't allow us to declare static fields at the
-  // top of the declaration.
-  //
-  // The following comment line is required for 'ant validate' to work
-  // in the Ganymede build system, even though we don't declare ts
-  // until the end of the enum.
-  //
-  // TranslationService.getTranslationService("arlut.csd.ganymede.common.TaskStatus");
+public class TaskStatus implements java.io.Serializable {
+
+  static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.TaskStatus");
 
   /**
    * OK used for scheduled, manual, builder, unscheduled builder,
@@ -71,14 +72,7 @@ public enum TaskStatus {
    * be.
    */
 
-  OK()
-    {
-      @Override public String getMessage(int queueSize, String condition)
-	{
-	  // "Good"
-	  return ts.l("ok");
-	}
-    },
+  static public final int OK = 0;
 
   /**
    * EMPTYQUEUE only used for SYNCINCREMENTAL.  Has the connotation
@@ -86,14 +80,7 @@ public enum TaskStatus {
    * an incremental sync channel.
    */
 
-  EMPTYQUEUE()
-    {
-      @Override public String getMessage(int queueSize, String condition)
-	{
-	  // "Good, Queue is empty"
-	  return ts.l("emptyQueue");
-	}
-    },
+  static public final int EMPTYQUEUE = 1;
 
   /**
    * NONEMPTYQUEUE only used for SYNCINCREMENTAL.  Has the
@@ -101,14 +88,7 @@ public enum TaskStatus {
    * not empty for an incremental sync channel.
    */
 
-  NONEMPTYQUEUE()
-    {
-      @Override public String getMessage(int queueSize, String condition)
-	{
-	  // "Good, Queue size is {0,number,#}"
-	  return ts.l("nonEmptyQueue", queueSize);
-	}
-    },
+  static public final int NONEMPTYQUEUE = 2;
 
   /**
    * STUCKQUEUE only used for SYNCINCREMENTAL.  Has the connotation
@@ -117,15 +97,8 @@ public enum TaskStatus {
    * meaning that the lowest numbered transaction in the queue
    * remained in the queue after the service was last run.
    */
-    
-  STUCKQUEUE()
-    {
-      @Override public String getMessage(int queueSize, String condition)
-	{
-	  // "Stuck, Queue size is {0,number,#}. {1}"
-	  return ts.l("stuckQueue", queueSize, condition);
-	}
-    },
+
+  static public final int STUCKQUEUE = 3;
 
   /**
    * SERVICEERROR is used for BUILDER, UNSCHEDULEDBUILDER,
@@ -135,14 +108,7 @@ public enum TaskStatus {
    * error.
    */
 
-  SERVICEERROR()
-    {
-      @Override public String getMessage(int queueSize, String condition)
-	{
-	  // "Service program could not be run: {0}"
-	  return ts.l("serviceError", condition);
-	}
-    },
+  static public final int SERVICEERROR = 4;
 
   /**
    * SERVICEFAIL is used for BUILDER, UNSCHEDULEDBUILDER,
@@ -151,32 +117,68 @@ public enum TaskStatus {
    * exited with a failure code.
    */
 
-  SERVICEFAIL()
-    {
-      @Override public String getMessage(int queueSize, String condition)
-	{
-	  // "Service program failure: {0}"
-	  return ts.l("serviceFail", condition);
-	}
-    },
+  static public final int SERVICEFAIL = 5;
 
   /**
    * FAIL can be used for any task type, and indicates some kind of
    * unexpected exception was thrown.
    */
 
-  FAIL()
-    {
-      @Override public String getMessage(int queueSize, String condition)
-	{
-	  // "Error: {0}"
-	  return ts.l("fail", condition);
-	}
-    };
+  static public final int FAIL = 6;
+  static public final int LAST = 6;
 
-  TaskStatus()
+  static private final TaskStatus ok = new TaskStatus(OK);
+  static private final TaskStatus emptyq = new TaskStatus(EMPTYQUEUE);
+  static private final TaskStatus nonemptyq = new TaskStatus(NONEMPTYQUEUE);
+  static private final TaskStatus stuckq = new TaskStatus(STUCKQUEUE);
+  static private final TaskStatus serviceerror = new TaskStatus(SERVICEERROR);
+  static private final TaskStatus servicefail = new TaskStatus(SERVICEFAIL);
+
+
+  static public TaskStatus get(int type)
+  {
+    switch (type)
     {
+    case OK:
+      return ok;
+
+    case EMPTYQUEUE:
+      return emptyq;
+
+    case NONEMPTYQUEUE:
+      return nonemptyq;
+
+    case STUCKQUEUE:
+      return stuckq;
+
+    case SERVICEERROR:
+      return serviceerror;
+
+    case SERVICEFAIL:
+      return servicefail;
     }
+
+    throw new IllegalArgumentException();
+  }
+
+  // --
+
+  private int type;
+
+  private TaskStatus(int type)
+  {
+    if (type < 0 || type > LAST)
+      {
+	throw new IllegalArgumentException();
+      }
+
+    this.type = type;
+  }
+
+  public int getID()
+  {
+    return type;
+  }
 
   public String getMessage()
   {
@@ -193,12 +195,39 @@ public enum TaskStatus {
     return getMessage(0, condition);
   }
 
-  abstract public String getMessage(int queueSize, String condition);
+  public String getMessage(int queueSize, String condition)
+  {
+    switch (type)
+      {
+      case OK:
+	// "Good"
+	return ts.l("ok");
 
-  /**
-   * TranslationService object for handling string localization in the
-   * Ganymede system.
-   */
+      case EMPTYQUEUE:
+	// "Good, Queue is empty"
+	return ts.l("emptyQueue");
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.TaskStatus");
+      case NONEMPTYQUEUE:
+	// "Good, Queue size is {0,number,#}"
+	return ts.l("nonEmptyQueue", queueSize);
+
+      case STUCKQUEUE:
+	// "Stuck, Queue size is {0,number,#}. {1}"
+	return ts.l("stuckQueue", queueSize, condition);
+
+      case SERVICEERROR:
+	// "Service program could not be run: {0}"
+	return ts.l("serviceError", condition);
+
+      case SERVICEFAIL:
+	// "Service program failure: {0}"
+	return ts.l("serviceFail", condition);
+
+      case FAIL:
+	  // "Error: {0}"
+	  return ts.l("fail", condition);
+      }
+
+    throw new IllegalArgumentException();
+  }
 }
