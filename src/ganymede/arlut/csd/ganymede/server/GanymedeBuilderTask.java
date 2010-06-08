@@ -72,6 +72,7 @@ import arlut.csd.ganymede.common.ClientMessage;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.scheduleHandle;
+import arlut.csd.ganymede.common.TaskStatus;
 import arlut.csd.ganymede.common.SchemaConstants;
 
 /*------------------------------------------------------------------------------
@@ -470,19 +471,19 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		  {
 		    this.builderPhase2();
 
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
+		    handle.setTaskStatus(TaskStatus.OK, 0, "");
 		  }
 		catch (ServiceNotFoundException ex)
 		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.SERVICEERROR, 0, ex.getMessage());
+		    handle.setTaskStatus(TaskStatus.SERVICEERROR, 0, ex.getMessage());
 		  }
 		catch (ServiceFailedException ex)
 		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.SERVICEFAIL, 0, ex.getMessage());
+		    handle.setTaskStatus(TaskStatus.SERVICEFAIL, 0, ex.getMessage());
 		  }
 		catch (Exception ex)
 		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.FAIL, 0, ex.getMessage());
+		    handle.setTaskStatus(TaskStatus.FAIL, 0, ex.getMessage());
 		  }
 		finally
 		  {
