@@ -238,6 +238,8 @@ public class SyncRunner implements Runnable {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.SyncRunner");
 
+  static final boolean debug = true;
+
   private static int id = 0;
 
   /**
@@ -602,8 +604,18 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("SyncRunner.writeIncrementalSync: entering queueGrowthLock section");
+      }
+
     synchronized (queueGrowthLock)
       {
+	if (debug)
+	  {
+	    System.err.println("SyncRunner.writeIncrementalSync: inside queueGrowthLock section");
+	  }
+
 	FieldBook book = new FieldBook();
 
 	initializeFieldBook(objectList, book);
@@ -1650,8 +1662,18 @@ public class SyncRunner implements Runnable {
 	return;
       }
 
+    if (debug)
+      {
+	System.err.println("SyncRunner.updateAdminConsole(): entering queueGrowthLock section");
+      }
+
     synchronized (queueGrowthLock)
       {
+	if (debug)
+	  {
+	    System.err.println("SyncRunner.updateAdminConsole(): now in queueGrowthLock section");
+	  }
+
 	int currentQueueSize = getQueueSize();
 
 	if (currentQueueSize == 0)

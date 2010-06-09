@@ -127,7 +127,7 @@ public class GanymedeScheduler extends Thread {
   public static final String weeks_str = ts.l("global.weeks"); // "Weeks"
 
   static final int minsPerDay = 1440;
-  static final boolean debug = false;
+  static final boolean debug = true;
   static final boolean logStuff = true;
 
   /**
@@ -1009,7 +1009,7 @@ public class GanymedeScheduler extends Thread {
 		
 		if (debug)
 		  {
-		    System.err.println("loop");
+		    System.err.println("Ganymede Scheduler loop");
 		  }
 		
 		if (nextAction == null)
@@ -1019,6 +1019,11 @@ public class GanymedeScheduler extends Thread {
 			if (debug)
 			  {
 			    System.err.println("*** snooze");
+			  }
+
+			if (debug)
+			  {
+			    System.err.println("Ganymede Scheduler loop waiting for wakeup");
 			  }
 			
 			wait();	// scheduleTask() can wake us up here via notify()
@@ -1048,7 +1053,7 @@ public class GanymedeScheduler extends Thread {
 			      {
 				if (debug)
 				  {
-				    System.err.println("*** snooze");
+				    System.err.println("Ganymede Scheduler loop hitting the snooze button");
 				  }
 				
 				wait(sleepTime);	// scheduleTask() can wake us up here via notify()
@@ -1061,7 +1066,7 @@ public class GanymedeScheduler extends Thread {
 			    
 			    if (debug)
 			      {
-				System.err.println("*** snort?");
+				System.err.println("Ganymede Scheduler loop waking from snooze");
 			      }
 			  }
 		      }
@@ -1113,6 +1118,11 @@ public class GanymedeScheduler extends Thread {
 			for (int i = 0; i < toRun.size(); i++)
 			  {
 			    handle = (scheduleHandle) toRun.elementAt(i);
+
+			    if (debug)
+			      {
+				System.err.println("Ganymede Scheduler loop running " + handle);
+			      }
 			    
 			    runTask(handle);
 			  }
@@ -1314,6 +1324,11 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
+    if (debug)
+      {
+	System.err.println("Ganymede Scheduler running updateTaskInfo()");
+      }
+
     taskList.setSize(0);
 
     en = currentlyScheduled.elements();
@@ -1340,6 +1355,12 @@ public class GanymedeScheduler extends Thread {
     if (reportTasks && updateConsoles)
       {    
 	GanymedeAdmin.refreshTasks();
+      }
+
+
+    if (debug)
+      {
+	System.err.println("Ganymede Scheduler exiting updateTaskInfo()");
       }
   }
 
