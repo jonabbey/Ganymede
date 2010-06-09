@@ -815,7 +815,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 	    if (debug)
 	      {
 		// "DBObjectBase.receive(): loading {0}"
-		System.err.print(ts.l("receive.basename", object_name));
+		System.err.println(ts.l("receive.basename", object_name));
 
 		// "DBObjectBase.receive(): Rewriting old system class name: {0} as {1}"
 		System.err.println(ts.l("receive.rewritingClassname", classname, newclassname));
