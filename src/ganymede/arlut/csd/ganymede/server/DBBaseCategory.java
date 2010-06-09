@@ -452,7 +452,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     this.parent = parent;
 
-    //how many nodes under this category?
+    // how many nodes under this category?
 
     count = in.readInt();
 
