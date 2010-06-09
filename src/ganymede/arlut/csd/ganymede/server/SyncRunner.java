@@ -238,7 +238,7 @@ public class SyncRunner implements Runnable {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.SyncRunner");
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   private static int id = 0;
 
@@ -1691,6 +1691,7 @@ public class SyncRunner implements Runnable {
 		else
 		  {
 		    handle.setTaskStatus(TaskStatus.STUCKQUEUE, currentQueueSize, "");
+		    needBuild.set(true);
 		  }
 
 		queueGrowthSize = 0;

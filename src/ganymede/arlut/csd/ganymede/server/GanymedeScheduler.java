@@ -127,7 +127,7 @@ public class GanymedeScheduler extends Thread {
   public static final String weeks_str = ts.l("global.weeks"); // "Weeks"
 
   static final int minsPerDay = 1440;
-  static final boolean debug = true;
+  static final boolean debug = false;
   static final boolean logStuff = true;
 
   /**
@@ -1009,7 +1009,7 @@ public class GanymedeScheduler extends Thread {
 		
 		if (debug)
 		  {
-		    System.err.println("Ganymede Scheduler loop");
+		    System.err.println("Ganymede Scheduler at top of loop");
 		  }
 		
 		if (nextAction == null)
