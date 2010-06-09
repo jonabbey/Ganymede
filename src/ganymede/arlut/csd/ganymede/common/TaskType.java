@@ -60,7 +60,7 @@ import arlut.csd.Util.TranslationService;
  * in the presence of serialization / RMI usage.
  */
 
-public class TaskType implements java.io.Serializable {
+public class TaskType {
 
   /**
    * TranslationService object for handling string localization in the

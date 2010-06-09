@@ -47,7 +47,7 @@ package arlut.csd.ganymede.common;
 import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
-                                                                           enum
+                                                                           class
                                                                       TaskStatus
 
 ------------------------------------------------------------------------------*/
@@ -60,7 +60,7 @@ import arlut.csd.Util.TranslationService;
  * in the presence of serialization / RMI usage.
  */
 
-public class TaskStatus implements java.io.Serializable {
+public class TaskStatus {
 
   static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.TaskStatus");
 
