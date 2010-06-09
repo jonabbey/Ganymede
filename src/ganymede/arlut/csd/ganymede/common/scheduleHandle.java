@@ -109,28 +109,6 @@ public class scheduleHandle implements java.io.Serializable {
   // we pass these attributes along to the admin console for it to display
 
   /**
-   * This booleanSemaphore will be set to true if the task associated
-   * with this scheduleHandle is currently running.
-   *
-   * It is a booleanSemaphore so that we can have an appropriate
-   * memory barrier for multiprocessor access without having to
-   * synchronize on the scheduleHandle upon calls to isRunning().
-   */
-
-  private booleanSemaphore isRunning = new booleanSemaphore(false);
-
-  /**
-   * This booleanSemaphore will be set to true if the task associated
-   * with this scheduleHandle is currently suspended.
-   *
-   * It is a booleanSemaphore so that we can have an appropriate
-   * memory barrier for multiprocessor access without having to
-   * synchronize on the scheduleHandle upon calls to isSuspended().
-   */
-
-  private booleanSemaphore suspend = new booleanSemaphore(false);
-
-  /**
    * What type of TaskStatus object corresponds to this
    * scheduleHandle.
    */
@@ -143,19 +121,6 @@ public class scheduleHandle implements java.io.Serializable {
    */
 
   public int tasktype;
-
-  /**
-   * This booleanSemaphore will be set to true if we are doing a
-   * on-demand and we get a request while running it, which signifies
-   * that we'll want to immediately re-run it on completion.
-   *
-   * It is a booleanSemaphore so that we can have an appropriate
-   * memory barrier for multiprocessor access without having to
-   * synchronize on the scheduleHandle upon calls to
-   * runAgain().
-   */
-
-  private booleanSemaphore rerun = new booleanSemaphore(false);
 
   /**
    * When was this task last issued?
@@ -247,6 +212,41 @@ public class scheduleHandle implements java.io.Serializable {
    */
 
   transient public GanymedeScheduler scheduler = null;
+
+  /**
+   * This booleanSemaphore will be set to true if the task associated
+   * with this scheduleHandle is currently running.
+   *
+   * It is a booleanSemaphore so that we can have an appropriate
+   * memory barrier for multiprocessor access without having to
+   * synchronize on the scheduleHandle upon calls to isRunning().
+   */
+
+  transient private booleanSemaphore isRunning = new booleanSemaphore(false);
+
+  /**
+   * This booleanSemaphore will be set to true if the task associated
+   * with this scheduleHandle is currently suspended.
+   *
+   * It is a booleanSemaphore so that we can have an appropriate
+   * memory barrier for multiprocessor access without having to
+   * synchronize on the scheduleHandle upon calls to isSuspended().
+   */
+
+  transient private booleanSemaphore suspend = new booleanSemaphore(false);
+
+  /**
+   * This booleanSemaphore will be set to true if we are doing a
+   * on-demand and we get a request while running it, which signifies
+   * that we'll want to immediately re-run it on completion.
+   *
+   * It is a booleanSemaphore so that we can have an appropriate
+   * memory barrier for multiprocessor access without having to
+   * synchronize on the scheduleHandle upon calls to
+   * runAgain().
+   */
+
+  transient private booleanSemaphore rerun = new booleanSemaphore(false);
 
   /* -- */
 
