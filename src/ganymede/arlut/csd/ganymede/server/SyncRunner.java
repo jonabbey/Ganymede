@@ -57,7 +57,6 @@ import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
-import arlut.csd.ganymede.common.TaskStatus;
 import arlut.csd.ganymede.rmi.FileTransmitter;
 
 import arlut.csd.Util.booleanSemaphore;
@@ -1689,7 +1688,7 @@ public class SyncRunner implements Runnable {
 
 	if (currentQueueSize == 0)
 	  {
-	    handle.setTaskStatus(TaskStatus.EMPTYQUEUE, 0, "");
+	    handle.setTaskStatus(scheduleHandle.TaskStatus.EMPTYQUEUE, 0, "");
 	  }
 	else
 	  {
@@ -1697,11 +1696,11 @@ public class SyncRunner implements Runnable {
 	      {
 		if (currentQueueSize <= queueGrowthSize)
 		  {
-		    handle.setTaskStatus(TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
 		  }
 		else
 		  {
-		    handle.setTaskStatus(TaskStatus.STUCKQUEUE, currentQueueSize, "");
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
 		    needBuild.set(true);
 		  }
 
@@ -1713,13 +1712,13 @@ public class SyncRunner implements Runnable {
 		// service program, we'll stay stuck until
 		// updateAdminConsole(true) says otherwise.
 
-		if (handle.getTaskStatus() == TaskStatus.STUCKQUEUE)
+		if (handle.getTaskStatus() == scheduleHandle.TaskStatus.STUCKQUEUE)
 		  {
-		    handle.setTaskStatus(TaskStatus.STUCKQUEUE, currentQueueSize, "");
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
 		  }
 		else
 		  {
-		    handle.setTaskStatus(TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+		    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
 		  }
 	      }
 	  }

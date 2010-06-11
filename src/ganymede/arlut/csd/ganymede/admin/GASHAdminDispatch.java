@@ -71,8 +71,6 @@ import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.adminAsyncMessage;
 import arlut.csd.ganymede.common.scheduleHandle;
-import arlut.csd.ganymede.common.TaskStatus;
-import arlut.csd.ganymede.common.TaskType;
 import arlut.csd.ganymede.rmi.AdminAsyncResponder;
 import arlut.csd.ganymede.rmi.SchemaEdit;
 import arlut.csd.ganymede.rmi.Server;
@@ -701,19 +699,19 @@ class GASHAdminDispatch implements Runnable {
 
 	switch (handle.getTaskType())
 	  {
-	  case TaskType.SCHEDULED:
+	  case SCHEDULED:
 	    scheduledTasks.addElement(handle);
 	    break;
 
-	  case TaskType.MANUAL:
+	  case MANUAL:
 	    manualTasks.addElement(handle);
 	    break;
 
-	  case TaskType.BUILDER:
-	  case TaskType.UNSCHEDULEDBUILDER:
-	  case TaskType.SYNCINCREMENTAL:
-	  case TaskType.SYNCFULLSTATE:
-	  case TaskType.SYNCMANUAL:
+	  case BUILDER:
+	  case UNSCHEDULEDBUILDER:
+	  case SYNCINCREMENTAL:
+	  case SYNCFULLSTATE:
+	  case SYNCMANUAL:
 	    syncTasks.addElement(handle);
 	  }
       }
@@ -859,7 +857,7 @@ class GASHAdminDispatch implements Runnable {
 
 	table.setCellText(handle.name, 0, handle.name, false); // task name
 
-	table.setCellText(handle.name, 1, TaskType.get(handle.getTaskType()).toString(), false);
+	table.setCellText(handle.name, 1, handle.getTaskType().toString(), false);
 
 	if (handle.isRunning() && handle.isSuspended())
 	  {
@@ -897,13 +895,13 @@ class GASHAdminDispatch implements Runnable {
 	    table.setCellBackColor(handle.name, 3, Color.white, false);
 	  }
 
-	table.setCellText(handle.name, 2, TaskStatus.get(handle.getTaskStatus()).getMessage(handle.queueSize, handle.condition), false);
+	table.setCellText(handle.name, 2, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
 
 	switch (handle.getTaskStatus())
 	  {
-	  case TaskStatus.OK:
-	  case TaskStatus.EMPTYQUEUE:
-	  case TaskStatus.NONEMPTYQUEUE:
+	  case OK:
+	  case EMPTYQUEUE:
+	  case NONEMPTYQUEUE:
 	    table.setCellColor(handle.name, 2, Color.black, false);
 	    table.setCellBackColor(handle.name, 2, Color.white, false);
 	    break;

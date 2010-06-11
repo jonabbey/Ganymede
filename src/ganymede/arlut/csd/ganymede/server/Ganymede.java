@@ -91,7 +91,6 @@ import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.common.SchemaConstants;
-import arlut.csd.ganymede.common.TaskType;
 import arlut.csd.ganymede.rmi.Server;
 
 /*------------------------------------------------------------------------------
@@ -1402,7 +1401,7 @@ public class Ganymede {
 
   static void runBuilderTasks()
   {
-    for (scheduleHandle handle: scheduler.getTasksByType(TaskType.BUILDER))
+    for (scheduleHandle handle: scheduler.getTasksByType(scheduleHandle.TaskType.BUILDER))
       {
 	scheduler.demandTask(handle.getName());
       }
@@ -1429,7 +1428,7 @@ public class Ganymede {
   {
     String[] options = {"forcebuild"};
 
-    for (scheduleHandle handle: scheduler.getTasksByType(TaskType.BUILDER))
+    for (scheduleHandle handle: scheduler.getTasksByType(scheduleHandle.TaskType.BUILDER))
       {
 	scheduler.demandTask(handle.getName(), options);
       }

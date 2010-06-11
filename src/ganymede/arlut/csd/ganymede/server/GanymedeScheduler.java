@@ -62,8 +62,6 @@ import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.common.scheduleHandle;
-import arlut.csd.ganymede.common.TaskType;
-import arlut.csd.ganymede.common.TaskStatus;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -412,17 +410,17 @@ public class GanymedeScheduler extends Thread {
 	throw new IllegalArgumentException("bad params to GanymedeScheduler.addActionOnDemand()");
       }
 
-    int type = TaskType.MANUAL;
+    scheduleHandle.TaskType type = scheduleHandle.TaskType.MANUAL;
 
     if (task instanceof GanymedeBuilderTask)
       {
 	if (((GanymedeBuilderTask) task).runsOnCommit())
 	  {
-	    type = TaskType.BUILDER;
+	    type = scheduleHandle.TaskType.BUILDER;
 	  }
 	else
 	  {
-	    type = TaskType.UNSCHEDULEDBUILDER;
+	    type = scheduleHandle.TaskType.UNSCHEDULEDBUILDER;
 	  }
       }
     else if (task instanceof SyncRunner)
@@ -431,15 +429,15 @@ public class GanymedeScheduler extends Thread {
 
 	if (runner.isFullState())
 	  {
-	    type = TaskType.SYNCFULLSTATE;
+	    type = scheduleHandle.TaskType.SYNCFULLSTATE;
 	  }
 	else if (runner.isIncremental())
 	  {
-	    type = TaskType.SYNCINCREMENTAL;
+	    type = scheduleHandle.TaskType.SYNCINCREMENTAL;
 	  }
 	else
 	  {
-	    type = TaskType.SYNCMANUAL;
+	    type = scheduleHandle.TaskType.SYNCMANUAL;
 	  }
       }
 
@@ -455,7 +453,7 @@ public class GanymedeScheduler extends Thread {
 	handle.setInterval(0);
 	handle.task = task;
 	handle.tasktype = type;
-	handle.setTaskStatus(TaskStatus.OK, 0, "");
+	handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
       }
 
     onDemand.put(handle.name, handle);
@@ -496,14 +494,15 @@ public class GanymedeScheduler extends Thread {
 
     if (handle == null)
       {
-	handle = new scheduleHandle(this, time, 0, task, name, TaskType.SCHEDULED);
+	handle = new scheduleHandle(this, time, 0, task, name,
+				    scheduleHandle.TaskType.SCHEDULED);
       }
     else
       {
 	handle.startTime = time;
 	handle.setInterval(0);
 	handle.task = task;
-	handle.setTaskStatus(TaskStatus.OK, 0, "");
+	handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
       }
 
     scheduleTask(handle);
@@ -567,14 +566,14 @@ public class GanymedeScheduler extends Thread {
     if (handle == null)
       {
 	handle = new scheduleHandle(this, time, minsPerDay, task, name,
-				    TaskType.SCHEDULED);
+				    scheduleHandle.TaskType.SCHEDULED);
       }
     else
       {
 	handle.startTime = time;
 	handle.setInterval(minsPerDay);
 	handle.task = task;
-	handle.setTaskStatus(TaskStatus.OK, 0, "");
+	handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
       }
 
     scheduleTask(handle);
@@ -626,14 +625,14 @@ public class GanymedeScheduler extends Thread {
     if (handle == null)
       {
 	handle = new scheduleHandle(this, firstTime, intervalMinutes, task, name,
-				    TaskType.SCHEDULED);
+				    scheduleHandle.TaskType.SCHEDULED);
       }
     else
       {
 	handle.startTime = firstTime;
 	handle.setInterval(intervalMinutes);
 	handle.task = task;
-	handle.setTaskStatus(TaskStatus.OK, 0, "");
+	handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
       }
 
     scheduleTask(handle);
@@ -905,7 +904,7 @@ public class GanymedeScheduler extends Thread {
    * of the given type.</p>
    */
 
-  public synchronized List<scheduleHandle> getTasksByType(int type)
+  public synchronized List<scheduleHandle> getTasksByType(scheduleHandle.TaskType type)
   {
     ArrayList<scheduleHandle> results = new ArrayList<scheduleHandle>();
 
