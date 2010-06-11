@@ -609,49 +609,109 @@ public class SyncRunner implements Runnable {
 	System.err.println("SyncRunner.writeIncrementalSync: entering queueGrowthLock section");
       }
 
-    synchronized (queueGrowthLock)
+    try
       {
-	if (debug)
+	synchronized (queueGrowthLock)
 	  {
-	    System.err.println("SyncRunner.writeIncrementalSync: inside queueGrowthLock section");
-	  }
+	    if (debug)
+	      {
+		System.err.println("SyncRunner.writeIncrementalSync: inside queueGrowthLock section");
+	      }
 
-	FieldBook book = new FieldBook();
+	    FieldBook book = new FieldBook();
 
-	initializeFieldBook(objectList, book);
+	    initializeFieldBook(objectList, book);
 
-	int context_count = 0;
+	    int context_count = 0;
 
-	// we want to group the objects we write out by invid type
+	    // we want to group the objects we write out by invid type
 
-	Set<Short> typeSet = new HashSet<Short>();
+	    Set<Short> typeSet = new HashSet<Short>();
 
-	for (Invid invid: book.objects())
-	  {
-	    typeSet.add(invid.getType());
-	  }
-
-	// first write out the objects that we actually changed this
-	// transaction
-
-	for (Short type: typeSet)
-	  {
 	    for (Invid invid: book.objects())
 	      {
-		if (!transaction.isEditingObject(invid))
+		typeSet.add(invid.getType());
+	      }
+
+	    // first write out the objects that we actually changed this
+	    // transaction
+
+	    for (Short type: typeSet)
+	      {
+		for (Invid invid: book.objects())
 		  {
-		    context_count++;
+		    if (!transaction.isEditingObject(invid))
+		      {
+			context_count++;
 
-		    continue;
+			continue;
+		      }
+
+		    if (!type.equals(invid.getType()))
+		      {
+			continue;
+		      }
+
+		    DBEditObject syncObject = transaction.findObject(invid);
+
+		    if (xmlOut == null)
+		      {
+			xmlOut = createXMLSync(transRecord);
+			xmlOut.setDeltaFieldBook(book);
+			xmlOut.setDBSession(transaction.getSession());
+		      }
+
+		    switch (syncObject.getStatus())
+		      {
+		      case ObjectStatus.CREATING:
+			xmlOut.startElementIndent("object_delta");
+
+			xmlOut.indentOut();
+
+			xmlOut.startElementIndent("before");
+			xmlOut.endElement("before");
+
+			xmlOut.startElementIndent("after");
+			xmlOut.indentOut();
+			syncObject.emitXML(xmlOut);
+			xmlOut.indentIn();
+			xmlOut.endElementIndent("after");
+
+			xmlOut.indentIn();
+			xmlOut.endElementIndent("object_delta");
+
+			break;
+
+		      case ObjectStatus.DELETING:
+			xmlOut.startElementIndent("object_delta");
+
+			xmlOut.indentOut();
+
+			xmlOut.startElementIndent("before");
+			xmlOut.indentOut();
+			syncObject.getOriginal().emitXML(xmlOut);
+			xmlOut.indentIn();
+			xmlOut.endElementIndent("before");
+
+			xmlOut.startElementIndent("after");
+			xmlOut.endElement("after");
+
+			xmlOut.indentIn();
+			xmlOut.endElementIndent("object_delta");
+			break;
+
+		      case ObjectStatus.EDITING:
+			syncObject.emitXMLDelta(xmlOut);
+			break;
+		      }
 		  }
+	      }
 
-		if (!type.equals(invid.getType()))
-		  {
-		    continue;
-		  }
+	    // then write out any objects that the SyncMaster has thrown in
+	    // for context
 
-		DBEditObject syncObject = transaction.findObject(invid);
-
+	    if (context_count > 0)
+	      {
 		if (xmlOut == null)
 		  {
 		    xmlOut = createXMLSync(transRecord);
@@ -659,104 +719,55 @@ public class SyncRunner implements Runnable {
 		    xmlOut.setDBSession(transaction.getSession());
 		  }
 
-		switch (syncObject.getStatus())
+		xmlOut.startElementIndent("context_objects");
+		xmlOut.indentOut();
+
+		for (Short type: typeSet)
 		  {
-		  case ObjectStatus.CREATING:
-		    xmlOut.startElementIndent("object_delta");
-
-		    xmlOut.indentOut();
-
-		    xmlOut.startElementIndent("before");
-		    xmlOut.endElement("before");
-
-		    xmlOut.startElementIndent("after");
-		    xmlOut.indentOut();
-		    syncObject.emitXML(xmlOut);
-		    xmlOut.indentIn();
-		    xmlOut.endElementIndent("after");
-
-		    xmlOut.indentIn();
-		    xmlOut.endElementIndent("object_delta");
-
-		    break;
-
-		  case ObjectStatus.DELETING:
-		    xmlOut.startElementIndent("object_delta");
-
-		    xmlOut.indentOut();
-
-		    xmlOut.startElementIndent("before");
-		    xmlOut.indentOut();
-		    syncObject.getOriginal().emitXML(xmlOut);
-		    xmlOut.indentIn();
-		    xmlOut.endElementIndent("before");
-
-		    xmlOut.startElementIndent("after");
-		    xmlOut.endElement("after");
-
-		    xmlOut.indentIn();
-		    xmlOut.endElementIndent("object_delta");
-		    break;
-
-		  case ObjectStatus.EDITING:
-		    syncObject.emitXMLDelta(xmlOut);
-		    break;
-		  }
-	      }
-	  }
-
-	// then write out any objects that the SyncMaster has thrown in
-	// for context
-
-	if (context_count > 0)
-	  {
-	    if (xmlOut == null)
-	      {
-		xmlOut = createXMLSync(transRecord);
-		xmlOut.setDeltaFieldBook(book);
-		xmlOut.setDBSession(transaction.getSession());
-	      }
-
-	    xmlOut.startElementIndent("context_objects");
-	    xmlOut.indentOut();
-
-	    for (Short type: typeSet)
-	      {
-		for (Invid invid: book.objects())
-		  {
-		    if (transaction.isEditingObject(invid))
+		    for (Invid invid: book.objects())
 		      {
-			continue;	// skip
+			if (transaction.isEditingObject(invid))
+			  {
+			    continue;	// skip
+			  }
+
+			if (!type.equals(invid.getType()))
+			  {
+			    continue;	// skip
+			  }
+
+			DBObject refObject = transaction.getSession().viewDBObject(invid);
+
+			refObject.emitXML(xmlOut);
 		      }
-
-		    if (!type.equals(invid.getType()))
-		      {
-			continue;	// skip
-		      }
-
-		    DBObject refObject = transaction.getSession().viewDBObject(invid);
-
-		    refObject.emitXML(xmlOut);
 		  }
+
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("context_objects");
 	      }
 
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("context_objects");
-	  }
+	    if (xmlOut != null)
+	      {
+		xmlOut.indentIn();
+		xmlOut.endElementIndent("transaction");
+		xmlOut.skipLine();
+		xmlOut.close();		// close() automatically flushes before closing
+		xmlOut = null;
 
+		needBuild.set(true);
+	      }
+
+	    setTransactionNumber(transRecord.getTransactionNumber());
+
+	    queueGrowthSize = queueGrowthSize + 1; // count the one that we just wrote out
+	  }
+      }
+    finally
+      {
 	if (xmlOut != null)
 	  {
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("transaction");
-	    xmlOut.skipLine();
-	    xmlOut.close();		// close() automatically flushes before closing
-
-	    needBuild.set(true);
+	    xmlOut.close();
 	  }
-
-	setTransactionNumber(transRecord.getTransactionNumber());
-
-	queueGrowthSize = queueGrowthSize + 1; // count the one that we just wrote out
       }
 
     updateAdminConsole(false);
