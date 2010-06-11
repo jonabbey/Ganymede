@@ -1652,7 +1652,7 @@ operation, due to full image garbage collection only being performed
 once an hour.
 
 With the RMIGC variable removed, the server now keeps much closer to a
-steady state and does go on wild ballooning trips through memory.
+steady state and does not go on wild ballooning trips through memory.
 
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 
