@@ -78,22 +78,6 @@ $MAXHEAP="1024m";
 
 $MAXPERMSPACE="256m";
 
-# These options control how frequently the Ganymede server will
-# perform full heap GC to insure release of remote (client-side) RMI
-# objects.  The Java 1.3 JDK defaults to doing full GC for RMI server
-# apps once a minute, but the Ganymede server never releases
-# references to clients or admin consoles unless the client or admin
-# console quits/disconnects, in which case there's no need for the
-# Ganymede server to tell the client/console that it can release
-# objects.
-#
-# By setting the RMIGC control values to 3600000, we make the
-# Ganymede server only perform mandatory full-heap GC once an
-# hour, letting the lower impact generational garbage collection logic
-# handle clean-up of transient objects
-
-$RMIGC='-Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000';
-
 # This option forces the Ganymede server to use 64 bit
 # cryptographically random object id numbers to make it extremely
 # unlikely for a third party to be able to guess the RMI/JRMP object
@@ -248,4 +232,4 @@ $SUNSPECIFIC="-server -XX:MaxPermSize=$MAXPERMSPACE";
 
 $ENV{'CLASSPATH'} = $CLASSPATH;
 
-exec("$JAVA $SUNSPECIFIC $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP $RMIGC $RMISECURITY $LANGUAGE arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR $EXTRAPARAMS > $INSTALLDIR/server.log 2>&1 &");
+exec("$JAVA $SUNSPECIFIC $DEBUG -Xms$MINHEAP -Xmx$MAXHEAP $RMISECURITY $LANGUAGE arlut.csd.ganymede.server.Ganymede -resetadmin -logrmi usedirectory=$INSTALLDIR $EXTRAPARAMS > $INSTALLDIR/server.log 2>&1 &");

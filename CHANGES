@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-31 May, 2010
+31 June, 2010
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 31 May, 2010
+RELEASE DATE: 31 June, 2010
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1633,6 +1633,26 @@ The Sync Monitor tab on the Admin Console now has a 'Status' column
 that displays this build status information.  The older 'Status'
 column has been renamed 'Scheduling Status' to distinguish it from the
 build status that is now being carried in the 'Status' column.
+
+109. [SERVER] Removed RMIGC from the bin/runServer script
+
+As of Java 1.6.0_18, the Java garbage collector seems to behave
+somewhat badly in the presence of modified values for
+
+ sun.rmi.dgc.client.gcInterval and
+ sun.rmi.dgc.server.gcInterval
+
+I have removed the RMIGC variable setting these properties to a very
+high value from the server's runServer script, to avoid gross memory
+loading behavior in the Ganymede server.
+
+Under Java 1.6.0_18 and later, the old gcInterval property settings
+was causing our Ganymede server to balloon up to 340 megabytes during
+operation, due to full image garbage collection only being performed
+once an hour.
+
+With the RMIGC variable removed, the server now keeps much closer to a
+steady state and does go on wild ballooning trips through memory.
 
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 
