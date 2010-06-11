@@ -131,10 +131,7 @@ public class FieldBook {
 	    return;		// we've already got the whole object
 	  }
 
-	for (Short fieldId: fieldIds)
-	  {
-	    set.add(fieldId);
-	  }
+	set.addAll(fieldIds);
       }
     else
       {
@@ -206,8 +203,12 @@ public class FieldBook {
   }
 
   /**
-   * Returns a set of field ids for fields for Invid invid that are
-   * part of this FieldBook.
+   * Returns a Set of field ids for fields for Invid invid that are
+   * part of this FieldBook, or null if all fields for the provided
+   * Invid are in this FieldBook.
+   *
+   * If this FieldBook contains no fields for the given Invid, an
+   * IllegalArgumentException will be thrown.
    */
 
   public Set<Short> fields(Invid invid)
