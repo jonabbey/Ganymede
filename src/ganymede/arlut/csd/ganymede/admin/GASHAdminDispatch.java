@@ -904,13 +904,11 @@ class GASHAdminDispatch implements Runnable {
 	  case NONEMPTYQUEUE:
 	    table.setCellColor(handle.name, 2, Color.black, false);
 	    table.setCellBackColor(handle.name, 2, Color.white, false);
-	    frame.tabPane.setBackgroundAt(2, null);
 	    break;
 	    
 	  default:
 	    table.setCellColor(handle.name, 2, Color.white, false);
 	    table.setCellBackColor(handle.name, 2, Color.red, false);
-	    frame.tabPane.setBackgroundAt(2, Color.red);
 	  }
 
 	if (handle.lastTime != null)
