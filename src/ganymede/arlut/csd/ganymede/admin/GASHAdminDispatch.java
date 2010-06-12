@@ -848,6 +848,8 @@ class GASHAdminDispatch implements Runnable {
 
     /* -- */
 
+    boolean error_seen = false;
+
     // now reload the table with the current stats
 
     for (scheduleHandle handle: tasks)
@@ -908,19 +910,26 @@ class GASHAdminDispatch implements Runnable {
 	  case NONEMPTYQUEUE:
 	    table.setCellColor(handle.name, 2, Color.black, false);
 	    table.setCellBackColor(handle.name, 2, Color.white, false);
-	    frame.tabPane.setIconAt(2, null);
 	    break;
 	    
 	  default:
 	    table.setCellColor(handle.name, 2, Color.white, false);
 	    table.setCellBackColor(handle.name, 2, Color.red, false);
-	    frame.tabPane.setIconAt(2, getErrorBall());
 	  }
 
 	if (handle.lastTime != null)
 	  {
 	    table.setCellText(handle.name, 4, handle.lastTime.toString(), false);
 	  }
+      }
+
+    if (error_seen)
+      {
+	frame.tabPane.setIconAt(2, getErrorBall());
+      }
+    else
+      {
+	frame.tabPane.setIconAt(2, null);
       }
 
     // and take any rows out that are gone
