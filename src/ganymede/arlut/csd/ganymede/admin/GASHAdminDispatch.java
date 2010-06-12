@@ -915,6 +915,7 @@ class GASHAdminDispatch implements Runnable {
 	  default:
 	    table.setCellColor(handle.name, 2, Color.white, false);
 	    table.setCellBackColor(handle.name, 2, Color.red, false);
+	    error_seen = true;
 	  }
 
 	if (handle.lastTime != null)
