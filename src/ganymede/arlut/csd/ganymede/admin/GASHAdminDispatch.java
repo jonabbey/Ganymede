@@ -926,11 +926,11 @@ class GASHAdminDispatch implements Runnable {
 
     if (error_seen)
       {
-	frame.tabPane.setIconAt(2, getErrorBall());
+	frame.tabPane.setIconAt(1, getErrorBall());
       }
     else
       {
-	frame.tabPane.setIconAt(2, null);
+	frame.tabPane.setIconAt(1, null);
       }
 
     // and take any rows out that are gone
