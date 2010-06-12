@@ -57,6 +57,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.text.NumberFormat;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -65,6 +66,7 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.JTable.rowTable;
+import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.AdminEntry;
@@ -110,6 +112,8 @@ class GASHAdminDispatch implements Runnable {
 
   private Thread asyncPollThread = null;
   private volatile boolean okayToPoll = false;
+
+  private ImageIcon errorBallIcon = null;
 
   NumberFormat numberFormatter = NumberFormat.getInstance();
 
@@ -904,11 +908,13 @@ class GASHAdminDispatch implements Runnable {
 	  case NONEMPTYQUEUE:
 	    table.setCellColor(handle.name, 2, Color.black, false);
 	    table.setCellBackColor(handle.name, 2, Color.white, false);
+	    frame.tabPane.setIconAt(2, null);
 	    break;
 	    
 	  default:
 	    table.setCellColor(handle.name, 2, Color.white, false);
 	    table.setCellBackColor(handle.name, 2, Color.red, false);
+	    frame.tabPane.setIconAt(2, getErrorBall());
 	  }
 
 	if (handle.lastTime != null)
@@ -1258,5 +1264,15 @@ class GASHAdminDispatch implements Runnable {
       }
 
     return retVal;
+  }
+
+  public ImageIcon getErrorBall()
+  {
+    if (errorBallIcon == null)
+      {
+	errorBallIcon = new ImageIcon(PackageResources.getImageResource(frame, "error-ball.png", getClass()));
+      }
+
+    return errorBallIcon;
   }
 }
