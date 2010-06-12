@@ -466,8 +466,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	      }
 	  }
 
-	// okay, now we we've added the server--side tabs are.  time
-	// to start in on the predefined tabs.
+	// okay, now we we've added the server--side tabs.  time to
+	// start in on the predefined tabs.
 
         // for user objects, see if we have an image to display
 
