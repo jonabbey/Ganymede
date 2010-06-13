@@ -1634,6 +1634,9 @@ that displays this build status information.  The older 'Status'
 column has been renamed 'Scheduling Status' to distinguish it from the
 build status that is now being carried in the 'Status' column.
 
+Added a red warning icon that will appear in the tab for 'Sync
+Tasks' if one or more builds are currently broken.
+
 109. [SERVER] Removed RMIGC from the bin/runServer script
 
 As of Java 1.6.0_18, the Java garbage collector seems to behave
