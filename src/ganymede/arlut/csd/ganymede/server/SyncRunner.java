@@ -1298,7 +1298,7 @@ public class SyncRunner implements Runnable {
       }
     else if (this.mode == SyncType.INCREMENTAL)
       {
-	if (this.needBuild.isSet())
+	if (this.needBuild.isSet() || getQueueSize() > 0)
 	  {
 	    runIncremental();
 	  }
