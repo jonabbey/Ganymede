@@ -1545,14 +1545,16 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
-    synchronized (this)
+    synchronized (queueGrowthLock)
       {
+	queueGrowthSize = 0;
+
 	myName = getName();
 	myTransactionNumber = getTransactionNumber();
 	myServiceProgram = getServiceProgram();
-        invocation = new String[2];
+	invocation = new String[2];
 	invocation[0] = myServiceProgram;
-        invocation[1] = String.valueOf(myTransactionNumber);
+	invocation[1] = String.valueOf(myTransactionNumber);
 	needBuild.set(false);
       }
 
@@ -1703,8 +1705,6 @@ public class SyncRunner implements Runnable {
 		    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
 		    needBuild.set(true);
 		  }
-
-		queueGrowthSize = 0;
 	      }
 	    else
 	      {
