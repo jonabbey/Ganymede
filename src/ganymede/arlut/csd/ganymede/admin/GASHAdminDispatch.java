@@ -114,6 +114,7 @@ class GASHAdminDispatch implements Runnable {
   private volatile boolean okayToPoll = false;
 
   private ImageIcon errorBallIcon = null;
+  private ImageIcon playIcon = null;
 
   NumberFormat numberFormatter = NumberFormat.getInstance();
 
@@ -849,6 +850,7 @@ class GASHAdminDispatch implements Runnable {
     /* -- */
 
     boolean error_seen = false;
+    boolean running = false;
 
     // now reload the table with the current stats
 
@@ -878,6 +880,8 @@ class GASHAdminDispatch implements Runnable {
 	    table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
 	    table.setCellColor(handle.name, 3, Color.blue, false);
 	    table.setCellBackColor(handle.name, 3, Color.white, false);
+
+	    running = true;
 	  }
 	else if (handle.isSuspended())
 	  {
@@ -924,7 +928,11 @@ class GASHAdminDispatch implements Runnable {
 	  }
       }
 
-    if (error_seen)
+    if (running)
+      {
+	frame.tabPane.setIconAt(1, getPlayIcon());
+      }
+    else if (error_seen)
       {
 	frame.tabPane.setIconAt(1, getErrorBall());
       }
@@ -1284,5 +1292,15 @@ class GASHAdminDispatch implements Runnable {
       }
 
     return errorBallIcon;
+  }
+
+  public ImageIcon getPlayIcon()
+  {
+    if (playIcon == null)
+      {
+	playIcon = new ImageIcon(PackageResources.getImageResource(frame, "playing-icon.png", getClass()));
+      }
+
+    return playIcon;
   }
 }
