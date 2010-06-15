@@ -115,6 +115,7 @@ class GASHAdminDispatch implements Runnable {
 
   private ImageIcon errorBallIcon = null;
   private ImageIcon playIcon = null;
+  private ImageIcon emptyIcon = null;
 
   NumberFormat numberFormatter = NumberFormat.getInstance();
 
@@ -938,7 +939,7 @@ class GASHAdminDispatch implements Runnable {
       }
     else
       {
-	frame.tabPane.setIconAt(1, null);
+	frame.tabPane.setIconAt(1, getEmptyIcon());
       }
 
     // and take any rows out that are gone
@@ -1302,5 +1303,15 @@ class GASHAdminDispatch implements Runnable {
       }
 
     return playIcon;
+  }
+
+  public ImageIcon getEmptyIcon()
+  {
+    if (emptyIcon == null)
+      {
+	emptyIcon = new ImageIcon(PackageResources.getImageResource(frame, "empty-icon.png", getClass()));
+      }
+
+    return emptyIcon;
   }
 }
