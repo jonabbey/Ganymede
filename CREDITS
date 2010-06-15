@@ -461,5 +461,11 @@ src/ganymede/org/solinger/cracklib/LICENSE for full details.
 
 --
 
+While most of the icons in the Ganymede distribution were created by
+us, Ganymede also uses some icons released into the public domain from
+the Tango project (http://tango.freedesktop.org/).
+
+--
+
 Special thanks to authors of Git, Ant, and Subversion for high quality
 build and version control tools.
