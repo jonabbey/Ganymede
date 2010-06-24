@@ -369,6 +369,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (eObj.fieldAry == null)
       {
+	// "Error, tried to call the DBObject view-copy constructor with a pseudo-static DBEditObject"
 	throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 

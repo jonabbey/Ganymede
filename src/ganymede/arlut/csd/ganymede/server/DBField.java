@@ -353,7 +353,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   Object value = null;
   
   /**
-   * The object this field is contained within
+   * The object this field is contained within, package private.
    */
 
   DBObject owner;
