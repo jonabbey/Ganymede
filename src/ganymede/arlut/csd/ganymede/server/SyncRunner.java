@@ -370,7 +370,7 @@ public class SyncRunner implements Runnable {
    * The lock object we're using for the queueGrowthSize management.
    */
 
-  private Object queueGrowthLock = new Object();
+  private Object queueGrowthMonitor = new Object();
 
   /**
    * A filter we use to find transaction files in the queue directory.
@@ -605,16 +605,16 @@ public class SyncRunner implements Runnable {
 
     if (debug)
       {
-	System.err.println("SyncRunner.writeIncrementalSync: entering queueGrowthLock section");
+	System.err.println("SyncRunner.writeIncrementalSync: entering queueGrowthMonitor section");
       }
 
     try
       {
-	synchronized (queueGrowthLock)
+	synchronized (queueGrowthMonitor)
 	  {
 	    if (debug)
 	      {
-		System.err.println("SyncRunner.writeIncrementalSync: inside queueGrowthLock section");
+		System.err.println("SyncRunner.writeIncrementalSync: inside queueGrowthMonitor section");
 	      }
 
 	    FieldBook book = new FieldBook();
@@ -1545,7 +1545,7 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
-    synchronized (queueGrowthLock)
+    synchronized (queueGrowthMonitor)
       {
 	queueGrowthSize = 0;
 
@@ -1676,14 +1676,14 @@ public class SyncRunner implements Runnable {
 
     if (debug)
       {
-	System.err.println("SyncRunner.updateAdminConsole(): entering queueGrowthLock section");
+	System.err.println("SyncRunner.updateAdminConsole(): entering queueGrowthMonitor section");
       }
 
-    synchronized (queueGrowthLock)
+    synchronized (queueGrowthMonitor)
       {
 	if (debug)
 	  {
-	    System.err.println("SyncRunner.updateAdminConsole(): now in queueGrowthLock section");
+	    System.err.println("SyncRunner.updateAdminConsole(): now in queueGrowthMonitor section");
 	  }
 
 	int currentQueueSize = getQueueSize();
