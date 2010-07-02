@@ -342,6 +342,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   /**
    * This field is used to handle field order sorting when
    * we read an old (pre-2.0) ganymede.db file.
+   *
+   * Note that this is currently DBObjectBaseField's only package
+   * private field, because we share the use of these tmp_displayOrder
+   * fields with DBBaseCategory and DBObjectBase, and there's just
+   * little upside in reworking the old compatibility code to use
+   * setters and accessors for this purpose.
    */
 
   int tmp_displayOrder = -1;

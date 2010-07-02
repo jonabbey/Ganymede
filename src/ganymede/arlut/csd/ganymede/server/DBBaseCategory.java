@@ -151,8 +151,13 @@ public class DBBaseCategory implements Category, CategoryNode {
    * In order to keep compatibility with versions 1.17 and previous of
    * the ganymede.db file format, we'll keep this field so we can do a
    * sort after loading when reading an old file.
+   *
+   * Note that this is currently DBBaseCategory's only package private
+   * field, because we share the use of these tmp_displayOrder fields
+   * with DBObjectBase and DBObjectBaseField, and there's just little
+   * upside in reworking the old compatibility code to use setters and
+   * accessors for this purpose.
    */
-
 
   int tmp_displayOrder = -1;
 

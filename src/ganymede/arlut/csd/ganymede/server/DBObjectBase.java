@@ -387,7 +387,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   private int maxid;
 
   /**
-   * used only during loading of pre-2.0 format ganymede.db files
+   * Used only during loading of pre-2.0 format ganymede.db files
+   *
+   * Note that this is currently DBObjectBase's only package private
+   * field, because we share the use of these tmp_displayOrder fields
+   * with DBBaseCategory and DBObjectBaseField, and there's just
+   * little upside in reworking the old compatibility code to use
+   * setters and accessors for this purpose.
    */
 
   int tmp_displayOrder = -1;
