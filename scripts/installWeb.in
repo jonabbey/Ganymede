@@ -124,6 +124,18 @@ foreach $step (@steps) {
       }
     }
 
+    if ($step eq "REGISTRYPORT") {
+	if ($vars{$step} > 65535) {
+	    print "*Port numbers must be less than 65536.\n";
+	    $success = 0;
+	}
+
+	if ($vars{$step} <= 0) {
+	    print "*Port numbers must be greater than 0.\n";
+	    $success = 0;
+	}
+    }
+
     if ($step eq "WEBURL" && $vars{"WEBURL"} !~ /^http:\/\//) {
       print "*Please provide a fully qualified URL.\n";
       $success = 0;
