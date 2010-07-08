@@ -529,7 +529,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     labelPanel.add("North", label);
 
     // {0}, port {1,number,#}
-    JLabel hostLabel = new JLabel(ts.l("createLoginPanel.serverPattern", serverhost, Integer.valueOf(registryPortProperty)));
+    JLabel hostLabel = new JLabel(ts.l("createLoginPanel.serverPattern", serverhost, Integer.valueOf(registryPort)));
     Font x = new Font("Courier", Font.ITALIC, 14);
     hostLabel.setFont(x);
     hostLabel.setForeground(Color.black);
