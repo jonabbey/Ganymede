@@ -504,8 +504,17 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       }
 
     serverhost = getConfigString("ganymede.serverhost");
-    registryPort = getConfigInteger("ganymede.registryPort");
-    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
+    
+    try
+      {
+	registryPort = getConfigInteger("ganymede.registryPort");
+      }
+    catch (NumberFormatException ex)
+      {
+	registryPort = registryPortProperty; // default
+      }
+
+    server_url = "rmi://" + serverhost + ":" + registryPort + "/ganymede.server";
 
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add("Center", createLoginPanel());
@@ -559,7 +568,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // "{0}, port {1,number,#}"
     JLabel hostLabel = new JLabel(ts.l("createLoginPanel.server_label2", 
 				       serverhost, 
-				       Integer.valueOf(registryPortProperty)));
+				       Integer.valueOf(registryPort)));
     Font x = new Font("Courier", Font.ITALIC, 14);
     hostLabel.setFont(x);
     hostLabel.setForeground(Color.black);
