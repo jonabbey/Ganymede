@@ -1660,7 +1660,16 @@ public class SyncRunner implements Runnable {
 
   public int getQueueSize()
   {
-    return new File(this.getDirectory()).list(dirFilter).length;
+    String[] dirEntries = new File(this.getDirectory()).list(dirFilter);
+
+    if (dirEntries == null)
+      {
+	return 0;
+      }
+    else
+      {
+	return dirEntries.length;
+      }
   }
 
   /**
