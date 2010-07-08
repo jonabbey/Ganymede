@@ -426,8 +426,17 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     GASHAdmin.my_GASHAdmin = this;
 
     serverhost = getConfigString("ganymede.serverhost");
-    registryPort = getConfigInteger("ganymede.registryPort");
-    server_url = "rmi://" + serverhost + ":" + registryPortProperty + "/ganymede.server";
+
+    try
+      {
+	registryPort = getConfigInteger("ganymede.registryPort");
+      }
+    catch (NumberFormatException ex)
+      {
+	registryPort = registryPortProperty; // default
+      }
+
+    server_url = "rmi://" + serverhost + ":" + registryPort + "/ganymede.server";
 
     GASHAdminFrame.sizer.restoreLookAndFeel();
 
