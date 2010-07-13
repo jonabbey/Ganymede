@@ -1044,6 +1044,9 @@ public class DBEditSet {
     if (mustAbort)
       {
 	release();
+
+	// "Forced Transaction Abort"
+	// "The server ran into a non-reversible error while processing this transaction and forced an abort."
 	return Ganymede.createErrorDialog(ts.l("commit.forced_abort"),
 					  ts.l("commit.forced_abort_text"));
       }
@@ -1078,6 +1081,9 @@ public class DBEditSet {
 
 	releaseWriteLock();
 	release();
+
+	// "Transaction commit failure"
+	// "Couldn''t commit transaction, exception caught: {0}"
 	return Ganymede.createErrorDialog(ts.l("commit.commit_failure"),
 					  ts.l("commit.commit_failure_text", Ganymede.stackTrace(ex)));
       }
