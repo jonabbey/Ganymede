@@ -450,7 +450,10 @@ public class Ganymede {
 
     if (propFilename == null)
       {
+	// "Error: invalid command line parameters"
         System.err.println(ts.l("main.cmd_line_error"));
+
+	// "Usage: java arlut.csd.ganymede.server.Ganymede\n properties = [-usedirectory=<server directory>|<property file>] [-resetadmin] [debug = <rmi debug file>]"
         System.err.println(ts.l("main.cmd_line_usage"));
         return;
       }
@@ -476,11 +479,14 @@ public class Ganymede {
 
     if (!loadProperties(propFilename))
       {
+	// "Error, couldn''t successfully load properties from file {0}."
 	System.err.println(ts.l("main.error_propload", propFilename));
+
 	return;
       }
     else
       {
+	// "Ganymede server: loaded properties successfully from {0}"
 	System.out.println(ts.l("main.ok_propload", propFilename));
       }
 
@@ -517,13 +523,16 @@ public class Ganymede {
     Ganymede.rmi = new GanymedeRMIManager(publishedObjectPortProperty, useSSL);
 
    /* Start up the RMI registry thread. */
+
     try
       {
         Ganymede.rmi.startRMIRegistry(registryPortProperty);
       }
     catch (RemoteException ex)
       {
+	// "Error, couln''t start the RMI registry."
         System.err.println(ts.l("main.error_starting_rmiregistry"));
+
         throw new RuntimeException(ex.getMessage());
       }    
     
@@ -542,6 +551,7 @@ public class Ganymede {
 	  }
 	catch (IOException ex)
 	  {
+	    // "Couldn''t open RMI debug log: {0}"
 	    System.err.println(ts.l("main.error_fail_debug", ex.toString()));
 	  }
       }
@@ -560,6 +570,7 @@ public class Ganymede {
 
     // create the database 
 
+    // "Creating DBStore structures"
     debug(ts.l("main.info_creating_dbstore"));
 
     db = new DBStore();		// And how can this be!?  For he IS the kwizatch-haderach!!
@@ -570,7 +581,9 @@ public class Ganymede {
     
     if (dataFile.exists())
       {
+	// "Loading DBStore contents"
 	debug(ts.l("main.info_loading_dbstore"));
+
 	db.load(dbFilename, true);
       }
     else
@@ -593,7 +606,6 @@ public class Ganymede {
 	    debug(ts.l("main.orphan_journal", Ganymede.journalProperty, dbFilename));
 
 	    // "Shutting down."
-
 	    Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
 
 	    System.exit(1);
@@ -628,8 +640,12 @@ public class Ganymede {
 
 	// create the database objects required for the server's operation
 
+	// "Creating mandatory database objects"
 	debug(ts.l("main.info_creating_mandatory"));
+
 	db.initializeObjects();
+
+	// "Mandatory database objects created."
 	debug(ts.l("main.info_created_mandatory"));
 
 	firstrun = false;
@@ -643,14 +659,14 @@ public class Ganymede {
 
     if (false)
       {
-	// Initializing Security Manager
+	// "Initializing Security Manager"
 	debug(ts.l("main.info_init_security"));
 
 	System.setSecurityManager(new RMISecurityManager());
       }
     else
       {
-	// Not Initializing RMI Security Manager.. not supporting classfile transfer
+	// "Not Initializing RMI Security Manager.. not supporting classfile transfer"
 	debug(ts.l("main.info_no_security"));
       }
 
@@ -661,13 +677,16 @@ public class Ganymede {
 
     try
       {
+	// "Creating GanymedeServer object"
 	debug(ts.l("main.info_creating_server"));
 
 	server = new GanymedeServer();
       }
     catch (Exception ex)
       {
+	// "Couldn''t create GanymedeServer: "
 	debug(ts.l("main.error_fail_server") + Ganymede.stackTrace(ex));
+
 	throw new RuntimeException(ex.getMessage());
       }
 
@@ -676,11 +695,14 @@ public class Ganymede {
 
     try
       {
+	// "Creating internal Ganymede Session"
 	debug(ts.l("main.info_creating_def_session"));
+
 	internalSession = new GanymedeSession();
 	internalSession.enableWizards(false);
 	internalSession.enableOversight(false);
 
+	// "Creating master BaseListTransport object"
 	debug(ts.l("main.info_creating_baselist_trans"));
 
 	Ganymede.baseTransport = Ganymede.internalSession.getBaseList();
@@ -725,6 +747,8 @@ public class Ganymede {
     catch (IOException ex)
       {
 	ex.printStackTrace();
+
+	// "Couldn''t initialize log file"
 	throw new RuntimeException(ts.l("main.error_log_file"));
       }
 
@@ -797,6 +821,7 @@ public class Ganymede {
       }
     catch (NotLoggedInException ex)
       {
+	// "Mysterious not logged in exception: "
 	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
       }
 
@@ -887,6 +912,7 @@ public class Ganymede {
 		  }
 		else
 		  {
+		    // "Avoiding loopback {0} definition, binding to {1}"
 		    Ganymede.debug(ts.l("main.info_avoiding_loopback",
 					java.net.InetAddress.getLocalHost().getHostName(),
 					hostname));
@@ -904,12 +930,14 @@ public class Ganymede {
 	// We're catching RuntimeException separately to placate
 	// FindBugs.
 
+	// "Couldn''t establish server binding: "
 	debug(ts.l("main.error_no_binding") + ex);
 
 	throw ex;
       }
     catch (Exception ex)
       {
+	// "Couldn''t establish server binding: "
 	debug(ts.l("main.error_no_binding") + ex);
 
 	throw new RuntimeException(ex);
@@ -944,6 +972,7 @@ public class Ganymede {
 	  }
 	catch (NumberFormatException ex)
 	  {
+	    // "Could not start telnet console, {0} is not a valid port number."
 	    debug(ts.l("main.badport", portString));
 	  }
       }
