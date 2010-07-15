@@ -417,6 +417,8 @@ public class Ganymede {
 
     /* -- */
 
+    System.setProperty("java.awt.headless", "true");
+
     // If the "usedirectory" option is set, then use the supplied
     // directory name as the base path to the properties file (which
     // is assumed to be "ganymede.properties" and the debug log
