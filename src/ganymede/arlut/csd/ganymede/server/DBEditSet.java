@@ -821,6 +821,7 @@ public class DBEditSet {
 
 	try
 	  {
+	    // "rollback() called in non-interactive transaction"
 	    throw new RuntimeException(ts.l("rollback.non_interactive"));
 	  }
 	catch (RuntimeException ex)
