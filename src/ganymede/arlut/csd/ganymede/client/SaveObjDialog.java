@@ -106,7 +106,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 
   JCheckBox showHistory, showTransactions;
 
-  JdateField date;
+  // JdateField date;
 
   JButton 
     ok,
