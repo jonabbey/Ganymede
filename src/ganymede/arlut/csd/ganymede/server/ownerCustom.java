@@ -160,23 +160,6 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 	result = VectorUtils.union(result, externalAddresses.getValuesLocal());
       }
 
-    if (debug)
-      {
-	System.err.print("getOwnerGroupAddresses(): returning: ");
-
-	for (int i = 0; i < result.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		System.err.print(", ");
-	      }
-
-	    System.err.print(result.elementAt(i));
-	  }
-
-	System.err.println();
-      }
-
     return result;
   }
 
