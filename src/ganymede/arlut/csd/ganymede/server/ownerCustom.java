@@ -141,15 +141,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     externalAddresses = (StringDBField) ownerGroup.getField(SchemaConstants.OwnerExternalMail);
 
-    if (externalAddresses == null)
-      {
-	if (debug)
-	  {
-	    System.err.println("getOwnerGroupAddresses(): No external mail list defined for owner group " + 
-			       ownerInvid.toString());
-	  }
-      }
-    else
+    if (externalAddresses != null)
       {
 	// we don't have to clone externalAddresses.getValuesLocal()
 	// since union() will copy the elements rather than just
