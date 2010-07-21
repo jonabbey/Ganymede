@@ -94,7 +94,8 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import arlut.csd.JDataComponent.JIPField;
-import arlut.csd.JDataComponent.JdateField;
+//import arlut.csd.JDataComponent.JdateField;
+import arlut.csd.JDataComponent.JdateField2;
 import arlut.csd.JDataComponent.JfloatField;
 import arlut.csd.JDataComponent.JnumberField;
 import arlut.csd.JDataComponent.JstringField;
@@ -302,7 +303,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 	Choice_Buttons.add(OkButton);
 	Choice_Buttons.add(CancelButton);
       }
-    
+
     editBox.addItemListener(this);
     editBox.setSelected(false);
 
@@ -943,6 +944,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   private synchronized void unregister()
   {
+	/*
     for (int i = 0; i < Rows.size(); i++)
       {
 	QueryRow row = (QueryRow) Rows.elementAt(i);
@@ -953,6 +955,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 	    ((JdateField) row.operand).unregister();
 	  }
       }
+	*/
   }
 
   private void removeRow()
@@ -1631,11 +1634,12 @@ class QueryRow implements ItemListener {
       }
     else if (field.isDate())
       {
-	if (!(operand instanceof JdateField))
+	if (!(operand instanceof JdateField2))
 	  {
 	    removeOperand();
 
-	    operand = new JdateField(new Date(), true, false, null, null);
+	    //operand = new JdateField(new Date(), true, false, null, null);
+	    operand = new JdateField2(new Date());
 	    addOperand = true;
 	  }
       }
@@ -1736,10 +1740,11 @@ class QueryRow implements ItemListener {
   {
     if (operand != null)
       {
+	/*
 	if (operand instanceof JdateField)
 	  {
 	    ((JdateField) operand).unregister();
-	  }
+	    }*/
 
 	if (operand instanceof JstringField)
 	  {
@@ -1775,12 +1780,13 @@ class QueryRow implements ItemListener {
     panel.remove(boolChoice);
     panel.remove(compareChoice);
 
+    /*
     if (operand instanceof JdateField)
       {
 	// pop down a popped up calendar
-
 	((JdateField) operand).unregister();
       }
+    */
 
     panel.remove(operandContainer);
   }
@@ -1861,9 +1867,9 @@ class QueryRow implements ItemListener {
 	JfloatField floatField = (JfloatField) operand;
 	value = floatField.getValue(); // Double
       }
-    else if (operand instanceof JdateField)
+    else if (operand instanceof JdateField2)
       {
-	JdateField dateField = (JdateField) operand;
+	JdateField2 dateField = (JdateField2) operand;
 	value = dateField.getDate(); // java.util.Date
       }
     else if (operand instanceof JCheckBox)
