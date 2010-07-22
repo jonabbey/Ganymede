@@ -3792,6 +3792,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (objectHash != null)
       {
+    /*
 	en = objectHash.keys();
 
 	while (en.hasMoreElements())
@@ -3805,6 +3806,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		df.unregister();
 	      }
 	  }
+    */
 
 	objectHash.clear();
 	objectHash = null;

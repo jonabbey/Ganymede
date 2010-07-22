@@ -57,6 +57,7 @@ import java.awt.BorderLayout;
 import java.util.Date; 
   
 import javax.swing.UIManager;
+import javax.swing.JButton;
   
 import org.jdesktop.swingx.JXDatePicker; 
 import org.jdesktop.swingx.JXPanel; 
@@ -70,6 +71,10 @@ import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
 public class JdateField2 extends JXPanel
 {
   private JXDatePicker datePicker;       
+  private JButton _clearButton;
+
+  private boolean iseditable = true;
+
       
   public JdateField2()
   {
@@ -105,10 +110,42 @@ public class JdateField2 extends JXPanel
     monthView.setZoomable(true);
     
     add(datePicker, BorderLayout.CENTER);
+
   } 
   
   public Date getDate() { 
     return datePicker.getDate(); 
   } 
+
+  public void setDate(Date d) { 
+    datePicker.setDate(d); 
+  } 
+
+  // POSSIBLE MORE HERE.
+
+  /**
+   * May this field be edited?
+   */
+
+  public void setEditable(boolean editable)
+  {
+    //_date.setEditable(editable);
+    this.iseditable = editable;
+  }
+
+  /**
+   * Passes enabled to all components in the date field.
+   */
+
+  public void setEnabled(boolean enabled)
+  {
+    try
+      {
+	//_clearButton.setEnabled(enabled);
+	//_clearButton.setVisible(enabled);
+      }
+    catch (NullPointerException e) {}  // the buttons might still be null
+  }
+
 
 }
