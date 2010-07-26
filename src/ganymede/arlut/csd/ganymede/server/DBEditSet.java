@@ -806,11 +806,6 @@ public class DBEditSet {
 
     /* -- */
 
-    if (debug)
-      {
-	System.err.println("DBEditSet.rollback(): rollback key " + name);
-      }
-
     if (!interactive)
       {
 	// oops, we're non-interactive and we didn't actually do the
@@ -855,30 +850,11 @@ public class DBEditSet {
 
     for (DBCheckPointObj objck: point.objects)
       {
-	if (debug)
-	  {
-	    System.err.println("Object in transaction at checkpoint time: " + objck.invid.toString());
-
-	    System.err.println("Looking for object " + objck.invid.toString() + " in database");
-	  }
-
 	DBEditObject obj = findObject(objck.invid);
 
 	if (obj != null)
 	  {
-	    if (debug)
-	      {
-		System.err.println("Found object " + obj.toString() + ", rolling back fields");
-	      }
-
 	    obj.rollback(objck.fields);
-
-	    if (debug)
-	      {
-		System.err.println("Found object " + obj.toString() + ", rolling back status ");
-		System.err.println(obj.status + " to old status " + objck.status);
-	      }
-
 	    obj.status = objck.status;
 	  }
 	else
@@ -887,23 +863,6 @@ public class DBEditSet {
 	    // error or something.  Complain.
 
 	    throw new RuntimeException("DBEditSet.rollback error.. we lost checked out objects in midstream?");
-	  }
-      }
-
-    if (debug)
-      {
-	System.err.println("DBEditSet.rollback() At checkpoint:");
-
-	for (DBCheckPointObj ckp_obj: point.objects)
-	  {
-	    System.err.println(ckp_obj);
-	  }
-
-	System.err.println("\nDBEditSet.rollback() Now:");
-
-	for (DBEditObject obj: objects.values())
-	  {
-	    System.err.println(obj);
 	  }
       }
 
@@ -962,12 +921,6 @@ public class DBEditSet {
 	      }
 
 	    break;
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("DBEditSet.rollback(): dropping object " + obj.getLabel() + " (" +
-			       obj.getInvid().toString() + ")");
 	  }
       }
 
