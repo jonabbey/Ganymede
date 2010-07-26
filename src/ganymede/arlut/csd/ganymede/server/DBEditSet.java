@@ -426,11 +426,6 @@ public class DBEditSet {
 
   public synchronized boolean addObject(DBEditObject object)
   {
-    if (false)
-      {
-	System.err.println("DBEditSet adding " + object.getTypeName() + " " + object.getLabel());
-      }
-
     // if this transaction is in the middle of commit(), don't let the
     // programmer try to corrupt the transaction by adding new objects
     // to this transaction.  Gaurav, this means you. ;-)
