@@ -140,8 +140,6 @@ import arlut.csd.ganymede.common.SchemaConstants;
 
 public class DBEditSet {
 
-  static final boolean debug = false;
-
   /**
    * <p>TranslationService object for handling string localization in
    * the Ganymede server.</p>
@@ -646,11 +644,6 @@ public class DBEditSet {
 
   public synchronized void checkpoint(String name)
   {
-    if (debug)
-      {
-	System.err.println("DBEditSet.checkpoint(): checkpointing key " + name);
-      }
-
     // if we're not interactive, we'll disregard any checkpointing, in
     // favor of just failing the transaction at commit time if a
     // rollback is later attempted
@@ -732,11 +725,6 @@ public class DBEditSet {
     DBCheckPoint point = null;
 
     /* -- */
-
-    if (debug)
-      {
-	System.err.println("DBEditSet.popCheckpoint(): seeking to pop " + name);
-      }
 
     // if we're not an interactive transaction, we disregard all checkpoints
 
@@ -985,11 +973,6 @@ public class DBEditSet {
 
   public synchronized ReturnVal commit(String comment)
   {
-    if (debug)
-      {
-	System.err.println(session.key + ": DBEditSet.commit(): entering");
-      }
-
     if (objects == null)
       {
 	throw new RuntimeException(ts.l("global.already"));
@@ -1142,12 +1125,6 @@ public class DBEditSet {
       }
 
     // and try to lock the bases down.
-
-    if (debug)
-      {
-	System.err.println(session.key + ": DBEditSet.commit(): acquiring write lock");
-      }
-
     // There should be NO WAY we can have a non-null wLock at this point.
 
     if (wLock != null)
@@ -1855,21 +1832,10 @@ public class DBEditSet {
 	      }
 	  }
 
-	if (debug)
-	  {
-	    System.err.println("Logging event for " + eObj.getLabel());
-	  }
-
 	diff = eObj.diff(fieldsTouched);
 
 	if (diff != null)
 	  {
-	    if (debug)
-	      {
-		System.err.println("**** DIFF (" + eObj.getLabel() +
-				   "):" + diff + " : ENDDIFF****");
-	      }
-
 	    boolean logNormal = true;
 
 	    if (eObj.isEmbedded())
@@ -1942,11 +1908,6 @@ public class DBEditSet {
 	      }
 	  }
 
-	if (debug)
-	  {
-	    System.err.println("Logging event for " + eObj.getLabel());
-	  }
-
 	// We'll call diff() to update the fieldsTouched hashtable,
 	// but we won't use the string generated, since
 	// getPrintString() does a better job of describing the
@@ -1962,12 +1923,6 @@ public class DBEditSet {
 
 	if (diff != null)
 	  {
-	    if (debug)
-	      {
-		System.err.println("**** DIFF (" + eObj.getLabel() +
-				   "):" + diff + " : ENDDIFF****");
-	      }
-
 	    boolean logNormal = true;
 
 	    if (eObj.isEmbedded())
@@ -2051,11 +2006,6 @@ public class DBEditSet {
 		// So we'll ignore this here for the sake of getting
 		// the dangling embedded object properly flushed.
 	      }
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("Logging event for " + eObj.getLabel());
 	  }
 
 	String oldVals = null;
@@ -2491,11 +2441,6 @@ public class DBEditSet {
 
   private final void release()
   {
-    if (debug)
-      {
-	System.err.println("DBEditSet.release()");
-      }
-
     if (objects == null)
       {
 	throw new RuntimeException(ts.l("global.already"));
@@ -2620,11 +2565,6 @@ public class DBEditSet {
       {
 	session.releaseLock(wLock);
 	wLock = null;
-
-	if (debug)
-	  {
-	    System.err.println(session.key + ": DBEditSet.commit(): released write lock");
-	  }
       }
   }
 }
