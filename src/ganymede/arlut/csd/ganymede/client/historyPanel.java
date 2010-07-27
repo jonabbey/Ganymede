@@ -76,8 +76,7 @@ import javax.swing.border.TitledBorder;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JResetDateObject;
 import arlut.csd.JDataComponent.JSetValueObject;
-//import arlut.csd.JDataComponent.JdateField;
-import arlut.csd.JDataComponent.JdateField2;
+import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
@@ -112,7 +111,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   private JComboBox
     choiceBox;
 
-  private JdateField2
+  private JdateField
     startDateField;
 
   private JButton
@@ -213,7 +212,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     gbl.setConstraints(startLabel, gbc);
     buttonPanel.add(startLabel);
 
-    startDateField = new JdateField2(createdDate, createdDate, new Date());
+    startDateField = new JdateField(createdDate, true, true, createdDate, new Date());
     gbc.gridx = index++;
     gbl.setConstraints(startDateField, gbc);
     buttonPanel.add(startDateField);

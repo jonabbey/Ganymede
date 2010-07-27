@@ -47,20 +47,12 @@
 package arlut.csd.JDataComponent;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.Frame;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.SimpleTimeZone;
-import java.util.TimeZone;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -76,7 +68,6 @@ import arlut.csd.Util.TranslationService;
 import javax.swing.UIManager;
 
 import org.jdesktop.swingx.JXDatePicker; 
-import org.jdesktop.swingx.JXPanel; 
 import org.jdesktop.swingx.JXMonthView;
 import org.jdesktop.swingx.plaf.basic.SpinningCalendarHeaderHandler;
 import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
@@ -94,7 +85,6 @@ import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
  *
  */
 
-//public class JdateField extends JPanel implements JsetValueCallback, ActionListener {
 public class JdateField extends JPanel implements ActionListener {
 
   static final boolean debug = false;
@@ -128,15 +118,8 @@ public class JdateField extends JPanel implements ActionListener {
     maxDate,
     minDate;
 
-  private JButton 
-    _calendarButton, 
-    _clearButton;
+  private JButton _calendarButton;
 
-  protected TimeZone
-    _myTimeZone = (TimeZone)(SimpleTimeZone.getDefault());
-
-  // "MM/dd/yyyy"
-  private SimpleDateFormat _dateformat = new SimpleDateFormat(ts.l("init.date_format"));
 
   //////////////////
   // Constructors //
@@ -200,8 +183,6 @@ public class JdateField extends JPanel implements ActionListener {
 	System.err.println("JdateField(): date = " + date);
       }
 
-    this.iseditable = iseditable;
-
     if (date == null)
       {
 	my_date = original_date = null; 
@@ -211,7 +192,7 @@ public class JdateField extends JPanel implements ActionListener {
 	my_date = original_date = new Date(date.getTime());
       }
 
-    // Check limits of date, TODO merge with below.
+    // Check if the date is limited.
     if (islimited)
       {
 	if (minDate == null)
@@ -225,51 +206,15 @@ public class JdateField extends JPanel implements ActionListener {
 	  }
 
 	limited = true;
-
 	this.minDate = minDate;
 	this.maxDate = maxDate;
       }       
    
     setLayout(new BorderLayout());
     
-    // max date size: 04/45/1998
-
-
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
-
-
-
-    // TODO REMOVE BELOW SECTION
-    /*
-    _date1 = new JstringField(12, // make it a bit wider than needed
-		      10, iseditable, false, "1234567890/.",
-		      null, this);
-    add(_date1,"West");
-    */
-
-
-    // Todo make cal button to pullup new popup.
-    /*
-    Image img = PackageResources.getImageResource(this, 
-				  "calendar.gif", getClass());
-    Image img_dn = PackageResources.getImageResource(this, 
-				  "calendar_dn.gif", getClass());
-
-    _calendarButton = new JButton(new ImageIcon(img));
-    _calendarButton.setPressedIcon(new ImageIcon(img_dn));
-    _calendarButton.setFocusPainted(false);
-    _calendarButton.addActionListener(this);
-
-    buttonPanel.add(_calendarButton,"West");
-    */
-    // TODO REMOVE ABOVE AREA
-
-
-
-
-    // START James Test Area
 
     // Adds a year spinner to the MonthView object.
     UIManager.put(CalendarHeaderHandler.uiControllerID, 
@@ -285,30 +230,26 @@ public class JdateField extends JPanel implements ActionListener {
     JXMonthView monthView = datePicker.getMonthView();
     if (minDate != null) monthView.setLowerBound(minDate);
     if (maxDate != null) monthView.setUpperBound(maxDate);
-    monthView.setZoomable(true);
-    
-    buttonPanel.add(datePicker, "East");
-
-    // Todo add a callback here...
-
-    // END James Test Area
+    monthView.setZoomable(true);    
+    buttonPanel.add(datePicker, "West");
 
 
+    // Add a calendar icon to popup the widget.
+    // TODO MAKE CAL BUTTON TO PULLUP NEW POPUP.
+    Image img = PackageResources.getImageResource(this, "calendar.gif", getClass());
+    Image img_dn = PackageResources.getImageResource(this, "calendar_dn.gif", getClass());
+    _calendarButton = new JButton(new ImageIcon(img));
+    _calendarButton.setPressedIcon(new ImageIcon(img_dn));
+    _calendarButton.setFocusPainted(false);
+    _calendarButton.addActionListener(this);
+    if (iseditable) buttonPanel.add(_calendarButton,"Center");
 
-
-    // don't need the clear button if it is not editable
-    if (iseditable)
-      {
-	// "Clear"
-	_clearButton = new JButton(ts.l("init.clear_button"));
-	_clearButton.addActionListener(this);
-	
-	buttonPanel.add(_clearButton, "Center");
-      }
 
     add(buttonPanel, "East");
+    
+    //setEditable(iseditable);
 
-    setEditable(iseditable);
+    datePicker.setEnabled(iseditable);
 
     unset = true;
 
@@ -318,31 +259,6 @@ public class JdateField extends JPanel implements ActionListener {
     validate();
   }
 
-  /**
-   * Can be used to make the calendar popup button visible or not
-   * visible.
-   */
-
-  public void showCalButton(boolean b)
-  {
-    _calendarButton.setVisible(b);
-
-    invalidate();
-    validate();
-  }
-
-  /**
-   * Can be used to make the clear/reset date button visible or not
-   * visible.
-   */
-
-  public void showClearButton(boolean b)
-  {
-    _clearButton.setVisible(b);
-    
-    invalidate();
-    validate();
-  }
 
   // Called from the addActionListeners above.
   public void actionPerformed(ActionEvent e) 
@@ -352,13 +268,8 @@ public class JdateField extends JPanel implements ActionListener {
 
     /* -- */
 
-
-    System.err.println("Alert, calling actionperformed...");
-
     if (c == datePicker) 
       {
-	System.err.println("Alert, datepicker has changed...");
-
 	// The user has pressed Tab or clicked elsewhere which has caused the
 	// datePicker component to lose focus.  This means that we need to update
 	// the date value (using the value in datePicker) and then propagate that value
@@ -367,14 +278,13 @@ public class JdateField extends JPanel implements ActionListener {
 	Date d1 = datePicker.getDate();
 	setDate(d1);
 
-
 	// Now, the date value needs to be propagated up to the server	
 	if (allowCallback) 
 	  {
-	    retval = false;
-
 	    try 
 	      {
+	System.err.println("calling back to the server now!!!");
+
 		retval = callback.setValuePerformed(new JSetValueObject(this, d1));
 	      }
 	    catch (RemoteException ex)
@@ -398,70 +308,15 @@ public class JdateField extends JPanel implements ActionListener {
 		setDate(old_date, false);
 	      }
 	  }
-      }
-    
+      }    
     // TODO UNUSED CURRENTLY
     // Open up the calendar widget when clicked.
-    if (c == _calendarButton)
+    else if (c == _calendarButton)
       {
+	System.err.println("We have clicked the cal button");
+
 	/*
-	if (pCal == null)
-	  {
-	    pCal = new JpopUpCalendar(findFrame((Component) c), _myCalendar, this, iseditable);
-
-	    if (callback instanceof Component)
-	      {
-		pCal.setLocationRelativeTo((Component) callback); // center relative to parent component
-	      }
-	    else
-	      {
-		pCal.setLocationRelativeTo(null); // center relative to screen
-	      }
-	  }
-
-	if (pCal.isVisible())
-	  {
-	    pCal.setVisible(false);
-	  }
-	else
-	  {
-	    if (my_date == null)
-	      {
-		my_date = new Date();
-		_myCalendar.setTime(my_date);
-	      }
-
-	    pCal.setVisible(true);
-	  }
 	*/
-      }
-    // Clear out the date selected.
-    else if (c == _clearButton)
-      {
-	try 
-	  {
-	    if (callback != null)
-	      {
-		retval = callback.setValuePerformed(new JSetValueObject(this, null));
-	      }
-	    changed = false;
-	  }
-	catch (java.rmi.RemoteException re) 
-	  {
-	    // throw up an information dialog here
-
-	    // "Date Field Error"
-	    // "There was an error communicating with the server!\n{0}"
-	    
-	   new JErrorDialog(new JFrame(),
-			    ts.l("global.error_subj"),
-			    ts.l("global.error_text", re.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
-	  }
-
-	if (retval == true)
-	  {
-	    setDate(null);
-	  }
       }
   }
 
@@ -469,28 +324,13 @@ public class JdateField extends JPanel implements ActionListener {
    * May this field be edited?
    */
 
+  /*
   public void setEditable(boolean editable)
   {
     //_date1.setEditable(editable);  TODO add this to new var.
     this.iseditable = editable;
   }
-
-  /**
-   * Passes enabled to all components in the date field.
-   */
-
-  public void setEnabled(boolean enabled)
-  {
-    try
-      {  // these were already commented.
-	//_calendarButton.setEnabled(enabled);
-	//_calendarButton.setVisible(enabled);
-	_clearButton.setEnabled(enabled);
-	_clearButton.setVisible(enabled);
-	//_date1.setEnabled(enabled);  
-      }
-    catch (NullPointerException e) {}  // the buttons might still be null
-  }
+  */
 
   /**
    * returns the date associated with this JdateField
@@ -554,13 +394,14 @@ public class JdateField extends JPanel implements ActionListener {
 
   public void setCallback(JsetValueCallback callback)
   {
+    System.err.println("inside set callback to true now, debug");
+
     if (callback == null)
       {
-	throw new IllegalArgumentException("Invalid Parameter: callback is null");
+	return;
       }
     
-    this.callback = callback;
-    
+    this.callback = callback;    
     allowCallback = true;
   }
 
@@ -625,16 +466,5 @@ public class JdateField extends JPanel implements ActionListener {
       }
   }
 
-  private Frame findFrame(Component thing)
-  {
-    Component parent = thing.getParent();
-
-    while (parent != null && !(parent instanceof Frame))
-      {
-        parent = parent.getParent();
-      }
-
-    return (Frame) parent;
-  }
 }
 
