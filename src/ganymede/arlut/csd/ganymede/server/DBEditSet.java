@@ -140,8 +140,6 @@ import arlut.csd.ganymede.common.SchemaConstants;
 
 public class DBEditSet {
 
-  static final boolean debug = false;
-
   /**
    * <p>TranslationService object for handling string localization in
    * the Ganymede server.</p>
@@ -428,11 +426,6 @@ public class DBEditSet {
 
   public synchronized boolean addObject(DBEditObject object)
   {
-    if (false)
-      {
-	System.err.println("DBEditSet adding " + object.getTypeName() + " " + object.getLabel());
-      }
-
     // if this transaction is in the middle of commit(), don't let the
     // programmer try to corrupt the transaction by adding new objects
     // to this transaction.  Gaurav, this means you. ;-)
@@ -646,11 +639,6 @@ public class DBEditSet {
 
   public synchronized void checkpoint(String name)
   {
-    if (debug)
-      {
-	System.err.println("DBEditSet.checkpoint(): checkpointing key " + name);
-      }
-
     // if we're not interactive, we'll disregard any checkpointing, in
     // favor of just failing the transaction at commit time if a
     // rollback is later attempted
@@ -733,11 +721,6 @@ public class DBEditSet {
 
     /* -- */
 
-    if (debug)
-      {
-	System.err.println("DBEditSet.popCheckpoint(): seeking to pop " + name);
-      }
-
     // if we're not an interactive transaction, we disregard all checkpoints
 
     if (!interactive)
@@ -806,11 +789,6 @@ public class DBEditSet {
 
     /* -- */
 
-    if (debug)
-      {
-	System.err.println("DBEditSet.rollback(): rollback key " + name);
-      }
-
     if (!interactive)
       {
 	// oops, we're non-interactive and we didn't actually do the
@@ -855,30 +833,11 @@ public class DBEditSet {
 
     for (DBCheckPointObj objck: point.objects)
       {
-	if (debug)
-	  {
-	    System.err.println("Object in transaction at checkpoint time: " + objck.invid.toString());
-
-	    System.err.println("Looking for object " + objck.invid.toString() + " in database");
-	  }
-
 	DBEditObject obj = findObject(objck.invid);
 
 	if (obj != null)
 	  {
-	    if (debug)
-	      {
-		System.err.println("Found object " + obj.toString() + ", rolling back fields");
-	      }
-
 	    obj.rollback(objck.fields);
-
-	    if (debug)
-	      {
-		System.err.println("Found object " + obj.toString() + ", rolling back status ");
-		System.err.println(obj.status + " to old status " + objck.status);
-	      }
-
 	    obj.status = objck.status;
 	  }
 	else
@@ -887,23 +846,6 @@ public class DBEditSet {
 	    // error or something.  Complain.
 
 	    throw new RuntimeException("DBEditSet.rollback error.. we lost checked out objects in midstream?");
-	  }
-      }
-
-    if (debug)
-      {
-	System.err.println("DBEditSet.rollback() At checkpoint:");
-
-	for (DBCheckPointObj ckp_obj: point.objects)
-	  {
-	    System.err.println(ckp_obj);
-	  }
-
-	System.err.println("\nDBEditSet.rollback() Now:");
-
-	for (DBEditObject obj: objects.values())
-	  {
-	    System.err.println(obj);
 	  }
       }
 
@@ -962,12 +904,6 @@ public class DBEditSet {
 	      }
 
 	    break;
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("DBEditSet.rollback(): dropping object " + obj.getLabel() + " (" +
-			       obj.getInvid().toString() + ")");
 	  }
       }
 
@@ -1032,11 +968,6 @@ public class DBEditSet {
 
   public synchronized ReturnVal commit(String comment)
   {
-    if (debug)
-      {
-	System.err.println(session.key + ": DBEditSet.commit(): entering");
-      }
-
     if (objects == null)
       {
 	throw new RuntimeException(ts.l("global.already"));
@@ -1189,12 +1120,6 @@ public class DBEditSet {
       }
 
     // and try to lock the bases down.
-
-    if (debug)
-      {
-	System.err.println(session.key + ": DBEditSet.commit(): acquiring write lock");
-      }
-
     // There should be NO WAY we can have a non-null wLock at this point.
 
     if (wLock != null)
@@ -1902,21 +1827,10 @@ public class DBEditSet {
 	      }
 	  }
 
-	if (debug)
-	  {
-	    System.err.println("Logging event for " + eObj.getLabel());
-	  }
-
 	diff = eObj.diff(fieldsTouched);
 
 	if (diff != null)
 	  {
-	    if (debug)
-	      {
-		System.err.println("**** DIFF (" + eObj.getLabel() +
-				   "):" + diff + " : ENDDIFF****");
-	      }
-
 	    boolean logNormal = true;
 
 	    if (eObj.isEmbedded())
@@ -1989,11 +1903,6 @@ public class DBEditSet {
 	      }
 	  }
 
-	if (debug)
-	  {
-	    System.err.println("Logging event for " + eObj.getLabel());
-	  }
-
 	// We'll call diff() to update the fieldsTouched hashtable,
 	// but we won't use the string generated, since
 	// getPrintString() does a better job of describing the
@@ -2009,12 +1918,6 @@ public class DBEditSet {
 
 	if (diff != null)
 	  {
-	    if (debug)
-	      {
-		System.err.println("**** DIFF (" + eObj.getLabel() +
-				   "):" + diff + " : ENDDIFF****");
-	      }
-
 	    boolean logNormal = true;
 
 	    if (eObj.isEmbedded())
@@ -2098,11 +2001,6 @@ public class DBEditSet {
 		// So we'll ignore this here for the sake of getting
 		// the dangling embedded object properly flushed.
 	      }
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("Logging event for " + eObj.getLabel());
 	  }
 
 	String oldVals = null;
@@ -2538,11 +2436,6 @@ public class DBEditSet {
 
   private final void release()
   {
-    if (debug)
-      {
-	System.err.println("DBEditSet.release()");
-      }
-
     if (objects == null)
       {
 	throw new RuntimeException(ts.l("global.already"));
@@ -2667,11 +2560,6 @@ public class DBEditSet {
       {
 	session.releaseLock(wLock);
 	wLock = null;
-
-	if (debug)
-	  {
-	    System.err.println(session.key + ": DBEditSet.commit(): released write lock");
-	  }
       }
   }
 }
