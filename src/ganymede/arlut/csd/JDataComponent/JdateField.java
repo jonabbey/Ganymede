@@ -67,11 +67,14 @@ import arlut.csd.Util.TranslationService;
 // James ADDS
 import javax.swing.UIManager;
 
-import org.jdesktop.swingx.JXDatePicker; 
+//import org.jdesktop.swingx.JXDatePicker; 
 import org.jdesktop.swingx.JXMonthView;
 import org.jdesktop.swingx.plaf.basic.SpinningCalendarHeaderHandler;
 import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
 
+//test
+import java.awt.event.FocusListener;
+import javax.swing.JFormattedTextField;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -85,7 +88,7 @@ import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
  *
  */
 
-public class JdateField extends JPanel implements ActionListener {
+public class JdateField extends JPanel implements ActionListener, FocusListener {
 
   static final boolean debug = false;
 
@@ -251,6 +254,10 @@ public class JdateField extends JPanel implements ActionListener {
 
     datePicker.setEnabled(iseditable);
 
+
+    JFormattedTextField textf = datePicker.getEditor();
+    textf.addFocusListener(this);
+
     unset = true;
 
     setDate(my_date);
@@ -259,55 +266,34 @@ public class JdateField extends JPanel implements ActionListener {
     validate();
   }
 
+  public void focusLost(FocusEvent e) 
+  {
+    System.out.println("Focus lost");
+
+    String d1 = datePicker.getEditor().getValue().toString();
+    
+
+    System.out.println("date curr:");
+    System.out.println(d1);
+
+    datePickerFocusLost();
+  }
+
+  public void focusGained(FocusEvent e) 
+  {
+    // nothing.
+  }
 
   // Called from the addActionListeners above.
   public void actionPerformed(ActionEvent e) 
   {
-    boolean retval = false;
     Object c = e.getSource();
 
     /* -- */
 
     if (c == datePicker) 
       {
-	// The user has pressed Tab or clicked elsewhere which has caused the
-	// datePicker component to lose focus.  This means that we need to update
-	// the date value (using the value in datePicker) and then propagate that value
-	// up to the server object.
-	
-	Date d1 = datePicker.getDate();
-	setDate(d1);
-
-	// Now, the date value needs to be propagated up to the server	
-	if (allowCallback) 
-	  {
-	    try 
-	      {
-	System.err.println("calling back to the server now!!!");
-
-		retval = callback.setValuePerformed(new JSetValueObject(this, d1));
-	      }
-	    catch (RemoteException ex)
-	      {
-		// throw up an information dialog here
-
-		// "Date Field Error"
-		// "There was an error communicating with the server!\n{0}"
-		new JErrorDialog(new JFrame(),
-				 ts.l("global.error_subj"),
-				 ts.l("global.error_text", ex.getMessage()), 
-				 StandardDialog.ModalityType.DOCUMENT_MODAL);
-	      }
-
-	    // if setValuePerformed() didn't work, revert the date,
-	    // otherwise do nothing and we'll let ourselves show a
-	    // refreshed value if the server requested us to refresh
-	    // ourselves during the processing of setValuePerformed().
-	    if (!retval)
-	      {
-		setDate(old_date, false);
-	      }
-	  }
+	datePickerFocusLost();
       }    
     // TODO UNUSED CURRENTLY
     // Open up the calendar widget when clicked.
@@ -320,6 +306,56 @@ public class JdateField extends JPanel implements ActionListener {
       }
   }
 
+
+  public void datePickerFocusLost()
+  {
+    // The user has pressed Tab or clicked elsewhere which has caused the
+    // datePicker component to lose focus.  This means that we need to update
+    // the date value (using the value in datePicker) and then propagate that value
+    // up to the server object.
+    
+    Date d1 = datePicker.getDate();
+    setDate(d1);
+
+    System.err.println(d1.toString());
+    
+    // Now, the date value needs to be propagated up to the server	
+    if (allowCallback) 
+      {
+	boolean retval = false;
+
+	try 
+	  {
+	    System.err.println("calling back to the server now!!!");
+	    
+	    retval = callback.setValuePerformed(new JSetValueObject(this, d1));
+
+	    System.out.println("retval was ");
+	    System.out.println(retval);
+	  }
+	catch (RemoteException ex)
+	  {
+	    // throw up an information dialog here
+	    
+	    // "Date Field Error"
+	    // "There was an error communicating with the server!\n{0}"
+	    new JErrorDialog(new JFrame(),
+			     ts.l("global.error_subj"),
+			     ts.l("global.error_text", ex.getMessage()), 
+			     StandardDialog.ModalityType.DOCUMENT_MODAL);
+	  }
+	
+	// if setValuePerformed() didn't work, revert the date,
+	// otherwise do nothing and we'll let ourselves show a
+	    // refreshed value if the server requested us to refresh
+	    // ourselves during the processing of setValuePerformed().
+	if (!retval)
+	  {
+	    setDate(old_date, false);
+	  }
+      }
+  }  
+  
   /**
    * May this field be edited?
    */
