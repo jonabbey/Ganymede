@@ -143,6 +143,7 @@ public final class XMLTransmitter implements FileTransmitter {
 	      // nothing we can productively do here, go
 	      // ahead and show it for debug purposes
 	      
+	      // "XML remote data/schema dump hit EOF.. client disconnected"
 	      System.err.println(ts.l("init.eof"));
 	    }
 	}}, ts.l("init.threadname")); // "Ganymede XMLSession Schema/Data Dump Thread"
@@ -233,6 +234,7 @@ public final class XMLTransmitter implements FileTransmitter {
 		    }
 		}
 
+	      // "XML remote data/schema dump hit EOF.. client disconnected"
 	      System.err.println(ts.l("init.eof"));
 	    }
 	  finally
