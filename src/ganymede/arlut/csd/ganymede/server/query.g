@@ -10,9 +10,9 @@
 
    Module By: Deepak Giridharagopal, deepak@brownman.org
    -----------------------------------------------------------------------
-    
+
    Ganymede Directory Management System
-   
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -46,26 +46,29 @@
 
 */
 
-header {
+grammar query;
+
+options {
+  output=AST;
+}
+
+@header {
 package arlut.csd.ganymede.server;
 }
 
-class QueryParser extends Parser;
-options { buildAST=true; }
-
-query : 
+query :
        select_clause
        from_clause
-       (where_clause)?
+       where_clause?
        EOF!
        ;
 
-select_clause: 
+select_clause:
        SELECT^ (OBJECT | (STRING_VALUE (COMMA! STRING_VALUE)*))
        ;
 
 from_clause:
-       FROM^ (EDITABLE)? STRING_VALUE
+       FROM^ EDITABLE? STRING_VALUE
        ;
 
 where_clause:
@@ -86,48 +89,41 @@ atom:
 simple_expression:
        STRING_VALUE (UNARY_OPERATOR^ | (BINARY_OPERATOR^ argument))
        ;
-       
+
 deref_expression:
        STRING_VALUE DEREF^ atom
        ;
- 
+
 argument:
-       STRING_VALUE 
+       STRING_VALUE
        | INT_VALUE
        | DECIMAL_VALUE
        | BOOLEAN_VALUE
        ;
 
-class QueryLexer extends Lexer;
-
-options {
-  k=10;                               // needed for some of our long op names
-  caseSensitive=false;
-  caseSensitiveLiterals=false;
-  charVocabulary='\u0000'..'\u007F';  // allow ascii
-}
+/* Lexer section */
 
 BACKSLASH: '\\';
 
-protected ESC : BACKSLASH 
+fragment ESC : BACKSLASH
   ( 'n'  { $setText("\n"); }
   | '"'  { $setText("\""); }
   | '\'' { $setText("'");  }
   | BACKSLASH
   );
 
-LPAREN : '(' ;
-RPAREN : ')' ;
-COMMA  : ',' ;
-AND    : "and";
-OR     : "or";
-NOT    : "not";
-SELECT : "select" ;
-FROM   : "from" ;
-WHERE  : "where" ;
-DEREF  : "->" ;
-OBJECT : "object";
-EDITABLE : "editable";
+LPAREN : '(';
+RPAREN : ')';
+COMMA  : ',';
+AND    : 'and';
+OR     : 'or';
+NOT    : 'not';
+SELECT : 'select';
+FROM   : 'from';
+WHERE  : 'where';
+DEREF  : '->';
+OBJECT : 'object';
+EDITABLE : 'editable';
 
 STRING_VALUE :
         '"' (options {greedy=false;}: (ESC)=> ESC | BACKSLASH | ~'"' )* '"'  |
@@ -135,43 +131,43 @@ STRING_VALUE :
         ;
 
 BOOLEAN_VALUE :
-         "true"
-         | "false"
+         'true'
+         | 'false'
          ;
 
-protected DIGIT : ('0'..'9') ;
-protected INT_VALUE : ('-')? (DIGIT)+ ;
-protected DECIMAL_VALUE : INT_VALUE ('.' (DIGIT)+)? ;
+fragment DIGIT : ('0'..'9') ;
+fragment INT_VALUE : '-'? DIGIT+;
+fragment DECIMAL_VALUE : INT_VALUE ('.' DIGIT+)? ;
 
-NUMERIC_ARG 
-        : ( INT_VALUE '.' ) => DECIMAL_VALUE { $setType(DECIMAL_VALUE); }
-        | INT_VALUE { $setType(INT_VALUE); }
+NUMERIC_ARG
+        : ( INT_VALUE '.' ) => DECIMAL_VALUE { $type = DECIMAL_VALUE; }
+        | INT_VALUE { $type =INT_VALUE; }
         ;
 
-UNARY_OPERATOR : "defined" ;
-         
-BINARY_OPERATOR 
-             : "=~"
-             | "=~_ci"
-             | "=="
-             | "==_ci"
-             | "<"
-             | "<="
-             | ">"
-             | ">="
-             | "starts"
-             | "ends"
-             | "len<"
-             | "len<="
-             | "len>"
-             | "len>="
-             | "len=="
+UNARY_OPERATOR : 'defined' ;
+
+BINARY_OPERATOR
+             : '=~'
+             | '=~_ci'
+             | '=='
+             | '==_ci'
+             | '<'
+             | '<='
+             | '>'
+             | '>='
+             | 'starts'
+             | 'ends'
+             | 'len<'
+             | 'len<='
+             | 'len>'
+             | 'len>='
+             | 'len=='
              ;
 
 WS    : ( ' '
         | '\t'
         | '\r' '\n'
         | '\n'
-        ) 
-        {$setType(Token.SKIP);}
-      ;    
+        )
+        {$channel = HIDDEN;}
+      ;
