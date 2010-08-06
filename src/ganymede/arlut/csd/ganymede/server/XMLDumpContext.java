@@ -69,12 +69,21 @@ import java.io.IOException;
 public class XMLDumpContext {
 
   /**
+   * If true, the Ganymede server thread using this XMLDumpContext
+   * will include password hash information to the emitted XML file.
+   *
+   * If false, no password hash data will be emitted at all.
+   */
+
+  private boolean dumpPasswordHashes;
+
+  /**
    * If true, the Ganymede server thread using this
    * XMLDumpContext will include plaintext passwords
    * to the emitted XML file whenever possible
    */
 
-  boolean dumpPlaintextPasswords;
+  private boolean dumpPlaintextPasswords;
 
   /**
    * If true, the Ganymede server thread using this
@@ -83,7 +92,7 @@ public class XMLDumpContext {
    * file.
    */
 
-  boolean dumpCreatorModifierInfo;
+  private boolean dumpCreatorModifierInfo;
 
   /**
    * If non-null, this SyncRunner will be consulted to answer the
@@ -510,6 +519,29 @@ public class XMLDumpContext {
   public void skipLine() throws IOException
   {
     XMLUtils.indent(xmlOut, 0);
+  }
+
+  /**
+   * Sets whether an XML Query being processed by this XMLDumpContext
+   * should allow password field hashes to be transmitted.
+   *
+   * Will be set to false by the XMLTransmitter constructor if the
+   * controlling GanymedeSession is not supergash.
+   */
+
+  public void setDumpPasswords(boolean allowHashes)
+  {
+    dumpPasswordHashes = allowHashes;
+  }
+
+  /**
+   * Returns true if this XMLDumpContext is configured to dump
+   * password information of any kind (i.e., password hashes)
+   */
+
+  public boolean doDumpPasswords()
+  {
+    return dumpPasswordHashes;
   }
 
   /**

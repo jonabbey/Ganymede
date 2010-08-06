@@ -963,6 +963,18 @@ public class PasswordDBField extends DBField implements pass_field {
       }
 
     dump.startElement("password");
+
+    if (!dump.doDumpPasswords())
+      {
+	dump.endElement("password");
+
+	if (writeSurroundContext)
+	  {
+	    dump.endElement(this.getXMLName());
+	  }
+
+	return;
+      }
     
     if (uncryptedPass != null && 
 	(dump.doDumpPlaintext() ||
