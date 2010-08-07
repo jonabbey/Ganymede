@@ -49,7 +49,9 @@
 grammar query;
 
 options {
+  language=Java;
   output=AST;
+  backtrack=true;
 }
 
 @header {
@@ -64,11 +66,11 @@ query :
        ;
 
 select_clause:
-       SELECT^ (OBJECT | (STRING_VALUE (COMMA! STRING_VALUE)*))
+       SELECT^ (OBJECT | (token (COMMA! token)*))
        ;
 
 from_clause:
-       FROM^ EDITABLE? STRING_VALUE
+       FROM^ EDITABLE? token
        ;
 
 where_clause:
@@ -82,35 +84,41 @@ expression:
 atom:
        LPAREN! expression RPAREN!
        | NOT^ atom
-       | (STRING_VALUE (UNARY_OPERATOR | BINARY_OPERATOR)) => simple_expression
-       | (STRING_VALUE DEREF) => deref_expression
+       | (token (UNARY_OPERATOR | BINARY_OPERATOR)) => simple_expression
+       | (token DEREF) => deref_expression
        ;
 
 simple_expression:
-       STRING_VALUE (UNARY_OPERATOR^ | (BINARY_OPERATOR^ argument))
+       token (UNARY_OPERATOR^ | (BINARY_OPERATOR^ argument))
        ;
 
 deref_expression:
-       STRING_VALUE DEREF^ atom
+       token DEREF^ atom
        ;
 
-argument:
-       STRING_VALUE
-       | INT_VALUE
-       | DECIMAL_VALUE
-       | BOOLEAN_VALUE
-       ;
+argument
+  : STRING_VALUE
+  | INT_VALUE
+  | DECIMAL_VALUE
+  | BOOLEAN_VALUE
+  ;
+
+token
+  : TOKEN_START_CHAR (TOKEN_START_CHAR | DIGIT)*
+  | STRING_VALUE
+  ;
 
 /* Lexer section */
 
 BACKSLASH: '\\';
 
-fragment ESC : BACKSLASH
-  ( 'n'  { $setText("\n"); }
-  | '"'  { $setText("\""); }
-  | '\'' { $setText("'");  }
+ESC : BACKSLASH
+  ( 'n'  { this.setText("\n"); }
+  | '"'  { this.setText("\""); }
+  | '\'' { this.setText("'");  }
   | BACKSLASH
   );
+
 
 LPAREN : '(';
 RPAREN : ')';
@@ -125,49 +133,76 @@ DEREF  : '->';
 OBJECT : 'object';
 EDITABLE : 'editable';
 
-STRING_VALUE :
-        '"' (options {greedy=false;}: (ESC)=> ESC | BACKSLASH | ~'"' )* '"'  |
-        '\'' (options {greedy=false;}: (ESC)=> ESC | BACKSLASH | ~'\'' )* '\''
-        ;
+BOOLEAN_VALUE
+  : 'true'
+  | 'false'
+  ;
 
-BOOLEAN_VALUE :
-         'true'
-         | 'false'
-         ;
+UNARY_OPERATOR
+  : 'defined'
+  ;
 
-fragment DIGIT : ('0'..'9') ;
-fragment INT_VALUE : '-'? DIGIT+;
-fragment DECIMAL_VALUE : INT_VALUE ('.' DIGIT+)? ;
+fragment TOKEN_START_CHAR
+  : 'A'..'Z'
+  | 'a'..'z'
+/*  |'\u0080'..'\u009F'// NO NO_BREAK SPACE
+  |'\u00A1'..'\u167F'// NO OGHAM SPACE MARK
+  |'\u1681'..'\u180D'// NO MONGOLIAN VOWEL SEPARATOR
+  |'\u180F'..'\u1FFF'// NO EN QUAD, EM QUAD, EN SPACE, THREE_PER_EM SPACE, FOUR_PER_EM SPACE, SIX_PER_EM SPACE
+  |'\u2007' // NO PUNCTUATION SPACE, THIN SPACE, HAIR SPACE
+  |'\u200B'..'\u202E'// NO NARROW NO_BREAK SPACE
+  |'\u2030'..'\u205E'// NO MEDIUM MATHEMATICAL SPACE
+  |'\u2060'..'\u2FFF'// NO IDEOGRAPHIC SPACE
+  |'\u3001'..'\uD7FF'
+  |'\uE000'..'\uFFFE' */
+  ;
+
+STRING_VALUE
+options {greedy=false;} 
+  : '"' ((ESC)=> ESC | ~'"' )* '"' 
+  | '\'' ((ESC)=> ESC | ~'\'' )* '\''
+  ;
+
+DIGIT
+  : ('0'..'9')
+  ;
+
+INT_VALUE
+  : '-'? DIGIT+
+  ;
+
+fragment DECIMAL_VALUE
+  : INT_VALUE ('.' DIGIT+)?
+  ;
 
 NUMERIC_ARG
-        : ( INT_VALUE '.' ) => DECIMAL_VALUE { $type = DECIMAL_VALUE; }
-        | INT_VALUE { $type =INT_VALUE; }
-        ;
-
-UNARY_OPERATOR : 'defined' ;
+  : ( INT_VALUE '.' ) => DECIMAL_VALUE { $type = DECIMAL_VALUE; }
+  | INT_VALUE { $type =INT_VALUE; }
+  ;
 
 BINARY_OPERATOR
-             : '=~'
-             | '=~_ci'
-             | '=='
-             | '==_ci'
-             | '<'
-             | '<='
-             | '>'
-             | '>='
-             | 'starts'
-             | 'ends'
-             | 'len<'
-             | 'len<='
-             | 'len>'
-             | 'len>='
-             | 'len=='
-             ;
+  : '=~'
+  | '=~_ci'
+  | '=='
+  | '==_ci'
+  | '<'
+  | '<='
+  | '>'
+  | '>='
+  | 'starts'
+  | 'ends'
+  | 'len<'
+  | 'len<='
+  | 'len>'
+  | 'len>='
+  | 'len=='
+  ;
 
-WS    : ( ' '
-        | '\t'
-        | '\r' '\n'
-        | '\n'
-        )
-        {$channel = HIDDEN;}
-      ;
+WS
+  : ( ' '
+    | '\t'
+    | '\r' '\n'
+    | '\n'
+    )
+    {$channel = HIDDEN;}
+  ;
