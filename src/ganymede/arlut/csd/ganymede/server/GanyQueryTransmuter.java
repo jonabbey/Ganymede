@@ -68,7 +68,7 @@ import arlut.csd.Util.TranslationService;
 
 import org.antlr.runtime.RecognitionException;
 
-import org.antlr.runtime.tree.Tree;
+import org.antlr.runtime.tree.CommonTree;
 
 import java.io.StringReader;
 
@@ -155,7 +155,7 @@ public class GanyQueryTransmuter {
   ArrayList selectFields = null;
   boolean editableFilter = false;
   String myQueryString = null;
-  Tree myQueryTree = null;
+  CommonTree myQueryTree = null;
 
   public GanyQueryTransmuter()
   {
@@ -177,7 +177,7 @@ public class GanyQueryTransmuter {
 	
       }
 
-    myQueryTree = parser.getAST();
+    myQueryTree = (CommonTree) parser.getTree();
 
     if (myQueryTree == null)
       {
@@ -194,7 +194,7 @@ public class GanyQueryTransmuter {
     catch (RuntimeException ex)
       {
 	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	String mesg = ts.l("global.parse_exception", ex.getMessage(), queryString, myQueryTree.toStringList());
+	String mesg = ts.l("global.parse_exception", ex.getMessage(), queryString, myQueryTree.toStringTree());
 	throw new RuntimeException(mesg, ex);
       }
 
@@ -228,16 +228,16 @@ public class GanyQueryTransmuter {
     return query;
   }
 
-  private QueryNode parse_tree(Tree ast) throws GanyParseException
+  private QueryNode parse_tree(CommonTree ast) throws GanyParseException
   {
     this.objectBase = parse_from_tree(ast.getNextSibling());
     this.selectFields = parse_select_tree(ast);
 
-    Tree whereTokenNode = ast.getNextSibling().getNextSibling();
+    CommonTree whereTokenNode = ast.getNextSibling().getNextSibling();
 
     if (whereTokenNode != null && whereTokenNode.getType() == QueryParser.WHERE)
       {
-	Tree where_node = ast.getNextSibling().getNextSibling().getFirstChild();
+	CommonTree where_node = ast.getNextSibling().getNextSibling().getFirstChild();
 
 	if (where_node != null)
 	  {
@@ -250,16 +250,16 @@ public class GanyQueryTransmuter {
     return null;
   }
 
-  private DBObjectBase parse_from_tree(Tree ast) throws GanyParseException
+  private DBObjectBase parse_from_tree(CommonTree ast) throws GanyParseException
   {
     String from_objectbase = null;
-    Tree node = ast.getFirstChild();
+    CommonTree node = ast.getFirstChild();
 
     if (node == null)		// the grammar _should_ prevent this
       {
 	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
 	// "Missing from clause."
-	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.missing_from"), myQueryString, myQueryTree.toStringList()));
+	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.missing_from"), myQueryString, myQueryTree.toStringTree()));
       }
 
     while (node != null)
@@ -280,7 +280,7 @@ public class GanyQueryTransmuter {
       {
 	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
 	// "From clause does not contain an object type to search."
-	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.no_objectbase"), myQueryString, myQueryTree.toStringList()));
+	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.no_objectbase"), myQueryString, myQueryTree.toStringTree()));
       }
 
     this.objectBase = Ganymede.db.getObjectBase(from_objectbase);
@@ -291,16 +291,16 @@ public class GanyQueryTransmuter {
 	// "The object type "{0}" in the query''s from clause does not exist."
 	throw new GanyParseException(ts.l("global.parse_exception", 
 					  ts.l("parse_from_tree.bad_objectbase", from_objectbase),
-					  myQueryString, myQueryTree.toStringList()));
+					  myQueryString, myQueryTree.toStringTree()));
       }
 
     return this.objectBase;
   }
 
-  private ArrayList parse_select_tree(Tree ast) throws GanyParseException
+  private ArrayList parse_select_tree(CommonTree ast) throws GanyParseException
   {
     ArrayList selectFields = new ArrayList();
-    Tree select_node = ast.getFirstChild();
+    CommonTree select_node = ast.getFirstChild();
 
     if (select_node.getType() == QueryParser.OBJECT)
       {
@@ -319,7 +319,7 @@ public class GanyQueryTransmuter {
 	    throw new GanyParseException(ts.l("global.parse_exception",
 					      ts.l("global.no_such_field", field_name, objectBase.getName()),
 					      myQueryString,
-					      myQueryTree.toStringList()));
+					      myQueryTree.toStringTree()));
 	  }
 
 	selectFields.add(field);
@@ -329,7 +329,7 @@ public class GanyQueryTransmuter {
     return selectFields;
   }
 
-  private QueryNode parse_where_clause(Tree ast, DBObjectBase base) throws GanyParseException
+  private QueryNode parse_where_clause(CommonTree ast, DBObjectBase base) throws GanyParseException
   {
     int root_type;
     QueryNode child1 = null, child2 = null;
@@ -340,7 +340,7 @@ public class GanyQueryTransmuter {
     int field_type = -1, argument_type = -1;
     String op;
     Object argument;
-    Tree field_node, argument_node;
+    CommonTree field_node, argument_node;
     
     /* -- */
 
@@ -375,7 +375,7 @@ public class GanyQueryTransmuter {
 		throw new GanyParseException(ts.l("global.parse_exception",
 						  ts.l("global.no_such_field", field_name, base.getName()),
 						  myQueryString,
-						  myQueryTree.toStringList()));
+						  myQueryTree.toStringTree()));
 	      }
 	    
 	    if (field.getType() != FieldType.INVID)
@@ -385,7 +385,7 @@ public class GanyQueryTransmuter {
 		throw new GanyParseException(ts.l("global.parse_exception",
 						  ts.l("parse_where_clause.not_invid", field_name),
 						  myQueryString,
-						  myQueryTree.toStringList()));
+						  myQueryTree.toStringTree()));
 	      }
 
 	    short target_objectbase_id = field.getTargetBase();
@@ -430,7 +430,7 @@ public class GanyQueryTransmuter {
 		throw new GanyParseException(ts.l("global.parse_exception",
 						  ts.l("global.no_such_field", field_name, base.getName()),
 						  myQueryString,
-						  myQueryTree.toStringList()));
+						  myQueryTree.toStringTree()));
 	      }
 
 	    field_type = field.getType();
@@ -478,7 +478,7 @@ public class GanyQueryTransmuter {
 		throw new GanyParseException(ts.l("global.parse_exception",
 						  ts.l("parse_where_clause.mystery_operator", op),
 						  myQueryString,
-						  myQueryTree.toStringList()));
+						  myQueryTree.toStringTree()));
               }
           }
         else
@@ -505,7 +505,7 @@ public class GanyQueryTransmuter {
 		    throw new GanyParseException(ts.l("global.parse_exception",
 						      ts.l("parse_where_clause.mystery_operator", op),
 						      myQueryString,
-						      myQueryTree.toStringList()));
+						      myQueryTree.toStringTree()));
                   }
               }
             else
@@ -526,7 +526,7 @@ public class GanyQueryTransmuter {
 	    throw new GanyParseException(ts.l("global.parse_exception",
 					      ts.l("parse_where_clause.bad_operator", op, base.getName(), field_name, field.getTypeDesc()),
 					      myQueryString,
-					      myQueryTree.toStringList()));
+					      myQueryTree.toStringTree()));
 	  }
 
 	return new QueryDataNode(field_name, scalar_operator, vector_operator, argument);
@@ -538,7 +538,7 @@ public class GanyQueryTransmuter {
 	throw new GanyParseException(ts.l("global.parse_exception",
 					  ts.l("parse_where_clause.bad_type", Integer.valueOf(root_type)),
 					  myQueryString,
-					  myQueryTree.toStringList()));
+					  myQueryTree.toStringTree()));
       }
   }
 
@@ -584,7 +584,7 @@ public class GanyQueryTransmuter {
 	    throw new GanyParseException(ts.l("global.parse_exception",
 					      ts.l("parse_argument.unrecognized_argument", Integer.valueOf(argument)),
 					      myQueryString,
-					      myQueryTree.toStringList()));
+					      myQueryTree.toStringTree()));
 	  }
       }
 
@@ -636,7 +636,7 @@ public class GanyQueryTransmuter {
 		throw new GanyParseException(ts.l("global.parse_exception",
 						  ts.l("parse_argument.bad_date", argument),
 						  myQueryString,
-						  myQueryTree.toStringList()));
+						  myQueryTree.toStringTree()));
 	      }
 	  }
       }
@@ -646,6 +646,6 @@ public class GanyQueryTransmuter {
     throw new GanyParseException(ts.l("global.parse_exception",
 				      ts.l("parse_argument.bad_argument_type", field.getName(), field.getTypeDesc()),
 				      myQueryString,
-				      myQueryTree.toStringList()));
+				      myQueryTree.toStringTree()));
   }
 }

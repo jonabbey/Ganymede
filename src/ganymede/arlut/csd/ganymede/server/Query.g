@@ -51,6 +51,7 @@ grammar Query;
 options {
   language=Java;
   output=AST;
+  ASTLabelType=CommonTree;
 }
 
 @header {

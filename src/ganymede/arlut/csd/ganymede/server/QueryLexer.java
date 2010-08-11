@@ -1,6 +1,6 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-10 20:52:04
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-10 21:07:35
 
-package arlut.csd.ganymede.server; // had to add this by hand, ANTLR didn't insert this properly.
+package arlut.csd.ganymede.server; // had to be added by hand, ANTLR didn't insert this as expected
 
 import org.antlr.runtime.*;
 import java.util.Stack;
@@ -54,8 +54,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = BACKSLASH;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:113:10: ( '\\\\' )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:113:12: '\\\\'
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:114:10: ( '\\\\' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:114:12: '\\\\'
             {
             match('\\'); if (state.failed) return ;
 
@@ -74,8 +74,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:114:8: ( '(' )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:114:10: '('
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:115:8: ( '(' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:115:10: '('
             {
             match('('); if (state.failed) return ;
 
@@ -94,8 +94,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:115:8: ( ')' )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:115:10: ')'
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:116:8: ( ')' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:116:10: ')'
             {
             match(')'); if (state.failed) return ;
 
@@ -114,8 +114,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:116:8: ( ',' )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:116:10: ','
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:117:8: ( ',' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:117:10: ','
             {
             match(','); if (state.failed) return ;
 
@@ -134,8 +134,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = DEREF;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:117:8: ( '->' )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:117:10: '->'
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:118:8: ( '->' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:118:10: '->'
             {
             match("->"); if (state.failed) return ;
 
@@ -155,8 +155,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = AND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:118:8: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:118:10: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:119:8: ( ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:119:10: ( 'A' | 'a' ) ( 'N' | 'n' ) ( 'D' | 'd' )
             {
             if ( input.LA(1)=='A'||input.LA(1)=='a' ) {
                 input.consume();
@@ -204,8 +204,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = OR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:119:8: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:119:10: ( 'O' | 'o' ) ( 'R' | 'r' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:120:8: ( ( 'O' | 'o' ) ( 'R' | 'r' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:120:10: ( 'O' | 'o' ) ( 'R' | 'r' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -243,8 +243,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = NOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:120:8: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:120:10: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:121:8: ( ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:121:10: ( 'N' | 'n' ) ( 'O' | 'o' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='N'||input.LA(1)=='n' ) {
                 input.consume();
@@ -292,8 +292,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = SELECT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:121:8: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:121:10: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:122:8: ( ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:122:10: ( 'S' | 's' ) ( 'E' | 'e' ) ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                 input.consume();
@@ -371,8 +371,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = FROM;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:122:8: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:122:10: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:123:8: ( ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:123:10: ( 'F' | 'f' ) ( 'R' | 'r' ) ( 'O' | 'o' ) ( 'M' | 'm' )
             {
             if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                 input.consume();
@@ -430,8 +430,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = WHERE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:123:8: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:123:10: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:124:8: ( ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:124:10: ( 'W' | 'w' ) ( 'H' | 'h' ) ( 'E' | 'e' ) ( 'R' | 'r' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='W'||input.LA(1)=='w' ) {
                 input.consume();
@@ -499,8 +499,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = OBJECT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:124:8: ( ( 'O' | 'o' ) ( 'B' | 'b' ) ( 'J' | 'j' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:124:10: ( 'O' | 'o' ) ( 'B' | 'b' ) ( 'J' | 'j' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:125:8: ( ( 'O' | 'o' ) ( 'B' | 'b' ) ( 'J' | 'j' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:125:10: ( 'O' | 'o' ) ( 'B' | 'b' ) ( 'J' | 'j' ) ( 'E' | 'e' ) ( 'C' | 'c' ) ( 'T' | 't' )
             {
             if ( input.LA(1)=='O'||input.LA(1)=='o' ) {
                 input.consume();
@@ -578,8 +578,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = EDITABLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:125:10: ( ( 'E' | 'e' ) ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'B' | 'b' ) ( 'L' | 'l' ) ( 'E' | 'e' ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:125:12: ( 'E' | 'e' ) ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'B' | 'b' ) ( 'L' | 'l' ) ( 'E' | 'e' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:126:10: ( ( 'E' | 'e' ) ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'B' | 'b' ) ( 'L' | 'l' ) ( 'E' | 'e' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:126:12: ( 'E' | 'e' ) ( 'D' | 'd' ) ( 'I' | 'i' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'B' | 'b' ) ( 'L' | 'l' ) ( 'E' | 'e' )
             {
             if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                 input.consume();
@@ -677,7 +677,7 @@ public class QueryLexer extends Lexer {
         try {
             int _type = BOOLEAN_VALUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:128:3: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) | ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:129:3: ( ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' ) | ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' ) )
             int alt1=2;
             int LA1_0 = input.LA(1);
 
@@ -696,7 +696,7 @@ public class QueryLexer extends Lexer {
             }
             switch (alt1) {
                 case 1 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:128:5: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:129:5: ( 'T' | 't' ) ( 'R' | 'r' ) ( 'U' | 'u' ) ( 'E' | 'e' )
                     {
                     if ( input.LA(1)=='T'||input.LA(1)=='t' ) {
                         input.consume();
@@ -742,7 +742,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:129:5: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:130:5: ( 'F' | 'f' ) ( 'A' | 'a' ) ( 'L' | 'l' ) ( 'S' | 's' ) ( 'E' | 'e' )
                     {
                     if ( input.LA(1)=='F'||input.LA(1)=='f' ) {
                         input.consume();
@@ -812,8 +812,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = UNARY_OPERATOR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:133:3: ( ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'D' | 'd' ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:133:5: ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'D' | 'd' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:134:3: ( ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'D' | 'd' ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:134:5: ( 'D' | 'd' ) ( 'E' | 'e' ) ( 'F' | 'f' ) ( 'I' | 'i' ) ( 'N' | 'n' ) ( 'E' | 'e' ) ( 'D' | 'd' )
             {
             if ( input.LA(1)=='D'||input.LA(1)=='d' ) {
                 input.consume();
@@ -901,12 +901,12 @@ public class QueryLexer extends Lexer {
         try {
             int _type = BINARY_OPERATOR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:137:3: ( '=~' | '=~_' ( 'C' | 'c' ) ( 'I' | 'i' ) | '==' | '==_' ( 'C' | 'c' ) ( 'I' | 'i' ) | '<' | '<=' | '>' | '>=' | ( 'S' | 's' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'T' | 't' ) ( 'S' | 's' ) | ( 'E' | 'e' ) ( 'N' | 'n' ) ( 'D' | 'd' ) ( 'S' | 's' ) | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<=' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>=' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '==' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:138:3: ( '=~' | '=~_' ( 'C' | 'c' ) ( 'I' | 'i' ) | '==' | '==_' ( 'C' | 'c' ) ( 'I' | 'i' ) | '<' | '<=' | '>' | '>=' | ( 'S' | 's' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'T' | 't' ) ( 'S' | 's' ) | ( 'E' | 'e' ) ( 'N' | 'n' ) ( 'D' | 'd' ) ( 'S' | 's' ) | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<=' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>=' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '==' )
             int alt2=15;
             alt2 = dfa2.predict(input);
             switch (alt2) {
                 case 1 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:137:5: '=~'
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:138:5: '=~'
                     {
                     match("=~"); if (state.failed) return ;
 
@@ -914,7 +914,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:138:5: '=~_' ( 'C' | 'c' ) ( 'I' | 'i' )
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:139:5: '=~_' ( 'C' | 'c' ) ( 'I' | 'i' )
                     {
                     match("=~_"); if (state.failed) return ;
 
@@ -942,7 +942,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:139:5: '=='
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:140:5: '=='
                     {
                     match("=="); if (state.failed) return ;
 
@@ -950,7 +950,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 4 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:140:5: '==_' ( 'C' | 'c' ) ( 'I' | 'i' )
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:141:5: '==_' ( 'C' | 'c' ) ( 'I' | 'i' )
                     {
                     match("==_"); if (state.failed) return ;
 
@@ -978,14 +978,14 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 5 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:141:5: '<'
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:142:5: '<'
                     {
                     match('<'); if (state.failed) return ;
 
                     }
                     break;
                 case 6 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:142:5: '<='
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:143:5: '<='
                     {
                     match("<="); if (state.failed) return ;
 
@@ -993,14 +993,14 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 7 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:143:5: '>'
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:144:5: '>'
                     {
                     match('>'); if (state.failed) return ;
 
                     }
                     break;
                 case 8 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:144:5: '>='
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:145:5: '>='
                     {
                     match(">="); if (state.failed) return ;
 
@@ -1008,7 +1008,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 9 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:145:5: ( 'S' | 's' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'T' | 't' ) ( 'S' | 's' )
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:146:5: ( 'S' | 's' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'T' | 't' ) ( 'S' | 's' )
                     {
                     if ( input.LA(1)=='S'||input.LA(1)=='s' ) {
                         input.consume();
@@ -1074,7 +1074,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 10 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:146:5: ( 'E' | 'e' ) ( 'N' | 'n' ) ( 'D' | 'd' ) ( 'S' | 's' )
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:147:5: ( 'E' | 'e' ) ( 'N' | 'n' ) ( 'D' | 'd' ) ( 'S' | 's' )
                     {
                     if ( input.LA(1)=='E'||input.LA(1)=='e' ) {
                         input.consume();
@@ -1120,7 +1120,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 11 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:147:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<'
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:148:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<'
                     {
                     if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                         input.consume();
@@ -1157,7 +1157,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 12 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:148:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<='
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:149:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<='
                     {
                     if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                         input.consume();
@@ -1195,7 +1195,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 13 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:149:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>'
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:150:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>'
                     {
                     if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                         input.consume();
@@ -1232,7 +1232,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 14 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:150:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>='
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:151:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>='
                     {
                     if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                         input.consume();
@@ -1270,7 +1270,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 15 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:151:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '=='
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:152:5: ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '=='
                     {
                     if ( input.LA(1)=='L'||input.LA(1)=='l' ) {
                         input.consume();
@@ -1322,7 +1322,7 @@ public class QueryLexer extends Lexer {
         try {
             int _type = TOKEN_START_CHAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:155:3: ( 'A' .. 'Z' | 'a' .. 'z' | '\\u0080' .. '\\u009F' | '\\u00A1' .. '\\u167F' | '\\u1681' .. '\\u180D' | '\\u180F' .. '\\u1FFF' | '\\u2007' | '\\u200B' .. '\\u202E' | '\\u2030' .. '\\u205E' | '\\u2060' .. '\\u2FFF' | '\\u3001' .. '\\uD7FF' | '\\uE000' .. '\\uFFFE' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:156:3: ( 'A' .. 'Z' | 'a' .. 'z' | '\\u0080' .. '\\u009F' | '\\u00A1' .. '\\u167F' | '\\u1681' .. '\\u180D' | '\\u180F' .. '\\u1FFF' | '\\u2007' | '\\u200B' .. '\\u202E' | '\\u2030' .. '\\u205E' | '\\u2060' .. '\\u2FFF' | '\\u3001' .. '\\uD7FF' | '\\uE000' .. '\\uFFFE' )
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:
             {
             if ( (input.LA(1)>='A' && input.LA(1)<='Z')||(input.LA(1)>='a' && input.LA(1)<='z')||(input.LA(1)>='\u0080' && input.LA(1)<='\u009F')||(input.LA(1)>='\u00A1' && input.LA(1)<='\u167F')||(input.LA(1)>='\u1681' && input.LA(1)<='\u180D')||(input.LA(1)>='\u180F' && input.LA(1)<='\u1FFF')||input.LA(1)=='\u2007'||(input.LA(1)>='\u200B' && input.LA(1)<='\u202E')||(input.LA(1)>='\u2030' && input.LA(1)<='\u205E')||(input.LA(1)>='\u2060' && input.LA(1)<='\u2FFF')||(input.LA(1)>='\u3001' && input.LA(1)<='\uD7FF')||(input.LA(1)>='\uE000' && input.LA(1)<='\uFFFE') ) {
@@ -1351,11 +1351,11 @@ public class QueryLexer extends Lexer {
         try {
             int _type = TOKEN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:170:3: ( TOKEN_START_CHAR ( TOKEN_START_CHAR | DIGIT )* )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:170:5: TOKEN_START_CHAR ( TOKEN_START_CHAR | DIGIT )*
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:171:3: ( TOKEN_START_CHAR ( TOKEN_START_CHAR | DIGIT )* )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:171:5: TOKEN_START_CHAR ( TOKEN_START_CHAR | DIGIT )*
             {
             mTOKEN_START_CHAR(); if (state.failed) return ;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:170:22: ( TOKEN_START_CHAR | DIGIT )*
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:171:22: ( TOKEN_START_CHAR | DIGIT )*
             loop3:
             do {
                 int alt3=2;
@@ -1405,11 +1405,11 @@ public class QueryLexer extends Lexer {
         try {
             int _type = ESC;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:173:5: ( BACKSLASH ( 'n' | '\"' | '\\'' | '\\ ' | BACKSLASH ) )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:173:7: BACKSLASH ( 'n' | '\"' | '\\'' | '\\ ' | BACKSLASH )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:174:5: ( BACKSLASH ( 'n' | '\"' | '\\'' | '\\ ' | BACKSLASH ) )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:174:7: BACKSLASH ( 'n' | '\"' | '\\'' | '\\ ' | BACKSLASH )
             {
             mBACKSLASH(); if (state.failed) return ;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:174:3: ( 'n' | '\"' | '\\'' | '\\ ' | BACKSLASH )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:175:3: ( 'n' | '\"' | '\\'' | '\\ ' | BACKSLASH )
             int alt4=5;
             switch ( input.LA(1) ) {
             case 'n':
@@ -1447,7 +1447,7 @@ public class QueryLexer extends Lexer {
 
             switch (alt4) {
                 case 1 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:174:5: 'n'
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:175:5: 'n'
                     {
                     match('n'); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
@@ -1457,7 +1457,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:175:5: '\"'
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:176:5: '\"'
                     {
                     match('\"'); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
@@ -1467,7 +1467,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:176:5: '\\''
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:177:5: '\\''
                     {
                     match('\''); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
@@ -1477,7 +1477,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 4 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:177:5: '\\ '
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:178:5: '\\ '
                     {
                     match(' '); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
@@ -1487,7 +1487,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 5 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:178:5: BACKSLASH
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:179:5: BACKSLASH
                     {
                     mBACKSLASH(); if (state.failed) return ;
 
@@ -1512,7 +1512,7 @@ public class QueryLexer extends Lexer {
         try {
             int _type = STRING_VALUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:183:3: ( '\"' ( ( ESC )=> ESC | ~ '\"' )* '\"' | '\\'' ( ( ESC )=> ESC | ~ '\\'' )* '\\'' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:3: ( '\"' ( ( ESC )=> ESC | ~ '\"' )* '\"' | '\\'' ( ( ESC )=> ESC | ~ '\\'' )* '\\'' )
             int alt7=2;
             int LA7_0 = input.LA(1);
 
@@ -1531,24 +1531,24 @@ public class QueryLexer extends Lexer {
             }
             switch (alt7) {
                 case 1 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:183:5: '\"' ( ( ESC )=> ESC | ~ '\"' )* '\"'
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:5: '\"' ( ( ESC )=> ESC | ~ '\"' )* '\"'
                     {
                     match('\"'); if (state.failed) return ;
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:183:9: ( ( ESC )=> ESC | ~ '\"' )*
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:9: ( ( ESC )=> ESC | ~ '\"' )*
                     loop5:
                     do {
                         int alt5=3;
                         alt5 = dfa5.predict(input);
                         switch (alt5) {
                     	case 1 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:183:10: ( ESC )=> ESC
+                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:10: ( ESC )=> ESC
                     	    {
                     	    mESC(); if (state.failed) return ;
 
                     	    }
                     	    break;
                     	case 2 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:183:24: ~ '\"'
+                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:24: ~ '\"'
                     	    {
                     	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='!')||(input.LA(1)>='#' && input.LA(1)<='\uFFFF') ) {
                     	        input.consume();
@@ -1574,24 +1574,24 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:5: '\\'' ( ( ESC )=> ESC | ~ '\\'' )* '\\''
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:5: '\\'' ( ( ESC )=> ESC | ~ '\\'' )* '\\''
                     {
                     match('\''); if (state.failed) return ;
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:10: ( ( ESC )=> ESC | ~ '\\'' )*
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:10: ( ( ESC )=> ESC | ~ '\\'' )*
                     loop6:
                     do {
                         int alt6=3;
                         alt6 = dfa6.predict(input);
                         switch (alt6) {
                     	case 1 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:11: ( ESC )=> ESC
+                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:11: ( ESC )=> ESC
                     	    {
                     	    mESC(); if (state.failed) return ;
 
                     	    }
                     	    break;
                     	case 2 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:25: ~ '\\''
+                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:25: ~ '\\''
                     	    {
                     	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='&')||(input.LA(1)>='(' && input.LA(1)<='\uFFFF') ) {
                     	        input.consume();
@@ -1631,8 +1631,8 @@ public class QueryLexer extends Lexer {
         try {
             int _type = DIGIT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:188:3: ( '0' .. '9' )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:188:5: '0' .. '9'
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:189:3: ( '0' .. '9' )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:189:5: '0' .. '9'
             {
             matchRange('0','9'); if (state.failed) return ;
 
@@ -1651,10 +1651,10 @@ public class QueryLexer extends Lexer {
         try {
             int _type = INT_VALUE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:192:3: ( ( '-' )? ( DIGIT )+ )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:192:5: ( '-' )? ( DIGIT )+
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:193:3: ( ( '-' )? ( DIGIT )+ )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:193:5: ( '-' )? ( DIGIT )+
             {
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:192:5: ( '-' )?
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:193:5: ( '-' )?
             int alt8=2;
             int LA8_0 = input.LA(1);
 
@@ -1663,7 +1663,7 @@ public class QueryLexer extends Lexer {
             }
             switch (alt8) {
                 case 1 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:192:5: '-'
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:193:5: '-'
                     {
                     match('-'); if (state.failed) return ;
 
@@ -1672,7 +1672,7 @@ public class QueryLexer extends Lexer {
 
             }
 
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:192:10: ( DIGIT )+
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:193:10: ( DIGIT )+
             int cnt9=0;
             loop9:
             do {
@@ -1686,7 +1686,7 @@ public class QueryLexer extends Lexer {
 
                 switch (alt9) {
             	case 1 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:192:10: DIGIT
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:193:10: DIGIT
             	    {
             	    mDIGIT(); if (state.failed) return ;
 
@@ -1717,11 +1717,11 @@ public class QueryLexer extends Lexer {
     // $ANTLR start "DECIMAL_VALUE"
     public final void mDECIMAL_VALUE() throws RecognitionException {
         try {
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:196:3: ( INT_VALUE ( '.' ( DIGIT )+ )? )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:196:5: INT_VALUE ( '.' ( DIGIT )+ )?
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:3: ( INT_VALUE ( '.' ( DIGIT )+ )? )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:5: INT_VALUE ( '.' ( DIGIT )+ )?
             {
             mINT_VALUE(); if (state.failed) return ;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:196:15: ( '.' ( DIGIT )+ )?
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:15: ( '.' ( DIGIT )+ )?
             int alt11=2;
             int LA11_0 = input.LA(1);
 
@@ -1730,10 +1730,10 @@ public class QueryLexer extends Lexer {
             }
             switch (alt11) {
                 case 1 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:196:16: '.' ( DIGIT )+
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:16: '.' ( DIGIT )+
                     {
                     match('.'); if (state.failed) return ;
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:196:20: ( DIGIT )+
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:20: ( DIGIT )+
                     int cnt10=0;
                     loop10:
                     do {
@@ -1747,7 +1747,7 @@ public class QueryLexer extends Lexer {
 
                         switch (alt10) {
                     	case 1 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:196:20: DIGIT
+                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:20: DIGIT
                     	    {
                     	    mDIGIT(); if (state.failed) return ;
 
@@ -1784,7 +1784,7 @@ public class QueryLexer extends Lexer {
         try {
             int _type = NUMERIC_ARG;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:200:3: ( ( INT_VALUE '.' )=> DECIMAL_VALUE | INT_VALUE )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:3: ( ( INT_VALUE '.' )=> DECIMAL_VALUE | INT_VALUE )
             int alt12=2;
             int LA12_0 = input.LA(1);
 
@@ -1842,7 +1842,7 @@ public class QueryLexer extends Lexer {
             }
             switch (alt12) {
                 case 1 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:200:5: ( INT_VALUE '.' )=> DECIMAL_VALUE
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:5: ( INT_VALUE '.' )=> DECIMAL_VALUE
                     {
                     mDECIMAL_VALUE(); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
@@ -1852,7 +1852,7 @@ public class QueryLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:5: INT_VALUE
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:202:5: INT_VALUE
                     {
                     mINT_VALUE(); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
@@ -1876,10 +1876,10 @@ public class QueryLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:205:3: ( ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+ )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:205:5: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:206:3: ( ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+ )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:206:5: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+
             {
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:205:5: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:206:5: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+
             int cnt13=0;
             loop13:
             do {
@@ -1910,21 +1910,21 @@ public class QueryLexer extends Lexer {
 
                 switch (alt13) {
             	case 1 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:205:7: ' '
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:206:7: ' '
             	    {
             	    match(' '); if (state.failed) return ;
 
             	    }
             	    break;
             	case 2 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:206:7: '\\t'
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:207:7: '\\t'
             	    {
             	    match('\t'); if (state.failed) return ;
 
             	    }
             	    break;
             	case 3 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:207:7: '\\r' '\\n'
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:208:7: '\\r' '\\n'
             	    {
             	    match('\r'); if (state.failed) return ;
             	    match('\n'); if (state.failed) return ;
@@ -1932,7 +1932,7 @@ public class QueryLexer extends Lexer {
             	    }
             	    break;
             	case 4 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:208:7: '\\n'
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:209:7: '\\n'
             	    {
             	    match('\n'); if (state.failed) return ;
 
@@ -2143,8 +2143,8 @@ public class QueryLexer extends Lexer {
 
     // $ANTLR start synpred1_Query
     public final void synpred1_Query_fragment() throws RecognitionException {   
-        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:183:10: ( ESC )
-        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:183:11: ESC
+        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:10: ( ESC )
+        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:11: ESC
         {
         mESC(); if (state.failed) return ;
 
@@ -2154,8 +2154,8 @@ public class QueryLexer extends Lexer {
 
     // $ANTLR start synpred2_Query
     public final void synpred2_Query_fragment() throws RecognitionException {   
-        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:11: ( ESC )
-        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:12: ESC
+        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:11: ( ESC )
+        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:12: ESC
         {
         mESC(); if (state.failed) return ;
 
@@ -2165,8 +2165,8 @@ public class QueryLexer extends Lexer {
 
     // $ANTLR start synpred3_Query
     public final void synpred3_Query_fragment() throws RecognitionException {   
-        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:200:5: ( INT_VALUE '.' )
-        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:200:7: INT_VALUE '.'
+        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:5: ( INT_VALUE '.' )
+        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:7: INT_VALUE '.'
         {
         mINT_VALUE(); if (state.failed) return ;
         match('.'); if (state.failed) return ;
@@ -2298,7 +2298,7 @@ public class QueryLexer extends Lexer {
             this.transition = DFA2_transition;
         }
         public String getDescription() {
-            return "136:1: BINARY_OPERATOR : ( '=~' | '=~_' ( 'C' | 'c' ) ( 'I' | 'i' ) | '==' | '==_' ( 'C' | 'c' ) ( 'I' | 'i' ) | '<' | '<=' | '>' | '>=' | ( 'S' | 's' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'T' | 't' ) ( 'S' | 's' ) | ( 'E' | 'e' ) ( 'N' | 'n' ) ( 'D' | 'd' ) ( 'S' | 's' ) | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<=' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>=' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '==' );";
+            return "137:1: BINARY_OPERATOR : ( '=~' | '=~_' ( 'C' | 'c' ) ( 'I' | 'i' ) | '==' | '==_' ( 'C' | 'c' ) ( 'I' | 'i' ) | '<' | '<=' | '>' | '>=' | ( 'S' | 's' ) ( 'T' | 't' ) ( 'A' | 'a' ) ( 'R' | 'r' ) ( 'T' | 't' ) ( 'S' | 's' ) | ( 'E' | 'e' ) ( 'N' | 'n' ) ( 'D' | 'd' ) ( 'S' | 's' ) | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '<=' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '>=' | ( 'L' | 'l' ) ( 'E' | 'e' ) ( 'N' | 'n' ) '==' );";
         }
     }
     static final String DFA5_eotS =
@@ -2358,7 +2358,7 @@ public class QueryLexer extends Lexer {
             this.transition = DFA5_transition;
         }
         public String getDescription() {
-            return "()* loopback of 183:9: ( ( ESC )=> ESC | ~ '\"' )*";
+            return "()* loopback of 184:9: ( ( ESC )=> ESC | ~ '\"' )*";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             IntStream input = _input;
@@ -2538,7 +2538,7 @@ public class QueryLexer extends Lexer {
             this.transition = DFA6_transition;
         }
         public String getDescription() {
-            return "()* loopback of 184:10: ( ( ESC )=> ESC | ~ '\\'' )*";
+            return "()* loopback of 185:10: ( ( ESC )=> ESC | ~ '\\'' )*";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             IntStream input = _input;
