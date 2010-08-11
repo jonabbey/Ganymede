@@ -51,7 +51,7 @@ grammar query;
 options {
   language=Java;
   output=AST;
-  backtrack=true;
+//  backtrack=true;
 }
 
 @header {
@@ -66,7 +66,7 @@ query :
        ;
 
 select_clause:
-       SELECT^ (OBJECT | (token (COMMA! token)*))
+       SELECT^ (OBJECT? | (token (COMMA! token)*))
        ;
 
 from_clause:
@@ -96,6 +96,11 @@ deref_expression:
        token DEREF^ atom
        ;
 
+token
+  : TOKEN
+  | STRING_VALUE
+  ;
+
 argument
   : STRING_VALUE
   | INT_VALUE
@@ -103,49 +108,54 @@ argument
   | BOOLEAN_VALUE
   ;
 
-token
-  : TOKEN_START_CHAR (TOKEN_START_CHAR | DIGIT)*
-  | STRING_VALUE
-  ;
 
 /* Lexer section */
 
 BACKSLASH: '\\';
-
-ESC : BACKSLASH
-  ( 'n'  { this.setText("\n"); }
-  | '"'  { this.setText("\""); }
-  | '\'' { this.setText("'");  }
-  | BACKSLASH
-  );
-
-
 LPAREN : '(';
 RPAREN : ')';
 COMMA  : ',';
-AND    : 'and';
-OR     : 'or';
-NOT    : 'not';
-SELECT : 'select';
-FROM   : 'from';
-WHERE  : 'where';
 DEREF  : '->';
-OBJECT : 'object';
-EDITABLE : 'editable';
+AND    : ('A'|'a')('N'|'n')('D'|'d');
+OR     : ('O'|'o')('R'|'r');
+NOT    : ('N'|'n')('O'|'o')('T'|'t');
+SELECT : ('S'|'s')('E'|'e')('L'|'l')('E'|'e')('C'|'c')('T'|'t');
+FROM   : ('F'|'f')('R'|'r')('O'|'o')('M'|'m');
+WHERE  : ('W'|'w')('H'|'h')('E'|'e')('R'|'r')('E'|'e');
+OBJECT : ('O'|'o')('B'|'b')('J'|'j')('E'|'e')('C'|'c')('T'|'t');
+EDITABLE : ('E'|'e')('D'|'d')('I'|'i')('T'|'t')('A'|'a')('B'|'b')('L'|'l')('E'|'e');
 
 BOOLEAN_VALUE
-  : 'true'
-  | 'false'
+  : ('T'|'t')('R'|'r')('U'|'u')('E'|'e')
+  | ('F'|'f')('A'|'a')('L'|'l')('S'|'s')('E'|'e')
   ;
 
 UNARY_OPERATOR
-  : 'defined'
+  : ('D'|'d')('E'|'e')('F'|'f')('I'|'i')('N'|'n')('E'|'e')('D'|'d')
   ;
 
-fragment TOKEN_START_CHAR
+BINARY_OPERATOR
+  : '=~'
+  | '=~_'('C'|'c')('I'|'i')
+  | '=='
+  | '==_'('C'|'c')('I'|'i')
+  | '<'
+  | '<='
+  | '>'
+  | '>='
+  | ('S'|'s')('T'|'t')('A'|'a')('R'|'r')('T'|'t')('S'|'s')
+  | ('E'|'e')('N'|'n')('D'|'d')('S'|'s')
+  | ('L'|'l')('E'|'e')('N'|'n')'<'
+  | ('L'|'l')('E'|'e')('N'|'n')'<='
+  | ('L'|'l')('E'|'e')('N'|'n')'>'
+  | ('L'|'l')('E'|'e')('N'|'n')'>='
+  | ('L'|'l')('E'|'e')('N'|'n')'=='
+  ;
+
+TOKEN_START_CHAR
   : 'A'..'Z'
   | 'a'..'z'
-/*  |'\u0080'..'\u009F'// NO NO_BREAK SPACE
+  |'\u0080'..'\u009F'// NO NO_BREAK SPACE
   |'\u00A1'..'\u167F'// NO OGHAM SPACE MARK
   |'\u1681'..'\u180D'// NO MONGOLIAN VOWEL SEPARATOR
   |'\u180F'..'\u1FFF'// NO EN QUAD, EM QUAD, EN SPACE, THREE_PER_EM SPACE, FOUR_PER_EM SPACE, SIX_PER_EM SPACE
@@ -154,8 +164,19 @@ fragment TOKEN_START_CHAR
   |'\u2030'..'\u205E'// NO MEDIUM MATHEMATICAL SPACE
   |'\u2060'..'\u2FFF'// NO IDEOGRAPHIC SPACE
   |'\u3001'..'\uD7FF'
-  |'\uE000'..'\uFFFE' */
+  |'\uE000'..'\uFFFE'
   ;
+
+TOKEN
+  : TOKEN_START_CHAR (TOKEN_START_CHAR | DIGIT)*
+  ;
+
+ESC : BACKSLASH
+  ( 'n'  { this.setText("\n"); }
+  | '"'  { this.setText("\""); }
+  | '\'' { this.setText("'");  }
+  | BACKSLASH
+  );
 
 STRING_VALUE
 options {greedy=false;} 
@@ -164,7 +185,7 @@ options {greedy=false;}
   ;
 
 DIGIT
-  : ('0'..'9')
+  : '0'..'9'
   ;
 
 INT_VALUE
@@ -178,24 +199,6 @@ fragment DECIMAL_VALUE
 NUMERIC_ARG
   : ( INT_VALUE '.' ) => DECIMAL_VALUE { $type = DECIMAL_VALUE; }
   | INT_VALUE { $type =INT_VALUE; }
-  ;
-
-BINARY_OPERATOR
-  : '=~'
-  | '=~_ci'
-  | '=='
-  | '==_ci'
-  | '<'
-  | '<='
-  | '>'
-  | '>='
-  | 'starts'
-  | 'ends'
-  | 'len<'
-  | 'len<='
-  | 'len>'
-  | 'len>='
-  | 'len=='
   ;
 
 WS
