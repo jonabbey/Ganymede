@@ -66,10 +66,9 @@ import arlut.csd.ganymede.common.QueryOrNode;
 import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
 
-import antlr.ANTLRException;
-import antlr.DumpASTVisitor;
+import org.antlr.runtime.RecognitionException;
 
-import antlr.collections.AST;
+import org.antlr.runtime.tree.Tree;
 
 import java.io.StringReader;
 
@@ -98,7 +97,7 @@ import java.util.HashMap;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
-public class GanyQueryTransmuter implements QueryParserTokenTypes {
+public class GanyQueryTransmuter {
 
   private static HashMap op_scalar_mapping;
   private static HashMap op_vector_mapping;
@@ -156,7 +155,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
   ArrayList selectFields = null;
   boolean editableFilter = false;
   String myQueryString = null;
-  AST myQueryTree = null;
+  Tree myQueryTree = null;
 
   public GanyQueryTransmuter()
   {
@@ -173,7 +172,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
       {
 	parser.query();
       }
-    catch (ANTLRException ex)
+    catch (RecognitionException ex)
       {
 	
       }
@@ -229,16 +228,16 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     return query;
   }
 
-  private QueryNode parse_tree(AST ast) throws GanyParseException
+  private QueryNode parse_tree(Tree ast) throws GanyParseException
   {
     this.objectBase = parse_from_tree(ast.getNextSibling());
     this.selectFields = parse_select_tree(ast);
 
-    AST whereTokenNode = ast.getNextSibling().getNextSibling();
+    Tree whereTokenNode = ast.getNextSibling().getNextSibling();
 
-    if (whereTokenNode != null && whereTokenNode.getType() == QueryParserTokenTypes.WHERE)
+    if (whereTokenNode != null && whereTokenNode.getType() == QueryParser.WHERE)
       {
-	AST where_node = ast.getNextSibling().getNextSibling().getFirstChild();
+	Tree where_node = ast.getNextSibling().getNextSibling().getFirstChild();
 
 	if (where_node != null)
 	  {
@@ -251,10 +250,10 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     return null;
   }
 
-  private DBObjectBase parse_from_tree(AST ast) throws GanyParseException
+  private DBObjectBase parse_from_tree(Tree ast) throws GanyParseException
   {
     String from_objectbase = null;
-    AST node = ast.getFirstChild();
+    Tree node = ast.getFirstChild();
 
     if (node == null)		// the grammar _should_ prevent this
       {
@@ -265,11 +264,11 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     while (node != null)
       {
-	if (node.getType() == QueryParserTokenTypes.EDITABLE)
+	if (node.getType() == QueryParser.EDITABLE)
 	  {
 	    this.editableFilter = true;
 	  }
-	else if (node.getType() == QueryParserTokenTypes.STRING_VALUE)
+	else if (node.getType() == QueryParser.STRING_VALUE)
 	  {
 	    from_objectbase = StringUtils.dequote(node.getText());
 	  }
@@ -298,12 +297,12 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     return this.objectBase;
   }
 
-  private ArrayList parse_select_tree(AST ast) throws GanyParseException
+  private ArrayList parse_select_tree(Tree ast) throws GanyParseException
   {
     ArrayList selectFields = new ArrayList();
-    AST select_node = ast.getFirstChild();
+    Tree select_node = ast.getFirstChild();
 
-    if (select_node.getType() == QueryParserTokenTypes.OBJECT)
+    if (select_node.getType() == QueryParser.OBJECT)
       {
 	return null;
       }
@@ -330,7 +329,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     return selectFields;
   }
 
-  private QueryNode parse_where_clause(AST ast, DBObjectBase base) throws GanyParseException
+  private QueryNode parse_where_clause(Tree ast, DBObjectBase base) throws GanyParseException
   {
     int root_type;
     QueryNode child1 = null, child2 = null;
@@ -341,7 +340,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
     int field_type = -1, argument_type = -1;
     String op;
     Object argument;
-    AST field_node, argument_node;
+    Tree field_node, argument_node;
     
     /* -- */
 
@@ -349,20 +348,20 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     switch (root_type)
       {
-      case QueryParserTokenTypes.NOT:
+      case QueryParser.NOT:
 	return new QueryNotNode(parse_where_clause(ast.getFirstChild(), base));
 
-      case QueryParserTokenTypes.AND:
+      case QueryParser.AND:
 	child1 = parse_where_clause(ast.getFirstChild(), base);
 	child2 = parse_where_clause(ast.getFirstChild().getNextSibling(), base);
 	return new QueryAndNode(child1, child2);
 
-      case QueryParserTokenTypes.OR:
+      case QueryParser.OR:
 	child1 = parse_where_clause(ast.getFirstChild(), base);
 	child2 = parse_where_clause(ast.getFirstChild().getNextSibling(), base);
 	return new QueryOrNode(child1, child2);
 
-      case QueryParserTokenTypes.DEREF:
+      case QueryParser.DEREF:
 	field_name = StringUtils.dequote(ast.getFirstChild().getText());
 
 	if (base != null)
@@ -409,8 +408,8 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	
 	return new QueryDeRefNode(field_name, child2);
 
-      case QueryParserTokenTypes.BINARY_OPERATOR:
-      case QueryParserTokenTypes.UNARY_OPERATOR:
+      case QueryParser.BINARY_OPERATOR:
+      case QueryParser.UNARY_OPERATOR:
 
 	op = ast.getText();
 	field_node = ast.getFirstChild();
@@ -437,7 +436,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	    field_type = field.getType();
 	  }
 
-	if (root_type == QueryParserTokenTypes.BINARY_OPERATOR)
+	if (root_type == QueryParser.BINARY_OPERATOR)
 	  {
 	    argument_node = field_node.getNextSibling();
 	    argument_type = argument_node.getType();
@@ -569,13 +568,13 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
       {
 	switch (argument_type)
 	  {
-	  case QueryParserTokenTypes.INT_VALUE:
+	  case QueryParser.INT_VALUE:
 	    return Integer.valueOf(argument);
 
-	  case QueryParserTokenTypes.DECIMAL_VALUE:
+	  case QueryParser.DECIMAL_VALUE:
 	    return Double.valueOf(argument);
 
-	  case QueryParserTokenTypes.STRING_VALUE:
+	  case QueryParser.STRING_VALUE:
 	    return StringUtils.dequote(argument);
 
 	  default:
@@ -589,7 +588,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	  }
       }
 
-    if (field.isArray() && argument_type == QueryParserTokenTypes.INT_VALUE &&
+    if (field.isArray() && argument_type == QueryParser.INT_VALUE &&
 	op_vector_mapping.containsKey(operator))
       {
 	return Integer.valueOf(argument);
@@ -597,15 +596,15 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 
     int field_type = field.getType();
 
-    if (field_type == FieldType.NUMERIC && argument_type == QueryParserTokenTypes.INT_VALUE)
+    if (field_type == FieldType.NUMERIC && argument_type == QueryParser.INT_VALUE)
       {
 	return Integer.valueOf(argument);
       }
-    else if (field_type == FieldType.FLOAT && argument_type == QueryParserTokenTypes.DECIMAL_VALUE)
+    else if (field_type == FieldType.FLOAT && argument_type == QueryParser.DECIMAL_VALUE)
       {
 	return new Double(argument);
       }
-    else if (argument_type == QueryParserTokenTypes.BOOLEAN_VALUE)
+    else if (argument_type == QueryParser.BOOLEAN_VALUE)
       {
 	if (argument.toLowerCase().equals("true"))
 	  {
@@ -616,7 +615,7 @@ public class GanyQueryTransmuter implements QueryParserTokenTypes {
 	    return Boolean.FALSE;
 	  }
       }
-    else if (argument_type == QueryParserTokenTypes.STRING_VALUE)
+    else if (argument_type == QueryParser.STRING_VALUE)
       {
 	switch (field_type)
 	  {

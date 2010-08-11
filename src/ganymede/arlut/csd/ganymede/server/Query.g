@@ -46,12 +46,11 @@
 
 */
 
-grammar query;
+grammar Query;
 
 options {
   language=Java;
   output=AST;
-//  backtrack=true;
 }
 
 @header {
@@ -175,6 +174,7 @@ ESC : BACKSLASH
   ( 'n'  { this.setText("\n"); }
   | '"'  { this.setText("\""); }
   | '\'' { this.setText("'");  }
+  | '\ ' { this.setText(" "); }
   | BACKSLASH
   );
 
@@ -206,6 +206,6 @@ WS
     | '\t'
     | '\r' '\n'
     | '\n'
-    )
+    )+
     {$channel = HIDDEN;}
   ;
