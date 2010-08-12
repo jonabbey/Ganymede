@@ -1,6 +1,6 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-11 19:07:22
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-11 19:46:41
 
-package arlut.csd.ganymede.server; // inserted by hand, ANTLR didn't put this here.
+package arlut.csd.ganymede.server; // added by hand, antlr didn't do this
 
 import org.antlr.runtime.*;
 import java.util.Stack;
