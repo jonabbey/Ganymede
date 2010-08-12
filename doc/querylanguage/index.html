@@ -82,7 +82,7 @@
       <p><code><span class="keyword">select</span> Username,UID,"Home Group" <span class="keyword">from editable</span> User
       <span class="keyword">where</span> "Home Group"<span class="keyword">-&gt;(</span>GID <span class="keyword">>=</span> 2000 <span class="keyword">and</span> GID <span class="keyword">&lt;=</span> 8000<span class="keyword">)</span></code></p>
 
-      <p><code><span class="keyword">select</span> Name <span class="keyword">from</span> "Owner Group" <span class="keyword">where</span> Members <span class="keyword">-&gt;</span>User<span class="keyword">-&gt;</span>"Home Group"<span class="keyword">-&gt;</span>Users <span class="keyword">len&lt;=</span> 5</code></p>
+      <p><code><span class="keyword">select</span> Name <span class="keyword">from</span> "Owner Group" <span class="keyword">where</span> Members<span class="keyword">-&gt;</span>User<span class="keyword">-&gt;</span>"Home Group"<span class="keyword">-&gt;</span>Users <span class="keyword">len&lt;=</span> 5</code></p>
     </div>
 
     <p>In English, these queries are as follows:</p>
