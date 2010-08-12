@@ -255,17 +255,16 @@ public class GanyQueryTransmuter {
 
   private DBObjectBase parse_from_tree(Tree ast) throws GanyParseException
   {
-    String from_objectbase = null;
-    Tree node = ast.getChild(0);
-
-    if (node == null)		// the grammar _should_ prevent this
+    if (ast.getChildCount() == 0)		// the grammar _should_ prevent this
       {
 	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
 	// "Missing from clause."
 	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.missing_from"), myQueryString, myQueryTree.toStringTree()));
       }
 
-    for (int i = 1; i < ast.getChildCount(); i++)
+    String from_objectbase = null;
+
+    for (int i = 0; i < ast.getChildCount(); i++)
       {
 	Tree subNode = ast.getChild(i);
 
