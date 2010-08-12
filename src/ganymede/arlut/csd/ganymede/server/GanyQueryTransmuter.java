@@ -230,8 +230,8 @@ public class GanyQueryTransmuter {
 
   private QueryNode parse_tree(Tree ast) throws GanyParseException
   {
+    this.objectBase = parse_from_tree(ast.getChild(1)); // we have to look up the object type first
     this.selectFields = parse_select_tree(ast.getChild(0));
-    this.objectBase = parse_from_tree(ast.getChild(1));
 
     if (ast.getChildCount() > 2)
       {
