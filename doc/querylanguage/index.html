@@ -11,7 +11,7 @@
 
       <div id="title">
         <h1>Ganymede 2.0 Query Language Guide</h1>
-        <p>Release 2.0 - 1 April 2008<br/>$Rev$</p>
+        <p>Release 2.0 - 12 August 2010</p>
       </div>
 
       <div id="abstract">
@@ -73,17 +73,17 @@
     <p>Here are some examples of what GanyQL queries look like:</p>
 
     <div class="example">
-      <p><code><span class="keyword">select object from editable</span> "User" <span class="keyword">where</span> "UID" <span class="keyword">&gt;=</span> 2000</code></p>
-      <p><code><span class="keyword">select</span> "Username","UID" <span class="keyword">from editable</span> "User"</code></p>
-      <p><code><span class="keyword">select</span> "Username" <span class="keyword">from</span> "User" <span class="keyword">where</span> "Expiration Date" <span class="keyword">defined</span></code></p>
+      <p><code><span class="keyword">select from editable</span> User <span class="keyword">where</span> UID <span class="keyword">&gt;=</span> 2000</code></p>
+      <p><code><span class="keyword">select</span> Username,UID <span class="keyword">from editable</span> User</code></p>
+      <p><code><span class="keyword">select</span> Username <span class="keyword">from</span> User <span class="keyword">where</span> "Expiration Date" <span class="keyword">defined</span></code></p>
 
-      <p><code><span class="keyword">select</span> "GroupName","GID" <span class="keyword">from</span> "Group" <span class="keyword">where</span> "Notes" <span class="keyword">=~_ci</span> "(atl|isl) group"</code></p>
+      <p><code><span class="keyword">select</span> GroupName,GID <span class="keyword">from</span> Group <span class="keyword">where</span> Notes <span class="keyword">=~_ci</span> "(atl|isl) group"</code></p>
 
-      <p><code><span class="keyword">select</span> "Username","UID","Home Group" <span class="keyword">from editable</span> "User"
-      <span class="keyword">where</span> "Home Group"<span class="keyword">-&gt;(</span>"GID" <span class="keyword">>=</span> 2000 <span class="keyword">and</span> "GID" <span class="keyword">&lt;=</span> 8000<span class="keyword">)</span></code></p>
+      <p><code><span class="keyword">select</span> Username,UID,"Home Group" <span class="keyword">from editable</span> User
+      <span class="keyword">where</span> "Home Group"<span class="keyword">-&gt;(</span>GID <span class="keyword">>=</span> 2000 <span class="keyword">and</span> GID <span class="keyword">&lt;=</span> 8000<span class="keyword">)</span></code></p>
 
-      <p><code><span class="keyword">select</span> "Name" <span class="keyword">from</span> "Owner Group" <span class="keyword">where</span> "Admin
-       Persona"<span class="keyword">-&gt;</span>"User"<span class="keyword">-&gt;</span>"Home Group"<span class="keyword">-&gt;</span>"Users" <span class="keyword">len&lt;=</span> 5</code></p>
+      <p><code><span class="keyword">select</span> Name <span class="keyword">from</span> "Owner Group" <span class="keyword">where</span> "Admin
+       Persona"<span class="keyword">-&gt;</span>User<span class="keyword">-&gt;</span>"Home Group"<span class="keyword">-&gt;</span>Users <span class="keyword">len&lt;=</span> 5</code></p>
     </div>
 
     <p>In English, these queries are as follows:</p>
@@ -145,7 +145,7 @@
 
     <p class="note">To fully express the syntax of GanyQL would
     require an exposition as long and precise as the actual <a
-    href="query.g">GanyQL grammar</a>.  If you've had any experience
+    href="Query.g">GanyQL grammar</a>.  If you've had any experience
     with abstract syntax definitions, you may find reading the grammar
     both interesting and informative.</p>
 
@@ -162,12 +162,11 @@
     where you will have to provide input.</p>
 
     <p>The "<i>Object Type</i>" string is the name of the type of
-    object in the Ganymede data store that you want to query.  As with
-    all strings you use in GanyQL, you'll need to surround the name of
-    the object type in either single or double quotation
-    characters.</p>
+    object in the Ganymede data store that you want to query.  The
+    (double or single) quotation marks are only needed here if the
+    object type has a space in it.</p>
 
-    <p>The <i>return values</i> can be the <span
+    <p>The <i>return values</i> can be skipped or be the <span
     class="keyword">object</span> keyword, if you want to get back all
     fields from the object, or a comma-separated list of field name
     strings to be retrieved from "<i>Object Type</i>".</p>
@@ -450,7 +449,7 @@
     <p>First, by using the opposite style of quotation for the string
     value:</p>
 
-    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span>
+    <div class="example"><span class="keyword">select object from</span> <i>User</i> <span class="keyword">where</span>
     "<i>Full Name</i>" <span class="keyword">==</span> '<i>"Jon"</i>'</div>
 
     <p>Second, by using backslash escaping:</p>
