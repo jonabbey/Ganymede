@@ -152,7 +152,7 @@ BINARY_OPERATOR
   | ('L'|'l')('E'|'e')('N'|'n')'=='
   ;
 
-TOKEN_START_CHAR
+fragment TOKEN_START_CHAR
   : 'A'..'Z'
   | 'a'..'z'
   |'\u0080'..'\u009F'// NO NO_BREAK SPACE

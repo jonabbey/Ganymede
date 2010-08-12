@@ -66,9 +66,11 @@ import arlut.csd.ganymede.common.QueryOrNode;
 import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
 
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-
 import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.Tree;
 
 import java.io.StringReader;
 
@@ -165,19 +167,20 @@ public class GanyQueryTransmuter {
   {
     myQueryString = queryString;
 
-    QueryLexer lexer = new QueryLexer(new StringReader(queryString));
-    QueryParser parser = new QueryParser(lexer);
+    QueryLexer lexer = new QueryLexer(new ANTLRStringStream(queryString));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    QueryParser parser = new QueryParser(tokens);
 
     try
       {
 	parser.query();
+
+	myQueryTree = (CommonTree) parser.query().getTree();
       }
     catch (RecognitionException ex)
       {
 	
       }
-
-    myQueryTree = (CommonTree) parser.getTree();
 
     if (myQueryTree == null)
       {
@@ -228,16 +231,16 @@ public class GanyQueryTransmuter {
     return query;
   }
 
-  private QueryNode parse_tree(CommonTree ast) throws GanyParseException
+  private QueryNode parse_tree(Tree ast) throws GanyParseException
   {
-    this.objectBase = parse_from_tree(ast.getNextSibling());
-    this.selectFields = parse_select_tree(ast);
+    this.selectFields = parse_select_tree(ast.getChild(0));
+    this.objectBase = parse_from_tree(ast.getChild(1));
 
-    CommonTree whereTokenNode = ast.getNextSibling().getNextSibling();
+    Tree whereTokenNode = ast.getChild(2);
 
     if (whereTokenNode != null && whereTokenNode.getType() == QueryParser.WHERE)
       {
-	CommonTree where_node = ast.getNextSibling().getNextSibling().getFirstChild();
+	Tree where_node = whereTokenNode.getChild(0);
 
 	if (where_node != null)
 	  {
@@ -250,10 +253,10 @@ public class GanyQueryTransmuter {
     return null;
   }
 
-  private DBObjectBase parse_from_tree(CommonTree ast) throws GanyParseException
+  private DBObjectBase parse_from_tree(Tree ast) throws GanyParseException
   {
     String from_objectbase = null;
-    CommonTree node = ast.getFirstChild();
+    Tree node = ast.getChild(0);
 
     if (node == null)		// the grammar _should_ prevent this
       {
@@ -262,8 +265,10 @@ public class GanyQueryTransmuter {
 	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.missing_from"), myQueryString, myQueryTree.toStringTree()));
       }
 
-    while (node != null)
+    for (int i = 0; i < node.getChildCount(); i++)
       {
+	Tree subNode = node.getChild(i);
+
 	if (node.getType() == QueryParser.EDITABLE)
 	  {
 	    this.editableFilter = true;
@@ -272,8 +277,10 @@ public class GanyQueryTransmuter {
 	  {
 	    from_objectbase = StringUtils.dequote(node.getText());
 	  }
-
-	node = node.getNextSibling();
+	else if (node.getType() == QueryParser.TOKEN)
+	  {
+	    from_objectbase = node.getText();
+	  }
       }
 
     if (from_objectbase == null) // the grammar _should_ prevent this
@@ -297,18 +304,24 @@ public class GanyQueryTransmuter {
     return this.objectBase;
   }
 
-  private ArrayList parse_select_tree(CommonTree ast) throws GanyParseException
+  private ArrayList parse_select_tree(Tree ast) throws GanyParseException
   {
-    ArrayList selectFields = new ArrayList();
-    CommonTree select_node = ast.getFirstChild();
-
-    if (select_node.getType() == QueryParser.OBJECT)
+    if (ast.getChildCount() == 0)
       {
-	return null;
+	return null;		// "select from", with no field list
       }
 
-    while (select_node != null)
+    if (ast.getChild(0).getType() == QueryParser.OBJECT)
       {
+	return null; 		// "select object from", also no field list.
+      }
+
+    ArrayList selectFields = new ArrayList();
+
+    for (int i = 0; i < ast.getChildCount(); i++)
+      {
+	Tree select_node = ast.getChild(i);
+
 	String field_name = StringUtils.dequote(select_node.getText());
 	DBObjectBaseField field = (DBObjectBaseField) objectBase.getField(field_name);
 
@@ -323,13 +336,12 @@ public class GanyQueryTransmuter {
 	  }
 
 	selectFields.add(field);
-	select_node = select_node.getNextSibling();
       }
 
     return selectFields;
   }
 
-  private QueryNode parse_where_clause(CommonTree ast, DBObjectBase base) throws GanyParseException
+  private QueryNode parse_where_clause(Tree ast, DBObjectBase base) throws GanyParseException
   {
     int root_type;
     QueryNode child1 = null, child2 = null;
@@ -340,7 +352,7 @@ public class GanyQueryTransmuter {
     int field_type = -1, argument_type = -1;
     String op;
     Object argument;
-    CommonTree field_node, argument_node;
+    Tree field_node, argument_node;
     
     /* -- */
 
@@ -349,20 +361,20 @@ public class GanyQueryTransmuter {
     switch (root_type)
       {
       case QueryParser.NOT:
-	return new QueryNotNode(parse_where_clause(ast.getFirstChild(), base));
+	return new QueryNotNode(parse_where_clause(ast.getChild(0), base));
 
       case QueryParser.AND:
-	child1 = parse_where_clause(ast.getFirstChild(), base);
-	child2 = parse_where_clause(ast.getFirstChild().getNextSibling(), base);
+	child1 = parse_where_clause(ast.getChild(0), base);
+	child2 = parse_where_clause(ast.getChild(1), base);
 	return new QueryAndNode(child1, child2);
 
       case QueryParser.OR:
-	child1 = parse_where_clause(ast.getFirstChild(), base);
-	child2 = parse_where_clause(ast.getFirstChild().getNextSibling(), base);
+	child1 = parse_where_clause(ast.getChild(0), base);
+	child2 = parse_where_clause(ast.getChild(1), base);
 	return new QueryOrNode(child1, child2);
 
       case QueryParser.DEREF:
-	field_name = StringUtils.dequote(ast.getFirstChild().getText());
+	field_name = StringUtils.dequote(ast.getChild(0).getText());
 
 	if (base != null)
 	  {
@@ -404,7 +416,7 @@ public class GanyQueryTransmuter {
 	    target_objectbase = null;
 	  }
 
-	child2 = parse_where_clause(ast.getFirstChild().getNextSibling(), target_objectbase);
+	child2 = parse_where_clause(ast.getChild(1), target_objectbase);
 	
 	return new QueryDeRefNode(field_name, child2);
 
@@ -412,7 +424,7 @@ public class GanyQueryTransmuter {
       case QueryParser.UNARY_OPERATOR:
 
 	op = ast.getText();
-	field_node = ast.getFirstChild();
+	field_node = ast.getChild(0);
 	field_name = StringUtils.dequote(field_node.getText());
 
 	if (base == null)
@@ -438,7 +450,7 @@ public class GanyQueryTransmuter {
 
 	if (root_type == QueryParser.BINARY_OPERATOR)
 	  {
-	    argument_node = field_node.getNextSibling();
+	    argument_node = ast.getChild(1);
 	    argument_type = argument_node.getType();
 	    argument = parse_argument(op, argument_node.getText(), argument_type, field);
 	  }

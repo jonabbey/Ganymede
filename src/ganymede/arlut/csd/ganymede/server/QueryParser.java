@@ -1,4 +1,4 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-10 21:07:35
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-11 19:07:22
 
 package arlut.csd.ganymede.server;
 
@@ -9,10 +9,12 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import org.antlr.runtime.debug.*;
+import java.io.IOException;
 
 import org.antlr.runtime.tree.*;
 
-public class QueryParser extends Parser {
+public class QueryParser extends DebugParser {
     public static final String[] tokenNames = new String[] {
         "<invalid>", "<EOR>", "<DOWN>", "<UP>", "SELECT", "OBJECT", "COMMA", "FROM", "EDITABLE", "WHERE", "AND", "OR", "LPAREN", "RPAREN", "NOT", "UNARY_OPERATOR", "BINARY_OPERATOR", "DEREF", "TOKEN", "STRING_VALUE", "INT_VALUE", "DECIMAL_VALUE", "BOOLEAN_VALUE", "BACKSLASH", "TOKEN_START_CHAR", "DIGIT", "ESC", "NUMERIC_ARG", "WS"
     };
@@ -46,23 +48,57 @@ public class QueryParser extends Parser {
     // delegates
     // delegators
 
-
+    public static final String[] ruleNames = new String[] {
+        "invalidRule", "select_clause", "token", "deref_expression", "synpred1_Query", 
+        "atom", "expression", "simple_expression", "where_clause", "query", 
+        "synpred2_Query", "argument", "from_clause"
+    };
+     
+        public int ruleLevel = 0;
+        public int getRuleLevel() { return ruleLevel; }
+        public void incRuleLevel() { ruleLevel++; }
+        public void decRuleLevel() { ruleLevel--; }
         public QueryParser(TokenStream input) {
-            this(input, new RecognizerSharedState());
+            this(input, DebugEventSocketProxy.DEFAULT_DEBUGGER_PORT, new RecognizerSharedState());
         }
-        public QueryParser(TokenStream input, RecognizerSharedState state) {
+        public QueryParser(TokenStream input, int port, RecognizerSharedState state) {
             super(input, state);
-             
+            DebugEventSocketProxy proxy =
+                new DebugEventSocketProxy(this,port,adaptor);
+            setDebugListener(proxy);
+            setTokenStream(new DebugTokenStream(input,proxy));
+            try {
+                proxy.handshake();
+            }
+            catch (IOException ioe) {
+                reportError(ioe);
+            }
+            TreeAdaptor adap = new CommonTreeAdaptor();
+            setTreeAdaptor(adap);
+            proxy.setTreeAdaptor(adap);
         }
-        
-    protected TreeAdaptor adaptor = new CommonTreeAdaptor();
+    public QueryParser(TokenStream input, DebugEventListener dbg) {
+        super(input, dbg);
 
+         
+        TreeAdaptor adap = new CommonTreeAdaptor();
+        setTreeAdaptor(adap);
+
+    }
+    protected boolean evalPredicate(boolean result, String predicate) {
+        dbg.semanticPredicate(result, predicate);
+        return result;
+    }
+
+    protected DebugTreeAdaptor adaptor;
     public void setTreeAdaptor(TreeAdaptor adaptor) {
-        this.adaptor = adaptor;
+        this.adaptor = new DebugTreeAdaptor(dbg,adaptor);
+
     }
     public TreeAdaptor getTreeAdaptor() {
         return adaptor;
     }
+
 
     public String[] getTokenNames() { return QueryParser.tokenNames; }
     public String getGrammarFileName() { return "/home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g"; }
@@ -91,35 +127,53 @@ public class QueryParser extends Parser {
 
         CommonTree EOF4_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "query");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(61, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:61:7: ( select_clause from_clause ( where_clause )? EOF )
+            dbg.enterAlt(1);
+
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:62:8: select_clause from_clause ( where_clause )? EOF
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(62,8);
             pushFollow(FOLLOW_select_clause_in_query52);
             select_clause1=select_clause();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, select_clause1.getTree());
+            dbg.location(63,8);
             pushFollow(FOLLOW_from_clause_in_query61);
             from_clause2=from_clause();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, from_clause2.getTree());
+            dbg.location(64,8);
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:64:8: ( where_clause )?
             int alt1=2;
+            try { dbg.enterSubRule(1);
+            try { dbg.enterDecision(1);
+
             int LA1_0 = input.LA(1);
 
             if ( (LA1_0==WHERE) ) {
                 alt1=1;
             }
+            } finally {dbg.exitDecision(1);}
+
             switch (alt1) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:64:8: where_clause
                     {
+                    dbg.location(64,8);
                     pushFollow(FOLLOW_where_clause_in_query70);
                     where_clause3=where_clause();
 
@@ -131,7 +185,9 @@ public class QueryParser extends Parser {
                     break;
 
             }
+            } finally {dbg.exitSubRule(1);}
 
+            dbg.location(65,11);
             EOF4=(Token)match(input,EOF,FOLLOW_EOF_in_query80); if (state.failed) return retval;
 
             }
@@ -152,6 +208,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(66, 8);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "query");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "query"
@@ -181,19 +246,31 @@ public class QueryParser extends Parser {
         CommonTree OBJECT6_tree=null;
         CommonTree COMMA8_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "select_clause");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(68, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:68:14: ( SELECT ( ( OBJECT )? | ( token ( COMMA token )* ) ) )
+            dbg.enterAlt(1);
+
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:8: SELECT ( ( OBJECT )? | ( token ( COMMA token )* ) )
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(69,14);
             SELECT5=(Token)match(input,SELECT,FOLLOW_SELECT_in_select_clause103); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             SELECT5_tree = (CommonTree)adaptor.create(SELECT5);
             root_0 = (CommonTree)adaptor.becomeRoot(SELECT5_tree, root_0);
             }
+            dbg.location(69,16);
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:16: ( ( OBJECT )? | ( token ( COMMA token )* ) )
             int alt4=2;
+            try { dbg.enterSubRule(4);
+            try { dbg.enterDecision(4);
+
             int LA4_0 = input.LA(1);
 
             if ( (LA4_0==OBJECT||LA4_0==FROM) ) {
@@ -207,23 +284,37 @@ public class QueryParser extends Parser {
                 NoViableAltException nvae =
                     new NoViableAltException("", 4, 0, input);
 
+                dbg.recognitionException(nvae);
                 throw nvae;
             }
+            } finally {dbg.exitDecision(4);}
+
             switch (alt4) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:17: ( OBJECT )?
                     {
+                    dbg.location(69,17);
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:17: ( OBJECT )?
                     int alt2=2;
+                    try { dbg.enterSubRule(2);
+                    try { dbg.enterDecision(2);
+
                     int LA2_0 = input.LA(1);
 
                     if ( (LA2_0==OBJECT) ) {
                         alt2=1;
                     }
+                    } finally {dbg.exitDecision(2);}
+
                     switch (alt2) {
                         case 1 :
+                            dbg.enterAlt(1);
+
                             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:17: OBJECT
                             {
+                            dbg.location(69,17);
                             OBJECT6=(Token)match(input,OBJECT,FOLLOW_OBJECT_in_select_clause107); if (state.failed) return retval;
                             if ( state.backtracking==0 ) {
                             OBJECT6_tree = (CommonTree)adaptor.create(OBJECT6);
@@ -234,26 +325,38 @@ public class QueryParser extends Parser {
                             break;
 
                     }
+                    } finally {dbg.exitSubRule(2);}
 
 
                     }
                     break;
                 case 2 :
+                    dbg.enterAlt(2);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:27: ( token ( COMMA token )* )
                     {
+                    dbg.location(69,27);
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:27: ( token ( COMMA token )* )
+                    dbg.enterAlt(1);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:28: token ( COMMA token )*
                     {
+                    dbg.location(69,28);
                     pushFollow(FOLLOW_token_in_select_clause113);
                     token7=token();
 
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) adaptor.addChild(root_0, token7.getTree());
+                    dbg.location(69,34);
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:34: ( COMMA token )*
+                    try { dbg.enterSubRule(3);
+
                     loop3:
                     do {
                         int alt3=2;
+                        try { dbg.enterDecision(3);
+
                         int LA3_0 = input.LA(1);
 
                         if ( (LA3_0==COMMA) ) {
@@ -261,11 +364,17 @@ public class QueryParser extends Parser {
                         }
 
 
+                        } finally {dbg.exitDecision(3);}
+
                         switch (alt3) {
                     	case 1 :
+                    	    dbg.enterAlt(1);
+
                     	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:35: COMMA token
                     	    {
+                    	    dbg.location(69,40);
                     	    COMMA8=(Token)match(input,COMMA,FOLLOW_COMMA_in_select_clause116); if (state.failed) return retval;
+                    	    dbg.location(69,42);
                     	    pushFollow(FOLLOW_token_in_select_clause119);
                     	    token9=token();
 
@@ -280,6 +389,7 @@ public class QueryParser extends Parser {
                     	    break loop3;
                         }
                     } while (true);
+                    } finally {dbg.exitSubRule(3);}
 
 
                     }
@@ -289,6 +399,7 @@ public class QueryParser extends Parser {
                     break;
 
             }
+            } finally {dbg.exitSubRule(4);}
 
 
             }
@@ -309,6 +420,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(70, 8);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "select_clause");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "select_clause"
@@ -334,28 +454,45 @@ public class QueryParser extends Parser {
         CommonTree FROM10_tree=null;
         CommonTree EDITABLE11_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "from_clause");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(72, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:72:12: ( FROM ( EDITABLE )? token )
+            dbg.enterAlt(1);
+
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:73:8: FROM ( EDITABLE )? token
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(73,12);
             FROM10=(Token)match(input,FROM,FOLLOW_FROM_in_from_clause145); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             FROM10_tree = (CommonTree)adaptor.create(FROM10);
             root_0 = (CommonTree)adaptor.becomeRoot(FROM10_tree, root_0);
             }
+            dbg.location(73,14);
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:73:14: ( EDITABLE )?
             int alt5=2;
+            try { dbg.enterSubRule(5);
+            try { dbg.enterDecision(5);
+
             int LA5_0 = input.LA(1);
 
             if ( (LA5_0==EDITABLE) ) {
                 alt5=1;
             }
+            } finally {dbg.exitDecision(5);}
+
             switch (alt5) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:73:14: EDITABLE
                     {
+                    dbg.location(73,14);
                     EDITABLE11=(Token)match(input,EDITABLE,FOLLOW_EDITABLE_in_from_clause148); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     EDITABLE11_tree = (CommonTree)adaptor.create(EDITABLE11);
@@ -366,7 +503,9 @@ public class QueryParser extends Parser {
                     break;
 
             }
+            } finally {dbg.exitSubRule(5);}
 
+            dbg.location(73,24);
             pushFollow(FOLLOW_token_in_from_clause151);
             token12=token();
 
@@ -392,6 +531,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(74, 8);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "from_clause");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "from_clause"
@@ -415,17 +563,26 @@ public class QueryParser extends Parser {
 
         CommonTree WHERE13_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "where_clause");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(76, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:76:13: ( WHERE expression )
+            dbg.enterAlt(1);
+
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:77:8: WHERE expression
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(77,13);
             WHERE13=(Token)match(input,WHERE,FOLLOW_WHERE_in_where_clause173); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             WHERE13_tree = (CommonTree)adaptor.create(WHERE13);
             root_0 = (CommonTree)adaptor.becomeRoot(WHERE13_tree, root_0);
             }
+            dbg.location(78,8);
             pushFollow(FOLLOW_expression_in_where_clause183);
             expression14=expression();
 
@@ -451,6 +608,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(78, 18);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "where_clause");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "where_clause"
@@ -478,22 +644,35 @@ public class QueryParser extends Parser {
         CommonTree AND16_tree=null;
         CommonTree OR17_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "expression");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(80, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:80:11: ( atom ( ( AND | OR ) atom )* )
+            dbg.enterAlt(1);
+
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:8: atom ( ( AND | OR ) atom )*
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(81,8);
             pushFollow(FOLLOW_atom_in_expression197);
             atom15=atom();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, atom15.getTree());
+            dbg.location(81,13);
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:13: ( ( AND | OR ) atom )*
+            try { dbg.enterSubRule(7);
+
             loop7:
             do {
                 int alt7=2;
+                try { dbg.enterDecision(7);
+
                 int LA7_0 = input.LA(1);
 
                 if ( ((LA7_0>=AND && LA7_0<=OR)) ) {
@@ -501,12 +680,20 @@ public class QueryParser extends Parser {
                 }
 
 
+                } finally {dbg.exitDecision(7);}
+
                 switch (alt7) {
             	case 1 :
+            	    dbg.enterAlt(1);
+
             	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:14: ( AND | OR ) atom
             	    {
+            	    dbg.location(81,14);
             	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:14: ( AND | OR )
             	    int alt6=2;
+            	    try { dbg.enterSubRule(6);
+            	    try { dbg.enterDecision(6);
+
             	    int LA6_0 = input.LA(1);
 
             	    if ( (LA6_0==AND) ) {
@@ -520,12 +707,18 @@ public class QueryParser extends Parser {
             	        NoViableAltException nvae =
             	            new NoViableAltException("", 6, 0, input);
 
+            	        dbg.recognitionException(nvae);
             	        throw nvae;
             	    }
+            	    } finally {dbg.exitDecision(6);}
+
             	    switch (alt6) {
             	        case 1 :
+            	            dbg.enterAlt(1);
+
             	            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:15: AND
             	            {
+            	            dbg.location(81,18);
             	            AND16=(Token)match(input,AND,FOLLOW_AND_in_expression201); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
             	            AND16_tree = (CommonTree)adaptor.create(AND16);
@@ -535,8 +728,11 @@ public class QueryParser extends Parser {
             	            }
             	            break;
             	        case 2 :
+            	            dbg.enterAlt(2);
+
             	            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:22: OR
             	            {
+            	            dbg.location(81,24);
             	            OR17=(Token)match(input,OR,FOLLOW_OR_in_expression206); if (state.failed) return retval;
             	            if ( state.backtracking==0 ) {
             	            OR17_tree = (CommonTree)adaptor.create(OR17);
@@ -547,7 +743,9 @@ public class QueryParser extends Parser {
             	            break;
 
             	    }
+            	    } finally {dbg.exitSubRule(6);}
 
+            	    dbg.location(81,27);
             	    pushFollow(FOLLOW_atom_in_expression210);
             	    atom18=atom();
 
@@ -562,6 +760,7 @@ public class QueryParser extends Parser {
             	    break loop7;
                 }
             } while (true);
+            } finally {dbg.exitSubRule(7);}
 
 
             }
@@ -582,6 +781,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(82, 8);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "expression");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "expression"
@@ -615,9 +823,16 @@ public class QueryParser extends Parser {
         CommonTree RPAREN21_tree=null;
         CommonTree NOT22_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "atom");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(84, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:84:5: ( LPAREN expression RPAREN | NOT atom | ( token ( UNARY_OPERATOR | BINARY_OPERATOR ) )=> simple_expression | ( token DEREF )=> deref_expression )
             int alt8=4;
+            try { dbg.enterDecision(8);
+
             switch ( input.LA(1) ) {
             case LPAREN:
                 {
@@ -648,6 +863,7 @@ public class QueryParser extends Parser {
                     NoViableAltException nvae =
                         new NoViableAltException("", 8, 3, input);
 
+                    dbg.recognitionException(nvae);
                     throw nvae;
                 }
                 }
@@ -657,36 +873,48 @@ public class QueryParser extends Parser {
                 NoViableAltException nvae =
                     new NoViableAltException("", 8, 0, input);
 
+                dbg.recognitionException(nvae);
                 throw nvae;
             }
 
+            } finally {dbg.exitDecision(8);}
+
             switch (alt8) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:85:8: LPAREN expression RPAREN
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(85,14);
                     LPAREN19=(Token)match(input,LPAREN,FOLLOW_LPAREN_in_atom234); if (state.failed) return retval;
+                    dbg.location(85,16);
                     pushFollow(FOLLOW_expression_in_atom237);
                     expression20=expression();
 
                     state._fsp--;
                     if (state.failed) return retval;
                     if ( state.backtracking==0 ) adaptor.addChild(root_0, expression20.getTree());
+                    dbg.location(85,33);
                     RPAREN21=(Token)match(input,RPAREN,FOLLOW_RPAREN_in_atom239); if (state.failed) return retval;
 
                     }
                     break;
                 case 2 :
+                    dbg.enterAlt(2);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:86:10: NOT atom
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(86,13);
                     NOT22=(Token)match(input,NOT,FOLLOW_NOT_in_atom251); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     NOT22_tree = (CommonTree)adaptor.create(NOT22);
                     root_0 = (CommonTree)adaptor.becomeRoot(NOT22_tree, root_0);
                     }
+                    dbg.location(86,15);
                     pushFollow(FOLLOW_atom_in_atom254);
                     atom23=atom();
 
@@ -697,10 +925,13 @@ public class QueryParser extends Parser {
                     }
                     break;
                 case 3 :
+                    dbg.enterAlt(3);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:87:10: ( token ( UNARY_OPERATOR | BINARY_OPERATOR ) )=> simple_expression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(87,56);
                     pushFollow(FOLLOW_simple_expression_in_atom279);
                     simple_expression24=simple_expression();
 
@@ -711,10 +942,13 @@ public class QueryParser extends Parser {
                     }
                     break;
                 case 4 :
+                    dbg.enterAlt(4);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:88:10: ( token DEREF )=> deref_expression
                     {
                     root_0 = (CommonTree)adaptor.nil();
 
+                    dbg.location(88,27);
                     pushFollow(FOLLOW_deref_expression_in_atom298);
                     deref_expression25=deref_expression();
 
@@ -742,6 +976,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(89, 8);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "atom");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "atom"
@@ -769,20 +1012,32 @@ public class QueryParser extends Parser {
         CommonTree UNARY_OPERATOR27_tree=null;
         CommonTree BINARY_OPERATOR28_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "simple_expression");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(91, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:91:18: ( token ( UNARY_OPERATOR | ( BINARY_OPERATOR argument ) ) )
+            dbg.enterAlt(1);
+
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:92:8: token ( UNARY_OPERATOR | ( BINARY_OPERATOR argument ) )
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(92,8);
             pushFollow(FOLLOW_token_in_simple_expression320);
             token26=token();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, token26.getTree());
+            dbg.location(92,14);
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:92:14: ( UNARY_OPERATOR | ( BINARY_OPERATOR argument ) )
             int alt9=2;
+            try { dbg.enterSubRule(9);
+            try { dbg.enterDecision(9);
+
             int LA9_0 = input.LA(1);
 
             if ( (LA9_0==UNARY_OPERATOR) ) {
@@ -796,12 +1051,18 @@ public class QueryParser extends Parser {
                 NoViableAltException nvae =
                     new NoViableAltException("", 9, 0, input);
 
+                dbg.recognitionException(nvae);
                 throw nvae;
             }
+            } finally {dbg.exitDecision(9);}
+
             switch (alt9) {
                 case 1 :
+                    dbg.enterAlt(1);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:92:15: UNARY_OPERATOR
                     {
+                    dbg.location(92,29);
                     UNARY_OPERATOR27=(Token)match(input,UNARY_OPERATOR,FOLLOW_UNARY_OPERATOR_in_simple_expression323); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     UNARY_OPERATOR27_tree = (CommonTree)adaptor.create(UNARY_OPERATOR27);
@@ -811,16 +1072,23 @@ public class QueryParser extends Parser {
                     }
                     break;
                 case 2 :
+                    dbg.enterAlt(2);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:92:33: ( BINARY_OPERATOR argument )
                     {
+                    dbg.location(92,33);
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:92:33: ( BINARY_OPERATOR argument )
+                    dbg.enterAlt(1);
+
                     // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:92:34: BINARY_OPERATOR argument
                     {
+                    dbg.location(92,49);
                     BINARY_OPERATOR28=(Token)match(input,BINARY_OPERATOR,FOLLOW_BINARY_OPERATOR_in_simple_expression329); if (state.failed) return retval;
                     if ( state.backtracking==0 ) {
                     BINARY_OPERATOR28_tree = (CommonTree)adaptor.create(BINARY_OPERATOR28);
                     root_0 = (CommonTree)adaptor.becomeRoot(BINARY_OPERATOR28_tree, root_0);
                     }
+                    dbg.location(92,51);
                     pushFollow(FOLLOW_argument_in_simple_expression332);
                     argument29=argument();
 
@@ -835,6 +1103,7 @@ public class QueryParser extends Parser {
                     break;
 
             }
+            } finally {dbg.exitSubRule(9);}
 
 
             }
@@ -855,6 +1124,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(93, 8);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "simple_expression");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "simple_expression"
@@ -880,23 +1158,33 @@ public class QueryParser extends Parser {
 
         CommonTree DEREF31_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "deref_expression");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(95, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:95:17: ( token DEREF atom )
+            dbg.enterAlt(1);
+
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:96:8: token DEREF atom
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(96,8);
             pushFollow(FOLLOW_token_in_deref_expression356);
             token30=token();
 
             state._fsp--;
             if (state.failed) return retval;
             if ( state.backtracking==0 ) adaptor.addChild(root_0, token30.getTree());
+            dbg.location(96,19);
             DEREF31=(Token)match(input,DEREF,FOLLOW_DEREF_in_deref_expression358); if (state.failed) return retval;
             if ( state.backtracking==0 ) {
             DEREF31_tree = (CommonTree)adaptor.create(DEREF31);
             root_0 = (CommonTree)adaptor.becomeRoot(DEREF31_tree, root_0);
             }
+            dbg.location(96,21);
             pushFollow(FOLLOW_atom_in_deref_expression361);
             atom32=atom();
 
@@ -922,6 +1210,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(97, 8);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "deref_expression");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "deref_expression"
@@ -943,12 +1240,20 @@ public class QueryParser extends Parser {
 
         CommonTree set33_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "token");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(99, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:100:3: ( TOKEN | STRING_VALUE )
+            dbg.enterAlt(1);
+
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(100,3);
             set33=(Token)input.LT(1);
             if ( (input.LA(1)>=TOKEN && input.LA(1)<=STRING_VALUE) ) {
                 input.consume();
@@ -958,6 +1263,7 @@ public class QueryParser extends Parser {
             else {
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 MismatchedSetException mse = new MismatchedSetException(null,input);
+                dbg.recognitionException(mse);
                 throw mse;
             }
 
@@ -980,6 +1286,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(102, 3);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "token");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "token"
@@ -1001,12 +1316,20 @@ public class QueryParser extends Parser {
 
         CommonTree set34_tree=null;
 
+        try { dbg.enterRule(getGrammarFileName(), "argument");
+        if ( getRuleLevel()==0 ) {dbg.commence();}
+        incRuleLevel();
+        dbg.location(104, 1);
+
         try {
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:105:3: ( STRING_VALUE | INT_VALUE | DECIMAL_VALUE | BOOLEAN_VALUE )
+            dbg.enterAlt(1);
+
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:
             {
             root_0 = (CommonTree)adaptor.nil();
 
+            dbg.location(105,3);
             set34=(Token)input.LT(1);
             if ( (input.LA(1)>=STRING_VALUE && input.LA(1)<=BOOLEAN_VALUE) ) {
                 input.consume();
@@ -1016,6 +1339,7 @@ public class QueryParser extends Parser {
             else {
                 if (state.backtracking>0) {state.failed=true; return retval;}
                 MismatchedSetException mse = new MismatchedSetException(null,input);
+                dbg.recognitionException(mse);
                 throw mse;
             }
 
@@ -1038,6 +1362,15 @@ public class QueryParser extends Parser {
         }
         finally {
         }
+        dbg.location(109, 3);
+
+        }
+        finally {
+            dbg.exitRule(getGrammarFileName(), "argument");
+            decRuleLevel();
+            if ( getRuleLevel()==0 ) {dbg.terminate();}
+        }
+
         return retval;
     }
     // $ANTLR end "argument"
@@ -1045,13 +1378,17 @@ public class QueryParser extends Parser {
     // $ANTLR start synpred1_Query
     public final void synpred1_Query_fragment() throws RecognitionException {   
         // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:87:10: ( token ( UNARY_OPERATOR | BINARY_OPERATOR ) )
+        dbg.enterAlt(1);
+
         // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:87:11: token ( UNARY_OPERATOR | BINARY_OPERATOR )
         {
+        dbg.location(87,11);
         pushFollow(FOLLOW_token_in_synpred1_Query266);
         token();
 
         state._fsp--;
         if (state.failed) return ;
+        dbg.location(87,17);
         if ( (input.LA(1)>=UNARY_OPERATOR && input.LA(1)<=BINARY_OPERATOR) ) {
             input.consume();
             state.errorRecovery=false;state.failed=false;
@@ -1059,6 +1396,7 @@ public class QueryParser extends Parser {
         else {
             if (state.backtracking>0) {state.failed=true; return ;}
             MismatchedSetException mse = new MismatchedSetException(null,input);
+            dbg.recognitionException(mse);
             throw mse;
         }
 
@@ -1070,13 +1408,17 @@ public class QueryParser extends Parser {
     // $ANTLR start synpred2_Query
     public final void synpred2_Query_fragment() throws RecognitionException {   
         // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:88:10: ( token DEREF )
+        dbg.enterAlt(1);
+
         // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:88:11: token DEREF
         {
+        dbg.location(88,11);
         pushFollow(FOLLOW_token_in_synpred2_Query291);
         token();
 
         state._fsp--;
         if (state.failed) return ;
+        dbg.location(88,17);
         match(input,DEREF,FOLLOW_DEREF_in_synpred2_Query293); if (state.failed) return ;
 
         }
@@ -1087,6 +1429,7 @@ public class QueryParser extends Parser {
 
     public final boolean synpred1_Query() {
         state.backtracking++;
+        dbg.beginBacktrack(state.backtracking);
         int start = input.mark();
         try {
             synpred1_Query_fragment(); // can never throw exception
@@ -1095,12 +1438,14 @@ public class QueryParser extends Parser {
         }
         boolean success = !state.failed;
         input.rewind(start);
+        dbg.endBacktrack(state.backtracking, success);
         state.backtracking--;
         state.failed=false;
         return success;
     }
     public final boolean synpred2_Query() {
         state.backtracking++;
+        dbg.beginBacktrack(state.backtracking);
         int start = input.mark();
         try {
             synpred2_Query_fragment(); // can never throw exception
@@ -1109,6 +1454,7 @@ public class QueryParser extends Parser {
         }
         boolean success = !state.failed;
         input.rewind(start);
+        dbg.endBacktrack(state.backtracking, success);
         state.backtracking--;
         state.failed=false;
         return success;
