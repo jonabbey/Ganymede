@@ -236,17 +236,20 @@ public class GanyQueryTransmuter {
     this.selectFields = parse_select_tree(ast.getChild(0));
     this.objectBase = parse_from_tree(ast.getChild(1));
 
-    Tree whereTokenNode = ast.getChild(2);
-
-    if (whereTokenNode != null && whereTokenNode.getType() == QueryParser.WHERE)
+    if (ast.getChildCount() > 2)
       {
-	Tree where_node = whereTokenNode.getChild(0);
+	Tree whereTokenNode = ast.getChild(2);
 
-	if (where_node != null)
+	if (whereTokenNode != null && whereTokenNode.getType() == QueryParser.WHERE)
 	  {
-	    QueryNode where_tree = parse_where_clause(where_node, objectBase);
+	    Tree where_node = whereTokenNode.getChild(0);
+
+	    if (where_node != null)
+	      {
+		QueryNode where_tree = parse_where_clause(where_node, objectBase);
 	    
-	    return where_tree;
+		return where_tree;
+	      }
 	  }
       }
 
