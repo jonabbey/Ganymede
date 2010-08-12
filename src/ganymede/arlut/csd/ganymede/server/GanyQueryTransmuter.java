@@ -265,9 +265,9 @@ public class GanyQueryTransmuter {
 	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.missing_from"), myQueryString, myQueryTree.toStringTree()));
       }
 
-    for (int i = 0; i < node.getChildCount(); i++)
+    for (int i = 1; i < ast.getChildCount(); i++)
       {
-	Tree subNode = node.getChild(i);
+	Tree subNode = ast.getChild(i);
 
 	if (node.getType() == QueryParser.EDITABLE)
 	  {
