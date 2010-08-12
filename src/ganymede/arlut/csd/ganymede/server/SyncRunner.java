@@ -846,6 +846,8 @@ public class SyncRunner implements Runnable {
 					       this,
 					       true); // include oid's in the object to act as remote foreign keys
 
+    xmlOut.setDumpPasswords(true);
+
     xmlOut.startElement("transaction");
     xmlOut.attribute("major_version", Byte.toString(major_xml_sync_version));
     xmlOut.attribute("minor_version", Byte.toString(major_xml_sync_version));
