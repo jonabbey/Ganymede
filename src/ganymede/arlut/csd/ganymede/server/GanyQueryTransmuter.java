@@ -173,13 +173,10 @@ public class GanyQueryTransmuter {
 
     try
       {
-	parser.query();
-
 	myQueryTree = (CommonTree) parser.query().getTree();
       }
     catch (RecognitionException ex)
       {
-	
       }
 
     if (myQueryTree == null)
