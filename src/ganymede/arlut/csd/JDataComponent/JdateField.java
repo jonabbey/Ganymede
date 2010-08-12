@@ -67,7 +67,7 @@ import arlut.csd.Util.TranslationService;
 // James ADDS
 import javax.swing.UIManager;
 
-//import org.jdesktop.swingx.JXDatePicker; 
+import org.jdesktop.swingx.JXDatePicker; 
 import org.jdesktop.swingx.JXMonthView;
 import org.jdesktop.swingx.plaf.basic.SpinningCalendarHeaderHandler;
 import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
@@ -75,6 +75,8 @@ import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
 //test
 import java.awt.event.FocusListener;
 import javax.swing.JFormattedTextField;
+
+import java.text.ParseException;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -88,7 +90,9 @@ import javax.swing.JFormattedTextField;
  *
  */
 
-public class JdateField extends JPanel implements ActionListener, FocusListener {
+public class JdateField extends JPanel implements ActionListener, FocusListener
+{
+  //public class JdateField extends JPanel implements ActionListener {
 
   static final boolean debug = false;
 
@@ -250,11 +254,21 @@ public class JdateField extends JPanel implements ActionListener, FocusListener 
 
     add(buttonPanel, "East");
     
-    //setEditable(iseditable);
-
-    datePicker.setEnabled(iseditable);
 
 
+    // This will make the text field and popup uneditable.
+    datePicker.setEditable(iseditable);
+
+
+    // todo, may need to add in a time field...
+
+
+    // just doesnt work.
+    // add an actionlistener now.
+    //    datePicker.addPropertyChangeListener(new FocusManagerListener());    
+
+
+    // this doesnt appear to get the change correctly.
     JFormattedTextField textf = datePicker.getEditor();
     textf.addFocusListener(this);
 
@@ -266,18 +280,41 @@ public class JdateField extends JPanel implements ActionListener, FocusListener 
     validate();
   }
 
+  /*
+  public FocusManagerListener() implements PropertyChangeListener {
+  public void propertyChangeListener(PropertyChangeEvent e) 
+  {
+    if ("date".equals(e.getPropertyName()))
+      {
+	System.out.println("date curr:");
+	System.out.println(d1);
+	
+	saveDate(picker.getDate());
+      }
+  }
+  }
+  */
+
+  
   public void focusLost(FocusEvent e) 
   {
     System.out.println("Focus lost");
 
-    String d1 = datePicker.getEditor().getValue().toString();
-    
+    try 
+      {
+	datePicker.getEditor().commitEdit();
+      } 
+    catch ( ParseException pe ) 
+      {
+      }  
 
-    System.out.println("date curr:");
+    String d1 = datePicker.getDate().toString();
+    System.out.println("date2 curr:");
     System.out.println(d1);
 
     datePickerFocusLost();
   }
+
 
   public void focusGained(FocusEvent e) 
   {
@@ -316,8 +353,8 @@ public class JdateField extends JPanel implements ActionListener, FocusListener 
     
     Date d1 = datePicker.getDate();
     setDate(d1);
+    //System.err.println(d1.toString());
 
-    System.err.println(d1.toString());
     
     // Now, the date value needs to be propagated up to the server	
     if (allowCallback) 
