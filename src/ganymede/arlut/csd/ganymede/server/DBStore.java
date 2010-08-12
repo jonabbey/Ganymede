@@ -1177,6 +1177,8 @@ public final class DBStore implements JythonMap {
 				    syncConstraint,
 				    includeOid);
 
+	xmlOut.setDumpPasswords(true); // we're doing a full dump, so passwords are allowed
+
 	if (false)
 	  {
 	    System.err.println("DBStore.dumpXML(): created XMLDumpContext");
