@@ -135,11 +135,11 @@
     <a href="../xml.html">Ganymede XML data format</a>, or to write
     custom Java code.</p>
 
-    <h2>The Data Model</h2>
+<!--    <h2>The Data Model</h2>
 
     <p>Before we get into the specific details of the GanyQL syntax,
     it'll be worthwhile for us to take the time to quickly review the
-    Ganymede data model.
+    Ganymede data model.  -->
 
     <h2>The Syntax</h2>
 
@@ -356,8 +356,8 @@
     <p>For example, both of these examples work just fine:</p>
 
     <div class="example">
-       <p><code>"<i>invid field</i>"<span class="keyword">-&gt;</span>"<i>field</i>" <span class="keyword">==</span> "<i>value</i>"</code></p>
-       <p><code>"<i>invid field</i>"<span class="keyword">-&gt;(</span>"<i>field 1</i>" <span class="keyword">==</span> "<i>value1</i>" <span class="keyword">and</span> "<i>field2</i>" <span class="keyword"><</span> 200<span class="keyword">)</span></code></p>
+       <p><code>"<i>invid field</i>"<span class="keyword">-&gt;</span><i>field</i> <span class="keyword">==</span> "<i>value</i>"</code></p>
+       <p><code>"<i>invid field</i>"<span class="keyword">-&gt;(</span><i>field 1</i> <span class="keyword">==</span> "<i>value1</i>" <span class="keyword">and</span> <i>field2</i> <span class="keyword"><</span> 200<span class="keyword">)</span></code></p>
     </div>
 
     <p>In the latter case, the tests against "field1" and "field2" are
@@ -374,17 +374,17 @@
     <p>Here's another example:</p>
 
     <div class="example">
-      <p><code>"<i>invid field</i>"<span class="keyword">-&gt;</span>"<i>invid field2</i>"<span class="keyword">-&gt;(</span>"<i>GID</i>" <span class="keyword">&lt;=</span> 3000 <span class="keyword">or</span> "<i>Users</i>"<span class="keyword">-&gt;(</span>"UID" <span class="keyword">&lt;</span> 4000 <span class="keyword">or</span> "<i>User Netgroup</i>"<span class="keyword">-&gt;</span>"<i>Members</i>"<span class="keyword">-&gt;</span>"<i>UID</i>" <span class="keyword">&gt;</span> 8192<span class="keyword">))</span></code></p>
+      <p><code>"<i>invid field</i>"<span class="keyword">-&gt;</span>"<i>invid field2</i>"<span class="keyword">-&gt;(</span><i>GID</i> <span class="keyword">&lt;=</span> 3000 <span class="keyword">or</span> <i>Users</i><span class="keyword">-&gt;(</span>UID <span class="keyword">&lt;</span> 4000 <span class="keyword">or</span> "<i>User Netgroup</i>"<span class="keyword">-&gt;</span><i>Members</i><span class="keyword">-&gt;</span><i>UID</i> <span class="keyword">&gt;</span> 8192<span class="keyword">))</span></code></p>
     </div>
 
     <p>This query expression returns true for all objects which have
     an "invid field" which points to an object which has an "invid
-    field2" that points to an object that has either a "GID" field
-    that is less than or equal to 3000, or that has a "Users" field
-    which points to an object that has either a "UID" field which is
+    field2" that points to an object that has either a GID field
+    that is less than or equal to 3000, or that has a Users field
+    which points to an object that has either a UID field which is
     less than 4000 or a "User Netgroup" field which points to an
-    object that has a "Members" field which points to an object that
-    has a "UID" field which holds a value greater than 8192.</p>
+    object that has a Members field which points to an object that
+    has a UID field which holds a value greater than 8192.</p>
 
     <p>If we assume that all invid fields involved in pointer
     dereferencing in this query are single-valued (not array) fields,
@@ -395,9 +395,9 @@
       <li>The object that contains the "invid field"</li>
       <li>The object pointed to by "invid field"</li>
       <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"</li>
-      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"<span class="keyword">-&gt;</span>"Users"</li>
-      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"<span class="keyword">-&gt;</span>"Users"<span class="keyword">-&gt;</span>"User Netgroup"</li>
-      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"<span class="keyword">-&gt;</span>"Users"<span class="keyword">-&gt;</span>"User Netgroup"<span class="keyword">-&gt;</span>"Members"</li>
+      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"<span class="keyword">-&gt;</span>Users</li>
+      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"<span class="keyword">-&gt;</span>Users<span class="keyword">-&gt;</span>"User Netgroup"</li>
+      <li>The object pointed to by "invid field"<span class="keyword">-&gt;</span>"invid field2"<span class="keyword">-&gt;</span>Users<span class="keyword">-&gt;</span>"User Netgroup"<span class="keyword">-&gt;</span>Members</li>
     </ul>
 
     <p>If any of those invid (object pointer) fields are actually
@@ -454,13 +454,13 @@
 
     <p>Second, by using backslash escaping:</p>
 
-    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span>
+    <div class="example"><span class="keyword">select object from</span> <i>User</i> <span class="keyword">where</span>
     "<i>Full Name</i>" <span class="keyword">==</span> "<i>\"Jon\"</i>"</div>
 
     <p>We can also use the escaping rules to embed newlines into the query string:</p>
 
-    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span>
-    "<i>Notes</i>" <span class="keyword">==</span> "<i>This user was created recently.\n\nCreated by Jonathan Abbey\n4 October 2006</i>"</div>
+    <div class="example"><span class="keyword">select object from</span> <i>User</i> <span class="keyword">where</span>
+    <i>Notes</i> <span class="keyword">==</span> "<i>This user was created recently.\n\nCreated by Jonathan Abbey\n4 October 2006</i>"</div>
 
     <p>Remember that these character escaping rules are in addition to
     the standard rules for regular expression syntax, so if you are
@@ -469,7 +469,7 @@
     the regular expression parser) you'd need to do something like
     this:</p>
 
-    <div class="example"><span class="keyword">select object from</span> "<i>User</i>" <span class="keyword">where</span>
+    <div class="example"><span class="keyword">select object from</span> <i>User</i> <span class="keyword">where</span>
     "<i>Full Name</i>" <span class="keyword">=~</span> "<i>Wu\\\\Tang</i>"</div>
 
     <p>In this case, we're really looking for any user whose full name
@@ -481,13 +481,13 @@
     <i>Wu\\\\Tang</i> to get the proper encoding all the way down to
     the regular expression parser.</p>
 
-    <h3>GanyQL Examples</h3>
+<!--    <h3>GanyQL Examples</h3>
 
     <h2>Using GanyQL</h2>
 
     <p>Support for GanyQL has been introduced into the primary <a
     href="../javadoc/arlut/csd/ganymede/rmi/Session.html">Session</a>
-    RMI interface used to communicate with the Ganymede server.</p>
+    RMI interface used to communicate with the Ganymede server.</p>  -->
 
   </body>
 </html>
