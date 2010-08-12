@@ -266,7 +266,7 @@ public class GanyQueryTransmuter {
 
     for (int i = 0; i < ast.getChildCount(); i++)
       {
-	Tree subNode = ast.getChild(i);
+	Tree node = ast.getChild(i);
 
 	if (node.getType() == QueryParser.EDITABLE)
 	  {
