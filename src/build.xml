@@ -263,6 +263,8 @@ refresh the jar files.
 
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/GanymedeSSLServerKeys"/>
       <fileset dir="${build.crypto}" includes="arlut/csd/ganymede/common/client.truststore"/>
+
+      <zipfileset src="${lib.dir}/antlr-runtime-3.2.jar"/>
     </jar>
 
     <!-- Build the client jar file -->
