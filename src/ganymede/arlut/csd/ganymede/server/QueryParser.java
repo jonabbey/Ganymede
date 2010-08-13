@@ -1,4 +1,4 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-11 19:46:41
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-12 19:15:53
 
 package arlut.csd.ganymede.server;
 
@@ -14,13 +14,12 @@ import org.antlr.runtime.tree.*;
 
 public class QueryParser extends Parser {
     public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "SELECT", "OBJECT", "COMMA", "FROM", "EDITABLE", "WHERE", "AND", "OR", "LPAREN", "RPAREN", "NOT", "UNARY_OPERATOR", "BINARY_OPERATOR", "DEREF", "TOKEN", "STRING_VALUE", "INT_VALUE", "DECIMAL_VALUE", "BOOLEAN_VALUE", "BACKSLASH", "TOKEN_START_CHAR", "DIGIT", "ESC", "NUMERIC_ARG", "WS"
+        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "SELECT", "OBJECT", "COMMA", "FROM", "EDITABLE", "WHERE", "AND", "OR", "LPAREN", "RPAREN", "NOT", "UNARY_OPERATOR", "BINARY_OPERATOR", "DEREF", "TOKEN", "STRING_VALUE", "INT_VALUE", "DECIMAL_VALUE", "BOOLEAN_VALUE", "BACKSLASH", "TOKEN_START_CHAR", "DIGIT", "ESC", "WS"
     };
     public static final int WHERE=9;
     public static final int TOKEN_START_CHAR=24;
     public static final int ESC=26;
     public static final int DECIMAL_VALUE=21;
-    public static final int NUMERIC_ARG=27;
     public static final int DEREF=17;
     public static final int BINARY_OPERATOR=16;
     public static final int NOT=14;
@@ -32,7 +31,7 @@ public class QueryParser extends Parser {
     public static final int RPAREN=13;
     public static final int INT_VALUE=20;
     public static final int EDITABLE=8;
-    public static final int WS=28;
+    public static final int WS=27;
     public static final int OBJECT=5;
     public static final int COMMA=6;
     public static final int OR=11;

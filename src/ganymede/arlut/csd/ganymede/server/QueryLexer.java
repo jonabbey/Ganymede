@@ -1,6 +1,6 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-11 19:46:41
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g 2010-08-12 19:15:53
 
-package arlut.csd.ganymede.server; // added by hand, antlr didn't do this
+package arlut.csd.ganymede.server; // added by hand, ANTLR didn't do this, unfortunately
 
 import org.antlr.runtime.*;
 import java.util.Stack;
@@ -13,7 +13,6 @@ public class QueryLexer extends Lexer {
     public static final int TOKEN_START_CHAR=24;
     public static final int DECIMAL_VALUE=21;
     public static final int ESC=26;
-    public static final int NUMERIC_ARG=27;
     public static final int DEREF=17;
     public static final int BINARY_OPERATOR=16;
     public static final int NOT=14;
@@ -25,7 +24,7 @@ public class QueryLexer extends Lexer {
     public static final int RPAREN=13;
     public static final int INT_VALUE=20;
     public static final int EDITABLE=8;
-    public static final int WS=28;
+    public static final int WS=27;
     public static final int OBJECT=5;
     public static final int COMMA=6;
     public static final int OR=11;
@@ -1625,8 +1624,6 @@ public class QueryLexer extends Lexer {
     // $ANTLR start "DIGIT"
     public final void mDIGIT() throws RecognitionException {
         try {
-            int _type = DIGIT;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:189:3: ( '0' .. '9' )
             // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:189:5: '0' .. '9'
             {
@@ -1634,8 +1631,6 @@ public class QueryLexer extends Lexer {
 
             }
 
-            state.type = _type;
-            state.channel = _channel;
         }
         finally {
         }
@@ -1713,214 +1708,109 @@ public class QueryLexer extends Lexer {
     // $ANTLR start "DECIMAL_VALUE"
     public final void mDECIMAL_VALUE() throws RecognitionException {
         try {
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:3: ( INT_VALUE ( '.' ( DIGIT )+ )? )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:5: INT_VALUE ( '.' ( DIGIT )+ )?
+            int _type = DECIMAL_VALUE;
+            int _channel = DEFAULT_TOKEN_CHANNEL;
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:3: ( INT_VALUE '.' ( DIGIT )+ )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:5: INT_VALUE '.' ( DIGIT )+
             {
             mINT_VALUE(); if (state.failed) return ;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:15: ( '.' ( DIGIT )+ )?
-            int alt11=2;
-            int LA11_0 = input.LA(1);
+            match('.'); if (state.failed) return ;
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:19: ( DIGIT )+
+            int cnt10=0;
+            loop10:
+            do {
+                int alt10=2;
+                int LA10_0 = input.LA(1);
 
-            if ( (LA11_0=='.') ) {
-                alt11=1;
-            }
-            switch (alt11) {
-                case 1 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:16: '.' ( DIGIT )+
-                    {
-                    match('.'); if (state.failed) return ;
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:20: ( DIGIT )+
-                    int cnt10=0;
-                    loop10:
-                    do {
-                        int alt10=2;
-                        int LA10_0 = input.LA(1);
-
-                        if ( ((LA10_0>='0' && LA10_0<='9')) ) {
-                            alt10=1;
-                        }
-
-
-                        switch (alt10) {
-                    	case 1 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:20: DIGIT
-                    	    {
-                    	    mDIGIT(); if (state.failed) return ;
-
-                    	    }
-                    	    break;
-
-                    	default :
-                    	    if ( cnt10 >= 1 ) break loop10;
-                    	    if (state.backtracking>0) {state.failed=true; return ;}
-                                EarlyExitException eee =
-                                    new EarlyExitException(10, input);
-                                throw eee;
-                        }
-                        cnt10++;
-                    } while (true);
-
-
-                    }
-                    break;
-
-            }
-
-
-            }
-
-        }
-        finally {
-        }
-    }
-    // $ANTLR end "DECIMAL_VALUE"
-
-    // $ANTLR start "NUMERIC_ARG"
-    public final void mNUMERIC_ARG() throws RecognitionException {
-        try {
-            int _type = NUMERIC_ARG;
-            int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:3: ( ( INT_VALUE '.' )=> DECIMAL_VALUE | INT_VALUE )
-            int alt12=2;
-            int LA12_0 = input.LA(1);
-
-            if ( (LA12_0=='-') ) {
-                int LA12_1 = input.LA(2);
-
-                if ( ((LA12_1>='0' && LA12_1<='9')) ) {
-                    int LA12_2 = input.LA(3);
-
-                    if ( (synpred3_Query()) ) {
-                        alt12=1;
-                    }
-                    else if ( (true) ) {
-                        alt12=2;
-                    }
-                    else {
-                        if (state.backtracking>0) {state.failed=true; return ;}
-                        NoViableAltException nvae =
-                            new NoViableAltException("", 12, 2, input);
-
-                        throw nvae;
-                    }
+                if ( ((LA10_0>='0' && LA10_0<='9')) ) {
+                    alt10=1;
                 }
-                else {
-                    if (state.backtracking>0) {state.failed=true; return ;}
-                    NoViableAltException nvae =
-                        new NoViableAltException("", 12, 1, input);
 
-                    throw nvae;
+
+                switch (alt10) {
+            	case 1 :
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:19: DIGIT
+            	    {
+            	    mDIGIT(); if (state.failed) return ;
+
+            	    }
+            	    break;
+
+            	default :
+            	    if ( cnt10 >= 1 ) break loop10;
+            	    if (state.backtracking>0) {state.failed=true; return ;}
+                        EarlyExitException eee =
+                            new EarlyExitException(10, input);
+                        throw eee;
                 }
-            }
-            else if ( ((LA12_0>='0' && LA12_0<='9')) ) {
-                int LA12_2 = input.LA(2);
+                cnt10++;
+            } while (true);
 
-                if ( (synpred3_Query()) ) {
-                    alt12=1;
-                }
-                else if ( (true) ) {
-                    alt12=2;
-                }
-                else {
-                    if (state.backtracking>0) {state.failed=true; return ;}
-                    NoViableAltException nvae =
-                        new NoViableAltException("", 12, 2, input);
-
-                    throw nvae;
-                }
-            }
-            else {
-                if (state.backtracking>0) {state.failed=true; return ;}
-                NoViableAltException nvae =
-                    new NoViableAltException("", 12, 0, input);
-
-                throw nvae;
-            }
-            switch (alt12) {
-                case 1 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:5: ( INT_VALUE '.' )=> DECIMAL_VALUE
-                    {
-                    mDECIMAL_VALUE(); if (state.failed) return ;
-                    if ( state.backtracking==0 ) {
-                       _type = DECIMAL_VALUE; 
-                    }
-
-                    }
-                    break;
-                case 2 :
-                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:202:5: INT_VALUE
-                    {
-                    mINT_VALUE(); if (state.failed) return ;
-                    if ( state.backtracking==0 ) {
-                       _type =INT_VALUE; 
-                    }
-
-                    }
-                    break;
 
             }
+
             state.type = _type;
             state.channel = _channel;
         }
         finally {
         }
     }
-    // $ANTLR end "NUMERIC_ARG"
+    // $ANTLR end "DECIMAL_VALUE"
 
     // $ANTLR start "WS"
     public final void mWS() throws RecognitionException {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:206:3: ( ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+ )
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:206:5: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:3: ( ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+ )
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:5: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+
             {
-            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:206:5: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+
-            int cnt13=0;
-            loop13:
+            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:5: ( ' ' | '\\t' | '\\r' '\\n' | '\\n' )+
+            int cnt11=0;
+            loop11:
             do {
-                int alt13=5;
+                int alt11=5;
                 switch ( input.LA(1) ) {
                 case ' ':
                     {
-                    alt13=1;
+                    alt11=1;
                     }
                     break;
                 case '\t':
                     {
-                    alt13=2;
+                    alt11=2;
                     }
                     break;
                 case '\r':
                     {
-                    alt13=3;
+                    alt11=3;
                     }
                     break;
                 case '\n':
                     {
-                    alt13=4;
+                    alt11=4;
                     }
                     break;
 
                 }
 
-                switch (alt13) {
+                switch (alt11) {
             	case 1 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:206:7: ' '
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:7: ' '
             	    {
             	    match(' '); if (state.failed) return ;
 
             	    }
             	    break;
             	case 2 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:207:7: '\\t'
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:202:7: '\\t'
             	    {
             	    match('\t'); if (state.failed) return ;
 
             	    }
             	    break;
             	case 3 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:208:7: '\\r' '\\n'
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:203:7: '\\r' '\\n'
             	    {
             	    match('\r'); if (state.failed) return ;
             	    match('\n'); if (state.failed) return ;
@@ -1928,7 +1818,7 @@ public class QueryLexer extends Lexer {
             	    }
             	    break;
             	case 4 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:209:7: '\\n'
+            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:204:7: '\\n'
             	    {
             	    match('\n'); if (state.failed) return ;
 
@@ -1936,13 +1826,13 @@ public class QueryLexer extends Lexer {
             	    break;
 
             	default :
-            	    if ( cnt13 >= 1 ) break loop13;
+            	    if ( cnt11 >= 1 ) break loop11;
             	    if (state.backtracking>0) {state.failed=true; return ;}
                         EarlyExitException eee =
-                            new EarlyExitException(13, input);
+                            new EarlyExitException(11, input);
                         throw eee;
                 }
-                cnt13++;
+                cnt11++;
             } while (true);
 
             if ( state.backtracking==0 ) {
@@ -1960,10 +1850,10 @@ public class QueryLexer extends Lexer {
     // $ANTLR end "WS"
 
     public void mTokens() throws RecognitionException {
-        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:8: ( BACKSLASH | LPAREN | RPAREN | COMMA | DEREF | AND | OR | NOT | SELECT | FROM | WHERE | OBJECT | EDITABLE | BOOLEAN_VALUE | UNARY_OPERATOR | BINARY_OPERATOR | TOKEN | ESC | STRING_VALUE | DIGIT | INT_VALUE | NUMERIC_ARG | WS )
-        int alt14=23;
-        alt14 = dfa14.predict(input);
-        switch (alt14) {
+        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:8: ( BACKSLASH | LPAREN | RPAREN | COMMA | DEREF | AND | OR | NOT | SELECT | FROM | WHERE | OBJECT | EDITABLE | BOOLEAN_VALUE | UNARY_OPERATOR | BINARY_OPERATOR | TOKEN | ESC | STRING_VALUE | INT_VALUE | DECIMAL_VALUE | WS )
+        int alt12=22;
+        alt12 = dfa12.predict(input);
+        switch (alt12) {
             case 1 :
                 // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:10: BACKSLASH
                 {
@@ -2098,28 +1988,21 @@ public class QueryLexer extends Lexer {
                 }
                 break;
             case 20 :
-                // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:159: DIGIT
-                {
-                mDIGIT(); if (state.failed) return ;
-
-                }
-                break;
-            case 21 :
-                // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:165: INT_VALUE
+                // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:159: INT_VALUE
                 {
                 mINT_VALUE(); if (state.failed) return ;
 
                 }
                 break;
-            case 22 :
-                // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:175: NUMERIC_ARG
+            case 21 :
+                // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:169: DECIMAL_VALUE
                 {
-                mNUMERIC_ARG(); if (state.failed) return ;
+                mDECIMAL_VALUE(); if (state.failed) return ;
 
                 }
                 break;
-            case 23 :
-                // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:187: WS
+            case 22 :
+                // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:1:183: WS
                 {
                 mWS(); if (state.failed) return ;
 
@@ -2152,32 +2035,6 @@ public class QueryLexer extends Lexer {
     }
     // $ANTLR end synpred2_Query
 
-    // $ANTLR start synpred3_Query
-    public final void synpred3_Query_fragment() throws RecognitionException {   
-        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:5: ( INT_VALUE '.' )
-        // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:7: INT_VALUE '.'
-        {
-        mINT_VALUE(); if (state.failed) return ;
-        match('.'); if (state.failed) return ;
-
-        }
-    }
-    // $ANTLR end synpred3_Query
-
-    public final boolean synpred3_Query() {
-        state.backtracking++;
-        int start = input.mark();
-        try {
-            synpred3_Query_fragment(); // can never throw exception
-        } catch (RecognitionException re) {
-            System.err.println("impossible: "+re);
-        }
-        boolean success = !state.failed;
-        input.rewind(start);
-        state.backtracking--;
-        state.failed=false;
-        return success;
-    }
     public final boolean synpred1_Query() {
         state.backtracking++;
         int start = input.mark();
@@ -2211,7 +2068,7 @@ public class QueryLexer extends Lexer {
     protected DFA2 dfa2 = new DFA2(this);
     protected DFA5 dfa5 = new DFA5(this);
     protected DFA6 dfa6 = new DFA6(this);
-    protected DFA14 dfa14 = new DFA14(this);
+    protected DFA12 dfa12 = new DFA12(this);
     static final String DFA2_eotS =
         "\2\uffff\1\12\1\14\3\uffff\1\17\1\21\12\uffff\1\27\1\31\5\uffff";
     static final String DFA2_eofS =
@@ -2301,7 +2158,7 @@ public class QueryLexer extends Lexer {
     static final String DFA5_acceptS =
         "\1\uffff\1\3\1\uffff\1\2\5\uffff\3\1";
     static final String DFA5_specialS =
-        "\1\4\1\uffff\1\2\1\uffff\1\6\1\5\1\0\1\1\1\3\3\uffff}>";
+        "\1\6\1\uffff\1\5\1\uffff\1\2\1\0\1\3\1\4\1\1\3\uffff}>";
     static final String[] DFA5_transitionS = {
             "\42\3\1\1\71\3\1\2\uffa3\3",
             "",
@@ -2354,81 +2211,6 @@ public class QueryLexer extends Lexer {
         	int _s = s;
             switch ( s ) {
                     case 0 : 
-                        int LA5_6 = input.LA(1);
-
-                         
-                        int index5_6 = input.index();
-                        input.rewind();
-                        s = -1;
-                        if ( (synpred1_Query()) ) {s = 11;}
-
-                        else if ( (true) ) {s = 3;}
-
-                         
-                        input.seek(index5_6);
-                        if ( s>=0 ) return s;
-                        break;
-                    case 1 : 
-                        int LA5_7 = input.LA(1);
-
-                         
-                        int index5_7 = input.index();
-                        input.rewind();
-                        s = -1;
-                        if ( (synpred1_Query()) ) {s = 11;}
-
-                        else if ( (true) ) {s = 3;}
-
-                         
-                        input.seek(index5_7);
-                        if ( s>=0 ) return s;
-                        break;
-                    case 2 : 
-                        int LA5_2 = input.LA(1);
-
-                        s = -1;
-                        if ( (LA5_2=='\"') ) {s = 4;}
-
-                        else if ( (LA5_2=='\\') ) {s = 5;}
-
-                        else if ( (LA5_2=='n') ) {s = 6;}
-
-                        else if ( (LA5_2=='\'') ) {s = 7;}
-
-                        else if ( (LA5_2==' ') ) {s = 8;}
-
-                        else if ( ((LA5_2>='\u0000' && LA5_2<='\u001F')||LA5_2=='!'||(LA5_2>='#' && LA5_2<='&')||(LA5_2>='(' && LA5_2<='[')||(LA5_2>=']' && LA5_2<='m')||(LA5_2>='o' && LA5_2<='\uFFFF')) ) {s = 3;}
-
-                        if ( s>=0 ) return s;
-                        break;
-                    case 3 : 
-                        int LA5_8 = input.LA(1);
-
-                         
-                        int index5_8 = input.index();
-                        input.rewind();
-                        s = -1;
-                        if ( (synpred1_Query()) ) {s = 11;}
-
-                        else if ( (true) ) {s = 3;}
-
-                         
-                        input.seek(index5_8);
-                        if ( s>=0 ) return s;
-                        break;
-                    case 4 : 
-                        int LA5_0 = input.LA(1);
-
-                        s = -1;
-                        if ( (LA5_0=='\"') ) {s = 1;}
-
-                        else if ( (LA5_0=='\\') ) {s = 2;}
-
-                        else if ( ((LA5_0>='\u0000' && LA5_0<='!')||(LA5_0>='#' && LA5_0<='[')||(LA5_0>=']' && LA5_0<='\uFFFF')) ) {s = 3;}
-
-                        if ( s>=0 ) return s;
-                        break;
-                    case 5 : 
                         int LA5_5 = input.LA(1);
 
                          
@@ -2443,7 +2225,22 @@ public class QueryLexer extends Lexer {
                         input.seek(index5_5);
                         if ( s>=0 ) return s;
                         break;
-                    case 6 : 
+                    case 1 : 
+                        int LA5_8 = input.LA(1);
+
+                         
+                        int index5_8 = input.index();
+                        input.rewind();
+                        s = -1;
+                        if ( (synpred1_Query()) ) {s = 11;}
+
+                        else if ( (true) ) {s = 3;}
+
+                         
+                        input.seek(index5_8);
+                        if ( s>=0 ) return s;
+                        break;
+                    case 2 : 
                         int LA5_4 = input.LA(1);
 
                          
@@ -2462,6 +2259,66 @@ public class QueryLexer extends Lexer {
                         input.seek(index5_4);
                         if ( s>=0 ) return s;
                         break;
+                    case 3 : 
+                        int LA5_6 = input.LA(1);
+
+                         
+                        int index5_6 = input.index();
+                        input.rewind();
+                        s = -1;
+                        if ( (synpred1_Query()) ) {s = 11;}
+
+                        else if ( (true) ) {s = 3;}
+
+                         
+                        input.seek(index5_6);
+                        if ( s>=0 ) return s;
+                        break;
+                    case 4 : 
+                        int LA5_7 = input.LA(1);
+
+                         
+                        int index5_7 = input.index();
+                        input.rewind();
+                        s = -1;
+                        if ( (synpred1_Query()) ) {s = 11;}
+
+                        else if ( (true) ) {s = 3;}
+
+                         
+                        input.seek(index5_7);
+                        if ( s>=0 ) return s;
+                        break;
+                    case 5 : 
+                        int LA5_2 = input.LA(1);
+
+                        s = -1;
+                        if ( (LA5_2=='\"') ) {s = 4;}
+
+                        else if ( (LA5_2=='\\') ) {s = 5;}
+
+                        else if ( (LA5_2=='n') ) {s = 6;}
+
+                        else if ( (LA5_2=='\'') ) {s = 7;}
+
+                        else if ( (LA5_2==' ') ) {s = 8;}
+
+                        else if ( ((LA5_2>='\u0000' && LA5_2<='\u001F')||LA5_2=='!'||(LA5_2>='#' && LA5_2<='&')||(LA5_2>='(' && LA5_2<='[')||(LA5_2>=']' && LA5_2<='m')||(LA5_2>='o' && LA5_2<='\uFFFF')) ) {s = 3;}
+
+                        if ( s>=0 ) return s;
+                        break;
+                    case 6 : 
+                        int LA5_0 = input.LA(1);
+
+                        s = -1;
+                        if ( (LA5_0=='\"') ) {s = 1;}
+
+                        else if ( (LA5_0=='\\') ) {s = 2;}
+
+                        else if ( ((LA5_0>='\u0000' && LA5_0<='!')||(LA5_0>='#' && LA5_0<='[')||(LA5_0>=']' && LA5_0<='\uFFFF')) ) {s = 3;}
+
+                        if ( s>=0 ) return s;
+                        break;
             }
             if (state.backtracking>0) {state.failed=true; return -1;}
             NoViableAltException nvae =
@@ -2471,27 +2328,28 @@ public class QueryLexer extends Lexer {
         }
     }
     static final String DFA6_eotS =
-        "\4\uffff\1\3\7\uffff";
+        "\6\uffff\1\3\6\uffff";
     static final String DFA6_eofS =
-        "\14\uffff";
+        "\15\uffff";
     static final String DFA6_minS =
-        "\1\0\1\uffff\1\0\1\uffff\5\0\3\uffff";
+        "\1\0\1\uffff\1\0\1\uffff\5\0\4\uffff";
     static final String DFA6_maxS =
-        "\1\uffff\1\uffff\1\uffff\1\uffff\1\uffff\4\0\3\uffff";
+        "\1\uffff\1\uffff\1\uffff\1\uffff\2\0\1\uffff\2\0\4\uffff";
     static final String DFA6_acceptS =
-        "\1\uffff\1\3\1\uffff\1\2\5\uffff\3\1";
+        "\1\uffff\1\3\1\uffff\1\2\5\uffff\4\1";
     static final String DFA6_specialS =
-        "\1\2\1\uffff\1\0\1\uffff\1\6\1\5\1\1\1\3\1\4\3\uffff}>";
+        "\1\5\1\uffff\1\3\1\uffff\1\4\1\2\1\1\1\6\1\0\4\uffff}>";
     static final String[] DFA6_transitionS = {
             "\47\3\1\1\64\3\1\2\uffa3\3",
             "",
-            "\40\3\1\10\1\3\1\7\4\3\1\4\64\3\1\5\21\3\1\6\uff91\3",
+            "\40\3\1\7\1\3\1\5\4\3\1\6\64\3\1\10\21\3\1\4\uff91\3",
             "",
-            "\47\13\1\11\64\13\1\12\uffa3\13",
             "\1\uffff",
             "\1\uffff",
+            "\47\14\1\12\64\14\1\13\uffa3\14",
             "\1\uffff",
             "\1\uffff",
+            "",
             "",
             "",
             ""
@@ -2534,21 +2392,18 @@ public class QueryLexer extends Lexer {
         	int _s = s;
             switch ( s ) {
                     case 0 : 
-                        int LA6_2 = input.LA(1);
+                        int LA6_8 = input.LA(1);
 
+                         
+                        int index6_8 = input.index();
+                        input.rewind();
                         s = -1;
-                        if ( (LA6_2=='\'') ) {s = 4;}
+                        if ( (synpred2_Query()) ) {s = 12;}
 
-                        else if ( (LA6_2=='\\') ) {s = 5;}
+                        else if ( (true) ) {s = 3;}
 
-                        else if ( (LA6_2=='n') ) {s = 6;}
-
-                        else if ( (LA6_2=='\"') ) {s = 7;}
-
-                        else if ( (LA6_2==' ') ) {s = 8;}
-
-                        else if ( ((LA6_2>='\u0000' && LA6_2<='\u001F')||LA6_2=='!'||(LA6_2>='#' && LA6_2<='&')||(LA6_2>='(' && LA6_2<='[')||(LA6_2>=']' && LA6_2<='m')||(LA6_2>='o' && LA6_2<='\uFFFF')) ) {s = 3;}
-
+                         
+                        input.seek(index6_8);
                         if ( s>=0 ) return s;
                         break;
                     case 1 : 
@@ -2558,15 +2413,67 @@ public class QueryLexer extends Lexer {
                         int index6_6 = input.index();
                         input.rewind();
                         s = -1;
-                        if ( (synpred2_Query()) ) {s = 11;}
+                        if ( (LA6_6=='\'') && (synpred2_Query())) {s = 10;}
 
-                        else if ( (true) ) {s = 3;}
+                        else if ( (LA6_6=='\\') && (synpred2_Query())) {s = 11;}
+
+                        else if ( ((LA6_6>='\u0000' && LA6_6<='&')||(LA6_6>='(' && LA6_6<='[')||(LA6_6>=']' && LA6_6<='\uFFFF')) && (synpred2_Query())) {s = 12;}
+
+                        else s = 3;
 
                          
                         input.seek(index6_6);
                         if ( s>=0 ) return s;
                         break;
                     case 2 : 
+                        int LA6_5 = input.LA(1);
+
+                         
+                        int index6_5 = input.index();
+                        input.rewind();
+                        s = -1;
+                        if ( (synpred2_Query()) ) {s = 9;}
+
+                        else if ( (true) ) {s = 3;}
+
+                         
+                        input.seek(index6_5);
+                        if ( s>=0 ) return s;
+                        break;
+                    case 3 : 
+                        int LA6_2 = input.LA(1);
+
+                        s = -1;
+                        if ( (LA6_2=='n') ) {s = 4;}
+
+                        else if ( (LA6_2=='\"') ) {s = 5;}
+
+                        else if ( (LA6_2=='\'') ) {s = 6;}
+
+                        else if ( (LA6_2==' ') ) {s = 7;}
+
+                        else if ( (LA6_2=='\\') ) {s = 8;}
+
+                        else if ( ((LA6_2>='\u0000' && LA6_2<='\u001F')||LA6_2=='!'||(LA6_2>='#' && LA6_2<='&')||(LA6_2>='(' && LA6_2<='[')||(LA6_2>=']' && LA6_2<='m')||(LA6_2>='o' && LA6_2<='\uFFFF')) ) {s = 3;}
+
+                        if ( s>=0 ) return s;
+                        break;
+                    case 4 : 
+                        int LA6_4 = input.LA(1);
+
+                         
+                        int index6_4 = input.index();
+                        input.rewind();
+                        s = -1;
+                        if ( (synpred2_Query()) ) {s = 9;}
+
+                        else if ( (true) ) {s = 3;}
+
+                         
+                        input.seek(index6_4);
+                        if ( s>=0 ) return s;
+                        break;
+                    case 5 : 
                         int LA6_0 = input.LA(1);
 
                         s = -1;
@@ -2578,68 +2485,19 @@ public class QueryLexer extends Lexer {
 
                         if ( s>=0 ) return s;
                         break;
-                    case 3 : 
+                    case 6 : 
                         int LA6_7 = input.LA(1);
 
                          
                         int index6_7 = input.index();
                         input.rewind();
                         s = -1;
-                        if ( (synpred2_Query()) ) {s = 11;}
+                        if ( (synpred2_Query()) ) {s = 12;}
 
                         else if ( (true) ) {s = 3;}
 
                          
                         input.seek(index6_7);
-                        if ( s>=0 ) return s;
-                        break;
-                    case 4 : 
-                        int LA6_8 = input.LA(1);
-
-                         
-                        int index6_8 = input.index();
-                        input.rewind();
-                        s = -1;
-                        if ( (synpred2_Query()) ) {s = 11;}
-
-                        else if ( (true) ) {s = 3;}
-
-                         
-                        input.seek(index6_8);
-                        if ( s>=0 ) return s;
-                        break;
-                    case 5 : 
-                        int LA6_5 = input.LA(1);
-
-                         
-                        int index6_5 = input.index();
-                        input.rewind();
-                        s = -1;
-                        if ( (synpred2_Query()) ) {s = 11;}
-
-                        else if ( (true) ) {s = 3;}
-
-                         
-                        input.seek(index6_5);
-                        if ( s>=0 ) return s;
-                        break;
-                    case 6 : 
-                        int LA6_4 = input.LA(1);
-
-                         
-                        int index6_4 = input.index();
-                        input.rewind();
-                        s = -1;
-                        if ( (LA6_4=='\'') && (synpred2_Query())) {s = 9;}
-
-                        else if ( (LA6_4=='\\') && (synpred2_Query())) {s = 10;}
-
-                        else if ( ((LA6_4>='\u0000' && LA6_4<='&')||(LA6_4>='(' && LA6_4<='[')||(LA6_4>=']' && LA6_4<='\uFFFF')) && (synpred2_Query())) {s = 11;}
-
-                        else s = 3;
-
-                         
-                        input.seek(index6_4);
                         if ( s>=0 ) return s;
                         break;
             }
@@ -2650,39 +2508,39 @@ public class QueryLexer extends Lexer {
             throw nvae;
         }
     }
-    static final String DFA14_eotS =
-        "\1\uffff\1\25\4\uffff\11\21\1\uffff\1\21\2\uffff\1\47\4\uffff\1"+
-        "\51\1\21\1\53\14\21\3\uffff\1\70\1\uffff\1\21\1\72\12\21\1\uffff"+
-        "\1\21\1\uffff\2\21\1\107\3\21\1\17\1\113\4\21\1\uffff\1\113\1\120"+
-        "\1\21\1\uffff\1\21\1\123\1\124\1\17\1\uffff\2\21\2\uffff\1\21\1"+
-        "\130\1\131\2\uffff";
-    static final String DFA14_eofS =
-        "\132\uffff";
-    static final String DFA14_minS =
+    static final String DFA12_eotS =
+        "\1\uffff\1\25\4\uffff\11\21\1\uffff\1\21\2\uffff\1\46\4\uffff\1"+
+        "\21\1\51\14\21\2\uffff\1\66\1\uffff\1\21\1\70\12\21\1\uffff\1\21"+
+        "\1\uffff\2\21\1\105\3\21\1\17\1\111\4\21\1\uffff\1\111\1\116\1\21"+
+        "\1\uffff\1\21\1\121\1\122\1\17\1\uffff\2\21\2\uffff\1\21\1\126\1"+
+        "\127\2\uffff";
+    static final String DFA12_eofS =
+        "\130\uffff";
+    static final String DFA12_minS =
         "\1\11\1\40\3\uffff\1\60\1\116\1\102\1\117\1\105\1\101\1\110\1\104"+
-        "\1\122\1\105\1\uffff\1\105\2\uffff\1\56\4\uffff\1\56\1\104\1\60"+
-        "\1\112\1\124\1\114\1\101\1\117\1\114\1\105\1\111\1\104\1\125\1\106"+
-        "\1\116\3\uffff\1\60\1\uffff\1\105\1\60\1\105\1\122\1\115\1\123\1"+
-        "\122\1\124\1\123\1\105\1\111\1\74\1\uffff\1\103\1\uffff\1\103\1"+
-        "\124\1\60\2\105\1\101\2\60\1\116\2\124\1\123\1\uffff\2\60\1\102"+
-        "\1\uffff\1\105\3\60\1\uffff\1\114\1\104\2\uffff\1\105\2\60\2\uffff";
-    static final String DFA14_maxS =
+        "\1\122\1\105\1\uffff\1\105\2\uffff\1\56\4\uffff\1\104\1\60\1\112"+
+        "\1\124\1\114\1\101\1\117\1\114\1\105\1\111\1\104\1\125\1\106\1\116"+
+        "\2\uffff\1\60\1\uffff\1\105\1\60\1\105\1\122\1\115\1\123\1\122\1"+
+        "\124\1\123\1\105\1\111\1\74\1\uffff\1\103\1\uffff\1\103\1\124\1"+
+        "\60\2\105\1\101\2\60\1\116\2\124\1\123\1\uffff\2\60\1\102\1\uffff"+
+        "\1\105\3\60\1\uffff\1\114\1\104\2\uffff\1\105\2\60\2\uffff";
+    static final String DFA12_maxS =
         "\1\ufffe\1\156\3\uffff\1\76\1\156\1\162\1\157\1\164\1\162\1\150"+
-        "\1\156\1\162\1\145\1\uffff\1\145\2\uffff\1\71\4\uffff\1\71\1\144"+
-        "\1\ufffe\1\152\1\164\1\154\1\141\1\157\1\154\1\145\1\151\1\144\1"+
-        "\165\1\146\1\156\3\uffff\1\ufffe\1\uffff\1\145\1\ufffe\1\145\1\162"+
-        "\1\155\1\163\1\162\1\164\1\163\1\145\1\151\1\76\1\uffff\1\143\1"+
-        "\uffff\1\143\1\164\1\ufffe\2\145\1\141\2\ufffe\1\156\2\164\1\163"+
-        "\1\uffff\2\ufffe\1\142\1\uffff\1\145\3\ufffe\1\uffff\1\154\1\144"+
-        "\2\uffff\1\145\2\ufffe\2\uffff";
-    static final String DFA14_acceptS =
-        "\2\uffff\1\2\1\3\1\4\12\uffff\1\20\1\uffff\1\21\1\23\1\uffff\1\27"+
-        "\1\1\1\22\1\5\17\uffff\1\24\1\26\1\25\1\uffff\1\7\14\uffff\1\6\1"+
-        "\uffff\1\10\14\uffff\1\12\3\uffff\1\16\4\uffff\1\13\2\uffff\1\14"+
-        "\1\11\3\uffff\1\17\1\15";
-    static final String DFA14_specialS =
-        "\132\uffff}>";
-    static final String[] DFA14_transitionS = {
+        "\1\156\1\162\1\145\1\uffff\1\145\2\uffff\1\71\4\uffff\1\144\1\ufffe"+
+        "\1\152\1\164\1\154\1\141\1\157\1\154\1\145\1\151\1\144\1\165\1\146"+
+        "\1\156\2\uffff\1\ufffe\1\uffff\1\145\1\ufffe\1\145\1\162\1\155\1"+
+        "\163\1\162\1\164\1\163\1\145\1\151\1\76\1\uffff\1\143\1\uffff\1"+
+        "\143\1\164\1\ufffe\2\145\1\141\2\ufffe\1\156\2\164\1\163\1\uffff"+
+        "\2\ufffe\1\142\1\uffff\1\145\3\ufffe\1\uffff\1\154\1\144\2\uffff"+
+        "\1\145\2\ufffe\2\uffff";
+    static final String DFA12_acceptS =
+        "\2\uffff\1\2\1\3\1\4\12\uffff\1\20\1\uffff\1\21\1\23\1\uffff\1\26"+
+        "\1\1\1\22\1\5\16\uffff\1\24\1\25\1\uffff\1\7\14\uffff\1\6\1\uffff"+
+        "\1\10\14\uffff\1\12\3\uffff\1\16\4\uffff\1\13\2\uffff\1\14\1\11"+
+        "\3\uffff\1\17\1\15";
+    static final String DFA12_specialS =
+        "\130\uffff}>";
+    static final String[] DFA12_transitionS = {
             "\2\24\2\uffff\1\24\22\uffff\1\24\1\uffff\1\22\4\uffff\1\22\1"+
             "\2\1\3\2\uffff\1\4\1\5\2\uffff\12\23\2\uffff\3\17\2\uffff\1"+
             "\6\2\21\1\16\1\14\1\12\5\21\1\20\1\21\1\10\1\7\3\21\1\11\1\15"+
@@ -2695,31 +2553,32 @@ public class QueryLexer extends Lexer {
             "",
             "",
             "",
-            "\12\30\4\uffff\1\27",
-            "\1\31\37\uffff\1\31",
-            "\1\33\17\uffff\1\32\17\uffff\1\33\17\uffff\1\32",
-            "\1\34\37\uffff\1\34",
-            "\1\35\16\uffff\1\36\20\uffff\1\35\16\uffff\1\36",
-            "\1\40\20\uffff\1\37\16\uffff\1\40\20\uffff\1\37",
-            "\1\41\37\uffff\1\41",
-            "\1\42\11\uffff\1\43\25\uffff\1\42\11\uffff\1\43",
+            "\12\23\4\uffff\1\27",
+            "\1\30\37\uffff\1\30",
+            "\1\32\17\uffff\1\31\17\uffff\1\32\17\uffff\1\31",
+            "\1\33\37\uffff\1\33",
+            "\1\34\16\uffff\1\35\20\uffff\1\34\16\uffff\1\35",
+            "\1\37\20\uffff\1\36\16\uffff\1\37\20\uffff\1\36",
+            "\1\40\37\uffff\1\40",
+            "\1\41\11\uffff\1\42\25\uffff\1\41\11\uffff\1\42",
+            "\1\43\37\uffff\1\43",
             "\1\44\37\uffff\1\44",
+            "",
             "\1\45\37\uffff\1\45",
             "",
-            "\1\46\37\uffff\1\46",
             "",
-            "",
-            "\1\50\1\uffff\12\30",
+            "\1\47\1\uffff\12\23",
             "",
             "",
             "",
             "",
-            "\1\50\1\uffff\12\30",
-            "\1\52\37\uffff\1\52",
+            "\1\50\37\uffff\1\50",
             "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
             "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
             "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
             "\u1fff\21",
+            "\1\52\37\uffff\1\52",
+            "\1\53\37\uffff\1\53",
             "\1\54\37\uffff\1\54",
             "\1\55\37\uffff\1\55",
             "\1\56\37\uffff\1\56",
@@ -2730,21 +2589,20 @@ public class QueryLexer extends Lexer {
             "\1\63\37\uffff\1\63",
             "\1\64\37\uffff\1\64",
             "\1\65\37\uffff\1\65",
-            "\1\66\37\uffff\1\66",
+            "",
+            "",
+            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
+            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
+            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
+            "\u1fff\21",
+            "",
             "\1\67\37\uffff\1\67",
-            "",
-            "",
-            "",
             "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
             "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
             "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
             "\u1fff\21",
-            "",
             "\1\71\37\uffff\1\71",
-            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
-            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
-            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
-            "\u1fff\21",
+            "\1\72\37\uffff\1\72",
             "\1\73\37\uffff\1\73",
             "\1\74\37\uffff\1\74",
             "\1\75\37\uffff\1\75",
@@ -2752,34 +2610,43 @@ public class QueryLexer extends Lexer {
             "\1\77\37\uffff\1\77",
             "\1\100\37\uffff\1\100",
             "\1\101\37\uffff\1\101",
-            "\1\102\37\uffff\1\102",
-            "\1\103\37\uffff\1\103",
             "\3\17",
             "",
-            "\1\104\37\uffff\1\104",
+            "\1\102\37\uffff\1\102",
             "",
-            "\1\105\37\uffff\1\105",
+            "\1\103\37\uffff\1\103",
+            "\1\104\37\uffff\1\104",
+            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
+            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
+            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
+            "\u1fff\21",
             "\1\106\37\uffff\1\106",
-            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
-            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
-            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
-            "\u1fff\21",
+            "\1\107\37\uffff\1\107",
             "\1\110\37\uffff\1\110",
-            "\1\111\37\uffff\1\111",
+            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
+            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
+            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
+            "\u1fff\21",
+            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
+            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
+            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
+            "\u1fff\21",
             "\1\112\37\uffff\1\112",
-            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
-            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
-            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
-            "\u1fff\21",
-            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
-            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
-            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
-            "\u1fff\21",
+            "\1\113\37\uffff\1\113",
             "\1\114\37\uffff\1\114",
             "\1\115\37\uffff\1\115",
-            "\1\116\37\uffff\1\116",
+            "",
+            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
+            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
+            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
+            "\u1fff\21",
+            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
+            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
+            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
+            "\u1fff\21",
             "\1\117\37\uffff\1\117",
             "",
+            "\1\120\37\uffff\1\120",
             "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
             "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
             "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
@@ -2788,27 +2655,16 @@ public class QueryLexer extends Lexer {
             "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
             "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
             "\u1fff\21",
-            "\1\121\37\uffff\1\121",
+            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
+            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
+            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
+            "\u1fff\21",
             "",
-            "\1\122\37\uffff\1\122",
-            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
-            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
-            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
-            "\u1fff\21",
-            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
-            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
-            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
-            "\u1fff\21",
-            "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
-            "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
-            "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
-            "\u1fff\21",
+            "\1\123\37\uffff\1\123",
+            "\1\124\37\uffff\1\124",
+            "",
             "",
             "\1\125\37\uffff\1\125",
-            "\1\126\37\uffff\1\126",
-            "",
-            "",
-            "\1\127\37\uffff\1\127",
             "\12\21\7\uffff\32\21\6\uffff\32\21\5\uffff\40\21\1\uffff\u15df"+
             "\21\1\uffff\u018d\21\1\uffff\u07f1\21\7\uffff\1\21\3\uffff\44"+
             "\21\1\uffff\57\21\1\uffff\u0fa0\21\1\uffff\ua7ff\21\u0800\uffff"+
@@ -2821,37 +2677,37 @@ public class QueryLexer extends Lexer {
             ""
     };
 
-    static final short[] DFA14_eot = DFA.unpackEncodedString(DFA14_eotS);
-    static final short[] DFA14_eof = DFA.unpackEncodedString(DFA14_eofS);
-    static final char[] DFA14_min = DFA.unpackEncodedStringToUnsignedChars(DFA14_minS);
-    static final char[] DFA14_max = DFA.unpackEncodedStringToUnsignedChars(DFA14_maxS);
-    static final short[] DFA14_accept = DFA.unpackEncodedString(DFA14_acceptS);
-    static final short[] DFA14_special = DFA.unpackEncodedString(DFA14_specialS);
-    static final short[][] DFA14_transition;
+    static final short[] DFA12_eot = DFA.unpackEncodedString(DFA12_eotS);
+    static final short[] DFA12_eof = DFA.unpackEncodedString(DFA12_eofS);
+    static final char[] DFA12_min = DFA.unpackEncodedStringToUnsignedChars(DFA12_minS);
+    static final char[] DFA12_max = DFA.unpackEncodedStringToUnsignedChars(DFA12_maxS);
+    static final short[] DFA12_accept = DFA.unpackEncodedString(DFA12_acceptS);
+    static final short[] DFA12_special = DFA.unpackEncodedString(DFA12_specialS);
+    static final short[][] DFA12_transition;
 
     static {
-        int numStates = DFA14_transitionS.length;
-        DFA14_transition = new short[numStates][];
+        int numStates = DFA12_transitionS.length;
+        DFA12_transition = new short[numStates][];
         for (int i=0; i<numStates; i++) {
-            DFA14_transition[i] = DFA.unpackEncodedString(DFA14_transitionS[i]);
+            DFA12_transition[i] = DFA.unpackEncodedString(DFA12_transitionS[i]);
         }
     }
 
-    class DFA14 extends DFA {
+    class DFA12 extends DFA {
 
-        public DFA14(BaseRecognizer recognizer) {
+        public DFA12(BaseRecognizer recognizer) {
             this.recognizer = recognizer;
-            this.decisionNumber = 14;
-            this.eot = DFA14_eot;
-            this.eof = DFA14_eof;
-            this.min = DFA14_min;
-            this.max = DFA14_max;
-            this.accept = DFA14_accept;
-            this.special = DFA14_special;
-            this.transition = DFA14_transition;
+            this.decisionNumber = 12;
+            this.eot = DFA12_eot;
+            this.eof = DFA12_eof;
+            this.min = DFA12_min;
+            this.max = DFA12_max;
+            this.accept = DFA12_accept;
+            this.special = DFA12_special;
+            this.transition = DFA12_transition;
         }
         public String getDescription() {
-            return "1:1: Tokens : ( BACKSLASH | LPAREN | RPAREN | COMMA | DEREF | AND | OR | NOT | SELECT | FROM | WHERE | OBJECT | EDITABLE | BOOLEAN_VALUE | UNARY_OPERATOR | BINARY_OPERATOR | TOKEN | ESC | STRING_VALUE | DIGIT | INT_VALUE | NUMERIC_ARG | WS );";
+            return "1:1: Tokens : ( BACKSLASH | LPAREN | RPAREN | COMMA | DEREF | AND | OR | NOT | SELECT | FROM | WHERE | OBJECT | EDITABLE | BOOLEAN_VALUE | UNARY_OPERATOR | BINARY_OPERATOR | TOKEN | ESC | STRING_VALUE | INT_VALUE | DECIMAL_VALUE | WS );";
         }
     }
  
