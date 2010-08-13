@@ -75,8 +75,11 @@ import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
 //test
 import java.awt.event.FocusListener;
 import javax.swing.JFormattedTextField;
+import javax.swing.JTextField;
 
 import java.text.ParseException;
+import java.util.Calendar;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -106,6 +109,8 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   // ---
 
   private JXDatePicker datePicker;       
+  private JFormattedTextField datef; // datepicker internal field
+  private JTextField timef;
 
   private boolean
     allowCallback = false,
@@ -232,17 +237,44 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     // Creates a new picker and sets the current date to today 
     datePicker = new JXDatePicker(date); 
     datePicker.setName("datePicker"); 
-    datePicker.addActionListener(this);
-    
+    datePicker.addActionListener(this);    
     JXMonthView monthView = datePicker.getMonthView();
     if (minDate != null) monthView.setLowerBound(minDate);
     if (maxDate != null) monthView.setUpperBound(maxDate);
     monthView.setZoomable(true);    
+
+    // This will make the text field and popup (un)editable.
+    datePicker.setEditable(iseditable);
+
+    datef = datePicker.getEditor();
+    datef.addFocusListener(this);
+
     buttonPanel.add(datePicker, "West");
 
 
+
+
+    // Add in a time input.
+    // todo optional, based on contructor - todo.
+    timef = new JTextField(5);
+    // set the time part of the date now too.
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(date);
+    String hour = prefixZero(Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
+    String minute = prefixZero(Integer.toString(cal.get(Calendar.MINUTE)));
+    timef.setText(hour+":"+minute);
+    timef.setEditable(iseditable);
+    add(timef);
+
+    // Add focus listener.
+    timef.addFocusListener(this);
+
+
+
+
+
     // Add a calendar icon to popup the widget.
-    // TODO MAKE CAL BUTTON TO PULLUP NEW POPUP.
+    // TODO MAKE OLD CAL BUTTON TO PULLUP NEW POPUP.
     Image img = PackageResources.getImageResource(this, "calendar.gif", getClass());
     Image img_dn = PackageResources.getImageResource(this, "calendar_dn.gif", getClass());
     _calendarButton = new JButton(new ImageIcon(img));
@@ -251,26 +283,9 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     _calendarButton.addActionListener(this);
     if (iseditable) buttonPanel.add(_calendarButton,"Center");
 
-
     add(buttonPanel, "East");
     
 
-
-    // This will make the text field and popup uneditable.
-    datePicker.setEditable(iseditable);
-
-
-    // todo, may need to add in a time field...
-
-
-    // just doesnt work.
-    // add an actionlistener now.
-    //    datePicker.addPropertyChangeListener(new FocusManagerListener());    
-
-
-    // this doesnt appear to get the change correctly.
-    JFormattedTextField textf = datePicker.getEditor();
-    textf.addFocusListener(this);
 
     unset = true;
 
@@ -280,39 +295,60 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     validate();
   }
 
-  /*
-  public FocusManagerListener() implements PropertyChangeListener {
-  public void propertyChangeListener(PropertyChangeEvent e) 
-  {
-    if ("date".equals(e.getPropertyName()))
-      {
-	System.out.println("date curr:");
-	System.out.println(d1);
-	
-	saveDate(picker.getDate());
-      }
-  }
-  }
-  */
 
-  
+  // This is needed for the datePicker textField tab/click focus lost.
   public void focusLost(FocusEvent e) 
   {
     System.out.println("Focus lost");
+    Object c = e.getSource();
 
-    try 
+    /* -- */
+
+    if (c == timef) 
       {
-	datePicker.getEditor().commitEdit();
-      } 
-    catch ( ParseException pe ) 
+	System.out.println("Focus lost on timef");
+	// update datepickers date time now.
+	Date d1 = datePicker.getDate();
+	Calendar cal = Calendar.getInstance();
+	cal.setTime(d1);
+
+	System.out.println("timef "+timef.getText());
+
+	String[] splt = timef.getText().split(":");
+	if (splt.length < 2)
+	  {
+	    // err
+	  }
+	  
+	System.out.println("length is "+splt.length);
+	System.out.println("split is "+splt[0]);
+	System.out.println("split is "+splt[1]);
+
+	int hour = Integer.parseInt(splt[0]);
+	int minute = Integer.parseInt(splt[1]);
+	cal.set(Calendar.HOUR_OF_DAY, hour);
+	cal.set(Calendar.HOUR_OF_DAY, minute);
+
+	datePickerFocusLost();
+      }
+    else if (c == datef) 
       {
-      }  
+	System.out.println("Focus lost on datef");
+	try 
+	  {
+	    datePicker.getEditor().commitEdit();
+	  } 
+	catch ( ParseException pe ) 
+	  {
+	  }  
+	
+	String d1 = datePicker.getDate().toString();
+	System.out.println("date2 curr:");
+	System.out.println(d1);
+	
+	datePickerFocusLost();
+      }
 
-    String d1 = datePicker.getDate().toString();
-    System.out.println("date2 curr:");
-    System.out.println(d1);
-
-    datePickerFocusLost();
   }
 
 
@@ -436,6 +472,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
    * @param d the date to use
    */
 
+  // checklimit unused... todo remove?
   public void setDate(Date d, boolean checkLimits)
   {
     if (debug)
@@ -447,6 +484,18 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
       {
 	unset = true;
       }
+    else
+      {
+	unset = false;
+      }
+
+    // set the time part of the date now too.
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(d);
+    String hour = prefixZero(Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
+    String minute = prefixZero(Integer.toString(cal.get(Calendar.MINUTE)));
+    timef.setText(hour+":"+minute);
+
 
     datePicker.setDate(d);  
     my_date = d;
@@ -456,8 +505,16 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
         original_date = d;
       }
 
-    unset = false;
     changed = true;
+  }
+
+  public String prefixZero(String str)
+  {
+    if (str.length() < 2)
+    {
+      str = "0" + str;
+    }
+    return str;
   }
 
   /**
