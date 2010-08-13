@@ -185,7 +185,7 @@ options {greedy=false;}
   | '\'' ((ESC)=> ESC | ~'\'' )* '\''
   ;
 
-DIGIT
+fragment DIGIT
   : '0'..'9'
   ;
 
@@ -193,13 +193,8 @@ INT_VALUE
   : '-'? DIGIT+
   ;
 
-fragment DECIMAL_VALUE
-  : INT_VALUE ('.' DIGIT+)?
-  ;
-
-NUMERIC_ARG
-  : ( INT_VALUE '.' ) => DECIMAL_VALUE { $type = DECIMAL_VALUE; }
-  | INT_VALUE { $type =INT_VALUE; }
+DECIMAL_VALUE
+  : INT_VALUE '.' DIGIT+
   ;
 
 WS
