@@ -634,6 +634,7 @@ public class GanyQueryTransmuter {
 	  case FieldType.INVID:
 	  case FieldType.IP:
 	    return StringUtils.dequote(argument);
+
 	  case FieldType.DATE:
 	    DateFormat format = DateFormat.getInstance();
 	    try
