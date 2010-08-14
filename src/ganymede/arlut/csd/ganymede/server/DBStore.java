@@ -1128,29 +1128,47 @@ public final class DBStore implements JythonMap {
 	System.err.println("DBStore: Dumping XML");
       }
 
-    if (!dumpDataObjects && !dumpSchema)
-      {
-	outStream.close();
-
-	// "One of dumpDataObjects and dumpSchema must be true."
-	throw new IllegalArgumentException(ts.l("dumpXML.doNothing"));
-      }
-
-    lock = new DBDumpLock(this);
-
     try
       {
-	lock.establish("System");	// wait until we get our lock 
-      }
-    catch (InterruptedException ex)
-      {
-	// "DBStore.dumpXML(): Interrupted waiting for dump lock:\n\n{0}"
-	Ganymede.debug(ts.l("dumpXML.interrupted", Ganymede.stackTrace(ex)));
-	throw new RuntimeException(ex);
-      }
+	if (!dumpDataObjects && !dumpSchema)
+	  {
+	    // "One of dumpDataObjects and dumpSchema must be true."
+	    throw new IllegalArgumentException(ts.l("dumpXML.doNothing"));
+	  }
 
-    try
-      {
+	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+				    includePlaintext,
+				    includeHistory,
+				    syncConstraint,
+				    includeOid);
+
+	// we don't need a lock if we're just dumping the schema,
+	// because the GanymedeServer loginSemaphore will keep the
+	// schema from changing under us.
+
+	if (!dumpDataObjects)
+	  {
+	    dumpSchemaXML(xmlOut);
+	    return;
+	  }
+
+	// we must be dumping objects, possibly with schema data as well
+
+	xmlOut.setDumpPasswords(true); // we're doing a full dump, so passwords are allowed
+
+	lock = new DBDumpLock(this);
+
+	try
+	  {
+	    lock.establish("System");	// wait until we get our lock 
+	  }
+	catch (InterruptedException ex)
+	  {
+	    // "DBStore.dumpXML(): Interrupted waiting for dump lock:\n\n{0}"
+	    Ganymede.debug(ts.l("dumpXML.interrupted", Ganymede.stackTrace(ex)));
+	    throw new RuntimeException(ex);
+	  }
+
 	if (false)
 	  {
 	    System.err.println("DBStore.dumpXML(): got dump lock");
@@ -1171,14 +1189,6 @@ public final class DBStore implements JythonMap {
 	      }
 	  }
 
-	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
-				    includePlaintext,
-				    includeHistory,
-				    syncConstraint,
-				    includeOid);
-
-	xmlOut.setDumpPasswords(true); // we're doing a full dump, so passwords are allowed
-
 	if (false)
 	  {
 	    System.err.println("DBStore.dumpXML(): created XMLDumpContext");
@@ -1186,85 +1196,42 @@ public final class DBStore implements JythonMap {
 	    
 	// start writing
 	    
-	if (dumpDataObjects)
-	  {
-	    xmlOut.startElement("ganymede");
-	    xmlOut.attribute("major", Integer.toString(GanymedeXMLSession.majorVersion));
-	    xmlOut.attribute("minor", Integer.toString(GanymedeXMLSession.minorVersion));
-	  }
-	    
+	xmlOut.startElement("ganymede");
+	xmlOut.attribute("major", Integer.toString(GanymedeXMLSession.majorVersion));
+	xmlOut.attribute("minor", Integer.toString(GanymedeXMLSession.minorVersion));
+
+	xmlOut.indentOut();
+
 	if (dumpSchema)
 	  {
-	    if (dumpDataObjects)
-	      {
-		xmlOut.indentOut();
-	      }
-	    
-	    xmlOut.startElementIndent("ganyschema");
-	    
-	    xmlOut.indentOut();
-	    xmlOut.startElementIndent("namespaces");
-	    
-	    xmlOut.indentOut();
-	    
-	    for (int i = 0; i < nameSpaces.size(); i++)
-	      {
-		ns = (DBNameSpace) nameSpaces.elementAt(i);
-		ns.emitXML(xmlOut);
-	      }
-	    
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("namespaces");
-	    
-	    // write out our category tree
-	    
-	    xmlOut.skipLine();
-	    
-	    xmlOut.startElementIndent("object_type_definitions");
-	    
-	    xmlOut.indentOut();
-	    rootCategory.emitXML(xmlOut);
-	    
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("object_type_definitions");
-	    
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("ganyschema");
+	    dumpSchemaXML(xmlOut);
 	  }
-	
-	if (dumpDataObjects)
+
+	xmlOut.startElementIndent("ganydata");
+	xmlOut.indentOut();
+
+	for (DBObjectBase base: getBases())
 	  {
-	    if (!dumpSchema)
+	    if (base.isEmbedded())
 	      {
-		xmlOut.indentOut();
+		continue;
 	      }
-	    
-	    xmlOut.startElementIndent("ganydata");
-	    xmlOut.indentOut();
-	    
-	    for (DBObjectBase base: getBases())
-	      {
-		if (base.isEmbedded())
-		  {
-		    continue;
-		  }
 		
-		for (DBObject x: base.getObjects())
+	    for (DBObject x: base.getObjects())
+	      {
+		if (xmlOut.mayInclude(x))
 		  {
-		    if (xmlOut.mayInclude(x))
-		      {
-			x.emitXML(xmlOut);
-		      }
+		    x.emitXML(xmlOut);
 		  }
 	      }
-	    
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("ganydata");
-	    
-	    xmlOut.indentIn();
-	    xmlOut.endElementIndent("ganymede");
 	  }
-	
+
+	xmlOut.indentIn();
+	xmlOut.endElementIndent("ganydata");
+
+	xmlOut.indentIn();
+	xmlOut.endElementIndent("ganymede");
+
 	xmlOut.write("\n");
 	xmlOut.close();
 	xmlOut = null;
@@ -1305,6 +1272,43 @@ public final class DBStore implements JythonMap {
 	      }
 	  }
       }
+  }
+
+  /**
+   * Dumps the schema definition to xmlOut.
+   */
+
+  public synchronized void dumpSchemaXML(XMLDumpContext xmlOut) throws IOException
+  {
+    xmlOut.startElementIndent("ganyschema");
+	    
+    xmlOut.indentOut();
+    xmlOut.startElementIndent("namespaces");
+	    
+    xmlOut.indentOut();
+	    
+    for (DBNameSpace ns: nameSpaces)
+      {
+	ns.emitXML(xmlOut);
+      }
+	    
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("namespaces");
+	    
+    // write out our category tree
+	    
+    xmlOut.skipLine();
+	    
+    xmlOut.startElementIndent("object_type_definitions");
+	    
+    xmlOut.indentOut();
+    rootCategory.emitXML(xmlOut);
+	    
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("object_type_definitions");
+	    
+    xmlOut.indentIn();
+    xmlOut.endElementIndent("ganyschema");
   }
 
   /**
