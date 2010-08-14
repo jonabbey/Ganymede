@@ -5182,23 +5182,12 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    if (!supergashMode)
+    if (sendData && !supergashMode)
       {
-	String message;
-
-	if (sendData)
-	  {
-	    // "You do not have permissions to dump the server''s data with the xml client"
-	    message = ts.l("getXML.data_refused");
-	  }
-	else
-	  {
-	    // "You do not have permissions to dump the server''s schema definition with the xml client"
-	    message = ts.l("getXML.schema_refused");
-	  }
-
+	// "Permissions Error"
+	// "You do not have permissions to dump the server''s data with the xml client"
 	return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
-					  message);
+					  ts.l("getXML.data_refused"));
       }
 
     XMLTransmitter transmitter = null;
@@ -5209,6 +5198,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     catch (IOException ex)
       {
+	// "Error transmitting XML"
+	// "Exception caught trying to initialize server transmitter\n\n{0}"
 	return Ganymede.createErrorDialog(ts.l("getXML.transmitter_error"),
 					  ts.l("getXML.transmitter_error_msg", ex.getMessage()));
       }
