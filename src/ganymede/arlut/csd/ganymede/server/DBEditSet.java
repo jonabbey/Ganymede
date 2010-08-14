@@ -1454,7 +1454,16 @@ public class DBEditSet {
     synchronized (dbStore.journal)
       {
 	commit_persistTransaction();
-	commit_writeSyncChannels();
+
+	// on first run we're initializing an empty database, and we
+	// won't have any sync channels registered, nor yet a
+	// scheduler to scan for them.
+
+	if (!Ganymede.firstrun)
+	  {
+	    commit_writeSyncChannels();
+	  }
+
 	commit_finalizeTransaction();
       }
 
