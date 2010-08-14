@@ -280,6 +280,13 @@ public class GanyQueryTransmuter {
 	  {
 	    from_objectbase = node.getText();
 	  }
+
+	// we don't allow underscores in object and field type names,
+	// because we reserve that character for representing spaces
+	// in our XML.  A user might be querying using the underscore
+	// variant, so take care of that here.
+
+	from_objectbase = from_objectbase.replace('_', ' ');
       }
 
     if (from_objectbase == null) // the grammar _should_ prevent this
@@ -322,6 +329,9 @@ public class GanyQueryTransmuter {
 	Tree select_node = ast.getChild(i);
 
 	String field_name = StringUtils.dequote(select_node.getText());
+
+	field_name = field_name.replace('_', ' ');
+
 	DBObjectBaseField field = (DBObjectBaseField) objectBase.getField(field_name);
 
 	if (field == null)
@@ -374,6 +384,7 @@ public class GanyQueryTransmuter {
 
       case QueryParser.DEREF:
 	field_name = StringUtils.dequote(ast.getChild(0).getText());
+	field_name = field_name.replace('_', ' ');
 
 	if (base != null)
 	  {
@@ -425,6 +436,7 @@ public class GanyQueryTransmuter {
 	op = ast.getText();
 	field_node = ast.getChild(0);
 	field_name = StringUtils.dequote(field_node.getText());
+	field_name = field_name.replace('_', ' ');
 
 	if (base == null)
 	  {
