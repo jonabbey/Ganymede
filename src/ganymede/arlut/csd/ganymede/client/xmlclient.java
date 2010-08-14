@@ -538,45 +538,45 @@ public final class xmlclient implements ClientListener, Runnable {
 	return false;
       }
 
-    // now do what we came for
-
-    ReturnVal retVal = null;
-
-    if (sendData && !sendSchema)
-      {
-	retVal = session.getDataXML(syncChannel, includeHistory, includeOid);
-      }
-    else if (sendSchema && !sendData)
-      {
-	retVal = session.getSchemaXML();
-      }
-    else if (sendSchema && sendData)
-      {
-	retVal = session.getXMLDump(includeHistory, includeOid);
-      }
-    else
-      {
-        throw new RuntimeException("ASSERT: neither sendSchema nor sendData set");
-      }
-
-    if (!ReturnVal.didSucceed(retVal))
-      {
-	String errorMessage = retVal.getDialogText();
-
-	if (errorMessage != null)
-	  {
-	    err.println(errorMessage);
-	  }
-
-	return false;
-      }
-
-    FileTransmitter transmitter = retVal.getFileTransmitter();
-
-    byte[] bytes = transmitter.getNextChunk();
-
     try
       {
+	// now do what we came for
+
+	ReturnVal retVal = null;
+
+	if (sendData && !sendSchema)
+	  {
+	    retVal = session.getDataXML(syncChannel, includeHistory, includeOid);
+	  }
+	else if (sendSchema && !sendData)
+	  {
+	    retVal = session.getSchemaXML();
+	  }
+	else if (sendSchema && sendData)
+	  {
+	    retVal = session.getXMLDump(includeHistory, includeOid);
+	  }
+	else
+	  {
+	    throw new RuntimeException("ASSERT: neither sendSchema nor sendData set");
+	  }
+
+	if (!ReturnVal.didSucceed(retVal))
+	  {
+	    String errorMessage = retVal.getDialogText();
+
+	    if (errorMessage != null)
+	      {
+		err.println(errorMessage);
+	      }
+
+	    return false;
+	  }
+
+	FileTransmitter transmitter = retVal.getFileTransmitter();
+
+	byte[] bytes = transmitter.getNextChunk();
+
 	while (bytes != null)
 	  {
 	    System.out.write(bytes);
