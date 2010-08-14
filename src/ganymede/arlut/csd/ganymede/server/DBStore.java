@@ -1384,7 +1384,7 @@ public final class DBStore implements JythonMap {
       {
 	for (DBObjectBase base: objectBases.values())
 	  {
-	    if (base.getName().equals(baseName))
+	    if (base.getName().equalsIgnoreCase(baseName))
 	      {
 		return base;
 	      }
