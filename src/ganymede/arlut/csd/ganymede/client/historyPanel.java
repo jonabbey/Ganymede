@@ -212,7 +212,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     gbl.setConstraints(startLabel, gbc);
     buttonPanel.add(startLabel);
 
-    startDateField = new JdateField(createdDate, true, true, createdDate, new Date());
+    startDateField = new JdateField(createdDate, true, true, false, createdDate, new Date());
     gbc.gridx = index++;
     gbl.setConstraints(startDateField, gbc);
     buttonPanel.add(startDateField);

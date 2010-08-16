@@ -3248,28 +3248,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     JsetValueCallback callback = null;
     if (enabled) callback = this;
           
-    JdateField df = new JdateField(date, enabled, false, null, null, callback);
+    JdateField df = new JdateField(date, enabled, false, true, null, null, callback);
 
     registerComponent(df, field, fieldTemplate);
 
-    //    if (debug) {
+    if (debug) {
       println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
-      //}
-
-
-    //df.setEditable(editable && fieldInfo.isEditable());
-    //df.setEnabled(editable && fieldInfo.isEditable());
-
-
-    // note that we set the callback after we initially set the
-    // date, to avoid having the callback triggered on a listing
-
-    /*
-    if (enabled)
-      {
-	df.setCallback(this);
-      }
-    */
+    }
 
     associateFieldId(fieldInfo, df);
 

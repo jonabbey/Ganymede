@@ -1611,7 +1611,7 @@ class QueryRow implements ItemListener {
 	  {
 	    removeOperand();
 
-	    operand = new JdateField(new Date(), true, false, null, null);
+	    operand = new JdateField(new Date(), true, false, false, null, null);
 	    addOperand = true;
 	  }
       }

@@ -114,21 +114,13 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
   private boolean
     allowCallback = false,
-    changed = false, 
-    limited,
-    unset,
     iseditable;
 
   private JsetValueCallback callback = null;
 
   protected Date
     original_date,
-    my_date,
-    old_date;
-
-  private Date 
-    maxDate,
-    minDate;
+    curr_date;
 
   private JButton _calendarButton;
 
@@ -145,7 +137,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   
   public JdateField()
   {
-    this(null,true,false,null,null);
+    this(null,true,false,true,null,null);
   }
 
   /**
@@ -164,11 +156,12 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   public JdateField(Date date,
 		    boolean iseditable,
 		    boolean islimited,
+		    boolean usetime,
 		    Date minDate,
 		    Date maxDate,
 		    JsetValueCallback parent)
   {
-    this(date,iseditable,islimited,minDate,maxDate);
+    this(date,iseditable,islimited,usetime,minDate,maxDate);
 
     setCallback(parent);
   }
@@ -187,6 +180,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   public JdateField(Date date,
 		    boolean iseditable,
 		    boolean islimited,
+		    boolean usetime,
 		    Date minDate,
 		    Date maxDate)
   { 
@@ -197,11 +191,11 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     if (date == null)
       {
-	my_date = original_date = null; 
+	curr_date = original_date = null; 
       }
     else
       {
-	my_date = original_date = new Date(date.getTime());
+	curr_date = original_date = new Date(date.getTime());
       }
 
     // Check if the date is limited.
@@ -216,14 +210,9 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 	  {
 	    throw new IllegalArgumentException("Invalid Parameter: maxDate canot be null");
 	  }
-
-	limited = true;
-	this.minDate = minDate;
-	this.maxDate = maxDate;
       }       
    
-    setLayout(new BorderLayout());
-    
+    setLayout(new BorderLayout());    
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
@@ -242,39 +231,34 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     if (minDate != null) monthView.setLowerBound(minDate);
     if (maxDate != null) monthView.setUpperBound(maxDate);
     monthView.setZoomable(true);    
-
     // This will make the text field and popup (un)editable.
     datePicker.setEditable(iseditable);
-
     datef = datePicker.getEditor();
-    datef.addFocusListener(this);
-
+    // No focus listener if uneditable!
+    if (iseditable)
+      {
+	datef.addFocusListener(this);
+      }    
     buttonPanel.add(datePicker, "West");
 
 
-
-
     // Add in a time input.
-    // todo optional, based on contructor - todo.
     timef = new JTextField(5);
-    // set the time part of the date now too.
-    Calendar cal = Calendar.getInstance();
-    cal.setTime(date);
-    String hour = prefixZero(Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
-    String minute = prefixZero(Integer.toString(cal.get(Calendar.MINUTE)));
-    timef.setText(hour+":"+minute);
     timef.setEditable(iseditable);
-    add(timef);
-
     // Add focus listener.
-    timef.addFocusListener(this);
-
-
-
+    if (iseditable && usetime)
+      {
+	timef.addFocusListener(this);
+      }
+    if (usetime) 
+      {
+	add(timef);
+      }
 
 
     // Add a calendar icon to popup the widget.
     // TODO MAKE OLD CAL BUTTON TO PULLUP NEW POPUP.
+    /*
     Image img = PackageResources.getImageResource(this, "calendar.gif", getClass());
     Image img_dn = PackageResources.getImageResource(this, "calendar_dn.gif", getClass());
     _calendarButton = new JButton(new ImageIcon(img));
@@ -282,14 +266,14 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     _calendarButton.setFocusPainted(false);
     _calendarButton.addActionListener(this);
     if (iseditable) buttonPanel.add(_calendarButton,"Center");
+    */
 
     add(buttonPanel, "East");
     
 
+    // initial set date and time.
+    setDate(curr_date);
 
-    unset = true;
-
-    setDate(my_date);
 
     invalidate();
     validate();
@@ -299,56 +283,25 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   // This is needed for the datePicker textField tab/click focus lost.
   public void focusLost(FocusEvent e) 
   {
-    System.out.println("Focus lost");
     Object c = e.getSource();
-
-    /* -- */
 
     if (c == timef) 
       {
-	System.out.println("Focus lost on timef");
-	// update datepickers date time now.
-	Date d1 = datePicker.getDate();
-	Calendar cal = Calendar.getInstance();
-	cal.setTime(d1);
-
-	System.out.println("timef "+timef.getText());
-
-	String[] splt = timef.getText().split(":");
-	if (splt.length < 2)
-	  {
-	    // err
-	  }
-	  
-	System.out.println("length is "+splt.length);
-	System.out.println("split is "+splt[0]);
-	System.out.println("split is "+splt[1]);
-
-	int hour = Integer.parseInt(splt[0]);
-	int minute = Integer.parseInt(splt[1]);
-	cal.set(Calendar.HOUR_OF_DAY, hour);
-	cal.set(Calendar.HOUR_OF_DAY, minute);
-
-	datePickerFocusLost();
+	setDate(datePicker.getDate());
+	updateServer();
       }
     else if (c == datef) 
       {
-	System.out.println("Focus lost on datef");
 	try 
 	  {
 	    datePicker.getEditor().commitEdit();
 	  } 
 	catch ( ParseException pe ) 
 	  {
-	  }  
-	
-	String d1 = datePicker.getDate().toString();
-	System.out.println("date2 curr:");
-	System.out.println(d1);
-	
-	datePickerFocusLost();
+	  }  	
+	setDate(datePicker.getDate());
+	updateServer();
       }
-
   }
 
 
@@ -357,41 +310,36 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     // nothing.
   }
 
-  // Called from the addActionListeners above.
+  // Called from calendar widget.
   public void actionPerformed(ActionEvent e) 
   {
     Object c = e.getSource();
 
-    /* -- */
-
     if (c == datePicker) 
       {
-	datePickerFocusLost();
+	setDate(datePicker.getDate());
+	updateServer();
       }    
     // TODO UNUSED CURRENTLY
     // Open up the calendar widget when clicked.
     else if (c == _calendarButton)
       {
 	System.err.println("We have clicked the cal button");
-
-	/*
-	*/
       }
   }
 
 
-  public void datePickerFocusLost()
+  public void updateServer()
   {
-    // The user has pressed Tab or clicked elsewhere which has caused the
-    // datePicker component to lose focus.  This means that we need to update
-    // the date value (using the value in datePicker) and then propagate that value
-    // up to the server object.
-    
-    Date d1 = datePicker.getDate();
-    setDate(d1);
-    //System.err.println(d1.toString());
+    // Propagate the date value up to the server object.
 
-    
+    // But first, if nothing in the JstringField has changed
+    // then there is no reason to do anything.	
+    if (curr_date.compareTo(original_date) == 0 || curr_date == null)
+      {
+	return;
+      }
+
     // Now, the date value needs to be propagated up to the server	
     if (allowCallback) 
       {
@@ -399,17 +347,11 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
 	try 
 	  {
-	    System.err.println("calling back to the server now!!!");
-	    
-	    retval = callback.setValuePerformed(new JSetValueObject(this, d1));
-
-	    System.out.println("retval was ");
-	    System.out.println(retval);
+	    retval = callback.setValuePerformed(new JSetValueObject(this, curr_date));
 	  }
 	catch (RemoteException ex)
 	  {
-	    // throw up an information dialog here
-	    
+	    // throw up an information dialog here	    
 	    // "Date Field Error"
 	    // "There was an error communicating with the server!\n{0}"
 	    new JErrorDialog(new JFrame(),
@@ -419,93 +361,89 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 	  }
 	
 	// if setValuePerformed() didn't work, revert the date,
-	// otherwise do nothing and we'll let ourselves show a
-	    // refreshed value if the server requested us to refresh
-	    // ourselves during the processing of setValuePerformed().
 	if (!retval)
 	  {
-	    setDate(old_date, false);
+	    setDateTime(original_date);
 	  }
+
+	// Now, the new value has propagated to the server, so reset
+	// original date, so that the next time we loose focus from
+	// this widget, we won't unnecessarily update the server value
+	// if nothing has changed locally.	
+	original_date = curr_date;
       }
   }  
   
-  /**
-   * May this field be edited?
-   */
-
-  /*
-  public void setEditable(boolean editable)
-  {
-    //_date1.setEditable(editable);  TODO add this to new var.
-    this.iseditable = editable;
-  }
-  */
-
   /**
    * returns the date associated with this JdateField
    */
 
   public Date getDate()
   {
-    if (unset)
-      {
-	return null;
-      }
-
-    return my_date;
+    return curr_date;
   }
 
   /**
-   * sets the date value of this JdateField
+   * sets the date value only of this JdateField
+   * using the time from the timef field.
    *
    * @param d the date to use
    */
 
-  public void setDate(Date d)
-  {
-    this.setDate(d, true);
-  }
-
-  /**
-   * sets the date value of this JdateField
-   *
-   * @param d the date to use
-   */
-
-  // checklimit unused... todo remove?
-  public void setDate(Date d, boolean checkLimits)
+  public void setDate(Date d1)
   {
     if (debug)
       {
-	System.err.println("setDate() called: " + d);
+	System.err.println("setDate() called: " + d1);
       }
 
-    if (d == null)
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(d1);
+            
+      String[] splt = timef.getText().split(":");
+      if (splt.length < 2)
+	{
+	  // err on time, just set date.
+	  setDateTime(d1);
+	  return;
+	}
+      
+      int hour = Integer.parseInt(splt[0]);
+      int minute = Integer.parseInt(splt[1]);
+      cal.set(Calendar.HOUR_OF_DAY, hour);
+      cal.set(Calendar.MINUTE, minute);
+      
+      setDateTime(cal.getTime());
+  }
+
+  /**
+   * sets the date and time value of this JdateField
+   *
+   * @param d the date to use
+   */
+
+  public void setDateTime(Date d1)
+  {
+    if (debug)
       {
-	unset = true;
-      }
-    else
-      {
-	unset = false;
+	System.err.println("setDateTime() called: " + d1);
       }
 
-    // set the time part of the date now too.
+    // Update the two widget pieces here
     Calendar cal = Calendar.getInstance();
-    cal.setTime(d);
+    cal.setTime(d1);
     String hour = prefixZero(Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
     String minute = prefixZero(Integer.toString(cal.get(Calendar.MINUTE)));
     timef.setText(hour+":"+minute);
 
+    datePicker.setDate(d1);  
 
-    datePicker.setDate(d);  
-    my_date = d;
-
+    // Our internal variable.
+    curr_date = d1;
     if (original_date == null)
       {
-        original_date = d;
+        original_date = d1;
       }
-
-    changed = true;
   }
 
   public String prefixZero(String str)
@@ -521,16 +459,12 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
    *  sets the parent of this component for callback purposes
    *
    */
-
   public void setCallback(JsetValueCallback callback)
   {
-    System.err.println("inside set callback to true now, debug");
-
     if (callback == null)
       {
 	return;
-      }
-    
+      }    
     this.callback = callback;    
     allowCallback = true;
   }
@@ -545,52 +479,13 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   public void processFocusEvent(FocusEvent e)
   {
     super.processFocusEvent(e);
-
+    
     switch (e.getID())
       {
       case FocusEvent.FOCUS_LOST:
-	// When the JdateField looses focus, any changes
-	// made to the value in the JdateField must be
-	// propagated to the db_field on the server.
-	
-	// But first, if nothing in the JstringField has changed
-	// then there is no reason to do anything.
-	
-	if (!changed)
-	  {
-	    break;
-	  }
-	
-	if (!unset && allowCallback)
-	  {
-	    // Do a callback to talk to the server
-	    
-	    try 
-	      {
-		callback.setValuePerformed(new JSetValueObject(this, my_date));
-	      }
-	    catch (java.rmi.RemoteException re) 
-	      {
-		// throw up an information dialog here
-
-		// "Date Field Error"
-		// "There was an error communicating with the server!\n{0}"
-		new JErrorDialog(new JFrame(),
-				 ts.l("global.error_subj"),
-				 ts.l("global.error_text", re.getMessage()), 
-				 StandardDialog.ModalityType.DOCUMENT_MODAL);
-	      }
-	  }
-	
-	// Now, the new value has propagated to the server, so we set
-	// changed to false, so that the next time we loose focus from
-	// this widget, we won't unnecessarily update the server value
-	// if nothing has changed locally.
-	
-	changed = false;
-
+	updateServer();
 	break;
-
+	
       case FocusEvent.FOCUS_GAINED:
 	break;
       }
