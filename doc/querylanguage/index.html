@@ -84,7 +84,7 @@
 
       <p><code><span class="keyword">select</span> Name <span class="keyword">from</span> "Owner Group" <span class="keyword">where</span> Members<span class="keyword">-&gt;</span>User<span class="keyword">-&gt;</span>"Home Group"<span class="keyword">-&gt;</span>Users <span class="keyword">len&lt;=</span> 5</code></p>
 
-      <p><code><span class="keyword">select</span> "System Name" <span class="keyword">from</span> System <span class="keyword">where</span> Virtual <span class="keyword">defined and</span> "Owner list"<span class="keyword">-&gt;</span>Name<span class="keyword">==</span>"ITS"</code></p>
+      <p><code><span class="keyword">select</span> system_name <span class="keyword">from</span> System <span class="keyword">where</span> Virtual <span class="keyword">defined and</span> owner_list <span class="keyword">==</span>"ITS"</code></p>
     </div>
 
     <p>In English, these queries are as follows:</p>
@@ -116,6 +116,12 @@
       Persona field points to an admin persona whose User field points
       to a user whose Home Group field points to a group whose Users
       field has five or fewer users in it.</li>
+
+      <li>Return a list of System Names for Systems which have their
+      Virtual checkbox checked and which are owned by the ITS owner
+      group.  In this case, the field named "System Name" is
+      represented by system_name, and the standard "Owner List" field
+      containing owner groups is represented by owner_list.</p>
     </ol>
 
     <p>As you can see from these examples, you can express some quite
