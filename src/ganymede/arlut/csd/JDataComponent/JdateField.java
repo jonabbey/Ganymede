@@ -9,9 +9,9 @@
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -51,35 +51,31 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.rmi.RemoteException;
+
+import java.text.ParseException;
+
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.JFormattedTextField;
+import javax.swing.JTextField;
+
+import org.jdesktop.swingx.JXDatePicker;
+import org.jdesktop.swingx.JXMonthView;
+import org.jdesktop.swingx.plaf.basic.SpinningCalendarHeaderHandler;
+import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
 
 import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
-
-// James ADDS
-import javax.swing.UIManager;
-
-import org.jdesktop.swingx.JXDatePicker; 
-import org.jdesktop.swingx.JXMonthView;
-import org.jdesktop.swingx.plaf.basic.SpinningCalendarHeaderHandler;
-import org.jdesktop.swingx.plaf.basic.CalendarHeaderHandler;
-
-//test
-import java.awt.event.FocusListener;
-import javax.swing.JFormattedTextField;
-import javax.swing.JTextField;
-
-import java.text.ParseException;
-import java.util.Calendar;
-
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -95,8 +91,6 @@ import java.util.Calendar;
 
 public class JdateField extends JPanel implements ActionListener, FocusListener
 {
-  //public class JdateField extends JPanel implements ActionListener {
-
   static final boolean debug = false;
 
   /**
@@ -108,8 +102,14 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
   // ---
 
-  private JXDatePicker datePicker;       
-  private JFormattedTextField datef; // datepicker internal field
+  private JXDatePicker datePicker;
+
+  /**
+   * datePicker's internal text editing field, that we apply a
+   * FocusListener to.
+   */
+
+  private JFormattedTextField datef;
   private JTextField timef;
 
   private boolean
@@ -132,9 +132,9 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   /**
    * Minimal Constructor for JdateField.  This will construct a JdateField
    * with no value.
-   *  
+   *
    */
-  
+
   public JdateField()
   {
     this(null,true,false,true,null,null);
@@ -165,7 +165,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     setCallback(parent);
   }
-  
+
   /**
    * Contructor that creates a JdateField based on the date it is given.  It is also
    * possible to set restrictions on the range of dates for this JdateField when
@@ -183,7 +183,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 		    boolean usetime,
 		    Date minDate,
 		    Date maxDate)
-  { 
+  {
     if (debug)
       {
 	System.err.println("JdateField(): date = " + date);
@@ -191,7 +191,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     if (date == null)
       {
-	curr_date = original_date = null; 
+	curr_date = original_date = null;
       }
     else
       {
@@ -210,27 +210,27 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 	  {
 	    throw new IllegalArgumentException("Invalid Parameter: maxDate canot be null");
 	  }
-      }       
-   
-    setLayout(new BorderLayout());    
+      }
+
+    setLayout(new BorderLayout());
 
     JPanel buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
 
     // Adds a year spinner to the MonthView object.
-    UIManager.put(CalendarHeaderHandler.uiControllerID, 
+    UIManager.put(CalendarHeaderHandler.uiControllerID,
 		  "org.jdesktop.swingx.plaf.basic.SpinningCalendarHeaderHandler");
     // Moves the year spinner after month arrows.
     UIManager.put(SpinningCalendarHeaderHandler.ARROWS_SURROUND_MONTH, Boolean.TRUE);
-    
-    // Creates a new picker and sets the current date to today 
-    datePicker = new JXDatePicker(date); 
-    datePicker.setName("datePicker"); 
-    datePicker.addActionListener(this);    
+
+    // Creates a new picker and sets the current date to today
+    datePicker = new JXDatePicker(date);
+    datePicker.setName("datePicker");
+    datePicker.addActionListener(this);
     JXMonthView monthView = datePicker.getMonthView();
     if (minDate != null) monthView.setLowerBound(minDate);
     if (maxDate != null) monthView.setUpperBound(maxDate);
-    monthView.setZoomable(true);    
+    monthView.setZoomable(true);
     // This will make the text field and popup (un)editable.
     datePicker.setEditable(iseditable);
     datef = datePicker.getEditor();
@@ -238,7 +238,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     if (iseditable)
       {
 	datef.addFocusListener(this);
-      }    
+      }
     buttonPanel.add(datePicker, "West");
 
 
@@ -250,7 +250,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
       {
 	timef.addFocusListener(this);
       }
-    if (usetime) 
+    if (usetime)
       {
 	add(timef);
       }
@@ -269,7 +269,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     */
 
     add(buttonPanel, "East");
-    
+
 
     // initial set date and time.
     setDate(curr_date);
@@ -281,45 +281,45 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
 
   // This is needed for the datePicker textField tab/click focus lost.
-  public void focusLost(FocusEvent e) 
+  public void focusLost(FocusEvent e)
   {
     Object c = e.getSource();
 
-    if (c == timef) 
+    if (c == timef)
       {
 	setDate(datePicker.getDate());
 	updateServer();
       }
-    else if (c == datef) 
+    else if (c == datef)
       {
-	try 
+	try
 	  {
 	    datePicker.getEditor().commitEdit();
-	  } 
-	catch ( ParseException pe ) 
+	  }
+	catch ( ParseException pe )
 	  {
-	  }  	
+	  }
 	setDate(datePicker.getDate());
 	updateServer();
       }
   }
 
 
-  public void focusGained(FocusEvent e) 
+  public void focusGained(FocusEvent e)
   {
     // nothing.
   }
 
   // Called from calendar widget.
-  public void actionPerformed(ActionEvent e) 
+  public void actionPerformed(ActionEvent e)
   {
     Object c = e.getSource();
 
-    if (c == datePicker) 
+    if (c == datePicker)
       {
 	setDate(datePicker.getDate());
 	updateServer();
-      }    
+      }
     // TODO UNUSED CURRENTLY
     // Open up the calendar widget when clicked.
     else if (c == _calendarButton)
@@ -334,32 +334,32 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     // Propagate the date value up to the server object.
 
     // But first, if nothing in the JstringField has changed
-    // then there is no reason to do anything.	
+    // then there is no reason to do anything.
     if (curr_date.compareTo(original_date) == 0 || curr_date == null)
       {
 	return;
       }
 
-    // Now, the date value needs to be propagated up to the server	
-    if (allowCallback) 
+    // Now, the date value needs to be propagated up to the server
+    if (allowCallback)
       {
 	boolean retval = false;
 
-	try 
+	try
 	  {
 	    retval = callback.setValuePerformed(new JSetValueObject(this, curr_date));
 	  }
 	catch (RemoteException ex)
 	  {
-	    // throw up an information dialog here	    
+	    // throw up an information dialog here
 	    // "Date Field Error"
 	    // "There was an error communicating with the server!\n{0}"
 	    new JErrorDialog(new JFrame(),
 			     ts.l("global.error_subj"),
-			     ts.l("global.error_text", ex.getMessage()), 
+			     ts.l("global.error_text", ex.getMessage()),
 			     StandardDialog.ModalityType.DOCUMENT_MODAL);
 	  }
-	
+
 	// if setValuePerformed() didn't work, revert the date,
 	if (!retval)
 	  {
@@ -369,11 +369,11 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 	// Now, the new value has propagated to the server, so reset
 	// original date, so that the next time we loose focus from
 	// this widget, we won't unnecessarily update the server value
-	// if nothing has changed locally.	
+	// if nothing has changed locally.
 	original_date = curr_date;
       }
-  }  
-  
+  }
+
   /**
    * returns the date associated with this JdateField
    */
@@ -399,7 +399,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
       Calendar cal = Calendar.getInstance();
       cal.setTime(d1);
-            
+
       String[] splt = timef.getText().split(":");
       if (splt.length < 2)
 	{
@@ -407,12 +407,12 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 	  setDateTime(d1);
 	  return;
 	}
-      
+
       int hour = Integer.parseInt(splt[0]);
       int minute = Integer.parseInt(splt[1]);
       cal.set(Calendar.HOUR_OF_DAY, hour);
       cal.set(Calendar.MINUTE, minute);
-      
+
       setDateTime(cal.getTime());
   }
 
@@ -436,7 +436,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     String minute = prefixZero(Integer.toString(cal.get(Calendar.MINUTE)));
     timef.setText(hour+":"+minute);
 
-    datePicker.setDate(d1);  
+    datePicker.setDate(d1);
 
     // Our internal variable.
     curr_date = d1;
@@ -464,8 +464,9 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
     if (callback == null)
       {
 	return;
-      }    
-    this.callback = callback;    
+      }
+
+    this.callback = callback;
     allowCallback = true;
   }
 
@@ -479,13 +480,13 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   public void processFocusEvent(FocusEvent e)
   {
     super.processFocusEvent(e);
-    
+
     switch (e.getID())
       {
       case FocusEvent.FOCUS_LOST:
 	updateServer();
 	break;
-	
+
       case FocusEvent.FOCUS_GAINED:
 	break;
       }
