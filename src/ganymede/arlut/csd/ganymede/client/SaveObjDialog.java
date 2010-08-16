@@ -69,7 +69,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
-import arlut.csd.JDataComponent.JdateField;
+//import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
@@ -106,7 +106,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 
   JCheckBox showHistory, showTransactions;
 
-  JdateField date;
+  // JdateField date;
 
   JButton 
     ok,

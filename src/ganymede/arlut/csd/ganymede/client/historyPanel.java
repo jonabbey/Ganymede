@@ -59,7 +59,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -74,7 +73,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 
-import arlut.csd.JCalendar.JpopUpCalendar;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JResetDateObject;
 import arlut.csd.JDataComponent.JSetValueObject;
@@ -85,6 +83,7 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.rmi.date_field;
 import arlut.csd.ganymede.rmi.string_field;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -213,11 +212,11 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     gbl.setConstraints(startLabel, gbc);
     buttonPanel.add(startLabel);
 
-    startDateField = new JdateField(createdDate, true, true, createdDate, new Date(), this);
-    startDateField.showClearButton(false);
+    startDateField = new JdateField(createdDate, true, true, false, createdDate, new Date());
     gbc.gridx = index++;
     gbl.setConstraints(startDateField, gbc);
     buttonPanel.add(startDateField);
+
 
     // "Go"
     showHistory = new JButton(ts.l("init.show_history_button"));
@@ -313,7 +312,8 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	      {
 		public Object run() throws Exception
 		{
-		  return gc.getSession().viewObjectHistory(invid, selectedDate, showAll);
+		  // JAMES MODIFY
+		  return gc.getSession().viewObjectHistory(invid, startDateField.getDate(), showAll);
 		}
 	      });
 
@@ -325,7 +325,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 	      {
 		public Object run() throws Exception
 		{
-		  return gc.getSession().viewAdminHistory(invid, selectedDate);
+		  return gc.getSession().viewObjectHistory(invid, startDateField.getDate());
 		}
 	      });
 	  }
@@ -336,6 +336,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
       }
   }
 
+  // JAMES NOTE, must incorporate this also....hmmmm...
   public boolean setValuePerformed(JValueObject e)
   {
     if (e instanceof JSetValueObject)

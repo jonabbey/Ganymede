@@ -44,6 +44,7 @@ JGoodies Forms is by the JGoodies company, Karsten Lentzsch, founder.
 
 JGoodies Forms is licensed under the permissive BSD license.
 
+Added swingx.jar to be able to use the new calendar widget implementation. --James July 2010
 --
 
 

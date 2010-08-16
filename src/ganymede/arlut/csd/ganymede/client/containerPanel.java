@@ -3243,31 +3243,18 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			    FieldInfo fieldInfo, 
 			    FieldTemplate fieldTemplate) throws RemoteException
   {
-    JdateField df = new JdateField();
+    boolean enabled = editable && fieldInfo.isEditable();
+    Date date = ((Date)fieldInfo.getValue());
+    JsetValueCallback callback = null;
+    if (enabled) callback = this;
+          
+    JdateField df = new JdateField(date, enabled, false, true, null, null, callback);
 
     registerComponent(df, field, fieldTemplate);
 
     if (debug) {
       println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
     }
-
-    df.setEditable(editable && fieldInfo.isEditable());
-    df.setEnabled(editable && fieldInfo.isEditable());
-
-    Date date = ((Date)fieldInfo.getValue());
-    
-    if (date != null)
-      {
-	df.setDate(date);
-      }
-
-    // note that we set the callback after we initially set the
-    // date, to avoid having the callback triggered on a listing
-
-    if (editable && fieldInfo.isEditable())
-      {
-	df.setCallback(this);
-      }
 
     associateFieldId(fieldInfo, df);
 
@@ -3792,6 +3779,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (objectHash != null)
       {
+    /*
 	en = objectHash.keys();
 
 	while (en.hasMoreElements())
@@ -3805,6 +3793,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		df.unregister();
 	      }
 	  }
+    */
 
 	objectHash.clear();
 	objectHash = null;
