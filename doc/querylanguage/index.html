@@ -75,12 +75,12 @@
     <div class="example">
       <p><code><span class="keyword">select from editable</span> User <span class="keyword">where</span> UID <span class="keyword">&gt;=</span> 2000</code></p>
       <p><code><span class="keyword">select</span> Username,UID <span class="keyword">from editable</span> User</code></p>
-      <p><code><span class="keyword">select</span> Username <span class="keyword">from</span> User <span class="keyword">where</span> "Expiration Date" <span class="keyword">defined</span></code></p>
+      <p><code><span class="keyword">select</span> Username <span class="keyword">from</span> User <span class="keyword">where</span> expiration_date <span class="keyword">defined</span></code></p>
 
       <p><code><span class="keyword">select</span> GroupName,GID <span class="keyword">from</span> Group <span class="keyword">where</span> Notes <span class="keyword">=~_ci</span> "(atl|isl) group"</code></p>
 
-      <p><code><span class="keyword">select</span> Username,UID,"Home Group" <span class="keyword">from editable</span> User
-      <span class="keyword">where</span> "Home Group"<span class="keyword">-&gt;(</span>GID <span class="keyword">>=</span> 2000 <span class="keyword">and</span> GID <span class="keyword">&lt;=</span> 8000<span class="keyword">)</span></code></p>
+      <p><code><span class="keyword">select</span> Username,UID,Home_Group <span class="keyword">from editable</span> User
+      <span class="keyword">where</span> Home_Group<span class="keyword">-&gt;(</span>GID <span class="keyword">>=</span> 2000 <span class="keyword">and</span> GID <span class="keyword">&lt;=</span> 8000<span class="keyword">)</span></code></p>
 
       <p><code><span class="keyword">select</span> Name <span class="keyword">from</span> "Owner Group" <span class="keyword">where</span> Members<span class="keyword">-&gt;</span>User<span class="keyword">-&gt;</span>"Home Group"<span class="keyword">-&gt;</span>Users <span class="keyword">len&lt;=</span> 5</code></p>
 
@@ -99,17 +99,17 @@
 
       <li>Return a list of user names for all users in the Ganymede
       server that I have permission to read and which have a non-empty
-      Expiration Date field.</li>
+      "Expiration Date" field.</li>
 
       <li>Return a list of GroupName and GIDs for all groups in the
       Ganymede server that I have permission to read and whose Notes
       field contains any text that matches '(atl|isl) group' using a
       case-insensitive Perl 5-style regular expression match.</li>
 
-      <li>Return a list of Usernames, UIDs and Home Groups for users
-      in the Ganymede server that I have permission to edit and whose
-      Home Group field points to a Group object whose GID field is
-      between 2000 and 8000, inclusive.</li>
+      <li>Return a list of Usernames, UIDs and "Home Group" fields for
+      users in the Ganymede server that I have permission to edit and
+      whose "Home Group" field points to a Group object whose GID
+      field is between 2000 and 8000, inclusive.</li>
 
       <li>Return a list of Names for Owner Group objects in the
       Ganymede server that I have permission to read and whose Admin
@@ -126,6 +126,17 @@
 
     <p>As you can see from these examples, you can express some quite
     involved queries with a very little bit of GanyQL.</p>
+
+    <div class="note"><p>When dealing with object types and field names,
+	case is not significant, and you can use underscores for space
+	characters if you like.  In such cases, quotation marks around the
+	object type or field name are not required.</p>
+      
+      <p>Note that this freedom does not extend to string values
+	(including object names) that you are seeking to match against.
+	In such cases, the quotation marks are mandatory, and you may
+	not substitute underscores for spaces.</p>
+    </div>
 
     <p>As powerful as it is, and as much as the syntax is designed to
     look like SQL, GanyQL is really very different.  Queries are made
@@ -171,8 +182,9 @@
     <p>The "<i>Object Type</i>" string is the name of the type of
     object in the Ganymede data store that you want to query.  The
     (double or single) quotation marks are only needed here if the
-    object type has a space in it.</p>
-
+    object type has a space in it, and you want to represent it in its
+    native form.</p>
+   
     <p>The <i>return values</i> can be skipped or be the <span
     class="keyword">object</span> keyword, if you want to get back all
     fields from the object, or a comma-separated list of field name
