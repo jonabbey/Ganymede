@@ -1205,7 +1205,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    date_field datef = (date_field) field;
 
 	    ((JdateField)comp).setDate((Date)currentInfo.getValue());
-	    ((JdateField)comp).setLimits(datef.minDate(), datef.maxDate());
+
+	    if (currentInfo.isEditable())
+	      {
+		((JdateField)comp).setLimits(datef.minDate(), datef.maxDate());
+	      }
 	  }
 	else if (comp instanceof JnumberField)
 	  {
@@ -3258,7 +3262,16 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     date_field datef = (date_field) field;
 
-    JdateField df = new JdateField(date, enabled, datef.limited(), true, datef.minDate(), datef.maxDate(), callback);
+    JdateField df = null;
+
+    if (fieldInfo.isEditable())
+      {
+	df = new JdateField(date, enabled, datef.limited(), true, datef.minDate(), datef.maxDate(), callback);
+      }
+    else
+      {
+	df = new JdateField(date, enabled, false, true, null, null, callback);
+      }
 
     registerComponent(df, field, fieldTemplate);
 
