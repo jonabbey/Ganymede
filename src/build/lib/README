@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-13 October 2009
+17 August 2010
 src/lib/README
 
 --------------------------------------------------------------------------------
@@ -44,7 +44,13 @@ JGoodies Forms is by the JGoodies company, Karsten Lentzsch, founder.
 
 JGoodies Forms is licensed under the permissive BSD license.
 
-Added swingx.jar to be able to use the new calendar widget implementation. --James July 2010
+The swingx.jar file is from the SwingX project at
+https://swingx.dev.java.net/, and is licensed under the LGPL 2.1.
+
+The SwingX jar currently provides support for the new date picking GUI
+component in the Ganymede client, but we may wind up using it for more
+things as we go along.
+
 --
 
 
