@@ -104,6 +104,7 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.date_field;
 import arlut.csd.ganymede.rmi.db_field;
 import arlut.csd.ganymede.rmi.db_object;
 import arlut.csd.ganymede.rmi.invid_field;
@@ -1201,7 +1202,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    // JdateField handles re-entrant refresh okay as well
 
+	    date_field datef = (date_field) field;
+
 	    ((JdateField)comp).setDate((Date)currentInfo.getValue());
+	    ((JdateField)comp).setLimits(datef.minDate(), datef.maxDate());
 	  }
 	else if (comp instanceof JnumberField)
 	  {
@@ -3246,15 +3250,22 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     boolean enabled = editable && fieldInfo.isEditable();
     Date date = ((Date)fieldInfo.getValue());
     JsetValueCallback callback = null;
-    if (enabled) callback = this;
-          
-    JdateField df = new JdateField(date, enabled, false, true, null, null, callback);
+
+    if (enabled)
+      {
+	callback = this;
+      }
+
+    date_field datef = (date_field) field;
+
+    JdateField df = new JdateField(date, enabled, datef.limited(), true, datef.minDate(), datef.maxDate(), callback);
 
     registerComponent(df, field, fieldTemplate);
 
-    if (debug) {
-      println("Editable: " + editable  + " isEditable: " +fieldInfo.isEditable());
-    }
+    if (debug)
+      {
+	println("Editable: " + editable  + " isEditable: " + fieldInfo.isEditable());
+      }
 
     associateFieldId(fieldInfo, df);
 

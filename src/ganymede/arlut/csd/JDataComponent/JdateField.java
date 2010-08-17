@@ -339,6 +339,25 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   }
 
   /**
+   * Sets the minimum and maximum dates allowed in this JdateField.
+   */
+
+  public void setLimits(Date minDate, Date maxDate)
+  {
+    JXMonthView monthView = datePicker.getMonthView();
+
+    if (minDate != null)
+      {
+	monthView.setLowerBound(minDate);
+      }
+
+    if (maxDate != null)
+      {
+	monthView.setUpperBound(maxDate);
+      }
+  }
+
+  /**
    * Sets the calendar date of this JdateField, keeping the time of
    * day previously set.
    *
