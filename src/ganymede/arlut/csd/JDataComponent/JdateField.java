@@ -122,12 +122,6 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   private JTextField timef;
 
   /**
-   * True if this JdateField is editable.
-   */
-
-  private boolean iseditable;
-
-  /**
    * The callback that we use to communicate date changes in this
    * field to the Ganymede client, etc.
    */
