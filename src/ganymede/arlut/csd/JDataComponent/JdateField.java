@@ -101,6 +101,10 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
   // ---
 
+  /**
+   * The SwingX date picker GUI component we're building JdateField around.
+   */
+
   private JXDatePicker datePicker;
 
   /**
@@ -117,13 +121,33 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
   private JTextField timef;
 
+  /**
+   * True if this JdateField is editable.
+   */
+
   private boolean iseditable;
+
+  /**
+   * The callback that we use to communicate date changes in this
+   * field to the Ganymede client, etc.
+   */
 
   private JsetValueCallback callback = null;
 
-  protected Date
-    original_date,
-    curr_date;
+  /**
+   * The last date that we had from the Ganymede server.  We will
+   * revert to this date if our callback refuses our change.
+   */
+
+  private Date original_date;
+
+  /**
+   * The date that we most recently have from our GUI components.
+   * This will be promoted into original_date once a callback carrying
+   * this date succeeds.
+   */
+
+  private Date curr_date;
 
   /* -- */
 
