@@ -1,10 +1,10 @@
 Ganymede Release 2.0
-15 June 2010
+17 August 2010
 CREDITS
 
 ---------------------------------------------
 
-Ganymede has been under development for over 12 years now, in both
+Ganymede has been under development for over 15 years now, in both
 planning and execution.  The work has primarily been performed in the
 Information Technology Services Division of the Applied Research
 Laboratories at the University of Texas at Austin, with support from
@@ -308,8 +308,42 @@ Ganymede clients under the BSD license.
 --
 
 Some code in Ganymede 2.0 is based on Terence Parr's incredutastic
-ANTLR parser generator.  The src/lib directory contains a jar file of
-classes from his project, which he has placed into the public domain.
+ANTLR3 parser generator.  The src/lib directory contains a jar file of
+runtime classes from his project, which he has released under the BSD
+license:
+
+[The BSD License]
+Copyright (c) 2003-2008, Terence Parr
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+    Neither the name of the author nor the names of its contributors
+    may be used to endorse or promote products derived from this
+    software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 See http://www.antlr.org/ for information on ANTLR.
 
 --
@@ -458,6 +492,12 @@ or by downloading it directly from
 
 See src/ganymede/org/solinger/cracklib/README and
 src/ganymede/org/solinger/cracklib/LICENSE for full details.
+
+--
+
+The SwingX jar file included in the Ganymede client comes from
+https://swingx.dev.java.net/, and is included in Ganymede under the
+terms of version 2.1 of the Lesser Gnu Public License (LGPL).
 
 --
 
