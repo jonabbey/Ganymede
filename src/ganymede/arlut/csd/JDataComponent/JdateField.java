@@ -386,22 +386,29 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
   private void setDateOnly(Date date)
   {
-    if (debug)
+    if (date != null)
       {
-	System.err.println("setDateOnly() called: " + date);
+	if (debug)
+	  {
+	    System.err.println("setDateOnly() called: " + date);
+	  }
+
+	Calendar cal = Calendar.getInstance();
+	cal.setTime(curr_date);
+
+	int hour = cal.get(Calendar.HOUR_OF_DAY);
+	int minute = cal.get(Calendar.MINUTE);
+
+	cal.setTime(date);
+	cal.set(Calendar.HOUR_OF_DAY, hour);
+	cal.set(Calendar.MINUTE, minute);
+
+	setDate(cal.getTime());
       }
-
-    Calendar cal = Calendar.getInstance();
-    cal.setTime(curr_date);
-
-    int hour = cal.get(Calendar.HOUR_OF_DAY);
-    int minute = cal.get(Calendar.MINUTE);
-
-    cal.setTime(date);
-    cal.set(Calendar.HOUR_OF_DAY, hour);
-    cal.set(Calendar.MINUTE, minute);
-
-    setDate(cal.getTime());
+    else
+      {
+	setDate(null);
+      }
   }
 
   /**
@@ -415,6 +422,11 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
   private void setTimeOnly(String timeStr)
   {
+    if (timeStr == null)
+      {
+	return;
+      }
+
     String[] splt = timeStr.split(":");
 
     if (splt.length < 2)
@@ -448,13 +460,20 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     datePicker.setDate(date);
 
-    Calendar cal = Calendar.getInstance();
-    cal.setTime(date);
+    if (date != null)
+      {
+	Calendar cal = Calendar.getInstance();
+	cal.setTime(date);
 
-    String hour = prefixZero(Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
-    String minute = prefixZero(Integer.toString(cal.get(Calendar.MINUTE)));
+	String hour = prefixZero(Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
+	String minute = prefixZero(Integer.toString(cal.get(Calendar.MINUTE)));
 
-    timef.setText(hour + ":" + minute);
+	timef.setText(hour + ":" + minute);
+      }
+    else
+      {
+	timef.setText("");
+      }
 
     curr_date = date;
 
