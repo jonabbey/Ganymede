@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-31 June, 2010
+23 August 2010
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 31 June, 2010
+RELEASE DATE: 23 August 2010
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1656,6 +1656,41 @@ once an hour.
 
 With the RMIGC variable removed, the server now keeps much closer to a
 steady state and does not go on wild ballooning trips through memory.
+
+110. [CLIENT, ADMIN CONSOLE] RMI Registry port numbers are now really honored
+
+The Ganymede client and admin console previously did not actually
+honor the RMI registry port number provided in the jnlp file /
+properties file, defaulting to port 1099 in all cases.
+
+The clients and admin console now honor the specified rmi registry
+port number.
+
+111. [CLIENT] Improved the client's date picker with SwingX JXDatePicker class.
+
+The Ganymede GUI client now uses the Swing Labs' JXDatePicker class to
+provide a drop-down calendar for date fields, rather than requiring a
+pop-up window incorporating our own heavy-weight calendar component.
+
+Wizards and expiration/removal panels still use our panel calendar.
+
+112. [SERVER] Improved security for XML client queries.
+
+The server will no longer provide password hash information to
+xmlclient queries unless the xmlclient is given supergash-level
+privileges.
+
+113. [SERVER] Simplified and updated query language, updated ANTLR
+
+The Ganymede Query Language no longer requires field names and object
+types to be single or double quoted in GanyQL queries.
+
+The GanyQL is now being constructed with ANTLRv3.2, and I've updated
+the ANTLR runtime included with the Ganymede distribution to ANTLR3.2.
+
+The Ant files for Ganymede now bodily include the ANTLR3.2 runtime
+classes into the produced GanymedeServer.jar, rather than requiring
+the runServer script to add the ANTLR runtime to the class path.
 
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 
