@@ -1,15 +1,10 @@
 Ganymede Release 2.0
-July 31, 2006
+23 August 2010
 KNOWNBUGS
-
-Last Revision Changed: $Rev$
-Last Changed By: $Author$
-Last Mod Date: $Date$
-SVN URL: $HeadURL$
 
 ----------------------------------------------
 
-Ganymede release 2.0 requires Java 1.4 or later.
+Ganymede release 2.0 requires Java 5 or later.
 
 --
 
