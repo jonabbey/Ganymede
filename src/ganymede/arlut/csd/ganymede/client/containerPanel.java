@@ -3252,7 +3252,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			    FieldTemplate fieldTemplate) throws RemoteException
   {
     boolean enabled = editable && fieldInfo.isEditable();
-    Date date = ((Date)fieldInfo.getValue());
+    Date date = (Date) fieldInfo.getValue();
     JsetValueCallback callback = null;
 
     if (enabled)
