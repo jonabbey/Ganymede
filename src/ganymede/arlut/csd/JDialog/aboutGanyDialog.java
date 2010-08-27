@@ -125,7 +125,7 @@ public class aboutGanyDialog extends JDialog {
 
     addTab(ts.l("init.about_tab"), ts.l("init.aboutText",
 					arlut.csd.Util.SVNVersion.getReleaseString()));
-    addTab(ts.l("init.credits_tab"), ts.l("init.creditsText"));
+
 
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.fill = GridBagConstraints.NONE;
@@ -149,9 +149,11 @@ public class aboutGanyDialog extends JDialog {
 
     super.pack();
 
-    // we add the license tab after packing so that we don't cause the
-    // dialog to get really tall in a futile attempt to encompass the
-    // whole GPL
+    // we add the credits and license tab after packing so that we
+    // don't cause the dialog to get really tall in a futile attempt
+    // to encompass the whole credits file and/or GPL
+
+    addTab(ts.l("init.credits_tab"), ts.l("init.creditsText"));
 
     addTab(ts.l("init.license_tab"), ts.l("init.licenseText"));
 
