@@ -47,6 +47,7 @@
 package arlut.csd.JDialog;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Image;
@@ -126,7 +127,6 @@ public class aboutGanyDialog extends JDialog {
     addTab(ts.l("init.about_tab"), ts.l("init.aboutText",
 					arlut.csd.Util.SVNVersion.getReleaseString()));
 
-
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridy = 0;
@@ -147,6 +147,10 @@ public class aboutGanyDialog extends JDialog {
 
     this.setContentPane(pane);
 
+    Dimension minimumSize = new Dimension(0, 450);
+
+    this.setMinimumSize(minimumSize);
+
     super.pack();
 
     // we add the credits and license tab after packing so that we
@@ -154,7 +158,6 @@ public class aboutGanyDialog extends JDialog {
     // to encompass the whole credits file and/or GPL
 
     addTab(ts.l("init.credits_tab"), ts.l("init.creditsText"));
-
     addTab(ts.l("init.license_tab"), ts.l("init.licenseText"));
 
     setLocationRelativeTo(frame);
