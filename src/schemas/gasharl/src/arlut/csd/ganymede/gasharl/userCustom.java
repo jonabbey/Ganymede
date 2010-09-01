@@ -469,6 +469,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
+    Invid category = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
+    DBObject categoryObj = lookupInvid(category, false);
+    String categoryName = categoryObj.getLabel();
+
+    if (!categoryName.equals("normal"))
+      {
+	needBadgeNameCheck = false;
+      }
+
     if (needBadgeNameCheck)
       {
 	String username = (String) getFieldValueLocal(userSchema.USERNAME);
