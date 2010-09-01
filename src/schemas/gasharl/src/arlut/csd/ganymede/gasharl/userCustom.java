@@ -463,7 +463,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	String ignoreResult = diff(fieldsChanged);
 
 	if (fieldsChanged.contains(getFieldDef(userSchema.USERNAME)) ||
-	    fieldsChanged.contains(getFieldDef(userSchema.BADGE)))
+	    fieldsChanged.contains(getFieldDef(userSchema.BADGE)) ||
+	    fieldsChanged.contains(getFieldDef(userSchema.CATEGORY)))
 	  {
 	    needBadgeNameCheck = true;
 	  }
