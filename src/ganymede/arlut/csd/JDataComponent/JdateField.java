@@ -393,6 +393,12 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 	    System.err.println("setDateOnly() called: " + date);
 	  }
 
+	if (curr_date == null)
+	  {
+	    setDate(date);
+	    return;
+	  }
+
 	Calendar cal = Calendar.getInstance();
 	cal.setTime(curr_date);
 
