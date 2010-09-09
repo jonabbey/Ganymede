@@ -482,11 +482,6 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
       }
 
     curr_date = date;
-
-    if (original_date == null)
-      {
-        original_date = date;
-      }
   }
 
   /**
@@ -510,7 +505,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 	return;
       }
 
-    if (curr_date == null || curr_date.compareTo(original_date) == 0)
+    if (curr_date == null || (original_date != null && curr_date.compareTo(original_date) == 0))
       {
 	return;
       }
