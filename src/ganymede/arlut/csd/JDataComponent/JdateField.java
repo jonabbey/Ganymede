@@ -505,6 +505,11 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 	return;
       }
 
+    // Right now, we don't support using the JdateField GUI component
+    // to set a date field on the server to null, nor do we have any
+    // reason to let the JdateField be used to re-transmit the
+    // currently set date to the server again.
+
     if (curr_date == null || (original_date != null && curr_date.compareTo(original_date) == 0))
       {
 	return;
