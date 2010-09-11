@@ -2334,12 +2334,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	return;
       }
 
-    StringWriter stringTarget = new StringWriter();
-    PrintWriter writer = new PrintWriter(stringTarget);
-    
-    ex.printStackTrace(writer);
-    writer.close();
-
     if (ex instanceof NotLoggedInException)
       {
 	showNotLoggedIn();
@@ -2356,20 +2350,16 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	  }
 	else
 	  {
-	    String text;
+	    String exceptionString = gclient.stackTrace(ex);
 
 	    if (message != null)
 	      {
-		text = message + "\n" + stringTarget.toString();
-	      }
-	    else
-	      {
-		text = stringTarget.toString();
+		exceptionString = message + "\n" + exceptionString;
 	      }
 
 	    // "Exception"
 	    showExceptionMessage(ts.l("processException.exception"),
-				 text);
+				 exceptionString);
 	  }
       }
 
