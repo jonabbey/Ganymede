@@ -7135,7 +7135,15 @@ class ClientExceptionHandler implements Thread.UncaughtExceptionHandler {
   {
     if (gclient.client != null)
       {
-	gclient.client.processException(ex);
+	try
+	  {
+	    gclient.client.processException(ex);
+	  }
+	catch (Throwable ex2)
+	  {
+	    ex.printStackTrace();
+	    ex2.printStackTrace();
+	  }
       }
     else
       {
