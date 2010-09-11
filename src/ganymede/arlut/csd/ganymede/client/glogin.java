@@ -476,6 +476,26 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  }
       }
   }
+  
+  public glogin()
+  {
+    // we'll offer to send any uncaught exceptions to the server,
+    // rather than sending it to stderr.
+    //
+    // although, before we login we will send it to stderr.
+
+    ClientExceptionHandler handler = new ClientExceptionHandler();
+
+    try
+      {
+	Thread.setDefaultUncaughtExceptionHandler(handler);
+      }
+    catch (SecurityException ex)
+      {
+	// running in a browser, presumably.. not much we can do about
+	// it.
+      }
+  }
 
   /**
    * Standard applet initialization method.

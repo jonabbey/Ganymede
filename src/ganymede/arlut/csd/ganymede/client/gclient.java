@@ -720,10 +720,6 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     client = this;
 
-    // from now on, we'll offer to send any uncaught exceptions to the
-    // server, rather than sending it to stderr.
-
-    Thread.setDefaultUncaughtExceptionHandler(new ClientExceptionHandler());
 
     Invid.setAllocator(new InvidPool(3257)); // modest sized prime, should be adequate for the client
 
