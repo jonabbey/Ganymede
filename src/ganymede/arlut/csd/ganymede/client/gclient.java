@@ -7133,29 +7133,6 @@ class ClientExceptionHandler implements Thread.UncaughtExceptionHandler {
 
   public void uncaughtException(Thread thread, Throwable ex)
   {
-    // make sure we're not recursively processing an exception
-    // that has been rethrown by our UncaughtExceptionHandler
-
-    boolean recursive = false;
-
-    StackTraceElement[] frames = ex.getStackTrace();
-
-    for (int i = 0; !recursive && i < frames.length; i++)
-      {
-	StackTraceElement frame = frames[i];
-
-	if (frame.getMethodName().equals("uncaughtException") &&
-	    frame.getClassName().endsWith("ClientExceptionHandler"))
-	  {
-	    recursive = true;
-	  }
-      }
-
-    if (recursive)
-      {
-	return;
-      }
-
     if (gclient.client != null)
       {
 	gclient.client.processException(ex);
