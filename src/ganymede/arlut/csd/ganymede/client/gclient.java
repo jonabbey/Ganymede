@@ -720,6 +720,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     client = this;
 
+    // from now on, we'll offer to send any uncaught exceptions to the
+    // server, rather than sending it to stderr.
+
+    Thread.setDefaultUncaughtExceptionHandler(new ClientExceptionHandler());
+
     Invid.setAllocator(new InvidPool(3257)); // modest sized prime, should be adequate for the client
 
     if (!debug)
@@ -7105,5 +7110,59 @@ class SecurityLaunderThread extends Thread {
   {
     this.done = true;
     notifyAll();
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                          ClientExceptionHandler
+
+------------------------------------------------------------------------------*/
+
+/**
+ * An UncaughtExceptionHandler used in the Ganymede client to catch
+ * any otherwise uncaught exceptions and prompt the user to send them
+ * to the server for recording.
+ */
+
+class ClientExceptionHandler implements Thread.UncaughtExceptionHandler {
+
+  public ClientExceptionHandler()
+  {
+  }
+
+  public void uncaughtException(Thread thread, Throwable ex)
+  {
+    // make sure we're not recursively processing an exception
+    // that has been rethrown by our UncaughtExceptionHandler
+
+    boolean recursive = false;
+
+    StackTraceElement[] frames = ex.getStackTrace();
+
+    for (int i = 0; !recursive && i < frames.length; i++)
+      {
+	StackTraceElement frame = frames[i];
+
+	if (frame.getMethodName().equals("uncaughtException") &&
+	    frame.getClassName().endsWith("ClientExceptionHandler"))
+	  {
+	    recursive = true;
+	  }
+      }
+
+    if (recursive)
+      {
+	return;
+      }
+
+    if (gclient.client != null)
+      {
+	gclient.client.processException(ex);
+      }
+    else
+      {
+	ex.printStackTrace();
+      }
   }
 }
