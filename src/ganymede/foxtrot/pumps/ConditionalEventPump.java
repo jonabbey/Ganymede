@@ -48,19 +48,31 @@ public class ConditionalEventPump implements EventPump, EventFilterable
                pumpEventsMethod = dispatchThreadClass.getDeclaredMethod("pumpEvents", new Class[]{conditionalClass});
                pumpEventsMethod.setAccessible(true);
 
+	       // The following code is no longer relevant in a JDK5 /
+	       // JDK6 context, now that we have
+	       // Thread.setDefaultUncaughtExceptionHandler().
+	       //
+	       // By commenting out this next block, I am avoiding
+	       // having Foxtrot override a default uncaught exception
+	       // handler with its own handler.
+	       //
+	       // Jonathan Abbey
+	       // 10 September 2010
+
                // See remarks for use of this property in java.awt.EventDispatchThread
-               String property = "sun.awt.exception.handler";
-               String handler = System.getProperty(property);
-               if (handler == null)
-               {
-                  handler = ThrowableHandler.class.getName();
-                  System.setProperty(property, handler);
-                  if (debug) System.out.println("[ConditionalEventPump] Installing AWT Throwable Handler " + handler);
-               }
-               else
-               {
-                  if (debug) System.out.println("[ConditionalEventPump] Using already installed AWT Throwable Handler " + handler);
-               }
+               // String property = "sun.awt.exception.handler";
+               // String handler = System.getProperty(property);
+               // if (handler == null)
+               // {
+               //    handler = ThrowableHandler.class.getName();
+               //    System.setProperty(property, handler);
+               //    if (debug) System.out.println("[ConditionalEventPump] Installing AWT Throwable Handler " + handler);
+               // }
+               // else
+               // {
+               //    if (debug) System.out.println("[ConditionalEventPump] Using already installed AWT Throwable Handler " + handler);
+               // }
+
                return null;
             }
          });
