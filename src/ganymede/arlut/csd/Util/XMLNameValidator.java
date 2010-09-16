@@ -118,7 +118,7 @@ public class XMLNameValidator {
 
   public static boolean isValidXMLName(String text)
   {
-    if (text == null || text.isEmpty())
+    if (text == null || text.length() == 0)
       {
 	return false;
       }
@@ -162,7 +162,7 @@ public class XMLNameValidator {
 
   public static boolean isValidGanymedeName(String text)
   {
-    if (text == null || text.isEmpty())
+    if (text == null || text.length() == 0)
       {
 	return false;
       }
