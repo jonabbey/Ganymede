@@ -1,10 +1,5 @@
 README -- arlut.csd.Util
 
-Last Revision Changed: $Rev$
-Last Changed By: $Author$
-Last Mod Date: $Date$
-SVN URL: $HeadURL$
-
 --------------------------------------------------------------------------------
 
 This directory contains various utility classes.  They are used by the
