@@ -988,9 +988,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	splitterPos = prefs.getInt(SPLITTER_POS, -1);
       }
 
-    statusBox.setPreferredSize(new Dimension(-1, splitterPos));
-
     splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
+    splitterPane.setDividerLocation(splitterPos);
     splitterPane.setOneTouchExpandable(true);
 
     getContentPane().add(splitterPane, BorderLayout.CENTER);
@@ -1011,15 +1010,15 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	  }
       }
 
-    pack();
-
     if (!sizer.restoreSize(this))
       {
 	this.setLocationRelativeTo(null); // center frame
 	sizer.saveSize(this);	// save an initial size before the user might maximize
       }
 
-    this.setVisible(true);
+    pack();
+
+    setVisible(true);
 
     // along with processWindowEvent(), this method allows us
     // to properly handle window system close events.
