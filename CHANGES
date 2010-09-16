@@ -1692,6 +1692,35 @@ The Ant files for Ganymede now bodily include the ANTLR3.2 runtime
 classes into the produced GanymedeServer.jar, rather than requiring
 the runServer script to add the ANTLR runtime to the class path.
 
+114. [CLIENT] Added comprehensive error detection and reporting to the client
+
+The Ganymede client includes a feature to report any uncaught
+exceptions that occur on the client and report them to the server to
+be logged.
+
+Previously, these exceptions had to be caught one by one throughout
+the client code.  This tended to miss exceptions that were thrown from
+the GUI thread before calling non-GUI client code.
+
+We have now added an UncaughtExceptionHandler to the client which will
+report any exceptions that occur anywhere in the client after login to
+the server.
+
+115. [CLIENT, ADMIN CONSOLE] Added the complete CREDITS file to the 'About Ganymede' dialog
+
+The About Ganymede dialog used to refer the viewer to the CREDITS file
+in the Ganymede distribution.
+
+We have now bodily included the contents of the CREDITS file into the
+About Ganymede dialog's properties file.
+
+Note that we will need to update the properties file whenever we
+update the CREDITS file.
+
+Note also that the German localization for Ganymede still has a
+truncated version that refers the user to the distribution's CREDITS
+file.
+
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
