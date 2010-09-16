@@ -835,15 +835,12 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 	// when we create the frame, it shows itself.
 
-	frame = new GASHAdminFrame(ts.l("global.consoleTitle"), this, debugFilename); // "Ganymede Admin Console"
+	frame = new GASHAdminFrame(ts.l("global.consoleTitle"), this, debugFilename, adminDispatch); // "Ganymede Admin Console"
 
 	hideLoginBox();
 	
-	// Now that the frame is completely initialized, tie the
-	// GASHAdminDispatch object to the frame, and vice-versa.
-	
-	frame.setDispatch(adminDispatch);
-	adminDispatch.setFrame(frame);
+	// Now that the frame is completely initialized, tell the
+	// GASHAdminDispatch to start polling the server for updates
 
 	try
 	  {

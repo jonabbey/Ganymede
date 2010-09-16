@@ -355,7 +355,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
    *
    */
 
-  public GASHAdminFrame(String title, GASHAdmin loginPanel, String debugFilename)
+  public GASHAdminFrame(String title, GASHAdmin loginPanel, String debugFilename, GASHAdminDispatch adminDispatch)
   {
     super(title);
 
@@ -989,7 +989,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
 
     splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
-    splitterPane.setDividerLocation(splitterPos);
     splitterPane.setOneTouchExpandable(true);
 
     getContentPane().add(splitterPane, BorderLayout.CENTER);
@@ -1016,14 +1015,20 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	sizer.saveSize(this);	// save an initial size before the user might maximize
       }
 
-    pack();
+    // Set the icon on the sync monitor so that pack() will align
+    // things properly before we go visible
 
-    setVisible(true);
+    adminDispatch.setFrame(this);
+    setDispatch(adminDispatch);
 
-    // along with processWindowEvent(), this method allows us
-    // to properly handle window system close events.
+    tabPane.setIconAt(1, adminDispatch.getOkIcon());
 
-    enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+    // and adjust the splitter pane with our saved divider location
+
+    if (splitterPos != -1)
+      {
+	splitterPane.setDividerLocation(splitterPos);
+      }
 
     if (debugFilename != null)
       {
@@ -1036,6 +1041,15 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	    System.err.println("couldn't open RMI debug log: " + ex);
 	  }
       }
+
+    // along with processWindowEvent(), this method allows us
+    // to properly handle window system close events.
+
+    enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+
+    pack();
+
+    setVisible(true);
   }
 
   public void setDispatch(GASHAdminDispatch ad)
