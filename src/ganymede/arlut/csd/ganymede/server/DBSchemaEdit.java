@@ -761,6 +761,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	store.nameSpaces.addElement(ns);
       }
 
+    Ganymede.rmi.publishObject(ns);
+
     return ns;
   }
 
