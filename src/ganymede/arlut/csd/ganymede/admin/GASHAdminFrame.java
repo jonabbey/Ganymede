@@ -179,6 +179,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   public static final windowSizer sizer = new windowSizer(prefs);
 
   static final String SPLITTER_POS = "admin_splitter_pos";
+  static final String STATUS_AREA_HEIGHT = "status_area_pos";
+  static final String TAB_AREA_HEIGHT = "tab_area_height";
 
   static final boolean debug = false;
 
@@ -346,6 +348,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   aboutJavaDialog java_ver_dialog = null;
 
   LAFMenu LandFMenu = null;
+
+  private JPanel statusBox = null;
 
   /* -- */
 
@@ -848,7 +852,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     statusArea.setEditable(false);
     JScrollPane statusAreaPane = new JScrollPane(statusArea);
 
-    JPanel statusBox = new JPanel(new java.awt.BorderLayout());
+    statusBox = new JPanel(new java.awt.BorderLayout());
     statusBox.add("Center", statusAreaPane);
 
     // "Server Log"
@@ -981,17 +985,23 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     // and put the tab pane into our frame with the
     // same constraints that the text area had
 
-    int splitterPos = -1;
+    int statusAreaHeight = -1;
+    int tabAreaHeight = -1;
+    int dividerLoc = -1;
 
     if (prefs != null)
       {
-	splitterPos = prefs.getInt(SPLITTER_POS, -1);
+	statusAreaHeight = prefs.getInt(STATUS_AREA_HEIGHT, -1);
+	tabAreaHeight = prefs.getInt(TAB_AREA_HEIGHT, -1);
+	dividerLoc = prefs.getInt(SPLITTER_POS, -1);
+
+	if (debug)
+	  {
+	    System.err.println("statusAreaHeight = " + statusAreaHeight);
+	    System.err.println("tabAreaHeight = " + tabAreaHeight);
+	    System.err.println("dividerLoc = " + dividerLoc);
+	  }
       }
-
-    splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
-    splitterPane.setOneTouchExpandable(true);
-
-    getContentPane().add(splitterPane, BorderLayout.CENTER);
 
     if (GASHAdmin.isRunningOnMac())
       {
@@ -1009,25 +1019,44 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	  }
       }
 
-    if (!sizer.restoreSize(this))
-      {
-	this.setLocationRelativeTo(null); // center frame
-	sizer.saveSize(this);	// save an initial size before the user might maximize
-      }
+    /*********************************************************************************
 
-    // Set the icon on the sync monitor so that pack() will align
-    // things properly before we go visible
+        				NOTE!
+
+        This whole JSplitPane sizing business is *very* *very* finicky!!
+
+       If you mess with any of the following sizing logic or operation
+       ordering, you are likely to see a failure to properly recreate the last
+       saved vertical split position on admin console restart on one platform
+       or another.
+
+       All of this took a *long* time to get right, so mess with it at your peril.
+
+    ********************************************************************************/
+
+    splitterPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, statusBox, tabPane);
+    splitterPane.setContinuousLayout(false);
+    splitterPane.setOneTouchExpandable(true);
+    getContentPane().add(splitterPane, BorderLayout.CENTER);
+
+    // Set the icon on the sync monitor so that we won't have our
+    // layout changed after we get our first adminDispatch callback on
+    // the sync monitor tab.
 
     adminDispatch.setFrame(this);
     setDispatch(adminDispatch);
 
     tabPane.setIconAt(1, adminDispatch.getOkIcon());
+    tabPane.setMinimumSize(new Dimension(0, 100));
 
-    // and adjust the splitter pane with our saved divider location
-
-    if (splitterPos != -1)
+    statusBox.setMinimumSize(new Dimension(0, 100));
+    statusBox.setPreferredSize(new Dimension(0, statusAreaHeight));
+    tabPane.setPreferredSize(new Dimension(0, tabAreaHeight));
+    
+    if (!sizer.restoreSize(this))
       {
-	splitterPane.setDividerLocation(splitterPos);
+	this.setLocationRelativeTo(null); // center frame
+	sizer.saveSize(this);	// save an initial size before the user might maximize
       }
 
     if (debugFilename != null)
@@ -1047,7 +1076,20 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 
-    pack();
+    // and adjust the splitter pane with our saved divider location
+
+    if (statusAreaHeight != -1)
+      {
+	if (debug)
+	  {
+	    System.err.println("Setting dividerLoc to " + dividerLoc);
+	  }
+
+	splitterPane.setDividerLocation(dividerLoc);
+      }
+
+    invalidate();
+    validateTree();
 
     setVisible(true);
   }
@@ -1467,6 +1509,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     if (prefs != null)
       {
 	sizer.saveSize(this);
+	prefs.putInt(STATUS_AREA_HEIGHT, statusBox.getHeight());
+	prefs.putInt(TAB_AREA_HEIGHT, tabPane.getHeight());
 	prefs.putInt(SPLITTER_POS, splitterPane.getDividerLocation());
       }
   }
