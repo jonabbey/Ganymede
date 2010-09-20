@@ -153,13 +153,12 @@ public class windowSizer {
     if (prefEngine.getBoolean(key(window, MAXIMIZED), false))
       {
 	window.setExtendedState(Frame.MAXIMIZED_BOTH);
+	locationSet = true;
       }
-    else
+
+    if (!locationSet)
       {
-	if (!locationSet)
-	  {
-	    return false;
-	  }
+	return false;
       }
 
     return true;
