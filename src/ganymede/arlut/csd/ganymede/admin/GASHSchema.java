@@ -1355,6 +1355,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 		      {
 			System.out.println("Adding new NameSpace: " + newNameSpace);
 		      }
+
 		    editor.createNewNameSpace(newNameSpace, insensitive.booleanValue());
 		  }
 		catch (java.rmi.RemoteException e)
