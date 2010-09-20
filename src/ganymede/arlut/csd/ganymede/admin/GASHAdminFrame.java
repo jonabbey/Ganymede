@@ -1050,12 +1050,20 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     tabPane.setMinimumSize(new Dimension(0, 100));
 
     statusBox.setMinimumSize(new Dimension(0, 100));
-    statusBox.setPreferredSize(new Dimension(0, statusAreaHeight));
-    tabPane.setPreferredSize(new Dimension(0, tabAreaHeight));
+
+    if (statusAreaHeight != -1 && tabAreaHeight != -1)
+      {
+	statusBox.setPreferredSize(new Dimension(0, statusAreaHeight));
+	tabPane.setPreferredSize(new Dimension(0, tabAreaHeight));
+      }
     
     if (!sizer.restoreSize(this))
       {
-	this.setLocationRelativeTo(null); // center frame
+	statusBox.setPreferredSize(new Dimension(0, 200));
+	tabPane.setPreferredSize(new Dimension(0, 200));
+
+	this.pack();
+
 	sizer.saveSize(this);	// save an initial size before the user might maximize
       }
 
