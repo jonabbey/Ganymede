@@ -2,16 +2,8 @@
 
    SyncMaster.java
 
-   This interface is used to expand the list of objects (and fields)
-   that are emitted to an incremental sync channel output stream.
-
-   The idea for this interface is that an incremental Sync Channel can
-   be defined in the Ganymede system that calls out to an
-   implementation of this interface to allow the Ganymede object
-   information that is passed to the sync channel through the
-   'fieldoption' field controlling what gets sent upon changes to be
-   augmented by additional object context that the external sync
-   channel scripting may depend on.
+   An interface used to inject additional context information into a
+   Sync Channel XML file for the benefit of the servicing program.
 
    Created: 22 February 2010
 
@@ -68,18 +60,29 @@ import arlut.csd.ganymede.common.Invid;
  * This interface is used to expand the list of objects (and fields)
  * that are emitted to an incremental sync channel output stream.
  *
- * The idea for this interface is that an incremental Sync Channel can
- * be defined in the Ganymede system that calls out to an
- * implementation of this interface to allow the Ganymede object
- * information that is passed to the sync channel through the
- * 'fieldoption' field controlling what gets sent upon changes to be
- * augmented by additional object context that the external sync
- * channel scripting may depend on.
+ * The idea for this interface is that we may need to provide
+ * additional context for an incremental synchronization.
  *
- * The Ganymede server's 'Sync Channel' object type will be expanded
- * with a class name field to allow for specification of an
- * implementation of the SyncMaster interface that will be consulted
- * when performing a write to the Sync Channel.
+ * Imagine a transaction in which a user is modified.  A Sync Channel
+ * is defined which specifies an interest in one of the user object's
+ * fields which was modified by the transaction.  The Sync Channel
+ * will write out an XML file describing all the changes to the user
+ * object that the Sync Channel definition is interested in.
+ *
+ * What happens if the synchronization software that reads that XML
+ * file needs information to complete the synchronization that comes
+ * from other objects in the Ganymede data store?  Those objects may
+ * not have changed in the transaction, so the Sync Channel will not
+ * know to include that infromation in the XML.
+ *
+ * That's where the SyncMaster interface comes in.  A Sync Channel can
+ * be configured with the fully qualified classname of a Java class
+ * implementing this interface.  When this is done, the Sync Channel
+ * calls augment() on the SyncMaster for every object to be written to
+ * the XML file.  The augment() method examines each DBEditObject and
+ * will call methods on the FieldBook parameter to request other
+ * objects and fields to be included in the XML transaction file for
+ * the benefit of the script servicing the Sync Channel queue.
  */
 
 public interface SyncMaster {
