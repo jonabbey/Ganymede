@@ -83,6 +83,14 @@ import arlut.csd.ganymede.common.Invid;
  * will call methods on the FieldBook parameter to request other
  * objects and fields to be included in the XML transaction file for
  * the benefit of the script servicing the Sync Channel queue.
+ *
+ * The objects added to the XML file by a SyncMaster will be contained
+ * in a &lt;context_objects&gt; element, unless the context object
+ * itself was modified in the transaction.  Sync Channels that need
+ * context augmentation should have queue service programs that can
+ * deal with these objects being written out either in the
+ * &lt;context_objects&gt; element or in an &lt;object_delta&gt;
+ * element along with the rest of the changes made by the transaction.
  */
 
 public interface SyncMaster {
