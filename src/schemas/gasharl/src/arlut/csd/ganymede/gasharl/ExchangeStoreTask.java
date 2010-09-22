@@ -168,7 +168,7 @@ public class ExchangeStoreTask implements Runnable {
 
 	try
 	  {
-	    Map<String,String> map = doTask();
+	    Map<String,String> map = getMailStores();
 	  }
 	catch (Throwable ex)
 	  {
@@ -220,7 +220,7 @@ public class ExchangeStoreTask implements Runnable {
       }
   }
 
-  public Map<String,String> doTask() throws NotLoggedInException
+  public Map<String,String> getMailStores()
   {
     Map<String,String> map = new HashMap<String,String>();
     Hashtable env = new Hashtable();
@@ -348,18 +348,11 @@ public class ExchangeStoreTask implements Runnable {
 
     ExchangeStoreTask task = new ExchangeStoreTask();
 
-    try
-      {
-	Map<String, String> storeMap = task.doTask();
+    Map<String, String> storeMap = task.getMailStores();
 
-	for (Map.Entry<String,String> store: storeMap.entrySet())
-	  {
-	    System.out.println(store.getKey() + ":" + store.getValue());
-	  }
-      }
-    catch (NotLoggedInException ex)
+    for (Map.Entry<String,String> store: storeMap.entrySet())
       {
-	throw new RuntimeException(ex);
+	System.out.println(store.getKey() + ":" + store.getValue());
       }
   }
 }
