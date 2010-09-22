@@ -56,6 +56,8 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 
 import java.util.Hashtable;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import javax.naming.Context;
 import javax.naming.directory.Attribute;
@@ -99,6 +101,7 @@ public class ExchangeStoreTask implements Runnable {
   static final boolean debug = true;
 
   static final boolean skipSSLValidation = false;
+  static private Pattern homeMDBPat = Pattern.compile("CN=([^,]+)");
 
   /* -- */
 
@@ -258,11 +261,25 @@ public class ExchangeStoreTask implements Runnable {
 	    SearchResult sr = (SearchResult) answer.next();
 	    System.out.println(">>>" + sr.getName());
 
-	    NamingEnumeration e = sr.getAttributes().getAll();
+	    NamingEnumeration<Attribute> e = (NamingEnumeration<Attribute>)sr.getAttributes().getAll();
 
 	    while (e.hasMore())
 	      {
-		System.out.println("\tvalue: " + e.next());
+		Attribute a = e.next();
+
+		if (a.getID().equals("homeMDB"))
+		  {
+		    String value = (String) a.get();
+
+		    Matcher m = homeMDBPat.matcher(value);
+		    
+		    if (m.find())
+		      {
+			String boxname = m.group(1);
+
+			System.out.println("\t" + a.getID() + ":" + boxname);
+		      }
+		  }
 	      }
 	  }
       }
