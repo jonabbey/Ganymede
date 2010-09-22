@@ -49,6 +49,10 @@
 
 package arlut.csd.ganymede.gasharl;
 
+import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+
 import java.rmi.RemoteException;
 
 import java.util.Hashtable;
@@ -272,6 +276,38 @@ public class ExchangeStoreTask implements Runnable {
 
   public static void main(String[] args)
   {
+    if (args.length == 0)
+      {
+	throw new IllegalArgumentException("Missing command line argument for properties file");
+      }
+
+    FileInputStream fis = null;
+    BufferedInputStream bis = null;
+
+    try
+      {
+	fis = new FileInputStream(args[0]);
+	bis = new BufferedInputStream(fis);
+	System.getProperties().load(bis);
+      }
+    catch (IOException ex)
+      {
+	throw new IllegalArgumentException("Couldn't load properties file " + args[0]);
+      }
+    finally
+      {
+	try
+	  {
+	    if (bis != null)
+	      {
+		bis.close();
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	  }
+      }
+
     ExchangeStoreTask task = new ExchangeStoreTask();
 
     try
