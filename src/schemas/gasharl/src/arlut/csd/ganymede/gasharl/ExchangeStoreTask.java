@@ -77,6 +77,7 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_object;
 import arlut.csd.ganymede.server.DBEditObject;
 import arlut.csd.ganymede.server.DBObject;
 import arlut.csd.ganymede.server.Ganymede;
@@ -169,11 +170,36 @@ public class ExchangeStoreTask implements Runnable {
 	try
 	  {
 	    Map<String,String> map = getMailStores();
+
+	    for (Map.Entry<String, String> entry: map.entrySet())
+	      {
+		Invid x = mySession.findLabeledObject(entry.getKey(), exchangeStoreSchema.BASE);
+
+		if (x == null)
+		  {
+		    ReturnVal r = mySession.create_db_object(exchangeStoreSchema.BASE);
+
+		    db_object obj = r.getObject();
+
+		    r = obj.setFieldValue(exchangeStoreSchema.MAILSTORENAME, entry.getKey());
+
+		    if (!ReturnVal.didSucceed(r))
+		      {
+			throw new RuntimeException("Error setting MAIL STORE NAME: " + r.toString());
+		      }
+
+		    r = obj.setFieldValue(exchangeStoreSchema.EXCHANGEMDB, entry.getValue());
+
+		    if (!ReturnVal.didSucceed(r))
+		      {
+			throw new RuntimeException("Error setting EXCHANGEMDB: " + r.toString());
+		      }
+		  }
+	      }
 	  }
 	catch (Throwable ex)
 	  {
 	    Ganymede.debug("Exchange Store Query / Update bailed");
-
 	    mySession.abortTransaction();
 	    return;
 	  }
@@ -219,6 +245,10 @@ public class ExchangeStoreTask implements Runnable {
 	mySession.logout();
       }
   }
+
+  /**
+   * Returns a Map of Exchange Mail Store names to Exchange Mail Store HomeMDB values.
+   */
 
   public Map<String,String> getMailStores()
   {
