@@ -55,7 +55,10 @@ import java.io.IOException;
 
 import java.rmi.RemoteException;
 
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -163,7 +166,11 @@ public class ExchangeStoreTask implements Runnable {
 	
 	// do the stuff
 
-	if (!doTask())
+	try
+	  {
+	    Map<String,String> map = doTask();
+	  }
+	catch (Throwable ex)
 	  {
 	    Ganymede.debug("Exchange Store Query / Update bailed");
 
@@ -213,8 +220,9 @@ public class ExchangeStoreTask implements Runnable {
       }
   }
 
-  public boolean doTask() throws NotLoggedInException
+  public Map<String,String> doTask() throws NotLoggedInException
   {
+    Map<String,String> map = new HashMap<String,String>();
     Hashtable env = new Hashtable();
     String url = System.getProperty("gasharl.active_directory.url");
     String principal = System.getProperty("gasharl.active_directory.security_principal");
@@ -246,9 +254,11 @@ public class ExchangeStoreTask implements Runnable {
 	env.put("java.naming.ldap.factory.socket", BlindSSLSocketFactory.class.getName());
       }
 
+    DirContext ctx = null;
+
     try
       {
-	DirContext ctx = new InitialDirContext(env);
+	ctx = new InitialDirContext(env);
 
 	Attributes matchAttrs = new BasicAttributes();
 	matchAttrs.put(new BasicAttribute("homeMDB"));
@@ -259,7 +269,6 @@ public class ExchangeStoreTask implements Runnable {
 	while (answer.hasMore())
 	  {
 	    SearchResult sr = (SearchResult) answer.next();
-	    System.out.println(">>>" + sr.getName());
 
 	    NamingEnumeration<Attribute> e = (NamingEnumeration<Attribute>)sr.getAttributes().getAll();
 
@@ -275,9 +284,7 @@ public class ExchangeStoreTask implements Runnable {
 		    
 		    if (m.find())
 		      {
-			String boxname = m.group(1);
-
-			System.out.println("\t" + a.getID() + ":" + boxname);
+			map.put(m.group(1), value);
 		      }
 		  }
 	      }
@@ -285,10 +292,24 @@ public class ExchangeStoreTask implements Runnable {
       }
     catch (NamingException ex)
       {
-	System.err.println(ex);
+	ex.printStackTrace();
+      }
+    finally
+      {
+	if (ctx != null)
+	  {
+	    try
+	      {
+		ctx.close();
+	      }
+	    catch (NamingException ex)
+	      {
+		ex.printStackTrace();
+	      }
+	  }
       }
    
-    return false;
+    return map;
   }
 
   public static void main(String[] args)
@@ -329,7 +350,12 @@ public class ExchangeStoreTask implements Runnable {
 
     try
       {
-	task.doTask();
+	Map<String, String> storeMap = task.doTask();
+
+	for (Map.Entry<String,String> store: storeMap.entrySet())
+	  {
+	    System.out.println(store.getKey() + ":" + store.getValue());
+	  }
       }
     catch (NotLoggedInException ex)
       {
