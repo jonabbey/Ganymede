@@ -51,6 +51,19 @@ package arlut.csd.ganymede.gasharl;
 
 import java.rmi.RemoteException;
 
+import java.util.Hashtable;
+
+import javax.naming.Context;
+import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.BasicAttributes;
+import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
+import javax.naming.directory.SearchResult;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -193,7 +206,56 @@ public class ExchangeStoreTask implements Runnable {
 
   public boolean doTask() throws NotLoggedInException
   {
+    Hashtable env = new Hashtable();
+    env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+    env.put(Context.PROVIDER_URL, "ldaps://ITSADOMAINSERVER:636/DC=arlut,DC=utexas,DC=edu");
+    env.put(Context.SECURITY_AUTHENTICATION, "simple");
+    env.put(Context.SECURITY_PRINCIPAL, "ITSAUSERNAME@arlut.utexas.edu");
+    env.put(Context.SECURITY_CREDENTIALS, "ITSAPASSWORD");
+    env.put("java.naming.ldap.factory.socket", BlindSSLSocketFactory.class.getName());
+
+    try
+      {
+	DirContext ctx = new InitialDirContext(env);
+
+	Attributes matchAttrs = new BasicAttributes();
+	matchAttrs.put(new BasicAttribute("homeMDB"));
+	matchAttrs.put(new BasicAttribute("msExchMailboxGuid"));
+
+	NamingEnumeration answer = ctx.search("CN=Microsoft Exchange System Objects", matchAttrs);
+
+	while (answer.hasMore())
+	  {
+	    SearchResult sr = (SearchResult) answer.next();
+	    System.out.println(">>>" + sr.getName());
+
+	    NamingEnumeration e = sr.getAttributes().getAll();
+
+	    while (e.hasMore())
+	      {
+		System.out.println("\tvalue: " + e.next());
+	      }
+	  }
+      }
+    catch (NamingException ex)
+      {
+	System.err.println(ex);
+      }
+   
     return false;
   }
-}
 
+  public static void main(String[] args)
+  {
+    ExchangeStoreTask task = new ExchangeStoreTask();
+
+    try
+      {
+	task.doTask();
+      }
+    catch (NotLoggedInException ex)
+      {
+	throw new RuntimeException(ex);
+      }
+  }
+}
