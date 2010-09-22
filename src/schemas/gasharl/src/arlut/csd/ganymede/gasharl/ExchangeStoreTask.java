@@ -94,6 +94,8 @@ public class ExchangeStoreTask implements Runnable {
 
   static final boolean debug = true;
 
+  static final boolean skipSSLValidation = false;
+
   /* -- */
 
   GanymedeSession mySession = null;
@@ -207,12 +209,35 @@ public class ExchangeStoreTask implements Runnable {
   public boolean doTask() throws NotLoggedInException
   {
     Hashtable env = new Hashtable();
+    String url = System.getProperty("gasharl.active_directory.url");
+    String principal = System.getProperty("gasharl.active_directory.security_principal");
+    String password = System.getProperty("gasharl.active_directory.security_password");
+
+    if (url == null)
+      {
+	throw new IllegalArgumentException("Missing Active Directory url from properties file");
+      }
+
+    if (principal == null)
+      {
+	throw new IllegalArgumentException("Missing Active Directory security principal from properties file");
+      }
+
+    if (password == null)
+      {
+	throw new IllegalArgumentException("Missing Active Directory security password from properties file");
+      }
+
     env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-    env.put(Context.PROVIDER_URL, "ldaps://ITSADOMAINSERVER:636/DC=arlut,DC=utexas,DC=edu");
     env.put(Context.SECURITY_AUTHENTICATION, "simple");
-    env.put(Context.SECURITY_PRINCIPAL, "ITSAUSERNAME@arlut.utexas.edu");
-    env.put(Context.SECURITY_CREDENTIALS, "ITSAPASSWORD");
-    env.put("java.naming.ldap.factory.socket", BlindSSLSocketFactory.class.getName());
+    env.put(Context.PROVIDER_URL, url);
+    env.put(Context.SECURITY_PRINCIPAL, principal);
+    env.put(Context.SECURITY_CREDENTIALS, password);
+
+    if (skipSSLValidation)
+      {
+	env.put("java.naming.ldap.factory.socket", BlindSSLSocketFactory.class.getName());
+      }
 
     try
       {
