@@ -441,7 +441,19 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
       }
 
     Calendar cal = Calendar.getInstance();
-    cal.setTime(curr_date);
+
+    if (curr_date == null)
+      {
+	// oops, we can't set the time without some underlying
+	// date.. pick the current date then set the time on it.
+
+	cal.setTime(new Date());
+      }
+    else
+      {
+	cal.setTime(curr_date);
+      }
+
     cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(splt[0]));
     cal.set(Calendar.MINUTE, Integer.parseInt(splt[1]));
 
@@ -478,7 +490,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
       }
     else
       {
-	timef.setText("");
+	timef.setText("00:00");
       }
 
     curr_date = date;
