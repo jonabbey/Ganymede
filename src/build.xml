@@ -298,7 +298,7 @@ refresh the jar files.
 
       <!-- add in a few extra for use w new calendar popup widget. James -->
       
-      <zipfileset src="${lib.dir}/swingx.jar"/>
+      <zipfileset src="${lib.dir}/swingx-core-1.6.2.jar"/>
     </jar>
 
     <!-- Build the admin jar file -->
