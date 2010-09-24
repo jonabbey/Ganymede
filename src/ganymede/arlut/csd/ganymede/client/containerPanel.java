@@ -1208,7 +1208,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    if (currentInfo.isEditable())
 	      {
-		((JdateField)comp).setLimits(datef.minDate(), datef.maxDate());
+		if (datef.limited())
+		  {
+		    ((JdateField)comp).setLimits(datef.minDate(), datef.maxDate());
+		  }
+		else
+		  {
+		    ((JdateField)comp).setLimits(null, null);
+		  }
 	      }
 	  }
 	else if (comp instanceof JnumberField)
