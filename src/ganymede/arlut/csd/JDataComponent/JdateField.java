@@ -247,14 +247,17 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     JXMonthView monthView = datePicker.getMonthView();
 
-    if (minDate != null)
+    if (islimited)
       {
-	monthView.setLowerBound(minDate);
-      }
+	if (minDate != null)
+	  {
+	    monthView.setLowerBound(minDate);
+	  }
 
-    if (maxDate != null)
-      {
-	monthView.setUpperBound(maxDate);
+	if (maxDate != null)
+	  {
+	    monthView.setUpperBound(maxDate);
+	  }
       }
 
     monthView.setZoomable(true);
