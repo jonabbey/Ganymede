@@ -1816,13 +1816,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     writer.println(result.toString());
   }
 
-
-  // ***
-  //
-  // The following private methods are used to support the DNS builder logic.
-  //
-  // ***
-
   /**
    *
    * This method generates an aliases_info file.  This method must be run during
@@ -1891,7 +1884,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     return true;
   }
-
 
   /**
    * This method writes out a mailman alias line to the aliases_info GASH source file.<br/><br/>
@@ -3841,9 +3833,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * <p>This method writes out password and group files compatible with
-   * with the Apache web server.  The password file is formatted according to
-   * the standard .htpasswd file format, as follows:</p>
+   * <p>This method writes out password and group files compatible
+   * with the Apache web server.  The password file is formatted
+   * according to the standard .htpasswd file format, as follows:</p>
    *
    * <PRE>
    * user1:3vWsXVZDX5E7E
@@ -3992,7 +3984,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   /**
    * <p>This method writes out credentials to our external SMTP server.
-   * The credentials file is formatted follows:</p>
+   * The credentials file is formatted as follows:</p>
    *
    * <PRE>
    * mailusername mailpassword
@@ -4000,7 +3992,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * </PRE>
    *
    * <p>It also writes out credentials for our internal server.
-   * The credentials file is formatted follows:</p>
+   * The credentials file is formatted as follows:</p>
    *
    * <PRE>
    * username mailusername mailpassword
@@ -4099,17 +4091,22 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     return true;
   }
 
-
   /**
-   * <P>This method generates a transitive closure of the members of a
+   * <p>This method generates a transitive closure of the members of a
    * user netgroup, including all users in all member netgroups,
-   * recursively.</P>
+   * recursively.</p>
    */
 
   private Vector netgroupMembers(DBObject object)
   {
     return netgroupMembers(object, null, null);
   }
+
+  /**
+   * <p>This method generates a transitive closure of the members of a
+   * user netgroup, including all users in all member netgroups,
+   * recursively.</p>
+   */
 
   private Vector netgroupMembers(DBObject object, Vector oldMembers, Hashtable graphCheck)
   {
@@ -4237,6 +4234,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     return buffer.toString();
   }
+
+  // ***
+  //
+  // The following private methods are used to support the DNS builder logic.
+  //
+  // ***
 
   /**
    * <p>This method generates a file that maps i.p. addresses to mac addresses, system names,
@@ -4761,6 +4764,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   {
     return (String) object.getFieldValueLocal(interfaceSchema.NAME);
   }
+
+  // ***
+  //
+  // The following private methods are used to support the DHCP emitter logic.
+  //
+  // ***
 
   /**
    * This method writes out the ISC DHCP server
