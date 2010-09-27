@@ -1136,25 +1136,16 @@ public final class DBStore implements JythonMap {
 	    throw new IllegalArgumentException(ts.l("dumpXML.doNothing"));
 	  }
 
-	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
-				    includePlaintext,
-				    includeHistory,
-				    syncConstraint,
-				    includeOid);
-
 	// we don't need a lock if we're just dumping the schema,
 	// because the GanymedeServer loginSemaphore will keep the
 	// schema from changing under us.
 
 	if (!dumpDataObjects)
 	  {
+	    xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS));
 	    dumpSchemaXML(xmlOut);
-	    return;
+	    return;		// but see finally {} below for cleanup
 	  }
-
-	// we must be dumping objects, possibly with schema data as well
-
-	xmlOut.setDumpPasswords(true); // we're doing a full dump, so passwords are allowed
 
 	lock = new DBDumpLock(this);
 
@@ -1189,6 +1180,16 @@ public final class DBStore implements JythonMap {
 	      }
 	  }
 
+	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+				    includePlaintext,
+				    includeHistory,
+				    syncConstraint,
+				    includeOid);
+
+	// we're doing a supergash-approved full dump, so passwords are allowed
+
+	xmlOut.setDumpPasswords(true);
+
 	if (false)
 	  {
 	    System.err.println("DBStore.dumpXML(): created XMLDumpContext");
@@ -1204,6 +1205,8 @@ public final class DBStore implements JythonMap {
 
 	if (dumpSchema)
 	  {
+	    // we may be dumping the schema along with the data objects
+
 	    dumpSchemaXML(xmlOut);
 	  }
 
