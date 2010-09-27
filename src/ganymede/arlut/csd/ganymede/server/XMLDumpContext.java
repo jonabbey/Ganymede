@@ -172,6 +172,17 @@ public class XMLDumpContext {
   /* -- */
 
   /**
+   * Constructor for use with dumping schema to XML
+   *
+   * @param xmlOut The XMLWriter to write to
+   */
+  
+  public XMLDumpContext(XMLWriter xmlOut)
+  {
+    this.xmlOut = xmlOut;
+  }
+
+  /**
    * Constructor for use with dumping query results to XML
    *
    * @param xmlOut The XMLWriter to write to
