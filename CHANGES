@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-16 September 2010
+27 September 2010
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 16 September 2010
+RELEASE DATE: 27 September 2010
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1720,6 +1720,18 @@ update the CREDITS file.
 Note also that the German localization for Ganymede still has a
 truncated version that refers the user to the distribution's CREDITS
 file.
+
+116. [EVERYTHING] Moved to require Java 6
+
+Since we are now incorporating SwingX in the Ganymede client, and
+SwingX since after release 1.0 has required Java 6, we are going to
+officially require Java 6 ourselves in the Ganymede client.
+
+The server still does not (at this time) contain any Java 6
+dependencies, but we will consider ourselves free to introduce them
+from this point on.
+
+(27 September 2010)
 
 -------------------- changes from 1.0.11 to 1.0.12 -------------------
 

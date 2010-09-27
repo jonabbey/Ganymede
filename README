@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-30 October 2009
+27 September 2010
 README
 
 ---------------------------------------------
@@ -35,7 +35,7 @@ This release includes:
 
 Things you will need to get started:
 
-  A Java 5 or better compliant JVM to run the server, client, and
+  A Java 6 or better compliant JVM to run the server, client, and
   admin console.
 
   Perl 5 to run the install scripts, and Ant to build the software.

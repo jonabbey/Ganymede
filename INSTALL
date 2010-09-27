@@ -87,13 +87,13 @@
    The Ganymede system is designed to be easy to install for anyone running a
    Unix or Linux system with Java, Perl, Bourne Shell, and Apache Ant
    installed. Ganymede 2.0 is designed to work with any version of Java equal
-   to or better than 5 (JDK1.5). You will need the full Java Development Kit
+   to or better than 6 (JDK1.6). You will need the full Java Development Kit
    (JDK or SDK) on your UNIX server so that you can compile any custom
    plug-in classes.
 
    To run the Ganymede clients in a web browser on a desktop PC running some
-   version of Windows, you will want to download and install version 5
-   (JDK1.5) or better of the Java Runtime Environment (JRE) for Windows. The
+   version of Windows, you will want to download and install version 6
+   (JDK1.6) or better of the Java Runtime Environment (JRE) for Windows. The
    Java Runtime Environment for Windows includes support for the Java
    Plug-In, a code module that will allow you to run the latest JVM's inside
    Netscape, Internet Explorer, Mozilla, and Firefox.
@@ -524,7 +524,7 @@
    The Ganymede system has two primary clients, the Ganymede GUI client and
    the Ganymede admin console. Both can be run from a UNIX command line with
    a shell script that will run java on them, or from a web browser with
-   support for Java 5 (JDK1.5) or better.
+   support for Java 6 (JDK1.6) or better.
 
    We have provided an install script for installing the Ganymede clients on
    a UNIX system. installClient will prompt you for the name of the machine
@@ -545,10 +545,10 @@
    document, below, for details on supporting JNLP launch.
 
    In general, you should be able to run the Ganymede clients on any platform
-   that supports Java 1.5 or better, as the clients are written in pure Java.
+   that supports Java 1.6 or better, as the clients are written in pure Java.
    The Ganymede clients are dual-mode, and will work both as an applet and as
    a command line application. If you are trying to run the clients on a
-   platform that supports Java 1.5 but which doesn't have a JNLP launcher
+   platform that supports Java 1.6 but which doesn't have a JNLP launcher
    available, you may want to examine the ganymede and ganymedeAdmin launch
    scripts installed by the installClient script and create appropriate
    translations of the launch scripts for your platform.
@@ -644,7 +644,7 @@
 
    If you do want your users to be able to run the full Ganymede client, you
    will need to be sure that their web browsers are configured properly,
-   either with support for running Java 1.5 applets directly, or for passing
+   either with support for running Java 1.6 applets directly, or for passing
    a JNLP file to Java Web Start.
 
    IMPORTANT NOTE: whenever you run applets from the launch page using the
