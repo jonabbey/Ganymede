@@ -719,6 +719,35 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
+   * Controls whether change information for the field can be safely
+   * logged to the Ganymede log.
+   *
+   * If okToLogField() returns false for a field, the change to the
+   * field will be mentioned in the log, but the actual values will
+   * not be.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public boolean okToLogField(DBField field)
+  {
+    short fieldid = field.getID();
+
+    switch (fieldid)
+      {
+      case MAILUSER:
+      case MAILPASSWORD2:
+      case MAILPASSWORD:
+      case OLDMAILUSER:
+      case OLDMAILPASSWORD:
+      case OLDMAILPASSWORD2:
+	return false;
+      }
+
+    return super.okToLogField(field);
+  }
+
+  /**
    * <p>Customization method to verify whether a specific field
    * in object should be cloned using the basic field-clone
    * logic.</p>
