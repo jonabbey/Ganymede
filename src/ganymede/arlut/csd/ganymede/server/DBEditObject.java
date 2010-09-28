@@ -1097,6 +1097,23 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
+   * Controls whether change information for the field can be safely
+   * logged to the Ganymede log and emailed to the owner notification
+   * list for the field's containing object.
+   *
+   * If okToLogField() returns false for a field, the change to the
+   * field will be mentioned in email and the log, but the actual
+   * values will not be.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public boolean okToLogField(DBField field)
+  {
+    return true;
+  }
+
+  /**
    * Customization method to verify whether the user has permission
    * to edit a given object.  The client's
    * {@link arlut.csd.ganymede.server.DBSession DBSession} object
@@ -3880,8 +3897,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 		changedFieldDefs.add(fieldDef);
 	      }
 
-	    // "\t{0}: {1}\n"
-	    added.append(ts.l("diff.field_template", fieldDef.getName(), currentField.getValueString()));
+	    if (okToLogField(currentField))
+	      {
+		// "\t{0}: {1}\n"
+		added.append(ts.l("diff.field_template", fieldDef.getName(), currentField.getValueString()));
+	      }
+	    else
+	      {
+		// "\t{0}\n"
+		added.append(ts.l("diff.anon_field_template", fieldDef.getName()));
+	      }
 
 	    diffFound = true;
 
@@ -3900,8 +3925,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 		changedFieldDefs.add(fieldDef);
 	      }
 
-	    // "\t{0}: {1}\n"
-	    deleted.append(ts.l("diff.field_template", fieldDef.getName(), origField.getValueString()));
+	    if (okToLogField(origField))
+	      {
+		// "\t{0}: {1}\n"
+		deleted.append(ts.l("diff.field_template", fieldDef.getName(), origField.getValueString()));
+	      }
+	    else
+	      {
+		// "\t{0}\n"
+		deleted.append(ts.l("diff.anon_field_template", fieldDef.getName()));
+	      }
 
 	    diffFound = true;
 
@@ -3913,27 +3946,35 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	  }
 	else
 	  {
-	    String diff = currentField.getDiffString(origField);
-
-	    if (diff != null)
+	    if (okToLogField(currentField) && okToLogField(origField))
 	      {
-		if (changedFieldDefs != null)
-		  {
-		    changedFieldDefs.add(fieldDef);
-		  }
+		String diff = currentField.getDiffString(origField);
 
+		if (diff != null)
+		  {
+		    if (changedFieldDefs != null)
+		      {
+			changedFieldDefs.add(fieldDef);
+		      }
+
+		    changed.append(fieldDef.getName());
+		    changed.append("\n");
+		    changed.append(diff);
+
+		    diffFound = true;
+
+		    if (debug)
+		      {
+			System.err.println("Field changed: " +
+					   fieldDef.getName() + "\n" +
+					   diff);
+		      }
+		  }
+	      }
+	    else
+	      {
 		changed.append(fieldDef.getName());
 		changed.append("\n");
-		changed.append(diff);
-
-		diffFound = true;
-
-		if (debug)
-		  {
-		    System.err.println("Field changed: " +
-				       fieldDef.getName() + "\n" +
-				       diff);
-		  }
 	      }
 	  }
       }
