@@ -734,11 +734,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     switch (fieldid)
       {
       case MAILUSER:
-      case MAILPASSWORD2:
       case OLDMAILUSER:
-      case OLDMAILPASSWORD2:
 	return false;
       }
+
+    // MAILPASSWORD2 and OLDMAILPASSWORD2 are password fields, and
+    // Ganymede will already keep that sensitive data from the logs
+    // and transaction email.
 
     return super.okToLogField(field);
   }
