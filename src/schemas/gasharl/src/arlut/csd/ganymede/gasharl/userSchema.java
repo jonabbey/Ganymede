@@ -93,10 +93,10 @@ public interface userSchema {
   final static short PASSWORDCHANGETIME=275;
   final static short ALLOWEXTERNAL=278;
   final static short MAILUSER=279;
-  final static short MAILPASSWORD=280;
+  final static short MAILPASSWORD=280; // removed
   final static short MAILPASSWORD2=284;
   final static short MAILEXPDATE=281;
   final static short OLDMAILUSER=282;
-  final static short OLDMAILPASSWORD=283;
+  final static short OLDMAILPASSWORD=283; // removed
   final static short OLDMAILPASSWORD2=285;
 }
