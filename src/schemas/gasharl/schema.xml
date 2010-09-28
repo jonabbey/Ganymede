@@ -33,6 +33,7 @@
     <namespace name="dhcp_option_type" case-sensitive="false"/>
     <namespace name="dhcp_network" case-sensitive="false"/>
     <namespace name="smailusers" case-sensitive="false"/>
+    <namespace name="ExchangeStore" case-sensitive="false"/>
   </namespaces>
 
   <object_type_definitions>
@@ -599,15 +600,9 @@ Limited to 16 for NFS.</comment>
                 <namespace val="smailusers"/>
               </typedef>
             </fielddef>
-            <fielddef name="Mail_Password" id="280">
-              <typedef type="string">
-                <minlength val="20"/>
-                <maxlength val="20"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Mail_Password_2" id="284">
+            <fielddef name="Mail_Password" id="284">
               <typedef type="password">
-                <minlength val="10"/>
+                <minlength val="20"/>
                 <maxlength val="20"/>
                 <md5crypted/>
                 <plaintext/>
@@ -622,12 +617,7 @@ Limited to 16 for NFS.</comment>
                 <namespace val="smailusers"/>
               </typedef>
             </fielddef>
-            <fielddef name="Old_Mail_Password" id="283">
-              <typedef type="string">
-                <maxlength val="20"/>
-              </typedef>
-            </fielddef>
-            <fielddef name="Old_Mail_Password_2" id="285">
+            <fielddef name="Old_Mail_Password" id="285">
               <typedef type="password">
                 <minlength val="10"/>
                 <maxlength val="20"/>
@@ -1432,6 +1422,24 @@ if the client does not explicitly request it.</comment>
                 <vector/>
                 <targetobject name="DHCP_Option_Value"/>
                 <embedded/>
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
+        <objectdef name="Exchange_Store" id="273">
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="Mail_Store_Name" id="256">
+              <comment>Ganymede label for this Exchange mail store.</comment>
+              <typedef type="string">
+                <maxlength val="80"/>
+                <namespace val="ExchangeStore"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Exchange_MDB" id="257">
+              <comment>Fully qualified LDAP DN for this Exchange Mail Store</comment>
+              <typedef type="string">
+                <maxlength val="1024"/>
               </typedef>
             </fielddef>
           </tab>
