@@ -673,7 +673,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Admin consoles connected to server */
 
-    // "Admin consoles connected to server:"
+    // "Admin Consoles:"
     adminLabel = new JLabel(ts.l("init.console_count"));
 
     adminField = new JTextField("", 40);
