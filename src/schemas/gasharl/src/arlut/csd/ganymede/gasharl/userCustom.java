@@ -708,9 +708,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case MAILEXPDATE:
 	return field.getObject().isSet(ALLOWEXTERNAL);
 
-      case MAILPASSWORD:
       case OLDMAILUSER:
-      case OLDMAILPASSWORD:
       case OLDMAILPASSWORD2:
 	return false;
       }
@@ -737,9 +735,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
       case MAILUSER:
       case MAILPASSWORD2:
-      case MAILPASSWORD:
       case OLDMAILUSER:
-      case OLDMAILPASSWORD:
       case OLDMAILPASSWORD2:
 	return false;
       }
@@ -774,10 +770,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case EMAILTARGET:
       case PASSWORDCHANGETIME:
       case MAILUSER:
-      case MAILPASSWORD:
       case MAILPASSWORD2:
       case OLDMAILUSER:
-      case OLDMAILPASSWORD:
       case OLDMAILPASSWORD2:
 	return false;
       }
