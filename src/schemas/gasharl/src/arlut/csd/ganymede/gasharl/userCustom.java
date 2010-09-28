@@ -568,7 +568,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		messageString = "The external mail credentials for user account " + this.getLabel() + 
 		  " have been changed.\n\n" +
-		  "In order continue to read and send mail from outside the laboratory, you will need to configure your external email client " +
+		  "In order to continue to read and send mail from outside the laboratory, you will need to configure your external email client " +
 		  "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
 		  "read incoming mail from mailboxes.arlut.utexas.edu via IMAP over SSL.\n" +
 		  "You will need to specify the following randomly assigned user name and password for both services:\n\n" +
