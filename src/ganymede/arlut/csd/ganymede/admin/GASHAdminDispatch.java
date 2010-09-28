@@ -460,8 +460,10 @@ class GASHAdminDispatch implements Runnable {
 	String inuse = numberFormatter.format(lTotalMemory - lFreeMemory);
 	String free = numberFormatter.format(lFreeMemory);
 	String total = numberFormatter.format(lTotalMemory);
-	
-	frame.memField.setText(inuse + " / " + free + " / " + total);
+
+	frame.usedMemField.setText(inuse);
+	frame.freeMemField.setText(free);
+	frame.totalMemField.setText(total);
       }
     });
   }

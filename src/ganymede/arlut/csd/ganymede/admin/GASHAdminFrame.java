@@ -287,8 +287,14 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   JLabel locksLabel = null;
   JTextField locksField = null;
 
-  JLabel memLabel = null;
-  JTextField memField = null;
+  JLabel usedMemLabel = null;
+  JTextField usedMemField = null;
+
+  JLabel freeMemLabel = null;
+  JTextField freeMemField = null;
+
+  JLabel totalMemLabel = null;
+  JTextField totalMemField = null;
 
   JTextPane statusArea = null;
 
@@ -636,6 +642,35 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     gbl.setConstraints(hostField, gbc);
     topPanel.add(hostField);
 
+    /* Server State */
+
+    // "Server State:"
+    stateLabel = new JLabel(ts.l("init.server_state"));
+
+    stateField = new JTextField("", 40);
+    stateField.setEditable(false);
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.weightx = 0;
+    gbc.gridy = 1;
+    gbc.gridx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(stateLabel, gbc);
+    topPanel.add(stateLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridy = 1;
+    gbc.gridx = 1;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(stateField, gbc);
+    topPanel.add(stateField);
+
     /* Admin consoles connected to server */
 
     // "Admin consoles connected to server:"
@@ -645,6 +680,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     adminField.setEditable(false);
 
     gbc.anchor = GridBagConstraints.EAST;
+    gbc.gridy = 1;
+    gbc.gridx = 2;
     gbc.weightx = 0;
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
@@ -656,35 +693,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     gbc.weightx = 100;
     gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridy = 1;
+    gbc.gridx = 3;
+    gbc.gridwidth = 1;
     gbc.gridheight = 1;
     gbl.setConstraints(adminField, gbc);
     topPanel.add(adminField);
-
-    /* Server State */
-
-    // "Server State:"
-    stateLabel = new JLabel(ts.l("init.server_state"));
-
-    stateField = new JTextField("", 40);
-    stateField.setEditable(false);
-
-    gbc.anchor = GridBagConstraints.EAST;
-    gbc.weightx = 0;
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbl.setConstraints(stateLabel, gbc);
-    topPanel.add(stateLabel);
-
-    gbc.anchor = GridBagConstraints.WEST;
-
-    gbc.weightx = 100;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.gridheight = 1;
-    gbl.setConstraints(stateField, gbc);
-    topPanel.add(stateField);
 
     /* Server Start Time */
 
@@ -695,6 +709,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     startField.setEditable(false);
 
     gbc.anchor = GridBagConstraints.EAST;
+    gbc.gridy = 2;
+    gbc.gridx = 0;
     gbc.weightx = 0;
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
@@ -705,8 +721,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     gbc.anchor = GridBagConstraints.WEST;
 
     gbc.weightx = 100;
+    gbc.gridy = 2;
+    gbc.gridx = 1;
     gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridwidth = 1;
     gbc.gridheight = 1;
     gbl.setConstraints(startField, gbc);
     topPanel.add(startField);
@@ -720,6 +738,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     dumpField.setEditable(false);
 
     gbc.anchor = GridBagConstraints.EAST;
+    gbc.gridy = 2;
+    gbc.gridx = 2;
     gbc.weightx = 0;
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
@@ -730,36 +750,93 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     gbc.anchor = GridBagConstraints.WEST;
 
     gbc.weightx = 100;
+    gbc.gridy = 2;
+    gbc.gridx = 3;
     gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridwidth = 1;
     gbc.gridheight = 1;
     gbl.setConstraints(dumpField, gbc);
     topPanel.add(dumpField);
 
     /* In-use / Free / Total Memory */
 
-    // "In-use / Free / Total Memory:"
-    memLabel = new JLabel(ts.l("init.memory"));
+    // "Memory In Use:"
+    usedMemLabel = new JLabel(ts.l("init.usedMemory"));
 
     gbc.anchor = GridBagConstraints.EAST;
+    gbc.gridy = 3;
+    gbc.gridx = 0;
     gbc.weightx = 0;
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
     gbc.gridheight = 1;
-    gbl.setConstraints(memLabel, gbc);
-    topPanel.add(memLabel);
+    gbl.setConstraints(usedMemLabel, gbc);
+    topPanel.add(usedMemLabel);
+
+    usedMemField = new JTextField("", 40);
+    usedMemField.setEditable(false);
 
     gbc.anchor = GridBagConstraints.WEST;
-
-    memField = new JTextField("", 40);
-    memField.setEditable(false);
-
     gbc.weightx = 100;
+    gbc.gridy = 3;
+    gbc.gridx = 1;
     gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridwidth = 1;
     gbc.gridheight = 1;
-    gbl.setConstraints(memField, gbc);
-    topPanel.add(memField);
+    gbl.setConstraints(usedMemField, gbc);
+    topPanel.add(usedMemField);
+
+    // "Free Memory:"
+    freeMemLabel = new JLabel(ts.l("init.freeMemory"));
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.gridy = 3;
+    gbc.gridx = 2;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(freeMemLabel, gbc);
+    topPanel.add(freeMemLabel);
+
+    freeMemField = new JTextField("", 40);
+    freeMemField.setEditable(false);
+
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.weightx = 100;
+    gbc.gridy = 3;
+    gbc.gridx = 3;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(freeMemField, gbc);
+    topPanel.add(freeMemField);
+
+    // "Total Server Memory:"
+    totalMemLabel = new JLabel(ts.l("init.totalMemory"));
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.gridy = 3;
+    gbc.gridx = 4;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(totalMemLabel, gbc);
+    topPanel.add(totalMemLabel);
+
+    totalMemField = new JTextField("", 40);
+    totalMemField.setEditable(false);
+
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.weightx = 100;
+    gbc.gridy = 3;
+    gbc.gridx = 5;;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(totalMemField, gbc);
+    topPanel.add(totalMemField);
 
     /* Transactions in Journal */
 
@@ -770,6 +847,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     journalField.setEditable(false);
 
     gbc.anchor = GridBagConstraints.EAST;
+    gbc.gridy = 4;
+    gbc.gridx = 0;
     gbc.weightx = 0;
     gbc.fill = GridBagConstraints.NONE;
     gbc.gridwidth = 1;
@@ -778,13 +857,44 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     topPanel.add(journalLabel);
 
     gbc.anchor = GridBagConstraints.WEST;
-
+    gbc.gridy = 4;
+    gbc.gridx = 1;
     gbc.weightx = 100;
     gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridwidth = 1;
     gbc.gridheight = 1;
     gbl.setConstraints(journalField, gbc);
     topPanel.add(journalField);
+
+    /* Locks held */
+
+    // "Locks Held:"
+    locksLabel = new JLabel(ts.l("init.locks"));
+
+    locksField = new JTextField("", 40);
+    locksField.setEditable(false);
+
+    gbc.anchor = GridBagConstraints.EAST;
+    gbc.gridy = 4;
+    gbc.gridx = 2;
+    gbc.weightx = 0;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(locksLabel, gbc);
+    topPanel.add(locksLabel);
+
+    gbc.anchor = GridBagConstraints.WEST;
+
+    gbc.gridy = 4;
+    gbc.gridx = 3;
+    gbc.weightx = 100;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbl.setConstraints(locksField, gbc);
+    topPanel.add(locksField);
+
 
     /* Objects Checked Out */
 
@@ -794,6 +904,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     checkedOutField = new JTextField("", 40);
     checkedOutField.setEditable(false);
 
+    gbc.gridy = 4;
+    gbc.gridx = 4;
     gbc.anchor = GridBagConstraints.EAST;
     gbc.weightx = 0;
     gbc.fill = GridBagConstraints.NONE;
@@ -805,36 +917,14 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     gbc.anchor = GridBagConstraints.WEST;
 
     gbc.weightx = 100;
+    gbc.gridy = 4;
+    gbc.gridx = 5;
     gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridwidth = 1;
     gbc.gridheight = 1;
     gbl.setConstraints(checkedOutField, gbc);
     topPanel.add(checkedOutField);
 
-    /* Locks held */
-
-    // "Locks Held:"
-    locksLabel = new JLabel(ts.l("init.locks"));
-
-    locksField = new JTextField("", 40);
-    locksField.setEditable(false);
-
-    gbc.anchor = GridBagConstraints.EAST;
-    gbc.weightx = 0;
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbl.setConstraints(locksLabel, gbc);
-    topPanel.add(locksLabel);
-
-    gbc.anchor = GridBagConstraints.WEST;
-
-    gbc.weightx = 100;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.gridheight = 1;
-    gbl.setConstraints(locksField, gbc);
-    topPanel.add(locksField);
 
     JPanel topBox = new JPanel(new BorderLayout());
     topBox.add("Center",topPanel);

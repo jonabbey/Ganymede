@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-27 September 2010
+28 September 2010
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 27 September 2010
+RELEASE DATE: 28 September 2010
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1733,7 +1733,14 @@ from this point on.
 
 (27 September 2010)
 
--------------------- changes from 1.0.11 to 1.0.12 -------------------
+117. [ADMIN CONSOLE] Reflowed server info fields in admin console
+
+I have reworked the top panel in the admin console to reduce the
+vertical space taken up by those constant fields.
+
+This will provide more space for the log box.
+
+-------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
 
