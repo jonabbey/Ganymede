@@ -812,7 +812,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     gbl.setConstraints(freeMemField, gbc);
     topPanel.add(freeMemField);
 
-    // "Total Server Memory:"
+    // "Total Process Memory:"
     totalMemLabel = new JLabel(ts.l("init.totalMemory"));
 
     gbc.anchor = GridBagConstraints.EAST;
