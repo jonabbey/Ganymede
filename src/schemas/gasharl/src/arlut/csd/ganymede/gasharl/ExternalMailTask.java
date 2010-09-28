@@ -322,7 +322,7 @@ public class ExternalMailTask implements Runnable {
       "\tUsername: " + mailUsername + "\n\n" +
       "and the new external access password for your account is:\n\n" +
       "\tPassword: " + mailPassword + "\n\n" +
-      "The previously assigned external password will no longer function.\n\n" +
+      "The previously assigned external password will soon cease functioning.\n\n" +
       "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
       "via SSL-protected IMAP.";
         
