@@ -314,18 +314,19 @@ public class ExternalMailTask implements Runnable {
 
     String titleString = "External Email Credentials Expiring Very Soon For User " + userObject.getLabel();
     
-    String messageString = "The old external email credentials from User account " + userObject.getLabel() + 
-      " will be expiring within 24 hours \n"+
-      " You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
+    String messageString = "The old external email credentials for User account " + userObject.getLabel() + " will be expiring within 24 hours. \n" +
+      "You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
       "In order to send mail from outside the laboratory, you will need to configure your external email client " +
-      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n" +
-      "You will need to specify your currently assigned user name and password:\n\n" +
-      "Username: " + mailUsername + "\n" +
-      "Password: " + mailPassword + "\n\n" +
+      "to send mail through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n\n" +
+      "The user name you should be using for external access is:\n\n" +
+      "\tUsername: " + mailUsername + "\n\n" +
+      "and the new external access password for your account is:\n\n" +
+      "\tPassword: " + mailPassword + "\n\n" +
+      "The previously assigned external password will no longer function.\n\n" +
       "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
-      "via SSL-protected IMAP.";	   
+      "via SSL-protected IMAP.";
         
-    Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.BOTH, objVect);
+    Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.USERS, objVect);
   }
 
 
@@ -385,19 +386,19 @@ public class ExternalMailTask implements Runnable {
 
 	String titleString = "External Email Credentials Changed For User " + userObject.getLabel();
 	
-	String messageString = "The external email credentials from User account " + userObject.getLabel() + 
-	  " have been changed. \n"+
-	  " You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
+	String messageString = "The external email credentials for User account " + userObject.getLabel() + " have been changed. \n" +
+	  "You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
 	  "In order to send mail from outside the laboratory, you will need to configure your external email client " +
-	  "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n" +
-	  "The currently assigned user name and password are:\n\n" +
-	  "Username: " + mailUsername + "\n" +
-	  "Password: " + mailPassword + "\n\n" +
-	  "The previously assigned username and password will no longer function. \n\n" +
+	  "to send email through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n\n" +
+	  "The user name you should be using for external access is:\n\n" +
+	  "\tUsername: " + mailUsername + "\n\n" +
+          "and the new external access password for your account is:\n\n" +
+	  "\tPassword: " + mailPassword + "\n\n" +
+	  "The previously assigned external password will no longer function. \n\n" +
 	  "You should continue to use your internal email username and password for reading email from mailboxes.arlut.utexas.edu " +
-	  "via SSL-protected IMAP.";	           
+	  "via SSL-protected IMAP.";
 
-	Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.BOTH, objVect);
+	Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.USERS, objVect);
 
 	return result;
 
