@@ -1065,6 +1065,22 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	<th>Purpose</th>
       <tr>
 	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getEmbeddedObjectDisplayLabelHook(arlut.csd.ganymede.server.DBObject)">getEmbeddedObjectDisplayLabelHook()</a>
+	</td>
+	<td>
+          <p>If this DBEditObject is managing an embedded object, the
+             getEmbeddedObjectLabel() can be overridden to display a synthetic
+             label in the context of viewing or editing the containing object,
+             and when doing queries on the containing type.</p>
+
+          <p>The getLabel() method will not consult this hook, however, and
+             embedded objects will be represented with their unique label
+             field when processed in an XML context.</p>
+	</td>
+      </tr>
+
+      <tr>
+	<td>
 	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#anonymousLinkOK(arlut.csd.ganymede.server.DBObject, short, arlut.csd.ganymede.server.GanymedeSession)">anonymousLinkOK()</a>
 	</td>
 	<td>
@@ -1111,19 +1127,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  will be followed.
 	</td>
       </tr>
-      <tr>
-	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#grantOwnership(arlut.csd.ganymede.server.GanymedeSession, arlut.csd.ganymede.server.DBObject)">grantOwnership()</a>
-	</td>
-	<td>
-	  Hook to allow subclasses to grant ownership privileges to a given
-	  object.  If this method returns true on a given object, the Ganymede
-	  Permissions system will provide access to the object as owned with
-	  whatever permissions apply to objects owned by the persona active
-	  in gSession.
-	</td>
-      </tr>
-      <tr>
+     <tr>
 	<td>
 	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#consistencyCheck(arlut.csd.ganymede.server.DBObject)">consistencyCheck()</a>
 	</td>
@@ -1165,7 +1169,40 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  available for editing by the client.
 	</td>
       </tr>
+     <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canSeeField(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBField)">canSeeField()</a>
+	</td>
+	<td>
+	  Customization method to verify whether the user should be able to
+          see a specific field in a given object.  Instances of
+          <a href="../javadoc/arlut/csd/ganymede/server/DBField.html">DBField</a> will
+          wind up calling up to here to let us override the normal visibility
+          process.
+	</td>
+      </tr>
       <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#okToLogField(arlut.csd.ganymede.server.DBField)">okToLogField()</a>
+	</td>
+	<td>
+         <p>Controls whether change information for the field can be safely
+         logged to the Ganymede log and emailed to the owner notification
+         list for the field's containing object.</p>
+        
+         <p>If okToLogField() returns false for a field, the change to the
+         field will be mentioned in email and the log, but the actual
+         values will not be.</p>
+
+	 <p>With the exception of PasswordDBFields, you should consider any
+            field for which okToLogField() returns true to be public data, as
+            any user able to log into Ganymede may be able to see the data in
+            the logs.  PasswordDBFields contain special logic to
+            prevent the data they contain from being revealed in logs
+            or email.</p>
+	</td>
+      </tr>
+     <tr>
 	<td>
 	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canBeInactivated()">canBeInactivated()</a>
 	</td>
@@ -1241,7 +1278,7 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
       </tr>
       <tr>
 	<td>
-	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canCreate(arlut.csd.ganymede.Session)">canCreate()</a>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#canCreate(arlut.csd.ganymede.rmi.Session)">canCreate()</a>
 	</td>
 	<td>
 	  Customization method to verify whether the user has permission
@@ -1249,6 +1286,19 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	</td>
       </tr>
       <tr>
+	<td>
+	  <a
+	  href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#grantOwnership(arlut.csd.ganymede.server.GanymedeSession, arlut.csd.ganymede.server.DBObject)">grantOwnership()</a>
+	</td>
+	<td>
+	  <p>Hook to allow subclasses to grant ownership privileges to a given
+          object.  If this method returns true on a given object, the Ganymede
+          Permissions system will provide access to the object as owned with
+          whatever permissions apply to objects owned by the persona active
+          in the GanymedeSession.</p>
+	</td>
+      </tr>
+     <tr>
 	<td>
 	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#hasEmailTarget(arlut.csd.ganymede.server.DBObject)">hasEmailTarget()</a>
 	</td>
@@ -1265,13 +1315,86 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	</td>
 	<td>
 	  This method provides a hook to allow custom DBEditObject subclasses to
-          return a Vector of Strings comprising a list of addresses to be
+          return a List of Strings comprising a list of addresses to be
           notified above and beyond the normal owner group notification when
           the given object is changed in a transaction.  Used for letting end-users
 	  be notified of changes to their account, etc.
 	</td>
       </tr>
-    </table>
+      <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getImageURLForObject(arlut.csd.ganymede.server.DBObject)">getImageURLForObject()</a>
+	</td>
+	<td>
+          This method provides a hook to allow custom DBEditObject
+          subclasses to return a String containing a URL for an image to
+          represent this object.  Intended to be used for users, primarily.
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <a
+	  href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#reactToExpirationWarning(arlut.csd.ganymede.server.DBObject,
+	  int)">reactToExpirationWarning()</a>
+	</td>
+	<td>
+	  This method provides a hook to allow custom DBEditObject
+          subclasses to react to forthcoming object expiration, during the
+          execution of the GanymedeWarningTask.
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <a
+	  href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#reactToRemovalWarning(arlut.csd.ganymede.server.DBObject,
+	  int)">reactToRemovalWarning()</a>
+	</td>
+	<td>
+	  This method provides a hook to allow custom DBEditObject
+          subclasses to react to forthcoming object removal.
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <a
+	  href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getForeignSyncKeys(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.server.DBObject,arlut.csd.ganymede.server.DBObject,java.lang.String,boolean)">getForeignSyncKeys()</a>
+	</td>
+	<td>
+	  <p>This method provides a hook that can be used by subclasses of
+             DBEditObject to return a list of attribute names and attribute
+             values to include when writing out &lt;invid&gt; elements to a
+             sync channel during transactional sync'ing.</p>
+
+          <p>The point of this is to allow DBEditObject subclasses to
+             inject additional data into a transactional sync record so that
+             external sync channel service code can have enough information to
+             identify a relationship that was made or broken within the
+             tranaction.</p>
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <a
+	  href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#getMyExtraInvidAttributes(arlut.csd.ganymede.server.DBObject,java.lang.String,boolean)">getMyExtraInvidAttributes()</a>
+	</td>
+	<td>
+	  <p>This method provides a hook that can be used by subclasses of
+             DBEditObject to return a list of attribute names and attribute
+             values to include when writing out &lt;invid&gt; elements that
+             point to them during a sync channel operation.</p>
+	  
+	  <p>The point of this is to allow DBEditObject subclasses to
+             inject additional data into a transactional sync record so that
+             external sync channel service code can have enough information to
+             identify a relationship that was made or broken within the
+             transaction.  For instance, if you are synchronizing to an LDAP
+             structure with the XML Sync Channel mechanism, you might want all
+             of your &lt;invid&gt; elements that point to Users to include a
+             dn attribute that provides the fully qualified LDAP DN for the
+             User object.</p>
+	</td>
+      </tr>
+   </table>
 
     <br/><br/>
 
@@ -1357,10 +1480,20 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	<td>
 	  This method allows the DBEditObject to have executive approval
 	  of any vector delete operation, and to take any special actions
-	  in reaction to the delete.  This method is called 
+	  in reaction to the delete.
 	</td>
       </tr>
       <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeDeleteElements(arlut.csd.ganymede.server.DBField,java.util.Vector)">finalizeDeleteElements()</a>
+	</td>
+	<td>
+	  This method allows the DBEditObject to have executive approval
+	  of any vector-vector removal operation, and to take any special actions
+	  in reaction to the removal.
+	</td>
+      </tr>
+     <tr>
 	<td>
 	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeAddElement(arlut.csd.ganymede.server.DBField, java.lang.Object)">finalizeAddElement()</a>
 	</td>
@@ -1368,6 +1501,16 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  This method allows the DBEditObject to have executive approval
 	  of any vector add operation, and to take any special actions
 	  in reaction to the add..
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#finalizeAddElements(arlut.csd.ganymede.server.DBField,java.util.Vector)">finalizeAddElements()</a>
+	</td>
+	<td>
+	  This method allows the DBEditObject to have executive approval
+	  of any vector-vector addition operation, and to take any special actions
+	  in reaction to the addition.
 	</td>
       </tr>
       <tr>
@@ -1388,6 +1531,19 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  This method allows the DBEditObject to have executive
 	  approval of any scalar set operation, and to take any
 	  special actions in reaction to the set..
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#excludeSelected(arlut.csd.ganymede.rmi.db_field,arlut.csd.ganymede.rmi.db_field)">excludeSelected()</a>
+	</td>
+	<td>
+	  <p>This method returns true if a field should not show any choices
+          that are currently selected in the second field, where both fields
+	  are fields in this object.</p>
+
+	  <p>The purpose of this method is to allow mutual exclusion between
+          a pair of fields with mandatory choices.</p>
 	</td>
       </tr>
       <tr>
@@ -1433,6 +1589,18 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	</td>
       </tr>
       <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)">choiceListHasExceptions()</a>
+	</td>
+	<td>
+	  This method is used to tell the client whether the list of options it gets
+          back for a field can be taken out of the cache.  If this method returns
+          true, that means that some of the results that obtainChoiceList() will
+          return will include items that normally wouldn't be availble to the
+          client, but are in this case because of the anonymousLinkOK() results.
+	</td>
+      </tr>
+     <tr>
 	<td>
 	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#mustChoose(arlut.csd.ganymede.server.DBField)">mustChoose()</a>
 	</td>
@@ -1514,7 +1682,34 @@ public class userCustom extends <a href="../javadoc/arlut/csd/ganymede/server/DB
 	  should have an upper limit to what is acceptable for input.
 	</td>
       </tr>
-    </table>
+      <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#isFloatLimited(arlut.csd.ganymede.server.DBField)">isFloatLimited()</a>
+	</td>
+	<td>
+          FloatDBFields under this object will call this method to determine whether they
+	  should limit input to a certain range (specified by minFloat()/maxFloat()).
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#minFloat(arlut.csd.ganymede.server.DBField)">minFloat()</a>
+	</td>
+	<td>
+	  FloatDBFields under this object will call this method to determine whether they
+	  should have a lower limit to what is acceptable for input.
+	</td>
+      </tr>
+      <tr>
+	<td>
+	  <a href="../javadoc/arlut/csd/ganymede/server/DBEditObject.html#maxFloat(arlut.csd.ganymede.server.DBField)">maxFloat()</a>
+	</td>
+	<td>
+	  FloatDBFields under this object will call this method to determine whether they
+	  should have an upper limit to what is acceptable for input.
+	</td>
+      </tr>
+   </table>
 
     <h3>DBEditObject methods invoked during transaction commit/abort</h3>
 
