@@ -1065,6 +1065,24 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
+   * Customization method to verify whether the user has permission
+   * to edit a given object.  The client's
+   * {@link arlut.csd.ganymede.server.DBSession DBSession} object
+   * will call this per-class method to do an object type-
+   * sensitive check to see if this object feels like being
+   * available for editing by the client.
+   *
+   * To be overridden on necessity in DBEditObject subclasses.
+   *
+   * <b>*PSEUDOSTATIC*</b>
+   */
+
+  public boolean canWrite(DBSession session, DBObject object)
+  {
+    return true;
+  }
+
+  /**
    * Customization method to verify whether the user should be able to
    * see a specific field in a given object.  Instances of
    * {@link arlut.csd.ganymede.server.DBField DBField} will
@@ -1105,28 +1123,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * field will be mentioned in email and the log, but the actual
    * values will not be.
    *
+   * With the exception of PasswordDBFields, you should consider any
+   * field for which okToLogField() returns true to be public data, as
+   * any user able to log into Ganymede may be able to see the data in
+   * the logs.  PasswordDBFields contain special logic to prevent the
+   * data they contain from being revealed in logs or email.
+   *
    * <b>*PSEUDOSTATIC*</b>
    */
 
   public boolean okToLogField(DBField field)
-  {
-    return true;
-  }
-
-  /**
-   * Customization method to verify whether the user has permission
-   * to edit a given object.  The client's
-   * {@link arlut.csd.ganymede.server.DBSession DBSession} object
-   * will call this per-class method to do an object type-
-   * sensitive check to see if this object feels like being
-   * available for editing by the client.
-   *
-   * To be overridden on necessity in DBEditObject subclasses.
-   *
-   * <b>*PSEUDOSTATIC*</b>
-   */
-
-  public boolean canWrite(DBSession session, DBObject object)
   {
     return true;
   }
@@ -1328,13 +1334,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   /**
    * This method provides a hook to allow custom DBEditObject subclasses to
-   * return a Vector of Strings comprising a list of addresses to be
+   * return a List of Strings comprising a list of addresses to be
    * notified above and beyond the normal owner group notification when
    * the given object is changed in a transaction.  Used for letting end-users
    * be notified of changes to their account, etc.
    *
    * If no email targets are present in this object, either a null value
-   * or an empty Vector may be returned.
+   * or an empty List may be returned.
    *
    * To be overridden on necessity in DBEditObject subclasses.
    *
@@ -1467,7 +1473,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * inject additional data into a transactional sync record so that
    * external sync channel service code can have enough information to
    * identify a relationship that was made or broken within the
-   * tranaction.  For instance, if you are synchronizing to an LDAP
+   * transaction.  For instance, if you are synchronizing to an LDAP
    * structure with the XML Sync Channel mechanism, you might want all
    * of your &lt;invid&gt; elements that point to Users to include a
    * dn attribute that provides the fully qualified LDAP DN for the
